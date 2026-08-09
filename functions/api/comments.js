@@ -4,6 +4,24 @@ const MAX_PASSWORD = 64;
 const RATE_LIMIT_COUNT = 5;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 
+const SCHEMA_SQL = `
+CREATE TABLE IF NOT EXISTS comments (
+  id TEXT PRIMARY KEY,
+  report_key TEXT NOT NULL,
+  nickname TEXT NOT NULL,
+  body TEXT NOT NULL,
+  password_salt TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
+  ip_hash TEXT,
+  created_at TEXT NOT NULL,
+  deleted_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_comments_report_created ON comments (report_key, created_at);
+CREATE INDEX IF NOT EXISTS idx_comments_ip_created ON comments (ip_hash, created_at);
+`;
+
+let schemaPromise = null;
+
 function reply(body, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -72,16 +90,28 @@ function sameOrigin(request) {
   return origin === new URL(request.url).origin;
 }
 
-function ensureDb(env) {
+async function ensureDbReady(env) {
   if (!env.COMMENTS_DB) {
     return reply({ error: 'DB_NOT_CONFIGURED', message: '댓글 데이터베이스가 아직 연결되지 않았습니다.' }, 503);
   }
-  return null;
+  if (!schemaPromise) {
+    schemaPromise = env.COMMENTS_DB.exec(SCHEMA_SQL).catch(err => {
+      schemaPromise = null;
+      throw err;
+    });
+  }
+  try {
+    await schemaPromise;
+    return null;
+  } catch (err) {
+    console.error('comment schema init failed', err);
+    return reply({ error: 'DB_INIT_FAILED', message: '댓글 데이터베이스 초기화에 실패했습니다.' }, 500);
+  }
 }
 
 export async function onRequestGet(context) {
   const { request, env } = context;
-  const missing = ensureDb(env);
+  const missing = await ensureDbReady(env);
   if (missing) return missing;
 
   const url = new URL(request.url);
@@ -106,7 +136,7 @@ export async function onRequestGet(context) {
 
 export async function onRequestPost(context) {
   const { request, env } = context;
-  const missing = ensureDb(env);
+  const missing = await ensureDbReady(env);
   if (missing) return missing;
   if (!sameOrigin(request)) return reply({ error: 'BAD_ORIGIN', message: '허용되지 않은 요청입니다.' }, 403);
 
@@ -154,10 +184,7 @@ export async function onRequestPost(context) {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)
     `).bind(id, reportKey, nickname, body, salt, passwordHash, ipHash, createdAt).run();
 
-    return reply({
-      ok: true,
-      comment: { id, nickname, body, createdAt }
-    }, 201);
+    return reply({ ok: true, comment: { id, nickname, body, createdAt } }, 201);
   } catch (err) {
     console.error('comments post failed', err);
     return reply({ error: 'COMMENTS_WRITE_FAILED', message: '댓글을 저장하지 못했습니다.' }, 500);
@@ -166,7 +193,7 @@ export async function onRequestPost(context) {
 
 export async function onRequestDelete(context) {
   const { request, env } = context;
-  const missing = ensureDb(env);
+  const missing = await ensureDbReady(env);
   if (missing) return missing;
   if (!sameOrigin(request)) return reply({ error: 'BAD_ORIGIN', message: '허용되지 않은 요청입니다.' }, 403);
 
@@ -200,9 +227,8 @@ export async function onRequestDelete(context) {
 
     if (!authorized) return reply({ error: 'BAD_PASSWORD', message: '삭제 비밀번호가 올바르지 않습니다.' }, 401);
 
-    await env.COMMENTS_DB.prepare(`
-      UPDATE comments SET deleted_at = ? WHERE id = ?
-    `).bind(new Date().toISOString(), id).run();
+    await env.COMMENTS_DB.prepare(`UPDATE comments SET deleted_at = ? WHERE id = ?`)
+      .bind(new Date().toISOString(), id).run();
 
     return reply({ ok: true });
   } catch (err) {
