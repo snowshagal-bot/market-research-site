@@ -58,7 +58,7 @@ export async function onRequest(context) {
     const root = host.attachShadow({ mode: 'open' });
 
     const style = document.createElement('style');
-    style.textContent = \`
+    style.textContent = `
       :host { all: initial; }
       * { box-sizing: border-box; }
       .bar {
@@ -114,21 +114,21 @@ export async function onRequest(context) {
         .divider { margin: 0 1px; }
         .brand { display: none; }
       }
-    \`;
+    `;
 
     const bar = document.createElement('nav');
     bar.className = 'bar';
     bar.setAttribute('aria-label', '리포트 사이트 메뉴');
-    bar.innerHTML = \`
+    bar.innerHTML = `
       <div class="inner">
         <a class="home" href="/">← 홈</a>
         <span class="divider" aria-hidden="true"></span>
-        <a class="${active === 'daily' ? 'active' : ''}" href="/?category=daily">주식</a>
+        <a class="${active === 'daily' ? 'active' : ''}" href="/?category=daily">데일리</a>
         <a class="${active === 'weekly' ? 'active' : ''}" href="/?category=weekly">위클리</a>
         <a class="${active === 'research' ? 'active' : ''}" href="/?category=research">비정기</a>
         <a class="${active === 'note' ? 'active' : ''}" href="/?category=note">끄적끄적</a>
         <span class="brand">MARKET RESEARCH</span>
-      </div>\`;
+      </div>`;
 
     root.append(style, bar);
   }
