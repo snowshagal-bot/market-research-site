@@ -1,5 +1,10 @@
 (function(){
-  const posts = window.RESEARCH_POSTS || [];
+  const posts = (window.RESEARCH_POSTS || []).slice().sort((a,b)=>{
+    const da=String(a.reportDate||a.date||'');
+    const db=String(b.reportDate||b.date||'');
+    if(da!==db) return db.localeCompare(da);
+    return String(b.registeredAt||'').localeCompare(String(a.registeredAt||''));
+  });
   const html = document.documentElement;
   const body = document.body;
   const hero = document.querySelector('.hero');
@@ -42,6 +47,7 @@
   });
 
   function esc(s){ return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+  function reportDate(p){ return p.reportDate || p.date || ''; }
 
   function categoryFeatured(){
     if(active === 'all') return posts.find(p=>p.featured) || posts[0];
@@ -77,7 +83,7 @@
     if(desc) desc.textContent=featured.description||'';
     if(link) link.href=featured.href;
     if(type) type.textContent=featured.typeLabel;
-    if(date) date.textContent=featured.date;
+    if(date) date.textContent=reportDate(featured);
   }
 
   function render(){
@@ -90,7 +96,7 @@
       list.innerHTML='<div class="empty">조건에 맞는 글이 없습니다.</div>';
       return;
     }
-    list.innerHTML = filtered.map(p=>`<a class="report-item" href="${esc(p.href)}"><div><span class="report-type ${esc(p.type)}">${esc(p.typeLabel)}</span><span class="report-date">${esc(p.date)}</span></div><div><div class="report-title">${esc(p.title)}</div><div class="report-subtitle">${esc(p.subtitle||'')}</div></div><span class="report-arrow" aria-hidden="true">→</span></a>`).join('');
+    list.innerHTML = filtered.map(p=>`<a class="report-item" href="${esc(p.href)}"><div><span class="report-type ${esc(p.type)}">${esc(p.typeLabel)}</span><span class="report-date">${esc(reportDate(p))}</span></div><div><div class="report-title">${esc(p.title)}</div><div class="report-subtitle">${esc(p.subtitle||'')}</div></div><span class="report-arrow" aria-hidden="true">→</span></a>`).join('');
   }
 
   filters.forEach(b=>b.addEventListener('click',()=>{
