@@ -6,14 +6,16 @@ This roadmap records implementation order, not a promise to build every future i
 
 ## Next action
 
-### 2. Harden comment operations
+### 2. Basic site polish
 
-The guest comment flow is working in production. Continue with small operational improvements only where they solve an observed need:
+Stabilize the current site as the v1 baseline. This is a validation and polish pass, not a feature expansion or visual redesign.
 
-- review rate-limit behavior and user-facing error messages;
-- decide whether the owner needs a simple admin moderation UI for deleting abusive comments without knowing guest passwords;
-- add lightweight spam controls only if real spam appears;
-- avoid CAPTCHA or account requirements unless necessary.
+- validate light and dark modes across the homepage, admin page, and shared report shell;
+- inspect real Android layouts at approximately 360–430px wide;
+- inspect desktop layouts at 1280px or wider;
+- check for horizontal overflow and fixed/sticky UI overlap;
+- verify hover and pointer behavior on desktop and touch target sizes on mobile;
+- review basic accessibility for navigation, forms, contrast, and focus states.
 
 ## Completed
 
@@ -44,12 +46,16 @@ Potential incremental improvements:
 
 Do not replace the working publisher with a large CMS unless the current flow becomes a real bottleneck.
 
-### 4. Basic site polish
+## Maintenance / when needed
 
-- validate light and dark modes across homepage/admin/shared report shell;
-- tune mobile typography/spacing from real-device screenshots;
-- verify desktop hover/pointer behavior for interactive report elements;
-- review accessibility basics for navigation, forms, contrast, and focus states.
+### Harden comment operations
+
+The guest comment flow has passed Production E2E validation and has no currently observed operational issues. Continue hardening only when a real need is observed:
+
+- review rate-limit behavior or user-facing error messages if they cause operational friction;
+- add simple admin moderation only if abusive comments create a real moderation need;
+- add lightweight spam controls only if real spam appears;
+- avoid CAPTCHA or account requirements unless necessary.
 
 ## Later, when traffic justifies it
 
