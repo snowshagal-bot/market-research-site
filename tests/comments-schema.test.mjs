@@ -27,7 +27,9 @@ class MockStatement {
   async all() {
     this.db.calls.push(this.sql);
     if (this.sql === 'PRAGMA table_info(comments)') {
-      return { results: this.db.columns.map(name => ({ name })) };
+      const results = this.db.columns.map(name => ({ name }));
+      this.db.pragmaResults.push(results.map(column => column.name));
+      return { results };
     }
     if (this.sql.includes('SELECT id, nickname, body')) return { results: [] };
     throw new Error(`Unexpected all(): ${this.sql}`);
@@ -61,6 +63,7 @@ class MockDb {
     this.columns = [...columns];
     this.legacyColumns = [];
     this.calls = [];
+    this.pragmaResults = [];
   }
 
   prepare(sql) {
@@ -73,6 +76,27 @@ class MockDb {
     return results;
   }
 }
+
+const freshDb = new MockDb([]);
+const freshResponse = await (await loadHandler('fresh'))({
+  request: new Request('https://example.com/api/comments?report=%2Freports%2Fsample.html'),
+  env: { COMMENTS_DB: freshDb }
+});
+
+assert.equal(freshResponse.status, 200);
+assert.deepEqual(freshDb.pragmaResults, [[]]);
+assert.equal(freshDb.calls.some(sql => sql.startsWith('ALTER TABLE comments')), false);
+assert.deepEqual(freshDb.legacyColumns, []);
+assert.deepEqual(freshDb.columns, currentColumns);
+assert.ok(freshDb.calls.some(sql => sql.startsWith('CREATE TABLE IF NOT EXISTS comments')));
+assert.deepEqual(
+  freshDb.calls.filter(sql => sql.startsWith('CREATE INDEX IF NOT EXISTS')),
+  [
+    'CREATE INDEX IF NOT EXISTS idx_comments_report_created ON comments (report_key, created_at)',
+    'CREATE INDEX IF NOT EXISTS idx_comments_ip_created ON comments (ip_hash, created_at)'
+  ]
+);
+assert.deepEqual(await freshResponse.json(), { ok: true, comments: [] });
 
 const legacyColumns = ['id', 'slug', 'nickname', 'body', 'status', 'created_at'];
 const legacyDb = new MockDb(legacyColumns);
@@ -98,4 +122,4 @@ assert.deepEqual(currentDb.columns, currentColumns);
 assert.equal(currentDb.calls.some(sql => sql.startsWith('ALTER TABLE comments')), false);
 assert.deepEqual(await currentResponse.json(), { ok: true, comments: [] });
 
-console.log('comments schema migration test passed');
+console.log('comments schema initialization tests passed');
