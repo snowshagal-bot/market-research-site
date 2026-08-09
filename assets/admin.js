@@ -22,8 +22,32 @@
   const overlayLinks = $('publish-links');
   const reportLink = $('published-report-link');
   const homeLink = $('published-home-link');
+  const html = document.documentElement;
+  const themeMedia = matchMedia('(prefers-color-scheme: dark)');
   let selectedFile = null;
   let publishing = false;
+
+  function savedTheme() {
+    try { return localStorage.getItem('site-theme') || 'system'; }
+    catch (_) { return 'system'; }
+  }
+
+  function applyTheme(preference) {
+    const actual = preference === 'system' ? (themeMedia.matches ? 'dark' : 'light') : preference;
+    html.dataset.theme = actual;
+    html.dataset.themePreference = preference;
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) themeMeta.setAttribute('content', actual === 'dark' ? '#161816' : '#f5f0e6');
+    if (themeBtn) {
+      themeBtn.setAttribute('aria-label', actual === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환');
+      themeBtn.textContent = actual === 'dark' ? '☀' : '◐';
+    }
+  }
+
+  applyTheme(savedTheme());
+  themeMedia.addEventListener?.('change', () => {
+    if (savedTheme() === 'system') applyTheme('system');
+  });
 
   const labels = {
     daily: '주식 리포트',
@@ -245,6 +269,11 @@
   ['dragenter','dragover'].forEach(evt => dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add('drag'); }));
   ['dragleave','drop'].forEach(evt => dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.remove('drag'); }));
   dropZone.addEventListener('drop', e => { const f = e.dataTransfer?.files?.[0]; if (f) parseFile(f); });
+  dropZone.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    fileInput.click();
+  });
   fileInput.addEventListener('change', () => parseFile(fileInput.files?.[0]));
   [type,date,title,subtitle,description,adminKey].forEach(el => el?.addEventListener('input', updatePublishState));
   type?.addEventListener('change', () => {
@@ -257,9 +286,9 @@
   publishBtn?.addEventListener('click', publish);
 
   themeBtn?.addEventListener('click', () => {
-    const dark = document.documentElement.dataset.theme === 'dark';
-    if (dark) delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = 'dark';
-    try { localStorage.setItem('site-theme', dark ? 'light' : 'dark'); } catch(e) {}
+    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    try { localStorage.setItem('site-theme', next); } catch (_) {}
+    applyTheme(next);
   });
 
   updatePublishState();

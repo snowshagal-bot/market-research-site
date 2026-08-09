@@ -1,0 +1,32 @@
+:root {
+  --muted: #666c67;
+}
+
+html[data-theme="dark"] {
+  --muted: #aab1aa;
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
+:where(input, textarea)::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+.footer-links > span {
+  cursor: default;
+}
+
+@media (min-width: 761px) {
+  .mobile-nav.open {
+    display: none;
+  }
+}
