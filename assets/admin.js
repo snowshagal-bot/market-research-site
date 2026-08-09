@@ -7,11 +7,16 @@
   const previewWrap = $('preview-wrap');
   const type = $('post-type');
   const date = $('post-date');
+  const registeredDate = $('registered-date');
   const title = $('post-title');
   const subtitle = $('post-subtitle');
   const description = $('post-description');
   const filename = $('post-filename');
+  const adminKey = $('admin-key');
+  const publishBtn = $('publish-btn');
   const themeBtn = document.querySelector('[data-theme-toggle]');
+  let selectedFile = null;
+  let publishing = false;
 
   const labels = {
     daily: '주식 리포트',
@@ -19,6 +24,8 @@
     research: '비정기 리서치',
     note: '끄적끄적'
   };
+
+  try { adminKey.value = sessionStorage.getItem('mrs-admin-key') || ''; } catch (_) {}
 
   function detectType(name, text) {
     const s = `${name} ${text.slice(0, 4000)}`;
@@ -34,7 +41,7 @@
     if (meta && /^\d{4}-\d{2}-\d{2}$/.test(meta)) return meta;
     const sources = [name, doc.title || '', text.slice(0, 5000)];
     for (const s of sources) {
-      let m = s.match(/(20\d{2})[.\-_\/년\s]+(\d{1,2})[.\-_\/월\s]+(\d{1,2})/);
+      const m = s.match(/(20\d{2})[.\-_\/년\s]+(\d{1,2})[.\-_\/월\s]+(\d{1,2})/);
       if (m) return `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;
     }
     return new Date().toISOString().slice(0,10);
@@ -75,11 +82,22 @@
     previewWrap.innerHTML = '<div class="preview-empty">파일을 넣으면 이곳에 원본 리포트가 표시됩니다.</div>';
   }
 
+  function updatePublishState() {
+    const ready = selectedFile && type.value && /^\d{4}-\d{2}-\d{2}$/.test(date.value) && title.value.trim() && filename.value.trim() && adminKey.value.trim();
+    publishBtn.disabled = publishing || !ready;
+  }
+
   async function parseFile(file) {
     if (!file || !/\.html?$/i.test(file.name)) {
       status.textContent = 'HTML 파일만 선택할 수 있습니다.';
       return;
     }
+    if (file.size > 5 * 1024 * 1024) {
+      status.textContent = '현재 게시기는 5MB 이하 HTML 파일만 지원합니다.';
+      return;
+    }
+    selectedFile = file;
+    registeredDate.value = '게시 시 자동 기록';
     status.textContent = 'HTML을 분석하는 중…';
     const text = await file.text();
     const doc = new DOMParser().parseFromString(text, 'text/html');
@@ -96,7 +114,7 @@
     filename.value = safeFilename(file.name);
 
     fileInfo.classList.add('on');
-    fileInfo.innerHTML = `<b>${file.name}</b><br>${(file.size/1024).toFixed(1)} KB · ${detectedType ? labels[detectedType] : '카테고리 확인 필요'} · ${detectedDate}`;
+    fileInfo.innerHTML = `<b>${file.name}</b><br>${(file.size/1024).toFixed(1)} KB · ${detectedType ? labels[detectedType] : '카테고리 확인 필요'} · 리포트 기준일 ${detectedDate}`;
 
     resetPreview();
     const blobUrl = URL.createObjectURL(file);
@@ -108,16 +126,75 @@
     previewWrap.appendChild(iframe);
 
     status.textContent = detectedType ? '자동 분석 완료. 게시 전에 항목을 확인하세요.' : '분석 완료. 카테고리는 직접 선택하세요.';
+    updatePublishState();
+  }
+
+  async function publish() {
+    if (publishing || publishBtn.disabled || !selectedFile) return;
+    const summary = `${date.value} · ${labels[type.value]}\n${title.value.trim()}\n\n이 내용으로 홈페이지에 게시할까요?`;
+    if (!confirm(summary)) return;
+
+    publishing = true;
+    updatePublishState();
+    publishBtn.textContent = '게시 중…';
+    status.textContent = 'HTML과 게시 목록을 GitHub에 반영하는 중…';
+
+    const form = new FormData();
+    form.append('file', selectedFile, filename.value.trim());
+    form.append('type', type.value);
+    form.append('reportDate', date.value);
+    form.append('title', title.value.trim());
+    form.append('subtitle', subtitle.value.trim());
+    form.append('description', description.value.trim());
+    form.append('filename', filename.value.trim());
+
+    try {
+      const key = adminKey.value.trim();
+      try { sessionStorage.setItem('mrs-admin-key', key); } catch (_) {}
+      const res = await fetch('/api/publish', {
+        method: 'POST',
+        headers: { 'X-Admin-Key': key },
+        body: form
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || data.error || `게시 실패 (${res.status})`);
+
+      registeredDate.value = data.registeredDate || '등록 완료';
+      status.textContent = `게시 완료 · 등록일 ${data.registeredDate}. Cloudflare 재배포가 끝나면 홈페이지에 반영됩니다.`;
+      publishBtn.textContent = '게시 완료';
+      publishBtn.disabled = true;
+      if (data.reportUrl) {
+        const a = document.createElement('a');
+        a.href = data.reportUrl;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = ' 게시된 리포트 열기 →';
+        a.style.marginLeft = '6px';
+        status.appendChild(a);
+      }
+    } catch (err) {
+      status.textContent = err.message || '게시 중 오류가 발생했습니다.';
+      publishBtn.textContent = '게시';
+      publishing = false;
+      updatePublishState();
+      return;
+    }
+    publishing = false;
   }
 
   ['dragenter','dragover'].forEach(evt => dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add('drag'); }));
   ['dragleave','drop'].forEach(evt => dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.remove('drag'); }));
   dropZone.addEventListener('drop', e => { const f = e.dataTransfer?.files?.[0]; if (f) parseFile(f); });
   fileInput.addEventListener('change', () => parseFile(fileInput.files?.[0]));
+  [type,date,title,subtitle,description,adminKey].forEach(el => el?.addEventListener('input', updatePublishState));
+  adminKey?.addEventListener('change', () => { try { sessionStorage.setItem('mrs-admin-key', adminKey.value.trim()); } catch (_) {} });
+  publishBtn?.addEventListener('click', publish);
 
   themeBtn?.addEventListener('click', () => {
     const dark = document.documentElement.dataset.theme === 'dark';
     if (dark) delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = 'dark';
     try { localStorage.setItem('site-theme', dark ? 'light' : 'dark'); } catch(e) {}
   });
+
+  updatePublishState();
 })();
