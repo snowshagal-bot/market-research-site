@@ -63,7 +63,7 @@ export async function onRequest(context) {
       * { box-sizing: border-box; }
       .bar {
         width: 100%;
-        height: ${BAR_H}px;
+        height: 52px;
         background: rgba(247,243,235,.97);
         border-bottom: 1px solid #d8d0c2;
         box-shadow: 0 1px 8px rgba(20,24,21,.05);
