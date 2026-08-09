@@ -64,7 +64,12 @@
     const date = document.querySelector('[data-feature-date]');
 
     body.dataset.category = active;
-    navLinks.forEach(a=>a.classList.toggle('active',a.dataset.navCategory === active));
+    navLinks.forEach(a=>{
+      const current = a.dataset.navCategory === active;
+      a.classList.toggle('active',current);
+      if(current) a.setAttribute('aria-current','page');
+      else a.removeAttribute('aria-current');
+    });
 
     if(!featured){
       if(hero) hero.dataset.empty='true';
@@ -89,7 +94,11 @@
   function render(){
     const q = (search?.value || '').trim().toLowerCase();
     const filtered = posts.filter(p => (active === 'all' || p.type === active) && (!q || `${p.title} ${p.subtitle||''} ${p.typeLabel} ${p.description||''}`.toLowerCase().includes(q)));
-    filters.forEach(b=>b.classList.toggle('active',b.dataset.filter===active));
+    filters.forEach(b=>{
+      const selected = b.dataset.filter===active;
+      b.classList.toggle('active',selected);
+      b.setAttribute('aria-pressed',String(selected));
+    });
     updateFeature();
 
     if(!filtered.length){
