@@ -1,39 +1,37 @@
 # Roadmap
 
-Updated: 2026-08-09
+Updated: 2026-08-10
 
 This roadmap records implementation order, not a promise to build every future idea. Keep the current site small until traffic and actual needs justify added complexity.
 
 ## Next action
 
+### 2. Basic site polish
+
+Stabilize the current site as the v1 baseline. This is a validation and polish pass, not a feature expansion or visual redesign.
+
+- validate light and dark modes across the homepage, admin page, and shared report shell;
+- inspect real Android layouts at approximately 360–430px wide;
+- inspect desktop layouts at 1280px or wider;
+- check for horizontal overflow and fixed/sticky UI overlap;
+- verify hover and pointer behavior on desktop and touch target sizes on mobile;
+- review basic accessibility for navigation, forms, contrast, and focus states.
+
+## Completed
+
 ### 1. Finish guest comments validation
 
-The D1 database `market-research-comments` exists and the Pages binding `COMMENTS_DB` has been saved.
+Completed on 2026-08-10. The D1 database `market-research-comments` and Production binding `COMMENTS_DB` are active.
 
-The documentation commits made during the Codex handoff will themselves trigger new Cloudflare Pages deployments. After the latest deployment succeeds:
+Production validation confirmed:
 
-- open a report on desktop and mobile;
-- confirm comments no longer show `댓글 기능 준비 중`;
-- create a test comment;
-- refresh and confirm persistence;
-- delete it with the deletion password;
-- confirm wrong-password deletion fails;
-- verify mobile composer starts collapsed behind `댓글 쓰기`;
-- verify desktop composer remains visible and layout is stable;
-- confirm no horizontal overflow or report-layout regression.
-
-Do not mark the comments feature complete until both mobile and desktop pass.
+- desktop comment creation succeeded and persisted after refresh;
+- wrong-password deletion was rejected;
+- correct-password deletion succeeded;
+- mobile comment creation and deletion succeeded;
+- mobile and desktop report layouts showed no regressions.
 
 ## Near-term priorities
-
-### 2. Harden comment operations
-
-Only after the basic flow works:
-
-- review rate-limit behavior and error messages;
-- decide whether the owner needs a simple admin moderation UI for deleting abusive comments without knowing guest passwords;
-- add lightweight spam controls only if real spam appears;
-- avoid CAPTCHA or account requirements unless necessary.
 
 ### 3. Improve publishing workflow only where friction appears
 
@@ -48,12 +46,16 @@ Potential incremental improvements:
 
 Do not replace the working publisher with a large CMS unless the current flow becomes a real bottleneck.
 
-### 4. Basic site polish
+## Maintenance / when needed
 
-- validate light and dark modes across homepage/admin/shared report shell;
-- tune mobile typography/spacing from real-device screenshots;
-- verify desktop hover/pointer behavior for interactive report elements;
-- review accessibility basics for navigation, forms, contrast, and focus states.
+### Harden comment operations
+
+The guest comment flow has passed Production E2E validation and has no currently observed operational issues. Continue hardening only when a real need is observed:
+
+- review rate-limit behavior or user-facing error messages if they cause operational friction;
+- add simple admin moderation only if abusive comments create a real moderation need;
+- add lightweight spam controls only if real spam appears;
+- avoid CAPTCHA or account requirements unless necessary.
 
 ## Later, when traffic justifies it
 
