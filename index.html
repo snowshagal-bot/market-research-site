@@ -7,6 +7,7 @@
 <title>Market Research</title>
 <meta name="description" content="데일리·위클리·비정기 시장 리서치를 모아보는 개인 리서치 아카이브.">
 <link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/category-state.css">
 <script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
 </head>
 <body>
@@ -15,10 +16,10 @@
     <div class="header-row">
       <a class="brand" href="./"><i></i>MARKET RESEARCH</a>
       <nav class="main-nav" aria-label="주 메뉴">
-        <a href="?category=daily">주식 리포트</a>
-        <a href="?category=weekly">위클리</a>
-        <a href="?category=research">비정기</a>
-        <a href="?category=note">끄적끄적</a>
+        <a data-nav-category="daily" href="?category=daily">주식 리포트</a>
+        <a data-nav-category="weekly" href="?category=weekly">위클리</a>
+        <a data-nav-category="research" href="?category=research">비정기</a>
+        <a data-nav-category="note" href="?category=note">끄적끄적</a>
       </nav>
       <div class="header-actions">
         <button class="icon-btn" type="button" data-theme-toggle aria-label="다크 모드 전환">◐</button>
@@ -26,8 +27,8 @@
       </div>
     </div>
     <nav class="mobile-nav" aria-label="모바일 메뉴">
-      <a href="?category=daily">주식 리포트</a><a href="?category=weekly">위클리 리포트</a>
-      <a href="?category=research">비정기 리포트</a><a href="?category=note">끄적끄적</a>
+      <a data-nav-category="daily" href="?category=daily">주식 리포트</a><a data-nav-category="weekly" href="?category=weekly">위클리 리포트</a>
+      <a data-nav-category="research" href="?category=research">비정기 리포트</a><a data-nav-category="note" href="?category=note">끄적끄적</a>
     </nav>
   </div>
 </header>
@@ -39,7 +40,7 @@
   <div class="site-wrap hero-grid">
     <div>
       <div class="eyebrow" data-feature-type>비정기 리서치</div>
-      <h1><span class="sr-only">최신 리서치:</span><b data-feature-title>누가 열쇠를 쥐는가</b><span data-feature-subtitle>소버린 AI의 여러 얼굴</span></h1>
+      <h1><span class="sr-only">대표 리포트:</span><b data-feature-title>누가 열쇠를 쥐는가</b><span data-feature-subtitle>소버린 AI의 여러 얼굴</span></h1>
       <p class="hero-desc" data-feature-desc></p>
       <a class="read-link" data-feature-link href="#">리포트 읽기 <span class="arrow">→</span></a>
     </div>
