@@ -6,16 +6,7 @@ This roadmap records implementation order, not a promise to build every future i
 
 ## Next action
 
-### 2. Basic site polish
-
-Stabilize the current site as the v1 baseline. This is a validation and polish pass, not a feature expansion or visual redesign.
-
-- validate light and dark modes across the homepage, admin page, and shared report shell;
-- inspect real Android layouts at approximately 360–430px wide;
-- inspect desktop layouts at 1280px or wider;
-- check for horizontal overflow and fixed/sticky UI overlap;
-- verify hover and pointer behavior on desktop and touch target sizes on mobile;
-- review basic accessibility for navigation, forms, contrast, and focus states.
+No feature work is scheduled as the next action. Operate the completed v1 baseline and decide the next task only when real production use reveals a concrete inconvenience, defect, or maintenance need.
 
 ## Completed
 
@@ -30,6 +21,20 @@ Production validation confirmed:
 - correct-password deletion succeeded;
 - mobile comment creation and deletion succeeded;
 - mobile and desktop report layouts showed no regressions.
+
+### 2. Basic site polish
+
+Completed and deployed to Production on 2026-08-10. The work stabilized the existing site as the v1 baseline without adding features or redesigning the product.
+
+Validation and polish covered:
+
+- light and dark modes across the homepage, admin page, and shared report shell;
+- site-controlled shared shell theming without changing original report designs;
+- common light-mode text contrast, keyboard focus visibility, and category/form accessibility semantics;
+- Android-sized layouts at 360px and 430px;
+- desktop layout at 1280px;
+- horizontal overflow, fixed/sticky UI spacing, hover/pointer behavior, and representative daily/weekly/research reports;
+- guest comments regression coverage after the UI changes.
 
 ## Near-term priorities
 
