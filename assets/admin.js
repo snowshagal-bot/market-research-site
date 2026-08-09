@@ -25,6 +25,13 @@
     note: '끄적끄적'
   };
 
+  const defaultDescriptions = {
+    daily: '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.',
+    weekly: '지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.',
+    research: '특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.',
+    note: '시장과 투자에 관한 생각을 자유롭게 정리한 글.'
+  };
+
   try { adminKey.value = sessionStorage.getItem('mrs-admin-key') || ''; } catch (_) {}
 
   function detectType(name, text) {
@@ -110,7 +117,7 @@
     date.value = detectedDate;
     title.value = detectedTitle;
     subtitle.value = detectedSubtitle;
-    description.value = detectedType ? `${labels[detectedType]} · 홈페이지 게시용 설명을 필요하면 수정하세요.` : '';
+    description.value = defaultDescriptions[detectedType] || '';
     filename.value = safeFilename(file.name);
 
     fileInfo.classList.add('on');
@@ -187,6 +194,12 @@
   dropZone.addEventListener('drop', e => { const f = e.dataTransfer?.files?.[0]; if (f) parseFile(f); });
   fileInput.addEventListener('change', () => parseFile(fileInput.files?.[0]));
   [type,date,title,subtitle,description,adminKey].forEach(el => el?.addEventListener('input', updatePublishState));
+  type?.addEventListener('change', () => {
+    if (!description.value.trim() || Object.values(defaultDescriptions).includes(description.value.trim())) {
+      description.value = defaultDescriptions[type.value] || '';
+    }
+    updatePublishState();
+  });
   adminKey?.addEventListener('change', () => { try { sessionStorage.setItem('mrs-admin-key', adminKey.value.trim()); } catch (_) {} });
   publishBtn?.addEventListener('click', publish);
 
