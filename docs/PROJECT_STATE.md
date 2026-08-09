@@ -1,0 +1,115 @@
+# Project state
+
+Updated: 2026-08-09
+
+## Purpose
+
+개인 시장 리서치 웹사이트. 주요 콘텐츠는 데일리 리포트 HTML, 위클리 HTML, 비정기 리서치 HTML, 자유 글(끄적끄적)이다. 현재는 낮은 트래픽을 전제로 단순하고 유지보수 쉬운 구조를 우선한다.
+
+## Current stack
+
+- Source: GitHub repository `snowshagal-bot/market-research-site`
+- Hosting: Cloudflare Pages
+- Production URL: `https://market-research-site.pages.dev`
+- Frontend: static HTML/CSS/vanilla JavaScript
+- Server-side features: Cloudflare Pages Functions
+- Comments storage: Cloudflare D1 database `market-research-comments`
+- No framework and no user membership system at present
+
+## Public information architecture
+
+Main categories:
+
+- `daily` → 데일리
+- `weekly` → 위클리
+- `research` → 비정기
+- `note` → 끄적끄적
+
+The homepage supports category filtering and search. The featured/hero area follows the selected category and shows the newest matching post.
+
+## Report publishing flow
+
+Admin page: `/admin/`
+
+1. User drops a standalone HTML report into the admin page.
+2. `assets/admin.js` reads the file locally and attempts to infer category, report date, title, and subtitle.
+3. Title extraction prefers report metadata/HTML content such as `meta[name="report-title"]`, `h1`, cover title, generic title class, and finally document title/file name.
+4. User can review/edit the extracted publishing metadata before publishing.
+5. `/api/publish` authenticates with `ADMIN_KEY` and uses `GITHUB_TOKEN` server-side.
+6. A single Git commit updates the report HTML plus `data/posts.json` and `data/posts.js`.
+7. Cloudflare Pages automatically deploys the new Git commit.
+8. Admin UI polls `data/posts.json` until the new post appears, then shows completion and redirects to the relevant category.
+
+Important date semantics:
+
+- `reportDate`: date the report itself belongs to / was authored or issued.
+- `registeredDate`, `registeredAt`: date/time the report was added to the website.
+- Archive sorting uses `reportDate` first, then registration time as a tiebreaker.
+
+## Report rendering and shared shell
+
+Files under `reports/` are standalone HTML documents that may contain their own CSS, JavaScript, interactions, embedded images, tooltips, fold/unfold behavior, and animations.
+
+`functions/_middleware.js` intercepts HTML responses under `/reports/` and injects `/assets/report-shell.js`.
+
+`assets/report-shell.js` currently provides:
+
+- fixed shared navigation bar
+- active category state
+- guest comment UI
+- Shadow DOM isolation to reduce style collision with report HTML
+
+The shared navigation is fixed at the top and inserts spacing so it does not cover the original report. Public labels are `데일리 / 위클리 / 비정기 / 끄적끄적`.
+
+## Comments feature
+
+Status: code implemented; Cloudflare D1 binding saved; production validation still pending after the next deployment.
+
+Relevant files:
+
+- `assets/report-shell.js` — guest comment UI
+- `functions/api/comments.js` — GET/POST/DELETE API
+- `migrations/0001_comments.sql` — schema reference
+
+Current behavior:
+
+- no membership required
+- nickname + comment + deletion password
+- comment body is inserted with `textContent`, not raw HTML
+- deletion password is salted and hashed using PBKDF2/SHA-256 before storage
+- soft delete via `deleted_at`
+- same-origin check for write/delete requests
+- honeypot field for simple bot filtering
+- per-IP-hash rate limit: 5 comments / 10 minutes
+- API auto-creates the D1 table/indexes on first use if they do not exist
+- mobile: comment composer is collapsed by default and opened with `댓글 쓰기`
+- desktop: composer is visible by default
+
+## Key files
+
+- `index.html` — homepage shell and category/search markup
+- `assets/site.css` — main site visual styles
+- `assets/category-state.css` — category state styles
+- `assets/site.js` — homepage category filtering, featured article, search, theme/menu behavior
+- `data/posts.json` — canonical post metadata used by publishing flow and deployment checks
+- `data/posts.js` — browser-consumable post data
+- `admin/index.html` — report publishing admin UI
+- `assets/admin.js` — local HTML parsing, publish flow, deployment polling
+- `functions/api/publish.js` — authenticated server-side publisher using GitHub API
+- `functions/_middleware.js` — injects shared report shell into `/reports/` HTML
+- `assets/report-shell.js` — isolated navigation + comments UI for report pages
+- `functions/api/comments.js` — D1-backed guest comment API
+- `reports/` — uploaded standalone report HTML files
+
+## Current constraints / deliberate non-features
+
+- No paid membership or account system yet.
+- No popular-post ranking or view counter.
+- No automated Tistory cross-posting; Tistory can link back to the site.
+- Market ticker is not currently a priority. Free/delayed data may be added later; paid market data is not required.
+- Custom domain is not required yet. Pages.dev is acceptable during early low-traffic operation.
+- No major framework migration planned unless the current architecture becomes a real blocker.
+
+## Known operational principle
+
+A UI change is not complete until both mobile and desktop are checked. The project previously exposed real regressions when a mobile-oriented shared navigation change rendered incorrectly on desktop, so this rule is mandatory rather than optional.
