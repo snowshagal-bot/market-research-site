@@ -3,6 +3,9 @@ const MAX_BODY = 1000;
 const MAX_PASSWORD = 64;
 const RATE_LIMIT_COUNT = 5;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const PASSWORD_HASH_ALGORITHM = 'pbkdf2-sha256';
+const PASSWORD_HASH_ITERATIONS = 100000;
+const MAX_PASSWORD_HASH_ITERATIONS = 100000;
 
 const TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS comments (
@@ -64,16 +67,44 @@ function base64ToBytes(value) {
   return bytes;
 }
 
-async function hashPassword(password, saltBase64) {
+async function hashPassword(password, saltBase64, iterations) {
+  if (!Number.isSafeInteger(iterations) || iterations < 1 || iterations > MAX_PASSWORD_HASH_ITERATIONS) {
+    throw new RangeError('Unsupported password hash iteration count.');
+  }
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
   const bits = await crypto.subtle.deriveBits({
     name: 'PBKDF2',
     salt: base64ToBytes(saltBase64),
-    iterations: 120000,
+    iterations,
     hash: 'SHA-256'
   }, key, 256);
   return bytesToBase64(new Uint8Array(bits));
+}
+
+function formatPasswordHash(hashBase64) {
+  return `${PASSWORD_HASH_ALGORITHM}$${PASSWORD_HASH_ITERATIONS}$${hashBase64}`;
+}
+
+function parsePasswordHash(value) {
+  const match = /^pbkdf2-sha256\$([1-9]\d*)\$([A-Za-z0-9+/]{43}=)$/.exec(String(value || ''));
+  if (!match) return null;
+
+  const iterations = Number(match[1]);
+  if (!Number.isSafeInteger(iterations) || iterations > MAX_PASSWORD_HASH_ITERATIONS) return null;
+  return { iterations, hashBase64: match[2] };
+}
+
+async function verifyPassword(password, saltBase64, storedHash) {
+  const parsed = parsePasswordHash(storedHash);
+  if (!parsed) return false;
+
+  try {
+    const candidate = await hashPassword(password, saltBase64, parsed.iterations);
+    return constantTimeEqual(candidate, parsed.hashBase64);
+  } catch (_) {
+    return false;
+  }
 }
 
 async function digestText(value) {
@@ -209,7 +240,9 @@ export async function onRequestPost(context) {
 
     const saltBytes = crypto.getRandomValues(new Uint8Array(16));
     const salt = bytesToBase64(saltBytes);
-    const passwordHash = await hashPassword(password, salt);
+    const passwordHash = formatPasswordHash(
+      await hashPassword(password, salt, PASSWORD_HASH_ITERATIONS)
+    );
     const id = crypto.randomUUID();
 
     await env.COMMENTS_DB.prepare(`
@@ -255,8 +288,7 @@ export async function onRequestDelete(context) {
     if (env.ADMIN_KEY && adminKey && constantTimeEqual(adminKey, env.ADMIN_KEY)) {
       authorized = true;
     } else if (password) {
-      const candidate = await hashPassword(password, row.passwordSalt);
-      authorized = constantTimeEqual(candidate, row.passwordHash);
+      authorized = await verifyPassword(password, row.passwordSalt, row.passwordHash);
     }
 
     if (!authorized) return reply({ error: 'BAD_PASSWORD', message: '삭제 비밀번호가 올바르지 않습니다.' }, 401);
