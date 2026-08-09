@@ -7,7 +7,7 @@ window.RESEARCH_POSTS = [
     title: "누가 열쇠를 쥐는가",
     subtitle: "소버린 AI의 여러 얼굴",
     description: "모델·컴퓨트·데이터·운영권 가운데 어느 층을 가져야 ‘우리 AI’가 되는지를 국가·기업 사례로 살펴본 비정기 리서치.",
-    href: "reports/2026-08-09-sovereign-ai.html",
+    href: "reports/비정기리서치_소버린AI_누가열쇠를쥐는가_2026.08.09_커버통합.html",
     featured: true
   },
   {
@@ -18,7 +18,7 @@ window.RESEARCH_POSTS = [
     title: "8월 1주차 위클리 분석",
     subtitle: "2026.08.03–08.07",
     description: "지난주 시장을 복기하고 다음 주 변수와 주도 업종의 조건을 정리한 주간 리포트.",
-    href: "reports/2026-08-week1-weekly.html"
+    href: "reports/8월 1주차 위클리 분석.html"
   },
   {
     id: "2026-08-07-daily",
@@ -28,6 +28,6 @@ window.RESEARCH_POSTS = [
     title: "8월 7일 주식시장 리포트",
     subtitle: "KOSPI Daily Report",
     description: "당일 시장의 핵심 서사, 수급, 업종, 매크로와 다음 거래일 시나리오를 정리한 데일리 리포트.",
-    href: "reports/2026-08-07-daily.html"
+    href: "reports/8월 7일 주식리포트_커버통합.html"
   }
 ];
