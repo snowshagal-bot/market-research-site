@@ -15,27 +15,133 @@ export async function onRequest(context) {
   else if (/비정기|소버린|research/i.test(decodedPath)) active = 'research';
   else if (/끄적|note/i.test(decodedPath)) active = 'note';
 
-  const itemStyle = 'display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:34px!important;padding:0 11px!important;border-radius:999px!important;text-decoration:none!important;white-space:nowrap!important;font-size:12px!important;font-weight:750!important;letter-spacing:-.015em!important;color:#525750!important;border:1px solid transparent!important;';
-  const activeStyle = 'background:#222622!important;color:#fff!important;border-color:#222622!important;';
+  const script = `
+<script>
+(() => {
+  const active = ${JSON.stringify(active)};
+  const BAR_H = 52;
 
-  const nav = `
-    <div id="mrs-report-nav-shell" style="display:block!important;width:100%!important;height:calc(48px + env(safe-area-inset-top, 0px))!important;box-sizing:border-box!important;">
-      <nav id="mrs-report-nav" aria-label="리포트 사이트 메뉴" style="position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:2147483647!important;width:100%!important;box-sizing:border-box!important;display:block!important;background:rgba(247,243,235,.96)!important;border-bottom:1px solid #d8d0c2!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important;font-family:Inter,Pretendard,'Noto Sans KR','Apple SD Gothic Neo',system-ui,-apple-system,sans-serif!important;line-height:1!important;padding-top:env(safe-area-inset-top,0px)!important;box-shadow:0 1px 8px rgba(20,24,21,.04)!important;">
-        <div style="height:48px!important;display:flex!important;align-items:center!important;gap:4px!important;overflow-x:auto!important;overflow-y:hidden!important;overscroll-behavior-x:contain!important;scrollbar-width:none!important;padding:6px max(10px,env(safe-area-inset-right)) 6px max(10px,env(safe-area-inset-left))!important;box-sizing:border-box!important;">
-          <a href="/" style="${itemStyle}font-weight:900!important;color:#1f2420!important;">← 홈</a>
-          <span aria-hidden="true" style="width:1px!important;height:20px!important;background:#d8d0c2!important;flex:0 0 auto!important;margin:0 2px!important;"></span>
-          <a href="/?category=daily" style="${itemStyle}${active === 'daily' ? activeStyle : ''}">주식</a>
-          <a href="/?category=weekly" style="${itemStyle}${active === 'weekly' ? activeStyle : ''}">위클리</a>
-          <a href="/?category=research" style="${itemStyle}${active === 'research' ? activeStyle : ''}">비정기</a>
-          <a href="/?category=note" style="${itemStyle}${active === 'note' ? activeStyle : ''}">끄적끄적</a>
-        </div>
-      </nav>
-    </div>`;
+  function mountReportNav() {
+    if (document.getElementById('mrs-nav-host')) return;
+
+    const spacer = document.createElement('div');
+    spacer.id = 'mrs-nav-spacer';
+    spacer.setAttribute('aria-hidden', 'true');
+    spacer.style.setProperty('display', 'block', 'important');
+    spacer.style.setProperty('width', '100%', 'important');
+    spacer.style.setProperty('height', BAR_H + 'px', 'important');
+    spacer.style.setProperty('min-height', BAR_H + 'px', 'important');
+    spacer.style.setProperty('max-height', BAR_H + 'px', 'important');
+    spacer.style.setProperty('margin', '0', 'important');
+    spacer.style.setProperty('padding', '0', 'important');
+    spacer.style.setProperty('border', '0', 'important');
+    spacer.style.setProperty('flex', '0 0 ' + BAR_H + 'px', 'important');
+    if (document.body.firstChild) document.body.insertBefore(spacer, document.body.firstChild);
+    else document.body.appendChild(spacer);
+
+    const host = document.createElement('div');
+    host.id = 'mrs-nav-host';
+    host.style.setProperty('all', 'initial', 'important');
+    host.style.setProperty('position', 'fixed', 'important');
+    host.style.setProperty('top', '0', 'important');
+    host.style.setProperty('left', '0', 'important');
+    host.style.setProperty('right', '0', 'important');
+    host.style.setProperty('width', '100vw', 'important');
+    host.style.setProperty('height', BAR_H + 'px', 'important');
+    host.style.setProperty('z-index', '2147483647', 'important');
+    host.style.setProperty('display', 'block', 'important');
+    host.style.setProperty('pointer-events', 'auto', 'important');
+    host.style.setProperty('transform', 'none', 'important');
+    host.style.setProperty('zoom', '1', 'important');
+
+    document.documentElement.appendChild(host);
+    const root = host.attachShadow({ mode: 'open' });
+
+    const style = document.createElement('style');
+    style.textContent = \`
+      :host { all: initial; }
+      * { box-sizing: border-box; }
+      .bar {
+        width: 100%;
+        height: ${BAR_H}px;
+        background: rgba(247,243,235,.97);
+        border-bottom: 1px solid #d8d0c2;
+        box-shadow: 0 1px 8px rgba(20,24,21,.05);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        font-family: Inter, Pretendard, 'Noto Sans KR', 'Apple SD Gothic Neo', system-ui, -apple-system, sans-serif;
+      }
+      .inner {
+        width: min(1180px, 100%);
+        height: 100%;
+        margin: 0 auto;
+        padding: 0 22px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+      }
+      .inner::-webkit-scrollbar { display: none; }
+      a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        color: #535850;
+        text-decoration: none;
+        white-space: nowrap;
+        font-size: 13px;
+        line-height: 1;
+        font-weight: 700;
+        letter-spacing: -.015em;
+        border: 1px solid transparent;
+        transition: background .15s ease, color .15s ease, border-color .15s ease;
+        cursor: pointer;
+      }
+      a:hover { background: #ebe5da; color: #1f2420; }
+      .home { color: #1f2420; font-weight: 850; }
+      .active { background: #222622; color: #fff; border-color: #222622; }
+      .active:hover { background: #222622; color: #fff; }
+      .divider { width: 1px; height: 20px; background: #d8d0c2; flex: 0 0 auto; margin: 0 3px; }
+      .brand { margin-left: auto; font-size: 11px; font-weight: 800; letter-spacing: .12em; color: #8a877f; white-space: nowrap; }
+      @media (max-width: 680px) {
+        .inner { width: 100%; margin: 0; padding: 0 8px; gap: 2px; }
+        a { min-height: 32px; padding: 0 10px; font-size: 12px; }
+        .divider { margin: 0 1px; }
+        .brand { display: none; }
+      }
+    \`;
+
+    const bar = document.createElement('nav');
+    bar.className = 'bar';
+    bar.setAttribute('aria-label', '리포트 사이트 메뉴');
+    bar.innerHTML = \`
+      <div class="inner">
+        <a class="home" href="/">← 홈</a>
+        <span class="divider" aria-hidden="true"></span>
+        <a class="${active === 'daily' ? 'active' : ''}" href="/?category=daily">주식</a>
+        <a class="${active === 'weekly' ? 'active' : ''}" href="/?category=weekly">위클리</a>
+        <a class="${active === 'research' ? 'active' : ''}" href="/?category=research">비정기</a>
+        <a class="${active === 'note' ? 'active' : ''}" href="/?category=note">끄적끄적</a>
+        <span class="brand">MARKET RESEARCH</span>
+      </div>\`;
+
+    root.append(style, bar);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mountReportNav, { once: true });
+  else mountReportNav();
+})();
+</script>`;
 
   return new HTMLRewriter()
     .on('body', {
       element(element) {
-        element.prepend(nav, { html: true });
+        element.append(script, { html: true });
       }
     })
     .transform(response);
