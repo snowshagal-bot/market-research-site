@@ -4,7 +4,7 @@ const MAX_PASSWORD = 64;
 const RATE_LIMIT_COUNT = 5;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 
-const SCHEMA_SQL = `
+const TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS comments (
   id TEXT PRIMARY KEY,
   report_key TEXT NOT NULL,
@@ -15,10 +15,17 @@ CREATE TABLE IF NOT EXISTS comments (
   ip_hash TEXT,
   created_at TEXT NOT NULL,
   deleted_at TEXT
-);
-CREATE INDEX IF NOT EXISTS idx_comments_report_created ON comments (report_key, created_at);
-CREATE INDEX IF NOT EXISTS idx_comments_ip_created ON comments (ip_hash, created_at);
+)
 `;
+const INDEX_SQL = [
+  'CREATE INDEX IF NOT EXISTS idx_comments_report_created ON comments (report_key, created_at)',
+  'CREATE INDEX IF NOT EXISTS idx_comments_ip_created ON comments (ip_hash, created_at)'
+];
+const REQUIRED_COLUMNS = [
+  'id', 'report_key', 'nickname', 'body', 'password_salt',
+  'password_hash', 'ip_hash', 'created_at', 'deleted_at'
+];
+const LEGACY_TABLE = 'comments_legacy_v1';
 
 let schemaPromise = null;
 
@@ -95,7 +102,7 @@ async function ensureDbReady(env) {
     return reply({ error: 'DB_NOT_CONFIGURED', message: '댓글 데이터베이스가 아직 연결되지 않았습니다.' }, 503);
   }
   if (!schemaPromise) {
-    schemaPromise = env.COMMENTS_DB.exec(SCHEMA_SQL).catch(err => {
+    schemaPromise = ensureSchema(env.COMMENTS_DB).catch(err => {
       schemaPromise = null;
       throw err;
     });
@@ -107,6 +114,33 @@ async function ensureDbReady(env) {
     console.error('comment schema init failed', err);
     return reply({ error: 'DB_INIT_FAILED', message: '댓글 데이터베이스 초기화에 실패했습니다.' }, 500);
   }
+}
+
+async function ensureSchema(db) {
+  const info = await db.prepare('PRAGMA table_info(comments)').all();
+  const columns = new Set((info.results || []).map(column => column.name));
+  const hasCurrentSchema = REQUIRED_COLUMNS.every(column => columns.has(column));
+
+  if (columns.size && !hasCurrentSchema) {
+    const existingLegacy = await db.prepare(
+      "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1"
+    ).bind(LEGACY_TABLE).first();
+
+    if (existingLegacy) {
+      throw new Error('An incompatible comments table and a preserved legacy table both exist.');
+    }
+
+    await db.batch([
+      db.prepare('DROP INDEX IF EXISTS idx_comments_report_created'),
+      db.prepare('DROP INDEX IF EXISTS idx_comments_ip_created'),
+      db.prepare(`ALTER TABLE comments RENAME TO ${LEGACY_TABLE}`)
+    ]);
+  }
+
+  await db.batch([
+    db.prepare(TABLE_SQL),
+    ...INDEX_SQL.map(statement => db.prepare(statement))
+  ]);
 }
 
 export async function onRequestGet(context) {
