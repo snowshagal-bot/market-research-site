@@ -62,10 +62,10 @@
     const root = host.attachShadow({ mode: 'open' });
     root.innerHTML = `
       <style>
-        :host{all:initial}*{box-sizing:border-box}.wrap{background:#f7f3eb;color:#22241f;border-top:1px solid #d8d0c2;padding:54px 20px 70px;font-family:Inter,Pretendard,'Noto Sans KR','Apple SD Gothic Neo',system-ui,-apple-system,sans-serif;line-height:1.55}.inner{width:min(820px,100%);margin:0 auto}.head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding-bottom:15px;border-bottom:1px solid #d8d0c2}.head h2{margin:0;font-size:21px;line-height:1.2;letter-spacing:-.035em}.count{font-size:12px;color:#77776f}.form{padding:20px 0 22px;border-bottom:1px solid #d8d0c2}.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.input,.textarea{width:100%;border:1px solid #d8d0c2;border-radius:10px;background:#fbf8f1;color:#22241f;font:inherit;font-size:14px;outline:none}.input{height:42px;padding:0 12px}.textarea{min-height:96px;padding:11px 12px;resize:vertical;margin-top:10px}.input:focus,.textarea:focus{border-color:#6d786e;box-shadow:0 0 0 2px rgba(65,82,70,.07)}.form-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px}.note{font-size:11px;color:#7d7d75}.submit{min-height:38px;padding:0 18px;border:0;border-radius:999px;background:#222622;color:#fff;font:inherit;font-size:12px;font-weight:800;cursor:pointer}.submit:hover{background:#343934}.submit:disabled{opacity:.45;cursor:default}.hp{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important}.status{min-height:20px;padding-top:9px;font-size:11px;color:#786c58}.list{display:grid}.empty,.loading,.unavailable{padding:28px 0;color:#88877f;font-size:13px}.comment{padding:18px 0;border-bottom:1px solid #e0d9ce}.comment-head{display:flex;align-items:center;gap:9px;margin-bottom:7px}.nickname{font-size:13px;font-weight:850;color:#242722}.date{font-size:10px;color:#949088}.delete{margin-left:auto;border:0;background:none;padding:4px 0 4px 8px;color:#969189;font:inherit;font-size:10px;cursor:pointer}.delete:hover{color:#22241f}.body{margin:0;color:#41433e;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}.unavailable{padding:22px 0}.unavailable b{display:block;color:#555750;margin-bottom:3px}.disabled-form{opacity:.45;pointer-events:none}@media(max-width:600px){.wrap{padding:38px 14px 54px}.head h2{font-size:19px}.fields{grid-template-columns:1fr}.form-bottom{align-items:flex-start;flex-direction:column}.submit{width:100%}.textarea{min-height:105px}.comment{padding:16px 0}.body{font-size:13px}}
+        :host{all:initial}*{box-sizing:border-box}.wrap{background:#f7f3eb;color:#22241f;border-top:1px solid #d8d0c2;padding:54px 20px 70px;font-family:Inter,Pretendard,'Noto Sans KR','Apple SD Gothic Neo',system-ui,-apple-system,sans-serif;line-height:1.55}.inner{width:min(820px,100%);margin:0 auto}.head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:15px;border-bottom:1px solid #d8d0c2}.head h2{margin:0;font-size:21px;line-height:1.2;letter-spacing:-.035em}.head-actions{display:flex;align-items:center;gap:10px}.count{font-size:12px;color:#77776f}.compose-toggle{display:none;min-height:32px;padding:0 12px;border:1px solid #d8d0c2;border-radius:999px;background:#fbf8f1;color:#333730;font:inherit;font-size:11px;font-weight:800;cursor:pointer}.compose-toggle:hover{background:#eee8dd}.compose-toggle:disabled{opacity:.45;cursor:default}.form{padding:20px 0 22px;border-bottom:1px solid #d8d0c2}.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.input,.textarea{width:100%;border:1px solid #d8d0c2;border-radius:10px;background:#fbf8f1;color:#22241f;font:inherit;font-size:14px;outline:none}.input{height:42px;padding:0 12px}.textarea{min-height:96px;padding:11px 12px;resize:vertical;margin-top:10px}.input:focus,.textarea:focus{border-color:#6d786e;box-shadow:0 0 0 2px rgba(65,82,70,.07)}.form-bottom{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px}.note{font-size:11px;color:#7d7d75}.submit{min-height:38px;padding:0 18px;border:0;border-radius:999px;background:#222622;color:#fff;font:inherit;font-size:12px;font-weight:800;cursor:pointer}.submit:hover{background:#343934}.submit:disabled{opacity:.45;cursor:default}.hp{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important}.status{min-height:20px;padding-top:9px;font-size:11px;color:#786c58}.list{display:grid}.empty,.loading,.unavailable{padding:28px 0;color:#88877f;font-size:13px}.comment{padding:18px 0;border-bottom:1px solid #e0d9ce}.comment-head{display:flex;align-items:center;gap:9px;margin-bottom:7px}.nickname{font-size:13px;font-weight:850;color:#242722}.date{font-size:10px;color:#949088}.delete{margin-left:auto;border:0;background:none;padding:4px 0 4px 8px;color:#969189;font:inherit;font-size:10px;cursor:pointer}.delete:hover{color:#22241f}.body{margin:0;color:#41433e;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}.unavailable{padding:22px 0}.unavailable b{display:block;color:#555750;margin-bottom:3px}.disabled-form{opacity:.45;pointer-events:none}@media(max-width:600px){.wrap{padding:34px 14px 48px}.head{padding-bottom:13px}.head h2{font-size:19px}.head-actions{gap:8px}.compose-toggle{display:inline-flex;align-items:center;justify-content:center}.form{display:none;padding:16px 0 20px}.form.open{display:block}.fields{grid-template-columns:1fr}.form-bottom{align-items:flex-start;flex-direction:column}.submit{width:100%}.textarea{min-height:105px}.comment{padding:16px 0}.body{font-size:13px}.empty,.loading,.unavailable{padding:22px 0}}
       </style>
       <div class="wrap"><div class="inner">
-        <div class="head"><h2>댓글</h2><span class="count" id="count">0</span></div>
+        <div class="head"><h2>댓글</h2><div class="head-actions"><span class="count" id="count">0</span><button class="compose-toggle" id="compose-toggle" type="button" aria-expanded="false">댓글 쓰기</button></div></div>
         <form class="form" id="comment-form">
           <div class="fields"><input class="input" id="nickname" maxlength="20" placeholder="닉네임" autocomplete="nickname" required><input class="input" id="password" type="password" minlength="4" maxlength="64" placeholder="삭제용 비밀번호" autocomplete="new-password" required></div>
           <textarea class="textarea" id="body" maxlength="1000" placeholder="댓글을 입력하세요." required></textarea>
@@ -86,10 +86,28 @@
     const status = $('status');
     const list = $('list');
     const count = $('count');
+    const composeToggle = $('compose-toggle');
     const key = reportKey();
     let comments = [];
 
     try { nickname.value = localStorage.getItem('mrs-comment-nickname') || ''; } catch (_) {}
+
+    function isMobile() {
+      return window.matchMedia('(max-width: 600px)').matches;
+    }
+
+    function setComposer(open, focus = false) {
+      if (!isMobile()) return;
+      form.classList.toggle('open', open);
+      composeToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      composeToggle.textContent = open ? '닫기' : '댓글 쓰기';
+      if (open && focus) setTimeout(() => nickname.focus(), 0);
+    }
+
+    composeToggle.addEventListener('click', () => {
+      const open = !form.classList.contains('open');
+      setComposer(open, open);
+    });
 
     function formatDate(value) {
       const d = new Date(value);
@@ -152,6 +170,7 @@
         list.appendChild(box);
         form.classList.add('disabled-form');
         submit.disabled = true;
+        composeToggle.disabled = true;
       }
     }
 
@@ -182,6 +201,7 @@
         password.value = '';
         status.textContent = '댓글이 등록되었습니다.';
         render();
+        if (isMobile()) setComposer(false);
       } catch (err) {
         status.textContent = err.message || '댓글 등록 중 오류가 발생했습니다.';
       } finally {
