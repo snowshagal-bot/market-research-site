@@ -41,5 +41,19 @@
     "subtitle": "KOSPI Daily Report",
     "description": "당일 시장의 핵심 서사, 수급, 업종, 매크로와 다음 거래일 시나리오를 정리한 데일리 리포트.",
     "href": "reports/8월 7일 주식리포트_커버통합.html"
+  },
+  {
+    "id": "2026-08-03-daily-181n1pj",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "date": "2026-08-03",
+    "reportDate": "2026-08-03",
+    "registeredDate": "2026-08-09",
+    "registeredAt": "2026-08-09T14:52:47.752Z",
+    "legacyImport": false,
+    "title": "갈라진 지수와 시장",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "href": "reports/8월 3일 주식리포트_커버통합.html"
   }
 ]
