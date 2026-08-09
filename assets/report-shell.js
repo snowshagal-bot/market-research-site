@@ -64,10 +64,10 @@
       </style>
       <nav class="bar" aria-label="리포트 사이트 메뉴"><div class="inner">
         <a class="home" href="/">← 홈</a><span class="divider" aria-hidden="true"></span>
-        <a class="${active === 'daily' ? 'active' : ''}" ${active === 'daily' ? 'aria-current="page"' : ''} href="/?category=daily">데일리</a>
-        <a class="${active === 'weekly' ? 'active' : ''}" ${active === 'weekly' ? 'aria-current="page"' : ''} href="/?category=weekly">위클리</a>
-        <a class="${active === 'research' ? 'active' : ''}" ${active === 'research' ? 'aria-current="page"' : ''} href="/?category=research">비정기</a>
-        <a class="${active === 'note' ? 'active' : ''}" ${active === 'note' ? 'aria-current="page"' : ''} href="/?category=note">끄적끄적</a>
+        <a class="${active === 'daily' ? 'active' : ''}" ${active === 'daily' ? 'aria-current="true"' : ''} href="/?category=daily">데일리</a>
+        <a class="${active === 'weekly' ? 'active' : ''}" ${active === 'weekly' ? 'aria-current="true"' : ''} href="/?category=weekly">위클리</a>
+        <a class="${active === 'research' ? 'active' : ''}" ${active === 'research' ? 'aria-current="true"' : ''} href="/?category=research">비정기</a>
+        <a class="${active === 'note' ? 'active' : ''}" ${active === 'note' ? 'aria-current="true"' : ''} href="/?category=note">끄적끄적</a>
         <span class="brand">MARKET RESEARCH</span>
       </div></nav>`;
   }
