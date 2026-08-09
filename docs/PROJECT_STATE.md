@@ -69,7 +69,7 @@ Relevant files:
 
 - `assets/report-shell.js` — guest comment UI
 - `functions/api/comments.js` — GET/POST/DELETE API
-- `migrations/0001_comments.sql` — schema reference
+- `db/schema.sql` — schema reference
 
 Current behavior:
 
@@ -82,6 +82,7 @@ Current behavior:
 - honeypot field for simple bot filtering
 - per-IP-hash rate limit: 5 comments / 10 minutes
 - API auto-creates the D1 table/indexes on first use if they do not exist
+- if an incompatible pre-release `comments` table exists, the API preserves it as `comments_legacy_v1` before creating the current schema
 - mobile: comment composer is collapsed by default and opened with `댓글 쓰기`
 - desktop: composer is visible by default
 

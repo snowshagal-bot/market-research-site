@@ -58,7 +58,7 @@ The binding has been created/saved in Cloudflare as of 2026-08-09. Cloudflare in
 
 `functions/api/comments.js` reads the database through `env.COMMENTS_DB`.
 
-The API automatically runs `CREATE TABLE IF NOT EXISTS` / `CREATE INDEX IF NOT EXISTS` on first use, so a manual schema paste is not required for initial setup. `migrations/0001_comments.sql` remains a schema reference.
+The API inspects and prepares the comments schema on first use, so a manual schema paste is not required for initial setup. If it finds an incompatible pre-release `comments` table, it preserves that table as `comments_legacy_v1` and then creates the current table and indexes. `db/schema.sql` remains the schema reference.
 
 ## Report publishing dependencies
 
