@@ -1,6 +1,6 @@
 # Project state
 
-Updated: 2026-08-09
+Updated: 2026-08-10
 
 ## Purpose
 
@@ -63,7 +63,7 @@ The shared navigation is fixed at the top and inserts spacing so it does not cov
 
 ## Comments feature
 
-Status: code implemented; Cloudflare D1 binding saved; production validation still pending after the next deployment.
+Status: complete and validated in production on desktop and mobile.
 
 Relevant files:
 
@@ -76,7 +76,8 @@ Current behavior:
 - no membership required
 - nickname + comment + deletion password
 - comment body is inserted with `textContent`, not raw HTML
-- deletion password is salted and hashed using PBKDF2/SHA-256 before storage
+- deletion password is salted and hashed using PBKDF2/SHA-256 with 100,000 iterations before storage
+- `password_hash` stores the algorithm and iteration count as `pbkdf2-sha256$<iterations>$<hash>` so future KDF changes do not invalidate existing comments
 - soft delete via `deleted_at`
 - same-origin check for write/delete requests
 - honeypot field for simple bot filtering
@@ -85,6 +86,13 @@ Current behavior:
 - if an incompatible pre-release `comments` table exists, the API preserves it as `comments_legacy_v1` before creating the current schema
 - mobile: comment composer is collapsed by default and opened with `댓글 쓰기`
 - desktop: composer is visible by default
+
+Production validation completed on 2026-08-10:
+
+- desktop comment creation succeeded and persisted after refresh
+- wrong deletion passwords were rejected and the correct password deleted the comment
+- mobile comment creation and deletion succeeded
+- report layouts remained stable on both mobile and desktop
 
 ## Key files
 
