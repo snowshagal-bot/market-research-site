@@ -15,6 +15,13 @@
   const adminKey = $('admin-key');
   const publishBtn = $('publish-btn');
   const themeBtn = document.querySelector('[data-theme-toggle]');
+  const overlay = $('publish-overlay');
+  const overlayTitle = $('publish-state-title');
+  const overlayText = $('publish-state-text');
+  const overlayDetail = $('publish-state-detail');
+  const overlayLinks = $('publish-links');
+  const reportLink = $('published-report-link');
+  const homeLink = $('published-home-link');
   let selectedFile = null;
   let publishing = false;
 
@@ -94,6 +101,57 @@
     publishBtn.disabled = publishing || !ready;
   }
 
+  function showOverlay(titleText, bodyText, detailText = '') {
+    if (!overlay) return;
+    overlay.classList.add('on');
+    overlay.classList.remove('done');
+    overlayTitle.textContent = titleText;
+    overlayText.textContent = bodyText;
+    overlayDetail.textContent = detailText;
+    overlayLinks.hidden = true;
+  }
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async function waitForDeployment(postId, reportUrl, postType, registered) {
+    const categoryUrl = `../?category=${encodeURIComponent(postType)}`;
+    homeLink.href = categoryUrl;
+    reportLink.href = reportUrl || '#';
+    overlayTitle.textContent = '홈페이지 반영 중';
+    overlayText.textContent = 'GitHub 게시가 끝났습니다. Cloudflare가 새 버전을 배포하고 있습니다.';
+    overlayDetail.textContent = `홈페이지 등록일 ${registered} · 새 배포 확인 중`;
+
+    for (let attempt = 1; attempt <= 40; attempt++) {
+      try {
+        const res = await fetch(`/data/posts.json?deploycheck=${Date.now()}`, { cache: 'no-store' });
+        if (res.ok) {
+          const posts = await res.json();
+          if (Array.isArray(posts) && posts.some(p => p.id === postId)) {
+            overlay.classList.add('done');
+            overlayTitle.textContent = '홈페이지 반영 완료';
+            overlayText.textContent = `${labels[postType] || '리포트'} 목록에 새 글이 등록됐습니다. 잠시 후 자동으로 이동합니다.`;
+            overlayDetail.textContent = `홈페이지 등록일 ${registered}`;
+            overlayLinks.hidden = false;
+            setTimeout(() => { location.href = categoryUrl; }, 1400);
+            return;
+          }
+        }
+      } catch (_) {}
+
+      if (attempt % 4 === 0) {
+        overlayDetail.textContent = `홈페이지 등록일 ${registered} · Cloudflare 배포 확인 중…`;
+      }
+      await sleep(2500);
+    }
+
+    overlayTitle.textContent = '게시는 완료됐습니다';
+    overlayText.textContent = 'Cloudflare 반영 확인이 예상보다 늦어지고 있습니다. 게시 자체는 완료됐으니 아래 버튼으로 이동해도 됩니다.';
+    overlayDetail.textContent = `홈페이지 등록일 ${registered}`;
+    overlayLinks.hidden = false;
+  }
+
   async function parseFile(file) {
     if (!file || !/\.html?$/i.test(file.name)) {
       status.textContent = 'HTML 파일만 선택할 수 있습니다.';
@@ -138,17 +196,19 @@
 
   async function publish() {
     if (publishing || publishBtn.disabled || !selectedFile) return;
-    const summary = `${date.value} · ${labels[type.value]}\n${title.value.trim()}\n\n이 내용으로 홈페이지에 게시할까요?`;
+    const postType = type.value;
+    const summary = `${date.value} · ${labels[postType]}\n${title.value.trim()}\n\n이 내용으로 홈페이지에 게시할까요?`;
     if (!confirm(summary)) return;
 
     publishing = true;
     updatePublishState();
     publishBtn.textContent = '게시 중…';
     status.textContent = 'HTML과 게시 목록을 GitHub에 반영하는 중…';
+    showOverlay('게시 처리 중', '리포트 HTML과 홈페이지 목록을 GitHub에 저장하고 있습니다.', '창을 닫지 않아도 됩니다.');
 
     const form = new FormData();
     form.append('file', selectedFile, filename.value.trim());
-    form.append('type', type.value);
+    form.append('type', postType);
     form.append('reportDate', date.value);
     form.append('title', title.value.trim());
     form.append('subtitle', subtitle.value.trim());
@@ -167,19 +227,12 @@
       if (!res.ok) throw new Error(data.message || data.error || `게시 실패 (${res.status})`);
 
       registeredDate.value = data.registeredDate || '등록 완료';
-      status.textContent = `게시 완료 · 등록일 ${data.registeredDate}. Cloudflare 재배포가 끝나면 홈페이지에 반영됩니다.`;
+      status.textContent = `게시 완료 · 등록일 ${data.registeredDate}. Cloudflare 재배포 확인 중…`;
       publishBtn.textContent = '게시 완료';
       publishBtn.disabled = true;
-      if (data.reportUrl) {
-        const a = document.createElement('a');
-        a.href = data.reportUrl;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.textContent = ' 게시된 리포트 열기 →';
-        a.style.marginLeft = '6px';
-        status.appendChild(a);
-      }
+      await waitForDeployment(data.id, data.reportUrl, postType, data.registeredDate || '등록 완료');
     } catch (err) {
+      if (overlay) overlay.classList.remove('on');
       status.textContent = err.message || '게시 중 오류가 발생했습니다.';
       publishBtn.textContent = '게시';
       publishing = false;
