@@ -25,6 +25,14 @@ html[data-theme="light"] {
   cursor: default;
 }
 
+.cover-category {
+  margin-top: 44px;
+}
+
+.cover-fallback .cover-category {
+  padding-top: 36px;
+}
+
 @media (min-width: 761px) {
   .mobile-nav.open {
     display: none;

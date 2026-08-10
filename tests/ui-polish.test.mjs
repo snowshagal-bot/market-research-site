@@ -24,7 +24,7 @@ test('light-mode muted UI text meets the WCAG AA normal-text target', () => {
 test('homepage exposes category state and has no placeholder footer links', async () => {
   const [html, script] = await Promise.all([read('index.html'), read('assets/site.js')]);
   assert.match(html, /data-filter="all" aria-pressed="true"/);
-  assert.equal((html.match(/data-filter="(?:daily|weekly|research|note)" aria-pressed="false"/g) || []).length, 4);
+  assert.equal((html.match(/data-filter="(?:daily|weekly|research|basics|note)" aria-pressed="false"/g) || []).length, 5);
   assert.match(script, /setAttribute\('aria-pressed',String\(selected\)\)/);
   assert.match(script, /setAttribute\('aria-current','page'\)/);
   assert.doesNotMatch(html, /<footer[\s\S]*?href="#"/);
@@ -42,7 +42,7 @@ test('shared report shell reuses site theme and exposes accessible comment field
   const script = await read('assets/report-shell.js');
   assert.match(script, /localStorage\.getItem\('site-theme'\)/);
   assert.match(script, /host\.dataset\.theme = theme/);
-  assert.equal((script.match(/aria-current=\"true\"/g) || []).length, 4);
+  assert.equal((script.match(/aria-current=\"true\"/g) || []).length, 5);
   for (const label of ['닉네임', '삭제용 비밀번호', '댓글 내용']) {
     assert.match(script, new RegExp(`aria-label="${label}"`));
   }

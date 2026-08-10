@@ -3,11 +3,13 @@ const REPO = 'market-research-site';
 const BRANCH = 'main';
 const API_VERSION = '2026-03-10';
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
+const MAX_COVER_BYTES = 4 * 1024 * 1024;
 
 const TYPE_LABELS = {
   daily: '주식 리포트',
   weekly: '위클리 리포트',
   research: '비정기 리서치',
+  basics: '시장 공부',
   note: '끄적끄적'
 };
 
@@ -37,6 +39,26 @@ function safeFilename(input) {
   if (!name) name = 'report.html';
   if (!/\.html?$/i.test(name)) name += '.html';
   return name.slice(0, 180);
+}
+
+function coverExtension(file) {
+  const extension = String(file?.name || '').split('.').pop()?.toLowerCase() || '';
+  const allowed = {
+    'image/jpeg': ['jpg', 'jpeg'],
+    'image/png': ['png'],
+    'image/webp': ['webp']
+  };
+  const mime = String(file?.type || '').toLowerCase();
+  return allowed[mime]?.includes(extension) ? extension : '';
+}
+
+function encodeBase64(bytes) {
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+  }
+  return btoa(binary);
 }
 
 function kstDate(now = new Date()) {
@@ -126,6 +148,7 @@ export async function onRequestPost(context) {
   }
 
   const file = form.get('file');
+  const cover = form.get('cover');
   const type = String(form.get('type') || '').trim();
   const reportDate = String(form.get('reportDate') || '').trim();
   const title = String(form.get('title') || '').trim().slice(0, 180);
@@ -138,6 +161,11 @@ export async function onRequestPost(context) {
   if (!/^20\d{2}-\d{2}-\d{2}$/.test(reportDate)) return reply({ error: 'BAD_DATE', message: '리포트 기준일을 확인하세요.' }, 400);
   if (!title) return reply({ error: 'NO_TITLE', message: '제목을 입력하세요.' }, 400);
   if (Number(file.size || 0) > MAX_FILE_BYTES) return reply({ error: 'FILE_TOO_LARGE', message: '현재 게시기는 5MB 이하 HTML 파일만 지원합니다.' }, 413);
+
+  const hasCover = Boolean(cover && typeof cover.arrayBuffer === 'function' && Number(cover.size || 0) > 0);
+  const coverExt = hasCover ? coverExtension(cover) : '';
+  if (hasCover && !coverExt) return reply({ error: 'BAD_COVER_TYPE', message: '대표 커버는 JPG, PNG, WebP 이미지만 지원합니다.' }, 400);
+  if (hasCover && Number(cover.size || 0) > MAX_COVER_BYTES) return reply({ error: 'COVER_TOO_LARGE', message: '대표 커버 이미지는 4MB 이하여야 합니다.' }, 413);
 
   const html = await file.text();
   if (!/<(?:!doctype\s+html|html\b)/i.test(html.slice(0, 10000))) {
@@ -162,6 +190,7 @@ export async function onRequestPost(context) {
     }
 
     const id = `${reportDate}-${type}-${simpleHash(`${filename}|${title}|${reportDate}`)}`;
+    const coverPath = hasCover ? `covers/${id}.${coverExt}` : null;
     const post = {
       id,
       type,
@@ -174,7 +203,8 @@ export async function onRequestPost(context) {
       title,
       subtitle,
       description,
-      href
+      href,
+      ...(coverPath ? { coverImage: coverPath } : {})
     };
 
     posts.push(post);
@@ -193,6 +223,17 @@ export async function onRequestPost(context) {
     const parentCommit = await gh(token, `/git/commits/${parentSha}`);
     const baseTree = parentCommit.tree.sha;
 
+    let coverEntry = null;
+    if (coverPath) {
+      const coverBytes = new Uint8Array(await cover.arrayBuffer());
+      const coverBlob = await gh(token, '/git/blobs', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ content: encodeBase64(coverBytes), encoding: 'base64' })
+      });
+      coverEntry = { path: coverPath, mode: '100644', type: 'blob', sha: coverBlob.sha };
+    }
+
     const tree = await gh(token, '/git/trees', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -200,6 +241,7 @@ export async function onRequestPost(context) {
         base_tree: baseTree,
         tree: [
           { path: reportPath, mode: '100644', type: 'blob', content: html },
+          ...(coverEntry ? [coverEntry] : []),
           { path: 'data/posts.json', mode: '100644', type: 'blob', content: postsJson },
           { path: 'data/posts.js', mode: '100644', type: 'blob', content: postsJs }
         ]
@@ -229,6 +271,7 @@ export async function onRequestPost(context) {
       registeredDate,
       registeredAt,
       reportUrl: `/${href.split('/').map(encodeURIComponent).join('/')}`,
+      coverImage: coverPath,
       commitSha: commit.sha
     });
   } catch (err) {

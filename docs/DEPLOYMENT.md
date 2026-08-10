@@ -69,7 +69,7 @@ For `/admin/` publishing to work, production needs:
 - GitHub token still valid and scoped to this repository with Contents read/write permission
 - Cloudflare Pages Git integration operational
 
-The publisher writes the report HTML and both post data files in one Git tree/commit to reduce partial publication states.
+The publisher writes the report HTML, optional cover image, and both post data files in one Git tree/commit to reduce partial publication states. Cover images are limited to JPG, PNG, or WebP files up to 4MB and are stored separately under `covers/`; original files under `reports/` are not modified to embed the cover.
 
 ## Comment dependencies
 

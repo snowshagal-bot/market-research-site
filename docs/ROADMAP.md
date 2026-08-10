@@ -6,7 +6,21 @@ This roadmap records implementation order, not a promise to build every future i
 
 ## Next action
 
-No feature work is scheduled as the next action. Operate the completed v1 baseline and decide the next task only when real production use reveals a concrete inconvenience, defect, or maintenance need.
+Review the homepage v2 Draft PR and its Cloudflare Pages Preview. After approval, merge it and complete Production validation for the carousel, dark mode, responsive layouts, archive filters/search, Market Basics empty state, admin publishing with and without a cover image, and existing report/comment behavior.
+
+This is validation of the requested v2 work, not a new feature commitment. After v2 Production validation, return to operating the site and choose future tasks only when real use reveals a concrete need.
+
+## In progress
+
+### 3. Homepage v2 editorial redesign
+
+Implemented for Draft PR review:
+
+- category-representative manual carousel for daily, weekly, research, and Market Basics;
+- optional separately stored cover images with backward-compatible fallback covers;
+- new `basics` / 시장 공부 category while retaining Notes;
+- understated introduction and latest-category cards;
+- existing archive/search, theme, accessibility, admin publishing, report shell, and comments preserved.
 
 ## Completed
 
@@ -38,7 +52,7 @@ Validation and polish covered:
 
 ## Near-term priorities
 
-### 3. Improve publishing workflow only where friction appears
+### 4. Improve publishing workflow only where friction appears
 
 Current `/admin/` publishing already supports HTML parsing, metadata review, secure server-side publishing, deployment progress, and redirect.
 

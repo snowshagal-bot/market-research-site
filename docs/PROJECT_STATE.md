@@ -4,7 +4,7 @@ Updated: 2026-08-10
 
 ## Purpose
 
-개인 시장 리서치 웹사이트. 주요 콘텐츠는 데일리 리포트 HTML, 위클리 HTML, 비정기 리서치 HTML, 자유 글(끄적끄적)이다. 현재는 낮은 트래픽을 전제로 단순하고 유지보수 쉬운 구조를 우선한다.
+개인 시장 리서치 웹사이트. 주요 콘텐츠는 데일리 리포트 HTML, 위클리 HTML, 비정기 리서치 HTML, 시장 공부, 자유 글(끄적끄적)이다. 현재는 낮은 트래픽을 전제로 단순하고 유지보수 쉬운 구조를 우선한다.
 
 ## Current stack
 
@@ -23,9 +23,18 @@ Main categories:
 - `daily` → 데일리
 - `weekly` → 위클리
 - `research` → 비정기
+- `basics` → 시장 공부 / Market Basics
 - `note` → 끄적끄적
 
-The homepage supports category filtering and search. The featured/hero area follows the selected category and shows the newest matching post.
+The homepage supports category filtering and search. Its v2 featured carousel selects one latest post from each available core category (`daily`, `weekly`, `research`, `basics`) rather than rotating chronologically. `note` remains available as a secondary navigation and archive category.
+
+Homepage v2 also provides:
+
+- manual previous/next and category-tab carousel controls with no autoplay
+- optional post cover images through `coverImage`
+- CSS/typographic fallback covers for all existing posts without `coverImage`
+- a concise site introduction and category-latest cards
+- the existing report archive, URL category filtering, and report-date sorting
 
 ## Report publishing flow
 
@@ -36,9 +45,10 @@ Admin page: `/admin/`
 3. Title extraction prefers report metadata/HTML content such as `meta[name="report-title"]`, `h1`, cover title, generic title class, and finally document title/file name.
 4. User can review/edit the extracted publishing metadata before publishing.
 5. `/api/publish` authenticates with `ADMIN_KEY` and uses `GITHUB_TOKEN` server-side.
-6. A single Git commit updates the report HTML plus `data/posts.json` and `data/posts.js`.
-7. Cloudflare Pages automatically deploys the new Git commit.
-8. Admin UI polls `data/posts.json` until the new post appears, then shows completion and redirects to the relevant category.
+6. An optional JPG/PNG/WebP cover image can be reviewed and uploaded separately from the report HTML.
+7. A single Git commit updates the report HTML, optional `covers/` asset, `data/posts.json`, and `data/posts.js`.
+8. Cloudflare Pages automatically deploys the new Git commit.
+9. Admin UI polls `data/posts.json` until the new post appears, then shows completion and redirects to the relevant category.
 
 Important date semantics:
 
@@ -59,7 +69,7 @@ Files under `reports/` are standalone HTML documents that may contain their own 
 - guest comment UI
 - Shadow DOM isolation to reduce style collision with report HTML
 
-The shared navigation is fixed at the top and inserts spacing so it does not cover the original report. Public labels are `데일리 / 위클리 / 비정기 / 끄적끄적`.
+The shared navigation is fixed at the top and inserts spacing so it does not cover the original report. Public labels are `데일리 / 위클리 / 비정기 / 시장 공부 / 끄적끄적`.
 
 ## Comments feature
 
@@ -114,6 +124,7 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 
 - `index.html` — homepage shell and category/search markup
 - `assets/site.css` — main site visual styles
+- `assets/home-v2.css` — homepage v2 carousel, fallback cover, introduction, and latest-card layout
 - `assets/category-state.css` — category state styles
 - `assets/site.js` — homepage category filtering, featured article, search, theme/menu behavior
 - `data/posts.json` — canonical post metadata used by publishing flow and deployment checks
@@ -124,6 +135,7 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `functions/_middleware.js` — injects shared report shell into `/reports/` HTML
 - `assets/report-shell.js` — isolated navigation + comments UI for report pages
 - `functions/api/comments.js` — D1-backed guest comment API
+- `covers/` — optional separately stored homepage cover assets created by the publisher
 - `reports/` — uploaded standalone report HTML files
 
 ## Current constraints / deliberate non-features
