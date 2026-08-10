@@ -39,7 +39,11 @@ test('basics is added without replacing notes across public and admin controls',
 });
 
 test('carousel uses one latest post per core category, never autoplay, and supports fallback covers', async () => {
-  const script = await read('assets/site.js');
+  const [script, homeStyles, polishStyles] = await Promise.all([
+    read('assets/site.js'),
+    read('assets/home-v2.css'),
+    read('assets/ui-polish.css')
+  ]);
   assert.match(script, /const coreTypes = \['daily', 'weekly', 'research', 'basics'\]/);
   assert.match(script, /coreTypes\.map\(type=>latestFor\(type\)\)\.filter\(Boolean\)/);
   assert.match(script, /if\(post\.coverImage\)/);
@@ -47,6 +51,17 @@ test('carousel uses one latest post per core category, never autoplay, and suppo
   assert.match(script, /touchstart/);
   assert.match(script, /touchend/);
   assert.doesNotMatch(script, /setInterval|autoplay/i);
+  assert.match(homeStyles, /Homepage cover sizing and fallback spacing stay local/);
+  assert.match(homeStyles, /\.carousel-cover\{height:510px\}/);
+  assert.match(homeStyles, /\.carousel-cover>img\{object-position:center top\}/);
+  assert.match(homeStyles, /\.cover-fallback strong\{max-width:13ch;font-size:25px/);
+  assert.doesNotMatch(polishStyles, /\.cover-category/);
+});
+
+test('homepage introduction uses the concise v2 copy', async () => {
+  const html = await read('index.html');
+  assert.match(html, /시장의 흐름을 데이터와 맥락으로 정리합니다\./);
+  assert.doesNotMatch(html, /투자와 의사결정에 필요한 인사이트를 제공합니다/);
 });
 
 test('existing post metadata remains valid without coverImage', async () => {
