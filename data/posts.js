@@ -1,5 +1,19 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-10-daily-1evguss",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "date": "2026-08-10",
+    "reportDate": "2026-08-10",
+    "registeredDate": "2026-08-10",
+    "registeredAt": "2026-08-10T09:56:35.777Z",
+    "legacyImport": false,
+    "title": "멈춘 두 줄기,번지는 들판",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "href": "reports/8월 10일 주식리포트_커버통합.html"
+  },
+  {
     "id": "2026-08-09-sovereign-ai",
     "type": "research",
     "typeLabel": "비정기 리서치",
