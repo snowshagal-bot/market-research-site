@@ -94,6 +94,22 @@ Production validation completed on 2026-08-10:
 - mobile comment creation and deletion succeeded
 - report layouts remained stable on both mobile and desktop
 
+## V1 baseline polish
+
+Status: complete and deployed to production on 2026-08-10.
+
+The v1 polish pass confirmed and stabilized:
+
+- synchronized light/dark theme state, controls, and browser theme color on the homepage and admin page
+- site-controlled dark mode for the shared report navigation and comments without recoloring original report content
+- WCAG AA-oriented light-mode text contrast for common site UI
+- visible keyboard focus treatment and accessible selected/current category semantics
+- explicit accessible names for guest comment fields
+- responsive layouts at 360px, 430px, and 1280px, including horizontal overflow and fixed/sticky UI checks
+- representative daily, weekly, and research report layouts with their original HTML unchanged
+
+The current v1 baseline is now in normal operation. There is no predetermined next feature; the next task should be chosen only when actual production use reveals a concrete inconvenience, defect, or maintenance need.
+
 ## Key files
 
 - `index.html` — homepage shell and category/search markup
