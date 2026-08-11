@@ -6,6 +6,8 @@
   const status = $('parse-status');
   const previewWrap = $('preview-wrap');
   const type = $('post-type');
+  const categoryStatus = $('category-status');
+  const categoryOptions = [...document.querySelectorAll('input[name="post-category"]')];
   const date = $('post-date');
   const registeredDate = $('registered-date');
   const title = $('post-title');
@@ -72,9 +74,9 @@
   });
 
   const labels = {
-    daily: '주식 리포트',
-    weekly: '위클리 리포트',
-    research: '비정기 리서치',
+    daily: '데일리',
+    weekly: '위클리',
+    research: '비정기',
     basics: '시장 공부',
     note: '끄적끄적'
   };
@@ -89,13 +91,24 @@
 
   try { adminKey.value = sessionStorage.getItem('mrs-admin-key') || ''; } catch (_) {}
 
-  function detectType(name, text) {
-    const s = `${name} ${text.slice(0, 4000)}`;
-    if (/시장\s*공부|경제\s*공부|주식\s*공부|market\s*basics|investing\s*basics|explainer/i.test(s)) return 'basics';
-    if (/비정기|소버린|technology\s*&\s*policy|research/i.test(s)) return 'research';
-    if (/위클리|weekly/i.test(s)) return 'weekly';
-    if (/주식리포트|데일리|daily market report|kospi daily/i.test(s)) return 'daily';
-    if (/끄적|essay|note/i.test(s)) return 'note';
+  function detectType(name, doc, text) {
+    const allowedTypes = ['daily', 'weekly', 'research', 'basics', 'note'];
+    const declaredType = doc.querySelector('meta[name="report-type"]')?.content?.trim().toLowerCase();
+    if (allowedTypes.includes(declaredType)) return declaredType;
+
+    const strongSignals = `${name} ${doc.title || ''}`;
+    if (/시장\s*공부|경제\s*공부|주식\s*공부|market\s*basics|investing\s*basics|explainer/i.test(strongSignals)) return 'basics';
+    if (/위클리|weekly/i.test(strongSignals)) return 'weekly';
+    if (/주식리포트|데일리|daily(?:\s+market)?|kospi\s+daily/i.test(strongSignals)) return 'daily';
+    if (/비정기|소버린|technology\s*&\s*policy|research\s+(?:report|brief|analysis)/i.test(strongSignals) || /^research(?:[-_\s]*(?:report|brief|analysis))?\.html?$/i.test(name)) return 'research';
+    if (/끄적|essay|(?:^|[\s_.-])notes?(?=$|[\s_.-])/i.test(strongSignals)) return 'note';
+
+    const bodySignals = text.slice(0, 4000);
+    if (/시장\s*공부|경제\s*공부|주식\s*공부|market\s*basics|investing\s*basics|explainer/i.test(bodySignals)) return 'basics';
+    if (/위클리|weekly/i.test(bodySignals)) return 'weekly';
+    if (/주식리포트|데일리|daily\s+market|kospi\s+daily/i.test(bodySignals)) return 'daily';
+    if (/비정기|소버린|technology\s*&\s*policy|research\s+(?:report|brief|analysis)/i.test(bodySignals)) return 'research';
+    if (/끄적|essay|(?:^|[\s_.-])notes?(?=$|[\s_.-])/i.test(bodySignals)) return 'note';
     return '';
   }
 
@@ -150,6 +163,24 @@
     if (!allowed[file.type]?.includes(extension)) return 'JPG, PNG, WebP 이미지만 선택할 수 있습니다.';
     if (file.size > 4 * 1024 * 1024) return '대표 커버 이미지는 4MB 이하여야 합니다.';
     return '';
+  }
+
+  function updateCategoryDescription(value) {
+    if (!description.value.trim() || Object.values(defaultDescriptions).includes(description.value.trim())) {
+      description.value = defaultDescriptions[value] || '';
+    }
+  }
+
+  function setCategory(value, source = '') {
+    type.value = value;
+    categoryOptions.forEach(option => { option.checked = option.value === value; });
+    updateCategoryDescription(value);
+    if (categoryStatus) {
+      if (source === 'auto' && value) categoryStatus.textContent = `자동 인식: ${labels[value]} · 필요하면 직접 변경하세요.`;
+      else if (source === 'manual' && value) categoryStatus.textContent = `직접 선택: ${labels[value]}`;
+      else if (source === 'auto') categoryStatus.textContent = '카테고리를 자동으로 판단하지 못했습니다. 직접 선택해 주세요.';
+    }
+    updatePublishState();
   }
 
   function formatFileSize(bytes) {
@@ -290,12 +321,12 @@
     status.textContent = 'HTML을 분석하는 중…';
     const text = await file.text();
     const doc = new DOMParser().parseFromString(text, 'text/html');
-    const detectedType = detectType(file.name, text);
+    const detectedType = detectType(file.name, doc, text);
     const detectedDate = detectDate(file.name, doc, text);
     const detectedTitle = detectTitle(file.name, doc);
     const detectedSubtitle = detectSubtitle(doc);
 
-    type.value = detectedType;
+    setCategory(detectedType, 'auto');
     date.value = detectedDate;
     title.value = detectedTitle;
     subtitle.value = detectedSubtitle;
@@ -396,12 +427,24 @@
   coverPreviewModes.forEach(button => {
     button.addEventListener('click', () => setCoverPreviewMode(button.dataset.coverPreviewMode));
   });
-  [type,date,title,subtitle,description,adminKey].forEach(el => el?.addEventListener('input', updatePublishState));
-  type?.addEventListener('change', () => {
-    if (!description.value.trim() || Object.values(defaultDescriptions).includes(description.value.trim())) {
-      description.value = defaultDescriptions[type.value] || '';
-    }
-    updatePublishState();
+  [date,title,subtitle,description,adminKey].forEach(el => el?.addEventListener('input', updatePublishState));
+  categoryOptions.forEach((option, index) => {
+    option.addEventListener('change', () => {
+      if (option.checked) setCategory(option.value, 'manual');
+    });
+    option.addEventListener('keydown', event => {
+      if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+      let nextIndex = index;
+      if (event.key === 'Home') nextIndex = 0;
+      else if (event.key === 'End') nextIndex = categoryOptions.length - 1;
+      else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') nextIndex = (index - 1 + categoryOptions.length) % categoryOptions.length;
+      else nextIndex = (index + 1) % categoryOptions.length;
+      const nextOption = categoryOptions[nextIndex];
+      nextOption.checked = true;
+      nextOption.focus();
+      setCategory(nextOption.value, 'manual');
+    });
   });
   adminKey?.addEventListener('change', () => { try { sessionStorage.setItem('mrs-admin-key', adminKey.value.trim()); } catch (_) {} });
   publishBtn?.addEventListener('click', publish);

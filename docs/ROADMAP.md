@@ -6,20 +6,24 @@ This roadmap records implementation order, not a promise to build every future i
 
 ## Next action
 
-Review the post-management deployment-overlay Draft PR. Validate the update/delete completion overlay, Production polling states, continue-management behavior, and responsive layout without performing a real repository mutation.
+Review the homepage archive and admin category-selection Draft PR. Validate the dynamic archive counts, responsive two-column-to-one-column transition, category query navigation, and automatic/manual admin category state without performing a real publish.
 
 ## In progress
 
-### 8. Post-management deployment feedback
+### 9. Homepage archive density and admin category selection
 
 In the current Draft PR:
 
-- keep the editor unchanged immediately after GitHub update/delete success;
-- show a centered completion overlay consistent with the existing publisher;
-- poll Production metadata and updated covers before reporting Cloudflare deployment complete;
-- support automatic homepage redirect, cancel/reload through “관리 계속하기”, and a non-error timeout state.
+- place a dynamic five-category archive index beside the denser recent-report list on desktop and stack it below on smaller screens;
+- keep search, category query filtering, report ordering, and the manual carousel unchanged;
+- replace the new-report category select with five always-visible accessible radio chips;
+- show automatic detection, unknown, and manual override states while preserving the existing publish FormData type values.
 
 ## Completed
+
+### 8. Post-management deployment feedback
+
+Squash-merged and deployed to Production on 2026-08-11. Successful update/delete actions keep the editor stable, show a centered completion overlay, poll Production metadata and covers, support automatic homepage redirect or continued management, and present deployment timeouts as delayed confirmation rather than failed saves.
 
 ### 7. Existing post management
 
