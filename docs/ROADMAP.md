@@ -6,20 +6,25 @@ This roadmap records implementation order, not a promise to build every future i
 
 ## Next action
 
-Review the admin cover-preview Draft PR and its Cloudflare Pages Preview. Confirm the local-only cover crop preview, responsive admin layout, and unchanged publish path before deciding whether to merge.
+Review the existing-post management Draft PR and its Cloudflare Pages Preview. Validate the list/search/filter/edit layout, local HTML and cover previews, deletion confirmation UI, and responsive behavior without performing a real repository mutation.
 
 ## In progress
 
-### 6. Admin cover preview
+### 7. Existing post management
 
 In the current Draft PR:
 
-- show the selected optional cover in the same `cover` / `center top` crop used by the homepage;
-- provide accessible PC 1280, mobile 430, and mobile 360 preview modes;
-- keep the image local until the existing publish action and release temporary object URLs when they are no longer needed;
-- preserve the existing cover validation, optional no-cover path, publisher API, metadata structure, and report HTML.
+- add `/admin/manage/` list, search, category filters, and selected-post editing while keeping immutable IDs and public URLs;
+- optionally replace report HTML at its existing path and keep/replace/remove managed homepage covers;
+- synchronize `data/posts.json` and `data/posts.js` with one authenticated Git commit for update or delete;
+- reject concurrent `main` changes instead of force-pushing and block deletion outside `reports/` or `covers/`;
+- preserve the existing publisher and current production post data, with no real mutations during Preview review.
 
 ## Completed
+
+### 6. Admin cover preview
+
+Squash-merged and deployed to Production on 2026-08-11. The new-report admin provides local PC 1280, mobile 430, and mobile 360 homepage crop previews, clears undecodable images before publishing, and keeps the optional fallback-cover path.
 
 ### 5. Representative report covers
 

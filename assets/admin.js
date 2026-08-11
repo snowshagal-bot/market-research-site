@@ -321,7 +321,8 @@
   async function publish() {
     if (publishing || publishBtn.disabled || !selectedFile) return;
     const postType = type.value;
-    const summary = `${date.value} · ${labels[postType]}\n${title.value.trim()}\n\n이 내용으로 홈페이지에 게시할까요?`;
+    const coverWarning = selectedCover ? '' : '\n\n대표 커버가 선택되지 않았습니다. 게시 후 홈페이지에서는 fallback cover가 사용됩니다.';
+    const summary = `${date.value} · ${labels[postType]}\n${title.value.trim()}${coverWarning}\n\n이 내용으로 홈페이지에 게시할까요?`;
     if (!confirm(summary)) return;
 
     publishing = true;

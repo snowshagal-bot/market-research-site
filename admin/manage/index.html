@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e6">
+<meta name="robots" content="noindex,nofollow">
+<title>게시물 관리 · Market Research</title>
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="stylesheet" href="../../assets/ui-polish.css?v=20260810-2">
+<link rel="stylesheet" href="../../assets/admin-manage.css?v=20260811-1">
+<script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
+</head>
+<body>
+<header class="site-header"><div class="site-wrap"><div class="header-row"><a class="brand" href="../../"><i></i>MARKET RESEARCH</a><div class="header-actions"><button class="icon-btn" type="button" data-theme-toggle aria-label="다크 모드로 전환">◐</button></div></div></div></header>
+<main class="manage"><div class="site-wrap">
+  <div class="manage-head"><div><a class="toplink" href="../../">← 홈페이지</a><h1>게시물 관리</h1><p>기존 게시물의 정보, 원본 HTML과 홈페이지 커버를 관리합니다.</p></div><div class="manage-note">ID와 공개 URL은 변경되지 않습니다.</div></div>
+  <nav class="admin-nav" aria-label="관리자 메뉴"><a href="../">새 리포트 등록</a><a href="./" aria-current="page">게시물 관리</a></nav>
+
+  <section class="card manage-toolbar" aria-label="게시물 검색과 필터">
+    <div class="field"><label for="manage-search">게시물 검색</label><input id="manage-search" type="search" placeholder="제목 또는 공개 URL 검색"></div>
+    <div class="filter-tabs" id="manage-filters" role="group" aria-label="카테고리 필터">
+      <button type="button" data-filter="all" aria-pressed="true">전체</button><button type="button" data-filter="daily" aria-pressed="false">데일리</button><button type="button" data-filter="weekly" aria-pressed="false">위클리</button><button type="button" data-filter="research" aria-pressed="false">비정기</button><button type="button" data-filter="basics" aria-pressed="false">시장 공부</button><button type="button" data-filter="note" aria-pressed="false">끄적끄적</button>
+    </div>
+  </section>
+
+  <div class="manage-grid">
+    <section class="card post-list-card" aria-labelledby="post-list-title"><div class="section-head"><h2 id="post-list-title">게시물 목록</h2><span id="post-count" aria-live="polite"></span></div><div class="post-list" id="post-list"><p class="empty-message">목록을 불러오는 중입니다.</p></div></section>
+    <section class="card editor-card" aria-labelledby="editor-title">
+      <div id="editor-empty" class="editor-empty">왼쪽 목록에서 수정할 게시물을 선택해 주세요.</div>
+      <form id="editor-form" hidden novalidate>
+        <div class="section-head"><h2 id="editor-title">게시물 수정</h2><a id="current-report-link" class="text-link" href="#" target="_blank" rel="noopener">현재 리포트 열기 ↗</a></div>
+        <div class="form-grid immutable-fields">
+          <div class="field"><label for="manage-id">게시물 ID</label><input id="manage-id" type="text" readonly></div>
+          <div class="field"><label for="manage-href">공개 URL</label><input id="manage-href" type="text" readonly></div>
+          <div class="field"><label for="manage-registered-date">등록일</label><input id="manage-registered-date" type="text" readonly></div>
+          <div class="field"><label for="manage-registered-at">등록 시각</label><input id="manage-registered-at" type="text" readonly></div>
+        </div>
+        <div class="form-grid editable-fields">
+          <div class="field"><label for="manage-type">카테고리</label><select id="manage-type" required><option value="daily">데일리</option><option value="weekly">위클리</option><option value="research">비정기</option><option value="basics">시장 공부</option><option value="note">끄적끄적</option></select></div>
+          <div class="field"><label for="manage-date">리포트 기준일</label><input id="manage-date" type="date" required></div>
+          <div class="field full"><label for="manage-title">제목</label><input id="manage-title" type="text" required></div>
+          <div class="field full"><label for="manage-subtitle">부제</label><input id="manage-subtitle" type="text"></div>
+          <div class="field full"><label for="manage-description">목록 설명</label><textarea id="manage-description"></textarea></div>
+        </div>
+
+        <section class="subsection" aria-labelledby="html-replacement-title"><div class="section-head"><h3 id="html-replacement-title">원본 HTML</h3><span class="subtle">선택하지 않으면 기존 파일 유지</span></div><div class="field"><label for="replacement-html">교체 HTML <span>(선택)</span></label><input id="replacement-html" type="file" accept=".html,text/html"><small id="html-status" aria-live="polite">기존 공개 URL에 그대로 저장됩니다.</small></div><div class="html-preview" id="html-preview" hidden><iframe id="html-preview-frame" title="교체할 리포트 HTML 미리보기"></iframe></div></section>
+
+        <section class="subsection" aria-labelledby="cover-management-title"><div class="section-head"><h3 id="cover-management-title">홈페이지 커버</h3><span class="subtle" id="current-cover-label"></span></div>
+          <fieldset class="cover-actions"><legend>커버 처리</legend><label><input type="radio" name="cover-action" value="keep" checked> 기존 커버 유지</label><label><input type="radio" name="cover-action" value="replace"> 새 커버로 교체</label><label><input type="radio" name="cover-action" value="remove"> 커버 제거</label></fieldset>
+          <div class="field" id="cover-file-field" hidden><label for="replacement-cover">새 커버 이미지</label><input id="replacement-cover" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"><small id="cover-status" aria-live="polite">JPG, PNG, WebP · 최대 4MB</small></div>
+          <div class="cover-preview-head"><div class="preview-modes" role="group" aria-label="커버 미리보기 화면 크기"><button type="button" data-preview-mode="1280" aria-pressed="true">PC 1280</button><button type="button" data-preview-mode="430" aria-pressed="false">모바일 430</button><button type="button" data-preview-mode="360" aria-pressed="false">모바일 360</button></div></div>
+          <div class="cover-preview-canvas" id="manage-cover-preview" data-preview-mode="1280"><div id="manage-cover-fallback" class="cover-fallback">홈페이지 fallback cover 사용</div><img id="manage-cover-image" alt="홈페이지 커버 미리보기" hidden></div>
+          <dl class="cover-meta" id="cover-meta" hidden><div><dt>파일명</dt><dd id="cover-name"></dd></div><div><dt>이미지 크기</dt><dd id="cover-dimensions"></dd></div><div><dt>파일 크기</dt><dd id="cover-size"></dd></div></dl>
+        </section>
+
+        <div class="auth-actions"><div class="field"><label for="manage-admin-key">관리자 키</label><input id="manage-admin-key" type="password" autocomplete="current-password"></div><button class="btn primary" id="save-post" type="submit">변경사항 저장</button></div>
+        <p class="manage-status" id="manage-status" aria-live="polite"></p>
+
+        <section class="danger-zone" aria-labelledby="danger-title"><h3 id="danger-title">Danger Zone</h3><p>게시물 정보, 원본 HTML과 연결된 커버가 한 번에 삭제됩니다.</p><button class="btn danger" id="start-delete" type="button">게시물 삭제</button><div id="delete-confirmation" hidden><label for="delete-title-confirm">확인을 위해 제목을 정확히 입력해 주세요: <strong id="delete-expected-title"></strong></label><input id="delete-title-confirm" type="text" autocomplete="off"><button class="btn danger solid" id="confirm-delete" type="button" disabled>영구 삭제</button></div></section>
+      </form>
+    </section>
+  </div>
+</div></main>
+<script src="../../assets/admin-manage.js?v=20260811-1"></script>
+</body>
+</html>

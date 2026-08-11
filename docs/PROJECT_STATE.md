@@ -54,6 +54,25 @@ Admin page: `/admin/`
 9. Cloudflare Pages automatically deploys the new Git commit.
 10. Admin UI polls `data/posts.json` until the new post appears, then shows completion and redirects to the relevant category.
 
+The publishing UI now warns before the final confirmation when no optional homepage cover is selected. Publishing without a cover remains supported and uses the homepage fallback cover.
+
+## Existing post management
+
+Draft implementation: `/admin/manage/`
+
+The management page extends the existing static admin and GitHub-backed publishing architecture without introducing a CMS or database:
+
+- loads and sorts the canonical `data/posts.json` list, with title/URL search and category filters;
+- edits only category, report date, title, subtitle, and description while preserving post ID, public URL, registration fields, and legacy-import state;
+- optionally replaces standalone report HTML at its existing `reports/` path;
+- keeps, replaces, or removes the optional homepage cover with the same PC/mobile crop preview used by the homepage;
+- requires a confirmation prompt plus exact-title entry before deletion;
+- uses authenticated `/api/manage` updates that create one Git commit for synchronized metadata and any report/cover changes;
+- checks the exact `main` SHA again before updating the ref and returns a conflict instead of force-pushing when the repository changes;
+- refuses to delete report or cover paths outside the managed `reports/` and `covers/` directories.
+
+Cloudflare Preview hosts disable actual update/delete actions in the client. Preview validation must use list, form, local HTML/cover preview, and mocked API tests only.
+
 Important date semantics:
 
 - `reportDate`: date the report itself belongs to / was authored or issued.
@@ -137,6 +156,9 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `admin/index.html` — report publishing admin UI
 - `assets/admin.js` — local HTML parsing, client-only cover crop preview, publish flow, deployment polling
 - `functions/api/publish.js` — authenticated server-side publisher using GitHub API
+- `admin/manage/index.html` — existing-post search, edit, cover/HTML replacement, and deletion UI
+- `assets/admin-manage.js` / `assets/admin-manage.css` — post-management client flow and responsive presentation
+- `functions/api/manage.js` — authenticated atomic update/delete commits with ref-conflict protection
 - `functions/_middleware.js` — injects shared report shell into `/reports/` HTML
 - `assets/report-shell.js` — isolated navigation + comments UI for report pages
 - `functions/api/comments.js` — D1-backed guest comment API
