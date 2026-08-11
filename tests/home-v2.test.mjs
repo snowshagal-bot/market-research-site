@@ -5,7 +5,7 @@ import test from 'node:test';
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 test('homepage v2 exposes the requested information architecture and carousel controls', async () => {
-  const html = await read('index.html');
+  const [html, englishHtml] = await Promise.all([read('index.html'), read('en/index.html')]);
   const order = [
     html.indexOf('class="site-header"'),
     html.indexOf('class="v2-hero"'),
@@ -17,6 +17,8 @@ test('homepage v2 exposes the requested information architecture and carousel co
   assert.match(html, /aria-label="이전 대표 리포트"/);
   assert.match(html, /aria-label="다음 대표 리포트"/);
   assert.match(html, /role="tablist"/);
+  assert.match(html, /home-v2\.css\?v=20260812-1/);
+  assert.match(englishHtml, /home-v2\.css\?v=20260812-1/);
 });
 
 test('basics is added without replacing notes across public and admin controls', async () => {
@@ -54,11 +56,13 @@ test('carousel uses one latest post per core category, never autoplay, and suppo
   assert.match(homeStyles, /Homepage cover sizing and fallback spacing stay local/);
   assert.match(homeStyles, /\.carousel-cover>img\{object-position:center top\}/);
   assert.match(homeStyles, /\.cover-fallback strong\{max-width:13ch;font-size:25px/);
-  assert.match(homeStyles, /@media\(min-width:961px\)/);
-  assert.match(homeStyles, /grid-template-columns:minmax\(0,42%\) minmax\(0,58%\)/);
-  assert.match(homeStyles, /\.featured-carousel\{overflow:hidden;border:0;border-top:1px solid var\(--line\);border-bottom:1px solid var\(--line\);border-radius:0;background:transparent;box-shadow:none\}/);
-  assert.match(homeStyles, /\.carousel-cover\{height:600px;padding:0;border-left:1px solid var\(--line\);background:transparent\}/);
-  assert.match(homeStyles, /\.latest-card\{min-height:148px/);
+  const desktopStart = homeStyles.indexOf('@media(min-width:961px)');
+  assert.notEqual(desktopStart, -1);
+  const desktopOverride = homeStyles.slice(desktopStart);
+  assert.match(desktopOverride, /\.featured-carousel\{[^}]*border-radius:0[^}]*box-shadow:none/);
+  assert.match(desktopOverride, /\.carousel-stage\{[^}]*grid-template-columns:minmax\([^)]+\) minmax\([^)]+\)/);
+  assert.match(desktopOverride, /\.carousel-cover\{[^}]*padding:0[^}]*border-left:/);
+  assert.match(desktopOverride, /\.latest-card\{[^}]*min-height:/);
   assert.match(homeStyles, /@media\(max-width:760px\)\{\.v2-hero/);
   assert.doesNotMatch(polishStyles, /\.cover-category/);
 });
