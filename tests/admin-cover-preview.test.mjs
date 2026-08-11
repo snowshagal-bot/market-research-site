@@ -28,7 +28,7 @@ function createElement(id = '') {
   };
 }
 
-async function loadAdmin() {
+async function loadAdmin({ confirmResult = false } = {}) {
   const source = await read('assets/admin.js');
   const ids = [
     'html-file', 'drop-zone', 'file-info', 'parse-status', 'preview-wrap', 'post-type',
@@ -36,7 +36,7 @@ async function loadAdmin() {
     'post-filename', 'cover-file', 'cover-info', 'cover-preview-canvas',
     'cover-preview-image', 'cover-preview-empty', 'cover-preview-meta',
     'cover-preview-name', 'cover-preview-dimensions', 'cover-preview-size',
-    'cover-preview-caption', 'admin-key', 'publish-btn', 'publish-overlay',
+    'cover-preview-caption', 'cover-preview-note', 'admin-key', 'publish-btn', 'publish-overlay',
     'publish-state-title', 'publish-state-text', 'publish-state-detail', 'publish-links',
     'published-report-link', 'published-home-link'
   ];
@@ -52,17 +52,30 @@ async function loadAdmin() {
   const windowListeners = new Map();
   const createdUrls = [];
   const revokedUrls = [];
+  const submissions = [];
+  class TestFormData {
+    entries = [];
+    append(...args) { this.entries.push(args); }
+  }
   const context = {
     console,
-    confirm: () => false,
-    fetch: async () => ({ ok: true, json: async () => [] }),
-    FormData,
+    confirm: () => confirmResult,
+    fetch: async (url, options = {}) => {
+      if (url === '/api/publish') {
+        submissions.push(options.body);
+        return { ok: false, status: 500, json: async () => ({ message: 'test stop' }) };
+      }
+      return { ok: true, json: async () => [] };
+    },
+    FormData: TestFormData,
     setTimeout() {},
     location: { href: '' },
     localStorage: { getItem: () => null, setItem() {} },
     sessionStorage: { getItem: () => null, setItem() {} },
     matchMedia: () => ({ matches: false, addEventListener() {} }),
-    DOMParser: class {},
+    DOMParser: class {
+      parseFromString() { return { title: '', querySelector: () => null }; }
+    },
     URL: {
       createObjectURL(file) {
         const url = `blob:test-${createdUrls.length + 1}-${file.name}`;
@@ -83,7 +96,7 @@ async function loadAdmin() {
     }
   };
   vm.runInNewContext(source, context);
-  return { elements, modeButtons, createdUrls, revokedUrls, windowListeners };
+  return { elements, modeButtons, createdUrls, revokedUrls, windowListeners, submissions };
 }
 
 const validCover = (name = 'cover.webp') => ({ name, type: 'image/webp', size: 320 * 1024 });
@@ -113,6 +126,43 @@ test('valid cover selection renders client-only metadata and actual image dimens
   elements['cover-preview-image'].onload();
   assert.equal(elements['cover-preview-dimensions'].textContent, '900 × 1350px');
   assert.equal(elements['cover-preview-meta'].hidden, false);
+  assert.equal(elements['cover-preview-note'].textContent, '선택한 커버가 홈페이지에 사용됩니다.');
+  assert.doesNotMatch(elements['cover-preview-note'].textContent, /커버 미선택/);
+});
+
+test('image load failure removes the selected cover and returns to the fallback state', async () => {
+  const { elements, createdUrls, revokedUrls } = await loadAdmin();
+  elements['cover-file'].files = [validCover('broken.webp')];
+  elements['cover-file'].emit('change');
+  elements['cover-preview-image'].onerror();
+  assert.equal(elements['cover-file'].value, '');
+  assert.deepEqual(revokedUrls, createdUrls);
+  assert.equal(elements['cover-preview-image'].hidden, true);
+  assert.equal(elements['cover-preview-meta'].hidden, true);
+  assert.match(elements['cover-info'].textContent, /이미지를 읽을 수 없습니다/);
+  assert.match(elements['cover-preview-note'].textContent, /커버 미선택/);
+});
+
+test('image load failure omits the cover from the publish FormData', async () => {
+  const { elements, submissions } = await loadAdmin({ confirmResult: true });
+  elements['cover-file'].files = [validCover('broken.webp')];
+  elements['cover-file'].emit('change');
+  elements['cover-preview-image'].onerror();
+
+  elements['admin-key'].value = 'test-key';
+  elements['html-file'].files = [{
+    name: '데일리.html',
+    size: 100,
+    text: async () => '<!doctype html><title>Daily report</title>'
+  }];
+  await elements['html-file'].emit('change');
+  assert.equal(elements['publish-btn'].disabled, false);
+  await elements['publish-btn'].emit('click');
+
+  assert.equal(submissions.length, 1);
+  const fieldNames = submissions[0].entries.map(([name]) => name);
+  assert.ok(fieldNames.includes('file'));
+  assert.ok(!fieldNames.includes('cover'));
 });
 
 test('invalid MIME-extension pairs and covers over 4MB clear the preview', async () => {

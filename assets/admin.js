@@ -22,6 +22,7 @@
   const coverPreviewDimensions = $('cover-preview-dimensions');
   const coverPreviewSize = $('cover-preview-size');
   const coverPreviewCaption = $('cover-preview-caption');
+  const coverPreviewNote = $('cover-preview-note');
   const coverPreviewModes = [...document.querySelectorAll('[data-cover-preview-mode]')];
   const adminKey = $('admin-key');
   const publishBtn = $('publish-btn');
@@ -41,6 +42,7 @@
   let publishing = false;
 
   const defaultCoverInfo = 'JPG, PNG, WebP · 최대 4MB · 원본 리포트 HTML과 별도로 저장됩니다.';
+  const defaultCoverPreviewNote = '커버 미선택 · 게시 후 홈페이지에서는 fallback cover 사용';
   const coverModeLabels = {
     1280: 'PC 1280',
     430: '모바일 430',
@@ -173,6 +175,7 @@
     if (coverPreviewName) coverPreviewName.textContent = '';
     if (coverPreviewDimensions) coverPreviewDimensions.textContent = '';
     if (coverPreviewSize) coverPreviewSize.textContent = '';
+    if (coverPreviewNote) coverPreviewNote.textContent = defaultCoverPreviewNote;
   }
 
   function showCoverPreview(file) {
@@ -183,14 +186,19 @@
     coverPreviewName.textContent = file.name;
     coverPreviewDimensions.textContent = '확인 중…';
     coverPreviewSize.textContent = formatFileSize(file.size);
+    coverPreviewNote.textContent = '커버 이미지 확인 중…';
     coverPreviewMeta.hidden = false;
     coverPreviewImage.onload = () => {
       if (coverPreviewUrl !== objectUrl) return;
       coverPreviewDimensions.textContent = `${coverPreviewImage.naturalWidth} × ${coverPreviewImage.naturalHeight}px`;
+      coverPreviewNote.textContent = '선택한 커버가 홈페이지에 사용됩니다.';
     };
     coverPreviewImage.onerror = () => {
       if (coverPreviewUrl !== objectUrl) return;
-      resetCoverPreview('이미지를 미리 볼 수 없습니다. 다른 파일을 선택해 주세요.');
+      selectedCover = null;
+      coverInput.value = '';
+      coverInfo.textContent = '이미지를 읽을 수 없습니다. 다른 JPG, PNG 또는 WebP 파일을 선택해 주세요.';
+      resetCoverPreview();
     };
     coverPreviewImage.src = objectUrl;
     coverPreviewImage.hidden = false;
