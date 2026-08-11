@@ -1,6 +1,8 @@
 (() => {
   const $ = (id) => document.getElementById(id);
   const TYPE_LABELS = { daily: '데일리', weekly: '위클리', research: '비정기', basics: '시장 공부', note: '끄적끄적' };
+  const DEPLOY_POLL_INTERVAL_MS = 2500;
+  const DEPLOY_POLL_MAX_ATTEMPTS = 36;
   const html = document.documentElement;
   const themeButton = document.querySelector('[data-theme-toggle]');
   const themeMedia = matchMedia('(prefers-color-scheme: dark)');
@@ -32,6 +34,12 @@
   const deleteExpectedTitle = $('delete-expected-title');
   const deleteTitleConfirm = $('delete-title-confirm');
   const confirmDelete = $('confirm-delete');
+  const resultOverlay = $('manage-result-overlay');
+  const resultTitle = $('manage-result-title');
+  const resultText = $('manage-result-text');
+  const resultDetail = $('manage-result-detail');
+  const resultHome = $('manage-result-home');
+  const resultContinue = $('manage-result-continue');
   let posts = [];
   let activeFilter = 'all';
   let selectedPost = null;
@@ -41,6 +49,9 @@
   let coverDecodePending = false;
   let coverDecodeVersion = 0;
   let saving = false;
+  let deploymentCheckVersion = 0;
+  let redirectTimer = 0;
+  let activeOperation = null;
 
   function savedTheme() {
     try { return localStorage.getItem('site-theme') || 'system'; } catch (_) { return 'system'; }
@@ -322,6 +333,112 @@
     return data;
   }
 
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  function cancelRedirect() {
+    if (redirectTimer) clearTimeout(redirectTimer);
+    redirectTimer = 0;
+  }
+
+  function showResultOverlay(operation) {
+    cancelRedirect();
+    resultOverlay.hidden = false;
+    resultOverlay.classList.remove('done', 'delayed');
+    resultTitle.textContent = operation.action === 'delete' ? '삭제되었습니다.' : '저장되었습니다.';
+    resultText.textContent = '홈페이지 반영을 확인하고 있습니다.';
+    resultDetail.textContent = `GitHub commit ${operation.commit.slice(0, 7)}`;
+    resultHome.textContent = '홈페이지로 이동';
+    resultHome.href = '/';
+    resultContinue.textContent = '관리 계속하기';
+  }
+
+  function deploymentPostMatches(actual, expected) {
+    if (!actual || !expected || actual.id !== expected.id) return false;
+    const keys = new Set([...Object.keys(expected), 'updatedAt', 'coverImage', 'title']);
+    return [...keys].every((key) => JSON.stringify(actual[key]) === JSON.stringify(expected[key]));
+  }
+
+  async function coverIsAvailable(post) {
+    if (!post.coverImage) return true;
+    const path = String(post.coverImage).replace(/^\/+/, '');
+    const response = await fetch(`/${path}?t=${Date.now()}`, { cache: 'no-store' });
+    return response.status === 200;
+  }
+
+  function completeDeployment(operation) {
+    if (activeOperation !== operation) return;
+    resultOverlay.classList.add('done');
+    resultOverlay.classList.remove('delayed');
+    resultTitle.textContent = operation.action === 'delete' ? '삭제가 홈페이지에 반영되었습니다.' : '홈페이지 반영이 완료되었습니다.';
+    resultText.textContent = '잠시 후 홈페이지로 이동합니다.';
+    resultHome.textContent = '홈페이지로 이동';
+    redirectTimer = setTimeout(() => { location.href = '/'; }, 1500);
+  }
+
+  function delayDeployment(operation) {
+    if (activeOperation !== operation) return;
+    resultOverlay.classList.remove('done');
+    resultOverlay.classList.add('delayed');
+    resultTitle.textContent = '저장은 완료됐지만 홈페이지 반영 확인이 지연되고 있습니다.';
+    resultText.textContent = 'Cloudflare 배포는 계속 진행될 수 있습니다. 아래에서 홈페이지를 확인하거나 관리를 계속할 수 있습니다.';
+    resultHome.textContent = '홈페이지 확인';
+  }
+
+  async function waitForDeployment(operation, { maxAttempts = DEPLOY_POLL_MAX_ATTEMPTS, intervalMs = DEPLOY_POLL_INTERVAL_MS } = {}) {
+    const checkVersion = ++deploymentCheckVersion;
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      if (checkVersion !== deploymentCheckVersion || activeOperation !== operation) return 'cancelled';
+      try {
+        const response = await fetch(`/data/posts.json?t=${Date.now()}`, { cache: 'no-store' });
+        if (response.ok) {
+          const deployedPosts = await response.json();
+          if (Array.isArray(deployedPosts)) {
+            const deployedPost = deployedPosts.find((post) => post.id === operation.id);
+            const reflected = operation.action === 'delete'
+              ? !deployedPost
+              : deploymentPostMatches(deployedPost, operation.post) && await coverIsAvailable(operation.post);
+            if (reflected) {
+              if (checkVersion !== deploymentCheckVersion || activeOperation !== operation) return 'cancelled';
+              completeDeployment(operation);
+              return 'complete';
+            }
+          }
+        }
+      } catch (_) {}
+      if (attempt < maxAttempts && intervalMs > 0) await sleep(intervalMs);
+    }
+    if (checkVersion !== deploymentCheckVersion || activeOperation !== operation) return 'cancelled';
+    delayDeployment(operation);
+    return 'timeout';
+  }
+
+  function beginDeploymentCheck(operation, options) {
+    activeOperation = operation;
+    showResultOverlay(operation);
+    return waitForDeployment(operation, options);
+  }
+
+  async function continueManagement() {
+    const operation = activeOperation;
+    if (!operation) return;
+    deploymentCheckVersion += 1;
+    cancelRedirect();
+    activeOperation = null;
+    resultOverlay.hidden = true;
+    resultOverlay.classList.remove('done', 'delayed');
+    if (operation.action === 'update') {
+      await loadPosts(operation.id);
+      return;
+    }
+    selectedPost = null;
+    form.hidden = true;
+    editorEmpty.hidden = false;
+    editorEmpty.textContent = '왼쪽 목록에서 수정할 게시물을 선택해 주세요.';
+    await loadPosts();
+  }
+
   async function save(event) {
     event.preventDefault();
     if (!selectedPost || saving) return;
@@ -343,9 +460,8 @@
     status.textContent = '변경사항을 저장하는 중입니다…';
     try {
       const data = await mutate(buildUpdateForm());
-      posts = posts.map((post) => post.id === data.post.id ? data.post : post);
-      selectPost(data.post.id);
-      status.textContent = `GitHub 저장 완료 · Cloudflare 반영까지 잠시 걸릴 수 있습니다 · commit ${data.commit.slice(0, 7)}`;
+      status.textContent = `GitHub 저장 완료 · commit ${data.commit.slice(0, 7)}`;
+      void beginDeploymentCheck({ action: 'update', id: data.post.id, post: data.post, commit: data.commit });
     } catch (error) {
       status.textContent = error.message || '저장하지 못했습니다.';
     } finally {
@@ -366,12 +482,8 @@
     try {
       const deletedId = selectedPost.id;
       const data = await mutate(body);
-      posts = posts.filter((post) => post.id !== deletedId);
-      selectedPost = null;
-      form.hidden = true;
-      editorEmpty.hidden = false;
-      editorEmpty.textContent = `삭제 완료 · commit ${data.commit.slice(0, 7)}`;
-      renderList();
+      status.textContent = `GitHub 삭제 완료 · commit ${data.commit.slice(0, 7)}`;
+      void beginDeploymentCheck({ action: 'delete', id: deletedId, post: null, commit: data.commit });
     } catch (error) {
       status.textContent = error.message || '삭제하지 못했습니다.';
       confirmDelete.disabled = false;
@@ -380,7 +492,7 @@
     }
   }
 
-  async function loadPosts() {
+  async function loadPosts(selectId = '') {
     try {
       const response = await fetch('../../data/posts.json', { cache: 'no-store' });
       if (!response.ok) throw new Error(`목록 요청 실패 (${response.status})`);
@@ -388,6 +500,7 @@
       if (!Array.isArray(data)) throw new Error('게시물 목록 형식이 올바르지 않습니다.');
       posts = sortPosts(data);
       renderList();
+      if (selectId && posts.some((post) => post.id === selectId)) selectPost(selectId);
     } catch (error) {
       list.innerHTML = `<p class="empty-message"></p>`;
       list.querySelector('p').textContent = error.message || '게시물 목록을 불러오지 못했습니다.';
@@ -425,7 +538,13 @@
   });
   deleteTitleConfirm.addEventListener('input', () => { confirmDelete.disabled = !selectedPost || deleteTitleConfirm.value !== selectedPost.title; });
   confirmDelete.addEventListener('click', deletePost);
-  window.addEventListener('pagehide', () => { revokeHtmlUrl(); revokeCoverUrl(); });
+  resultContinue.addEventListener('click', continueManagement);
+  window.addEventListener('pagehide', () => {
+    deploymentCheckVersion += 1;
+    cancelRedirect();
+    revokeHtmlUrl();
+    revokeCoverUrl();
+  });
 
   window.__adminManageTest = {
     sortPosts,
@@ -436,9 +555,15 @@
     chooseCover,
     buildUpdateForm,
     save,
+    deletePost,
     selectPost,
+    beginDeploymentCheck,
+    waitForDeployment,
+    continueManagement,
+    deploymentPostMatches,
     setPosts(items) { posts = items; },
-    coverState() { return { selectedCover, coverDecodePending }; }
+    coverState() { return { selectedCover, coverDecodePending }; },
+    deploymentState() { return { activeOperation, redirectTimer }; }
   };
   loadPosts();
 })();

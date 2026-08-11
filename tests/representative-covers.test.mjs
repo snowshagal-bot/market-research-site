@@ -11,17 +11,12 @@ const expectedCovers = new Map([
   ['2026-08-09-sovereign-ai', 'covers/2026-08-09-sovereign-ai.webp']
 ]);
 
-test('representative carousel posts use synchronized static WebP covers', async () => {
+test('post cover metadata stays synchronized and points to supported static images', async () => {
   const jsonPosts = JSON.parse(await read('data/posts.json'));
   const script = (await read('data/posts.js')).toString('utf8');
   const scriptPosts = JSON.parse(script.slice(script.indexOf('['), script.lastIndexOf(']') + 1));
 
   assert.deepEqual(scriptPosts, jsonPosts);
-  assert.deepEqual(
-    jsonPosts.filter(post => Object.hasOwn(post, 'coverImage')).map(post => post.id).sort(),
-    [...expectedCovers.keys()].sort()
-  );
-
   for (const [id, coverImage] of expectedCovers) {
     const post = jsonPosts.find(candidate => candidate.id === id);
     assert.ok(post, `missing representative post ${id}`);
@@ -31,6 +26,18 @@ test('representative carousel posts use synchronized static WebP covers', async 
     const image = await read(coverImage);
     assert.equal(image.subarray(0, 4).toString('ascii'), 'RIFF');
     assert.equal(image.subarray(8, 12).toString('ascii'), 'WEBP');
+  }
+
+  for (const post of jsonPosts.filter(candidate => Object.hasOwn(candidate, 'coverImage'))) {
+    assert.match(post.coverImage, /^covers\/[A-Za-z0-9._-]+\.(?:jpe?g|png|webp)$/i);
+    await access(new URL(post.coverImage, rootUrl));
+    const image = await read(post.coverImage);
+    if (/\.png$/i.test(post.coverImage)) assert.equal(image.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
+    if (/\.jpe?g$/i.test(post.coverImage)) assert.equal(image.subarray(0, 2).toString('hex'), 'ffd8');
+    if (/\.webp$/i.test(post.coverImage)) {
+      assert.equal(image.subarray(0, 4).toString('ascii'), 'RIFF');
+      assert.equal(image.subarray(8, 12).toString('ascii'), 'WEBP');
+    }
   }
 });
 

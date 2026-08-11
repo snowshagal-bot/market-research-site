@@ -73,6 +73,8 @@ The publisher writes the report HTML, optional cover image, and both post data f
 
 `/api/manage` uses the same secrets and repository permissions. It reads `data/posts.json` from the exact current `main` commit, creates one commit containing all requested metadata/report/cover changes, rechecks the branch ref, and updates it with `force: false`. If `main` moves during the operation, the API returns HTTP 409 and the administrator must refresh before retrying. Delete operations are limited to canonical paths under `reports/` and `covers/`.
 
+After a successful update or delete, `/admin/manage/` polls the Production `/data/posts.json` with cache busting for up to about 90 seconds. Updates must match the API-returned post metadata and any new cover must return HTTP 200 before the UI reports deployment complete. Deletes complete only after the post ID disappears. A delayed deployment check remains a successful GitHub save and is presented as a non-error state.
+
 Cloudflare Preview validation must not perform real `/api/manage` mutations. Both the management client and `/api/manage` enforce read-only behavior outside the exact production hostname `market-research-site.pages.dev`; Preview, localhost, IP hosts, and other hostnames receive HTTP 403 `PREVIEW_READ_ONLY` before GitHub access. Use local file previews and mocked API tests there.
 
 ## Comment dependencies
