@@ -17,6 +17,7 @@
   const title = $('post-title');
   const subtitle = $('post-subtitle');
   const description = $('post-description');
+  const postSummary = $('post-summary');
   const filename = $('post-filename');
   const coverInput = $('cover-file');
   const coverInfo = $('cover-info');
@@ -189,6 +190,10 @@
     if (meta) return meta;
     const node = doc.querySelector('.subtitle,.cover-subtitle,[class*="subtitle"]');
     return node ? node.textContent.replace(/\s+/g,' ').trim().slice(0,120) : '';
+  }
+
+  function detectSummary(doc) {
+    return (doc.querySelector('meta[name="report-summary"]')?.content || '').trim().slice(0, 500);
   }
 
   function safeFilename(original) {
@@ -370,12 +375,14 @@
     const detectedDate = detectDate(file.name, doc, text);
     const detectedTitle = detectTitle(file.name, doc);
     const detectedSubtitle = detectSubtitle(doc);
+    const detectedSummary = detectSummary(doc);
 
     setCategory(detectedType, 'auto');
     date.value = detectedDate;
     title.value = detectedTitle;
     subtitle.value = detectedSubtitle;
     description.value = defaultDescriptions[detectedType] || '';
+    postSummary.value = detectedSummary;
     filename.value = safeFilename(file.name);
 
     fileInfo.classList.add('on');
@@ -419,6 +426,7 @@
     form.append('title', title.value.trim());
     form.append('subtitle', subtitle.value.trim());
     form.append('description', description.value.trim());
+    form.append('summary', postSummary.value.trim());
     form.append('filename', filename.value.trim());
     form.append('lang', language);
     if (translationSource?.value) form.append('translationGroup', translationSource.value);
@@ -480,7 +488,7 @@
   coverPreviewModes.forEach(button => {
     button.addEventListener('click', () => setCoverPreviewMode(button.dataset.coverPreviewMode));
   });
-  [date,title,subtitle,description,adminKey].forEach(el => el?.addEventListener('input', updatePublishState));
+  [date,title,subtitle,description,postSummary,adminKey].forEach(el => el?.addEventListener('input', updatePublishState));
   categoryOptions.forEach((option, index) => {
     option.addEventListener('change', () => {
       if (option.checked) setCategory(option.value, 'manual');

@@ -17,8 +17,10 @@ test('homepage v2 exposes the requested information architecture and carousel co
   assert.match(html, /aria-label="이전 대표 리포트"/);
   assert.match(html, /aria-label="다음 대표 리포트"/);
   assert.match(html, /role="tablist"/);
-  assert.match(html, /home-v2\.css\?v=20260812-1/);
-  assert.match(englishHtml, /home-v2\.css\?v=20260812-1/);
+  assert.match(html, /home-v2\.css\?v=20260812-2/);
+  assert.match(englishHtml, /home-v2\.css\?v=20260812-2/);
+  assert.match(html, /site\.js\?v=20260812-2/);
+  assert.match(englishHtml, /site\.js\?v=20260812-2/);
 });
 
 test('basics is added without replacing notes across public and admin controls', async () => {
@@ -50,6 +52,7 @@ test('carousel uses one latest post per core category, never autoplay, and suppo
   assert.match(script, /coreTypes\.map\(type=>latestFor\(type\)\)\.filter\(Boolean\)/);
   assert.match(script, /if\(post\.coverImage\)/);
   assert.match(script, /cover-fallback/);
+  assert.match(script, /post\.summary \|\| post\.description \|\| info\.description/);
   assert.match(script, /touchstart/);
   assert.match(script, /touchend/);
   assert.doesNotMatch(script, /setInterval|autoplay/i);
@@ -61,9 +64,12 @@ test('carousel uses one latest post per core category, never autoplay, and suppo
   const desktopOverride = homeStyles.slice(desktopStart);
   assert.match(desktopOverride, /\.featured-carousel\{[^}]*border-radius:0[^}]*box-shadow:none/);
   assert.match(desktopOverride, /\.carousel-stage\{[^}]*grid-template-columns:minmax\([^)]+\) minmax\([^)]+\)/);
-  assert.match(desktopOverride, /\.carousel-cover\{[^}]*padding:0[^}]*border-left:/);
+  assert.match(desktopOverride, /\.carousel-cover\{[^}]*grid-column:1[^}]*padding:0[^}]*border-right:/);
+  assert.match(desktopOverride, /\.carousel-copy\{[^}]*grid-column:2/);
   assert.match(desktopOverride, /\.latest-card\{[^}]*min-height:/);
   assert.match(homeStyles, /@media\(max-width:760px\)\{\.v2-hero/);
+  assert.match(homeStyles, /\.carousel-cover\{order:1/);
+  assert.match(homeStyles, /\.carousel-copy\{order:2/);
   assert.doesNotMatch(polishStyles, /\.cover-category/);
 });
 

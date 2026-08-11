@@ -44,6 +44,7 @@
           <div class="field full"><label for="manage-title">제목</label><input id="manage-title" type="text" required></div>
           <div class="field full"><label for="manage-subtitle">부제</label><input id="manage-subtitle" type="text"></div>
           <div class="field full"><label for="manage-description">목록 설명</label><textarea id="manage-description"></textarea></div>
+          <div class="field full"><label for="manage-summary">홈페이지 요약 <span>(선택)</span></label><textarea id="manage-summary" maxlength="500"></textarea><small>Hero 전용 teaser · 권장 2~3문장 · 약 90~140자</small></div>
         </div>
 
         <section class="subsection" aria-labelledby="html-replacement-title"><div class="section-head"><h3 id="html-replacement-title">원본 HTML</h3><span class="subtle">선택하지 않으면 기존 파일 유지</span></div><div class="field"><label for="replacement-html">교체 HTML <span>(선택)</span></label><input id="replacement-html" type="file" accept=".html,text/html"><small id="html-status" aria-live="polite">기존 공개 URL에 그대로 저장됩니다.</small></div><div class="html-preview" id="html-preview" hidden><iframe id="html-preview-frame" title="교체할 리포트 HTML 미리보기" sandbox="allow-scripts"></iframe></div></section>
@@ -67,6 +68,6 @@
 <div class="manage-result-overlay" id="manage-result-overlay" role="dialog" aria-modal="true" aria-live="polite" aria-labelledby="manage-result-title" aria-describedby="manage-result-text" hidden>
   <div class="manage-result-box"><div class="manage-result-spinner" aria-hidden="true"></div><h2 id="manage-result-title">저장되었습니다.</h2><p id="manage-result-text">홈페이지 반영을 확인하고 있습니다.</p><p class="manage-result-detail" id="manage-result-detail"></p><div class="manage-result-actions"><a class="btn primary" id="manage-result-home" href="/">홈페이지로 이동</a><button class="btn" id="manage-result-continue" type="button">관리 계속하기</button></div></div>
 </div>
-<script src="../../assets/admin-manage.js?v=20260811-3"></script>
+<script src="../../assets/admin-manage.js?v=20260812-1"></script>
 </body>
 </html>

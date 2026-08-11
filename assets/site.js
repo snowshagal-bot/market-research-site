@@ -128,7 +128,7 @@
     slideTitle.textContent = post.title;
     slideSubtitle.textContent = post.subtitle || '';
     slideSubtitle.hidden = !post.subtitle;
-    slideDescription.textContent = post.description || info.description;
+    slideDescription.textContent = post.summary || post.description || info.description;
     slideLink.href = rootPath(post.href);
     slideCover.innerHTML = coverMarkup(post);
     slideCurrent.textContent = String(slideIndex + 1).padStart(2,'0');

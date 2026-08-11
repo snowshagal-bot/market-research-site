@@ -34,7 +34,7 @@ async function loadAdmin({ confirmResult = false } = {}) {
   const source = await read('assets/admin.js');
   const ids = [
     'html-file', 'drop-zone', 'file-info', 'parse-status', 'preview-wrap', 'post-type',
-    'post-date', 'registered-date', 'post-title', 'post-subtitle', 'post-description',
+    'post-date', 'registered-date', 'post-title', 'post-subtitle', 'post-description', 'post-summary',
     'post-filename', 'cover-file', 'cover-info', 'cover-preview-canvas',
     'cover-preview-image', 'cover-preview-empty', 'cover-preview-meta',
     'cover-preview-name', 'cover-preview-dimensions', 'cover-preview-size',
@@ -147,6 +147,7 @@ test('admin markup contains the cover preview modes before the original HTML pre
   assert.match(html, /\.cover-preview-empty\[hidden\],[^}]*\{display:none\}/);
   assert.match(adminScript, /iframe\.setAttribute\('sandbox', 'allow-scripts'\)/);
   assert.match(adminScript, /iframe\.srcdoc = text/);
+  assert.match(html, /admin\.js\?v=20260812-2/);
   assert.doesNotMatch(adminScript, /allow-same-origin/);
 });
 
@@ -204,6 +205,30 @@ test('manual category override becomes the final publish FormData value', async 
   await elements['publish-btn'].emit('click');
   assert.equal(submissions.length, 1);
   assert.equal(submissions[0].entries.find(([name]) => name === 'type')?.[1], 'weekly');
+});
+
+test('report-summary metadata fills an editable homepage summary and blank metadata stays blank', async () => {
+  const { elements, submissions } = await loadAdmin({ confirmResult: true });
+  elements['admin-key'].value = 'test-key';
+  elements['html-file'].files = [{
+    name: 'weekly-report.html',
+    size: 100,
+    text: async () => '<!doctype html><meta name="report-summary" content="자동 인식한 홈페이지 요약"><title>Weekly report</title>'
+  }];
+  await elements['html-file'].emit('change');
+  assert.equal(elements['post-summary'].value, '자동 인식한 홈페이지 요약');
+  elements['post-summary'].value = '사용자가 수정한 최종 요약';
+  await elements['publish-btn'].emit('click');
+  assert.equal(submissions[0].entries.find(([name]) => name === 'summary')?.[1], '사용자가 수정한 최종 요약');
+
+  const withoutMeta = await loadAdmin();
+  withoutMeta.elements['html-file'].files = [{
+    name: 'weekly-report.html',
+    size: 100,
+    text: async () => '<!doctype html><title>Weekly report</title>'
+  }];
+  await withoutMeta.elements['html-file'].emit('change');
+  assert.equal(withoutMeta.elements['post-summary'].value, '');
 });
 
 test('language defaults to Korean and English selection submits an optional translation group', async () => {
