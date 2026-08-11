@@ -36,4 +36,4 @@
 
 ## 현재 바로 이어서 할 작업
 
-`docs/ROADMAP.md`의 "Next action"부터 시작한다. 현재 홈페이지 v2 Draft PR의 Preview 및 Production 검수가 다음 작업이며, 이후에는 운영 중 실제 필요가 관찰될 때 새 작업을 정한다.
+`docs/ROADMAP.md`의 "Next action"부터 시작한다. 현재 홈페이지 소개문 정리와 빈 `/about/` 공통 셸 Draft PR의 Preview 검수가 다음 작업이며, 이후에는 운영 중 실제 필요가 관찰될 때 새 작업을 정한다.

@@ -52,11 +52,14 @@
     try { localStorage.setItem('site-theme',next); } catch (_) {}
     applyTheme(next);
   });
-  menuBtn?.addEventListener('click',()=>{
+  if(menuBtn && mobileNav) menuBtn.addEventListener('click',()=>{
     const open = mobileNav.classList.toggle('open');
     menuBtn.setAttribute('aria-expanded',String(open));
     menuBtn.setAttribute('aria-label',open ? '메뉴 닫기' : '메뉴 열기');
   });
+
+  const isHomepage = Boolean(list && search && document.querySelector('[data-carousel]') && document.getElementById('latest-category-cards'));
+  if(!isHomepage) return;
 
   function esc(value){
     return String(value ?? '').replace(/[&<>"']/g,character=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[character]));

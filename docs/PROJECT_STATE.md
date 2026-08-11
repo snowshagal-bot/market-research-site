@@ -1,6 +1,6 @@
 # Project state
 
-Updated: 2026-08-10
+Updated: 2026-08-11
 
 ## Purpose
 
@@ -28,12 +28,14 @@ Main categories:
 
 The homepage supports category filtering and search. Its v2 featured carousel selects one latest post from each available core category (`daily`, `weekly`, `research`, `basics`) rather than rotating chronologically. `note` remains available as a secondary navigation and archive category.
 
+`/about/` is a noindex site-shell page reserved for a future user-authored introduction. It currently contains the shared header, navigation, theme control, empty main area, and footer only.
+
 Homepage v2 also provides:
 
 - manual previous/next and category-tab carousel controls with no autoplay
 - optional post cover images through `coverImage`
 - CSS/typographic fallback covers for all existing posts without `coverImage`
-- a concise site introduction and category-latest cards
+- full-width category-latest cards without a separate introduction copy block
 - the existing report archive, URL category filtering, and report-date sorting
 
 ## Report publishing flow
@@ -69,7 +71,7 @@ Files under `reports/` are standalone HTML documents that may contain their own 
 - guest comment UI
 - Shadow DOM isolation to reduce style collision with report HTML
 
-The shared navigation is fixed at the top and inserts spacing so it does not cover the original report. Public labels are `데일리 / 위클리 / 비정기 / 시장 공부 / 끄적끄적`.
+The shared navigation is fixed at the top and inserts spacing so it does not cover the original report. Public links are `데일리 / 위클리 / 비정기 / 시장 공부 / 끄적끄적 / 소개`.
 
 ## Comments feature
 
@@ -123,8 +125,9 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 ## Key files
 
 - `index.html` — homepage shell and category/search markup
+- `about/index.html` — empty noindex About page shell
 - `assets/site.css` — main site visual styles
-- `assets/home-v2.css` — homepage v2 carousel, fallback cover, introduction, and latest-card layout
+- `assets/home-v2.css` — homepage v2 carousel, fallback cover, and latest-card layout
 - `assets/category-state.css` — category state styles
 - `assets/site.js` — homepage category filtering, featured article, search, theme/menu behavior
 - `data/posts.json` — canonical post metadata used by publishing flow and deployment checks
