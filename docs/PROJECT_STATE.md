@@ -58,7 +58,7 @@ The publishing UI now warns before the final confirmation when no optional homep
 
 ## Existing post management
 
-Draft implementation: `/admin/manage/`
+Admin page: `/admin/manage/`
 
 The management page extends the existing static admin and GitHub-backed publishing architecture without introducing a CMS or database:
 
@@ -70,6 +70,8 @@ The management page extends the existing static admin and GitHub-backed publishi
 - uses authenticated `/api/manage` updates that create one Git commit for synchronized metadata and any report/cover changes;
 - checks the exact `main` SHA again before updating the ref and returns a conflict instead of force-pushing when the repository changes;
 - refuses to delete report or cover paths outside the managed `reports/` and `covers/` directories.
+- keeps the editor unchanged after a successful mutation, shows a centered completion overlay, and polls the Production `data/posts.json` plus any updated cover until Cloudflare reflects the commit;
+- redirects to the homepage after confirmed deployment, while allowing the administrator to cancel the redirect and reload the latest management list.
 
 Cloudflare Preview hosts disable actual update/delete actions in the client, and `/api/manage` independently rejects every mutation whose request hostname is not exactly `market-research-site.pages.dev`. Preview validation must use list, form, sandboxed local HTML/cover preview, and mocked API tests only.
 

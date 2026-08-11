@@ -8,6 +8,7 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 function element(id = '') {
   const listeners = new Map();
   const attributes = new Map();
+  const classes = new Set();
   return {
     id,
     value: '',
@@ -20,8 +21,13 @@ function element(id = '') {
     src: '',
     naturalWidth: 0,
     naturalHeight: 0,
+    href: '',
     checked: id === 'cover-keep',
-    classList: { add() {}, remove() {} },
+    classList: {
+      add(...names) { names.forEach((name) => classes.add(name)); },
+      remove(...names) { names.forEach((name) => classes.delete(name)); },
+      contains(name) { return classes.has(name); }
+    },
     addEventListener(type, handler) { listeners.set(type, handler); },
     emit(type, event = {}) { return listeners.get(type)?.({ preventDefault() {}, ...event }); },
     setAttribute(name, value) { attributes.set(name, String(value)); },
@@ -33,7 +39,14 @@ function element(id = '') {
   };
 }
 
-async function loadClientHelpers({ confirmResult = true, manageResponse = null } = {}) {
+async function loadClientHelpers({
+  confirmResult = true,
+  manageResponse = null,
+  listPosts = [],
+  deployResponses = [],
+  coverStatuses = [],
+  hostname = 'market-research-site.pages.dev'
+} = {}) {
   const source = await read('assets/admin-manage.js');
   const ids = [
     'post-list', 'post-count', 'manage-search', 'editor-empty', 'editor-form', 'manage-status',
@@ -41,19 +54,28 @@ async function loadClientHelpers({ confirmResult = true, manageResponse = null }
     'replacement-cover', 'cover-file-field', 'cover-status', 'manage-cover-image',
     'manage-cover-fallback', 'cover-meta', 'cover-name', 'cover-dimensions', 'cover-size',
     'current-cover-label', 'start-delete', 'delete-confirmation', 'delete-expected-title',
-    'delete-title-confirm', 'confirm-delete', 'manage-cover-preview', 'save-post'
+    'delete-title-confirm', 'confirm-delete', 'manage-cover-preview', 'save-post',
+    'manage-result-overlay', 'manage-result-title', 'manage-result-text', 'manage-result-detail',
+    'manage-result-home', 'manage-result-continue'
   ];
   const elements = Object.fromEntries(ids.map((id) => [id, element(id)]));
+  elements['manage-result-overlay'].hidden = true;
   const themeButton = element('theme');
   const themeMeta = element('theme-meta');
   const coverKeep = element('cover-keep');
   coverKeep.value = 'keep';
   coverKeep.checked = true;
   const fetchCalls = [];
+  const allFetchCalls = [];
+  const timers = new Map();
+  const clearedTimers = [];
+  let nextTimerId = 1;
+  const location = { hostname, href: '' };
   const context = {
     console,
     confirm: () => confirmResult,
     fetch: async (url, options = {}) => {
+      allFetchCalls.push({ url: String(url), options });
       if (String(url).includes('/api/manage')) {
         fetchCalls.push({ url, options });
         return {
@@ -62,11 +84,21 @@ async function loadClientHelpers({ confirmResult = true, manageResponse = null }
           json: async () => manageResponse || { ok: true, post: {}, commit: 'abcdef0123456789' }
         };
       }
-      return { ok: true, status: 200, json: async () => [] };
+      if (String(url).startsWith('/data/posts.json?t=')) {
+        const next = deployResponses.length ? deployResponses.shift() : listPosts;
+        return { ok: true, status: 200, json: async () => next };
+      }
+      if (String(url).startsWith('/covers/')) {
+        const status = coverStatuses.length ? coverStatuses.shift() : 404;
+        return { ok: status === 200, status, json: async () => ({}) };
+      }
+      return { ok: true, status: 200, json: async () => listPosts };
     },
+    setTimeout(callback, delay) { const id = nextTimerId++; timers.set(id, { callback, delay }); return id; },
+    clearTimeout(id) { clearedTimers.push(id); timers.delete(id); },
     FormData,
     URL: { createObjectURL: () => 'blob:test', revokeObjectURL() {} },
-    location: { hostname: 'market-research-site.pages.dev' },
+    location,
     localStorage: { getItem: () => null, setItem() {} },
     sessionStorage: { getItem: () => null, setItem() {} },
     matchMedia: () => ({ matches: false, addEventListener() {} }),
@@ -82,7 +114,11 @@ async function loadClientHelpers({ confirmResult = true, manageResponse = null }
   vm.runInNewContext(source, context);
   await Promise.resolve();
   await Promise.resolve();
-  return { helpers: context.window.__adminManageTest, elements, coverKeep, fetchCalls };
+  return { helpers: context.window.__adminManageTest, elements, coverKeep, fetchCalls, allFetchCalls, timers, clearedTimers, location };
+}
+
+async function flushPromises(turns = 6) {
+  for (let index = 0; index < turns; index += 1) await Promise.resolve();
 }
 
 test('manage page includes navigation, list controls, immutable metadata, edit fields, previews, and two-step delete UI', async () => {
@@ -103,6 +139,9 @@ test('manage page includes navigation, list controls, immutable metadata, edit f
   assert.match(html, /id="start-delete"/);
   assert.match(html, /id="delete-title-confirm"/);
   assert.match(html, /id="confirm-delete"[^>]*disabled/);
+  assert.match(html, /id="manage-result-overlay"[^>]*role="dialog"[^>]*aria-modal="true"/);
+  assert.match(html, /id="manage-result-home"[^>]*href="\/"/);
+  assert.match(html, /id="manage-result-continue"/);
 });
 
 test('client list sorting, title/href search, category filters, file validation, and Preview safety are deterministic', async () => {
@@ -133,6 +172,8 @@ test('manage client keeps immutable values server-owned and preserves current hr
   assert.match(source, /body\.append\('confirmTitle', deleteTitleConfirm\.value\)/);
   assert.match(source, /deleteTitleConfirm\.value !== selectedPost\.title/);
   assert.match(source, /Preview에서는 실제 저장·삭제를 실행할 수 없습니다/);
+  assert.match(source, /DEPLOY_POLL_INTERVAL_MS = 2500/);
+  assert.match(source, /DEPLOY_POLL_MAX_ATTEMPTS = 36/);
 });
 
 test('cover replacement is excluded until decode succeeds and remains excluded after decode failure', async () => {
@@ -170,24 +211,128 @@ test('cover replacement is excluded until decode succeeds and remains excluded a
   assert.equal(Array.from(helpers.buildUpdateForm().keys()).includes('cover'), true);
 });
 
-test('successful save keeps the GitHub and Cloudflare deployment status message visible', async () => {
+test('update success opens the deployment overlay without immediately rerendering the editor', async () => {
   const post = {
     id: 'post-1', type: 'daily', reportDate: '2026-08-11', date: '2026-08-11',
     registeredDate: '2026-08-11', registeredAt: '2026-08-11T00:00:00Z',
     title: '테스트 제목', subtitle: '', description: '', href: 'reports/test.html'
   };
-  const responsePost = { ...post, updatedAt: '2026-08-11T12:00:00Z' };
+  const responsePost = { ...post, title: '수정 제목', updatedAt: '2026-08-11T12:00:00Z' };
   const { helpers, elements, fetchCalls } = await loadClientHelpers({
-    manageResponse: { ok: true, post: responsePost, commit: 'abcdef0123456789' }
+    listPosts: [post],
+    deployResponses: [[post]],
+    manageResponse: { ok: true, action: 'update', post: responsePost, commit: 'abcdef0123456789' }
   });
   helpers.setPosts([post]);
   helpers.selectPost(post.id);
   elements['manage-admin-key'].value = 'test-key';
+  elements['manage-title'].value = responsePost.title;
   await helpers.save({ preventDefault() {} });
   assert.equal(fetchCalls.length, 1);
-  assert.match(elements['manage-status'].textContent, /GitHub 저장 완료/);
-  assert.match(elements['manage-status'].textContent, /Cloudflare 반영까지 잠시 걸릴 수 있습니다/);
-  assert.match(elements['manage-status'].textContent, /abcdef0/);
+  assert.equal(elements['manage-result-overlay'].hidden, false);
+  assert.equal(elements['manage-result-title'].textContent, '저장되었습니다.');
+  assert.equal(elements['manage-result-text'].textContent, '홈페이지 반영을 확인하고 있습니다.');
+  assert.match(elements['manage-result-detail'].textContent, /abcdef0/);
+  assert.equal(elements['manage-title'].value, responsePost.title);
+  const source = await read('assets/admin-manage.js');
+  assert.doesNotMatch(source, /selectPost\(data\.post\.id\)/);
+});
+
+test('deployment polling matches the updated post, verifies the cover, and redirects home', async () => {
+  const updated = {
+    id: 'post-1', type: 'daily', typeLabel: '주식 리포트', reportDate: '2026-08-11', date: '2026-08-11',
+    registeredDate: '2026-08-11', registeredAt: '2026-08-11T00:00:00Z', title: '수정 제목', subtitle: '',
+    description: '수정 설명', href: 'reports/test.html', updatedAt: '2026-08-11T12:00:00Z', coverImage: 'covers/post-1.webp'
+  };
+  const { helpers, elements, allFetchCalls, timers, location } = await loadClientHelpers({
+    listPosts: [updated], deployResponses: [[updated]], coverStatuses: [200]
+  });
+  const operation = { action: 'update', id: updated.id, post: updated, commit: 'abcdef0123456789' };
+  const result = await helpers.beginDeploymentCheck(operation, { maxAttempts: 1, intervalMs: 0 });
+  assert.equal(result, 'complete');
+  assert.equal(elements['manage-result-overlay'].classList.contains('done'), true);
+  assert.equal(elements['manage-result-title'].textContent, '홈페이지 반영이 완료되었습니다.');
+  assert.equal(elements['manage-result-text'].textContent, '잠시 후 홈페이지로 이동합니다.');
+  const postsCall = allFetchCalls.find((call) => call.url.startsWith('/data/posts.json?t='));
+  const coverCall = allFetchCalls.find((call) => call.url.startsWith('/covers/post-1.webp?t='));
+  assert.equal(postsCall.options.cache, 'no-store');
+  assert.equal(coverCall.options.cache, 'no-store');
+  assert.equal([...timers.values()].some((timer) => timer.delay === 1500), true);
+  [...timers.values()].find((timer) => timer.delay === 1500).callback();
+  assert.equal(location.href, '/');
+});
+
+test('continue management cancels redirect, reloads production posts, and reselects the updated post', async () => {
+  const oldPost = {
+    id: 'post-1', type: 'daily', reportDate: '2026-08-11', date: '2026-08-11', registeredDate: '2026-08-11',
+    registeredAt: '2026-08-11T00:00:00Z', title: '기존 제목', subtitle: '', description: '', href: 'reports/test.html'
+  };
+  const updated = { ...oldPost, title: '배포된 제목', updatedAt: '2026-08-11T12:00:00Z' };
+  const { helpers, elements, allFetchCalls, timers, clearedTimers } = await loadClientHelpers({
+    listPosts: [updated], deployResponses: [[updated]]
+  });
+  helpers.setPosts([oldPost]);
+  helpers.selectPost(oldPost.id);
+  const operation = { action: 'update', id: updated.id, post: updated, commit: 'abcdef0123456789' };
+  await helpers.beginDeploymentCheck(operation, { maxAttempts: 1, intervalMs: 0 });
+  const redirectId = [...timers.entries()].find(([, timer]) => timer.delay === 1500)[0];
+  await helpers.continueManagement();
+  assert.equal(elements['manage-result-overlay'].hidden, true);
+  assert.equal(clearedTimers.includes(redirectId), true);
+  assert.equal(elements['manage-title'].value, updated.title);
+  assert.equal(allFetchCalls.filter((call) => call.url === '../../data/posts.json').length >= 2, true);
+});
+
+test('deployment timeout keeps the successful save state and offers non-error actions', async () => {
+  const expected = { id: 'post-1', title: '새 제목', updatedAt: '2026-08-11T12:00:00Z' };
+  const stale = { id: 'post-1', title: '이전 제목', updatedAt: '2026-08-11T11:00:00Z' };
+  const { helpers, elements } = await loadClientHelpers({ listPosts: [stale], deployResponses: [[stale]] });
+  const result = await helpers.beginDeploymentCheck(
+    { action: 'update', id: expected.id, post: expected, commit: 'abcdef0123456789' },
+    { maxAttempts: 1, intervalMs: 0 }
+  );
+  assert.equal(result, 'timeout');
+  assert.equal(elements['manage-result-overlay'].classList.contains('delayed'), true);
+  assert.equal(elements['manage-result-overlay'].classList.contains('done'), false);
+  assert.equal(elements['manage-result-title'].textContent, '저장은 완료됐지만 홈페이지 반영 확인이 지연되고 있습니다.');
+  assert.equal(elements['manage-result-home'].textContent, '홈페이지 확인');
+  assert.equal(elements['manage-result-continue'].textContent, '관리 계속하기');
+});
+
+test('delete success waits until the post disappears from production data', async () => {
+  const post = {
+    id: 'post-1', type: 'daily', reportDate: '2026-08-11', date: '2026-08-11', registeredDate: '2026-08-11',
+    registeredAt: '2026-08-11T00:00:00Z', title: '삭제 제목', subtitle: '', description: '', href: 'reports/test.html'
+  };
+  const { helpers, elements, fetchCalls } = await loadClientHelpers({
+    listPosts: [post], deployResponses: [[]], manageResponse: { ok: true, action: 'delete', post: null, commit: 'fedcba9876543210' }
+  });
+  helpers.setPosts([post]);
+  helpers.selectPost(post.id);
+  elements['manage-admin-key'].value = 'test-key';
+  elements['delete-title-confirm'].value = post.title;
+  await helpers.deletePost();
+  await flushPromises();
+  assert.equal(fetchCalls.length, 1);
+  assert.equal(elements['manage-result-overlay'].hidden, false);
+  assert.equal(elements['manage-result-overlay'].classList.contains('done'), true);
+  assert.equal(elements['manage-result-title'].textContent, '삭제가 홈페이지에 반영되었습니다.');
+  assert.equal(elements['manage-result-text'].textContent, '잠시 후 홈페이지로 이동합니다.');
+});
+
+test('Preview still blocks mutations before the management API is called', async () => {
+  const post = {
+    id: 'post-1', type: 'daily', reportDate: '2026-08-11', date: '2026-08-11', registeredDate: '2026-08-11',
+    registeredAt: '2026-08-11T00:00:00Z', title: '테스트 제목', subtitle: '', description: '', href: 'reports/test.html'
+  };
+  const { helpers, elements, fetchCalls } = await loadClientHelpers({ hostname: 'branch.market-research-site.pages.dev', listPosts: [post] });
+  helpers.setPosts([post]);
+  helpers.selectPost(post.id);
+  elements['manage-admin-key'].value = 'test-key';
+  await helpers.save({ preventDefault() {} });
+  assert.equal(fetchCalls.length, 0);
+  assert.match(elements['manage-status'].textContent, /Preview에서는 실제 저장·삭제를 실행할 수 없습니다/);
+  assert.equal(elements['manage-result-overlay'].hidden, true);
 });
 
 test('repository posts metadata is synchronized and the current production post remains unchanged', async () => {
@@ -196,7 +341,7 @@ test('repository posts metadata is synchronized and the current production post 
   assert.equal(jsText.replace(/\r\n/g, '\n'), `window.RESEARCH_POSTS = ${JSON.stringify(posts, null, 2)};\n`);
   const current = posts.find((post) => post.id === '2026-08-11-daily-12vx8a7');
   assert.deepEqual(current, {
-    id: '2026-08-11-daily-12vx8a7', type: 'daily', typeLabel: '주식 리포트', date: '2026-08-11', reportDate: '2026-08-11', registeredDate: '2026-08-11', registeredAt: '2026-08-11T10:06:02.296Z', legacyImport: false, title: '한 척이끌고 간 바다', subtitle: '', description: '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.', href: 'reports/8월 11일 주식리포트_커버통합.html'
+    id: '2026-08-11-daily-12vx8a7', type: 'daily', typeLabel: '주식 리포트', date: '2026-08-11', reportDate: '2026-08-11', registeredDate: '2026-08-11', registeredAt: '2026-08-11T10:06:02.296Z', legacyImport: false, title: '한 척이끌고 간 바다', subtitle: '', description: '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.', href: 'reports/8월 11일 주식리포트_커버통합.html', updatedAt: '2026-08-11T15:03:02.337Z', coverImage: 'covers/2026-08-11-daily-12vx8a7.png'
   });
 });
 

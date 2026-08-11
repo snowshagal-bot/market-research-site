@@ -6,21 +6,24 @@ This roadmap records implementation order, not a promise to build every future i
 
 ## Next action
 
-Review the existing-post management Draft PR and its Cloudflare Pages Preview. Validate the list/search/filter/edit layout, local HTML and cover previews, deletion confirmation UI, and responsive behavior without performing a real repository mutation.
+Review the post-management deployment-overlay Draft PR. Validate the update/delete completion overlay, Production polling states, continue-management behavior, and responsive layout without performing a real repository mutation.
 
 ## In progress
 
-### 7. Existing post management
+### 8. Post-management deployment feedback
 
 In the current Draft PR:
 
-- add `/admin/manage/` list, search, category filters, and selected-post editing while keeping immutable IDs and public URLs;
-- optionally replace report HTML at its existing path and keep/replace/remove managed homepage covers;
-- synchronize `data/posts.json` and `data/posts.js` with one authenticated Git commit for update or delete;
-- reject concurrent `main` changes instead of force-pushing and block deletion outside `reports/` or `covers/`;
-- preserve the existing publisher and current production post data, with no real mutations during Preview review.
+- keep the editor unchanged immediately after GitHub update/delete success;
+- show a centered completion overlay consistent with the existing publisher;
+- poll Production metadata and updated covers before reporting Cloudflare deployment complete;
+- support automatic homepage redirect, cancel/reload through “관리 계속하기”, and a non-error timeout state.
 
 ## Completed
+
+### 7. Existing post management
+
+Squash-merged and deployed to Production on 2026-08-11. `/admin/manage/` provides list/search/filter/edit, optional HTML and cover replacement, exact-title deletion confirmation, atomic GitHub updates, Preview write blocking, and managed-path safety.
 
 ### 6. Admin cover preview
 
