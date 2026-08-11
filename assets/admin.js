@@ -14,6 +14,15 @@
   const filename = $('post-filename');
   const coverInput = $('cover-file');
   const coverInfo = $('cover-info');
+  const coverPreviewCanvas = $('cover-preview-canvas');
+  const coverPreviewImage = $('cover-preview-image');
+  const coverPreviewEmpty = $('cover-preview-empty');
+  const coverPreviewMeta = $('cover-preview-meta');
+  const coverPreviewName = $('cover-preview-name');
+  const coverPreviewDimensions = $('cover-preview-dimensions');
+  const coverPreviewSize = $('cover-preview-size');
+  const coverPreviewCaption = $('cover-preview-caption');
+  const coverPreviewModes = [...document.querySelectorAll('[data-cover-preview-mode]')];
   const adminKey = $('admin-key');
   const publishBtn = $('publish-btn');
   const themeBtn = document.querySelector('[data-theme-toggle]');
@@ -28,7 +37,15 @@
   const themeMedia = matchMedia('(prefers-color-scheme: dark)');
   let selectedFile = null;
   let selectedCover = null;
+  let coverPreviewUrl = '';
   let publishing = false;
+
+  const defaultCoverInfo = 'JPG, PNG, WebP · 최대 4MB · 원본 리포트 HTML과 별도로 저장됩니다.';
+  const coverModeLabels = {
+    1280: 'PC 1280',
+    430: '모바일 430',
+    360: '모바일 360'
+  };
 
   function savedTheme() {
     try { return localStorage.getItem('site-theme') || 'system'; }
@@ -131,6 +148,62 @@
     if (!allowed[file.type]?.includes(extension)) return 'JPG, PNG, WebP 이미지만 선택할 수 있습니다.';
     if (file.size > 4 * 1024 * 1024) return '대표 커버 이미지는 4MB 이하여야 합니다.';
     return '';
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+
+  function revokeCoverPreviewUrl() {
+    if (!coverPreviewUrl) return;
+    URL.revokeObjectURL(coverPreviewUrl);
+    coverPreviewUrl = '';
+  }
+
+  function resetCoverPreview(message = '대표 커버를 선택하면 홈페이지에서 보이는 영역을 확인할 수 있습니다.') {
+    revokeCoverPreviewUrl();
+    coverPreviewImage?.removeAttribute('src');
+    if (coverPreviewImage) coverPreviewImage.hidden = true;
+    if (coverPreviewEmpty) {
+      coverPreviewEmpty.textContent = message;
+      coverPreviewEmpty.hidden = false;
+    }
+    if (coverPreviewMeta) coverPreviewMeta.hidden = true;
+    if (coverPreviewName) coverPreviewName.textContent = '';
+    if (coverPreviewDimensions) coverPreviewDimensions.textContent = '';
+    if (coverPreviewSize) coverPreviewSize.textContent = '';
+  }
+
+  function showCoverPreview(file) {
+    resetCoverPreview();
+    if (!file || !coverPreviewImage) return;
+    const objectUrl = URL.createObjectURL(file);
+    coverPreviewUrl = objectUrl;
+    coverPreviewName.textContent = file.name;
+    coverPreviewDimensions.textContent = '확인 중…';
+    coverPreviewSize.textContent = formatFileSize(file.size);
+    coverPreviewMeta.hidden = false;
+    coverPreviewImage.onload = () => {
+      if (coverPreviewUrl !== objectUrl) return;
+      coverPreviewDimensions.textContent = `${coverPreviewImage.naturalWidth} × ${coverPreviewImage.naturalHeight}px`;
+    };
+    coverPreviewImage.onerror = () => {
+      if (coverPreviewUrl !== objectUrl) return;
+      resetCoverPreview('이미지를 미리 볼 수 없습니다. 다른 파일을 선택해 주세요.');
+    };
+    coverPreviewImage.src = objectUrl;
+    coverPreviewImage.hidden = false;
+    coverPreviewEmpty.hidden = true;
+  }
+
+  function setCoverPreviewMode(mode) {
+    if (!coverModeLabels[mode] || !coverPreviewCanvas) return;
+    coverPreviewCanvas.dataset.coverMode = mode;
+    coverPreviewCaption.textContent = `홈페이지 커버 표시 영역 · ${coverModeLabels[mode]}`;
+    coverPreviewModes.forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.coverPreviewMode === mode));
+    });
   }
 
   function resetPreview() {
@@ -302,12 +375,18 @@
       selectedCover = null;
       coverInput.value = '';
       coverInfo.textContent = error;
+      resetCoverPreview();
       return;
     }
     selectedCover = file;
     coverInfo.textContent = file
       ? `${file.name} · ${(file.size / 1024).toFixed(1)} KB`
-      : 'JPG, PNG, WebP · 최대 4MB · 원본 리포트 HTML과 별도로 저장됩니다.';
+      : defaultCoverInfo;
+    if (file) showCoverPreview(file);
+    else resetCoverPreview();
+  });
+  coverPreviewModes.forEach(button => {
+    button.addEventListener('click', () => setCoverPreviewMode(button.dataset.coverPreviewMode));
   });
   [type,date,title,subtitle,description,adminKey].forEach(el => el?.addEventListener('input', updatePublishState));
   type?.addEventListener('change', () => {
@@ -324,6 +403,8 @@
     try { localStorage.setItem('site-theme', next); } catch (_) {}
     applyTheme(next);
   });
+
+  window.addEventListener('pagehide', revokeCoverPreviewUrl);
 
   updatePublishState();
 })();
