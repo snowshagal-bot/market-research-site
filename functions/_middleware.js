@@ -16,7 +16,7 @@ export async function onRequest(context) {
   else if (/비정기|소버린|research/i.test(decodedPath)) active = 'research';
   else if (/끄적|note/i.test(decodedPath)) active = 'note';
 
-  const shell = `<script src="/assets/report-shell.js?v=20260810-2" data-category="${active}"></script>`;
+  const shell = `<script src="/assets/report-shell.js?v=20260811-1" data-category="${active}"></script>`;
 
   return new HTMLRewriter()
     .on('body', {

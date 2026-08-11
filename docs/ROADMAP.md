@@ -1,28 +1,30 @@
 # Roadmap
 
-Updated: 2026-08-10
+Updated: 2026-08-11
 
 This roadmap records implementation order, not a promise to build every future idea. Keep the current site small until traffic and actual needs justify added complexity.
 
 ## Next action
 
-Review the homepage v2 Draft PR and its Cloudflare Pages Preview. After approval, merge it and complete Production validation for the carousel, dark mode, responsive layouts, archive filters/search, Market Basics empty state, admin publishing with and without a cover image, and existing report/comment behavior.
-
-This is validation of the requested v2 work, not a new feature commitment. After v2 Production validation, return to operating the site and choose future tasks only when real use reveals a concrete need.
+Review the homepage cleanup and empty About page shell Draft PR and its Cloudflare Pages Preview. Confirm the shared navigation, empty `/about/` shell, homepage card flow, and responsive header behavior before deciding whether to merge.
 
 ## In progress
 
-### 3. Homepage v2 editorial redesign
+### 4. Homepage cleanup and About page shell
 
-Implemented for Draft PR review:
+In the current Draft PR:
 
-- category-representative manual carousel for daily, weekly, research, and Market Basics;
-- optional separately stored cover images with backward-compatible fallback covers;
-- new `basics` / 시장 공부 category while retaining Notes;
-- understated introduction and latest-category cards;
-- existing archive/search, theme, accessibility, admin publishing, report shell, and comments preserved.
+- remove the homepage introduction copy while retaining full-width category-latest cards;
+- add `소개` to desktop, mobile, and shared report navigation;
+- add an empty noindex `/about/` page using the common site shell;
+- replace the footer placeholder with the real About link;
+- keep homepage-only JavaScript inactive on non-home static pages while preserving common theme and mobile-menu behavior.
 
 ## Completed
+
+### 3. Homepage v2 editorial redesign
+
+Squash-merged and deployed to Production on 2026-08-11. Production validation covered the category-representative carousel, light/dark mode, search and filters, 360px/430px/1280px layouts, mobile swipe/menu behavior, existing report shell/comments, and the admin Market Basics/optional-cover controls.
 
 ### 1. Finish guest comments validation
 
@@ -52,7 +54,7 @@ Validation and polish covered:
 
 ## Near-term priorities
 
-### 4. Improve publishing workflow only where friction appears
+### 5. Improve publishing workflow only where friction appears
 
 Current `/admin/` publishing already supports HTML parsing, metadata review, secure server-side publishing, deployment progress, and redirect.
 

@@ -1,6 +1,6 @@
 # UI and responsive rules
 
-Updated: 2026-08-09
+Updated: 2026-08-11
 
 ## Design direction
 
@@ -35,12 +35,13 @@ Homepage public categories:
 - 비정기
 - 시장 공부
 - 끄적끄적
+- 소개
 
-Internal values are `daily`, `weekly`, `research`, `basics`, `note`. Market Basics is a core category; Notes remains a secondary category without being renamed or removed.
+Internal category values are `daily`, `weekly`, `research`, `basics`, `note`. Market Basics is a core category; Notes remains a secondary category without being renamed or removed. `소개` links to `/about/` and is a secondary site page rather than a report category.
 
 Report pages use a fixed shared top bar:
 
-`← 홈 | 데일리 | 위클리 | 비정기 | 시장 공부 | 끄적끄적`
+`← 홈 | 데일리 | 위클리 | 비정기 | 시장 공부 | 끄적끄적 | 소개`
 
 The current category should have a clear but restrained active state. The report navigation is injected outside the original report design and must remain visually stable regardless of report-specific CSS.
 

@@ -58,10 +58,12 @@ test('carousel uses one latest post per core category, never autoplay, and suppo
   assert.doesNotMatch(polishStyles, /\.cover-category/);
 });
 
-test('homepage introduction uses the concise v2 copy', async () => {
+test('homepage removes the introduction copy while preserving the carousel and latest cards', async () => {
   const html = await read('index.html');
-  assert.match(html, /시장의 흐름을 데이터와 맥락으로 정리합니다\./);
-  assert.doesNotMatch(html, /투자와 의사결정에 필요한 인사이트를 제공합니다/);
+  assert.doesNotMatch(html, /class="intro-copy"/);
+  assert.doesNotMatch(html, /INDEPENDENT ARCHIVE/);
+  assert.match(html, /data-carousel/);
+  assert.match(html, /id="latest-category-cards"/);
 });
 
 test('existing post metadata remains valid without coverImage', async () => {

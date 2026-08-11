@@ -21,12 +21,40 @@ html[data-theme="light"] {
   opacity: 1;
 }
 
-.footer-links > span {
-  cursor: default;
+.nav-secondary {
+  opacity: .72;
+}
+
+.nav-secondary:hover,
+.nav-secondary.active {
+  opacity: 1;
+}
+
+body.static-page {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.static-page-main {
+  flex: 1;
+}
+
+@media (max-width: 960px) and (min-width: 761px) {
+  .main-nav {
+    gap: 10px;
+    margin-left: 16px;
+  }
 }
 
 @media (min-width: 761px) {
   .mobile-nav.open {
     display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .mobile-nav .nav-secondary {
+    grid-column: 1 / -1;
   }
 }
