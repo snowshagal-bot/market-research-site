@@ -11,7 +11,9 @@ window.RESEARCH_POSTS = [
     "title": "한 척이끌고 간 바다",
     "subtitle": "",
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
-    "href": "reports/8월 11일 주식리포트_커버통합.html"
+    "href": "reports/8월 11일 주식리포트_커버통합.html",
+    "updatedAt": "2026-08-11T15:03:02.337Z",
+    "coverImage": "covers/2026-08-11-daily-12vx8a7.png"
   },
   {
     "id": "2026-08-10-daily-1evguss",
