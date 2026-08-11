@@ -38,13 +38,14 @@ Homepage v2 also provides:
 - CSS/typographic fallback covers for posts without `coverImage`
 - full-width category-latest cards without a separate introduction copy block
 - the existing report archive, URL category filtering, and report-date sorting
+- a denser two-column desktop archive with the recent-report list beside a five-category index whose counts are calculated from the current post data; tablet and mobile stack the index after the list
 
 ## Report publishing flow
 
 Admin page: `/admin/`
 
 1. User drops a standalone HTML report into the admin page.
-2. `assets/admin.js` reads the file locally and attempts to infer category, report date, title, and subtitle.
+2. `assets/admin.js` reads the file locally and attempts to infer category, report date, title, and subtitle. The five report categories remain visible as keyboard-accessible radio chips; automatic detection selects an initial value and the administrator can override it before publishing.
 3. Title extraction prefers report metadata/HTML content such as `meta[name="report-title"]`, `h1`, cover title, generic title class, and finally document title/file name.
 4. An optional cover can be reviewed locally with the homepage's actual `cover` / `center top` crop at PC 1280, mobile 430, and mobile 360 before publishing. The preview uses a temporary browser object URL and does not upload the image.
 5. User can review/edit the extracted publishing metadata before publishing.

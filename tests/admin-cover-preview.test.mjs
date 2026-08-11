@@ -12,6 +12,7 @@ function createElement(id = '') {
     id,
     value: '',
     files: [],
+    checked: false,
     hidden: false,
     textContent: '',
     innerHTML: '',
@@ -24,6 +25,7 @@ function createElement(id = '') {
     removeAttribute(name) { if (name === 'src') this.src = ''; attributes.delete(name); },
     querySelector() { return null; },
     appendChild() {},
+    focus() {},
     click() {}
   };
 }
@@ -38,7 +40,7 @@ async function loadAdmin({ confirmResult = false } = {}) {
     'cover-preview-name', 'cover-preview-dimensions', 'cover-preview-size',
     'cover-preview-caption', 'cover-preview-note', 'admin-key', 'publish-btn', 'publish-overlay',
     'publish-state-title', 'publish-state-text', 'publish-state-detail', 'publish-links',
-    'published-report-link', 'published-home-link'
+    'published-report-link', 'published-home-link', 'category-status'
   ];
   const elements = Object.fromEntries(ids.map(id => [id, createElement(id)]));
   const themeButton = createElement('theme-toggle');
@@ -48,6 +50,11 @@ async function loadAdmin({ confirmResult = false } = {}) {
     button.dataset.coverPreviewMode = mode;
     button.setAttribute('aria-pressed', String(mode === '1280'));
     return button;
+  });
+  const categoryOptions = ['daily', 'weekly', 'research', 'basics', 'note'].map(value => {
+    const option = createElement(`category-${value}`);
+    option.value = value;
+    return option;
   });
   const windowListeners = new Map();
   const createdUrls = [];
@@ -89,7 +96,9 @@ async function loadAdmin({ confirmResult = false } = {}) {
       documentElement: { dataset: {} },
       getElementById: id => elements[id],
       querySelector: selector => selector === '[data-theme-toggle]' ? themeButton : selector === 'meta[name="theme-color"]' ? themeMeta : null,
-      querySelectorAll: selector => selector === '[data-cover-preview-mode]' ? modeButtons : [],
+      querySelectorAll: selector => selector === '[data-cover-preview-mode]'
+        ? modeButtons
+        : selector === 'input[name="post-category"]' ? categoryOptions : [],
       createElement: tag => createElement(tag)
     },
     window: {
@@ -97,7 +106,7 @@ async function loadAdmin({ confirmResult = false } = {}) {
     }
   };
   vm.runInNewContext(source, context);
-  return { elements, modeButtons, createdUrls, revokedUrls, windowListeners, submissions, confirmMessages };
+  return { elements, modeButtons, categoryOptions, createdUrls, revokedUrls, windowListeners, submissions, confirmMessages };
 }
 
 const validCover = (name = 'cover.webp') => ({ name, type: 'image/webp', size: 320 * 1024 });
@@ -114,6 +123,77 @@ test('admin markup contains the cover preview modes before the original HTML pre
   assert.match(adminScript, /iframe\.setAttribute\('sandbox', 'allow-scripts'\)/);
   assert.match(adminScript, /iframe\.srcdoc = text/);
   assert.doesNotMatch(adminScript, /allow-same-origin/);
+});
+
+test('admin exposes five always-visible accessible category radio chips', async () => {
+  const html = await read('admin/index.html');
+  assert.match(html, /class="category-options" role="radiogroup"/);
+  assert.equal((html.match(/name="post-category" value="(?:daily|weekly|research|basics|note)"/g) || []).length, 5);
+  for (const label of ['데일리', '위클리', '비정기', '시장 공부', '끄적끄적']) assert.match(html, new RegExp(`<span>${label}</span>`));
+  assert.doesNotMatch(html, /<select id="post-type"/);
+  assert.match(html, /\.category-chip input:focus-visible\+span/);
+});
+
+test('category auto-detection covers Korean and English inputs and leaves unknown reports unselected', async () => {
+  const cases = [
+    ['위클리.html', '', 'weekly'],
+    ['report.html', 'weekly', 'weekly'],
+    ['비정기.html', '', 'research'],
+    ['report.html', 'research', 'research'],
+    ['시장 공부.html', '', 'basics'],
+    ['report.html', 'market basics', 'basics'],
+    ['끄적.html', '', 'note'],
+    ['report.html', 'note', 'note'],
+    ['데일리.html', '', 'daily'],
+    ['주식리포트.html', '', 'daily'],
+    ['generic.html', 'no category evidence', '']
+  ];
+  for (const [name, text, expected] of cases) {
+    const { elements, categoryOptions } = await loadAdmin();
+    elements['html-file'].files = [{ name, size: 100, text: async () => `<!doctype html><title>Report</title>${text}` }];
+    await elements['html-file'].emit('change');
+    assert.equal(elements['post-type'].value, expected, name);
+    assert.equal(categoryOptions.find(option => option.checked)?.value || '', expected, name);
+    if (expected) assert.match(elements['category-status'].textContent, new RegExp(`자동 인식: .+직접 변경`));
+    else assert.match(elements['category-status'].textContent, /자동으로 판단하지 못했습니다/);
+  }
+});
+
+test('manual category override becomes the final publish FormData value', async () => {
+  const { elements, categoryOptions, submissions } = await loadAdmin({ confirmResult: true });
+  elements['admin-key'].value = 'test-key';
+  elements['html-file'].files = [{
+    name: '데일리.html',
+    size: 100,
+    text: async () => '<!doctype html><title>Daily report</title>'
+  }];
+  await elements['html-file'].emit('change');
+  assert.equal(elements['post-type'].value, 'daily');
+
+  const weekly = categoryOptions.find(option => option.value === 'weekly');
+  categoryOptions.find(option => option.value === 'daily').emit('keydown', { key: 'ArrowRight' });
+  assert.equal(elements['post-type'].value, 'weekly');
+  assert.equal(weekly.checked, true);
+  assert.equal(elements['category-status'].textContent, '직접 선택: 위클리');
+  assert.equal(elements['publish-btn'].disabled, false);
+
+  await elements['publish-btn'].emit('click');
+  assert.equal(submissions.length, 1);
+  assert.equal(submissions[0].entries.find(([name]) => name === 'type')?.[1], 'weekly');
+});
+
+test('publish remains disabled when category detection has no result', async () => {
+  const { elements, categoryOptions } = await loadAdmin();
+  elements['admin-key'].value = 'test-key';
+  elements['html-file'].files = [{
+    name: 'generic.html',
+    size: 100,
+    text: async () => '<!doctype html><title>Unclassified report</title>'
+  }];
+  await elements['html-file'].emit('change');
+  assert.equal(elements['post-type'].value, '');
+  assert.equal(categoryOptions.some(option => option.checked), false);
+  assert.equal(elements['publish-btn'].disabled, true);
 });
 
 test('valid cover selection renders client-only metadata and actual image dimensions', async () => {

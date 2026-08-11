@@ -66,6 +66,31 @@ test('homepage removes the introduction copy while preserving the carousel and l
   assert.match(html, /id="latest-category-cards"/);
 });
 
+test('homepage archive uses a responsive two-column index with dynamic category counts', async () => {
+  const [html, script, styles, posts] = await Promise.all([
+    read('index.html'),
+    read('assets/site.js'),
+    read('assets/home-v2.css'),
+    read('data/posts.json').then(JSON.parse)
+  ]);
+  assert.match(html, /class="archive-layout"/);
+  assert.match(html, /class="archive-index"/);
+  assert.match(html, /id="archive-index"/);
+  assert.match(html, /class="archive-about" href="\/about\/"/);
+  assert.match(script, /const counts=posts\.reduce/);
+  assert.match(script, /href="\?category=\$\{encodeURIComponent\(type\)\}"/);
+  assert.match(script, /counts\[type\]\|\|0/);
+  assert.match(script, /const subtitle=post\.subtitle\?/);
+  assert.match(styles, /\.archive-layout\{display:grid;grid-template-columns:minmax\(0,1fr\) minmax\(270px,300px\)/);
+  assert.match(styles, /@media\(max-width:960px\)\{\.archive-layout\{grid-template-columns:minmax\(0,1fr\)/);
+
+  const counts = posts.reduce((result, post) => {
+    result[post.type] = (result[post.type] || 0) + 1;
+    return result;
+  }, {});
+  assert.deepEqual(counts, { daily: 4, research: 1, weekly: 1 });
+});
+
 test('existing post metadata remains valid without coverImage', async () => {
   const posts = JSON.parse(await read('data/posts.json'));
   assert.ok(posts.length > 0);

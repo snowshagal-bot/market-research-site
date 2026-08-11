@@ -23,6 +23,7 @@
   const search = document.getElementById('search-input');
   const filters = Array.from(document.querySelectorAll('[data-filter]'));
   const navLinks = Array.from(document.querySelectorAll('[data-nav-category]'));
+  const archiveIndex = document.getElementById('archive-index');
   const params = new URLSearchParams(location.search);
   const requestedCategory = params.get('category') || 'all';
   let active = validTypes.includes(requestedCategory) ? requestedCategory : 'all';
@@ -180,6 +181,19 @@
     });
   }
 
+  function renderArchiveIndex(){
+    if(!archiveIndex) return;
+    const counts=posts.reduce((result,post)=>{
+      if(coreTypes.includes(post.type)||post.type==='note') result[post.type]=(result[post.type]||0)+1;
+      return result;
+    },{});
+    archiveIndex.innerHTML=[...coreTypes,'note'].map(type=>{
+      const info=categoryInfo(type);
+      const current=type===active;
+      return `<a class="archive-index-item" href="?category=${encodeURIComponent(type)}"${current?' aria-current="page"':''}><span class="archive-index-row"><strong>${esc(info.label)}</strong><b>${counts[type]||0}</b></span><span class="archive-index-description">${esc(info.description)}</span></a>`;
+    }).join('');
+  }
+
   function renderArchive(){
     const query=(search?.value||'').trim().toLowerCase();
     const filtered=posts.filter(post=>(active==='all'||post.type===active)&&(!query||`${post.title} ${post.subtitle||''} ${post.typeLabel||''} ${post.description||''}`.toLowerCase().includes(query)));
@@ -189,6 +203,7 @@
       button.setAttribute('aria-pressed',String(selected));
     });
     renderNavigation();
+    renderArchiveIndex();
     if(!filtered.length){
       const message=active==='basics'?'시장 공부 글이 아직 없습니다.':'조건에 맞는 글이 없습니다.';
       list.innerHTML=`<div class="empty">${message}</div>`;
@@ -196,7 +211,8 @@
     }
     list.innerHTML=filtered.map(post=>{
       const info=categoryInfo(post.type);
-      return `<a class="report-item" href="${esc(post.href)}"><div><span class="report-type ${esc(post.type)}">${esc(info.label)}</span><span class="report-date">${esc(reportDate(post))}</span></div><div><div class="report-title">${esc(post.title)}</div><div class="report-subtitle">${esc(post.subtitle||'')}</div></div><span class="report-arrow" aria-hidden="true">→</span></a>`;
+      const subtitle=post.subtitle?`<div class="report-subtitle">${esc(post.subtitle)}</div>`:'';
+      return `<a class="report-item" href="${esc(post.href)}"><div><span class="report-type ${esc(post.type)}">${esc(info.label)}</span><span class="report-date">${esc(reportDate(post))}</span></div><div><div class="report-title">${esc(post.title)}</div>${subtitle}</div><span class="report-arrow"><span class="report-read-label">읽기</span><span aria-hidden="true">→</span></span></a>`;
     }).join('');
   }
 

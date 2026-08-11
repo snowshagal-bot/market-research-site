@@ -57,6 +57,21 @@ The homepage v2 carousel is an editorial category overview, not a promotional ba
 - on mobile, place the cover before the text and preserve vertical scrolling while allowing deliberate horizontal swipe gestures;
 - respect `prefers-reduced-motion` and keep transitions subtle.
 
+## Homepage archive
+
+- on desktop, use a restrained two-column editorial layout: the recent-report list takes the flexible main column and a 270–300px category index sits alongside it;
+- calculate category counts from the loaded post data, including explicit zero counts, and reuse the existing `?category=` navigation;
+- keep report rows compact and omit empty subtitle markup so missing subtitles do not create artificial space;
+- at tablet and mobile widths, stack the recent reports first and the archive index second without horizontal overflow;
+- keep the index typographic and border-led rather than turning it into a dashboard or adding popularity metrics.
+
+## Admin category selection
+
+- the new-report page must show all five report categories at once using native radio semantics;
+- automatic type detection is an initial selection, not a lock: always allow a manual override and show whether the current state came from detection or direct selection;
+- an unclassified report remains unselected and cannot be published until the administrator chooses a category;
+- the submitted type values remain `daily`, `weekly`, `research`, `basics`, and `note`.
+
 ## Report isolation
 
 Uploaded reports are standalone documents and can contain global CSS rules. Do not assume their CSS is well-scoped.

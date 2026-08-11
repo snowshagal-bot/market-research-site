@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="assets/site.css">
 <link rel="stylesheet" href="assets/category-state.css">
 <link rel="stylesheet" href="assets/ui-polish.css?v=20260811-1">
-<link rel="stylesheet" href="assets/home-v2.css?v=20260811-1">
+<link rel="stylesheet" href="assets/home-v2.css?v=20260811-2">
 <script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
 </head>
 <body>
@@ -86,12 +86,19 @@
           <button class="filter" data-filter="note" aria-pressed="false">끄적끄적</button>
         </div>
       </div>
-      <div id="report-list" class="report-list"></div>
+      <div class="archive-layout">
+        <div id="report-list" class="report-list"></div>
+        <aside class="archive-index" aria-labelledby="archive-index-heading">
+          <h3 id="archive-index-heading">아카이브</h3>
+          <div id="archive-index" class="archive-index-list"></div>
+          <a class="archive-about" href="/about/">사이트 소개 <span aria-hidden="true">→</span></a>
+        </aside>
+      </div>
     </div>
   </section>
 </main>
 <footer class="footer"><div class="site-wrap footer-row"><span>Independent Market Research Archive</span><div class="footer-links" aria-label="사이트 링크"><a href="/about/">About</a></div></div></footer>
 <script src="data/posts.js"></script>
-<script src="assets/site.js?v=20260811-1"></script>
+<script src="assets/site.js?v=20260811-2"></script>
 </body>
 </html>
