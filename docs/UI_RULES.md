@@ -60,6 +60,8 @@ English report pages use the same isolated top bar with English category and com
 
 The homepage v2 carousel is an editorial category overview, not a promotional banner or chronological autoplay slider.
 
+- at 961px and wider, present the hero as an open editorial spread with a larger visual column, square edges, thin horizontal rules, and no card shadow;
+- keep the desktop copy and cover close to a 42:58 balance with an approximately 600px stage, while preserving the existing mobile-first card layout below 961px;
 - include the latest available post from each core category: daily, weekly, research, Market Basics;
 - do not autoplay;
 - keep previous/next buttons, category tabs, keyboard state, and current/total status accessible;
