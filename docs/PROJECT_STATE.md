@@ -34,7 +34,8 @@ Homepage v2 also provides:
 
 - manual previous/next and category-tab carousel controls with no autoplay
 - optional post cover images through `coverImage`
-- CSS/typographic fallback covers for all existing posts without `coverImage`
+- rendered 900×1350 WebP covers for the latest representative DAILY, WEEKLY, and RESEARCH posts
+- CSS/typographic fallback covers for posts without `coverImage`
 - full-width category-latest cards without a separate introduction copy block
 - the existing report archive, URL category filtering, and report-date sorting
 

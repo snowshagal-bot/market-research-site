@@ -6,21 +6,23 @@ This roadmap records implementation order, not a promise to build every future i
 
 ## Next action
 
-Review the homepage cleanup and empty About page shell Draft PR and its Cloudflare Pages Preview. Confirm the shared navigation, empty `/about/` shell, homepage card flow, and responsive header behavior before deciding whether to merge.
+Review the representative report cover Draft PR and its Cloudflare Pages Preview. Confirm the rendered DAILY, WEEKLY, and RESEARCH covers at 360px, 430px, and 1280px in both themes before deciding whether to merge.
 
 ## In progress
 
-### 4. Homepage cleanup and About page shell
+### 5. Representative report covers
 
 In the current Draft PR:
 
-- remove the homepage introduction copy while retaining full-width category-latest cards;
-- add `소개` to desktop, mobile, and shared report navigation;
-- add an empty noindex `/about/` page using the common site shell;
-- replace the footer placeholder with the real About link;
-- keep homepage-only JavaScript inactive on non-home static pages while preserving common theme and mobile-menu behavior.
+- render the existing first-screen designs of the latest DAILY, WEEKLY, and RESEARCH reports as static 900×1350 WebP covers;
+- connect only those three assets through synchronized `data/posts.json` and `data/posts.js` metadata;
+- preserve the CSS fallback for future posts without `coverImage` and leave the original report HTML unchanged.
 
 ## Completed
+
+### 4. Homepage cleanup and About page shell
+
+Squash-merged and deployed to Production on 2026-08-11. The homepage introduction copy was removed, full-width latest-category cards were retained, `소개` was added to public navigation, and the empty noindex `/about/` common shell was added without changing report content.
 
 ### 3. Homepage v2 editorial redesign
 
@@ -54,7 +56,7 @@ Validation and polish covered:
 
 ## Near-term priorities
 
-### 5. Improve publishing workflow only where friction appears
+### 6. Improve publishing workflow only where friction appears
 
 Current `/admin/` publishing already supports HTML parsing, metadata review, secure server-side publishing, deployment progress, and redirect.
 

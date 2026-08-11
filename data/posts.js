@@ -11,7 +11,8 @@ window.RESEARCH_POSTS = [
     "title": "멈춘 두 줄기,번지는 들판",
     "subtitle": "",
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
-    "href": "reports/8월 10일 주식리포트_커버통합.html"
+    "href": "reports/8월 10일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-08-10-daily-1evguss.webp"
   },
   {
     "id": "2026-08-09-sovereign-ai",
@@ -26,6 +27,7 @@ window.RESEARCH_POSTS = [
     "subtitle": "소버린 AI의 여러 얼굴",
     "description": "모델·컴퓨트·데이터·운영권 가운데 어느 층을 가져야 ‘우리 AI’가 되는지를 국가·기업 사례로 살펴본 비정기 리서치.",
     "href": "reports/비정기리서치_소버린AI_누가열쇠를쥐는가_2026.08.09_커버통합.html",
+    "coverImage": "covers/2026-08-09-sovereign-ai.webp",
     "featured": true
   },
   {
@@ -40,7 +42,8 @@ window.RESEARCH_POSTS = [
     "title": "8월 1주차 위클리 분석",
     "subtitle": "2026.08.03–08.07",
     "description": "지난주 시장을 복기하고 다음 주 변수와 주도 업종의 조건을 정리한 주간 리포트.",
-    "href": "reports/8월 1주차 위클리 분석.html"
+    "href": "reports/8월 1주차 위클리 분석.html",
+    "coverImage": "covers/2026-08-week1-weekly.webp"
   },
   {
     "id": "2026-08-07-daily",
