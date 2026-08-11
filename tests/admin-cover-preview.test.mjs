@@ -1,0 +1,221 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import test from 'node:test';
+import vm from 'node:vm';
+
+const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
+
+function createElement(id = '') {
+  const listeners = new Map();
+  const attributes = new Map();
+  return {
+    id,
+    value: '',
+    files: [],
+    hidden: false,
+    textContent: '',
+    innerHTML: '',
+    dataset: {},
+    classList: { add() {}, remove() {} },
+    addEventListener(type, handler) { listeners.set(type, handler); },
+    emit(type, event = {}) { return listeners.get(type)?.({ preventDefault() {}, ...event }); },
+    setAttribute(name, value) { attributes.set(name, String(value)); },
+    getAttribute(name) { return attributes.get(name); },
+    removeAttribute(name) { if (name === 'src') this.src = ''; attributes.delete(name); },
+    querySelector() { return null; },
+    appendChild() {},
+    click() {}
+  };
+}
+
+async function loadAdmin({ confirmResult = false } = {}) {
+  const source = await read('assets/admin.js');
+  const ids = [
+    'html-file', 'drop-zone', 'file-info', 'parse-status', 'preview-wrap', 'post-type',
+    'post-date', 'registered-date', 'post-title', 'post-subtitle', 'post-description',
+    'post-filename', 'cover-file', 'cover-info', 'cover-preview-canvas',
+    'cover-preview-image', 'cover-preview-empty', 'cover-preview-meta',
+    'cover-preview-name', 'cover-preview-dimensions', 'cover-preview-size',
+    'cover-preview-caption', 'cover-preview-note', 'admin-key', 'publish-btn', 'publish-overlay',
+    'publish-state-title', 'publish-state-text', 'publish-state-detail', 'publish-links',
+    'published-report-link', 'published-home-link'
+  ];
+  const elements = Object.fromEntries(ids.map(id => [id, createElement(id)]));
+  const themeButton = createElement('theme-toggle');
+  const themeMeta = createElement('theme-color');
+  const modeButtons = ['1280', '430', '360'].map(mode => {
+    const button = createElement(`mode-${mode}`);
+    button.dataset.coverPreviewMode = mode;
+    button.setAttribute('aria-pressed', String(mode === '1280'));
+    return button;
+  });
+  const windowListeners = new Map();
+  const createdUrls = [];
+  const revokedUrls = [];
+  const submissions = [];
+  class TestFormData {
+    entries = [];
+    append(...args) { this.entries.push(args); }
+  }
+  const context = {
+    console,
+    confirm: () => confirmResult,
+    fetch: async (url, options = {}) => {
+      if (url === '/api/publish') {
+        submissions.push(options.body);
+        return { ok: false, status: 500, json: async () => ({ message: 'test stop' }) };
+      }
+      return { ok: true, json: async () => [] };
+    },
+    FormData: TestFormData,
+    setTimeout() {},
+    location: { href: '' },
+    localStorage: { getItem: () => null, setItem() {} },
+    sessionStorage: { getItem: () => null, setItem() {} },
+    matchMedia: () => ({ matches: false, addEventListener() {} }),
+    DOMParser: class {
+      parseFromString() { return { title: '', querySelector: () => null }; }
+    },
+    URL: {
+      createObjectURL(file) {
+        const url = `blob:test-${createdUrls.length + 1}-${file.name}`;
+        createdUrls.push(url);
+        return url;
+      },
+      revokeObjectURL(url) { revokedUrls.push(url); }
+    },
+    document: {
+      documentElement: { dataset: {} },
+      getElementById: id => elements[id],
+      querySelector: selector => selector === '[data-theme-toggle]' ? themeButton : selector === 'meta[name="theme-color"]' ? themeMeta : null,
+      querySelectorAll: selector => selector === '[data-cover-preview-mode]' ? modeButtons : [],
+      createElement: tag => createElement(tag)
+    },
+    window: {
+      addEventListener(type, handler) { windowListeners.set(type, handler); }
+    }
+  };
+  vm.runInNewContext(source, context);
+  return { elements, modeButtons, createdUrls, revokedUrls, windowListeners, submissions };
+}
+
+const validCover = (name = 'cover.webp') => ({ name, type: 'image/webp', size: 320 * 1024 });
+
+test('admin markup contains the cover preview modes before the original HTML preview', async () => {
+  const html = await read('admin/index.html');
+  assert.match(html, /3\. 홈페이지 커버 미리보기/);
+  assert.match(html, /4\. 원본 HTML 미리보기/);
+  assert.ok(html.indexOf('3. 홈페이지 커버 미리보기') < html.indexOf('4. 원본 HTML 미리보기'));
+  assert.equal((html.match(/data-cover-preview-mode="(?:1280|430|360)"/g) || []).length, 3);
+  assert.match(html, /data-cover-preview-mode="1280" aria-pressed="true"/);
+  assert.match(html, /대표 커버를 선택하면 홈페이지에서 보이는 영역을 확인할 수 있습니다/);
+  assert.match(html, /\.cover-preview-empty\[hidden\],[^}]*\{display:none\}/);
+});
+
+test('valid cover selection renders client-only metadata and actual image dimensions', async () => {
+  const { elements, createdUrls } = await loadAdmin();
+  elements['cover-file'].files = [validCover('portrait.webp')];
+  elements['cover-file'].emit('change');
+  assert.equal(createdUrls.length, 1);
+  assert.equal(elements['cover-preview-image'].src, createdUrls[0]);
+  assert.equal(elements['cover-preview-image'].hidden, false);
+  assert.equal(elements['cover-preview-name'].textContent, 'portrait.webp');
+  assert.equal(elements['cover-preview-size'].textContent, '320.0 KB');
+  elements['cover-preview-image'].naturalWidth = 900;
+  elements['cover-preview-image'].naturalHeight = 1350;
+  elements['cover-preview-image'].onload();
+  assert.equal(elements['cover-preview-dimensions'].textContent, '900 × 1350px');
+  assert.equal(elements['cover-preview-meta'].hidden, false);
+  assert.equal(elements['cover-preview-note'].textContent, '선택한 커버가 홈페이지에 사용됩니다.');
+  assert.doesNotMatch(elements['cover-preview-note'].textContent, /커버 미선택/);
+});
+
+test('image load failure removes the selected cover and returns to the fallback state', async () => {
+  const { elements, createdUrls, revokedUrls } = await loadAdmin();
+  elements['cover-file'].files = [validCover('broken.webp')];
+  elements['cover-file'].emit('change');
+  elements['cover-preview-image'].onerror();
+  assert.equal(elements['cover-file'].value, '');
+  assert.deepEqual(revokedUrls, createdUrls);
+  assert.equal(elements['cover-preview-image'].hidden, true);
+  assert.equal(elements['cover-preview-meta'].hidden, true);
+  assert.match(elements['cover-info'].textContent, /이미지를 읽을 수 없습니다/);
+  assert.match(elements['cover-preview-note'].textContent, /커버 미선택/);
+});
+
+test('image load failure omits the cover from the publish FormData', async () => {
+  const { elements, submissions } = await loadAdmin({ confirmResult: true });
+  elements['cover-file'].files = [validCover('broken.webp')];
+  elements['cover-file'].emit('change');
+  elements['cover-preview-image'].onerror();
+
+  elements['admin-key'].value = 'test-key';
+  elements['html-file'].files = [{
+    name: '데일리.html',
+    size: 100,
+    text: async () => '<!doctype html><title>Daily report</title>'
+  }];
+  await elements['html-file'].emit('change');
+  assert.equal(elements['publish-btn'].disabled, false);
+  await elements['publish-btn'].emit('click');
+
+  assert.equal(submissions.length, 1);
+  const fieldNames = submissions[0].entries.map(([name]) => name);
+  assert.ok(fieldNames.includes('file'));
+  assert.ok(!fieldNames.includes('cover'));
+});
+
+test('invalid MIME-extension pairs and covers over 4MB clear the preview', async () => {
+  for (const file of [
+    { name: 'cover.png', type: 'image/webp', size: 100 },
+    { name: 'cover.webp', type: 'image/webp', size: 4 * 1024 * 1024 + 1 }
+  ]) {
+    const { elements, createdUrls } = await loadAdmin();
+    elements['cover-file'].files = [file];
+    elements['cover-file'].emit('change');
+    assert.equal(createdUrls.length, 0);
+    assert.equal(elements['cover-file'].value, '');
+    assert.equal(elements['cover-preview-image'].hidden, true);
+    assert.equal(elements['cover-preview-meta'].hidden, true);
+  }
+});
+
+test('cover object URLs are revoked on replacement, reset, and page exit', async () => {
+  const { elements, createdUrls, revokedUrls, windowListeners } = await loadAdmin();
+  elements['cover-file'].files = [validCover('first.webp')];
+  elements['cover-file'].emit('change');
+  elements['cover-file'].files = [validCover('second.webp')];
+  elements['cover-file'].emit('change');
+  assert.deepEqual(revokedUrls, [createdUrls[0]]);
+  elements['cover-file'].files = [];
+  elements['cover-file'].emit('change');
+  assert.deepEqual(revokedUrls, [createdUrls[0], createdUrls[1]]);
+  elements['cover-file'].files = [validCover('third.webp')];
+  elements['cover-file'].emit('change');
+  windowListeners.get('pagehide')();
+  assert.deepEqual(revokedUrls, createdUrls);
+});
+
+test('preview modes use buttons with aria-pressed and match homepage cover cropping', async () => {
+  const [html, homepageStyles] = await Promise.all([read('admin/index.html'), read('assets/home-v2.css')]);
+  const { elements, modeButtons } = await loadAdmin();
+  modeButtons[1].emit('click');
+  assert.equal(elements['cover-preview-canvas'].dataset.coverMode, '430');
+  assert.equal(modeButtons[1].getAttribute('aria-pressed'), 'true');
+  assert.equal(modeButtons[0].getAttribute('aria-pressed'), 'false');
+  assert.match(html, /\.cover-preview-canvas img\{[^}]*object-fit:cover;object-position:center top/);
+  assert.match(homepageStyles, /\.carousel-cover>img\{object-position:center top\}/);
+  assert.match(html, /--cover-preview-ratio:485 \/ 481/);
+  assert.match(html, /--cover-preview-ratio:382 \/ 311/);
+  assert.match(html, /--cover-preview-ratio:312 \/ 231/);
+});
+
+test('cover preview keeps the optional publish payload and server publisher unchanged in scope', async () => {
+  const [adminScript, publishScript] = await Promise.all([
+    read('assets/admin.js'),
+    read('functions/api/publish.js')
+  ]);
+  assert.match(adminScript, /if \(selectedCover\) form\.append\('cover', selectedCover, selectedCover\.name\)/);
+  assert.match(adminScript, /const ready = selectedFile && type\.value/);
+  assert.doesNotMatch(publishScript, /cover-preview|createObjectURL|revokeObjectURL/);
+});

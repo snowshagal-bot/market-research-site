@@ -6,19 +6,24 @@ This roadmap records implementation order, not a promise to build every future i
 
 ## Next action
 
-Review the representative report cover Draft PR and its Cloudflare Pages Preview. Confirm the rendered DAILY, WEEKLY, and RESEARCH covers at 360px, 430px, and 1280px in both themes before deciding whether to merge.
+Review the admin cover-preview Draft PR and its Cloudflare Pages Preview. Confirm the local-only cover crop preview, responsive admin layout, and unchanged publish path before deciding whether to merge.
 
 ## In progress
 
-### 5. Representative report covers
+### 6. Admin cover preview
 
 In the current Draft PR:
 
-- render the existing first-screen designs of the latest DAILY, WEEKLY, and RESEARCH reports as static 900×1350 WebP covers;
-- connect only those three assets through synchronized `data/posts.json` and `data/posts.js` metadata;
-- preserve the CSS fallback for future posts without `coverImage` and leave the original report HTML unchanged.
+- show the selected optional cover in the same `cover` / `center top` crop used by the homepage;
+- provide accessible PC 1280, mobile 430, and mobile 360 preview modes;
+- keep the image local until the existing publish action and release temporary object URLs when they are no longer needed;
+- preserve the existing cover validation, optional no-cover path, publisher API, metadata structure, and report HTML.
 
 ## Completed
+
+### 5. Representative report covers
+
+Squash-merged and deployed to Production on 2026-08-11. The latest representative DAILY, WEEKLY, and RESEARCH posts use rendered 900×1350 WebP covers, synchronized metadata, and the existing homepage crop while the fallback remains available for posts without a cover.
 
 ### 4. Homepage cleanup and About page shell
 

@@ -46,12 +46,13 @@ Admin page: `/admin/`
 1. User drops a standalone HTML report into the admin page.
 2. `assets/admin.js` reads the file locally and attempts to infer category, report date, title, and subtitle.
 3. Title extraction prefers report metadata/HTML content such as `meta[name="report-title"]`, `h1`, cover title, generic title class, and finally document title/file name.
-4. User can review/edit the extracted publishing metadata before publishing.
-5. `/api/publish` authenticates with `ADMIN_KEY` and uses `GITHUB_TOKEN` server-side.
-6. An optional JPG/PNG/WebP cover image can be reviewed and uploaded separately from the report HTML.
-7. A single Git commit updates the report HTML, optional `covers/` asset, `data/posts.json`, and `data/posts.js`.
-8. Cloudflare Pages automatically deploys the new Git commit.
-9. Admin UI polls `data/posts.json` until the new post appears, then shows completion and redirects to the relevant category.
+4. An optional cover can be reviewed locally with the homepage's actual `cover` / `center top` crop at PC 1280, mobile 430, and mobile 360 before publishing. The preview uses a temporary browser object URL and does not upload the image.
+5. User can review/edit the extracted publishing metadata before publishing.
+6. `/api/publish` authenticates with `ADMIN_KEY` and uses `GITHUB_TOKEN` server-side.
+7. An optional JPG/PNG/WebP cover image can be uploaded separately from the report HTML.
+8. A single Git commit updates the report HTML, optional `covers/` asset, `data/posts.json`, and `data/posts.js`.
+9. Cloudflare Pages automatically deploys the new Git commit.
+10. Admin UI polls `data/posts.json` until the new post appears, then shows completion and redirects to the relevant category.
 
 Important date semantics:
 
@@ -134,7 +135,7 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `data/posts.json` — canonical post metadata used by publishing flow and deployment checks
 - `data/posts.js` — browser-consumable post data
 - `admin/index.html` — report publishing admin UI
-- `assets/admin.js` — local HTML parsing, publish flow, deployment polling
+- `assets/admin.js` — local HTML parsing, client-only cover crop preview, publish flow, deployment polling
 - `functions/api/publish.js` — authenticated server-side publisher using GitHub API
 - `functions/_middleware.js` — injects shared report shell into `/reports/` HTML
 - `assets/report-shell.js` — isolated navigation + comments UI for report pages
