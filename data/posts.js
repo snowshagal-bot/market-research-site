@@ -1,5 +1,19 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-11-daily-12vx8a7",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "date": "2026-08-11",
+    "reportDate": "2026-08-11",
+    "registeredDate": "2026-08-11",
+    "registeredAt": "2026-08-11T10:06:02.296Z",
+    "legacyImport": false,
+    "title": "한 척이끌고 간 바다",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "href": "reports/8월 11일 주식리포트_커버통합.html"
+  },
+  {
     "id": "2026-08-10-daily-1evguss",
     "type": "daily",
     "typeLabel": "주식 리포트",
