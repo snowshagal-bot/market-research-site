@@ -1,6 +1,7 @@
 const OWNER = 'snowshagal-bot';
 const REPO = 'market-research-site';
 const BRANCH = 'main';
+const PRODUCTION_HOSTNAME = 'market-research-site.pages.dev';
 const API_VERSION = '2026-03-10';
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const MAX_COVER_BYTES = 4 * 1024 * 1024;
@@ -12,6 +13,17 @@ const TYPE_LABELS = {
   basics: '시장 공부',
   note: '끄적끄적'
 };
+const EN_TYPE_LABELS = {
+  daily: 'Daily',
+  weekly: 'Weekly',
+  research: 'Research',
+  basics: 'Market Basics',
+  note: 'Notes'
+};
+
+function typeLabel(type, lang) {
+  return lang === 'en' ? EN_TYPE_LABELS[type] : TYPE_LABELS[type];
+}
 
 function reply(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -128,6 +140,10 @@ async function gh(token, path, options = {}) {
 export async function onRequestPost(context) {
   const { request, env } = context;
 
+  if (new URL(request.url).hostname !== PRODUCTION_HOSTNAME) {
+    return reply({ error: 'PREVIEW_READ_ONLY', message: 'Preview와 로컬 환경에서는 게시할 수 없습니다.' }, 403);
+  }
+
   if (!env.GITHUB_TOKEN || !env.ADMIN_KEY) {
     return reply({
       error: 'SERVER_NOT_CONFIGURED',
@@ -150,6 +166,8 @@ export async function onRequestPost(context) {
   const file = form.get('file');
   const cover = form.get('cover');
   const type = String(form.get('type') || '').trim();
+  const lang = String(form.get('lang') || '').trim();
+  const translationGroup = String(form.get('translationGroup') || '').trim();
   const reportDate = String(form.get('reportDate') || '').trim();
   const title = String(form.get('title') || '').trim().slice(0, 180);
   const subtitle = String(form.get('subtitle') || '').trim().slice(0, 240);
@@ -158,6 +176,10 @@ export async function onRequestPost(context) {
 
   if (!file || typeof file.text !== 'function') return reply({ error: 'NO_FILE', message: 'HTML 파일이 없습니다.' }, 400);
   if (!TYPE_LABELS[type]) return reply({ error: 'BAD_TYPE', message: '카테고리를 확인하세요.' }, 400);
+  if (!['ko', 'en'].includes(lang)) return reply({ error: 'BAD_LANG', message: '언어는 ko 또는 en이어야 합니다.' }, 400);
+  if (translationGroup && (!/^[A-Za-z0-9._:-]+$/.test(translationGroup) || translationGroup.length > 180)) {
+    return reply({ error: 'BAD_TRANSLATION_GROUP', message: '번역 연결 정보를 확인하세요.' }, 400);
+  }
   if (!/^20\d{2}-\d{2}-\d{2}$/.test(reportDate)) return reply({ error: 'BAD_DATE', message: '리포트 기준일을 확인하세요.' }, 400);
   if (!title) return reply({ error: 'NO_TITLE', message: '제목을 입력하세요.' }, 400);
   if (Number(file.size || 0) > MAX_FILE_BYTES) return reply({ error: 'FILE_TOO_LARGE', message: '현재 게시기는 5MB 이하 HTML 파일만 지원합니다.' }, 413);
@@ -173,7 +195,7 @@ export async function onRequestPost(context) {
   }
 
   const token = env.GITHUB_TOKEN;
-  const reportPath = `reports/${filename}`;
+  const reportPath = lang === 'en' ? `reports/en/${filename}` : `reports/${filename}`;
   const href = reportPath;
   const now = new Date();
   const registeredAt = now.toISOString();
@@ -189,12 +211,13 @@ export async function onRequestPost(context) {
       return reply({ error: 'DUPLICATE', message: '같은 파일명의 리포트가 이미 등록되어 있습니다. 파일명을 확인하세요.' }, 409);
     }
 
-    const id = `${reportDate}-${type}-${simpleHash(`${filename}|${title}|${reportDate}`)}`;
+    const id = `${reportDate}-${type}-${simpleHash(`${lang}|${filename}|${title}|${reportDate}`)}`;
     const coverPath = hasCover ? `covers/${id}.${coverExt}` : null;
     const post = {
       id,
       type,
-      typeLabel: TYPE_LABELS[type],
+      typeLabel: typeLabel(type, lang),
+      lang,
       date: reportDate,
       reportDate,
       registeredDate,
@@ -204,6 +227,7 @@ export async function onRequestPost(context) {
       subtitle,
       description,
       href,
+      ...(translationGroup ? { translationGroup } : {}),
       ...(coverPath ? { coverImage: coverPath } : {})
     };
 
@@ -252,7 +276,7 @@ export async function onRequestPost(context) {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        message: `Publish ${reportDate} ${TYPE_LABELS[type]}: ${title}`,
+        message: `Publish ${reportDate} ${typeLabel(type, lang)}: ${title}`,
         tree: tree.sha,
         parents: [parentSha]
       })
@@ -272,6 +296,8 @@ export async function onRequestPost(context) {
       registeredAt,
       reportUrl: `/${href.split('/').map(encodeURIComponent).join('/')}`,
       coverImage: coverPath,
+      lang,
+      translationGroup: translationGroup || null,
       commitSha: commit.sha
     });
   } catch (err) {

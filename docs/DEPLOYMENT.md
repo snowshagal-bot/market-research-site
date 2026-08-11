@@ -1,6 +1,6 @@
 # Deployment and environment
 
-Updated: 2026-08-09
+Updated: 2026-08-12
 
 ## GitHub
 
@@ -70,6 +70,10 @@ For `/admin/` publishing to work, production needs:
 - Cloudflare Pages Git integration operational
 
 The publisher writes the report HTML, optional cover image, and both post data files in one Git tree/commit to reduce partial publication states. Cover images are limited to JPG, PNG, or WebP files up to 4MB and are stored separately under `covers/`; original files under `reports/` are not modified to embed the cover.
+
+Publishing accepts only `lang=ko|en`. Korean reports retain the existing `reports/` layout, while English reports are stored below `reports/en/`. Optional translation relationships are stored as `translationGroup` metadata in both synchronized post data files. Legacy records without `lang` remain Korean and are not bulk-rewritten.
+
+Both `/api/publish` and `/api/manage` reject mutation requests unless the request hostname is exactly `market-research-site.pages.dev`; Preview and local validation must never perform a real publish, update, or delete.
 
 `/api/manage` uses the same secrets and repository permissions. It reads `data/posts.json` from the exact current `main` commit, creates one commit containing all requested metadata/report/cover changes, rechecks the branch ref, and updates it with `force: false`. If `main` moves during the operation, the API returns HTTP 409 and the administrator must refresh before retrying. Delete operations are limited to canonical paths under `reports/` and `covers/`.
 

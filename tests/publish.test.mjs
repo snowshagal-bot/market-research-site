@@ -33,7 +33,7 @@ function githubMock(existingPosts = []) {
   return calls;
 }
 
-function publishRequest({ type = 'daily', cover = null } = {}) {
+function publishRequest({ type = 'daily', cover = null, lang = 'ko', translationGroup = '' } = {}, url = 'https://market-research-site.pages.dev/api/publish') {
   const form = new FormData();
   form.append('file', new File(['<!doctype html><html><body>report</body></html>'], 'report.html', { type: 'text/html' }));
   form.append('type', type);
@@ -42,8 +42,10 @@ function publishRequest({ type = 'daily', cover = null } = {}) {
   form.append('subtitle', '테스트 부제');
   form.append('description', '테스트 설명');
   form.append('filename', `${type}-report.html`);
+  form.append('lang', lang);
+  if (translationGroup) form.append('translationGroup', translationGroup);
   if (cover) form.append('cover', cover, cover.name);
-  return new Request('https://example.test/api/publish', {
+  return new Request(url, {
     method: 'POST',
     headers: { 'x-admin-key': ADMIN_KEY },
     body: form
@@ -54,6 +56,30 @@ async function runPublish(options = {}) {
   const response = await onRequestPost({ request: publishRequest(options), env: { GITHUB_TOKEN: 'token', ADMIN_KEY } });
   return { response, data: await response.json() };
 }
+
+test('Preview and local publish requests are rejected before GitHub access', async () => {
+  for (const url of ['https://branch.market-research-site.pages.dev/api/publish', 'http://localhost:8788/api/publish']) {
+    const calls = githubMock();
+    try {
+      const response = await onRequestPost({ request: publishRequest({}, url), env: { GITHUB_TOKEN: 'token', ADMIN_KEY } });
+      assert.equal(response.status, 403);
+      assert.equal((await response.json()).error, 'PREVIEW_READ_ONLY');
+      assert.equal(calls.length, 0);
+    } finally { globalThis.fetch = originalFetch; }
+  }
+});
+
+test('publish validates language before GitHub access', async () => {
+  for (const lang of ['', 'ja', 'english']) {
+    const calls = githubMock();
+    try {
+      const { response, data } = await runPublish({ lang });
+      assert.equal(response.status, 400);
+      assert.equal(data.error, 'BAD_LANG');
+      assert.equal(calls.length, 0);
+    } finally { globalThis.fetch = originalFetch; }
+  }
+});
 
 test('publishing without a cover preserves existing records and omits coverImage', async () => {
   const existing = [{ id: 'legacy', href: 'reports/old.html', type: 'daily', title: 'Old report' }];
@@ -94,6 +120,23 @@ test('publishing Market Basics with a cover stores a binary blob and coverImage 
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+test('English reports are stored under reports/en with language and translation metadata', async () => {
+  const calls = githubMock([{ id: 'ko-source', href: 'reports/source.html', type: 'weekly', title: '원문' }]);
+  try {
+    const { response, data } = await runPublish({ type: 'weekly', lang: 'en', translationGroup: 'ko-source' });
+    assert.equal(response.status, 200);
+    assert.equal(data.lang, 'en');
+    assert.equal(data.translationGroup, 'ko-source');
+    const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+    assert.ok(tree.some(entry => entry.path === 'reports/en/weekly-report.html'));
+    const post = JSON.parse(tree.find(entry => entry.path === 'data/posts.json').content).find(item => item.id === data.id);
+    assert.equal(post.lang, 'en');
+    assert.equal(post.translationGroup, 'ko-source');
+    assert.equal(post.href, 'reports/en/weekly-report.html');
+    assert.equal(post.typeLabel, 'Weekly');
+  } finally { globalThis.fetch = originalFetch; }
 });
 
 test('unsupported and oversized cover files are rejected before GitHub writes', async () => {

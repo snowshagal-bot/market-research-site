@@ -1,6 +1,20 @@
 (() => {
   const scriptEl = document.currentScript;
   const active = scriptEl?.dataset.category || '';
+  const locale = scriptEl?.dataset.lang === 'en' || /^\/reports\/en\//i.test(location.pathname) ? 'en' : 'ko';
+  const targetLocale = locale === 'en' ? 'ko' : 'en';
+  const localeApi = window.MARKET_LOCALE;
+  const copy = locale === 'en' ? {
+    navLabel: 'Report site menu', home: '← Home', daily: 'Daily', weekly: 'Weekly', research: 'Research', basics: 'Market Basics', note: 'Notes', about: 'About', switchLabel: 'Read in Korean', switchText: 'KO',
+    comments: 'Comments', write: 'Write a comment', close: 'Close', nickname: 'Nickname', password: 'Deletion password', body: 'Write a comment.', website: 'Website', noteText: 'No account required · The password is used only for deletion.', submit: 'Post comment', loading: 'Loading comments…', empty: 'No comments yet.', delete: 'Delete',
+    loadError: 'Could not load comments.', dbTitle: 'Comments are being prepared', dbText: 'Comments will be available after the database is connected.', retry: 'Please try again later.', posting: 'Posting…', postError: 'Could not post the comment.', posted: 'Comment posted.', deletePrompt: 'Enter the deletion password.', deleteError: 'Could not delete the comment.'
+  } : {
+    navLabel: '리포트 사이트 메뉴', home: '← 홈', daily: '데일리', weekly: '위클리', research: '비정기', basics: '시장 공부', note: '끄적끄적', about: '소개', switchLabel: '영어로 읽기', switchText: 'EN',
+    comments: '댓글', write: '댓글 쓰기', close: '닫기', nickname: '닉네임', password: '삭제용 비밀번호', body: '댓글을 입력하세요.', website: '웹사이트', noteText: '회원가입 없이 작성 · 비밀번호는 삭제할 때만 사용됩니다.', submit: '댓글 등록', loading: '댓글을 불러오는 중…', empty: '아직 댓글이 없습니다.', delete: '삭제',
+    loadError: '댓글을 불러오지 못했습니다.', dbTitle: '댓글 기능 준비 중', dbText: '데이터베이스 연결 후 사용할 수 있습니다.', retry: '잠시 후 다시 시도해주세요.', posting: '등록 중…', postError: '댓글을 등록하지 못했습니다.', posted: '댓글이 등록되었습니다.', deletePrompt: '댓글 삭제 비밀번호를 입력하세요.', deleteError: '댓글을 삭제하지 못했습니다.'
+  };
+  const homePath = locale === 'en' ? '/en/' : '/';
+  const aboutPath = locale === 'en' ? '/en/about/' : '/about/';
   const BAR_H = 52;
   const themeMedia = matchMedia('(prefers-color-scheme: dark)');
   const shellHosts = [];
@@ -55,23 +69,43 @@
     const root = host.attachShadow({ mode: 'open' });
     root.innerHTML = `
       <style>
-        :host{all:initial}*{box-sizing:border-box}.bar{width:100%;height:52px;background:rgba(247,243,235,.97);border-bottom:1px solid #d8d0c2;box-shadow:0 1px 8px rgba(20,24,21,.05);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);font-family:Inter,Pretendard,'Noto Sans KR','Apple SD Gothic Neo',system-ui,-apple-system,sans-serif}.inner{width:min(1180px,100%);height:100%;margin:0 auto;padding:0 22px;display:flex;align-items:center;gap:6px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}.inner::-webkit-scrollbar{display:none}a{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 12px;border-radius:999px;color:#535850;text-decoration:none;white-space:nowrap;font-size:13px;line-height:1;font-weight:700;letter-spacing:-.015em;border:1px solid transparent;transition:background .15s ease,color .15s ease,border-color .15s ease;cursor:pointer}a:hover{background:#ebe5da;color:#1f2420}.home{color:#1f2420;font-weight:850}.active{background:#222622;color:#fff;border-color:#222622}.active:hover{background:#222622;color:#fff}.divider{width:1px;height:20px;background:#d8d0c2;flex:0 0 auto;margin:0 3px}.brand{margin-left:auto;font-size:11px;font-weight:800;letter-spacing:.12em;color:#8a877f;white-space:nowrap}@media(max-width:680px){.inner{width:100%;margin:0;padding:0 8px;gap:2px}a{min-height:32px;padding:0 10px;font-size:12px}.divider{margin:0 1px}.brand{display:none}}
+        :host{all:initial}*{box-sizing:border-box}.bar{width:100%;height:52px;background:rgba(247,243,235,.97);border-bottom:1px solid #d8d0c2;box-shadow:0 1px 8px rgba(20,24,21,.05);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);font-family:Inter,Pretendard,'Noto Sans KR','Apple SD Gothic Neo',system-ui,-apple-system,sans-serif}.inner{width:min(1180px,100%);height:100%;margin:0 auto;padding:0 22px;display:flex;align-items:center;gap:6px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}.inner::-webkit-scrollbar{display:none}a{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 12px;border-radius:999px;color:#535850;text-decoration:none;white-space:nowrap;font-size:13px;line-height:1;font-weight:700;letter-spacing:-.015em;border:1px solid transparent;transition:background .15s ease,color .15s ease,border-color .15s ease;cursor:pointer}a:hover{background:#ebe5da;color:#1f2420}.home{color:#1f2420;font-weight:850}.language{font-size:11px;font-weight:850;letter-spacing:.06em}.active{background:#222622;color:#fff;border-color:#222622}.active:hover{background:#222622;color:#fff}.divider{width:1px;height:20px;background:#d8d0c2;flex:0 0 auto;margin:0 3px}.brand{margin-left:auto;font-size:11px;font-weight:800;letter-spacing:.12em;color:#8a877f;white-space:nowrap}@media(max-width:680px){.inner{width:100%;margin:0;padding:0 8px;gap:2px}a{min-height:32px;padding:0 10px;font-size:12px}.divider{margin:0 1px}.brand{display:none}}
       </style>
       <style>
         :host{--shell-bg:rgba(247,243,235,.97);--shell-panel:#ebe5da;--shell-text:#1f2420;--shell-text-2:#535850;--shell-muted:#666c67;--shell-line:#d8d0c2;--shell-active:#222622;--shell-active-text:#fff;--shell-focus:#344b40}
         :host([data-theme="dark"]){--shell-bg:rgba(28,31,28,.97);--shell-panel:#222622;--shell-text:#edf0ec;--shell-text-2:#b9c0ba;--shell-muted:#aab1aa;--shell-line:#3b423c;--shell-active:#edf0ec;--shell-active-text:#161816;--shell-focus:#a8c1b1}
         .bar{background:var(--shell-bg);border-bottom-color:var(--shell-line)}a{color:var(--shell-text-2)}a:hover{background:var(--shell-panel);color:var(--shell-text)}.home{color:var(--shell-text)}.active,.active:hover{background:var(--shell-active);color:var(--shell-active-text);border-color:var(--shell-active)}.divider{background:var(--shell-line)}.brand{color:var(--shell-muted)}a:focus-visible{outline:2px solid var(--shell-focus);outline-offset:2px}
       </style>
-      <nav class="bar" aria-label="리포트 사이트 메뉴"><div class="inner">
-        <a class="home" href="/">← 홈</a><span class="divider" aria-hidden="true"></span>
-        <a class="${active === 'daily' ? 'active' : ''}" ${active === 'daily' ? 'aria-current="true"' : ''} href="/?category=daily">데일리</a>
-        <a class="${active === 'weekly' ? 'active' : ''}" ${active === 'weekly' ? 'aria-current="true"' : ''} href="/?category=weekly">위클리</a>
-        <a class="${active === 'research' ? 'active' : ''}" ${active === 'research' ? 'aria-current="true"' : ''} href="/?category=research">비정기</a>
-        <a class="${active === 'basics' ? 'active' : ''}" ${active === 'basics' ? 'aria-current="true"' : ''} href="/?category=basics">시장 공부</a>
-        <a class="${active === 'note' ? 'active' : ''}" ${active === 'note' ? 'aria-current="true"' : ''} href="/?category=note">끄적끄적</a>
-        <a href="/about/">소개</a>
+      <nav class="bar" aria-label="${copy.navLabel}"><div class="inner">
+        <a class="home" href="${homePath}">${copy.home}</a><span class="divider" aria-hidden="true"></span>
+        <a class="${active === 'daily' ? 'active' : ''}" ${active === 'daily' ? 'aria-current="true"' : ''} href="${homePath}?category=daily">${copy.daily}</a>
+        <a class="${active === 'weekly' ? 'active' : ''}" ${active === 'weekly' ? 'aria-current="true"' : ''} href="${homePath}?category=weekly">${copy.weekly}</a>
+        <a class="${active === 'research' ? 'active' : ''}" ${active === 'research' ? 'aria-current="true"' : ''} href="${homePath}?category=research">${copy.research}</a>
+        <a class="${active === 'basics' ? 'active' : ''}" ${active === 'basics' ? 'aria-current="true"' : ''} href="${homePath}?category=basics">${copy.basics}</a>
+        <a class="${active === 'note' ? 'active' : ''}" ${active === 'note' ? 'aria-current="true"' : ''} href="${homePath}?category=note">${copy.note}</a>
+        <a href="${aboutPath}">${copy.about}</a>
+        <a class="language" id="report-language-switch" href="${targetLocale === 'en' ? '/en/' : '/'}" aria-label="${copy.switchLabel}">${copy.switchText}</a>
         <span class="brand">MARKET RESEARCH</span>
       </div></nav>`;
+
+    const languageLink = root.getElementById('report-language-switch');
+    languageLink?.addEventListener('click', () => {
+      try { localStorage.setItem('site-language', targetLocale); } catch (_) {}
+    });
+    void resolveReportLanguageLink(languageLink);
+  }
+
+  async function resolveReportLanguageLink(link) {
+    if (!link || !localeApi) return;
+    const fallback = localeApi.homepagePath(targetLocale);
+    link.href = fallback;
+    try {
+      const response = await fetch(`/data/posts.json?langswitch=${Date.now()}`, { cache: 'no-store' });
+      if (!response.ok) return;
+      const posts = await response.json();
+      const counterpart = localeApi.findCounterpart(posts, location.pathname, targetLocale);
+      if (counterpart?.href) link.href = `/${String(counterpart.href).replace(/^\/+/, '')}`;
+    } catch (_) {}
   }
 
   function reportKey() {
@@ -84,7 +118,7 @@
 
     const host = document.createElement('section');
     host.id = 'mrs-comments-host';
-    host.setAttribute('aria-label', '댓글');
+    host.setAttribute('aria-label', copy.comments);
     shellHosts.push(host);
     applyShellTheme();
     const hostStyles = {
@@ -105,15 +139,15 @@
         .wrap{background:var(--comments-bg);color:var(--comments-text);border-top-color:var(--comments-line)}.head,.form{border-bottom-color:var(--comments-line)}.count,.note,.empty,.loading,.unavailable,.date,.delete{color:var(--comments-muted)}.compose-toggle,.input,.textarea{background:var(--comments-panel);color:var(--comments-text);border-color:var(--comments-line)}.input::placeholder,.textarea::placeholder{color:var(--comments-muted);opacity:1}.compose-toggle:hover{background:var(--comments-hover)}.input:focus,.textarea:focus{border-color:var(--comments-focus)}.submit{background:var(--comments-primary);color:var(--comments-primary-text)}.submit:hover{background:var(--comments-primary);filter:brightness(.92)}.status{color:var(--comments-status)}.comment{border-bottom-color:var(--comments-line)}.nickname{color:var(--comments-text)}.delete:hover{color:var(--comments-text)}.body,.unavailable b{color:var(--comments-text-2)}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--comments-focus);outline-offset:2px}
       </style>
       <div class="wrap"><div class="inner">
-        <div class="head"><h2>댓글</h2><div class="head-actions"><span class="count" id="count">0</span><button class="compose-toggle" id="compose-toggle" type="button" aria-expanded="false">댓글 쓰기</button></div></div>
+        <div class="head"><h2>${copy.comments}</h2><div class="head-actions"><span class="count" id="count">0</span><button class="compose-toggle" id="compose-toggle" type="button" aria-expanded="false">${copy.write}</button></div></div>
         <form class="form" id="comment-form">
-          <div class="fields"><input class="input" id="nickname" maxlength="20" placeholder="닉네임" aria-label="닉네임" autocomplete="nickname" required><input class="input" id="password" type="password" minlength="4" maxlength="64" placeholder="삭제용 비밀번호" aria-label="삭제용 비밀번호" autocomplete="new-password" required></div>
-          <textarea class="textarea" id="body" maxlength="1000" placeholder="댓글을 입력하세요." aria-label="댓글 내용" required></textarea>
-          <label class="hp" aria-hidden="true">웹사이트<input id="website" tabindex="-1" autocomplete="off"></label>
-          <div class="form-bottom"><span class="note">회원가입 없이 작성 · 비밀번호는 삭제할 때만 사용됩니다.</span><button class="submit" id="submit" type="submit">댓글 등록</button></div>
+          <div class="fields"><input class="input" id="nickname" maxlength="20" placeholder="${copy.nickname}" aria-label="${copy.nickname}" autocomplete="nickname" required><input class="input" id="password" type="password" minlength="4" maxlength="64" placeholder="${copy.password}" aria-label="${copy.password}" autocomplete="new-password" required></div>
+          <textarea class="textarea" id="body" maxlength="1000" placeholder="${copy.body}" aria-label="${copy.body}" required></textarea>
+          <label class="hp" aria-hidden="true">${copy.website}<input id="website" tabindex="-1" autocomplete="off"></label>
+          <div class="form-bottom"><span class="note">${copy.noteText}</span><button class="submit" id="submit" type="submit">${copy.submit}</button></div>
           <div class="status" id="status" aria-live="polite"></div>
         </form>
-        <div class="list" id="list"><div class="loading">댓글을 불러오는 중…</div></div>
+        <div class="list" id="list"><div class="loading">${copy.loading}</div></div>
       </div></div>`;
 
     const $ = id => root.getElementById(id);
@@ -140,7 +174,7 @@
       if (!isMobile()) return;
       form.classList.toggle('open', open);
       composeToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      composeToggle.textContent = open ? '닫기' : '댓글 쓰기';
+      composeToggle.textContent = open ? copy.close : copy.write;
       if (open && focus) setTimeout(() => nickname.focus(), 0);
     }
 
@@ -152,7 +186,7 @@
     function formatDate(value) {
       const d = new Date(value);
       if (Number.isNaN(d.getTime())) return '';
-      return new Intl.DateTimeFormat('ko-KR', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }).format(d);
+      return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'ko-KR', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }).format(d);
     }
 
     function render() {
@@ -161,7 +195,7 @@
       if (!comments.length) {
         const empty = document.createElement('div');
         empty.className = 'empty';
-        empty.textContent = '아직 댓글이 없습니다.';
+        empty.textContent = copy.empty;
         list.appendChild(empty);
         return;
       }
@@ -180,7 +214,7 @@
         const del = document.createElement('button');
         del.className = 'delete';
         del.type = 'button';
-        del.textContent = '삭제';
+        del.textContent = copy.delete;
         del.addEventListener('click', () => deleteComment(comment));
         const text = document.createElement('p');
         text.className = 'body';
@@ -195,7 +229,7 @@
       try {
         const res = await fetch('/api/comments?report=' + encodeURIComponent(key), { cache: 'no-store' });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw Object.assign(new Error(data.message || '댓글을 불러오지 못했습니다.'), { code: data.error });
+        if (!res.ok) throw Object.assign(new Error(locale === 'en' ? copy.loadError : (data.message || copy.loadError)), { code: data.error });
         comments = Array.isArray(data.comments) ? data.comments : [];
         render();
       } catch (err) {
@@ -203,9 +237,9 @@
         const box = document.createElement('div');
         box.className = 'unavailable';
         const b = document.createElement('b');
-        b.textContent = err.code === 'DB_NOT_CONFIGURED' ? '댓글 기능 준비 중' : '댓글을 불러오지 못했습니다.';
+        b.textContent = err.code === 'DB_NOT_CONFIGURED' ? copy.dbTitle : copy.loadError;
         const small = document.createElement('span');
-        small.textContent = err.code === 'DB_NOT_CONFIGURED' ? '데이터베이스 연결 후 사용할 수 있습니다.' : '잠시 후 다시 시도해주세요.';
+        small.textContent = err.code === 'DB_NOT_CONFIGURED' ? copy.dbText : copy.retry;
         box.append(b, small);
         list.appendChild(box);
         form.classList.add('disabled-form');
@@ -225,7 +259,7 @@
         website: website.value
       };
       submit.disabled = true;
-      submit.textContent = '등록 중…';
+      submit.textContent = copy.posting;
       status.textContent = '';
       try {
         const res = await fetch('/api/comments', {
@@ -234,24 +268,24 @@
           body: JSON.stringify(payload)
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.message || '댓글을 등록하지 못했습니다.');
+        if (!res.ok) throw new Error(locale === 'en' ? copy.postError : (data.message || copy.postError));
         if (data.comment) comments.push(data.comment);
         try { localStorage.setItem('mrs-comment-nickname', payload.nickname); } catch (_) {}
         body.value = '';
         password.value = '';
-        status.textContent = '댓글이 등록되었습니다.';
+        status.textContent = copy.posted;
         render();
         if (isMobile()) setComposer(false);
       } catch (err) {
-        status.textContent = err.message || '댓글 등록 중 오류가 발생했습니다.';
+        status.textContent = err.message || copy.postError;
       } finally {
         submit.disabled = false;
-        submit.textContent = '댓글 등록';
+        submit.textContent = copy.submit;
       }
     });
 
     async function deleteComment(comment) {
-      const pw = prompt('댓글 삭제 비밀번호를 입력하세요.');
+      const pw = prompt(copy.deletePrompt);
       if (pw === null) return;
       try {
         const res = await fetch('/api/comments', {
@@ -260,11 +294,11 @@
           body: JSON.stringify({ id: comment.id, report: key, password: pw })
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.message || '댓글을 삭제하지 못했습니다.');
+        if (!res.ok) throw new Error(locale === 'en' ? copy.deleteError : (data.message || copy.deleteError));
         comments = comments.filter(c => c.id !== comment.id);
         render();
       } catch (err) {
-        alert(err.message || '댓글 삭제 중 오류가 발생했습니다.');
+        alert(err.message || copy.deleteError);
       }
     }
 

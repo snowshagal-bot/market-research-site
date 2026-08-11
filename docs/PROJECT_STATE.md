@@ -1,6 +1,6 @@
 # Project state
 
-Updated: 2026-08-11
+Updated: 2026-08-12
 
 ## Purpose
 
@@ -17,6 +17,14 @@ Updated: 2026-08-11
 - No framework and no user membership system at present
 
 ## Public information architecture
+
+Locale structure:
+
+- Korean is the default at `/`; English uses `/en/` on the same domain.
+- `/about/` and `/en/about/` are matching locale shells.
+- the shared `assets/locale.js` treats posts without `lang` as Korean, filters homepage data by `ko` or `en`, preserves category queries across explicit language switches, and resolves optional `translationGroup` counterparts;
+- browser language never redirects visitors automatically; `site-language` is written only after an explicit KO/EN choice and is read only on `/` to restore an English choice while preserving `?category=`;
+- English can remain empty without mixing Korean posts into its carousel, latest cards, archive, counts, or search.
 
 Main categories:
 
@@ -46,14 +54,15 @@ Admin page: `/admin/`
 
 1. User drops a standalone HTML report into the admin page.
 2. `assets/admin.js` reads the file locally and attempts to infer category, report date, title, and subtitle. The five report categories remain visible as keyboard-accessible radio chips; automatic detection selects an initial value and the administrator can override it before publishing.
-3. Title extraction prefers report metadata/HTML content such as `meta[name="report-title"]`, `h1`, cover title, generic title class, and finally document title/file name.
-4. An optional cover can be reviewed locally with the homepage's actual `cover` / `center top` crop at PC 1280, mobile 430, and mobile 360 before publishing. The preview uses a temporary browser object URL and does not upload the image.
-5. User can review/edit the extracted publishing metadata before publishing.
-6. `/api/publish` authenticates with `ADMIN_KEY` and uses `GITHUB_TOKEN` server-side.
-7. An optional JPG/PNG/WebP cover image can be uploaded separately from the report HTML.
-8. A single Git commit updates the report HTML, optional `covers/` asset, `data/posts.json`, and `data/posts.js`.
-9. Cloudflare Pages automatically deploys the new Git commit.
-10. Admin UI polls `data/posts.json` until the new post appears, then shows completion and redirects to the relevant category.
+3. The administrator chooses Korean (default) or English and may optionally connect an opposite-language post as its translation pair.
+4. Title extraction prefers report metadata/HTML content such as `meta[name="report-title"]`, `h1`, cover title, generic title class, and finally document title/file name.
+5. An optional cover can be reviewed locally with the homepage's actual `cover` / `center top` crop at PC 1280, mobile 430, and mobile 360 before publishing. The preview uses a temporary browser object URL and does not upload the image.
+6. User can review/edit the extracted publishing metadata before publishing.
+7. `/api/publish` authenticates with `ADMIN_KEY` and uses `GITHUB_TOKEN` server-side. It accepts only `ko` or `en`; Korean reports keep `reports/`, while English reports are written under `reports/en/`.
+8. An optional JPG/PNG/WebP cover image can be uploaded separately from the report HTML.
+9. A single Git commit updates the report HTML, optional `covers/` asset, `data/posts.json`, and `data/posts.js`.
+10. Cloudflare Pages automatically deploys the new Git commit.
+11. Admin UI polls `data/posts.json` until the new post appears, then shows completion and redirects to the relevant locale/category.
 
 The publishing UI now warns before the final confirmation when no optional homepage cover is selected. Publishing without a cover remains supported and uses the homepage fallback cover.
 
@@ -64,6 +73,7 @@ Admin page: `/admin/manage/`
 The management page extends the existing static admin and GitHub-backed publishing architecture without introducing a CMS or database:
 
 - loads and sorts the canonical `data/posts.json` list, with title/URL search and category filters;
+- displays each post's language, treating legacy missing `lang` as Korean, and shows but does not edit `translationGroup`;
 - edits only category, report date, title, subtitle, and description while preserving post ID, public URL, registration fields, and legacy-import state;
 - optionally replaces standalone report HTML at its existing `reports/` path;
 - keeps, replaces, or removes the optional homepage cover with the same PC/mobile crop preview used by the homepage;
@@ -93,6 +103,8 @@ Files under `reports/` are standalone HTML documents that may contain their own 
 - fixed shared navigation bar
 - active category state
 - guest comment UI
+- Korean/English common navigation and comment copy based on the report locale
+- a KO/EN report switch that opens the matching `translationGroup` report when present and otherwise falls back to the target-language homepage
 - Shadow DOM isolation to reduce style collision with report HTML
 
 The shared navigation is fixed at the top and inserts spacing so it does not cover the original report. Public links are `데일리 / 위클리 / 비정기 / 시장 공부 / 끄적끄적 / 소개`.
@@ -154,6 +166,9 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `assets/home-v2.css` — homepage v2 carousel, fallback cover, and latest-card layout
 - `assets/category-state.css` — category state styles
 - `assets/site.js` — homepage category filtering, featured article, search, theme/menu behavior
+- `assets/locale.js` — shared locale copy, legacy-language normalization, filtering, URL, and translation-pair helpers
+- `assets/language.css` — restrained desktop/mobile language selector styling
+- `en/index.html` / `en/about/index.html` — English homepage and About shells
 - `data/posts.json` — canonical post metadata used by publishing flow and deployment checks
 - `data/posts.js` — browser-consumable post data
 - `admin/index.html` — report publishing admin UI

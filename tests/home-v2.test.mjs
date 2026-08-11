@@ -77,7 +77,7 @@ test('homepage archive uses a responsive two-column index with dynamic category 
   assert.match(html, /class="archive-index"/);
   assert.match(html, /id="archive-index"/);
   assert.match(html, /class="archive-about" href="\/about\/"/);
-  assert.match(script, /const counts=posts\.reduce/);
+  assert.match(script, /categoryCounts\(allPosts, locale/);
   assert.match(script, /archiveIndex\.innerHTML=\[\.\.\.coreTypes,'note'\]\.map/);
   assert.match(script, /href="\?category=\$\{encodeURIComponent\(type\)\}"/);
   assert.match(script, /counts\[type\]\|\|0/);

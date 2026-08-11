@@ -14,7 +14,8 @@ test('homepage desktop and mobile navigation link to the About page', async () =
 
 test('shared report shell links to the About page', async () => {
   const shell = await read('assets/report-shell.js');
-  assert.match(shell, /<a href="\/about\/">소개<\/a>/);
+  assert.match(shell, /const aboutPath = locale === 'en' \? '\/en\/about\/' : '\/about\/'/);
+  assert.match(shell, /href="\$\{aboutPath\}">\$\{copy\.about\}<\/a>/);
 });
 
 test('About page is an empty noindex shell with active navigation', async () => {
@@ -25,10 +26,21 @@ test('About page is an empty noindex shell with active navigation', async () => 
   assert.match(html, /<main class="static-page-main"><\/main>/);
   assert.match(html, /data-theme-toggle/);
   assert.match(html, /data-menu-toggle/);
-  assert.match(html, /src="\/assets\/site\.js\?v=20260811-1"/);
+  assert.match(html, /src="\/assets\/site\.js\?v=20260812-1"/);
   for (const placeholder of ['준비 중입니다', 'Lorem ipsum', '프로필', '연락처']) {
     assert.doesNotMatch(html, new RegExp(placeholder));
   }
+});
+
+test('English About page is a matching empty noindex shell', async () => {
+  const html = await read('en/about/index.html');
+  assert.match(html, /<html lang="en" data-site-lang="en">/);
+  assert.match(html, /<title>About · Market Research<\/title>/);
+  assert.match(html, /<meta name="robots" content="noindex,nofollow">/);
+  assert.equal((html.match(/href="\/en\/about\/" aria-current="page">About<\/a>/g) || []).length, 2);
+  assert.match(html, /<main class="static-page-main"><\/main>/);
+  assert.match(html, /data-language-choice="ko"/);
+  assert.match(html, /data-language-choice="en"/);
 });
 
 test('common site script exits before homepage-only initialization on static pages', async () => {

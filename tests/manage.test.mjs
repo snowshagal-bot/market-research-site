@@ -124,6 +124,26 @@ test('metadata update preserves immutable fields, keeps HTML, and synchronizes p
   } finally { globalThis.fetch = originalFetch; }
 });
 
+test('metadata update preserves lang and translationGroup without moving the report path', async () => {
+  const englishPost = {
+    ...basePost,
+    lang: 'en',
+    translationGroup: 'ko-source-post',
+    typeLabel: 'Daily',
+    href: 'reports/en/daily-report.html'
+  };
+  const calls = githubMock([englishPost]);
+  try {
+    const { response } = await run();
+    assert.equal(response.status, 200);
+    const updated = postsFromTree(treeFrom(calls))[0];
+    assert.equal(updated.lang, 'en');
+    assert.equal(updated.translationGroup, 'ko-source-post');
+    assert.equal(updated.href, englishPost.href);
+    assert.equal(updated.typeLabel, 'Weekly');
+  } finally { globalThis.fetch = originalFetch; }
+});
+
 test('optional HTML replacement keeps href and validates standalone HTML before GitHub access', async () => {
   const calls = githubMock();
   try {
