@@ -1,5 +1,19 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-11-basics-1e0xeuz",
+    "type": "basics",
+    "typeLabel": "시장 공부",
+    "date": "2026-08-11",
+    "reportDate": "2026-08-11",
+    "registeredDate": "2026-08-12",
+    "registeredAt": "2026-08-11T17:01:07.192Z",
+    "legacyImport": false,
+    "title": "주가는누가 움직이는가",
+    "subtitle": "",
+    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
+    "href": "reports/시장을읽는말들_1편_주가는누가움직이는가.html"
+  },
+  {
     "id": "2026-08-11-daily-12vx8a7",
     "type": "daily",
     "typeLabel": "주식 리포트",
