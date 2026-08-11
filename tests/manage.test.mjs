@@ -51,7 +51,7 @@ function githubMock(existingPosts = [basePost], { conflict = false } = {}) {
   return calls;
 }
 
-function manageRequest(fields = {}, key = ADMIN_KEY) {
+function manageRequest(fields = {}, key = ADMIN_KEY, url = 'https://market-research-site.pages.dev/api/manage') {
   const form = new FormData();
   for (const [name, value] of Object.entries({
     action: 'update',
@@ -67,11 +67,11 @@ function manageRequest(fields = {}, key = ADMIN_KEY) {
     if (value instanceof File) form.append(name, value, value.name);
     else if (value !== null && value !== undefined) form.append(name, String(value));
   }
-  return new Request('https://example.test/api/manage', { method: 'POST', headers: { 'x-admin-key': key }, body: form });
+  return new Request(url, { method: 'POST', headers: { 'x-admin-key': key }, body: form });
 }
 
-async function run(fields = {}, env = { GITHUB_TOKEN: 'token', ADMIN_KEY }) {
-  const response = await onRequestPost({ request: manageRequest(fields), env });
+async function run(fields = {}, env = { GITHUB_TOKEN: 'token', ADMIN_KEY }, url) {
+  const response = await onRequestPost({ request: manageRequest(fields, ADMIN_KEY, url), env });
   return { response, data: await response.json() };
 }
 
@@ -82,6 +82,24 @@ function treeFrom(calls) {
 function postsFromTree(tree) {
   return JSON.parse(tree.find((entry) => entry.path === 'data/posts.json').content);
 }
+
+test('Preview, localhost, and non-production hosts are read-only before GitHub access', async () => {
+  for (const url of [
+    'https://d66a2dcd.market-research-site.pages.dev/api/manage',
+    'https://agent-admin-post-management.market-research-site.pages.dev/api/manage',
+    'http://localhost:8788/api/manage',
+    'http://127.0.0.1:8788/api/manage',
+    'https://admin.example.com/api/manage'
+  ]) {
+    const calls = githubMock();
+    try {
+      const { response, data } = await run({}, { GITHUB_TOKEN: 'token', ADMIN_KEY }, url);
+      assert.equal(response.status, 403);
+      assert.equal(data.error, 'PREVIEW_READ_ONLY');
+      assert.equal(calls.length, 0);
+    } finally { globalThis.fetch = originalFetch; }
+  }
+});
 
 test('metadata update preserves immutable fields, keeps HTML, and synchronizes posts files', async () => {
   const legacy = { ...basePost, id: 'older', reportDate: '2026-08-01', date: '2026-08-01', href: 'reports/older.html', legacyImport: true };
@@ -158,6 +176,8 @@ test('cover add, same-extension replace, extension change, and remove use safe r
 test('invalid covers and unsafe stored paths are rejected without repository mutation', async () => {
   for (const [posts, fields, expected] of [
     [[basePost], { coverAction: 'replace', cover: new File(['gif'], 'bad.gif', { type: 'image/gif' }) }, 'INVALID_COVER'],
+    [[basePost], { coverAction: 'replace', cover: new File(['png'], 'bad.gif', { type: 'image/png' }) }, 'INVALID_COVER'],
+    [[basePost], { coverAction: 'replace', cover: new File(['jpeg'], 'bad.exe', { type: 'image/jpeg' }) }, 'INVALID_COVER'],
     [[{ ...basePost, coverImage: 'assets/not-managed.webp' }], { coverAction: 'remove' }, 'UNSAFE_COVER_PATH'],
     [[{ ...basePost, href: '../outside.html' }], { action: 'delete' }, 'UNSAFE_REPORT_PATH']
   ]) {
@@ -175,7 +195,7 @@ test('delete removes metadata, report HTML, and managed cover in one tree', asyn
   const post = { ...basePost, coverImage: `covers/${basePost.id}.webp` };
   const calls = githubMock([post]);
   try {
-    const { response, data } = await run({ action: 'delete' });
+    const { response, data } = await run({ action: 'delete', confirmTitle: post.title });
     assert.equal(response.status, 200);
     assert.equal(data.post, null);
     const tree = treeFrom(calls);
@@ -185,6 +205,20 @@ test('delete removes metadata, report HTML, and managed cover in one tree', asyn
     assert.equal(calls.filter((call) => call.path.endsWith('/git/commits')).length, 1);
     assert.deepEqual(calls.find((call) => call.path.endsWith('/git/commits')).body.parents, ['base-sha']);
   } finally { globalThis.fetch = originalFetch; }
+});
+
+test('delete requires the exact current title before creating a Git tree or commit', async () => {
+  for (const confirmTitle of [undefined, '틀린 제목']) {
+    const calls = githubMock();
+    try {
+      const fields = { action: 'delete' };
+      if (confirmTitle !== undefined) fields.confirmTitle = confirmTitle;
+      const { response, data } = await run(fields);
+      assert.equal(response.status, 400);
+      assert.equal(data.error, 'DELETE_CONFIRMATION_MISMATCH');
+      assert.equal(calls.some((call) => call.path.endsWith('/git/trees') || call.path.endsWith('/git/commits')), false);
+    } finally { globalThis.fetch = originalFetch; }
+  }
 });
 
 test('main branch movement returns 409 and never force-updates the ref', async () => {

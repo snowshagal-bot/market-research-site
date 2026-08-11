@@ -71,7 +71,7 @@ The management page extends the existing static admin and GitHub-backed publishi
 - checks the exact `main` SHA again before updating the ref and returns a conflict instead of force-pushing when the repository changes;
 - refuses to delete report or cover paths outside the managed `reports/` and `covers/` directories.
 
-Cloudflare Preview hosts disable actual update/delete actions in the client. Preview validation must use list, form, local HTML/cover preview, and mocked API tests only.
+Cloudflare Preview hosts disable actual update/delete actions in the client, and `/api/manage` independently rejects every mutation whose request hostname is not exactly `market-research-site.pages.dev`. Preview validation must use list, form, sandboxed local HTML/cover preview, and mocked API tests only.
 
 Important date semantics:
 

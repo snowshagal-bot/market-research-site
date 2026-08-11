@@ -6,6 +6,8 @@ import vm from 'node:vm';
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 function element(id = '') {
+  const listeners = new Map();
+  const attributes = new Map();
   return {
     id,
     value: '',
@@ -15,18 +17,23 @@ function element(id = '') {
     innerHTML: '',
     files: [],
     dataset: {},
+    src: '',
+    naturalWidth: 0,
+    naturalHeight: 0,
     checked: id === 'cover-keep',
     classList: { add() {}, remove() {} },
-    addEventListener() {},
-    setAttribute() {},
-    removeAttribute() {},
+    addEventListener(type, handler) { listeners.set(type, handler); },
+    emit(type, event = {}) { return listeners.get(type)?.({ preventDefault() {}, ...event }); },
+    setAttribute(name, value) { attributes.set(name, String(value)); },
+    getAttribute(name) { return attributes.get(name); },
+    removeAttribute(name) { if (name === 'src') this.src = ''; attributes.delete(name); },
     appendChild() {},
     querySelector() { return element(); },
     focus() {}
   };
 }
 
-async function loadClientHelpers() {
+async function loadClientHelpers({ confirmResult = true, manageResponse = null } = {}) {
   const source = await read('assets/admin-manage.js');
   const ids = [
     'post-list', 'post-count', 'manage-search', 'editor-empty', 'editor-form', 'manage-status',
@@ -42,13 +49,24 @@ async function loadClientHelpers() {
   const coverKeep = element('cover-keep');
   coverKeep.value = 'keep';
   coverKeep.checked = true;
+  const fetchCalls = [];
   const context = {
     console,
-    confirm: () => false,
-    fetch: () => new Promise(() => {}),
+    confirm: () => confirmResult,
+    fetch: async (url, options = {}) => {
+      if (String(url).includes('/api/manage')) {
+        fetchCalls.push({ url, options });
+        return {
+          ok: true,
+          status: 200,
+          json: async () => manageResponse || { ok: true, post: {}, commit: 'abcdef0123456789' }
+        };
+      }
+      return { ok: true, status: 200, json: async () => [] };
+    },
     FormData,
     URL: { createObjectURL: () => 'blob:test', revokeObjectURL() {} },
-    location: { hostname: 'localhost' },
+    location: { hostname: 'market-research-site.pages.dev' },
     localStorage: { getItem: () => null, setItem() {} },
     sessionStorage: { getItem: () => null, setItem() {} },
     matchMedia: () => ({ matches: false, addEventListener() {} }),
@@ -62,7 +80,9 @@ async function loadClientHelpers() {
     window: { addEventListener() {} }
   };
   vm.runInNewContext(source, context);
-  return context.window.__adminManageTest;
+  await Promise.resolve();
+  await Promise.resolve();
+  return { helpers: context.window.__adminManageTest, elements, coverKeep, fetchCalls };
 }
 
 test('manage page includes navigation, list controls, immutable metadata, edit fields, previews, and two-step delete UI', async () => {
@@ -74,6 +94,8 @@ test('manage page includes navigation, list controls, immutable metadata, edit f
   for (const id of ['manage-id', 'manage-href', 'manage-registered-date', 'manage-registered-at']) assert.match(html, new RegExp(`id="${id}"[^>]*readonly`));
   for (const id of ['manage-type', 'manage-date', 'manage-title', 'manage-subtitle', 'manage-description']) assert.match(html, new RegExp(`id="${id}"`));
   assert.match(html, /id="replacement-html"[^>]*accept="\.html,text\/html"/);
+  assert.match(html, /id="html-preview-frame"[^>]*sandbox="allow-scripts"/);
+  assert.doesNotMatch(html, /sandbox="[^"]*allow-same-origin/);
   assert.match(html, /name="cover-action" value="keep" checked/);
   assert.match(html, /name="cover-action" value="replace"/);
   assert.match(html, /name="cover-action" value="remove"/);
@@ -84,7 +106,7 @@ test('manage page includes navigation, list controls, immutable metadata, edit f
 });
 
 test('client list sorting, title/href search, category filters, file validation, and Preview safety are deterministic', async () => {
-  const helpers = await loadClientHelpers();
+  const { helpers } = await loadClientHelpers();
   const items = [
     { id: 'old', type: 'daily', reportDate: '2026-08-01', registeredAt: '2026-08-02T00:00:00Z', title: '알파', href: 'reports/alpha.html' },
     { id: 'newer-registration', type: 'weekly', reportDate: '2026-08-11', registeredAt: '2026-08-11T02:00:00Z', title: '주간', href: 'reports/weekly.html' },
@@ -107,8 +129,65 @@ test('manage client keeps immutable values server-owned and preserves current hr
   assert.match(source, /body\.append\('id', selectedPost\.id\)/);
   assert.doesNotMatch(source, /body\.append\('(href|registeredDate|registeredAt|legacyImport)'/);
   assert.match(source, /selectedHtml[^\n]+body\.append\('file'/);
+  assert.match(source, /htmlFrame\.srcdoc = source/);
+  assert.match(source, /body\.append\('confirmTitle', deleteTitleConfirm\.value\)/);
   assert.match(source, /deleteTitleConfirm\.value !== selectedPost\.title/);
   assert.match(source, /Preview에서는 실제 저장·삭제를 실행할 수 없습니다/);
+});
+
+test('cover replacement is excluded until decode succeeds and remains excluded after decode failure', async () => {
+  const { helpers, elements, coverKeep, fetchCalls } = await loadClientHelpers();
+  const post = {
+    id: 'post-1', type: 'daily', reportDate: '2026-08-11', date: '2026-08-11',
+    registeredDate: '2026-08-11', registeredAt: '2026-08-11T00:00:00Z',
+    title: '테스트 제목', subtitle: '', description: '', href: 'reports/test.html'
+  };
+  helpers.setPosts([post]);
+  helpers.selectPost(post.id);
+  coverKeep.value = 'replace';
+  const cover = new File(['image'], 'cover.webp', { type: 'image/webp' });
+
+  helpers.chooseCover(cover);
+  assert.equal(helpers.coverState().coverDecodePending, true);
+  assert.equal(helpers.coverState().selectedCover, null);
+  assert.equal(elements['save-post'].disabled, true);
+  assert.equal(Array.from(helpers.buildUpdateForm().keys()).includes('cover'), false);
+  await helpers.save({ preventDefault() {} });
+  assert.equal(fetchCalls.length, 0);
+
+  elements['manage-cover-image'].onerror();
+  assert.equal(helpers.coverState().coverDecodePending, false);
+  assert.equal(helpers.coverState().selectedCover, null);
+  assert.equal(Array.from(helpers.buildUpdateForm().keys()).includes('cover'), false);
+
+  helpers.chooseCover(cover);
+  elements['manage-cover-image'].naturalWidth = 900;
+  elements['manage-cover-image'].naturalHeight = 1350;
+  elements['manage-cover-image'].onload();
+  assert.equal(helpers.coverState().coverDecodePending, false);
+  assert.equal(helpers.coverState().selectedCover, cover);
+  assert.equal(elements['save-post'].disabled, false);
+  assert.equal(Array.from(helpers.buildUpdateForm().keys()).includes('cover'), true);
+});
+
+test('successful save keeps the GitHub and Cloudflare deployment status message visible', async () => {
+  const post = {
+    id: 'post-1', type: 'daily', reportDate: '2026-08-11', date: '2026-08-11',
+    registeredDate: '2026-08-11', registeredAt: '2026-08-11T00:00:00Z',
+    title: '테스트 제목', subtitle: '', description: '', href: 'reports/test.html'
+  };
+  const responsePost = { ...post, updatedAt: '2026-08-11T12:00:00Z' };
+  const { helpers, elements, fetchCalls } = await loadClientHelpers({
+    manageResponse: { ok: true, post: responsePost, commit: 'abcdef0123456789' }
+  });
+  helpers.setPosts([post]);
+  helpers.selectPost(post.id);
+  elements['manage-admin-key'].value = 'test-key';
+  await helpers.save({ preventDefault() {} });
+  assert.equal(fetchCalls.length, 1);
+  assert.match(elements['manage-status'].textContent, /GitHub 저장 완료/);
+  assert.match(elements['manage-status'].textContent, /Cloudflare 반영까지 잠시 걸릴 수 있습니다/);
+  assert.match(elements['manage-status'].textContent, /abcdef0/);
 });
 
 test('repository posts metadata is synchronized and the current production post remains unchanged', async () => {

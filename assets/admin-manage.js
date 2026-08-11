@@ -37,8 +37,9 @@
   let selectedPost = null;
   let selectedHtml = null;
   let selectedCover = null;
-  let htmlObjectUrl = '';
   let coverObjectUrl = '';
+  let coverDecodePending = false;
+  let coverDecodeVersion = 0;
   let saving = false;
 
   function savedTheme() {
@@ -98,9 +99,8 @@
   }
 
   function revokeHtmlUrl() {
-    if (htmlObjectUrl) URL.revokeObjectURL(htmlObjectUrl);
-    htmlObjectUrl = '';
     htmlFrame.removeAttribute('src');
+    htmlFrame.srcdoc = '';
     htmlPreview.hidden = true;
   }
 
@@ -110,6 +110,8 @@
   }
 
   function resetReplacementFiles() {
+    coverDecodeVersion += 1;
+    coverDecodePending = false;
     selectedHtml = null;
     selectedCover = null;
     htmlInput.value = '';
@@ -118,6 +120,7 @@
     revokeCoverUrl();
     htmlStatus.textContent = '기존 공개 URL에 그대로 저장됩니다.';
     coverStatus.textContent = 'JPG, PNG, WebP · 최대 4MB';
+    updateSaveButton();
   }
 
   function renderList() {
@@ -152,14 +155,6 @@
     coverMeta.hidden = false;
     coverImage.onload = () => { coverDimensions.textContent = `${coverImage.naturalWidth} × ${coverImage.naturalHeight}px`; };
     coverImage.onerror = () => {
-      if (coverObjectUrl && coverImage.src === coverObjectUrl) {
-        selectedCover = null;
-        coverInput.value = '';
-        revokeCoverUrl();
-        coverStatus.textContent = '이미지를 읽을 수 없습니다. 다른 JPG, PNG 또는 WebP 파일을 선택해 주세요.';
-        showExistingCover();
-        return;
-      }
       coverImage.hidden = true;
       coverFallback.hidden = false;
       coverFallback.textContent = '커버 이미지를 불러올 수 없습니다.';
@@ -187,10 +182,16 @@
     return document.querySelector('input[name="cover-action"]:checked')?.value || 'keep';
   }
 
+  function updateSaveButton() {
+    $('save-post').disabled = saving || coverDecodePending;
+  }
+
   function syncCoverAction() {
     const action = coverAction();
     coverFileField.hidden = action !== 'replace';
     if (action !== 'replace') {
+      coverDecodeVersion += 1;
+      coverDecodePending = false;
       selectedCover = null;
       coverInput.value = '';
       coverStatus.textContent = 'JPG, PNG, WebP · 최대 4MB';
@@ -205,6 +206,7 @@
       coverFallback.textContent = '저장 후 홈페이지 fallback cover 사용';
       coverMeta.hidden = true;
     }
+    updateSaveButton();
   }
 
   function selectPost(id) {
@@ -242,21 +244,56 @@
     const error = validateHtml(file, source);
     if (error) { htmlInput.value = ''; htmlStatus.textContent = error; return; }
     selectedHtml = file;
-    htmlObjectUrl = URL.createObjectURL(file);
-    htmlFrame.src = htmlObjectUrl;
+    htmlFrame.srcdoc = source;
     htmlPreview.hidden = false;
     htmlStatus.textContent = `${file.name} · ${formatBytes(file.size)} · 기존 URL에 교체`;
   }
 
   function chooseCover(file) {
+    const decodeVersion = ++coverDecodeVersion;
     revokeCoverUrl();
     selectedCover = null;
+    coverDecodePending = false;
     const error = validateCover(file);
-    if (error) { coverInput.value = ''; coverStatus.textContent = error; showExistingCover(); return; }
-    selectedCover = file;
-    coverObjectUrl = URL.createObjectURL(file);
-    coverStatus.textContent = `${file.name} · ${formatBytes(file.size)}`;
-    showCoverSource(coverObjectUrl, file.name, formatBytes(file.size));
+    if (error) {
+      coverInput.value = '';
+      coverStatus.textContent = error;
+      showExistingCover();
+      updateSaveButton();
+      return;
+    }
+
+    coverDecodePending = true;
+    coverStatus.textContent = '이미지 확인 중…';
+    updateSaveButton();
+    const objectUrl = URL.createObjectURL(file);
+    coverObjectUrl = objectUrl;
+    coverFallback.hidden = true;
+    coverImage.hidden = false;
+    coverImage.alt = `${selectedPost?.title || '게시물'} 홈페이지 커버 미리보기`;
+    coverName.textContent = file.name;
+    coverDimensions.textContent = '확인 중…';
+    coverSize.textContent = formatBytes(file.size);
+    coverMeta.hidden = false;
+    coverImage.onload = () => {
+      if (decodeVersion !== coverDecodeVersion || coverObjectUrl !== objectUrl) return;
+      coverDimensions.textContent = `${coverImage.naturalWidth} × ${coverImage.naturalHeight}px`;
+      selectedCover = file;
+      coverDecodePending = false;
+      coverStatus.textContent = `${file.name} · ${formatBytes(file.size)}`;
+      updateSaveButton();
+    };
+    coverImage.onerror = () => {
+      if (decodeVersion !== coverDecodeVersion || coverObjectUrl !== objectUrl) return;
+      selectedCover = null;
+      coverDecodePending = false;
+      coverInput.value = '';
+      revokeCoverUrl();
+      coverStatus.textContent = '이미지를 읽을 수 없습니다. 다른 JPG, PNG 또는 WebP 파일을 선택해 주세요.';
+      showExistingCover();
+      updateSaveButton();
+    };
+    coverImage.src = objectUrl;
   }
 
   function buildUpdateForm() {
@@ -288,6 +325,10 @@
   async function save(event) {
     event.preventDefault();
     if (!selectedPost || saving) return;
+    if (coverDecodePending) {
+      status.textContent = '커버 이미지 확인이 끝날 때까지 기다려 주세요.';
+      return;
+    }
     if (!$('manage-title').value.trim() || !$('manage-date').value || !$('manage-type').value) {
       status.textContent = '카테고리, 리포트 기준일과 제목을 확인해 주세요.';
       return;
@@ -298,18 +339,18 @@
     }
     if (!confirm('변경사항을 main에 한 커밋으로 저장할까요?')) return;
     saving = true;
-    $('save-post').disabled = true;
+    updateSaveButton();
     status.textContent = '변경사항을 저장하는 중입니다…';
     try {
       const data = await mutate(buildUpdateForm());
       posts = posts.map((post) => post.id === data.post.id ? data.post : post);
-      status.textContent = `저장 완료 · commit ${data.commit.slice(0, 7)}`;
       selectPost(data.post.id);
+      status.textContent = `GitHub 저장 완료 · Cloudflare 반영까지 잠시 걸릴 수 있습니다 · commit ${data.commit.slice(0, 7)}`;
     } catch (error) {
       status.textContent = error.message || '저장하지 못했습니다.';
     } finally {
       saving = false;
-      $('save-post').disabled = false;
+      updateSaveButton();
     }
   }
 
@@ -318,6 +359,7 @@
     const body = new FormData();
     body.append('action', 'delete');
     body.append('id', selectedPost.id);
+    body.append('confirmTitle', deleteTitleConfirm.value);
     saving = true;
     confirmDelete.disabled = true;
     status.textContent = '게시물을 삭제하는 중입니다…';
@@ -385,6 +427,18 @@
   confirmDelete.addEventListener('click', deletePost);
   window.addEventListener('pagehide', () => { revokeHtmlUrl(); revokeCoverUrl(); });
 
-  window.__adminManageTest = { sortPosts, filteredPosts, validateHtml, validateCover, isPreviewHost };
+  window.__adminManageTest = {
+    sortPosts,
+    filteredPosts,
+    validateHtml,
+    validateCover,
+    isPreviewHost,
+    chooseCover,
+    buildUpdateForm,
+    save,
+    selectPost,
+    setPosts(items) { posts = items; },
+    coverState() { return { selectedCover, coverDecodePending }; }
+  };
   loadPosts();
 })();

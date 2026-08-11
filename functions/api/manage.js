@@ -1,6 +1,7 @@
 const OWNER = "snowshagal-bot";
 const REPO = "market-research-site";
 const BRANCH = "main";
+const PRODUCTION_HOSTNAME = "market-research-site.pages.dev";
 const API_VERSION = "2026-03-10";
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const MAX_COVER_BYTES = 4 * 1024 * 1024;
@@ -94,12 +95,14 @@ function isStandaloneHtml(source) {
 }
 
 function coverExtension(file) {
-  const extensions = {
-    "image/jpeg": "jpg",
-    "image/png": "png",
-    "image/webp": "webp",
+  const allowedExtensions = {
+    "image/jpeg": ["jpg", "jpeg"],
+    "image/png": ["png"],
+    "image/webp": ["webp"],
   };
-  return extensions[file?.type] || "";
+  const filenameExtension = String(file?.name || "").split(".").pop()?.toLowerCase() || "";
+  if (!allowedExtensions[file?.type]?.includes(filenameExtension)) return "";
+  return file.type === "image/jpeg" ? "jpg" : filenameExtension;
 }
 
 function isManagedPath(path, root) {
@@ -189,6 +192,9 @@ function validateEditableFields(form) {
 
 export async function onRequestPost(context) {
   const { request, env } = context;
+  if (new URL(request.url).hostname !== PRODUCTION_HOSTNAME) {
+    return reply({ ok: false, error: "PREVIEW_READ_ONLY", message: "Preview와 로컬 환경에서는 게시물을 변경할 수 없습니다." }, 403);
+  }
   if (!env.ADMIN_KEY || !env.GITHUB_TOKEN) {
     return reply({ ok: false, error: "SERVER_NOT_CONFIGURED", message: "관리자 환경 변수가 설정되지 않았습니다." }, 503);
   }
@@ -261,6 +267,9 @@ export async function onRequestPost(context) {
     }
     if (existing.coverImage && !isManagedPath(existing.coverImage, "covers")) {
       return reply({ ok: false, error: "UNSAFE_COVER_PATH", message: "안전하지 않은 커버 경로는 변경할 수 없습니다." }, 400);
+    }
+    if (action === "delete" && String(form.get("confirmTitle") || "") !== existing.title) {
+      return reply({ ok: false, error: "DELETE_CONFIRMATION_MISMATCH", message: "삭제 확인 제목이 현재 게시물 제목과 일치하지 않습니다." }, 400);
     }
 
     const entries = [];

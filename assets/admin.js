@@ -306,11 +306,10 @@
     fileInfo.innerHTML = `<b>${file.name}</b><br>${(file.size/1024).toFixed(1)} KB · ${detectedType ? labels[detectedType] : '카테고리 확인 필요'} · 리포트 기준일 ${detectedDate}`;
 
     resetPreview();
-    const blobUrl = URL.createObjectURL(file);
     const iframe = document.createElement('iframe');
-    iframe.src = blobUrl;
-    iframe.dataset.url = blobUrl;
+    iframe.srcdoc = text;
     iframe.title = '리포트 원본 미리보기';
+    iframe.setAttribute('sandbox', 'allow-scripts');
     previewWrap.innerHTML = '';
     previewWrap.appendChild(iframe);
 

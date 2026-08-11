@@ -44,7 +44,7 @@
           <div class="field full"><label for="manage-description">목록 설명</label><textarea id="manage-description"></textarea></div>
         </div>
 
-        <section class="subsection" aria-labelledby="html-replacement-title"><div class="section-head"><h3 id="html-replacement-title">원본 HTML</h3><span class="subtle">선택하지 않으면 기존 파일 유지</span></div><div class="field"><label for="replacement-html">교체 HTML <span>(선택)</span></label><input id="replacement-html" type="file" accept=".html,text/html"><small id="html-status" aria-live="polite">기존 공개 URL에 그대로 저장됩니다.</small></div><div class="html-preview" id="html-preview" hidden><iframe id="html-preview-frame" title="교체할 리포트 HTML 미리보기"></iframe></div></section>
+        <section class="subsection" aria-labelledby="html-replacement-title"><div class="section-head"><h3 id="html-replacement-title">원본 HTML</h3><span class="subtle">선택하지 않으면 기존 파일 유지</span></div><div class="field"><label for="replacement-html">교체 HTML <span>(선택)</span></label><input id="replacement-html" type="file" accept=".html,text/html"><small id="html-status" aria-live="polite">기존 공개 URL에 그대로 저장됩니다.</small></div><div class="html-preview" id="html-preview" hidden><iframe id="html-preview-frame" title="교체할 리포트 HTML 미리보기" sandbox="allow-scripts"></iframe></div></section>
 
         <section class="subsection" aria-labelledby="cover-management-title"><div class="section-head"><h3 id="cover-management-title">홈페이지 커버</h3><span class="subtle" id="current-cover-label"></span></div>
           <fieldset class="cover-actions"><legend>커버 처리</legend><label><input type="radio" name="cover-action" value="keep" checked> 기존 커버 유지</label><label><input type="radio" name="cover-action" value="replace"> 새 커버로 교체</label><label><input type="radio" name="cover-action" value="remove"> 커버 제거</label></fieldset>
@@ -62,6 +62,6 @@
     </section>
   </div>
 </div></main>
-<script src="../../assets/admin-manage.js?v=20260811-1"></script>
+<script src="../../assets/admin-manage.js?v=20260811-2"></script>
 </body>
 </html>
