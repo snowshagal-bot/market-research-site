@@ -52,9 +52,14 @@ test('carousel uses one latest post per core category, never autoplay, and suppo
   assert.match(script, /touchend/);
   assert.doesNotMatch(script, /setInterval|autoplay/i);
   assert.match(homeStyles, /Homepage cover sizing and fallback spacing stay local/);
-  assert.match(homeStyles, /\.carousel-cover\{height:510px\}/);
   assert.match(homeStyles, /\.carousel-cover>img\{object-position:center top\}/);
   assert.match(homeStyles, /\.cover-fallback strong\{max-width:13ch;font-size:25px/);
+  assert.match(homeStyles, /@media\(min-width:961px\)/);
+  assert.match(homeStyles, /grid-template-columns:minmax\(0,42%\) minmax\(0,58%\)/);
+  assert.match(homeStyles, /\.featured-carousel\{overflow:hidden;border:0;border-top:1px solid var\(--line\);border-bottom:1px solid var\(--line\);border-radius:0;background:transparent;box-shadow:none\}/);
+  assert.match(homeStyles, /\.carousel-cover\{height:600px;padding:0;border-left:1px solid var\(--line\);background:transparent\}/);
+  assert.match(homeStyles, /\.latest-card\{min-height:148px/);
+  assert.match(homeStyles, /@media\(max-width:760px\)\{\.v2-hero/);
   assert.doesNotMatch(polishStyles, /\.cover-category/);
 });
 
