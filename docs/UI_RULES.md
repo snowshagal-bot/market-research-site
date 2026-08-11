@@ -33,15 +33,28 @@ Homepage public categories:
 - 데일리
 - 위클리
 - 비정기
+- 시장 공부
 - 끄적끄적
 
-Internal values remain `daily`, `weekly`, `research`, `note`.
+Internal values are `daily`, `weekly`, `research`, `basics`, `note`. Market Basics is a core category; Notes remains a secondary category without being renamed or removed.
 
 Report pages use a fixed shared top bar:
 
-`← 홈 | 데일리 | 위클리 | 비정기 | 끄적끄적`
+`← 홈 | 데일리 | 위클리 | 비정기 | 시장 공부 | 끄적끄적`
 
 The current category should have a clear but restrained active state. The report navigation is injected outside the original report design and must remain visually stable regardless of report-specific CSS.
+
+## Homepage featured carousel
+
+The homepage v2 carousel is an editorial category overview, not a promotional banner or chronological autoplay slider.
+
+- include the latest available post from each core category: daily, weekly, research, Market Basics;
+- do not autoplay;
+- keep previous/next buttons, category tabs, keyboard state, and current/total status accessible;
+- use a separate optional `coverImage` when available;
+- use a category/date/title typographic fallback when no cover image exists;
+- on mobile, place the cover before the text and preserve vertical scrolling while allowing deliberate horizontal swipe gestures;
+- respect `prefers-reduced-motion` and keep transitions subtle.
 
 ## Report isolation
 

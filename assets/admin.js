@@ -12,6 +12,8 @@
   const subtitle = $('post-subtitle');
   const description = $('post-description');
   const filename = $('post-filename');
+  const coverInput = $('cover-file');
+  const coverInfo = $('cover-info');
   const adminKey = $('admin-key');
   const publishBtn = $('publish-btn');
   const themeBtn = document.querySelector('[data-theme-toggle]');
@@ -25,6 +27,7 @@
   const html = document.documentElement;
   const themeMedia = matchMedia('(prefers-color-scheme: dark)');
   let selectedFile = null;
+  let selectedCover = null;
   let publishing = false;
 
   function savedTheme() {
@@ -53,6 +56,7 @@
     daily: '주식 리포트',
     weekly: '위클리 리포트',
     research: '비정기 리서치',
+    basics: '시장 공부',
     note: '끄적끄적'
   };
 
@@ -60,6 +64,7 @@
     daily: '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.',
     weekly: '지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.',
     research: '특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.',
+    basics: '경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.',
     note: '시장과 투자에 관한 생각을 자유롭게 정리한 글.'
   };
 
@@ -67,6 +72,7 @@
 
   function detectType(name, text) {
     const s = `${name} ${text.slice(0, 4000)}`;
+    if (/시장\s*공부|경제\s*공부|주식\s*공부|market\s*basics|investing\s*basics|explainer/i.test(s)) return 'basics';
     if (/비정기|소버린|technology\s*&\s*policy|research/i.test(s)) return 'research';
     if (/위클리|weekly/i.test(s)) return 'weekly';
     if (/주식리포트|데일리|daily market report|kospi daily/i.test(s)) return 'daily';
@@ -112,6 +118,19 @@
 
   function safeFilename(original) {
     return original.replace(/[\\/:*?"<>|]/g,'-').replace(/\s+/g,' ').trim();
+  }
+
+  function validateCover(file) {
+    if (!file) return '';
+    const extension = file.name.split('.').pop()?.toLowerCase() || '';
+    const allowed = {
+      'image/jpeg': ['jpg', 'jpeg'],
+      'image/png': ['png'],
+      'image/webp': ['webp']
+    };
+    if (!allowed[file.type]?.includes(extension)) return 'JPG, PNG, WebP 이미지만 선택할 수 있습니다.';
+    if (file.size > 4 * 1024 * 1024) return '대표 커버 이미지는 4MB 이하여야 합니다.';
+    return '';
   }
 
   function resetPreview() {
@@ -238,6 +257,7 @@
     form.append('subtitle', subtitle.value.trim());
     form.append('description', description.value.trim());
     form.append('filename', filename.value.trim());
+    if (selectedCover) form.append('cover', selectedCover, selectedCover.name);
 
     try {
       const key = adminKey.value.trim();
@@ -275,6 +295,20 @@
     fileInput.click();
   });
   fileInput.addEventListener('change', () => parseFile(fileInput.files?.[0]));
+  coverInput?.addEventListener('change', () => {
+    const file = coverInput.files?.[0] || null;
+    const error = validateCover(file);
+    if (error) {
+      selectedCover = null;
+      coverInput.value = '';
+      coverInfo.textContent = error;
+      return;
+    }
+    selectedCover = file;
+    coverInfo.textContent = file
+      ? `${file.name} · ${(file.size / 1024).toFixed(1)} KB`
+      : 'JPG, PNG, WebP · 최대 4MB · 원본 리포트 HTML과 별도로 저장됩니다.';
+  });
   [type,date,title,subtitle,description,adminKey].forEach(el => el?.addEventListener('input', updatePublishState));
   type?.addEventListener('change', () => {
     if (!description.value.trim() || Object.values(defaultDescriptions).includes(description.value.trim())) {

@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f5f0e6">
 <title>Market Research</title>
-<meta name="description" content="데일리·위클리·비정기 시장 리서치를 모아보는 개인 리서치 아카이브.">
+<meta name="description" content="데일리·위클리·비정기 리서치와 시장 공부를 아카이브하는 독립 시장 리서치 사이트.">
 <link rel="stylesheet" href="assets/site.css">
 <link rel="stylesheet" href="assets/category-state.css">
-<link rel="stylesheet" href="assets/ui-polish.css">
+<link rel="stylesheet" href="assets/ui-polish.css?v=20260810-3">
+<link rel="stylesheet" href="assets/home-v2.css?v=20260810-6">
 <script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
 </head>
 <body>
@@ -20,7 +21,8 @@
         <a data-nav-category="daily" href="?category=daily">데일리</a>
         <a data-nav-category="weekly" href="?category=weekly">위클리</a>
         <a data-nav-category="research" href="?category=research">비정기</a>
-        <a data-nav-category="note" href="?category=note">끄적끄적</a>
+        <a data-nav-category="basics" href="?category=basics">시장 공부</a>
+        <a class="nav-secondary" data-nav-category="note" href="?category=note">끄적끄적</a>
       </nav>
       <div class="header-actions">
         <button class="icon-btn" type="button" data-theme-toggle aria-label="다크 모드 전환">◐</button>
@@ -28,47 +30,71 @@
       </div>
     </div>
     <nav class="mobile-nav" aria-label="모바일 메뉴">
-      <a data-nav-category="daily" href="?category=daily">데일리</a><a data-nav-category="weekly" href="?category=weekly">위클리</a>
-      <a data-nav-category="research" href="?category=research">비정기</a><a data-nav-category="note" href="?category=note">끄적끄적</a>
+      <a data-nav-category="daily" href="?category=daily">데일리</a>
+      <a data-nav-category="weekly" href="?category=weekly">위클리</a>
+      <a data-nav-category="research" href="?category=research">비정기</a>
+      <a data-nav-category="basics" href="?category=basics">시장 공부</a>
+      <a class="nav-secondary" data-nav-category="note" href="?category=note">끄적끄적</a>
     </nav>
   </div>
 </header>
-<div class="marketbar" aria-label="시장 지표" hidden>
-  <div class="site-wrap"><span class="market-label">MARKET</span><span class="market-placeholder">시장 데이터 영역</span></div>
-</div>
 <main>
-<section class="hero">
-  <div class="site-wrap hero-grid">
-    <div>
-      <div class="eyebrow" data-feature-type>비정기 리서치</div>
-      <h1><span class="sr-only">대표 리포트:</span><b data-feature-title>누가 열쇠를 쥐는가</b><span data-feature-subtitle>소버린 AI의 여러 얼굴</span></h1>
-      <p class="hero-desc" data-feature-desc></p>
-      <a class="read-link" data-feature-link href="#">리포트 읽기 <span class="arrow">→</span></a>
-    </div>
-    <div class="hero-meta">
-      <div class="meta-row"><span>발행일</span><b data-feature-date>2026-08-09</b></div>
-    </div>
-  </div>
-</section>
-<section class="section">
-  <div class="site-wrap">
-    <div class="section-head"><h2>리포트 아카이브</h2><span>최신순</span></div>
-    <div class="toolbar">
-      <label class="search"><span class="sr-only">리포트 검색</span><input id="search-input" type="search" placeholder="제목·내용 검색"></label>
-      <div class="filters" aria-label="카테고리 필터">
-        <button class="filter active" data-filter="all" aria-pressed="true">전체</button>
-        <button class="filter" data-filter="daily" aria-pressed="false">데일리</button>
-        <button class="filter" data-filter="weekly" aria-pressed="false">위클리</button>
-        <button class="filter" data-filter="research" aria-pressed="false">비정기</button>
-        <button class="filter" data-filter="note" aria-pressed="false">끄적끄적</button>
+  <section class="v2-hero" aria-labelledby="featured-heading">
+    <div class="site-wrap">
+      <div class="featured-carousel" data-carousel aria-roledescription="carousel" aria-label="카테고리 대표 리포트">
+        <div class="carousel-stage" id="featured-slide" role="group" aria-roledescription="slide" aria-live="polite">
+          <div class="carousel-copy">
+            <div class="carousel-meta"><span class="carousel-badge" data-slide-category>데일리</span><time data-slide-date datetime="">—</time></div>
+            <h1 id="featured-heading" data-slide-title>시장 리서치 아카이브</h1>
+            <p class="carousel-subtitle" data-slide-subtitle></p>
+            <p class="carousel-description" data-slide-description>시장의 흐름을 데이터와 맥락으로 정리합니다.</p>
+            <a class="carousel-cta" data-slide-link href="./">리포트 전문 보기 <span aria-hidden="true">→</span></a>
+          </div>
+          <div class="carousel-cover" data-slide-cover aria-label="대표 리포트 커버"></div>
+        </div>
+        <div class="carousel-footer">
+          <div class="carousel-tabs" data-carousel-tabs role="tablist" aria-label="대표 리포트 카테고리"></div>
+          <div class="carousel-status"><span data-slide-current>01</span><span aria-hidden="true">/</span><span data-slide-total>01</span></div>
+          <div class="carousel-arrows">
+            <button type="button" data-slide-prev aria-label="이전 대표 리포트">←</button>
+            <button type="button" data-slide-next aria-label="다음 대표 리포트">→</button>
+          </div>
+        </div>
       </div>
     </div>
-    <div id="report-list" class="report-list"></div>
-  </div>
-</section>
+  </section>
+
+  <section class="site-introduction" aria-labelledby="intro-heading">
+    <div class="site-wrap intro-grid">
+      <div class="intro-copy">
+        <span class="section-kicker">INDEPENDENT ARCHIVE</span>
+        <h2 id="intro-heading">데일리·위클리·비정기 리서치와 시장 공부를 아카이브하는 독립 시장 리서치 사이트.</h2>
+        <p>시장의 흐름을 데이터와 맥락으로 정리합니다.</p>
+      </div>
+      <div class="latest-cards" id="latest-category-cards" aria-label="카테고리별 최신 콘텐츠"></div>
+    </div>
+  </section>
+
+  <section class="section archive-section" aria-labelledby="archive-heading">
+    <div class="site-wrap">
+      <div class="section-head"><h2 id="archive-heading">최근 리포트</h2><span>리포트 기준일 최신순</span></div>
+      <div class="toolbar">
+        <label class="search"><span class="sr-only">리포트 검색</span><input id="search-input" type="search" placeholder="제목·내용 검색"></label>
+        <div class="filters" aria-label="카테고리 필터">
+          <button class="filter active" data-filter="all" aria-pressed="true">전체</button>
+          <button class="filter" data-filter="daily" aria-pressed="false">데일리</button>
+          <button class="filter" data-filter="weekly" aria-pressed="false">위클리</button>
+          <button class="filter" data-filter="research" aria-pressed="false">비정기</button>
+          <button class="filter" data-filter="basics" aria-pressed="false">시장 공부</button>
+          <button class="filter" data-filter="note" aria-pressed="false">끄적끄적</button>
+        </div>
+      </div>
+      <div id="report-list" class="report-list"></div>
+    </div>
+  </section>
 </main>
 <footer class="footer"><div class="site-wrap footer-row"><span>Independent Market Research Archive</span><div class="footer-links" aria-label="준비 중인 페이지"><span>Tistory</span><span>About</span></div></div></footer>
 <script src="data/posts.js"></script>
-<script src="assets/site.js"></script>
+<script src="assets/site.js?v=20260810-2"></script>
 </body>
 </html>

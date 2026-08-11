@@ -67,6 +67,7 @@
         <a class="${active === 'daily' ? 'active' : ''}" ${active === 'daily' ? 'aria-current="true"' : ''} href="/?category=daily">데일리</a>
         <a class="${active === 'weekly' ? 'active' : ''}" ${active === 'weekly' ? 'aria-current="true"' : ''} href="/?category=weekly">위클리</a>
         <a class="${active === 'research' ? 'active' : ''}" ${active === 'research' ? 'aria-current="true"' : ''} href="/?category=research">비정기</a>
+        <a class="${active === 'basics' ? 'active' : ''}" ${active === 'basics' ? 'aria-current="true"' : ''} href="/?category=basics">시장 공부</a>
         <a class="${active === 'note' ? 'active' : ''}" ${active === 'note' ? 'aria-current="true"' : ''} href="/?category=note">끄적끄적</a>
         <span class="brand">MARKET RESEARCH</span>
       </div></nav>`;
