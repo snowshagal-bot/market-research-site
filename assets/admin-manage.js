@@ -148,7 +148,8 @@
       button.className = 'post-item';
       button.dataset.postId = post.id;
       button.setAttribute('aria-current', String(post.id === selectedPost?.id));
-      button.innerHTML = `<span class="post-item-top"><span>${TYPE_LABELS[post.type] || post.type} · ${post.reportDate || post.date || ''}</span><span class="cover-badge">${post.coverImage ? '커버 있음' : 'fallback'}</span></span><strong></strong><small></small><span class="post-item-top"><span>등록 ${post.registeredDate || '-'}</span></span>`;
+      const languageLabel = post.lang === 'en' ? 'English' : (post.lang ? '한국어' : '한국어 · legacy');
+      button.innerHTML = `<span class="post-item-top"><span>${TYPE_LABELS[post.type] || post.type} · ${post.reportDate || post.date || ''}</span><span class="cover-badge">${languageLabel} · ${post.coverImage ? '커버 있음' : 'fallback'}</span></span><strong></strong><small></small><span class="post-item-top"><span>등록 ${post.registeredDate || '-'}</span></span>`;
       button.querySelector('strong').textContent = post.title || '(제목 없음)';
       button.querySelector('small').textContent = post.href || '';
       button.addEventListener('click', () => selectPost(post.id));
@@ -231,6 +232,8 @@
     $('manage-href').value = next.href || '';
     $('manage-registered-date').value = next.registeredDate || '';
     $('manage-registered-at').value = next.registeredAt || '';
+    $('manage-language').value = next.lang === 'en' ? 'English (en)' : (next.lang ? '한국어 (ko)' : '한국어 (ko · legacy 기본값)');
+    $('manage-translation-group').value = next.translationGroup || '연결 없음';
     $('manage-type').value = next.type || '';
     $('manage-date').value = next.reportDate || next.date || '';
     $('manage-title').value = next.title || '';

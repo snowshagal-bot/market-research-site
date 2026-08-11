@@ -8,6 +8,10 @@
   const type = $('post-type');
   const categoryStatus = $('category-status');
   const categoryOptions = [...document.querySelectorAll('input[name="post-category"]')];
+  const postLanguage = $('post-language');
+  const languageOptions = [...document.querySelectorAll('input[name="post-language-choice"]')];
+  const translationSource = $('translation-source');
+  const translationSourceStatus = $('translation-source-status');
   const date = $('post-date');
   const registeredDate = $('registered-date');
   const title = $('post-title');
@@ -42,6 +46,8 @@
   let selectedCover = null;
   let coverPreviewUrl = '';
   let publishing = false;
+  const PRODUCTION_HOSTNAME = 'market-research-site.pages.dev';
+  const localeApi = window.MARKET_LOCALE;
 
   const defaultCoverInfo = 'JPG, PNG, WebP · 최대 4MB · 원본 리포트 HTML과 별도로 저장됩니다.';
   const defaultCoverPreviewNote = '커버 미선택 · 게시 후 홈페이지에서는 fallback cover 사용';
@@ -80,6 +86,43 @@
     basics: '시장 공부',
     note: '끄적끄적'
   };
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, character => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[character]);
+  }
+
+  function normalizedLanguage(post) {
+    return localeApi?.postLanguage(post) || (post?.lang === 'en' ? 'en' : 'ko');
+  }
+
+  function translationKey(post) {
+    return localeApi?.groupKey(post) || String(post?.translationGroup || post?.id || '');
+  }
+
+  function populateTranslationSources() {
+    if (!translationSource || !postLanguage) return;
+    const targetLanguage = postLanguage.value === 'en' ? 'ko' : 'en';
+    const items = (window.RESEARCH_POSTS || []).filter(post => normalizedLanguage(post) === targetLanguage);
+    translationSource.innerHTML = `<option value="">연결하지 않음</option>${items.map(post => `<option value="${escapeHtml(translationKey(post))}">${escapeHtml(post.title || post.id)} · ${escapeHtml(post.reportDate || post.date || '')}</option>`).join('')}`;
+    translationSource.value = '';
+    if (translationSourceStatus) {
+      const targetLabel = targetLanguage === 'en' ? 'English' : '한국어';
+      translationSourceStatus.textContent = items.length
+        ? `${targetLabel} 게시물 ${items.length}개 중 번역 짝을 선택할 수 있습니다.`
+        : `연결할 기존 ${targetLabel} 게시물이 없습니다. 연결 없이 게시할 수 있습니다.`;
+    }
+  }
+
+  function setLanguage(value) {
+    if (!postLanguage || !['ko', 'en'].includes(value)) return;
+    postLanguage.value = value;
+    languageOptions.forEach(option => { option.checked = option.value === value; });
+    populateTranslationSources();
+  }
+
+  function isPreviewHost(hostname) {
+    return Boolean(hostname) && hostname !== PRODUCTION_HOSTNAME;
+  }
 
   const defaultDescriptions = {
     daily: '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.',
@@ -270,8 +313,10 @@
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async function waitForDeployment(postId, reportUrl, postType, registered) {
-    const categoryUrl = `../?category=${encodeURIComponent(postType)}`;
+  async function waitForDeployment(postId, reportUrl, postType, registered, language) {
+    const categoryUrl = language === 'en'
+      ? `../en/?category=${encodeURIComponent(postType)}`
+      : `../?category=${encodeURIComponent(postType)}`;
     homeLink.href = categoryUrl;
     reportLink.href = reportUrl || '#';
     overlayTitle.textContent = '홈페이지 반영 중';
@@ -350,9 +395,15 @@
 
   async function publish() {
     if (publishing || publishBtn.disabled || !selectedFile) return;
+    if (isPreviewHost(location.hostname)) {
+      status.textContent = 'Preview와 로컬 환경에서는 실제 게시를 실행할 수 없습니다.';
+      return;
+    }
     const postType = type.value;
+    const language = postLanguage?.value === 'en' ? 'en' : 'ko';
+    const languageLabel = language === 'en' ? 'English' : '한국어';
     const coverWarning = selectedCover ? '' : '\n\n대표 커버가 선택되지 않았습니다. 게시 후 홈페이지에서는 fallback cover가 사용됩니다.';
-    const summary = `${date.value} · ${labels[postType]}\n${title.value.trim()}${coverWarning}\n\n이 내용으로 홈페이지에 게시할까요?`;
+    const summary = `${date.value} · ${labels[postType]} · ${languageLabel}\n${title.value.trim()}${coverWarning}\n\n이 내용으로 홈페이지에 게시할까요?`;
     if (!confirm(summary)) return;
 
     publishing = true;
@@ -369,6 +420,8 @@
     form.append('subtitle', subtitle.value.trim());
     form.append('description', description.value.trim());
     form.append('filename', filename.value.trim());
+    form.append('lang', language);
+    if (translationSource?.value) form.append('translationGroup', translationSource.value);
     if (selectedCover) form.append('cover', selectedCover, selectedCover.name);
 
     try {
@@ -386,7 +439,7 @@
       status.textContent = `게시 완료 · 등록일 ${data.registeredDate}. Cloudflare 재배포 확인 중…`;
       publishBtn.textContent = '게시 완료';
       publishBtn.disabled = true;
-      await waitForDeployment(data.id, data.reportUrl, postType, data.registeredDate || '등록 완료');
+      await waitForDeployment(data.id, data.reportUrl, postType, data.registeredDate || '등록 완료', language);
     } catch (err) {
       if (overlay) overlay.classList.remove('on');
       status.textContent = err.message || '게시 중 오류가 발생했습니다.';
@@ -446,6 +499,11 @@
       setCategory(nextOption.value, 'manual');
     });
   });
+  languageOptions.forEach(option => {
+    option.addEventListener('change', () => {
+      if (option.checked) setLanguage(option.value);
+    });
+  });
   adminKey?.addEventListener('change', () => { try { sessionStorage.setItem('mrs-admin-key', adminKey.value.trim()); } catch (_) {} });
   publishBtn?.addEventListener('click', publish);
 
@@ -457,5 +515,7 @@
 
   window.addEventListener('pagehide', revokeCoverPreviewUrl);
 
+  setLanguage(postLanguage?.value || 'ko');
+  if (isPreviewHost(location.hostname)) status.textContent = 'Preview와 로컬 환경에서는 실제 게시가 비활성화됩니다.';
   updatePublishState();
 })();

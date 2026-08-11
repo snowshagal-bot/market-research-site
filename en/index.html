@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en" data-site-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e6">
+<title>Market Research</title>
+<meta name="description" content="An independent archive of daily, weekly, and special market research and market basics.">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/language.css?v=20260812-1">
+<link rel="stylesheet" href="/assets/category-state.css">
+<link rel="stylesheet" href="/assets/ui-polish.css?v=20260811-1">
+<link rel="stylesheet" href="/assets/home-v2.css?v=20260811-2">
+<script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="site-wrap">
+    <div class="header-row">
+      <a class="brand" href="/en/"><i></i>MARKET RESEARCH</a>
+      <nav class="main-nav" aria-label="Main menu">
+        <a data-nav-category="daily" href="?category=daily">Daily</a>
+        <a data-nav-category="weekly" href="?category=weekly">Weekly</a>
+        <a data-nav-category="research" href="?category=research">Research</a>
+        <a data-nav-category="basics" href="?category=basics">Market Basics</a>
+        <a class="nav-secondary" data-nav-category="note" href="?category=note">Notes</a>
+        <a class="nav-secondary" href="/en/about/">About</a>
+      </nav>
+      <div class="header-actions">
+        <nav class="language-switch" aria-label="Language"><a data-language-choice="ko" href="/">KO</a><span aria-hidden="true">|</span><a data-language-choice="en" href="/en/" aria-current="page">EN</a></nav>
+        <button class="icon-btn" type="button" data-theme-toggle aria-label="Switch to dark mode">◐</button>
+        <button class="icon-btn menu-btn" type="button" data-menu-toggle aria-label="Open menu" aria-expanded="false">☰</button>
+      </div>
+    </div>
+    <nav class="mobile-nav" aria-label="Mobile menu">
+      <a data-nav-category="daily" href="?category=daily">Daily</a>
+      <a data-nav-category="weekly" href="?category=weekly">Weekly</a>
+      <a data-nav-category="research" href="?category=research">Research</a>
+      <a data-nav-category="basics" href="?category=basics">Market Basics</a>
+      <a class="nav-secondary" data-nav-category="note" href="?category=note">Notes</a>
+      <a class="nav-secondary" href="/en/about/">About</a>
+      <div class="mobile-language"><span>Language</span><div><a data-language-choice="ko" href="/">한국어</a><a data-language-choice="en" href="/en/" aria-current="page">English</a></div></div>
+    </nav>
+  </div>
+</header>
+<main>
+  <section class="v2-hero" aria-labelledby="featured-heading">
+    <div class="site-wrap">
+      <div class="featured-carousel" data-carousel aria-roledescription="carousel" aria-label="Featured reports by category">
+        <div class="carousel-stage" id="featured-slide" role="group" aria-roledescription="slide" aria-live="polite">
+          <div class="carousel-copy">
+            <div class="carousel-meta"><span class="carousel-badge" data-slide-category>Daily</span><time data-slide-date datetime="">—</time></div>
+            <h1 id="featured-heading" data-slide-title>Market Research Archive</h1>
+            <p class="carousel-subtitle" data-slide-subtitle></p>
+            <p class="carousel-description" data-slide-description>Market direction, data, and context in one independent archive.</p>
+            <a class="carousel-cta" data-slide-link href="/en/">Read full report <span aria-hidden="true">→</span></a>
+          </div>
+          <div class="carousel-cover" data-slide-cover aria-label="Featured report cover"></div>
+        </div>
+        <div class="carousel-footer">
+          <div class="carousel-tabs" data-carousel-tabs role="tablist" aria-label="Featured report categories"></div>
+          <div class="carousel-status"><span data-slide-current>01</span><span aria-hidden="true">/</span><span data-slide-total>01</span></div>
+          <div class="carousel-arrows">
+            <button type="button" data-slide-prev aria-label="Previous featured report">←</button>
+            <button type="button" data-slide-next aria-label="Next featured report">→</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="site-introduction" aria-label="Latest by category">
+    <div class="site-wrap"><div class="latest-cards" id="latest-category-cards" aria-label="Latest by category"></div></div>
+  </section>
+
+  <section class="section archive-section" aria-labelledby="archive-heading">
+    <div class="site-wrap">
+      <div class="section-head"><h2 id="archive-heading">Recent Reports</h2><span>Newest report date first</span></div>
+      <div class="toolbar">
+        <label class="search"><span class="sr-only">Search reports</span><input id="search-input" type="search" placeholder="Search titles and summaries"></label>
+        <div class="filters" aria-label="Category filters">
+          <button class="filter active" data-filter="all" aria-pressed="true">All</button>
+          <button class="filter" data-filter="daily" aria-pressed="false">Daily</button>
+          <button class="filter" data-filter="weekly" aria-pressed="false">Weekly</button>
+          <button class="filter" data-filter="research" aria-pressed="false">Research</button>
+          <button class="filter" data-filter="basics" aria-pressed="false">Market Basics</button>
+          <button class="filter" data-filter="note" aria-pressed="false">Notes</button>
+        </div>
+      </div>
+      <div class="archive-layout">
+        <div id="report-list" class="report-list"></div>
+        <aside class="archive-index" aria-labelledby="archive-index-heading">
+          <h3 id="archive-index-heading">Archive</h3>
+          <div id="archive-index" class="archive-index-list"></div>
+          <a class="archive-about" href="/en/about/">About this site <span aria-hidden="true">→</span></a>
+        </aside>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="footer"><div class="site-wrap footer-row"><span>Independent Market Research Archive</span><div class="footer-links" aria-label="Site links"><a href="/en/about/">About</a></div></div></footer>
+<script src="/data/posts.js"></script>
+<script src="/assets/locale.js?v=20260812-1"></script>
+<script src="/assets/site.js?v=20260812-1"></script>
+</body>
+</html>

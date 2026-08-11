@@ -13,6 +13,21 @@ const TYPE_LABELS = {
   basics: "시장 공부",
   note: "끄적끄적",
 };
+const EN_TYPE_LABELS = {
+  daily: "Daily",
+  weekly: "Weekly",
+  research: "Research",
+  basics: "Market Basics",
+  note: "Notes",
+};
+
+function postLanguage(post) {
+  return post?.lang === "en" ? "en" : "ko";
+}
+
+function typeLabel(type, lang) {
+  return lang === "en" ? EN_TYPE_LABELS[type] : TYPE_LABELS[type];
+}
 
 function reply(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -286,7 +301,7 @@ export async function onRequestPost(context) {
       const updated = {
         ...existing,
         type: editFields.type,
-        typeLabel: TYPE_LABELS[editFields.type],
+        typeLabel: typeLabel(editFields.type, postLanguage(existing)),
         date: editFields.reportDate,
         reportDate: editFields.reportDate,
         title: editFields.title,

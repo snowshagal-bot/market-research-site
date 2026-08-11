@@ -41,6 +41,7 @@ async function loadAdmin({ confirmResult = false } = {}) {
     'cover-preview-caption', 'cover-preview-note', 'admin-key', 'publish-btn', 'publish-overlay',
     'publish-state-title', 'publish-state-text', 'publish-state-detail', 'publish-links',
     'published-report-link', 'published-home-link', 'category-status'
+    , 'post-language', 'translation-source', 'translation-source-status'
   ];
   const elements = Object.fromEntries(ids.map(id => [id, createElement(id)]));
   const themeButton = createElement('theme-toggle');
@@ -56,6 +57,13 @@ async function loadAdmin({ confirmResult = false } = {}) {
     option.value = value;
     return option;
   });
+  const languageOptions = ['ko', 'en'].map(value => {
+    const option = createElement(`language-${value}`);
+    option.value = value;
+    option.checked = value === 'ko';
+    return option;
+  });
+  elements['post-language'].value = 'ko';
   const windowListeners = new Map();
   const createdUrls = [];
   const revokedUrls = [];
@@ -77,7 +85,7 @@ async function loadAdmin({ confirmResult = false } = {}) {
     },
     FormData: TestFormData,
     setTimeout() {},
-    location: { href: '' },
+    location: { href: '', hostname: 'market-research-site.pages.dev' },
     localStorage: { getItem: () => null, setItem() {} },
     sessionStorage: { getItem: () => null, setItem() {} },
     matchMedia: () => ({ matches: false, addEventListener() {} }),
@@ -110,15 +118,20 @@ async function loadAdmin({ confirmResult = false } = {}) {
       querySelector: selector => selector === '[data-theme-toggle]' ? themeButton : selector === 'meta[name="theme-color"]' ? themeMeta : null,
       querySelectorAll: selector => selector === '[data-cover-preview-mode]'
         ? modeButtons
-        : selector === 'input[name="post-category"]' ? categoryOptions : [],
+        : selector === 'input[name="post-category"]' ? categoryOptions
+          : selector === 'input[name="post-language-choice"]' ? languageOptions : [],
       createElement: tag => createElement(tag)
     },
     window: {
+      RESEARCH_POSTS: [
+        { id: 'ko-source', title: '한국어 원문', reportDate: '2026-08-10', href: 'reports/source.html' },
+        { id: 'en-source', lang: 'en', title: 'English source', reportDate: '2026-08-10', href: 'reports/en/source.html' }
+      ],
       addEventListener(type, handler) { windowListeners.set(type, handler); }
     }
   };
   vm.runInNewContext(source, context);
-  return { elements, modeButtons, categoryOptions, createdUrls, revokedUrls, windowListeners, submissions, confirmMessages };
+  return { elements, modeButtons, categoryOptions, languageOptions, createdUrls, revokedUrls, windowListeners, submissions, confirmMessages };
 }
 
 const validCover = (name = 'cover.webp') => ({ name, type: 'image/webp', size: 320 * 1024 });
@@ -191,6 +204,30 @@ test('manual category override becomes the final publish FormData value', async 
   await elements['publish-btn'].emit('click');
   assert.equal(submissions.length, 1);
   assert.equal(submissions[0].entries.find(([name]) => name === 'type')?.[1], 'weekly');
+});
+
+test('language defaults to Korean and English selection submits an optional translation group', async () => {
+  const { elements, languageOptions, submissions } = await loadAdmin({ confirmResult: true });
+  assert.equal(elements['post-language'].value, 'ko');
+  assert.equal(languageOptions.find(option => option.checked)?.value, 'ko');
+
+  const english = languageOptions.find(option => option.value === 'en');
+  english.checked = true;
+  english.emit('change');
+  assert.equal(elements['post-language'].value, 'en');
+  elements['translation-source'].value = 'ko-source';
+  elements['admin-key'].value = 'test-key';
+  elements['html-file'].files = [{
+    name: 'weekly-report.html',
+    size: 100,
+    text: async () => '<!doctype html><title>Weekly report</title>'
+  }];
+  await elements['html-file'].emit('change');
+  await elements['publish-btn'].emit('click');
+
+  assert.equal(submissions.length, 1);
+  assert.equal(submissions[0].entries.find(([name]) => name === 'lang')?.[1], 'en');
+  assert.equal(submissions[0].entries.find(([name]) => name === 'translationGroup')?.[1], 'ko-source');
 });
 
 test('publish remains disabled when category detection has no result', async () => {

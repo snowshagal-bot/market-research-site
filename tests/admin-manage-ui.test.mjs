@@ -127,7 +127,7 @@ test('manage page includes navigation, list controls, immutable metadata, edit f
   assert.match(html, /href="\.\/" aria-current="page">게시물 관리/);
   assert.match(html, /id="manage-search"[^>]*type="search"/);
   for (const type of ['all', 'daily', 'weekly', 'research', 'basics', 'note']) assert.match(html, new RegExp(`data-filter="${type}"`));
-  for (const id of ['manage-id', 'manage-href', 'manage-registered-date', 'manage-registered-at']) assert.match(html, new RegExp(`id="${id}"[^>]*readonly`));
+  for (const id of ['manage-id', 'manage-href', 'manage-registered-date', 'manage-registered-at', 'manage-language', 'manage-translation-group']) assert.match(html, new RegExp(`id="${id}"[^>]*readonly`));
   for (const id of ['manage-type', 'manage-date', 'manage-title', 'manage-subtitle', 'manage-description']) assert.match(html, new RegExp(`id="${id}"`));
   assert.match(html, /id="replacement-html"[^>]*accept="\.html,text\/html"/);
   assert.match(html, /id="html-preview-frame"[^>]*sandbox="allow-scripts"/);
@@ -170,6 +170,8 @@ test('manage client keeps immutable values server-owned and preserves current hr
   assert.match(source, /selectedHtml[^\n]+body\.append\('file'/);
   assert.match(source, /htmlFrame\.srcdoc = source/);
   assert.match(source, /body\.append\('confirmTitle', deleteTitleConfirm\.value\)/);
+  assert.match(source, /next\.lang === 'en' \? 'English \(en\)'/);
+  assert.match(source, /next\.translationGroup \|\| '연결 없음'/);
   assert.match(source, /deleteTitleConfirm\.value !== selectedPost\.title/);
   assert.match(source, /Preview에서는 실제 저장·삭제를 실행할 수 없습니다/);
   assert.match(source, /DEPLOY_POLL_INTERVAL_MS = 2500/);

@@ -1,6 +1,6 @@
 # UI and responsive rules
 
-Updated: 2026-08-11
+Updated: 2026-08-12
 
 ## Design direction
 
@@ -28,6 +28,15 @@ If a change is made specifically to mobile, test desktop before marking it compl
 
 ## Navigation
 
+Language navigation:
+
+- Korean remains the default at `/`; English uses `/en/` without browser-language redirects.
+- desktop uses a restrained text `KO | EN` control beside the theme toggle;
+- mobile puts a `Language` section at the bottom of the hamburger menu instead of adding another header button;
+- no flag icons;
+- explicit homepage language switches preserve the current `?category=` value, and About switches between `/about/` and `/en/about/`;
+- the active locale is clear but visually secondary to report navigation.
+
 Homepage public categories:
 
 - 데일리
@@ -44,6 +53,8 @@ Report pages use a fixed shared top bar:
 `← 홈 | 데일리 | 위클리 | 비정기 | 시장 공부 | 끄적끄적 | 소개`
 
 The current category should have a clear but restrained active state. The report navigation is injected outside the original report design and must remain visually stable regardless of report-specific CSS.
+
+English report pages use the same isolated top bar with English category and comment copy. Their KO/EN switch should prefer a matching `translationGroup` report and fall back to the selected locale homepage when no counterpart exists.
 
 ## Homepage featured carousel
 

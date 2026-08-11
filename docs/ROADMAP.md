@@ -1,25 +1,30 @@
 # Roadmap
 
-Updated: 2026-08-11
+Updated: 2026-08-12
 
 This roadmap records implementation order, not a promise to build every future idea. Keep the current site small until traffic and actual needs justify added complexity.
 
 ## Next action
 
-Review the homepage archive and admin category-selection Draft PR. Validate the dynamic archive counts, responsive two-column-to-one-column transition, category query navigation, and automatic/manual admin category state without performing a real publish.
+Review the KO/EN structure Draft PR in Cloudflare Preview. Validate locale-isolated homepage data, language switches, English empty states, report-shell fallback behavior, and admin language/pair controls without performing a real publish, update, or delete.
 
 ## In progress
 
-### 9. Homepage archive density and admin category selection
+### 10. Korean / English site structure
 
 In the current Draft PR:
 
-- place a dynamic five-category archive index beside the denser recent-report list on desktop and stack it below on smaller screens;
-- keep search, category query filtering, report ordering, and the manual carousel unchanged;
-- replace the new-report category select with five always-visible accessible radio chips;
-- show automatic detection, unknown, and manual override states while preserving the existing publish FormData type values.
+- add `/en/` and `/en/about/` while keeping Korean as the default locale;
+- isolate carousel, latest cards, archive counts, search, and filters by post language, with missing `lang` treated as Korean;
+- add explicit desktop/mobile KO/EN controls without automatic browser-language redirects;
+- support `translationGroup` report counterparts and localized report-shell/comment copy without editing uploaded report HTML;
+- publish English HTML under `reports/en/`, expose a simple optional pair selector, and preserve locale metadata in management updates.
 
 ## Completed
+
+### 9. Homepage archive density and admin category selection
+
+Squash-merged and deployed to Production on 2026-08-12. The homepage now uses a dynamic five-category archive index beside compact recent-report rows on desktop and stacked below on smaller screens. The new-report admin keeps five accessible category chips visible, with conservative automatic detection and manual override.
 
 ### 8. Post-management deployment feedback
 
@@ -125,13 +130,9 @@ Not urgent while traffic is very low. The site can continue on `pages.dev`. Add 
 
 Tistory does not need automatic cross-posting. Use Tistory/social posts as distribution channels linking back to the canonical website.
 
-### International expansion
+### International expansion follow-ups
 
-When there is evidence of overseas readership:
-
-- consider locale-aware URLs such as `/ko/`, `/en/`, `/ja/`;
-- start with translated title/summary and selected high-value reports rather than translating everything;
-- then add sitemap/hreflang/canonical metadata as needed.
+The KO/EN URL and publishing structure is now being introduced. Add actual English reports only through the authenticated publishing flow when translations are ready. Consider sitemap, hreflang, canonical metadata, or more locales later, based on real readership; do not bulk-translate or duplicate existing production records merely to populate the English archive.
 
 ### Ads / donations / paid access
 

@@ -1,24 +1,24 @@
 (function(){
-  const categories = {
-    daily: { label: '데일리', english: 'DAILY', description: '오늘 시장의 흐름과 수급을 기록합니다.' },
-    weekly: { label: '위클리', english: 'WEEKLY', description: '한 주의 시장을 복기하고 다음 변수를 살핍니다.' },
-    research: { label: '비정기', english: 'RESEARCH', description: '산업·기업·정책의 구조적 변화를 깊이 읽습니다.' },
-    basics: { label: '시장 공부', english: 'MARKET BASICS', description: '경제와 투자의 기본 개념을 차분히 설명합니다.' },
-    note: { label: '끄적끄적', english: 'NOTES', description: '시장과 투자에 관한 짧은 생각을 기록합니다.' }
-  };
+  const localeApi = window.MARKET_LOCALE;
+  const html = document.documentElement;
+  const body = document.body;
+  const locale = localeApi?.siteLanguage(document) || (html.lang === 'en' ? 'en' : 'ko');
+  const messages = localeApi?.copy?.[locale] || localeApi?.copy?.ko;
+  const categories = messages.categories;
   const coreTypes = ['daily', 'weekly', 'research', 'basics'];
   const validTypes = ['all', ...coreTypes, 'note'];
-  const posts = (window.RESEARCH_POSTS || []).slice().sort((a,b)=>{
+  const allPosts = (window.RESEARCH_POSTS || []).slice();
+  const localizedPosts = localeApi?.localePosts(allPosts, locale) || allPosts.filter(post => (post.lang === 'en' ? 'en' : 'ko') === locale);
+  const posts = localeApi?.sortPosts(localizedPosts) || localizedPosts.sort((a,b)=>{
     const da=String(a.reportDate||a.date||'');
     const db=String(b.reportDate||b.date||'');
     if(da!==db) return db.localeCompare(da);
     return String(b.registeredAt||'').localeCompare(String(a.registeredAt||''));
   });
-  const html = document.documentElement;
-  const body = document.body;
   const themeBtn = document.querySelector('[data-theme-toggle]');
   const menuBtn = document.querySelector('[data-menu-toggle]');
   const mobileNav = document.querySelector('.mobile-nav');
+  const languageLinks = Array.from(document.querySelectorAll('[data-language-choice]'));
   const list = document.getElementById('report-list');
   const search = document.getElementById('search-input');
   const filters = Array.from(document.querySelectorAll('[data-filter]'));
@@ -40,7 +40,7 @@
     const themeMeta = document.querySelector('meta[name="theme-color"]');
     if(themeMeta) themeMeta.setAttribute('content', actual === 'dark' ? '#161816' : '#f5f0e6');
     if(themeBtn){
-      themeBtn.setAttribute('aria-label', actual === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환');
+      themeBtn.setAttribute('aria-label', actual === 'dark' ? messages.themeLight : messages.themeDark);
       themeBtn.textContent = actual === 'dark' ? '☀' : '◐';
     }
   }
@@ -56,7 +56,16 @@
   if(menuBtn && mobileNav) menuBtn.addEventListener('click',()=>{
     const open = mobileNav.classList.toggle('open');
     menuBtn.setAttribute('aria-expanded',String(open));
-    menuBtn.setAttribute('aria-label',open ? '메뉴 닫기' : '메뉴 열기');
+    menuBtn.setAttribute('aria-label',open ? messages.menuClose : messages.menuOpen);
+  });
+
+  languageLinks.forEach(link=>{
+    const target = link.dataset.languageChoice;
+    if(!localeApi?.validLanguages.includes(target)) return;
+    link.href = localeApi.pageLanguagePath(location.pathname, target, location.search);
+    link.addEventListener('click',()=>{
+      try { localStorage.setItem('site-language', target); } catch (_) {}
+    });
   });
 
   const isHomepage = Boolean(list && search && document.querySelector('[data-carousel]') && document.getElementById('latest-category-cards'));
@@ -66,10 +75,11 @@
     return String(value ?? '').replace(/[&<>"']/g,character=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[character]));
   }
   function reportDate(post){ return post.reportDate || post.date || ''; }
-  function categoryInfo(type){ return categories[type] || { label: type || '리포트', english: 'REPORT' }; }
+  function rootPath(path){ return `/${String(path || '').replace(/^\/+/, '')}`; }
+  function categoryInfo(type){ return categories[type] || { label: type || (locale === 'en' ? 'Report' : '리포트'), english: 'REPORT', description: '' }; }
   function latestFor(type){ return posts.find(post=>post.type===type) || null; }
 
-  const slides = coreTypes.map(type=>latestFor(type)).filter(Boolean);
+  const slides = localeApi?.latestByCore(allPosts, locale, coreTypes) || coreTypes.map(type=>latestFor(type)).filter(Boolean);
   let slideIndex = Math.max(0, slides.findIndex(post=>post.type===active));
   const carousel = document.querySelector('[data-carousel]');
   const stage = document.getElementById('featured-slide');
@@ -89,7 +99,8 @@
   function coverMarkup(post){
     const info = categoryInfo(post.type);
     if(post.coverImage){
-      return `<img src="${esc(post.coverImage)}" alt="${esc(post.title)} 커버 이미지" loading="eager">`;
+      const alt = locale === 'en' ? `${post.title} ${messages.coverAlt}` : `${post.title} ${messages.coverAlt}`;
+      return `<img src="${esc(rootPath(post.coverImage))}" alt="${esc(alt)}" loading="eager">`;
     }
     return `<div class="cover-fallback" data-fallback-category="${esc(post.type)}"><span class="cover-brand">MARKET RESEARCH</span><span class="cover-category">${esc(info.english)}</span><strong>${esc(post.title)}</strong><time datetime="${esc(reportDate(post))}">${esc(reportDate(post))}</time></div>`;
   }
@@ -103,7 +114,7 @@
     const post = slides[slideIndex];
     const info = categoryInfo(post.type);
     stage.dataset.category = post.type;
-    stage.setAttribute('aria-label',`${slideIndex + 1}/${slides.length} ${info.label} 대표 리포트`);
+    stage.setAttribute('aria-label',`${slideIndex + 1}/${slides.length} ${info.label} ${messages.representative}`);
     slideCategory.textContent = info.label;
     slideDate.textContent = reportDate(post);
     slideDate.dateTime = reportDate(post);
@@ -111,7 +122,7 @@
     slideSubtitle.textContent = post.subtitle || '';
     slideSubtitle.hidden = !post.subtitle;
     slideDescription.textContent = post.description || info.description;
-    slideLink.href = post.href;
+    slideLink.href = rootPath(post.href);
     slideCover.innerHTML = coverMarkup(post);
     slideCurrent.textContent = String(slideIndex + 1).padStart(2,'0');
     slideTotal.textContent = String(slides.length).padStart(2,'0');
@@ -132,7 +143,8 @@
     }
     tabs.innerHTML = slides.map((post,index)=>{
       const info=categoryInfo(post.type);
-      return `<button type="button" role="tab" aria-controls="featured-slide" aria-selected="${index===slideIndex}" tabindex="${index===slideIndex?0:-1}" data-slide-tab="${index}" aria-label="${esc(info.label)} 대표 리포트 보기">${esc(info.label)}</button>`;
+      const label = locale === 'en' ? `View featured ${info.label} report` : `${info.label} 대표 리포트 보기`;
+      return `<button type="button" role="tab" aria-controls="featured-slide" aria-selected="${index===slideIndex}" tabindex="${index===slideIndex?0:-1}" data-slide-tab="${index}" aria-label="${esc(label)}">${esc(info.label)}</button>`;
     }).join('');
     tabs.querySelectorAll('[data-slide-tab]').forEach(tab=>tab.addEventListener('click',()=>setSlide(Number(tab.dataset.slideTab))));
     previous.disabled = slides.length < 2;
@@ -165,9 +177,11 @@
   function renderHighlights(){
     const host=document.getElementById('latest-category-cards');
     const highlights=['daily','weekly','research'].map(type=>latestFor(type)).filter(Boolean);
+    const section=host.closest('.site-introduction');
+    if(section) section.hidden=!highlights.length;
     host.innerHTML=highlights.map(post=>{
       const info=categoryInfo(post.type);
-      return `<a class="latest-card" href="${esc(post.href)}"><span>${esc(info.label)} · ${esc(reportDate(post))}</span><strong>${esc(post.title)}</strong><i aria-hidden="true">→</i></a>`;
+      return `<a class="latest-card" href="${esc(rootPath(post.href))}"><span>${esc(info.label)} · ${esc(reportDate(post))}</span><strong>${esc(post.title)}</strong><i aria-hidden="true">→</i></a>`;
     }).join('');
   }
 
@@ -183,7 +197,7 @@
 
   function renderArchiveIndex(){
     if(!archiveIndex) return;
-    const counts=posts.reduce((result,post)=>{
+    const counts=localeApi?.categoryCounts(allPosts, locale, [...coreTypes,'note']) || posts.reduce((result,post)=>{
       if(coreTypes.includes(post.type)||post.type==='note') result[post.type]=(result[post.type]||0)+1;
       return result;
     },{});
@@ -196,7 +210,7 @@
 
   function renderArchive(){
     const query=(search?.value||'').trim().toLowerCase();
-    const filtered=posts.filter(post=>(active==='all'||post.type===active)&&(!query||`${post.title} ${post.subtitle||''} ${post.typeLabel||''} ${post.description||''}`.toLowerCase().includes(query)));
+    const filtered=localeApi?.searchPosts(allPosts, locale, query, active) || posts.filter(post=>(active==='all'||post.type===active)&&(!query||`${post.title} ${post.subtitle||''} ${post.typeLabel||''} ${post.description||''}`.toLowerCase().includes(query)));
     filters.forEach(button=>{
       const selected=button.dataset.filter===active;
       button.classList.toggle('active',selected);
@@ -205,14 +219,14 @@
     renderNavigation();
     renderArchiveIndex();
     if(!filtered.length){
-      const message=active==='basics'?'시장 공부 글이 아직 없습니다.':'조건에 맞는 글이 없습니다.';
-      list.innerHTML=`<div class="empty">${message}</div>`;
+      const message=active==='basics'?messages.basicsEmpty:messages.empty;
+      list.innerHTML=`<div class="empty">${esc(message)}</div>`;
       return;
     }
     list.innerHTML=filtered.map(post=>{
       const info=categoryInfo(post.type);
       const subtitle=post.subtitle?`<div class="report-subtitle">${esc(post.subtitle)}</div>`:'';
-      return `<a class="report-item" href="${esc(post.href)}"><div><span class="report-type ${esc(post.type)}">${esc(info.label)}</span><span class="report-date">${esc(reportDate(post))}</span></div><div><div class="report-title">${esc(post.title)}</div>${subtitle}</div><span class="report-arrow"><span class="report-read-label">읽기</span><span aria-hidden="true">→</span></span></a>`;
+      return `<a class="report-item" href="${esc(rootPath(post.href))}"><div><span class="report-type ${esc(post.type)}">${esc(info.label)}</span><span class="report-date">${esc(reportDate(post))}</span></div><div><div class="report-title">${esc(post.title)}</div>${subtitle}</div><span class="report-arrow"><span class="report-read-label">${esc(messages.read)}</span><span aria-hidden="true">→</span></span></a>`;
     }).join('');
   }
 
@@ -222,6 +236,10 @@
     if(active==='all') url.searchParams.delete('category');
     else url.searchParams.set('category',active);
     history.replaceState(null,'',url);
+    languageLinks.forEach(link=>{
+      const target=link.dataset.languageChoice;
+      link.href=localeApi.pageLanguagePath(location.pathname,target,url.search);
+    });
     const matchingSlide=slides.findIndex(post=>post.type===active);
     if(matchingSlide>=0) setSlide(matchingSlide);
     renderArchive();

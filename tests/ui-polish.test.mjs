@@ -45,8 +45,11 @@ test('shared report shell reuses site theme and exposes accessible comment field
   assert.match(script, /localStorage\.getItem\('site-theme'\)/);
   assert.match(script, /host\.dataset\.theme = theme/);
   assert.equal((script.match(/aria-current=\"true\"/g) || []).length, 5);
-  for (const label of ['닉네임', '삭제용 비밀번호', '댓글 내용']) {
-    assert.match(script, new RegExp(`aria-label="${label}"`));
-  }
+  assert.match(script, /nickname: '닉네임'/);
+  assert.match(script, /password: '삭제용 비밀번호'/);
+  assert.match(script, /body: '댓글을 입력하세요\.'/);
+  assert.match(script, /aria-label="\$\{copy\.nickname\}"/);
+  assert.match(script, /aria-label="\$\{copy\.password\}"/);
+  assert.match(script, /aria-label="\$\{copy\.body\}"/);
   assert.match(script, /:focus-visible/);
 });
