@@ -33,7 +33,7 @@ function githubMock(existingPosts = []) {
   return calls;
 }
 
-function publishRequest({ type = 'daily', cover = null, lang = 'ko', translationGroup = '' } = {}, url = 'https://market-research-site.pages.dev/api/publish') {
+function publishRequest({ type = 'daily', cover = null, lang = 'ko', translationGroup = '', summary } = {}, url = 'https://market-research-site.pages.dev/api/publish') {
   const form = new FormData();
   form.append('file', new File(['<!doctype html><html><body>report</body></html>'], 'report.html', { type: 'text/html' }));
   form.append('type', type);
@@ -41,6 +41,7 @@ function publishRequest({ type = 'daily', cover = null, lang = 'ko', translation
   form.append('title', type === 'basics' ? '시장을 읽는 기본' : '테스트 리포트');
   form.append('subtitle', '테스트 부제');
   form.append('description', '테스트 설명');
+  if (summary !== undefined) form.append('summary', summary);
   form.append('filename', `${type}-report.html`);
   form.append('lang', lang);
   if (translationGroup) form.append('translationGroup', translationGroup);
@@ -95,6 +96,7 @@ test('publishing without a cover preserves existing records and omits coverImage
     const posts = JSON.parse(postsEntry.content);
     assert.deepEqual(posts.find(post => post.id === 'legacy'), existing[0]);
     assert.equal(Object.hasOwn(posts.find(post => post.id !== 'legacy'), 'coverImage'), false);
+    assert.equal(Object.hasOwn(posts.find(post => post.id !== 'legacy'), 'summary'), false);
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -119,6 +121,22 @@ test('publishing Market Basics with a cover stores a binary blob and coverImage 
     assert.equal(post.coverImage, data.coverImage);
   } finally {
     globalThis.fetch = originalFetch;
+  }
+});
+
+test('publishing stores an optional trimmed homepage summary up to 500 characters', async () => {
+  for (const [input, expected] of [
+    ['  홈페이지 전용 요약  ', '홈페이지 전용 요약'],
+    ['요'.repeat(520), '요'.repeat(500)]
+  ]) {
+    const calls = githubMock();
+    try {
+      const { response, data } = await runPublish({ summary: input });
+      assert.equal(response.status, 200);
+      const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+      const post = JSON.parse(tree.find(entry => entry.path === 'data/posts.json').content).find(item => item.id === data.id);
+      assert.equal(post.summary, expected);
+    } finally { globalThis.fetch = originalFetch; }
   }
 });
 

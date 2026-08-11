@@ -239,6 +239,7 @@
     $('manage-title').value = next.title || '';
     $('manage-subtitle').value = next.subtitle || '';
     $('manage-description').value = next.description || '';
+    $('manage-summary').value = next.summary || '';
     $('current-report-link').href = `../../${next.href}`;
     document.querySelector('input[name="cover-action"][value="keep"]').checked = true;
     deleteConfirmation.hidden = true;
@@ -319,6 +320,7 @@
     body.append('title', $('manage-title').value.trim());
     body.append('subtitle', $('manage-subtitle').value.trim());
     body.append('description', $('manage-description').value.trim());
+    body.append('summary', $('manage-summary').value.trim());
     body.append('coverAction', coverAction());
     if (selectedHtml) body.append('file', selectedHtml, selectedHtml.name);
     if (coverAction() === 'replace' && selectedCover) body.append('cover', selectedCover, selectedCover.name);

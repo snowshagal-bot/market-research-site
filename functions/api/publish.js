@@ -172,6 +172,7 @@ export async function onRequestPost(context) {
   const title = String(form.get('title') || '').trim().slice(0, 180);
   const subtitle = String(form.get('subtitle') || '').trim().slice(0, 240);
   const description = String(form.get('description') || '').trim().slice(0, 700);
+  const summary = String(form.get('summary') || '').trim().slice(0, 500);
   const filename = safeFilename(form.get('filename') || file?.name || 'report.html');
 
   if (!file || typeof file.text !== 'function') return reply({ error: 'NO_FILE', message: 'HTML 파일이 없습니다.' }, 400);
@@ -226,6 +227,7 @@ export async function onRequestPost(context) {
       title,
       subtitle,
       description,
+      ...(summary ? { summary } : {}),
       href,
       ...(translationGroup ? { translationGroup } : {}),
       ...(coverPath ? { coverImage: coverPath } : {})

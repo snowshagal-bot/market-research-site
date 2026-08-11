@@ -144,6 +144,27 @@ test('metadata update preserves lang and translationGroup without moving the rep
   } finally { globalThis.fetch = originalFetch; }
 });
 
+test('summary updates are capped at 500 characters and omitted fields preserve existing summary', async () => {
+  const summarized = { ...basePost, summary: '기존 홈페이지 요약', lang: 'en', translationGroup: 'pair-1' };
+  let calls = githubMock([summarized]);
+  try {
+    const { response } = await run({ summary: null });
+    assert.equal(response.status, 200);
+    const updated = postsFromTree(treeFrom(calls))[0];
+    assert.equal(updated.summary, summarized.summary);
+    assert.equal(updated.lang, 'en');
+    assert.equal(updated.translationGroup, 'pair-1');
+  } finally { globalThis.fetch = originalFetch; }
+
+  calls = githubMock([summarized]);
+  try {
+    const { response } = await run({ summary: '새'.repeat(520) });
+    assert.equal(response.status, 200);
+    const updated = postsFromTree(treeFrom(calls))[0];
+    assert.equal(updated.summary, '새'.repeat(500));
+  } finally { globalThis.fetch = originalFetch; }
+});
+
 test('optional HTML replacement keeps href and validates standalone HTML before GitHub access', async () => {
   const calls = githubMock();
   try {

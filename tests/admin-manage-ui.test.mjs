@@ -128,7 +128,7 @@ test('manage page includes navigation, list controls, immutable metadata, edit f
   assert.match(html, /id="manage-search"[^>]*type="search"/);
   for (const type of ['all', 'daily', 'weekly', 'research', 'basics', 'note']) assert.match(html, new RegExp(`data-filter="${type}"`));
   for (const id of ['manage-id', 'manage-href', 'manage-registered-date', 'manage-registered-at', 'manage-language', 'manage-translation-group']) assert.match(html, new RegExp(`id="${id}"[^>]*readonly`));
-  for (const id of ['manage-type', 'manage-date', 'manage-title', 'manage-subtitle', 'manage-description']) assert.match(html, new RegExp(`id="${id}"`));
+  for (const id of ['manage-type', 'manage-date', 'manage-title', 'manage-subtitle', 'manage-description', 'manage-summary']) assert.match(html, new RegExp(`id="${id}"`));
   assert.match(html, /id="replacement-html"[^>]*accept="\.html,text\/html"/);
   assert.match(html, /id="html-preview-frame"[^>]*sandbox="allow-scripts"/);
   assert.doesNotMatch(html, /sandbox="[^"]*allow-same-origin/);
@@ -142,6 +142,7 @@ test('manage page includes navigation, list controls, immutable metadata, edit f
   assert.match(html, /id="manage-result-overlay"[^>]*role="dialog"[^>]*aria-modal="true"/);
   assert.match(html, /id="manage-result-home"[^>]*href="\/"/);
   assert.match(html, /id="manage-result-continue"/);
+  assert.match(html, /admin-manage\.js\?v=20260812-1/);
 });
 
 test('client list sorting, title/href search, category filters, file validation, and Preview safety are deterministic', async () => {
@@ -170,12 +171,32 @@ test('manage client keeps immutable values server-owned and preserves current hr
   assert.match(source, /selectedHtml[^\n]+body\.append\('file'/);
   assert.match(source, /htmlFrame\.srcdoc = source/);
   assert.match(source, /body\.append\('confirmTitle', deleteTitleConfirm\.value\)/);
+  assert.match(source, /body\.append\('summary', \$\('manage-summary'\)\.value\.trim\(\)\)/);
   assert.match(source, /next\.lang === 'en' \? 'English \(en\)'/);
   assert.match(source, /next\.translationGroup \|\| '연결 없음'/);
   assert.match(source, /deleteTitleConfirm\.value !== selectedPost\.title/);
   assert.match(source, /Preview에서는 실제 저장·삭제를 실행할 수 없습니다/);
   assert.match(source, /DEPLOY_POLL_INTERVAL_MS = 2500/);
   assert.match(source, /DEPLOY_POLL_MAX_ATTEMPTS = 36/);
+});
+
+test('manage editor displays legacy blank summaries and submits edited summary values', async () => {
+  const { helpers, elements } = await loadClientHelpers();
+  const legacy = {
+    id: 'legacy', type: 'daily', reportDate: '2026-08-11', date: '2026-08-11',
+    registeredDate: '2026-08-11', registeredAt: '2026-08-11T00:00:00Z',
+    title: '레거시 게시물', subtitle: '', description: '기존 설명', href: 'reports/legacy.html'
+  };
+  helpers.setPosts([legacy]);
+  helpers.selectPost(legacy.id);
+  assert.equal(elements['manage-summary'].value, '');
+  elements['manage-summary'].value = '관리 화면에서 수정한 요약';
+  assert.equal(helpers.buildUpdateForm().get('summary'), '관리 화면에서 수정한 요약');
+
+  const summarized = { ...legacy, id: 'summarized', summary: '저장된 요약' };
+  helpers.setPosts([summarized]);
+  helpers.selectPost(summarized.id);
+  assert.equal(elements['manage-summary'].value, '저장된 요약');
 });
 
 test('cover replacement is excluded until decode succeeds and remains excluded after decode failure', async () => {
@@ -360,6 +381,10 @@ test('repository posts metadata is synchronized and follows stable schema invari
       assert.equal(typeof post.coverImage, 'string');
       assert.match(post.coverImage, /^covers\/[^/\\]+\.(?:jpe?g|png|webp)$/i);
       assert.ok(!post.coverImage.includes('..'));
+    }
+    if (Object.hasOwn(post, 'summary')) {
+      assert.equal(typeof post.summary, 'string');
+      assert.ok(post.summary.length <= 500);
     }
   }
 });

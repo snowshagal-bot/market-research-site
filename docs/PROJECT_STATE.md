@@ -41,6 +41,7 @@ The homepage supports category filtering and search. Its v2 featured carousel se
 Homepage v2 also provides:
 
 - manual previous/next and category-tab carousel controls with no autoplay
+- an optional homepage-only `summary` teaser, falling back to the existing `description` and then category copy for legacy posts
 - optional post cover images through `coverImage`
 - rendered 900×1350 WebP covers for the latest representative DAILY, WEEKLY, and RESEARCH posts
 - CSS/typographic fallback covers for posts without `coverImage`
@@ -53,11 +54,11 @@ Homepage v2 also provides:
 Admin page: `/admin/`
 
 1. User drops a standalone HTML report into the admin page.
-2. `assets/admin.js` reads the file locally and attempts to infer category, report date, title, and subtitle. The five report categories remain visible as keyboard-accessible radio chips; automatic detection selects an initial value and the administrator can override it before publishing.
+2. `assets/admin.js` reads the file locally and attempts to infer category, report date, title, subtitle, and optional `meta[name="report-summary"]`. The five report categories remain visible as keyboard-accessible radio chips; automatic detection selects an initial value and the administrator can override it before publishing.
 3. The administrator chooses Korean (default) or English and may optionally connect an opposite-language post as its translation pair.
 4. Title extraction prefers report metadata/HTML content such as `meta[name="report-title"]`, `h1`, cover title, generic title class, and finally document title/file name.
 5. An optional cover can be reviewed locally with the homepage's actual `cover` / `center top` crop at PC 1280, mobile 430, and mobile 360 before publishing. The preview uses a temporary browser object URL and does not upload the image.
-6. User can review/edit the extracted publishing metadata before publishing.
+6. User can review/edit the extracted publishing metadata before publishing. `summary` is an optional homepage hero teaser, separate from `description`; 2–3 sentences or about 90–140 characters is recommended.
 7. `/api/publish` authenticates with `ADMIN_KEY` and uses `GITHUB_TOKEN` server-side. It accepts only `ko` or `en`; Korean reports keep `reports/`, while English reports are written under `reports/en/`.
 8. An optional JPG/PNG/WebP cover image can be uploaded separately from the report HTML.
 9. A single Git commit updates the report HTML, optional `covers/` asset, `data/posts.json`, and `data/posts.js`.
@@ -74,7 +75,7 @@ The management page extends the existing static admin and GitHub-backed publishi
 
 - loads and sorts the canonical `data/posts.json` list, with title/URL search and category filters;
 - displays each post's language, treating legacy missing `lang` as Korean, and shows but does not edit `translationGroup`;
-- edits only category, report date, title, subtitle, and description while preserving post ID, public URL, registration fields, and legacy-import state;
+- edits category, report date, title, subtitle, description, and optional homepage summary while preserving post ID, public URL, registration fields, and legacy-import state;
 - optionally replaces standalone report HTML at its existing `reports/` path;
 - keeps, replaces, or removes the optional homepage cover with the same PC/mobile crop preview used by the homepage;
 - requires a confirmation prompt plus exact-title entry before deletion;

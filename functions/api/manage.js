@@ -202,6 +202,8 @@ function validateEditableFields(form) {
     title,
     subtitle: String(form.get("subtitle") || "").trim(),
     description: String(form.get("description") || "").trim(),
+    summaryProvided: form.has("summary"),
+    summary: String(form.get("summary") || "").trim().slice(0, 500),
   };
 }
 
@@ -309,6 +311,10 @@ export async function onRequestPost(context) {
         description: editFields.description,
         updatedAt: new Date().toISOString(),
       };
+      if (editFields.summaryProvided) {
+        if (editFields.summary) updated.summary = editFields.summary;
+        else delete updated.summary;
+      }
 
       if (replacementHtml !== null) {
         entries.push({ path: existing.href, mode: "100644", type: "blob", content: replacementHtml });
