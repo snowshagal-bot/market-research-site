@@ -91,13 +91,24 @@
 
   try { adminKey.value = sessionStorage.getItem('mrs-admin-key') || ''; } catch (_) {}
 
-  function detectType(name, text) {
-    const s = `${name} ${text.slice(0, 4000)}`;
-    if (/시장\s*공부|경제\s*공부|주식\s*공부|market\s*basics|investing\s*basics|explainer/i.test(s)) return 'basics';
-    if (/비정기|소버린|technology\s*&\s*policy|research/i.test(s)) return 'research';
-    if (/위클리|weekly/i.test(s)) return 'weekly';
-    if (/주식리포트|데일리|daily market report|kospi daily/i.test(s)) return 'daily';
-    if (/끄적|essay|note/i.test(s)) return 'note';
+  function detectType(name, doc, text) {
+    const allowedTypes = ['daily', 'weekly', 'research', 'basics', 'note'];
+    const declaredType = doc.querySelector('meta[name="report-type"]')?.content?.trim().toLowerCase();
+    if (allowedTypes.includes(declaredType)) return declaredType;
+
+    const strongSignals = `${name} ${doc.title || ''}`;
+    if (/시장\s*공부|경제\s*공부|주식\s*공부|market\s*basics|investing\s*basics|explainer/i.test(strongSignals)) return 'basics';
+    if (/위클리|weekly/i.test(strongSignals)) return 'weekly';
+    if (/주식리포트|데일리|daily(?:\s+market)?|kospi\s+daily/i.test(strongSignals)) return 'daily';
+    if (/비정기|소버린|technology\s*&\s*policy|research\s+(?:report|brief|analysis)/i.test(strongSignals) || /^research(?:[-_\s]*(?:report|brief|analysis))?\.html?$/i.test(name)) return 'research';
+    if (/끄적|essay|(?:^|[\s_.-])notes?(?=$|[\s_.-])/i.test(strongSignals)) return 'note';
+
+    const bodySignals = text.slice(0, 4000);
+    if (/시장\s*공부|경제\s*공부|주식\s*공부|market\s*basics|investing\s*basics|explainer/i.test(bodySignals)) return 'basics';
+    if (/위클리|weekly/i.test(bodySignals)) return 'weekly';
+    if (/주식리포트|데일리|daily\s+market|kospi\s+daily/i.test(bodySignals)) return 'daily';
+    if (/비정기|소버린|technology\s*&\s*policy|research\s+(?:report|brief|analysis)/i.test(bodySignals)) return 'research';
+    if (/끄적|essay|(?:^|[\s_.-])notes?(?=$|[\s_.-])/i.test(bodySignals)) return 'note';
     return '';
   }
 
@@ -310,7 +321,7 @@
     status.textContent = 'HTML을 분석하는 중…';
     const text = await file.text();
     const doc = new DOMParser().parseFromString(text, 'text/html');
-    const detectedType = detectType(file.name, text);
+    const detectedType = detectType(file.name, doc, text);
     const detectedDate = detectDate(file.name, doc, text);
     const detectedTitle = detectTitle(file.name, doc);
     const detectedSubtitle = detectSubtitle(doc);

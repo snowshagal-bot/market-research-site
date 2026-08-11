@@ -82,7 +82,19 @@ async function loadAdmin({ confirmResult = false } = {}) {
     sessionStorage: { getItem: () => null, setItem() {} },
     matchMedia: () => ({ matches: false, addEventListener() {} }),
     DOMParser: class {
-      parseFromString() { return { title: '', querySelector: () => null }; }
+      parseFromString(text) {
+        const title = text.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1]?.trim() || '';
+        return {
+          title,
+          querySelector(selector) {
+            const metaName = selector.match(/^meta\[name="([^"]+)"\]$/)?.[1];
+            if (!metaName) return null;
+            const tag = text.match(new RegExp(`<meta\\s+[^>]*name=["']${metaName}["'][^>]*>`, 'i'))?.[0];
+            const content = tag?.match(/content=["']([^"']*)["']/i)?.[1];
+            return content === undefined ? null : { content };
+          }
+        };
+      }
     },
     URL: {
       createObjectURL(file) {
@@ -136,21 +148,20 @@ test('admin exposes five always-visible accessible category radio chips', async 
 
 test('category auto-detection covers Korean and English inputs and leaves unknown reports unselected', async () => {
   const cases = [
-    ['위클리.html', '', 'weekly'],
-    ['report.html', 'weekly', 'weekly'],
-    ['비정기.html', '', 'research'],
-    ['report.html', 'research', 'research'],
-    ['시장 공부.html', '', 'basics'],
-    ['report.html', 'market basics', 'basics'],
-    ['끄적.html', '', 'note'],
-    ['report.html', 'note', 'note'],
-    ['데일리.html', '', 'daily'],
-    ['주식리포트.html', '', 'daily'],
-    ['generic.html', 'no category evidence', '']
+    ['weekly-report.html', '<title>Market Research</title><body>MARKET RESEARCH</body>', 'weekly'],
+    ['데일리.html', '<title>Daily</title><body>This research reviews market flows.</body>', 'daily'],
+    ['generic.html', '<title>Market Research</title>', ''],
+    ['generic.html', '<title>Generic report</title><body>This research reviews market flows.</body>', ''],
+    ['비정기.html', '<title>Special report</title>', 'research'],
+    ['시장 공부.html', '<title>Market Basics</title>', 'basics'],
+    ['notes.html', '<title>Notes</title>', 'note'],
+    ['데일리.html', '<meta name="report-type" content="weekly"><title>Daily</title>', 'weekly'],
+    ['generic.html', '<meta name="report-type" content="research"><title>Market Research</title>', 'research'],
+    ['generic.html', '<meta name="report-type" content="invalid"><title>Market Research</title>', '']
   ];
-  for (const [name, text, expected] of cases) {
+  for (const [name, markup, expected] of cases) {
     const { elements, categoryOptions } = await loadAdmin();
-    elements['html-file'].files = [{ name, size: 100, text: async () => `<!doctype html><title>Report</title>${text}` }];
+    elements['html-file'].files = [{ name, size: 100, text: async () => `<!doctype html>${markup}` }];
     await elements['html-file'].emit('change');
     assert.equal(elements['post-type'].value, expected, name);
     assert.equal(categoryOptions.find(option => option.checked)?.value || '', expected, name);

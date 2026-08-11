@@ -335,14 +335,31 @@ test('Preview still blocks mutations before the management API is called', async
   assert.equal(elements['manage-result-overlay'].hidden, true);
 });
 
-test('repository posts metadata is synchronized and the current production post remains unchanged', async () => {
+test('repository posts metadata is synchronized and follows stable schema invariants', async () => {
   const [jsonText, jsText] = await Promise.all([read('data/posts.json'), read('data/posts.js')]);
   const posts = JSON.parse(jsonText);
   assert.equal(jsText.replace(/\r\n/g, '\n'), `window.RESEARCH_POSTS = ${JSON.stringify(posts, null, 2)};\n`);
-  const current = posts.find((post) => post.id === '2026-08-11-daily-12vx8a7');
-  assert.deepEqual(current, {
-    id: '2026-08-11-daily-12vx8a7', type: 'daily', typeLabel: '주식 리포트', date: '2026-08-11', reportDate: '2026-08-11', registeredDate: '2026-08-11', registeredAt: '2026-08-11T10:06:02.296Z', legacyImport: false, title: '한 척이끌고 간 바다', subtitle: '', description: '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.', href: 'reports/8월 11일 주식리포트_커버통합.html', updatedAt: '2026-08-11T15:03:02.337Z', coverImage: 'covers/2026-08-11-daily-12vx8a7.png'
-  });
+  assert.ok(Array.isArray(posts));
+  const allowedTypes = new Set(['daily', 'weekly', 'research', 'basics', 'note']);
+  const ids = new Set();
+  for (const post of posts) {
+    assert.equal(typeof post.id, 'string');
+    assert.ok(post.id.length > 0);
+    assert.equal(ids.has(post.id), false);
+    ids.add(post.id);
+    assert.ok(allowedTypes.has(post.type));
+    assert.equal(typeof post.title, 'string');
+    assert.ok(post.title.trim().length > 0);
+    assert.equal(typeof post.href, 'string');
+    assert.match(post.href, /^reports\/.+\.html?$/i);
+    assert.ok(!post.href.includes('..') && !post.href.includes('\\'));
+    assert.match(post.reportDate, /^\d{4}-\d{2}-\d{2}$/);
+    if (Object.hasOwn(post, 'coverImage')) {
+      assert.equal(typeof post.coverImage, 'string');
+      assert.match(post.coverImage, /^covers\/[^/\\]+\.(?:jpe?g|png|webp)$/i);
+      assert.ok(!post.coverImage.includes('..'));
+    }
+  }
 });
 
 test('responsive management CSS retains homepage crop behavior and visible focus states', async () => {
