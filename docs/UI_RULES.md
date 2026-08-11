@@ -30,7 +30,7 @@ If a change is made specifically to mobile, test desktop before marking it compl
 
 Language navigation:
 
-- Korean remains the default at `/`; English uses `/en/` without browser-language redirects.
+- Korean remains the first-visit default at `/`; English uses `/en/` without browser-language redirects. After an explicit English choice, only a later `/` visit may restore `/en/` (preserving `?category=`); explicit About and report URLs never redirect from saved preference.
 - desktop uses a restrained text `KO | EN` control beside the theme toggle;
 - mobile puts a `Language` section at the bottom of the hamburger menu instead of adding another header button;
 - no flag icons;

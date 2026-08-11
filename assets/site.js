@@ -4,6 +4,13 @@
   const body = document.body;
   const locale = localeApi?.siteLanguage(document) || (html.lang === 'en' ? 'en' : 'ko');
   const messages = localeApi?.copy?.[locale] || localeApi?.copy?.ko;
+  let savedLanguage = '';
+  try { savedLanguage = localStorage.getItem('site-language') || ''; } catch (_) {}
+  const preferredHomepage = localeApi?.preferredHomepageRedirect(locale, location.pathname, location.search, savedLanguage) || '';
+  if(preferredHomepage){
+    location.replace(preferredHomepage);
+    return;
+  }
   const categories = messages.categories;
   const coreTypes = ['daily', 'weekly', 'research', 'basics'];
   const validTypes = ['all', ...coreTypes, 'note'];

@@ -40,8 +40,15 @@ test('language URLs preserve category queries without browser-language redirects
   assert.equal(api.pageLanguagePath('/en/', 'ko', '?category=weekly'), '/?category=weekly');
   assert.equal(api.pageLanguagePath('/about/', 'en'), '/en/about/');
   assert.equal(api.pageLanguagePath('/en/about/', 'ko'), '/about/');
+  assert.equal(api.preferredHomepageRedirect('ko', '/', '', 'en'), '/en/');
+  assert.equal(api.preferredHomepageRedirect('ko', '/', '?category=weekly', 'en'), '/en/?category=weekly');
+  assert.equal(api.preferredHomepageRedirect('ko', '/', '', 'ko'), '');
+  assert.equal(api.preferredHomepageRedirect('en', '/en/', '', 'en'), '');
+  assert.equal(api.preferredHomepageRedirect('ko', '/about/', '', 'en'), '');
+  assert.equal(api.preferredHomepageRedirect('ko', '/reports/example.html', '', 'en'), '');
   assert.doesNotMatch(site, /navigator\.language|navigator\.languages/);
-  assert.doesNotMatch(site, /getItem\(['"]site-language/);
+  assert.match(site, /localStorage\.getItem\('site-language'\)/);
+  assert.match(site, /location\.replace\(preferredHomepage\)/);
   assert.match(site, /setItem\('site-language', target\)/);
   assert.match(koHome, /data-site-lang="ko"/);
   assert.match(enHome, /data-site-lang="en"/);

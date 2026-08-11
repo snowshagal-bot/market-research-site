@@ -125,6 +125,11 @@
     return homepagePath(targetLanguage, category);
   }
 
+  function preferredHomepageRedirect(currentLanguage, pathname, search, savedLanguage) {
+    if (currentLanguage !== 'ko' || pathname !== '/' || savedLanguage !== 'en') return '';
+    return pageLanguagePath(pathname, 'en', search);
+  }
+
   root.MARKET_LOCALE = {
     validLanguages,
     copy,
@@ -140,6 +145,7 @@
     findCurrentPost,
     findCounterpart,
     homepagePath,
-    pageLanguagePath
+    pageLanguagePath,
+    preferredHomepageRedirect
   };
 })(typeof window !== 'undefined' ? window : globalThis);

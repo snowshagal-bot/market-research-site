@@ -23,7 +23,7 @@ Locale structure:
 - Korean is the default at `/`; English uses `/en/` on the same domain.
 - `/about/` and `/en/about/` are matching locale shells.
 - the shared `assets/locale.js` treats posts without `lang` as Korean, filters homepage data by `ko` or `en`, preserves category queries across explicit language switches, and resolves optional `translationGroup` counterparts;
-- browser language never redirects visitors automatically; `site-language` is written only after an explicit KO/EN choice;
+- browser language never redirects visitors automatically; `site-language` is written only after an explicit KO/EN choice and is read only on `/` to restore an English choice while preserving `?category=`;
 - English can remain empty without mixing Korean posts into its carousel, latest cards, archive, counts, or search.
 
 Main categories:
