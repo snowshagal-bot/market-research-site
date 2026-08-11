@@ -53,13 +53,14 @@ async function loadAdmin({ confirmResult = false } = {}) {
   const createdUrls = [];
   const revokedUrls = [];
   const submissions = [];
+  const confirmMessages = [];
   class TestFormData {
     entries = [];
     append(...args) { this.entries.push(args); }
   }
   const context = {
     console,
-    confirm: () => confirmResult,
+    confirm: message => { confirmMessages.push(message); return confirmResult; },
     fetch: async (url, options = {}) => {
       if (url === '/api/publish') {
         submissions.push(options.body);
@@ -96,13 +97,13 @@ async function loadAdmin({ confirmResult = false } = {}) {
     }
   };
   vm.runInNewContext(source, context);
-  return { elements, modeButtons, createdUrls, revokedUrls, windowListeners, submissions };
+  return { elements, modeButtons, createdUrls, revokedUrls, windowListeners, submissions, confirmMessages };
 }
 
 const validCover = (name = 'cover.webp') => ({ name, type: 'image/webp', size: 320 * 1024 });
 
 test('admin markup contains the cover preview modes before the original HTML preview', async () => {
-  const html = await read('admin/index.html');
+  const [html, adminScript] = await Promise.all([read('admin/index.html'), read('assets/admin.js')]);
   assert.match(html, /3\. 홈페이지 커버 미리보기/);
   assert.match(html, /4\. 원본 HTML 미리보기/);
   assert.ok(html.indexOf('3. 홈페이지 커버 미리보기') < html.indexOf('4. 원본 HTML 미리보기'));
@@ -110,6 +111,9 @@ test('admin markup contains the cover preview modes before the original HTML pre
   assert.match(html, /data-cover-preview-mode="1280" aria-pressed="true"/);
   assert.match(html, /대표 커버를 선택하면 홈페이지에서 보이는 영역을 확인할 수 있습니다/);
   assert.match(html, /\.cover-preview-empty\[hidden\],[^}]*\{display:none\}/);
+  assert.match(adminScript, /iframe\.setAttribute\('sandbox', 'allow-scripts'\)/);
+  assert.match(adminScript, /iframe\.srcdoc = text/);
+  assert.doesNotMatch(adminScript, /allow-same-origin/);
 });
 
 test('valid cover selection renders client-only metadata and actual image dimensions', async () => {
@@ -218,4 +222,19 @@ test('cover preview keeps the optional publish payload and server publisher unch
   assert.match(adminScript, /if \(selectedCover\) form\.append\('cover', selectedCover, selectedCover\.name\)/);
   assert.match(adminScript, /const ready = selectedFile && type\.value/);
   assert.doesNotMatch(publishScript, /cover-preview|createObjectURL|revokeObjectURL/);
+});
+
+test('publishing without a cover shows an explicit fallback-cover warning in the final confirmation', async () => {
+  const { elements, confirmMessages } = await loadAdmin({ confirmResult: false });
+  elements['admin-key'].value = 'test-key';
+  elements['html-file'].files = [{
+    name: '데일리.html',
+    size: 100,
+    text: async () => '<!doctype html><html><head><title>Daily report</title></head><body></body></html>'
+  }];
+  await elements['html-file'].emit('change');
+  await elements['publish-btn'].emit('click');
+  assert.equal(confirmMessages.length, 1);
+  assert.match(confirmMessages[0], /대표 커버가 선택되지 않았습니다/);
+  assert.match(confirmMessages[0], /fallback cover/);
 });

@@ -36,4 +36,4 @@
 
 ## 현재 바로 이어서 할 작업
 
-`docs/ROADMAP.md`의 "Next action"부터 시작한다. 현재 관리자 홈페이지 커버 미리보기 Draft PR의 Preview 검수가 다음 작업이며, 이후에는 운영 중 실제 필요가 관찰될 때 새 작업을 정한다.
+`docs/ROADMAP.md`의 "Next action"부터 시작한다. 현재 기존 게시물 관리 Draft PR의 Preview 검수가 다음 작업이다. Preview에서는 실제 게시물 수정·삭제를 실행하지 않고, UI와 로컬 파일 미리보기만 확인한다.
