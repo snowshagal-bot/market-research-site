@@ -83,9 +83,49 @@ test('cover export prefers a real WebP blob and otherwise retries as PNG', async
   assert.match(source, /canvas\.toBlob\(png => finish\(png, 'png'\), 'image\/png'\)/);
 });
 
+test('captured HTML covers use centered contain placement without forced cropping', async () => {
+  const api = await generatorApi();
+  const placement = api.containPlacement(1600, 900);
+  assert.equal(api.OUTPUT_WIDTH, 900);
+  assert.equal(api.OUTPUT_HEIGHT, 1350);
+  assert.equal(placement.drawWidth <= api.OUTPUT_WIDTH, true);
+  assert.equal(placement.drawHeight <= api.OUTPUT_HEIGHT, true);
+  assert.equal(placement.x >= 0, true);
+  assert.equal(placement.y >= 0, true);
+  assert.ok(Math.abs(placement.drawWidth / placement.drawHeight - 1600 / 900) < 1e-10);
+
+  const source = await read('assets/cover-generator.js');
+  assert.match(source, /Math\.min\(availableWidth \/ sourceWidth, availableHeight \/ sourceHeight\)/);
+  assert.doesNotMatch(source, /Math\.max\(OUTPUT_WIDTH \/ width, OUTPUT_HEIGHT \/ height\)/);
+  assert.match(source, /context\.drawImage\(image, placement\.x, placement\.y, placement\.drawWidth, placement\.drawHeight\)/);
+});
+
+test('captured covers prefer target or body background and retain the template fallback path', async () => {
+  const api = await generatorApi();
+  const styles = new Map([
+    ['target', 'rgba(0, 0, 0, 0)'],
+    ['body', 'rgb(236, 231, 220)'],
+    ['html', 'transparent']
+  ]);
+  const target = { key: 'target' };
+  const body = { key: 'body' };
+  const documentElement = { key: 'html' };
+  const doc = {
+    body,
+    documentElement,
+    defaultView: { getComputedStyle: node => ({ backgroundColor: styles.get(node.key) }) }
+  };
+  assert.equal(api.captureBackgroundColor(doc, target), 'rgb(236, 231, 220)');
+
+  const source = await read('assets/cover-generator.js');
+  assert.match(source, /const fallback = await createTemplateCover\(template\)/);
+  assert.match(source, /if \(candidate\.target\) \{[\s\S]*return await captureTarget\(doc, candidate\)/);
+});
+
 test('capture serialization inlines computed styles and uses an SVG data URL', async () => {
   const source = await read('assets/cover-generator.js');
   assert.match(source, /cloneWithComputedStyles\(candidate\.target, doc\.defaultView\)/);
+  assert.match(source, /clone\.style\.margin = '0'/);
   assert.match(source, /new XMLSerializer\(\)\.serializeToString\(styledClone\)/);
   assert.match(source, /data:image\/svg\+xml;charset=utf-8/);
   assert.doesNotMatch(source, /createObjectURL\(svgBlob\)/);
@@ -102,7 +142,7 @@ test('the capture frame receives srcdoc before it is attached so blank-frame loa
 test('admin connects generated files to the existing cover preview and publish payload', async () => {
   const [html, admin] = await Promise.all([read('admin/index.html'), read('assets/admin.js')]);
   assert.match(html, /id="generate-cover-btn"[^>]*disabled>HTML에서 커버 자동 생성/);
-  assert.match(html, /cover-generator\.js\?v=20260812-2/);
+  assert.match(html, /cover-generator\.js\?v=20260812-3/);
   assert.match(admin, /showCoverPreview\(result\.file, generationReportVersion\)/);
   assert.match(admin, /generationReportVersion !== reportSelectionVersion/);
   assert.match(admin, /coverPreviewImage\.onload = \(\) => \{[\s\S]*selectedCover = file/);

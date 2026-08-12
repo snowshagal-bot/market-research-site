@@ -1,6 +1,8 @@
 (() => {
   const OUTPUT_WIDTH = 900;
   const OUTPUT_HEIGHT = 1350;
+  const CAPTURE_PADDING = 32;
+  const DEFAULT_CAPTURE_BACKGROUND = '#ece7dc';
   const HEURISTIC_SELECTORS = [
     '.cover',
     '.cover-page',
@@ -155,6 +157,7 @@
       const computed = view.getComputedStyle(source);
       target.style.cssText = [...computed].map(property => `${property}:${computed.getPropertyValue(property)};`).join('');
     });
+    clone.style.margin = '0';
     clone.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
     return clone;
   }
@@ -166,6 +169,32 @@
       image.onerror = () => reject(new Error('렌더링 결과를 이미지로 읽을 수 없습니다.'));
       image.src = url;
     });
+  }
+
+  function containPlacement(sourceWidth, sourceHeight, padding = CAPTURE_PADDING) {
+    const safePadding = Math.max(0, Math.min(Number(padding) || 0, OUTPUT_WIDTH / 4, OUTPUT_HEIGHT / 4));
+    const availableWidth = OUTPUT_WIDTH - safePadding * 2;
+    const availableHeight = OUTPUT_HEIGHT - safePadding * 2;
+    const scale = Math.min(availableWidth / sourceWidth, availableHeight / sourceHeight);
+    const drawWidth = sourceWidth * scale;
+    const drawHeight = sourceHeight * scale;
+    return {
+      scale,
+      drawWidth,
+      drawHeight,
+      x: (OUTPUT_WIDTH - drawWidth) / 2,
+      y: (OUTPUT_HEIGHT - drawHeight) / 2
+    };
+  }
+
+  function captureBackgroundColor(doc, target) {
+    const view = doc.defaultView;
+    for (const node of [target, doc.body, doc.documentElement]) {
+      if (!node || !view?.getComputedStyle) continue;
+      const color = view.getComputedStyle(node).backgroundColor;
+      if (color && color !== 'transparent' && !/^rgba\([^)]*,\s*0(?:\.0+)?\s*\)$/i.test(color)) return color;
+    }
+    return DEFAULT_CAPTURE_BACKGROUND;
   }
 
   async function captureTarget(doc, candidate) {
@@ -183,12 +212,10 @@
       canvas.width = OUTPUT_WIDTH;
       canvas.height = OUTPUT_HEIGHT;
       const context = canvas.getContext('2d');
-      context.fillStyle = '#f3eddf';
+      context.fillStyle = captureBackgroundColor(doc, candidate.target);
       context.fillRect(0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
-      const scale = Math.max(OUTPUT_WIDTH / width, OUTPUT_HEIGHT / height);
-      const drawWidth = width * scale;
-      const drawHeight = height * scale;
-      context.drawImage(image, (OUTPUT_WIDTH - drawWidth) / 2, 0, drawWidth, drawHeight);
+      const placement = containPlacement(width, height);
+      context.drawImage(image, placement.x, placement.y, placement.drawWidth, placement.drawHeight);
       const { blob, extension } = await canvasBlob(canvas);
       return {
         file: new File([blob], `generated-cover.${extension}`, { type: blob.type || `image/${extension}` }),
@@ -252,6 +279,8 @@
     findCaptureTarget,
     fallbackSummary,
     templateData,
+    containPlacement,
+    captureBackgroundColor,
     createTemplateCover,
     generate
   };
