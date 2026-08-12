@@ -383,15 +383,15 @@ test('cover object URLs are revoked on replacement, reset, and page exit', async
   assert.deepEqual(revokedUrls, createdUrls);
 });
 
-test('preview modes use buttons with aria-pressed and match homepage cover cropping', async () => {
+test('preview modes use buttons with aria-pressed and show the complete homepage cover', async () => {
   const [html, homepageStyles] = await Promise.all([read('admin/index.html'), read('assets/home-v2.css')]);
   const { elements, modeButtons } = await loadAdmin();
   modeButtons[1].emit('click');
   assert.equal(elements['cover-preview-canvas'].dataset.coverMode, '430');
   assert.equal(modeButtons[1].getAttribute('aria-pressed'), 'true');
   assert.equal(modeButtons[0].getAttribute('aria-pressed'), 'false');
-  assert.match(html, /\.cover-preview-canvas img\{[^}]*object-fit:cover;object-position:center top/);
-  assert.match(homepageStyles, /\.carousel-cover>img\{object-position:center top\}/);
+  assert.match(html, /\.cover-preview-canvas img\{[^}]*object-fit:contain;object-position:center center/);
+  assert.match(homepageStyles, /\.carousel-cover>img\{object-position:center center\}/);
   assert.match(html, /--cover-preview-ratio:485 \/ 481/);
   assert.match(html, /--cover-preview-ratio:382 \/ 311/);
   assert.match(html, /--cover-preview-ratio:312 \/ 231/);

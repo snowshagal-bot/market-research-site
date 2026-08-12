@@ -389,9 +389,9 @@ test('repository posts metadata is synchronized and follows stable schema invari
   }
 });
 
-test('responsive management CSS retains homepage crop behavior and visible focus states', async () => {
+test('responsive management CSS retains full-cover preview behavior and visible focus states', async () => {
   const css = await read('assets/admin-manage.css');
-  assert.match(css, /object-fit:cover;object-position:center top/);
+  assert.match(css, /object-fit:contain;object-position:center center/);
   assert.match(css, /\[hidden\]\{display:none!important\}/);
   assert.match(css, /--preview-ratio:485 \/ 481/);
   assert.match(css, /--preview-ratio:382 \/ 311/);
