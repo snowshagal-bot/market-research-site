@@ -21,6 +21,8 @@
   const filename = $('post-filename');
   const coverInput = $('cover-file');
   const coverInfo = $('cover-info');
+  const generateCoverBtn = $('generate-cover-btn');
+  const coverGeneratorStatus = $('cover-generator-status');
   const coverPreviewCanvas = $('cover-preview-canvas');
   const coverPreviewImage = $('cover-preview-image');
   const coverPreviewEmpty = $('cover-preview-empty');
@@ -45,6 +47,9 @@
   const themeMedia = matchMedia('(prefers-color-scheme: dark)');
   let selectedFile = null;
   let selectedCover = null;
+  let selectedHtmlText = '';
+  let selectedHtmlDocument = null;
+  let generatingCover = false;
   let coverPreviewUrl = '';
   let publishing = false;
   const PRODUCTION_HOSTNAME = 'market-research-site.pages.dev';
@@ -258,6 +263,7 @@
   }
 
   function showCoverPreview(file) {
+    selectedCover = null;
     resetCoverPreview();
     if (!file || !coverPreviewImage) return;
     const objectUrl = URL.createObjectURL(file);
@@ -269,6 +275,7 @@
     coverPreviewMeta.hidden = false;
     coverPreviewImage.onload = () => {
       if (coverPreviewUrl !== objectUrl) return;
+      selectedCover = file;
       coverPreviewDimensions.textContent = `${coverPreviewImage.naturalWidth} × ${coverPreviewImage.naturalHeight}px`;
       coverPreviewNote.textContent = '선택한 커버가 홈페이지에 사용됩니다.';
     };
@@ -302,6 +309,42 @@
   function updatePublishState() {
     const ready = selectedFile && type.value && /^\d{4}-\d{2}-\d{2}$/.test(date.value) && title.value.trim() && filename.value.trim() && adminKey.value.trim();
     publishBtn.disabled = publishing || !ready;
+    if (generateCoverBtn) generateCoverBtn.disabled = generatingCover || !selectedFile || !selectedHtmlText || !selectedHtmlDocument;
+  }
+
+  async function generateCover() {
+    if (generatingCover || !selectedHtmlText || !selectedHtmlDocument || !window.MARKET_COVER_GENERATOR) return;
+    generatingCover = true;
+    updatePublishState();
+    generateCoverBtn.textContent = '커버 생성 중…';
+    coverGeneratorStatus.textContent = 'HTML 첫 화면을 분석하고 커버 이미지를 만들고 있습니다.';
+    try {
+      const result = await window.MARKET_COVER_GENERATOR.generate({
+        html: selectedHtmlText,
+        host: document.body,
+        template: {
+          category: labels[type.value] || '리포트',
+          date: date.value,
+          title: title.value.trim(),
+          metaSummary: detectSummary(selectedHtmlDocument),
+          summary: postSummary.value.trim(),
+          description: description.value.trim()
+        }
+      });
+      coverInput.value = '';
+      coverInfo.textContent = `${result.file.name} · ${(result.file.size / 1024).toFixed(1)} KB`;
+      showCoverPreview(result.file);
+      coverGeneratorStatus.textContent = result.method === 'template'
+        ? `표준 템플릿 커버를 생성했습니다${result.attemptedSelector ? ` · ${result.attemptedSelector} 캡처 대체` : ''}. 수동 커버로 교체할 수도 있습니다.`
+        : `HTML 캡처로 커버를 생성했습니다${result.selector ? ` · ${result.selector}` : ''}.`;
+      if (result.method === 'template' && result.captureError) console.warn('cover capture fallback:', result.captureError);
+    } catch (_) {
+      coverGeneratorStatus.textContent = '커버 자동 생성에 실패했습니다. 수동 커버를 업로드하거나 다시 시도해 주세요.';
+    } finally {
+      generatingCover = false;
+      generateCoverBtn.textContent = 'HTML에서 커버 자동 생성';
+      updatePublishState();
+    }
   }
 
   function showOverlay(titleText, bodyText, detailText = '') {
@@ -367,10 +410,14 @@
       return;
     }
     selectedFile = file;
+    selectedHtmlText = '';
+    selectedHtmlDocument = null;
     registeredDate.value = '게시 시 자동 기록';
     status.textContent = 'HTML을 분석하는 중…';
     const text = await file.text();
     const doc = new DOMParser().parseFromString(text, 'text/html');
+    selectedHtmlText = text;
+    selectedHtmlDocument = doc;
     const detectedType = detectType(file.name, doc, text);
     const detectedDate = detectDate(file.name, doc, text);
     const detectedTitle = detectTitle(file.name, doc);
@@ -478,13 +525,13 @@
       resetCoverPreview();
       return;
     }
-    selectedCover = file;
     coverInfo.textContent = file
       ? `${file.name} · ${(file.size / 1024).toFixed(1)} KB`
       : defaultCoverInfo;
     if (file) showCoverPreview(file);
     else resetCoverPreview();
   });
+  generateCoverBtn?.addEventListener('click', generateCover);
   coverPreviewModes.forEach(button => {
     button.addEventListener('click', () => setCoverPreviewMode(button.dataset.coverPreviewMode));
   });

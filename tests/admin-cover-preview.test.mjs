@@ -41,7 +41,7 @@ async function loadAdmin({ confirmResult = false } = {}) {
     'cover-preview-caption', 'cover-preview-note', 'admin-key', 'publish-btn', 'publish-overlay',
     'publish-state-title', 'publish-state-text', 'publish-state-detail', 'publish-links',
     'published-report-link', 'published-home-link', 'category-status'
-    , 'post-language', 'translation-source', 'translation-source-status'
+    , 'post-language', 'translation-source', 'translation-source-status', 'generate-cover-btn', 'cover-generator-status'
   ];
   const elements = Object.fromEntries(ids.map(id => [id, createElement(id)]));
   const themeButton = createElement('theme-toggle');
@@ -123,6 +123,9 @@ async function loadAdmin({ confirmResult = false } = {}) {
       createElement: tag => createElement(tag)
     },
     window: {
+      MARKET_COVER_GENERATOR: {
+        generate: async () => ({ file: validCover('generated-cover.webp'), method: 'template', selector: '' })
+      },
       RESEARCH_POSTS: [
         { id: 'ko-source', title: '한국어 원문', reportDate: '2026-08-10', href: 'reports/source.html' },
         { id: 'en-source', lang: 'en', title: 'English source', reportDate: '2026-08-10', href: 'reports/en/source.html' }
@@ -147,7 +150,7 @@ test('admin markup contains the cover preview modes before the original HTML pre
   assert.match(html, /\.cover-preview-empty\[hidden\],[^}]*\{display:none\}/);
   assert.match(adminScript, /iframe\.setAttribute\('sandbox', 'allow-scripts'\)/);
   assert.match(adminScript, /iframe\.srcdoc = text/);
-  assert.match(html, /admin\.js\?v=20260812-2/);
+  assert.match(html, /admin\.js\?v=20260812-4/);
   assert.doesNotMatch(adminScript, /allow-same-origin/);
 });
 
@@ -390,4 +393,23 @@ test('publishing without a cover shows an explicit fallback-cover warning in the
   assert.equal(confirmMessages.length, 1);
   assert.match(confirmMessages[0], /대표 커버가 선택되지 않았습니다/);
   assert.match(confirmMessages[0], /fallback cover/);
+});
+
+test('an automatically generated cover suppresses the missing-cover warning', async () => {
+  const { elements, confirmMessages } = await loadAdmin({ confirmResult: false });
+  elements['admin-key'].value = 'test-key';
+  elements['html-file'].files = [{
+    name: '데일리.html',
+    size: 100,
+    text: async () => '<!doctype html><html><head><title>Daily report</title></head><body></body></html>'
+  }];
+  await elements['html-file'].emit('change');
+  assert.equal(elements['generate-cover-btn'].disabled, false);
+  await elements['generate-cover-btn'].emit('click');
+  elements['cover-preview-image'].naturalWidth = 900;
+  elements['cover-preview-image'].naturalHeight = 1350;
+  elements['cover-preview-image'].onload();
+  await elements['publish-btn'].emit('click');
+  assert.equal(confirmMessages.length, 1);
+  assert.doesNotMatch(confirmMessages[0], /대표 커버가 선택되지 않았습니다|fallback cover/);
 });
