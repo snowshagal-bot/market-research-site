@@ -1,5 +1,22 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-12-weekly-1macab6",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-08-12",
+    "reportDate": "2026-08-12",
+    "registeredDate": "2026-08-13",
+    "registeredAt": "2026-08-12T17:54:55.860Z",
+    "legacyImport": false,
+    "title": "7월 5주차 위클리 · 애플과 세 개의 칩",
+    "subtitle": "",
+    "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "summary": "연준은 금리를 동결했지만 장기금리는 올랐고, 빅테크의 AI 투자는 매출과 비용을 동시에 키웠다. 메모리 재고가 줄어든 가운데 애플과 삼성전자·SK하이닉스·마이크론의 협상력이 어떻게 달라졌는지, 다음 주 금리와 전기전자 수급까지 연결해 살펴본다.",
+    "href": "reports/7월 5주차 위클리 분석.html",
+    "coverImage": "covers/2026-08-12-weekly-1macab6.webp"
+  },
+  {
     "id": "2026-08-11-basics-1e0xeuz",
     "type": "basics",
     "typeLabel": "시장 공부",
