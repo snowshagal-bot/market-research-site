@@ -50,14 +50,17 @@
   let selectedHtmlText = '';
   let selectedHtmlDocument = null;
   let generatingCover = false;
+  let coverGenerationVersion = 0;
   let coverDecodePending = false;
   let coverDecodeVersion = 0;
+  let reportSelectionVersion = 0;
   let coverPreviewUrl = '';
   let publishing = false;
   const PRODUCTION_HOSTNAME = 'market-research-site.pages.dev';
   const localeApi = window.MARKET_LOCALE;
 
   const defaultCoverInfo = 'JPG, PNG, WebP · 최대 4MB · 원본 리포트 HTML과 별도로 저장됩니다.';
+  const defaultCoverGeneratorStatus = '업로드한 리포트 HTML의 첫 화면을 기준으로 생성합니다. 결과는 게시 전에 미리보고 교체할 수 있습니다.';
   const defaultCoverPreviewNote = '커버 미선택 · 게시 후 홈페이지에서는 fallback cover 사용';
   const coverModeLabels = {
     1280: 'PC 1280',
@@ -270,7 +273,8 @@
     updatePublishState();
   }
 
-  function showCoverPreview(file) {
+  function showCoverPreview(file, reportVersion = reportSelectionVersion) {
+    if (reportVersion !== reportSelectionVersion) return;
     const decodeVersion = ++coverDecodeVersion;
     selectedCover = null;
     coverDecodePending = Boolean(file && coverPreviewImage);
@@ -288,7 +292,7 @@
     coverPreviewNote.textContent = '커버 이미지 확인 중…';
     coverPreviewMeta.hidden = false;
     coverPreviewImage.onload = () => {
-      if (decodeVersion !== coverDecodeVersion || coverPreviewUrl !== objectUrl) return;
+      if (decodeVersion !== coverDecodeVersion || reportVersion !== reportSelectionVersion || coverPreviewUrl !== objectUrl) return;
       selectedCover = file;
       coverDecodePending = false;
       coverPreviewDimensions.textContent = `${coverPreviewImage.naturalWidth} × ${coverPreviewImage.naturalHeight}px`;
@@ -296,7 +300,7 @@
       updatePublishState();
     };
     coverPreviewImage.onerror = () => {
-      if (decodeVersion !== coverDecodeVersion || coverPreviewUrl !== objectUrl) return;
+      if (decodeVersion !== coverDecodeVersion || reportVersion !== reportSelectionVersion || coverPreviewUrl !== objectUrl) return;
       selectedCover = null;
       coverDecodePending = false;
       coverInput.value = '';
@@ -331,6 +335,8 @@
 
   async function generateCover() {
     if (generatingCover || !selectedHtmlText || !selectedHtmlDocument || !window.MARKET_COVER_GENERATOR) return;
+    const generationVersion = ++coverGenerationVersion;
+    const generationReportVersion = reportSelectionVersion;
     generatingCover = true;
     updatePublishState();
     generateCoverBtn.textContent = '커버 생성 중…';
@@ -348,18 +354,21 @@
           description: description.value.trim()
         }
       });
+      if (generationVersion !== coverGenerationVersion || generationReportVersion !== reportSelectionVersion) return;
       coverInput.value = '';
       coverInfo.textContent = `${result.file.name} · ${(result.file.size / 1024).toFixed(1)} KB`;
-      showCoverPreview(result.file);
+      showCoverPreview(result.file, generationReportVersion);
       coverGeneratorStatus.textContent = result.method === 'template'
         ? `표준 템플릿 커버를 생성했습니다${result.attemptedSelector ? ` · ${result.attemptedSelector} 캡처 대체` : ''}. 수동 커버로 교체할 수도 있습니다.`
         : `HTML 캡처로 커버를 생성했습니다${result.selector ? ` · ${result.selector}` : ''}.`;
       if (result.method === 'template' && result.captureError) console.warn('cover capture fallback:', result.captureError);
     } catch (_) {
+      if (generationVersion !== coverGenerationVersion || generationReportVersion !== reportSelectionVersion) return;
       coverDecodeVersion += 1;
       coverDecodePending = false;
       coverGeneratorStatus.textContent = '커버 자동 생성에 실패했습니다. 수동 커버를 업로드하거나 다시 시도해 주세요.';
     } finally {
+      if (generationVersion !== coverGenerationVersion || generationReportVersion !== reportSelectionVersion) return;
       generatingCover = false;
       generateCoverBtn.textContent = 'HTML에서 커버 자동 생성';
       updatePublishState();
@@ -428,12 +437,21 @@
       status.textContent = '현재 게시기는 5MB 이하 HTML 파일만 지원합니다.';
       return;
     }
+    const reportVersion = ++reportSelectionVersion;
+    coverGenerationVersion += 1;
+    generatingCover = false;
+    generateCoverBtn.textContent = 'HTML에서 커버 자동 생성';
+    coverGeneratorStatus.textContent = defaultCoverGeneratorStatus;
+    coverInput.value = '';
+    coverInfo.textContent = defaultCoverInfo;
+    resetCoverPreview();
     selectedFile = file;
     selectedHtmlText = '';
     selectedHtmlDocument = null;
     registeredDate.value = '게시 시 자동 기록';
     status.textContent = 'HTML을 분석하는 중…';
     const text = await file.text();
+    if (reportVersion !== reportSelectionVersion) return;
     const doc = new DOMParser().parseFromString(text, 'text/html');
     selectedHtmlText = text;
     selectedHtmlDocument = doc;

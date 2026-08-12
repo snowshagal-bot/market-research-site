@@ -160,6 +160,12 @@ async function makePublishReady(elements) {
   assert.equal(elements['publish-btn'].disabled, false);
 }
 
+const reportFile = name => ({
+  name,
+  size: 100,
+  text: async () => `<!doctype html><html><head><title>${name}</title></head><body></body></html>`
+});
+
 test('admin markup contains the cover preview modes before the original HTML preview', async () => {
   const [html, adminScript] = await Promise.all([read('admin/index.html'), read('assets/admin.js')]);
   assert.match(html, /3\. 홈페이지 커버 미리보기/);
@@ -171,7 +177,7 @@ test('admin markup contains the cover preview modes before the original HTML pre
   assert.match(html, /\.cover-preview-empty\[hidden\],[^}]*\{display:none\}/);
   assert.match(adminScript, /iframe\.setAttribute\('sandbox', 'allow-scripts'\)/);
   assert.match(adminScript, /iframe\.srcdoc = text/);
-  assert.match(html, /admin\.js\?v=20260812-5/);
+  assert.match(html, /admin\.js\?v=20260812-6/);
   assert.doesNotMatch(adminScript, /allow-same-origin/);
 });
 
@@ -524,4 +530,92 @@ test('automatic generation failure restores coverless publishing', async () => {
   assert.equal(elements['publish-btn'].disabled, false);
   await elements['publish-btn'].emit('click');
   assert.match(confirmMessages[0], /fallback cover/);
+});
+
+test('G: a cover generated for report A is discarded after report B is selected', async () => {
+  const generationA = deferred();
+  const { elements, createdUrls } = await loadAdmin({ generateCover: () => generationA.promise });
+  elements['admin-key'].value = 'test-key';
+  elements['html-file'].files = [reportFile('A-데일리.html')];
+  await elements['html-file'].emit('change');
+  const generationTaskA = elements['generate-cover-btn'].emit('click');
+  assert.equal(elements['publish-btn'].disabled, true);
+
+  elements['html-file'].files = [reportFile('B-데일리.html')];
+  await elements['html-file'].emit('change');
+  assert.equal(elements['publish-btn'].disabled, false);
+  generationA.resolve({ file: validCover('a-generated.webp'), method: 'template', selector: '' });
+  await generationTaskA;
+
+  assert.equal(createdUrls.length, 0);
+  assert.equal(elements['cover-preview-image'].hidden, true);
+  assert.match(elements['cover-preview-note'].textContent, /커버 미선택/);
+  assert.match(elements['cover-generator-status'].textContent, /업로드한 리포트 HTML의 첫 화면/);
+});
+
+test('H: report A decode completion cannot attach its cover after report B is selected', async () => {
+  const { elements, createdUrls, revokedUrls } = await loadAdmin();
+  elements['admin-key'].value = 'test-key';
+  elements['html-file'].files = [reportFile('A-데일리.html')];
+  await elements['html-file'].emit('change');
+  await elements['generate-cover-btn'].emit('click');
+  const staleOnload = elements['cover-preview-image'].onload;
+  assert.equal(elements['publish-btn'].disabled, true);
+
+  elements['html-file'].files = [reportFile('B-데일리.html')];
+  await elements['html-file'].emit('change');
+  staleOnload();
+
+  assert.deepEqual(revokedUrls, createdUrls);
+  assert.equal(elements['cover-preview-image'].hidden, true);
+  assert.match(elements['cover-preview-note'].textContent, /커버 미선택/);
+  assert.equal(elements['publish-btn'].disabled, false);
+});
+
+test('I: selecting report B clears report A manual cover and restores cover-missing state', async () => {
+  const { elements, confirmMessages } = await loadAdmin({ confirmResult: false });
+  elements['admin-key'].value = 'test-key';
+  elements['html-file'].files = [reportFile('A-데일리.html')];
+  await elements['html-file'].emit('change');
+  elements['cover-file'].files = [validCover('a-manual.webp')];
+  elements['cover-file'].emit('change');
+  elements['cover-preview-image'].onload();
+  assert.doesNotMatch(elements['cover-preview-note'].textContent, /커버 미선택/);
+
+  elements['html-file'].files = [reportFile('B-데일리.html')];
+  await elements['html-file'].emit('change');
+  assert.equal(elements['cover-file'].value, '');
+  assert.equal(elements['cover-preview-image'].hidden, true);
+  assert.match(elements['cover-preview-note'].textContent, /커버 미선택/);
+  await elements['publish-btn'].emit('click');
+  assert.match(confirmMessages[0], /fallback cover/);
+});
+
+test('J: report B publishes only the newly generated and decoded B cover', async () => {
+  let generationCount = 0;
+  const coverA = validCover('a-generated.webp');
+  const coverB = validCover('b-generated.webp');
+  const { elements, submissions, confirmMessages } = await loadAdmin({
+    confirmResult: true,
+    generateCover: async () => ({ file: ++generationCount === 1 ? coverA : coverB, method: 'template', selector: '' })
+  });
+  elements['admin-key'].value = 'test-key';
+  elements['html-file'].files = [reportFile('A-데일리.html')];
+  await elements['html-file'].emit('change');
+  await elements['generate-cover-btn'].emit('click');
+  elements['cover-preview-image'].onload();
+
+  elements['html-file'].files = [reportFile('B-데일리.html')];
+  await elements['html-file'].emit('change');
+  await elements['generate-cover-btn'].emit('click');
+  assert.equal(elements['publish-btn'].disabled, true);
+  elements['cover-preview-image'].onload();
+  assert.equal(elements['publish-btn'].disabled, false);
+  await elements['publish-btn'].emit('click');
+
+  const coverEntry = submissions[0].entries.find(([name]) => name === 'cover');
+  assert.equal(coverEntry?.[1], coverB);
+  assert.equal(coverEntry?.[2], 'b-generated.webp');
+  assert.notEqual(coverEntry?.[1], coverA);
+  assert.doesNotMatch(confirmMessages[0], /fallback cover/);
 });
