@@ -17,8 +17,8 @@ test('homepage v2 exposes the requested information architecture and carousel co
   assert.match(html, /aria-label="이전 대표 리포트"/);
   assert.match(html, /aria-label="다음 대표 리포트"/);
   assert.match(html, /role="tablist"/);
-  assert.match(html, /home-v2\.css\?v=20260812-3/);
-  assert.match(englishHtml, /home-v2\.css\?v=20260812-3/);
+  assert.match(html, /home-v2\.css\?v=20260813-1/);
+  assert.match(englishHtml, /home-v2\.css\?v=20260813-1/);
   assert.match(html, /site\.js\?v=20260812-2/);
   assert.match(englishHtml, /site\.js\?v=20260812-2/);
 });
@@ -57,7 +57,7 @@ test('carousel uses one latest post per core category, never autoplay, and suppo
   assert.match(script, /touchend/);
   assert.doesNotMatch(script, /setInterval|autoplay/i);
   assert.match(homeStyles, /Homepage cover sizing and fallback spacing stay local/);
-  assert.match(homeStyles, /\.carousel-cover>img\{object-position:center top\}/);
+  assert.match(homeStyles, /\.carousel-cover>img\{object-position:center center\}/);
   assert.match(homeStyles, /\.cover-fallback strong\{max-width:13ch;font-size:25px/);
   const midWidthStart = homeStyles.indexOf('@media(min-width:761px) and (max-width:960px)');
   assert.notEqual(midWidthStart, -1);
