@@ -1,6 +1,8 @@
 const MAX_HTML_BYTES = 5 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const RENDER_TIMEOUT_MS = 25000;
+const RENDER_VIEWPORT = { width: 480, height: 900 };
+const MAX_CAPTURE_DIMENSION = 4096;
 const SELECTOR_PRIORITY = ['.cover-frame', '.cover-page', '.cover-screen', '.report-cover'];
 
 function json(body, status = 200) {
@@ -59,6 +61,37 @@ function sanitizedUpstreamError(status) {
   return 'Browser Rendering에서 커버를 생성하지 못했습니다.';
 }
 
+function captureGeometry(payload, selector) {
+  const entries = Array.isArray(payload?.result) ? payload.result : Array.isArray(payload) ? payload : [];
+  const entry = entries.find(item => item?.selector === selector) || entries[0];
+  const candidate = Array.isArray(entry?.results) ? entry.results[0] : entry?.results;
+  const clip = {
+    x: Number(candidate?.left),
+    y: Number(candidate?.top),
+    width: Number(candidate?.width),
+    height: Number(candidate?.height)
+  };
+  if (
+    !Object.values(clip).every(Number.isFinite)
+    || clip.x < 0
+    || clip.y < 0
+    || clip.width <= 0
+    || clip.height <= 0
+    || clip.width > MAX_CAPTURE_DIMENSION
+    || clip.height > MAX_CAPTURE_DIMENSION
+  ) return null;
+  return clip;
+}
+
+function renderingPayload(html, selector) {
+  return {
+    html,
+    viewport: RENDER_VIEWPORT,
+    waitForSelector: { selector, visible: true, timeout: 10000 },
+    waitForTimeout: 250
+  };
+}
+
 export async function onRequestPost({ request, env }) {
   if (!env.ADMIN_KEY || !env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_BROWSER_RENDERING_TOKEN) {
     return json({ error: 'BROWSER_RENDERING_NOT_CONFIGURED', message: '커버 생성 서비스 설정이 필요합니다.' }, 503);
@@ -90,21 +123,40 @@ export async function onRequestPost({ request, env }) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), RENDER_TIMEOUT_MS);
   try {
+    const endpoint = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(env.CLOUDFLARE_ACCOUNT_ID)}/browser-rendering`;
+    const headers = {
+      'authorization': `Bearer ${env.CLOUDFLARE_BROWSER_RENDERING_TOKEN}`,
+      'content-type': 'application/json'
+    };
+    const scrape = await fetch(`${endpoint}/scrape`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        ...renderingPayload(html, selector),
+        elements: [{ selector }]
+      }),
+      signal: controller.signal
+    });
+    if (!scrape.ok) {
+      return json({ error: 'BROWSER_RENDERING_FAILED', message: sanitizedUpstreamError(scrape.status) }, 502);
+    }
+    const geometry = captureGeometry(await scrape.json().catch(() => null), selector);
+    if (!geometry) {
+      return json({ error: 'INVALID_CAPTURE_GEOMETRY', message: '커버 영역의 크기를 확인하지 못했습니다.' }, 502);
+    }
+
     const upstream = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(env.CLOUDFLARE_ACCOUNT_ID)}/browser-rendering/screenshot`,
+      `${endpoint}/screenshot`,
       {
         method: 'POST',
-        headers: {
-          'authorization': `Bearer ${env.CLOUDFLARE_BROWSER_RENDERING_TOKEN}`,
-          'content-type': 'application/json'
-        },
+        headers,
         body: JSON.stringify({
-          html,
-          selector,
-          viewport: { width: 480, height: 900, deviceScaleFactor: 2 },
-          waitForSelector: { selector, visible: true, timeout: 10000 },
-          waitForTimeout: 250,
-          screenshotOptions: { type: 'png', captureBeyondViewport: true }
+          ...renderingPayload(html, selector),
+          screenshotOptions: {
+            type: 'png',
+            captureBeyondViewport: true,
+            clip: { ...geometry, scale: 1 }
+          }
         }),
         signal: controller.signal
       }
@@ -145,7 +197,11 @@ export const __test = {
   MAX_HTML_BYTES,
   MAX_IMAGE_BYTES,
   RENDER_TIMEOUT_MS,
+  RENDER_VIEWPORT,
+  MAX_CAPTURE_DIMENSION,
   SELECTOR_PRIORITY,
+  captureGeometry,
+  renderingPayload,
   declaredSelector,
   selectCaptureSelector
 };

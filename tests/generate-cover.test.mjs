@@ -29,9 +29,19 @@ test('selector priority prefers metadata, then cover-frame before outer wrappers
 
 test('raw HTML and selected cover-frame are sent to Cloudflare Browser Rendering', { concurrency: false }, async () => {
   const originalFetch = globalThis.fetch;
-  let call;
+  const calls = [];
   globalThis.fetch = async (url, options) => {
-    call = { url, options, payload: JSON.parse(options.body) };
+    const call = { url, options, payload: JSON.parse(options.body) };
+    calls.push(call);
+    if (url.endsWith('/scrape')) {
+      return Response.json({
+        success: true,
+        result: [{
+          selector: '.cover-frame',
+          results: [{ left: 0, top: 0, width: 465, height: 697.5 }]
+        }]
+      });
+    }
     return new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'content-type': 'image/png' } });
   };
   try {
@@ -40,16 +50,42 @@ test('raw HTML and selected cover-frame are sent to Cloudflare Browser Rendering
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('content-type'), 'image/png');
     assert.equal(response.headers.get('x-cover-selector'), '.cover-frame');
-    assert.match(call.url, /accounts\/account-id\/browser-rendering\/screenshot$/);
-    assert.equal(call.options.headers.authorization, 'Bearer server-secret-token');
-    assert.equal(call.payload.html, html);
-    assert.equal(call.payload.selector, '.cover-frame');
-    assert.deepEqual(call.payload.viewport, { width: 480, height: 900, deviceScaleFactor: 2 });
-    assert.equal(call.payload.screenshotOptions.type, 'png');
-    assert.equal('url' in call.payload, false);
+    assert.equal(calls.length, 2);
+    const [scrape, screenshot] = calls;
+    assert.match(scrape.url, /accounts\/account-id\/browser-rendering\/scrape$/);
+    assert.deepEqual(scrape.payload.elements, [{ selector: '.cover-frame' }]);
+    assert.equal(scrape.options.headers.authorization, 'Bearer server-secret-token');
+    assert.equal(scrape.payload.html, html);
+    assert.deepEqual(scrape.payload.viewport, { width: 480, height: 900 });
+    assert.equal('deviceScaleFactor' in scrape.payload.viewport, false);
+
+    assert.match(screenshot.url, /accounts\/account-id\/browser-rendering\/screenshot$/);
+    assert.equal(screenshot.options.headers.authorization, 'Bearer server-secret-token');
+    assert.equal(screenshot.payload.html, html);
+    assert.deepEqual(screenshot.payload.viewport, { width: 480, height: 900 });
+    assert.deepEqual(screenshot.payload.screenshotOptions, {
+      type: 'png',
+      captureBeyondViewport: true,
+      clip: { x: 0, y: 0, width: 465, height: 697.5, scale: 1 }
+    });
+    assert.equal('selector' in screenshot.payload, false);
+    assert.equal('url' in screenshot.payload, false);
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+test('capture geometry accepts Cloudflare scrape shapes and rejects unsafe dimensions', () => {
+  assert.deepEqual(
+    __test.captureGeometry({ result: [{ selector: '.cover-frame', results: { left: 7.5, top: 2, width: 465, height: 697.5 } }] }, '.cover-frame'),
+    { x: 7.5, y: 2, width: 465, height: 697.5 }
+  );
+  assert.deepEqual(
+    __test.captureGeometry([{ selector: '.cover-frame', results: [{ left: 0, top: 0, width: 480, height: 720 }] }], '.cover-frame'),
+    { x: 0, y: 0, width: 480, height: 720 }
+  );
+  assert.equal(__test.captureGeometry({ result: [{ selector: '.cover-frame', results: { left: -1, top: 0, width: 480, height: 720 } }] }, '.cover-frame'), null);
+  assert.equal(__test.captureGeometry({ result: [{ selector: '.cover-frame', results: { left: 0, top: 0, width: 5000, height: 720 } }] }, '.cover-frame'), null);
 });
 
 test('missing and incorrect admin authentication are rejected before Browser Rendering', { concurrency: false }, async () => {
@@ -91,6 +127,23 @@ test('Cloudflare errors are sanitized and secrets remain server-only', { concurr
   ]);
   for (const client of [generator, admin, html]) {
     assert.doesNotMatch(client, /CLOUDFLARE_ACCOUNT_ID|CLOUDFLARE_BROWSER_RENDERING_TOKEN|server-secret-token/);
+  }
+});
+
+test('invalid scrape geometry stops before the screenshot request', { concurrency: false }, async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls += 1;
+    return Response.json({ success: true, result: [{ selector: '.cover-frame', results: [] }] });
+  };
+  try {
+    const response = await onRequestPost({ request: request({ html: '<div class="cover-frame">cover</div>' }), env: ENV });
+    assert.equal(response.status, 502);
+    assert.equal((await response.json()).error, 'INVALID_CAPTURE_GEOMETRY');
+    assert.equal(calls, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
   }
 });
 
