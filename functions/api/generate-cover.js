@@ -97,6 +97,25 @@ function coverFrameCapturePlan(html, selector) {
   };
 }
 
+function weeklyCoverCapturePlan(html, selector) {
+  if (selector !== '.cover') return null;
+  const hasWeeklyFrame = /<section\b[^>]*class\s*=\s*["'][^"']*\bcover\b[^"']*\bcv\b[^"']*["'][^>]*>/i.test(html)
+    && /<div\b[^>]*class\s*=\s*["'][^"']*\bcvwrap\b[^"']*["'][^>]*>/i.test(html)
+    && /\.cvwrap\s*\{[^}]*aspect-ratio\s*:\s*2\s*\/\s*3\b/i.test(html);
+  if (!hasWeeklyFrame) return null;
+  const captureHeight = RENDER_VIEWPORT.width * 3 / 2;
+  return {
+    addStyleTag: [{
+      content: `html,body{margin:0!important;padding:0!important;width:${RENDER_VIEWPORT.width}px!important;min-width:0!important;overflow:hidden!important}.app{width:${RENDER_VIEWPORT.width}px!important;max-width:none!important;margin:0!important}.cover.cv{position:fixed!important;inset:0 auto auto 0!important;width:${RENDER_VIEWPORT.width}px!important;max-width:none!important;margin:0!important;padding:0!important;z-index:2147483647!important}`
+    }],
+    screenshotOptions: {
+      type: 'png',
+      captureBeyondViewport: true,
+      clip: { x: 0, y: 0, width: RENDER_VIEWPORT.width, height: captureHeight, scale: 1 }
+    }
+  };
+}
+
 async function fetchRendering(url, options) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), RENDER_TIMEOUT_MS);
@@ -162,7 +181,7 @@ export async function onRequestPost({ request, env }) {
       'authorization': `Bearer ${env.CLOUDFLARE_BROWSER_RENDERING_TOKEN}`,
       'content-type': 'application/json'
     };
-    const framePlan = coverFrameCapturePlan(html, selector);
+    const framePlan = coverFrameCapturePlan(html, selector) || weeklyCoverCapturePlan(html, selector);
     const upstream = await fetchRenderingWithRetry(
       `${endpoint}/screenshot`,
       {
@@ -217,6 +236,7 @@ export const __test = {
   RENDER_VIEWPORT,
   SELECTOR_PRIORITY,
   coverFrameCapturePlan,
+  weeklyCoverCapturePlan,
   fetchRendering,
   fetchRenderingWithRetry,
   rateLimitRetryMs,

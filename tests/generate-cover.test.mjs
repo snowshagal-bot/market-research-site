@@ -32,7 +32,7 @@ test('weekly reports using a section.cover root select the real cover instead of
   assert.equal(__test.selectCaptureSelector(html, '.cover'), '.cover');
 });
 
-test('weekly section.cover is sent to Browser Rendering as the screenshot selector', { concurrency: false }, async () => {
+test('completed weekly section.cover uses one full-bleed Browser Rendering clip', { concurrency: false }, async () => {
   const originalFetch = globalThis.fetch;
   let payload;
   globalThis.fetch = async (_url, options) => {
@@ -40,15 +40,22 @@ test('weekly section.cover is sent to Browser Rendering as the screenshot select
     return new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'content-type': 'image/png' } });
   };
   try {
-    const html = '<section class="cover cv" id="s0"><div class="cvwrap"><img class="cvart" width="900" height="1350"></div></section>';
+    const html = '<style>.cvwrap{position:relative;aspect-ratio:2/3}</style><div class="app"><section class="cover cv" id="s0"><div class="cvwrap"><img class="cvart" width="900" height="1350"></div></section></div>';
     const response = await onRequestPost({ request: request({ html, preferredSelector: '.cover' }), env: ENV });
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('x-cover-selector'), '.cover');
-    assert.equal(payload.selector, '.cover');
+    assert.equal('selector' in payload, false);
     assert.equal(payload.html, html);
+    assert.deepEqual(payload.screenshotOptions.clip, { x: 0, y: 0, width: 480, height: 720, scale: 1 });
+    assert.match(payload.addStyleTag[0].content, /\.cover\.cv\{position:fixed!important/);
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+test('non-weekly .cover candidates retain the general selector screenshot path', () => {
+  assert.equal(__test.weeklyCoverCapturePlan('<section class="cover">generic</section>', '.cover'), null);
+  assert.equal(__test.weeklyCoverCapturePlan('<style>.cvwrap{aspect-ratio:2/3}</style><section class="cover cv"><div class="cvwrap"></div></section>', '.cover').screenshotOptions.clip.height, 720);
 });
 
 test('raw HTML and selected cover-frame are sent to Cloudflare Browser Rendering', { concurrency: false }, async () => {
