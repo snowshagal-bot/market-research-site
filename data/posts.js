@@ -124,6 +124,23 @@ window.RESEARCH_POSTS = [
     "href": "reports/7월 29일 비정기 리서치_두 개의 착시.html"
   },
   {
+    "id": "2026-07-20-weekly-1u5gndk",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-07-20",
+    "reportDate": "2026-07-20",
+    "registeredDate": "2026-08-13",
+    "registeredAt": "2026-08-12T17:53:38.237Z",
+    "legacyImport": false,
+    "title": "7월 4주차 위클리 분석 (2026.07.20–24) · Sung Oh Weekly",
+    "subtitle": "",
+    "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "summary": "나흘간 외국인 매수로 반등하던 코스피는 금요일 5.72% 급락하며 흐름이 뒤집혔다. FOMC·SK하이닉스·빅테크 실적을 통해 좋은 실적이 다시 주가를 움직일 수 있는지, 그리고 메모리·전력 인프라로 돈이 향할 조건을 점검한다.",
+    "href": "reports/7월 4주차 위클리 분석_에디토리얼형.html",
+    "coverImage": "covers/2026-07-20-weekly-1u5gndk.webp"
+  },
+  {
     "id": "2026-07-13-weekly-um5mnf",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
