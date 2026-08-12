@@ -1,6 +1,8 @@
 const MAX_HTML_BYTES = 5 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const RENDER_TIMEOUT_MS = 25000;
+const DEFAULT_RATE_LIMIT_RETRY_MS = 10000;
+const MAX_RATE_LIMIT_RETRY_MS = 15000;
 const RENDER_VIEWPORT = { width: 480, height: 900 };
 const MAX_CAPTURE_DIMENSION = 4096;
 const SELECTOR_PRIORITY = ['.cover-frame', '.cover-page', '.cover-screen', '.report-cover'];
@@ -92,6 +94,37 @@ function renderingPayload(html, selector) {
   };
 }
 
+async function fetchRendering(url, options) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), RENDER_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function rateLimitRetryMs(response) {
+  if (response.status !== 429) return null;
+  const raw = response.headers.get('retry-after');
+  if (!raw) return DEFAULT_RATE_LIMIT_RETRY_MS;
+  const seconds = Number(raw);
+  const wait = Number.isFinite(seconds)
+    ? seconds * 1000
+    : Date.parse(raw) - Date.now();
+  if (!Number.isFinite(wait)) return DEFAULT_RATE_LIMIT_RETRY_MS;
+  return Math.max(0, Math.min(wait + 250, MAX_RATE_LIMIT_RETRY_MS));
+}
+
+async function fetchRenderingWithRetry(url, options) {
+  let response = await fetchRendering(url, options);
+  const wait = rateLimitRetryMs(response);
+  if (wait === null) return response;
+  if (wait > 0) await new Promise(resolve => setTimeout(resolve, wait));
+  response = await fetchRendering(url, options);
+  return response;
+}
+
 export async function onRequestPost({ request, env }) {
   if (!env.ADMIN_KEY || !env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_BROWSER_RENDERING_TOKEN) {
     return json({ error: 'BROWSER_RENDERING_NOT_CONFIGURED', message: '커버 생성 서비스 설정이 필요합니다.' }, 503);
@@ -120,22 +153,19 @@ export async function onRequestPost({ request, env }) {
   const selector = selectCaptureSelector(html, input?.preferredSelector);
   if (!selector) return json({ error: 'COVER_TARGET_NOT_FOUND', message: '캡처할 커버 영역을 찾지 못했습니다.' }, 422);
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), RENDER_TIMEOUT_MS);
   try {
     const endpoint = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(env.CLOUDFLARE_ACCOUNT_ID)}/browser-rendering`;
     const headers = {
       'authorization': `Bearer ${env.CLOUDFLARE_BROWSER_RENDERING_TOKEN}`,
       'content-type': 'application/json'
     };
-    const scrape = await fetch(`${endpoint}/scrape`, {
+    const scrape = await fetchRenderingWithRetry(`${endpoint}/scrape`, {
       method: 'POST',
       headers,
       body: JSON.stringify({
         ...renderingPayload(html, selector),
         elements: [{ selector }]
-      }),
-      signal: controller.signal
+      })
     });
     if (!scrape.ok) {
       return json({ error: 'BROWSER_RENDERING_FAILED', message: sanitizedUpstreamError(scrape.status) }, 502);
@@ -145,7 +175,7 @@ export async function onRequestPost({ request, env }) {
       return json({ error: 'INVALID_CAPTURE_GEOMETRY', message: '커버 영역의 크기를 확인하지 못했습니다.' }, 502);
     }
 
-    const upstream = await fetch(
+    const upstream = await fetchRenderingWithRetry(
       `${endpoint}/screenshot`,
       {
         method: 'POST',
@@ -158,8 +188,7 @@ export async function onRequestPost({ request, env }) {
             captureBeyondViewport: true,
             clip: { ...geometry, scale: 1 }
           }
-        }),
-        signal: controller.signal
+        })
       }
     );
 
@@ -189,8 +218,6 @@ export async function onRequestPost({ request, env }) {
       error: timeout ? 'BROWSER_RENDERING_TIMEOUT' : 'BROWSER_RENDERING_FAILED',
       message: timeout ? '커버 생성 확인이 지연되고 있습니다.' : '커버 생성 서비스에 연결하지 못했습니다.'
     }, timeout ? 504 : 502);
-  } finally {
-    clearTimeout(timer);
   }
 }
 
@@ -198,10 +225,15 @@ export const __test = {
   MAX_HTML_BYTES,
   MAX_IMAGE_BYTES,
   RENDER_TIMEOUT_MS,
+  DEFAULT_RATE_LIMIT_RETRY_MS,
+  MAX_RATE_LIMIT_RETRY_MS,
   RENDER_VIEWPORT,
   MAX_CAPTURE_DIMENSION,
   SELECTOR_PRIORITY,
   captureGeometry,
+  fetchRendering,
+  fetchRenderingWithRetry,
+  rateLimitRetryMs,
   renderingPayload,
   declaredSelector,
   selectCaptureSelector
