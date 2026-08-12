@@ -177,7 +177,7 @@ test('admin markup contains the cover preview modes before the original HTML pre
   assert.match(html, /\.cover-preview-empty\[hidden\],[^}]*\{display:none\}/);
   assert.match(adminScript, /iframe\.setAttribute\('sandbox', 'allow-scripts'\)/);
   assert.match(adminScript, /iframe\.srcdoc = text/);
-  assert.match(html, /admin\.js\?v=20260812-8/);
+  assert.match(html, /admin\.js\?v=20260812-9/);
   assert.doesNotMatch(adminScript, /allow-same-origin/);
 });
 
