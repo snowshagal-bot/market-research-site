@@ -50,6 +50,8 @@
   let selectedHtmlText = '';
   let selectedHtmlDocument = null;
   let generatingCover = false;
+  let coverDecodePending = false;
+  let coverDecodeVersion = 0;
   let coverPreviewUrl = '';
   let publishing = false;
   const PRODUCTION_HOSTNAME = 'market-research-site.pages.dev';
@@ -247,7 +249,12 @@
     coverPreviewUrl = '';
   }
 
-  function resetCoverPreview(message = '대표 커버를 선택하면 홈페이지에서 보이는 영역을 확인할 수 있습니다.') {
+  function resetCoverPreview(message = '대표 커버를 선택하면 홈페이지에서 보이는 영역을 확인할 수 있습니다.', invalidateDecode = true) {
+    if (invalidateDecode) {
+      coverDecodeVersion += 1;
+      coverDecodePending = false;
+      selectedCover = null;
+    }
     revokeCoverPreviewUrl();
     coverPreviewImage?.removeAttribute('src');
     if (coverPreviewImage) coverPreviewImage.hidden = true;
@@ -260,12 +267,19 @@
     if (coverPreviewDimensions) coverPreviewDimensions.textContent = '';
     if (coverPreviewSize) coverPreviewSize.textContent = '';
     if (coverPreviewNote) coverPreviewNote.textContent = defaultCoverPreviewNote;
+    updatePublishState();
   }
 
   function showCoverPreview(file) {
+    const decodeVersion = ++coverDecodeVersion;
     selectedCover = null;
-    resetCoverPreview();
-    if (!file || !coverPreviewImage) return;
+    coverDecodePending = Boolean(file && coverPreviewImage);
+    resetCoverPreview(undefined, false);
+    if (!file || !coverPreviewImage) {
+      coverDecodePending = false;
+      updatePublishState();
+      return;
+    }
     const objectUrl = URL.createObjectURL(file);
     coverPreviewUrl = objectUrl;
     coverPreviewName.textContent = file.name;
@@ -274,17 +288,20 @@
     coverPreviewNote.textContent = '커버 이미지 확인 중…';
     coverPreviewMeta.hidden = false;
     coverPreviewImage.onload = () => {
-      if (coverPreviewUrl !== objectUrl) return;
+      if (decodeVersion !== coverDecodeVersion || coverPreviewUrl !== objectUrl) return;
       selectedCover = file;
+      coverDecodePending = false;
       coverPreviewDimensions.textContent = `${coverPreviewImage.naturalWidth} × ${coverPreviewImage.naturalHeight}px`;
       coverPreviewNote.textContent = '선택한 커버가 홈페이지에 사용됩니다.';
+      updatePublishState();
     };
     coverPreviewImage.onerror = () => {
-      if (coverPreviewUrl !== objectUrl) return;
+      if (decodeVersion !== coverDecodeVersion || coverPreviewUrl !== objectUrl) return;
       selectedCover = null;
+      coverDecodePending = false;
       coverInput.value = '';
       coverInfo.textContent = '이미지를 읽을 수 없습니다. 다른 JPG, PNG 또는 WebP 파일을 선택해 주세요.';
-      resetCoverPreview();
+      resetCoverPreview(undefined, false);
     };
     coverPreviewImage.src = objectUrl;
     coverPreviewImage.hidden = false;
@@ -308,8 +325,8 @@
 
   function updatePublishState() {
     const ready = selectedFile && type.value && /^\d{4}-\d{2}-\d{2}$/.test(date.value) && title.value.trim() && filename.value.trim() && adminKey.value.trim();
-    publishBtn.disabled = publishing || !ready;
-    if (generateCoverBtn) generateCoverBtn.disabled = generatingCover || !selectedFile || !selectedHtmlText || !selectedHtmlDocument;
+    publishBtn.disabled = publishing || generatingCover || coverDecodePending || !ready;
+    if (generateCoverBtn) generateCoverBtn.disabled = generatingCover || coverDecodePending || !selectedFile || !selectedHtmlText || !selectedHtmlDocument;
   }
 
   async function generateCover() {
@@ -339,6 +356,8 @@
         : `HTML 캡처로 커버를 생성했습니다${result.selector ? ` · ${result.selector}` : ''}.`;
       if (result.method === 'template' && result.captureError) console.warn('cover capture fallback:', result.captureError);
     } catch (_) {
+      coverDecodeVersion += 1;
+      coverDecodePending = false;
       coverGeneratorStatus.textContent = '커버 자동 생성에 실패했습니다. 수동 커버를 업로드하거나 다시 시도해 주세요.';
     } finally {
       generatingCover = false;
