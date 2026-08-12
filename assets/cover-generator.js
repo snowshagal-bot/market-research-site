@@ -1,13 +1,16 @@
 (() => {
   const OUTPUT_WIDTH = 900;
   const OUTPUT_HEIGHT = 1350;
+  const CAPTURE_PADDING = 32;
+  const DEFAULT_CAPTURE_BACKGROUND = '#ece7dc';
   const HEURISTIC_SELECTORS = [
     '.cover',
     '.cover-page',
+    '.cover-frame',
     '.cover-screen',
     '.page.cover',
-    '.page:first-of-type',
     '.report-cover',
+    '.page:first-of-type',
     'main'
   ];
 
@@ -24,17 +27,25 @@
     return text.length >= 8;
   }
 
+  function normalizeCaptureTarget(target, selector, source) {
+    if (target?.matches?.('.cover-screen')) {
+      const frame = target.querySelector('.cover-frame');
+      if (usableCandidate(frame)) return { target: frame, selector: '.cover-frame', source };
+    }
+    return { target, selector, source };
+  }
+
   function findCaptureTarget(doc) {
     const declared = selectorMeta(doc);
     if (declared) {
       try {
         const target = doc.querySelector(declared);
-        if (usableCandidate(target)) return { target, selector: declared, source: 'meta' };
+        if (usableCandidate(target)) return normalizeCaptureTarget(target, declared, 'meta');
       } catch (_) {}
     }
     for (const selector of HEURISTIC_SELECTORS) {
       const target = doc.querySelector(selector);
-      if (usableCandidate(target)) return { target, selector, source: 'heuristic' };
+      if (usableCandidate(target)) return normalizeCaptureTarget(target, selector, 'heuristic');
     }
     const body = doc.body;
     if (usableCandidate(body, false)) return { target: body, selector: 'body', source: 'heuristic' };
@@ -145,20 +156,6 @@
     };
   }
 
-  function cloneWithComputedStyles(node, view) {
-    const clone = node.cloneNode(true);
-    const sources = [node, ...node.querySelectorAll('*')];
-    const clones = [clone, ...clone.querySelectorAll('*')];
-    sources.forEach((source, index) => {
-      const target = clones[index];
-      if (!target?.style) return;
-      const computed = view.getComputedStyle(source);
-      target.style.cssText = [...computed].map(property => `${property}:${computed.getPropertyValue(property)};`).join('');
-    });
-    clone.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
-    return clone;
-  }
-
   function imageFromUrl(url) {
     return new Promise((resolve, reject) => {
       const image = new Image();
@@ -168,80 +165,88 @@
     });
   }
 
-  async function captureTarget(doc, candidate) {
-    const rect = candidate.target.getBoundingClientRect();
-    const width = Math.max(1, Math.round(rect.width || candidate.target.scrollWidth || doc.documentElement.clientWidth));
-    const height = Math.max(1, Math.round(rect.height || candidate.target.scrollHeight || doc.documentElement.clientHeight));
-    if (width < 80 || height < 80) throw new Error('캡처 영역이 너무 작습니다.');
-    const styledClone = cloneWithComputedStyles(candidate.target, doc.defaultView);
-    const markup = new XMLSerializer().serializeToString(styledClone);
-    const serialized = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><foreignObject width="100%" height="100%">${markup}</foreignObject></svg>`;
-    const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(serialized)}`;
-    {
-      const image = await imageFromUrl(svgUrl);
+  function containPlacement(sourceWidth, sourceHeight, padding = CAPTURE_PADDING) {
+    const sourceRatio = sourceWidth / sourceHeight;
+    const targetRatio = OUTPUT_WIDTH / OUTPUT_HEIGHT;
+    const ratioDifference = Math.abs(sourceRatio - targetRatio) / targetRatio;
+    const requestedPadding = ratioDifference <= 0.02 ? 0 : padding;
+    const safePadding = Math.max(0, Math.min(Number(requestedPadding) || 0, OUTPUT_WIDTH / 4, OUTPUT_HEIGHT / 4));
+    const availableWidth = OUTPUT_WIDTH - safePadding * 2;
+    const availableHeight = OUTPUT_HEIGHT - safePadding * 2;
+    const scale = Math.min(availableWidth / sourceWidth, availableHeight / sourceHeight);
+    const drawWidth = sourceWidth * scale;
+    const drawHeight = sourceHeight * scale;
+    return {
+      scale,
+      drawWidth,
+      drawHeight,
+      x: (OUTPUT_WIDTH - drawWidth) / 2,
+      y: (OUTPUT_HEIGHT - drawHeight) / 2
+    };
+  }
+
+  function preferredSelector(html) {
+    try {
+      const doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
+      return findCaptureTarget(doc).selector;
+    } catch (_) {
+      return '';
+    }
+  }
+
+  async function resizeServerCapture(blob) {
+    const objectUrl = URL.createObjectURL(blob);
+    try {
+      const image = await imageFromUrl(objectUrl);
       const canvas = document.createElement('canvas');
       canvas.width = OUTPUT_WIDTH;
       canvas.height = OUTPUT_HEIGHT;
       const context = canvas.getContext('2d');
-      context.fillStyle = '#f3eddf';
+      context.fillStyle = DEFAULT_CAPTURE_BACKGROUND;
       context.fillRect(0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
-      const scale = Math.max(OUTPUT_WIDTH / width, OUTPUT_HEIGHT / height);
-      const drawWidth = width * scale;
-      const drawHeight = height * scale;
-      context.drawImage(image, (OUTPUT_WIDTH - drawWidth) / 2, 0, drawWidth, drawHeight);
-      const { blob, extension } = await canvasBlob(canvas);
-      return {
-        file: new File([blob], `generated-cover.${extension}`, { type: blob.type || `image/${extension}` }),
-        method: candidate.source,
-        selector: candidate.selector
-      };
-    }
-  }
-
-  function waitForFrame(iframe) {
-    return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error('HTML 렌더링 시간이 초과됐습니다.')), 8000);
-      iframe.onload = async () => {
-        clearTimeout(timer);
-        try {
-          const doc = iframe.contentDocument;
-          if (!doc) throw new Error('HTML 렌더링 문서에 접근할 수 없습니다.');
-          await doc.fonts?.ready;
-          await Promise.all([...doc.images].map(image => image.complete
-            ? Promise.resolve()
-            : new Promise(done => { image.onload = image.onerror = done; })));
-          resolve(doc);
-        } catch (error) { reject(error); }
-      };
-    });
-  }
-
-  async function generate({ html, template, host = document.body }) {
-    let iframe;
-    let captureError = '';
-    try {
-      iframe = document.createElement('iframe');
-      iframe.className = 'cover-capture-frame';
-      iframe.title = '자동 커버 생성용 HTML 렌더링';
-      iframe.setAttribute('sandbox', 'allow-same-origin');
-      iframe.setAttribute('aria-hidden', 'true');
-      const ready = waitForFrame(iframe);
-      iframe.srcdoc = String(html || '').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
-      host.appendChild(iframe);
-      const doc = await ready;
-      const candidate = findCaptureTarget(doc);
-      if (candidate.target) {
-        try { return await captureTarget(doc, candidate); }
-        catch (error) { captureError = error?.message || 'HTML 캡처 실패'; }
-      }
-      const fallback = await createTemplateCover(template);
-      return { ...fallback, attemptedSelector: candidate.selector, captureError };
-    } catch (error) {
-      const fallback = await createTemplateCover(template);
-      return { ...fallback, attemptedSelector: '', captureError: error?.message || 'HTML 렌더링 실패' };
+      const placement = containPlacement(image.naturalWidth || image.width, image.naturalHeight || image.height);
+      context.drawImage(image, placement.x, placement.y, placement.drawWidth, placement.drawHeight);
+      return canvasBlob(canvas);
     } finally {
-      iframe?.remove();
+      URL.revokeObjectURL(objectUrl);
     }
+  }
+
+  async function serverCapture(html, selector, adminKey) {
+    const response = await fetch('/api/generate-cover', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-admin-key': String(adminKey || '')
+      },
+      body: JSON.stringify({ html: String(html || ''), preferredSelector: selector })
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Browser Rendering 커버 생성에 실패했습니다.');
+    }
+    const type = (response.headers.get('content-type') || '').split(';')[0].toLowerCase();
+    if (!['image/png', 'image/webp'].includes(type)) throw new Error('커버 이미지 응답 형식이 올바르지 않습니다.');
+    const captured = await response.blob();
+    const { blob, extension } = await resizeServerCapture(captured);
+    return {
+      file: new File([blob], `generated-cover.${extension}`, { type: blob.type || `image/${extension}` }),
+      method: 'browser-rendering',
+      selector: response.headers.get('x-cover-selector') || selector
+    };
+  }
+
+  async function generate({ html, template, adminKey }) {
+    const selector = preferredSelector(html);
+    if (selector) {
+      try { return await serverCapture(html, selector, adminKey); }
+      catch (error) {
+        const fallback = await createTemplateCover(template);
+        return { ...fallback, attemptedSelector: selector, captureError: error?.message || 'Browser Rendering 실패' };
+      }
+    }
+    const fallback = await createTemplateCover(template);
+    return { ...fallback, attemptedSelector: '', captureError: '' };
   }
 
   window.MARKET_COVER_GENERATOR = {
@@ -249,9 +254,13 @@
     OUTPUT_HEIGHT,
     HEURISTIC_SELECTORS,
     selectorMeta,
+    normalizeCaptureTarget,
     findCaptureTarget,
     fallbackSummary,
     templateData,
+    containPlacement,
+    preferredSelector,
+    serverCapture,
     createTemplateCover,
     generate
   };

@@ -59,6 +59,48 @@ test('heuristic cover candidates are used when selector metadata is absent', asy
   assert.equal(result.source, 'heuristic');
 });
 
+test('a usable cover frame is captured instead of its cover-screen wrapper and hint', async () => {
+  const api = await generatorApi();
+  const frame = node('', { visual: true });
+  const hint = node('아래로 넘겨 리포트 보기');
+  const screen = node('완성된 커버 아래로 넘겨 리포트 보기');
+  screen.matches = selector => selector === '.cover-screen';
+  screen.querySelector = selector => selector === '.cover-frame' ? frame : null;
+  screen.children = [frame, hint];
+  const doc = {
+    body: node('본문'),
+    querySelector(selector) {
+      if (selector === '.cover-screen') return screen;
+      return null;
+    }
+  };
+
+  const result = api.findCaptureTarget(doc);
+  assert.equal(result.target, frame);
+  assert.notEqual(result.target, screen);
+  assert.equal(result.selector, '.cover-frame');
+  assert.equal(result.source, 'heuristic');
+});
+
+test('a cover-screen without a usable cover frame remains the capture target', async () => {
+  const api = await generatorApi();
+  const screen = node('완성된 커버 wrapper', { visual: true });
+  screen.matches = selector => selector === '.cover-screen';
+  const originalQuerySelector = screen.querySelector;
+  screen.querySelector = selector => selector === '.cover-frame' ? null : originalQuerySelector.call(screen, selector);
+  const doc = {
+    body: node('본문'),
+    querySelector(selector) {
+      if (selector === '.cover-screen') return screen;
+      return null;
+    }
+  };
+
+  const result = api.findCaptureTarget(doc);
+  assert.equal(result.target, screen);
+  assert.equal(result.selector, '.cover-screen');
+});
+
 test('ambiguous minimal HTML falls through to the standard template path', async () => {
   const api = await generatorApi();
   const doc = { body: node('구조가 애매한 짧은 글'), querySelector: () => null };
@@ -83,26 +125,59 @@ test('cover export prefers a real WebP blob and otherwise retries as PNG', async
   assert.match(source, /canvas\.toBlob\(png => finish\(png, 'png'\), 'image\/png'\)/);
 });
 
-test('capture serialization inlines computed styles and uses an SVG data URL', async () => {
+test('captured HTML covers use centered contain placement without forced cropping', async () => {
+  const api = await generatorApi();
+  const placement = api.containPlacement(1600, 900);
+  assert.equal(api.OUTPUT_WIDTH, 900);
+  assert.equal(api.OUTPUT_HEIGHT, 1350);
+  assert.equal(placement.drawWidth <= api.OUTPUT_WIDTH, true);
+  assert.equal(placement.drawHeight <= api.OUTPUT_HEIGHT, true);
+  assert.equal(placement.x >= 0, true);
+  assert.equal(placement.y >= 0, true);
+  assert.ok(Math.abs(placement.drawWidth / placement.drawHeight - 1600 / 900) < 1e-10);
+
   const source = await read('assets/cover-generator.js');
-  assert.match(source, /cloneWithComputedStyles\(candidate\.target, doc\.defaultView\)/);
-  assert.match(source, /new XMLSerializer\(\)\.serializeToString\(styledClone\)/);
-  assert.match(source, /data:image\/svg\+xml;charset=utf-8/);
-  assert.doesNotMatch(source, /createObjectURL\(svgBlob\)/);
+  assert.match(source, /Math\.min\(availableWidth \/ sourceWidth, availableHeight \/ sourceHeight\)/);
+  assert.doesNotMatch(source, /Math\.max\(OUTPUT_WIDTH \/ width, OUTPUT_HEIGHT \/ height\)/);
+  assert.match(source, /context\.drawImage\(image, placement\.x, placement\.y, placement\.drawWidth, placement\.drawHeight\)/);
 });
 
-test('the capture frame receives srcdoc before it is attached so blank-frame load cannot win', async () => {
+test('two-by-three completed covers render full bleed while other ratios retain contain padding', async () => {
+  const api = await generatorApi();
+  const fullBleed = api.containPlacement(480, 720);
+  assert.ok(Math.abs(fullBleed.x) < 1e-10);
+  assert.ok(Math.abs(fullBleed.y) < 1e-10);
+  assert.ok(Math.abs(fullBleed.drawWidth - 900) < 1e-10);
+  assert.ok(Math.abs(fullBleed.drawHeight - 1350) < 1e-10);
+
+  const contained = api.containPlacement(1600, 900);
+  assert.ok(contained.x >= 32 - 1e-10);
+  assert.ok(contained.y >= 32 - 1e-10);
+  assert.ok(contained.drawWidth <= 900 - 64 + 1e-10);
+  assert.ok(contained.drawHeight <= 1350 - 64 + 1e-10);
+});
+
+test('HTML targets use the same-origin server capture endpoint and preserve the template fallback', async () => {
   const source = await read('assets/cover-generator.js');
-  const srcdocIndex = source.indexOf("iframe.srcdoc = String(html || '')");
-  const appendIndex = source.indexOf('host.appendChild(iframe)', srcdocIndex);
-  assert.notEqual(srcdocIndex, -1);
-  assert.ok(appendIndex > srcdocIndex);
+  assert.match(source, /fetch\('\/api\/generate-cover'/);
+  assert.match(source, /'x-admin-key': String\(adminKey \|\| ''\)/);
+  assert.match(source, /body: JSON\.stringify\(\{ html: String\(html \|\| ''\), preferredSelector: selector \}\)/);
+  assert.match(source, /method: 'browser-rendering'/);
+  assert.match(source, /const fallback = await createTemplateCover\(template\)/);
+  assert.match(source, /try \{ return await serverCapture\(html, selector, adminKey\); \}[\s\S]*createTemplateCover\(template\)/);
+});
+
+test('the broken foreignObject rasterization path is no longer used', async () => {
+  const source = await read('assets/cover-generator.js');
+  assert.doesNotMatch(source, /foreignObject|XMLSerializer|cloneWithComputedStyles|iframe\.srcdoc/);
 });
 
 test('admin connects generated files to the existing cover preview and publish payload', async () => {
   const [html, admin] = await Promise.all([read('admin/index.html'), read('assets/admin.js')]);
   assert.match(html, /id="generate-cover-btn"[^>]*disabled>HTML에서 커버 자동 생성/);
-  assert.match(html, /cover-generator\.js\?v=20260812-2/);
+  assert.match(html, /cover-generator\.js\?v=20260812-6/);
+  assert.match(html, /admin\.js\?v=20260812-9/);
+  assert.match(admin, /adminKey: adminKey\.value\.trim\(\)/);
   assert.match(admin, /showCoverPreview\(result\.file, generationReportVersion\)/);
   assert.match(admin, /generationReportVersion !== reportSelectionVersion/);
   assert.match(admin, /coverPreviewImage\.onload = \(\) => \{[\s\S]*selectedCover = file/);

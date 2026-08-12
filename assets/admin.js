@@ -330,11 +330,11 @@
   function updatePublishState() {
     const ready = selectedFile && type.value && /^\d{4}-\d{2}-\d{2}$/.test(date.value) && title.value.trim() && filename.value.trim() && adminKey.value.trim();
     publishBtn.disabled = publishing || generatingCover || coverDecodePending || !ready;
-    if (generateCoverBtn) generateCoverBtn.disabled = generatingCover || coverDecodePending || !selectedFile || !selectedHtmlText || !selectedHtmlDocument;
+    if (generateCoverBtn) generateCoverBtn.disabled = generatingCover || coverDecodePending || !selectedFile || !selectedHtmlText || !selectedHtmlDocument || !adminKey.value.trim();
   }
 
   async function generateCover() {
-    if (generatingCover || !selectedHtmlText || !selectedHtmlDocument || !window.MARKET_COVER_GENERATOR) return;
+    if (generatingCover || !selectedHtmlText || !selectedHtmlDocument || !adminKey.value.trim() || !window.MARKET_COVER_GENERATOR) return;
     const generationVersion = ++coverGenerationVersion;
     const generationReportVersion = reportSelectionVersion;
     generatingCover = true;
@@ -344,7 +344,7 @@
     try {
       const result = await window.MARKET_COVER_GENERATOR.generate({
         html: selectedHtmlText,
-        host: document.body,
+        adminKey: adminKey.value.trim(),
         template: {
           category: labels[type.value] || '리포트',
           date: date.value,
@@ -359,8 +359,8 @@
       coverInfo.textContent = `${result.file.name} · ${(result.file.size / 1024).toFixed(1)} KB`;
       showCoverPreview(result.file, generationReportVersion);
       coverGeneratorStatus.textContent = result.method === 'template'
-        ? `표준 템플릿 커버를 생성했습니다${result.attemptedSelector ? ` · ${result.attemptedSelector} 캡처 대체` : ''}. 수동 커버로 교체할 수도 있습니다.`
-        : `HTML 캡처로 커버를 생성했습니다${result.selector ? ` · ${result.selector}` : ''}.`;
+        ? `표준 템플릿 커버를 생성했습니다${result.attemptedSelector ? ` · ${result.attemptedSelector} 캡처 대체` : ''}${result.captureError ? ` · ${result.captureError}` : ''}. 수동 커버로 교체할 수도 있습니다.`
+        : `브라우저 렌더링으로 커버를 생성했습니다${result.selector ? ` · ${result.selector}` : ''}.`;
       if (result.method === 'template' && result.captureError) console.warn('cover capture fallback:', result.captureError);
     } catch (_) {
       if (generationVersion !== coverGenerationVersion || generationReportVersion !== reportSelectionVersion) return;
