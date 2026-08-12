@@ -8,6 +8,7 @@ const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 function createElement(id = '') {
   const listeners = new Map();
   const attributes = new Map();
+  const classes = new Set();
   return {
     id,
     value: '',
@@ -17,7 +18,7 @@ function createElement(id = '') {
     textContent: '',
     innerHTML: '',
     dataset: {},
-    classList: { add() {}, remove() {} },
+    classList: { add(...names) { names.forEach(name => classes.add(name)); }, remove(...names) { names.forEach(name => classes.delete(name)); }, contains(name) { return classes.has(name); } },
     addEventListener(type, handler) { listeners.set(type, handler); },
     emit(type, event = {}) { return listeners.get(type)?.({ preventDefault() {}, ...event }); },
     setAttribute(name, value) { attributes.set(name, String(value)); },
@@ -25,12 +26,12 @@ function createElement(id = '') {
     removeAttribute(name) { if (name === 'src') this.src = ''; attributes.delete(name); },
     querySelector() { return null; },
     appendChild() {},
-    focus() {},
+    focus() { this.focused = true; },
     click() {}
   };
 }
 
-async function loadAdmin({ confirmResult = false, generateCover } = {}) {
+async function loadAdmin({ confirmResult = false, generateCover, publishResponse } = {}) {
   const source = await read('assets/admin.js');
   const ids = [
     'html-file', 'drop-zone', 'file-info', 'parse-status', 'preview-wrap', 'post-type',
@@ -40,6 +41,7 @@ async function loadAdmin({ confirmResult = false, generateCover } = {}) {
     'cover-preview-name', 'cover-preview-dimensions', 'cover-preview-size',
     'cover-preview-caption', 'cover-preview-note', 'admin-key', 'publish-btn', 'publish-overlay',
     'publish-state-title', 'publish-state-text', 'publish-state-detail', 'publish-links',
+    'publish-error-actions', 'publish-error-close',
     'published-report-link', 'published-home-link', 'category-status'
     , 'post-language', 'translation-source', 'translation-source-status', 'generate-cover-btn', 'cover-generator-status'
   ];
@@ -79,7 +81,7 @@ async function loadAdmin({ confirmResult = false, generateCover } = {}) {
     fetch: async (url, options = {}) => {
       if (url === '/api/publish') {
         submissions.push(options.body);
-        return { ok: false, status: 500, json: async () => ({ message: 'test stop' }) };
+        return publishResponse || { ok: false, status: 500, json: async () => ({ message: 'test stop' }) };
       }
       return { ok: true, json: async () => [] };
     },
@@ -177,7 +179,7 @@ test('admin markup contains the cover preview modes before the original HTML pre
   assert.match(html, /\.cover-preview-empty\[hidden\],[^}]*\{display:none\}/);
   assert.match(adminScript, /iframe\.setAttribute\('sandbox', 'allow-scripts'\)/);
   assert.match(adminScript, /iframe\.srcdoc = text/);
-  assert.match(html, /admin\.js\?v=20260812-9/);
+  assert.match(html, /admin\.js\?v=20260813-1/);
   assert.doesNotMatch(adminScript, /allow-same-origin/);
 });
 
@@ -420,6 +422,39 @@ test('publishing without a cover shows an explicit fallback-cover warning in the
   assert.equal(confirmMessages.length, 1);
   assert.match(confirmMessages[0], /대표 커버가 선택되지 않았습니다/);
   assert.match(confirmMessages[0], /fallback cover/);
+});
+
+test('invalid administrator authentication keeps a clear publish failure visible and returns focus to the key', async () => {
+  const { elements, submissions } = await loadAdmin({
+    confirmResult: true,
+    publishResponse: {
+      ok: false,
+      status: 401,
+      json: async () => ({ error: 'UNAUTHORIZED', message: '관리자 키가 올바르지 않습니다.' })
+    }
+  });
+  await makePublishReady(elements);
+  await elements['publish-btn'].emit('click');
+
+  assert.equal(submissions.length, 1);
+  assert.equal(elements['publish-overlay'].classList.contains('on'), true);
+  assert.equal(elements['publish-overlay'].classList.contains('error'), true);
+  assert.equal(elements['publish-overlay'].getAttribute('role'), 'alertdialog');
+  assert.equal(elements['publish-state-title'].textContent, '게시되지 않았습니다.');
+  assert.match(elements['publish-state-text'].textContent, /관리자 키가 올바르지 않아 게시하지 못했습니다/);
+  assert.equal(elements['publish-error-actions'].hidden, false);
+  assert.equal(elements['admin-key'].getAttribute('aria-invalid'), 'true');
+  assert.match(elements['parse-status'].textContent, /게시되지 않음/);
+
+  elements['publish-error-close'].emit('click');
+  assert.equal(elements['publish-overlay'].classList.contains('on'), false);
+  assert.equal(elements['admin-key'].focused, true);
+
+  elements['admin-key'].value = 'corrected-key';
+  elements['admin-key'].emit('input');
+  assert.equal(elements['admin-key'].getAttribute('aria-invalid'), undefined);
+  assert.equal(elements['parse-status'].classList.contains('error'), false);
+  assert.match(elements['parse-status'].textContent, /다시 게시해 주세요/);
 });
 
 test('an automatically generated cover suppresses the missing-cover warning', async () => {
