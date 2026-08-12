@@ -152,6 +152,7 @@ export async function onRequestPost({ request, env }) {
         headers,
         body: JSON.stringify({
           ...renderingPayload(html, selector),
+          viewport: { ...RENDER_VIEWPORT, deviceScaleFactor: 2 },
           screenshotOptions: {
             type: 'png',
             captureBeyondViewport: true,

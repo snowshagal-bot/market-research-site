@@ -62,7 +62,7 @@ test('raw HTML and selected cover-frame are sent to Cloudflare Browser Rendering
     assert.match(screenshot.url, /accounts\/account-id\/browser-rendering\/screenshot$/);
     assert.equal(screenshot.options.headers.authorization, 'Bearer server-secret-token');
     assert.equal(screenshot.payload.html, html);
-    assert.deepEqual(screenshot.payload.viewport, { width: 480, height: 900 });
+    assert.deepEqual(screenshot.payload.viewport, { width: 480, height: 900, deviceScaleFactor: 2 });
     assert.deepEqual(screenshot.payload.screenshotOptions, {
       type: 'png',
       captureBeyondViewport: true,
