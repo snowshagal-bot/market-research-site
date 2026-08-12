@@ -21,6 +21,8 @@
   const filename = $('post-filename');
   const coverInput = $('cover-file');
   const coverInfo = $('cover-info');
+  const generateCoverBtn = $('generate-cover-btn');
+  const coverGeneratorStatus = $('cover-generator-status');
   const coverPreviewCanvas = $('cover-preview-canvas');
   const coverPreviewImage = $('cover-preview-image');
   const coverPreviewEmpty = $('cover-preview-empty');
@@ -45,12 +47,20 @@
   const themeMedia = matchMedia('(prefers-color-scheme: dark)');
   let selectedFile = null;
   let selectedCover = null;
+  let selectedHtmlText = '';
+  let selectedHtmlDocument = null;
+  let generatingCover = false;
+  let coverGenerationVersion = 0;
+  let coverDecodePending = false;
+  let coverDecodeVersion = 0;
+  let reportSelectionVersion = 0;
   let coverPreviewUrl = '';
   let publishing = false;
   const PRODUCTION_HOSTNAME = 'market-research-site.pages.dev';
   const localeApi = window.MARKET_LOCALE;
 
   const defaultCoverInfo = 'JPG, PNG, WebP · 최대 4MB · 원본 리포트 HTML과 별도로 저장됩니다.';
+  const defaultCoverGeneratorStatus = '업로드한 리포트 HTML의 첫 화면을 기준으로 생성합니다. 결과는 게시 전에 미리보고 교체할 수 있습니다.';
   const defaultCoverPreviewNote = '커버 미선택 · 게시 후 홈페이지에서는 fallback cover 사용';
   const coverModeLabels = {
     1280: 'PC 1280',
@@ -242,7 +252,12 @@
     coverPreviewUrl = '';
   }
 
-  function resetCoverPreview(message = '대표 커버를 선택하면 홈페이지에서 보이는 영역을 확인할 수 있습니다.') {
+  function resetCoverPreview(message = '대표 커버를 선택하면 홈페이지에서 보이는 영역을 확인할 수 있습니다.', invalidateDecode = true) {
+    if (invalidateDecode) {
+      coverDecodeVersion += 1;
+      coverDecodePending = false;
+      selectedCover = null;
+    }
     revokeCoverPreviewUrl();
     coverPreviewImage?.removeAttribute('src');
     if (coverPreviewImage) coverPreviewImage.hidden = true;
@@ -255,11 +270,20 @@
     if (coverPreviewDimensions) coverPreviewDimensions.textContent = '';
     if (coverPreviewSize) coverPreviewSize.textContent = '';
     if (coverPreviewNote) coverPreviewNote.textContent = defaultCoverPreviewNote;
+    updatePublishState();
   }
 
-  function showCoverPreview(file) {
-    resetCoverPreview();
-    if (!file || !coverPreviewImage) return;
+  function showCoverPreview(file, reportVersion = reportSelectionVersion) {
+    if (reportVersion !== reportSelectionVersion) return;
+    const decodeVersion = ++coverDecodeVersion;
+    selectedCover = null;
+    coverDecodePending = Boolean(file && coverPreviewImage);
+    resetCoverPreview(undefined, false);
+    if (!file || !coverPreviewImage) {
+      coverDecodePending = false;
+      updatePublishState();
+      return;
+    }
     const objectUrl = URL.createObjectURL(file);
     coverPreviewUrl = objectUrl;
     coverPreviewName.textContent = file.name;
@@ -268,16 +292,20 @@
     coverPreviewNote.textContent = '커버 이미지 확인 중…';
     coverPreviewMeta.hidden = false;
     coverPreviewImage.onload = () => {
-      if (coverPreviewUrl !== objectUrl) return;
+      if (decodeVersion !== coverDecodeVersion || reportVersion !== reportSelectionVersion || coverPreviewUrl !== objectUrl) return;
+      selectedCover = file;
+      coverDecodePending = false;
       coverPreviewDimensions.textContent = `${coverPreviewImage.naturalWidth} × ${coverPreviewImage.naturalHeight}px`;
       coverPreviewNote.textContent = '선택한 커버가 홈페이지에 사용됩니다.';
+      updatePublishState();
     };
     coverPreviewImage.onerror = () => {
-      if (coverPreviewUrl !== objectUrl) return;
+      if (decodeVersion !== coverDecodeVersion || reportVersion !== reportSelectionVersion || coverPreviewUrl !== objectUrl) return;
       selectedCover = null;
+      coverDecodePending = false;
       coverInput.value = '';
       coverInfo.textContent = '이미지를 읽을 수 없습니다. 다른 JPG, PNG 또는 WebP 파일을 선택해 주세요.';
-      resetCoverPreview();
+      resetCoverPreview(undefined, false);
     };
     coverPreviewImage.src = objectUrl;
     coverPreviewImage.hidden = false;
@@ -301,7 +329,50 @@
 
   function updatePublishState() {
     const ready = selectedFile && type.value && /^\d{4}-\d{2}-\d{2}$/.test(date.value) && title.value.trim() && filename.value.trim() && adminKey.value.trim();
-    publishBtn.disabled = publishing || !ready;
+    publishBtn.disabled = publishing || generatingCover || coverDecodePending || !ready;
+    if (generateCoverBtn) generateCoverBtn.disabled = generatingCover || coverDecodePending || !selectedFile || !selectedHtmlText || !selectedHtmlDocument;
+  }
+
+  async function generateCover() {
+    if (generatingCover || !selectedHtmlText || !selectedHtmlDocument || !window.MARKET_COVER_GENERATOR) return;
+    const generationVersion = ++coverGenerationVersion;
+    const generationReportVersion = reportSelectionVersion;
+    generatingCover = true;
+    updatePublishState();
+    generateCoverBtn.textContent = '커버 생성 중…';
+    coverGeneratorStatus.textContent = 'HTML 첫 화면을 분석하고 커버 이미지를 만들고 있습니다.';
+    try {
+      const result = await window.MARKET_COVER_GENERATOR.generate({
+        html: selectedHtmlText,
+        host: document.body,
+        template: {
+          category: labels[type.value] || '리포트',
+          date: date.value,
+          title: title.value.trim(),
+          metaSummary: detectSummary(selectedHtmlDocument),
+          summary: postSummary.value.trim(),
+          description: description.value.trim()
+        }
+      });
+      if (generationVersion !== coverGenerationVersion || generationReportVersion !== reportSelectionVersion) return;
+      coverInput.value = '';
+      coverInfo.textContent = `${result.file.name} · ${(result.file.size / 1024).toFixed(1)} KB`;
+      showCoverPreview(result.file, generationReportVersion);
+      coverGeneratorStatus.textContent = result.method === 'template'
+        ? `표준 템플릿 커버를 생성했습니다${result.attemptedSelector ? ` · ${result.attemptedSelector} 캡처 대체` : ''}. 수동 커버로 교체할 수도 있습니다.`
+        : `HTML 캡처로 커버를 생성했습니다${result.selector ? ` · ${result.selector}` : ''}.`;
+      if (result.method === 'template' && result.captureError) console.warn('cover capture fallback:', result.captureError);
+    } catch (_) {
+      if (generationVersion !== coverGenerationVersion || generationReportVersion !== reportSelectionVersion) return;
+      coverDecodeVersion += 1;
+      coverDecodePending = false;
+      coverGeneratorStatus.textContent = '커버 자동 생성에 실패했습니다. 수동 커버를 업로드하거나 다시 시도해 주세요.';
+    } finally {
+      if (generationVersion !== coverGenerationVersion || generationReportVersion !== reportSelectionVersion) return;
+      generatingCover = false;
+      generateCoverBtn.textContent = 'HTML에서 커버 자동 생성';
+      updatePublishState();
+    }
   }
 
   function showOverlay(titleText, bodyText, detailText = '') {
@@ -366,11 +437,24 @@
       status.textContent = '현재 게시기는 5MB 이하 HTML 파일만 지원합니다.';
       return;
     }
+    const reportVersion = ++reportSelectionVersion;
+    coverGenerationVersion += 1;
+    generatingCover = false;
+    generateCoverBtn.textContent = 'HTML에서 커버 자동 생성';
+    coverGeneratorStatus.textContent = defaultCoverGeneratorStatus;
+    coverInput.value = '';
+    coverInfo.textContent = defaultCoverInfo;
+    resetCoverPreview();
     selectedFile = file;
+    selectedHtmlText = '';
+    selectedHtmlDocument = null;
     registeredDate.value = '게시 시 자동 기록';
     status.textContent = 'HTML을 분석하는 중…';
     const text = await file.text();
+    if (reportVersion !== reportSelectionVersion) return;
     const doc = new DOMParser().parseFromString(text, 'text/html');
+    selectedHtmlText = text;
+    selectedHtmlDocument = doc;
     const detectedType = detectType(file.name, doc, text);
     const detectedDate = detectDate(file.name, doc, text);
     const detectedTitle = detectTitle(file.name, doc);
@@ -478,13 +562,13 @@
       resetCoverPreview();
       return;
     }
-    selectedCover = file;
     coverInfo.textContent = file
       ? `${file.name} · ${(file.size / 1024).toFixed(1)} KB`
       : defaultCoverInfo;
     if (file) showCoverPreview(file);
     else resetCoverPreview();
   });
+  generateCoverBtn?.addEventListener('click', generateCover);
   coverPreviewModes.forEach(button => {
     button.addEventListener('click', () => setCoverPreviewMode(button.dataset.coverPreviewMode));
   });

@@ -86,6 +86,13 @@ The homepage v2 carousel is an editorial category overview, not a promotional ba
 - an unclassified report remains unselected and cannot be published until the administrator chooses a category;
 - the submitted type values remain `daily`, `weekly`, `research`, `basics`, and `note`.
 
+## Admin cover generation
+
+- `/admin/` may generate a 900×1350 cover once from the locally uploaded report HTML before publishing; the public homepage never generates covers at runtime;
+- prefer `meta[name="report-cover-selector"]`, then conservative cover/first-page candidates, and use the restrained editorial template when capture is unavailable or ambiguous;
+- generated covers must immediately reuse the PC 1280, mobile 430, and mobile 360 crop previews and the same publish payload as manual JPG/PNG/WebP covers;
+- automatic generation remains optional, failures must not block publishing, and manual cover upload must remain available.
+
 ## Report isolation
 
 Uploaded reports are standalone documents and can contain global CSS rules. Do not assume their CSS is well-scoped.
