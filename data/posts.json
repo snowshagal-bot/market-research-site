@@ -102,5 +102,21 @@
     "subtitle": "",
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "href": "reports/8월 3일 주식리포트_커버통합.html"
+  },
+  {
+    "id": "2026-07-29-research-m2ef0m",
+    "type": "research",
+    "typeLabel": "비정기 리서치",
+    "lang": "ko",
+    "date": "2026-07-29",
+    "reportDate": "2026-07-29",
+    "registeredDate": "2026-08-12",
+    "registeredAt": "2026-08-12T08:08:46.956Z",
+    "legacyImport": false,
+    "title": "두 개의 착시",
+    "subtitle": "",
+    "description": "특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.",
+    "summary": "외국인은 대규모로 팔았는데 보유비중은 오르고, 급락의 범인으로 지목된 레버리지는 단독 원인으로 보기 어렵다. 외국인 수급·대형주 쏠림·레버리지 리밸런싱을 따라가며 **숫자 뒤에 숨은 시장 구조**를 살펴본다.",
+    "href": "reports/7월 29일 비정기 리서치_두 개의 착시.html"
   }
 ]
