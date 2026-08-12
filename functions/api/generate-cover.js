@@ -4,7 +4,6 @@ const RENDER_TIMEOUT_MS = 25000;
 const DEFAULT_RATE_LIMIT_RETRY_MS = 10000;
 const MAX_RATE_LIMIT_RETRY_MS = 15000;
 const RENDER_VIEWPORT = { width: 480, height: 900 };
-const MAX_CAPTURE_DIMENSION = 4096;
 const SELECTOR_PRIORITY = ['.cover-frame', '.cover-page', '.cover-screen', '.report-cover'];
 
 function json(body, status = 200) {
@@ -63,34 +62,38 @@ function sanitizedUpstreamError(status) {
   return 'Browser Rendering에서 커버를 생성하지 못했습니다.';
 }
 
-function captureGeometry(payload, selector) {
-  const entries = Array.isArray(payload?.result) ? payload.result : Array.isArray(payload) ? payload : [];
-  const entry = entries.find(item => item?.selector === selector) || entries[0];
-  const candidate = Array.isArray(entry?.results) ? entry.results[0] : entry?.results;
-  const clip = {
-    x: Number(candidate?.left),
-    y: Number(candidate?.top),
-    width: Number(candidate?.width),
-    height: Number(candidate?.height)
-  };
-  if (
-    !Object.values(clip).every(Number.isFinite)
-    || clip.x < 0
-    || clip.y < 0
-    || clip.width <= 0
-    || clip.height <= 0
-    || clip.width > MAX_CAPTURE_DIMENSION
-    || clip.height > MAX_CAPTURE_DIMENSION
-  ) return null;
-  return clip;
-}
-
 function renderingPayload(html, selector) {
   return {
     html,
     viewport: RENDER_VIEWPORT,
     waitForSelector: { selector, visible: true, timeout: 10000 },
     waitForTimeout: 250
+  };
+}
+
+function tagAttribute(tag, name) {
+  return tag.match(new RegExp(`\\b${name}\\s*=\\s*["']([^"']+)["']`, 'i'))?.[1] || '';
+}
+
+function coverFrameCapturePlan(html, selector) {
+  if (selector !== '.cover-frame') return null;
+  const imageTag = [...html.matchAll(/<img\b[^>]*>/gi)]
+    .map(match => match[0])
+    .find(tag => tagAttribute(tag, 'class').split(/\s+/).includes('cover-art'));
+  const sourceWidth = Number(tagAttribute(imageTag || '', 'width'));
+  const sourceHeight = Number(tagAttribute(imageTag || '', 'height'));
+  if (!Number.isFinite(sourceWidth) || !Number.isFinite(sourceHeight) || sourceWidth <= 0 || sourceHeight <= 0) return null;
+  const captureHeight = RENDER_VIEWPORT.width * sourceHeight / sourceWidth;
+  if (!Number.isFinite(captureHeight) || captureHeight < 80 || captureHeight > RENDER_VIEWPORT.height) return null;
+  return {
+    addStyleTag: [{
+      content: `html,body{margin:0!important;padding:0!important;width:${RENDER_VIEWPORT.width}px!important;min-width:0!important;overflow:hidden!important}.cover-screen{position:fixed!important;inset:0 auto auto 0!important;width:${RENDER_VIEWPORT.width}px!important;max-width:none!important;min-height:0!important;margin:0!important;z-index:2147483647!important}.cover-frame{width:${RENDER_VIEWPORT.width}px!important;max-width:none!important;margin:0!important}.cover-hint{display:none!important}`
+    }],
+    screenshotOptions: {
+      type: 'png',
+      captureBeyondViewport: true,
+      clip: { x: 0, y: 0, width: RENDER_VIEWPORT.width, height: captureHeight, scale: 1 }
+    }
   };
 }
 
@@ -159,22 +162,7 @@ export async function onRequestPost({ request, env }) {
       'authorization': `Bearer ${env.CLOUDFLARE_BROWSER_RENDERING_TOKEN}`,
       'content-type': 'application/json'
     };
-    const scrape = await fetchRenderingWithRetry(`${endpoint}/scrape`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        ...renderingPayload(html, selector),
-        elements: [{ selector }]
-      })
-    });
-    if (!scrape.ok) {
-      return json({ error: 'BROWSER_RENDERING_FAILED', message: sanitizedUpstreamError(scrape.status) }, 502);
-    }
-    const geometry = captureGeometry(await scrape.json().catch(() => null), selector);
-    if (!geometry) {
-      return json({ error: 'INVALID_CAPTURE_GEOMETRY', message: '커버 영역의 크기를 확인하지 못했습니다.' }, 502);
-    }
-
+    const framePlan = coverFrameCapturePlan(html, selector);
     const upstream = await fetchRenderingWithRetry(
       `${endpoint}/screenshot`,
       {
@@ -183,11 +171,10 @@ export async function onRequestPost({ request, env }) {
         body: JSON.stringify({
           ...renderingPayload(html, selector),
           viewport: { ...RENDER_VIEWPORT, deviceScaleFactor: 2 },
-          screenshotOptions: {
-            type: 'png',
-            captureBeyondViewport: true,
-            clip: { ...geometry, scale: 1 }
-          }
+          ...(framePlan || {
+            selector,
+            screenshotOptions: { type: 'png', captureBeyondViewport: true }
+          })
         })
       }
     );
@@ -228,9 +215,8 @@ export const __test = {
   DEFAULT_RATE_LIMIT_RETRY_MS,
   MAX_RATE_LIMIT_RETRY_MS,
   RENDER_VIEWPORT,
-  MAX_CAPTURE_DIMENSION,
   SELECTOR_PRIORITY,
-  captureGeometry,
+  coverFrameCapturePlan,
   fetchRendering,
   fetchRenderingWithRetry,
   rateLimitRetryMs,
