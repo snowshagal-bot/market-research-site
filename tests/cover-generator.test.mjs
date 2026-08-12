@@ -59,6 +59,48 @@ test('heuristic cover candidates are used when selector metadata is absent', asy
   assert.equal(result.source, 'heuristic');
 });
 
+test('a usable cover frame is captured instead of its cover-screen wrapper and hint', async () => {
+  const api = await generatorApi();
+  const frame = node('', { visual: true });
+  const hint = node('아래로 넘겨 리포트 보기');
+  const screen = node('완성된 커버 아래로 넘겨 리포트 보기');
+  screen.matches = selector => selector === '.cover-screen';
+  screen.querySelector = selector => selector === '.cover-frame' ? frame : null;
+  screen.children = [frame, hint];
+  const doc = {
+    body: node('본문'),
+    querySelector(selector) {
+      if (selector === '.cover-screen') return screen;
+      return null;
+    }
+  };
+
+  const result = api.findCaptureTarget(doc);
+  assert.equal(result.target, frame);
+  assert.notEqual(result.target, screen);
+  assert.equal(result.selector, '.cover-frame');
+  assert.equal(result.source, 'heuristic');
+});
+
+test('a cover-screen without a usable cover frame remains the capture target', async () => {
+  const api = await generatorApi();
+  const screen = node('완성된 커버 wrapper', { visual: true });
+  screen.matches = selector => selector === '.cover-screen';
+  const originalQuerySelector = screen.querySelector;
+  screen.querySelector = selector => selector === '.cover-frame' ? null : originalQuerySelector.call(screen, selector);
+  const doc = {
+    body: node('본문'),
+    querySelector(selector) {
+      if (selector === '.cover-screen') return screen;
+      return null;
+    }
+  };
+
+  const result = api.findCaptureTarget(doc);
+  assert.equal(result.target, screen);
+  assert.equal(result.selector, '.cover-screen');
+});
+
 test('ambiguous minimal HTML falls through to the standard template path', async () => {
   const api = await generatorApi();
   const doc = { body: node('구조가 애매한 짧은 글'), querySelector: () => null };
@@ -98,6 +140,21 @@ test('captured HTML covers use centered contain placement without forced croppin
   assert.match(source, /Math\.min\(availableWidth \/ sourceWidth, availableHeight \/ sourceHeight\)/);
   assert.doesNotMatch(source, /Math\.max\(OUTPUT_WIDTH \/ width, OUTPUT_HEIGHT \/ height\)/);
   assert.match(source, /context\.drawImage\(image, placement\.x, placement\.y, placement\.drawWidth, placement\.drawHeight\)/);
+});
+
+test('two-by-three completed covers render full bleed while other ratios retain contain padding', async () => {
+  const api = await generatorApi();
+  const fullBleed = api.containPlacement(480, 720);
+  assert.ok(Math.abs(fullBleed.x) < 1e-10);
+  assert.ok(Math.abs(fullBleed.y) < 1e-10);
+  assert.ok(Math.abs(fullBleed.drawWidth - 900) < 1e-10);
+  assert.ok(Math.abs(fullBleed.drawHeight - 1350) < 1e-10);
+
+  const contained = api.containPlacement(1600, 900);
+  assert.ok(contained.x >= 32 - 1e-10);
+  assert.ok(contained.y >= 32 - 1e-10);
+  assert.ok(contained.drawWidth <= 900 - 64 + 1e-10);
+  assert.ok(contained.drawHeight <= 1350 - 64 + 1e-10);
 });
 
 test('captured covers prefer target or body background and retain the template fallback path', async () => {
@@ -142,7 +199,7 @@ test('the capture frame receives srcdoc before it is attached so blank-frame loa
 test('admin connects generated files to the existing cover preview and publish payload', async () => {
   const [html, admin] = await Promise.all([read('admin/index.html'), read('assets/admin.js')]);
   assert.match(html, /id="generate-cover-btn"[^>]*disabled>HTML에서 커버 자동 생성/);
-  assert.match(html, /cover-generator\.js\?v=20260812-3/);
+  assert.match(html, /cover-generator\.js\?v=20260812-4/);
   assert.match(admin, /showCoverPreview\(result\.file, generationReportVersion\)/);
   assert.match(admin, /generationReportVersion !== reportSelectionVersion/);
   assert.match(admin, /coverPreviewImage\.onload = \(\) => \{[\s\S]*selectedCover = file/);

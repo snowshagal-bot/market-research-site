@@ -6,10 +6,11 @@
   const HEURISTIC_SELECTORS = [
     '.cover',
     '.cover-page',
+    '.cover-frame',
     '.cover-screen',
     '.page.cover',
-    '.page:first-of-type',
     '.report-cover',
+    '.page:first-of-type',
     'main'
   ];
 
@@ -26,17 +27,25 @@
     return text.length >= 8;
   }
 
+  function normalizeCaptureTarget(target, selector, source) {
+    if (target?.matches?.('.cover-screen')) {
+      const frame = target.querySelector('.cover-frame');
+      if (usableCandidate(frame)) return { target: frame, selector: '.cover-frame', source };
+    }
+    return { target, selector, source };
+  }
+
   function findCaptureTarget(doc) {
     const declared = selectorMeta(doc);
     if (declared) {
       try {
         const target = doc.querySelector(declared);
-        if (usableCandidate(target)) return { target, selector: declared, source: 'meta' };
+        if (usableCandidate(target)) return normalizeCaptureTarget(target, declared, 'meta');
       } catch (_) {}
     }
     for (const selector of HEURISTIC_SELECTORS) {
       const target = doc.querySelector(selector);
-      if (usableCandidate(target)) return { target, selector, source: 'heuristic' };
+      if (usableCandidate(target)) return normalizeCaptureTarget(target, selector, 'heuristic');
     }
     const body = doc.body;
     if (usableCandidate(body, false)) return { target: body, selector: 'body', source: 'heuristic' };
@@ -172,7 +181,11 @@
   }
 
   function containPlacement(sourceWidth, sourceHeight, padding = CAPTURE_PADDING) {
-    const safePadding = Math.max(0, Math.min(Number(padding) || 0, OUTPUT_WIDTH / 4, OUTPUT_HEIGHT / 4));
+    const sourceRatio = sourceWidth / sourceHeight;
+    const targetRatio = OUTPUT_WIDTH / OUTPUT_HEIGHT;
+    const ratioDifference = Math.abs(sourceRatio - targetRatio) / targetRatio;
+    const requestedPadding = ratioDifference <= 0.02 ? 0 : padding;
+    const safePadding = Math.max(0, Math.min(Number(requestedPadding) || 0, OUTPUT_WIDTH / 4, OUTPUT_HEIGHT / 4));
     const availableWidth = OUTPUT_WIDTH - safePadding * 2;
     const availableHeight = OUTPUT_HEIGHT - safePadding * 2;
     const scale = Math.min(availableWidth / sourceWidth, availableHeight / sourceHeight);
@@ -276,6 +289,7 @@
     OUTPUT_HEIGHT,
     HEURISTIC_SELECTORS,
     selectorMeta,
+    normalizeCaptureTarget,
     findCaptureTarget,
     fallbackSummary,
     templateData,
