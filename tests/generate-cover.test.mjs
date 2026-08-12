@@ -22,7 +22,7 @@ function request(body, key = ENV.ADMIN_KEY) {
 
 test('selector priority prefers metadata, then cover-frame before outer wrappers', () => {
   assert.equal(__test.selectCaptureSelector('<meta name="report-cover-selector" content="#hero"><div class="cover-frame">x</div>'), '#hero');
-  assert.equal(__test.selectCaptureSelector('<section class="cover-screen"><div class="cover-frame">x</div></section>'), '.cover-frame');
+  assert.equal(__test.selectCaptureSelector('<section class="cover-screen"><div class="cover-frame"><img class="cover-art"><div class="cover-copy">title</div></div><span class="cover-hint">hint</span></section>'), '.cover-frame');
   assert.equal(__test.selectCaptureSelector('<div class="cover-page">x</div><section class="cover-screen">y</section>'), '.cover-page');
   assert.deepEqual(__test.SELECTOR_PRIORITY, ['.cover-frame', '.cover-page', '.cover-screen', '.report-cover']);
 });
@@ -52,6 +52,11 @@ test('raw HTML and selected cover-frame are sent to Cloudflare Browser Rendering
     assert.equal(response.headers.get('x-cover-selector'), '.cover-frame');
     assert.equal(calls.length, 2);
     const [scrape, screenshot] = calls;
+    assert.ok(scrape.options.signal instanceof AbortSignal);
+    assert.ok(screenshot.options.signal instanceof AbortSignal);
+    assert.notEqual(scrape.options.signal, screenshot.options.signal);
+    assert.equal(scrape.options.signal.aborted, false);
+    assert.equal(screenshot.options.signal.aborted, false);
     assert.match(scrape.url, /accounts\/account-id\/browser-rendering\/scrape$/);
     assert.deepEqual(scrape.payload.elements, [{ selector: '.cover-frame' }]);
     assert.equal(scrape.options.headers.authorization, 'Bearer server-secret-token');
@@ -86,6 +91,43 @@ test('capture geometry accepts Cloudflare scrape shapes and rejects unsafe dimen
   );
   assert.equal(__test.captureGeometry({ result: [{ selector: '.cover-frame', results: { left: -1, top: 0, width: 480, height: 720 } }] }, '.cover-frame'), null);
   assert.equal(__test.captureGeometry({ result: [{ selector: '.cover-frame', results: { left: 0, top: 0, width: 5000, height: 720 } }] }, '.cover-frame'), null);
+});
+
+test('Cloudflare Quick Action rate limits are retried once before falling back', { concurrency: false }, async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url, options) => {
+    calls.push({ url, options });
+    if (url.endsWith('/scrape')) {
+      return Response.json({
+        success: true,
+        result: [{ selector: '.cover-frame', results: { left: 0, top: 0, width: 480, height: 720 } }]
+      });
+    }
+    if (calls.filter(call => call.url.endsWith('/screenshot')).length === 1) {
+      return new Response(null, { status: 429, headers: { 'retry-after': '0' } });
+    }
+    return new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'content-type': 'image/png' } });
+  };
+  try {
+    const response = await onRequestPost({
+      request: request({ html: '<div class="cover-frame">cover</div>' }),
+      env: ENV
+    });
+    assert.equal(response.status, 200);
+    assert.equal(calls.length, 3);
+    assert.equal(calls.filter(call => call.url.endsWith('/scrape')).length, 1);
+    assert.equal(calls.filter(call => call.url.endsWith('/screenshot')).length, 2);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('rate-limit retry delay is bounded and defaults to the Free-plan interval', () => {
+  assert.equal(__test.rateLimitRetryMs(new Response(null, { status: 200 })), null);
+  assert.equal(__test.rateLimitRetryMs(new Response(null, { status: 429 })), __test.DEFAULT_RATE_LIMIT_RETRY_MS);
+  assert.equal(__test.rateLimitRetryMs(new Response(null, { status: 429, headers: { 'retry-after': '0' } })), 250);
+  assert.equal(__test.rateLimitRetryMs(new Response(null, { status: 429, headers: { 'retry-after': '60' } })), __test.MAX_RATE_LIMIT_RETRY_MS);
 });
 
 test('missing and incorrect admin authentication are rejected before Browser Rendering', { concurrency: false }, async () => {
