@@ -124,6 +124,22 @@ window.RESEARCH_POSTS = [
     "href": "reports/7월 29일 비정기 리서치_두 개의 착시.html"
   },
   {
+    "id": "2026-07-13-weekly-um5mnf",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-07-13",
+    "reportDate": "2026-07-13",
+    "registeredDate": "2026-08-13",
+    "registeredAt": "2026-08-12T17:51:16.570Z",
+    "legacyImport": false,
+    "title": "폭락과 급반등을 오간 나흘 —진앙은 시장이 아니라 반도체 한 축",
+    "subtitle": "",
+    "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "href": "reports/7월 2주차 위클리 분석1.html",
+    "coverImage": "covers/2026-07-13-weekly-um5mnf.png"
+  },
+  {
     "id": "2026-07-06-weekly-a0ek97",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
