@@ -212,10 +212,13 @@
     }
   }
 
-  async function serverCapture(html, selector) {
+  async function serverCapture(html, selector, adminKey) {
     const response = await fetch('/api/generate-cover', {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: {
+        'content-type': 'application/json',
+        'x-admin-key': String(adminKey || '')
+      },
       body: JSON.stringify({ html: String(html || ''), preferredSelector: selector })
     });
     if (!response.ok) {
@@ -233,10 +236,10 @@
     };
   }
 
-  async function generate({ html, template }) {
+  async function generate({ html, template, adminKey }) {
     const selector = preferredSelector(html);
     if (selector) {
-      try { return await serverCapture(html, selector); }
+      try { return await serverCapture(html, selector, adminKey); }
       catch (error) {
         const fallback = await createTemplateCover(template);
         return { ...fallback, attemptedSelector: selector, captureError: error?.message || 'Browser Rendering 실패' };

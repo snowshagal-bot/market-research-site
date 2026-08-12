@@ -13,10 +13,6 @@ function json(body, status = 200) {
   });
 }
 
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 function classExists(html, selector) {
   const className = selector.slice(1);
   const attributes = html.matchAll(/class\s*=\s*["']([^"']*)["']/gi);
@@ -24,6 +20,21 @@ function classExists(html, selector) {
     if (match[1].split(/\s+/).includes(className)) return true;
   }
   return false;
+}
+
+async function secretsMatch(left, right) {
+  if (!left || !right) return false;
+  const encoder = new TextEncoder();
+  const [leftHash, rightHash] = await Promise.all([
+    crypto.subtle.digest('SHA-256', encoder.encode(left)),
+    crypto.subtle.digest('SHA-256', encoder.encode(right))
+  ]);
+  const leftBytes = new Uint8Array(leftHash);
+  const rightBytes = new Uint8Array(rightHash);
+  if (leftBytes.length !== rightBytes.length) return false;
+  let mismatch = 0;
+  for (let index = 0; index < leftBytes.length; index += 1) mismatch |= leftBytes[index] ^ rightBytes[index];
+  return mismatch === 0;
 }
 
 function declaredSelector(html) {
@@ -49,8 +60,13 @@ function sanitizedUpstreamError(status) {
 }
 
 export async function onRequestPost({ request, env }) {
-  if (!env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_BROWSER_RENDERING_TOKEN) {
+  if (!env.ADMIN_KEY || !env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_BROWSER_RENDERING_TOKEN) {
     return json({ error: 'BROWSER_RENDERING_NOT_CONFIGURED', message: '커버 생성 서비스 설정이 필요합니다.' }, 503);
+  }
+
+  const suppliedKey = request.headers.get('x-admin-key') || '';
+  if (!(await secretsMatch(suppliedKey, env.ADMIN_KEY))) {
+    return json({ error: 'UNAUTHORIZED', message: '관리자 키가 올바르지 않습니다.' }, 401);
   }
 
   const contentLength = Number(request.headers.get('content-length') || 0);

@@ -160,10 +160,11 @@ test('two-by-three completed covers render full bleed while other ratios retain 
 test('HTML targets use the same-origin server capture endpoint and preserve the template fallback', async () => {
   const source = await read('assets/cover-generator.js');
   assert.match(source, /fetch\('\/api\/generate-cover'/);
+  assert.match(source, /'x-admin-key': String\(adminKey \|\| ''\)/);
   assert.match(source, /body: JSON\.stringify\(\{ html: String\(html \|\| ''\), preferredSelector: selector \}\)/);
   assert.match(source, /method: 'browser-rendering'/);
   assert.match(source, /const fallback = await createTemplateCover\(template\)/);
-  assert.match(source, /try \{ return await serverCapture\(html, selector\); \}[\s\S]*createTemplateCover\(template\)/);
+  assert.match(source, /try \{ return await serverCapture\(html, selector, adminKey\); \}[\s\S]*createTemplateCover\(template\)/);
 });
 
 test('the broken foreignObject rasterization path is no longer used', async () => {
@@ -174,8 +175,9 @@ test('the broken foreignObject rasterization path is no longer used', async () =
 test('admin connects generated files to the existing cover preview and publish payload', async () => {
   const [html, admin] = await Promise.all([read('admin/index.html'), read('assets/admin.js')]);
   assert.match(html, /id="generate-cover-btn"[^>]*disabled>HTML에서 커버 자동 생성/);
-  assert.match(html, /cover-generator\.js\?v=20260812-5/);
-  assert.match(html, /admin\.js\?v=20260812-7/);
+  assert.match(html, /cover-generator\.js\?v=20260812-6/);
+  assert.match(html, /admin\.js\?v=20260812-8/);
+  assert.match(admin, /adminKey: adminKey\.value\.trim\(\)/);
   assert.match(admin, /showCoverPreview\(result\.file, generationReportVersion\)/);
   assert.match(admin, /generationReportVersion !== reportSelectionVersion/);
   assert.match(admin, /coverPreviewImage\.onload = \(\) => \{[\s\S]*selectedCover = file/);

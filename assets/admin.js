@@ -330,11 +330,11 @@
   function updatePublishState() {
     const ready = selectedFile && type.value && /^\d{4}-\d{2}-\d{2}$/.test(date.value) && title.value.trim() && filename.value.trim() && adminKey.value.trim();
     publishBtn.disabled = publishing || generatingCover || coverDecodePending || !ready;
-    if (generateCoverBtn) generateCoverBtn.disabled = generatingCover || coverDecodePending || !selectedFile || !selectedHtmlText || !selectedHtmlDocument;
+    if (generateCoverBtn) generateCoverBtn.disabled = generatingCover || coverDecodePending || !selectedFile || !selectedHtmlText || !selectedHtmlDocument || !adminKey.value.trim();
   }
 
   async function generateCover() {
-    if (generatingCover || !selectedHtmlText || !selectedHtmlDocument || !window.MARKET_COVER_GENERATOR) return;
+    if (generatingCover || !selectedHtmlText || !selectedHtmlDocument || !adminKey.value.trim() || !window.MARKET_COVER_GENERATOR) return;
     const generationVersion = ++coverGenerationVersion;
     const generationReportVersion = reportSelectionVersion;
     generatingCover = true;
@@ -344,7 +344,7 @@
     try {
       const result = await window.MARKET_COVER_GENERATOR.generate({
         html: selectedHtmlText,
-        host: document.body,
+        adminKey: adminKey.value.trim(),
         template: {
           category: labels[type.value] || '리포트',
           date: date.value,

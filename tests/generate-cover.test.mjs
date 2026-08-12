@@ -4,14 +4,18 @@ import test from 'node:test';
 import { __test, onRequestPost } from '../functions/api/generate-cover.js';
 
 const ENV = {
+  ADMIN_KEY: 'test-admin-key',
   CLOUDFLARE_ACCOUNT_ID: 'account-id',
   CLOUDFLARE_BROWSER_RENDERING_TOKEN: 'server-secret-token'
 };
 
-function request(body) {
+function request(body, key = ENV.ADMIN_KEY) {
   return new Request('https://preview.example/api/generate-cover', {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: {
+      'content-type': 'application/json',
+      ...(key === null ? {} : { 'x-admin-key': key })
+    },
     body: JSON.stringify(body)
   });
 }
@@ -43,6 +47,25 @@ test('raw HTML and selected cover-frame are sent to Cloudflare Browser Rendering
     assert.deepEqual(call.payload.viewport, { width: 480, height: 900, deviceScaleFactor: 2 });
     assert.equal(call.payload.screenshotOptions.type, 'png');
     assert.equal('url' in call.payload, false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('missing and incorrect admin authentication are rejected before Browser Rendering', { concurrency: false }, async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => { calls += 1; return new Response(); };
+  try {
+    for (const [key, label] of [[null, 'missing'], ['wrong-key', 'incorrect']]) {
+      const response = await onRequestPost({
+        request: request({ html: '<div class="cover-frame">cover</div>' }, key),
+        env: ENV
+      });
+      assert.equal(response.status, 401, label);
+      assert.equal((await response.json()).error, 'UNAUTHORIZED', label);
+    }
+    assert.equal(calls, 0);
   } finally {
     globalThis.fetch = originalFetch;
   }

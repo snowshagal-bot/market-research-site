@@ -177,7 +177,7 @@ test('admin markup contains the cover preview modes before the original HTML pre
   assert.match(html, /\.cover-preview-empty\[hidden\],[^}]*\{display:none\}/);
   assert.match(adminScript, /iframe\.setAttribute\('sandbox', 'allow-scripts'\)/);
   assert.match(adminScript, /iframe\.srcdoc = text/);
-  assert.match(html, /admin\.js\?v=20260812-7/);
+  assert.match(html, /admin\.js\?v=20260812-8/);
   assert.doesNotMatch(adminScript, /allow-same-origin/);
 });
 
@@ -439,6 +439,19 @@ test('an automatically generated cover suppresses the missing-cover warning', as
   await elements['publish-btn'].emit('click');
   assert.equal(confirmMessages.length, 1);
   assert.doesNotMatch(confirmMessages[0], /대표 커버가 선택되지 않았습니다|fallback cover/);
+});
+
+test('automatic cover generation passes the current admin key to the generator', async () => {
+  let generationInput;
+  const { elements } = await loadAdmin({
+    generateCover: async input => {
+      generationInput = input;
+      return { file: validCover('authenticated.webp'), method: 'browser-rendering', selector: '.cover-frame' };
+    }
+  });
+  await makePublishReady(elements);
+  await elements['generate-cover-btn'].emit('click');
+  assert.equal(generationInput.adminKey, 'test-key');
 });
 
 test('A-C: automatic generation and generated-image decode both block publishing until onload', async () => {
