@@ -360,7 +360,7 @@
       showCoverPreview(result.file, generationReportVersion);
       coverGeneratorStatus.textContent = result.method === 'template'
         ? `표준 템플릿 커버를 생성했습니다${result.attemptedSelector ? ` · ${result.attemptedSelector} 캡처 대체` : ''}. 수동 커버로 교체할 수도 있습니다.`
-        : `HTML 캡처로 커버를 생성했습니다${result.selector ? ` · ${result.selector}` : ''}.`;
+        : `브라우저 렌더링으로 커버를 생성했습니다${result.selector ? ` · ${result.selector}` : ''}.`;
       if (result.method === 'template' && result.captureError) console.warn('cover capture fallback:', result.captureError);
     } catch (_) {
       if (generationVersion !== coverGenerationVersion || generationReportVersion !== reportSelectionVersion) return;

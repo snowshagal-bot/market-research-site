@@ -157,49 +157,25 @@ test('two-by-three completed covers render full bleed while other ratios retain 
   assert.ok(contained.drawHeight <= 1350 - 64 + 1e-10);
 });
 
-test('captured covers prefer target or body background and retain the template fallback path', async () => {
-  const api = await generatorApi();
-  const styles = new Map([
-    ['target', 'rgba(0, 0, 0, 0)'],
-    ['body', 'rgb(236, 231, 220)'],
-    ['html', 'transparent']
-  ]);
-  const target = { key: 'target' };
-  const body = { key: 'body' };
-  const documentElement = { key: 'html' };
-  const doc = {
-    body,
-    documentElement,
-    defaultView: { getComputedStyle: node => ({ backgroundColor: styles.get(node.key) }) }
-  };
-  assert.equal(api.captureBackgroundColor(doc, target), 'rgb(236, 231, 220)');
-
+test('HTML targets use the same-origin server capture endpoint and preserve the template fallback', async () => {
   const source = await read('assets/cover-generator.js');
+  assert.match(source, /fetch\('\/api\/generate-cover'/);
+  assert.match(source, /body: JSON\.stringify\(\{ html: String\(html \|\| ''\), preferredSelector: selector \}\)/);
+  assert.match(source, /method: 'browser-rendering'/);
   assert.match(source, /const fallback = await createTemplateCover\(template\)/);
-  assert.match(source, /if \(candidate\.target\) \{[\s\S]*return await captureTarget\(doc, candidate\)/);
+  assert.match(source, /try \{ return await serverCapture\(html, selector\); \}[\s\S]*createTemplateCover\(template\)/);
 });
 
-test('capture serialization inlines computed styles and uses an SVG data URL', async () => {
+test('the broken foreignObject rasterization path is no longer used', async () => {
   const source = await read('assets/cover-generator.js');
-  assert.match(source, /cloneWithComputedStyles\(candidate\.target, doc\.defaultView\)/);
-  assert.match(source, /clone\.style\.margin = '0'/);
-  assert.match(source, /new XMLSerializer\(\)\.serializeToString\(styledClone\)/);
-  assert.match(source, /data:image\/svg\+xml;charset=utf-8/);
-  assert.doesNotMatch(source, /createObjectURL\(svgBlob\)/);
-});
-
-test('the capture frame receives srcdoc before it is attached so blank-frame load cannot win', async () => {
-  const source = await read('assets/cover-generator.js');
-  const srcdocIndex = source.indexOf("iframe.srcdoc = String(html || '')");
-  const appendIndex = source.indexOf('host.appendChild(iframe)', srcdocIndex);
-  assert.notEqual(srcdocIndex, -1);
-  assert.ok(appendIndex > srcdocIndex);
+  assert.doesNotMatch(source, /foreignObject|XMLSerializer|cloneWithComputedStyles|iframe\.srcdoc/);
 });
 
 test('admin connects generated files to the existing cover preview and publish payload', async () => {
   const [html, admin] = await Promise.all([read('admin/index.html'), read('assets/admin.js')]);
   assert.match(html, /id="generate-cover-btn"[^>]*disabled>HTML에서 커버 자동 생성/);
-  assert.match(html, /cover-generator\.js\?v=20260812-4/);
+  assert.match(html, /cover-generator\.js\?v=20260812-5/);
+  assert.match(html, /admin\.js\?v=20260812-7/);
   assert.match(admin, /showCoverPreview\(result\.file, generationReportVersion\)/);
   assert.match(admin, /generationReportVersion !== reportSelectionVersion/);
   assert.match(admin, /coverPreviewImage\.onload = \(\) => \{[\s\S]*selectedCover = file/);
