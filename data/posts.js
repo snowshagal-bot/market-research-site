@@ -211,6 +211,23 @@ window.RESEARCH_POSTS = [
     "summary": "대형 반도체 급락과 외국인 매도로 코스피는 크게 밀렸지만, 코스닥은 오르고 상승 종목도 더 많았다. 지수의 급락과 시장 전체의 방향이 갈라진 이유, 그리고 대형 메모리 밖 성장주로 이동한 자금을 살펴본다"
   },
   {
+    "id": "2026-07-30-daily-10k99v5",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-07-30",
+    "reportDate": "2026-07-30",
+    "registeredDate": "2026-08-13",
+    "registeredAt": "2026-08-13T14:50:27.388Z",
+    "legacyImport": false,
+    "title": "가장 좋은 날의 종가",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "삼성전자 사상 최대 실적과 외국인 1.34조 원 매수 전환에도 코스피는 장중 6,000 문턱에서 밀려 상승분을 모두 반납했다. 지수와 달리 상승 종목은 613개로 넓어진 가운데, 좋은 실적이 확인되는 순간 차익 매물이 나온 이유를 살펴본다.",
+    "href": "reports/7월 30일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-07-30-daily-10k99v5.webp"
+  },
+  {
     "id": "2026-07-29-daily-mo0iu1",
     "type": "daily",
     "typeLabel": "주식 리포트",
