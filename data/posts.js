@@ -144,6 +144,22 @@ window.RESEARCH_POSTS = [
     "summary": "대형 반도체가 흔들린 자리를 2차전지와 정유가 메웠고, 기관은 닷새 만에 현물 매수로 돌아섰다. 지수는 하락했지만 상승 종목이 더 많았던 장에서 칩에서 다른 대형주로 이동한 자금의 방향을 추적한다."
   },
   {
+    "id": "2026-08-06-daily-94w8bi",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-08-06",
+    "reportDate": "2026-08-06",
+    "registeredDate": "2026-08-13",
+    "registeredAt": "2026-08-13T14:40:29.675Z",
+    "legacyImport": false,
+    "title": "반도체 앞으로 온계산서",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "href": "reports/8월 6일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-08-06-daily-94w8bi.webp"
+  },
+  {
     "id": "2026-08-03-daily-181n1pj",
     "type": "daily",
     "typeLabel": "주식 리포트",
