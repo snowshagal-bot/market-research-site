@@ -211,6 +211,23 @@ window.RESEARCH_POSTS = [
     "summary": "대형 반도체 급락과 외국인 매도로 코스피는 크게 밀렸지만, 코스닥은 오르고 상승 종목도 더 많았다. 지수의 급락과 시장 전체의 방향이 갈라진 이유, 그리고 대형 메모리 밖 성장주로 이동한 자금을 살펴본다"
   },
   {
+    "id": "2026-07-31-daily-lr4ely",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-07-31",
+    "reportDate": "2026-07-31",
+    "registeredDate": "2026-08-13",
+    "registeredAt": "2026-08-13T14:50:53.977Z",
+    "legacyImport": false,
+    "title": "하루가 되돌린 사흘",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "외국인 7.24조 원 매수와 반도체 전면 반등으로 코스피는 사흘간 낙폭의 86%를 하루 만에 되돌렸고, SK하이닉스는 상한가를 기록했다. 지수·시장 폭·수급이 함께 반등한 가운데, 급등 뒤에도 남은 선물 베이시스의 불안을 살펴본다.",
+    "href": "reports/7월 31일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-07-31-daily-lr4ely.webp"
+  },
+  {
     "id": "2026-07-30-daily-10k99v5",
     "type": "daily",
     "typeLabel": "주식 리포트",
