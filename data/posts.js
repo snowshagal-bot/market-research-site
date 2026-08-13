@@ -1,5 +1,22 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-13-daily-1tgqr3y",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-08-13",
+    "reportDate": "2026-08-13",
+    "registeredDate": "2026-08-13",
+    "registeredAt": "2026-08-13T14:26:33.160Z",
+    "legacyImport": false,
+    "title": "뜬 배는 둘",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "외국인 매수가 삼성전자·SK하이닉스에 집중되며 코스피는 3.56% 급등했지만, 오른 종목은 37%에 그쳤다. 대형 반도체가 끌어올린 지수와 더 약해진 시장 폭의 간극을 살펴본다",
+    "href": "reports/8월 13일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-08-13-daily-1tgqr3y.webp"
+  },
+  {
     "id": "2026-08-12-weekly-1macab6",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
