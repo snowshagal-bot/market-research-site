@@ -178,6 +178,23 @@
     "coverImage": "covers/2026-08-05-daily-oq9vps.webp"
   },
   {
+    "id": "2026-08-04-daily-wfcoi4",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-08-04",
+    "reportDate": "2026-08-04",
+    "registeredDate": "2026-08-13",
+    "registeredAt": "2026-08-13T14:43:09.609Z",
+    "legacyImport": false,
+    "title": "붉은 한낮의검은 봉오리 둘",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "장중 2.83%까지 밀렸던 코스피는 오후 들어 낙폭을 모두 되돌렸고, 219개 테마 중 218개가 상승했다. 대형 반도체가 멈춘 사이 넓어진 상승 폭이 지수를 다시 끌어올린 하루를 살펴본다.",
+    "href": "reports/8월 4일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-08-04-daily-wfcoi4.webp"
+  },
+  {
     "id": "2026-08-03-daily-181n1pj",
     "type": "daily",
     "typeLabel": "주식 리포트",
