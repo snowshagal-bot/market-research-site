@@ -227,6 +227,23 @@
     "href": "reports/7월 29일 비정기 리서치_두 개의 착시.html"
   },
   {
+    "id": "2026-07-28-daily-g24k4s",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-07-28",
+    "reportDate": "2026-07-28",
+    "registeredDate": "2026-08-13",
+    "registeredAt": "2026-08-13T14:47:21.696Z",
+    "legacyImport": false,
+    "title": "IMF보다 큰 한 달",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "삼성전자·SK하이닉스 급락과 외국인 4.97조 원 매도로 코스피는 10.84% 무너졌고 양시장 서킷브레이커가 발동했다. 반도체 재평가가 시총 집중도·레버리지 구조와 겹치며 79개 업종 전부로 충격이 번진 하루를 분석한다.",
+    "href": "reports/7월 28일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-07-28-daily-g24k4s.webp"
+  },
+  {
     "id": "2026-07-27-daily-1og5hu",
     "type": "daily",
     "typeLabel": "주식 리포트",
