@@ -211,6 +211,23 @@ window.RESEARCH_POSTS = [
     "summary": "대형 반도체 급락과 외국인 매도로 코스피는 크게 밀렸지만, 코스닥은 오르고 상승 종목도 더 많았다. 지수의 급락과 시장 전체의 방향이 갈라진 이유, 그리고 대형 메모리 밖 성장주로 이동한 자금을 살펴본다"
   },
   {
+    "id": "2026-07-29-daily-mo0iu1",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-07-29",
+    "reportDate": "2026-07-29",
+    "registeredDate": "2026-08-13",
+    "registeredAt": "2026-08-13T14:48:22.130Z",
+    "legacyImport": false,
+    "title": "이익률 76%의 가격",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "SK하이닉스가 사상 최대 실적과 76% 영업이익률을 발표했지만 주가는 9.61% 하락했고, 코스피는 이틀 연속 서킷브레이커를 맞았다. 이익의 크기보다 지속성과 주주환원으로 시장의 질문이 옮겨간 가운데, 기관 3.16조 원 매수가 저점 이후 400포인트를 되돌린 흐름을 살펴본다.",
+    "href": "reports/7월 29일 주식리포트.html",
+    "coverImage": "covers/2026-07-29-daily-mo0iu1.webp"
+  },
+  {
     "id": "2026-07-29-research-m2ef0m",
     "type": "research",
     "typeLabel": "비정기 리서치",
