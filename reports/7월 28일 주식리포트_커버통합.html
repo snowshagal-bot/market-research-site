@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>2026.07.28 코스피 데일리 리포트 · Sung Oh</title>
+<style>
+:root{
+  /* 표면 (웜그레이·그레이지) */
+  --surface-page:#ECEAE5;
+  --surface-hero-top:#F2EFE8;
+  --surface-hero-mid:#ECE9E2;
+  --surface-hero-bottom:#E8E5DE;
+  --surface-section:#E3E0D9;
+  --surface-module:#E8E5DF;
+  --surface-detail:#EDEAE4;
+  --surface-inner:#F1EFEA;
+  --surface-muted:#DAD6CE;
+  /* 글자 */
+  --ink:#333333;
+  --ink2:#43423E;
+  --body:#53514C;
+  --sub:#706D66;
+  --muted:#868179;
+  /* 선 */
+  --line:#CEC9BF;
+  --line2:#DCD7CE;
+  /* 주 편집색 — 딥그린 */
+  --accent-green:#46584D;
+  --accent-green-dark:#35433A;
+  --accent-green-soft:#DCE3DD;
+  --accent-green-line:#AAB6AC;
+  /* 보조 구조색 — 슬레이트 네이비 */
+  --accent-navy:#3F4854;
+  --accent-navy-dark:#303843;
+  --accent-navy-soft:#DDE1E4;
+  /* 상승·하락 */
+  --up:#C74754;
+  --up-soft:#F0DCDF;
+  --down:#4F78A8;
+  --down-soft:#DCE5EF;
+  /* 경고·중립 */
+  --warn:#7A5444;
+  --neutral:#66645F;
+  --r:14px;
+  --r-sm:12px;
+  --shadow:none;
+  /* 레거시 별칭 → 딥그린·슬레이트네이비 */
+  --bg:#ECEAE5;
+  --card:#F1EFEA;
+  --accent:#46584D;
+  --gold:#46584D;
+  --gold-soft:#DCE3DD;
+  --gold-bg:#DCE3DD;
+  --goldweak:#DCE3DD;
+  --navy:#3F4854;
+  --navy2:#46584D;
+  --upweak:#F0DCDF;
+  --downweak:#DCE5EF;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:62px;overflow-x:hidden}
+html,body{max-width:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Pretendard Variable","Pretendard","SUIT","Noto Sans KR","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  line-height:1.55;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;
+  word-break:keep-all;line-break:strict;
+}
+/* 네이티브 문서 스크롤 사용 (iOS 호환) — 내부 스크롤 컨테이너 제거 */
+.scroll-area{display:block}
+.app{max-width:480px;margin:0 auto;padding:0 15px calc(72px + env(safe-area-inset-bottom,0px));width:100%}
+.num,.big,.pct{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.up{color:var(--up)}.down{color:var(--down)}.neutral{color:var(--neutral)}.warn{color:var(--warn)}
+a{color:inherit;text-decoration:none}
+
+/* top bar */
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+  margin:0 -15px;padding:calc(11px + env(safe-area-inset-top,0)) 18px 10px;
+  background:rgba(236,234,229,.90);-webkit-backdrop-filter:saturate(180%) blur(12px);backdrop-filter:saturate(120%) blur(12px);
+  border-bottom:1px solid rgba(90,84,74,.12)}
+.topbar .brand{font-size:13.5px;font-weight:800;letter-spacing:-.02em;color:#333333}
+.topbar .brand i{font-style:normal;color:var(--accent-navy)}
+.topbar .date{font-size:12px;font-weight:700;color:#706D66}
+
+/* page nav */
+
+/* hero */
+.hero{position:relative;overflow:hidden;border-radius:var(--r);margin:16px 0 14px;padding:22px 18px 18px;
+  background:linear-gradient(160deg,var(--surface-hero-top) 0%,var(--surface-hero-mid) 55%,var(--surface-hero-bottom) 100%);
+  color:var(--ink);border:1px solid rgba(74,70,62,.08);box-shadow:none;
+  -webkit-transform:translateZ(0);transform:translateZ(0)}
+.hero .kick{position:relative;display:inline-block;font-size:11px;font-weight:800;letter-spacing:.02em;color:#625E57;
+  background:rgba(255,255,255,.18);border:1px solid rgba(84,79,70,.12);border-radius:999px;padding:5px 11px;margin-bottom:14px}
+.hero .h1sub{color:var(--accent-navy)}
+.hero h1{position:relative;margin:0 0 11px;font-size:25px;line-height:1.32;font-weight:800;letter-spacing:-.04em;color:#333333}
+.hero .term{color:#333333;border-bottom-color:#827B70}
+.hero .thesis{position:relative;margin:0;font-size:13px;line-height:1.62;color:var(--body)}
+.hero .thesis b{color:var(--ink);font-weight:800}
+.hero .pull{position:relative;margin:11px 0 0;font-size:13px;line-height:1.55;font-weight:700;color:var(--accent-green-dark)}
+
+/* (장중 그래프: 정적 story-graph 사용 — 레거시 intraday 애니메이션 제거) */
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .back-to-top{transition:none}
+}
+
+/* timeline */
+.timeline{margin:13px 0 2px;display:grid;gap:0}
+.tl{position:relative;display:grid;grid-template-columns:46px 1fr;gap:11px;padding:9px 0}
+.tl:not(:last-child):after{content:"";position:absolute;left:23px;top:30px;bottom:-4px;width:1.5px;background:#B9B3A8}
+.tl .tg{position:relative;z-index:2;align-self:start;font-size:10.5px;font-weight:800;color:#3F3C37;background:#D7D2C8;border-radius:999px;padding:4px 0;text-align:center}
+.tl .tt{font-size:12px;line-height:1.5;color:#4E4C47;font-weight:600;align-self:center}
+.tl .tt b{color:#333333;font-weight:800}
+.idx .l{font-size:11.5px;font-weight:800;color:var(--sub);margin-bottom:5px;letter-spacing:-.01em}
+.idx .v{font-size:22px;font-weight:800;letter-spacing:-.035em;line-height:1.05}
+.idx .c{font-size:11.5px;font-weight:800;margin-top:3px}
+.idx .n{font-size:11px;color:var(--sub);margin-top:6px;line-height:1.42;font-weight:500}
+.ex .l{font-size:10.5px;font-weight:800;color:var(--sub);margin-bottom:3px}
+.ex .v{font-size:16px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.ex .c{font-size:10.5px;font-weight:800;margin-top:1px}
+.ex .n{font-size:10px;color:var(--sub);margin-top:4px;line-height:1.4;font-weight:500}.kread.b:before{background:var(--down)}.kread.c:before{background:var(--gold)}
+.sub.gold:before{background:var(--gold)}
+
+/* kpi row (deep pages) */
+.krow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.kc{background:var(--card);border-radius:12px;box-shadow:var(--shadow);padding:12px 13px}
+.kc .l{font-size:11px;font-weight:800;color:var(--sub);margin-bottom:4px}
+.kc .v{font-size:18px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.kc .n{font-size:10.5px;color:var(--sub);margin-top:4px;font-weight:500;line-height:1.4}.dl li.b:before{background:var(--down)}.dl li.c:before{background:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:11.5px;line-height:1.4;min-width:520px}
+th{background:#F1EFEA;color:var(--sub);font-weight:800;padding:9px 8px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 8px;border-bottom:1px solid var(--line2);text-align:center;color:var(--body);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td:first-child,th.l,td.l{text-align:left}
+td:first-child{font-weight:800;color:var(--ink);white-space:nowrap}
+.tnote{font-size:11px;color:var(--sub);margin:8px 2px 2px;line-height:1.5;font-weight:500}
+.tnote.hang{padding-left:1.3em}
+.tnote.hang>.rm:first-child{display:inline-block;width:1.3em;margin-left:-1.3em}
+.rm{color:var(--warn);font-weight:800}
+.dvc.s h4{background:var(--up)}
+.secbox .it .ih .v{font-size:14px;font-weight:800;letter-spacing:-.02em;white-space:nowrap}
+.secbox .it .tg{display:inline-block;margin-top:6px;font-size:10px;font-weight:700;color:var(--sub);background:#F2F4F6;border-radius:999px;padding:3px 8px}
+
+/* ranks */
+.ranks{display:grid;gap:10px}
+.rank{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.rank .rh{padding:8px 12px;font-size:12px;font-weight:800;background:#F1EFEA;color:var(--ink)}
+.rank .pair{display:grid;grid-template-columns:1fr 1fr}
+.rank .col{min-width:0}
+.rank .col+.col{border-left:1px solid var(--line2)}
+.rank .ch{font-size:10.5px;font-weight:800;padding:7px 12px 4px;color:var(--sub)}
+.rank .col.b .ch{color:var(--up)}.rank .col.s .ch{color:var(--down)}
+.rank ol{list-style:none;margin:0;padding:0 12px 8px;min-width:0}
+.rank li{display:flex;justify-content:space-between;gap:8px;padding:5px 0;font-size:11px;border-bottom:1px solid var(--line2)}
+.rank li:last-child{border-bottom:0}
+.rank li b{font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.rank li span{font-weight:800;white-space:nowrap}
+
+/* prev-call check table */
+.pcheck{border:1px solid var(--line);border-radius:var(--r);background:var(--surface-inner);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow)}
+.pcheck .ph2{background:#F1EFEA;padding:11px 15px;font-size:12.5px;font-weight:800;color:var(--ink);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.pcheck .ph2 span{font-size:10.5px;font-weight:700;color:var(--sub)}
+.pcheck .pi{padding:12px 15px;border-bottom:1px solid var(--line2)}
+.pcheck .pi:last-child{border-bottom:0}
+.pcheck .pi .pq{font-size:11.5px;font-weight:700;color:var(--sub);margin-bottom:4px;line-height:1.45}
+.pcheck .pi .pr{font-size:12.5px;font-weight:800;color:var(--ink);margin-bottom:5px;line-height:1.45}
+.pcheck .pi .pd{font-size:11.5px;line-height:1.5;color:var(--body)}
+.stchip{display:inline-flex;align-items:center;margin-bottom:5px;padding:3px 9px;border-radius:999px;font-size:10.5px;font-weight:800}
+.stchip.watch{background:#E7E1DC;color:#7A5444}
+.stchip.fail{background:var(--downweak);color:var(--down)}
+.stchip.ok{background:var(--upweak);color:var(--up)}
+.pcheck .pconc{padding:13px 15px;background:#F1EFEA}
+.pcheck .pconc b{display:block;font-size:11px;font-weight:800;color:var(--accent-green-dark);margin-bottom:5px}
+.pcheck .pconc p{margin:0;font-size:12px;line-height:1.55;color:var(--body)}
+
+/* details fold */
+details.fold{border:1px solid var(--line);border-radius:13px;background:var(--surface-inner);margin-bottom:10px;overflow:hidden}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:13px 15px;font-size:13px;font-weight:800;color:var(--ink)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary:after{content:"+";font-size:19px;font-weight:800;color:var(--accent-green);line-height:.9}
+details.fold[open]>summary:after{content:"−";font-size:19px;font-weight:800;color:var(--accent-green);line-height:.9}
+details.fold .fb{padding:0 13px 13px}
+.fb input.seg-radio{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
+.seg{display:flex;margin-bottom:10px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg label{flex:1;text-align:center;padding:8px 0;font-size:12px;font-weight:800;color:#66625B;cursor:pointer;background:transparent;transition:background .2s,color .2s}
+.segpane{display:none}
+#seg-kospi:checked ~ .segpane.kospi{display:block}
+#seg-kosdaq:checked ~ .segpane.kosdaq{display:block}
+#seg-kospi:checked ~ .seg label[for="seg-kospi"]{background:var(--accent-green-soft);color:var(--ink);box-shadow:inset 0 -2px 0 var(--accent-green)}
+#seg-kosdaq:checked ~ .seg label[for="seg-kosdaq"]{background:var(--accent-green-soft);color:var(--ink);box-shadow:inset 0 -2px 0 var(--accent-green)}
+.ac .v{display:block;font-size:14.5px;font-weight:800;letter-spacing:-.02em}
+.cmpc .ch{padding:9px 12px;font-size:12px;font-weight:800;color:var(--ink);display:flex;justify-content:space-between;gap:8px}
+.cmpc.a .ch{background:var(--up)}.cmpc.b .ch{background:var(--down)}
+
+/* sources */
+details.src{border:1px solid var(--line);border-radius:13px;background:var(--surface-inner);margin-bottom:10px;overflow:hidden}
+details.src>summary{list-style:none;cursor:pointer;padding:13px 15px;font-size:13px;font-weight:800;color:var(--ink);display:flex;justify-content:space-between}
+details.src>summary::-webkit-details-marker{display:none}
+details.src>summary:after{content:"+";color:var(--navy2);font-size:19px;font-weight:800;line-height:.9}
+details.src[open]>summary:after{content:"−";color:var(--navy2);font-size:19px;font-weight:800;line-height:.9}
+details.src .sb{padding:0 15px 14px}
+details.src ol{margin:0;padding-left:18px}
+details.src li{font-size:11px;line-height:1.6;color:var(--body);margin:4px 0}
+details.src a{color:var(--accent-green-dark);text-decoration:underline}
+.disc{font-size:10.8px;color:var(--sub);text-align:center;line-height:1.6;padding:6px 6px 0;font-weight:500}
+.foot{text-align:center;font-size:11.5px;color:var(--sub);padding:16px 0 6px;font-weight:700}
+
+/* term chip */
+.term{border-bottom:1.5px dashed #868179;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;font-weight:850;color:var(--ink);
+  display:inline;padding:0;margin:0;line-height:1.3;
+  touch-action:manipulation;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.term .tip{position:fixed;left:12px;top:0;bottom:auto;transform:none;min-width:160px;max-width:min(240px,calc(100vw - 28px));
+  background:#3A3936;color:#F2F0EB;font-size:11px;font-weight:600;line-height:1.5;padding:9px 11px;border-radius:10px;
+  box-shadow:0 8px 22px rgba(0,0,0,.22);z-index:60;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease;white-space:normal;text-align:left}
+.term .tip:after{content:"";position:absolute;top:100%;left:var(--ax,50%);transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--ink)}
+.term .tip.below:after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:var(--ink)}
+.term.open .tip{opacity:1;visibility:visible;pointer-events:auto}
+
+/* reveal — iOS 호환: opacity:0 제거, 콘텐츠 항상 표시 */
+.rv{opacity:1;transform:none}
+@media(max-width:360px){.hero h1{font-size:23px}.idx .v{font-size:20px}.phead .pno{font-size:26px}}
+
+/* weekly schedule badges */
+tr.past td{background:var(--surface-inner)!important;color:#868179!important}
+tr.today td{background:var(--accent-green-soft)!important}
+tr.upcoming td{background:#F1EFEA!important}
+.badge{display:inline-block;border-radius:999px;padding:2px 7px;font-size:10px;font-weight:800;margin-right:4px;background:#F2F4F6;color:var(--sub)}
+.badge.today{background:var(--accent-green-soft);color:var(--accent-green-dark)}.badge.upcoming{background:var(--surface-detail);color:var(--neutral)}.badge.past{background:#E8E5DF;color:#868179}.badge.core{background:var(--accent-navy-soft);color:var(--accent-navy-dark)}
+.smallnote{font-size:10px;color:var(--sub);line-height:1.45;font-weight:600;margin-top:5px}
+
+/* ── 구조샘플E ── */
+.hchips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
+.hchips span{font-size:11px;font-weight:800;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.18);color:#4A4843;border:1px solid rgba(83,78,69,.10)}.hchips span .up{color:var(--up)}.hchips span .down{color:var(--down)}
+.hbig .hbl{font-size:12px;font-weight:800;color:#CEC9BF}
+.hbig .hbn{font-size:38px;font-weight:800;letter-spacing:-.045em;line-height:1;color:var(--ink)}
+.hbig .hbc{font-size:13.5px;font-weight:800;color:var(--neutral)}.hbc.up{color:var(--up)}.hbc.down{color:var(--down)}
+.tl2 .tg{align-self:start;font-size:10.5px;font-weight:800;color:var(--ink);background:var(--navy);border-radius:999px;padding:4px 0;text-align:center;margin-top:1px}
+.tl2 .tt{font-size:12px;line-height:1.52;color:var(--body);font-weight:600}
+.tl2 .tt b{color:var(--ink);font-weight:800}
+.snapc .l{font-size:11px;font-weight:800;color:var(--sub)}
+.snapc .v{font-size:23px;font-weight:800;letter-spacing:-.035em;margin-top:4px;line-height:1.05}
+.snapc .c{font-size:11.5px;font-weight:800;margin-top:3px}
+.snapc .n{font-size:10px;color:var(--sub);margin-top:5px;font-weight:600;line-height:1.4}
+.mv .l{font-size:9px;font-weight:800;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mv .v{font-size:12.5px;font-weight:800;color:var(--ink);margin-top:3px;letter-spacing:-.035em;white-space:nowrap}
+.mv .c{font-size:9.5px;font-weight:800;margin-top:2px;white-space:nowrap}
+.tonight .tl{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.07em;color:var(--neutral);background:var(--accent-green-soft);border-radius:999px;padding:3px 10px;margin-bottom:8px}
+.idx3 .c3{background:var(--surface-inner);border-radius:var(--r-sm);box-shadow:var(--shadow);padding:12px 9px;text-align:center}
+.idx3 .c3 .l{font-size:10.5px;font-weight:800;color:var(--sub)}
+.idx3 .c3 .v{font-size:18px;font-weight:800;letter-spacing:-.035em;margin-top:3px;line-height:1.05}
+.idx3 .c3 .c{font-size:10.5px;font-weight:800;margin-top:2px}
+.hidx{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 0}
+.hidx .u2{background:rgba(255,255,255,.17);border:1px solid rgba(78,73,64,.09);border-radius:12px;padding:11px 13px}
+.hidx .hbl{font-size:11px;font-weight:800;color:#68645D}
+.hidx .hbn{font-size:24px;font-weight:800;letter-spacing:-.035em;color:var(--ink);line-height:1.1;margin-top:3px}
+.hidx .hbc{font-size:12px;font-weight:800;color:var(--neutral);margin-top:2px}.hidx .hbc.up{color:var(--up)}.hidx .hbc.down{color:var(--down)}
+.snapd .sc2 .l{font-size:11px;font-weight:800;color:var(--ink)}
+.snapd .sc2 .v{font-size:20px;font-weight:800;letter-spacing:-.03em;margin-top:3px;color:var(--ink);line-height:1.1}
+.snapd .sc2 .c{font-size:11px;font-weight:800;margin-top:2px}
+.snapd .sc2 .n{font-size:10px;color:var(--body);margin-top:4px;font-weight:600;line-height:1.4}
+
+/* ── Hero 보조 라벨·박스·색상 (상승 빨강 / 하락 파랑, 네이비 배경 가독 톤) ── */
+.hsec{margin:17px 0 3px;font-size:11px;font-weight:800;letter-spacing:.05em;color:#817C73}
+.hsec i{font-style:normal;color:var(--accent-green);font-weight:800;margin-left:5px}
+.hero .term,.special-hero .term,.sfinal .term{color:var(--ink);border-bottom-color:rgba(90,84,74,.12)}
+
+/* ── xref 넘김 알약 ── */
+.xref{display:inline-block;background:var(--accent-green-soft);color:var(--accent-green-dark);border:1px solid var(--accent-green-line);border-radius:6px;padding:1px 7px;font-size:10px;font-weight:800;line-height:1.45;white-space:nowrap;vertical-align:baseline;text-decoration:none}
+.xref:after{content:"›";margin-left:3px;font-weight:800}
+/* ── 5거래일 수급 카드형 ── */
+.flist{display:grid;gap:7px;margin:2px 0 0}
+.fitem{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:var(--surface-inner)}
+.fitem .fih{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.fitem .fdate{font-size:12px;font-weight:800;color:var(--ink);flex:0 0 auto}
+.fitem .fnums{display:flex;gap:11px;flex-wrap:wrap}
+.fitem .fnums>span{display:inline-flex;gap:4px;align-items:baseline}
+.fitem .fnums i{font-style:normal;color:var(--sub);font-weight:700;font-size:10px}
+.fitem .fnums b{font-weight:800;font-size:11.5px}
+.fitem .fii{margin:6px 0 0;font-size:11.5px;line-height:1.5;color:var(--body)}
+/* ── 일정 카드형 ── */
+.slist{display:grid;gap:7px;margin:2px 0 0}
+.sitem{display:grid;grid-template-columns:52px 1fr;gap:11px;border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:var(--surface-inner)}
+.sitem.past{background:#E5E2DC}
+.sitem.upcoming{background:#ECE9E2}
+.sitem.today{background:var(--accent-green-soft);border-color:#AAB6AC}
+.sitem .sdate .badge{display:inline-block}
+.sitem .sdate .sd2{display:block;margin-top:3px;font-size:12px;font-weight:800;color:var(--ink)}
+.sitem .sbody b{display:block;font-size:12px;font-weight:800;color:var(--ink);line-height:1.45;margin-bottom:3px}
+.sitem .sbody p{margin:0;font-size:11px;line-height:1.5;color:var(--body)}
+/* ── 확률 바 ── */
+.probbar{display:flex;height:34px;border-radius:9px;overflow:hidden;margin-bottom:8px;box-shadow:var(--shadow)}
+.probbar>div{display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;color:var(--ink)}
+.probbar .pbu{background:var(--up)}.probbar .pbd{background:var(--down)}
+.probbar b{margin-right:5px}
+.probnote{font-size:11px;color:var(--sub);font-weight:600;line-height:1.5;margin:0 2px 12px;padding-left:1.3em}
+.probnote:before{content:"※";color:var(--warn);font-weight:800;display:inline-block;width:1.3em;margin-left:-1.3em}
+.trigrow.up .trigt{background:var(--upweak);color:var(--up)}
+.trigrow.down .trigt{background:var(--downweak);color:var(--down)}
+.trigrow.watch .trigt{background:#E7E1DC;color:var(--warn)}
+.mread .mrfold .fb{padding:0 16px 14px}
+.emphasis{color:var(--accent-green-dark);font-weight:800}
+/* ── 용어 한 줄 사전 (위클리 .gloss 동형) ── */
+.gloss{display:grid;grid-template-columns:92px 1fr;gap:7px 11px;margin:2px 0 0;font-size:11.5px}
+.gloss dt{font-weight:850;color:#4B4740;word-break:keep-all}
+.gloss dd{margin:0;color:var(--body);line-height:1.5}
+.uw{color:#C74754;font-weight:800}
+.dw{color:#4F78A8;font-weight:800}
+.fnode.core{background:var(--navy);color:var(--ink)}
+.fnode.core .fk{color:#B7B1A6}
+.fnode.core .fs{color:var(--body)}
+.mfill2.up{background:var(--up)}.mfill2.down{background:var(--down)}.mfill2.gold{background:var(--gold)}
+.sectorboard{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.sectorcol{background:var(--surface-inner);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.sectorcol .sct{padding:9px 12px;color:var(--ink);font-size:12px;font-weight:800}
+.sectorcol.upc .sct{background:#D8B7BB;color:#4A3034}.sectorcol.dnc .sct{background:#BECBDC;color:#30465E}
+.sectoritem{padding:9px 11px;border-bottom:1px solid var(--line2)}
+.sectoritem:last-child{border-bottom:0}
+.sectoritem .sil{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-size:10.5px;font-weight:800}
+.sectoritem .sil b{color:var(--ink)}
+.sectoritem .sil span{white-space:nowrap}
+.sitrack{height:5px;background:#DCD7CE;border-radius:999px;overflow:hidden;margin-top:5px}
+.sifill{display:block;height:100%;border-radius:999px}
+.upc .sifill{background:var(--up)}.dnc .sifill{background:var(--down)}
+.tstep.core .tag2{background:var(--upweak);color:var(--up)}
+.tstep.watch .tag2{background:#E7E1DC;color:var(--warn)}.sdot.gold{background:var(--gold)}
+.levels{display:grid;gap:12px}
+.level{background:var(--surface-inner);border:1px solid var(--line);border-radius:11px;padding:10px 11px}
+.leveltop{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.leveltop b{font-size:11.5px;color:var(--ink)}
+.leveltop span{font-size:11px;font-weight:800}
+.level p{margin:6px 0 0;font-size:10.5px;line-height:1.45;color:var(--body);font-weight:600}
+.judge .jstatus.ok{background:#E6F4EA;color:#2E7D4F}
+@media(max-width:360px){
+  .flowmap{grid-template-columns:minmax(0,1fr) 16px minmax(0,1fr) 16px minmax(0,1fr)}
+  .fnode{padding:9px 5px}.fnode .fv{font-size:13px}.fnode .fs{font-size:8.7px}
+  .vsplit,.sectorboard,.policy2,.twosig{gap:7px}
+  .macroroute{grid-template-columns:1fr 12px 1fr 12px 1fr 12px 1fr}
+  .macnode{padding:8px 4px}.macnode .mv2{font-size:11.5px}
+  .tstep{grid-template-columns:50px 1fr 44px;gap:8px}
+}
+
+/* 히어로 내 해외지수/환율 다크 그리드 (07.16 재배치) */
+.hmvg{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:2px 0 6px}
+.hmv{background:rgba(255,255,255,.16);border:1px solid rgba(79,74,65,.08);border-radius:10px;padding:8px 7px 7px;min-width:0}
+.hmv .l{font-size:9px;font-weight:700;color:#77736B;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hmv .v{font-size:12.5px;font-weight:800;color:var(--ink);letter-spacing:-.03em;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hmv .c{font-size:9.5px;font-weight:800;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hmv .c.up{color:#C74754}.hmv .c.down{color:#4F78A8}
+
+/* 히어로 지수 접힘 (07.16 refine) */
+details.hfold{margin:6px 0 2px;border-top:1px solid rgba(90,84,74,.12);border-bottom:1px solid rgba(90,84,74,.12)}
+details.hfold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:9px 1px;font-size:11.5px;font-weight:800;color:#55524C;letter-spacing:.01em}
+details.hfold>summary::-webkit-details-marker{display:none}
+details.hfold>summary:after{content:"+";font-size:18px;font-weight:800;color:var(--accent-green);line-height:.9}
+details.hfold[open]>summary:after{content:"−";font-size:18px;font-weight:800;color:var(--accent-green);line-height:.9}
+details.hfold .hsec:first-of-type{margin-top:4px}
+
+/* 기술적 기준선 정확 레일 (07.16 refine2) */
+.lrail{position:relative;height:6px;background:#DCD7CE;border-radius:4px;margin:24px 7px 3px}
+.ltick{position:absolute;top:50%;width:2px;height:10px;background:#B7B1A6;transform:translate(-50%,-50%);border-radius:1px}
+.lcur{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:var(--accent-navy);border:2.5px solid var(--surface-inner);box-shadow:0 0 0 1.5px var(--navy2);transform:translate(-50%,-50%);z-index:2}
+.lcap{position:absolute;top:-17px;transform:translateX(-50%);font-size:9.5px;font-weight:800;color:var(--navy2);white-space:nowrap}
+.llab{position:relative;height:14px;margin:0 7px 3px}
+.llab span{position:absolute;top:0;transform:translateX(-50%);font-size:9px;font-weight:700;color:var(--sub);white-space:nowrap}
+.mdrow>b.down{color:var(--down)}
+</style>
+<style id="report-ext">
+/* ===== 2차 개편: 모바일 가독성 — 공유 본문 소폭 상향 ===== */
+.psub{font-size:13.5px;line-height:1.6}
+.fii{font-size:12.5px}
+.fitem .fih .fdate{font-size:12px}
+.tnote{font-size:12px;line-height:1.55}
+.kc .l{font-size:11.5px}
+.kc .n{font-size:12px;line-height:1.5}
+.mdrow p{font-size:12px}
+.level p{font-size:12.5px;line-height:1.6}
+.sbody b{font-size:12.5px}
+.sbody p{font-size:11.5px}
+.smallnote{font-size:10.5px}
+.gloss{font-size:12.5px}
+.gloss dt{font-size:12px}
+.sb li{font-size:11px;line-height:1.6}
+.ranks .col li{font-size:12px}
+.mtitle{font-size:12px}
+.vcaption{font-size:12px;line-height:1.55}
+.sil b{font-size:12.5px}
+
+/* ===== P2 · 해설 (2차) ===== */
+[id^="detail-"]{scroll-margin-top:78px}
+.lead2{margin:2px 2px 16px;font-size:16px;line-height:1.56;font-weight:800;letter-spacing:-.02em;color:var(--ink);word-break:keep-all}
+.lead2 b{color:var(--accent-green-dark)}
+.blk{margin-bottom:16px}
+.blkt{display:-webkit-flex;display:flex;-webkit-align-items:baseline;align-items:baseline;gap:8px;margin:0 2px 9px}
+.blkt b{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.blkt span{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.05em}
+.blkc{font-size:12.5px;line-height:1.64;color:var(--body);font-weight:600;margin:9px 3px 0;word-break:keep-all}
+.blkc b{color:var(--ink)}
+.card2{background:var(--surface-inner);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:14px 15px}
+/* 수급 다이버징 바 */
+.sply .splyr{display:grid;grid-template-columns:46px 1fr 60px;-webkit-align-items:center;align-items:center;gap:9px;padding:7px 0}
+.sply .sl{font-size:12.5px;font-weight:800;color:var(--ink)}
+.sply .sbar{position:relative;height:17px;background:#DEDAD2;border-radius:5px;overflow:hidden}
+.sply .sbar:before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1.5px;background:#CEC9BF;transform:translateX(-50%)}
+.sply .sfl{position:absolute;top:2px;bottom:2px;border-radius:3px}
+.sply .sfl.up{background:var(--up)}
+.sply .sfl.down{background:var(--down)}
+.sply .sv{font-size:12.5px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+.splynote{margin-top:9px;padding-top:10px;border-top:1px solid var(--line2);display:-webkit-flex;display:flex;gap:9px;-webkit-align-items:center;align-items:center}
+.splynote .sd{position:relative;width:54px;flex-shrink:0;text-align:center}
+.splynote .sd svg{transform:rotate(-90deg);display:block;margin:0 auto}
+.splynote .sdv{position:absolute;top:0;left:0;right:0;height:44px;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;font-size:11.5px;font-weight:800;color:var(--ink)}
+.splynote .sdl{display:block;margin-top:3px;font-size:8.5px;font-weight:800;letter-spacing:-.02em;color:var(--sub);white-space:nowrap}
+.splynote p{margin:0;font-size:12px;line-height:1.55;color:var(--body);font-weight:600}
+.splynote p b{color:var(--ink)}
+.chips3{display:-webkit-flex;display:flex;gap:7px;margin-top:10px}
+.chips3 .c3{flex:1;background:var(--bg);border-radius:9px;padding:8px 6px;text-align:center}
+.chips3 .c3 i{display:block;font-style:normal;font-size:9.5px;font-weight:700;color:var(--sub);margin-bottom:2px}
+.chips3 .c3 b{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums}
+/* 거시 2×2 */
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mg{background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:11px 13px}
+.mg .ml{font-size:10.5px;font-weight:700;color:var(--sub)}
+.mg .mv{font-size:15.5px;font-weight:800;color:var(--ink);margin-top:2px;font-variant-numeric:tabular-nums}
+.mg .mv .ar{font-size:12px;margin-left:5px;font-weight:800}
+.mg .ms{font-size:10px;color:var(--sub);font-weight:600;margin-top:2px}
+
+/* ===== P3 · 내일 (2차) ===== */
+.evtcard{background:var(--surface-inner);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:4px 15px;margin-bottom:16px}
+.evt{display:-webkit-flex;display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line2)}
+.evt:last-child{border-bottom:none}
+.evt .et{-webkit-flex-shrink:0;flex-shrink:0;width:62px;font-size:11px;font-weight:800;color:var(--accent-green-dark);line-height:1.35}
+.evt .et i{display:block;font-style:normal;font-size:9.5px;font-weight:700;color:var(--sub);margin-top:2px}
+.evt .eb{min-width:0}
+.evt .eb b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.evt .eb .ei{margin:5px 0 0;font-size:12px;line-height:1.55;color:var(--body);font-weight:600;word-break:keep-all}
+.evt .eb .ei em{font-style:normal;font-weight:800;color:var(--ink)}
+.evt.core{position:relative}
+.evt.core .et{color:#C4314B}
+
+
+/* P1 제목 위계 */
+.hero .h1sub{display:block;font-size:12px;font-weight:800;letter-spacing:0;color:var(--accent-navy);margin:0 0 6px}
+.hero h1{font-size:23px;line-height:1.3}
+/* 상승 재료 · 종가 제약 비교 카드 */
+.vs2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.vs2 .vcol{border-radius:var(--r);padding:12px 13px}
+.vs2 .vcol.pos{background:#FEF0F2;border:1px solid rgba(196,49,75,.26)}
+.vs2 .vcol.neg{background:#F1EFEA;border:1px solid rgba(108,99,85,.25)}
+.vs2 .vh{font-size:11.5px;font-weight:800;margin-bottom:9px;letter-spacing:-.01em}
+.vs2 .vcol.pos .vh{color:#C4314B}
+.vs2 .vcol.neg .vh{color:var(--neutral)}
+.vs2 ul{margin:0;padding:0;list-style:none}
+.vs2 li{font-size:11.5px;line-height:1.4;font-weight:700;color:var(--ink2);padding:5px 0 5px 14px;position:relative;word-break:keep-all}
+.vs2 li:before{content:"";position:absolute;left:2px;top:9.5px;width:5px;height:5px;border-radius:50%}
+.vs2 .vcol.pos li:before{background:var(--up)}
+.vs2 .vcol.neg li:before{background:var(--down)}
+/* 업종 항목식 */
+.seclist{background:var(--surface-inner);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:11px 15px}
+.seclist .sr{display:-webkit-flex;display:flex;gap:8px;-webkit-align-items:baseline;align-items:baseline;padding:6px 0;font-size:12.5px;line-height:1.45;font-weight:600;color:var(--body);word-break:keep-all}
+.seclist .sr .sk{-webkit-flex-shrink:0;flex-shrink:0;font-weight:800;color:var(--ink)}
+.seclist .sr .sv{-webkit-flex-shrink:0;flex-shrink:0;font-weight:800;font-variant-numeric:tabular-nums;margin-left:auto;padding-left:8px}
+.seclist .srsum{margin:8px 0 0;padding-top:9px;border-top:1px solid var(--line2);font-size:12.5px;font-weight:800;color:var(--ink)}
+.breadthbar{display:-webkit-flex;display:flex;gap:2px;margin:9px 0 2px;height:16px;border-radius:5px;overflow:hidden;font-size:9.5px;font-weight:800}
+.breadthbar span{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;color:var(--ink)}
+/* 이어지는 거시 */
+.macrofwd{background:var(--surface-inner);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:11px 15px}
+.macrofwd .mr{display:-webkit-flex;display:flex;gap:9px;padding:7px 0;border-bottom:1px solid var(--line2);font-size:12.5px;line-height:1.5;font-weight:600;color:var(--body);word-break:keep-all}
+.macrofwd .mr:last-child{border-bottom:none}
+.macrofwd .mr .mk{-webkit-flex-shrink:0;flex-shrink:0;width:52px;font-weight:800;color:var(--ink)}
+.macrofwd .mr b{color:var(--ink)}
+.watchline{margin:10px 2px 0;font-size:11.5px;font-weight:700;color:var(--sub)}
+.watchline b{color:var(--accent-green-dark);font-weight:800}
+
+/* 연속 본문 구분 제목 */
+.sect-h{font-size:16px;font-weight:800;letter-spacing:-.02em;color:var(--ink);margin:22px 2px 12px;padding-bottom:8px;border-bottom:2px solid var(--accent-green)}
+.sect-h.sm{font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--sub);border-bottom:1px solid var(--line);padding-bottom:6px;margin:22px 2px 9px}
+/* 수급 상세 하위 제목 */
+.subh{font-size:11.5px;font-weight:800;letter-spacing:.03em;color:#333333;margin:14px 0 8px;padding-left:9px;border-left:3px solid var(--gold)}
+.subh:first-child{margin-top:2px}
+/* 맨 위로 버튼 (앵커형 원형 아이콘) */
+.back-to-top{position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:80;display:-webkit-inline-flex;display:inline-flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;width:44px;height:44px;padding:0;border-radius:50%;background:var(--accent-green-dark);color:#F1EFEA;border:1px solid rgba(241,239,234,.18);box-shadow:0 3px 10px rgba(65,60,52,.14);font-size:17px;line-height:1;font-weight:800;text-decoration:none;opacity:1;transform:translateY(0);transition:opacity .18s ease,transform .18s ease;-webkit-tap-highlight-color:transparent}
+.back-to-top.is-hidden{opacity:0;pointer-events:none;transform:translateY(8px)}
+.back-to-top:active{transform:translateY(1px)}
+
+/* ── g버전 경로 그래프 (P1 이식) ── */
+.story-graph{background:#E2DED6;border:1px solid rgba(79,74,65,.09);border-radius:12px;padding:12px 12px 5px;box-shadow:none}
+.story-graph .graph-title{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:space-between;justify-content:space-between;gap:8px;margin:0 3px 9px;font-size:9.5px;font-weight:800;letter-spacing:.04em;color:var(--sub)}
+.story-graph .graph-title b{font-size:11.5px;letter-spacing:-.01em;color:var(--ink)}
+.story-graph svg{display:block;width:100%;height:auto}
+.story-graph .svg-note{font-size:8.5px;font-weight:700;fill:#6F6C66}
+.story-graph .svg-value{font-size:9.5px;font-weight:850;fill:#333333}
+.story-graph .svg-value.hot{fill:var(--up)}.story-graph .svg-value.cool{fill:var(--down)}
+.story-graph .svg-value.close{fill:var(--accent-green-dark)}
+.story-graph .svg-delta{font-size:9px;font-weight:850;fill:var(--down)}
+.story-graph .svg-time{font-size:8.5px;font-weight:700;fill:#75716B}
+/* ── 업종 중간점 코멘트 (플랫) ── */
+.seccmt{margin:11px 2px 0}
+.seccmt p{margin:6px 0;font-size:13px;line-height:1.5;color:var(--body);font-weight:600;word-break:keep-all}
+.seccmt p b{color:var(--ink);font-weight:800}
+/* ── 글씨 0.5px 상향 ── */
+.blkc{font-size:13px}.blkt b{font-size:14.5px}.lead2{font-size:16.5px}
+.seclist .sr{font-size:13px}.macrofwd .mr{font-size:13px}.evt .eb .ei{font-size:12.5px}
+.evt .eb b{font-size:14px}.close2{font-size:14px}.mg .mv{font-size:16px}
+.sil b{font-size:13px}.vs2 li{font-size:12px}.fii{font-size:13px}.tnote{font-size:12.5px}
+.kc .n{font-size:12.5px}.chkr .cv{font-size:12.5px}.chkr .ck{font-size:13px}
+
+/* ── 편집형 전체폭 시스템 (디자인 개편) ── */
+.sect-h{font-size:20px;margin:26px 2px 12px}
+.blkt{margin:0 2px 10px;padding:0 0 6px 10px;border-bottom:1px solid var(--line);border-left:3px solid var(--accent-green)}
+.blkt b{font-size:16px;font-weight:900}
+.concl{font-size:17px;font-weight:800;color:var(--ink);letter-spacing:-.02em;margin:0 2px 11px}
+.sumlist{margin:0 2px 6px}
+.sumlist p{margin:6px 0;font-size:13.5px;line-height:1.5;color:var(--body);font-weight:600;padding-left:13px;position:relative;word-break:keep-all}
+.sumlist p:before{content:"·";position:absolute;left:2px;color:var(--gold);font-weight:800}
+.sumlist p b{color:var(--ink);font-weight:800}
+.nsec{padding:11px 2px;border-bottom:1px solid var(--line2)}
+.nsec:last-child{border-bottom:none}
+.nsh{display:-webkit-flex;display:flex;gap:8px;-webkit-align-items:baseline;align-items:baseline;margin-bottom:6px}
+.nsh .nn{font-size:11.5px;font-weight:800;color:var(--accent-green-dark);background:var(--navy);border-radius:50%;width:23px;height:23px;-webkit-flex-shrink:0;flex-shrink:0;display:-webkit-inline-flex;display:inline-flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;font-variant-numeric:tabular-nums}
+.nsh .nt{font-size:14.5px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.nsec ul{list-style:none;margin:0;padding:0}
+.nsec li{font-size:13px;line-height:1.5;color:var(--body);font-weight:600;padding-left:12px;position:relative;word-break:keep-all;margin:4px 0}
+.nsec li:before{content:"·";position:absolute;left:2px;color:var(--sub);font-weight:800}
+.nsec li b{color:var(--ink);font-weight:800}
+.nsec .nsd{margin:0;font-size:13px;line-height:1.5;color:var(--body);font-weight:600;word-break:keep-all}
+.nsec .nsd b{color:var(--ink);font-weight:800}
+.dvsum{font-size:14.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em;margin:0 2px 12px;padding-left:12px;border-left:3px solid var(--gold);line-height:1.45}
+.evlist{margin:0 2px}
+.evline{display:grid;grid-template-columns:58px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line2)}
+.evline:last-child{border-bottom:none}
+.evline .evt2{font-size:12px;font-weight:800;color:var(--gold);line-height:1.35}
+.evline .evb2{font-size:14.5px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.evline .evd2{font-size:12.5px;line-height:1.5;color:var(--body);font-weight:600;margin-top:3px;word-break:keep-all}
+/* ── P1 그래프: .story-graph 최종 규칙은 상단 한 곳에만 존재 ── */
+/* ── 타임라인 항목식 ── */
+.timeline .tt .tf{display:block;margin:2px 0;padding-left:.56em;text-indent:-.56em}
+
+/* ── 인과 서사 (시장 해설) ── */
+.flow5{margin:0 2px 6px}
+.flow5 .fstep{display:grid;grid-template-columns:26px 1fr;gap:11px;padding:11px 0;border-bottom:1px solid var(--line2)}
+.flow5 .fstep:last-child{border-bottom:none}
+.flow5 .fsn{font-size:11.5px;font-weight:800;color:#F1EFEA;background:var(--accent-green);border-radius:50%;width:24px;height:24px;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center}
+.flow5 .fsb b{display:block;font-size:14.5px;font-weight:800;color:var(--ink);margin-bottom:4px;letter-spacing:-.01em}
+.flow5 .fsb p{margin:0;font-size:13px;line-height:1.6;color:var(--body);font-weight:600;word-break:keep-all}
+/* ── 회색 편집형 통일 (흰 카드·그림자 제거, 명암 차) ── */
+:root{--shadow:none}
+body{background:var(--bg)}
+/* .fold,.src consolidated below */
+
+
+.c3{background:var(--surface-detail) !important}
+.fitem,.sitem,.level,.krow .kc,.ranks .rank,.mini-viz,.mdtable,.gloss,.slist,.seg,.sectorcol,.seclist,.macrofwd,.evtcard{box-shadow:none !important}
+.fitem,.level,.krow .kc,.ranks .rank{background:#F1EFEA !important}
+
+/* ── flow5 세로 연결선 + 해석줄 ── */
+.flow5{position:relative}
+.flow5:before{content:"";position:absolute;left:11px;top:14px;bottom:14px;width:2px;background:var(--accent-green-line);opacity:1;z-index:0}
+.flow5 .fstep{position:relative;z-index:1}
+.flow5 .fsn{box-shadow:0 0 0 4px var(--bg)}
+.flow5 .fsb .intp{display:block;margin-top:9px;padding:8px 11px;background:var(--accent-green-soft);border-left:3px solid var(--accent-green);border-radius:0 9px 9px 0;color:var(--accent-green-dark);font-weight:800;font-size:13px;line-height:1.5;word-break:keep-all}
+.sumlist .ip{color:var(--sub);font-weight:600}
+/* ── 회색 통일 + 미세 그라데이션 (흰 배경 제거) ── */
+
+
+.fitem,.level,.krow .kc,.ranks .rank{background:#F1EFEA !important}
+.sectorcol{background:linear-gradient(180deg,#F1EFEA 0%,#F4F7F9 100%) !important}
+.sitem{background:#F1EFEA !important}
+.dvsum{background:linear-gradient(180deg,rgba(233,216,174,.14),rgba(233,216,174,.05));border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:11px 13px;margin:0 2px 14px}
+
+.hlead{position:relative;font-size:15px;line-height:1.6;font-weight:800;color:var(--ink);letter-spacing:-.02em;margin:2px 2px 16px;padding:4px 0 4px 15px;border-left:3px solid var(--accent-green);word-break:keep-all}
+/* 해설 리드문 — 라벨 칩 + 행 정렬 (2026.07.28) */
+.hlead .hr{display:-webkit-flex;display:flex;-webkit-align-items:flex-start;align-items:flex-start;gap:9px;margin:9px 0}
+.hlead .hr:first-child{margin-top:0}.hlead .hr:last-child{margin-bottom:0}
+.hlead .hk{-webkit-flex:0 0 auto;flex:0 0 auto;width:36px;margin-top:3px;padding:3px 0;border-radius:5px;background:var(--accent-green);color:#F1EFEA;font-size:11px;font-weight:900;letter-spacing:.04em;text-align:center;line-height:1.2}
+.hlead .hv{-webkit-flex:1 1 auto;flex:1 1 auto;min-width:0;font-size:14.5px;line-height:1.55;font-weight:800}
+.flow5 .fsb .li{display:block;margin:4px 0;font-size:13px;line-height:1.55;color:var(--body);font-weight:600;word-break:keep-all;padding-left:.56em;text-indent:-.56em}
+.hb{display:block;margin:5px 0;line-height:1.6;padding-left:.62em;text-indent:-.62em;word-break:keep-all}
+.lb{color:var(--accent-green-dark);font-weight:800;margin-right:.3em}
+.flow5 .fsb .lb,.flow5 .fsb .intp b,.flow5 .fsb .li b,.flow5 .fsb .tnote b,.flow5 .fsb .cv b,.flow5 .fsb .cv i,.hb .lb{display:inline;font-size:inherit;margin-bottom:0;letter-spacing:-.01em}
+.flow5 .fsb .lb{color:var(--accent-green-dark);font-weight:800}
+.flow5 .fsb .intp b{font-weight:900;color:#22302A}
+.flow5 .fsb .li b{font-weight:800;color:var(--ink)}
+.hb:first-child{margin-top:0}
+.hb:last-child{margin-bottom:0}
+.flow5 .fsb .si{display:block;margin:2px 0 4px 12px;padding-left:9px;border-left:2px solid var(--line);font-size:12.5px;line-height:1.5;color:var(--sub);font-weight:600;word-break:keep-all}
+.flow5 .fsb .sh2{display:block;margin:8px 0 2px;font-size:13px;font-weight:800;color:var(--ink)}
+
+
+/* ── 회색 표면 시스템 통일 (순백색 제거) ── */
+/* (표면 변수는 상단 :root로 통합) */
+body{background:var(--surface-page)}
+.fold,.src{background:linear-gradient(180deg,#EEECE6 0%,#E7E4DE 100%) !important;border:none !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.20), 0 3px 10px rgba(65,60,52,.03) !important}
+.fold[open]>.fb,.fold[open] .fb,.src[open] .sb{background:transparent !important}
+.pcheck{background:var(--surface-inner) !important;box-shadow:none !important}
+.seg label{background:var(--surface-detail) !important}
+.idx,.rank{background:var(--surface-inner) !important}
+.card2,.sply{background:linear-gradient(180deg,#EFEDE7 0%,#E8E5DF 100%) !important;box-shadow:none !important;border:1px solid var(--line)}
+.sectorcol{background:linear-gradient(180deg,#EBE8E2 0%,#E3E0D9 100%) !important;box-shadow:none !important}
+.fitem,.level,.krow .kc,.ranks .rank,.sitem,.mdtable,.gloss{background:var(--surface-inner) !important;box-shadow:none !important}
+.c3{background:var(--surface-detail) !important;box-shadow:none !important}
+.sply .sbar{background:#DAD6CE}
+/* ── 시장 해설 / 내일 음영 밴드 ── */
+.mband{margin:20px -15px 0;padding:20px 17px 16px;background:linear-gradient(180deg,#E3E0D9 0%,#E8E5DF 100%)}
+.mband .sect-h{margin-top:0}
+/* ── 종가의 의미: 네이비 → 회색 음영 ── */
+.closecard{background:linear-gradient(180deg,#D9D5CD 0%,#E1DED7 100%) !important;color:var(--ink) !important;border:1px solid rgba(70,67,61,.08);border-radius:12px;box-shadow:none;padding:15px 16px;margin:6px 2px 2px}
+.closecard .cck{font-size:16.5px;font-weight:900;letter-spacing:-.02em;color:#333333;margin-bottom:8px}
+.closecard .cckmark{color:var(--accent-green);font-weight:900;margin-right:3px}
+.closecard p{color:var(--ink2) !important;font-weight:600}
+.closecard .ccx{margin-top:9px;padding-top:9px;border-top:1px solid rgba(70,67,61,.10) !important;color:var(--accent-green-dark) !important;font-weight:800}
+/* 종가의 의미 — 매거진형 스탯 그리드 (2026.07.28) */
+.closecard .cclead{margin:0 0 13px;padding:0 0 12px;font-size:14.5px;line-height:1.5;font-weight:900;letter-spacing:-.02em;color:#22302A !important;border-bottom:1px solid rgba(70,67,61,.13);word-break:keep-all}
+.closecard .ccgrid{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:0 -6px}
+.closecard .ccitem{-webkit-flex:0 0 50%;flex:0 0 50%;max-width:50%;box-sizing:border-box;padding:0 6px 11px}
+.closecard .ccitem i{display:block;font-style:normal;font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--accent-green-dark);margin-bottom:2px}
+.closecard .ccitem b{display:block;font-size:17px;font-weight:900;letter-spacing:-.035em;line-height:1.15;color:#333333;font-variant-numeric:tabular-nums}
+.closecard .ccitem b.down{color:var(--down)}.closecard .ccitem b.up{color:var(--up)}
+.closecard .ccitem span{display:block;margin-top:4px;font-size:11px;line-height:1.45;font-weight:600;color:#5B5852;word-break:keep-all}
+@media(max-width:340px){.closecard .ccitem{-webkit-flex:0 0 100%;flex:0 0 100%;max-width:100%}}
+/* ── dvsum: 골드바 제거, 회색 음영 ── */
+.dvsum{background:linear-gradient(180deg,#E3E0D9,#E8E5DF) !important;border-left:none !important;border-radius:10px;padding:11px 14px;margin:0 2px 14px;font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.01em;line-height:1.45}
+/* ── 시장 폭 전체폭 행 ── */
+.breadth-row{margin-top:11px;padding-top:11px;border-top:1px solid var(--line)}
+.breadth-row .brh{font-size:14px;font-weight:800;color:#333333;letter-spacing:-.01em;margin-bottom:7px}
+.breadth-row .brm{font-size:13.5px;font-weight:800;color:#3F3E3A;font-variant-numeric:tabular-nums;margin:3px 0}
+.breadth-row .brx{font-size:12.5px;line-height:1.55;color:#5B5852;font-weight:600}
+/* ── 오늘밤·내일 핵심 일정: 3열 골드 세로선 타임라인 ── */
+.schedule-timeline{position:relative;margin:0 2px}
+.schedule-row{position:relative;display:grid;grid-template-columns:50px 22px 1fr;column-gap:12px}
+.schedule-time{text-align:right;font-size:12px;font-weight:800;color:var(--accent-green-dark);line-height:1.4;letter-spacing:-.01em;padding:15px 0}
+.schedule-axis{position:relative}
+.schedule-axis:before{content:"";position:absolute;left:calc(50% - 1px);top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--accent-green-line) 0%,var(--accent-green-dark) 100%)}
+.schedule-row:first-child .schedule-axis:before{top:24px}
+.schedule-row:last-child .schedule-axis:before{bottom:calc(100% - 24px)}
+.schedule-dot{position:absolute;left:calc(50% - 5px);top:19px;width:10px;height:10px;border-radius:50%;background:var(--accent-green);box-shadow:0 0 0 4px var(--surface-page);z-index:1}
+.schedule-body{padding:15px 0}
+.schedule-body .sbt{font-size:14.5px;font-weight:800;color:var(--ink);margin-bottom:5px;letter-spacing:-.01em}
+.schedule-body .sbd .li{display:block;font-size:12.5px;line-height:1.5;color:var(--body);font-weight:600;margin:3px 0;word-break:keep-all}
+.schedule-body .sbd .si{display:block;margin:3px 0;font-size:12.5px;line-height:1.5;color:var(--navy);font-weight:700;word-break:keep-all}
+.schedule-body .sbd .si:first-child{margin-top:0}
+.schedule-body .sbd .si.note{color:var(--sub);font-weight:600;margin-top:5px;padding-top:5px;border-top:1px solid var(--line2)}
+.cons{margin:6px 0 0;border-top:1px solid var(--line2);padding-top:7px}
+.cons .cr{display:grid;grid-template-columns:64px 1fr;column-gap:8px;align-items:baseline;padding:4px 0}
+.cons .cr+.cr{border-top:1px dashed var(--line2)}
+.cons .cn{font-size:11.5px;font-weight:800;color:var(--accent-green-dark);letter-spacing:-.02em}
+.cons .cv{font-size:12px;font-weight:700;color:var(--ink2);line-height:1.5;font-variant-numeric:tabular-nums;word-break:keep-all}
+.cons .cv i{font-style:normal;color:var(--sub);font-weight:600}
+</style>
+<style id="cover-screen-style">
+/* 커버통합 v2 — 일반 세로 스크롤(iOS 안전). fixed·100vh·overflow:hidden 미사용 */
+/* 레이아웃 고정: 상단 = 킥커·룰·제목·오늘의 한줄 / 하단 = 지수·룰·보조 지표 3 (사진 위 직접 배치) */
+.cover-screen{position:relative;width:100%;max-width:480px;margin:0 auto;min-height:60svh;display:block;background:#ECEAE5}
+.cover-frame{display:grid;width:100%}
+.cover-frame>*{grid-area:1/1;min-width:0}
+.cover-art{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
+.cover-copy{position:relative;z-index:2;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-justify-content:space-between;justify-content:space-between;padding:7.5% 8% 5.5% 8%}
+.cover-top,.cover-bottom{display:block}
+.cover-kick{display:block;font-size:10px;font-weight:800;letter-spacing:.14em;color:#5F5A50}
+.cover-rule{display:block;width:104px;height:1px;margin:10px 0 14px;background:#46584D}
+.cover-title{margin:0;font-size:31px;line-height:1.2;font-weight:800;letter-spacing:-.045em;color:#2A2721;word-break:keep-all}
+.cover-oneline-l{display:block;margin-top:28px;font-size:10.5px;font-weight:800;letter-spacing:.02em;color:#46584D}
+.cover-oneline{display:block;margin-top:7px;max-width:250px;font-size:13.5px;line-height:1.5;font-weight:700;color:#332F29;word-break:keep-all}
+.cover-idx{display:block;font-size:15px;font-weight:800;letter-spacing:-.02em;color:#2A2721;font-variant-numeric:tabular-nums;text-shadow:0 1px 3px rgba(236,234,229,.7)}
+.cover-idx .kl{font-size:11.5px;font-weight:800;letter-spacing:.03em;margin-right:6px}
+.cover-rule2{display:block;width:132px;height:1px;margin:8px 0;background:#46584D;opacity:.75}
+.cover-meta{display:block;max-width:225px;font-size:9.5px;line-height:1.6;font-weight:700;color:#4A453D;word-break:keep-all;text-shadow:0 1px 3px rgba(236,234,229,.7)}
+.cover-dn{color:#3F6795;font-weight:800}
+.cover-hint{display:block;text-align:center;padding:12px 0 16px;background:#ECEAE5;color:#46584D;font-size:11px;font-weight:800;letter-spacing:-.01em}
+.cover-hint span{display:inline-block;animation:coverNudge 1.6s ease-in-out infinite}
+@keyframes coverNudge{0%,100%{transform:translateY(0);opacity:.65}50%{transform:translateY(3px);opacity:1}}
+@media(prefers-reduced-motion:reduce){.cover-hint span{animation:none}}
+@media(max-width:360px){.cover-title{font-size:27px}.cover-oneline{font-size:12.5px;max-width:225px}.cover-idx{font-size:14px}.cover-meta{font-size:9px;max-width:205px}}
+@media(min-width:431px){.cover-title{font-size:35px}.cover-oneline{font-size:14.5px;max-width:280px}.cover-idx{font-size:17px}.cover-meta{font-size:10.5px;max-width:255px}}
+</style>
+</head>
+<body>
+<section class="cover-screen" aria-label="2026년 7월 28일 데일리 마켓 리포트 표지">
+  <div class="cover-frame">
+    <img class="cover-art" src="data:image/webp;base64,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" alt="젠가 탑에서 두 개의 블록이 빠져나오자 탑 전체가 무너지는 장면" width="900" height="1200" decoding="async">
+    <div class="cover-copy">
+      <div class="cover-top">
+        <span class="cover-kick">2026.07.28 DAILY MARKET REPORT</span>
+        <span class="cover-rule" aria-hidden="true"></span>
+        <h1 class="cover-title">IMF보다 큰 한 달</h1>
+        <span class="cover-oneline-l">오늘의 한줄</span>
+        <span class="cover-oneline">팔린 건 두 종목, 내린 건 79개 업종 전부</span>
+      </div>
+      <div class="cover-bottom">
+        <span class="cover-idx"><span class="kl">KOSPI</span><span class="cover-dn">−10.84%</span> · 6,023.66</span>
+        <span class="cover-rule2" aria-hidden="true"></span>
+        <span class="cover-meta">외국인 <span class="cover-dn">−4.97조</span> · 반도체 <span class="cover-dn">−13.91%</span><br>업종 79개 전원 하락</span>
+      </div>
+    </div>
+  </div>
+  <div class="cover-hint" aria-hidden="true"><span>아래로 스크롤 ↓</span></div>
+</section>
+<div class="scroll-area" id="reportStart">
+<div class="app">
+<span id="top"></span>
+
+<div class="topbar">
+  <span class="brand"><i>Sung Oh</i> · 코스피 데일리 리포트</span>
+  <span class="date">2026.07.28 (화) 장마감</span>
+</div>
+
+<span id="p1" style="display:block;position:relative;top:-1px"></span>
+<div class="hero">
+  <span class="kick">2026.07.28 · DAILY MARKET REPORT · 요약</span>
+  <span class="h1sub">7월 누적 -28.9% · 1997년 10월 -27.25% 초과</span>
+  <h1>IMF보다 큰 한 달</h1>
+  <div class="hchips"><span>서킷브레이커 <span class="down">양시장 발동</span></span><span>외국인 사흘째 <span class="down">-4.97조</span></span><span>업종 79개 <span class="down">전원 하락</span></span></div>
+  <div class="hidx">
+    <div class="u2"><div class="hbl">KOSPI</div><div class="hbn num">6,023.66</div><div class="hbc down">▼10.84%</div></div>
+    <div class="u2"><div class="hbl">KOSDAQ</div><div class="hbn num">705.85</div><div class="hbc down">▼7.72%</div></div>
+  </div>
+  <div class="story-graph">
+    <svg viewBox="0 0 360 224" role="img" aria-label="코스피 6,400.27 시가(개장 직후 고가 6,413.57) → 10시 13분 서킷브레이커 → 저가 5,992.91 → 6,023.66 종가">
+      <defs><linearGradient id="pathfill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4F78A8" stop-opacity=".13"/><stop offset="1" stop-color="#4F78A8" stop-opacity="0"/></linearGradient></defs>
+      <line x1="26" y1="44" x2="334" y2="44" stroke="#B7B1A6" stroke-width="1" stroke-dasharray="4 4"/>
+      <text x="30" y="39" class="svg-note">전일 종가 6,755.75</text>
+      <path d="M34 117 C36 115,38 113,41 114 C55 124,70 141,83 155 L99 156 C121 168,145 183,163 191 C172 194,182 186,193 182 C205 179,218 181,230 184 C252 188,278 192,299 196 C304 197,308 199,311 200 C316 202,321 197,326 194 L326 208 L34 208 Z" fill="url(#pathfill)"/>
+      <path d="M34 117 C36 115,38 113,41 114 C55 124,70 141,83 155 L99 156 C121 168,145 183,163 191 C172 194,182 186,193 182 C205 179,218 181,230 184 C252 188,278 192,299 196 C304 197,308 199,311 200 C316 202,321 197,326 194" fill="none" stroke="#4F78A8" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="34" cy="117" r="4.6" fill="#3F4854" stroke="#3F4854" stroke-width="2.2"/>
+      <circle cx="311" cy="200" r="5" fill="#4F78A8"/>
+      <circle cx="326" cy="194" r="5.6" fill="#46584D"/>
+      <text x="38" y="106" text-anchor="start" class="svg-value">시가 6,400.27 · 갭 하락</text>
+      <text x="96" y="144" text-anchor="start" class="svg-note">10:13 서킷브레이커 · 20분 중단</text>
+      <text x="238" y="206" text-anchor="start" class="svg-value cool">저가 5,992.91</text>
+      <text x="332" y="180" text-anchor="end" class="svg-value close">종가 6,023.66</text>
+      <text x="334" y="60" text-anchor="end" class="svg-value cool">-732p</text>
+      <text x="26" y="217" class="svg-time">09:00</text>
+      <text x="120" y="217" class="svg-time">11:00</text>
+      <text x="230" y="217" class="svg-time">14:00</text>
+      <text x="334" y="217" text-anchor="end" class="svg-time">15:30</text>
+    </svg>
+  </div>
+  <div class="hsec">장중 흐름</div>
+  <div class="timeline">
+    <div class="tl"><span class="tg">장전</span><div class="tt"><span class="tf">· 미 증시(07.27)는 지수만 보면 잔잔(나스닥 <span class="dw">-0.18%</span>·다우 <span class="uw">+0.51%</span>). 그러나 엔비디아 <span class="dw">-5.0%</span>·ASML <span class="dw">-5.8%</span></span><span class="tf">· 중국 <span class="term">액침 DUV 노광장비<span class="tip">반도체 회로를 새기는 핵심 장비. 중국 업체의 생산 착수 보도로 ASML 독점 구도에 균열 우려</span></span> 생산 착수 보도(디인포메이션) + 엔비디아의 대규모 고객 금융지원 거래군을 둘러싼 <span class="term">순환 거래<span class="tip">칩 회사가 고객사에 투자·금융을 대주고 그 고객이 다시 칩을 사는 구조. AI 수요의 실체 논란</span></span> 논란</span><span class="tf">· 개장 전부터 반도체 급락 예고. 닛케이도 오전 4%대 하락</span></div></div>
+    <div class="tl"><span class="tg">개장</span><div class="tt"><span class="tf">· <span class="dw">6,400.27(-5.26%)</span> 갭 하락 출발. 개장 직후 고가 6,413.57이 하루의 최고점</span><span class="tf">· 9시 6분 코스피 매도 <span class="term">사이드카<span class="tip">선물 급변동 시 프로그램 주문을 5분간 정지하는 장치. 오늘 코스피 9:06·코스닥 9:14 발동</span></span>(올해 13번째)·9시 14분 코스닥</span><span class="tf">· 외국인, 두 반도체주 중심 매도 개시</span></div></div>
+    <div class="tl"><span class="tg">오전</span><div class="tt"><span class="tf">· 10시 13분 코스피 <span class="term">서킷브레이커<span class="tip">지수가 8% 이상 급변해 1분 지속되면 매매를 20분 중단하는 장치. 코스피 올해 8번째 발동</span></span> 발동, 매매 20분 중단(올해 8번째)</span><span class="tf">· 재개 후에도 낙폭 확대. 12시 1분 코스닥 서킷브레이커, 12시 10분 코스피 <span class="dw">-10.62%(6,038)</span></span><span class="tf">· 코스닥 장중 697.57. 700선 붕괴는 1년 3개월 만</span></div></div>
+    <div class="tl"><span class="tg">마감</span><div class="tt"><span class="tf">· 오후 6,030~6,100대 횡보. 마감 직전 6,000선 붕괴, 저가 <span class="dw">5,992.91(-11.29%)</span></span><span class="tf">· 코스피 <span class="dw">-10.84%</span> · 코스닥 <span class="dw">705.85(-7.72%)</span> 마감</span><span class="tf">· 7월 낙폭은 한 달 기준 역대 최대. 유럽(STOXX <span class="uw">+0.27%</span>)·홍콩(<span class="uw">+0.22%</span>)과는 정반대</span></div></div>
+  </div>
+  <div class="hsec">시장 설명 지표 <i>07.27 미장 종가 · 07.28 국장 마감</i></div>
+  <div class="hmvg">
+    <div class="hmv"><div class="l">나스닥</div><div class="v">24,932.08</div><div class="c down">▼0.18%</div></div>
+    <div class="hmv"><div class="l"><span class="term">SOX<span class="tip">미국 필라델피아 반도체지수. 글로벌 반도체주의 대표 지표</span></span></div><div class="v">11,554.88</div><div class="c down">▼2.23%</div></div>
+    <div class="hmv"><div class="l">엔비디아</div><div class="v">$196.51</div><div class="c down">▼5.00%</div></div>
+    <div class="hmv"><div class="l">다우</div><div class="v">52,210.08</div><div class="c up">▲0.51%</div></div>
+    <div class="hmv"><div class="l">US 10Y</div><div class="v">4.641%</div><div class="c down">▼3.8bp</div></div>
+    <div class="hmv"><div class="l"><span class="term">원/달러<span class="tip">네이버 금융 일별시세 매매기준율 기준. 은행 간 거래 환율의 가중평균으로 매일 고시</span></span></div><div class="v">1,460.90</div><div class="c down">▼5.10</div></div>
+    <div class="hmv"><div class="l">WTI</div><div class="v">82.61</div><div class="c down">▼7.50%</div></div>
+    <div class="hmv"><div class="l">브렌트</div><div class="v">88.36</div><div class="c down">▼8.70%</div></div>
+  </div>
+  <details class="hfold">
+  <summary>그 외 주요 지표</summary>
+  <div class="hmvg" style="margin-top:7px">
+    <div class="hmv"><div class="l">삼성전자</div><div class="v">220,000</div><div class="c down">▼13.39%</div></div>
+    <div class="hmv"><div class="l">SK하이닉스</div><div class="v">1,550,000</div><div class="c down">▼14.65%</div></div>
+    <div class="hmv"><div class="l">S&amp;P500</div><div class="v">7,413.18</div><div class="c up">▲0.02%</div></div>
+    <div class="hmv"><div class="l">VIX</div><div class="v">19.05</div><div class="c up">▲2.04%</div></div>
+    <div class="hmv"><div class="l">닛케이</div><div class="v">62,364.92</div><div class="c down">▼3.95%</div></div>
+    <div class="hmv"><div class="l">비트코인</div><div class="v">$63,436</div><div class="c down">▼0.45%</div></div>
+    <div class="hmv"><div class="l">엔/원 100엔</div><div class="v">889.10</div><div class="c down">▼0.22%</div></div>
+    <div class="hmv"><div class="l">달러인덱스</div><div class="v">101.535</div><div class="c up">▲0.06%</div></div>
+  </div>
+  </details>
+</div>
+
+<details class="fold rv">
+  <summary>다음 거래일 조건 · 하방 경계 우위</summary>
+  <div class="fb">
+    <p class="probnote rv" style="margin-bottom:9px;font-weight:800;color:var(--accent-green-dark)">급락 다음 날의 방향은 관성이 아니라 아침의 실적 숫자가 정한다. 볼 것은 SK하이닉스의 답안과 외국인 나흘째.</p>
+    <div class="probbar rv" style="margin-top:2px"><div class="pbu" style="width:40%"><b>상방</b> 40%</div><div class="pbd" style="width:60%"><b>하방</b> 60%</div></div>
+    <p class="probnote rv" style="margin-top:-2px;font-size:10.5px;color:var(--sub)">40:60은 정량 예측 확률이 아니라 15:30 장마감 시점에 확인된 상·하방 조건의 상대적 무게다. 방향보다 중요한 것은 실적 뒤 세 갈래 판정(<a class="xref" href="#p3">다음 거래일 주목할 것 01</a>).</p>
+    <p class="probnote rv"><b>상방 근거</b> ① SK하이닉스 실적(수 오전). <span class="term">컨센서스<span class="tip">증권사 전망치의 평균. 실제 발표치가 아니라 추정치</span></span> 사상 최대 분기로, 서프라이즈면 공급 우려 서사에 대한 첫 반박 ② 과매도 신호. 상승 종목 비율 4.2%에 리서치센터장들 '6,000 초반은 과매도', 하한가가 코스피 2·코스닥 2뿐이라 매물 잠김도 적음 ③ 전면 이탈과 결이 다른 보조 신호(원화 강세·외국인 코스닥 순매수 전환). <b>하방 근거</b> ① 외국인 현물 사흘 -11.12조의 관성과 <b>저가에서 31pt만 올라온 마감</b>(장중 반등 실패) ② 중국 DUV·엔비디아 <span class="term">순환 거래<span class="tip">칩 회사가 고객사에 투자·금융을 대주고 그 고객이 다시 칩을 사는 구조. AI 수요의 실체 논란</span></span> 서사의 이틀째 파급(오늘 밤 미국장) ③ 기계적 <span class="term">디레버리징<span class="tip">차입·레버리지 포지션을 줄이는 과정. 뉴스가 멎어도 후행 매물이 며칠 이어질 수 있음</span></span>이 원인의 일부라면 새 악재 없이도 후행 매물 ④ <span class="term">FOMC<span class="tip">미 연준의 금리 결정 회의. 이번 회의는 현지 7/28~29, 결과는 한국시간 7/30 새벽</span></span> 결과 전 관망에 아래로는 미확인 구간(기술 지지 소실). <b>미시구조 변수</b> 7/31 단일종목 레버리지 1차 규제. 변동성 억제에는 긍정, 신규 매수 여력에는 중립~부정이라 완충 요인으로만 읽지 않음. <b>완충 요인</b> 바이오 등 방어 축 생존.</p>
+    <div style="background:#E7E1DC;border:1px solid #CBBDB4;border-radius:12px;padding:11px 13px;margin-bottom:10px">
+      <div style="font-size:10px;font-weight:800;letter-spacing:.05em;color:var(--warn);margin-bottom:5px">장 마감 이후 변수 · 7월 28일 21시 기준 · 확정 종가 아님</div>
+      <p style="margin:0;font-size:12px;line-height:1.55;color:var(--ink2);font-weight:600">국장 마감 뒤 미 화요장 진행 중. 엔비디아·ASML의 이틀째 반응과 <span class="term">FOMC<span class="tip">미 연준의 금리 결정 회의. 이번 회의는 현지 7/28~29, 결과는 한국시간 7/30 새벽</span></span> 둘째 날. 유가는 추가 하락 진행(브렌트 $86대·WTI $80대).<br>수요일 개장 전 첫 확인점은 SK하이닉스 실적(오전), 두 번째가 미국장 반도체의 확정 낙폭.</p>
+    </div>
+    </div>
+</details>
+
+<details class="fold rv">
+  <summary>전일 판단 대비 확인 · 7.27 → 7.28</summary>
+  <div class="pcheck" style="border:none;box-shadow:none;margin:0;border-radius:0">
+    <div class="pi">
+      <div class="pq"><b>직전(7.27) 판단</b> 하방 55%. 하방 발동 조건은 '외국인 사흘째 대량 매도 지속 → 6,650대 재확인, 6,557 이탈 시 6,516 확인' (★★★★★)</div>
+      <div class="pr"><b>결과</b> 외국인 사흘째 대량 매도, 지수 -10.84%. 방향은 하방이 맞았다</div>
+      <span class="stchip ok">방향 적중 · 나흘 만</span>
+      <div class="pd">다만 6,516 '확인'이 아니라 개장과 동시에 지나쳐 5,992까지 갔다.<br><b>낙폭의 실제 동인(중국 DUV·엔비디아 순환 거래)은 조건 목록에 없던 재료.</b> 방향은 맞고 원인과 규모는 빗나감.</div>
+    </div>
+    <div class="pi">
+      <div class="pq"><b>직전(7.27) 판단</b> 상방 유효 조건은 '브렌트 90달러 아래 마감 확정(안착) → 6,798·6,806 순차 시도' (★★★★★)</div>
+      <div class="pr"><b>결과</b> 브렌트 $88.36 확정 마감으로 조건은 충족. 그러나 지수는 반대로 갔다</div>
+      <span class="stchip watch">조건 충족 · 방향 무관</span>
+      <div class="pd">유럽 증시는 같은 유가 하락에 올랐지만(STOXX +0.27%) 국장은 두 자릿수 하락.<br><b>유가는 사라진 게 아니라 역할이 바뀜. 방향을 정하던 변수에서 낙폭을 일부 덜어주는 완충 변수로 강등.</b> 원화·항공·내수의 방어와 <span class="term">FOMC<span class="tip">미 연준의 금리 결정 회의. 이번 회의는 현지 7/28~29, 결과는 한국시간 7/30 새벽</span></span> 부담 완화가 그 몫. 오늘의 진짜 변화는 <b>좋은 매크로 뉴스가 주가를 올리지 못했다는 것</b>.</div>
+    </div>
+    <div class="pconc"><b>전일 조건 결론</b><p><b>방향은 맞았지만 시야가 좁았다.</b><br>조건 목록이 '전날 재료의 연장'(유가·외국인·이벤트 관망)에 갇혀, 새 악재의 등장이라는 꼬리 위험을 다루지 못함. 규모 자체가 어떤 조건에도 없던 크기.</p></div>
+  </div>
+</details>
+
+
+
+<!-- PAGE 2 · 해설 -->
+<div class="mband rv"><div class="sect-h" id="p2">오늘 장의 해설</div>
+
+<div class="hlead rv"><div class="hr"><span class="hk">촉발</span><span class="hv">중국 DUV 생산 착수와 엔비디아 <span class="term">순환 거래<span class="tip">칩 회사가 고객사에 투자·금융을 대주고 그 고객이 다시 칩을 사는 구조. AI 수요의 실체 논란</span></span> 논란이 실적 발표 전날 겹치며 반도체 재평가</span></div><div class="hr"><span class="hk">증폭</span><span class="hv">미장에선 지수 안에 머문 낙폭이, 시총 1·2위가 반도체인 국장에선 지수 전체로</span></div><div class="hr"><span class="hk">결과</span><span class="hv">유가 급락·원화 강세의 완충에도 <span class="down">-10.84%</span>, 하락 878종목</span></div></div>
+<div class="flow5 rv">
+  <div class="fstep"><span class="fsn">01</span><div class="fsb"><b>반도체 이중 충격</b><p><span class="li">· <b class="lb">장기 공급</b> 중국 업체가 <b>액침 <span class="term">DUV 노광장비<span class="tip">반도체 회로를 새기는 핵심 장비. 중국 업체의 생산 착수 보도로 ASML 독점 구도에 균열 우려</span></span> 생산에 착수</b>했다는 디인포메이션 보도(사명 비공개·올해 약 5대→2027년 약 20대·성능은 ASML 열위·양산 전 검증 필요). ASML <span class="down">-5.8%</span>·BE세미컨덕터 <span class="down">-10%</span>. <b>당장의 물량이 아니라 중국의 장비 자립 가능성을 시장이 앞당겨 할인한 사건</b>. 이미 커진 공급자의 가격표인 <span class="term">CXMT<span class="tip">중국 최대 메모리 업체. 7/27 상하이 상장 첫날 +466%, 중국 본토 시총 1위</span></span>(전날 +466%)와는 시간축이 다름</span><span class="li">· <b class="lb">수요의 질</b> 엔비디아의 <b>대규모 고객 투자·금융지원 거래군</b>이 부각. SK그룹과의 5,000억달러 이상 협력안과 오픈AI 관련 금융지원 논의가 동시에 알려지며 '고객에 돈을 대 자사 칩을 사게 한다'는 <span class="term">순환 거래<span class="tip">칩 회사가 고객사에 투자·금융을 대주고 그 고객이 다시 칩을 사는 구조. AI 수요의 실체 논란</span></span> 우려 재점화. 주가 <span class="down">-5.0%</span>($196.51·6/5 이후 최대 낙폭), <b>엔비디아 <span class="term">CDS 프리미엄<span class="tip">기업의 부도 위험을 사고파는 보험료율. 오를수록 신용도가 나빠졌다고 본다는 뜻</span></span></b>은 연 0.82%로 사상 최대폭 상승(+0.14%p), 시총 1위를 애플에 내줌. <b>수요의 크기가 아니라 그 수요가 어떻게 조달되는가의 문제</b></span><span class="li">· <b class="lb">증폭</b> 같은 서사가 두 시장에서 다른 깊이로. 미장은 반도체 낙폭이 지수 안에 머물렀고, <b>시총 1·2위가 반도체인 국장에서는 그대로 지수의 낙폭</b>(아래 도형)</span><span class="intp">동일 재료, <b>지수 내 반도체 비중만큼 다른 낙폭.</b></span></p>
+  <div class="story-graph" style="margin-top:10px">
+    <div class="graph-title"><b>시장별 당일 등락</b><span>07.27 미장 확정 · 07.28 그 외 장마감</span></div>
+    <svg viewBox="0 0 360 186" role="img" aria-label="시장별 당일 등락: STOXX600 +0.27%, 항셍 +0.22%, 나스닥 -0.18%, SOX -2.23%, 닛케이 -3.95%, 코스피 -10.84%, 국장 반도체 업종 -13.91%">
+      <line x1="280.0" y1="8" x2="280.0" y2="162" stroke="#B7B1A6" stroke-width="1" stroke-dasharray="3 3"/>
+      <text x="8" y="24" class="svg-value">STOXX600</text>
+      <rect x="280.0" y="15" width="4.0" height="11" rx="2" fill="#C74754"/>
+      <text x="356" y="24" text-anchor="end" class="svg-value hot">+0.27%</text>
+      <text x="8" y="45" class="svg-value">항셍</text>
+      <rect x="280.0" y="36" width="3.3" height="11" rx="2" fill="#C74754"/>
+      <text x="356" y="45" text-anchor="end" class="svg-value hot">+0.22%</text>
+      <text x="8" y="66" class="svg-value">나스닥</text>
+      <rect x="277.3" y="57" width="2.7" height="11" rx="2" fill="#4F78A8"/>
+      <text x="356" y="66" text-anchor="end" class="svg-value cool">-0.18%</text>
+      <text x="8" y="87" class="svg-value">SOX</text>
+      <rect x="246.7" y="78" width="33.3" height="11" rx="2" fill="#4F78A8"/>
+      <text x="356" y="87" text-anchor="end" class="svg-value cool">-2.23%</text>
+      <text x="8" y="108" class="svg-value">닛케이</text>
+      <rect x="220.9" y="99" width="59.1" height="11" rx="2" fill="#4F78A8"/>
+      <text x="356" y="108" text-anchor="end" class="svg-value cool">-3.95%</text>
+      <text x="8" y="129" class="svg-value">코스피</text>
+      <rect x="117.9" y="120" width="162.1" height="11" rx="2" fill="#4F78A8"/>
+      <text x="356" y="129" text-anchor="end" class="svg-value cool">-10.84%</text>
+      <text x="8" y="150" class="svg-value">국장 반도체</text>
+      <rect x="72.0" y="141" width="208.0" height="11" rx="2" fill="#4F78A8"/>
+      <text x="356" y="150" text-anchor="end" class="svg-value cool">-13.91%</text>
+      <text x="280.0" y="176" text-anchor="middle" class="svg-note">0%</text>
+      <text x="8" y="176" class="svg-note">AI 밸류체인 노출이 큰 시장일수록 낙폭 확대</text>
+    </svg>
+  </div></div></div>
+  <div class="fstep"><span class="fsn">02</span><div class="fsb"><b>멈춤 장치</b><p><span class="li">· <b class="lb">발동</b> 9시 6분 코스피 매도 <span class="term">사이드카<span class="tip">선물 급변동 시 프로그램 주문을 5분간 정지하는 장치. 오늘 코스피 9:06·코스닥 9:14 발동</span></span>(올해 13번째)·9시 14분 코스닥(5번째) → <b>10시 13분 코스피 <span class="term">서킷브레이커<span class="tip">지수가 8% 이상 급변해 1분 지속되면 매매를 20분 중단하는 장치. 코스피 올해 8번째 발동</span></span></b>(올해 8번째) → 12시 1분 코스닥. 재개 후에도 낙폭은 더 커짐</span><span class="li">· <b class="lb">정부</b> 이억원 금융위원장 긴급 시장점검. <b>단일종목 <span class="term">레버리지 ETF 예탁금<span class="tip">단일종목 레버리지 상품 투자에 요구되는 기본 예치금. 7/31부터 현금 3,000만원으로 상향</span></span> 3,000만원 등 1차 조치 7/31 조기 시행 확정</b>, 불안 지속 시 고위험 투자 총량 20% 제한 검토. 해당 상품군은 이날 19~24% 급락</span><span class="intp">매매 정지 40분에도 재개 후 낙폭 확대.<br><b>완화장치는 속도만 제어, 방향에는 미개입.</b></span></p>
+    <span class="sh2">이날 세워진 기록</span>
+    <div class="cons" style="margin-top:0;border-top:none;padding-top:0">
+      <div class="cr" style="grid-template-columns:70px 1fr"><span class="cn">일간 낙폭</span><span class="cv"><span class="down">-732.09pt</span> · 역대 2위 <i>1위 6/23 -910.71pt</i></span></div>
+      <div class="cr" style="grid-template-columns:70px 1fr"><span class="cn">하락률</span><span class="cv"><span class="down">-10.84%</span> · 올해 2위 <i>1위 3/4 -12.06%</i></span></div>
+      <div class="cr" style="grid-template-columns:70px 1fr"><span class="cn">7월 누적</span><span class="cv"><span class="down">-28.9%</span> · 월간 최대 <i>IMF 1997.10 초과</i></span></div>
+      <div class="cr" style="grid-template-columns:70px 1fr"><span class="cn">코스닥</span><span class="cv">장중 697.57 · 700선 붕괴 <i>1년 3개월 만</i></span></div>
+    </div>
+    <p class="tnote hang" style="margin-top:7px"><span class="rm">※</span> 1997년 10월과의 비교는 <b>월간 하락률 크기</b>에 한정. 위기의 원인·성격이 같다는 뜻이 아님(당시는 외환·신용 위기, 이번은 반도체 재평가발 조정).</p></div></div>
+  <div class="fstep"><span class="fsn">03</span><div class="fsb"><b>수급</b><p><span class="li">· <b class="lb">외국인</b> 현물 사흘째 <span class="down">-4.97조</span>, 사흘 합산 <span class="down">-11.12조</span>. <b>매도의 무게중심은 두 반도체주</b>로 SK하이닉스 <span class="down">-3.21조</span>·삼성전자 <span class="down">-1.64조</span>(<a class="xref" href="#supply-structure">수급 구조</a>)</span><span class="li">· <b class="lb">반대편</b> 같은 외국인이 K200 선물은 <span class="up">+1.17조</span> 순매수, 코스닥도 <span class="up">+860억</span> 순매수 전환. <span class="term">베이시스<span class="tip">선물가격 − 현물지수. 플러스면 콘탱고로 선물이 현물보다 비싼 상태</span></span> +11.06으로 콘탱고 확대</span><span class="li">· <b class="lb">흡수</b> 개인 <span class="up">+4.33조</span> 중 <b>+3.93조가 그 두 종목</b>. 기관도 <span class="up">+0.63조</span> 이틀째로, 매수 1위는 SK하이닉스 +9,000억</span><span class="intp">현물은 두 종목 집중 매도, 선물·코스닥은 순매수. <b>전면 이탈로 판정할 근거는 부족.</b><br>선물 매수는 헤지 청산·베이시스 거래 포함 가능성으로 방향 신호에서 제외.</span></p></div></div>
+</div>
+<div class="closecard rv">
+  <div class="cck"><span class="cckmark">◆</span> 종가의 의미</div>
+  <p class="cclead">촉발은 반도체 재평가, 낙폭은 그 위에 얹힌 지수 집중도와 레버리지 구조.</p>
+  <div class="ccgrid">
+    <div class="ccitem"><i>마감선</i><b>6,023.66</b><span>4월 말 이후 최저. 7월의 지지선(6,516·6,429)을 하루에 통과</span></div>
+    <div class="ccitem"><i>역설</i><b class="down">-14.65%</b><span>가장 깊게 팔린 SK하이닉스가 하루 뒤 사상 최대 이익률 예상 종목</span></div>
+    <div class="ccitem"><i>넓이</i><b>79 / 79</b><span>업종 전원 하락. 시총 상위 14종목 중 삼성바이오로직스만 상승</span></div>
+    <div class="ccitem"><i>환율</i><b>1,460.90</b><span>5/7 이후 최저. 전면 자금 이탈 해석을 약화시키는 방향</span></div>
+  </div>
+</div>
+</div>
+
+<div class="blk rv" id="supply-structure">
+  <div class="blkt"><b>수급 구조</b><span>코스피 · 하루 전체 집계</span></div>
+  <div class="card2 sply">
+    <div class="splyr"><span class="sl">개인</span><span class="sbar"><span class="sfl up" style="left:50%;width:41.8%"></span></span><span class="sv up">+4.33조</span></div>
+    <div class="splyr"><span class="sl">외국인</span><span class="sbar"><span class="sfl down" style="left:2%;width:48%"></span></span><span class="sv down">-4.97조</span></div>
+    <div class="splyr"><span class="sl">기관</span><span class="sbar"><span class="sfl up" style="left:50%;width:6.1%"></span></span><span class="sv up">+0.63조</span></div>
+    <div class="splynote">
+      <div class="sd">
+        <svg viewBox="0 0 44 44" width="44" height="44" aria-hidden="true"><circle cx="22" cy="22" r="18" fill="none" stroke="#DCD7CE" stroke-width="7"/><circle cx="22" cy="22" r="18" fill="none" stroke="#46584D" stroke-width="7" stroke-dasharray="93.9 19.2" stroke-linecap="round"/></svg>
+        <span class="sdv">83%</span>
+        <span class="sdl">두 반도체주</span>
+      </div>
+      <p>두 종목이 <b>외국인 순매도 종목 합계(-5.87조)의 83%.</b> 다만 나머지 종목의 순매수·순매도를 모두 상계하면, 두 종목 제외 외국인 순매도는 <b>572억</b>에 그침.<br><span class="emphasis">시장을 판 게 아니라 두 종목을 판 수급.</span> ※상계 후 값이라 다른 업종의 포지션 이동까지 없었다는 뜻은 아님.</p>
+    </div>
+    <div class="chips3">
+      <div class="c3"><i>외국인 선물</i><b class="up">+1.17조</b></div>
+      <div class="c3"><i><span class="term">프로그램<span class="tip">여러 종목을 한 번에 사고파는 자동 주문. 지수·수급을 크게 움직이는 경로</span></span>(코스피)</i><b class="down">-2조5,983억</b></div>
+      <div class="c3"><i><span class="term">원/달러<span class="tip">네이버 금융 일별시세 매매기준율 기준. 은행 간 거래 환율의 가중평균으로 매일 고시</span></span></i><b class="down">1,460.90 ▼5.10</b></div>
+    </div>
+    <div class="breadth-row">
+      <div class="brh"><span class="term">시장 폭<span class="tip">지수가 아니라 오른 종목 수의 비율. 상승·하락이 얼마나 넓게 퍼졌는지의 지표</span></span></div>
+      <div class="brm">코스피 상승 36 / 하락 878 (상한 3·하한 2)</div>
+      <div class="brm">코스닥 상승 140 / 하락 1,557 (상한 11·하한 2)</div>
+      <div class="brx"><span class="hb">· 코스피 상승 비율 <b>4.2%</b>·코스닥 8.6%. 다만 하한가는 코스피 2·코스닥 2에 그침. 폭은 넓고 잠김은 적었던 하락</span><span class="hb">· <b class="lb">연속 수급</b> NAVER는 외국인 현물 나흘째 순매도(나흘 합산 -2,312억) vs 기관 나흘째 순매수(+2,248억)의 거울 구도 지속, SK스퀘어는 기관 나흘째 순매도(-5,462억) vs 개인 나흘째 순매수(+4,168억). 오늘은 외국인도 +641억 가세(KRX 종목 수급·주식시장 전체 기준)</span></div>
+    </div>
+  </div>
+
+</div>
+
+<details class="fold rv" id="analysis-flow">
+  <summary>수급 상세</summary>
+  <div class="fb">
+    <div class="subh">최근 5거래일 수급</div>
+    <div id="detail-flow"><input type="radio" id="seg-kospi" name="flowseg" class="seg-radio" checked>
+    <input type="radio" id="seg-kosdaq" name="flowseg" class="seg-radio">
+    <div class="seg">
+      <label for="seg-kospi">KOSPI</label>
+      <label for="seg-kosdaq">KOSDAQ</label>
+    </div>
+    <div class="segpane kospi">
+<div class="flist">
+        <div class="fitem"><div class="fih"><span class="fdate">07.28</span><span class="fnums"><span><i>개인</i><b class="up">+4.33조</b></span><span><i>외인</i><b class="down">-4.97조</b></span><span><i>기관</i><b class="up">+0.63조</b></span></span></div><p class="fii"><span class="emphasis">외국인 사흘째·이번 국면 최대 규모.</span> 개인이 4.33조를 받았으나 두 자릿수 하락</p></div>
+        <div class="fitem"><div class="fih"><span class="fdate">07.27</span><span class="fnums"><span><i>개인</i><b class="up">+1.98조</b></span><span><i>외인</i><b class="down">-2.88조</b></span><span><i>기관</i><b class="up">+0.86조</b></span></span></div><p class="fii">외국인 이틀째 대량 매도·기관 매수 유턴. 받는 쪽이 넓어지며 <span class="up">+0.97%</span></p></div>
+        <div class="fitem"><div class="fih"><span class="fdate">07.24</span><span class="fnums"><span><i>개인</i><b class="up">+5.18조</b></span><span><i>외인</i><b class="down">-3.27조</b></span><span><i>기관</i><b class="down">-1.95조</b></span></span></div><p class="fii">나흘간 쌓인 매수분의 상당 부분 회수. 기관 동반 매도·개인 단독 수용, <span class="down">-5.72%</span></p></div>
+        <div class="fitem"><div class="fih"><span class="fdate">07.23</span><span class="fnums"><span><i>개인</i><b class="down">-2.21조</b></span><span><i>외인</i><b class="up">+2.14조</b></span><span><i>기관</i><b class="up">+0.10조</b></span></span></div><p class="fii">외국인 나흘째·나흘 누적 +5.6조. 알파벳 실적에 갭 상승 지킨 <span class="up">+4.40%</span></p></div>
+        <div class="fitem"><div class="fih"><span class="fdate">07.22</span><span class="fnums"><span><i>개인</i><b class="down">-1.22조</b></span><span><i>외인</i><b class="up">+2.62조</b></span><span><i>기관</i><b class="down">-1.40조</b></span></span></div><p class="fii">외국인 사흘째 매수·닷새 내 최대. 갭 상승분 368pt 반납 <span class="up">+0.74%</span></p></div>
+      </div>
+      <p class="tnote">5거래일 합계(단순 합산): 개인 <span class="up">+8.06조</span> / 외국인 <span class="down">-6.36조</span> / 기관 <span class="down">-1.76조</span>.<br><span class="emphasis">외국인 사흘 매도가 그 직전 나흘 매수의 두 배.</span> 매수 나흘(+5.6조)과 매도 사흘(-11.12조)의 비대칭. (KRX 공식 일자별 기준)</p>
+    </div>
+    <div class="segpane kosdaq">
+<div class="flist">
+        <div class="fitem"><div class="fih"><span class="fdate">07.28</span><span class="fnums"><span><i>개인</i><b class="up">+515억</b></span><span><i>외인</i><b class="up">+860억</b></span><span><i>기관</i><b class="down">-1,345억</b></span></span></div><p class="fii"><span class="emphasis">외국인, 코스닥에선 순매수 전환.</span> 15시 이후 매수 급증. 그래도 <span class="down">-7.72%</span></p></div>
+        <div class="fitem"><div class="fih"><span class="fdate">07.27</span><span class="fnums"><span><i>개인</i><b class="down">-1,550억</b></span><span><i>외인</i><b class="down">-1,422억</b></span><span><i>기관</i><b class="up">+2,731억</b></span></span></div><p class="fii">기관 단독 매수 전환. 개인·외국인 매도를 받아내며 <span class="up">+2.22%</span></p></div>
+        <div class="fitem"><div class="fih"><span class="fdate">07.24</span><span class="fnums"><span><i>개인</i><b class="up">+4,881억</b></span><span><i>외인</i><b class="down">-1,315억</b></span><span><i>기관</i><b class="down">-3,580억</b></span></span></div><p class="fii">외국인·기관 하루 만에 재매도. 어제 +5.22% 상승을 하루에 되돌린 <span class="down">-5.32%</span></p></div>
+        <div class="fitem"><div class="fih"><span class="fdate">07.23</span><span class="fnums"><span><i>개인</i><b class="down">-2,373억</b></span><span><i>외인</i><b class="up">+1,675억</b></span><span><i>기관</i><b class="up">+643억</b></span></span></div><p class="fii">외국인·기관 매수 전환. 나흘 매도 끝 동반 매수 <span class="up">+5.22%</span></p></div>
+        <div class="fitem"><div class="fih"><span class="fdate">07.22</span><span class="fnums"><span><i>개인</i><b class="up">+2,636억</b></span><span><i>외인</i><b class="down">-815억</b></span><span><i>기관</i><b class="down">-1,914억</b></span></span></div><p class="fii">외국인·기관 매도 나흘째. 바이오 약세 이틀째 <span class="down">-0.30%</span>, 748 위는 방어</p></div>
+      </div>
+      <p class="tnote">5거래일 합계: 개인 <span class="up">+4,109억</span> / 외국인 <span class="down">-1,017억</span> / 기관 <span class="down">-3,465억</span>.<br><span class="emphasis">코스피를 대량으로 판 날, 코스닥에선 산 외국인.</span> 매도의 표적이 시장 전체가 아니라는 또 하나의 단면. (과거 일자 수치는 KRX 확정치 기준)</p>
+    </div></div>
+    <div class="subh">선물·<span class="term">프로그램<span class="tip">여러 종목을 한 번에 사고파는 자동 주문. 지수·수급을 크게 움직이는 경로</span></span></div>
+    <div id="detail-program"><div class="krow">
+      <div class="kc"><div class="l">외국인 선물</div><div class="v up">+1.17조</div><div class="n">어제 -5,560억 매도에서 대량 매수로 반전. 현물 -4.97조와 정반대 방향.</div></div>
+      <div class="kc"><div class="l">기관 선물</div><div class="v down">-1.36조</div><div class="n">현물 +0.63조 매수와 반대의 매도. 어제 +6,340억에서 반전.</div></div>
+      <div class="kc"><div class="l"><span class="term">프로그램<span class="tip">여러 종목을 한 번에 사고파는 자동 주문. 지수·수급을 크게 움직이는 경로</span></span>(코스피)</div><div class="v down">-2조5,983억</div><div class="n"><span class="term">차익<span class="tip">현물·선물 가격차를 이용한 차익거래 매매</span></span> +3,556억 · <span class="term">비차익<span class="tip">차익거래 외 일반 프로그램 매매(지수 추종 등)</span></span> -2조9,539억. 사흘 연속 2조원대 매도, 코스닥은 +12억.</div></div>
+      <div class="kc"><div class="l"><span class="term">베이시스<span class="tip">선물가격 − 현물지수. 플러스면 콘탱고로 선물이 현물보다 비싼 상태</span></span></div><div class="v">+11.06</div><div class="n">콘탱고 확대(현물 945.69·선물 956.75). 어제 +5.28의 두 배 폭. 급락일에 선물이 현물보다 강함.</div></div>
+    </div>
+    <p class="tnote hang"><span class="rm">※</span> 어제의 '현물 대량 매도+선물 매도 확대'가 오늘은 <b>'현물 대량 매도+선물 대량 매수'로 뒤집힘.</b> 선물 매수에는 반등 대비뿐 아니라 헤지 청산·<span class="term">차익<span class="tip">현물·선물 가격차를 이용한 차익거래 매매</span></span> 조정도 포함될 수 있어 방향 전환으로 단정하지 않되, 콘탱고 확대·코스닥 순매수 전환과 같은 방향의 신호라는 점은 기록해 둠. 개인 K200 선물은 +0.11조. <span class="term">프로그램 매매<span class="tip">여러 종목을 한 번에 사고파는 자동 주문. 지수·수급을 크게 움직이는 경로</span></span>는 투자자별 수급에 포함되는 경로라 별도로 합산하지 않음.</p></div>
+  </div>
+</details>
+
+<details class="fold rv" id="detail-ranks">
+  <summary>주체별 순매수·순매도</summary>
+  <div class="fb">
+    <div class="ranks">
+      <div class="rank"><div class="rh">외국인</div><div class="pair">
+        <div class="col b"><div class="ch">순매수</div><ol><li><b>SK스퀘어</b><span class="up">+641억</span></li><li><b>대덕전자</b><span class="up">+383억</span></li><li><b>현대모비스</b><span class="up">+376억</span></li><li><b>SK</b><span class="up">+368억</span></li><li><b>SK이터닉스</b><span class="up">+328억</span></li></ol></div>
+        <div class="col s"><div class="ch">순매도</div><ol><li><b>SK하이닉스</b><span class="down">-3조2,092억</span></li><li><b>삼성전자</b><span class="down">-1조6,414억</span></li><li><b>현대차</b><span class="down">-606억</span></li><li><b>파마리서치</b><span class="down">-547억</span></li><li><b>KB금융</b><span class="down">-413억</span></li></ol></div>
+      </div></div>
+      <div class="rank"><div class="rh">기관</div><div class="pair">
+        <div class="col b"><div class="ch">순매수</div><ol><li><b>SK하이닉스</b><span class="up">+8,997억</span></li><li><b>파마리서치</b><span class="up">+899억</span></li><li><b>삼성바이오로직스</b><span class="up">+821억</span></li><li><b>셀트리온</b><span class="up">+718억</span></li><li><b>KB금융</b><span class="up">+237억</span></li></ol></div>
+        <div class="col s"><div class="ch">순매도</div><ol><li><b>SK스퀘어</b><span class="down">-1,530억</span></li><li><b>삼성전자우</b><span class="down">-430억</span></li><li><b>삼성SDI</b><span class="down">-396억</span></li><li><b>LG이노텍</b><span class="down">-376억</span></li><li><b>SK</b><span class="down">-323억</span></li></ol></div>
+      </div></div>
+      <div class="rank"><div class="rh">개인</div><div class="pair">
+        <div class="col b"><div class="ch">순매수</div><ol><li><b>SK하이닉스</b><span class="up">+2조2,611억</span></li><li><b>삼성전자</b><span class="up">+1조6,743억</span></li><li><b>SK스퀘어</b><span class="up">+789억</span></li><li><b>삼성전자우</b><span class="up">+663억</span></li><li><b>현대차</b><span class="up">+628억</span></li></ol></div>
+        <div class="col s"><div class="ch">순매도</div><ol><li><b>셀트리온</b><span class="down">-438억</span></li><li><b>삼성바이오로직스</b><span class="down">-437억</span></li><li><b>파마리서치</b><span class="down">-354억</span></li><li><b>현대모비스</b><span class="down">-287억</span></li><li><b>HD현대중공업</b><span class="down">-255억</span></li></ol></div>
+      </div></div>
+    </div>
+    <p class="tnote">외국인 순매도 1·2위와 개인 순매수 1·2위가 같은 두 종목. <b>외국인이 던진 두 반도체주를 개인이 거의 그대로 받은 구도.</b> 기관은 SK하이닉스만 +8,997억을 받고 매수 2~4위는 파마리서치·삼성바이오로직스·셀트리온 등 바이오(시총 상위 유일 상승 삼성바이오로직스와 같은 축). 개인의 매도 상위가 그 바이오라는 점도 거울상. 삼성전자는 기관이 -10억으로 비켜서 개인 홀로 받음. (KRX 투자자별 거래실적, 주식시장 전체 기준)</p>
+  </div>
+</details>
+
+<!-- PAGE 3 · 다음 거래일 -->
+
+
+<div class="blk rv" id="analysis-sector">
+  <div class="blkt"><b>업종 강약</b><span>장마감 확정</span></div>
+  <div class="sectorboard">
+    <div class="sectorcol dnc">
+      <div class="sct">낙폭이 작았던 업종</div>
+      <div class="sectoritem"><div class="sil"><b>담배</b><span class="down">-0.49%</span></div><div class="sitrack"><span class="sifill" style="width:41%"></span></div></div>
+      <div class="sectoritem"><div class="sil"><b>통신서비스</b><span class="down">-0.96%</span></div><div class="sitrack"><span class="sifill" style="width:81%"></span></div></div>
+      <div class="sectoritem"><div class="sil"><b>부동산</b><span class="down">-1.03%</span></div><div class="sitrack"><span class="sifill" style="width:87%"></span></div></div>
+      <div class="sectoritem"><div class="sil"><b>음료</b><span class="down">-1.19%</span></div><div class="sitrack"><span class="sifill" style="width:100%"></span></div></div>
+    </div>
+    <div class="sectorcol dnc">
+      <div class="sct">낙폭이 컸던 업종</div>
+      <div class="sectoritem"><div class="sil"><b>전자장비·기기</b><span class="down">-14.92%</span></div><div class="sitrack"><span class="sifill" style="width:100%"></span></div></div>
+      <div class="sectoritem"><div class="sil"><b>반도체·장비</b><span class="down">-13.91%</span></div><div class="sitrack"><span class="sifill" style="width:93%"></span></div></div>
+      <div class="sectoritem"><div class="sil"><b>무선통신서비스</b><span class="down">-12.01%</span></div><div class="sitrack"><span class="sifill" style="width:81%"></span></div></div>
+      <div class="sectoritem"><div class="sil"><b>전기장비</b><span class="down">-11.96%</span></div><div class="sitrack"><span class="sifill" style="width:80%"></span></div></div>
+    </div>
+  </div>
+  <p class="tnote"><b>79개 업종 전원 하락.</b> 왼쪽 열도 '오른 업종'이 아니라 덜 내린 업종. 버틴 축은 담배·통신·부동산·음료·제약(-1.77%) 등 반도체와 먼 내수, 낙폭 상위는 전자장비·반도체·통신장비(-9.21%)·전기장비 등 IT 하드웨어 일색. 반도체와반도체장비는 171종목 중 상승 2개.</p>
+  <div class="blkt" style="margin-top:14px"><b>업종 해석</b></div>
+  <div class="flow5 rv">
+    <div class="fstep"><span class="fsn">01</span><div class="fsb"><b>반도체</b><p><span class="li">· <b class="lb">가격</b> 삼성전자 220,000원(<span class="down">-13.39%</span>)·SK하이닉스 1,550,000원(<span class="down">-14.65%</span>)에 반도체·반도체장비 <span class="down">-13.91%</span>. 시총 1·2위의 낙폭이 지수를 넘어서며 K200 <span class="down">-11.55%</span> &gt; 코스피 <span class="down">-10.84%</span></span><span class="li">· <b class="lb">체인</b> 삼성전기 <span class="down">-15.92%</span>·SK스퀘어 <span class="down">-15.60%</span>·원익IPS <span class="down">-15.57%</span>·주성엔지니어링 <span class="down">-14.08%</span>. 소부장까지 일괄. 테마도 <span class="term">HBM<span class="tip">고대역폭 메모리. AI 가속기에 쓰이는 고부가 D램으로 범용 D램과 시장이 갈림</span></span> <span class="down">-11.25%</span>·반도체 재료/부품 <span class="down">-10.12%</span></span><span class="li">· <b class="lb">재료</b> 중국 DUV·엔비디아 딜의 상세는 <a class="xref" href="#p2">해설 01</a>. 여기서는 가격 반응의 크기만. SK하이닉스는 한 달 새 시가총액이 반토막(장마감 보도), 실적 발표 하루 전의 낙폭으로는 이번 국면 최대</span><span class="intp">서사가 어느 쪽도 확정되지 않은 채 가격이 먼저 움직임.<br>내일 아침의 답안이 서사를 이기는지가 <b>첫 판정</b>.</span></p></div></div>
+    <div class="fstep"><span class="fsn">02</span><div class="fsb"><b>확산의 경로</b><p><span class="li">· <b class="lb">전방위</b> 반도체 밖에서도 건설 <span class="down">-8.42%</span>·자동차 <span class="down">-8.32%</span>·생명보험 <span class="down">-8.27%</span>·증권 <span class="down">-8.08%</span>. 실적·업황과 무관한 축까지 8%대</span><span class="li">· <b class="lb">쏠림</b> 2026 하반기 신규상장 테마 <span class="down">-17.05%</span> 등 수급이 얇은 자리일수록 깊게 파임. 레버리지 상품군의 급락과 규제는 <a class="xref" href="#p2">해설 02</a></span><span class="li">· <b class="lb">기계적 경로</b> <span class="term">비차익<span class="tip">차익거래 외 일반 프로그램 매매(지수 추종 등)</span></span> 프로그램 <span class="down">-2조9,539억</span>. 지수·ETF 환매와 레버리지 리밸런싱, 위험한도 축소가 함께 작동하는 통로로, <b>원인이라기보다 반도체발 충격을 업종 구분 없이 전달한 장치</b></span><span class="intp">판 것은 두 종목인데 값이 내린 것은 878종목.<br>그 간극을 메운 것은 판단이 아니라 <b>기계</b>였다는 게 당국·증권가의 공통 지목.</span></p></div></div>
+    <div class="fstep"><span class="fsn">03</span><div class="fsb"><b>버틴 자리</b><p><span class="li">· <b class="lb">생존</b> 담배 <span class="down">-0.49%</span>·통신서비스 <span class="down">-0.96%</span>·부동산 <span class="down">-1.03%</span>·제약 <span class="down">-1.77%</span>. 금리도 경기도 아닌 <b>'반도체와의 거리'</b>가 이날의 방어 기준. 정확히는 노출도와 가격 탄력성으로, <b>외국인 집중도·레버리지 노출·성장 프리미엄이 낮은 업종일수록 덜 내림</b></span><span class="li">· <b class="lb">종목</b> 시총 상위 14개 중 유일 상승 삼성바이오로직스 <span class="up">+0.26%</span>. 기관 순매수 2~4위가 파마리서치·삼성바이오로직스·셀트리온. 바이오로 피난한 기관</span><span class="intp"><b>방어 순위는 반도체 노출도의 역순.</b><br>시장 간 낙폭 차이도 같은 축(<a class="xref" href="#p2">해설 01</a>).</span></p></div></div>
+  </div>
+</div>
+
+<div class="mband rv"><div class="sect-h" id="p3">다음 거래일 주목할 것</div>
+<div class="flow5 rv">
+  <div class="fstep"><span class="fsn">01</span><div class="fsb"><b>SK하이닉스 실적</b><p><span class="li">· 내일 오전 발표. <b>확률보다 발표 뒤 주가 반응이 이번 조정의 성격을 정함</b></span></p>
+    <div class="cons" style="margin-top:2px">
+      <div class="cr" style="grid-template-columns:70px 1fr"><span class="cn">컨센서스</span><span class="cv">영업이익 64조889억 · 이익률 75~77% <i>사상 최대 분기 · 증권사 14곳</i></span></div>
+      <div class="cr" style="grid-template-columns:70px 1fr"><span class="cn">볼 것</span><span class="cv"><span class="term">HBM<span class="tip">고대역폭 메모리. AI 가속기에 쓰이는 고부가 D램으로 범용 D램과 시장이 갈림</span></span> 출하 · 범용 D램 가격 · 3분기 가이던스 · 중국 공급 질의</span></div>
+    </div>
+    <span class="sh2">발표 뒤 갈리는 세 갈래</span>
+    <div class="cons" style="margin-top:0;border-top:none;padding-top:0">
+      <div class="cr" style="grid-template-columns:70px 1fr"><span class="cn">둘 다 강</span><span class="cv">오늘 낙폭은 수급 과잉반응</span></div>
+      <div class="cr" style="grid-template-columns:70px 1fr"><span class="cn">실적만 강</span><span class="cv">구조적 <span class="term">디레이팅<span class="tip">이익이 아니라 그 이익에 매기는 배수(밸류에이션)가 낮아지는 것</span></span>으로 이동 <i>가장 중요한 갈래</i></span></div>
+      <div class="cr" style="grid-template-columns:70px 1fr"><span class="cn">둘 다 약</span><span class="cv">업황 둔화와 겹침 · 2차 하락 위험</span></div>
+    </div></div></div>
+  <div class="fstep"><span class="fsn">02</span><div class="fsb"><b>외국인 나흘째</b><p><span class="li">· <b class="lb">범위</b> 매도가 두 반도체주에 갇히면 <b>종목 재평가</b>, 다른 종목으로 번지면 <b>시장 이탈</b></span><span class="li">· <b class="lb">잔여 매물</b> 뉴스면 잦아들며 되돌림, <span class="term">디레버리징<span class="tip">차입·레버리지 포지션을 줄이는 과정. 뉴스가 멎어도 후행 매물이 며칠 이어질 수 있음</span></span>이면 새 악재 없이도 후행 매물, 호가 공백이면 적은 매수로도 큰 반등</span><span class="si">거래대금 33.69조 · 받는 손인 개인의 예탁금 체력도 변수</span></p></div></div>
+  <div class="fstep"><span class="fsn">03</span><div class="fsb"><b>미국장·<span class="term">FOMC<span class="tip">미 연준의 금리 결정 회의. 이번 회의는 현지 7/28~29, 결과는 한국시간 7/30 새벽</span></span></b><p><span class="li">· <b class="lb">이틀째 반응</b> 오늘 밤 엔비디아·ASML의 후속. DUV·<span class="term">순환 거래<span class="tip">칩 회사가 고객사에 투자·금융을 대주고 그 고객이 다시 칩을 사는 구조. AI 수요의 실체 논란</span></span> 서사가 하루짜리인지 이틀째로 번지는지</span><span class="li">· <b class="lb">금리</b> <span class="term">FOMC<span class="tip">미 연준의 금리 결정 회의. 이번 회의는 현지 7/28~29, 결과는 한국시간 7/30 새벽</span></span> 결과는 목요일 새벽 3시, <span class="term">인상 프라이싱<span class="tip">금리 선물 가격에 반영된 시장의 인상 확률. 회의 전에도 매일 움직이는 기대치</span></span>은 31.5%(CME·7/27). 유가 급락이 동결 쪽 재료로 반영되는지</span><span class="li">· <b class="lb">과매도 반작용</b> 리서치센터장들 '6,000 초반은 과매도·분할 매수 구간'. 반등 시도의 소재는 이미 나와 있음</span><span class="si">과매도 신호와 실적·FOMC 대기가 같은 날 겹침. 반등이 시도돼도 검증은 목요일 새벽까지 이어짐</span></p></div></div>
+</div>
+<p class="watchline"><b>시장 관찰</b> 실적 뒤 세 갈래 판정 · 외국인 나흘째와 잔여 매물 · 미 화요장 반도체 · <span class="term">FOMC<span class="tip">미 연준의 금리 결정 회의. 이번 회의는 현지 7/28~29, 결과는 한국시간 7/30 새벽</span></span> 결과 대기</p>
+</div>
+
+<div class="blk rv">
+  <div class="blkt" id="sched"><b>오늘 밤 · 이번 주 핵심 일정</b><span>앞으로의 이벤트 3</span></div>
+  <div class="schedule-timeline">
+    <div class="schedule-row">
+      <div class="schedule-time">오늘 밤</div>
+      <div class="schedule-axis"><span class="schedule-dot"></span></div>
+      <div class="schedule-body"><div class="sbt">미 증시(07.28) · 엔비디아·ASML 이틀째 반응 · <span class="term">FOMC<span class="tip">미 연준의 금리 결정 회의. 이번 회의는 현지 7/28~29, 결과는 한국시간 7/30 새벽</span></span> 둘째 날</div><div class="sbd"><span class="si">DUV·<span class="term">순환 거래<span class="tip">칩 회사가 고객사에 투자·금융을 대주고 그 고객이 다시 칩을 사는 구조. AI 수요의 실체 논란</span></span> 서사의 지속 여부. <b>수요일 시가의 두 번째 변수</b>(첫 번째는 아침의 실적)</span></div></div>
+    </div>
+    <div class="schedule-row">
+      <div class="schedule-time">7/29<br/>수</div>
+      <div class="schedule-axis"><span class="schedule-dot"></span></div>
+      <div class="schedule-body"><div class="sbt">SK하이닉스 실적(오전) · MS·메타(미 장후 = 7/30 새벽)</div><div class="sbd"><span class="si">급락 다음 날의 첫 답안. <span class="term">컨센서스<span class="tip">증권사 전망치의 평균. 실제 발표치가 아니라 추정치</span></span>와 판정은 <a class="xref" href="#p3">다음 거래일 01</a></span><span class="si note">MS·메타의 AI 투자 계획은 <span class="term">순환 거래<span class="tip">칩 회사가 고객사에 투자·금융을 대주고 그 고객이 다시 칩을 사는 구조. AI 수요의 실체 논란</span></span> 논란의 반대 증거 후보</span></div></div>
+    </div>
+    <div class="schedule-row">
+      <div class="schedule-time">7/30<br/>~31</div>
+      <div class="schedule-axis"><span class="schedule-dot"></span></div>
+      <div class="schedule-body"><div class="sbt"><span class="term">FOMC<span class="tip">미 연준의 금리 결정 회의. 이번 회의는 현지 7/28~29, 결과는 한국시간 7/30 새벽</span></span> 결과(7/30 새벽 3시) · 삼성전자 실적 · 애플·아마존 · 미 GDP·PCE · BOJ</div><div class="sbd"><span class="si">금리·실적·물가 연쇄 / 7/31 <span class="term">레버리지 ETF 예탁금<span class="tip">단일종목 레버리지 상품 투자에 요구되는 기본 예치금. 7/31부터 현금 3,000만원으로 상향</span></span> 3,000만원 등 1차 규제 시행 · 6월 산업활동동향</span></div></div>
+    </div>
+  </div>
+</div>
+<details class="fold rv" id="detail-schedule">
+  <summary>이번 주 복기 · 남은 일정</summary>
+  <div class="fb">
+<div class="slist">
+      <div class="sitem past"><div class="sdate"><span class="badge past">완료</span><span class="sd2">07.23</span></div><div class="sbody"><b>알파벳 실적에 <span class="up">+4.40%</span>. 닷새 만 7,000 회복·2분기 GDP <span class="up">+0.6%</span></b></div></div>
+      <div class="sitem past"><div class="sdate"><span class="badge past">완료</span><span class="sd2">07.24</span></div><div class="sbody"><b>유가·미 기술주·관세 3중 악재 <span class="down">-5.72%</span>. 매도 사이드카·외국인 -3.27조</b></div></div>
+      <div class="sitem past"><div class="sdate"><span class="badge past">완료</span><span class="sd2">07.27</span></div><div class="sbody"><b>미·이란 교전 중단. 유가 급락에 <span class="up">+0.97%</span> 반등·외국인 이틀째 -2.88조</b></div></div>
+      <div class="sitem today"><div class="sdate"><span class="badge today">오늘</span><span class="sd2">07.28</span></div><div class="sbody"><b><span class="badge core">핵심</span>중·미발 반도체 이중 충격 <span class="down">-10.84%</span>. 양시장 <span class="term">서킷브레이커<span class="tip">지수가 8% 이상 급변해 1분 지속되면 매매를 20분 중단하는 장치. 코스피 올해 8번째 발동</span></span> 발동·업종 전원 하락</b></div></div>
+      <div class="sitem upcoming"><div class="sdate"><span class="badge upcoming">수</span><span class="sd2">07.29</span></div><div class="sbody"><b><span class="badge core">핵심</span>SK하이닉스 실적·IR(오전) · MS·메타(미 장후)</b><p><span class="term">컨센서스<span class="tip">증권사 전망치의 평균. 실제 발표치가 아니라 추정치</span></span>는 사상 최대 분기. 급락 다음 날의 첫 답안</p></div></div>
+      <div class="sitem upcoming"><div class="sdate"><span class="badge upcoming">목</span><span class="sd2">07.30</span></div><div class="sbody"><b><span class="term">FOMC<span class="tip">미 연준의 금리 결정 회의. 이번 회의는 현지 7/28~29, 결과는 한국시간 7/30 새벽</span></span> 결과(새벽 3시) · 삼성전자 실적 · BOJ 개시</b><p><span class="term">인상 프라이싱<span class="tip">금리 선물 가격에 반영된 시장의 인상 확률. 회의 전에도 매일 움직이는 기대치</span></span> 31.5%에서의 결론. 동결이어도 성명서의 9월 신호가 재료</p></div></div>
+      <div class="sitem upcoming"><div class="sdate"><span class="badge upcoming">금</span><span class="sd2">07.31</span></div><div class="sbody"><b>6월 산업활동동향 · 애플·아마존(미 장후) · 단일종목 레버리지 1차 규제 시행</b><p>예탁금 현금 3,000만원·최소 매매단위 20좌·사전교육 강화</p></div></div>
+    </div>
+    <p class="smallnote">시각은 한국시간. <span class="term">FOMC<span class="tip">미 연준의 금리 결정 회의. 이번 회의는 현지 7/28~29, 결과는 한국시간 7/30 새벽</span></span>는 현지 7/28~29이고 결과는 한국시간 7/30 새벽 3시. SK하이닉스 실적·IR은 7/29 공시 기준. 발표 시각·내용은 변동 가능.</p>
+  </div>
+</details>
+
+<div class="sect-h rv sm">기록</div>
+<details class="fold rv" id="detail-levels">
+  <summary>기술적 기준선 · 세 지수</summary>
+  <div class="fb">
+    <div class="levels">
+      <div class="level">
+        <div class="leveltop"><b>KOSPI</b><span>현재 6,023.66</span></div>
+        <div class="lrail"><span class="ltick" style="left:7%"></span><span class="ltick" style="left:73%"></span><span class="ltick" style="left:91%"></span><span class="lcur" style="left:12%"></span><span class="lcap" style="left:12%">현재</span></div>
+        <div class="llab"><span style="left:7%">5,992</span><span style="left:73%">6,400</span><span style="left:91%">6,516</span></div>
+        <p>어제까지의 지지 지도(6,650대·6,557·6,516·6,429)가 <b>하루 만에 전부 위로 넘어감</b>. 아래로 확인된 선은 5,992(오늘 저가)와 6,000 심리선뿐. 그 아래는 4월 이후 가격이 다니지 않은 미확인 구간. 위는 6,400(오늘 시가·갭 하단) 회복이 첫 관문, 다음이 6,516(7/20 종가)·6,557.</p>
+      </div>
+      <div class="level">
+        <div class="leveltop"><b>KOSPI200</b><span>현재 945.69</span></div>
+        <div class="lrail"><span class="ltick" style="left:15%"></span><span class="ltick" style="left:54%"></span><span class="ltick" style="left:92%"></span><span class="lcur" style="left:11%"></span><span class="lcap" style="left:11%">현재</span></div>
+        <div class="llab"><span style="left:15%">950</span><span style="left:54%">1,000</span><span style="left:92%">1,050</span></div>
+        <p>현재 945.69(-11.55%)는 코스피(-10.84%)보다 깊음. 두 반도체주가 몰린 지수라 낙폭도 가장 큼. 어제의 지지 1,050은 하루 만에 104pt 위의 저항이 됨. 950 회복이 첫걸음, 1,000 심리선·1,050 차례. 아래는 미확인 구간.</p>
+      </div>
+      <div class="level">
+        <div class="leveltop"><b>KOSDAQ</b><span>현재 705.85</span></div>
+        <div class="lrail"><span class="ltick" style="left:10%"></span><span class="ltick" style="left:60%"></span><span class="ltick" style="left:85%"></span><span class="lcur" style="left:23%"></span><span class="lcap" style="left:23%">현재</span></div>
+        <div class="llab"><span style="left:10%">697</span><span style="left:60%">731</span><span style="left:85%">748</span></div>
+        <p>현재 705.85는 장중 697.57로 <b>700을 1년 3개월 만에 깬 뒤 되올라온 자리</b>. 700 심리선과 697(오늘 저가)이 아래 기준, 위는 731(옛 최후 확인선)·742(오늘 시가)·748(신저가선) 차례. 마감 직전 외국인 순매수 전환이 700 위 복귀와 겹친 점은 기록.</p>
+      </div>
+    </div>
+  </div>
+</details>
+<details class="fold rv" id="detail-glossary">
+  <summary>용어 한 줄 사전</summary>
+  <div class="fb">
+    <dl class="gloss">
+      <dt>서킷브레이커</dt><dd>지수가 8% 이상 급변해 1분 지속되면 매매를 20분 중단하는 장치. 오늘 코스피 10:13(올해 8번째)·코스닥 12:01 발동</dd>
+      <dt>사이드카</dt><dd>선물이 급등·급락할 때 프로그램 주문을 5분간 정지하는 장치. 오늘 코스피 9:06·코스닥 9:14 매도 사이드카 발동</dd>
+      <dt>DUV 노광장비</dt><dd>반도체 회로를 웨이퍼에 새기는 심자외선 장비. 액침형은 ASML이 사실상 독점해 온 영역</dd>
+      <dt>순환 거래</dt><dd>칩 회사가 고객사에 투자·금융을 대주고 그 고객이 다시 칩을 사는 구조. AI 수요의 실체 논란의 핵심</dd>
+      <dt>CXMT(창신메모리)</dt><dd>중국 최대 메모리 업체. 7/27 상하이 상장 첫날 +466%, 중국 본토 시총 1위</dd>
+      <dt>HBM</dt><dd>고대역폭 메모리. AI 가속기에 쓰이는 고부가 D램으로 범용 D램과 시장이 갈림</dd>
+      <dt>SOX</dt><dd>미국 필라델피아 반도체지수. 글로벌 반도체주의 대표 지표</dd>
+      <dt>FOMC</dt><dd>미 연준의 금리 결정 회의. 이번 회의는 현지 7/28~29, 결과는 한국시간 7/30 새벽 3시</dd>
+      <dt>인상 프라이싱</dt><dd>금리 선물 가격에 반영된 시장의 인상 확률. 회의 전에도 매일 움직이는 기대치</dd>
+      <dt>프로그램 매매</dt><dd>여러 종목을 한 번에 사고파는 자동 주문. 지수·수급을 크게 움직이는 경로</dd>
+      <dt>비차익</dt><dd>차익거래 외 일반 프로그램 매매(지수 추종 등). 외국인·기관 현물 주문의 주요 경로</dd>
+      <dt>베이시스</dt><dd>선물가격 − 현물지수. 플러스면 콘탱고, 마이너스면 백워데이션</dd>
+      <dt>매매기준율</dt><dd>은행 간 거래 환율의 가중평균으로 매일 고시되는 기준 환율. 이 리포트의 원/달러 기준</dd>
+      <dt>레버리지 ETF 예탁금</dt><dd>단일종목 레버리지 상품 투자에 요구되는 기본 예치금. 7/31부터 현금 3,000만원으로 상향</dd>
+      <dt>시장 폭</dt><dd>지수가 아니라 오른 종목 수의 비율. 상승·하락이 얼마나 넓게 퍼졌는지의 지표</dd>
+      <dt>디레버리징</dt><dd>차입·레버리지 포지션을 줄이는 과정. 뉴스가 멎어도 후행 매물이 며칠 이어질 수 있음</dd>
+      <dt>디레이팅</dt><dd>이익이 아니라 그 이익에 매기는 배수(밸류에이션)가 낮아지는 것</dd>
+      <dt>컨센서스</dt><dd>증권사 전망치의 평균. 실제 발표치가 아니라 추정치</dd>
+    </dl>
+  </div>
+</details>
+<details class="src rv" id="detail-sources">
+  <summary>출처 및 데이터 기준</summary>
+  <div class="sb"><ol>
+    <li><b>미국 지수</b> 07.27 정규장 확정 종가: 나스닥 24,932.08(−0.18%)·다우 52,210.08(+0.51%)·S&amp;P500 7,413.18(+0.02%)·<span class="term">SOX<span class="tip">미국 필라델피아 반도체지수. 글로벌 반도체주의 대표 지표</span></span> 11,554.88(−2.23%)·US 10Y 4.641%(−3.8bp): 네이버 금융·Yahoo Finance·MarketWatch (2026.07.27 정규장 마감). 엔비디아 −5.0% $196.51(6/5 이후 최대 낙폭)·CDS 프리미엄 연 0.82%로 사상 최대폭 상승·시총 1위 애플에 양보: <a href="https://www.ajunews.com/view/20260728101333679" target="_blank" rel="noopener">아주경제</a> · ASML −5.8%(장중 −7%)·BE세미컨덕터 −10%·소이텍 −5%: <a href="https://www.newspim.com/news/view/20260728000031" target="_blank" rel="noopener">뉴스핌</a></li>
+    <li><b>반도체 이중 충격의 재료</b> 중국 업체(사명 비공개)의 액침 <span class="term">DUV 노광장비<span class="tip">반도체 회로를 새기는 핵심 장비. 액침형은 ASML이 사실상 독점해 온 영역</span></span> 생산 착수·올해 약 5대→2027년 약 20대·SMIC·화훙·CXMT 공급 대상·'성능은 ASML 열위, 양산 전 검증 필요': 디인포메이션 보도를 <a href="https://www.newspim.com/news/view/20260728000031" target="_blank" rel="noopener">뉴스핌</a>이 인용 (2026.07.28) · 엔비디아의 고객 투자·금융지원 거래군 — SK그룹 5,000억달러 이상 협력안, 오픈AI 관련 지급보증 2,500억·자금지원 3,500억달러 논의, SSI 50억·네이버 10억달러(개별 발표 기준. 보도별 집계 범위가 달라 총액은 표기하지 않음)와 <span class="term">순환 거래<span class="tip">칩 회사가 고객사에 투자·금융을 대주고 그 고객이 다시 칩을 사는 구조. AI 수요의 실체 논란</span></span> 우려 재점화: <a href="https://www.ajunews.com/view/20260728101333679" target="_blank" rel="noopener">아주경제</a>·<a href="https://www.g-enews.com/article/Global-Biz/2026/07/202607280654005338fbbec65dfb_1" target="_blank" rel="noopener">글로벌이코노믹</a> · CXMT 상장 이튿날 '글로벌 자금 블랙홀' 수급 논지(심리 영향은 가능하나 실제 수급 이탈은 제한적 평가 병존): <a href="https://www.mt.co.kr/stock/2026/07/28/2026072808363814528" target="_blank" rel="noopener">머니투데이</a></li>
+    <li><b>한국거래소(KRX)·네이버 금융</b> 코스피 6,023.66(−10.84%, 07.28 장마감 확정) 시 6,400.27·고 6,413.57(개장 직후)·저 5,992.91(마감 직전) / 코스닥 705.85(−7.72%) 시 742.13·저 697.57 / 코스피200 945.69(−11.55%) / 투자자별(코스피): 개인 +4조3,340억·외국인 −4조9,666억·기관 +6,300억, 코스닥: 개인 +515억·외국인 +860억(장 후반 순매수 전환)·기관 −1,345억, K200 선물: 외국인 +1조1,660억·기관 −1조3,640억·개인 +1,070억, <span class="term">프로그램<span class="tip">여러 종목을 한 번에 사고파는 자동 주문. 지수·수급을 크게 움직이는 경로</span></span> 코스피 <span class="term">차익<span class="tip">현물·선물 가격차를 이용한 차익거래 매매</span></span> +3,556억·<span class="term">비차익<span class="tip">차익거래 외 일반 프로그램 매매(지수 추종 등). 외국인·기관 현물 주문의 주요 경로</span></span> −2조9,539억·전체 −2조5,983억(코스닥 +12억), <span class="term">베이시스<span class="tip">선물가격 − 현물지수. 플러스면 콘탱고, 마이너스면 백워데이션</span></span> +11.06 콘탱고(현물 945.69·선물 956.75), 등락 코스피 상승 36·보합 3·하락 878(상한 3·하한 2, 상승비율 4.2%) / 코스닥 상승 140·보합 38·하락 1,557(상한 11·하한 2, 8.6%), 거래대금 코스피 33.69조·코스닥 4.74조, 공매도 코스피 1.57조(3.4%)·코스닥 0.24조(4.2%, KRX+NXT 합산): 한국거래소 장마감 확정 통계·네이버 금융 (2026.07.28). 투자자별 수급은 언론 보도치(외국인 −4조9,841억 등)와 집계 범위에 따른 소폭 차이가 있으며, 본 리포트는 거래소 확정 통계를 따름</li>
+    <li><b>서킷브레이커·사이드카·기록</b> 매도 사이드카 코스피 9:06(올해 13번째)·코스닥 9:14(5번째), <span class="term">서킷브레이커<span class="tip">지수가 8% 이상 급변해 1분 지속되면 매매를 20분 중단하는 장치. 코스피 올해 8번째 발동</span></span> 코스피 10:13·코스닥 12:01(각 20분 중단), 12시 10분 코스피 −10.62%(6,038.27): <a href="https://www.hankyung.com/article/2026072808096" target="_blank" rel="noopener">한국경제</a>·<a href="https://www.fnnews.com/news/202607281227037163" target="_blank" rel="noopener">fn뉴스</a> · 코스피 CB 올해 8번째: <a href="https://www.hankookilbo.com/news/article/A2026072810140005538" target="_blank" rel="noopener">한국일보</a> · −732.09pt 역대 2위(1위 6/23 −910.71pt)·코스닥 장중 700 붕괴 1년 3개월 만: <a href="https://www.fnnews.com/news/202607281537146394" target="_blank" rel="noopener">fn뉴스</a>·<a href="https://www.hankyung.com/article/2026072806816" target="_blank" rel="noopener">한국경제</a> · 7월 누적 −28.9%로 IMF 1997년 10월(−27.25%) 초과 월간 최대: <a href="https://www.newspim.com/news/view/20260728000876" target="_blank" rel="noopener">뉴스핌</a> · 세 달 만의 장중 6,000 붕괴(4월 말 이후 최저 수준): <a href="https://biz.heraldcorp.com/article/10823180" target="_blank" rel="noopener">헤럴드경제</a>·<a href="https://www.hankyung.com/article/202607280491i" target="_blank" rel="noopener">한국경제</a></li>
+    <li><b>종목별 순매수·순매도와 연속 수급</b> 한국거래소 투자자별 종목 수급(MDCSTAT024, 주식시장 전체·2026.07.28): 외국인 SK하이닉스 −3조2,092억·삼성전자 −1조6,414억. 두 종목 합계 −4조8,506억은 <b>순매도 종목만 합산한 −5조8,680억의 83%</b>이며, 나머지 종목의 순매수·순매도를 상계한 <b>두 종목 제외 외국인 순매도는 572억</b>(분모가 다른 두 값이므로 직접 차감되지 않음). 기관 SK하이닉스 +8,997억·삼성전자 −10억, 개인 두 종목 +3조9,354억. NAVER 나흘 연속(외국인 −2,312억/기관 +2,248억)·SK스퀘어 나흘 연속(기관 −5,462억/개인 +4,168억)은 07.23·24·27·28 일자별 대조. 수급 집중도(외국인 매도 상위 1종목 55%·상위 5종목 85%, 기관 매수 상위 1종목 56%)와 정합</li>
+    <li><b>종목 종가</b> 삼성전자 220,000원(−13.39%)·SK하이닉스 1,550,000원(−14.65%): <a href="https://www.etoday.co.kr/news/view/2608394" target="_blank" rel="noopener">이투데이</a>·<a href="https://www.fnnews.com/news/202607281538171499" target="_blank" rel="noopener">fn뉴스</a> (2026.07.28 장마감). 삼성전기 −15.92%·SK스퀘어 −15.60%·현대차 −9.68%·삼성물산 −10.16%·삼성생명 −8.51%·원익IPS −15.57%·주성엔지니어링 −14.08%: <a href="https://www.ajunews.com/view/20260728163933514" target="_blank" rel="noopener">아주경제</a> · 시총 상위 14개 중 삼성바이오로직스(+0.26%)만 상승: <a href="https://www.fnnews.com/news/202607281538171499" target="_blank" rel="noopener">fn뉴스</a> · 단일종목 레버리지 ETF 19~24% 급락·SK하이닉스 한 달 새 시총 반토막: <a href="https://v.daum.net/v/20260728120710751" target="_blank" rel="noopener">서울신문(daum)</a>·<a href="https://www.fnnews.com/news/202607281338522448" target="_blank" rel="noopener">fn뉴스</a></li>
+    <li><b><span class="term">원/달러<span class="tip">네이버 금융 일별시세 매매기준율 기준. 은행 간 거래 환율의 가중평균으로 매일 고시</span></span></b> 1,460.90원(▼5.10). 네이버 금융 일별시세 <span class="term">매매기준율<span class="tip">은행 간 거래 환율의 가중평균으로 매일 고시되는 기준 환율. 이 리포트의 원/달러 기준</span></span>(2026.07.28). ※같은 표에서 07.27은 1,466.00 — 전호에 실린 1,468.80(19:23 고시)과의 2.80원 차이는 고시 회차 차이이며, 전일대비는 같은 표 계열끼리 계산. 주간거래 종가 기준 1,462.5원(−6.0원)·5/7 이후 최저·장중 변동폭 11.0원·월말 네고 물량: <a href="https://www.etoday.co.kr/news/view/2608389" target="_blank" rel="noopener">이투데이</a> · 엔/원 889.10(−0.22%)·달러인덱스 101.535(+0.06%)·비트코인 $63,436(−0.45%)·국제 금 $4,047.80(−0.66%)·VIX 19.05(+2.04%)는 07.28 21시 기준 장중 시세(확정 아님) · LME 구리 13,810(+1.42%)·알루미늄 3,192(+0.54%)는 Cash 기준일 07.27</li>
+    <li><b>유가·중동</b> 07.27 확정 마감: 브렌트 $88.36(−8.42달러, −8.7%)·WTI $82.61(−6.70달러, −7.5%): <a href="https://www.fnnews.com/news/202607280450513300" target="_blank" rel="noopener">fn뉴스</a>·<a href="https://newsway.co.kr/news/view?ud=2026072810232730137" target="_blank" rel="noopener">뉴스웨이</a>. 브렌트 90달러 아래 확정 마감으로 전일 상방 트리거 '안착' 조건은 충족 · 미·이란: 주말 공습 중단·트럼프 'good talks' 언급·협상 실패 시 재개 경고, 이란은 직접 협상 부인(오만 경유 호르무즈 협의만 인정). 공식 휴전 협정 없는 불안정한 군사 휴지 상태로 표기: 로이터·CBS (2026.07.28). 07.28 21시 기준 진행 시세 브렌트 $86대·WTI $80대는 확정 아님</li>
+    <li><b><span class="term">FOMC<span class="tip">미 연준의 금리 결정 회의. 이번 회의는 현지 7/28~29, 결과는 한국시간 7/30 새벽</span></span>(현지 7/28~29)</b> CME 페드워치 동결 68.5% vs 25bp 인상 31.5%·'7월 동결, 9월 인상' 베팅: <a href="https://www.hankyung.com/article/202607278269i" target="_blank" rel="noopener">한국경제</a> (2026.07.27). 결과 발표는 한국시간 7/30 새벽 3시. 유가 급락(전일 −7~9%)의 프라이싱 반영 여부가 관전점</li>
+    <li><b>아시아·해외 동반</b> 닛케이 62,364.92(−3.95%, 2개월 만 최저)·토픽스 −2.52%·키옥시아 가격제한폭 하한가(5만엔 하회)·어드반테스트·도쿄일렉트론 동반 약세: <a href="https://www.newspim.com/news/view/20260728000974" target="_blank" rel="noopener">뉴스핌</a>·<a href="https://www.fnnews.com/news/202607281543262063" target="_blank" rel="noopener">fn뉴스</a> · TSMC 등 아시아 반도체 동반 급락: <a href="https://biz.heraldcorp.com/article/10823065" target="_blank" rel="noopener">헤럴드경제</a> · STOXX600 +0.27%·항셍 +0.22%(07.28)·'AI 밸류체인 선별 조정' 프레임: FT·WSJ·블룸버그 (2026.07.28)</li>
+    <li><b>정부 대응</b> 이억원 금융위원장, 금융투자협회 긴급 시장점검 회의(28일 오전)에서 단일종목 레버리지 1차 조치 7/31 조기 시행(기본예탁금 현금 3,000만원·최소 매매단위 1→20좌·사전교육 강화), 시장 불안 지속 시 개인 고위험 상품 투자 총량 20% 제한 등 2차 검토: <a href="https://v.daum.net/v/20260728120710751" target="_blank" rel="noopener">서울신문(daum)</a> · 경제금융당국 '변동성 유발 위험요인 면밀 점검': <a href="https://imnews.imbc.com/news/2026/econo/article/6835857_36932.html" target="_blank" rel="noopener">MBC</a></li>
+    <li><b>시장 코멘트</b> 리서치센터장 8인 '6,000 초반은 과매도·저평가 구간'(한화 박영훈·IBK 이승훈), NH 조수홍 '수급이 주도하는 장세의 반복 급락', 신한 윤창용 '낙폭 확대는 외국인 대규모 매도와 레버리지·ETF의 기계적 매매': <a href="https://www.mt.co.kr/stock/2026/07/28/2026072814002761433" target="_blank" rel="noopener">머니투데이</a> · 삼성증권 조아인 '기초체력 훼손보다 복합 불확실성의 심리 위축': <a href="https://www.ajunews.com/view/20260728163933514" target="_blank" rel="noopener">아주경제</a> · '저점 반등 가능성·분할 매수 고려' vs '반도체 심리 극도 위축' 병존: <a href="https://www.newspim.com/news/view/20260728000876" target="_blank" rel="noopener">뉴스핌</a></li>
+    <li><b>SK하이닉스 2분기 <span class="term">컨센서스<span class="tip">증권사 전망치의 평균. 실제 발표치가 아니라 추정치</span></span>(7/29 발표)</b> 연합인포맥스 집계 증권사 14곳 기준 영업이익 64조889억원·매출 84조597억원·영업이익률 75~77%: <a href="https://www.fnnews.com/news/202607260555359670" target="_blank" rel="noopener">fn뉴스</a> (2026.07.26) · MS FY26 4분기 EPS 4.21달러·매출 876.2억달러(7/29 미 장후): <a href="https://www.marketbeat.com/earnings/reports/2026-7-29-microsoft-co-stock/" target="_blank" rel="noopener">MarketBeat</a> · 메타 2분기 EPS 7.23달러·매출 602.6억달러: <a href="https://news.alphastreet.com/meta-platforms-meta-q2-2026-preview-eps-est-7-23-reports-july-29/" target="_blank" rel="noopener">AlphaStreet</a>. 컨센서스는 추정치로 확정 실적이 아님</li>
+    <li><b>증권사 리서치(2026.07.27자)</b> 메모리 공급 부족 심화·재고 3주: SK증권 · AI 수요 견조·시선은 자본효율성으로: 교보증권 · 원화 강세 구조적 배경: 키움증권 · <span class="term">FOMC<span class="tip">미 연준의 금리 결정 회의. 이번 회의는 현지 7/28~29, 결과는 한국시간 7/30 새벽</span></span> 프리뷰 '인상에 대한 두려움': 유진투자증권 · 9월 <span class="term">인상 프라이싱<span class="tip">금리 선물 가격에 반영된 시장의 인상 확률. 회의 전에도 매일 움직이는 기대치</span></span>: 하나증권 채권 · 과창판 IPO(중국): 하나증권</li>
+  </ol></div>
+</details>
+
+<p class="disc">Disclaimer: 본 자료는 시장 구조 분석과 판단 재료 정리를 위한 참고자료이며 특정 금융상품의 매수·매도 권유가 아님.</p>
+<div class="foot">2026.07.28 · Sung Oh 코스피 데일리 리포트</div>
+</div><!-- /.app -->
+</div><!-- /.scroll-area -->
+
+<a href="#top" class="back-to-top is-hidden" id="backToTop" aria-label="맨 위로 이동"><span aria-hidden="true">↑</span></a>
+<script>
+(function(){
+  if(window.__sungOh) return; window.__sungOh = true;
+
+  /* ── 용어 툴팁 : 각 .term에 직접 바인딩 (iOS 탭 호환) ──
+     열릴 때 position:fixed로 전환해 overflow:hidden 컨테이너(fbx/secbox 등) 밖으로도
+     온전히 표시. 화면 상단에 가까우면 아래쪽으로 뒤집어(below) 잘림 방지. */
+  function resetTip(el){ var tp=el.querySelector('.tip'); if(tp){ tp.classList.remove('below'); tp.removeAttribute('style'); } }
+  function clampTip(t){
+    var tip=t.querySelector('.tip'); if(!tip) return;
+    var vw=window.innerWidth, pad=12;
+    var w=Math.min(240, vw-2*pad);
+    tip.style.position='fixed'; tip.style.bottom='auto'; tip.style.transform='none';
+    tip.style.width=w+'px'; tip.style.left='0px'; tip.style.top='0px';
+    var tr=t.getBoundingClientRect();
+    var th=tip.getBoundingClientRect().height;
+    var left=tr.left+tr.width/2-w/2;
+    if(left<pad) left=pad;
+    if(left+w>vw-pad) left=vw-pad-w;
+    var top=tr.top-th-9, below=false;
+    if(top<pad+50){ top=tr.bottom+9; below=true; } /* 상단 고정바(topbar) 아래 여유 확보 */
+    /* 세로 최종 클램프(2026.07.19 브랜드 정렬) — 뒤집어도 넘치면 뷰포트 안으로 강제 */
+    var vh=window.innerHeight;
+    if(top+th>vh-pad){ top=vh-pad-th; }
+    if(top<pad){ top=pad; }
+    tip.style.left=Math.round(left)+'px';
+    tip.style.top=Math.round(top)+'px';
+    /* transform 조상(.hero 등) 안에서는 fixed 기준이 밀림 — 실측 후 보정 */
+    var tb=tip.getBoundingClientRect();
+    var dx=tb.left-left, dy=tb.top-top;
+    if(dx||dy){ tip.style.left=Math.round(left-dx)+'px'; tip.style.top=Math.round(top-dy)+'px'; }
+    tip.classList.toggle('below', below);
+    var ax=tr.left+tr.width/2-left;
+    ax=Math.max(12, Math.min(w-12, ax));
+    tip.style.setProperty('--ax', Math.round(ax)+'px');
+  }
+  function closeTerms(except){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++){ if(open[i]!==except){ open[i].classList.remove('open'); resetTip(open[i]); } }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.term'), function(t){
+    t.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var willOpen=!t.classList.contains('open');
+      closeTerms(t);
+      t.classList.toggle('open', willOpen);
+      if(willOpen) clampTip(t);
+    });
+  });
+  document.addEventListener('click', function(){ closeTerms(null); });
+  window.addEventListener('scroll', function(){ closeTerms(null); }, {passive:true}); /* fixed 툴팁이 스크롤에 떠다니지 않도록 닫음 */
+  window.addEventListener('resize', function(){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++) clampTip(open[i]);
+  });
+
+
+  /* ── 맨 위로 버튼 : 앵커(#top) 링크 — JS는 표시/숨김만(500px 기준), 이동은 href로 ── */
+  var backToTop=document.getElementById('backToTop');
+  function updateBackToTop(){
+    if(!backToTop) return;
+    var y=window.scrollY||window.pageYOffset||0;
+    if(y>500) backToTop.classList.remove('is-hidden');
+    else backToTop.classList.add('is-hidden');
+  }
+  window.addEventListener('scroll', updateBackToTop, {passive:true});
+  window.addEventListener('resize', updateBackToTop);
+  updateBackToTop();
+
+})();
+</script>
+</body>
+</html>
