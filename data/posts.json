@@ -227,6 +227,23 @@
     "href": "reports/7월 29일 비정기 리서치_두 개의 착시.html"
   },
   {
+    "id": "2026-07-27-daily-1og5hu",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-07-27",
+    "reportDate": "2026-07-27",
+    "registeredDate": "2026-08-13",
+    "registeredAt": "2026-08-13T14:46:59.154Z",
+    "legacyImport": false,
+    "title": "매도는 이어졌고, 흡수는 넓어졌다",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "외국인 2.88조 원 매도가 이어졌지만 기관과 개인의 흡수가 넓어지며 코스피는 0.97% 반등했다. 유가 하락과 AI 투자 재료가 지수를 밀어 올린 가운데, 가격 회복과 아직 복구되지 않은 외국인 수급의 간극을 살펴본다.",
+    "href": "reports/7월 27일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-07-27-daily-1og5hu.webp"
+  },
+  {
     "id": "2026-07-20-weekly-1u5gndk",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
