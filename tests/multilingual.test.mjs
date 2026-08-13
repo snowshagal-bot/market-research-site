@@ -32,6 +32,20 @@ test('legacy posts are Korean and homepage data stays separated by language', as
   assert.deepEqual(Array.from(api.searchPosts(fixturePosts, 'en', 'Dollar'), post => post.id), ['en-daily']);
 });
 
+test('registration and report chronology remain separate ordering contracts', async () => {
+  const api = await localeHelpers();
+  const posts = [
+    { id: 'older-report-new-upload', reportDate: '2026-07-20', registeredDate: '2026-08-12', registeredAt: '2026-08-12T10:00:00Z' },
+    { id: 'newer-report-old-upload', reportDate: '2026-08-05', registeredDate: '2026-08-10', registeredAt: '2026-08-10T10:00:00Z' }
+  ];
+  assert.deepEqual(Array.from(api.sortPosts(posts), post => post.id), [
+    'newer-report-old-upload', 'older-report-new-upload'
+  ]);
+  assert.deepEqual(Array.from(api.sortPostsByRegistration(posts), post => post.id), [
+    'older-report-new-upload', 'newer-report-old-upload'
+  ]);
+});
+
 test('language URLs preserve category queries without browser-language redirects', async () => {
   const [api, site, koHome, enHome] = await Promise.all([
     localeHelpers(), read('assets/site.js'), read('index.html'), read('en/index.html')

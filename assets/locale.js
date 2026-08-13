@@ -73,6 +73,17 @@
     });
   }
 
+  function sortPostsByRegistration(posts) {
+    return (Array.isArray(posts) ? posts : []).slice().sort((left, right) => {
+      const leftRegistered = String(left?.registeredAt || left?.registeredDate || '');
+      const rightRegistered = String(right?.registeredAt || right?.registeredDate || '');
+      if (leftRegistered !== rightRegistered) return rightRegistered.localeCompare(leftRegistered);
+      const leftDate = String(left?.reportDate || left?.date || '');
+      const rightDate = String(right?.reportDate || right?.date || '');
+      return rightDate.localeCompare(leftDate);
+    });
+  }
+
   function latestByCore(posts, language, coreTypes = ['daily', 'weekly', 'research', 'basics']) {
     const localized = sortPosts(localePosts(posts, language));
     return coreTypes.map(type => localized.find(post => post.type === type)).filter(Boolean);
@@ -139,6 +150,7 @@
     normalizeReportPath,
     localePosts,
     sortPosts,
+    sortPostsByRegistration,
     latestByCore,
     categoryCounts,
     searchPosts,
