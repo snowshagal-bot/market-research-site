@@ -17,6 +17,22 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-13-daily-1tgqr3y.webp"
   },
   {
+    "id": "2026-08-12-daily-15kwiwr",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-08-12",
+    "reportDate": "2026-08-12",
+    "registeredDate": "2026-08-13",
+    "registeredAt": "2026-08-13T14:33:16.534Z",
+    "legacyImport": false,
+    "title": "고도(高度)를기다리며",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "href": "reports/8월 12일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-08-12-daily-15kwiwr.webp"
+  },
+  {
     "id": "2026-08-12-weekly-1macab6",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
