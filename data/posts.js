@@ -157,7 +157,9 @@ window.RESEARCH_POSTS = [
     "subtitle": "",
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "href": "reports/8월 6일 주식리포트_커버통합.html",
-    "coverImage": "covers/2026-08-06-daily-94w8bi.webp"
+    "coverImage": "covers/2026-08-06-daily-94w8bi.webp",
+    "updatedAt": "2026-08-13T14:41:25.927Z",
+    "summary": "삼성전자·SK하이닉스 급락으로 코스피는 4.58% 밀렸지만, 오른 종목은 493개로 하락 종목보다 많았다. 대형 반도체에 집중된 충격과 외국인 3.33조 원 현물 매도·선물 매수 전환이 함께 나타난 하루를 살펴본다"
   },
   {
     "id": "2026-08-03-daily-181n1pj",
