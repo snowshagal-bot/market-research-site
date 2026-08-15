@@ -9,6 +9,7 @@ import {
   findPostByPath,
   reportAlternates,
   reportSeoTags,
+  reportSiteUrl,
   sitemapXml
 } from '../functions/_seo.js';
 
@@ -41,10 +42,11 @@ test('public locale shells use snowshagal.com canonicals and only real homepage 
 test('report SEO resolves encoded paths and links only explicit translation counterparts', () => {
   const korean = findPostByPath(pairedPosts, '/reports/%ED%95%9C%EA%B5%AD%EC%96%B4.html');
   assert.equal(korean.id, 'ko-pair');
+  assert.equal(findPostByPath(pairedPosts, '/reports/%ED%95%9C%EA%B5%AD%EC%96%B4')?.id, 'ko-pair');
   assert.deepEqual(reportAlternates(pairedPosts, korean).map(({ lang }) => lang), ['en', 'ko', 'x-default']);
   const tags = reportSeoTags(pairedPosts, korean);
-  assert.match(tags, /rel="canonical" href="https:\/\/snowshagal\.com\/reports\/%ED%95%9C%EA%B5%AD%EC%96%B4\.html"/);
-  assert.match(tags, /hreflang="en" href="https:\/\/snowshagal\.com\/reports\/en\/report\.html"/);
+  assert.match(tags, /rel="canonical" href="https:\/\/snowshagal\.com\/reports\/%ED%95%9C%EA%B5%AD%EC%96%B4"/);
+  assert.match(tags, /hreflang="en" href="https:\/\/snowshagal\.com\/reports\/en\/report"/);
   assert.doesNotMatch(reportSeoTags(pairedPosts, pairedPosts[2]), /hreflang=/);
   assert.doesNotMatch(tags, /pages\.dev/);
 });
@@ -53,9 +55,9 @@ test('sitemap contains canonical public locale pages and published reports witho
   const xml = sitemapXml(pairedPosts);
   assert.match(xml, /<loc>https:\/\/snowshagal\.com\/<\/loc>/);
   assert.match(xml, /<loc>https:\/\/snowshagal\.com\/en\/<\/loc>/);
-  assert.match(xml, /https:\/\/snowshagal\.com\/reports\/%ED%95%9C%EA%B5%AD%EC%96%B4\.html/);
-  assert.match(xml, /hreflang="en" href="https:\/\/snowshagal\.com\/reports\/en\/report\.html"/);
-  const unpairedEntry = xml.match(/<url><loc>https:\/\/snowshagal\.com\/reports\/only\.html<\/loc>[\s\S]*?<\/url>/)?.[0] || '';
+  assert.match(xml, /https:\/\/snowshagal\.com\/reports\/%ED%95%9C%EA%B5%AD%EC%96%B4<\/loc>/);
+  assert.match(xml, /hreflang="en" href="https:\/\/snowshagal\.com\/reports\/en\/report"/);
+  const unpairedEntry = xml.match(/<url><loc>https:\/\/snowshagal\.com\/reports\/only<\/loc>[\s\S]*?<\/url>/)?.[0] || '';
   assert.doesNotMatch(unpairedEntry, /xhtml:link/);
   assert.doesNotMatch(xml, /about|pages\.dev/);
 });
@@ -86,7 +88,7 @@ test('repository post metadata references existing public report files without f
   const expectedLocations = [
     `${PRODUCTION_ORIGIN}/`,
     `${PRODUCTION_ORIGIN}/en/`,
-    ...posts.map((post) => new URL(post.href, `${PRODUCTION_ORIGIN}/`).href)
+    ...posts.map((post) => reportSiteUrl(post.href))
   ];
   assert.deepEqual(new Set(sitemapLocations), new Set(expectedLocations));
 });

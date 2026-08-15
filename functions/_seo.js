@@ -15,9 +15,14 @@ export function absoluteSiteUrl(path) {
   return new URL(`/${normalized}`, PRODUCTION_ORIGIN).href;
 }
 
+export function reportSiteUrl(path) {
+  const normalized = normalizeSitePath(path).replace(/\.html?$/i, '');
+  return new URL(`/${normalized}`, PRODUCTION_ORIGIN).href;
+}
+
 export function findPostByPath(posts, pathname) {
-  const normalized = normalizeSitePath(pathname);
-  return posts.find((post) => normalizeSitePath(post?.href) === normalized) || null;
+  const normalized = normalizeSitePath(pathname).replace(/\.html?$/i, '');
+  return posts.find((post) => normalizeSitePath(post?.href).replace(/\.html?$/i, '') === normalized) || null;
 }
 
 export function findTranslationCounterpart(posts, post) {
@@ -35,7 +40,7 @@ export function reportAlternates(posts, post) {
   const counterpart = findTranslationCounterpart(posts, post);
   if (!counterpart) return [];
   const entries = [post, counterpart]
-    .map((candidate) => ({ lang: postLanguage(candidate), href: absoluteSiteUrl(candidate.href) }))
+    .map((candidate) => ({ lang: postLanguage(candidate), href: reportSiteUrl(candidate.href) }))
     .sort((left, right) => left.lang.localeCompare(right.lang));
   const korean = entries.find((entry) => entry.lang === 'ko');
   if (korean) entries.push({ lang: 'x-default', href: korean.href });
@@ -51,7 +56,7 @@ export function escapeHtml(value) {
 }
 
 export function reportSeoTags(posts, post) {
-  const canonical = absoluteSiteUrl(post.href);
+  const canonical = reportSiteUrl(post.href);
   const lang = postLanguage(post);
   const description = String(post.summary || post.description || '').trim();
   const image = post.coverImage ? absoluteSiteUrl(post.coverImage) : '';
@@ -88,7 +93,7 @@ export function sitemapXml(posts) {
     urlEntry(`${PRODUCTION_ORIGIN}/`, '', homeAlternates),
     urlEntry(`${PRODUCTION_ORIGIN}/en/`, '', homeAlternates),
     ...validPosts.map((post) => urlEntry(
-      absoluteSiteUrl(post.href),
+      reportSiteUrl(post.href),
       post.updatedAt || post.registeredAt || post.reportDate || post.date,
       reportAlternates(validPosts, post)
     ))
