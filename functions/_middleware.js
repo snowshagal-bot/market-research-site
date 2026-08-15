@@ -1,6 +1,18 @@
+import { PRODUCTION_ORIGIN, findPostByPath, loadPosts, reportSeoTags } from './_seo.js';
+
 export async function onRequest(context) {
   const url = new URL(context.request.url);
-  const response = await context.next();
+  let response = await context.next();
+
+  if (url.hostname !== new URL(PRODUCTION_ORIGIN).hostname) {
+    const headers = new Headers(response.headers);
+    headers.set('x-robots-tag', 'noindex, nofollow');
+    response = new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers
+    });
+  }
 
   if (!url.pathname.startsWith('/reports/')) return response;
   const contentType = response.headers.get('content-type') || '';
@@ -18,8 +30,19 @@ export async function onRequest(context) {
   else if (/끄적|note/i.test(decodedPath)) active = 'note';
 
   const shell = `<script src="/assets/locale.js?v=20260812-1"></script><script src="/assets/report-shell.js?v=20260812-1" data-category="${active}" data-lang="${lang}"></script>`;
+  let seo = '';
+  try {
+    const posts = await loadPosts(context.request, context.env);
+    const post = findPostByPath(posts, url.pathname);
+    if (post) seo = reportSeoTags(posts, post);
+  } catch (_) {}
 
   return new HTMLRewriter()
+    .on('link[rel="canonical"]', { element(element) { element.remove(); } })
+    .on('link[rel="alternate"][hreflang]', { element(element) { element.remove(); } })
+    .on('meta[name="description"]', { element(element) { if (seo) element.remove(); } })
+    .on('meta[property^="og:"]', { element(element) { if (seo) element.remove(); } })
+    .on('head', { element(element) { if (seo) element.append(seo, { html: true }); } })
     .on('body', {
       element(element) {
         element.append(shell, { html: true });
@@ -27,3 +50,5 @@ export async function onRequest(context) {
     })
     .transform(response);
 }
+
+export const __test = { findPostByPath, reportSeoTags };

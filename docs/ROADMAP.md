@@ -122,9 +122,9 @@ Possible header indicators: KOSPI, KOSDAQ, Nasdaq, Dow, USD/KRW, Bitcoin.
 
 Priority rule: use free data only. Delayed data is acceptable if clearly labeled. If reliable display requires paid market-data licensing, omit the feature rather than add recurring cost at the current stage.
 
-### Custom domain
+### Custom domain and search indexing
 
-Not urgent while traffic is very low. The site can continue on `pages.dev`. Add a custom domain later without changing the content architecture.
+`snowshagal.com` is connected as the Production apex and the former Pages Production URL redirects to it. Canonical metadata, real KO/EN alternates, a data-driven sitemap, and robots policy now use the apex domain. The remaining manual operation is Domain-property DNS verification and sitemap submission in Google Search Console.
 
 ### Tistory and social
 
@@ -132,7 +132,7 @@ Tistory does not need automatic cross-posting. Use Tistory/social posts as distr
 
 ### International expansion follow-ups
 
-The KO/EN URL and publishing structure is now being introduced. Add actual English reports only through the authenticated publishing flow when translations are ready. Consider sitemap, hreflang, canonical metadata, or more locales later, based on real readership; do not bulk-translate or duplicate existing production records merely to populate the English archive.
+Add actual English reports only through the authenticated publishing flow when translations are ready. `hreflang` connects report pages only after an explicit `translationGroup` has real KO and EN records; do not bulk-translate or duplicate existing production records merely to populate the English archive.
 
 ### Ads / donations / paid access
 

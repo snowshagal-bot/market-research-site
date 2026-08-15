@@ -45,7 +45,7 @@ async function loadClientHelpers({
   listPosts = [],
   deployResponses = [],
   coverStatuses = [],
-  hostname = 'market-research-site.pages.dev'
+  hostname = 'snowshagal.com'
 } = {}) {
   const source = await read('assets/admin-manage.js');
   const ids = [
@@ -142,7 +142,7 @@ test('manage page includes navigation, list controls, immutable metadata, edit f
   assert.match(html, /id="manage-result-overlay"[^>]*role="dialog"[^>]*aria-modal="true"/);
   assert.match(html, /id="manage-result-home"[^>]*href="\/"/);
   assert.match(html, /id="manage-result-continue"/);
-  assert.match(html, /admin-manage\.js\?v=20260812-1/);
+  assert.match(html, /admin-manage\.js\?v=20260815-1/);
 });
 
 test('client list sorting, title/href search, category filters, file validation, and Preview safety are deterministic', async () => {
@@ -161,7 +161,8 @@ test('client list sorting, title/href search, category filters, file validation,
   assert.equal(helpers.validateCover({ name: 'cover.webp', type: 'image/webp', size: 100 }), '');
   assert.match(helpers.validateCover({ name: 'cover.gif', type: 'image/gif', size: 100 }), /JPG/);
   assert.equal(helpers.isPreviewHost('abc.market-research-site.pages.dev'), true);
-  assert.equal(helpers.isPreviewHost('market-research-site.pages.dev'), false);
+  assert.equal(helpers.isPreviewHost('market-research-site.pages.dev'), true);
+  assert.equal(helpers.isPreviewHost('snowshagal.com'), false);
 });
 
 test('manage client keeps immutable values server-owned and preserves current href for HTML replacement', async () => {

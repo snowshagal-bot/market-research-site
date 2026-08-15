@@ -1,6 +1,6 @@
 # Deployment and environment
 
-Updated: 2026-08-12
+Updated: 2026-08-15
 
 ## GitHub
 
@@ -23,7 +23,9 @@ Never store the token value in Git, source code, screenshots, issues, or documen
 
 Project name: `market-research-site`
 
-Production URL: `https://market-research-site.pages.dev`
+Production URL: `https://snowshagal.com`
+
+`www.snowshagal.com` and the former `market-research-site.pages.dev` Production address permanently redirect to the apex custom domain. Branch-specific `*.market-research-site.pages.dev` addresses remain Preview-only.
 
 Current application model:
 
@@ -73,13 +75,19 @@ The publisher writes the report HTML, optional cover image, and both post data f
 
 Publishing accepts only `lang=ko|en`. Korean reports retain the existing `reports/` layout, while English reports are stored below `reports/en/`. Optional translation relationships are stored as `translationGroup` metadata in both synchronized post data files. Legacy records without `lang` remain Korean and are not bulk-rewritten.
 
-Both `/api/publish` and `/api/manage` reject mutation requests unless the request hostname is exactly `market-research-site.pages.dev`; Preview and local validation must never perform a real publish, update, or delete.
+Both `/api/publish` and `/api/manage` reject mutation requests unless the request hostname is exactly `snowshagal.com`; Preview, the former Pages Production hostname, and local validation must never perform a real publish, update, or delete.
 
 `/api/manage` uses the same secrets and repository permissions. It reads `data/posts.json` from the exact current `main` commit, creates one commit containing all requested metadata/report/cover changes, rechecks the branch ref, and updates it with `force: false`. If `main` moves during the operation, the API returns HTTP 409 and the administrator must refresh before retrying. Delete operations are limited to canonical paths under `reports/` and `covers/`.
 
 After a successful update or delete, `/admin/manage/` polls the Production `/data/posts.json` with cache busting for up to about 90 seconds. Updates must match the API-returned post metadata and any new cover must return HTTP 200 before the UI reports deployment complete. Deletes complete only after the post ID disappears. A delayed deployment check remains a successful GitHub save and is presented as a non-error state.
 
-Cloudflare Preview validation must not perform real `/api/manage` mutations. Both the management client and `/api/manage` enforce read-only behavior outside the exact production hostname `market-research-site.pages.dev`; Preview, localhost, IP hosts, and other hostnames receive HTTP 403 `PREVIEW_READ_ONLY` before GitHub access. Use local file previews and mocked API tests there.
+Cloudflare Preview validation must not perform real `/api/manage` mutations. Both the management client and `/api/manage` enforce read-only behavior outside the exact production hostname `snowshagal.com`; Preview, the former Pages Production hostname, localhost, IP hosts, and other hostnames receive HTTP 403 `PREVIEW_READ_ONLY` before GitHub access. Use local file previews and mocked API tests there.
+
+## Search indexing
+
+The apex custom domain is the only SEO canonical origin. Static locale pages declare their own canonical and real KO/EN alternates. Report responses receive canonical, metadata, and any real `translationGroup` alternates from the shared Pages middleware, without modifying uploaded report HTML. `/sitemap.xml` is generated from `data/posts.json`; repository tests ensure every listed report path exists. `/robots.txt` permits public pages, excludes `/admin/` and `/api/`, and advertises the apex sitemap. The shared middleware also sends `X-Robots-Tag: noindex, nofollow` outside `snowshagal.com`, keeping branch Preview responses available for QA without making them index candidates.
+
+Search Console should use a Domain property for `snowshagal.com`, verified with its Google-provided DNS TXT record. After verification, submit `sitemap.xml` and inspect the apex homepage. Do not commit a verification token or add it to application secrets.
 
 ## Comment dependencies
 

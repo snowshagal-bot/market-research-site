@@ -176,7 +176,7 @@ test('admin connects generated files to the existing cover preview and publish p
   const [html, admin] = await Promise.all([read('admin/index.html'), read('assets/admin.js')]);
   assert.match(html, /id="generate-cover-btn"[^>]*disabled>HTML에서 커버 자동 생성/);
   assert.match(html, /cover-generator\.js\?v=20260812-6/);
-  assert.match(html, /admin\.js\?v=20260812-9/);
+  assert.match(html, /admin\.js\?v=20260815-1/);
   assert.match(admin, /adminKey: adminKey\.value\.trim\(\)/);
   assert.match(admin, /showCoverPreview\(result\.file, generationReportVersion\)/);
   assert.match(admin, /generationReportVersion !== reportSelectionVersion/);
