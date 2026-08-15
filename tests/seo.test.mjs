@@ -31,9 +31,18 @@ test('public locale shells use snowshagal.com canonicals and only real homepage 
     assert.match(html, /hreflang="ko"/);
     assert.match(html, /hreflang="en"/);
     assert.match(html, /hreflang="x-default"/);
-    assert.match(html, /type="application\/ld\+json"/);
     assert.doesNotMatch(html, /pages\.dev/);
   }
+  const websiteJson = ko.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1];
+  assert.ok(websiteJson);
+  assert.deepEqual(JSON.parse(websiteJson), {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Snowshagal',
+    url: 'https://snowshagal.com/',
+    inLanguage: 'ko'
+  });
+  assert.doesNotMatch(en, /type="application\/ld\+json"/);
   assert.match(aboutKo, /noindex,nofollow/);
   assert.match(aboutKo, /rel="canonical" href="https:\/\/snowshagal\.com\/about\/"/);
   assert.match(aboutEn, /rel="canonical" href="https:\/\/snowshagal\.com\/en\/about\/"/);
