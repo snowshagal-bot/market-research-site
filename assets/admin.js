@@ -56,7 +56,7 @@
   let reportSelectionVersion = 0;
   let coverPreviewUrl = '';
   let publishing = false;
-  const PRODUCTION_HOSTNAME = 'market-research-site.pages.dev';
+  const PRODUCTION_HOSTNAME = 'snowshagal.com';
   const localeApi = window.MARKET_LOCALE;
 
   const defaultCoverInfo = 'JPG, PNG, WebP · 최대 4MB · 원본 리포트 HTML과 별도로 저장됩니다.';

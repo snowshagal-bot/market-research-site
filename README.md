@@ -2,7 +2,7 @@
 
 Personal market research website for publishing standalone daily, weekly, and irregular research HTML reports.
 
-Production: `https://market-research-site.pages.dev`
+Production: `https://snowshagal.com`
 
 ## Project documentation
 

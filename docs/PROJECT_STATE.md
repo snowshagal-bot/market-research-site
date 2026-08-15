@@ -1,6 +1,6 @@
 # Project state
 
-Updated: 2026-08-12
+Updated: 2026-08-15
 
 ## Purpose
 
@@ -10,7 +10,7 @@ Updated: 2026-08-12
 
 - Source: GitHub repository `snowshagal-bot/market-research-site`
 - Hosting: Cloudflare Pages
-- Production URL: `https://market-research-site.pages.dev`
+- Production URL: `https://snowshagal.com`
 - Frontend: static HTML/CSS/vanilla JavaScript
 - Server-side features: Cloudflare Pages Functions
 - Comments storage: Cloudflare D1 database `market-research-comments`
@@ -85,7 +85,7 @@ The management page extends the existing static admin and GitHub-backed publishi
 - keeps the editor unchanged after a successful mutation, shows a centered completion overlay, and polls the Production `data/posts.json` plus any updated cover until Cloudflare reflects the commit;
 - redirects to the homepage after confirmed deployment, while allowing the administrator to cancel the redirect and reload the latest management list.
 
-Cloudflare Preview hosts disable actual update/delete actions in the client, and `/api/manage` independently rejects every mutation whose request hostname is not exactly `market-research-site.pages.dev`. Preview validation must use list, form, sandboxed local HTML/cover preview, and mocked API tests only.
+Cloudflare Preview hosts disable actual update/delete actions in the client, and `/api/manage` independently rejects every mutation whose request hostname is not exactly `snowshagal.com`. Preview validation must use list, form, sandboxed local HTML/cover preview, and mocked API tests only.
 
 Important date semantics:
 
@@ -98,6 +98,8 @@ Important date semantics:
 Files under `reports/` are standalone HTML documents that may contain their own CSS, JavaScript, interactions, embedded images, tooltips, fold/unfold behavior, and animations.
 
 `functions/_middleware.js` intercepts HTML responses under `/reports/` and injects `/assets/report-shell.js`.
+
+The same middleware injects canonical `snowshagal.com` metadata into published report responses and marks non-Production hosts `noindex, nofollow` by response header. It adds `hreflang` only when both sides of an explicit `translationGroup` exist, so untranslated reports never point to invented English pages. Static KO/EN home shells declare reciprocal alternates, the empty About shells remain `noindex`, and the data-driven `/sitemap.xml` excludes them while listing current published reports. `/robots.txt` allows public crawling and excludes administrator/API routes.
 
 `assets/report-shell.js` currently provides:
 
@@ -190,7 +192,7 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - No popular-post ranking or view counter.
 - No automated Tistory cross-posting; Tistory can link back to the site.
 - Market ticker is not currently a priority. Free/delayed data may be added later; paid market data is not required.
-- Custom domain is not required yet. Pages.dev is acceptable during early low-traffic operation.
+- `snowshagal.com` is the sole Production and SEO canonical origin; Pages Preview subdomains are development-only.
 - No major framework migration planned unless the current architecture becomes a real blocker.
 
 ## Known operational principle

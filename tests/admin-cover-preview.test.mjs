@@ -85,7 +85,7 @@ async function loadAdmin({ confirmResult = false, generateCover } = {}) {
     },
     FormData: TestFormData,
     setTimeout() {},
-    location: { href: '', hostname: 'market-research-site.pages.dev' },
+    location: { href: '', hostname: 'snowshagal.com' },
     localStorage: { getItem: () => null, setItem() {} },
     sessionStorage: { getItem: () => null, setItem() {} },
     matchMedia: () => ({ matches: false, addEventListener() {} }),
@@ -177,7 +177,7 @@ test('admin markup contains the cover preview modes before the original HTML pre
   assert.match(html, /\.cover-preview-empty\[hidden\],[^}]*\{display:none\}/);
   assert.match(adminScript, /iframe\.setAttribute\('sandbox', 'allow-scripts'\)/);
   assert.match(adminScript, /iframe\.srcdoc = text/);
-  assert.match(html, /admin\.js\?v=20260812-9/);
+  assert.match(html, /admin\.js\?v=20260815-1/);
   assert.doesNotMatch(adminScript, /allow-same-origin/);
 });
 

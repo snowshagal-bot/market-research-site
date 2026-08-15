@@ -85,7 +85,7 @@
   }
 
   function isPreviewHost(hostname) {
-    return hostname.endsWith('.pages.dev') && hostname !== 'market-research-site.pages.dev';
+    return Boolean(hostname) && hostname !== 'snowshagal.com';
   }
 
   function formatBytes(bytes) {

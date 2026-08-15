@@ -1,7 +1,7 @@
 const OWNER = "snowshagal-bot";
 const REPO = "market-research-site";
 const BRANCH = "main";
-const PRODUCTION_HOSTNAME = "market-research-site.pages.dev";
+const PRODUCTION_HOSTNAME = "snowshagal.com";
 const API_VERSION = "2026-03-10";
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const MAX_COVER_BYTES = 4 * 1024 * 1024;

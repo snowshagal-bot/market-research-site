@@ -51,7 +51,7 @@ function githubMock(existingPosts = [basePost], { conflict = false } = {}) {
   return calls;
 }
 
-function manageRequest(fields = {}, key = ADMIN_KEY, url = 'https://market-research-site.pages.dev/api/manage') {
+function manageRequest(fields = {}, key = ADMIN_KEY, url = 'https://snowshagal.com/api/manage') {
   const form = new FormData();
   for (const [name, value] of Object.entries({
     action: 'update',
@@ -87,6 +87,7 @@ test('Preview, localhost, and non-production hosts are read-only before GitHub a
   for (const url of [
     'https://d66a2dcd.market-research-site.pages.dev/api/manage',
     'https://agent-admin-post-management.market-research-site.pages.dev/api/manage',
+    'https://market-research-site.pages.dev/api/manage',
     'http://localhost:8788/api/manage',
     'http://127.0.0.1:8788/api/manage',
     'https://admin.example.com/api/manage'

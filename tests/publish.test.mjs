@@ -33,7 +33,7 @@ function githubMock(existingPosts = []) {
   return calls;
 }
 
-function publishRequest({ type = 'daily', cover = null, lang = 'ko', translationGroup = '', summary } = {}, url = 'https://market-research-site.pages.dev/api/publish') {
+function publishRequest({ type = 'daily', cover = null, lang = 'ko', translationGroup = '', summary } = {}, url = 'https://snowshagal.com/api/publish') {
   const form = new FormData();
   form.append('file', new File(['<!doctype html><html><body>report</body></html>'], 'report.html', { type: 'text/html' }));
   form.append('type', type);
@@ -58,8 +58,8 @@ async function runPublish(options = {}) {
   return { response, data: await response.json() };
 }
 
-test('Preview and local publish requests are rejected before GitHub access', async () => {
-  for (const url of ['https://branch.market-research-site.pages.dev/api/publish', 'http://localhost:8788/api/publish']) {
+test('Preview, former production, and local publish requests are rejected before GitHub access', async () => {
+  for (const url of ['https://branch.market-research-site.pages.dev/api/publish', 'https://market-research-site.pages.dev/api/publish', 'http://localhost:8788/api/publish']) {
     const calls = githubMock();
     try {
       const response = await onRequestPost({ request: publishRequest({}, url), env: { GITHUB_TOKEN: 'token', ADMIN_KEY } });
