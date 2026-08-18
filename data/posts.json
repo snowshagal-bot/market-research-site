@@ -1,5 +1,21 @@
 [
   {
+    "id": "2026-08-18-daily-1burfko",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-08-18",
+    "reportDate": "2026-08-18",
+    "registeredDate": "2026-08-18",
+    "registeredAt": "2026-08-18T13:18:01.076Z",
+    "legacyImport": false,
+    "title": "한 칸을넘지 못한 빛",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "href": "reports/8월 18일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-08-18-daily-1burfko.webp"
+  },
+  {
     "id": "2026-08-13-daily-1tgqr3y",
     "type": "daily",
     "typeLabel": "주식 리포트",
