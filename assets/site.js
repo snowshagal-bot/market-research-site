@@ -22,12 +22,15 @@
     if(da!==db) return db.localeCompare(da);
     return String(b.registeredAt||'').localeCompare(String(a.registeredAt||''));
   });
+  const registeredPosts = localeApi?.sortPostsByRegistration(localizedPosts) || localizedPosts.slice().sort((a,b)=>String(b.registeredAt||b.registeredDate||'').localeCompare(String(a.registeredAt||a.registeredDate||'')));
   const themeBtn = document.querySelector('[data-theme-toggle]');
   const menuBtn = document.querySelector('[data-menu-toggle]');
   const mobileNav = document.querySelector('.mobile-nav');
   const languageLinks = Array.from(document.querySelectorAll('[data-language-choice]'));
   const list = document.getElementById('report-list');
   const search = document.getElementById('search-input');
+  const archiveHeading = document.getElementById('archive-heading');
+  const archiveOrder = document.getElementById('archive-order');
   const filters = Array.from(document.querySelectorAll('[data-filter]'));
   const navLinks = Array.from(document.querySelectorAll('[data-nav-category]'));
   const archiveIndex = document.getElementById('archive-index');
@@ -82,9 +85,11 @@
     return String(value ?? '').replace(/[&<>"']/g,character=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[character]));
   }
   function reportDate(post){ return post.reportDate || post.date || ''; }
+  function registeredDate(post){ return post.registeredDate || String(post.registeredAt || '').slice(0,10); }
   function rootPath(path){ return `/${String(path || '').replace(/^\/+/, '')}`; }
   function categoryInfo(type){ return categories[type] || { label: type || (locale === 'en' ? 'Report' : '리포트'), english: 'REPORT', description: '' }; }
   function latestFor(type){ return posts.find(post=>post.type===type) || null; }
+  function latestRegisteredFor(type){ return registeredPosts.find(post=>post.type===type) || null; }
 
   const slides = localeApi?.latestByCore(allPosts, locale, coreTypes) || coreTypes.map(type=>latestFor(type)).filter(Boolean);
   let slideIndex = Math.max(0, slides.findIndex(post=>post.type===active));
@@ -183,12 +188,12 @@
 
   function renderHighlights(){
     const host=document.getElementById('latest-category-cards');
-    const highlights=['daily','weekly','research'].map(type=>latestFor(type)).filter(Boolean);
+    const highlights=['daily','weekly','research'].map(type=>latestRegisteredFor(type)).filter(Boolean);
     const section=host.closest('.site-introduction');
     if(section) section.hidden=!highlights.length;
     host.innerHTML=highlights.map(post=>{
       const info=categoryInfo(post.type);
-      return `<a class="latest-card" href="${esc(rootPath(post.href))}"><span>${esc(info.label)} · ${esc(reportDate(post))}</span><strong>${esc(post.title)}</strong><i aria-hidden="true">→</i></a>`;
+      return `<a class="latest-card" href="${esc(rootPath(post.href))}"><span>${esc(info.label)} · ${locale==='en'?'Registered':'등록'} ${esc(registeredDate(post))}</span><strong>${esc(post.title)}</strong><i aria-hidden="true">→</i></a>`;
     }).join('');
   }
 
@@ -217,7 +222,18 @@
 
   function renderArchive(){
     const query=(search?.value||'').trim().toLowerCase();
-    const filtered=localeApi?.searchPosts(allPosts, locale, query, active) || posts.filter(post=>(active==='all'||post.type===active)&&(!query||`${post.title} ${post.subtitle||''} ${post.typeLabel||''} ${post.description||''}`.toLowerCase().includes(query)));
+    const matches=localeApi?.searchPosts(allPosts, locale, query, active) || posts.filter(post=>(active==='all'||post.type===active)&&(!query||`${post.title} ${post.subtitle||''} ${post.typeLabel||''} ${post.description||''}`.toLowerCase().includes(query)));
+    const reportChronology=active==='daily'||active==='weekly';
+    const filtered=reportChronology
+      ? (localeApi?.sortPosts(matches) || matches.slice().sort((a,b)=>reportDate(b).localeCompare(reportDate(a))))
+      : (localeApi?.sortPostsByRegistration(matches) || matches.slice().sort((a,b)=>String(b.registeredAt||b.registeredDate||'').localeCompare(String(a.registeredAt||a.registeredDate||''))));
+    const activeInfo=categoryInfo(active);
+    if(archiveHeading) archiveHeading.textContent=reportChronology
+      ? (locale==='en'?`${activeInfo.label} Reports`:`${activeInfo.label} 리포트`)
+      : (locale==='en'?'Recent Reports':'최근 리포트');
+    if(archiveOrder) archiveOrder.textContent=reportChronology
+      ? (locale==='en'?'Newest report date first':'리포트 기준일 최신순')
+      : (locale==='en'?'Newest registration first':'등록일 최신순');
     filters.forEach(button=>{
       const selected=button.dataset.filter===active;
       button.classList.toggle('active',selected);
@@ -233,7 +249,12 @@
     list.innerHTML=filtered.map(post=>{
       const info=categoryInfo(post.type);
       const subtitle=post.subtitle?`<div class="report-subtitle">${esc(post.subtitle)}</div>`:'';
-      return `<a class="report-item" href="${esc(rootPath(post.href))}"><div><span class="report-type ${esc(post.type)}">${esc(info.label)}</span><span class="report-date">${esc(reportDate(post))}</span></div><div><div class="report-title">${esc(post.title)}</div>${subtitle}</div><span class="report-arrow"><span class="report-read-label">${esc(messages.read)}</span><span aria-hidden="true">→</span></span></a>`;
+      const summary=reportChronology&&(post.summary||post.description)?`<div class="report-summary">${esc(post.summary||post.description)}</div>`:'';
+      const registered=registeredDate(post);
+      const dateMeta=reportChronology
+        ? `<span class="report-date report-date-primary">${locale==='en'?'Report':'리포트'} ${esc(reportDate(post))}</span><span class="report-registered">${locale==='en'?'Registered':'등록'} ${esc(registered)}</span>`
+        : `<span class="report-date">${esc(reportDate(post))}</span><span class="report-registered">${locale==='en'?'Registered':'등록'} ${esc(registered)}</span>`;
+      return `<a class="report-item" href="${esc(rootPath(post.href))}"><div><span class="report-type ${esc(post.type)}">${esc(info.label)}</span>${dateMeta}</div><div><div class="report-title">${esc(post.title)}</div>${subtitle}${summary}</div><span class="report-arrow"><span class="report-read-label">${esc(messages.read)}</span><span aria-hidden="true">→</span></span></a>`;
     }).join('');
   }
 

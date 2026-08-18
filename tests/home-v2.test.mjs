@@ -17,10 +17,10 @@ test('homepage v2 exposes the requested information architecture and carousel co
   assert.match(html, /aria-label="이전 대표 리포트"/);
   assert.match(html, /aria-label="다음 대표 리포트"/);
   assert.match(html, /role="tablist"/);
-  assert.match(html, /home-v2\.css\?v=20260813-1/);
-  assert.match(englishHtml, /home-v2\.css\?v=20260813-1/);
-  assert.match(html, /site\.js\?v=20260812-2/);
-  assert.match(englishHtml, /site\.js\?v=20260812-2/);
+  assert.match(html, /home-v2\.css\?v=20260813-2/);
+  assert.match(englishHtml, /home-v2\.css\?v=20260813-2/);
+  assert.match(html, /site\.js\?v=20260813-1/);
+  assert.match(englishHtml, /site\.js\?v=20260813-1/);
 });
 
 test('basics is added without replacing notes across public and admin controls', async () => {
@@ -111,6 +111,26 @@ test('homepage archive uses a responsive two-column index with dynamic category 
   const allowedTypes = new Set(['daily', 'weekly', 'research', 'basics', 'note']);
   assert.ok(Array.isArray(posts));
   assert.ok(posts.every(post => allowedTypes.has(post.type)));
+});
+
+test('shared recency uses registration time while Daily and Weekly use report chronology', async () => {
+  const [html, englishHtml, script, styles] = await Promise.all([
+    read('index.html'), read('en/index.html'), read('assets/site.js'), read('assets/home-v2.css')
+  ]);
+  assert.match(html, /id="archive-order">등록일 최신순/);
+  assert.match(englishHtml, /id="archive-order">Newest registration first/);
+  assert.match(script, /const registeredPosts = localeApi\?\.sortPostsByRegistration/);
+  assert.match(script, /latestRegisteredFor\(type\)/);
+  assert.match(script, /const reportChronology=active==='daily'\|\|active==='weekly'/);
+  assert.match(script, /localeApi\?\.sortPosts\(matches\)/);
+  assert.match(script, /localeApi\?\.sortPostsByRegistration\(matches\)/);
+  assert.match(script, /등록일 최신순/);
+  assert.match(script, /리포트 기준일 최신순/);
+  assert.match(script, /report-registered/);
+  assert.match(styles, /Shared registration recency stays compact/);
+  assert.match(styles, /body\[data-category="daily"\] \.archive-layout \.report-item/);
+  assert.match(styles, /body\[data-category="weekly"\] \.archive-layout \.report-title/);
+  assert.match(styles, /@media\(max-width:760px\)[\s\S]*body\[data-category="daily"\]/);
 });
 
 test('existing post metadata supports an optional coverImage without snapshotting production state', async () => {
