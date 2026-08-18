@@ -16,6 +16,22 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-18-daily-1burfko.webp"
   },
   {
+    "id": "2026-08-14-daily-dqoisk",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-08-14",
+    "reportDate": "2026-08-14",
+    "registeredDate": "2026-08-18",
+    "registeredAt": "2026-08-18T13:25:25.050Z",
+    "legacyImport": false,
+    "title": "트인 쪽은 바깥",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "href": "reports/8월 14일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-08-14-daily-dqoisk.webp"
+  },
+  {
     "id": "2026-08-13-daily-1tgqr3y",
     "type": "daily",
     "typeLabel": "주식 리포트",
