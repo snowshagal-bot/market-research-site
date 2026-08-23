@@ -59,6 +59,24 @@ test('heuristic cover candidates are used when selector metadata is absent', asy
   assert.equal(result.source, 'heuristic');
 });
 
+test('Korean and English opener covers are selected instead of the template fallback', async () => {
+  const api = await generatorApi();
+  for (const text of ['두 개의 착시', 'Two Illusions']) {
+    const opener = node(text, { visual: true, children: 3 });
+    const doc = {
+      body: node(`${text} report body`, { children: 4 }),
+      querySelector(selector) {
+        if (selector === '.opener') return opener;
+        return null;
+      }
+    };
+    const result = api.findCaptureTarget(doc);
+    assert.equal(result.target, opener);
+    assert.equal(result.selector, '.opener');
+    assert.equal(result.source, 'heuristic');
+  }
+});
+
 test('a usable cover frame is captured instead of its cover-screen wrapper and hint', async () => {
   const api = await generatorApi();
   const frame = node('', { visual: true });
@@ -175,7 +193,7 @@ test('the broken foreignObject rasterization path is no longer used', async () =
 test('admin connects generated files to the existing cover preview and publish payload', async () => {
   const [html, admin] = await Promise.all([read('admin/index.html'), read('assets/admin.js')]);
   assert.match(html, /id="generate-cover-btn"[^>]*disabled>HTML에서 커버 자동 생성/);
-  assert.match(html, /cover-generator\.js\?v=20260812-6/);
+  assert.match(html, /cover-generator\.js\?v=20260823-1/);
   assert.match(html, /admin\.js\?v=20260815-1/);
   assert.match(admin, /adminKey: adminKey\.value\.trim\(\)/);
   assert.match(admin, /showCoverPreview\(result\.file, generationReportVersion\)/);

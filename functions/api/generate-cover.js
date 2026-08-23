@@ -4,7 +4,7 @@ const RENDER_TIMEOUT_MS = 25000;
 const DEFAULT_RATE_LIMIT_RETRY_MS = 10000;
 const MAX_RATE_LIMIT_RETRY_MS = 15000;
 const RENDER_VIEWPORT = { width: 480, height: 900 };
-const SELECTOR_PRIORITY = ['.cover-frame', '.cover-page', '.cover-screen', '.report-cover', '.cover'];
+const SELECTOR_PRIORITY = ['.cover-frame', '.cover-page', '.cover-screen', '.report-cover', '.cover', '.opener'];
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {

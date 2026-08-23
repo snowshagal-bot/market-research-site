@@ -24,7 +24,32 @@ test('selector priority prefers metadata, then cover-frame before outer wrappers
   assert.equal(__test.selectCaptureSelector('<meta name="report-cover-selector" content="#hero"><div class="cover-frame">x</div>'), '#hero');
   assert.equal(__test.selectCaptureSelector('<section class="cover-screen"><div class="cover-frame"><img class="cover-art"><div class="cover-copy">title</div></div><span class="cover-hint">hint</span></section>'), '.cover-frame');
   assert.equal(__test.selectCaptureSelector('<div class="cover-page">x</div><section class="cover-screen">y</section>'), '.cover-page');
-  assert.deepEqual(__test.SELECTOR_PRIORITY, ['.cover-frame', '.cover-page', '.cover-screen', '.report-cover', '.cover']);
+  assert.deepEqual(__test.SELECTOR_PRIORITY, ['.cover-frame', '.cover-page', '.cover-screen', '.report-cover', '.cover', '.opener']);
+});
+
+test('Korean and English opener covers are accepted as Browser Rendering targets', () => {
+  assert.equal(__test.selectCaptureSelector('<section class="opener" aria-label="표지"><img><h1>두 개의 착시</h1></section>'), '.opener');
+  assert.equal(__test.selectCaptureSelector('<section class="opener" aria-label="Cover"><img><h1>Two Illusions</h1></section>'), '.opener');
+});
+
+test('opener capture sends the complete overlaid cover to Browser Rendering', { concurrency: false }, async () => {
+  const originalFetch = globalThis.fetch;
+  let payload;
+  globalThis.fetch = async (_url, options) => {
+    payload = JSON.parse(options.body);
+    return new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'content-type': 'image/png' } });
+  };
+  try {
+    const html = '<section class="opener" aria-label="Cover"><img src="data:image/webp;base64,AA=="><div class="bot"><h1>Two Illusions</h1></div></section>';
+    const response = await onRequestPost({ request: request({ html, preferredSelector: '.opener' }), env: ENV });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('x-cover-selector'), '.opener');
+    assert.equal(payload.selector, '.opener');
+    assert.equal(payload.html, html);
+    assert.deepEqual(payload.screenshotOptions, { type: 'png', captureBeyondViewport: true });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
 
 test('weekly reports using a section.cover root select the real cover instead of the template fallback', () => {
