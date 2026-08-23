@@ -32,6 +32,20 @@ test('legacy posts are Korean and homepage data stays separated by language', as
   assert.deepEqual(Array.from(api.searchPosts(fixturePosts, 'en', 'Dollar'), post => post.id), ['en-daily']);
 });
 
+test('report ordering uses report date before registration time and registration only breaks ties', async () => {
+  const api = await localeHelpers();
+  const posts = [
+    { id: 'older-report-new-upload', reportDate: '2026-07-27', registeredAt: '2026-08-24T00:00:00Z' },
+    { id: 'newer-report-old-upload', reportDate: '2026-08-10', registeredAt: '2026-08-12T00:00:00Z' },
+    { id: 'newer-report-new-upload', reportDate: '2026-08-10', registeredAt: '2026-08-23T00:00:00Z' }
+  ];
+  assert.deepEqual(Array.from(api.sortPosts(posts), post => post.id), [
+    'newer-report-new-upload',
+    'newer-report-old-upload',
+    'older-report-new-upload'
+  ]);
+});
+
 test('language URLs preserve category queries without browser-language redirects', async () => {
   const [api, site, koHome, enHome] = await Promise.all([
     localeHelpers(), read('assets/site.js'), read('index.html'), read('en/index.html')
@@ -101,9 +115,15 @@ test('publisher admin exposes language and optional translation pairing without 
 test('repository post files remain synchronized and allow optional locale metadata', async () => {
   const [jsonText, jsText] = await Promise.all([read('data/posts.json'), read('data/posts.js')]);
   const posts = JSON.parse(jsonText);
+  const postsById = new Map(posts.map(post => [post.id, post]));
   assert.equal(jsText.replace(/\r\n/g, '\n'), `window.RESEARCH_POSTS = ${JSON.stringify(posts, null, 2)};\n`);
   for (const post of posts) {
     if (Object.hasOwn(post, 'lang')) assert.ok(['ko', 'en'].includes(post.lang));
-    if (Object.hasOwn(post, 'translationGroup')) assert.equal(typeof post.translationGroup, 'string');
+    if (Object.hasOwn(post, 'translationGroup')) {
+      assert.equal(typeof post.translationGroup, 'string');
+      const source = postsById.get(post.translationGroup);
+      assert.ok(source, `missing translation source for ${post.id}`);
+      assert.equal(post.reportDate, source.reportDate, `translation date mismatch for ${post.id}`);
+    }
   }
 });
