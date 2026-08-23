@@ -10,6 +10,7 @@
   const count = $('post-count');
   const search = $('manage-search');
   const filters = [...document.querySelectorAll('[data-filter]')];
+  const languageFilters = [...document.querySelectorAll('[data-language-filter]')];
   const editorEmpty = $('editor-empty');
   const form = $('editor-form');
   const status = $('manage-status');
@@ -42,6 +43,7 @@
   const resultContinue = $('manage-result-continue');
   let posts = [];
   let activeFilter = 'all';
+  let activeLanguage = 'all';
   let selectedPost = null;
   let selectedHtml = null;
   let selectedCover = null;
@@ -75,12 +77,15 @@
     });
   }
 
-  function filteredPosts(items, query, filter) {
+  function filteredPosts(items, query, filter, language = 'all') {
     const normalized = query.trim().toLocaleLowerCase('ko');
     return sortPosts(items).filter((post) => {
       if (filter !== 'all' && post.type !== filter) return false;
+      const postLanguage = post.lang === 'en' ? 'en' : 'ko';
+      if (language !== 'all' && postLanguage !== language) return false;
       if (!normalized) return true;
-      return `${post.title || ''} ${post.href || ''}`.toLocaleLowerCase('ko').includes(normalized);
+      const languageTerms = postLanguage === 'en' ? 'english en 영문 영어' : 'korean ko 한국어 한글';
+      return `${post.title || ''} ${post.href || ''} ${languageTerms}`.toLocaleLowerCase('ko').includes(normalized);
     });
   }
 
@@ -135,7 +140,7 @@
   }
 
   function renderList() {
-    const visible = filteredPosts(posts, search.value, activeFilter);
+    const visible = filteredPosts(posts, search.value, activeFilter, activeLanguage);
     count.textContent = `${visible.length}개`;
     list.innerHTML = '';
     if (!visible.length) {
@@ -524,6 +529,11 @@
   filters.forEach((button) => button.addEventListener('click', () => {
     activeFilter = button.dataset.filter;
     filters.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+    renderList();
+  }));
+  languageFilters.forEach((button) => button.addEventListener('click', () => {
+    activeLanguage = button.dataset.languageFilter;
+    languageFilters.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
     renderList();
   }));
   htmlInput.addEventListener('change', () => chooseHtml(htmlInput.files?.[0] || null));
