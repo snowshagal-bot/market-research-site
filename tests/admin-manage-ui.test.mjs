@@ -128,6 +128,7 @@ test('manage page includes navigation, list controls, immutable metadata, edit f
   assert.match(html, /href="\.\.\/analytics\/">방문 통계/);
   assert.match(html, /id="manage-search"[^>]*type="search"/);
   for (const type of ['all', 'daily', 'weekly', 'research', 'basics', 'note']) assert.match(html, new RegExp(`data-filter="${type}"`));
+  for (const language of ['all', 'ko', 'en']) assert.match(html, new RegExp(`data-language-filter="${language}"`));
   for (const id of ['manage-id', 'manage-href', 'manage-registered-date', 'manage-registered-at', 'manage-language', 'manage-translation-group']) assert.match(html, new RegExp(`id="${id}"[^>]*readonly`));
   for (const id of ['manage-type', 'manage-date', 'manage-title', 'manage-subtitle', 'manage-description', 'manage-summary']) assert.match(html, new RegExp(`id="${id}"`));
   assert.match(html, /id="replacement-html"[^>]*accept="\.html,text\/html"/);
@@ -143,20 +144,24 @@ test('manage page includes navigation, list controls, immutable metadata, edit f
   assert.match(html, /id="manage-result-overlay"[^>]*role="dialog"[^>]*aria-modal="true"/);
   assert.match(html, /id="manage-result-home"[^>]*href="\/"/);
   assert.match(html, /id="manage-result-continue"/);
-  assert.match(html, /admin-manage\.js\?v=20260815-1/);
+  assert.match(html, /admin-manage\.css\?v=20260824-1/);
+  assert.match(html, /admin-manage\.js\?v=20260824-1/);
 });
 
-test('client list sorting, title/href search, category filters, file validation, and Preview safety are deterministic', async () => {
+test('client list sorting, search, category and language filters, file validation, and Preview safety are deterministic', async () => {
   const { helpers } = await loadClientHelpers();
   const items = [
-    { id: 'old', type: 'daily', reportDate: '2026-08-01', registeredAt: '2026-08-02T00:00:00Z', title: '알파', href: 'reports/alpha.html' },
+    { id: 'old', type: 'daily', lang: 'ko', reportDate: '2026-08-01', registeredAt: '2026-08-02T00:00:00Z', title: '알파', href: 'reports/alpha.html' },
     { id: 'newer-registration', type: 'weekly', reportDate: '2026-08-11', registeredAt: '2026-08-11T02:00:00Z', title: '주간', href: 'reports/weekly.html' },
-    { id: 'newest', type: 'research', reportDate: '2026-08-11', registeredAt: '2026-08-11T03:00:00Z', title: '소버린 AI', href: 'reports/sovereign.html' }
+    { id: 'newest', type: 'research', lang: 'en', reportDate: '2026-08-11', registeredAt: '2026-08-11T03:00:00Z', title: 'Sovereign AI', href: 'reports/en/sovereign.html' }
   ];
   assert.deepEqual(Array.from(helpers.sortPosts(items), (post) => post.id), ['newest', 'newer-registration', 'old']);
-  assert.deepEqual(Array.from(helpers.filteredPosts(items, '소버린', 'all'), (post) => post.id), ['newest']);
+  assert.deepEqual(Array.from(helpers.filteredPosts(items, 'Sovereign', 'all'), (post) => post.id), ['newest']);
   assert.deepEqual(Array.from(helpers.filteredPosts(items, 'weekly.html', 'all'), (post) => post.id), ['newer-registration']);
   assert.deepEqual(Array.from(helpers.filteredPosts(items, '', 'daily'), (post) => post.id), ['old']);
+  assert.deepEqual(Array.from(helpers.filteredPosts(items, '', 'all', 'en'), (post) => post.id), ['newest']);
+  assert.deepEqual(Array.from(helpers.filteredPosts(items, '', 'all', 'ko'), (post) => post.id), ['newer-registration', 'old']);
+  assert.deepEqual(Array.from(helpers.filteredPosts(items, '영문', 'all'), (post) => post.id), ['newest']);
   assert.equal(helpers.validateHtml({ name: 'report.html', size: 100 }, '<!doctype html><html><body></body></html>'), '');
   assert.match(helpers.validateHtml({ name: 'report.html', size: 100 }, '<div>fragment</div>'), /독립 실행형/);
   assert.equal(helpers.validateCover({ name: 'cover.webp', type: 'image/webp', size: 100 }), '');
