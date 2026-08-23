@@ -182,7 +182,7 @@ test('admin markup contains the cover preview modes before the original HTML pre
   assert.match(html, /\.cover-preview-empty\[hidden\],[^}]*\{display:none\}/);
   assert.match(adminScript, /iframe\.setAttribute\('sandbox', 'allow-scripts'\)/);
   assert.match(adminScript, /iframe\.srcdoc = text/);
-  assert.match(html, /admin\.js\?v=20260823-1/);
+  assert.match(html, /admin\.js\?v=20260824-1/);
   assert.doesNotMatch(adminScript, /allow-same-origin/);
 });
 
@@ -562,6 +562,23 @@ test('automatic generation failure restores coverless publishing', async () => {
   assert.equal(elements['publish-btn'].disabled, false);
   await elements['publish-btn'].emit('click');
   assert.match(confirmMessages[0], /fallback cover/);
+});
+
+test('automatic generation shows the exact safe server error instead of silently using a template', async () => {
+  const failure = Object.assign(new Error('관리자 키가 올바르지 않습니다.'), {
+    code: 'UNAUTHORIZED',
+    status: 401
+  });
+  const { elements } = await loadAdmin({
+    generateCover: async () => { throw failure; }
+  });
+  await makePublishReady(elements);
+
+  await elements['generate-cover-btn'].emit('click');
+  assert.match(elements['cover-generator-status'].textContent, /관리자 키가 올바르지 않습니다/);
+  assert.match(elements['cover-generator-status'].textContent, /UNAUTHORIZED · HTTP 401/);
+  assert.doesNotMatch(elements['cover-generator-status'].textContent, /표준 템플릿 커버를 생성했습니다/);
+  assert.equal(elements['cover-preview-image'].hidden, true);
 });
 
 test('G: a cover generated for report A is discarded after report B is selected', async () => {

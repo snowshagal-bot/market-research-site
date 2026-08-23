@@ -203,6 +203,17 @@ test('HTML targets use the same-origin server capture endpoint and preserve the 
   assert.match(source, /try \{ return await serverCapture\(html, selector, adminKey\); \}[\s\S]*createTemplateCover\(template\)/);
 });
 
+test('configuration and authentication errors are never hidden by a template fallback', async () => {
+  const api = await generatorApi();
+  for (const code of ['UNAUTHORIZED', 'BROWSER_RENDERING_NOT_CONFIGURED', 'HTML_TOO_LARGE', 'COVER_TARGET_NOT_FOUND']) {
+    assert.equal(api.canUseTemplateFallback({ code }), false, code);
+  }
+  for (const code of ['BROWSER_RENDERING_FAILED', 'BROWSER_RENDERING_TIMEOUT', 'INVALID_RENDER_RESPONSE', 'INVALID_RENDER_SIZE']) {
+    assert.equal(api.canUseTemplateFallback({ code }), true, code);
+  }
+  assert.equal(api.canUseTemplateFallback(new TypeError('network failure')), true);
+});
+
 test('the broken foreignObject rasterization path is no longer used', async () => {
   const source = await read('assets/cover-generator.js');
   assert.doesNotMatch(source, /foreignObject|XMLSerializer|cloneWithComputedStyles|iframe\.srcdoc/);
@@ -211,8 +222,8 @@ test('the broken foreignObject rasterization path is no longer used', async () =
 test('admin connects generated files to the existing cover preview and publish payload', async () => {
   const [html, admin] = await Promise.all([read('admin/index.html'), read('assets/admin.js')]);
   assert.match(html, /id="generate-cover-btn"[^>]*disabled>HTML에서 커버 자동 생성/);
-  assert.match(html, /cover-generator\.js\?v=20260824-1/);
-  assert.match(html, /admin\.js\?v=20260823-1/);
+  assert.match(html, /cover-generator\.js\?v=20260824-2/);
+  assert.match(html, /admin\.js\?v=20260824-1/);
   assert.match(admin, /adminKey: adminKey\.value\.trim\(\)/);
   assert.match(admin, /showCoverPreview\(result\.file, generationReportVersion\)/);
   assert.match(admin, /generationReportVersion !== reportSelectionVersion/);

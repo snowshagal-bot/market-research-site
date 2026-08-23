@@ -386,11 +386,13 @@
         ? `표준 템플릿 커버를 생성했습니다${result.attemptedSelector ? ` · ${result.attemptedSelector} 캡처 대체` : ''}${result.captureError ? ` · ${result.captureError}` : ''}. 수동 커버로 교체할 수도 있습니다.`
         : `브라우저 렌더링으로 커버를 생성했습니다${result.selector ? ` · ${result.selector}` : ''}.`;
       if (result.method === 'template' && result.captureError) console.warn('cover capture fallback:', result.captureError);
-    } catch (_) {
+    } catch (error) {
       if (generationVersion !== coverGenerationVersion || generationReportVersion !== reportSelectionVersion) return;
       coverDecodeVersion += 1;
       coverDecodePending = false;
-      coverGeneratorStatus.textContent = '커버 자동 생성에 실패했습니다. 수동 커버를 업로드하거나 다시 시도해 주세요.';
+      const reason = String(error?.message || '').trim();
+      const detail = [error?.code, error?.status ? `HTTP ${error.status}` : ''].filter(Boolean).join(' · ');
+      coverGeneratorStatus.textContent = `커버 자동 생성에 실패했습니다${reason ? ` · ${reason}` : ''}${detail ? ` (${detail})` : ''}. 수동 커버를 업로드하거나 다시 시도해 주세요.`;
     } finally {
       if (generationVersion !== coverGenerationVersion || generationReportVersion !== reportSelectionVersion) return;
       generatingCover = false;
