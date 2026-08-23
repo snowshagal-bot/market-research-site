@@ -31,6 +31,7 @@
   const filters = Array.from(document.querySelectorAll('[data-filter]'));
   const navLinks = Array.from(document.querySelectorAll('[data-nav-category]'));
   const archiveIndex = document.getElementById('archive-index');
+  const archiveOrderLabel = document.getElementById('archive-order-label');
   const params = new URLSearchParams(location.search);
   const requestedCategory = params.get('category') || 'all';
   let active = validTypes.includes(requestedCategory) ? requestedCategory : 'all';
@@ -217,7 +218,11 @@
 
   function renderArchive(){
     const query=(search?.value||'').trim().toLowerCase();
-    const filtered=localeApi?.searchPosts(allPosts, locale, query, active) || posts.filter(post=>(active==='all'||post.type===active)&&(!query||`${post.title} ${post.subtitle||''} ${post.typeLabel||''} ${post.description||''}`.toLowerCase().includes(query)));
+    const matched=localeApi?.searchPosts(allPosts, locale, query, active) || localizedPosts.filter(post=>(active==='all'||post.type===active)&&(!query||`${post.title} ${post.subtitle||''} ${post.typeLabel||''} ${post.description||''}`.toLowerCase().includes(query)));
+    const filtered=active==='all'
+      ? (localeApi?.sortPostsByRegistration(matched) || matched.slice().sort((a,b)=>String(b.registeredAt||b.registeredDate||'').localeCompare(String(a.registeredAt||a.registeredDate||''))))
+      : (localeApi?.sortPosts(matched) || matched.slice().sort((a,b)=>String(b.reportDate||b.date||'').localeCompare(String(a.reportDate||a.date||''))));
+    if(archiveOrderLabel) archiveOrderLabel.textContent=active==='all'?messages.registrationOrder:messages.reportOrder;
     filters.forEach(button=>{
       const selected=button.dataset.filter===active;
       button.classList.toggle('active',selected);

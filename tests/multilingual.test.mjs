@@ -44,6 +44,11 @@ test('report ordering uses report date before registration time and registration
     'newer-report-old-upload',
     'older-report-new-upload'
   ]);
+  assert.deepEqual(Array.from(api.sortPostsByRegistration(posts), post => post.id), [
+    'older-report-new-upload',
+    'newer-report-new-upload',
+    'newer-report-old-upload'
+  ]);
 });
 
 test('language URLs preserve category queries without browser-language redirects', async () => {

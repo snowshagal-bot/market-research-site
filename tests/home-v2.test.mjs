@@ -19,8 +19,10 @@ test('homepage v2 exposes the requested information architecture and carousel co
   assert.match(html, /role="tablist"/);
   assert.match(html, /home-v2\.css\?v=20260813-1/);
   assert.match(englishHtml, /home-v2\.css\?v=20260813-1/);
-  assert.match(html, /site\.js\?v=20260812-2/);
-  assert.match(englishHtml, /site\.js\?v=20260812-2/);
+  assert.match(html, /locale\.js\?v=20260824-1/);
+  assert.match(englishHtml, /locale\.js\?v=20260824-1/);
+  assert.match(html, /site\.js\?v=20260824-1/);
+  assert.match(englishHtml, /site\.js\?v=20260824-1/);
 });
 
 test('basics is added without replacing notes across public and admin controls', async () => {
@@ -105,6 +107,8 @@ test('homepage archive uses a responsive two-column index with dynamic category 
   assert.match(script, /href="\?category=\$\{encodeURIComponent\(type\)\}"/);
   assert.match(script, /counts\[type\]\|\|0/);
   assert.match(script, /const subtitle=post\.subtitle\?/);
+  assert.match(script, /active==='all'[\s\S]*sortPostsByRegistration\(matched\)[\s\S]*sortPosts\(matched\)/);
+  assert.match(html, /id="archive-order-label">홈페이지 등록일 최신순/);
   assert.match(styles, /\.archive-layout\{display:grid;grid-template-columns:minmax\(0,1fr\) minmax\(270px,300px\)/);
   assert.match(styles, /@media\(max-width:960px\)\{\.archive-layout\{grid-template-columns:minmax\(0,1fr\)/);
 

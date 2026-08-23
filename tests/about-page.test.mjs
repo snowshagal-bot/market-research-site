@@ -26,7 +26,7 @@ test('About page is an empty noindex shell with active navigation', async () => 
   assert.match(html, /<main class="static-page-main"><\/main>/);
   assert.match(html, /data-theme-toggle/);
   assert.match(html, /data-menu-toggle/);
-  assert.match(html, /src="\/assets\/site\.js\?v=20260812-1"/);
+  assert.match(html, /src="\/assets\/site\.js\?v=20260824-1"/);
   for (const placeholder of ['준비 중입니다', 'Lorem ipsum', '프로필', '연락처']) {
     assert.doesNotMatch(html, new RegExp(placeholder));
   }
