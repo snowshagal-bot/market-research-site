@@ -60,7 +60,8 @@ const SCHEMA_TYPES = {
       typeField('date_leq', ref('Date', 'SCALAR')),
       typeField('siteTag_in', { kind: 'LIST', name: null, ofType: ref('String', 'SCALAR') }),
       typeField('requestHost_in', { kind: 'LIST', name: null, ofType: ref('String', 'SCALAR') }),
-      typeField('requestPath_notlike', ref('String', 'SCALAR'))
+      typeField('requestPath_notlike', ref('String', 'SCALAR')),
+      typeField('excludeBots', ref('String', 'SCALAR'))
     ]
   },
   RumPageloadOrderBy: {
@@ -73,6 +74,7 @@ function analyticsRows() {
   const row = (dimension, label, count, visits) => ({ count, sum: { visits }, dimensions: { [dimension]: label } });
   return {
     viewer: { accounts: [{
+      allTrafficTrend: [row('date', '2026-08-22', 6, 3), row('date', '2026-08-23', 9, 5)],
       trend: [row('date', '2026-08-22', 4, 2), row('date', '2026-08-23', 7, 3)],
       pages: [row('requestPath', '/reports/alpha', 7, 3), row('requestPath', '/', 4, 2)],
       referers: [row('refererHost', '', 3, 2), row('refererHost', 'www.google.com', 5, 2), row('refererHost', 'snowshagal.tistory.com', 2, 1)],
@@ -96,7 +98,7 @@ function installCloudflareMock({ empty = false } = {}) {
       return Response.json({ data: { __type: SCHEMA_TYPES[payload.variables.name] || null } });
     }
     const data = empty
-      ? { viewer: { accounts: [{ trend: [], pages: [], referers: [], countries: [], devices: [], browsers: [], operatingSystems: [] }] } }
+      ? { viewer: { accounts: [{ allTrafficTrend: [], trend: [], pages: [], referers: [], countries: [], devices: [], browsers: [], operatingSystems: [] }] } }
       : analyticsRows();
     return Response.json({ data });
   };
@@ -133,7 +135,9 @@ test('authenticated requests introspect the live schema before querying the RUM 
     assert.equal(response.status, 200);
     assert.equal(data.source.dataset, 'rumPageloadEventsAdaptiveGroups');
     assert.equal(data.source.visitsMetric, 'sum.visits');
+    assert.equal(data.source.excludeBots, 'Yes');
     assert.deepEqual(data.totals, { visits: 5, pageViews: 11 });
+    assert.deepEqual(data.allTrafficTotals, { visits: 8, pageViews: 15 });
     assert.equal(data.topPages[0].label, '/reports/alpha');
     assert.deepEqual(data.referrers.map((item) => item.label), ['Google', 'Direct', 'Tistory']);
     assert.equal(calls[0].query.includes('__schema'), true);
@@ -143,6 +147,10 @@ test('authenticated requests introspect the live schema before querying the RUM 
     assert.match(query, /siteTag_in: \["site-tag-secret"\]/);
     assert.match(query, /requestHost_in: \["snowshagal\.com"\]/);
     assert.match(query, /requestPath_notlike: "\/admin\/%"/);
+    assert.equal((query.match(/excludeBots: "Yes"/g) || []).length, 7);
+    const allTrafficAlias = query.split('\n').find((line) => line.includes('allTrafficTrend:'));
+    assert.ok(allTrafficAlias);
+    assert.doesNotMatch(allTrafficAlias, /excludeBots/);
     assert.doesNotMatch(query, /market-research-site\.pages\.dev/);
     assert.match(query, /accountTag: "account-tag"/);
     assert.equal(response.headers.get('cache-control'), 'private, no-store, max-age=0');
@@ -150,7 +158,7 @@ test('authenticated requests introspect the live schema before querying the RUM 
   } finally { globalThis.fetch = originalFetch; }
 });
 
-test('production host and admin path exclusions protect every analytics aggregate', { concurrency: false }, async () => {
+test('production host and admin path exclusions protect human and all-traffic aggregates', { concurrency: false }, async () => {
   const originalFetch = globalThis.fetch;
   __test.resetSchemaCache();
   const calls = installCloudflareMock();
@@ -158,17 +166,18 @@ test('production host and admin path exclusions protect every analytics aggregat
     const response = await onRequestGet({ request: request(), env: ENV });
     assert.equal(response.status, 200);
     const query = calls.at(-1).query;
-    assert.equal((query.match(/requestHost_in: \["snowshagal\.com"\]/g) || []).length, 7);
-    assert.equal((query.match(/requestPath_notlike: "\/admin\/%"/g) || []).length, 7);
+    assert.equal((query.match(/requestHost_in: \["snowshagal\.com"\]/g) || []).length, 8);
+    assert.equal((query.match(/requestPath_notlike: "\/admin\/%"/g) || []).length, 8);
+    assert.equal((query.match(/excludeBots: "Yes"/g) || []).length, 7);
     assert.doesNotMatch(query, /pages\.dev|\/admin\/analytics/);
   } finally { globalThis.fetch = originalFetch; }
 });
 
-test('unsupported host or admin-prefix filters fail closed before analytics rows are queried', { concurrency: false }, async () => {
+test('unsupported host, admin-prefix, or bot filters fail closed before analytics rows are queried', { concurrency: false }, async () => {
   const originalFetch = globalThis.fetch;
   const originalFields = SCHEMA_TYPES.RumPageloadFilter_InputObject.inputFields;
   let dataQueries = 0;
-  SCHEMA_TYPES.RumPageloadFilter_InputObject.inputFields = originalFields.filter((item) => !['requestHost_in', 'requestPath_notlike'].includes(item.name));
+  SCHEMA_TYPES.RumPageloadFilter_InputObject.inputFields = originalFields.filter((item) => !['requestHost_in', 'requestPath_notlike', 'excludeBots'].includes(item.name));
   __test.resetSchemaCache();
   globalThis.fetch = async (_url, options) => {
     const payload = JSON.parse(options.body);
@@ -188,6 +197,7 @@ test('unsupported host or admin-prefix filters fail closed before analytics rows
     assert.equal(data.error, 'ANALYTICS_SCHEMA_UNSUPPORTED');
     assert.match(data.message, /filter:productionHost/);
     assert.match(data.message, /filter:adminPath/);
+    assert.match(data.message, /filter:excludeBots/);
     assert.equal(dataQueries, 0);
   } finally {
     SCHEMA_TYPES.RumPageloadFilter_InputObject.inputFields = originalFields;
@@ -206,6 +216,7 @@ test('zero rows are a successful empty state rather than an API failure', { conc
     assert.equal(response.status, 200);
     assert.equal(data.empty, true);
     assert.deepEqual(data.totals, { visits: 0, pageViews: 0 });
+    assert.deepEqual(data.allTrafficTotals, { visits: 0, pageViews: 0 });
     assert.deepEqual(data.topPages, []);
   } finally { globalThis.fetch = originalFetch; }
 });
@@ -251,13 +262,14 @@ test('date ranges and referer buckets are deterministic', () => {
     dataset: __test.DATASET,
     dimensions: { date: 'date', host: 'requestHost', path: 'requestPath', referer: 'refererHost', country: 'countryName', device: 'deviceType', browser: 'userAgentBrowser', os: 'userAgentOS' },
     visits: { container: 'sum', field: 'visits' },
-    filters: { start: 'datetime_geq', end: 'datetime_lt', siteTag: 'siteTag_in', siteTagList: true, host: 'requestHost_in', hostList: true, excludeAdminPath: 'requestPath_notlike', datetime: true },
+    filters: { start: 'datetime_geq', end: 'datetime_lt', siteTag: 'siteTag_in', siteTagList: true, host: 'requestHost_in', hostList: true, excludeAdminPath: 'requestPath_notlike', excludeBots: 'excludeBots', excludeBotsList: false, excludeBotsEnum: false, datetime: true },
     countOrder: 'count_DESC', dateOrder: 'date_ASC'
   }, 'account', 'site', { start: '2026-08-17', end: '2026-08-23' });
   assert.match(datetimeQuery, /datetime_geq: "2026-08-17T00:00:00\.000Z"/);
   assert.match(datetimeQuery, /datetime_lt: "2026-08-24T00:00:00\.000Z"/);
   assert.match(datetimeQuery, /requestHost_in: \["snowshagal\.com"\]/);
   assert.match(datetimeQuery, /requestPath_notlike: "\/admin\/%"/);
+  assert.equal((datetimeQuery.match(/excludeBots: "Yes"/g) || []).length, 7);
 });
 
 function element(id = '') {
@@ -278,15 +290,18 @@ function element(id = '') {
   };
 }
 
-test('analytics page keeps secrets server-side and renders authenticated zero data without breaking', async () => {
+test('analytics page keeps secrets server-side and renders Human only versus All traffic', async () => {
   const html = await readFile(new URL('../admin/analytics/index.html', import.meta.url), 'utf8');
   const client = await readFile(new URL('../assets/admin-analytics.js', import.meta.url), 'utf8');
   assert.match(html, /meta name="robots" content="noindex,nofollow"/);
   assert.match(html, /사용자 국적이 아닌 접속 위치 기준 국가/);
+  assert.match(html, /Human only/);
+  assert.match(html, /Exclude Bots = Yes/);
+  assert.match(html, /All traffic/);
   assert.match(html, /href="\.\.\/manage\/">게시물 관리/);
   assert.doesNotMatch(`${html}\n${client}`, /CLOUDFLARE_(?:ACCOUNT_ID|ANALYTICS_API_TOKEN|WEB_ANALYTICS_SITE_TAG)|analytics-token-secret|site-tag-secret/);
 
-  const ids = ['analytics-admin-key', 'analytics-load', 'analytics-dashboard', 'analytics-status', 'metric-visits', 'metric-pageviews', 'metric-depth', 'analytics-period', 'analytics-empty', 'trend-chart', 'top-pages', 'top-referers', 'top-countries', 'top-devices', 'top-browsers', 'top-os', 'analytics-source'];
+  const ids = ['analytics-admin-key', 'analytics-load', 'analytics-dashboard', 'analytics-status', 'metric-visits', 'metric-pageviews', 'metric-depth', 'metric-visits-all', 'metric-pageviews-all', 'metric-depth-all', 'analytics-period', 'analytics-empty', 'trend-chart', 'top-pages', 'top-referers', 'top-countries', 'top-devices', 'top-browsers', 'top-os', 'analytics-source'];
   const elements = Object.fromEntries(ids.map((id) => [id, element(id)]));
   elements['analytics-dashboard'].hidden = true;
   const ranges = [1, 7, 28].map((range) => { const button = element(); button.dataset.range = String(range); return button; });
@@ -295,10 +310,10 @@ test('analytics page keeps secrets server-side and renders authenticated zero da
     console,
     Intl,
     fetch: async () => Response.json({
-      ok: true, generatedAt: '2026-08-23T00:00:00.000Z', empty: true,
+      ok: true, generatedAt: '2026-08-23T00:00:00.000Z', empty: false,
       range: { days: 7, from: '2026-08-17', to: '2026-08-23', timezone: 'UTC' },
-      totals: { visits: 0, pageViews: 0 }, trend: [], topPages: [], referrers: [], countries: [], devices: [], browsers: [], operatingSystems: [],
-      source: { dataset: 'rumPageloadEventsAdaptiveGroups' }
+      totals: { visits: 1, pageViews: 2 }, allTrafficTotals: { visits: 2, pageViews: 3 }, trend: [], topPages: [], referrers: [], countries: [], devices: [], browsers: [], operatingSystems: [],
+      source: { dataset: 'rumPageloadEventsAdaptiveGroups', excludeBots: 'Yes' }
     }),
     sessionStorage: { getItem: () => '', setItem() {} },
     localStorage: { setItem() {} },
@@ -315,6 +330,11 @@ test('analytics page keeps secrets server-side and renders authenticated zero da
   elements['analytics-admin-key'].value = 'test-admin-key';
   await context.window.__adminAnalyticsTest.loadAnalytics(7);
   assert.equal(elements['analytics-dashboard'].hidden, false);
-  assert.equal(elements['analytics-empty'].hidden, false);
-  assert.match(elements['analytics-status'].textContent, /아직 수집된 데이터가 없습니다/);
+  assert.equal(elements['analytics-empty'].hidden, true);
+  assert.equal(elements['metric-visits'].textContent, '1');
+  assert.equal(elements['metric-pageviews'].textContent, '2');
+  assert.equal(elements['metric-visits-all'].textContent, '2');
+  assert.equal(elements['metric-pageviews-all'].textContent, '3');
+  assert.match(elements['analytics-source'].textContent, /Exclude Bots = Yes/);
+  assert.match(elements['analytics-status'].textContent, /통계 조회가 완료됐습니다/);
 });
