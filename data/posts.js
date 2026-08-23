@@ -13,7 +13,9 @@ window.RESEARCH_POSTS = [
     "subtitle": "",
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "href": "reports/8월 21일 주식리포트_커버통합.html",
-    "coverImage": "covers/2026-08-21-daily-1i56f22.webp"
+    "coverImage": "covers/2026-08-21-daily-1i56f22.webp",
+    "updatedAt": "2026-08-23T08:25:49.091Z",
+    "summary": "삼성전자·SK하이닉스가 반등하며 코스피는 0.88% 올랐지만, 오른 종목은 21.3%에 그쳤고 코스닥은 4.63% 급락했다. 대형 반도체 두 종목이 지수를 받친 반면 반도체 업종 171개 중 152개가 하락한, 지수와 종목 전반의 흐름이 다시 갈라진 하루를 살펴본다."
   },
   {
     "id": "2026-08-20-daily-c6eow2",
