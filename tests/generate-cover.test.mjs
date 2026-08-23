@@ -20,11 +20,12 @@ function request(body, key = ENV.ADMIN_KEY) {
   });
 }
 
-test('selector priority prefers metadata, then cover-frame before outer wrappers', () => {
+test('selector priority prefers metadata, then completed cover structures before outer wrappers', () => {
   assert.equal(__test.selectCaptureSelector('<meta name="report-cover-selector" content="#hero"><div class="cover-frame">x</div>'), '#hero');
   assert.equal(__test.selectCaptureSelector('<section class="cover-screen"><div class="cover-frame"><img class="cover-art"><div class="cover-copy">title</div></div><span class="cover-hint">hint</span></section>'), '.cover-frame');
   assert.equal(__test.selectCaptureSelector('<div class="cover-page">x</div><section class="cover-screen">y</section>'), '.cover-page');
-  assert.deepEqual(__test.SELECTOR_PRIORITY, ['.cover-frame', '.cover-page', '.cover-screen', '.report-cover', '.cover', '.opener']);
+  assert.equal(__test.selectCaptureSelector('<section class="mag-cover plate"><img class="cv-img" width="900" height="1350"><h1 class="cv-h1">반도체 다음의 자리</h1></section><div class="cover">unrelated</div>'), '.mag-cover');
+  assert.deepEqual(__test.SELECTOR_PRIORITY, ['.cover-frame', '.cover-page', '.mag-cover', '.cover-screen', '.report-cover', '.cover', '.opener']);
 });
 
 test('Korean and English opener covers are accepted as Browser Rendering targets', () => {
@@ -76,6 +77,38 @@ test('completed weekly section.cover uses one full-bleed Browser Rendering clip'
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+test('completed mag-cover captures the image and overlay copy as one full-bleed cover', { concurrency: false }, async () => {
+  const originalFetch = globalThis.fetch;
+  let payload;
+  globalThis.fetch = async (_url, options) => {
+    payload = JSON.parse(options.body);
+    return new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'content-type': 'image/png' } });
+  };
+  try {
+    const html = '<section class="mag-cover plate" id="s0"><img class="cv-img" width="900" height="1350" src="data:image/webp;base64,AA=="><span class="cv-date">2026.08.10</span><h1 class="cv-h1">반도체 다음의 자리</h1><div class="cv-bottom">weekly details</div></section>';
+    const response = await onRequestPost({ request: request({ html }), env: ENV });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('x-cover-selector'), '.mag-cover');
+    assert.equal('selector' in payload, false);
+    assert.equal(payload.html, html);
+    assert.deepEqual(payload.screenshotOptions.clip, { x: 0, y: 0, width: 480, height: 720, scale: 1 });
+    assert.match(payload.addStyleTag[0].content, /\.mag-cover\.plate\{position:fixed!important/);
+    assert.match(payload.html, /class="cv-h1"/);
+    assert.match(payload.html, /class="cv-bottom"/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('magazine capture plan derives the complete cover ratio from cv-img without selecting the image alone', () => {
+  const html = '<section class="mag-cover plate"><img class="cv-img" width="900" height="1350"><h1 class="cv-h1">title</h1></section>';
+  const plan = __test.magazineCoverCapturePlan(html, '.mag-cover');
+  assert.deepEqual(plan.screenshotOptions.clip, { x: 0, y: 0, width: 480, height: 720, scale: 1 });
+  assert.ok(__test.magazineCoverCapturePlan('<section class="plate mag-cover"><img class="cv-img" width="480" height="720"></section>', '.mag-cover'));
+  assert.equal(__test.magazineCoverCapturePlan(html, '.cv-img'), null);
+  assert.equal(__test.magazineCoverCapturePlan('<section class="mag-cover">generic</section>', '.mag-cover'), null);
 });
 
 test('non-weekly .cover candidates retain the general selector screenshot path', () => {
