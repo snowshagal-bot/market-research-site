@@ -54,6 +54,22 @@ window.RESEARCH_POSTS = [
     "summary": "미 30년물이 장중 5.33%대까지 오르고 미국 반도체주가 급락하자 삼성전자·SK하이닉스를 중심으로 코스피가 5.80% 무너졌다. 외국인이 3.49조 원을 팔고 개인이 4.64조 원을 받아낸 가운데, 높은 금리가 가장 많이 오른 대형 메모리부터 압박한 하루를 분석한다."
   },
   {
+    "id": "2026-08-18-weekly-99e6io",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-08-18",
+    "reportDate": "2026-08-18",
+    "registeredDate": "2026-08-23",
+    "registeredAt": "2026-08-23T09:35:36.386Z",
+    "legacyImport": false,
+    "title": "8월 3주차 위클리 분석 (2026.08.18~08.21)",
+    "subtitle": "",
+    "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "href": "reports/8월 3주차 위클리 분석.html",
+    "coverImage": "covers/2026-08-18-weekly-99e6io.webp"
+  },
+  {
     "id": "2026-08-18-daily-1burfko",
     "type": "daily",
     "typeLabel": "주식 리포트",
