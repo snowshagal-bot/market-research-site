@@ -1,5 +1,7 @@
 const GRAPHQL_ENDPOINT = 'https://api.cloudflare.com/client/v4/graphql';
 const DATASET = 'rumPageloadEventsAdaptiveGroups';
+const PRODUCTION_HOSTNAME = 'snowshagal.com';
+const ADMIN_PATH_PREFIX = '/admin/';
 const REQUEST_TIMEOUT_MS = 12000;
 const SCHEMA_CACHE_MS = 15 * 60 * 1000;
 const RANGE_DAYS = new Set([1, 7, 28]);
@@ -155,6 +157,7 @@ async function discoverSchema(token) {
   const dimensions = {
     date: firstAvailable(dimensionNames, ['date', 'datetimeDay', 'datetimeHour', 'datetimeFifteenMinutes', 'datetimeMinute']),
     siteTag: firstAvailable(dimensionNames, ['siteTag']),
+    host: firstAvailable(dimensionNames, ['requestHost', 'host']),
     path: firstAvailable(dimensionNames, ['requestPath', 'path']),
     referer: firstAvailable(dimensionNames, ['refererHost', 'refererPath', 'referer', 'referrerHost']),
     country: firstAvailable(dimensionNames, ['countryName', 'country']),
@@ -170,17 +173,24 @@ async function discoverSchema(token) {
   const startFilter = filterType?.inputFields?.find((item) => ['date_geq', 'datetimeDay_geq', 'datetime_geq'].includes(item.name));
   const endFilter = filterType?.inputFields?.find((item) => ['date_leq', 'datetimeDay_leq', 'datetime_leq', 'datetime_lt'].includes(item.name));
   const siteFilter = filterType?.inputFields?.find((item) => ['siteTag_in', 'siteTag'].includes(item.name));
+  const hostFilter = filterType?.inputFields?.find((item) => ['requestHost_in', 'requestHost', 'host_in', 'host'].includes(item.name));
+  const adminPathFilter = filterType?.inputFields?.find((item) => ['requestPath_notlike', 'path_notlike'].includes(item.name));
   const filters = {
     start: startFilter?.name || '',
     end: endFilter?.name || '',
     siteTag: siteFilter?.name || '',
     siteTagList: includesKind(siteFilter?.type, 'LIST'),
+    host: hostFilter?.name || '',
+    hostList: includesKind(hostFilter?.type, 'LIST'),
+    excludeAdminPath: adminPathFilter?.name || '',
     datetime: Boolean(startFilter?.name.startsWith('datetime'))
   };
   const missing = Object.entries(dimensions).filter(([, value]) => !value).map(([name]) => `dimension:${name}`);
   if (!field(groupType, 'count')) missing.push('metric:count');
   if (!visits) missing.push('metric:visits');
   if (!filters.start || !filters.end || !filters.siteTag) missing.push('filter:date/siteTag');
+  if (!filters.host) missing.push('filter:productionHost');
+  if (!filters.excludeAdminPath) missing.push('filter:adminPath');
   if (missing.length) {
     throw analyticsError('ANALYTICS_SCHEMA_UNSUPPORTED', `Web Analytics schema에 필요한 항목이 없습니다: ${missing.join(', ')}`);
   }
@@ -234,7 +244,8 @@ function buildAnalyticsQuery(schema, accountId, siteTag, dates) {
       : filterDateValue(dates.end, true)
     : dates.end;
   const site = schema.filters.siteTagList ? `[${gqlString(siteTag)}]` : gqlString(siteTag);
-  const filter = `{ ${schema.filters.start}: ${gqlString(start)}, ${schema.filters.end}: ${gqlString(end)}, ${schema.filters.siteTag}: ${site} }`;
+  const host = schema.filters.hostList ? `[${gqlString(PRODUCTION_HOSTNAME)}]` : gqlString(PRODUCTION_HOSTNAME);
+  const filter = `{ ${schema.filters.start}: ${gqlString(start)}, ${schema.filters.end}: ${gqlString(end)}, ${schema.filters.siteTag}: ${site}, ${schema.filters.host}: ${host}, ${schema.filters.excludeAdminPath}: ${gqlString(`${ADMIN_PATH_PREFIX}%`)} }`;
   const datasetArgs = (limit, orderBy = '') => `filter: ${filter}, limit: ${limit}${orderBy ? `, orderBy: [${orderBy}]` : ''}`;
   const topOrder = schema.countOrder;
   const aliases = [
@@ -376,6 +387,8 @@ export async function onRequestGet({ request, env }) {
 export const __test = {
   DATASET,
   GRAPHQL_ENDPOINT,
+  PRODUCTION_HOSTNAME,
+  ADMIN_PATH_PREFIX,
   REQUEST_TIMEOUT_MS,
   TYPE_QUERY,
   namedType,
