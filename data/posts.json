@@ -54,6 +54,23 @@
     "summary": "미 30년물이 장중 5.33%대까지 오르고 미국 반도체주가 급락하자 삼성전자·SK하이닉스를 중심으로 코스피가 5.80% 무너졌다. 외국인이 3.49조 원을 팔고 개인이 4.64조 원을 받아낸 가운데, 높은 금리가 가장 많이 오른 대형 메모리부터 압박한 하루를 분석한다."
   },
   {
+    "id": "2026-08-18-weekly-11u1873",
+    "type": "weekly",
+    "typeLabel": "Weekly",
+    "lang": "en",
+    "date": "2026-08-18",
+    "reportDate": "2026-08-18",
+    "registeredDate": "2026-08-24",
+    "registeredAt": "2026-08-23T19:31:42.711Z",
+    "legacyImport": false,
+    "title": "Same inputs,different answers",
+    "subtitle": "",
+    "description": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
+    "href": "reports/en/2026-08-18_08-21_Korea_Weekly_Report_EN.html",
+    "translationGroup": "2026-08-18-weekly-n6uraz",
+    "coverImage": "covers/2026-08-18-weekly-11u1873.webp"
+  },
+  {
     "id": "2026-08-18-weekly-n6uraz",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
@@ -173,23 +190,6 @@
     "summary": "외국인 2.84조 원이 삼성전자·SK하이닉스 등 대형 IT에 집중되며 코스피는 3.68% 급등했다. 하지만 오른 종목은 절반에도 못 미쳐, 대형 반도체가 끌어올린 지수와 시장 전체의 온도차를 살펴본다."
   },
   {
-    "id": "2026-08-12-weekly-1macab6",
-    "type": "weekly",
-    "typeLabel": "위클리 리포트",
-    "lang": "ko",
-    "date": "2026-07-27",
-    "reportDate": "2026-07-27",
-    "registeredDate": "2026-08-13",
-    "registeredAt": "2026-08-12T17:54:55.860Z",
-    "legacyImport": false,
-    "title": "7월 5주차 위클리 · 애플과 세 개의 칩",
-    "subtitle": "",
-    "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
-    "summary": "연준은 금리를 동결했지만 장기금리는 올랐고, 빅테크의 AI 투자는 매출과 비용을 동시에 키웠다. 메모리 재고가 줄어든 가운데 애플과 삼성전자·SK하이닉스·마이크론의 협상력이 어떻게 달라졌는지, 다음 주 금리와 전기전자 수급까지 연결해 살펴본다.",
-    "href": "reports/7월 5주차 위클리 분석.html",
-    "coverImage": "covers/2026-08-12-weekly-1macab6.webp"
-  },
-  {
     "id": "2026-08-11-basics-1e0xeuz",
     "type": "basics",
     "typeLabel": "시장 공부",
@@ -299,21 +299,6 @@
     "href": "reports/비정기리서치_소버린AI_누가열쇠를쥐는가_2026.08.09_커버통합.html",
     "coverImage": "covers/2026-08-09-sovereign-ai.webp",
     "featured": true
-  },
-  {
-    "id": "2026-08-week1-weekly",
-    "type": "weekly",
-    "typeLabel": "위클리 리포트",
-    "date": "2026-08-03",
-    "reportDate": "2026-08-03",
-    "registeredDate": "2026-08-09",
-    "registeredAt": null,
-    "legacyImport": true,
-    "title": "8월 1주차 위클리 분석",
-    "subtitle": "2026.08.03–08.07",
-    "description": "지난주 시장을 복기하고 다음 주 변수와 주도 업종의 조건을 정리한 주간 리포트.",
-    "href": "reports/8월 1주차 위클리 분석.html",
-    "coverImage": "covers/2026-08-week1-weekly.webp"
   },
   {
     "id": "2026-08-07-daily",
@@ -433,6 +418,21 @@
     "summary": "대형 반도체 급락과 외국인 매도로 코스피는 크게 밀렸지만, 코스닥은 오르고 상승 종목도 더 많았다. 지수의 급락과 시장 전체의 방향이 갈라진 이유, 그리고 대형 메모리 밖 성장주로 이동한 자금을 살펴본다"
   },
   {
+    "id": "2026-08-week1-weekly",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "date": "2026-08-03",
+    "reportDate": "2026-08-03",
+    "registeredDate": "2026-08-09",
+    "registeredAt": null,
+    "legacyImport": true,
+    "title": "8월 1주차 위클리 분석",
+    "subtitle": "2026.08.03–08.07",
+    "description": "지난주 시장을 복기하고 다음 주 변수와 주도 업종의 조건을 정리한 주간 리포트.",
+    "href": "reports/8월 1주차 위클리 분석.html",
+    "coverImage": "covers/2026-08-week1-weekly.webp"
+  },
+  {
     "id": "2026-07-31-daily-lr4ely",
     "type": "daily",
     "typeLabel": "주식 리포트",
@@ -550,6 +550,23 @@
     "summary": "외국인 2.88조 원 매도가 이어졌지만 기관과 개인의 흡수가 넓어지며 코스피는 0.97% 반등했다. 유가 하락과 AI 투자 재료가 지수를 밀어 올린 가운데, 가격 회복과 아직 복구되지 않은 외국인 수급의 간극을 살펴본다.",
     "href": "reports/7월 27일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-07-27-daily-1og5hu.webp"
+  },
+  {
+    "id": "2026-08-12-weekly-1macab6",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-07-27",
+    "reportDate": "2026-07-27",
+    "registeredDate": "2026-08-13",
+    "registeredAt": "2026-08-12T17:54:55.860Z",
+    "legacyImport": false,
+    "title": "7월 5주차 위클리 · 애플과 세 개의 칩",
+    "subtitle": "",
+    "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "summary": "연준은 금리를 동결했지만 장기금리는 올랐고, 빅테크의 AI 투자는 매출과 비용을 동시에 키웠다. 메모리 재고가 줄어든 가운데 애플과 삼성전자·SK하이닉스·마이크론의 협상력이 어떻게 달라졌는지, 다음 주 금리와 전기전자 수급까지 연결해 살펴본다.",
+    "href": "reports/7월 5주차 위클리 분석.html",
+    "coverImage": "covers/2026-08-12-weekly-1macab6.webp"
   },
   {
     "id": "2026-07-20-weekly-1u5gndk",
