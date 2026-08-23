@@ -102,7 +102,7 @@
     renderRanking('top-devices', data.devices);
     renderRanking('top-browsers', data.browsers);
     renderRanking('top-os', data.operatingSystems);
-    $('analytics-source').textContent = `Cloudflare Web Analytics · Human only: Exclude Bots = ${data.source.excludeBots || 'Yes'} · All traffic 비교 · ${data.source.dataset} · ${data.generatedAt}`;
+    $('analytics-source').textContent = `Cloudflare Web Analytics · Bots excluded: Exclude Bots = ${data.source.excludeBots || 'Yes'} · All traffic 비교 · ${data.source.dataset} · ${data.generatedAt}`;
     dashboard.hidden = false;
   }
 

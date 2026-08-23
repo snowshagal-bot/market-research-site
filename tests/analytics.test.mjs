@@ -290,14 +290,16 @@ function element(id = '') {
   };
 }
 
-test('analytics page keeps secrets server-side and renders Human only versus All traffic', async () => {
+test('analytics page keeps secrets server-side and renders Bots excluded versus All traffic', async () => {
   const html = await readFile(new URL('../admin/analytics/index.html', import.meta.url), 'utf8');
   const client = await readFile(new URL('../assets/admin-analytics.js', import.meta.url), 'utf8');
   assert.match(html, /meta name="robots" content="noindex,nofollow"/);
   assert.match(html, /사용자 국적이 아닌 접속 위치 기준 국가/);
-  assert.match(html, /Human only/);
+  assert.match(html, /Bots excluded/);
+  assert.match(html, /모든 자동화 트래픽이 제거됐다는 의미는 아닙니다/);
   assert.match(html, /Exclude Bots = Yes/);
   assert.match(html, /All traffic/);
+  assert.doesNotMatch(`${html}\n${client}`, /Human only/);
   assert.match(html, /href="\.\.\/manage\/">게시물 관리/);
   assert.doesNotMatch(`${html}\n${client}`, /CLOUDFLARE_(?:ACCOUNT_ID|ANALYTICS_API_TOKEN|WEB_ANALYTICS_SITE_TAG)|analytics-token-secret|site-tag-secret/);
 
@@ -335,6 +337,6 @@ test('analytics page keeps secrets server-side and renders Human only versus All
   assert.equal(elements['metric-pageviews'].textContent, '2');
   assert.equal(elements['metric-visits-all'].textContent, '2');
   assert.equal(elements['metric-pageviews-all'].textContent, '3');
-  assert.match(elements['analytics-source'].textContent, /Exclude Bots = Yes/);
+  assert.match(elements['analytics-source'].textContent, /Bots excluded: Exclude Bots = Yes/);
   assert.match(elements['analytics-status'].textContent, /통계 조회가 완료됐습니다/);
 });
