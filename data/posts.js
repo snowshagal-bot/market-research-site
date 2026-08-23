@@ -185,6 +185,23 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-10-daily-1evguss.webp"
   },
   {
+    "id": "2026-08-09-research-12sm7v2",
+    "type": "research",
+    "typeLabel": "Research",
+    "lang": "en",
+    "date": "2026-08-09",
+    "reportDate": "2026-08-09",
+    "registeredDate": "2026-08-24",
+    "registeredAt": "2026-08-23T17:13:42.753Z",
+    "legacyImport": false,
+    "title": "WhoHolds the Keys?",
+    "subtitle": "",
+    "description": "Independent research on specific industries, companies, policies, and market structure.",
+    "href": "reports/en/2026-08-09_Sovereign_AI_Who_Holds_the_Keys_EN.html",
+    "translationGroup": "2026-08-09-sovereign-ai",
+    "coverImage": "covers/2026-08-09-research-12sm7v2.webp"
+  },
+  {
     "id": "2026-08-09-sovereign-ai",
     "type": "research",
     "typeLabel": "비정기 리서치",
