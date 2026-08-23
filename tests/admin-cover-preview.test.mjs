@@ -96,10 +96,15 @@ async function loadAdmin({ confirmResult = false, generateCover } = {}) {
           title,
           querySelector(selector) {
             const metaName = selector.match(/^meta\[name="([^"]+)"\]$/)?.[1];
-            if (!metaName) return null;
-            const tag = text.match(new RegExp(`<meta\\s+[^>]*name=["']${metaName}["'][^>]*>`, 'i'))?.[0];
-            const content = tag?.match(/content=["']([^"']*)["']/i)?.[1];
-            return content === undefined ? null : { content };
+            if (metaName) {
+              const tag = text.match(new RegExp(`<meta\\s+[^>]*name=["']${metaName}["'][^>]*>`, 'i'))?.[0];
+              const content = tag?.match(/content=["']([^"']*)["']/i)?.[1];
+              return content === undefined ? null : { content };
+            }
+            const className = selector.match(/\.([a-z0-9_-]+)(?:\s*$)/i)?.[1];
+            if (!className) return null;
+            const match = text.match(new RegExp(`<([a-z0-9]+)[^>]*class=["'][^"']*\\b${className}\\b[^"']*["'][^>]*>([\\s\\S]*?)<\\/\\1>`, 'i'));
+            return match ? { textContent: match[2].replace(/<[^>]+>/g, ' ') } : null;
           }
         };
       }
@@ -177,7 +182,7 @@ test('admin markup contains the cover preview modes before the original HTML pre
   assert.match(html, /\.cover-preview-empty\[hidden\],[^}]*\{display:none\}/);
   assert.match(adminScript, /iframe\.setAttribute\('sandbox', 'allow-scripts'\)/);
   assert.match(adminScript, /iframe\.srcdoc = text/);
-  assert.match(html, /admin\.js\?v=20260815-1/);
+  assert.match(html, /admin\.js\?v=20260823-1/);
   assert.doesNotMatch(adminScript, /allow-same-origin/);
 });
 
@@ -237,7 +242,7 @@ test('manual category override becomes the final publish FormData value', async 
   assert.equal(submissions[0].entries.find(([name]) => name === 'type')?.[1], 'weekly');
 });
 
-test('report-summary metadata fills an editable homepage summary and blank metadata stays blank', async () => {
+test('report-summary metadata takes priority and cover copy supplies a language-neutral editable fallback', async () => {
   const { elements, submissions } = await loadAdmin({ confirmResult: true });
   elements['admin-key'].value = 'test-key';
   elements['html-file'].files = [{
@@ -251,14 +256,28 @@ test('report-summary metadata fills an editable homepage summary and blank metad
   await elements['publish-btn'].emit('click');
   assert.equal(submissions[0].entries.find(([name]) => name === 'summary')?.[1], '사용자가 수정한 최종 요약');
 
-  const withoutMeta = await loadAdmin();
-  withoutMeta.elements['html-file'].files = [{
-    name: 'weekly-report.html',
+  const english = await loadAdmin();
+  const englishChoice = english.languageOptions.find(option => option.value === 'en');
+  englishChoice.checked = true;
+  englishChoice.emit('change');
+  english.elements['html-file'].files = [{
+    name: 'daily-report.html',
     size: 100,
-    text: async () => '<!doctype html><title>Weekly report</title>'
+    text: async () => '<!doctype html><title>Daily report</title><span class="cover-oneline">Two heavyweight stocks dragged the index,<br>while the rest of the market went its own way.</span>'
   }];
-  await withoutMeta.elements['html-file'].emit('change');
-  assert.equal(withoutMeta.elements['post-summary'].value, '');
+  await english.elements['html-file'].emit('change');
+  assert.equal(english.elements['post-summary'].value, 'Two heavyweight stocks dragged the index, while the rest of the market went its own way.');
+  assert.equal(english.elements['post-description'].value, 'A daily report on market trends, investor flows, sectors, and macro drivers.');
+
+  const korean = await loadAdmin();
+  korean.elements['html-file'].files = [{
+    name: '비정기 리서치.html',
+    size: 100,
+    text: async () => '<!doctype html><title>비정기 리서치</title><section class="opener"><p class="stand">보이는 수급 아래, <b>잠긴 구조를 읽는다.</b></p></section>'
+  }];
+  await korean.elements['html-file'].emit('change');
+  assert.equal(korean.elements['post-summary'].value, '보이는 수급 아래, 잠긴 구조를 읽는다.');
+  assert.equal(korean.elements['post-description'].value, '특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.');
 });
 
 test('language defaults to Korean and English selection submits an optional translation group', async () => {
