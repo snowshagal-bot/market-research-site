@@ -1,5 +1,21 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-21-daily-1i56f22",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-08-21",
+    "reportDate": "2026-08-21",
+    "registeredDate": "2026-08-23",
+    "registeredAt": "2026-08-23T07:29:22.905Z",
+    "legacyImport": false,
+    "title": "두 개의와이어",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "href": "reports/8월 21일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-08-21-daily-1i56f22.webp"
+  },
+  {
     "id": "2026-08-20-daily-c6eow2",
     "type": "daily",
     "typeLabel": "주식 리포트",
