@@ -283,6 +283,22 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-04-daily-wfcoi4.webp"
   },
   {
+    "id": "2026-08-03-daily-ely1wy",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-03",
+    "reportDate": "2026-08-03",
+    "registeredDate": "2026-08-24",
+    "registeredAt": "2026-08-23T15:19:07.737Z",
+    "legacyImport": false,
+    "title": "A Split Market",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "href": "reports/en/2026-08-03_KOSPI_Daily_Report_EN.html",
+    "coverImage": "covers/2026-08-03-daily-ely1wy.webp"
+  },
+  {
     "id": "2026-08-03-daily-181n1pj",
     "type": "daily",
     "typeLabel": "주식 리포트",
