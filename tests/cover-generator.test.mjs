@@ -77,6 +77,24 @@ test('Korean and English opener covers are selected instead of the template fall
   }
 });
 
+test('completed magazine covers are selected as one overlaid cover instead of the template fallback', async () => {
+  const api = await generatorApi();
+  const magazineCover = node('반도체 다음의 자리', { visual: true, children: 6 });
+  const genericCover = node('unrelated cover');
+  const doc = {
+    body: node('위클리 리포트 본문', { children: 8 }),
+    querySelector(selector) {
+      if (selector === '.mag-cover') return magazineCover;
+      if (selector === '.cover') return genericCover;
+      return null;
+    }
+  };
+  const result = api.findCaptureTarget(doc);
+  assert.equal(result.target, magazineCover);
+  assert.equal(result.selector, '.mag-cover');
+  assert.equal(result.source, 'heuristic');
+});
+
 test('a usable cover frame is captured instead of its cover-screen wrapper and hint', async () => {
   const api = await generatorApi();
   const frame = node('', { visual: true });
@@ -193,7 +211,7 @@ test('the broken foreignObject rasterization path is no longer used', async () =
 test('admin connects generated files to the existing cover preview and publish payload', async () => {
   const [html, admin] = await Promise.all([read('admin/index.html'), read('assets/admin.js')]);
   assert.match(html, /id="generate-cover-btn"[^>]*disabled>HTML에서 커버 자동 생성/);
-  assert.match(html, /cover-generator\.js\?v=20260823-1/);
+  assert.match(html, /cover-generator\.js\?v=20260824-1/);
   assert.match(html, /admin\.js\?v=20260823-1/);
   assert.match(admin, /adminKey: adminKey\.value\.trim\(\)/);
   assert.match(admin, /showCoverPreview\(result\.file, generationReportVersion\)/);

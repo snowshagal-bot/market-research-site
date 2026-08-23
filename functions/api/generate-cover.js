@@ -4,7 +4,7 @@ const RENDER_TIMEOUT_MS = 25000;
 const DEFAULT_RATE_LIMIT_RETRY_MS = 10000;
 const MAX_RATE_LIMIT_RETRY_MS = 15000;
 const RENDER_VIEWPORT = { width: 480, height: 900 };
-const SELECTOR_PRIORITY = ['.cover-frame', '.cover-page', '.cover-screen', '.report-cover', '.cover', '.opener'];
+const SELECTOR_PRIORITY = ['.cover-frame', '.cover-page', '.mag-cover', '.cover-screen', '.report-cover', '.cover', '.opener'];
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -116,6 +116,32 @@ function weeklyCoverCapturePlan(html, selector) {
   };
 }
 
+function magazineCoverCapturePlan(html, selector) {
+  if (selector !== '.mag-cover') return null;
+  const hasCompletedCover = [...html.matchAll(/<(?:section|div)\b[^>]*>/gi)]
+    .map(match => tagAttribute(match[0], 'class').split(/\s+/))
+    .some(classes => classes.includes('mag-cover') && classes.includes('plate'));
+  if (!hasCompletedCover) return null;
+  const imageTag = [...html.matchAll(/<img\b[^>]*>/gi)]
+    .map(match => match[0])
+    .find(tag => tagAttribute(tag, 'class').split(/\s+/).includes('cv-img'));
+  const sourceWidth = Number(tagAttribute(imageTag || '', 'width'));
+  const sourceHeight = Number(tagAttribute(imageTag || '', 'height'));
+  if (!Number.isFinite(sourceWidth) || !Number.isFinite(sourceHeight) || sourceWidth <= 0 || sourceHeight <= 0) return null;
+  const captureHeight = RENDER_VIEWPORT.width * sourceHeight / sourceWidth;
+  if (!Number.isFinite(captureHeight) || captureHeight < 80 || captureHeight > RENDER_VIEWPORT.height) return null;
+  return {
+    addStyleTag: [{
+      content: `html,body{margin:0!important;padding:0!important;width:${RENDER_VIEWPORT.width}px!important;min-width:0!important;overflow:hidden!important}.mag-cover.plate{position:fixed!important;inset:0 auto auto 0!important;width:${RENDER_VIEWPORT.width}px!important;max-width:none!important;min-height:0!important;margin:0!important;padding:0!important;z-index:2147483647!important}`
+    }],
+    screenshotOptions: {
+      type: 'png',
+      captureBeyondViewport: true,
+      clip: { x: 0, y: 0, width: RENDER_VIEWPORT.width, height: captureHeight, scale: 1 }
+    }
+  };
+}
+
 async function fetchRendering(url, options) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), RENDER_TIMEOUT_MS);
@@ -181,7 +207,9 @@ export async function onRequestPost({ request, env }) {
       'authorization': `Bearer ${env.CLOUDFLARE_BROWSER_RENDERING_TOKEN}`,
       'content-type': 'application/json'
     };
-    const framePlan = coverFrameCapturePlan(html, selector) || weeklyCoverCapturePlan(html, selector);
+    const framePlan = coverFrameCapturePlan(html, selector)
+      || magazineCoverCapturePlan(html, selector)
+      || weeklyCoverCapturePlan(html, selector);
     const upstream = await fetchRenderingWithRetry(
       `${endpoint}/screenshot`,
       {
@@ -236,6 +264,7 @@ export const __test = {
   RENDER_VIEWPORT,
   SELECTOR_PRIORITY,
   coverFrameCapturePlan,
+  magazineCoverCapturePlan,
   weeklyCoverCapturePlan,
   fetchRendering,
   fetchRenderingWithRetry,

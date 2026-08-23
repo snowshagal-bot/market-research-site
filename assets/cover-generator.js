@@ -4,6 +4,7 @@
   const CAPTURE_PADDING = 32;
   const DEFAULT_CAPTURE_BACKGROUND = '#ece7dc';
   const HEURISTIC_SELECTORS = [
+    '.mag-cover',
     '.cover',
     '.cover-page',
     '.cover-frame',
