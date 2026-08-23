@@ -294,9 +294,10 @@
     "legacyImport": false,
     "title": "A Split Market",
     "subtitle": "",
-    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "description": "A daily report on market breadth, investor flows, sectors, and macro drivers.",
     "href": "reports/en/2026-08-03_KOSPI_Daily_Report_EN.html",
-    "coverImage": "covers/2026-08-03-daily-ely1wy.webp"
+    "coverImage": "covers/2026-08-03-daily-ely1wy.webp",
+    "summary": "Two heavyweight stocks dragged the index, while the rest of the market went its own way."
   },
   {
     "id": "2026-08-03-daily-181n1pj",
@@ -360,10 +361,11 @@
     "legacyImport": false,
     "title": "Two Illusions",
     "subtitle": "",
-    "description": "특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.",
+    "description": "Independent research on foreign ownership, market concentration, and leveraged-product flows.",
     "href": "reports/en/2026-07-29_Special_Research_Two_Illusions_EN.html",
     "translationGroup": "2026-07-29-research-m2ef0m",
-    "coverImage": "covers/2026-07-29-research-4eg0o9.webp"
+    "coverImage": "covers/2026-07-29-research-4eg0o9.webp",
+    "summary": "The first mistakes two different metrics for the same number; the second confuses the cause with the amplifier. Beneath the visible flows, we read the submerged structure."
   },
   {
     "id": "2026-07-29-daily-mo0iu1",

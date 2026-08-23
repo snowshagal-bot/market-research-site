@@ -129,6 +129,7 @@
     postLanguage.value = value;
     languageOptions.forEach(option => { option.checked = option.value === value; });
     populateTranslationSources();
+    updateCategoryDescription(type.value);
   }
 
   function isPreviewHost(hostname) {
@@ -136,12 +137,29 @@
   }
 
   const defaultDescriptions = {
-    daily: '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.',
-    weekly: '지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.',
-    research: '특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.',
-    basics: '경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.',
-    note: '시장과 투자에 관한 생각을 자유롭게 정리한 글.'
+    ko: {
+      daily: '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.',
+      weekly: '지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.',
+      research: '특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.',
+      basics: '경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.',
+      note: '시장과 투자에 관한 생각을 자유롭게 정리한 글.'
+    },
+    en: {
+      daily: 'A daily report on market trends, investor flows, sectors, and macro drivers.',
+      weekly: 'A weekly report reviewing recent market moves and the key variables for the week ahead.',
+      research: 'Independent research on specific industries, companies, policies, and market structure.',
+      basics: 'A clear guide to the essential concepts behind markets, economics, and investing.',
+      note: 'Notes and observations on markets and investing.'
+    }
   };
+
+  function defaultDescription(typeValue, language = postLanguage?.value) {
+    return defaultDescriptions[language === 'en' ? 'en' : 'ko'][typeValue] || '';
+  }
+
+  function isDefaultDescription(value) {
+    return Object.values(defaultDescriptions).some(descriptions => Object.values(descriptions).includes(value));
+  }
 
   try { adminKey.value = sessionStorage.getItem('mrs-admin-key') || ''; } catch (_) {}
 
@@ -203,7 +221,13 @@
   }
 
   function detectSummary(doc) {
-    return (doc.querySelector('meta[name="report-summary"]')?.content || '').trim().slice(0, 500);
+    const declared = (doc.querySelector('meta[name="report-summary"]')?.content || '').trim();
+    if (declared) return declared.slice(0, 500);
+    for (const selector of ['.cover-oneline', '.opener .stand', '.cover-summary', '.cover-description', '[data-report-summary]']) {
+      const text = (doc.querySelector(selector)?.textContent || '').replace(/\s+/g, ' ').trim();
+      if (text) return text.slice(0, 500);
+    }
+    return '';
   }
 
   function safeFilename(original) {
@@ -224,8 +248,8 @@
   }
 
   function updateCategoryDescription(value) {
-    if (!description.value.trim() || Object.values(defaultDescriptions).includes(description.value.trim())) {
-      description.value = defaultDescriptions[value] || '';
+    if (!description.value.trim() || isDefaultDescription(description.value.trim())) {
+      description.value = defaultDescription(value);
     }
   }
 
@@ -465,7 +489,7 @@
     date.value = detectedDate;
     title.value = detectedTitle;
     subtitle.value = detectedSubtitle;
-    description.value = defaultDescriptions[detectedType] || '';
+    description.value = defaultDescription(detectedType);
     postSummary.value = detectedSummary;
     filename.value = safeFilename(file.name);
 
