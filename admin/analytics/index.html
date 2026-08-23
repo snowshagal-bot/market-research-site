@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e6">
+<meta name="robots" content="noindex,nofollow">
+<title>방문 통계 · Market Research</title>
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="stylesheet" href="../../assets/ui-polish.css?v=20260810-2">
+<link rel="stylesheet" href="../../assets/admin-analytics.css?v=20260823-1">
+<script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
+</head>
+<body>
+<header class="site-header"><div class="site-wrap"><div class="header-row"><a class="brand" href="../../"><i></i>MARKET RESEARCH</a><div class="header-actions"><button class="icon-btn" type="button" data-theme-toggle aria-label="다크 모드로 전환">◐</button></div></div></div></header>
+<main class="analytics"><div class="site-wrap">
+  <div class="analytics-head"><div><a class="toplink" href="../../">← 홈페이지</a><h1>방문 통계</h1><p>Cloudflare Web Analytics의 핵심 방문·유입 지표를 확인합니다.</p></div><div class="analytics-note">읽기 전용 · 브라우저에는 집계 결과만 표시</div></div>
+  <nav class="admin-nav" aria-label="관리자 메뉴"><a href="../">새 리포트 등록</a><a href="../manage/">게시물 관리</a><a href="./" aria-current="page">방문 통계</a></nav>
+
+  <section class="card analytics-auth" aria-labelledby="analytics-auth-title">
+    <div><h2 id="analytics-auth-title">관리자 인증</h2><p>기존 관리자 키로 통계 데이터 조회를 시작합니다.</p></div>
+    <div class="auth-controls"><label for="analytics-admin-key">관리자 키</label><div><input id="analytics-admin-key" type="password" autocomplete="current-password" placeholder="Cloudflare에 설정한 관리자 키"><button class="btn primary" id="analytics-load" type="button">통계 조회</button></div></div>
+  </section>
+
+  <div class="analytics-status" id="analytics-status" role="status" aria-live="polite">관리자 키를 입력하면 통계를 불러옵니다.</div>
+
+  <section id="analytics-dashboard" hidden>
+    <div class="range-tabs" id="analytics-ranges" role="group" aria-label="조회 기간">
+      <button type="button" data-range="1" aria-pressed="false">오늘</button>
+      <button type="button" data-range="7" aria-pressed="true">7일</button>
+      <button type="button" data-range="28" aria-pressed="false">28일</button>
+    </div>
+
+    <div class="summary-grid" aria-label="방문 요약">
+      <article class="card metric-card"><span>Visits</span><strong id="metric-visits">0</strong><small>선택 기간 방문</small></article>
+      <article class="card metric-card"><span>Page views</span><strong id="metric-pageviews">0</strong><small>선택 기간 페이지 조회</small></article>
+      <article class="card metric-card"><span>Pages / visit</span><strong id="metric-depth">0</strong><small>방문당 조회 페이지</small></article>
+    </div>
+
+    <section class="card trend-card" aria-labelledby="trend-title"><div class="section-head"><div><h2 id="trend-title">방문 추이</h2><p id="analytics-period"></p></div><div class="chart-legend"><span><i class="visits"></i>Visits</span><span><i class="views"></i>Page views</span></div></div><div class="trend-chart" id="trend-chart"></div><div class="empty-state" id="analytics-empty" hidden>아직 이 기간에 수집된 방문 데이터가 없습니다.</div></section>
+
+    <div class="analytics-grid">
+      <section class="card ranking-card" aria-labelledby="pages-title"><div class="section-head"><div><h2 id="pages-title">많이 본 페이지</h2><p>Page views 기준 TOP 10</p></div></div><ol id="top-pages" class="ranking-list"></ol></section>
+      <section class="card ranking-card" aria-labelledby="referers-title"><div class="section-head"><div><h2 id="referers-title">유입처</h2><p>Google · Tistory · Direct · 기타</p></div></div><ol id="top-referers" class="ranking-list"></ol></section>
+      <section class="card ranking-card" aria-labelledby="countries-title"><div class="section-head"><div><h2 id="countries-title">접속 국가</h2><p>사용자 국적이 아닌 접속 위치 기준 국가입니다.</p></div></div><ol id="top-countries" class="ranking-list"></ol></section>
+      <section class="card ranking-card" aria-labelledby="devices-title"><div class="section-head"><div><h2 id="devices-title">Device type</h2><p>기기 유형별 Page views</p></div></div><ol id="top-devices" class="ranking-list"></ol></section>
+      <section class="card ranking-card" aria-labelledby="browsers-title"><div class="section-head"><div><h2 id="browsers-title">Browser</h2><p>브라우저별 Page views</p></div></div><ol id="top-browsers" class="ranking-list"></ol></section>
+      <section class="card ranking-card" aria-labelledby="os-title"><div class="section-head"><div><h2 id="os-title">Operating system</h2><p>운영체제별 Page views</p></div></div><ol id="top-os" class="ranking-list"></ol></section>
+    </div>
+    <p class="analytics-source" id="analytics-source"></p>
+  </section>
+</div></main>
+<script src="../../assets/admin-analytics.js?v=20260823-1"></script>
+</body>
+</html>

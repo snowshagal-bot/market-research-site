@@ -46,9 +46,29 @@ Fine-grained GitHub PAT used only by the authenticated publishing and post-manag
 
 ### `ADMIN_KEY`
 
-Private admin password used by the `/admin/` publishing and `/admin/manage/` post-management flows. The browser sends it to `/api/publish` or `/api/manage` in `X-Admin-Key` after the user enters it. The current admin UI stores the entered value only in browser `sessionStorage` for the session.
+Private admin password used by `/admin/`, `/admin/manage/`, and `/admin/analytics/`. The browser sends it to the corresponding Pages Function in `X-Admin-Key` after the user enters it. The admin UI stores the entered value only in browser `sessionStorage` for the session.
 
-Do not commit either secret value.
+### `CLOUDFLARE_ACCOUNT_ID`
+
+Account identifier used only by the server-side analytics Function.
+
+### `CLOUDFLARE_ANALYTICS_API_TOKEN`
+
+Read-only API token used by `/api/analytics` to query Cloudflare GraphQL Analytics. Create a custom token with only `Account` → `Account Analytics` → `Read` for the site account. Do not reuse the Browser Rendering token or expose this value in client code.
+
+### `CLOUDFLARE_WEB_ANALYTICS_SITE_TAG`
+
+The Web Analytics site tag for `snowshagal.com`, used server-side to isolate the RUM dataset to this site.
+
+Do not commit any secret or environment-variable value.
+
+## Web Analytics dependencies
+
+`/admin/analytics/` requires `ADMIN_KEY`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_ANALYTICS_API_TOKEN`, and `CLOUDFLARE_WEB_ANALYTICS_SITE_TAG` in each Cloudflare Pages environment where live analytics should be queried. Configure Preview and Production separately.
+
+`/api/analytics` first uses GraphQL introspection to verify the current account's `rumPageloadEventsAdaptiveGroups` dataset and available dimensions, metrics, filters, and ordering fields. It then constructs a read-only query from the discovered schema. The response contains only aggregated visits, page views, dates, paths, referers, countries, devices, browsers, and operating systems. It is returned with `private, no-store`; the API token, account ID, and site tag are never returned.
+
+No rows is a normal successful response and renders an empty state. Missing configuration, unsupported schema, timeout, authentication failure, and Cloudflare query failure are separate error states and must not be converted to zero totals. Preview validation can use mocked GraphQL responses before Preview secrets are configured; the endpoint never writes Analytics data.
 
 ## Cloudflare D1
 

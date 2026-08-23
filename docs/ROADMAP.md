@@ -6,9 +6,17 @@ This roadmap records implementation order, not a promise to build every future i
 
 ## Next action
 
-Review the Soft 404 handling Draft PR in Cloudflare Preview. Confirm unknown root/report paths return HTTP 404 while public locale pages, reports, sitemap, robots, Clean URL redirects, canonical metadata, and Preview noindex behavior remain intact.
+Review the authenticated Cloudflare Web Analytics dashboard Draft PR in Preview. Configure read-only Analytics secrets when live Preview verification is required; otherwise verify UI and error/empty states with mocked GraphQL responses.
 
 ## In progress
+
+### 12. Lightweight admin Web Analytics
+
+- add `/admin/analytics/` with today, 7-day, and 28-day Visits/Page views and lightweight trend/ranking views;
+- protect `/api/analytics` with the existing `ADMIN_KEY` and keep every Cloudflare credential server-only;
+- discover and validate the account's `rumPageloadEventsAdaptiveGroups` schema before querying;
+- distinguish empty data, configuration, schema, timeout, authentication, and upstream failures;
+- validate responsive light/dark UI and read-only Preview behavior without report mutations.
 
 ### 11. Explicit Cloudflare Pages 404 handling
 
