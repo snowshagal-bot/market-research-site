@@ -204,6 +204,22 @@
     "coverImage": "covers/2026-08-11-daily-12vx8a7.png"
   },
   {
+    "id": "2026-08-10-weekly-1rva1f6",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-08-10",
+    "reportDate": "2026-08-10",
+    "registeredDate": "2026-08-24",
+    "registeredAt": "2026-08-23T17:56:47.515Z",
+    "legacyImport": false,
+    "title": "반도체다음의 자리",
+    "subtitle": "",
+    "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "href": "reports/8월 2주차 위클리 분석.html",
+    "coverImage": "covers/2026-08-10-weekly-1rva1f6.webp"
+  },
+  {
     "id": "2026-08-10-daily-1evguss",
     "type": "daily",
     "typeLabel": "주식 리포트",
