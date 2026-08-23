@@ -14,6 +14,10 @@ export async function onRequest(context) {
     });
   }
 
+  // Preserve Pages redirects and real error responses. In particular, a missing
+  // report must keep the root 404 page/status instead of receiving report UI.
+  if (!response.ok) return response;
+
   if (!url.pathname.startsWith('/reports/')) return response;
   const contentType = response.headers.get('content-type') || '';
   if (!contentType.includes('text/html')) return response;

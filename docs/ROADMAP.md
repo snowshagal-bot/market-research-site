@@ -1,14 +1,20 @@
 # Roadmap
 
-Updated: 2026-08-12
+Updated: 2026-08-23
 
 This roadmap records implementation order, not a promise to build every future idea. Keep the current site small until traffic and actual needs justify added complexity.
 
 ## Next action
 
-Review the KO/EN structure Draft PR in Cloudflare Preview. Validate locale-isolated homepage data, language switches, English empty states, report-shell fallback behavior, and admin language/pair controls without performing a real publish, update, or delete.
+Review the Soft 404 handling Draft PR in Cloudflare Preview. Confirm unknown root/report paths return HTTP 404 while public locale pages, reports, sitemap, robots, Clean URL redirects, canonical metadata, and Preview noindex behavior remain intact.
 
 ## In progress
+
+### 11. Explicit Cloudflare Pages 404 handling
+
+- add a minimal, non-indexable root `404.html` so unknown paths no longer receive the homepage with HTTP 200;
+- preserve 404 and redirect responses in the shared middleware without report-shell injection;
+- validate real Preview HTTP status and SEO regressions without Production mutations.
 
 ### 10. Korean / English site structure
 

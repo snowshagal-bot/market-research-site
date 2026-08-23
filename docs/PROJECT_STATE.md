@@ -1,6 +1,6 @@
 # Project state
 
-Updated: 2026-08-15
+Updated: 2026-08-23
 
 ## Purpose
 
@@ -100,6 +100,8 @@ Files under `reports/` are standalone HTML documents that may contain their own 
 `functions/_middleware.js` intercepts HTML responses under `/reports/` and injects `/assets/report-shell.js`.
 
 The same middleware injects canonical `snowshagal.com` metadata into published report responses and marks non-Production hosts `noindex, nofollow` by response header. It adds `hreflang` only when both sides of an explicit `translationGroup` exist, so untranslated reports never point to invented English pages. Static KO/EN home shells declare reciprocal alternates, the empty About shells remain `noindex`, and the data-driven `/sitemap.xml` excludes them while listing current published reports. `/robots.txt` allows public crawling and excludes administrator/API routes.
+
+The repository root also contains a non-indexable `404.html`. Its presence disables Cloudflare Pages' homepage SPA fallback for unknown paths, so missing public and report URLs return HTTP 404. The shared middleware preserves redirects and error statuses without injecting the report shell or report SEO metadata.
 
 `assets/report-shell.js` currently provides:
 
