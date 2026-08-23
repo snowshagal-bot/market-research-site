@@ -1,6 +1,6 @@
 # Deployment and environment
 
-Updated: 2026-08-15
+Updated: 2026-08-23
 
 ## GitHub
 
@@ -88,6 +88,8 @@ Cloudflare Preview validation must not perform real `/api/manage` mutations. Bot
 The apex custom domain is the only SEO canonical origin. Static locale pages declare their own canonical and real KO/EN alternates. Report responses receive canonical, metadata, and any real `translationGroup` alternates from the shared Pages middleware, without modifying uploaded report HTML. Canonical report URLs omit the stored `.html` suffix because Cloudflare Pages redirects those file URLs to its extensionless Clean URLs. `/sitemap.xml` is generated from `data/posts.json`; repository tests ensure every listed report path exists. `/robots.txt` permits public pages, excludes `/admin/` and `/api/`, and advertises the apex sitemap. The shared middleware also sends `X-Robots-Tag: noindex, nofollow` outside `snowshagal.com`, keeping branch Preview responses available for QA without making them index candidates.
 
 Search Console should use a Domain property for `snowshagal.com`, verified with its Google-provided DNS TXT record. After verification, submit `sitemap.xml` and inspect the apex homepage. Do not commit a verification token or add it to application secrets.
+
+The root `404.html` is required for Cloudflare Pages to return an actual HTTP 404 instead of using `index.html` as an SPA fallback for unknown paths. Pages Functions middleware must leave redirect and error responses unchanged apart from the existing Preview `X-Robots-Tag` header. After changing this behavior, verify both a random root path and a random `/reports/` path on Preview before Production deployment.
 
 ## Comment dependencies
 

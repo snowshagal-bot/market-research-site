@@ -129,3 +129,33 @@ test('shared middleware marks Preview responses noindex while preserving Product
   assert.equal(preview.headers.get('x-robots-tag'), 'noindex, nofollow');
   assert.equal(production.headers.get('x-robots-tag'), null);
 });
+
+test('custom 404 is non-indexable and does not claim a canonical URL', async () => {
+  const html = await read('404.html');
+  assert.match(html, /<meta name="robots" content="noindex,nofollow">/);
+  assert.match(html, /<title>페이지를 찾을 수 없습니다 · Snowshagal<\/title>/);
+  assert.match(html, /href="\/assets\/site\.css"/);
+  assert.match(html, /href="\/">홈페이지로 돌아가기/);
+  assert.doesNotMatch(html, /rel="canonical"|pages\.dev/);
+});
+
+test('shared middleware preserves missing report status and body without report-shell injection', async () => {
+  const body = await read('404.html');
+  const next = async () => new Response(body, {
+    status: 404,
+    headers: { 'content-type': 'text/html; charset=utf-8' }
+  });
+  const production = await middlewareRequest({
+    request: new Request('https://snowshagal.com/reports/not-a-real-report'), next, env: {}
+  });
+  const preview = await middlewareRequest({
+    request: new Request('https://branch.market-research-site.pages.dev/reports/not-a-real-report'), next, env: {}
+  });
+
+  assert.equal(production.status, 404);
+  assert.equal(production.headers.get('x-robots-tag'), null);
+  assert.doesNotMatch(await production.text(), /report-shell\.js/);
+  assert.equal(preview.status, 404);
+  assert.equal(preview.headers.get('x-robots-tag'), 'noindex, nofollow');
+  assert.doesNotMatch(await preview.text(), /report-shell\.js/);
+});
