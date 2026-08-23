@@ -225,7 +225,10 @@
     });
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
-      throw new Error(data.message || 'Browser Rendering 커버 생성에 실패했습니다.');
+      const error = new Error(data.message || 'Browser Rendering 커버 생성에 실패했습니다.');
+      error.code = String(data.error || 'COVER_GENERATION_FAILED');
+      error.status = response.status;
+      throw error;
     }
     const type = (response.headers.get('content-type') || '').split(';')[0].toLowerCase();
     if (!['image/png', 'image/webp'].includes(type)) throw new Error('커버 이미지 응답 형식이 올바르지 않습니다.');
@@ -238,11 +241,22 @@
     };
   }
 
+  function canUseTemplateFallback(error) {
+    const code = String(error?.code || '');
+    return !code || [
+      'BROWSER_RENDERING_FAILED',
+      'BROWSER_RENDERING_TIMEOUT',
+      'INVALID_RENDER_RESPONSE',
+      'INVALID_RENDER_SIZE'
+    ].includes(code);
+  }
+
   async function generate({ html, template, adminKey }) {
     const selector = preferredSelector(html);
     if (selector) {
       try { return await serverCapture(html, selector, adminKey); }
       catch (error) {
+        if (!canUseTemplateFallback(error)) throw error;
         const fallback = await createTemplateCover(template);
         return { ...fallback, attemptedSelector: selector, captureError: error?.message || 'Browser Rendering 실패' };
       }
@@ -263,6 +277,7 @@
     containPlacement,
     preferredSelector,
     serverCapture,
+    canUseTemplateFallback,
     createTemplateCover,
     generate
   };

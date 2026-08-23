@@ -1,0 +1,5 @@
+/data/posts.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/data/posts.json
+  Cache-Control: no-cache, no-store, must-revalidate

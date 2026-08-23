@@ -35,14 +35,35 @@ async function secretsMatch(left, right) {
   return mismatch === 0;
 }
 
-function analyticsError(code, message, status = 502) {
+function analyticsError(code, message, status = 424, details = {}) {
   const error = new Error(message);
   error.code = code;
   error.status = status;
+  Object.assign(error, details);
   return error;
 }
 
-async function graphQL(token, query, variables = {}) {
+function classifyGraphQLError(message) {
+  const value = String(message || '').toLowerCase();
+  if (/complexity|too many|cost|query limit/.test(value)) return 'QUERY_COMPLEXITY';
+  if (/unknown (?:argument|field)|cannot query field|validation/.test(value)) return 'QUERY_VALIDATION';
+  if (/permission|access denied|not authorized|authorization/.test(value)) return 'PERMISSION';
+  if (/rate limit|too many requests/.test(value)) return 'RATE_LIMIT';
+  return 'GRAPHQL_ERROR';
+}
+
+function logAnalyticsFailure(error) {
+  console.error(JSON.stringify({
+    scope: 'admin-analytics',
+    code: error?.code || 'ANALYTICS_QUERY_FAILED',
+    stage: error?.stage || 'unknown',
+    upstreamStatus: error?.upstreamStatus || null,
+    upstreamCodes: error?.upstreamCodes || [],
+    upstreamReasons: error?.upstreamReasons || []
+  }));
+}
+
+async function graphQL(token, query, variables = {}, stage = 'unknown') {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
@@ -58,15 +79,25 @@ async function graphQL(token, query, variables = {}) {
     });
     let payload;
     try { payload = await response.json(); }
-    catch (_) { throw analyticsError('ANALYTICS_BAD_RESPONSE', 'Cloudflare Analytics 응답을 읽을 수 없습니다.'); }
+    catch (_) {
+      throw analyticsError('ANALYTICS_BAD_RESPONSE', 'Cloudflare Analytics 응답을 읽을 수 없습니다.', 424, {
+        stage,
+        upstreamStatus: response.status
+      });
+    }
     if (!response.ok || payload?.errors?.length) {
       const status = response.status === 401 || response.status === 403 ? 503 : 502;
-      throw analyticsError('ANALYTICS_QUERY_FAILED', 'Cloudflare Analytics 데이터 조회에 실패했습니다.', status);
+      throw analyticsError('ANALYTICS_QUERY_FAILED', 'Cloudflare Analytics 데이터 조회에 실패했습니다.', status === 502 ? 424 : status, {
+        stage,
+        upstreamStatus: response.status,
+        upstreamCodes: (payload?.errors || []).map((item) => String(item?.extensions?.code || '').replace(/[^A-Z0-9_-]/gi, '').slice(0, 40)).filter(Boolean).slice(0, 5),
+        upstreamReasons: [...new Set((payload?.errors || []).map((item) => classifyGraphQLError(item?.message)))].slice(0, 5)
+      });
     }
     return payload?.data;
   } catch (error) {
     if (error?.name === 'AbortError') {
-      throw analyticsError('ANALYTICS_TIMEOUT', 'Cloudflare Analytics 응답이 지연되고 있습니다.', 504);
+      throw analyticsError('ANALYTICS_TIMEOUT', 'Cloudflare Analytics 응답이 지연되고 있습니다.', 504, { stage });
     }
     throw error;
   } finally {
@@ -110,7 +141,7 @@ function firstAvailable(names, candidates) {
 
 async function inspectType(token, name) {
   if (!name) return null;
-  const data = await graphQL(token, TYPE_QUERY, { name });
+  const data = await graphQL(token, TYPE_QUERY, { name }, `schema:type:${name}`);
   return data?.__type || null;
 }
 
@@ -120,7 +151,7 @@ async function discoverSchema(token) {
 
   const rootData = await graphQL(token, `query AnalyticsRoot {
     __schema { queryType { name fields { name type { ${TYPE_REF} } } } }
-  }`);
+  }`, {}, 'schema:root');
   const queryType = rootData?.__schema?.queryType;
   const viewerField = queryType?.fields?.find((item) => item.name === 'viewer');
   const viewerType = await inspectType(token, namedType(viewerField?.type));
@@ -176,8 +207,10 @@ async function discoverSchema(token) {
   const hostFilter = filterType?.inputFields?.find((item) => ['requestHost_in', 'requestHost', 'host_in', 'host'].includes(item.name));
   const adminPathFilter = filterType?.inputFields?.find((item) => ['requestPath_notlike', 'path_notlike'].includes(item.name));
   const excludeBotsFilter = filterType?.inputFields?.find((item) => item.name === 'excludeBots');
+  const botFilter = filterType?.inputFields?.find((item) => item.name === 'bot');
+  const selectedBotFilter = excludeBotsFilter || botFilter;
   const excludeBotsType = (() => {
-    let current = excludeBotsFilter?.type;
+    let current = selectedBotFilter?.type;
     while (current?.ofType) current = current.ofType;
     return current;
   })();
@@ -189,9 +222,10 @@ async function discoverSchema(token) {
     host: hostFilter?.name || '',
     hostList: includesKind(hostFilter?.type, 'LIST'),
     excludeAdminPath: adminPathFilter?.name || '',
-    excludeBots: excludeBotsFilter?.name || '',
-    excludeBotsList: includesKind(excludeBotsFilter?.type, 'LIST'),
+    excludeBots: selectedBotFilter?.name || '',
+    excludeBotsList: includesKind(selectedBotFilter?.type, 'LIST'),
     excludeBotsEnum: excludeBotsType?.kind === 'ENUM',
+    excludeBotsZero: selectedBotFilter?.name === 'bot',
     datetime: Boolean(startFilter?.name.startsWith('datetime'))
   };
   const missing = Object.entries(dimensions).filter(([, value]) => !value).map(([name]) => `dimension:${name}`);
@@ -202,7 +236,9 @@ async function discoverSchema(token) {
   if (!filters.excludeAdminPath) missing.push('filter:adminPath');
   if (!filters.excludeBots) missing.push('filter:excludeBots');
   if (missing.length) {
-    throw analyticsError('ANALYTICS_SCHEMA_UNSUPPORTED', `Web Analytics schema에 필요한 항목이 없습니다: ${missing.join(', ')}`);
+    throw analyticsError('ANALYTICS_SCHEMA_UNSUPPORTED', `Web Analytics schema에 필요한 항목이 없습니다: ${missing.join(', ')}`, 424, {
+      stage: 'schema:validation'
+    });
   }
 
   const value = {
@@ -256,7 +292,9 @@ function buildAnalyticsQuery(schema, accountId, siteTag, dates) {
   const site = schema.filters.siteTagList ? `[${gqlString(siteTag)}]` : gqlString(siteTag);
   const host = schema.filters.hostList ? `[${gqlString(PRODUCTION_HOSTNAME)}]` : gqlString(PRODUCTION_HOSTNAME);
   const baseFilter = `${schema.filters.start}: ${gqlString(start)}, ${schema.filters.end}: ${gqlString(end)}, ${schema.filters.siteTag}: ${site}, ${schema.filters.host}: ${host}, ${schema.filters.excludeAdminPath}: ${gqlString(`${ADMIN_PATH_PREFIX}%`)}`;
-  const excludeBotsValue = schema.filters.excludeBotsEnum ? 'Yes' : gqlString('Yes');
+  const excludeBotsValue = schema.filters.excludeBotsZero
+    ? '0'
+    : schema.filters.excludeBotsEnum ? 'Yes' : gqlString('Yes');
   const excludeBots = schema.filters.excludeBotsList ? `[${excludeBotsValue}]` : excludeBotsValue;
   const humanFilter = `{ ${baseFilter}, ${schema.filters.excludeBots}: ${excludeBots} }`;
   const allTrafficFilter = `{ ${baseFilter} }`;
@@ -396,14 +434,16 @@ export async function onRequestGet({ request, env }) {
     const schema = await discoverSchema(env.CLOUDFLARE_ANALYTICS_API_TOKEN);
     const dates = rangeDates(days);
     const query = buildAnalyticsQuery(schema, env.CLOUDFLARE_ACCOUNT_ID, env.CLOUDFLARE_WEB_ANALYTICS_SITE_TAG, dates);
-    const data = await graphQL(env.CLOUDFLARE_ANALYTICS_API_TOKEN, query);
+    const data = await graphQL(env.CLOUDFLARE_ANALYTICS_API_TOKEN, query, {}, 'analytics:data');
     return json(normalizeAnalytics(data, schema, days, dates));
   } catch (error) {
+    logAnalyticsFailure(error);
     return json({
       ok: false,
       error: error?.code || 'ANALYTICS_QUERY_FAILED',
-      message: error?.message || 'Cloudflare Analytics 데이터 조회에 실패했습니다.'
-    }, error?.status || 502);
+      message: error?.message || 'Cloudflare Analytics 데이터 조회에 실패했습니다.',
+      stage: error?.stage || 'unknown'
+    }, error?.status || 424);
   }
 }
 
@@ -424,5 +464,6 @@ export const __test = {
   normalizeTrend,
   normalizeAnalytics,
   refererBucket,
+  classifyGraphQLError,
   resetSchemaCache() { schemaCache = null; }
 };

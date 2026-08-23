@@ -124,6 +124,20 @@ test('existing post metadata supports an optional coverImage without snapshottin
   assert.ok(posts.every(post => !Object.hasOwn(post, 'coverImage') || typeof post.coverImage === 'string'));
 });
 
+test('homepage post metadata bypasses stale browser caches now and on later publishes', async () => {
+  const [home, englishHome, admin, headers] = await Promise.all([
+    read('index.html'),
+    read('en/index.html'),
+    read('admin/index.html'),
+    read('_headers')
+  ]);
+  assert.match(home, /\/data\/posts\.js\?v=20260824-1/);
+  assert.match(englishHome, /\/data\/posts\.js\?v=20260824-1/);
+  assert.match(admin, /\.\.\/data\/posts\.js\?v=20260824-1/);
+  assert.match(headers, /\/data\/posts\.js\s+Cache-Control: no-cache, no-store, must-revalidate/);
+  assert.match(headers, /\/data\/posts\.json\s+Cache-Control: no-cache, no-store, must-revalidate/);
+});
+
 test('admin exposes an optional validated cover input', async () => {
   const [html, script] = await Promise.all([read('admin/index.html'), read('assets/admin.js')]);
   assert.match(html, /id="cover-file"/);

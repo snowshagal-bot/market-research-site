@@ -61,7 +61,7 @@ const SCHEMA_TYPES = {
       typeField('siteTag_in', { kind: 'LIST', name: null, ofType: ref('String', 'SCALAR') }),
       typeField('requestHost_in', { kind: 'LIST', name: null, ofType: ref('String', 'SCALAR') }),
       typeField('requestPath_notlike', ref('String', 'SCALAR')),
-      typeField('excludeBots', ref('String', 'SCALAR'))
+      typeField('bot', ref('uint8', 'SCALAR'))
     ]
   },
   RumPageloadOrderBy: {
@@ -147,10 +147,10 @@ test('authenticated requests introspect the live schema before querying the RUM 
     assert.match(query, /siteTag_in: \["site-tag-secret"\]/);
     assert.match(query, /requestHost_in: \["snowshagal\.com"\]/);
     assert.match(query, /requestPath_notlike: "\/admin\/%"/);
-    assert.equal((query.match(/excludeBots: "Yes"/g) || []).length, 7);
+    assert.equal((query.match(/bot: 0/g) || []).length, 7);
     const allTrafficAlias = query.split('\n').find((line) => line.includes('allTrafficTrend:'));
     assert.ok(allTrafficAlias);
-    assert.doesNotMatch(allTrafficAlias, /excludeBots/);
+    assert.doesNotMatch(allTrafficAlias, /bot: 0/);
     assert.doesNotMatch(query, /market-research-site\.pages\.dev/);
     assert.match(query, /accountTag: "account-tag"/);
     assert.equal(response.headers.get('cache-control'), 'private, no-store, max-age=0');
@@ -168,17 +168,20 @@ test('production host and admin path exclusions protect human and all-traffic ag
     const query = calls.at(-1).query;
     assert.equal((query.match(/requestHost_in: \["snowshagal\.com"\]/g) || []).length, 8);
     assert.equal((query.match(/requestPath_notlike: "\/admin\/%"/g) || []).length, 8);
-    assert.equal((query.match(/excludeBots: "Yes"/g) || []).length, 7);
+    assert.equal((query.match(/bot: 0/g) || []).length, 7);
     assert.doesNotMatch(query, /pages\.dev|\/admin\/analytics/);
   } finally { globalThis.fetch = originalFetch; }
 });
 
 test('unsupported host, admin-prefix, or bot filters fail closed before analytics rows are queried', { concurrency: false }, async () => {
   const originalFetch = globalThis.fetch;
+  const originalConsoleError = console.error;
+  const errorLogs = [];
   const originalFields = SCHEMA_TYPES.RumPageloadFilter_InputObject.inputFields;
   let dataQueries = 0;
-  SCHEMA_TYPES.RumPageloadFilter_InputObject.inputFields = originalFields.filter((item) => !['requestHost_in', 'requestPath_notlike', 'excludeBots'].includes(item.name));
+  SCHEMA_TYPES.RumPageloadFilter_InputObject.inputFields = originalFields.filter((item) => !['requestHost_in', 'requestPath_notlike', 'bot'].includes(item.name));
   __test.resetSchemaCache();
+  console.error = (message) => errorLogs.push(message);
   globalThis.fetch = async (_url, options) => {
     const payload = JSON.parse(options.body);
     if (payload.query.includes('__schema')) {
@@ -193,16 +196,19 @@ test('unsupported host, admin-prefix, or bot filters fail closed before analytic
   try {
     const response = await onRequestGet({ request: request(), env: ENV });
     const data = await response.json();
-    assert.equal(response.status, 502);
+    assert.equal(response.status, 424);
     assert.equal(data.error, 'ANALYTICS_SCHEMA_UNSUPPORTED');
+    assert.equal(data.stage, 'schema:validation');
     assert.match(data.message, /filter:productionHost/);
     assert.match(data.message, /filter:adminPath/);
     assert.match(data.message, /filter:excludeBots/);
     assert.equal(dataQueries, 0);
+    assert.match(errorLogs.join('\n'), /"stage":"schema:validation"/);
   } finally {
     SCHEMA_TYPES.RumPageloadFilter_InputObject.inputFields = originalFields;
     __test.resetSchemaCache();
     globalThis.fetch = originalFetch;
+    console.error = originalConsoleError;
   }
 });
 
@@ -223,16 +229,25 @@ test('zero rows are a successful empty state rather than an API failure', { conc
 
 test('Cloudflare GraphQL errors are distinct from zero data and sanitized', { concurrency: false }, async () => {
   const originalFetch = globalThis.fetch;
+  const originalConsoleError = console.error;
+  const errorLogs = [];
   __test.resetSchemaCache();
   globalThis.fetch = async () => Response.json({ errors: [{ message: 'internal account detail' }] });
+  console.error = (message) => errorLogs.push(message);
   try {
     const response = await onRequestGet({ request: request(), env: ENV });
     const data = await response.json();
-    assert.equal(response.status, 502);
+    assert.equal(response.status, 424);
     assert.equal(data.ok, false);
     assert.equal(data.error, 'ANALYTICS_QUERY_FAILED');
+    assert.equal(data.stage, 'schema:root');
     assert.doesNotMatch(data.message, /internal account detail/);
-  } finally { globalThis.fetch = originalFetch; }
+    assert.match(errorLogs.join('\n'), /"stage":"schema:root"/);
+    assert.doesNotMatch(errorLogs.join('\n'), /internal account detail|analytics-token-secret|site-tag-secret/);
+  } finally {
+    globalThis.fetch = originalFetch;
+    console.error = originalConsoleError;
+  }
 });
 
 test('missing server secrets are reported only after successful admin authentication', async () => {
@@ -250,6 +265,9 @@ test('date ranges and referer buckets are deterministic', () => {
   assert.equal(__test.refererBucket('https://www.google.co.kr/search'), 'Google');
   assert.equal(__test.refererBucket('blog.tistory.com'), 'Tistory');
   assert.equal(__test.refererBucket('https://example.com/path'), 'example.com');
+  assert.equal(__test.classifyGraphQLError('query exceeded complexity budget'), 'QUERY_COMPLEXITY');
+  assert.equal(__test.classifyGraphQLError('Cannot query field foo'), 'QUERY_VALIDATION');
+  assert.equal(__test.classifyGraphQLError('permission denied'), 'PERMISSION');
   assert.deepEqual(__test.normalizeTrend([
     { count: 2, sum: { visits: 1 }, dimensions: { datetimeHour: '2026-08-22T10:00:00Z' } },
     { count: 3, sum: { visits: 2 }, dimensions: { datetimeHour: '2026-08-22T11:00:00Z' } },
@@ -262,14 +280,14 @@ test('date ranges and referer buckets are deterministic', () => {
     dataset: __test.DATASET,
     dimensions: { date: 'date', host: 'requestHost', path: 'requestPath', referer: 'refererHost', country: 'countryName', device: 'deviceType', browser: 'userAgentBrowser', os: 'userAgentOS' },
     visits: { container: 'sum', field: 'visits' },
-    filters: { start: 'datetime_geq', end: 'datetime_lt', siteTag: 'siteTag_in', siteTagList: true, host: 'requestHost_in', hostList: true, excludeAdminPath: 'requestPath_notlike', excludeBots: 'excludeBots', excludeBotsList: false, excludeBotsEnum: false, datetime: true },
+    filters: { start: 'datetime_geq', end: 'datetime_lt', siteTag: 'siteTag_in', siteTagList: true, host: 'requestHost_in', hostList: true, excludeAdminPath: 'requestPath_notlike', excludeBots: 'bot', excludeBotsList: false, excludeBotsEnum: false, excludeBotsZero: true, datetime: true },
     countOrder: 'count_DESC', dateOrder: 'date_ASC'
   }, 'account', 'site', { start: '2026-08-17', end: '2026-08-23' });
   assert.match(datetimeQuery, /datetime_geq: "2026-08-17T00:00:00\.000Z"/);
   assert.match(datetimeQuery, /datetime_lt: "2026-08-24T00:00:00\.000Z"/);
   assert.match(datetimeQuery, /requestHost_in: \["snowshagal\.com"\]/);
   assert.match(datetimeQuery, /requestPath_notlike: "\/admin\/%"/);
-  assert.equal((datetimeQuery.match(/excludeBots: "Yes"/g) || []).length, 7);
+  assert.equal((datetimeQuery.match(/bot: 0/g) || []).length, 7);
 });
 
 function element(id = '') {
@@ -339,4 +357,13 @@ test('analytics page keeps secrets server-side and renders Bots excluded versus 
   assert.equal(elements['metric-pageviews-all'].textContent, '3');
   assert.match(elements['analytics-source'].textContent, /Bots excluded: Exclude Bots = Yes/);
   assert.match(elements['analytics-status'].textContent, /통계 조회가 완료됐습니다/);
+
+  context.fetch = async () => new Response('error code: 502\n', {
+    status: 502,
+    headers: { 'content-type': 'text/plain; charset=UTF-8', 'cf-ray': 'test-ray-SIN' }
+  });
+  await context.window.__adminAnalyticsTest.loadAnalytics(7);
+  assert.match(elements['analytics-status'].textContent, /HTTP 502/);
+  assert.match(elements['analytics-status'].textContent, /text\/plain; charset=UTF-8/);
+  assert.match(elements['analytics-status'].textContent, /CF-Ray test-ray-SIN/);
 });

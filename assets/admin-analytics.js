@@ -125,10 +125,18 @@
         headers: { 'X-Admin-Key': key },
         cache: 'no-store'
       });
+      const responseText = await response.text();
       let data;
-      try { data = await response.json(); }
-      catch (_) { data = { message: '통계 응답을 읽을 수 없습니다.' }; }
-      if (!response.ok) throw new Error(data.message || '통계 데이터를 불러오지 못했습니다.');
+      try { data = JSON.parse(responseText); }
+      catch (_) {
+        const contentType = response.headers.get('content-type') || 'unknown content-type';
+        const cfRay = response.headers.get('cf-ray') || 'unknown';
+        data = { message: `통계 API 응답 오류 · HTTP ${response.status} · ${contentType} · CF-Ray ${cfRay}` };
+      }
+      if (!response.ok) {
+        const stage = data.stage && data.stage !== 'unknown' ? ` · 단계 ${data.stage}` : '';
+        throw new Error(`${data.message || '통계 데이터를 불러오지 못했습니다.'}${stage}`);
+      }
       render(data);
       rangeButtons.forEach((button) => button.setAttribute('aria-pressed', String(Number(button.dataset.range) === selectedRange)));
       setStatus(data.empty ? '조회는 정상적으로 완료됐지만 아직 수집된 데이터가 없습니다.' : '통계 조회가 완료됐습니다.');
