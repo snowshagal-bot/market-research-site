@@ -16,6 +16,8 @@
       menuClose: '메뉴 닫기',
       representative: '대표 리포트',
       coverAlt: '커버 이미지',
+      registrationOrder: '홈페이지 등록일 최신순',
+      reportOrder: '리포트 기준일 최신순',
       basicsEmpty: '시장 공부 글이 아직 없습니다.',
       empty: '조건에 맞는 글이 없습니다.',
       read: '읽기'
@@ -34,6 +36,8 @@
       menuClose: 'Close menu',
       representative: 'featured report',
       coverAlt: 'cover image',
+      registrationOrder: 'Newest homepage registration first',
+      reportOrder: 'Newest report date first',
       basicsEmpty: 'No Market Basics posts yet.',
       empty: 'No English reports match these filters yet.',
       read: 'Read'
@@ -70,6 +74,17 @@
       const rightDate = String(right?.reportDate || right?.date || '');
       if (leftDate !== rightDate) return rightDate.localeCompare(leftDate);
       return String(right?.registeredAt || '').localeCompare(String(left?.registeredAt || ''));
+    });
+  }
+
+  function sortPostsByRegistration(posts) {
+    return (Array.isArray(posts) ? posts : []).slice().sort((left, right) => {
+      const leftRegistration = String(left?.registeredAt || left?.registeredDate || '');
+      const rightRegistration = String(right?.registeredAt || right?.registeredDate || '');
+      if (leftRegistration !== rightRegistration) return rightRegistration.localeCompare(leftRegistration);
+      const leftDate = String(left?.reportDate || left?.date || '');
+      const rightDate = String(right?.reportDate || right?.date || '');
+      return rightDate.localeCompare(leftDate);
     });
   }
 
@@ -139,6 +154,7 @@
     normalizeReportPath,
     localePosts,
     sortPosts,
+    sortPostsByRegistration,
     latestByCore,
     categoryCounts,
     searchPosts,
