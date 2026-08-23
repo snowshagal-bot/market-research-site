@@ -72,6 +72,23 @@ window.RESEARCH_POSTS = [
     "summary": "메모리 호재로 장중 7,200선을 넘었던 코스피는 기관·비차익 매도에 밀려 1.55% 하락했고, 오른 종목은 22%에 그쳤다. 외국인 매수는 이어졌지만 규모가 급감한 가운데, 호재가 SK하이닉스에만 남고 시장 전반으로 퍼지지 못한 하루를 살펴본다"
   },
   {
+    "id": "2026-08-16-research-1b9x09d",
+    "type": "research",
+    "typeLabel": "Research",
+    "lang": "en",
+    "date": "2026-08-16",
+    "reportDate": "2026-08-16",
+    "registeredDate": "2026-08-24",
+    "registeredAt": "2026-08-23T17:27:37.020Z",
+    "legacyImport": false,
+    "title": "Interest on the Chip",
+    "subtitle": "",
+    "description": "Independent research on specific industries, companies, policies, and market structure.",
+    "href": "reports/en/2026-08-16_Can_a_GPU_Become_a_Bond_EN.html",
+    "translationGroup": "2026-08-16-research-141u5l9",
+    "coverImage": "covers/2026-08-16-research-1b9x09d.webp"
+  },
+  {
     "id": "2026-08-16-research-141u5l9",
     "type": "research",
     "typeLabel": "비정기 리서치",
