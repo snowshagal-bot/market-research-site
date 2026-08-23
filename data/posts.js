@@ -1,5 +1,21 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-20-daily-c6eow2",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-08-20",
+    "reportDate": "2026-08-20",
+    "registeredDate": "2026-08-23",
+    "registeredAt": "2026-08-23T07:27:58.040Z",
+    "legacyImport": false,
+    "title": "어제의 천장에서시작한 하루",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "href": "reports/8월 20일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-08-20-daily-c6eow2.webp"
+  },
+  {
     "id": "2026-08-19-daily-kuhjks",
     "type": "daily",
     "typeLabel": "주식 리포트",
