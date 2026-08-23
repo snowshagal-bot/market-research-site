@@ -175,6 +175,12 @@ async function discoverSchema(token) {
   const siteFilter = filterType?.inputFields?.find((item) => ['siteTag_in', 'siteTag'].includes(item.name));
   const hostFilter = filterType?.inputFields?.find((item) => ['requestHost_in', 'requestHost', 'host_in', 'host'].includes(item.name));
   const adminPathFilter = filterType?.inputFields?.find((item) => ['requestPath_notlike', 'path_notlike'].includes(item.name));
+  const excludeBotsFilter = filterType?.inputFields?.find((item) => item.name === 'excludeBots');
+  const excludeBotsType = (() => {
+    let current = excludeBotsFilter?.type;
+    while (current?.ofType) current = current.ofType;
+    return current;
+  })();
   const filters = {
     start: startFilter?.name || '',
     end: endFilter?.name || '',
@@ -183,6 +189,9 @@ async function discoverSchema(token) {
     host: hostFilter?.name || '',
     hostList: includesKind(hostFilter?.type, 'LIST'),
     excludeAdminPath: adminPathFilter?.name || '',
+    excludeBots: excludeBotsFilter?.name || '',
+    excludeBotsList: includesKind(excludeBotsFilter?.type, 'LIST'),
+    excludeBotsEnum: excludeBotsType?.kind === 'ENUM',
     datetime: Boolean(startFilter?.name.startsWith('datetime'))
   };
   const missing = Object.entries(dimensions).filter(([, value]) => !value).map(([name]) => `dimension:${name}`);
@@ -191,6 +200,7 @@ async function discoverSchema(token) {
   if (!filters.start || !filters.end || !filters.siteTag) missing.push('filter:date/siteTag');
   if (!filters.host) missing.push('filter:productionHost');
   if (!filters.excludeAdminPath) missing.push('filter:adminPath');
+  if (!filters.excludeBots) missing.push('filter:excludeBots');
   if (missing.length) {
     throw analyticsError('ANALYTICS_SCHEMA_UNSUPPORTED', `Web Analytics schema에 필요한 항목이 없습니다: ${missing.join(', ')}`);
   }
@@ -245,17 +255,22 @@ function buildAnalyticsQuery(schema, accountId, siteTag, dates) {
     : dates.end;
   const site = schema.filters.siteTagList ? `[${gqlString(siteTag)}]` : gqlString(siteTag);
   const host = schema.filters.hostList ? `[${gqlString(PRODUCTION_HOSTNAME)}]` : gqlString(PRODUCTION_HOSTNAME);
-  const filter = `{ ${schema.filters.start}: ${gqlString(start)}, ${schema.filters.end}: ${gqlString(end)}, ${schema.filters.siteTag}: ${site}, ${schema.filters.host}: ${host}, ${schema.filters.excludeAdminPath}: ${gqlString(`${ADMIN_PATH_PREFIX}%`)} }`;
-  const datasetArgs = (limit, orderBy = '') => `filter: ${filter}, limit: ${limit}${orderBy ? `, orderBy: [${orderBy}]` : ''}`;
+  const baseFilter = `${schema.filters.start}: ${gqlString(start)}, ${schema.filters.end}: ${gqlString(end)}, ${schema.filters.siteTag}: ${site}, ${schema.filters.host}: ${host}, ${schema.filters.excludeAdminPath}: ${gqlString(`${ADMIN_PATH_PREFIX}%`)}`;
+  const excludeBotsValue = schema.filters.excludeBotsEnum ? 'Yes' : gqlString('Yes');
+  const excludeBots = schema.filters.excludeBotsList ? `[${excludeBotsValue}]` : excludeBotsValue;
+  const humanFilter = `{ ${baseFilter}, ${schema.filters.excludeBots}: ${excludeBots} }`;
+  const allTrafficFilter = `{ ${baseFilter} }`;
+  const datasetArgs = (filter, limit, orderBy = '') => `filter: ${filter}, limit: ${limit}${orderBy ? `, orderBy: [${orderBy}]` : ''}`;
   const topOrder = schema.countOrder;
   const aliases = [
-    `trend: ${schema.dataset}(${datasetArgs(1000, schema.dateOrder)}) { ${buildSelection(schema, schema.dimensions.date)} }`,
-    `pages: ${schema.dataset}(${datasetArgs(100, topOrder)}) { ${buildSelection(schema, schema.dimensions.path)} }`,
-    `referers: ${schema.dataset}(${datasetArgs(100, topOrder)}) { ${buildSelection(schema, schema.dimensions.referer)} }`,
-    `countries: ${schema.dataset}(${datasetArgs(100, topOrder)}) { ${buildSelection(schema, schema.dimensions.country)} }`,
-    `devices: ${schema.dataset}(${datasetArgs(100, topOrder)}) { ${buildSelection(schema, schema.dimensions.device)} }`,
-    `browsers: ${schema.dataset}(${datasetArgs(100, topOrder)}) { ${buildSelection(schema, schema.dimensions.browser)} }`,
-    `operatingSystems: ${schema.dataset}(${datasetArgs(100, topOrder)}) { ${buildSelection(schema, schema.dimensions.os)} }`
+    `allTrafficTrend: ${schema.dataset}(${datasetArgs(allTrafficFilter, 1000, schema.dateOrder)}) { ${buildSelection(schema, schema.dimensions.date)} }`,
+    `trend: ${schema.dataset}(${datasetArgs(humanFilter, 1000, schema.dateOrder)}) { ${buildSelection(schema, schema.dimensions.date)} }`,
+    `pages: ${schema.dataset}(${datasetArgs(humanFilter, 100, topOrder)}) { ${buildSelection(schema, schema.dimensions.path)} }`,
+    `referers: ${schema.dataset}(${datasetArgs(humanFilter, 100, topOrder)}) { ${buildSelection(schema, schema.dimensions.referer)} }`,
+    `countries: ${schema.dataset}(${datasetArgs(humanFilter, 100, topOrder)}) { ${buildSelection(schema, schema.dimensions.country)} }`,
+    `devices: ${schema.dataset}(${datasetArgs(humanFilter, 100, topOrder)}) { ${buildSelection(schema, schema.dimensions.device)} }`,
+    `browsers: ${schema.dataset}(${datasetArgs(humanFilter, 100, topOrder)}) { ${buildSelection(schema, schema.dimensions.browser)} }`,
+    `operatingSystems: ${schema.dataset}(${datasetArgs(humanFilter, 100, topOrder)}) { ${buildSelection(schema, schema.dimensions.os)} }`
   ];
   return `query AdminAnalytics {
     viewer {
@@ -329,7 +344,12 @@ function normalizeAnalytics(data, schema, days, dates) {
   const account = data?.viewer?.accounts?.[0];
   if (!account) throw analyticsError('ANALYTICS_ACCOUNT_NOT_FOUND', 'Cloudflare Analytics 계정 데이터를 찾지 못했습니다.');
   const trend = normalizeTrend(account.trend, schema.dimensions.date, schema, days);
+  const allTrafficTrend = normalizeTrend(account.allTrafficTrend, schema.dimensions.date, schema, days);
   const totals = trend.reduce((result, item) => ({
+    visits: result.visits + item.visits,
+    pageViews: result.pageViews + item.pageViews
+  }), { visits: 0, pageViews: 0 });
+  const allTrafficTotals = allTrafficTrend.reduce((result, item) => ({
     visits: result.visits + item.visits,
     pageViews: result.pageViews + item.pageViews
   }), { visits: 0, pageViews: 0 });
@@ -338,6 +358,7 @@ function normalizeAnalytics(data, schema, days, dates) {
     generatedAt: new Date().toISOString(),
     range: { days, from: dates.start, to: dates.end, timezone: 'UTC' },
     totals,
+    allTrafficTotals,
     trend,
     topPages: normalizeGroups(account.pages, schema.dimensions.path, schema),
     referrers: normalizeReferers(account.referers, schema.dimensions.referer, schema),
@@ -348,10 +369,12 @@ function normalizeAnalytics(data, schema, days, dates) {
     source: {
       dataset: schema.dataset,
       dimensions: schema.dimensions,
-      visitsMetric: `${schema.visits.container}.${schema.visits.field}`
+      visitsMetric: `${schema.visits.container}.${schema.visits.field}`,
+      excludeBots: 'Yes'
     }
   };
-  result.empty = result.totals.visits === 0 && result.totals.pageViews === 0;
+  result.empty = result.totals.visits === 0 && result.totals.pageViews === 0
+    && result.allTrafficTotals.visits === 0 && result.allTrafficTotals.pageViews === 0;
   return result;
 }
 

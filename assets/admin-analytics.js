@@ -85,9 +85,13 @@
   }
 
   function render(data) {
+    const allTraffic = data.allTrafficTotals || data.totals;
     $('metric-visits').textContent = formatNumber(data.totals.visits);
     $('metric-pageviews').textContent = formatNumber(data.totals.pageViews);
     $('metric-depth').textContent = data.totals.visits ? formatNumber(data.totals.pageViews / data.totals.visits) : '0';
+    $('metric-visits-all').textContent = formatNumber(allTraffic.visits);
+    $('metric-pageviews-all').textContent = formatNumber(allTraffic.pageViews);
+    $('metric-depth-all').textContent = allTraffic.visits ? formatNumber(allTraffic.pageViews / allTraffic.visits) : '0';
     $('analytics-period').textContent = `${data.range.from} — ${data.range.to} · ${data.range.timezone} 기준`;
     $('analytics-empty').hidden = !data.empty;
     $('trend-chart').hidden = data.empty;
@@ -98,7 +102,7 @@
     renderRanking('top-devices', data.devices);
     renderRanking('top-browsers', data.browsers);
     renderRanking('top-os', data.operatingSystems);
-    $('analytics-source').textContent = `Cloudflare Web Analytics · ${data.source.dataset} · ${data.generatedAt}`;
+    $('analytics-source').textContent = `Cloudflare Web Analytics · Bots excluded: Exclude Bots = ${data.source.excludeBots || 'Yes'} · All traffic 비교 · ${data.source.dataset} · ${data.generatedAt}`;
     dashboard.hidden = false;
   }
 

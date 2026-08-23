@@ -8,7 +8,7 @@
 <title>방문 통계 · Market Research</title>
 <link rel="stylesheet" href="../../assets/site.css">
 <link rel="stylesheet" href="../../assets/ui-polish.css?v=20260810-2">
-<link rel="stylesheet" href="../../assets/admin-analytics.css?v=20260823-1">
+<link rel="stylesheet" href="../../assets/admin-analytics.css?v=20260823-2">
 <script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
 </head>
 <body>
@@ -30,11 +30,12 @@
       <button type="button" data-range="7" aria-pressed="true">7일</button>
       <button type="button" data-range="28" aria-pressed="false">28일</button>
     </div>
+    <p class="traffic-scope"><strong>Bots excluded</strong>가 기본 통계입니다. Cloudflare <code>Exclude Bots = Yes</code>를 적용한, 실제 사용자에 더 가까운 수치이며 모든 자동화 트래픽이 제거됐다는 의미는 아닙니다. 카드의 All traffic은 같은 조건에서 bot 필터만 제외한 비교값이며, 차트와 TOP 10도 Bots excluded 기준입니다.</p>
 
     <div class="summary-grid" aria-label="방문 요약">
-      <article class="card metric-card"><span>Visits</span><strong id="metric-visits">0</strong><small>선택 기간 방문</small></article>
-      <article class="card metric-card"><span>Page views</span><strong id="metric-pageviews">0</strong><small>선택 기간 페이지 조회</small></article>
-      <article class="card metric-card"><span>Pages / visit</span><strong id="metric-depth">0</strong><small>방문당 조회 페이지</small></article>
+      <article class="card metric-card"><span>Bots excluded · Visits</span><strong id="metric-visits">0</strong><small>All traffic <b id="metric-visits-all">0</b></small></article>
+      <article class="card metric-card"><span>Bots excluded · Page views</span><strong id="metric-pageviews">0</strong><small>All traffic <b id="metric-pageviews-all">0</b></small></article>
+      <article class="card metric-card"><span>Bots excluded · Pages / visit</span><strong id="metric-depth">0</strong><small>All traffic <b id="metric-depth-all">0</b></small></article>
     </div>
 
     <section class="card trend-card" aria-labelledby="trend-title"><div class="section-head"><div><h2 id="trend-title">방문 추이</h2><p id="analytics-period"></p></div><div class="chart-legend"><span><i class="visits"></i>Visits</span><span><i class="views"></i>Page views</span></div></div><div class="trend-chart" id="trend-chart"></div><div class="empty-state" id="analytics-empty" hidden>아직 이 기간에 수집된 방문 데이터가 없습니다.</div></section>
@@ -50,6 +51,6 @@
     <p class="analytics-source" id="analytics-source"></p>
   </section>
 </div></main>
-<script src="../../assets/admin-analytics.js?v=20260823-1"></script>
+<script src="../../assets/admin-analytics.js?v=20260823-3"></script>
 </body>
 </html>
