@@ -87,6 +87,14 @@ The management page extends the existing static admin and GitHub-backed publishi
 
 Cloudflare Preview hosts disable actual update/delete actions in the client, and `/api/manage` independently rejects every mutation whose request hostname is not exactly `snowshagal.com`. Preview validation must use list, form, sandboxed local HTML/cover preview, and mocked API tests only.
 
+## Admin Web Analytics
+
+Admin page: `/admin/analytics/`
+
+The lightweight analytics dashboard reuses the existing `ADMIN_KEY` and `mrs-admin-key` session storage convention. Its authenticated `/api/analytics` Pages Function reads the account-scoped Cloudflare Web Analytics `rumPageloadEventsAdaptiveGroups` dataset through GraphQL and sends only aggregate results to the browser. The Function discovers and validates the current GraphQL schema before building its query, uses the site tag to isolate `snowshagal.com`, applies a timeout, and returns private/no-store responses.
+
+The UI offers today, 7-day, and 28-day views for Visits, Page views, trend, top paths, referers, connection-location countries, device types, browsers, and operating systems. An empty dataset is a successful empty state; configuration, schema, timeout, and upstream failures remain visible errors rather than fake zeroes. Country copy explicitly describes connection location, not nationality.
+
 Important date semantics:
 
 - `reportDate`: date the report itself belongs to / was authored or issued.
@@ -182,6 +190,8 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `admin/manage/index.html` — existing-post search, edit, cover/HTML replacement, and deletion UI
 - `assets/admin-manage.js` / `assets/admin-manage.css` — post-management client flow and responsive presentation
 - `functions/api/manage.js` — authenticated atomic update/delete commits with ref-conflict protection
+- `admin/analytics/index.html` / `assets/admin-analytics.js` / `assets/admin-analytics.css` — authenticated lightweight Cloudflare Web Analytics dashboard
+- `functions/api/analytics.js` — authenticated, schema-discovered GraphQL Analytics aggregation endpoint
 - `functions/_middleware.js` — injects shared report shell into `/reports/` HTML
 - `assets/report-shell.js` — isolated navigation + comments UI for report pages
 - `functions/api/comments.js` — D1-backed guest comment API

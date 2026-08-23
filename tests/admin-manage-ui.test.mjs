@@ -125,6 +125,7 @@ test('manage page includes navigation, list controls, immutable metadata, edit f
   const html = await read('admin/manage/index.html');
   assert.match(html, /href="\.\.\/"[^>]*>새 리포트 등록/);
   assert.match(html, /href="\.\/" aria-current="page">게시물 관리/);
+  assert.match(html, /href="\.\.\/analytics\/">방문 통계/);
   assert.match(html, /id="manage-search"[^>]*type="search"/);
   for (const type of ['all', 'daily', 'weekly', 'research', 'basics', 'note']) assert.match(html, new RegExp(`data-filter="${type}"`));
   for (const id of ['manage-id', 'manage-href', 'manage-registered-date', 'manage-registered-at', 'manage-language', 'manage-translation-group']) assert.match(html, new RegExp(`id="${id}"[^>]*readonly`));
