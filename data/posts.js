@@ -349,6 +349,23 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-07-30-daily-10k99v5.webp"
   },
   {
+    "id": "2026-07-29-research-4eg0o9",
+    "type": "research",
+    "typeLabel": "Research",
+    "lang": "en",
+    "date": "2026-07-29",
+    "reportDate": "2026-07-29",
+    "registeredDate": "2026-08-24",
+    "registeredAt": "2026-08-23T15:47:04.685Z",
+    "legacyImport": false,
+    "title": "Two Illusions",
+    "subtitle": "",
+    "description": "특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.",
+    "href": "reports/en/2026-07-29_Special_Research_Two_Illusions_EN.html",
+    "translationGroup": "2026-07-29-research-m2ef0m",
+    "coverImage": "covers/2026-07-29-research-4eg0o9.webp"
+  },
+  {
     "id": "2026-07-29-daily-mo0iu1",
     "type": "daily",
     "typeLabel": "주식 리포트",
