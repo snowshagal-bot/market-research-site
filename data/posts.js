@@ -31,7 +31,9 @@ window.RESEARCH_POSTS = [
     "subtitle": "",
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "href": "reports/8월 20일 주식리포트_커버통합.html",
-    "coverImage": "covers/2026-08-20-daily-c6eow2.webp"
+    "coverImage": "covers/2026-08-20-daily-c6eow2.webp",
+    "updatedAt": "2026-08-23T08:26:11.525Z",
+    "summary": "미 장기금리 후퇴와 SK하이닉스 40조 원 자사주 취득·소각이 겹치며 코스피는 하루 만에 5.89% 반등했다. 외국인이 대형 메모리를 다시 사들이고 상승 종목 비율도 57.8%까지 회복한 가운데, 전날과 수급 방향이 통째로 뒤집힌 하루를 살펴본다."
   },
   {
     "id": "2026-08-19-daily-kuhjks",
