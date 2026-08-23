@@ -49,7 +49,9 @@ window.RESEARCH_POSTS = [
     "subtitle": "",
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "href": "reports/8월 19일 주식리포트_커버통합.html",
-    "coverImage": "covers/2026-08-19-daily-kuhjks.webp"
+    "coverImage": "covers/2026-08-19-daily-kuhjks.webp",
+    "updatedAt": "2026-08-23T08:26:28.075Z",
+    "summary": "미 30년물이 장중 5.33%대까지 오르고 미국 반도체주가 급락하자 삼성전자·SK하이닉스를 중심으로 코스피가 5.80% 무너졌다. 외국인이 3.49조 원을 팔고 개인이 4.64조 원을 받아낸 가운데, 높은 금리가 가장 많이 오른 대형 메모리부터 압박한 하루를 분석한다."
   },
   {
     "id": "2026-08-18-daily-1burfko",
