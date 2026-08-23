@@ -334,6 +334,23 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-04-daily-wfcoi4.webp"
   },
   {
+    "id": "2026-08-03-weekly-yqni0t",
+    "type": "weekly",
+    "typeLabel": "Weekly",
+    "lang": "en",
+    "date": "2026-08-03",
+    "reportDate": "2026-08-03",
+    "registeredDate": "2026-08-24",
+    "registeredAt": "2026-08-23T17:33:36.749Z",
+    "legacyImport": false,
+    "title": "What came down was the price,what remains are the conditions.",
+    "subtitle": "",
+    "description": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
+    "href": "reports/en/2026-08-03_08-07_Korea_Weekly_Report_EN.html",
+    "translationGroup": "2026-08-week1-weekly",
+    "coverImage": "covers/2026-08-03-weekly-yqni0t.webp"
+  },
+  {
     "id": "2026-08-03-daily-ely1wy",
     "type": "daily",
     "typeLabel": "Daily",
