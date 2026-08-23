@@ -72,6 +72,23 @@ window.RESEARCH_POSTS = [
     "summary": "메모리 호재로 장중 7,200선을 넘었던 코스피는 기관·비차익 매도에 밀려 1.55% 하락했고, 오른 종목은 22%에 그쳤다. 외국인 매수는 이어졌지만 규모가 급감한 가운데, 호재가 SK하이닉스에만 남고 시장 전반으로 퍼지지 못한 하루를 살펴본다"
   },
   {
+    "id": "2026-08-16-research-141u5l9",
+    "type": "research",
+    "typeLabel": "비정기 리서치",
+    "lang": "ko",
+    "date": "2026-08-16",
+    "reportDate": "2026-08-16",
+    "registeredDate": "2026-08-24",
+    "registeredAt": "2026-08-23T17:19:08.100Z",
+    "legacyImport": false,
+    "title": "칩 위에 붙은 이자",
+    "subtitle": "",
+    "description": "특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.",
+    "summary": "GPU는 채권이 될 수 있을까?\r\n칩 위에 붙은 이자를 알아보자.",
+    "href": "reports/비정기리서치_GPU는채권이될수있는가_2026.08.16_수정본.html",
+    "coverImage": "covers/2026-08-16-research-141u5l9.webp"
+  },
+  {
     "id": "2026-08-14-daily-dqoisk",
     "type": "daily",
     "typeLabel": "주식 리포트",
