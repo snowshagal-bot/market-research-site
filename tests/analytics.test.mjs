@@ -61,7 +61,7 @@ const SCHEMA_TYPES = {
       typeField('siteTag_in', { kind: 'LIST', name: null, ofType: ref('String', 'SCALAR') }),
       typeField('requestHost_in', { kind: 'LIST', name: null, ofType: ref('String', 'SCALAR') }),
       typeField('requestPath_notlike', ref('String', 'SCALAR')),
-      typeField('excludeBots', ref('String', 'SCALAR'))
+      typeField('bot', ref('uint8', 'SCALAR'))
     ]
   },
   RumPageloadOrderBy: {
@@ -147,10 +147,10 @@ test('authenticated requests introspect the live schema before querying the RUM 
     assert.match(query, /siteTag_in: \["site-tag-secret"\]/);
     assert.match(query, /requestHost_in: \["snowshagal\.com"\]/);
     assert.match(query, /requestPath_notlike: "\/admin\/%"/);
-    assert.equal((query.match(/excludeBots: "Yes"/g) || []).length, 7);
+    assert.equal((query.match(/bot: 0/g) || []).length, 7);
     const allTrafficAlias = query.split('\n').find((line) => line.includes('allTrafficTrend:'));
     assert.ok(allTrafficAlias);
-    assert.doesNotMatch(allTrafficAlias, /excludeBots/);
+    assert.doesNotMatch(allTrafficAlias, /bot: 0/);
     assert.doesNotMatch(query, /market-research-site\.pages\.dev/);
     assert.match(query, /accountTag: "account-tag"/);
     assert.equal(response.headers.get('cache-control'), 'private, no-store, max-age=0');
@@ -168,7 +168,7 @@ test('production host and admin path exclusions protect human and all-traffic ag
     const query = calls.at(-1).query;
     assert.equal((query.match(/requestHost_in: \["snowshagal\.com"\]/g) || []).length, 8);
     assert.equal((query.match(/requestPath_notlike: "\/admin\/%"/g) || []).length, 8);
-    assert.equal((query.match(/excludeBots: "Yes"/g) || []).length, 7);
+    assert.equal((query.match(/bot: 0/g) || []).length, 7);
     assert.doesNotMatch(query, /pages\.dev|\/admin\/analytics/);
   } finally { globalThis.fetch = originalFetch; }
 });
@@ -179,7 +179,7 @@ test('unsupported host, admin-prefix, or bot filters fail closed before analytic
   const errorLogs = [];
   const originalFields = SCHEMA_TYPES.RumPageloadFilter_InputObject.inputFields;
   let dataQueries = 0;
-  SCHEMA_TYPES.RumPageloadFilter_InputObject.inputFields = originalFields.filter((item) => !['requestHost_in', 'requestPath_notlike', 'excludeBots'].includes(item.name));
+  SCHEMA_TYPES.RumPageloadFilter_InputObject.inputFields = originalFields.filter((item) => !['requestHost_in', 'requestPath_notlike', 'bot'].includes(item.name));
   __test.resetSchemaCache();
   console.error = (message) => errorLogs.push(message);
   globalThis.fetch = async (_url, options) => {
@@ -280,14 +280,14 @@ test('date ranges and referer buckets are deterministic', () => {
     dataset: __test.DATASET,
     dimensions: { date: 'date', host: 'requestHost', path: 'requestPath', referer: 'refererHost', country: 'countryName', device: 'deviceType', browser: 'userAgentBrowser', os: 'userAgentOS' },
     visits: { container: 'sum', field: 'visits' },
-    filters: { start: 'datetime_geq', end: 'datetime_lt', siteTag: 'siteTag_in', siteTagList: true, host: 'requestHost_in', hostList: true, excludeAdminPath: 'requestPath_notlike', excludeBots: 'excludeBots', excludeBotsList: false, excludeBotsEnum: false, datetime: true },
+    filters: { start: 'datetime_geq', end: 'datetime_lt', siteTag: 'siteTag_in', siteTagList: true, host: 'requestHost_in', hostList: true, excludeAdminPath: 'requestPath_notlike', excludeBots: 'bot', excludeBotsList: false, excludeBotsEnum: false, excludeBotsZero: true, datetime: true },
     countOrder: 'count_DESC', dateOrder: 'date_ASC'
   }, 'account', 'site', { start: '2026-08-17', end: '2026-08-23' });
   assert.match(datetimeQuery, /datetime_geq: "2026-08-17T00:00:00\.000Z"/);
   assert.match(datetimeQuery, /datetime_lt: "2026-08-24T00:00:00\.000Z"/);
   assert.match(datetimeQuery, /requestHost_in: \["snowshagal\.com"\]/);
   assert.match(datetimeQuery, /requestPath_notlike: "\/admin\/%"/);
-  assert.equal((datetimeQuery.match(/excludeBots: "Yes"/g) || []).length, 7);
+  assert.equal((datetimeQuery.match(/bot: 0/g) || []).length, 7);
 });
 
 function element(id = '') {

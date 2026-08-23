@@ -207,8 +207,10 @@ async function discoverSchema(token) {
   const hostFilter = filterType?.inputFields?.find((item) => ['requestHost_in', 'requestHost', 'host_in', 'host'].includes(item.name));
   const adminPathFilter = filterType?.inputFields?.find((item) => ['requestPath_notlike', 'path_notlike'].includes(item.name));
   const excludeBotsFilter = filterType?.inputFields?.find((item) => item.name === 'excludeBots');
+  const botFilter = filterType?.inputFields?.find((item) => item.name === 'bot');
+  const selectedBotFilter = excludeBotsFilter || botFilter;
   const excludeBotsType = (() => {
-    let current = excludeBotsFilter?.type;
+    let current = selectedBotFilter?.type;
     while (current?.ofType) current = current.ofType;
     return current;
   })();
@@ -220,9 +222,10 @@ async function discoverSchema(token) {
     host: hostFilter?.name || '',
     hostList: includesKind(hostFilter?.type, 'LIST'),
     excludeAdminPath: adminPathFilter?.name || '',
-    excludeBots: excludeBotsFilter?.name || '',
-    excludeBotsList: includesKind(excludeBotsFilter?.type, 'LIST'),
+    excludeBots: selectedBotFilter?.name || '',
+    excludeBotsList: includesKind(selectedBotFilter?.type, 'LIST'),
     excludeBotsEnum: excludeBotsType?.kind === 'ENUM',
+    excludeBotsZero: selectedBotFilter?.name === 'bot',
     datetime: Boolean(startFilter?.name.startsWith('datetime'))
   };
   const missing = Object.entries(dimensions).filter(([, value]) => !value).map(([name]) => `dimension:${name}`);
@@ -289,7 +292,9 @@ function buildAnalyticsQuery(schema, accountId, siteTag, dates) {
   const site = schema.filters.siteTagList ? `[${gqlString(siteTag)}]` : gqlString(siteTag);
   const host = schema.filters.hostList ? `[${gqlString(PRODUCTION_HOSTNAME)}]` : gqlString(PRODUCTION_HOSTNAME);
   const baseFilter = `${schema.filters.start}: ${gqlString(start)}, ${schema.filters.end}: ${gqlString(end)}, ${schema.filters.siteTag}: ${site}, ${schema.filters.host}: ${host}, ${schema.filters.excludeAdminPath}: ${gqlString(`${ADMIN_PATH_PREFIX}%`)}`;
-  const excludeBotsValue = schema.filters.excludeBotsEnum ? 'Yes' : gqlString('Yes');
+  const excludeBotsValue = schema.filters.excludeBotsZero
+    ? '0'
+    : schema.filters.excludeBotsEnum ? 'Yes' : gqlString('Yes');
   const excludeBots = schema.filters.excludeBotsList ? `[${excludeBotsValue}]` : excludeBotsValue;
   const humanFilter = `{ ${baseFilter}, ${schema.filters.excludeBots}: ${excludeBots} }`;
   const allTrafficFilter = `{ ${baseFilter} }`;
