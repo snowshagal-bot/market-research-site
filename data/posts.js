@@ -204,6 +204,23 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-11-daily-12vx8a7.png"
   },
   {
+    "id": "2026-08-10-weekly-hez6ok",
+    "type": "weekly",
+    "typeLabel": "Weekly",
+    "lang": "en",
+    "date": "2026-08-10",
+    "reportDate": "2026-08-10",
+    "registeredDate": "2026-08-24",
+    "registeredAt": "2026-08-23T18:01:50.087Z",
+    "legacyImport": false,
+    "title": "SemiconductorsWhat Comes Next",
+    "subtitle": "",
+    "description": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
+    "href": "reports/en/2026-08-10_08-14_Korea_Weekly_Report_EN.html",
+    "translationGroup": "2026-08-10-weekly-1rva1f6",
+    "coverImage": "covers/2026-08-10-weekly-hez6ok.webp"
+  },
+  {
     "id": "2026-08-10-weekly-1rva1f6",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
