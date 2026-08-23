@@ -10,6 +10,7 @@
     '.cover-screen',
     '.page.cover',
     '.report-cover',
+    '.opener',
     '.page:first-of-type',
     'main'
   ];
