@@ -16,6 +16,24 @@
     "coverImage": "covers/2026-08-24-daily-97jc8s.webp"
   },
   {
+    "id": "2026-08-21-daily-16tx7f1",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-21",
+    "reportDate": "2026-08-21",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-24T18:25:49.152Z",
+    "legacyImport": false,
+    "title": "TwoWires",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "193 stocks up.683 stocks down.",
+    "href": "reports/en/2026-08-21_KOSPI_Daily_Report_EN_Benchmark.html",
+    "translationGroup": "2026-08-21-daily-1i56f22",
+    "coverImage": "covers/2026-08-21-daily-16tx7f1.webp"
+  },
+  {
     "id": "2026-08-21-daily-1i56f22",
     "type": "daily",
     "typeLabel": "주식 리포트",
