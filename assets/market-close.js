@@ -107,7 +107,8 @@
     </div><div class="breadth-bar" aria-label="${copy.riseRatio} ${ratioPct(item?.rise_ratio)}, ${copy.fallRatio} ${ratioPct(item?.fall_ratio)}"><span class="advance" style="width:${valid(item?.rise_ratio) ? item.rise_ratio * 100 : 0}%"></span><span class="decline" style="width:${valid(item?.fall_ratio) ? item.fall_ratio * 100 : 0}%"></span></div><div class="breadth-ratios"><span class="up">${copy.riseRatio} ${ratioPct(item?.rise_ratio)}</span><span class="down">${copy.fallRatio} ${ratioPct(item?.fall_ratio)}</span></div></article>`;
   }
 
-  function render(data) {
+  function render(data, target = document.getElementById('market-close-root')) {
+    if (!target) return;
     const i = data.indices || {};
     const rate = data.rates_fx_volatility || {};
     const commodity = data.commodities_crypto || {};
@@ -162,7 +163,7 @@
         </div>
         <div class="market-data-note"><p>${copy.source}: ${html(Array.from(sourceSet).map(item => item.split(' · ')[0]).filter((item, index, all) => all.indexOf(item) === index).join(', '))}</p><p>${copy.generated}: ${html(data.meta?.generated_at || '--')} · ${html(data.meta?.schema_version || '')}</p></div>
       </div>`;
-    document.getElementById('market-close-root').innerHTML = output;
+    target.innerHTML = output;
   }
 
   function latestDaily() {
@@ -172,11 +173,13 @@
     return localized.find(post => post.type === 'daily') || null;
   }
 
-  function renderError() {
-    document.getElementById('market-close-root').innerHTML = `<section class="market-state"><span aria-hidden="true">✦</span><h1>${copy.loadError}</h1><p>${copy.retry}</p></section>`;
+  function renderError(target = document.getElementById('market-close-root')) {
+    if (!target) return;
+    target.innerHTML = `<section class="market-state"><span aria-hidden="true">✦</span><h1>${copy.loadError}</h1><p>${copy.retry}</p></section>`;
   }
 
   async function init() {
+    if (!document.getElementById('market-close-root')) return;
     const source = document.body.dataset.marketSource;
     if (!source) return renderError();
     try {

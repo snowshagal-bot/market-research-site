@@ -16,21 +16,29 @@ Contract: `1.0.1`
   - replaced the global header/report-shell About slot with Market while retaining About in the footer.
 - Checkpoint 1 browser QA passed at 1280px, 430px, and 360px with no horizontal overflow or console warnings/errors. KO/EN and light/dark mode were checked.
 - Checkpoint 1 focused tests: 10/10 passed. Full regression before this status update: 135/139 passed; the four expected About-navigation assertions were updated to the approved Market-navigation behavior and now pass.
+- Checkpoint 1 commit: `a1d3108` (`Add fixture-driven Market Close UI`), pushed to the Draft PR branch.
+- Checkpoint 2 implementation is complete:
+  - added public `GET /api/market/latest` with short cache headers and ETag support;
+  - added Production-only `POST /api/market/publish` with a 512KB limit, full schema validation, final-only gates, and separate automated/admin header authentication;
+  - added idempotent D1 upserts keyed by `market_date` and latest-date-safe reads;
+  - reused `COMMENTS_DB`, with guarded runtime table initialization and matching checked-in SQL;
+  - added `/admin/market/` for JSON inspection, status display, full Market layout preview, and authenticated manual publishing;
+  - documented exact uploader and admin authentication in `docs/MARKET_PUBLISHING.md`.
+- Checkpoint 2 focused tests: 14/14 passed. The browser selected the example JSON successfully, showed date/version/final/PASSED, rendered all 10 preview sections, kept publish disabled without an admin key, and emitted no console warnings/errors.
 
 ## TODO
 
-- Checkpoint 2: add D1-backed publish/latest APIs, validation, authentication, and the manual admin uploader.
 - Checkpoint 3: connect the public page to the API, add loading/empty/error states and SEO, run regressions, and validate the Cloudflare Preview.
 
 ## 현재 동작 상태
 
 - Production and `main` are unchanged.
-- `/market/` and `/en/market/` currently read only the copied example fixture for isolated UI verification.
-- No Market API or D1 table exists yet.
+- `/market/` and `/en/market/` still read only the copied example fixture for isolated UI verification; Checkpoint 3 will switch them to `/api/market/latest`.
+- The Market API and admin uploader are implemented locally. No Production D1 write has been performed.
 
 ## 다음 작업 위치
 
-- Start Checkpoint 2 in `functions/api/market/`, then add the read-only `/admin/market/` uploader shell.
+- Start Checkpoint 3 by switching the public pages from the fixture to `/api/market/latest`, then finish SEO/sitemap and Cloudflare Preview QA.
 
 ## 주의사항
 
