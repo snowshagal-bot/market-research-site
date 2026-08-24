@@ -41,7 +41,7 @@ Homepage public categories:
 
 - 데일리
 - 위클리
-- 비정기
+- 리서치
 - 시장 공부
 - 끄적끄적
 - 소개
@@ -50,7 +50,7 @@ Internal category values are `daily`, `weekly`, `research`, `basics`, `note`. Ma
 
 Report pages use a fixed shared top bar:
 
-`← 홈 | 데일리 | 위클리 | 비정기 | 시장 공부 | 끄적끄적 | 소개`
+`← 홈 | 데일리 | 위클리 | 리서치 | 시장 공부 | 끄적끄적 | 소개`
 
 The current category should have a clear but restrained active state. The report navigation is injected outside the original report design and must remain visually stable regardless of report-specific CSS.
 

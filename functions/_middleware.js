@@ -33,7 +33,7 @@ export async function onRequest(context) {
   else if (/비정기|소버린|research/i.test(decodedPath)) active = 'research';
   else if (/끄적|note/i.test(decodedPath)) active = 'note';
 
-  const shell = `<script src="/assets/locale.js?v=20260812-1"></script><script src="/assets/report-shell.js?v=20260812-1" data-category="${active}" data-lang="${lang}"></script>`;
+  const shell = `<script src="/assets/locale.js?v=20260824-2"></script><script src="/assets/report-shell.js?v=20260824-1" data-category="${active}" data-lang="${lang}"></script>`;
   let seo = '';
   try {
     const posts = await loadPosts(context.request, context.env);

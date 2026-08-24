@@ -30,7 +30,7 @@ Main categories:
 
 - `daily` → 데일리
 - `weekly` → 위클리
-- `research` → 비정기
+- `research` → 리서치
 - `basics` → 시장 공부 / Market Basics
 - `note` → 끄적끄적
 
@@ -118,7 +118,7 @@ The repository root also contains a non-indexable `404.html`. Its presence disab
 - a KO/EN report switch that opens the matching `translationGroup` report when present and otherwise falls back to the target-language homepage
 - Shadow DOM isolation to reduce style collision with report HTML
 
-The shared navigation is fixed at the top and inserts spacing so it does not cover the original report. Public links are `데일리 / 위클리 / 비정기 / 시장 공부 / 끄적끄적 / 소개`.
+The shared navigation is fixed at the top and inserts spacing so it does not cover the original report. Public links are `데일리 / 위클리 / 리서치 / 시장 공부 / 끄적끄적 / 소개`.
 
 ## Comments feature
 

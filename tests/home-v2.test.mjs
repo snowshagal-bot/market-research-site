@@ -26,8 +26,8 @@ test('homepage presents the Snowshagal brand hero before latest reports and arch
   assert.doesNotMatch(html, /Independent Market Research/);
   assert.match(html, /home-v2\.css\?v=20260824-5/);
   assert.match(englishHtml, /home-v2\.css\?v=20260824-5/);
-  assert.match(html, /locale\.js\?v=20260824-1/);
-  assert.match(englishHtml, /locale\.js\?v=20260824-1/);
+  assert.match(html, /locale\.js\?v=20260824-2/);
+  assert.match(englishHtml, /locale\.js\?v=20260824-2/);
   assert.match(html, /site\.js\?v=20260824-5/);
   assert.match(englishHtml, /site\.js\?v=20260824-5/);
 });
