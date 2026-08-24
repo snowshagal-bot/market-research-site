@@ -27,6 +27,15 @@ test('public locale shells use snowshagal.com canonicals and only real homepage 
   ]);
   assert.match(ko, /rel="canonical" href="https:\/\/snowshagal\.com\/"/);
   assert.match(en, /rel="canonical" href="https:\/\/snowshagal\.com\/en\/"/);
+  assert.match(ko, /<title>Snowshagal \| 한국 시장 데일리·위클리·투자 인사이트<\/title>/);
+  assert.match(ko, /<meta name="description" content="한국 시장의 데일리 복기와 위클리 전망, 주요 경제·시장 이슈와 투자에 참고할 만한 인사이트를 정리합니다\.">/);
+  assert.match(ko, /<meta property="og:title" content="Snowshagal \| 한국 시장 데일리·위클리·투자 인사이트">/);
+  assert.match(ko, /<meta property="og:description" content="한국 시장의 데일리 복기와 위클리 전망, 주요 경제·시장 이슈와 투자에 참고할 만한 인사이트를 정리합니다\.">/);
+  assert.match(en, /<title>Snowshagal \| Korean Market Daily, Weekly &amp; Investment Insights<\/title>/);
+  assert.match(en, /<meta name="description" content="Daily reviews and weekly outlooks on the Korean market, covering major economic and market issues with insights to support investment decisions\.">/);
+  assert.match(en, /<meta property="og:title" content="Snowshagal \| Korean Market Daily, Weekly &amp; Investment Insights">/);
+  assert.match(en, /<meta property="og:description" content="Daily reviews and weekly outlooks on the Korean market, covering major economic and market issues with insights to support investment decisions\.">/);
+  for (const html of [ko, en]) assert.match(html, /<meta property="og:site_name" content="Snowshagal">/);
   for (const html of [ko, en]) {
     assert.match(html, /hreflang="ko"/);
     assert.match(html, /hreflang="en"/);

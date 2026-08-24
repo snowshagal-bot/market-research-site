@@ -15,11 +15,15 @@ test('homepage presents the Snowshagal brand hero before latest reports and arch
   ];
   assert.deepEqual(order, [...order].sort((a, b) => a - b));
   assert.match(html, /<strong>SNOWSHAGAL<\/strong><small>MARKET RESEARCH<\/small>/);
+  assert.doesNotMatch(html, /class="hero-kicker"/);
+  assert.doesNotMatch(englishHtml, /class="hero-kicker"/);
   assert.match(html, /<span>하루의 움직임에서,<\/span><span>다음 흐름까지\.<\/span>/);
   assert.match(html, /한국 시장의 데일리 복기부터 위클리 전망,/);
   assert.match(html, /그리고 투자에 참고할 만한 인사이트까지\./);
   assert.match(html, /class="hero-entries"/);
   assert.doesNotMatch(html, /Login|data-carousel|featured-slide/);
+  assert.match(html, /<footer[^>]*>[\s\S]*?<span>SNOWSHAGAL<\/span>/);
+  assert.doesNotMatch(html, /Independent Market Research/);
   assert.match(html, /home-v2\.css\?v=20260824-2/);
   assert.match(englishHtml, /home-v2\.css\?v=20260824-2/);
   assert.match(html, /locale\.js\?v=20260824-1/);

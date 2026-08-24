@@ -117,24 +117,6 @@ html[data-theme="dark"] {
   padding: 72px 0 66px;
 }
 
-.hero-kicker {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin: 0 0 29px;
-  color: var(--navy);
-  font-size: 10px;
-  font-weight: 850;
-  letter-spacing: .16em;
-}
-
-.hero-kicker span {
-  padding-left: 10px;
-  border-left: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 8px;
-}
-
 .hero-copy h1 {
   max-width: none;
   margin: 0;
@@ -624,8 +606,6 @@ html[data-theme="dark"] .hero-art img {
     padding: 54px 0 36px;
   }
 
-  .hero-kicker { margin-bottom: 23px; }
-
   .hero-copy h1 {
     max-width: none;
     font-size: clamp(29px, 9.2vw, 42px);
@@ -713,7 +693,6 @@ html[data-theme="dark"] .hero-art img {
 
 @media (max-width: 380px) {
   .hero-copy { min-height: 470px; padding-top: 46px; }
-  .hero-kicker span { display: none; }
   .hero-entries { margin-top: 30px; }
   .hero-entries strong { font-size: 8px; }
   .hero-art { height: 280px; }
