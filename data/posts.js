@@ -69,6 +69,24 @@ window.RESEARCH_POSTS = [
     "summary": "미 장기금리 후퇴와 SK하이닉스 40조 원 자사주 취득·소각이 겹치며 코스피는 하루 만에 5.89% 반등했다. 외국인이 대형 메모리를 다시 사들이고 상승 종목 비율도 57.8%까지 회복한 가운데, 전날과 수급 방향이 통째로 뒤집힌 하루를 살펴본다."
   },
   {
+    "id": "2026-08-19-daily-otvpwu",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-19",
+    "reportDate": "2026-08-19",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-24T18:19:10.656Z",
+    "legacyImport": false,
+    "title": "The Shadow ofHigh Rates",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "As the 30-year yield hit a high,the biggest prior winners were sold first",
+    "href": "reports/en/2026-08-19_KOSPI_Daily_Report_EN_Benchmark.html",
+    "translationGroup": "2026-08-19-daily-kuhjks",
+    "coverImage": "covers/2026-08-19-daily-otvpwu.webp"
+  },
+  {
     "id": "2026-08-19-daily-kuhjks",
     "type": "daily",
     "typeLabel": "주식 리포트",
