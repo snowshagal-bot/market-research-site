@@ -159,7 +159,7 @@ async function makePublishReady(elements) {
   elements['html-file'].files = [{
     name: '데일리.html',
     size: 100,
-    text: async () => '<!doctype html><html><head><title>Daily report</title></head><body></body></html>'
+    text: async () => '<!doctype html><html><head><meta name="report-date" content="2026-08-10"><title>Daily report</title></head><body></body></html>'
   }];
   await elements['html-file'].emit('change');
   assert.equal(elements['publish-btn'].disabled, false);
@@ -168,7 +168,7 @@ async function makePublishReady(elements) {
 const reportFile = name => ({
   name,
   size: 100,
-  text: async () => `<!doctype html><html><head><title>${name}</title></head><body></body></html>`
+  text: async () => `<!doctype html><html><head><meta name="report-date" content="2026-08-10"><title>${name}</title></head><body></body></html>`
 });
 
 test('admin markup contains the cover preview modes before the original HTML preview', async () => {
@@ -182,7 +182,7 @@ test('admin markup contains the cover preview modes before the original HTML pre
   assert.match(html, /\.cover-preview-empty\[hidden\],[^}]*\{display:none\}/);
   assert.match(adminScript, /iframe\.setAttribute\('sandbox', 'allow-scripts'\)/);
   assert.match(adminScript, /iframe\.srcdoc = text/);
-  assert.match(html, /admin\.js\?v=20260824-1/);
+  assert.match(html, /admin\.js\?v=20260824-2/);
   assert.doesNotMatch(adminScript, /allow-same-origin/);
 });
 
@@ -219,13 +219,43 @@ test('category auto-detection covers Korean and English inputs and leaves unknow
   }
 });
 
+test('English natural-language report dates are detected and an unknown date stays blank', async () => {
+  for (const [titleText, expected] of [
+    ['KOSPI Daily Report · August 4, 2026 · Sung Oh', '2026-08-04'],
+    ['KOSPI Daily Report · 5 Aug 2026 · Sung Oh', '2026-08-05']
+  ]) {
+    const { elements } = await loadAdmin();
+    elements['admin-key'].value = 'test-key';
+    elements['html-file'].files = [{
+      name: 'daily-report.html',
+      size: 100,
+      text: async () => `<!doctype html><title>${titleText}</title>`
+    }];
+    await elements['html-file'].emit('change');
+    assert.equal(elements['post-date'].value, expected);
+    assert.equal(elements['publish-btn'].disabled, false);
+  }
+
+  const { elements } = await loadAdmin();
+  elements['admin-key'].value = 'test-key';
+  elements['html-file'].files = [{
+    name: 'daily-report.html',
+    size: 100,
+    text: async () => '<!doctype html><title>Daily report without a date</title>'
+  }];
+  await elements['html-file'].emit('change');
+  assert.equal(elements['post-date'].value, '');
+  assert.equal(elements['publish-btn'].disabled, true);
+  assert.match(elements['parse-status'].textContent, /기준일을 자동으로 찾지 못했습니다/);
+});
+
 test('manual category override becomes the final publish FormData value', async () => {
   const { elements, categoryOptions, submissions } = await loadAdmin({ confirmResult: true });
   elements['admin-key'].value = 'test-key';
   elements['html-file'].files = [{
     name: '데일리.html',
     size: 100,
-    text: async () => '<!doctype html><title>Daily report</title>'
+    text: async () => '<!doctype html><meta name="report-date" content="2026-08-10"><title>Daily report</title>'
   }];
   await elements['html-file'].emit('change');
   assert.equal(elements['post-type'].value, 'daily');
@@ -248,7 +278,7 @@ test('report-summary metadata takes priority and cover copy supplies a language-
   elements['html-file'].files = [{
     name: 'weekly-report.html',
     size: 100,
-    text: async () => '<!doctype html><meta name="report-summary" content="자동 인식한 홈페이지 요약"><title>Weekly report</title>'
+    text: async () => '<!doctype html><meta name="report-date" content="2026-08-10"><meta name="report-summary" content="자동 인식한 홈페이지 요약"><title>Weekly report</title>'
   }];
   await elements['html-file'].emit('change');
   assert.equal(elements['post-summary'].value, '자동 인식한 홈페이지 요약');
@@ -297,11 +327,35 @@ test('language defaults to Korean and English selection submits an optional tran
     text: async () => '<!doctype html><title>Weekly report</title>'
   }];
   await elements['html-file'].emit('change');
+  assert.equal(elements['post-date'].value, '2026-08-10');
+  assert.match(elements['translation-source-status'].textContent, /2026-08-10.*자동 적용/);
   await elements['publish-btn'].emit('click');
 
   assert.equal(submissions.length, 1);
   assert.equal(submissions[0].entries.find(([name]) => name === 'lang')?.[1], 'en');
   assert.equal(submissions[0].entries.find(([name]) => name === 'translationGroup')?.[1], 'ko-source');
+});
+
+test('translation pairing blocks a manually changed date that differs from its counterpart', async () => {
+  const { elements, languageOptions, submissions, confirmMessages } = await loadAdmin({ confirmResult: true });
+  const english = languageOptions.find(option => option.value === 'en');
+  english.checked = true;
+  english.emit('change');
+  elements['translation-source'].value = 'ko-source';
+  elements['translation-source'].emit('change');
+  elements['admin-key'].value = 'test-key';
+  elements['html-file'].files = [{
+    name: 'daily-report.html',
+    size: 100,
+    text: async () => '<!doctype html><title>August 10, 2026 Daily report</title>'
+  }];
+  await elements['html-file'].emit('change');
+  elements['post-date'].value = '2026-08-24';
+  await elements['publish-btn'].emit('click');
+
+  assert.equal(submissions.length, 0);
+  assert.equal(confirmMessages.length, 0);
+  assert.match(elements['parse-status'].textContent, /번역 짝과 같은 2026-08-10/);
 });
 
 test('publish remains disabled when category detection has no result', async () => {
@@ -359,7 +413,7 @@ test('image load failure omits the cover from the publish FormData', async () =>
   elements['html-file'].files = [{
     name: '데일리.html',
     size: 100,
-    text: async () => '<!doctype html><title>Daily report</title>'
+    text: async () => '<!doctype html><meta name="report-date" content="2026-08-10"><title>Daily report</title>'
   }];
   await elements['html-file'].emit('change');
   assert.equal(elements['publish-btn'].disabled, false);
@@ -432,7 +486,7 @@ test('publishing without a cover shows an explicit fallback-cover warning in the
   elements['html-file'].files = [{
     name: '데일리.html',
     size: 100,
-    text: async () => '<!doctype html><html><head><title>Daily report</title></head><body></body></html>'
+    text: async () => '<!doctype html><html><head><meta name="report-date" content="2026-08-10"><title>Daily report</title></head><body></body></html>'
   }];
   await elements['html-file'].emit('change');
   await elements['publish-btn'].emit('click');
@@ -447,7 +501,7 @@ test('an automatically generated cover suppresses the missing-cover warning', as
   elements['html-file'].files = [{
     name: '데일리.html',
     size: 100,
-    text: async () => '<!doctype html><html><head><title>Daily report</title></head><body></body></html>'
+    text: async () => '<!doctype html><html><head><meta name="report-date" content="2026-08-10"><title>Daily report</title></head><body></body></html>'
   }];
   await elements['html-file'].emit('change');
   assert.equal(elements['generate-cover-btn'].disabled, false);

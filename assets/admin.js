@@ -110,6 +110,38 @@
     return localeApi?.groupKey(post) || String(post?.translationGroup || post?.id || '');
   }
 
+  function pairedTranslationPost() {
+    if (!translationSource?.value || !postLanguage) return null;
+    const targetLanguage = postLanguage.value === 'en' ? 'ko' : 'en';
+    return (window.RESEARCH_POSTS || []).find(post => (
+      normalizedLanguage(post) === targetLanguage && translationKey(post) === translationSource.value
+    )) || null;
+  }
+
+  function pairedReportDate(post = pairedTranslationPost()) {
+    const value = String(post?.reportDate || post?.date || '');
+    return /^20\d{2}-\d{2}-\d{2}$/.test(value) ? value : '';
+  }
+
+  function syncPairedReportDate() {
+    const pair = pairedTranslationPost();
+    if (!pair) {
+      updatePublishState();
+      return;
+    }
+    const pairDate = pairedReportDate(pair);
+    if (!pairDate) {
+      status.textContent = '선택한 번역 짝의 리포트 기준일을 확인할 수 없습니다.';
+      updatePublishState();
+      return;
+    }
+    date.value = pairDate;
+    if (translationSourceStatus) {
+      translationSourceStatus.textContent = `번역 짝의 리포트 기준일 ${pairDate}을 자동 적용했습니다.`;
+    }
+    updatePublishState();
+  }
+
   function populateTranslationSources() {
     if (!translationSource || !postLanguage) return;
     const targetLanguage = postLanguage.value === 'en' ? 'ko' : 'en';
@@ -188,11 +220,35 @@
     const meta = doc.querySelector('meta[name="report-date"]')?.content?.trim();
     if (meta && /^\d{4}-\d{2}-\d{2}$/.test(meta)) return meta;
     const sources = [name, doc.title || '', text.slice(0, 5000)];
+    const months = {
+      january: 1, jan: 1, february: 2, feb: 2, march: 3, mar: 3, april: 4, apr: 4,
+      may: 5, june: 6, jun: 6, july: 7, jul: 7, august: 8, aug: 8,
+      september: 9, sep: 9, sept: 9, october: 10, oct: 10, november: 11, nov: 11,
+      december: 12, dec: 12
+    };
+    const formatDate = (year, month, day) => {
+      const parsed = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+      if (parsed.getUTCFullYear() !== Number(year) || parsed.getUTCMonth() + 1 !== Number(month) || parsed.getUTCDate() !== Number(day)) return '';
+      return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    };
     for (const s of sources) {
       const m = s.match(/(20\d{2})[.\-_\/년\s]+(\d{1,2})[.\-_\/월\s]+(\d{1,2})/);
-      if (m) return `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;
+      if (m) {
+        const found = formatDate(m[1], m[2], m[3]);
+        if (found) return found;
+      }
+      const monthFirst = s.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sept?|oct|nov|dec)\.?\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s*(20\d{2})\b/i);
+      if (monthFirst) {
+        const found = formatDate(monthFirst[3], months[monthFirst[1].toLowerCase()], monthFirst[2]);
+        if (found) return found;
+      }
+      const dayFirst = s.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s+(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sept?|oct|nov|dec)\.?\s*,?\s*(20\d{2})\b/i);
+      if (dayFirst) {
+        const found = formatDate(dayFirst[3], months[dayFirst[2].toLowerCase()], dayFirst[1]);
+        if (found) return found;
+      }
     }
-    return new Date().toISOString().slice(0,10);
+    return '';
   }
 
   function cleanTitle(s) {
@@ -489,6 +545,7 @@
 
     setCategory(detectedType, 'auto');
     date.value = detectedDate;
+    if (translationSource?.value) syncPairedReportDate();
     title.value = detectedTitle;
     subtitle.value = detectedSubtitle;
     description.value = defaultDescription(detectedType);
@@ -496,7 +553,7 @@
     filename.value = safeFilename(file.name);
 
     fileInfo.classList.add('on');
-    fileInfo.innerHTML = `<b>${file.name}</b><br>${(file.size/1024).toFixed(1)} KB · ${detectedType ? labels[detectedType] : '카테고리 확인 필요'} · 리포트 기준일 ${detectedDate}`;
+    fileInfo.innerHTML = `<b>${file.name}</b><br>${(file.size/1024).toFixed(1)} KB · ${detectedType ? labels[detectedType] : '카테고리 확인 필요'} · ${date.value ? `리포트 기준일 ${date.value}` : '리포트 기준일 확인 필요'}`;
 
     resetPreview();
     const iframe = document.createElement('iframe');
@@ -506,7 +563,9 @@
     previewWrap.innerHTML = '';
     previewWrap.appendChild(iframe);
 
-    status.textContent = detectedType ? '자동 분석 완료. 게시 전에 항목을 확인하세요.' : '분석 완료. 카테고리는 직접 선택하세요.';
+    status.textContent = !date.value
+      ? '리포트 기준일을 자동으로 찾지 못했습니다. 날짜를 직접 확인해 주세요.'
+      : detectedType ? '자동 분석 완료. 게시 전에 항목을 확인하세요.' : '분석 완료. 카테고리는 직접 선택하세요.';
     updatePublishState();
   }
 
@@ -519,6 +578,18 @@
     const postType = type.value;
     const language = postLanguage?.value === 'en' ? 'en' : 'ko';
     const languageLabel = language === 'en' ? 'English' : '한국어';
+    if (translationSource?.value) {
+      const pair = pairedTranslationPost();
+      const pairDate = pairedReportDate(pair);
+      if (!pair || !pairDate) {
+        status.textContent = '선택한 번역 짝의 연결 정보와 기준일을 확인해 주세요.';
+        return;
+      }
+      if (date.value !== pairDate) {
+        status.textContent = `리포트 기준일은 번역 짝과 같은 ${pairDate}이어야 합니다.`;
+        return;
+      }
+    }
     const coverWarning = selectedCover ? '' : '\n\n대표 커버가 선택되지 않았습니다. 게시 후 홈페이지에서는 fallback cover가 사용됩니다.';
     const summary = `${date.value} · ${labels[postType]} · ${languageLabel}\n${title.value.trim()}${coverWarning}\n\n이 내용으로 홈페이지에 게시할까요?`;
     if (!confirm(summary)) return;
@@ -622,6 +693,7 @@
       if (option.checked) setLanguage(option.value);
     });
   });
+  translationSource?.addEventListener('change', syncPairedReportDate);
   adminKey?.addEventListener('change', () => { try { sessionStorage.setItem('mrs-admin-key', adminKey.value.trim()); } catch (_) {} });
   publishBtn?.addEventListener('click', publish);
 
