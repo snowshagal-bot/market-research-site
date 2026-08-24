@@ -236,6 +236,24 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-11-daily-12vx8a7.png"
   },
   {
+    "id": "2026-08-10-daily-1bb8z4p",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-10",
+    "reportDate": "2026-08-10",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-24T15:01:44.842Z",
+    "legacyImport": false,
+    "title": "Two Engines Paused,The Market Broadened",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "With Samsung Electronics and SK Hynixtaking a breather,KOSDAQ and small- and mid-cap stocksbroadened the market first.",
+    "href": "reports/en/2026-08-10_KOSPI_Daily_Report_EN_Benchmark.html",
+    "translationGroup": "2026-08-10-weekly-1rva1f6",
+    "coverImage": "covers/2026-08-10-daily-1bb8z4p.webp"
+  },
+  {
     "id": "2026-08-10-weekly-hez6ok",
     "type": "weekly",
     "typeLabel": "Weekly",
