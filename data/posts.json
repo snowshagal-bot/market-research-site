@@ -34,6 +34,23 @@
     "summary": "삼성전자·SK하이닉스가 반등하며 코스피는 0.88% 올랐지만, 오른 종목은 21.3%에 그쳤고 코스닥은 4.63% 급락했다. 대형 반도체 두 종목이 지수를 받친 반면 반도체 업종 171개 중 152개가 하락한, 지수와 종목 전반의 흐름이 다시 갈라진 하루를 살펴본다."
   },
   {
+    "id": "2026-08-20-daily-1ctu7fr",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-20",
+    "reportDate": "2026-08-20",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-24T17:10:54.138Z",
+    "legacyImport": false,
+    "title": "Starting atYesterday's Ceiling",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "Prior-session high 6,614.39.Today's open 6,680.34.",
+    "href": "reports/en/2026-08-20_KOSPI_Daily_Report_EN_Benchmark (1).html",
+    "coverImage": "covers/2026-08-20-daily-1ctu7fr.webp"
+  },
+  {
     "id": "2026-08-20-daily-c6eow2",
     "type": "daily",
     "typeLabel": "주식 리포트",
