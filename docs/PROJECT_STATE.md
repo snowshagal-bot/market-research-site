@@ -1,6 +1,6 @@
 # Project state
 
-Updated: 2026-08-23
+Updated: 2026-08-24
 
 ## Purpose
 
@@ -34,18 +34,16 @@ Main categories:
 - `basics` → 시장 공부 / Market Basics
 - `note` → 끄적끄적
 
-The homepage supports category filtering and search. Its v2 featured carousel selects one latest post from each available core category (`daily`, `weekly`, `research`, `basics`) rather than rotating chronologically. `note` remains available as a secondary navigation and archive category.
+The homepage supports category filtering and search. Its opening surface is now a fixed Snowshagal brand hero rather than a post carousel. The hero keeps the brand promise stable while three concise Daily / Weekly / Research entry points lead into the existing category query flow. `basics` and `note` remain available in the shared navigation, filters, and archive.
 
 `/about/` is a noindex site-shell page reserved for a future user-authored introduction. It currently contains the shared header, navigation, theme control, empty main area, and footer only.
 
-Homepage v2 also provides:
+The homepage also provides:
 
-- manual previous/next and category-tab carousel controls with no autoplay
-- an optional homepage-only `summary` teaser, falling back to the existing `description` and then category copy for legacy posts
-- optional post cover images through `coverImage`
-- rendered 900×1350 WebP covers for the latest representative DAILY, WEEKLY, and RESEARCH posts
-- CSS/typographic fallback covers for posts without `coverImage`
-- full-width category-latest cards without a separate introduction copy block
+- an original watercolor hero asset with separate desktop and mobile composition rules
+- a fixed Korean hero headline and supporting copy, with a matching English-language hero on `/en/`
+- post-driven latest DAILY, WEEKLY, and RESEARCH cards using the current localized `posts` data
+- optional post cover images through `coverImage`, with a restrained CSS fallback when no cover exists
 - the existing report archive, URL category filtering, and report-date sorting
 - a denser two-column desktop archive with the recent-report list beside a five-category index whose counts are calculated from the current post data; tablet and mobile stack the index after the list
 
@@ -176,7 +174,7 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `index.html` — homepage shell and category/search markup
 - `about/index.html` — empty noindex About page shell
 - `assets/site.css` — main site visual styles
-- `assets/home-v2.css` — homepage v2 carousel, fallback cover, and latest-card layout
+- `assets/home-v2.css` — Snowshagal hero, responsive artwork, latest-card, and archive layout
 - `assets/category-state.css` — category state styles
 - `assets/site.js` — homepage category filtering, featured article, search, theme/menu behavior
 - `assets/locale.js` — shared locale copy, legacy-language normalization, filtering, URL, and translation-pair helpers

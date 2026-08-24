@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f5f0e6">
+<meta name="theme-color" content="#f7f4ec">
 <title>Market Research</title>
 <meta name="description" content="데일리·위클리·비정기 리서치와 시장 공부를 아카이브하는 독립 시장 리서치 사이트.">
 <link rel="canonical" href="https://snowshagal.com/">
@@ -21,14 +21,17 @@
 <link rel="stylesheet" href="/assets/language.css?v=20260812-1">
 <link rel="stylesheet" href="assets/category-state.css">
 <link rel="stylesheet" href="assets/ui-polish.css?v=20260811-1">
-<link rel="stylesheet" href="assets/home-v2.css?v=20260813-1">
+<link rel="stylesheet" href="assets/home-v2.css?v=20260824-2">
 <script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
 </head>
-<body>
+<body class="home-page">
 <header class="site-header">
   <div class="site-wrap">
     <div class="header-row">
-      <a class="brand" href="./"><i></i>MARKET RESEARCH</a>
+      <a class="brand snowshagal-brand" href="./" aria-label="Snowshagal 홈">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span class="brand-copy"><strong>SNOWSHAGAL</strong><small>MARKET RESEARCH</small></span>
+      </a>
       <nav class="main-nav" aria-label="주 메뉴">
         <a data-nav-category="daily" href="?category=daily">데일리</a>
         <a data-nav-category="weekly" href="?category=weekly">위클리</a>
@@ -55,33 +58,31 @@
   </div>
 </header>
 <main>
-  <section class="v2-hero" aria-labelledby="featured-heading">
-    <div class="site-wrap">
-      <div class="featured-carousel" data-carousel aria-roledescription="carousel" aria-label="카테고리 대표 리포트">
-        <div class="carousel-stage" id="featured-slide" role="group" aria-roledescription="slide" aria-live="polite">
-          <div class="carousel-copy">
-            <div class="carousel-meta"><span class="carousel-badge" data-slide-category>데일리</span><time data-slide-date datetime="">—</time></div>
-            <h1 id="featured-heading" data-slide-title>시장 리서치 아카이브</h1>
-            <p class="carousel-subtitle" data-slide-subtitle></p>
-            <p class="carousel-description" data-slide-description>시장의 흐름을 데이터와 맥락으로 정리합니다.</p>
-            <a class="carousel-cta" data-slide-link href="./">리포트 전문 보기 <span aria-hidden="true">→</span></a>
-          </div>
-          <div class="carousel-cover" data-slide-cover aria-label="대표 리포트 커버"></div>
-        </div>
-        <div class="carousel-footer">
-          <div class="carousel-tabs" data-carousel-tabs role="tablist" aria-label="대표 리포트 카테고리"></div>
-          <div class="carousel-status"><span data-slide-current>01</span><span aria-hidden="true">/</span><span data-slide-total>01</span></div>
-          <div class="carousel-arrows">
-            <button type="button" data-slide-prev aria-label="이전 대표 리포트">←</button>
-            <button type="button" data-slide-next aria-label="다음 대표 리포트">→</button>
-          </div>
-        </div>
+  <section class="brand-hero" aria-labelledby="home-hero-heading">
+    <div class="site-wrap hero-shell">
+      <div class="hero-copy">
+        <p class="hero-kicker">SNOWSHAGAL <span>MARKET RESEARCH</span></p>
+        <h1 id="home-hero-heading"><span>하루의 움직임에서,</span><span>다음 흐름까지.</span></h1>
+        <span class="hero-rule" aria-hidden="true"></span>
+        <p class="hero-description">
+          <span>한국 시장의 데일리 복기부터 위클리 전망,</span>
+          <span>그리고 투자에 참고할 만한 인사이트까지.</span>
+        </p>
+        <nav class="hero-entries" aria-label="주요 리서치 바로가기">
+          <a href="?category=daily"><span class="entry-symbol entry-daily" aria-hidden="true"></span><span><strong>DAILY</strong><small>오늘의 시장</small></span></a>
+          <a href="?category=weekly"><span class="entry-symbol entry-weekly" aria-hidden="true"></span><span><strong>WEEKLY</strong><small>한 주의 흐름</small></span></a>
+          <a href="?category=research"><span class="entry-symbol entry-research" aria-hidden="true"></span><span><strong>RESEARCH</strong><small>깊이 읽기</small></span></a>
+        </nav>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <img src="/assets/snowshagal-hero.webp" alt="" width="1536" height="1024" fetchpriority="high">
       </div>
     </div>
   </section>
 
-  <section class="site-introduction" aria-label="카테고리별 최신 콘텐츠">
+  <section class="site-introduction" aria-labelledby="latest-heading">
     <div class="site-wrap">
+      <div class="latest-head"><div><span>LATEST</span><h2 id="latest-heading">최신 리포트</h2></div><a href="#archive-heading">전체 보기 <span aria-hidden="true">→</span></a></div>
       <div class="latest-cards" id="latest-category-cards" aria-label="카테고리별 최신 콘텐츠"></div>
     </div>
   </section>
@@ -111,9 +112,9 @@
     </div>
   </section>
 </main>
-<footer class="footer"><div class="site-wrap footer-row"><span>Independent Market Research Archive</span><div class="footer-links" aria-label="사이트 링크"><a href="/about/">About</a></div></div></footer>
+<footer class="footer"><div class="site-wrap footer-row"><span>SNOWSHAGAL · Independent Market Research</span><div class="footer-links" aria-label="사이트 링크"><a href="/about/">About</a></div></div></footer>
 <script src="/data/posts.js?v=20260824-1"></script>
 <script src="/assets/locale.js?v=20260824-1"></script>
-<script src="/assets/site.js?v=20260824-1"></script>
+<script src="/assets/site.js?v=20260824-2"></script>
 </body>
 </html>

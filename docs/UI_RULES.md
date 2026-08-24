@@ -1,6 +1,6 @@
 # UI and responsive rules
 
-Updated: 2026-08-12
+Updated: 2026-08-24
 
 ## Design direction
 
@@ -56,20 +56,19 @@ The current category should have a clear but restrained active state. The report
 
 English report pages use the same isolated top bar with English category and comment copy. Their KO/EN switch should prefer a matching `translationGroup` report and fall back to the selected locale homepage when no counterpart exists.
 
-## Homepage featured carousel
+## Snowshagal homepage hero
 
-The homepage v2 carousel is an editorial category overview, not a promotional banner or chronological autoplay slider.
+The homepage opens with the Snowshagal brand rather than a rotating post or a generic research-archive title.
 
-- at 961px and wider, present the hero as an open editorial spread with a larger visual column, square edges, thin horizontal rules, and no card shadow;
-- at desktop widths, anchor the spread with the cover on the left and a restrained copy column on the right, while preserving the existing mobile-first cover/copy/footer order below 761px;
-- use optional `summary` as the homepage hero teaser, independently from `description`; prefer 2–3 sentences or about 90–140 characters, then fall back to `description` and category copy when absent;
-- include the latest available post from each core category: daily, weekly, research, Market Basics;
-- do not autoplay;
-- keep previous/next buttons, category tabs, keyboard state, and current/total status accessible;
-- use a separate optional `coverImage` when available;
-- use a category/date/title typographic fallback when no cover image exists;
-- on mobile, place the cover before the text and preserve vertical scrolling while allowing deliberate horizontal swipe gestures;
-- respect `prefers-reduced-motion` and keep transitions subtle.
+- keep `SNOWSHAGAL` visually primary and treat `MARKET RESEARCH` as a small descriptor;
+- preserve the Korean headline `하루의 움직임에서, 다음 흐름까지.` and its requested supporting copy without embellishment;
+- use the original watercolor artwork as atmosphere, with ample ivory negative space and restrained chart, paper, moon, and small-town motifs;
+- avoid photorealistic winter/travel imagery and avoid decorative red/blue finance colors outside actual data;
+- on desktop, keep the copy readable on the left and let the illustration breathe across the right side;
+- at 320–480px, show the headline and supporting copy first, then continue the artwork below as a deliberate mobile composition rather than a scaled desktop spread;
+- keep Daily / Weekly / Research as concise hero entry points and retain Market Basics / Notes in the main navigation and archive;
+- the latest report cards must continue to render from localized post data and may use the existing optional `coverImage` or a restrained CSS fallback;
+- respect `prefers-reduced-motion` and keep hover movement subtle.
 
 ## Homepage archive
 

@@ -1,14 +1,22 @@
 # Roadmap
 
-Updated: 2026-08-23
+Updated: 2026-08-24
 
 This roadmap records implementation order, not a promise to build every future idea. Keep the current site small until traffic and actual needs justify added complexity.
 
 ## Next action
 
-Review the authenticated Cloudflare Web Analytics dashboard Draft PR in Preview. Configure read-only Analytics secrets when live Preview verification is required; otherwise verify UI and error/empty states with mocked GraphQL responses.
+Review the Snowshagal homepage redesign Draft PR in Cloudflare Preview at 360px, 430px, and 1280px in light and dark modes. Confirm category links, localized post cards, search, filters, archive, KO/EN switching, theme, and the mobile menu without merging to Production.
 
 ## In progress
+
+### 13. Snowshagal homepage brand redesign
+
+- replace the rotating report-led opener with a fixed Snowshagal brand hero and the approved Korean copy;
+- use one original watercolor illustration with desktop and mobile-specific crops;
+- keep Daily / Weekly / Research entry points concise while preserving every existing category, search, archive, locale, theme, and mobile-menu path;
+- keep latest report content driven by the current localized post data and leave SEO, Pages Functions, Analytics, admin, and publishing behavior unchanged;
+- validate the Draft PR in Cloudflare Preview on desktop and mobile before Production merge.
 
 ### 12. Lightweight admin Web Analytics
 

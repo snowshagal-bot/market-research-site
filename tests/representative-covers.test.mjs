@@ -41,13 +41,13 @@ test('post cover metadata stays synchronized and points to supported static imag
   }
 });
 
-test('coverless posts still use the homepage typography fallback', async () => {
+test('coverless posts still use the homepage visual fallback', async () => {
   const [script, styles] = await Promise.all([
     read('assets/site.js').then(buffer => buffer.toString('utf8')),
     read('assets/home-v2.css').then(buffer => buffer.toString('utf8'))
   ]);
 
-  assert.match(script, /if\(post\.coverImage\)/);
-  assert.match(script, /class="cover-fallback"/);
-  assert.match(styles, /\.cover-fallback/);
+  assert.match(script, /const visual=post\.coverImage/);
+  assert.match(script, /class="latest-card-art"/);
+  assert.match(styles, /\.latest-card-art/);
 });
