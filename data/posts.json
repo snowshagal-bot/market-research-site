@@ -317,6 +317,24 @@
     "featured": true
   },
   {
+    "id": "2026-08-07-daily-cjwe8f",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-07",
+    "reportDate": "2026-08-07",
+    "registeredDate": "2026-08-24",
+    "registeredAt": "2026-08-24T14:08:52.539Z",
+    "legacyImport": false,
+    "title": "The side under pressure was narrow,while the side providing support was broad.",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "The two market leaders diverged,and the index held its ground in between.",
+    "href": "reports/en/8월 7일 주식리포트_커버통합_en.html",
+    "translationGroup": "2026-08-07-daily",
+    "coverImage": "covers/2026-08-07-daily-cjwe8f.webp"
+  },
+  {
     "id": "2026-08-07-daily",
     "type": "daily",
     "typeLabel": "주식 리포트",
