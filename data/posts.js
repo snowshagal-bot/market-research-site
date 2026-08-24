@@ -1,5 +1,23 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-24-daily-og5aig",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-24",
+    "reportDate": "2026-08-24",
+    "registeredDate": "2026-08-24",
+    "registeredAt": "2026-08-24T11:42:40.621Z",
+    "legacyImport": false,
+    "title": "Thawing frozen sentiment, bit by bit.",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "As oil prices and interest rates cool.Returning hands.",
+    "href": "reports/en/8월 5일 주식리포트_커버통합_en.html",
+    "translationGroup": "2026-08-05-daily-oq9vps",
+    "coverImage": "covers/2026-08-24-daily-og5aig.webp"
+  },
+  {
     "id": "2026-08-24-daily-1nyohtr",
     "type": "daily",
     "typeLabel": "Daily",
