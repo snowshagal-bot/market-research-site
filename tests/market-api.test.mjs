@@ -6,6 +6,7 @@ import { onRequestPost } from '../functions/api/market/publish.js';
 import { MAX_PAYLOAD_BYTES, validateMarketPayload } from '../functions/api/market/_shared.js';
 
 const fixture = JSON.parse(await readFile(new URL('../contracts/market_close/market_close.example.json', import.meta.url), 'utf8'));
+const schema = JSON.parse(await readFile(new URL('../contracts/market_close/market_close.schema.json', import.meta.url), 'utf8'));
 const clone = value => JSON.parse(JSON.stringify(value));
 
 class MockStatement {
@@ -34,7 +35,12 @@ class MockDb {
   prepare(sql) { return new MockStatement(this, sql); }
 }
 
-const environment = db => ({ COMMENTS_DB: db, ADMIN_KEY: 'admin-secret', MARKET_PUBLISH_KEY: 'market-secret' });
+const environment = db => ({
+  COMMENTS_DB: db,
+  ADMIN_KEY: 'admin-secret',
+  MARKET_PUBLISH_KEY: 'market-secret',
+  ASSETS: { fetch: async request => new URL(request.url).pathname.endsWith('/market_close.schema.json') ? Response.json(schema) : new Response('Not found', { status: 404 }) }
+});
 const publishRequest = (payload, headers = {}, host = 'snowshagal.com') => new Request(`https://${host}/api/market/publish`, {
   method: 'POST',
   headers: { 'content-type': 'application/json', ...headers },
@@ -42,20 +48,20 @@ const publishRequest = (payload, headers = {}, host = 'snowshagal.com') => new R
 });
 
 test('authoritative example passes the schema-backed final validator', () => {
-  assert.deepEqual(validateMarketPayload(fixture), { passed: true, errors: [] });
+  assert.deepEqual(validateMarketPayload(fixture, schema), { passed: true, errors: [] });
 });
 
 test('validator rejects contract drift, incomplete data, wrong types, and final cardinality failures', () => {
   const extra = clone(fixture); extra.indices.KOSPI.invented = 1;
-  assert.equal(validateMarketPayload(extra).passed, false);
+  assert.equal(validateMarketPayload(extra, schema).passed, false);
   const incomplete = clone(fixture); incomplete.meta.status = 'incomplete';
-  assert.match(validateMarketPayload(incomplete).errors.join('\n'), /final/);
+  assert.match(validateMarketPayload(incomplete, schema).errors.join('\n'), /final/);
   const wrongType = clone(fixture); wrongType.market_breadth.KOSPI.rise = 1.5;
-  assert.match(validateMarketPayload(wrongType).errors.join('\n'), /integer/);
+  assert.match(validateMarketPayload(wrongType, schema).errors.join('\n'), /integer/);
   const shortList = clone(fixture); shortList.short_selling.top5_by_value.pop();
-  assert.match(validateMarketPayload(shortList).errors.join('\n'), /최소 5개/);
+  assert.match(validateMarketPayload(shortList, schema).errors.join('\n'), /최소 5개/);
   const missing = clone(fixture); delete missing.market_internals.turnover.KOSDAQ;
-  assert.match(validateMarketPayload(missing).errors.join('\n'), /KOSDAQ/);
+  assert.match(validateMarketPayload(missing, schema).errors.join('\n'), /KOSDAQ/);
 });
 
 test('publish fails closed on Preview, missing auth, invalid JSON, and oversized bodies', async () => {

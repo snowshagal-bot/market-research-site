@@ -1,8 +1,7 @@
-import MARKET_CLOSE_SCHEMA from '../../../contracts/market_close/market_close.schema.json' with { type: 'json' };
-
 export const SCHEMA_VERSION = '1.0.1';
 export const MAX_PAYLOAD_BYTES = 512 * 1024;
 export const TABLE_NAME = 'market_close_snapshots';
+export const SCHEMA_PATH = '/contracts/market_close/market_close.schema.json';
 
 const schemaPromises = new WeakMap();
 
@@ -76,9 +75,23 @@ export class MarketDbError extends Error {
   }
 }
 
-function resolveRef(reference) {
+export async function loadMarketSchema(request, env) {
+  if (!env?.ASSETS?.fetch) throw new MarketDbError('SCHEMA_UNAVAILABLE', 'Market Close JSON Schema를 불러올 수 없습니다.', 500);
+  try {
+    const response = await env.ASSETS.fetch(new Request(new URL(SCHEMA_PATH, request.url), { headers: { accept: 'application/json' } }));
+    if (!response.ok) throw new Error(`SCHEMA_HTTP_${response.status}`);
+    const schema = await response.json();
+    if (schema?.properties?.meta?.properties?.schema_version?.const !== SCHEMA_VERSION) throw new Error('SCHEMA_VERSION_MISMATCH');
+    return schema;
+  } catch (error) {
+    console.error('market close schema load failed', error);
+    throw new MarketDbError('SCHEMA_UNAVAILABLE', 'Market Close JSON Schema를 불러올 수 없습니다.', 500);
+  }
+}
+
+function resolveRef(reference, rootSchema) {
   if (!String(reference || '').startsWith('#/')) return null;
-  return reference.slice(2).split('/').reduce((value, key) => value?.[key.replace(/~1/g, '/').replace(/~0/g, '~')], MARKET_CLOSE_SCHEMA);
+  return reference.slice(2).split('/').reduce((value, key) => value?.[key.replace(/~1/g, '/').replace(/~0/g, '~')], rootSchema);
 }
 
 function valueType(value) {
@@ -111,18 +124,18 @@ function isDateTime(value) {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value) && Number.isFinite(Date.parse(value));
 }
 
-function validateNode(value, schema, path, errors) {
+function validateNode(value, schema, path, errors, rootSchema) {
   if (!schema || errors.length >= 100) return;
   if (schema.$ref) {
-    const resolved = resolveRef(schema.$ref);
+    const resolved = resolveRef(schema.$ref, rootSchema);
     if (!resolved) errors.push(`${path}: 지원하지 않는 schema reference입니다.`);
-    else validateNode(value, resolved, path, errors);
+    else validateNode(value, resolved, path, errors, rootSchema);
     return;
   }
   if (schema.anyOf) {
     const passed = schema.anyOf.some(candidate => {
       const candidateErrors = [];
-      validateNode(value, candidate, path, candidateErrors);
+      validateNode(value, candidate, path, candidateErrors, rootSchema);
       return candidateErrors.length === 0;
     });
     if (!passed) errors.push(`${path}: 허용된 형식과 일치하지 않습니다.`);
@@ -143,7 +156,7 @@ function validateNode(value, schema, path, errors) {
   if (Array.isArray(value)) {
     if (schema.minItems !== undefined && value.length < schema.minItems) errors.push(`${path}: 항목이 최소 ${schema.minItems}개 필요합니다.`);
     if (schema.maxItems !== undefined && value.length > schema.maxItems) errors.push(`${path}: 항목은 최대 ${schema.maxItems}개입니다.`);
-    if (schema.items) value.forEach((item, index) => validateNode(item, schema.items, `${path}[${index}]`, errors));
+    if (schema.items) value.forEach((item, index) => validateNode(item, schema.items, `${path}[${index}]`, errors, rootSchema));
   }
   if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
     for (const key of schema.required || []) {
@@ -155,20 +168,21 @@ function validateNode(value, schema, path, errors) {
       }
     }
     for (const [key, childSchema] of Object.entries(schema.properties || {})) {
-      if (Object.hasOwn(value, key)) validateNode(value[key], childSchema, `${path}.${key}`, errors);
+      if (Object.hasOwn(value, key)) validateNode(value[key], childSchema, `${path}.${key}`, errors, rootSchema);
     }
   }
-  for (const part of schema.allOf || []) validateNode(value, part, path, errors);
+  for (const part of schema.allOf || []) validateNode(value, part, path, errors, rootSchema);
   if (schema.if) {
     const conditionErrors = [];
-    validateNode(value, schema.if, path, conditionErrors);
-    validateNode(value, conditionErrors.length === 0 ? schema.then : schema.else, path, errors);
+    validateNode(value, schema.if, path, conditionErrors, rootSchema);
+    validateNode(value, conditionErrors.length === 0 ? schema.then : schema.else, path, errors, rootSchema);
   }
 }
 
-export function validateMarketPayload(payload) {
+export function validateMarketPayload(payload, schema) {
   const errors = [];
-  validateNode(payload, MARKET_CLOSE_SCHEMA, '$', errors);
+  if (!schema || typeof schema !== 'object') errors.push('$: JSON Schema가 없습니다.');
+  else validateNode(payload, schema, '$', errors, schema);
   if (payload?.meta?.status !== 'final') errors.push('$.meta.status: publish API는 final 데이터만 허용합니다.');
   if (payload?.meta?.schema_version !== SCHEMA_VERSION) errors.push(`$.meta.schema_version: ${SCHEMA_VERSION}이어야 합니다.`);
   if (payload?.validation?.passed !== true) errors.push('$.validation.passed: true여야 합니다.');

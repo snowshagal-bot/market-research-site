@@ -1,4 +1,4 @@
-import { MAX_PAYLOAD_BYTES, TABLE_NAME, MarketDbError, authorizePublish, ensureMarketTable, isProductionRequest, json, validateMarketPayload } from './_shared.js';
+import { MAX_PAYLOAD_BYTES, TABLE_NAME, MarketDbError, authorizePublish, ensureMarketTable, isProductionRequest, json, loadMarketSchema, validateMarketPayload } from './_shared.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -17,7 +17,13 @@ export async function onRequestPost(context) {
   let payload;
   try { payload = JSON.parse(raw); }
   catch (_) { return json({ error: 'INVALID_JSON', message: '올바른 JSON 파일이 아닙니다.' }, 400); }
-  const validation = validateMarketPayload(payload);
+  let schema;
+  try { schema = await loadMarketSchema(request, env); }
+  catch (error) {
+    if (error instanceof MarketDbError) return json({ error: error.code, message: error.message }, error.status);
+    return json({ error: 'SCHEMA_UNAVAILABLE', message: 'Market Close JSON Schema를 불러올 수 없습니다.' }, 500);
+  }
+  const validation = validateMarketPayload(payload, schema);
   if (!validation.passed) return json({ error: 'VALIDATION_FAILED', message: 'Market Close 데이터 계약 검증에 실패했습니다.', details: validation.errors }, 422);
 
   try {
