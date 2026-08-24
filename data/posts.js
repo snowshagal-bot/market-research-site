@@ -1,5 +1,22 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-24-daily-ya1ru9",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-24",
+    "reportDate": "2026-08-24",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-24T18:29:58.339Z",
+    "legacyImport": false,
+    "title": "Index -3.12%, advancers 64.2%",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "href": "reports/en/2026-08-24_KOSPI_Daily_Report_EN_Benchmark.html",
+    "translationGroup": "2026-08-24-daily-97jc8s",
+    "coverImage": "covers/2026-08-24-daily-ya1ru9.png"
+  },
+  {
     "id": "2026-08-24-daily-97jc8s",
     "type": "daily",
     "typeLabel": "주식 리포트",
