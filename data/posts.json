@@ -188,6 +188,24 @@
     "coverImage": "covers/2026-08-14-daily-dqoisk.webp"
   },
   {
+    "id": "2026-08-13-daily-1nnspvd",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-13",
+    "reportDate": "2026-08-13",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-24T18:03:24.015Z",
+    "legacyImport": false,
+    "title": "Two Boats Afloat",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "The Index Rose Like the Tide533 Left in the Mudflats",
+    "href": "reports/en/2026-08-13_KOSPI_Daily_Report_EN_Benchmark (1).html",
+    "translationGroup": "2026-08-13-daily-1tgqr3y",
+    "coverImage": "covers/2026-08-13-daily-1nnspvd.webp"
+  },
+  {
     "id": "2026-08-13-daily-1tgqr3y",
     "type": "daily",
     "typeLabel": "주식 리포트",
