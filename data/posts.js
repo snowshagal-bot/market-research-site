@@ -172,6 +172,24 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-16-research-141u5l9.webp"
   },
   {
+    "id": "2026-08-14-daily-1yyf33y",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-14",
+    "reportDate": "2026-08-14",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-24T18:03:42.320Z",
+    "legacyImport": false,
+    "title": "The Channels Open Outward",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "The Main Current Holds",
+    "href": "reports/en/2026-08-14_KOSPI_Daily_Report_EN_Benchmark.html",
+    "translationGroup": "2026-08-14-daily-dqoisk",
+    "coverImage": "covers/2026-08-14-daily-1yyf33y.webp"
+  },
+  {
     "id": "2026-08-14-daily-dqoisk",
     "type": "daily",
     "typeLabel": "주식 리포트",
