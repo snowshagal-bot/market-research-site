@@ -1,5 +1,23 @@
 [
   {
+    "id": "2026-08-24-daily-1nyohtr",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-24",
+    "reportDate": "2026-08-24",
+    "registeredDate": "2026-08-24",
+    "registeredAt": "2026-08-24T11:42:15.423Z",
+    "legacyImport": false,
+    "title": "Red MiddayTwo Black Buds",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "Large-cap semiconductors stalled,while the rest of the market drove the index recovery.",
+    "href": "reports/en/8월 4일 주식리포트_커버통합_en.html",
+    "translationGroup": "2026-08-04-daily-wfcoi4",
+    "coverImage": "covers/2026-08-24-daily-1nyohtr.webp"
+  },
+  {
     "id": "2026-08-24-daily-97jc8s",
     "type": "daily",
     "typeLabel": "주식 리포트",
