@@ -33,11 +33,11 @@ function githubMock(existingPosts = []) {
   return calls;
 }
 
-function publishRequest({ type = 'daily', cover = null, lang = 'ko', translationGroup = '', summary } = {}, url = 'https://snowshagal.com/api/publish') {
+function publishRequest({ type = 'daily', cover = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary } = {}, url = 'https://snowshagal.com/api/publish') {
   const form = new FormData();
   form.append('file', new File(['<!doctype html><html><body>report</body></html>'], 'report.html', { type: 'text/html' }));
   form.append('type', type);
-  form.append('reportDate', '2026-08-10');
+  form.append('reportDate', reportDate);
   form.append('title', type === 'basics' ? '시장을 읽는 기본' : '테스트 리포트');
   form.append('subtitle', '테스트 부제');
   form.append('description', '테스트 설명');
@@ -141,7 +141,7 @@ test('publishing stores an optional trimmed homepage summary up to 500 character
 });
 
 test('English reports are stored under reports/en with language and translation metadata', async () => {
-  const calls = githubMock([{ id: 'ko-source', href: 'reports/source.html', type: 'weekly', title: '원문' }]);
+  const calls = githubMock([{ id: 'ko-source', href: 'reports/source.html', type: 'weekly', title: '원문', reportDate: '2026-08-10' }]);
   try {
     const { response, data } = await runPublish({ type: 'weekly', lang: 'en', translationGroup: 'ko-source' });
     assert.equal(response.status, 200);
@@ -155,6 +155,21 @@ test('English reports are stored under reports/en with language and translation 
     assert.equal(post.href, 'reports/en/weekly-report.html');
     assert.equal(post.typeLabel, 'Weekly');
   } finally { globalThis.fetch = originalFetch; }
+});
+
+test('translation pairing rejects a missing counterpart or a mismatched report date', async () => {
+  for (const [existingPosts, options, expectedError] of [
+    [[], { lang: 'en', translationGroup: 'missing-source' }, 'BAD_TRANSLATION_GROUP'],
+    [[{ id: 'ko-source', reportDate: '2026-08-04' }], { lang: 'en', translationGroup: 'ko-source', reportDate: '2026-08-24' }, 'PAIR_DATE_MISMATCH']
+  ]) {
+    const calls = githubMock(existingPosts);
+    try {
+      const { response, data } = await runPublish(options);
+      assert.equal(response.status, 400);
+      assert.equal(data.error, expectedError);
+      assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
+    } finally { globalThis.fetch = originalFetch; }
+  }
 });
 
 test('unsupported and oversized cover files are rejected before GitHub writes', async () => {

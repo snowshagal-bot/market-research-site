@@ -208,6 +208,22 @@ export async function onRequestPost(context) {
     let posts = JSON.parse(postsText);
     if (!Array.isArray(posts)) throw new Error('posts.json 형식이 올바르지 않습니다.');
 
+    if (translationGroup) {
+      const targetLanguage = lang === 'en' ? 'ko' : 'en';
+      const pairedPost = posts.find(post => {
+        const postLanguage = post?.lang === 'en' ? 'en' : 'ko';
+        const postTranslationKey = String(post?.translationGroup || post?.id || '');
+        return postLanguage === targetLanguage && postTranslationKey === translationGroup;
+      });
+      if (!pairedPost) {
+        return reply({ error: 'BAD_TRANSLATION_GROUP', message: '선택한 번역 짝을 찾을 수 없습니다. 목록을 새로고침한 뒤 다시 선택하세요.' }, 400);
+      }
+      const pairedDate = String(pairedPost.reportDate || pairedPost.date || '');
+      if (pairedDate !== reportDate) {
+        return reply({ error: 'PAIR_DATE_MISMATCH', message: `리포트 기준일은 번역 짝과 같은 ${pairedDate || '날짜'}이어야 합니다.` }, 400);
+      }
+    }
+
     if (posts.some(p => p.href === href)) {
       return reply({ error: 'DUPLICATE', message: '같은 파일명의 리포트가 이미 등록되어 있습니다. 파일명을 확인하세요.' }, 409);
     }
