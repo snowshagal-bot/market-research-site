@@ -1,0 +1,500 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://snowshagal.com/schemas/market_close-1.0.1.schema.json",
+  "title": "Snowshagal Market Close EOD Snapshot",
+  "description": "글로벌 시장/KRX 대시보드에서 생성하는 공개용 일일 마감 데이터 계약. 계약 변경 시 meta.schema_version과 이 스키마의 $id/const를 함께 갱신해야 한다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "meta", "indices", "rates_fx_volatility", "commodities_crypto",
+    "krx_investor_trading", "recent_5d_flows", "market_breadth",
+    "program_basis", "market_internals", "short_selling",
+    "market_cap_top10", "validation"
+  ],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["market_date", "generated_at", "timezone", "status", "schema_version"],
+      "properties": {
+        "market_date": {"$ref": "#/$defs/date"},
+        "generated_at": {"$ref": "#/$defs/dateTime"},
+        "timezone": {"const": "Asia/Bangkok"},
+        "status": {"enum": ["final", "incomplete"]},
+        "schema_version": {"const": "1.0.1"}
+      }
+    },
+    "indices": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["KOSPI", "KOSDAQ", "NASDAQ", "DOW", "SP500"],
+      "properties": {
+        "KOSPI": {"$ref": "#/$defs/nullableInstrument"},
+        "KOSDAQ": {"$ref": "#/$defs/nullableInstrument"},
+        "NASDAQ": {"$ref": "#/$defs/nullableInstrument"},
+        "DOW": {"$ref": "#/$defs/nullableInstrument"},
+        "SP500": {"$ref": "#/$defs/nullableInstrument"}
+      }
+    },
+    "rates_fx_volatility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["SOX", "VIX", "US10Y", "USDKRW", "JPYKRW", "DXY"],
+      "properties": {
+        "SOX": {"$ref": "#/$defs/nullableInstrument"},
+        "VIX": {"$ref": "#/$defs/nullableInstrument"},
+        "US10Y": {"$ref": "#/$defs/nullableInstrument"},
+        "USDKRW": {"$ref": "#/$defs/nullableInstrument"},
+        "JPYKRW": {"$ref": "#/$defs/nullableInstrument"},
+        "DXY": {"$ref": "#/$defs/nullableInstrument"}
+      }
+    },
+    "commodities_crypto": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["WTI", "GOLD", "BITCOIN"],
+      "properties": {
+        "WTI": {"$ref": "#/$defs/nullableInstrument"},
+        "GOLD": {"$ref": "#/$defs/nullableInstrument"},
+        "BITCOIN": {"$ref": "#/$defs/nullableInstrument"}
+      }
+    },
+    "krx_investor_trading": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit", "markets"],
+      "properties": {
+        "unit": {"const": "KRW billion"},
+        "markets": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "KOSPI": {"$ref": "#/$defs/investorMarket"},
+            "KOSDAQ": {"$ref": "#/$defs/investorMarket"},
+            "KOSPI200선물": {"$ref": "#/$defs/investorMarket"}
+          }
+        }
+      }
+    },
+    "recent_5d_flows": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit", "used_trading_days", "start_date", "end_date", "markets"],
+      "properties": {
+        "unit": {"const": "KRW billion"},
+        "used_trading_days": {"type": "integer", "minimum": 0, "maximum": 5},
+        "start_date": {"$ref": "#/$defs/nullableDate"},
+        "end_date": {"$ref": "#/$defs/nullableDate"},
+        "markets": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "KOSPI": {"$ref": "#/$defs/investorTotals"},
+            "KOSDAQ": {"$ref": "#/$defs/investorTotals"},
+            "KOSPI200선물": {"$ref": "#/$defs/investorTotals"}
+          }
+        }
+      }
+    },
+    "market_breadth": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "KOSPI": {"$ref": "#/$defs/breadth"},
+        "KOSDAQ": {"$ref": "#/$defs/breadth"}
+      }
+    },
+    "program_basis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["basis", "program_trading"],
+      "properties": {
+        "basis": {"anyOf": [{"$ref": "#/$defs/basis"}, {"type": "null"}]},
+        "program_trading": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "차익": {"$ref": "#/$defs/programRow"},
+            "비차익": {"$ref": "#/$defs/programRow"},
+            "전체": {"$ref": "#/$defs/programRow"}
+          }
+        }
+      }
+    },
+    "market_internals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["turnover", "concentration"],
+      "properties": {
+        "turnover": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "KOSPI": {"$ref": "#/$defs/turnover"},
+            "KOSDAQ": {"$ref": "#/$defs/turnover"}
+          }
+        },
+        "concentration": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "외국인": {"$ref": "#/$defs/concentrationSides"},
+            "기관": {"$ref": "#/$defs/concentrationSides"}
+          }
+        }
+      }
+    },
+    "short_selling": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["market_summary", "top5_by_value", "top5_by_ratio"],
+      "properties": {
+        "market_summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "KOSPI": {"$ref": "#/$defs/shortMarket"},
+            "KOSDAQ": {"$ref": "#/$defs/shortMarket"}
+          }
+        },
+        "top5_by_value": {"type": "array", "maxItems": 5, "items": {"$ref": "#/$defs/shortStock"}},
+        "top5_by_ratio": {"type": "array", "maxItems": 5, "items": {"$ref": "#/$defs/shortStock"}}
+      }
+    },
+    "market_cap_top10": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {"$ref": "#/$defs/marketCapStock"}
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["passed", "errors"],
+      "properties": {
+        "passed": {"type": "boolean"},
+        "errors": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "meta": {
+            "properties": {"status": {"const": "final"}},
+            "required": ["status"]
+          }
+        },
+        "required": ["meta"]
+      },
+      "then": {
+        "properties": {
+          "indices": {
+            "properties": {
+              "KOSPI": {"$ref": "#/$defs/instrument"},
+              "KOSDAQ": {"$ref": "#/$defs/instrument"}
+            }
+          },
+          "krx_investor_trading": {
+            "properties": {
+              "markets": {"required": ["KOSPI", "KOSDAQ", "KOSPI200선물"]}
+            }
+          },
+          "recent_5d_flows": {
+            "properties": {
+              "used_trading_days": {"const": 5},
+              "markets": {"required": ["KOSPI", "KOSDAQ", "KOSPI200선물"]}
+            }
+          },
+          "market_breadth": {"required": ["KOSPI", "KOSDAQ"]},
+          "program_basis": {
+            "properties": {
+              "basis": {"$ref": "#/$defs/basis"},
+              "program_trading": {"required": ["차익", "비차익", "전체"]}
+            }
+          },
+          "market_internals": {
+            "properties": {
+              "turnover": {"required": ["KOSPI", "KOSDAQ"]},
+              "concentration": {
+                "required": ["외국인", "기관"],
+                "properties": {
+                  "외국인": {"required": ["buy", "sell"]},
+                  "기관": {"required": ["buy", "sell"]}
+                }
+              }
+            }
+          },
+          "short_selling": {
+            "properties": {
+              "market_summary": {"required": ["KOSPI", "KOSDAQ"]},
+              "top5_by_value": {"minItems": 5, "maxItems": 5},
+              "top5_by_ratio": {"minItems": 5, "maxItems": 5}
+            }
+          },
+          "market_cap_top10": {"minItems": 10, "maxItems": 10},
+          "validation": {
+            "properties": {
+              "passed": {"const": true},
+              "errors": {"maxItems": 0}
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "date": {"type": "string", "format": "date"},
+    "nullableDate": {"anyOf": [{"$ref": "#/$defs/date"}, {"type": "null"}]},
+    "dateTime": {"type": "string", "format": "date-time"},
+    "nullableDateTime": {"anyOf": [{"$ref": "#/$defs/dateTime"}, {"type": "null"}]},
+    "nullableNumber": {"type": ["number", "null"]},
+    "nullableInteger": {"type": ["integer", "null"]},
+    "nullableString": {"type": ["string", "null"]},
+    "nullableInstrument": {"anyOf": [{"$ref": "#/$defs/instrument"}, {"type": "null"}]},
+    "instrument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name", "ticker", "close", "current", "change", "change_pct",
+        "open", "high", "low", "previous_close", "source_date", "as_of",
+        "retrieved_at", "data_state", "is_cached", "source"
+      ],
+      "properties": {
+        "name": {"type": "string"},
+        "ticker": {"type": "string"},
+        "close": {"$ref": "#/$defs/nullableNumber"},
+        "current": {"$ref": "#/$defs/nullableNumber"},
+        "change": {"$ref": "#/$defs/nullableNumber"},
+        "change_pct": {"$ref": "#/$defs/nullableNumber"},
+        "open": {"$ref": "#/$defs/nullableNumber"},
+        "high": {"$ref": "#/$defs/nullableNumber"},
+        "low": {"$ref": "#/$defs/nullableNumber"},
+        "previous_close": {"$ref": "#/$defs/nullableNumber"},
+        "source_date": {"$ref": "#/$defs/nullableDate"},
+        "as_of": {"type": ["string", "null"]},
+        "retrieved_at": {"$ref": "#/$defs/nullableDateTime"},
+        "data_state": {"enum": ["final_close", "intraday", "unavailable"]},
+        "is_cached": {"type": "boolean"},
+        "source": {"type": "string"}
+      }
+    },
+    "sourceState": {
+      "type": "object",
+      "required": ["source_date", "as_of", "data_state"],
+      "properties": {
+        "source_date": {"$ref": "#/$defs/date"},
+        "as_of": {"$ref": "#/$defs/dateTime"},
+        "data_state": {"type": "string"}
+      }
+    },
+    "investorValues": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sell", "buy", "net_buy"],
+      "properties": {
+        "sell": {"type": "integer"},
+        "buy": {"type": "integer"},
+        "net_buy": {"type": "integer"}
+      }
+    },
+    "investorMarket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_date", "as_of", "data_state", "investors"],
+      "properties": {
+        "source_date": {"$ref": "#/$defs/date"},
+        "as_of": {"$ref": "#/$defs/dateTime"},
+        "data_state": {"type": "string"},
+        "investors": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["외국인", "기관", "개인"],
+          "properties": {
+            "외국인": {"$ref": "#/$defs/investorValues"},
+            "기관": {"$ref": "#/$defs/investorValues"},
+            "개인": {"$ref": "#/$defs/investorValues"}
+          }
+        }
+      }
+    },
+    "investorTotals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["외국인", "기관", "개인"],
+      "properties": {
+        "외국인": {"type": "integer"},
+        "기관": {"type": "integer"},
+        "개인": {"type": "integer"}
+      }
+    },
+    "breadth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "upper_limit", "rise", "flat", "fall", "lower_limit", "rise_count",
+        "fall_count", "rise_ratio", "fall_ratio", "source_date", "as_of", "data_state"
+      ],
+      "properties": {
+        "upper_limit": {"type": "integer", "minimum": 0},
+        "rise": {"type": "integer", "minimum": 0},
+        "flat": {"type": "integer", "minimum": 0},
+        "fall": {"type": "integer", "minimum": 0},
+        "lower_limit": {"type": "integer", "minimum": 0},
+        "rise_count": {"type": "integer", "minimum": 0},
+        "fall_count": {"type": "integer", "minimum": 0},
+        "rise_ratio": {"$ref": "#/$defs/nullableNumber"},
+        "fall_ratio": {"$ref": "#/$defs/nullableNumber"},
+        "source_date": {"$ref": "#/$defs/date"},
+        "as_of": {"$ref": "#/$defs/dateTime"},
+        "data_state": {"type": "string"}
+      }
+    },
+    "basis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kospi200_spot", "future", "basis", "future_ticker", "future_name",
+        "future_expiry", "market_state", "source_date", "as_of", "data_state"
+      ],
+      "properties": {
+        "kospi200_spot": {"type": "number"},
+        "future": {"type": "number"},
+        "basis": {"type": "number"},
+        "future_ticker": {"type": "string"},
+        "future_name": {"type": "string"},
+        "future_expiry": {"type": "string"},
+        "market_state": {"type": "string"},
+        "source_date": {"$ref": "#/$defs/date"},
+        "as_of": {"$ref": "#/$defs/dateTime"},
+        "data_state": {"type": "string"}
+      }
+    },
+    "programRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sell_won", "buy_won", "net_buy_won", "source_date", "as_of", "data_state"],
+      "properties": {
+        "sell_won": {"type": "integer"},
+        "buy_won": {"type": "integer"},
+        "net_buy_won": {"type": "integer"},
+        "source_date": {"$ref": "#/$defs/date"},
+        "as_of": {"$ref": "#/$defs/dateTime"},
+        "data_state": {"type": "string"}
+      }
+    },
+    "turnover": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value_won", "volume", "previous_value_won", "average5_value_won",
+        "ratio5", "source_date", "as_of", "data_state"
+      ],
+      "properties": {
+        "value_won": {"type": "integer"},
+        "volume": {"type": "integer"},
+        "previous_value_won": {"$ref": "#/$defs/nullableInteger"},
+        "average5_value_won": {"$ref": "#/$defs/nullableInteger"},
+        "ratio5": {"$ref": "#/$defs/nullableNumber"},
+        "source_date": {"$ref": "#/$defs/date"},
+        "as_of": {"$ref": "#/$defs/dateTime"},
+        "data_state": {"type": "string"}
+      }
+    },
+    "concentrationSides": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "buy": {"$ref": "#/$defs/concentration"},
+        "sell": {"$ref": "#/$defs/concentration"}
+      }
+    },
+    "concentration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "top1_ratio", "top5_ratio", "total_amount_won", "top_ticker", "top_name",
+        "source_date", "as_of", "data_state"
+      ],
+      "properties": {
+        "top1_ratio": {"type": "number"},
+        "top5_ratio": {"type": "number"},
+        "total_amount_won": {"type": "integer"},
+        "top_ticker": {"type": "string"},
+        "top_name": {"type": "string"},
+        "source_date": {"$ref": "#/$defs/date"},
+        "as_of": {"$ref": "#/$defs/dateTime"},
+        "data_state": {"type": "string"}
+      }
+    },
+    "shortMarket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "short_volume", "short_value_won", "total_volume", "total_value_won",
+        "short_volume_ratio", "short_value_ratio", "market_scope", "session_scope",
+        "coverage_scope", "source_date", "as_of", "data_state"
+      ],
+      "properties": {
+        "short_volume": {"type": "integer"},
+        "short_value_won": {"type": "integer"},
+        "total_volume": {"type": "integer"},
+        "total_value_won": {"type": "integer"},
+        "short_volume_ratio": {"type": "number"},
+        "short_value_ratio": {"type": "number"},
+        "market_scope": {"type": "string"},
+        "session_scope": {"type": "string"},
+        "coverage_scope": {"type": "string"},
+        "source_date": {"$ref": "#/$defs/date"},
+        "as_of": {"$ref": "#/$defs/dateTime"},
+        "data_state": {"type": "string"}
+      }
+    },
+    "shortStock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "market", "ticker", "name", "close", "change_pct", "short_volume",
+        "short_value_won", "total_volume", "total_value_won", "short_volume_ratio",
+        "short_value_ratio", "source_date", "as_of", "data_state"
+      ],
+      "properties": {
+        "market": {"type": "string"},
+        "ticker": {"type": "string"},
+        "name": {"type": "string"},
+        "close": {"$ref": "#/$defs/nullableInteger"},
+        "change_pct": {"$ref": "#/$defs/nullableNumber"},
+        "short_volume": {"type": "integer"},
+        "short_value_won": {"type": "integer"},
+        "total_volume": {"type": "integer"},
+        "total_value_won": {"type": "integer"},
+        "short_volume_ratio": {"type": "number"},
+        "short_value_ratio": {"type": "number"},
+        "source_date": {"$ref": "#/$defs/date"},
+        "as_of": {"$ref": "#/$defs/dateTime"},
+        "data_state": {"type": "string"}
+      }
+    },
+    "marketCapStock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rank", "market", "name", "ticker", "close", "change_pct",
+        "market_cap_won", "source_date", "as_of", "data_state"
+      ],
+      "properties": {
+        "rank": {"type": "integer", "minimum": 1, "maximum": 10},
+        "market": {"type": "string"},
+        "name": {"type": "string"},
+        "ticker": {"type": "string"},
+        "close": {"type": "integer"},
+        "change_pct": {"type": "number"},
+        "market_cap_won": {"type": "integer"},
+        "trading_value_won": {"type": "integer"},
+        "source_date": {"$ref": "#/$defs/date"},
+        "as_of": {"$ref": "#/$defs/dateTime"},
+        "data_state": {"type": "string"}
+      }
+    }
+  }
+}

@@ -5,16 +5,16 @@
   const targetLocale = locale === 'en' ? 'ko' : 'en';
   const localeApi = window.MARKET_LOCALE;
   const copy = locale === 'en' ? {
-    navLabel: 'Report site menu', home: '← Home', daily: 'Daily', weekly: 'Weekly', research: 'Research', basics: 'Market Basics', note: 'Notes', about: 'About', switchLabel: 'Read in Korean', switchText: 'KO',
+    navLabel: 'Report site menu', home: '← Home', daily: 'Daily', weekly: 'Weekly', research: 'Research', basics: 'Market Basics', note: 'Notes', market: 'Market', switchLabel: 'Read in Korean', switchText: 'KO',
     comments: 'Comments', write: 'Write a comment', close: 'Close', nickname: 'Nickname', password: 'Deletion password', body: 'Write a comment.', website: 'Website', noteText: 'No account required · The password is used only for deletion.', submit: 'Post comment', loading: 'Loading comments…', empty: 'No comments yet.', delete: 'Delete',
     loadError: 'Could not load comments.', dbTitle: 'Comments are being prepared', dbText: 'Comments will be available after the database is connected.', retry: 'Please try again later.', posting: 'Posting…', postError: 'Could not post the comment.', posted: 'Comment posted.', deletePrompt: 'Enter the deletion password.', deleteError: 'Could not delete the comment.'
   } : {
-    navLabel: '리포트 사이트 메뉴', home: '← 홈', daily: '데일리', weekly: '위클리', research: '리서치', basics: '시장 공부', note: '끄적끄적', about: '소개', switchLabel: '영어로 읽기', switchText: 'EN',
+    navLabel: '리포트 사이트 메뉴', home: '← 홈', daily: '데일리', weekly: '위클리', research: '리서치', basics: '시장 공부', note: '끄적끄적', market: '마켓', switchLabel: '영어로 읽기', switchText: 'EN',
     comments: '댓글', write: '댓글 쓰기', close: '닫기', nickname: '닉네임', password: '삭제용 비밀번호', body: '댓글을 입력하세요.', website: '웹사이트', noteText: '회원가입 없이 작성 · 비밀번호는 삭제할 때만 사용됩니다.', submit: '댓글 등록', loading: '댓글을 불러오는 중…', empty: '아직 댓글이 없습니다.', delete: '삭제',
     loadError: '댓글을 불러오지 못했습니다.', dbTitle: '댓글 기능 준비 중', dbText: '데이터베이스 연결 후 사용할 수 있습니다.', retry: '잠시 후 다시 시도해주세요.', posting: '등록 중…', postError: '댓글을 등록하지 못했습니다.', posted: '댓글이 등록되었습니다.', deletePrompt: '댓글 삭제 비밀번호를 입력하세요.', deleteError: '댓글을 삭제하지 못했습니다.'
   };
   const homePath = locale === 'en' ? '/en/' : '/';
-  const aboutPath = locale === 'en' ? '/en/about/' : '/about/';
+  const marketPath = locale === 'en' ? '/en/market/' : '/market/';
   const BAR_H = 52;
   const themeMedia = matchMedia('(prefers-color-scheme: dark)');
   const shellHosts = [];
@@ -83,7 +83,7 @@
         <a class="${active === 'research' ? 'active' : ''}" ${active === 'research' ? 'aria-current="true"' : ''} href="${homePath}?category=research">${copy.research}</a>
         <a class="${active === 'basics' ? 'active' : ''}" ${active === 'basics' ? 'aria-current="true"' : ''} href="${homePath}?category=basics">${copy.basics}</a>
         <a class="${active === 'note' ? 'active' : ''}" ${active === 'note' ? 'aria-current="true"' : ''} href="${homePath}?category=note">${copy.note}</a>
-        <a href="${aboutPath}">${copy.about}</a>
+        <a href="${marketPath}">${copy.market}</a>
         <a class="language" id="report-language-switch" href="${targetLocale === 'en' ? '/en/' : '/'}" aria-label="${copy.switchLabel}">${copy.switchText}</a>
         <span class="brand">MARKET RESEARCH</span>
       </div></nav>`;

@@ -1,0 +1,824 @@
+{
+  "meta": {
+    "market_date": "2026-08-24",
+    "generated_at": "2026-08-25T00:07:44.795479+07:00",
+    "timezone": "Asia/Bangkok",
+    "status": "final",
+    "schema_version": "1.0.1"
+  },
+  "indices": {
+    "KOSPI": {
+      "name": "코스피",
+      "ticker": "^KS11",
+      "close": 6696.96,
+      "current": 6696.96,
+      "change": -215.98999999999978,
+      "change_pct": -3.12442589632501,
+      "open": 6881.07,
+      "high": 6884.57,
+      "low": 6656.07,
+      "previous_close": 6912.95,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-24",
+      "retrieved_at": "2026-08-24T23:54:32.453084+07:00",
+      "data_state": "final_close",
+      "is_cached": true,
+      "source": "네이버 금융 지수 일봉 · KRX 원천"
+    },
+    "KOSDAQ": {
+      "name": "코스닥",
+      "ticker": "^KQ11",
+      "close": 813.33,
+      "current": 813.33,
+      "change": 11.389999999999986,
+      "change_pct": 1.4203057585355494,
+      "open": 804.27,
+      "high": 821.96,
+      "low": 804.27,
+      "previous_close": 801.94,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-24",
+      "retrieved_at": "2026-08-24T23:54:32.436389+07:00",
+      "data_state": "final_close",
+      "is_cached": true,
+      "source": "네이버 금융 지수 일봉 · KRX 원천"
+    },
+    "NASDAQ": {
+      "name": "나스닥 종합",
+      "ticker": "^IXIC",
+      "close": 26072.96484375,
+      "current": 26072.965,
+      "change": -107.49593749999985,
+      "change_pct": -0.41059604625228857,
+      "open": 26065.3203125,
+      "high": 26109.9609375,
+      "low": 25910.81640625,
+      "previous_close": 26180.4609375,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-24",
+      "retrieved_at": "2026-08-24T23:54:32.251866+07:00",
+      "data_state": "intraday",
+      "is_cached": true,
+      "source": "Yahoo Finance · ^IXIC"
+    },
+    "DOW": {
+      "name": "다우존스",
+      "ticker": "^DJI",
+      "close": 53402.80078125,
+      "current": 53402.8,
+      "change": 125.78828125000291,
+      "change_pct": 0.2361023585820481,
+      "open": 53261.94921875,
+      "high": 53508.1796875,
+      "low": 53261.94921875,
+      "previous_close": 53277.01171875,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-24",
+      "retrieved_at": "2026-08-24T23:54:32.251866+07:00",
+      "data_state": "intraday",
+      "is_cached": true,
+      "source": "Yahoo Finance · ^DJI"
+    },
+    "SP500": {
+      "name": "S&P 500",
+      "ticker": "^GSPC",
+      "close": 7660.56982421875,
+      "current": 7660.57,
+      "change": -13.800117187500291,
+      "change_pct": -0.17982084492632933,
+      "open": 7663.3798828125,
+      "high": 7670.2998046875,
+      "low": 7638.169921875,
+      "previous_close": 7674.3701171875,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-24",
+      "retrieved_at": "2026-08-24T23:54:32.251866+07:00",
+      "data_state": "intraday",
+      "is_cached": true,
+      "source": "Yahoo Finance · ^GSPC"
+    }
+  },
+  "rates_fx_volatility": {
+    "SOX": {
+      "name": "필라델피아 반도체",
+      "ticker": "^SOX",
+      "close": 11422.5361328125,
+      "current": 11422.536,
+      "change": -317.83411718749994,
+      "change_pct": -2.707189926850787,
+      "open": 11513.875,
+      "high": 11513.875,
+      "low": 11263.33984375,
+      "previous_close": 11740.3701171875,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-24",
+      "retrieved_at": "2026-08-24T23:54:32.251866+07:00",
+      "data_state": "intraday",
+      "is_cached": true,
+      "source": "Yahoo Finance · ^SOX"
+    },
+    "VIX": {
+      "name": "VIX 변동성",
+      "ticker": "^VIX",
+      "close": 15.680000305175781,
+      "current": 15.68,
+      "change": 0.5499998855590817,
+      "change_pct": 3.635161146060608,
+      "open": 15.899999618530273,
+      "high": 16.059999465942383,
+      "low": 15.619999885559082,
+      "previous_close": 15.130000114440918,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-24",
+      "retrieved_at": "2026-08-24T23:54:32.415822+07:00",
+      "data_state": "intraday",
+      "is_cached": true,
+      "source": "Yahoo Finance · ^VIX"
+    },
+    "US10Y": {
+      "name": "미국 국채 10년",
+      "ticker": "^TNX",
+      "close": 4.691999912261963,
+      "current": 4.692,
+      "change": -0.045999916076659986,
+      "change_pct": -0.9708720323226724,
+      "open": 4.7139997482299805,
+      "high": 4.720000267028809,
+      "low": 4.679999828338623,
+      "previous_close": 4.73799991607666,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-24",
+      "retrieved_at": "2026-08-24T23:54:32.403023+07:00",
+      "data_state": "intraday",
+      "is_cached": true,
+      "source": "Yahoo Finance · ^TNX"
+    },
+    "USDKRW": {
+      "name": "원/달러",
+      "ticker": "KRW=X",
+      "close": 1381.7,
+      "current": 1383.36,
+      "change": -2.4400000000000546,
+      "change_pct": -0.17607158320104305,
+      "open": 1383.9000244140625,
+      "high": 1387.1199951171875,
+      "low": 1376.1800537109375,
+      "previous_close": 1385.8,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-24T15:30:00+09:00",
+      "retrieved_at": "2026-08-24T23:54:34.339097+07:00",
+      "data_state": "intraday",
+      "is_cached": true,
+      "source": "네이버 금융 하나은행 15:30 회차별 매매기준율 + Yahoo 현재가 · KRW=X"
+    },
+    "JPYKRW": {
+      "name": "원/100엔",
+      "ticker": "JPYKRW=X",
+      "close": 869.27,
+      "current": 867.3,
+      "change": -4.520000000000124,
+      "change_pct": -0.51845564451379,
+      "open": 869.4000244140625,
+      "high": 871.8999862670898,
+      "low": 864.0999794006348,
+      "previous_close": 871.8200000000002,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-24T15:30:00+09:00",
+      "retrieved_at": "2026-08-24T23:54:34.355044+07:00",
+      "data_state": "intraday",
+      "is_cached": true,
+      "source": "네이버 금융 하나은행 15:30 회차별 매매기준율 + Yahoo 현재가 · JPYKRW=X"
+    },
+    "DXY": {
+      "name": "달러인덱스",
+      "ticker": "DX-Y.NYB",
+      "close": 98.9749984741211,
+      "current": 98.975,
+      "change": 0.17499694824218182,
+      "change_pct": 0.17712241177817284,
+      "open": 98.85600280761719,
+      "high": 99.0250015258789,
+      "low": 98.76200103759766,
+      "previous_close": 98.80000305175781,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-24",
+      "retrieved_at": "2026-08-24T23:54:32.575378+07:00",
+      "data_state": "intraday",
+      "is_cached": true,
+      "source": "Yahoo Finance · DX-Y.NYB"
+    }
+  },
+  "commodities_crypto": {
+    "WTI": {
+      "name": "WTI 원유",
+      "ticker": "CL=F",
+      "close": 85.37000274658203,
+      "current": 85.37,
+      "change": -1.6899975585937455,
+      "change_pct": -1.941187234075364,
+      "open": 86.5,
+      "high": 86.56999969482422,
+      "low": 84.36000061035156,
+      "previous_close": 87.05999755859375,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-24",
+      "retrieved_at": "2026-08-24T23:54:32.565377+07:00",
+      "data_state": "intraday",
+      "is_cached": true,
+      "source": "Yahoo Finance · CL=F"
+    },
+    "GOLD": {
+      "name": "국제 금",
+      "ticker": "GC=F",
+      "close": 4717.7001953125,
+      "current": 4717.7,
+      "change": 93.59990234374982,
+      "change_pct": 2.0241755231724206,
+      "open": 4673.39990234375,
+      "high": 4738.5,
+      "low": 4651.7998046875,
+      "previous_close": 4624.10009765625,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-24",
+      "retrieved_at": "2026-08-24T23:54:32.592474+07:00",
+      "data_state": "intraday",
+      "is_cached": true,
+      "source": "Yahoo Finance · GC=F"
+    },
+    "BITCOIN": {
+      "name": "비트코인",
+      "ticker": "BTC-USD",
+      "close": 79005.6875,
+      "current": 79005.69,
+      "change": 1250.4243750000023,
+      "change_pct": 1.6081539493808428,
+      "open": 77727.6171875,
+      "high": 79891.3046875,
+      "low": 76838.7265625,
+      "previous_close": 77755.265625,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-24",
+      "retrieved_at": "2026-08-24T23:54:32.736728+07:00",
+      "data_state": "intraday",
+      "is_cached": true,
+      "source": "Yahoo Finance · BTC-USD"
+    }
+  },
+  "krx_investor_trading": {
+    "unit": "KRW billion",
+    "markets": {
+      "KOSPI": {
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-24T16:28:28+09:00",
+        "data_state": "확정",
+        "investors": {
+          "기관": {
+            "sell": 8657,
+            "buy": 7364,
+            "net_buy": -1293
+          },
+          "외국인": {
+            "sell": 10713,
+            "buy": 7037,
+            "net_buy": -3676
+          },
+          "개인": {
+            "sell": 6557,
+            "buy": 9878,
+            "net_buy": 3321
+          }
+        }
+      },
+      "KOSDAQ": {
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-24T16:28:29+09:00",
+        "data_state": "확정",
+        "investors": {
+          "기관": {
+            "sell": 506,
+            "buy": 531,
+            "net_buy": 25
+          },
+          "외국인": {
+            "sell": 1157,
+            "buy": 1399,
+            "net_buy": 242
+          },
+          "개인": {
+            "sell": 2758,
+            "buy": 2497,
+            "net_buy": -260
+          }
+        }
+      },
+      "KOSPI200선물": {
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-24T16:28:29+09:00",
+        "data_state": "확정",
+        "investors": {
+          "기관": {
+            "sell": 5406,
+            "buy": 4536,
+            "net_buy": -870
+          },
+          "외국인": {
+            "sell": 27924,
+            "buy": 28619,
+            "net_buy": 695
+          },
+          "개인": {
+            "sell": 4440,
+            "buy": 4661,
+            "net_buy": 222
+          }
+        }
+      }
+    }
+  },
+  "recent_5d_flows": {
+    "unit": "KRW billion",
+    "used_trading_days": 5,
+    "start_date": "2026-08-18",
+    "end_date": "2026-08-24",
+    "markets": {
+      "KOSPI": {
+        "외국인": -5541,
+        "기관": -3653,
+        "개인": 5263
+      },
+      "KOSDAQ": {
+        "외국인": -118,
+        "기관": -577,
+        "개인": 683
+      },
+      "KOSPI200선물": {
+        "외국인": -718,
+        "기관": 1072,
+        "개인": -219
+      }
+    }
+  },
+  "market_breadth": {
+    "KOSPI": {
+      "upper_limit": 3,
+      "rise": 579,
+      "flat": 38,
+      "fall": 286,
+      "lower_limit": 0,
+      "rise_count": 582,
+      "fall_count": 286,
+      "rise_ratio": 0.6423841059602649,
+      "fall_ratio": 0.31567328918322296,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-24T16:28:30+09:00",
+      "data_state": "확정"
+    },
+    "KOSDAQ": {
+      "upper_limit": 5,
+      "rise": 921,
+      "flat": 96,
+      "fall": 706,
+      "lower_limit": 2,
+      "rise_count": 926,
+      "fall_count": 708,
+      "rise_ratio": 0.5352601156069364,
+      "fall_ratio": 0.4092485549132948,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-24T16:28:30+09:00",
+      "data_state": "확정"
+    }
+  },
+  "program_basis": {
+    "basis": {
+      "kospi200_spot": 1054.01,
+      "future": 1051.65,
+      "basis": -2.3599999999999,
+      "future_ticker": "FUT-2609",
+      "future_name": "선물(2609)",
+      "future_expiry": "2026-09",
+      "market_state": "백워데이션",
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-25T01:51:07.754810+09:00",
+      "data_state": "확정"
+    },
+    "program_trading": {
+      "차익": {
+        "sell_won": 395500000000,
+        "buy_won": 513800000000,
+        "net_buy_won": 118300000000,
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-24T18:05:00+09:00",
+        "data_state": "확정"
+      },
+      "비차익": {
+        "sell_won": 8920800000000,
+        "buy_won": 5862600000000,
+        "net_buy_won": -3058200000000,
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-24T18:05:00+09:00",
+        "data_state": "확정"
+      },
+      "전체": {
+        "sell_won": 9316300000000,
+        "buy_won": 6376400000000,
+        "net_buy_won": -2939900000000,
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-24T18:05:00+09:00",
+        "data_state": "확정"
+      }
+    }
+  },
+  "market_internals": {
+    "turnover": {
+      "KOSPI": {
+        "value_won": 26164000000000,
+        "volume": 268000000,
+        "previous_value_won": 28692000000000,
+        "average5_value_won": 27360600000000,
+        "ratio5": 0.9562655789712214,
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-25T01:50:54.456367+09:00",
+        "data_state": "확정"
+      },
+      "KOSDAQ": {
+        "value_won": 4486000000000,
+        "volume": 525000000,
+        "previous_value_won": 5412000000000,
+        "average5_value_won": 6577000000000,
+        "ratio5": 0.6820738938725863,
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-25T01:50:54.456367+09:00",
+        "data_state": "확정"
+      }
+    },
+    "concentration": {
+      "외국인": {
+        "buy": {
+          "top1_ratio": 0.05558930355082436,
+          "top5_ratio": 0.17369734822603242,
+          "total_amount_won": 981925820497,
+          "top_ticker": "402340",
+          "top_name": "SK스퀘어",
+          "source_date": "2026-08-24",
+          "as_of": "2026-08-25T01:51:06.602857+09:00",
+          "data_state": "확정"
+        },
+        "sell": {
+          "top1_ratio": 0.40971245474417434,
+          "top5_ratio": 0.8715831238040878,
+          "total_amount_won": 4420983941362,
+          "top_ticker": "005930",
+          "top_name": "삼성전자",
+          "source_date": "2026-08-24",
+          "as_of": "2026-08-25T01:51:06.602857+09:00",
+          "data_state": "확정"
+        }
+      },
+      "기관": {
+        "buy": {
+          "top1_ratio": 0.08556975233469766,
+          "top5_ratio": 0.280249350672343,
+          "total_amount_won": 1193364932863,
+          "top_ticker": "035420",
+          "top_name": "NAVER",
+          "source_date": "2026-08-24",
+          "as_of": "2026-08-25T01:51:06.602857+09:00",
+          "data_state": "확정"
+        },
+        "sell": {
+          "top1_ratio": 0.664692042091312,
+          "top5_ratio": 0.8580370765556328,
+          "total_amount_won": 2458584392493,
+          "top_ticker": "005930",
+          "top_name": "삼성전자",
+          "source_date": "2026-08-24",
+          "as_of": "2026-08-25T01:51:06.602857+09:00",
+          "data_state": "확정"
+        }
+      }
+    }
+  },
+  "short_selling": {
+    "market_summary": {
+      "KOSPI": {
+        "short_volume": 15821772,
+        "short_value_won": 2177561312398,
+        "total_volume": 312293904,
+        "total_value_won": 35038784736844,
+        "short_volume_ratio": 0.050663083068057585,
+        "short_value_ratio": 0.062147170021803,
+        "market_scope": "전체시장",
+        "session_scope": "전체시장",
+        "coverage_scope": "KRX+NXT 합산",
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-25T01:51:08.120452+09:00",
+        "data_state": "전체시장 확정"
+      },
+      "KOSDAQ": {
+        "short_volume": 10867028,
+        "short_value_won": 293999067307,
+        "total_volume": 546537436,
+        "total_value_won": 5405064218544,
+        "short_volume_ratio": 0.019883410145759898,
+        "short_value_ratio": 0.05439326073098843,
+        "market_scope": "전체시장",
+        "session_scope": "전체시장",
+        "coverage_scope": "KRX+NXT 합산",
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-25T01:51:08.120452+09:00",
+        "data_state": "전체시장 확정"
+      }
+    },
+    "top5_by_value": [
+      {
+        "market": "KOSPI",
+        "ticker": "005930",
+        "name": "삼성전자",
+        "close": 257000,
+        "change_pct": -8.7,
+        "short_volume": 3905261,
+        "short_value_won": 1017560398000,
+        "total_volume": 44276708,
+        "total_value_won": 11549571950250,
+        "short_volume_ratio": 0.0882,
+        "short_value_ratio": 0.08810000000000001,
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-25T01:51:08.120452+09:00",
+        "data_state": "확정"
+      },
+      {
+        "market": "KOSPI",
+        "ticker": "000660",
+        "name": "SK하이닉스",
+        "close": 1671000,
+        "change_pct": -3.41,
+        "short_volume": 199588,
+        "short_value_won": 344520661000,
+        "total_volume": 5496143,
+        "total_value_won": 9446826712500,
+        "short_volume_ratio": 0.0363,
+        "short_value_ratio": 0.0365,
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-25T01:51:08.120452+09:00",
+        "data_state": "확정"
+      },
+      {
+        "market": "KOSPI",
+        "ticker": "042700",
+        "name": "한미반도체",
+        "close": 209000,
+        "change_pct": -2.11,
+        "short_volume": 205688,
+        "short_value_won": 43021635750,
+        "total_volume": 584664,
+        "total_value_won": 122452215500,
+        "short_volume_ratio": 0.3518,
+        "short_value_ratio": 0.3513,
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-25T01:51:08.120452+09:00",
+        "data_state": "확정"
+      },
+      {
+        "market": "KOSPI",
+        "ticker": "009150",
+        "name": "삼성전기",
+        "close": 1318000,
+        "change_pct": 0.15,
+        "short_volume": 32310,
+        "short_value_won": 42558004500,
+        "total_volume": 720079,
+        "total_value_won": 948554809500,
+        "short_volume_ratio": 0.0449,
+        "short_value_ratio": 0.0449,
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-25T01:51:08.120452+09:00",
+        "data_state": "확정"
+      },
+      {
+        "market": "KOSPI",
+        "ticker": "402340",
+        "name": "SK스퀘어",
+        "close": 1076000,
+        "change_pct": -4.19,
+        "short_volume": 37711,
+        "short_value_won": 41010967000,
+        "total_volume": 600287,
+        "total_value_won": 654311627500,
+        "short_volume_ratio": 0.06280000000000001,
+        "short_value_ratio": 0.06269999999999999,
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-25T01:51:08.120452+09:00",
+        "data_state": "확정"
+      }
+    ],
+    "top5_by_ratio": [
+      {
+        "market": "KOSPI",
+        "ticker": "095570",
+        "name": "AJ네트웍스",
+        "close": 4350,
+        "change_pct": 0.23,
+        "short_volume": 48173,
+        "short_value_won": 207639060,
+        "total_volume": 95534,
+        "total_value_won": 411760639,
+        "short_volume_ratio": 0.5042,
+        "short_value_ratio": 0.5043,
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-25T01:51:08.120452+09:00",
+        "data_state": "확정"
+      },
+      {
+        "market": "KOSDAQ",
+        "ticker": "095340",
+        "name": "ISC",
+        "close": 154200,
+        "change_pct": -0.06,
+        "short_volume": 76506,
+        "short_value_won": 11818606400,
+        "total_volume": 167192,
+        "total_value_won": 25898729000,
+        "short_volume_ratio": 0.4576,
+        "short_value_ratio": 0.45630000000000004,
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-25T01:51:08.120452+09:00",
+        "data_state": "확정"
+      },
+      {
+        "market": "KOSPI",
+        "ticker": "047810",
+        "name": "한국항공우주",
+        "close": 130700,
+        "change_pct": 0.54,
+        "short_volume": 113363,
+        "short_value_won": 14683262900,
+        "total_volume": 274403,
+        "total_value_won": 35558292400,
+        "short_volume_ratio": 0.4131,
+        "short_value_ratio": 0.4129,
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-25T01:51:08.120452+09:00",
+        "data_state": "확정"
+      },
+      {
+        "market": "KOSPI",
+        "ticker": "013890",
+        "name": "지누스",
+        "close": 7380,
+        "change_pct": 0.54,
+        "short_volume": 5961,
+        "short_value_won": 43698425,
+        "total_volume": 16857,
+        "total_value_won": 123540965,
+        "short_volume_ratio": 0.35359999999999997,
+        "short_value_ratio": 0.35369999999999996,
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-25T01:51:08.120452+09:00",
+        "data_state": "확정"
+      },
+      {
+        "market": "KOSPI",
+        "ticker": "042700",
+        "name": "한미반도체",
+        "close": 209000,
+        "change_pct": -2.11,
+        "short_volume": 205688,
+        "short_value_won": 43021635750,
+        "total_volume": 584664,
+        "total_value_won": 122452215500,
+        "short_volume_ratio": 0.3518,
+        "short_value_ratio": 0.3513,
+        "source_date": "2026-08-24",
+        "as_of": "2026-08-25T01:51:08.120452+09:00",
+        "data_state": "확정"
+      }
+    ]
+  },
+  "market_cap_top10": [
+    {
+      "rank": 1,
+      "market": "KOSPI",
+      "name": "삼성전자",
+      "ticker": "005930",
+      "close": 257000,
+      "change_pct": -8.7,
+      "market_cap_won": 1502493602256000,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-25T01:51:10.189884+09:00",
+      "data_state": "정규장 종가 확정"
+    },
+    {
+      "rank": 2,
+      "market": "KOSPI",
+      "name": "SK하이닉스",
+      "ticker": "000660",
+      "close": 1671000,
+      "change_pct": -3.41,
+      "market_cap_won": 1220652741915000,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-25T01:51:10.189884+09:00",
+      "data_state": "정규장 종가 확정"
+    },
+    {
+      "rank": 3,
+      "market": "KOSPI",
+      "name": "삼성전자우",
+      "ticker": "005935",
+      "close": 189300,
+      "change_pct": -8.55,
+      "market_cap_won": 151888868727900,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-25T01:51:10.189884+09:00",
+      "data_state": "정규장 종가 확정"
+    },
+    {
+      "rank": 4,
+      "market": "KOSPI",
+      "name": "SK스퀘어",
+      "ticker": "402340",
+      "close": 1076000,
+      "change_pct": -4.19,
+      "market_cap_won": 141950221848000,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-25T01:51:10.189884+09:00",
+      "data_state": "정규장 종가 확정"
+    },
+    {
+      "rank": 5,
+      "market": "KOSPI",
+      "name": "삼성전기",
+      "ticker": "009150",
+      "close": 1318000,
+      "change_pct": 0.15,
+      "market_cap_won": 98446291328000,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-25T01:51:10.189884+09:00",
+      "data_state": "정규장 종가 확정"
+    },
+    {
+      "rank": 6,
+      "market": "KOSPI",
+      "name": "현대차",
+      "ticker": "005380",
+      "close": 414000,
+      "change_pct": -0.24,
+      "market_cap_won": 84769715124000,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-25T01:51:10.189884+09:00",
+      "data_state": "정규장 종가 확정"
+    },
+    {
+      "rank": 7,
+      "market": "KOSPI",
+      "name": "LG에너지솔루션",
+      "ticker": "373220",
+      "close": 362000,
+      "change_pct": 5.39,
+      "market_cap_won": 84708000000000,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-25T01:51:10.189884+09:00",
+      "data_state": "정규장 종가 확정"
+    },
+    {
+      "rank": 8,
+      "market": "KOSPI",
+      "name": "삼성바이오로직스",
+      "ticker": "207940",
+      "close": 1573000,
+      "change_pct": 1.42,
+      "market_cap_won": 72815665923000,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-25T01:51:10.189884+09:00",
+      "data_state": "정규장 종가 확정"
+    },
+    {
+      "rank": 9,
+      "market": "KOSPI",
+      "name": "삼성물산",
+      "ticker": "028260",
+      "close": 364500,
+      "change_pct": -7.84,
+      "market_cap_won": 59110083274500,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-25T01:51:10.189884+09:00",
+      "data_state": "정규장 종가 확정"
+    },
+    {
+      "rank": 10,
+      "market": "KOSPI",
+      "name": "KB금융",
+      "ticker": "105560",
+      "close": 163100,
+      "change_pct": -0.73,
+      "market_cap_won": 57849569415400,
+      "source_date": "2026-08-24",
+      "as_of": "2026-08-25T01:51:10.189884+09:00",
+      "data_state": "정규장 종가 확정"
+    }
+  ],
+  "validation": {
+    "passed": true,
+    "errors": []
+  }
+}
+
