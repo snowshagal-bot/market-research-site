@@ -24,12 +24,12 @@ test('homepage presents the Snowshagal brand hero before latest reports and arch
   assert.doesNotMatch(html, /Login|data-carousel|featured-slide/);
   assert.match(html, /<footer[^>]*>[\s\S]*?<span>SNOWSHAGAL<\/span>/);
   assert.doesNotMatch(html, /Independent Market Research/);
-  assert.match(html, /home-v2\.css\?v=20260824-4/);
-  assert.match(englishHtml, /home-v2\.css\?v=20260824-4/);
+  assert.match(html, /home-v2\.css\?v=20260824-5/);
+  assert.match(englishHtml, /home-v2\.css\?v=20260824-5/);
   assert.match(html, /locale\.js\?v=20260824-1/);
   assert.match(englishHtml, /locale\.js\?v=20260824-1/);
-  assert.match(html, /site\.js\?v=20260824-4/);
-  assert.match(englishHtml, /site\.js\?v=20260824-4/);
+  assert.match(html, /site\.js\?v=20260824-5/);
+  assert.match(englishHtml, /site\.js\?v=20260824-5/);
 });
 
 test('basics is added without replacing notes across public and admin controls', async () => {
@@ -64,19 +64,20 @@ test('brand hero is fixed while latest cards remain post-driven and responsive',
   assert.match(script, /post\.summary\|\|post\.description\|\|post\.subtitle/);
   assert.match(script, /locale==='en'\?'Read report':'리포트 보기'/);
   assert.match(script, /latest-card-body/);
-  assert.match(script, /latest-card-content/);
+  assert.match(script, /latest-card-title/);
+  assert.match(script, /latest-card-copy/);
   assert.match(script, /latest-card-summary/);
   assert.match(script, /latest-card-read/);
-  assert.match(script, /latest-card-meta[\s\S]*latest-card-content[\s\S]*latest-card-read/);
+  assert.match(script, /latest-card-meta[\s\S]*latest-card-title[\s\S]*latest-card-body[\s\S]*latest-card-copy[\s\S]*latest-card-read/);
   assert.match(script, /post\.title/);
   assert.doesNotMatch(script, /setInterval|autoplay|data-slide|buildCarousel/i);
   assert.match(homeStyles, /\.hero-shell\s*\{[\s\S]*?grid-template-columns:/);
   assert.match(homeStyles, /\.hero-art img\s*\{[\s\S]*?object-fit: cover/);
   assert.match(homeStyles, /\.latest-card-cover img\s*\{[\s\S]*?object-position: center center/);
-  assert.match(homeStyles, /\.latest-card-body\s*\{[\s\S]*?grid-template-columns:/);
-  assert.match(homeStyles, /\.latest-card\s*\{[\s\S]*?grid-template-rows: auto minmax\(0, 1fr\) auto/);
-  assert.match(homeStyles, /\.latest-card-content\s*\{[\s\S]*?align-self: center/);
-  assert.match(homeStyles, /\.latest-card-read\s*\{[\s\S]*?justify-self: start/);
+  assert.match(homeStyles, /\.latest-card-body\s*\{[\s\S]*?grid-template-columns:[\s\S]*?align-items: center/);
+  assert.match(homeStyles, /\.latest-card-copy\s*\{[\s\S]*?flex-direction: column;[\s\S]*?align-self: center/);
+  assert.match(homeStyles, /\.latest-card-read\s*\{[\s\S]*?margin-top: 12px/);
+  assert.doesNotMatch(homeStyles, /grid-template-rows: auto minmax\(0, 1fr\) auto/);
   assert.match(homeStyles, /\.latest-card-summary\s*\{[\s\S]*?-webkit-line-clamp: 4/);
   assert.match(homeStyles, /@media \(max-width: 760px\)/);
   assert.match(homeStyles, /\.hero-shell\s*\{[\s\S]*?display: flex;[\s\S]*?flex-direction: column/);
