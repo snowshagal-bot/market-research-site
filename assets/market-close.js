@@ -221,13 +221,13 @@
 
   function renderError(target = document.getElementById('market-close-root')) {
     if (!target) return;
-    target.innerHTML = `<section class="market-state" role="alert"><span aria-hidden="true">✦</span><h1>${copy.loadError}</h1><button class="market-retry" type="button">${copy.retry}</button></section>`;
+    target.innerHTML = `<section class="market-state" role="alert"><img class="market-state-owl" src="/assets/brand/snowshagal-owl.webp" alt="" width="232" height="256" aria-hidden="true"><h1>${copy.loadError}</h1><button class="market-retry" type="button">${copy.retry}</button></section>`;
     target.querySelector('.market-retry')?.addEventListener('click', init, { once: true });
   }
 
   function renderEmpty(target = document.getElementById('market-close-root')) {
     if (!target) return;
-    target.innerHTML = `<section class="market-state"><span aria-hidden="true">✦</span><h1>${copy.emptyTitle}</h1><p>${copy.emptyBody}</p></section>`;
+    target.innerHTML = `<section class="market-state"><img class="market-state-owl" src="/assets/brand/snowshagal-owl.webp" alt="" width="232" height="256" aria-hidden="true"><h1>${copy.emptyTitle}</h1><p>${copy.emptyBody}</p></section>`;
   }
 
   function isPreviewFixtureHost() {

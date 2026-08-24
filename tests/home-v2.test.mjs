@@ -32,6 +32,71 @@ test('homepage presents the Snowshagal brand hero before latest reports and arch
   assert.match(englishHtml, /site\.js\?v=20260824-5/);
 });
 
+test('official Snowshagal owl branding replaces decorative sparkles without changing functional upload marks', async () => {
+  const [home, englishHome, market, englishMarket, about, englishAbout, marketScript, marketStyles, adminMarket] = await Promise.all([
+    read('index.html'),
+    read('en/index.html'),
+    read('market/index.html'),
+    read('en/market/index.html'),
+    read('about/index.html'),
+    read('en/about/index.html'),
+    read('assets/market-close.js'),
+    read('assets/market-close.css'),
+    read('admin/market/index.html')
+  ]);
+
+  for (const source of [home, englishHome, market, englishMarket, about, englishAbout]) {
+    assert.match(source, /class="brand-owl" src="\/assets\/brand\/snowshagal-owl\.webp"/);
+    assert.doesNotMatch(source, /class="brand-mark"|>✦</);
+  }
+
+  assert.match(marketScript, /class="market-state-owl" src="\/assets\/brand\/snowshagal-owl\.webp"/);
+  assert.doesNotMatch(marketScript, /✦/);
+  assert.match(marketStyles, /market-note::after\{content:""[\s\S]*?snowshagal-owl\.webp/);
+  assert.doesNotMatch(marketStyles, /content:"✦"/);
+  assert.match(adminMarket, /market-json-drop[\s\S]*?>✦<\/span>/);
+
+  const [logoAsset, owlAsset] = await Promise.all([
+    stat(new URL('../assets/brand/snowshagal-logo.webp', import.meta.url)),
+    stat(new URL('../assets/brand/snowshagal-owl.webp', import.meta.url))
+  ]);
+  assert.ok(logoAsset.size > 0);
+  assert.ok(owlAsset.size > 0);
+});
+
+test('desktop navigation uses the approved order and larger type while mobile sizing stays unchanged', async () => {
+  const pages = [
+    ['index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
+    ['en/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']],
+    ['market/index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
+    ['en/market/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']],
+    ['about/index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
+    ['en/about/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']]
+  ];
+
+  for (const [path, labels] of pages) {
+    const source = await read(path);
+    for (const navClass of ['main-nav', 'mobile-nav']) {
+      const nav = source.match(new RegExp(`<nav class="${navClass}"[\\s\\S]*?<\\/nav>`))?.[0] || '';
+      const positions = labels.map(label => nav.indexOf(`>${label}</a>`));
+      assert.ok(positions.every(position => position >= 0), `${path} ${navClass} is missing a requested label`);
+      assert.deepEqual(positions, [...positions].sort((a, b) => a - b), `${path} ${navClass} order`);
+    }
+  }
+
+  const [brandStyles, marketStyles, reportShell] = await Promise.all([
+    read('assets/brand.css'),
+    read('assets/market-close.css'),
+    read('assets/report-shell.js')
+  ]);
+  assert.match(brandStyles, /\.main-nav\s*\{\s*font-size: 14px;/);
+  assert.match(brandStyles, /@media \(max-width: 760px\)[\s\S]*?\.main-nav\s*\{\s*font-size: 13px;/);
+  assert.match(marketStyles, /@media\(max-width:1060px\)\{\.market-close-page \.main-nav\{gap:12px;font-size:13px\}/);
+  assert.match(reportShell, /a\{[\s\S]*?font-size:14px/);
+  assert.match(reportShell, /@media\(max-width:680px\)[\s\S]*?font-size:12px/);
+  assert.ok(reportShell.indexOf('<a href="${marketPath}">${copy.market}</a>') < reportShell.indexOf('?category=daily'));
+});
+
 test('basics is added without replacing notes across public and admin controls', async () => {
   const [html, admin, adminScript, middleware, shell] = await Promise.all([
     read('index.html'),
