@@ -87,6 +87,24 @@ window.RESEARCH_POSTS = [
     "summary": "미 30년물이 장중 5.33%대까지 오르고 미국 반도체주가 급락하자 삼성전자·SK하이닉스를 중심으로 코스피가 5.80% 무너졌다. 외국인이 3.49조 원을 팔고 개인이 4.64조 원을 받아낸 가운데, 높은 금리가 가장 많이 오른 대형 메모리부터 압박한 하루를 분석한다."
   },
   {
+    "id": "2026-08-18-daily-tfmejq",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-18",
+    "reportDate": "2026-08-18",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-24T18:17:14.398Z",
+    "legacyImport": false,
+    "title": "The Light That FellOne Step Short",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "The memory catalyststayed with SK Hynix,while institutional and non-arbitrage sellingcut breadth to 22%.",
+    "href": "reports/en/2026-08-18_KOSPI_Daily_Report_EN_Benchmark.html",
+    "translationGroup": "2026-08-18-daily-1burfko",
+    "coverImage": "covers/2026-08-18-daily-tfmejq.webp"
+  },
+  {
     "id": "2026-08-18-weekly-11u1873",
     "type": "weekly",
     "typeLabel": "Weekly",
