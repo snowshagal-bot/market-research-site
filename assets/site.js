@@ -95,11 +95,13 @@
     if(section) section.hidden=!highlights.length;
     host.innerHTML=highlights.map(post=>{
       const info=categoryInfo(post.type);
-      const subtitle=post.subtitle?`<p>${esc(post.subtitle)}</p>`:'';
+      const summary=String(post.summary||post.description||post.subtitle||'').trim();
+      const readLabel=locale==='en'?'Read report':'리포트 보기';
       const visual=post.coverImage
         ? `<span class="latest-card-cover"><img src="${esc(rootPath(post.coverImage))}" alt="" loading="lazy"></span>`
         : '<span class="latest-card-art" aria-hidden="true"></span>';
-      return `<a class="latest-card latest-card-${esc(post.type)}" href="${esc(rootPath(post.href))}"><span class="latest-card-meta"><b>${esc(info.english)}</b><time datetime="${esc(reportDate(post))}">${esc(reportDate(post))}</time></span><strong>${esc(post.title)}</strong>${subtitle}${visual}<i aria-hidden="true">→</i></a>`;
+      const summaryCopy=summary?`<p class="latest-card-summary">${esc(summary)}</p>`:'';
+      return `<a class="latest-card latest-card-${esc(post.type)}" href="${esc(rootPath(post.href))}"><span class="latest-card-meta"><b>${esc(info.english)}</b><time datetime="${esc(reportDate(post))}">${esc(reportDate(post))}</time></span><strong>${esc(post.title)}</strong><span class="latest-card-body">${visual}<span class="latest-card-copy">${summaryCopy}<span class="latest-card-read">${esc(readLabel)} <i aria-hidden="true">→</i></span></span></span></a>`;
     }).join('');
   }
 
