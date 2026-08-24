@@ -333,6 +333,23 @@
     "summary": "대형 반도체가 흔들린 자리를 2차전지와 정유가 메웠고, 기관은 닷새 만에 현물 매수로 돌아섰다. 지수는 하락했지만 상승 종목이 더 많았던 장에서 칩에서 다른 대형주로 이동한 자금의 방향을 추적한다."
   },
   {
+    "id": "2026-08-06-daily-1d9zin0",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-06",
+    "reportDate": "2026-08-06",
+    "registeredDate": "2026-08-24",
+    "registeredAt": "2026-08-24T14:08:01.154Z",
+    "legacyImport": false,
+    "title": "The Bill Presented to SemiconductorsThe Bill",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "href": "reports/en/8월 6일 주식리포트_커버통합_en.html",
+    "translationGroup": "2026-08-06-daily-94w8bi",
+    "coverImage": "covers/2026-08-06-daily-1d9zin0.webp"
+  },
+  {
     "id": "2026-08-06-daily-94w8bi",
     "type": "daily",
     "typeLabel": "주식 리포트",
