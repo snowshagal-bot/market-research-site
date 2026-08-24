@@ -1,5 +1,21 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-24-daily-97jc8s",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-08-24",
+    "reportDate": "2026-08-24",
+    "registeredDate": "2026-08-24",
+    "registeredAt": "2026-08-24T11:28:23.355Z",
+    "legacyImport": false,
+    "title": "선물의 무게",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "href": "reports/8월 24일 주식 리포트_커버 통합.html",
+    "coverImage": "covers/2026-08-24-daily-97jc8s.webp"
+  },
+  {
     "id": "2026-08-21-daily-1i56f22",
     "type": "daily",
     "typeLabel": "주식 리포트",
