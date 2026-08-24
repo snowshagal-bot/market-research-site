@@ -1,8 +1,24 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import vm from 'node:vm';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
+
+async function marketRuntime(lang = 'ko') {
+  const script = await read('assets/market-close.js');
+  const document = {
+    documentElement: { dataset: { siteLang: lang } },
+    body: { dataset: {} },
+    readyState: 'loading',
+    addEventListener() {},
+    getElementById() { return null; }
+  };
+  const window = {};
+  const context = vm.createContext({ window, document, location: { hostname: 'localhost' }, Intl, Date, Set, console });
+  vm.runInContext(script, context);
+  return window.MARKET_CLOSE;
+}
 
 test('authoritative Market Close contract copies remain internally consistent', async () => {
   const [contract, schemaText, exampleText] = await Promise.all([
@@ -55,10 +71,66 @@ test('Market renderer covers every contract section without inventing an intrada
     assert.match(script, new RegExp(token));
   }
   assert.match(script, /ratioPct/);
-  assert.match(script, /value \/ 1e8/);
+  assert.match(script, /value \* 1e9/);
   assert.match(script, /data_state === 'intraday'/);
   assert.match(script, /key === 'USDKRW' \|\| key === 'JPYKRW'/);
   assert.doesNotMatch(script, /LME|canvas|getContext|chart\.js|highcharts|plotly/i);
+});
+
+test('KRX flow values use the Contract v1.0.1 KRW billion unit', async () => {
+  const [ko, en] = await Promise.all([marketRuntime('ko'), marketRuntime('en')]);
+  assert.equal(ko.format.flow(-3676), '−3.68조원');
+  assert.equal(ko.format.flow(242), '+2,420억원');
+  assert.equal(ko.format.flow(25), '+250억원');
+  assert.equal(ko.format.flow(-118), '−1,180억원');
+  assert.equal(en.format.flow(-3676), 'KRW −3.68tn');
+  assert.equal(en.format.flow(242), 'KRW +242bn');
+  assert.equal(en.format.flow(25), 'KRW +25bn');
+});
+
+test('FX close/current and US10Y basis-point changes render without mixing value bases', async () => {
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+  for (const lang of ['ko', 'en']) {
+    const runtime = await marketRuntime(lang);
+    const target = { innerHTML: '' };
+    runtime.render(data, target);
+    assert.match(target.innerHTML, lang === 'ko' ? /1,381\.70원[\s\S]*15:30 확정[\s\S]*현재[\s\S]*1,383\.36원[\s\S]*▼ 2\.44/ : /₩1,381\.70[\s\S]*15:30 close[\s\S]*Latest[\s\S]*₩1,383\.36[\s\S]*▼ 2\.44/);
+    assert.match(target.innerHTML, lang === 'ko' ? /869\.27원[\s\S]*15:30 확정[\s\S]*현재[\s\S]*867\.30원[\s\S]*▼ 4\.52/ : /₩869\.27[\s\S]*15:30 close[\s\S]*Latest[\s\S]*₩867\.30[\s\S]*▼ 4\.52/);
+    assert.match(target.innerHTML, /4\.692%[\s\S]*▼ 4\.6bp/);
+    assert.doesNotMatch(target.innerHTML, /4\.6bp[\s\S]{0,40}\(-0\.97%\)/);
+  }
+});
+
+test('flow concentration renders TOP1 and TOP5 together', async () => {
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+  const runtime = await marketRuntime('en');
+  const target = { innerHTML: '' };
+  runtime.render(data, target);
+  assert.match(target.innerHTML, /TOP1 5\.6% · TOP5 17\.4%/);
+  assert.match(target.innerHTML, /TOP1 41\.0% · TOP5 87\.2%/);
+});
+
+test('English company resolver covers every fixture ticker and never leaks Korean company names', async () => {
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+  const en = await marketRuntime('en');
+  const expected = new Map([
+    ['005930', 'Samsung Electronics'], ['000660', 'SK hynix'], ['005935', 'Samsung Electronics Pref.'], ['402340', 'SK Square'],
+    ['009150', 'Samsung Electro-Mechanics'], ['005380', 'Hyundai Motor'], ['373220', 'LG Energy Solution'], ['207940', 'Samsung Biologics'],
+    ['028260', 'Samsung C&T'], ['105560', 'KB Financial Group'], ['042700', 'Hanmi Semiconductor'], ['047810', 'Korea Aerospace Industries'],
+    ['095570', 'AJ Networks'], ['095340', 'ISC'], ['013890', 'Zinus'], ['035420', 'NAVER']
+  ]);
+  const companies = [
+    ...data.market_cap_top10,
+    ...data.short_selling.top5_by_value,
+    ...data.short_selling.top5_by_ratio,
+    ...Object.values(data.market_internals.concentration).flatMap(side => Object.values(side))
+  ];
+  for (const item of companies) {
+    const ticker = item.ticker || item.top_ticker;
+    assert.equal(en.companyName(item), expected.get(ticker), `missing English company name for ${ticker}`);
+    assert.doesNotMatch(en.companyName(item), /[\u3131-\u318e\uac00-\ud7a3]/);
+  }
+  assert.equal(en.companyName({ ticker: '123456', name: '미등록회사' }), '123456');
 });
 
 test('Market layout explicitly supports dark mode and compact mobile widths', async () => {

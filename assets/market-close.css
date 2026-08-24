@@ -26,6 +26,8 @@ html[data-theme="dark"] .market-mountain{opacity:.42;filter:saturate(.56) contra
 .instrument-heading small{font-size:8px;color:var(--muted);font-weight:600;white-space:nowrap}
 .instrument-value{display:block;font-family:Georgia,"Times New Roman",serif;font-size:25px;line-height:1.1;font-weight:500;margin:7px 0 2px;letter-spacing:.01em;white-space:nowrap}
 .instrument-card:not(.major) .instrument-value{font-size:20px}
+.instrument-close-label{font-size:8px;color:var(--muted);margin-bottom:4px}
+.instrument-current{display:flex;align-items:baseline;gap:5px;font-size:9px;color:var(--text-2);white-space:nowrap}.instrument-current strong{font-size:11px;color:var(--market-ink);font-weight:750;font-variant-numeric:tabular-nums}
 .instrument-change{font-size:10px;font-weight:750;font-variant-numeric:tabular-nums;white-space:nowrap}
 .up{color:var(--market-red)!important}.down{color:var(--market-blue)!important}.neutral{color:var(--muted)!important}
 .market-ohlc{border-block:1px solid color-mix(in srgb,var(--line) 65%,transparent);margin:10px 0 0;padding:7px 0;display:grid;gap:2px}

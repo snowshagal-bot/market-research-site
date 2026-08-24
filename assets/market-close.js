@@ -5,7 +5,7 @@
   const copy = ko ? {
     title: 'MARKET CLOSE', subtitle: '오늘 시장은 어떻게 마감했나', closeBasis: '15:30 KST 마감 기준', overseas: '* 해외 시장은 각 시장의 최신 거래일 기준',
     sections: ['주요 지수', '금리 · 환율 · 변동성', '원자재 · 가상자산', '시장 폭', 'KRX 투자자 매매동향 (당일)', '최근 5거래일 누적 수급', '프로그램 & 베이시스', '시장 내부 지표', '공매도 현황', '시가총액 상위 10종목 (KOSPI)'],
-    open: '시가', high: '고가', low: '저가', previous: '전일', close: '종가', current: '최신', intraday: '장중', recentClose: '최근 종가', unavailable: '데이터 없음',
+    open: '시가', high: '고가', low: '저가', previous: '전일', close: '종가', current: '현재', fixedClose: '15:30 확정', intraday: '장중', recentClose: '최근 종가', unavailable: '데이터 없음',
     rise: '상승종목', fall: '하락종목', flat: '보합종목', upper: '상한가', lower: '하한가', riseRatio: '상승비율', fallRatio: '하락비율',
     foreign: '외국인', institution: '기관', individual: '개인', market: '시장', fiveDays: '5거래일', billion: '억원',
     arbitrage: '차익', nonArbitrage: '비차익', total: '전체', netBuy: '순매수', spot: 'KOSPI200 현물', future: '선물', basis: '베이시스',
@@ -15,9 +15,9 @@
     noteTitle: '숫자 너머의 의미를 해석합니다.', noteBody: '시장 전체 흐름과 한국시장 내부 구조를 한눈에 정리하고, 더 깊은 해설은 Snowshagal 리포트에서 이어갑니다.',
     previewFixture: 'PREVIEW FIXTURE · 실제 게시 데이터가 아닙니다.', emptyTitle: '첫 마감 데이터를 준비하고 있습니다.', emptyBody: '데이터가 게시되면 이곳에서 최신 한국 시장 마감을 확인할 수 있습니다.', loadError: '마감 데이터를 불러오지 못했습니다.', retry: '다시 시도'
   } : {
-    title: 'MARKET CLOSE', subtitle: 'How did the market finish today?', closeBasis: 'Korea close as of 15:30 KST', overseas: '* Overseas markets use each market’s latest trading session.',
+    title: 'MARKET CLOSE', subtitle: 'How did the Korean market close today?', closeBasis: 'Korea close as of 15:30 KST', overseas: '* Overseas markets use each market’s latest trading session.',
     sections: ['Major Indices', 'Rates · FX · Volatility', 'Commodities · Crypto', 'Market Breadth', 'KRX Investor Flows (Daily)', 'Cumulative Flows: Last 5 Sessions', 'Program Trading & Basis', 'Market Internals', 'Short Selling', 'Top 10 by Market Cap (KOSPI)'],
-    open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', close: 'Close', current: 'Latest', intraday: 'Intraday', recentClose: 'Recent close', unavailable: 'Unavailable',
+    open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', close: 'Close', current: 'Latest', fixedClose: '15:30 close', intraday: 'Intraday', recentClose: 'Recent close', unavailable: 'Unavailable',
     rise: 'Advancers', fall: 'Decliners', flat: 'Unchanged', upper: 'Limit up', lower: 'Limit down', riseRatio: 'Advance ratio', fallRatio: 'Decline ratio',
     foreign: 'Foreign', institution: 'Institution', individual: 'Retail', market: 'Market', fiveDays: '5 sessions', billion: 'KRW 100m',
     arbitrage: 'Arbitrage', nonArbitrage: 'Non-arbitrage', total: 'Total', netBuy: 'Net buy', spot: 'KOSPI 200 spot', future: 'Futures', basis: 'Basis',
@@ -31,6 +31,25 @@
   const names = {
     NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones', SP500: 'S&P 500', SOX: 'Philadelphia Semiconductor', VIX: 'VIX', US10Y: 'US 10Y', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW (100)', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', BITCOIN: 'Bitcoin',
     KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', 'KOSPI200선물': 'KOSPI 200 Futures', '기관': 'Institution', '외국인': 'Foreign', '개인': 'Retail', '차익': 'Arbitrage', '비차익': 'Non-arbitrage', '전체': 'Total'
+  };
+
+  const KRX_COMPANY_NAMES_EN = {
+    '000660': 'SK hynix',
+    '005380': 'Hyundai Motor',
+    '005930': 'Samsung Electronics',
+    '005935': 'Samsung Electronics Pref.',
+    '009150': 'Samsung Electro-Mechanics',
+    '013890': 'Zinus',
+    '028260': 'Samsung C&T',
+    '035420': 'NAVER',
+    '042700': 'Hanmi Semiconductor',
+    '047810': 'Korea Aerospace Industries',
+    '095340': 'ISC',
+    '095570': 'AJ Networks',
+    '105560': 'KB Financial Group',
+    '207940': 'Samsung Biologics',
+    '373220': 'LG Energy Solution',
+    '402340': 'SK Square'
   };
 
   const html = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
@@ -59,7 +78,26 @@
     if (abs >= 1e9) return `KRW ${number(value / 1e9, 1)}bn`;
     return `KRW ${integer(value)}`;
   };
-  const flow = value => valid(value) ? `${signed(value, 0)}` : '--';
+  const flow = value => {
+    if (!valid(value)) return '--';
+    const wonValue = value * 1e9;
+    const abs = Math.abs(wonValue);
+    const sign = value > 0 ? '+' : value < 0 ? '−' : '';
+    if (ko) {
+      if (abs >= 1e12) return `${sign}${number(abs / 1e12, 2)}조원`;
+      return `${sign}${number(abs / 1e8, 0)}억원`;
+    }
+    if (abs >= 1e12) return `KRW ${sign}${number(abs / 1e12, 2)}tn`;
+    return `KRW ${sign}${number(abs / 1e9, 0)}bn`;
+  };
+  const companyName = item => {
+    const rawName = String(item?.name ?? item?.top_name ?? '').trim();
+    const ticker = String(item?.ticker ?? item?.top_ticker ?? '').trim();
+    if (ko) return rawName || ticker || '--';
+    if (KRX_COMPANY_NAMES_EN[ticker]) return KRX_COMPANY_NAMES_EN[ticker];
+    if (rawName && !/[\u3131-\u318e\uac00-\ud7a3]/i.test(rawName)) return rawName;
+    return ticker || '--';
+  };
   const instrumentName = (key, item) => ko ? (item?.name || key) : (names[key] || key);
   const valueUnit = (key, value) => {
     if (!valid(value)) return '--';
@@ -86,13 +124,21 @@
     const display = displayValue(key, item);
     const movement = item?.change;
     const movementClass = signClass(movement);
+    const movementArrow = movementClass === 'up' ? '▲' : movementClass === 'down' ? '▼' : '—';
+    const isFx = key === 'USDKRW' || key === 'JPYKRW';
+    const changeContent = key === 'US10Y'
+      ? `${movementArrow} ${valid(movement) ? `${number(Math.abs(movement * 100), 1)}bp` : '--'}`
+      : isFx
+        ? `${movementArrow} ${valid(movement) ? number(Math.abs(movement), 2) : '--'} <span>(${pct(item?.change_pct)})</span>`
+        : `${movementArrow} ${signed(movement, 2)} <span>(${pct(item?.change_pct)})</span>`;
+    const fxContext = isFx ? `<div class="instrument-close-label">${copy.fixedClose}</div><div class="instrument-current"><span>${copy.current}</span><strong>${valueUnit(key, item?.current)}</strong></div>` : '';
     const detail = major ? `<dl class="market-ohlc">
       <div><dt>${copy.open}</dt><dd>${number(item?.open, 2)}</dd></div><div><dt>${copy.high}</dt><dd>${number(item?.high, 2)}</dd></div><div><dt>${copy.low}</dt><dd>${number(item?.low, 2)}</dd></div><div><dt>${copy.previous}</dt><dd>${number(item?.previous_close, 2)}</dd></div>
     </dl>` : '';
     return `<article class="instrument-card ${major ? 'major' : ''}">
       <div class="instrument-heading"><span>${html(instrumentName(key, item))}</span>${item?.ticker ? `<small>${html(item.ticker)}</small>` : ''}</div>
       <strong class="instrument-value">${valueUnit(key, display)}</strong>
-      <div class="instrument-change ${movementClass}">${movementClass === 'up' ? '▲' : movementClass === 'down' ? '▼' : '—'} ${signed(movement, key === 'US10Y' ? 3 : 2)} <span>(${pct(item?.change_pct)})</span></div>
+      ${fxContext}<div class="instrument-change ${movementClass}">${changeContent}</div>
       ${detail}<div class="instrument-state">${dateText(item?.source_date)} · ${stateText(item)}</div>
     </article>`;
   }
@@ -133,8 +179,8 @@
     const concentrationItems = [
       [copy.foreignBuy, concentration['외국인']?.buy], [copy.foreignSell, concentration['외국인']?.sell], [copy.institutionBuy, concentration['기관']?.buy], [copy.institutionSell, concentration['기관']?.sell]
     ];
-    const shortList = (items, ratioMode = false) => `<ol class="rank-list">${(items || []).map(item => `<li><span><b>${html(item.name)}</b><small>${html(item.market)}</small></span><strong>${ratioMode ? ratioPct(item.short_value_ratio) : won(item.short_value_won)}</strong></li>`).join('')}</ol>`;
-    const marketCapRows = marketCap.map(item => [integer(item.rank), `<span class="stock-name"><b>${html(item.name)}</b><small>${html(item.ticker)}</small></span>`, integer(item.close), `<span class="${signClass(item.change_pct)}">${pct(item.change_pct)}</span>`, won(item.market_cap_won)]);
+    const shortList = (items, ratioMode = false) => `<ol class="rank-list">${(items || []).map(item => `<li><span><b>${html(companyName(item))}</b><small>${html(item.market)}</small></span><strong>${ratioMode ? ratioPct(item.short_value_ratio) : won(item.short_value_won)}</strong></li>`).join('')}</ol>`;
+    const marketCapRows = marketCap.map(item => [integer(item.rank), `<span class="stock-name"><b>${html(companyName(item))}</b><small>${html(item.ticker)}</small></span>`, integer(item.close), `<span class="${signClass(item.change_pct)}">${pct(item.change_pct)}</span>`, won(item.market_cap_won)]);
 
     const output = `
       <section class="market-hero" aria-labelledby="market-close-heading"><div class="market-wrap market-hero-inner"><div class="market-hero-copy">
@@ -149,12 +195,12 @@
         </div>
         ${section(4, copy.sections[3], `<div class="breadth-grid">${['KOSPI', 'KOSDAQ'].map(key => breadthCard(key, breadth[key])).join('')}</div>`)}
         <div class="market-pair market-pair-tables">
-          ${section(5, copy.sections[4], `${dataTable([copy.market, copy.foreign, copy.institution, copy.individual], investorRows)}<p class="unit-note">${ko ? '단위: 억원' : 'Unit: KRW 100 million'}</p>`)}
+          ${section(5, copy.sections[4], dataTable([copy.market, copy.foreign, copy.institution, copy.individual], investorRows))}
           ${section(6, copy.sections[5], `${dataTable([copy.market, copy.foreign, copy.institution, copy.individual], fiveRows)}<p class="unit-note">${dateText(data.recent_5d_flows?.start_date)} – ${dateText(data.recent_5d_flows?.end_date)}</p>`)}
         </div>
         <div class="market-trio">
           ${section(7, copy.sections[6], `<div class="program-grid"><div><h3>${ko ? '프로그램 매매' : 'Program trading'}</h3>${dataTable(['', copy.netBuy], programRows, 'compact')}</div><div class="basis-panel">${metric(copy.spot, number(program.basis?.kospi200_spot, 2))}${metric(program.basis?.future_name || copy.future, number(program.basis?.future, 2))}${metric(copy.basis, signed(program.basis?.basis, 2), signClass(program.basis?.basis))}<span class="state-chip">${html(program.basis?.market_state || '--')}</span></div></div>`)}
-          ${section(8, copy.sections[7], `<div class="turnover-grid">${['KOSPI', 'KOSDAQ'].map(key => `<article><h3>${key}</h3>${metric(copy.turnover, won(internals.turnover?.[key]?.value_won))}${metric(copy.average5, won(internals.turnover?.[key]?.average5_value_won))}${metric(copy.ratio5, valid(internals.turnover?.[key]?.ratio5) ? `${number(internals.turnover[key].ratio5, 2)}×` : '--')}</article>`).join('')}</div><h3 class="subsection-title">${copy.concentration}</h3><div class="concentration-grid">${concentrationItems.map(([label, item]) => `<div><span>${label}</span><b>${copy.top5} ${ratioPct(item?.top5_ratio)}</b><small>${html(item?.top_name || '--')}</small></div>`).join('')}</div>`)}
+          ${section(8, copy.sections[7], `<div class="turnover-grid">${['KOSPI', 'KOSDAQ'].map(key => `<article><h3>${key}</h3>${metric(copy.turnover, won(internals.turnover?.[key]?.value_won))}${metric(copy.average5, won(internals.turnover?.[key]?.average5_value_won))}${metric(copy.ratio5, valid(internals.turnover?.[key]?.ratio5) ? `${number(internals.turnover[key].ratio5, 2)}×` : '--')}</article>`).join('')}</div><h3 class="subsection-title">${copy.concentration}</h3><div class="concentration-grid">${concentrationItems.map(([label, item]) => `<div><span>${label}</span><b>${copy.top1} ${ratioPct(item?.top1_ratio)} · ${copy.top5} ${ratioPct(item?.top5_ratio)}</b><small>${html(companyName(item))}</small></div>`).join('')}</div>`)}
           ${section(9, copy.sections[8], `<div class="short-summary">${['KOSPI', 'KOSDAQ'].map(key => `<article><h3>${key}</h3>${metric(copy.shortAmount, won(shorts.market_summary?.[key]?.short_value_won))}${metric(copy.valueRatio, ratioPct(shorts.market_summary?.[key]?.short_value_ratio))}</article>`).join('')}</div><div class="short-ranks"><div><h3>${copy.shortValue}</h3>${shortList(shorts.top5_by_value)}</div><div><h3>${copy.shortRatio}</h3>${shortList(shorts.top5_by_ratio, true)}</div></div>`)}
         </div>
         <div class="market-bottom-grid">
@@ -215,7 +261,7 @@
     } catch (_) { renderError(); }
   }
 
-  root.MARKET_CLOSE = { render, format: { number, pct, ratioPct, won, flow }, displayValue };
+  root.MARKET_CLOSE = { render, format: { number, pct, ratioPct, won, flow }, displayValue, companyName };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
   else init();
 })(window);
