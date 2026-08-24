@@ -188,6 +188,24 @@
     "coverImage": "covers/2026-08-13-daily-1tgqr3y.webp"
   },
   {
+    "id": "2026-08-12-daily-rk55d0",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-12",
+    "reportDate": "2026-08-12",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-24T16:18:52.772Z",
+    "legacyImport": false,
+    "title": "Waiting for(高度)Altitude",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "Two Semiconductor Giants,Waiting to Revisit Their Highs",
+    "href": "reports/en/2026-08-12_KOSPI_Daily_Report_EN_Benchmark.html",
+    "translationGroup": "2026-08-12-daily-15kwiwr",
+    "coverImage": "covers/2026-08-12-daily-rk55d0.webp"
+  },
+  {
     "id": "2026-08-12-daily-15kwiwr",
     "type": "daily",
     "typeLabel": "주식 리포트",
