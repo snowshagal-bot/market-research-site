@@ -9,6 +9,8 @@ The public Market Close payload is contract version `1.0.1`. The canonical contr
 
 The POST endpoint accepts only `https://snowshagal.com`. Cloudflare Preview and localhost hosts are deliberately read-only.
 
+Cloudflare Preview currently has no `COMMENTS_DB` binding. The public Preview page therefore labels and renders the checked-in example as `PREVIEW FIXTURE` after the live API attempt fails. This fallback is guarded to `*.pages.dev`, `localhost`, and `127.0.0.1`; it can never run on `snowshagal.com`.
+
 ## Automated uploader authentication
 
 The local market-dashboard uploader sends the JSON file as the request body with:

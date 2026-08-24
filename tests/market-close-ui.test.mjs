@@ -25,6 +25,7 @@ test('KO and EN Market pages use only the public latest API at runtime', async (
   for (const page of [ko, en]) {
     assert.match(page, /data-market-source="\/api\/market\/latest"/);
     assert.doesNotMatch(page, /data-market-source="[^\"]*example\.json"/);
+    assert.match(page, /data-market-preview-fixture="\/contracts\/market_close\/market_close\.example\.json"/);
     assert.match(page, /src="\/assets\/market-close\.js/);
     assert.match(page, /href="\/assets\/market-close\.css/);
     assert.match(page, /href="\/about\/">About<\/a>|href="\/en\/about\/">About<\/a>/);
@@ -42,6 +43,10 @@ test('Market renderer distinguishes loading, empty, and retryable error states',
   assert.match(script, /function renderEmpty/);
   assert.match(script, /class="market-retry"/);
   assert.match(script, /addEventListener\('click', init/);
+  assert.match(script, /pages\\\.dev/);
+  assert.match(script, /localhost\|127\\\.0\\\.0\\\.1/);
+  assert.match(script, /market-preview-notice/);
+  assert.doesNotMatch(script, /snowshagal\.com.*example\.json/);
 });
 
 test('Market renderer covers every contract section without inventing an intraday chart', async () => {

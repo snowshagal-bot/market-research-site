@@ -13,7 +13,7 @@
     shortSummary: '시장별 공매도', shortValue: '공매도 거래대금 TOP5', shortRatio: '공매도 비중 TOP5', valueRatio: '거래대금 비중', shortAmount: '공매도 거래대금',
     rank: '순위', stock: '종목명', price: '종가', change: '등락률', marketCap: '시가총액', source: '데이터 출처', generated: '생성', latestReport: '오늘의 리포트 보기',
     noteTitle: '숫자 너머의 의미를 해석합니다.', noteBody: '시장 전체 흐름과 한국시장 내부 구조를 한눈에 정리하고, 더 깊은 해설은 Snowshagal 리포트에서 이어갑니다.',
-    emptyTitle: '첫 마감 데이터를 준비하고 있습니다.', emptyBody: '데이터가 게시되면 이곳에서 최신 한국 시장 마감을 확인할 수 있습니다.', loadError: '마감 데이터를 불러오지 못했습니다.', retry: '다시 시도'
+    previewFixture: 'PREVIEW FIXTURE · 실제 게시 데이터가 아닙니다.', emptyTitle: '첫 마감 데이터를 준비하고 있습니다.', emptyBody: '데이터가 게시되면 이곳에서 최신 한국 시장 마감을 확인할 수 있습니다.', loadError: '마감 데이터를 불러오지 못했습니다.', retry: '다시 시도'
   } : {
     title: 'MARKET CLOSE', subtitle: 'How did the market finish today?', closeBasis: 'Korea close as of 15:30 KST', overseas: '* Overseas markets use each market’s latest trading session.',
     sections: ['Major Indices', 'Rates · FX · Volatility', 'Commodities · Crypto', 'Market Breadth', 'KRX Investor Flows (Daily)', 'Cumulative Flows: Last 5 Sessions', 'Program Trading & Basis', 'Market Internals', 'Short Selling', 'Top 10 by Market Cap (KOSPI)'],
@@ -25,7 +25,7 @@
     shortSummary: 'Market Short Selling', shortValue: 'Top 5 by Short Value', shortRatio: 'Top 5 by Short Ratio', valueRatio: 'Value ratio', shortAmount: 'Short value',
     rank: 'Rank', stock: 'Company', price: 'Close', change: 'Change', marketCap: 'Market cap', source: 'Sources', generated: 'Generated', latestReport: 'Read today’s report',
     noteTitle: 'We interpret the meaning beyond the numbers.', noteBody: 'See the market’s broad direction and internal Korean-market structure at a glance, then continue with deeper context in Snowshagal reports.',
-    emptyTitle: 'The first market close is being prepared.', emptyBody: 'The latest Korean market close will appear here once it is published.', loadError: 'Could not load the market close.', retry: 'Try again'
+    previewFixture: 'PREVIEW FIXTURE · Not published market data.', emptyTitle: 'The first market close is being prepared.', emptyBody: 'The latest Korean market close will appear here once it is published.', loadError: 'Could not load the market close.', retry: 'Try again'
   };
 
   const names = {
@@ -184,14 +184,33 @@
     target.innerHTML = `<section class="market-state"><span aria-hidden="true">✦</span><h1>${copy.emptyTitle}</h1><p>${copy.emptyBody}</p></section>`;
   }
 
+  function isPreviewFixtureHost() {
+    return /(?:^|\.)pages\.dev$/i.test(location.hostname) || /^(?:localhost|127\.0\.0\.1)$/i.test(location.hostname);
+  }
+
+  async function renderPreviewFixture(target) {
+    const fixture = document.body.dataset.marketPreviewFixture;
+    if (!fixture || !isPreviewFixtureHost()) return false;
+    try {
+      const response = await fetch(fixture, { headers: { Accept: 'application/json' }, cache: 'no-store' });
+      if (!response.ok) return false;
+      render(await response.json(), target);
+      target.insertAdjacentHTML('afterbegin', `<div class="market-preview-notice" role="status">${copy.previewFixture}</div>`);
+      return true;
+    } catch (_) { return false; }
+  }
+
   async function init() {
     if (!document.getElementById('market-close-root')) return;
     const source = document.body.dataset.marketSource;
     if (!source) return renderError();
     try {
       const response = await fetch(source, { headers: { Accept: 'application/json' } });
-      if (response.status === 404) return renderEmpty();
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+        if (await renderPreviewFixture(document.getElementById('market-close-root'))) return;
+        if (response.status === 404) return renderEmpty();
+        throw new Error(`HTTP ${response.status}`);
+      }
       render(await response.json());
     } catch (_) { renderError(); }
   }
