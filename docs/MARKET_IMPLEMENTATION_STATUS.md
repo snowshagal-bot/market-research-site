@@ -31,20 +31,35 @@ Contract: `1.0.1`
   - added distinct loading, no-data, and retryable error states;
   - added localized canonical, hreflang, description, Open Graph, image, and WebPage structured data;
   - added `/market/` and `/en/market/` to the dynamic sitemap with locale alternates.
+- Checkpoint 3 commit: `87c712c` (`Connect Market Close UI to live API`).
+- Cloudflare compatibility follow-ups:
+  - `eae9f80` loads the authoritative schema through the Pages `ASSETS` binding for Wrangler 3 compatibility;
+  - `9483714` shows the copied example only on `*.pages.dev`/localhost with a visible `PREVIEW FIXTURE` label when Preview has no D1 binding. Production can never use this fallback.
+- Active Preview: `https://feature-market-close.market-research-site.pages.dev/` (deployment `53a6bd26`, source `9483714`).
+- Final Preview route checks:
+  - `/market/`, `/en/market/`, and `/admin/market/`: HTTP 200 with `X-Robots-Tag: noindex, nofollow`;
+  - `/sitemap.xml`: includes both localized Market canonical URLs and alternates;
+  - `POST /api/market/publish`: HTTP 403 on Preview before authentication or storage;
+  - `GET /api/market/latest`: HTTP 503 `DB_NOT_CONFIGURED` on Preview because `COMMENTS_DB` is Production-only, followed by the explicitly labeled client-side Preview fixture.
+- Final browser QA passed at KO 1280/430 and EN 360, plus light/dark mode: 10 sections, localized Daily CTA, correct active navigation, zero horizontal overflow, and zero console warnings/errors.
+- Final full regression: 155/155 tests passed.
+- Cloudflare environment audit: Production already has encrypted `ADMIN_KEY`; `MARKET_PUBLISH_KEY` is not configured yet and is required for the automated local-dashboard uploader. No secret values were read or exposed.
+- D1 migration status: SQL and guarded runtime initialization are implemented, but no Production migration/write has been run because this Draft PR is not merged. The first Production GET/POST after merge will create the table through the existing `COMMENTS_DB` binding.
 
 ## TODO
 
-- Checkpoint 3: push the API-connected build, wait for Cloudflare Preview, run full regression and final 1280/430/360 browser QA, then record the Preview result.
+- Before Production use, configure encrypted `MARKET_PUBLISH_KEY` in the Cloudflare Pages Production environment and point the local market-dashboard uploader at `https://snowshagal.com/api/market/publish` with `X-Market-Publish-Key`.
+- After explicit merge approval in a separate step, confirm the first Production `GET /api/market/latest` initializes `market_close_snapshots`, then publish the first final v1.0.1 snapshot.
 
 ## 현재 동작 상태
 
 - Production and `main` are unchanged.
 - `/market/` and `/en/market/` now read only `/api/market/latest`; the example JSON is no longer a runtime source or fallback.
-- The Market API and admin uploader are implemented locally. No Production D1 write has been performed.
+- The Market API, admin uploader, SEO, sitemap, and Preview UI are complete on the feature branch. No Production D1 write has been performed.
 
 ## 다음 작업 위치
 
-- Commit and push Checkpoint 3, then verify the Cloudflare build and the final Preview routes before closing the Draft PR handoff.
+- Await review on Draft PR #34. Do not merge or configure Production from this task.
 
 ## 주의사항
 
