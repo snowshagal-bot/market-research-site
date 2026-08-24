@@ -3,8 +3,10 @@
   const OUTPUT_HEIGHT = 1350;
   const CAPTURE_PADDING = 32;
   const DEFAULT_CAPTURE_BACKGROUND = '#ece7dc';
+  const FINAL_COVER_SELECTOR = '[class^="final-cover-"], [class*=" final-cover-"]';
   const HEURISTIC_SELECTORS = [
     '.mag-cover',
+    FINAL_COVER_SELECTOR,
     '.cover',
     '.cover-page',
     '.cover-frame',
@@ -268,6 +270,7 @@
   window.MARKET_COVER_GENERATOR = {
     OUTPUT_WIDTH,
     OUTPUT_HEIGHT,
+    FINAL_COVER_SELECTOR,
     HEURISTIC_SELECTORS,
     selectorMeta,
     normalizeCaptureTarget,

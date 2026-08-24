@@ -25,7 +25,8 @@ test('selector priority prefers metadata, then completed cover structures before
   assert.equal(__test.selectCaptureSelector('<section class="cover-screen"><div class="cover-frame"><img class="cover-art"><div class="cover-copy">title</div></div><span class="cover-hint">hint</span></section>'), '.cover-frame');
   assert.equal(__test.selectCaptureSelector('<div class="cover-page">x</div><section class="cover-screen">y</section>'), '.cover-page');
   assert.equal(__test.selectCaptureSelector('<section class="mag-cover plate"><img class="cv-img" width="900" height="1350"><h1 class="cv-h1">반도체 다음의 자리</h1></section><div class="cover">unrelated</div>'), '.mag-cover');
-  assert.deepEqual(__test.SELECTOR_PRIORITY, ['.cover-frame', '.cover-page', '.mag-cover', '.cover-screen', '.report-cover', '.cover', '.opener']);
+  assert.equal(__test.selectCaptureSelector('<section class="final-cover-0824"><img src="cover.webp"></section>'), __test.FINAL_COVER_SELECTOR);
+  assert.deepEqual(__test.SELECTOR_PRIORITY, ['.cover-frame', '.cover-page', '.mag-cover', __test.FINAL_COVER_SELECTOR, '.cover-screen', '.report-cover', '.cover', '.opener']);
 });
 
 test('Korean and English opener covers are accepted as Browser Rendering targets', () => {

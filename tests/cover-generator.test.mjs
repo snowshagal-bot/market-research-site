@@ -59,6 +59,22 @@ test('heuristic cover candidates are used when selector metadata is absent', asy
   assert.equal(result.source, 'heuristic');
 });
 
+test('dated final-cover class families are selected without explicit metadata', async () => {
+  const api = await generatorApi();
+  const completedCover = node('', { visual: true });
+  const doc = {
+    body: node('리포트 본문', { children: 4 }),
+    querySelector(selector) {
+      if (selector === api.FINAL_COVER_SELECTOR) return completedCover;
+      return null;
+    }
+  };
+  const result = api.findCaptureTarget(doc);
+  assert.equal(result.target, completedCover);
+  assert.equal(result.selector, api.FINAL_COVER_SELECTOR);
+  assert.equal(result.source, 'heuristic');
+});
+
 test('Korean and English opener covers are selected instead of the template fallback', async () => {
   const api = await generatorApi();
   for (const text of ['두 개의 착시', 'Two Illusions']) {

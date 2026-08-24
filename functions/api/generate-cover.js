@@ -4,7 +4,8 @@ const RENDER_TIMEOUT_MS = 25000;
 const DEFAULT_RATE_LIMIT_RETRY_MS = 10000;
 const MAX_RATE_LIMIT_RETRY_MS = 15000;
 const RENDER_VIEWPORT = { width: 480, height: 900 };
-const SELECTOR_PRIORITY = ['.cover-frame', '.cover-page', '.mag-cover', '.cover-screen', '.report-cover', '.cover', '.opener'];
+const FINAL_COVER_SELECTOR = '[class^="final-cover-"], [class*=" final-cover-"]';
+const SELECTOR_PRIORITY = ['.cover-frame', '.cover-page', '.mag-cover', FINAL_COVER_SELECTOR, '.cover-screen', '.report-cover', '.cover', '.opener'];
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -17,10 +18,14 @@ function json(body, status = 200) {
 }
 
 function classExists(html, selector) {
-  const className = selector.slice(1);
   const attributes = html.matchAll(/class\s*=\s*["']([^"']*)["']/gi);
   for (const match of attributes) {
-    if (match[1].split(/\s+/).includes(className)) return true;
+    const classes = match[1].split(/\s+/);
+    if (selector === FINAL_COVER_SELECTOR) {
+      if (classes.some(className => className.startsWith('final-cover-'))) return true;
+      continue;
+    }
+    if (classes.includes(selector.slice(1))) return true;
   }
   return false;
 }
@@ -262,6 +267,7 @@ export const __test = {
   DEFAULT_RATE_LIMIT_RETRY_MS,
   MAX_RATE_LIMIT_RETRY_MS,
   RENDER_VIEWPORT,
+  FINAL_COVER_SELECTOR,
   SELECTOR_PRIORITY,
   coverFrameCapturePlan,
   magazineCoverCapturePlan,
