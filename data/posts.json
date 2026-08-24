@@ -1,5 +1,22 @@
 [
   {
+    "id": "2026-08-24-daily-ya1ru9",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-24",
+    "reportDate": "2026-08-24",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-24T18:29:58.339Z",
+    "legacyImport": false,
+    "title": "Index -3.12%, advancers 64.2%",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "href": "reports/en/2026-08-24_KOSPI_Daily_Report_EN_Benchmark.html",
+    "translationGroup": "2026-08-24-daily-97jc8s",
+    "coverImage": "covers/2026-08-24-daily-ya1ru9.png"
+  },
+  {
     "id": "2026-08-24-daily-97jc8s",
     "type": "daily",
     "typeLabel": "주식 리포트",
@@ -14,6 +31,24 @@
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "href": "reports/8월 24일 주식 리포트_커버 통합.html",
     "coverImage": "covers/2026-08-24-daily-97jc8s.webp"
+  },
+  {
+    "id": "2026-08-21-daily-16tx7f1",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-21",
+    "reportDate": "2026-08-21",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-24T18:25:49.152Z",
+    "legacyImport": false,
+    "title": "TwoWires",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "193 stocks up.683 stocks down.",
+    "href": "reports/en/2026-08-21_KOSPI_Daily_Report_EN_Benchmark.html",
+    "translationGroup": "2026-08-21-daily-1i56f22",
+    "coverImage": "covers/2026-08-21-daily-16tx7f1.webp"
   },
   {
     "id": "2026-08-21-daily-1i56f22",
@@ -69,6 +104,24 @@
     "summary": "미 장기금리 후퇴와 SK하이닉스 40조 원 자사주 취득·소각이 겹치며 코스피는 하루 만에 5.89% 반등했다. 외국인이 대형 메모리를 다시 사들이고 상승 종목 비율도 57.8%까지 회복한 가운데, 전날과 수급 방향이 통째로 뒤집힌 하루를 살펴본다."
   },
   {
+    "id": "2026-08-19-daily-otvpwu",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-19",
+    "reportDate": "2026-08-19",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-24T18:19:10.656Z",
+    "legacyImport": false,
+    "title": "The Shadow ofHigh Rates",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "As the 30-year yield hit a high,the biggest prior winners were sold first",
+    "href": "reports/en/2026-08-19_KOSPI_Daily_Report_EN_Benchmark.html",
+    "translationGroup": "2026-08-19-daily-kuhjks",
+    "coverImage": "covers/2026-08-19-daily-otvpwu.webp"
+  },
+  {
     "id": "2026-08-19-daily-kuhjks",
     "type": "daily",
     "typeLabel": "주식 리포트",
@@ -85,6 +138,24 @@
     "coverImage": "covers/2026-08-19-daily-kuhjks.webp",
     "updatedAt": "2026-08-23T08:26:28.075Z",
     "summary": "미 30년물이 장중 5.33%대까지 오르고 미국 반도체주가 급락하자 삼성전자·SK하이닉스를 중심으로 코스피가 5.80% 무너졌다. 외국인이 3.49조 원을 팔고 개인이 4.64조 원을 받아낸 가운데, 높은 금리가 가장 많이 오른 대형 메모리부터 압박한 하루를 분석한다."
+  },
+  {
+    "id": "2026-08-18-daily-tfmejq",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-18",
+    "reportDate": "2026-08-18",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-24T18:17:14.398Z",
+    "legacyImport": false,
+    "title": "The Light That FellOne Step Short",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "The memory catalyststayed with SK Hynix,while institutional and non-arbitrage sellingcut breadth to 22%.",
+    "href": "reports/en/2026-08-18_KOSPI_Daily_Report_EN_Benchmark.html",
+    "translationGroup": "2026-08-18-daily-1burfko",
+    "coverImage": "covers/2026-08-18-daily-tfmejq.webp"
   },
   {
     "id": "2026-08-18-weekly-11u1873",
@@ -172,6 +243,24 @@
     "coverImage": "covers/2026-08-16-research-141u5l9.webp"
   },
   {
+    "id": "2026-08-14-daily-1yyf33y",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-14",
+    "reportDate": "2026-08-14",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-24T18:03:42.320Z",
+    "legacyImport": false,
+    "title": "The Channels Open Outward",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "The Main Current Holds",
+    "href": "reports/en/2026-08-14_KOSPI_Daily_Report_EN_Benchmark.html",
+    "translationGroup": "2026-08-14-daily-dqoisk",
+    "coverImage": "covers/2026-08-14-daily-1yyf33y.webp"
+  },
+  {
     "id": "2026-08-14-daily-dqoisk",
     "type": "daily",
     "typeLabel": "주식 리포트",
@@ -186,6 +275,24 @@
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "href": "reports/8월 14일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-08-14-daily-dqoisk.webp"
+  },
+  {
+    "id": "2026-08-13-daily-1nnspvd",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-13",
+    "reportDate": "2026-08-13",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-24T18:03:24.015Z",
+    "legacyImport": false,
+    "title": "Two Boats Afloat",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "The Index Rose Like the Tide533 Left in the Mudflats",
+    "href": "reports/en/2026-08-13_KOSPI_Daily_Report_EN_Benchmark (1).html",
+    "translationGroup": "2026-08-13-daily-1tgqr3y",
+    "coverImage": "covers/2026-08-13-daily-1nnspvd.webp"
   },
   {
     "id": "2026-08-13-daily-1tgqr3y",
