@@ -46,7 +46,8 @@
     html.dataset.theme = actual;
     html.dataset.themePreference = value;
     const themeMeta = document.querySelector('meta[name="theme-color"]');
-    if(themeMeta) themeMeta.setAttribute('content', actual === 'dark' ? '#161816' : '#f5f0e6');
+    const homeTheme = body.classList.contains('home-page');
+    if(themeMeta) themeMeta.setAttribute('content', actual === 'dark' ? (homeTheme ? '#101722' : '#161816') : (homeTheme ? '#f7f4ec' : '#f5f0e6'));
     if(themeBtn){
       themeBtn.setAttribute('aria-label', actual === 'dark' ? messages.themeLight : messages.themeDark);
       themeBtn.textContent = actual === 'dark' ? '☀' : '◐';
@@ -76,7 +77,7 @@
     });
   });
 
-  const isHomepage = Boolean(list && search && document.querySelector('[data-carousel]') && document.getElementById('latest-category-cards'));
+  const isHomepage = Boolean(list && search && document.getElementById('latest-category-cards'));
   if(!isHomepage) return;
 
   function esc(value){
@@ -87,101 +88,6 @@
   function categoryInfo(type){ return categories[type] || { label: type || (locale === 'en' ? 'Report' : '리포트'), english: 'REPORT', description: '' }; }
   function latestFor(type){ return posts.find(post=>post.type===type) || null; }
 
-  const slides = localeApi?.latestByCore(allPosts, locale, coreTypes) || coreTypes.map(type=>latestFor(type)).filter(Boolean);
-  let slideIndex = Math.max(0, slides.findIndex(post=>post.type===active));
-  const carousel = document.querySelector('[data-carousel]');
-  const stage = document.getElementById('featured-slide');
-  const tabs = document.querySelector('[data-carousel-tabs]');
-  const previous = document.querySelector('[data-slide-prev]');
-  const next = document.querySelector('[data-slide-next]');
-  const slideCategory = document.querySelector('[data-slide-category]');
-  const slideDate = document.querySelector('[data-slide-date]');
-  const slideTitle = document.querySelector('[data-slide-title]');
-  const slideSubtitle = document.querySelector('[data-slide-subtitle]');
-  const slideDescription = document.querySelector('[data-slide-description]');
-  const slideLink = document.querySelector('[data-slide-link]');
-  const slideCover = document.querySelector('[data-slide-cover]');
-  const slideCurrent = document.querySelector('[data-slide-current]');
-  const slideTotal = document.querySelector('[data-slide-total]');
-
-  function coverMarkup(post){
-    const info = categoryInfo(post.type);
-    if(post.coverImage){
-      const alt = locale === 'en' ? `${post.title} ${messages.coverAlt}` : `${post.title} ${messages.coverAlt}`;
-      return `<img src="${esc(rootPath(post.coverImage))}" alt="${esc(alt)}" loading="eager">`;
-    }
-    return `<div class="cover-fallback" data-fallback-category="${esc(post.type)}"><span class="cover-brand">MARKET RESEARCH</span><span class="cover-category">${esc(info.english)}</span><strong>${esc(post.title)}</strong><time datetime="${esc(reportDate(post))}">${esc(reportDate(post))}</time></div>`;
-  }
-
-  function setSlide(index, focusTab=false){
-    if(!slides.length){
-      carousel.hidden = true;
-      return;
-    }
-    slideIndex = (index + slides.length) % slides.length;
-    const post = slides[slideIndex];
-    const info = categoryInfo(post.type);
-    stage.dataset.category = post.type;
-    stage.setAttribute('aria-label',`${slideIndex + 1}/${slides.length} ${info.label} ${messages.representative}`);
-    slideCategory.textContent = info.label;
-    slideDate.textContent = reportDate(post);
-    slideDate.dateTime = reportDate(post);
-    slideTitle.textContent = post.title;
-    slideSubtitle.textContent = post.subtitle || '';
-    slideSubtitle.hidden = !post.subtitle;
-    slideDescription.textContent = post.summary || post.description || info.description;
-    slideLink.href = rootPath(post.href);
-    slideCover.innerHTML = coverMarkup(post);
-    slideCurrent.textContent = String(slideIndex + 1).padStart(2,'0');
-    slideTotal.textContent = String(slides.length).padStart(2,'0');
-    tabs.querySelectorAll('[role="tab"]').forEach((tab,tabIndex)=>{
-      const selected = tabIndex === slideIndex;
-      tab.setAttribute('aria-selected',String(selected));
-      tab.tabIndex = selected ? 0 : -1;
-      if(selected && focusTab) tab.focus();
-    });
-    stage.classList.remove('slide-refresh');
-    requestAnimationFrame(()=>stage.classList.add('slide-refresh'));
-  }
-
-  function buildCarousel(){
-    if(!slides.length){
-      carousel.hidden = true;
-      return;
-    }
-    tabs.innerHTML = slides.map((post,index)=>{
-      const info=categoryInfo(post.type);
-      const label = locale === 'en' ? `View featured ${info.label} report` : `${info.label} 대표 리포트 보기`;
-      return `<button type="button" role="tab" aria-controls="featured-slide" aria-selected="${index===slideIndex}" tabindex="${index===slideIndex?0:-1}" data-slide-tab="${index}" aria-label="${esc(label)}">${esc(info.label)}</button>`;
-    }).join('');
-    tabs.querySelectorAll('[data-slide-tab]').forEach(tab=>tab.addEventListener('click',()=>setSlide(Number(tab.dataset.slideTab))));
-    previous.disabled = slides.length < 2;
-    next.disabled = slides.length < 2;
-    previous.addEventListener('click',()=>setSlide(slideIndex-1));
-    next.addEventListener('click',()=>setSlide(slideIndex+1));
-    tabs.addEventListener('keydown',event=>{
-      if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
-      event.preventDefault();
-      if(event.key==='Home') setSlide(0,true);
-      else if(event.key==='End') setSlide(slides.length-1,true);
-      else setSlide(slideIndex+(event.key==='ArrowRight'?1:-1),true);
-    });
-    let touchStartX=0;
-    let touchStartY=0;
-    stage.addEventListener('touchstart',event=>{
-      const touch=event.changedTouches[0];
-      touchStartX=touch.clientX;
-      touchStartY=touch.clientY;
-    },{passive:true});
-    stage.addEventListener('touchend',event=>{
-      const touch=event.changedTouches[0];
-      const dx=touch.clientX-touchStartX;
-      const dy=touch.clientY-touchStartY;
-      if(Math.abs(dx)>55 && Math.abs(dx)>Math.abs(dy)*1.4) setSlide(slideIndex+(dx<0?1:-1));
-    },{passive:true});
-    setSlide(slideIndex);
-  }
-
   function renderHighlights(){
     const host=document.getElementById('latest-category-cards');
     const highlights=['daily','weekly','research'].map(type=>latestFor(type)).filter(Boolean);
@@ -189,7 +95,13 @@
     if(section) section.hidden=!highlights.length;
     host.innerHTML=highlights.map(post=>{
       const info=categoryInfo(post.type);
-      return `<a class="latest-card" href="${esc(rootPath(post.href))}"><span>${esc(info.label)} · ${esc(reportDate(post))}</span><strong>${esc(post.title)}</strong><i aria-hidden="true">→</i></a>`;
+      const summary=String(post.summary||post.description||post.subtitle||'').trim();
+      const readLabel=locale==='en'?'Read report':'리포트 보기';
+      const visual=post.coverImage
+        ? `<span class="latest-card-cover"><img src="${esc(rootPath(post.coverImage))}" alt="" loading="lazy"></span>`
+        : '<span class="latest-card-art" aria-hidden="true"></span>';
+      const summaryCopy=summary?`<p class="latest-card-summary">${esc(summary)}</p>`:'';
+      return `<a class="latest-card latest-card-${esc(post.type)}" href="${esc(rootPath(post.href))}"><span class="latest-card-meta"><b>${esc(info.english)}</b><time datetime="${esc(reportDate(post))}">${esc(reportDate(post))}</time></span><strong class="latest-card-title">${esc(post.title)}</strong><span class="latest-card-body">${visual}<span class="latest-card-copy">${summaryCopy}<span class="latest-card-read">${esc(readLabel)} <i aria-hidden="true">→</i></span></span></span></a>`;
     }).join('');
   }
 
@@ -252,13 +164,10 @@
       const target=link.dataset.languageChoice;
       link.href=localeApi.pageLanguagePath(location.pathname,target,url.search);
     });
-    const matchingSlide=slides.findIndex(post=>post.type===active);
-    if(matchingSlide>=0) setSlide(matchingSlide);
     renderArchive();
   }));
   search?.addEventListener('input',renderArchive);
 
-  buildCarousel();
   renderHighlights();
   renderArchive();
 })();

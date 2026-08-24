@@ -17,7 +17,7 @@
 3. 기존 리포트의 접힘/펼침, 툴팁, 애니메이션, 내부 JavaScript가 깨지지 않도록 한다.
 4. 공통 UI가 리포트 고유 CSS와 충돌하지 않게 격리를 우선한다. 현재 리포트 상단바와 댓글 UI는 Shadow DOM을 사용한다.
 5. 사이트는 Mobile First이지만 데스크탑 완성도를 희생하지 않는다. 가로 overflow, 고정 UI 겹침, hover/cursor, 터치 영역을 함께 본다.
-6. 현재 공개 메뉴 명칭은 `데일리 / 위클리 / 비정기 / 시장 공부 / 끄적끄적`이다. 내부 타입은 `daily / weekly / research / basics / note`를 유지한다. `basics`는 핵심 카테고리이고 `note`는 별도 보조 카테고리다.
+6. 현재 공개 메뉴 명칭은 `데일리 / 위클리 / 리서치 / 시장 공부 / 끄적끄적`이다. 내부 타입은 `daily / weekly / research / basics / note`를 유지한다. `basics`는 핵심 카테고리이고 `note`는 별도 보조 카테고리다.
 7. 인기글, 조회수, 랭킹 같은 기능은 현재 요구사항이 아니다. 미래 확장을 막지 않되 지금 임의로 추가하지 않는다.
 8. 회원제는 현재 사용하지 않는다. 댓글은 게스트 방식이 기본이다.
 9. 보안 비밀값의 실제 값은 절대 Git에 기록하지 않는다. `GITHUB_TOKEN`, `ADMIN_KEY`는 Cloudflare Secret이고, `COMMENTS_DB`는 D1 binding 이름이다.

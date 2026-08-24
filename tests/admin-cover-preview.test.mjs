@@ -410,7 +410,7 @@ test('preview modes use buttons with aria-pressed and show the complete homepage
   assert.equal(modeButtons[1].getAttribute('aria-pressed'), 'true');
   assert.equal(modeButtons[0].getAttribute('aria-pressed'), 'false');
   assert.match(html, /\.cover-preview-canvas img\{[^}]*object-fit:contain;object-position:center center/);
-  assert.match(homepageStyles, /\.carousel-cover>img\{object-position:center center\}/);
+  assert.match(homepageStyles, /\.latest-card-cover img\s*\{[\s\S]*?object-position: center center/);
   assert.match(html, /--cover-preview-ratio:485 \/ 481/);
   assert.match(html, /--cover-preview-ratio:382 \/ 311/);
   assert.match(html, /--cover-preview-ratio:312 \/ 231/);

@@ -48,6 +48,7 @@ test('shared report shell reuses site theme and exposes accessible comment field
   assert.match(script, /nickname: '닉네임'/);
   assert.match(script, /password: '삭제용 비밀번호'/);
   assert.match(script, /body: '댓글을 입력하세요\.'/);
+  assert.match(script, /research: '리서치'/);
   assert.match(script, /aria-label="\$\{copy\.nickname\}"/);
   assert.match(script, /aria-label="\$\{copy\.password\}"/);
   assert.match(script, /aria-label="\$\{copy\.body\}"/);

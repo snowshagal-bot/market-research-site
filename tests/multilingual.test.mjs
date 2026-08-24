@@ -104,6 +104,9 @@ test('English and Korean page shells expose restrained desktop and mobile langua
   assert.match(pages[1], />Recent Reports</);
   assert.match(pages[1], />All</);
   assert.match(pages[1], /No English reports match these filters yet|assets\/site\.js/);
+  assert.match(pages[0], /data-nav-category="research"[^>]*>리서치<\/a>/);
+  assert.match(pages[2], /data-nav-category="research"[^>]*>리서치<\/a>/);
+  assert.doesNotMatch(pages[0], />비정기<\/a>|>비정기<\/button>/);
 });
 
 test('publisher admin exposes language and optional translation pairing without changing category controls', async () => {

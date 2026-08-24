@@ -1,28 +1,35 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import test from 'node:test';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
-test('homepage v2 exposes the requested information architecture and carousel controls', async () => {
+test('homepage presents the Snowshagal brand hero before latest reports and archive', async () => {
   const [html, englishHtml] = await Promise.all([read('index.html'), read('en/index.html')]);
   const order = [
     html.indexOf('class="site-header"'),
-    html.indexOf('class="v2-hero"'),
+    html.indexOf('class="brand-hero"'),
     html.indexOf('class="site-introduction"'),
     html.indexOf('class="section archive-section"'),
     html.indexOf('class="footer"')
   ];
   assert.deepEqual(order, [...order].sort((a, b) => a - b));
-  assert.match(html, /aria-label="이전 대표 리포트"/);
-  assert.match(html, /aria-label="다음 대표 리포트"/);
-  assert.match(html, /role="tablist"/);
-  assert.match(html, /home-v2\.css\?v=20260813-1/);
-  assert.match(englishHtml, /home-v2\.css\?v=20260813-1/);
-  assert.match(html, /locale\.js\?v=20260824-1/);
-  assert.match(englishHtml, /locale\.js\?v=20260824-1/);
-  assert.match(html, /site\.js\?v=20260824-1/);
-  assert.match(englishHtml, /site\.js\?v=20260824-1/);
+  assert.match(html, /<strong>SNOWSHAGAL<\/strong><small>MARKET RESEARCH<\/small>/);
+  assert.doesNotMatch(html, /class="hero-kicker"/);
+  assert.doesNotMatch(englishHtml, /class="hero-kicker"/);
+  assert.match(html, /<span>하루의 움직임에서,<\/span><span>다음 흐름까지\.<\/span>/);
+  assert.match(html, /한국 시장의 데일리 복기부터 위클리 전망,/);
+  assert.match(html, /그리고 투자에 참고할 만한 인사이트까지\./);
+  assert.match(html, /class="hero-entries"/);
+  assert.doesNotMatch(html, /Login|data-carousel|featured-slide/);
+  assert.match(html, /<footer[^>]*>[\s\S]*?<span>SNOWSHAGAL<\/span>/);
+  assert.doesNotMatch(html, /Independent Market Research/);
+  assert.match(html, /home-v2\.css\?v=20260824-5/);
+  assert.match(englishHtml, /home-v2\.css\?v=20260824-5/);
+  assert.match(html, /locale\.js\?v=20260824-2/);
+  assert.match(englishHtml, /locale\.js\?v=20260824-2/);
+  assert.match(html, /site\.js\?v=20260824-5/);
+  assert.match(englishHtml, /site\.js\?v=20260824-5/);
 });
 
 test('basics is added without replacing notes across public and admin controls', async () => {
@@ -44,50 +51,49 @@ test('basics is added without replacing notes across public and admin controls',
   assert.match(middleware, /active = 'basics'/);
 });
 
-test('carousel uses one latest post per core category, never autoplay, and supports fallback covers', async () => {
+test('brand hero is fixed while latest cards remain post-driven and responsive', async () => {
   const [script, homeStyles, polishStyles] = await Promise.all([
     read('assets/site.js'),
     read('assets/home-v2.css'),
     read('assets/ui-polish.css')
   ]);
   assert.match(script, /const coreTypes = \['daily', 'weekly', 'research', 'basics'\]/);
-  assert.match(script, /coreTypes\.map\(type=>latestFor\(type\)\)\.filter\(Boolean\)/);
-  assert.match(script, /if\(post\.coverImage\)/);
-  assert.match(script, /cover-fallback/);
-  assert.match(script, /post\.summary \|\| post\.description \|\| info\.description/);
-  assert.match(script, /touchstart/);
-  assert.match(script, /touchend/);
-  assert.doesNotMatch(script, /setInterval|autoplay/i);
-  assert.match(homeStyles, /Homepage cover sizing and fallback spacing stay local/);
-  assert.match(homeStyles, /\.carousel-cover>img\{object-position:center center\}/);
-  assert.match(homeStyles, /\.cover-fallback strong\{max-width:13ch;font-size:25px/);
-  const midWidthStart = homeStyles.indexOf('@media(min-width:761px) and (max-width:960px)');
-  assert.notEqual(midWidthStart, -1);
-  const midWidthEnd = homeStyles.indexOf('@media(min-width:961px)', midWidthStart);
-  const midWidthOverride = homeStyles.slice(midWidthStart, midWidthEnd);
-  assert.match(midWidthOverride, /\.featured-carousel\{[^}]*border-radius:0[^}]*box-shadow:none/);
-  assert.match(midWidthOverride, /\.carousel-stage\{[^}]*grid-template-columns:minmax\([^)]+\) minmax\([^)]+\)/);
-  assert.match(midWidthOverride, /\.carousel-cover\{[^}]*grid-column:1[^}]*padding:0[^}]*border-right:/);
-  assert.match(midWidthOverride, /\.carousel-copy\{[^}]*grid-column:2/);
-  const desktopStart = homeStyles.indexOf('@media(min-width:961px)');
-  assert.notEqual(desktopStart, -1);
-  const desktopOverride = homeStyles.slice(desktopStart);
-  assert.match(desktopOverride, /\.featured-carousel\{[^}]*border-radius:0[^}]*box-shadow:none/);
-  assert.match(desktopOverride, /\.carousel-stage\{[^}]*grid-template-columns:minmax\([^)]+\) minmax\([^)]+\)/);
-  assert.match(desktopOverride, /\.carousel-cover\{[^}]*grid-column:1[^}]*padding:0[^}]*border-right:/);
-  assert.match(desktopOverride, /\.carousel-copy\{[^}]*grid-column:2/);
-  assert.match(desktopOverride, /\.latest-card\{[^}]*min-height:/);
-  assert.match(homeStyles, /@media\(max-width:760px\)\{\.v2-hero/);
-  assert.match(homeStyles, /\.carousel-cover\{order:1/);
-  assert.match(homeStyles, /\.carousel-copy\{order:2/);
-  assert.doesNotMatch(polishStyles, /\.cover-category/);
+  assert.match(script, /\['daily','weekly','research'\]\.map\(type=>latestFor\(type\)\)\.filter\(Boolean\)/);
+  assert.match(script, /const visual=post\.coverImage/);
+  assert.match(script, /latest-card-cover/);
+  assert.match(script, /post\.summary\|\|post\.description\|\|post\.subtitle/);
+  assert.match(script, /locale==='en'\?'Read report':'리포트 보기'/);
+  assert.match(script, /latest-card-body/);
+  assert.match(script, /latest-card-title/);
+  assert.match(script, /latest-card-copy/);
+  assert.match(script, /latest-card-summary/);
+  assert.match(script, /latest-card-read/);
+  assert.match(script, /latest-card-meta[\s\S]*latest-card-title[\s\S]*latest-card-body[\s\S]*latest-card-copy[\s\S]*latest-card-read/);
+  assert.match(script, /post\.title/);
+  assert.doesNotMatch(script, /setInterval|autoplay|data-slide|buildCarousel/i);
+  assert.match(homeStyles, /\.hero-shell\s*\{[\s\S]*?grid-template-columns:/);
+  assert.match(homeStyles, /\.hero-art img\s*\{[\s\S]*?object-fit: cover/);
+  assert.match(homeStyles, /\.latest-card-cover img\s*\{[\s\S]*?object-position: center center/);
+  assert.match(homeStyles, /\.latest-card-body\s*\{[\s\S]*?grid-template-columns:[\s\S]*?align-items: center/);
+  assert.match(homeStyles, /\.latest-card-copy\s*\{[\s\S]*?flex-direction: column;[\s\S]*?align-self: center/);
+  assert.match(homeStyles, /\.latest-card-read\s*\{[\s\S]*?margin-top: 12px/);
+  assert.doesNotMatch(homeStyles, /grid-template-rows: auto minmax\(0, 1fr\) auto/);
+  assert.match(homeStyles, /\.latest-card-summary\s*\{[\s\S]*?-webkit-line-clamp: 4/);
+  assert.match(homeStyles, /@media \(max-width: 760px\)/);
+  assert.match(homeStyles, /\.hero-shell\s*\{[\s\S]*?display: flex;[\s\S]*?flex-direction: column/);
+  assert.match(homeStyles, /\.latest-cards\s*\{ grid-template-columns: 1fr/);
+  assert.match(homeStyles, /@media \(max-width: 760px\)[\s\S]*?\.latest-card-body\s*\{[\s\S]*?grid-template-columns: minmax\(84px, 30%\) minmax\(0, 1fr\)/);
+  assert.match(homeStyles, /@media \(max-width: 760px\)[\s\S]*?\.latest-card-summary\s*\{[\s\S]*?-webkit-line-clamp: 3/);
+  assert.doesNotMatch(polishStyles, /\.hero-art/);
+  const heroAsset = await stat(new URL('../assets/snowshagal-hero.webp', import.meta.url));
+  assert.ok(heroAsset.size > 0);
 });
 
-test('homepage removes the introduction copy while preserving the carousel and latest cards', async () => {
+test('homepage keeps dynamic latest cards without restoring the old archive hero', async () => {
   const html = await read('index.html');
   assert.doesNotMatch(html, /class="intro-copy"/);
   assert.doesNotMatch(html, /INDEPENDENT ARCHIVE/);
-  assert.match(html, /data-carousel/);
+  assert.doesNotMatch(html, /data-carousel/);
   assert.match(html, /id="latest-category-cards"/);
 });
 
@@ -109,8 +115,8 @@ test('homepage archive uses a responsive two-column index with dynamic category 
   assert.match(script, /const subtitle=post\.subtitle\?/);
   assert.match(script, /active==='all'[\s\S]*sortPostsByRegistration\(matched\)[\s\S]*sortPosts\(matched\)/);
   assert.match(html, /id="archive-order-label">홈페이지 등록일 최신순/);
-  assert.match(styles, /\.archive-layout\{display:grid;grid-template-columns:minmax\(0,1fr\) minmax\(270px,300px\)/);
-  assert.match(styles, /@media\(max-width:960px\)\{\.archive-layout\{grid-template-columns:minmax\(0,1fr\)/);
+  assert.match(styles, /\.archive-layout\s*\{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) minmax\(270px, 300px\)/);
+  assert.match(styles, /@media \(max-width: 960px\)[\s\S]*?\.archive-layout\s*\{[\s\S]*?grid-template-columns: minmax\(0, 1fr\)/);
 
   const allowedTypes = new Set(['daily', 'weekly', 'research', 'basics', 'note']);
   assert.ok(Array.isArray(posts));

@@ -48,5 +48,5 @@ test('common site script exits before homepage-only initialization on static pag
   const guard = script.indexOf('const isHomepage = Boolean(');
   assert.ok(guard > script.indexOf("themeBtn?.addEventListener('click'"));
   assert.ok(guard > script.indexOf("menuBtn.addEventListener('click'"));
-  assert.ok(script.indexOf('if(!isHomepage) return;', guard) < script.indexOf('buildCarousel();'));
+  assert.ok(script.indexOf('if(!isHomepage) return;', guard) < script.indexOf('renderHighlights();'));
 });

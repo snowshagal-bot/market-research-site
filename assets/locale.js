@@ -6,7 +6,7 @@
       categories: {
         daily: { label: '데일리', english: 'DAILY', description: '오늘 시장의 흐름과 수급을 기록합니다.' },
         weekly: { label: '위클리', english: 'WEEKLY', description: '한 주의 시장을 복기하고 다음 변수를 살핍니다.' },
-        research: { label: '비정기', english: 'RESEARCH', description: '산업·기업·정책의 구조적 변화를 깊이 읽습니다.' },
+        research: { label: '리서치', english: 'RESEARCH', description: '산업·기업·정책의 구조적 변화를 깊이 읽습니다.' },
         basics: { label: '시장 공부', english: 'MARKET BASICS', description: '경제와 투자의 기본 개념을 차분히 설명합니다.' },
         note: { label: '끄적끄적', english: 'NOTES', description: '시장과 투자에 관한 짧은 생각을 기록합니다.' }
       },
