@@ -20,10 +20,11 @@ test('authoritative Market Close contract copies remain internally consistent', 
   assert.match(contract, /schema_version/);
 });
 
-test('KO and EN Market pages use the fixture only for checkpoint-one UI', async () => {
+test('KO and EN Market pages use only the public latest API at runtime', async () => {
   const [ko, en] = await Promise.all([read('market/index.html'), read('en/market/index.html')]);
   for (const page of [ko, en]) {
-    assert.match(page, /data-market-source="\/contracts\/market_close\/market_close\.example\.json"/);
+    assert.match(page, /data-market-source="\/api\/market\/latest"/);
+    assert.doesNotMatch(page, /data-market-source="[^\"]*example\.json"/);
     assert.match(page, /src="\/assets\/market-close\.js/);
     assert.match(page, /href="\/assets\/market-close\.css/);
     assert.match(page, /href="\/about\/">About<\/a>|href="\/en\/about\/">About<\/a>/);
@@ -31,6 +32,16 @@ test('KO and EN Market pages use the fixture only for checkpoint-one UI', async 
   }
   assert.match(ko, /href="\/market\/" aria-current="page">마켓<\/a>/);
   assert.match(en, /href="\/en\/market\/" aria-current="page">Market<\/a>/);
+});
+
+test('Market renderer distinguishes loading, empty, and retryable error states', async () => {
+  const [ko, en, script] = await Promise.all([read('market/index.html'), read('en/market/index.html'), read('assets/market-close.js')]);
+  assert.match(ko, /class="market-loading" role="status"/);
+  assert.match(en, /class="market-loading" role="status"/);
+  assert.match(script, /response\.status === 404/);
+  assert.match(script, /function renderEmpty/);
+  assert.match(script, /class="market-retry"/);
+  assert.match(script, /addEventListener\('click', init/);
 });
 
 test('Market renderer covers every contract section without inventing an intraday chart', async () => {

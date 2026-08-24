@@ -25,20 +25,26 @@ Contract: `1.0.1`
   - added `/admin/market/` for JSON inspection, status display, full Market layout preview, and authenticated manual publishing;
   - documented exact uploader and admin authentication in `docs/MARKET_PUBLISHING.md`.
 - Checkpoint 2 focused tests: 14/14 passed. The browser selected the example JSON successfully, showed date/version/final/PASSED, rendered all 10 preview sections, kept publish disabled without an admin key, and emitted no console warnings/errors.
+- Checkpoint 2 commit: `a694f8f` (`Add Market Close D1 publishing flow`), pushed to the Draft PR branch.
+- Checkpoint 3 code is ready for Preview:
+  - switched both public locale pages from the example fixture to `GET /api/market/latest` only;
+  - added distinct loading, no-data, and retryable error states;
+  - added localized canonical, hreflang, description, Open Graph, image, and WebPage structured data;
+  - added `/market/` and `/en/market/` to the dynamic sitemap with locale alternates.
 
 ## TODO
 
-- Checkpoint 3: connect the public page to the API, add loading/empty/error states and SEO, run regressions, and validate the Cloudflare Preview.
+- Checkpoint 3: push the API-connected build, wait for Cloudflare Preview, run full regression and final 1280/430/360 browser QA, then record the Preview result.
 
 ## 현재 동작 상태
 
 - Production and `main` are unchanged.
-- `/market/` and `/en/market/` still read only the copied example fixture for isolated UI verification; Checkpoint 3 will switch them to `/api/market/latest`.
+- `/market/` and `/en/market/` now read only `/api/market/latest`; the example JSON is no longer a runtime source or fallback.
 - The Market API and admin uploader are implemented locally. No Production D1 write has been performed.
 
 ## 다음 작업 위치
 
-- Start Checkpoint 3 by switching the public pages from the fixture to `/api/market/latest`, then finish SEO/sitemap and Cloudflare Preview QA.
+- Commit and push Checkpoint 3, then verify the Cloudflare build and the final Preview routes before closing the Draft PR handoff.
 
 ## 주의사항
 

@@ -57,6 +57,21 @@ test('public locale shells use snowshagal.com canonicals and only real homepage 
   assert.match(aboutEn, /rel="canonical" href="https:\/\/snowshagal\.com\/en\/about\/"/);
 });
 
+test('Market Close locale pages expose canonical SEO and matching alternates', async () => {
+  const [ko, en] = await Promise.all([read('market/index.html'), read('en/market/index.html')]);
+  assert.match(ko, /<title>Market Close \| 오늘의 한국 시장 마감 \| Snowshagal<\/title>/);
+  assert.match(en, /<title>Market Close \| Today’s Korean Market Close \| Snowshagal<\/title>/);
+  assert.match(ko, /rel="canonical" href="https:\/\/snowshagal\.com\/market\/"/);
+  assert.match(en, /rel="canonical" href="https:\/\/snowshagal\.com\/en\/market\/"/);
+  for (const page of [ko, en]) {
+    assert.match(page, /hreflang="ko" href="https:\/\/snowshagal\.com\/market\/"/);
+    assert.match(page, /hreflang="en" href="https:\/\/snowshagal\.com\/en\/market\/"/);
+    assert.match(page, /property="og:image" content="https:\/\/snowshagal\.com\/assets\/market-close-mountain\.png"/);
+    assert.match(page, /type="application\/ld\+json"/);
+    assert.doesNotMatch(page, /pages\.dev/);
+  }
+});
+
 test('report SEO resolves encoded paths and links only explicit translation counterparts', () => {
   const korean = findPostByPath(pairedPosts, '/reports/%ED%95%9C%EA%B5%AD%EC%96%B4.html');
   assert.equal(korean.id, 'ko-pair');
@@ -73,6 +88,8 @@ test('sitemap contains canonical public locale pages and published reports witho
   const xml = sitemapXml(pairedPosts);
   assert.match(xml, /<loc>https:\/\/snowshagal\.com\/<\/loc>/);
   assert.match(xml, /<loc>https:\/\/snowshagal\.com\/en\/<\/loc>/);
+  assert.match(xml, /<loc>https:\/\/snowshagal\.com\/market\/<\/loc>/);
+  assert.match(xml, /<loc>https:\/\/snowshagal\.com\/en\/market\/<\/loc>/);
   assert.match(xml, /https:\/\/snowshagal\.com\/reports\/%ED%95%9C%EA%B5%AD%EC%96%B4<\/loc>/);
   assert.match(xml, /hreflang="en" href="https:\/\/snowshagal\.com\/reports\/en\/report"/);
   const unpairedEntry = xml.match(/<url><loc>https:\/\/snowshagal\.com\/reports\/only<\/loc>[\s\S]*?<\/url>/)?.[0] || '';
@@ -106,6 +123,8 @@ test('repository post metadata references existing public report files without f
   const expectedLocations = [
     `${PRODUCTION_ORIGIN}/`,
     `${PRODUCTION_ORIGIN}/en/`,
+    `${PRODUCTION_ORIGIN}/market/`,
+    `${PRODUCTION_ORIGIN}/en/market/`,
     ...posts.map((post) => reportSiteUrl(post.href))
   ];
   assert.deepEqual(new Set(sitemapLocations), new Set(expectedLocations));
