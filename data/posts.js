@@ -206,6 +206,24 @@ window.RESEARCH_POSTS = [
     "summary": "외국인 2.84조 원이 삼성전자·SK하이닉스 등 대형 IT에 집중되며 코스피는 3.68% 급등했다. 하지만 오른 종목은 절반에도 못 미쳐, 대형 반도체가 끌어올린 지수와 시장 전체의 온도차를 살펴본다."
   },
   {
+    "id": "2026-08-11-daily-yxlmio",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-11",
+    "reportDate": "2026-08-11",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-24T16:17:30.596Z",
+    "legacyImport": false,
+    "title": "One ShipPulled the Sea Along",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "One ship on the ripples.The waters ahead are still dark.",
+    "href": "reports/en/2026-08-11_KOSPI_Daily_Report_EN_Benchmark.html",
+    "translationGroup": "2026-08-11-daily-12vx8a7",
+    "coverImage": "covers/2026-08-11-daily-yxlmio.webp"
+  },
+  {
     "id": "2026-08-11-basics-1e0xeuz",
     "type": "basics",
     "typeLabel": "시장 공부",
