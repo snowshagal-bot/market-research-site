@@ -1,5 +1,22 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-25-daily-bmu64e",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-25",
+    "reportDate": "2026-08-25",
+    "registeredDate": "2026-08-26",
+    "registeredAt": "2026-08-25T15:43:04.681Z",
+    "legacyImport": false,
+    "title": "Rewindingthe Drop",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "href": "reports/en/2026-08-25_KOSPI_Daily_Report_EN_Benchmark.html",
+    "translationGroup": "2026-08-25-daily-13engmv",
+    "coverImage": "covers/2026-08-25-daily-bmu64e.webp"
+  },
+  {
     "id": "2026-08-25-daily-13engmv",
     "type": "daily",
     "typeLabel": "주식 리포트",
