@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>The Language of Markets · Episode 1 Who Moves Stock Prices?</title>
+<style>
+:root{
+  --surface-page:#ECEAE5;
+  --surface-band:#E3E0D9;
+  --surface-inner:#F1EFEA;
+  --surface-detail:#E8E5DF;
+  --surface-muted:#DAD6CE;
+  --ink:#2E2E2C;
+  --ink2:#43423E;
+  --body:#53514C;
+  --sub:#706D66;
+  --muted:#8B867E;
+  --line:#CEC9BF;
+  --line2:#DCD7CE;
+  --green:#46584D;
+  --green-dark:#2F3C34;
+  --green-soft:#DCE3DD;
+  --green-line:#AAB6AC;
+  --green-pale:#A8C6B4;
+  --navy:#3F4854;
+  --navy-dark:#2B323C;
+  --navy-soft:#DDE1E4;
+  --clay:#B58E63;
+  --clay-soft:#EDE2D3;
+  --up:#C74754;
+  --up-soft:#F2DDE0;
+  --down:#4F78A8;
+  --down-soft:#DCE5EF;
+  --warn:#7A5444;
+  --r:14px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:60px;overflow-x:hidden}
+html,body{max-width:100%}
+body{
+  margin:0;background:var(--surface-page);color:var(--ink);
+  font-family:"Pretendard Variable","Pretendard","SUIT","Noto Sans KR","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  line-height:1.62;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;
+  word-break:keep-all;line-break:strict;
+}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(46px + env(safe-area-inset-bottom,0px));width:100%;position:relative}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.up{color:var(--up)}.down{color:var(--down)}
+a{color:inherit;text-decoration:none}
+
+/* ─────────── 상단바 + 진행바 ─────────── */
+.topbar{position:sticky;top:0;z-index:50;margin:0 -16px;
+  background:rgba(236,234,229,.92);-webkit-backdrop-filter:saturate(150%) blur(12px);backdrop-filter:saturate(150%) blur(12px);
+  border-bottom:1px solid rgba(90,84,74,.13)}
+.tbin{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0)) 18px 9px}
+.tbin .brand{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.tbin .brand i{font-style:normal;color:var(--green)}
+.tbin .ep{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.prog{height:2px;background:rgba(90,84,74,.10)}
+.prog i{display:block;height:100%;width:0;background:var(--green);transition:width .1s linear}
+
+/* ─────────── 표지 ─────────── */
+.cover{margin:0 -16px;padding:34px 22px 30px;
+  background:linear-gradient(158deg,#3C4B41 0%,#2F3C34 58%,#28332C 100%);color:#EFEDE7;position:relative;overflow:hidden}
+.cover:before{content:"";position:absolute;right:-58px;top:-58px;width:190px;height:190px;border-radius:50%;
+  border:1px solid rgba(168,198,180,.20)}
+.cover:after{content:"";position:absolute;right:-14px;top:64px;width:120px;height:120px;border-radius:50%;
+  border:1px solid rgba(168,198,180,.13)}
+.cvkick{position:relative;display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.06em;
+  color:#BFD2C6;border:1px solid rgba(168,198,180,.34);border-radius:999px;padding:5px 12px}
+.cvkick b{color:#EFEDE7;font-weight:800}
+.cvtitle{position:relative;margin:18px 0 0;font-size:38px;line-height:1.2;font-weight:800;letter-spacing:-.05em;color:#F4F2ED}
+.cvtitle span{display:block;color:var(--green-pale)}
+.cvsub{position:relative;margin:15px 0 0;font-size:14px;line-height:1.62;font-weight:600;color:#C6D2CA;max-width:19em}
+.cvidx{position:relative;display:flex;gap:6px;margin:22px 0 0;flex-wrap:wrap}
+.cvidx a{font-size:11.5px;font-weight:800;color:#D3DED7;background:rgba(255,255,255,.07);
+  border:1px solid rgba(168,198,180,.22);border-radius:999px;padding:6px 12px}
+.cvidx a b{color:var(--green-pale);font-weight:800;margin-right:5px}
+
+/* ─────────── 챕터 오프너 ─────────── */
+.chapter{margin:36px 0 16px;padding-top:15px;border-top:2.5px solid var(--ink)}
+.chrow{display:flex;align-items:flex-start;gap:13px}
+.chno{font-size:40px;font-weight:800;letter-spacing:-.05em;line-height:.9;color:var(--green-line);flex-shrink:0}
+.chbd{padding-top:3px}
+.chkick{display:block;font-size:11.5px;font-weight:800;letter-spacing:.1em;color:var(--green);margin-bottom:4px}
+.chbd h2{margin:0;font-size:22px;line-height:1.32;font-weight:800;letter-spacing:-.035em;color:var(--ink)}
+
+/* ─────────── 장면 (모순된 두 숫자) ─────────── */
+.scene{margin:20px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:var(--r);padding:18px 18px 16px}
+.stag{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.06em;color:var(--green-dark);
+  background:var(--green-soft);border-radius:999px;padding:4px 11px;margin-bottom:16px}
+.sline{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.sline .sk{font-size:12.5px;font-weight:800;color:var(--sub)}
+.sline .sv{font-size:33px;font-weight:800;letter-spacing:-.05em;line-height:1}
+.sline .sn{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:5px;text-align:right}
+.sconj{display:flex;align-items:center;gap:10px;margin:14px 0}
+.sconj:before,.sconj:after{content:"";flex:1;height:1px;background:var(--line)}
+.sconj span{font-size:11.5px;font-weight:800;color:var(--muted);letter-spacing:.04em}
+.snote{margin:16px 0 0;padding-top:11px;border-top:1px dashed var(--line);font-size:11.5px;font-weight:600;color:var(--muted);line-height:1.55}
+
+/* ─────────── 큰 질문 · 한 문장 답 ─────────── */
+.bigq{margin:28px 0 0;font-size:23px;line-height:1.42;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.answer{margin:16px -16px 0;padding:20px 22px;background:var(--green);color:#EFEDE7;position:relative;overflow:hidden}
+.answer:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green-pale)}
+.answer .ak{font-size:11px;font-weight:800;letter-spacing:.14em;color:#A8BCAE;margin-bottom:8px}
+.answer .av{font-size:20px;line-height:1.44;font-weight:800;letter-spacing:-.035em;color:#F4F2ED}
+.answer .al{margin:13px 0 0;padding-top:12px;border-top:1px solid rgba(168,198,180,.24);display:flex;flex-wrap:wrap;gap:6px}
+.answer .al span{font-size:11.5px;font-weight:700;color:#CBD8CF;background:rgba(255,255,255,.07);border-radius:6px;padding:5px 9px}
+.answer .al span b{color:var(--green-pale);font-weight:800;margin-right:4px}
+
+/* ─────────── 웹툰 스트립 ─────────── */
+.strip{margin:26px 0 0;border:1.5px solid var(--ink);border-radius:4px;overflow:hidden;background:var(--ink)}
+.striphead{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--ink);color:#EDEAE4}
+.striphead b{font-size:11.5px;font-weight:800;letter-spacing:.03em}
+.striphead i{font-style:normal;font-size:11px;font-weight:700;color:#A9A49B}
+.stripgrid{display:grid;grid-template-columns:1fr 1fr;gap:1.5px}
+.pnl{background:var(--surface-inner);position:relative}
+.pnl svg{display:block;width:100%;height:auto}
+.pnl .pno{position:absolute;left:0;top:0;font-size:11px;font-weight:800;color:#EDEAE4;background:var(--ink);padding:3px 8px 4px 8px;border-radius:0 0 6px 0}
+.pnl .pcap{padding:9px 11px 11px;font-size:12px;line-height:1.48;font-weight:700;color:var(--ink2);border-top:1px solid var(--line2);background:var(--surface-detail);min-height:52px}
+.stripfoot{padding:8px 12px;background:var(--ink);color:#A9A49B;font-size:11px;font-weight:600}
+
+/* ─────────── 다리 문장 ─────────── */
+.bridge{margin:24px 0 0;font-size:15px;line-height:1.6;font-weight:800;letter-spacing:-.025em;color:var(--ink2)}
+.bridge b{color:var(--green-dark)}
+
+/* ─────────── 본문 공통 ─────────── */
+.lead{margin:2px 0 22px;font-size:15px;line-height:1.66;font-weight:700;color:var(--ink2)}
+.lead b{color:var(--green-dark);font-weight:800}
+.tp{margin:11px 0 0;font-size:13.5px;line-height:1.68;color:var(--body);font-weight:600}
+.tp b{color:var(--ink);font-weight:800}
+.dot{margin:9px 0 0;padding-left:14px;position:relative;font-size:13.5px;line-height:1.62;font-weight:600;color:var(--body)}
+.dot:before{content:"·";position:absolute;left:2px;color:var(--green);font-weight:800}
+.dot b{color:var(--ink);font-weight:800}
+.subhead{margin:22px 0 0;font-size:15.5px;font-weight:800;letter-spacing:-.025em;color:var(--ink)}
+
+/* ─────────── 용어 모듈 ─────────── */
+.termblk{margin:0 0 30px}
+.thead{display:flex;align-items:flex-start;gap:11px;margin:0 0 12px;padding-bottom:9px;border-bottom:2px solid var(--ink)}
+.thead .tno{font-size:11.5px;font-weight:800;color:#EFEDE7;background:var(--ink);border-radius:4px;padding:3px 7px;letter-spacing:.03em;flex-shrink:0;margin-top:3px}
+.thead .tbd{min-width:0}
+.thead .tbd b{display:block;font-size:19px;font-weight:800;letter-spacing:-.035em;color:var(--ink);line-height:1.28}
+.thead .tbd i{display:block;font-style:normal;font-size:11.5px;font-weight:700;color:var(--sub);margin-top:3px}
+.tdef{margin:0 0 4px;font-size:15px;line-height:1.55;font-weight:800;letter-spacing:-.025em;color:var(--green-dark)}
+
+/* 순매수 계산 */
+.calc{background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:15px 15px 13px;margin:13px 0 0}
+.calc .ct{font-size:11.5px;font-weight:800;letter-spacing:.05em;color:var(--muted);margin-bottom:12px}
+.crow{display:grid;grid-template-columns:40px 1fr 66px;align-items:center;gap:10px;margin:8px 0}
+.crow .cl{font-size:12.5px;font-weight:800;color:var(--ink)}
+.crow .ctr{position:relative;height:15px;background:var(--surface-muted);border-radius:4px;overflow:hidden}
+.crow .cf{position:absolute;top:2px;bottom:2px;left:2px;border-radius:2px}
+.crow .cf.b{background:var(--navy)}
+.crow .cf.s{background:var(--clay)}
+.crow .cv{font-size:12.5px;font-weight:800;text-align:right;color:var(--ink2)}
+.ceq{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.ceq .cel{font-size:12.5px;font-weight:800;color:var(--green-dark)}
+.ceq .cev{font-size:16.5px;font-weight:800;letter-spacing:-.03em;color:var(--ink)}
+.cnote{margin-top:10px;font-size:12px;line-height:1.58;color:var(--sub);font-weight:600}
+
+/* 오해 / 해석 */
+.myth{margin:14px 0 0;display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden}
+.myth .mi{padding:13px 14px}
+.myth .m1{background:var(--clay-soft)}
+.myth .m2{background:var(--green-soft)}
+.myth .mh{font-size:11px;font-weight:800;letter-spacing:.08em;margin-bottom:5px}
+.myth .m1 .mh{color:var(--warn)}
+.myth .m2 .mh{color:var(--green-dark)}
+.myth p{margin:0;font-size:13px;line-height:1.58;font-weight:700;color:var(--ink2)}
+.myth .m2 p b{color:var(--green-dark);font-weight:800}
+
+/* 2열 묶음 (데스크톱용) */
+.twocol{display:block}
+
+/* 풀쿼트 */
+.pull{margin:28px -16px;padding:26px 22px;background:var(--surface-band);border-top:2px solid var(--ink);border-bottom:2px solid var(--ink)}
+.pull p{margin:0;font-size:21px;line-height:1.46;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.pull p b{color:var(--green-dark)}
+.pull .pc{margin-top:11px;font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--muted)}
+
+/* 호가 사다리 */
+.ladder{margin:13px 0 0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ladder .lh{padding:10px 14px;background:var(--surface-detail);font-size:11.5px;font-weight:800;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--line)}
+.lrow{display:grid;grid-template-columns:66px 1fr;gap:11px;align-items:center;padding:11px 14px;background:var(--surface-inner);border-bottom:1px solid var(--line2)}
+.lrow:last-child{border-bottom:none}
+.lrow .lp{font-size:15px;font-weight:800;letter-spacing:-.03em;color:var(--muted);text-align:right}
+.lrow .ld{font-size:13px;line-height:1.5;font-weight:600;color:var(--body)}
+.lrow .ld b{color:var(--ink);font-weight:800}
+.lrow .tag{display:inline-block;font-size:11px;font-weight:800;border-radius:3px;padding:2px 7px;margin-right:5px;vertical-align:1.5px;letter-spacing:.02em}
+.lrow .tag.s{background:var(--clay-soft);color:var(--warn)}
+.lrow .tag.b{background:var(--green-soft);color:var(--green-dark)}
+.lrow.hit{background:var(--green-soft)}
+.lrow.hit .lp{color:var(--green-dark)}
+
+/* 좌우 대비 (흡수 vs 주도) */
+.vs2{display:grid;grid-template-columns:1fr 1fr;gap:1.5px;margin:14px 0 0;background:var(--line);border-radius:12px;overflow:hidden}
+.vs2 .vcol{padding:14px 13px}
+.vs2 .a{background:var(--surface-inner)}
+.vs2 .b{background:var(--green-soft)}
+.vs2 .vh{font-size:14px;font-weight:800;letter-spacing:-.02em;color:var(--ink);margin-bottom:9px;padding-bottom:7px;border-bottom:1px solid var(--line2)}
+.vs2 .b .vh{color:var(--green-dark);border-color:var(--green-line)}
+.vs2 p{margin:0 0 9px;font-size:13px;line-height:1.56;font-weight:600;color:var(--body)}
+.vs2 p:last-child{margin-bottom:0}
+.vs2 p b{color:var(--ink)}
+.vs2 .vq{font-size:11px;font-weight:800;letter-spacing:.07em;color:var(--muted);margin:11px 0 4px}
+
+/* 장난감 시장 */
+.toy{margin:14px 0 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface-inner)}
+.toy .th{padding:10px 14px;background:var(--surface-detail);border-bottom:1px solid var(--line)}
+.toy .th b{font-size:12px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.toy .th i{display:block;font-style:normal;font-size:11.5px;font-weight:600;color:var(--sub);margin-top:3px;line-height:1.45}
+.toy .tv{padding:14px 14px 4px}
+.toy svg{display:block;width:100%;height:auto}
+.toyres{display:grid;grid-template-columns:1fr 1fr;gap:1.5px;background:var(--line);border-top:1px solid var(--line)}
+.toyres .tr{padding:12px 10px;text-align:center}
+.toyres .tr.i{background:var(--up-soft)}
+.toyres .tr.b{background:var(--down-soft)}
+.toyres .trl{font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--sub)}
+.toyres .trv{font-size:20px;font-weight:800;letter-spacing:-.035em;margin-top:3px}
+.toyres .tr.i .trv{color:var(--up)}
+.toyres .tr.b .trv{color:var(--down)}
+.toyres .trn{font-size:11px;font-weight:600;color:var(--sub);margin-top:3px;line-height:1.4}
+.toynote{padding:13px 14px;font-size:13px;line-height:1.6;font-weight:600;color:var(--body);border-top:1px solid var(--line)}
+.toynote b{color:var(--ink);font-weight:800}
+
+/* ─────────── 3장 ─────────── */
+.newsq{margin:18px -16px 0;padding:20px 22px;background:var(--navy);color:#E9EBEE;position:relative}
+.newsq .nk{font-size:11px;font-weight:800;letter-spacing:.1em;color:#A3ACB8;margin-bottom:9px}
+.newsq p{margin:0;font-size:17px;line-height:1.5;font-weight:800;letter-spacing:-.03em;color:#F2F4F6}
+.steps{margin:20px 0 0;counter-reset:st}
+.step{display:grid;grid-template-columns:28px 1fr;gap:12px;padding:13px 0;border-bottom:1px solid var(--line2)}
+.step:last-child{border-bottom:none}
+.step .sn{font-size:12px;font-weight:800;color:#EFEDE7;background:var(--green);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step .sb b{display:block;font-size:14.5px;font-weight:800;color:var(--ink);margin-bottom:4px;letter-spacing:-.025em}
+.step .sb p{margin:0;font-size:13px;line-height:1.6;color:var(--body);font-weight:600}
+.step .sb p b{display:inline;font-size:inherit;color:var(--ink);margin:0}
+
+/* 함정 */
+.trap{margin:14px 0 0;display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden}
+.trap .ti{padding:13px 14px;background:var(--surface-inner)}
+.trap .tx{font-size:13.5px;font-weight:800;color:var(--ink);line-height:1.5;letter-spacing:-.02em;margin-bottom:6px}
+.trap .tk{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--warn);background:var(--clay-soft);border-radius:3px;padding:2px 7px;margin-bottom:7px}
+.trap .to{font-size:13px;font-weight:600;color:var(--body);line-height:1.6}
+.trap .to b{color:var(--green-dark);font-weight:800}
+
+/* 퀴즈 */
+.quiz{margin:16px -16px 0;padding:22px;background:var(--surface-band)}
+.quiz .qh{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--green-dark);margin-bottom:12px}
+.qchips{display:grid;grid-template-columns:1fr 1fr;gap:1.5px;background:var(--line);border-radius:10px;overflow:hidden;margin-bottom:15px}
+.qchips .qc{background:var(--surface-inner);padding:11px 12px}
+.qchips .qc i{display:block;font-style:normal;font-size:11.5px;font-weight:700;color:var(--sub);margin-bottom:2px}
+.qchips .qc b{font-size:17px;font-weight:800;letter-spacing:-.035em}
+.quiz .qq{margin:0;font-size:17px;font-weight:800;line-height:1.45;letter-spacing:-.03em;color:var(--ink)}
+details.rev{margin-top:13px;border:1.5px solid var(--green);border-radius:11px;background:var(--surface-inner);overflow:hidden}
+details.rev>summary{list-style:none;cursor:pointer;padding:12px 14px;font-size:13px;font-weight:800;color:var(--green-dark);display:flex;justify-content:space-between;align-items:center}
+details.rev>summary::-webkit-details-marker{display:none}
+details.rev>summary:after{content:"+";font-size:19px;font-weight:800;color:var(--green);line-height:.9}
+details.rev[open]>summary:after{content:"−"}
+details.rev .rb{padding:0 14px 14px;font-size:13px;line-height:1.66;color:var(--body);font-weight:600}
+details.rev .rb b{color:var(--ink);font-weight:800}
+.verdict{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.03em;border-radius:999px;padding:4px 11px;margin-bottom:9px;background:var(--green);color:#EFEDE7}
+
+/* 다음 편 */
+.next{margin:30px -16px 0;padding:24px 22px;background:linear-gradient(150deg,#454F5C 0%,#2B323C 100%);color:#E9EBEE;position:relative;overflow:hidden}
+.next:before{content:"";position:absolute;right:-40px;bottom:-52px;width:150px;height:150px;border-radius:50%;border:1px solid rgba(180,190,202,.18)}
+.next .nh{position:relative;font-size:11px;font-weight:800;letter-spacing:.12em;color:#A3ACB8;margin-bottom:10px}
+.next p{position:relative;margin:0;font-size:16px;line-height:1.56;font-weight:800;letter-spacing:-.03em;color:#EDEFF2}
+.next p b{color:#FFFFFF}
+.next .nt{position:relative;margin-top:14px;padding-top:12px;border-top:1px solid rgba(180,190,202,.22);font-size:12.5px;font-weight:800;color:#B9C1CB}
+.next .nt b{color:#EDEFF2;font-weight:800}
+
+/* 접힘 */
+.foldwrap{margin:28px 0 0}
+details.fold{border:1px solid var(--line);border-radius:12px;background:var(--surface-detail);margin:0 0 9px;overflow:hidden}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:13px 15px;font-size:13px;font-weight:800;color:var(--ink)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary:after{content:"+";font-size:18px;font-weight:800;color:var(--green);line-height:.9}
+details.fold[open]>summary:after{content:"−"}
+details.fold .fb{padding:0 15px 14px}
+.gloss{display:grid;grid-template-columns:98px 1fr;gap:9px 11px;margin:2px 0 0;font-size:13px}
+.gloss dt{font-weight:850;color:#4B4740}
+.gloss dd{margin:0;color:var(--body);line-height:1.55}
+.fb .case{padding:11px 0;border-bottom:1px solid var(--line2)}
+.fb .case:last-child{border-bottom:none}
+.fb .case b{display:block;font-size:13px;font-weight:800;color:var(--ink);margin-bottom:4px}
+.fb .case p{margin:0;font-size:12.5px;line-height:1.6;color:var(--body);font-weight:600}
+.fb ol{margin:0;padding-left:17px}
+.fb ol li{font-size:12px;line-height:1.62;color:var(--body);margin:5px 0}
+.disc{font-size:11.5px;color:var(--muted);text-align:center;line-height:1.6;padding:14px 8px 0;font-weight:500}
+.foot{text-align:center;font-size:11.5px;color:var(--sub);padding:14px 0 4px;font-weight:800;letter-spacing:-.01em}
+
+/* 툴팁 */
+.term{border-bottom:1.5px dashed #8B867E;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;font-weight:850;color:var(--ink);
+  display:inline-block;padding:3px 4px;margin:-3px -4px;line-height:1.3;
+  touch-action:manipulation;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.term .tip{position:fixed;left:12px;top:0;min-width:160px;max-width:min(244px,calc(100vw - 28px));
+  background:#33322F;color:#F2F0EB;font-size:12px;font-weight:600;line-height:1.52;padding:9px 11px;border-radius:9px;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);z-index:60;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease;white-space:normal;text-align:left}
+.term .tip:after{content:"";position:absolute;top:100%;left:var(--ax,50%);transform:translateX(-50%);border:6px solid transparent;border-top-color:#33322F}
+.term .tip.below:after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#33322F}
+.term.open .tip{opacity:1;visibility:visible;pointer-events:auto}
+
+@media(max-width:360px){
+  .cvtitle{font-size:32px}
+  .sline .sv{font-size:28px}
+  .bigq{font-size:20px}
+  .pull p{font-size:18.5px}
+  .chno{font-size:34px}
+  .gloss{grid-template-columns:84px 1fr}
+}
+
+/* ─────────── 데스크톱 (768px+) ─────────── */
+@media(min-width:768px){
+  .app{max-width:760px;padding-left:28px;padding-right:28px}
+  .cover{margin:0 -28px;padding:46px 40px 40px}
+  .topbar{margin:0 -28px}
+  .cvtitle{font-size:46px}
+  .cvsub{font-size:15px;max-width:26em}
+  .chapter{margin-top:48px}
+  .chno{font-size:48px}
+  .chbd h2{font-size:26px}
+  .bigq{font-size:26px}
+  .answer{margin-left:-28px;margin-right:-28px;padding:24px 40px}
+  .newsq{margin-left:-28px;margin-right:-28px;padding:24px 40px}
+  .quiz{margin-left:-28px;margin-right:-28px;padding:26px 40px}
+  .next{margin-left:-28px;margin-right:-28px;padding:28px 40px}
+  .pull{margin-left:-28px;margin-right:-28px;padding:32px 40px}
+  .pull p{font-size:25px}
+
+  /* 웹툰 4컷을 가로 한 줄로 */
+  .stripgrid{grid-template-columns:repeat(4,1fr)}
+
+  /* 순매수 계산 + 오해박스 2열 */
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  .twocol .calc,.twocol .myth{margin-top:0}
+
+  /* 호가 사다리 + 해설 2열 */
+  .laddercol{display:grid;grid-template-columns:1.2fr 1fr;gap:20px;align-items:start;margin-top:13px}
+  .laddercol .ladder{margin-top:0}
+  .laddercol .tp{margin-top:0}
+
+  /* 장난감 시장: 그림과 결과를 좌우로 */
+  .toy .tv{padding:18px 20px 4px}
+
+  /* 함정 카드 2열 */
+  .trap{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<span id="top"></span>
+<div class="topbar">
+<div class="tbin">
+<span class="brand"><i>The Language of Markets</i> · Episode 1</span>
+<span class="ep">01 / 05</span>
+</div>
+<div class="prog"><i id="pg"></i></div>
+</div>
+<!-- ══════ 표지 ══════ -->
+<div class="cover">
+<span class="cvkick">ECONOMICS &amp; MARKET TERMS <b>01</b></span>
+<h1 class="cvtitle">Who Moves<span>Stock Prices?</span></h1>
+<p class="cvsub">Retail investors bought trillions of won, yet the index fell. Who actually set the price that day?</p>
+<div class="cvidx">
+<a href="#c1"><b>01</b>THE EVENT &amp; THE QUESTION</a>
+<a href="#c2"><b>02</b>STRUCTURE &amp; TERMS</a>
+<a href="#c3"><b>03</b>HOW TO READ IT &amp; REVIEW</a>
+</div>
+</div>
+<!-- ══════ 01 사건과 질문 ══════ -->
+<div class="chapter" id="c1">
+<div class="chrow">
+<span class="chno">01</span>
+<div class="chbd">
+<span class="chkick">THE EVENT &amp; THE QUESTION</span>
+<h2>Heavy Buying, Steeper Losses</h2>
+</div>
+</div>
+</div>
+<div class="scene">
+<span class="stag">2026.07.16 · ACTUAL MARKET</span>
+<div class="sline">
+<span class="sk">KOSPI</span>
+<span class="sv down num">−6.37%</span>
+</div>
+<div class="sconj"><span>BUT</span></div>
+<div class="sline">
+<span class="sk">Retail net buying</span>
+<span class="sv num" style="color:var(--green-dark)">+₩3.66tn</span>
+</div>
+<p class="snote">Retail investors were the only net buyers among the three groups. Foreign investors: −₩1.38tn; institutions: −₩2.37tn.<br/>Source: Korea Exchange (KRX), trading by investor type.</p>
+</div>
+<p class="bigq">With investors buying this much,<br/>why did stock prices still fall?</p>
+<div class="answer">
+<div class="ak">ONE-LINE ANSWER</div>
+<div class="av">The biggest buyer and the price-setting side can be different.</div>
+<div class="al">
+<span><b>01</b>What net buying means</span>
+<span><b>02</b>Where price is set</span>
+<span><b>03</b>What pulls the index</span>
+</div>
+</div>
+<div class="strip">
+<div class="striphead"><b>That day’s flows, simplified in four panels</b><i>Reconstruction of 2026.07.16</i></div>
+<div class="stripgrid">
+<div class="pnl">
+<span class="pno">01</span>
+<svg aria-label="Illustration of foreign investors and institutions placing sell orders into the market" role="img" viewbox="0 0 168 150">
+<rect fill="#F1EFEA" height="150" width="168" x="0" y="0"></rect>
+<line stroke="#CEC9BF" stroke-width="2" x1="10" x2="158" y1="128" y2="128"></line>
+<circle cx="36" cy="42" fill="#3F4854" r="8.5"></circle>
+<rect fill="#3F4854" height="32" rx="8" width="18" x="27" y="53"></rect>
+<circle cx="68" cy="46" fill="#3F4854" r="8.5"></circle>
+<rect fill="#3F4854" height="30" rx="8" width="18" x="59" y="57"></rect>
+<rect fill="#C9B18C" height="46" rx="3" stroke="#A78F6C" stroke-width="1.5" width="60" x="90" y="82"></rect>
+<line stroke="#A78F6C" stroke-width="1.2" x1="90" x2="150" y1="97" y2="97"></line>
+<text fill="#5D4E38" font-size="12" font-weight="800" text-anchor="middle" x="120" y="118">SUPPLY</text>
+<line stroke="#3F4854" stroke-linecap="round" stroke-width="3.5" x1="45" x2="88" y1="68" y2="88"></line>
+<line stroke="#3F4854" stroke-linecap="round" stroke-width="3.5" x1="77" x2="92" y1="70" y2="84"></line>
+<path d="M120 58 l0 15 m-5 -6 l5 7 l5 -7" fill="none" stroke="#8B867E" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<div class="pcap">Foreign investors and institutions put stock up for sale</div>
+</div>
+<div class="pnl">
+<span class="pno">02</span>
+<svg aria-label="Illustration of sellers lowering their offers step by step" role="img" viewbox="0 0 168 150">
+<rect fill="#F1EFEA" height="150" width="168" x="0" y="0"></rect>
+<rect fill="#E8E5DF" height="24" rx="4" stroke="#CEC9BF" width="58" x="18" y="24"></rect>
+<text fill="#8B867E" font-size="11" font-weight="800" text-anchor="middle" x="47" y="40">69,800</text>
+<rect fill="#E8E5DF" height="24" rx="4" stroke="#CEC9BF" width="58" x="56" y="60"></rect>
+<text fill="#8B867E" font-size="11" font-weight="800" text-anchor="middle" x="85" y="76">69,500</text>
+<rect fill="#DCE5EF" height="24" rx="4" stroke="#4F78A8" width="58" x="94" y="96"></rect>
+<text fill="#4F78A8" font-size="11" font-weight="800" text-anchor="middle" x="123" y="112">69,200</text>
+<path d="M42 52 L74 62 M80 88 L98 96" fill="none" stroke="#4F78A8" stroke-dasharray="3 3" stroke-width="1.8"></path>
+<path d="M142 32 l0 42 m-6 -8 l6 9 l6 -9" fill="none" stroke="#4F78A8" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+<div class="pcap">Selling pressure pushes the price lower</div>
+</div>
+<div class="pnl">
+<span class="pno">03</span>
+<svg aria-label="Illustration of retail investors absorbing supply at lower prices" role="img" viewbox="0 0 168 150">
+<rect fill="#F1EFEA" height="150" width="168" x="0" y="0"></rect>
+<line stroke="#CEC9BF" stroke-width="2" x1="10" x2="158" y1="132" y2="132"></line>
+<rect fill="#C9B18C" height="44" rx="3" stroke="#A78F6C" stroke-width="1.5" width="60" x="54" y="28"></rect>
+<line stroke="#A78F6C" stroke-width="1.2" x1="54" x2="114" y1="43" y2="43"></line>
+<text fill="#5D4E38" font-size="12" font-weight="800" text-anchor="middle" x="84" y="63">SUPPLY</text>
+<circle cx="84" cy="96" fill="#46584D" r="9.5"></circle>
+<rect fill="#46584D" height="24" rx="9" width="24" x="72" y="108"></rect>
+<line stroke="#46584D" stroke-linecap="round" stroke-width="4.2" x1="71" x2="58" y1="103" y2="76"></line>
+<line stroke="#46584D" stroke-linecap="round" stroke-width="4.2" x1="97" x2="110" y1="103" y2="76"></line>
+</svg>
+<div class="pcap">Retail investors absorb the supply</div>
+</div>
+<div class="pnl">
+<span class="pno">04</span>
+<svg aria-label="Illustration of the index falling while a retail investor asks why" role="img" viewbox="0 0 168 150">
+<rect fill="#F1EFEA" height="150" width="168" x="0" y="0"></rect>
+<line stroke="#CEC9BF" stroke-width="1.5" x1="14" x2="156" y1="132" y2="132"></line>
+<path d="M16 60 L52 76 L78 70 L112 100 L152 118" fill="none" stroke="#4F78A8" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+<circle cx="152" cy="118" fill="#4F78A8" r="4"></circle>
+<rect fill="#E8E5DF" height="40" rx="9" stroke="#CEC9BF" width="106" x="50" y="14"></rect>
+<path d="M68 54 l-8 12 l16 -12 z" fill="#E8E5DF" stroke="#CEC9BF" stroke-width="1"></path>
+<text fill="#2E2E2C" font-size="11.5" font-weight="800" text-anchor="middle" x="103" y="31">Bought this much—</text>
+<text fill="#2E2E2C" font-size="11.5" font-weight="800" text-anchor="middle" x="103" y="46">why is it falling?</text>
+<circle cx="34" cy="102" fill="#46584D" r="8.5"></circle>
+<rect fill="#46584D" height="19" rx="8" width="18" x="25" y="113"></rect>
+</svg>
+<div class="pcap">Retail leads net buying; the index still falls</div>
+</div>
+</div>
+<div class="stripfoot">Illustrations simplify and reconstruct that day’s flow structure</div>
+</div>
+<p class="bridge">These four panels capture the basic structure of that day’s flows.<br/>To read them correctly, you need <b>three terms</b>.</p>
+<!-- ══════ 02 구조와 용어 ══════ -->
+<div class="chapter" id="c2">
+<div class="chrow">
+<span class="chno">02</span>
+<div class="chbd">
+<span class="chkick">STRUCTURE &amp; TERMS</span>
+<h2>The Biggest Buyer Is Not Always<br/>the Side Moving the Market</h2>
+</div>
+</div>
+</div>
+<p class="lead">Market flows are a record of <b>who bought and who sold today</b>. In Korea, the exchange publishes these flows each day by grouping investors into <span class="term">retail · foreign · institutional<span class="tip">The three investor groups KRX reports each day. “Retail” means individual investors, “foreign” means overseas capital, and “institutions” aggregate pension funds, asset managers, insurers, and others.</span></span>.</p>
+<div class="termblk">
+<div class="thead"><span class="tno">01</span><div class="tbd"><b>Net Buying · Net Selling</b><i>The basic unit of flow reporting</i></div></div>
+<p class="tdef">The amount bought minus the amount sold.</p>
+<div class="twocol">
+<div class="calc">
+<div class="ct">Foreign-investor trading on a sample day</div>
+<div class="crow"><span class="cl">BUY</span><span class="ctr"><span class="cf b" style="width:calc(72.7% - 4px)"></span></span><span class="cv num">₩8tn</span></div>
+<div class="crow"><span class="cl">SELL</span><span class="ctr"><span class="cf s" style="width:calc(100% - 4px)"></span></span><span class="cv num">₩11tn</span></div>
+<div class="ceq"><span class="cel">NET BUYING</span><span class="cev num">₩8tn − ₩11tn = −₩3tn</span></div>
+<p class="cnote">A news report would call this <b>₩3tn of net selling</b>. The same line hides the fact that foreign investors also bought ₩8tn worth that day.</p>
+</div>
+<div class="myth">
+<div class="mi m1"><div class="mh">COMMON MISREAD</div><p>“Retail investors net-bought ₩5tn, so retail drove the market higher.”</p></div>
+<div class="mi m2"><div class="mh">BETTER READING</div><p>They may simply have absorbed stock being dumped during a sharp decline. <b>Buying the most and leading the market are not the same thing.</b></p></div>
+</div>
+</div>
+</div>
+<div class="termblk">
+<div class="thead"><span class="tno">02</span><div class="tbd"><b>The Last Trade Sets the Price</b><i>What matters more than net buying</i></div></div>
+<p class="tdef">Price is set not by the total amount traded, but by the level at which the latest trade occurs.</p>
+<p class="dot">Every completed trade pairs a buyer and a seller for the same value.</p>
+<p class="dot">Across the market as a whole, total purchases and total sales are always equal.</p>
+<p class="dot">But <b>once trades are split by investor type</b>, the picture changes: foreign investors can be net sellers while retail investors are net buyers.</p>
+<div class="laddercol">
+<div class="ladder">
+<div class="lh">Order-book ladder (example)</div>
+<div class="lrow"><span class="lp num">69,800</span><span class="ld"><span class="tag s">SELL</span>Seller’s first offer. No buyer takes it.</span></div>
+<div class="lrow"><span class="lp num">69,500</span><span class="ld"><span class="tag s">SELL</span>The seller lowers the offer. The urgency is still on the sell side.</span></div>
+<div class="lrow hit"><span class="lp num">69,200</span><span class="ld"><span class="tag b">TRADE</span>The trade occurs only after the seller comes down to the waiting buyer’s bid. <b>This is where price is set in the example.</b></span></div>
+</div>
+<p class="tp">When sellers move down while buyers hold their bids, as in this example, the price in that interval is effectively being set by the sell side.<br/><br/>A real trading day is far more complex. Timing, order aggressiveness, and stock-level concentration are all compressed into a single net-buying figure. <b>A single day’s net flow cannot tell you with certainty which investor group drove prices lower.</b></p>
+</div>
+</div>
+<div class="pull">
+<p>Even after buying trillions of won,<br/><b>you may still have been following the market</b>.</p>
+<div class="pc">Because price is determined by where trades clear, not by how much one side bought.</div>
+</div>
+<p class="subhead">Same Net Buying, Two Different Faces</p>
+<p class="tp">Buying that absorbs falling supply is different from buying that chases offers and pushes price higher. But one day’s aggregate number cannot cleanly separate the two.</p>
+<div class="vs2">
+<div class="vcol a">
+<div class="vh">Absorbing supply</div>
+<p>Buying stock as sellers lower their prices.</p>
+<p>The amount can be large without meaning the buyer itself pushed prices higher.</p>
+</div>
+<div class="vcol b">
+<div class="vh">Driving the market</div>
+<p>Buying aggressively by lifting higher offers.</p>
+<p>Even a smaller amount can have a greater chance of moving the index.</p>
+</div>
+</div>
+<p class="tp">There is no absolute dividing line. Put net buying next to <b>the day’s price direction and intraday timing</b> and you begin to see clues.</p>
+<p class="dot">When heavy net buying coincides with a decline, the buying may have been absorbing supply into weakness. Intraday timing and stock-level concentration are needed to judge further.</p>
+<p class="dot">If net buying persists alongside gains in the largest-cap stocks, it is a clue that the buyer may be driving the market. Persistence, trading value, and broader participation are still needed before calling it leadership.</p>
+<div class="termblk" style="margin-top:30px">
+<div class="thead"><span class="tno">03</span><div class="tbd"><b>Market Cap · Index Concentration · Market Breadth</b><i>Why the index can differ from investors’ experience</i></div></div>
+<p class="tdef">The KOSPI is a weighted average that uses <span class="term">market capitalization<span class="tip">Share price × shares outstanding. It is the market value of the entire listed company. The larger it is, the more influence the stock has on the index.</span></span> as its weight.</p>
+<p class="tp">The heaviest stocks can effectively become the index. Many smaller stocks can fall without pulling the index down.</p>
+<div class="toy">
+<div class="th"><b>A five-stock toy market</b><i>One heavyweight with a market cap of 50, plus four stocks with market caps of 5</i></div>
+<div class="tv">
+<svg aria-label="Illustration showing one heavyweight stock rising, four stocks falling, and the index still gaining" role="img" viewbox="0 0 328 142">
+<rect fill="#DDE1E4" height="104" rx="5" stroke="#3F4854" stroke-width="1.5" width="92" x="12" y="14"></rect>
+<text fill="#2B323C" font-size="12.5" font-weight="800" text-anchor="middle" x="58" y="52">LEADER</text>
+<text fill="#53514C" font-size="11.5" font-weight="700" text-anchor="middle" x="58" y="72">MKT CAP 50</text>
+<text fill="#C74754" font-size="14" font-weight="800" text-anchor="middle" x="58" y="100">+5%</text>
+<text fill="#8B867E" font-size="11.5" font-weight="700" text-anchor="middle" x="216" y="52">4 others fall</text>
+<g font-size="11" font-weight="700">
+<rect fill="#F1EFEA" height="46" rx="4" stroke="#CEC9BF" width="46" x="120" y="72"></rect>
+<text fill="#53514C" text-anchor="middle" x="143" y="92">MKT CAP 5</text>
+<text fill="#4F78A8" font-size="11.5" font-weight="800" text-anchor="middle" x="143" y="108">−2%</text>
+<rect fill="#F1EFEA" height="46" rx="4" stroke="#CEC9BF" width="46" x="172" y="72"></rect>
+<text fill="#53514C" text-anchor="middle" x="195" y="92">MKT CAP 5</text>
+<text fill="#4F78A8" font-size="11.5" font-weight="800" text-anchor="middle" x="195" y="108">−2%</text>
+<rect fill="#F1EFEA" height="46" rx="4" stroke="#CEC9BF" width="46" x="224" y="72"></rect>
+<text fill="#53514C" text-anchor="middle" x="247" y="92">MKT CAP 5</text>
+<text fill="#4F78A8" font-size="11.5" font-weight="800" text-anchor="middle" x="247" y="108">−2%</text>
+<rect fill="#F1EFEA" height="46" rx="4" stroke="#CEC9BF" width="46" x="276" y="72"></rect>
+<text fill="#53514C" text-anchor="middle" x="299" y="92">MKT CAP 5</text>
+<text fill="#4F78A8" font-size="11.5" font-weight="800" text-anchor="middle" x="299" y="108">−2%</text>
+</g>
+<line stroke="#CEC9BF" stroke-width="1.5" x1="12" x2="316" y1="130" y2="130"></line>
+</svg>
+</div>
+<div class="toyres">
+<div class="tr i"><div class="trl">INDEX</div><div class="trv num">+3.0%</div><div class="trn">70 → 72.1</div></div>
+<div class="tr b"><div class="trl">DECLINERS</div><div class="trv num">4 / 5</div><div class="trn">Four of five stocks fall</div></div>
+</div>
+<p class="toynote">The result created by those weights is <b>index concentration</b>; counting advancers and decliners gives you <b>market breadth</b>. This is how the index can look healthy while an investor’s own portfolio feels weak.</p>
+</div>
+<p class="tp">In the real KOSPI, Samsung Electronics and SK hynix occupy this heavyweight role. That is why the index should be read alongside the <span class="term">number of advancing stocks<span class="tip">The number of stocks that rose that day. Read together with decliners, it shows how broadly gains were distributed.</span></span>.</p>
+</div>
+<details class="fold">
+<summary>One-Line Glossary</summary>
+<div class="fb">
+<dl class="gloss">
+<dt>Cash equities</dt><dd>The market where the shares themselves are bought and sold, as opposed to futures or options.</dd>
+<dt>Large-cap stock</dt><dd>A stock with a large market capitalization and therefore greater index weight.</dd>
+<dt>KOSPI 200</dt><dd>An index of 200 leading KOSPI stocks; a benchmark for futures, options, and many funds.</dd>
+<dt>Change of hands</dt><dd>A transfer of ownership in the same stock from one investor group to another.</dd>
+<dt>Trading value</dt><dd>The total value of trades executed that day; a gauge of how much money is circulating through the market.</dd>
+<dt>market breadth</dt><dd>The balance between the number of advancing and declining stocks.</dd>
+<dt>Price priority · Time priority</dt><dd>KRX’s order-matching rules: better prices take priority; at the same price, earlier orders are filled first.</dd>
+</dl>
+</div>
+</details>
+<p class="bridge">That is the structure.<br/>Now <b>when you encounter a market headline,</b> you can work through it in order.</p>
+<!-- ══════ 03 판정과 복습 ══════ -->
+<div class="chapter" id="c3">
+<div class="chrow">
+<span class="chno">03</span>
+<div class="chbd">
+<span class="chkick">HOW TO READ IT &amp; REVIEW</span>
+<h2>When You See This Headline,<br/>Check Three Things</h2>
+</div>
+</div>
+</div>
+<div class="newsq">
+<div class="nk">A COMMON HEADLINE</div>
+<p>“Foreign investors net-buy for a third straight day; institutions turn net sellers after one day”</p>
+</div>
+<div class="steps">
+<div class="step"><span class="sn">1</span><div class="sb"><b>Who bought?</b><p>Net buying tells you only the difference between purchases and sales. Stop there, and you have read only half the story.</p></div></div>
+<div class="step"><span class="sn">2</span><div class="sb"><b>Where did trades clear?</b><p>If prices fell sharply the same day, aggressive sell orders likely consumed bids, or waiting buyers moved their bids lower. But one day’s net flows cannot identify with certainty which investor group drove the decline.</p></div></div>
+<div class="step"><span class="sn">3</span><div class="sb"><b>What happened to the largest-cap stocks?</b><p>If buying was concentrated in a few heavyweight stocks, the index move may largely reflect <b>what happened in those names</b>.</p></div></div>
+</div>
+<div class="termblk" style="margin-top:30px">
+<div class="thead"><span class="tno">CAUTION</span><div class="tbd"><b>Easy-to-Misread Headlines</b><i>Headline traps</i></div></div>
+<div class="trap">
+<div class="ti">
+<div class="tk">TRAP 01</div>
+<div class="tx">“Retail investors bought ₩5tn and defended the market.”</div>
+<div class="to">Calling it “defense” requires another piece of evidence: did the decline narrow, or did prices turn when retail buying intensified? <b>Absorbing supply and stopping a decline are not the same.</b></div>
+</div>
+<div class="ti">
+<div class="tk">TRAP 02</div>
+<div class="tx">“Foreign investors net-buy for three straight days: trend reversal.”</div>
+<div class="to">One day’s flows reflect one day’s conditions. It is common to buy for three days and sell it back in one. <b>Only after checking persistence and the breadth of the buying</b> can you talk about a genuine change in stance.</div>
+</div>
+</div>
+</div>
+<div class="quiz">
+<div class="qh">SCENARIO</div>
+<div class="qchips">
+<div class="qc"><i>KOSPI</i><b class="down num">−4%</b></div>
+<div class="qc"><i>Retail</i><b class="num" style="color:var(--green-dark)">+₩5tn</b></div>
+<div class="qc"><i>Foreign</i><b class="num" style="color:var(--ink2)">−₩3tn</b></div>
+<div class="qc"><i>Institutions</i><b class="num" style="color:var(--ink2)">−₩2tn</b></div>
+</div>
+<p class="qq">Did retail investors drive the market?</p>
+<details class="rev">
+<summary>CHECK THE READING</summary>
+<div class="rb">
+<span class="verdict">CANNOT CONCLUDE</span>
+      Retail investors did absorb the stock being sold. But a −4% decline is more consistent with aggressive sell orders consuming bids, or waiting buyers retreating to lower prices.<br/>You still cannot determine which investor group drove price from one day’s net-flow totals alone. You need to know who kept lowering offers and how the largest-cap stocks moved.
+    </div>
+</details>
+</div>
+<div class="next">
+<div class="nh">NEXT</div>
+<p>But if foreign investors <b>sold cash equities while buying futures</b>, the story becomes more complicated. Did they leave Korea, or merely change their positioning?</p>
+<div class="nt"><b>EPISODE 2</b> When Cash and Futures Diverge</div>
+</div>
+<div class="foldwrap">
+<details class="fold">
+<summary>Actual Market Cases Used in This Episode</summary>
+<div class="fb">
+<div class="case"><b>2026.07.16 · Retail +₩3.66tn net buying, KOSPI −6.37%</b><p>Retail investors absorbed stock sold by foreign investors (−₩1.38tn) and institutions (−₩2.37tn). The index gave up the 7,000 level in a single day—an example of heavy net buying and a sharp market decline occurring together.</p></div>
+<div class="case"><b>2026.07.22 · Foreign investors +₩2.62tn; index gives back 368pt from the high</b><p>SK hynix alone accounted for 48% of foreign net buying. Stocks that institutions had bought the previous day changed hands as institutions sold and foreign investors absorbed them. On the KOSPI, 469 of 915 stocks advanced—roughly half the market held up.</p></div>
+</div>
+</details>
+<details class="fold">
+<summary>Sources &amp; Data Notes</summary>
+<div class="fb">
+<ol>
+<li>Flows, index levels, and advancing/declining stock counts for 2026.07.16 and 2026.07.22 are based on Korea Exchange (KRX) investor trading data and daily market data.</li>
+<li>Figures labeled as examples are illustrative and are not actual market prices.</li>
+<li>The order-book and execution examples are simplified hypothetical cases designed to explain how limit orders interact with bids and offers.</li>
+</ol>
+</div>
+</details>
+</div>
+<p class="disc">This material is educational content intended to explain economic and stock-market terminology and market structure. It is not a recommendation to buy or sell any financial product.</p>
+<div class="foot">The Language of Markets · Episode 1 Who Moves Stock Prices?</div>
+</div><!-- /.app -->
+<script>
+(function(){
+  if(window.__mwWords) return; window.__mwWords = true;
+
+  /* 진행바 */
+  var pg=document.getElementById('pg');
+  function updateProg(){
+    if(!pg) return;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var y=window.scrollY||window.pageYOffset||0;
+    pg.style.width=(h>0?Math.min(100,Math.max(0,y/h*100)):0)+'%';
+  }
+  window.addEventListener('scroll',updateProg,{passive:true});
+  window.addEventListener('resize',updateProg);
+  updateProg();
+
+  /* 용어 툴팁 */
+  function resetTip(el){ var tp=el.querySelector('.tip'); if(tp){ tp.classList.remove('below'); tp.removeAttribute('style'); } }
+  function clampTip(t){
+    var tip=t.querySelector('.tip'); if(!tip) return;
+    var vw=window.innerWidth, pad=12;
+    var w=Math.min(244, vw-2*pad);
+    tip.style.position='fixed'; tip.style.bottom='auto'; tip.style.transform='none';
+    tip.style.width=w+'px'; tip.style.left='0px'; tip.style.top='0px';
+    var tr=t.getBoundingClientRect();
+    var th=tip.getBoundingClientRect().height;
+    var left=tr.left+tr.width/2-w/2;
+    if(left<pad) left=pad;
+    if(left+w>vw-pad) left=vw-pad-w;
+    var top=tr.top-th-9, below=false;
+    if(top<pad+50){ top=tr.bottom+9; below=true; }
+    var vh=window.innerHeight;
+    if(top+th>vh-pad){ top=vh-pad-th; }
+    if(top<pad){ top=pad; }
+    tip.style.left=Math.round(left)+'px';
+    tip.style.top=Math.round(top)+'px';
+    var tb=tip.getBoundingClientRect();
+    var dx=tb.left-left, dy=tb.top-top;
+    if(dx||dy){ tip.style.left=Math.round(left-dx)+'px'; tip.style.top=Math.round(top-dy)+'px'; }
+    tip.classList.toggle('below', below);
+    var ax=tr.left+tr.width/2-left;
+    ax=Math.max(12, Math.min(w-12, ax));
+    tip.style.setProperty('--ax', Math.round(ax)+'px');
+  }
+  function closeTerms(except){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++){ if(open[i]!==except){ open[i].classList.remove('open'); resetTip(open[i]); } }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.term'), function(t){
+    t.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var willOpen=!t.classList.contains('open');
+      closeTerms(t);
+      t.classList.toggle('open', willOpen);
+      if(willOpen) clampTip(t);
+    });
+  });
+  document.addEventListener('click', function(){ closeTerms(null); });
+  window.addEventListener('scroll', function(){ closeTerms(null); }, {passive:true});
+  window.addEventListener('resize', function(){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++) clampTip(open[i]);
+  });
+})();
+</script>
+</body>
+</html>

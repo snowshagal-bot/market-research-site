@@ -495,6 +495,22 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-11-daily-12vx8a7.png"
   },
   {
+    "id": "2026-08-10-basics-f7gadj",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-08-10",
+    "reportDate": "2026-08-10",
+    "registeredDate": "2026-08-26",
+    "registeredAt": "2026-08-25T15:46:19.514Z",
+    "legacyImport": false,
+    "title": "Who MovesStock Prices?",
+    "subtitle": "",
+    "description": "A clear guide to the essential concepts behind markets, economics, and investing.",
+    "href": "reports/en/Market_Language_Ep1_Who_Moves_Stock_Prices.html",
+    "coverImage": "covers/2026-08-10-basics-f7gadj.webp"
+  },
+  {
     "id": "2026-08-10-daily-1bb8z4p",
     "type": "daily",
     "typeLabel": "Daily",
