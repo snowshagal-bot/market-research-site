@@ -28,8 +28,8 @@ test('homepage presents the Snowshagal brand hero before latest reports and arch
   assert.match(englishHtml, /home-v2\.css\?v=20260825-1/);
   assert.match(html, /locale\.js\?v=20260824-2/);
   assert.match(englishHtml, /locale\.js\?v=20260824-2/);
-  assert.match(html, /site\.js\?v=20260824-5/);
-  assert.match(englishHtml, /site\.js\?v=20260824-5/);
+  assert.match(html, /site\.js\?v=20260826-1/);
+  assert.match(englishHtml, /site\.js\?v=20260826-1/);
 });
 
 test('homepage serves a smaller eager hero asset on mobile without changing desktop art', async () => {
@@ -202,8 +202,10 @@ test('homepage archive uses a responsive two-column index with dynamic category 
   assert.match(script, /href="\?category=\$\{encodeURIComponent\(type\)\}"/);
   assert.match(script, /counts\[type\]\|\|0/);
   assert.match(script, /const subtitle=post\.subtitle\?/);
-  assert.match(script, /active==='all'[\s\S]*sortPostsByRegistration\(matched\)[\s\S]*sortPosts\(matched\)/);
-  assert.match(html, /id="archive-order-label">홈페이지 등록일 최신순/);
+  assert.match(script, /const filtered=localeApi\?\.sortPosts\(matched\)/);
+  assert.doesNotMatch(script, /sortPostsByRegistration\(matched\)/);
+  assert.match(script, /archiveOrderLabel\.textContent=messages\.reportOrder/);
+  assert.match(html, /id="archive-order-label">리포트 기준일 최신순/);
   assert.match(styles, /\.archive-layout\s*\{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) minmax\(270px, 300px\)/);
   assert.match(styles, /@media \(max-width: 960px\)[\s\S]*?\.archive-layout\s*\{[\s\S]*?grid-template-columns: minmax\(0, 1fr\)/);
 
