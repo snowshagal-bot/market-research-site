@@ -312,6 +312,23 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-13-daily-1tgqr3y.webp"
   },
   {
+    "id": "2026-08-10-basics-1rhknmt",
+    "type": "basics",
+    "typeLabel": "시장 공부",
+    "lang": "ko",
+    "date": "2026-08-12",
+    "reportDate": "2026-08-12",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-25T11:08:22.548Z",
+    "legacyImport": false,
+    "title": "현물과 선물이엇갈릴 때",
+    "subtitle": "",
+    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
+    "href": "reports/시장을읽는말들_2편_현물과선물이엇갈릴때.html",
+    "coverImage": "covers/2026-08-10-basics-1rhknmt.webp",
+    "updatedAt": "2026-08-25T11:09:25.060Z"
+  },
+  {
     "id": "2026-08-12-daily-rk55d0",
     "type": "daily",
     "typeLabel": "Daily",
@@ -394,22 +411,6 @@ window.RESEARCH_POSTS = [
     "href": "reports/8월 11일 주식리포트_커버통합.html",
     "updatedAt": "2026-08-11T15:03:02.337Z",
     "coverImage": "covers/2026-08-11-daily-12vx8a7.png"
-  },
-  {
-    "id": "2026-08-10-basics-1rhknmt",
-    "type": "basics",
-    "typeLabel": "시장 공부",
-    "lang": "ko",
-    "date": "2026-08-10",
-    "reportDate": "2026-08-10",
-    "registeredDate": "2026-08-25",
-    "registeredAt": "2026-08-25T11:08:22.548Z",
-    "legacyImport": false,
-    "title": "현물과 선물이엇갈릴 때",
-    "subtitle": "",
-    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
-    "href": "reports/시장을읽는말들_2편_현물과선물이엇갈릴때.html",
-    "coverImage": "covers/2026-08-10-basics-1rhknmt.webp"
   },
   {
     "id": "2026-08-10-daily-1bb8z4p",
