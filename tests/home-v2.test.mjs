@@ -22,7 +22,7 @@ test('homepage presents the Snowshagal brand hero before latest reports and arch
   assert.match(html, /그리고 투자에 참고할 만한 인사이트까지\./);
   assert.match(html, /class="hero-entries"/);
   assert.doesNotMatch(html, /Login|data-carousel|featured-slide/);
-  assert.match(html, /<footer[^>]*>[\s\S]*?<span>SNOWSHAGAL<\/span>/);
+  assert.match(html, /<footer[^>]*>[\s\S]*?<span[^>]*>SNOWSHAGAL<\/span>/);
   assert.doesNotMatch(html, /Independent Market Research/);
   assert.match(html, /home-v2\.css\?v=20260825-1/);
   assert.match(englishHtml, /home-v2\.css\?v=20260825-1/);
