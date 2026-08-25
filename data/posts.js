@@ -359,6 +359,22 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-14-daily-dqoisk.webp"
   },
   {
+    "id": "2026-08-13-basics-1cmfur2",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-08-13",
+    "reportDate": "2026-08-13",
+    "registeredDate": "2026-08-26",
+    "registeredAt": "2026-08-25T15:51:11.804Z",
+    "legacyImport": false,
+    "title": "How U.S. DataReaches Korea",
+    "subtitle": "",
+    "description": "A clear guide to the essential concepts behind markets, economics, and investing.",
+    "href": "reports/en/Market_Language_Ep3_How_US_Data_Reaches_Korea.html",
+    "coverImage": "covers/2026-08-13-basics-1cmfur2.webp"
+  },
+  {
     "id": "2026-08-13-basics-1qofo4f",
     "type": "basics",
     "typeLabel": "시장 공부",
