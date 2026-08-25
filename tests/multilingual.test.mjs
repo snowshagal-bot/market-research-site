@@ -73,6 +73,16 @@ test('language URLs preserve category queries without browser-language redirects
   assert.match(enHome, /data-site-lang="en"/);
 });
 
+test('recent report archives use report-date ordering in both locale shells', async () => {
+  const [site, koHome, enHome] = await Promise.all([
+    read('assets/site.js'), read('index.html'), read('en/index.html')
+  ]);
+  assert.match(site, /const filtered=localeApi\?\.sortPosts\(matched\)/);
+  assert.doesNotMatch(site, /sortPostsByRegistration\(matched\)/);
+  assert.match(koHome, /리포트 기준일 최신순/);
+  assert.match(enHome, /Newest report date first/);
+});
+
 test('report translation counterpart lookup and locale homepage fallback are deterministic', async () => {
   const api = await localeHelpers();
   const counterpart = api.findCounterpart(fixturePosts, '/reports/weekly.html', 'en');
