@@ -1,0 +1,61 @@
+.snowshagal-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #102d5b;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.brand-owl {
+  display: block;
+  width: 32px;
+  height: auto;
+  flex: 0 0 auto;
+}
+
+.brand-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.brand-copy strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  line-height: 1;
+  letter-spacing: .08em;
+}
+
+.brand-copy small {
+  font-size: 7px;
+  line-height: 1;
+  letter-spacing: .24em;
+  font-weight: 800;
+  color: #315b8f;
+}
+
+.main-nav {
+  font-size: 14px;
+}
+
+html[data-theme="dark"] .snowshagal-brand {
+  color: #d9e6fa;
+}
+
+html[data-theme="dark"] .brand-copy small {
+  color: #91add2;
+}
+
+html[data-theme="dark"] .brand-owl {
+  filter: drop-shadow(0 1px 5px rgba(151, 183, 225, .16));
+}
+
+@media (max-width: 760px) {
+  .brand-owl {
+    width: 26px;
+  }
+
+  .main-nav {
+    font-size: 13px;
+  }
+}

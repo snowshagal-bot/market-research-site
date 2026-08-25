@@ -5,16 +5,16 @@
   const targetLocale = locale === 'en' ? 'ko' : 'en';
   const localeApi = window.MARKET_LOCALE;
   const copy = locale === 'en' ? {
-    navLabel: 'Report site menu', home: '← Home', daily: 'Daily', weekly: 'Weekly', research: 'Research', basics: 'Market Basics', note: 'Notes', about: 'About', switchLabel: 'Read in Korean', switchText: 'KO',
+    navLabel: 'Report site menu', home: '← Home', daily: 'Daily', weekly: 'Weekly', research: 'Research', basics: 'Market Basics', note: 'Notes', market: 'Market', switchLabel: 'Read in Korean', switchText: 'KO',
     comments: 'Comments', write: 'Write a comment', close: 'Close', nickname: 'Nickname', password: 'Deletion password', body: 'Write a comment.', website: 'Website', noteText: 'No account required · The password is used only for deletion.', submit: 'Post comment', loading: 'Loading comments…', empty: 'No comments yet.', delete: 'Delete',
     loadError: 'Could not load comments.', dbTitle: 'Comments are being prepared', dbText: 'Comments will be available after the database is connected.', retry: 'Please try again later.', posting: 'Posting…', postError: 'Could not post the comment.', posted: 'Comment posted.', deletePrompt: 'Enter the deletion password.', deleteError: 'Could not delete the comment.'
   } : {
-    navLabel: '리포트 사이트 메뉴', home: '← 홈', daily: '데일리', weekly: '위클리', research: '리서치', basics: '시장 공부', note: '끄적끄적', about: '소개', switchLabel: '영어로 읽기', switchText: 'EN',
+    navLabel: '리포트 사이트 메뉴', home: '← 홈', daily: '데일리', weekly: '위클리', research: '리서치', basics: '시장 공부', note: '끄적끄적', market: '마켓', switchLabel: '영어로 읽기', switchText: 'EN',
     comments: '댓글', write: '댓글 쓰기', close: '닫기', nickname: '닉네임', password: '삭제용 비밀번호', body: '댓글을 입력하세요.', website: '웹사이트', noteText: '회원가입 없이 작성 · 비밀번호는 삭제할 때만 사용됩니다.', submit: '댓글 등록', loading: '댓글을 불러오는 중…', empty: '아직 댓글이 없습니다.', delete: '삭제',
     loadError: '댓글을 불러오지 못했습니다.', dbTitle: '댓글 기능 준비 중', dbText: '데이터베이스 연결 후 사용할 수 있습니다.', retry: '잠시 후 다시 시도해주세요.', posting: '등록 중…', postError: '댓글을 등록하지 못했습니다.', posted: '댓글이 등록되었습니다.', deletePrompt: '댓글 삭제 비밀번호를 입력하세요.', deleteError: '댓글을 삭제하지 못했습니다.'
   };
   const homePath = locale === 'en' ? '/en/' : '/';
-  const aboutPath = locale === 'en' ? '/en/about/' : '/about/';
+  const marketPath = locale === 'en' ? '/en/market/' : '/market/';
   const BAR_H = 52;
   const themeMedia = matchMedia('(prefers-color-scheme: dark)');
   const shellHosts = [];
@@ -69,23 +69,23 @@
     const root = host.attachShadow({ mode: 'open' });
     root.innerHTML = `
       <style>
-        :host{all:initial}*{box-sizing:border-box}.bar{width:100%;height:52px;background:rgba(247,243,235,.97);border-bottom:1px solid #d8d0c2;box-shadow:0 1px 8px rgba(20,24,21,.05);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);font-family:Inter,Pretendard,'Noto Sans KR','Apple SD Gothic Neo',system-ui,-apple-system,sans-serif}.inner{width:min(1180px,100%);height:100%;margin:0 auto;padding:0 22px;display:flex;align-items:center;gap:6px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}.inner::-webkit-scrollbar{display:none}a{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 12px;border-radius:999px;color:#535850;text-decoration:none;white-space:nowrap;font-size:13px;line-height:1;font-weight:700;letter-spacing:-.015em;border:1px solid transparent;transition:background .15s ease,color .15s ease,border-color .15s ease;cursor:pointer}a:hover{background:#ebe5da;color:#1f2420}.home{color:#1f2420;font-weight:850}.language{font-size:11px;font-weight:850;letter-spacing:.06em}.active{background:#222622;color:#fff;border-color:#222622}.active:hover{background:#222622;color:#fff}.divider{width:1px;height:20px;background:#d8d0c2;flex:0 0 auto;margin:0 3px}.brand{margin-left:auto;font-size:11px;font-weight:800;letter-spacing:.12em;color:#8a877f;white-space:nowrap}@media(max-width:680px){.inner{width:100%;margin:0;padding:0 8px;gap:2px}a{min-height:32px;padding:0 10px;font-size:12px}.divider{margin:0 1px}.brand{display:none}}
+        :host{all:initial}*{box-sizing:border-box}.bar{width:100%;height:52px;background:rgba(247,243,235,.97);border-bottom:1px solid #d8d0c2;box-shadow:0 1px 8px rgba(20,24,21,.05);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);font-family:Inter,Pretendard,'Noto Sans KR','Apple SD Gothic Neo',system-ui,-apple-system,sans-serif}.inner{width:min(1180px,100%);height:100%;margin:0 auto;padding:0 22px;display:flex;align-items:center;gap:6px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}.inner::-webkit-scrollbar{display:none}a{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 12px;border-radius:999px;color:#535850;text-decoration:none;white-space:nowrap;font-size:14px;line-height:1;font-weight:700;letter-spacing:-.015em;border:1px solid transparent;transition:background .15s ease,color .15s ease,border-color .15s ease;cursor:pointer}a:hover{background:#ebe5da;color:#1f2420}.home{color:#1f2420;font-weight:850}.language{font-size:11px;font-weight:850;letter-spacing:.06em}.active{background:#222622;color:#fff;border-color:#222622}.active:hover{background:#222622;color:#fff}.divider{width:1px;height:20px;background:#d8d0c2;flex:0 0 auto;margin:0 3px}.brand{margin-left:auto;display:inline-flex;align-items:center;gap:7px;padding:0 4px;font-size:10px;font-weight:800;letter-spacing:.1em;color:#8a877f;white-space:nowrap}.brand img{display:block;width:24px;height:auto;flex:0 0 auto}@media(max-width:680px){.inner{width:100%;margin:0;padding:0 8px;gap:2px}a{min-height:32px;padding:0 10px;font-size:12px}.divider{margin:0 1px}.brand{display:none}}
       </style>
       <style>
         :host{--shell-bg:rgba(247,243,235,.97);--shell-panel:#ebe5da;--shell-text:#1f2420;--shell-text-2:#535850;--shell-muted:#666c67;--shell-line:#d8d0c2;--shell-active:#222622;--shell-active-text:#fff;--shell-focus:#344b40}
         :host([data-theme="dark"]){--shell-bg:rgba(28,31,28,.97);--shell-panel:#222622;--shell-text:#edf0ec;--shell-text-2:#b9c0ba;--shell-muted:#aab1aa;--shell-line:#3b423c;--shell-active:#edf0ec;--shell-active-text:#161816;--shell-focus:#a8c1b1}
-        .bar{background:var(--shell-bg);border-bottom-color:var(--shell-line)}a{color:var(--shell-text-2)}a:hover{background:var(--shell-panel);color:var(--shell-text)}.home{color:var(--shell-text)}.active,.active:hover{background:var(--shell-active);color:var(--shell-active-text);border-color:var(--shell-active)}.divider{background:var(--shell-line)}.brand{color:var(--shell-muted)}a:focus-visible{outline:2px solid var(--shell-focus);outline-offset:2px}
+        .bar{background:var(--shell-bg);border-bottom-color:var(--shell-line)}a{color:var(--shell-text-2)}a:hover{background:var(--shell-panel);color:var(--shell-text)}.home{color:var(--shell-text)}.active,.active:hover{background:var(--shell-active);color:var(--shell-active-text);border-color:var(--shell-active)}.divider{background:var(--shell-line)}.brand{color:var(--shell-muted)}:host([data-theme="dark"]) .brand img{filter:drop-shadow(0 1px 5px rgba(151,183,225,.16))}a:focus-visible{outline:2px solid var(--shell-focus);outline-offset:2px}
       </style>
       <nav class="bar" aria-label="${copy.navLabel}"><div class="inner">
         <a class="home" href="${homePath}">${copy.home}</a><span class="divider" aria-hidden="true"></span>
+        <a href="${marketPath}">${copy.market}</a>
         <a class="${active === 'daily' ? 'active' : ''}" ${active === 'daily' ? 'aria-current="true"' : ''} href="${homePath}?category=daily">${copy.daily}</a>
         <a class="${active === 'weekly' ? 'active' : ''}" ${active === 'weekly' ? 'aria-current="true"' : ''} href="${homePath}?category=weekly">${copy.weekly}</a>
         <a class="${active === 'research' ? 'active' : ''}" ${active === 'research' ? 'aria-current="true"' : ''} href="${homePath}?category=research">${copy.research}</a>
         <a class="${active === 'basics' ? 'active' : ''}" ${active === 'basics' ? 'aria-current="true"' : ''} href="${homePath}?category=basics">${copy.basics}</a>
         <a class="${active === 'note' ? 'active' : ''}" ${active === 'note' ? 'aria-current="true"' : ''} href="${homePath}?category=note">${copy.note}</a>
-        <a href="${aboutPath}">${copy.about}</a>
         <a class="language" id="report-language-switch" href="${targetLocale === 'en' ? '/en/' : '/'}" aria-label="${copy.switchLabel}">${copy.switchText}</a>
-        <span class="brand">MARKET RESEARCH</span>
+        <a class="brand" href="${homePath}" aria-label="Snowshagal Market Research"><img src="/assets/brand/snowshagal-owl.webp" alt="" width="232" height="256" aria-hidden="true"><span>SNOWSHAGAL</span></a>
       </div></nav>`;
 
     const languageLink = root.getElementById('report-language-switch');

@@ -80,6 +80,11 @@ export function sitemapXml(posts) {
     { lang: 'en', href: `${PRODUCTION_ORIGIN}/en/` },
     { lang: 'x-default', href: `${PRODUCTION_ORIGIN}/` }
   ];
+  const marketAlternates = [
+    { lang: 'ko', href: `${PRODUCTION_ORIGIN}/market/` },
+    { lang: 'en', href: `${PRODUCTION_ORIGIN}/en/market/` },
+    { lang: 'x-default', href: `${PRODUCTION_ORIGIN}/market/` }
+  ];
   const urlEntry = (loc, lastmod, alternates = []) => {
     const alternateTags = alternates.map((entry) => (
       `<xhtml:link rel="alternate" hreflang="${entry.lang}" href="${escapeHtml(entry.href)}"/>`
@@ -92,6 +97,8 @@ export function sitemapXml(posts) {
   const entries = [
     urlEntry(`${PRODUCTION_ORIGIN}/`, '', homeAlternates),
     urlEntry(`${PRODUCTION_ORIGIN}/en/`, '', homeAlternates),
+    urlEntry(`${PRODUCTION_ORIGIN}/market/`, '', marketAlternates),
+    urlEntry(`${PRODUCTION_ORIGIN}/en/market/`, '', marketAlternates),
     ...validPosts.map((post) => urlEntry(
       reportSiteUrl(post.href),
       post.updatedAt || post.registeredAt || post.reportDate || post.date,

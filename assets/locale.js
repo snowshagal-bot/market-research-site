@@ -137,6 +137,9 @@
     if (/^\/en\/about\/?$/i.test(path) || /^\/about\/?$/i.test(path)) {
       return targetLanguage === 'en' ? '/en/about/' : '/about/';
     }
+    if (/^\/en\/market\/?$/i.test(path) || /^\/market\/?$/i.test(path)) {
+      return targetLanguage === 'en' ? '/en/market/' : '/market/';
+    }
     return homepagePath(targetLanguage, category);
   }
 
