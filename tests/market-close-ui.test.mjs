@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
 
@@ -133,12 +133,28 @@ test('English company resolver covers every fixture ticker and never leaks Korea
   assert.equal(en.companyName({ ticker: '123456', name: '미등록회사' }), '123456');
 });
 
-test('Market layout explicitly supports dark mode and compact mobile widths', async () => {
-  const css = await read('assets/market-close.css');
+test('Market layout explicitly supports dark mode, compact mobile widths, and responsive hero assets', async () => {
+  const [css, koPage, enPage] = await Promise.all([
+    read('assets/market-close.css'),
+    read('market/index.html'),
+    read('en/market/index.html')
+  ]);
   assert.match(css, /html\[data-theme="dark"\] \.market-close-page/);
   assert.match(css, /@media\(max-width:430px\)/);
   assert.match(css, /@media\(max-width:360px\)/);
-  assert.match(css, /market-close-mountain\.png/);
+  assert.match(css, /market-close-mountain\.webp/);
+  assert.match(css, /@media\(max-width:760px\)[\s\S]*?market-close-mountain-mobile\.webp/);
+  assert.doesNotMatch(css, /market-close-mountain\.png/);
+  for (const page of [koPage, enPage]) {
+    assert.match(page, /rel="preload" as="image" href="\/assets\/market-close-mountain\.webp" media="\(min-width: 761px\)"/);
+    assert.match(page, /rel="preload" as="image" href="\/assets\/market-close-mountain-mobile\.webp" media="\(max-width: 760px\)"/);
+  }
+  const [desktopHero, mobileHero] = await Promise.all([
+    stat(new URL('../assets/market-close-mountain.webp', import.meta.url)),
+    stat(new URL('../assets/market-close-mountain-mobile.webp', import.meta.url))
+  ]);
+  assert.ok(desktopHero.size <= 300_000);
+  assert.ok(mobileHero.size <= 150_000);
 });
 
 test('locale switch preserves Market routes', async () => {

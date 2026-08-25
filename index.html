@@ -22,7 +22,9 @@
 <link rel="stylesheet" href="/assets/language.css?v=20260812-1">
 <link rel="stylesheet" href="assets/category-state.css">
 <link rel="stylesheet" href="assets/ui-polish.css?v=20260811-1">
-<link rel="stylesheet" href="assets/home-v2.css?v=20260824-5">
+<link rel="stylesheet" href="assets/home-v2.css?v=20260825-1">
+<link rel="preload" as="image" href="/assets/snowshagal-hero.webp" media="(min-width: 761px)">
+<link rel="preload" as="image" href="/assets/snowshagal-hero-mobile.webp" media="(max-width: 760px)">
 <script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
 </head>
 <body class="home-page">
@@ -75,7 +77,10 @@
         </nav>
       </div>
       <div class="hero-art" aria-hidden="true">
-        <img src="/assets/snowshagal-hero.webp" alt="" width="1536" height="1024" fetchpriority="high">
+        <picture>
+          <source media="(max-width: 760px)" srcset="/assets/snowshagal-hero-mobile.webp">
+          <img src="/assets/snowshagal-hero.webp" alt="" width="1536" height="1024" fetchpriority="high">
+        </picture>
       </div>
     </div>
   </section>

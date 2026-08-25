@@ -24,12 +24,28 @@ test('homepage presents the Snowshagal brand hero before latest reports and arch
   assert.doesNotMatch(html, /Login|data-carousel|featured-slide/);
   assert.match(html, /<footer[^>]*>[\s\S]*?<span>SNOWSHAGAL<\/span>/);
   assert.doesNotMatch(html, /Independent Market Research/);
-  assert.match(html, /home-v2\.css\?v=20260824-5/);
-  assert.match(englishHtml, /home-v2\.css\?v=20260824-5/);
+  assert.match(html, /home-v2\.css\?v=20260825-1/);
+  assert.match(englishHtml, /home-v2\.css\?v=20260825-1/);
   assert.match(html, /locale\.js\?v=20260824-2/);
   assert.match(englishHtml, /locale\.js\?v=20260824-2/);
   assert.match(html, /site\.js\?v=20260824-5/);
   assert.match(englishHtml, /site\.js\?v=20260824-5/);
+});
+
+test('homepage serves a smaller eager hero asset on mobile without changing desktop art', async () => {
+  const [html, englishHtml] = await Promise.all([read('index.html'), read('en/index.html')]);
+  for (const source of [html, englishHtml]) {
+    assert.match(source, /rel="preload" as="image" href="\/assets\/snowshagal-hero\.webp" media="\(min-width: 761px\)"/);
+    assert.match(source, /rel="preload" as="image" href="\/assets\/snowshagal-hero-mobile\.webp" media="\(max-width: 760px\)"/);
+    assert.match(source, /<picture>[\s\S]*?<source media="\(max-width: 760px\)" srcset="\/assets\/snowshagal-hero-mobile\.webp">[\s\S]*?<img src="\/assets\/snowshagal-hero\.webp"[^>]*fetchpriority="high">[\s\S]*?<\/picture>/);
+    assert.doesNotMatch(source, /snowshagal-hero-mobile\.webp[^>]*loading="lazy"/);
+  }
+  const [desktopHero, mobileHero] = await Promise.all([
+    stat(new URL('../assets/snowshagal-hero.webp', import.meta.url)),
+    stat(new URL('../assets/snowshagal-hero-mobile.webp', import.meta.url))
+  ]);
+  assert.ok(desktopHero.size > mobileHero.size);
+  assert.ok(mobileHero.size <= 150_000);
 });
 
 test('official Snowshagal owl branding replaces decorative sparkles without changing functional upload marks', async () => {
