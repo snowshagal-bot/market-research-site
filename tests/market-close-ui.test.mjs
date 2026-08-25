@@ -142,6 +142,7 @@ test('Market layout explicitly supports dark mode, compact mobile widths, and re
   assert.match(css, /html\[data-theme="dark"\] \.market-close-page/);
   assert.match(css, /@media\(max-width:430px\)/);
   assert.match(css, /@media\(max-width:360px\)/);
+  assert.match(css, /body\.market-close-page:has\(\.market-loading\)>\.footer\{visibility:hidden\}/);
   assert.match(css, /market-close-mountain\.webp/);
   assert.match(css, /@media\(max-width:760px\)[\s\S]*?market-close-mountain-mobile\.webp/);
   assert.doesNotMatch(css, /market-close-mountain\.png/);
