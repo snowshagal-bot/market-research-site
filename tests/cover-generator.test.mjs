@@ -95,6 +95,28 @@ test('completed magazine covers are selected as one overlaid cover instead of th
   assert.equal(result.source, 'heuristic');
 });
 
+test('date-suffixed standalone image covers are detected regardless of rendered size', async () => {
+  const api = await generatorApi();
+  const finalCover = node('', { visual: true, children: 2 });
+  finalCover.classList = ['final-cover-0824'];
+  finalCover.id = '';
+  finalCover.getAttribute = name => name === 'aria-label'
+    ? '2026년 8월 24일 SnowShagal DAILY 커버 · 선물의 무게'
+    : '';
+  const doc = {
+    body: node('리포트 본문', { children: 8 }),
+    querySelector: () => null,
+    querySelectorAll(selector) {
+      return selector === 'body > section, body > div' ? [finalCover] : [];
+    }
+  };
+
+  const result = api.findCaptureTarget(doc);
+  assert.equal(result.target, finalCover);
+  assert.equal(result.selector, '.final-cover-0824');
+  assert.equal(result.source, 'heuristic');
+});
+
 test('a usable cover frame is captured instead of its cover-screen wrapper and hint', async () => {
   const api = await generatorApi();
   const frame = node('', { visual: true });
@@ -222,7 +244,7 @@ test('the broken foreignObject rasterization path is no longer used', async () =
 test('admin connects generated files to the existing cover preview and publish payload', async () => {
   const [html, admin] = await Promise.all([read('admin/index.html'), read('assets/admin.js')]);
   assert.match(html, /id="generate-cover-btn"[^>]*disabled>HTML에서 커버 자동 생성/);
-  assert.match(html, /cover-generator\.js\?v=20260824-2/);
+  assert.match(html, /cover-generator\.js\?v=20260825-1/);
   assert.match(html, /admin\.js\?v=20260824-2/);
   assert.match(admin, /adminKey: adminKey\.value\.trim\(\)/);
   assert.match(admin, /showCoverPreview\(result\.file, generationReportVersion\)/);
