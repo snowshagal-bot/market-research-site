@@ -33,6 +33,33 @@ test('Korean and English opener covers are accepted as Browser Rendering targets
   assert.equal(__test.selectCaptureSelector('<section class="opener" aria-label="Cover"><img><h1>Two Illusions</h1></section>'), '.opener');
 });
 
+test('date-suffixed standalone image covers are selected without relying on fixed dimensions', () => {
+  const html = '<body><section class="final-cover-0824" aria-label="SnowShagal DAILY 커버"><img src="data:image/webp;base64,AA==" alt="선물의 무게"></section><main>report</main></body>';
+  assert.equal(__test.standaloneImageCoverSelector(html), '.final-cover-0824');
+  assert.equal(__test.selectCaptureSelector(html, 'body'), '.final-cover-0824');
+  assert.equal(__test.safePreferredSelector(html, '.final-cover-0824'), '.final-cover-0824');
+  assert.equal(__test.safePreferredSelector(html, 'body'), '');
+});
+
+test('standalone image cover is sent to Browser Rendering as its complete section', { concurrency: false }, async () => {
+  const originalFetch = globalThis.fetch;
+  let payload;
+  globalThis.fetch = async (_url, options) => {
+    payload = JSON.parse(options.body);
+    return new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'content-type': 'image/png' } });
+  };
+  try {
+    const html = '<body><section class="final-cover-0824" aria-label="SnowShagal DAILY 커버"><img src="data:image/webp;base64,AA=="><a class="site-hit">site</a></section><main>report</main></body>';
+    const response = await onRequestPost({ request: request({ html, preferredSelector: 'body' }), env: ENV });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('x-cover-selector'), '.final-cover-0824');
+    assert.equal(payload.selector, '.final-cover-0824');
+    assert.deepEqual(payload.screenshotOptions, { type: 'png', captureBeyondViewport: true });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('opener capture sends the complete overlaid cover to Browser Rendering', { concurrency: false }, async () => {
   const originalFetch = globalThis.fetch;
   let payload;

@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>시장을 읽는 말들 · 제3편 미국의 숫자는 어떻게 한국에 도착하는가</title>
+<style>
+:root{
+  --surface-page:#ECEAE5;
+  --surface-band:#E3E0D9;
+  --surface-inner:#F1EFEA;
+  --surface-detail:#E8E5DF;
+  --surface-muted:#DAD6CE;
+  --ink:#2E2E2C;
+  --ink2:#43423E;
+  --body:#53514C;
+  --sub:#706D66;
+  --muted:#8B867E;
+  --line:#CEC9BF;
+  --line2:#DCD7CE;
+  /* 판정 전용 · 시리즈 공통 */
+  --green:#46584D;
+  --green-dark:#2F3C34;
+  --green-soft:#DCE3DD;
+  --green-line:#AAB6AC;
+  --green-pale:#A8C6B4;
+  /* 환승역 색 · 이번 편 전용 */
+  --ind:#A87B4E;          /* 지표 */
+  --ind-dark:#6F4F2F;
+  --ind-soft:#EFE2D0;
+  --rate:#3F4854;         /* 금리 */
+  --rate-dark:#2B323C;
+  --rate-soft:#DEE2E6;
+  --fx:#41706E;           /* 달러·환율 */
+  --fx-dark:#2C4E4D;
+  --fx-soft:#D9E4E3;
+  --eq:#6E6A7A;           /* 미국 주식 */
+  --eq-dark:#4A4753;
+  --eq-soft:#E2E0E6;
+  /* 가격 방향 전용 */
+  --up:#C74754;
+  --down:#4F78A8;
+  --warn:#7A5444;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:58px;overflow-x:hidden}
+html,body{max-width:100%}
+body{
+  margin:0;background:var(--surface-page);color:var(--ink);
+  font-family:"Pretendard Variable","Pretendard","SUIT","Noto Sans KR","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  line-height:1.58;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;
+  word-break:keep-all;line-break:strict;
+}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(38px + env(safe-area-inset-bottom,0px));width:100%;position:relative}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.up{color:var(--up)}.down{color:var(--down)}
+a{color:inherit;text-decoration:none}
+
+/* ── 상단바 ── */
+.topbar{position:sticky;top:0;z-index:50;margin:0 -16px;
+  background:rgba(236,234,229,.92);-webkit-backdrop-filter:saturate(150%) blur(12px);backdrop-filter:saturate(150%) blur(12px);
+  border-bottom:1px solid rgba(90,84,74,.13)}
+.tbin{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0)) 18px 9px}
+.tbin .brand{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.tbin .brand i{font-style:normal;color:var(--green)}
+.tbin .ep{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.prog{height:2px;background:rgba(90,84,74,.10)}
+.prog i{display:block;height:100%;width:0;background:var(--green);transition:width .1s linear}
+
+/* ── 표지 ── */
+.cover{margin:0 -16px;padding:20px 22px 16px;
+  background:linear-gradient(160deg,#37453C 0%,#2B372F 55%,#232C26 100%);color:#EFEDE7}
+.cvkick{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.06em;
+  color:#BFD2C6;border:1px solid rgba(168,198,180,.34);border-radius:999px;padding:5px 12px}
+.cvkick b{color:#EFEDE7;font-weight:800}
+.cvtitle{margin:14px 0 0;font-size:30px;line-height:1.24;font-weight:800;letter-spacing:-.05em;color:#F4F2ED}
+.cvtitle span{display:block;color:var(--green-pale)}
+.cvsub{margin:12px 0 0;font-size:14px;line-height:1.58;font-weight:600;color:#C6D2CA}
+.cvmotif{margin:13px 0 0}
+.cvmotif svg{display:block;width:100%;height:auto}
+.cvidx{display:flex;gap:6px;margin:14px 0 0;flex-wrap:wrap}
+.cvidx a{font-size:11.5px;font-weight:800;color:#D3DED7;background:rgba(255,255,255,.07);
+  border:1px solid rgba(168,198,180,.22);border-radius:999px;padding:6px 12px}
+.cvidx a b{color:var(--green-pale);font-weight:800;margin-right:5px}
+
+/* ── 챕터 오프너 ── */
+.ch{margin:18px 0 11px}
+.chtop{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.chn{font-size:12px;font-weight:800;color:#EFEDE7;background:var(--ink);border-radius:4px;padding:3px 8px;letter-spacing:.04em}
+.chk{font-size:11.5px;font-weight:800;letter-spacing:.11em;color:var(--sub)}
+.cht{margin:0;font-size:24px;line-height:1.3;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.chrule{display:flex;height:3px;margin-top:12px;gap:2px}
+.chrule i{display:block;height:100%;flex:1}
+.chrule .r1{background:var(--ind)}
+.chrule .r2{background:var(--rate)}
+.chrule .r3{background:var(--fx)}
+.chrule .r4{background:var(--eq)}
+.chrule .r5{background:var(--green)}
+
+/* ── 큰 질문 · 한 문장 답 ── */
+.qbig{margin:14px 0 0;font-size:22px;line-height:1.44;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.ans{margin:12px -16px 0;padding:16px 22px;background:var(--green);color:#EFEDE7;position:relative;overflow:hidden}
+.ans:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green-pale)}
+.ans .ak{font-size:11px;font-weight:800;letter-spacing:.14em;color:#A8BCAE;margin-bottom:8px}
+.ans .av{font-size:20px;line-height:1.44;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.ans .aw{margin:11px 0 0;padding-top:11px;border-top:1px solid rgba(168,198,180,.24);font-size:13px;line-height:1.6;font-weight:600;color:#CBD8CF}
+
+/* ── 야간 타임라인 ── */
+.tl{margin:16px 0 0;position:relative}
+.tlrow{display:grid;grid-template-columns:60px 18px 1fr;gap:7px;position:relative}
+.tltime{text-align:right;padding:11px 0 0}
+.tltime b{display:block;font-size:12.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.3;font-variant-numeric:tabular-nums}
+.tltime i{display:block;font-style:normal;font-size:11.5px;font-weight:700;color:var(--muted);margin-top:1px;line-height:1.25}
+.tlaxis{position:relative}
+.tlaxis:before{content:"";position:absolute;left:calc(50% - 1px);top:0;bottom:0;width:2px;background:var(--line)}
+.tlrow:first-child .tlaxis:before{top:20px}
+.tlrow:last-child .tlaxis:before{bottom:calc(100% - 20px)}
+.tldot{position:absolute;left:calc(50% - 6px);top:15px;width:12px;height:12px;border-radius:50%;
+  background:var(--surface-page);border:3px solid var(--line);z-index:1}
+.tldot.d1{border-color:var(--ind)}
+.tldot.d2{border-color:var(--rate)}
+.tldot.d3{border-color:var(--eq)}
+.tldot.d4{border-color:var(--fx)}
+.tldot.d5{border-color:var(--green);background:var(--green)}
+.tlbody{padding:7px 0 9px}
+.tlst{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;border-radius:4px;padding:2px 7px;margin-bottom:4px}
+.tlst.s1{background:var(--ind-soft);color:var(--ind-dark)}
+.tlst.s2{background:var(--rate-soft);color:var(--rate-dark)}
+.tlst.s3{background:var(--eq-soft);color:var(--eq-dark)}
+.tlst.s4{background:var(--fx-soft);color:var(--fx-dark)}
+.tlst.s5{background:var(--green);color:#EFEDE7}
+.tlbody b.tlh{display:block;font-size:14.5px;font-weight:800;color:var(--ink);letter-spacing:-.025em;line-height:1.35;margin-bottom:4px}
+.tlbody p{margin:4px 0 0;font-size:12.5px;line-height:1.5;color:var(--body);font-weight:600}
+.tlbody p b{color:var(--ink);font-weight:800}
+.tlnums{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.tlnums span{font-size:11.5px;font-weight:700;color:var(--ink2);background:var(--surface-inner);
+  border:1px solid var(--line);border-radius:6px;padding:3px 8px;font-variant-numeric:tabular-nums}
+.tlnums span b{font-weight:800;margin-left:3px}
+
+/* ── 시점 규칙 박스 ── */
+.stamp{margin:10px 0 0;border:1px solid var(--line);border-radius:12px;background:var(--surface-detail);padding:10px 14px}
+.stamp .sh{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.025em;margin-bottom:7px}
+.stamp .schips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.stamp .schips span{font-size:11.5px;font-weight:800;background:var(--surface-inner);border:1px solid var(--line);
+  border-radius:999px;padding:3px 9px;color:var(--ink2)}
+.stamp p{margin:0;font-size:12.5px;line-height:1.5;font-weight:600;color:var(--body)}
+.stamp p b{color:var(--ink);font-weight:800}
+
+/* ── 격차 대비 ── */
+.gap{margin:11px 0 0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.gaph{padding:8px 14px;background:var(--surface-detail);border-bottom:1px solid var(--line);
+  font-size:11.5px;font-weight:800;letter-spacing:.05em;color:var(--muted)}
+.gapb{display:grid;grid-template-columns:1fr 1fr;gap:1.5px;background:var(--line)}
+.gapb div{background:var(--surface-inner);padding:10px 13px}
+.gapb i{display:block;font-style:normal;font-size:11.5px;font-weight:800;color:var(--sub);margin-bottom:6px}
+.gapb b{display:block;font-size:23px;font-weight:800;letter-spacing:-.05em;line-height:1;color:var(--ink)}
+.gapb em{display:block;font-style:normal;font-size:11.5px;font-weight:600;color:var(--muted);margin-top:5px;line-height:1.35}
+.gapf{padding:10px 14px;font-size:13px;line-height:1.52;font-weight:600;color:var(--body);border-top:1px solid var(--line)}
+.gapf b{color:var(--green-dark);font-weight:800}
+
+/* ── 다리 문장 ── */
+.bridge{margin:12px 0 0;font-size:15px;line-height:1.6;font-weight:800;letter-spacing:-.025em;color:var(--ink2)}
+.bridge b{color:var(--green-dark)}
+
+/* ── 본문 ── */
+.tp{margin:9px 0 0;font-size:13.5px;line-height:1.6;color:var(--body);font-weight:600}
+.tp b{color:var(--ink);font-weight:800}
+.dot{margin:8px 0 0;padding-left:14px;position:relative;font-size:13px;line-height:1.62;font-weight:600;color:var(--body)}
+.dot:before{content:"·";position:absolute;left:2px;color:var(--green);font-weight:800}
+.dot b{color:var(--ink);font-weight:800}
+.sech{margin:15px 0 0;font-size:17px;font-weight:800;letter-spacing:-.03em;color:var(--ink)}
+.sesub{margin:4px 0 0;font-size:13px;line-height:1.6;font-weight:600;color:var(--body)}
+.sesub b{color:var(--ink);font-weight:800}
+
+/* ── 네 겹 교정지 ── */
+.layers{margin:10px 0 0;border-left:2px solid var(--ind);padding-left:2px}
+.lay{position:relative;background:var(--surface-inner);border:1px solid var(--line);border-left:none;
+  border-radius:0 10px 10px 0;padding:7px 13px;margin:0 0 3px 0}
+.lay:nth-child(2){margin-left:7px}
+.lay:nth-child(3){margin-left:14px}
+.lay:nth-child(4){margin-left:21px}
+.lay .lno{font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--ind-dark);margin-right:7px}
+.lay b.lh{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.025em}
+.lay p{margin:3px 0 0;font-size:12.5px;line-height:1.45;font-weight:600;color:var(--body)}
+.lay p b{color:var(--ink);font-weight:800}
+
+/* ── CPI 표 ── */
+.cpit{margin:10px 0 0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.cpith{padding:8px 13px;background:var(--ind-soft);border-bottom:1px solid var(--line)}
+.cpith b{font-size:12.5px;font-weight:800;color:var(--ind-dark);letter-spacing:-.01em}
+.cpith i{display:block;font-style:normal;font-size:11.5px;font-weight:700;color:var(--ind-dark);opacity:.8;margin-top:2px;line-height:1.4}
+.cpig{display:grid;grid-template-columns:1fr 58px 58px 58px;background:var(--line);gap:1px}
+.cpig>span{background:var(--surface-inner);padding:6px 8px;font-size:12px;font-weight:700;color:var(--body);
+  display:flex;align-items:center;font-variant-numeric:tabular-nums}
+.cpig>span.hd{background:var(--surface-detail);font-size:11.5px;font-weight:800;color:var(--sub);justify-content:center}
+.cpig>span.rw{font-size:12px;font-weight:800;color:var(--ink)}
+.cpig>span.v{justify-content:center;font-weight:800;color:var(--ink)}
+.cpig>span.v.act{background:var(--green-soft);color:var(--green-dark)}
+.cpinote{padding:9px 13px;font-size:12px;line-height:1.47;font-weight:600;color:var(--body);border-top:1px solid var(--line)}
+.cpinote b{color:var(--ink);font-weight:800}
+
+/* ── 컨센서스 박스 ── */
+.cons{margin:11px 0 0;border:1px solid var(--ind);border-radius:12px;background:var(--ind-soft);padding:11px 14px}
+.cons .ch2{font-size:14px;font-weight:800;color:var(--ind-dark);letter-spacing:-.025em;margin-bottom:8px}
+.cons .cvs{display:flex;align-items:center;gap:10px;margin-bottom:9px;padding-bottom:9px;border-bottom:1px solid var(--ind)}
+.cons .cvs span{font-size:12.5px;font-weight:800;color:var(--ind-dark);font-variant-numeric:tabular-nums}
+.cons .cvs i{font-style:normal;font-size:11.5px;font-weight:700;color:var(--ind-dark);opacity:.75}
+.cons p{margin:0;font-size:12.5px;line-height:1.5;font-weight:600;color:var(--ink2)}
+.cons p b{color:var(--ind-dark);font-weight:800}
+
+/* ── 전달 경로 분기 ── */
+.route{margin:10px 0 0}
+.rstart{background:var(--ind-soft);border:1px solid var(--ind);border-radius:11px;padding:10px 14px;text-align:center}
+.rstart b{font-size:13.5px;font-weight:800;color:var(--ind-dark);letter-spacing:-.02em}
+.rsplit{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 0;font-size:11.5px;font-weight:800;color:var(--muted)}
+.rsplit:before,.rsplit:after{content:"";flex:1;height:1px;background:var(--line)}
+.rpaths{display:grid;grid-template-columns:1fr 1fr;gap:7px;align-items:start}
+.rp{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface-inner)}
+.rph{padding:8px 11px;font-size:12px;font-weight:800;border-bottom:1px solid var(--line2);line-height:1.35}
+.rp.a .rph{background:var(--green-soft);color:var(--green-dark)}
+.rp.b .rph{background:var(--surface-detail);color:var(--warn)}
+.rpb{padding:7px 11px 9px}
+.rstep{display:block;font-size:12px;line-height:1.42;font-weight:700;color:var(--body);padding:4px 0 4px 14px;position:relative}
+.rstep:before{content:"";position:absolute;left:2px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--line)}
+.rstep.k1:before{background:var(--rate)}
+.rstep.k2:before{background:var(--fx)}
+.rstep.k3:before{background:var(--eq)}
+.rstep.k4:before{background:var(--green)}
+.rstep b{color:var(--ink);font-weight:800}
+.rwarn{margin:10px 0 0;padding:10px 14px;background:var(--surface-band);border-left:3px solid var(--warn);border-radius:0 10px 10px 0;
+  font-size:12.5px;line-height:1.54;font-weight:700;color:var(--ink2)}
+
+/* ── 환승역 카드 ── */
+.stations{margin:10px 0 0;display:grid;gap:6px}
+.st{border:1px solid var(--line);border-left-width:3px;border-radius:0 11px 11px 0;background:var(--surface-inner);padding:8px 13px}
+.st.rate{border-left-color:var(--rate)}
+.st.fx{border-left-color:var(--fx)}
+.st.eq{border-left-color:var(--eq)}
+.sth{margin-bottom:5px}
+.sth b{font-size:13.5px;font-weight:800;letter-spacing:-.025em}
+.st.rate .sth b{color:var(--rate-dark)}
+.st.fx .sth b{color:var(--fx-dark)}
+.st.eq .sth b{color:var(--eq-dark)}
+.stb .sd{margin:0;font-size:12.5px;line-height:1.5;font-weight:600;color:var(--body)}
+.stb .sd b{color:var(--ink);font-weight:800}
+.stb .sx{margin:6px 0 0;padding-top:6px;border-top:1px dashed var(--line);font-size:12.5px;line-height:1.5;font-weight:700;color:var(--green-dark)}
+
+/* ── 풀쿼트 ── */
+.pull{margin:13px -16px;padding:20px 22px;background:var(--surface-band);border-top:2px solid var(--ink);border-bottom:2px solid var(--ink)}
+.pull p{margin:0;font-size:20px;line-height:1.48;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.pull p b{color:var(--green-dark)}
+
+/* ── 기상도 2×2 ── */
+.wx{margin:10px 0 0}
+.wxaxis{display:flex;justify-content:space-between;font-size:11.5px;font-weight:800;color:var(--muted);margin-bottom:6px;padding:0 2px 0 26px}
+.wxwrap{display:grid;grid-template-columns:20px 1fr;gap:6px}
+.wxrail{display:grid;grid-template-rows:1fr 1fr;gap:1.5px}
+.wxrail span{display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;color:var(--muted);
+  writing-mode:vertical-rl;text-orientation:upright;letter-spacing:.06em;background:var(--surface-detail);border-radius:6px;line-height:1}
+.wxg{display:grid;grid-template-columns:1fr 1fr;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden}
+.wxc{background:var(--surface-inner);padding:8px 11px}
+.wxc svg{display:block;width:100%;height:auto;margin-bottom:6px}
+.wxc .wl{display:block;font-size:11.5px;font-weight:800;color:var(--sub);margin-bottom:3px;line-height:1.3}
+.wxc .wt{display:block;font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.025em;line-height:1.3;margin-bottom:4px}
+.wxc .wd{display:block;font-size:12px;line-height:1.42;font-weight:600;color:var(--body)}
+.wxside{font-size:11.5px;font-weight:800;color:var(--muted);text-align:center;margin-top:6px}
+.wxfoot{margin:8px 0 0;font-size:12.5px;line-height:1.55;font-weight:700;color:var(--ink2)}
+.wxfoot b{color:var(--green-dark);font-weight:800}
+
+/* ── 판정 순서 ── */
+.order{margin:9px 0 0}
+.ord{display:grid;grid-template-columns:24px 1fr;gap:9px;padding:6px 0;border-bottom:1px solid var(--line2)}
+.ord:last-child{border-bottom:none}
+.ord .on{font-size:11.5px;font-weight:800;color:#EFEDE7;background:var(--green);border-radius:50%;width:23px;height:23px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.ord .ob b{display:block;font-size:13.5px;font-weight:800;color:var(--ink);margin-bottom:2px;letter-spacing:-.025em}
+.ord .ob p{margin:0;font-size:12.5px;line-height:1.46;color:var(--body);font-weight:600}
+.ord .ob p b{display:inline;font-size:inherit;color:var(--ink);margin:0}
+
+/* ── FOMC ── */
+.fomc{margin:11px 0 0;border:1px solid var(--rate);border-radius:12px;background:var(--rate-soft);padding:11px 14px}
+.fomc .fh{font-size:14px;font-weight:800;color:var(--rate-dark);letter-spacing:-.025em;margin-bottom:7px}
+.fomc .fsteps{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}
+.fomc .fsteps span{font-size:11.5px;font-weight:700;background:var(--surface-inner);border:1px solid var(--line);
+  border-radius:999px;padding:4px 10px;color:var(--ink2)}
+.fomc .fsteps span b{color:var(--rate-dark);font-weight:800;margin-right:4px}
+.fomc p{margin:0;font-size:12.5px;line-height:1.6;font-weight:700;color:var(--rate-dark)}
+.fomc .fnote{margin:6px 0 0;font-size:11.5px;font-weight:600;line-height:1.45;color:var(--rate-dark);opacity:.85}
+.fomc sup{font-size:9px;vertical-align:super;line-height:0}
+
+/* ── 연습 문제 ── */
+.prob{margin:11px -16px 0;padding:16px 22px;background:var(--surface-band)}
+.probh{font-size:11.5px;font-weight:800;letter-spacing:.1em;color:var(--green-dark);margin-bottom:10px}
+.pchips{display:grid;grid-template-columns:1fr 1fr;gap:1.5px;background:var(--line);border-radius:10px;overflow:hidden}
+.pchips div{background:var(--surface-inner);padding:8px 12px}
+.pchips i{display:block;font-style:normal;font-size:11.5px;font-weight:700;color:var(--sub);margin-bottom:2px}
+.pchips b{font-size:16px;font-weight:800;letter-spacing:-.035em;color:var(--ink);font-variant-numeric:tabular-nums}
+.pline{margin:9px 0 0;font-size:12.5px;line-height:1.6;font-weight:700;color:var(--ink2)}
+.pline b{font-weight:800}
+.pq{margin:12px 0 0;font-size:17.5px;font-weight:800;line-height:1.44;letter-spacing:-.035em;color:var(--ink)}
+details.rev{margin-top:12px;border:1.5px solid var(--green);border-radius:11px;background:var(--surface-inner);overflow:hidden}
+details.rev>summary{list-style:none;cursor:pointer;padding:12px 14px;font-size:13px;font-weight:800;color:var(--green-dark);display:flex;justify-content:space-between;align-items:center}
+details.rev>summary::-webkit-details-marker{display:none}
+details.rev>summary:after{content:"+";font-size:19px;font-weight:800;color:var(--green);line-height:.9}
+details.rev[open]>summary:after{content:"−"}
+details.rev .rb{padding:0 14px 13px;font-size:12.5px;line-height:1.6;color:var(--body);font-weight:600}
+details.rev .rb b{color:var(--ink);font-weight:800}
+.verdict{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.03em;border-radius:999px;padding:4px 11px;margin-bottom:9px;background:var(--green);color:#EFEDE7}
+.rb .rl{display:block;margin:5px 0;padding-left:15px;position:relative}
+.rb .rl i{position:absolute;left:0;font-style:normal;font-weight:800;color:var(--green-dark)}
+.rb .rend{margin:10px 0 0;padding-top:10px;border-top:1px dashed var(--line);font-weight:700;color:var(--green-dark)}
+
+/* ── 함정 ── */
+.trap{margin:9px 0 0;display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden}
+.trap .ti{padding:8px 14px;background:var(--surface-inner)}
+.trap .tk{font-size:11.5px;font-weight:800;letter-spacing:.04em;color:var(--warn);margin-right:6px}
+.trap .tx{font-size:13.5px;font-weight:800;color:var(--ink);line-height:1.5;letter-spacing:-.02em;margin-bottom:6px}
+.trap .to{font-size:12.5px;font-weight:600;color:var(--body);line-height:1.5}
+.trap .to b{color:var(--green-dark);font-weight:800}
+
+/* ── 다음 편 ── */
+.next{margin:14px -16px 0;padding:19px 22px;background:linear-gradient(150deg,#454F5C 0%,#2B323C 100%);color:#E9EBEE;position:relative;overflow:hidden}
+.next:before{content:"";position:absolute;right:-40px;bottom:-52px;width:150px;height:150px;border-radius:50%;border:1px solid rgba(180,190,202,.18)}
+.next .nh{position:relative;font-size:11px;font-weight:800;letter-spacing:.12em;color:#A3ACB8;margin-bottom:10px}
+.next p{position:relative;margin:0;font-size:16px;line-height:1.56;font-weight:800;letter-spacing:-.03em;color:#EDEFF2}
+.next p b{color:#FFFFFF}
+.next .nt{position:relative;margin-top:13px;padding-top:12px;border-top:1px solid rgba(180,190,202,.22);font-size:12.5px;font-weight:800;color:#B9C1CB}
+.next .nt b{color:#EDEFF2;font-weight:800}
+
+/* ── 접힘 ── */
+.foldwrap{margin:13px 0 0}
+details.fold{border:1px solid var(--line);border-radius:12px;background:var(--surface-detail);margin:0 0 8px;overflow:hidden}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:12px 15px;font-size:13px;font-weight:800;color:var(--ink)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary:after{content:"+";font-size:18px;font-weight:800;color:var(--green);line-height:.9}
+details.fold[open]>summary:after{content:"−"}
+details.fold .fb{padding:0 15px 14px}
+.gloss{display:grid;grid-template-columns:96px 1fr;gap:9px 11px;margin:2px 0 0;font-size:13px}
+.gloss dt{font-weight:850;color:#4B4740}
+.gloss dd{margin:0;color:var(--body);line-height:1.55}
+.fb ol{margin:0;padding-left:17px}
+.fb ol li{font-size:12px;line-height:1.62;color:var(--body);margin:6px 0}
+.fb ol li b{color:var(--ink);font-weight:800}
+.fb .miss{margin:10px 0 0;padding:11px 12px;background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;
+  font-size:12px;line-height:1.6;font-weight:700;color:var(--ink2)}
+.disc{font-size:11.5px;color:var(--muted);text-align:center;line-height:1.5;padding:10px 8px 0;font-weight:500}
+.foot{text-align:center;font-size:11.5px;color:var(--sub);padding:10px 0 4px;font-weight:800;letter-spacing:-.01em}
+
+/* ── 툴팁 ── */
+.term{border-bottom:1.5px dashed #8B867E;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;font-weight:850;color:var(--ink);
+  display:inline-block;padding:3px 4px;margin:-3px -4px;line-height:1.3;
+  touch-action:manipulation;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.term .tip{position:fixed;left:12px;top:0;min-width:160px;max-width:min(248px,calc(100vw - 28px));
+  background:#33322F;color:#F2F0EB;font-size:12px;font-weight:600;line-height:1.52;padding:9px 11px;border-radius:9px;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);z-index:60;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease;white-space:normal;text-align:left}
+.term .tip:after{content:"";position:absolute;top:100%;left:var(--ax,50%);transform:translateX(-50%);border:6px solid transparent;border-top-color:#33322F}
+.term .tip.below:after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#33322F}
+.term.open .tip{opacity:1;visibility:visible;pointer-events:auto}
+
+@media(max-width:360px){
+  .cvtitle{font-size:28px}
+  .qbig{font-size:19px}
+  .ans .av{font-size:18px}
+  .pull p{font-size:18px}
+  .cht{font-size:21px}
+  .gapb b{font-size:23px}
+  .tlrow{grid-template-columns:56px 20px 1fr;gap:7px}
+  .cpig{grid-template-columns:1fr 52px 52px 52px}
+  .gloss{grid-template-columns:84px 1fr}
+}
+
+/* ── 데스크톱 ── */
+@media(min-width:768px){
+  .app{max-width:770px;padding-left:28px;padding-right:28px}
+  .topbar{margin:0 -28px}
+  .cover{margin:0 -28px;padding:44px 40px 34px}
+  .cvtitle{font-size:44px}
+  .cvsub{font-size:15px;max-width:30em}
+  .ch{margin-top:46px}
+  .cht{font-size:29px}
+  .qbig{font-size:26px}
+  .ans{margin-left:-28px;margin-right:-28px;padding:26px 40px}
+  .ans .av{font-size:24px}
+  .pull{margin-left:-28px;margin-right:-28px;padding:32px 40px}
+  .pull p{font-size:25px}
+  .prob{margin-left:-28px;margin-right:-28px;padding:28px 40px}
+  .next{margin-left:-28px;margin-right:-28px;padding:28px 40px}
+  .tlrow{grid-template-columns:104px 26px 1fr;gap:14px}
+  .tltime b{font-size:13.5px}
+  .layers{grid-template-columns:1fr 1fr}
+  .cpig{grid-template-columns:1fr 96px 96px 96px}
+  .stations{grid-template-columns:1fr 1fr;align-items:start}
+  .rpaths{grid-template-columns:1fr 1fr;align-items:start}
+  .trap{grid-template-columns:1fr 1fr 1fr}
+  .pchips{grid-template-columns:repeat(4,1fr)}
+  .gapb b{font-size:34px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<span id="top"></span>
+
+<div class="topbar">
+  <div class="tbin">
+    <span class="brand"><i>시장을 읽는 말들</i> · 제3편</span>
+    <span class="ep">03 / 05</span>
+  </div>
+  <div class="prog"><i id="pg"></i></div>
+</div>
+
+<!-- ══════ 표지 ══════ -->
+<div class="cover">
+  <span class="cvkick">경제·주식 용어 연재 <b>03</b></span>
+  <h1 class="cvtitle">미국의 숫자는<span>어떻게 한국에 도착하는가</span></h1>
+  <p class="cvsub">미국의 숫자 하나가 왜 다음 날<br/>원화·외국인·반도체를 함께 움직일까.</p>
+  <div class="cvmotif">
+    <svg viewBox="0 0 340 66" role="img" aria-label="밤 21시 30분 미국 지표 발표에서 다음 날 아침 9시 한국 개장까지 다섯 환승역을 지나는 노선도">
+      <line x1="12" y1="30" x2="328" y2="30" stroke="rgba(210,220,213,.34)" stroke-width="2"/>
+      <circle cx="12" cy="30" r="6" fill="#C9A87C"/>
+      <circle cx="91" cy="30" r="6" fill="#8C97A5"/>
+      <circle cx="170" cy="30" r="6" fill="#9D98A8"/>
+      <circle cx="249" cy="30" r="6" fill="#6F9C99"/>
+      <circle cx="328" cy="30" r="7" fill="#A8C6B4"/>
+      <text x="12" y="16" text-anchor="start" font-size="11" font-weight="800" fill="#C9A87C">지표</text>
+      <text x="91" y="16" text-anchor="middle" font-size="11" font-weight="800" fill="#AEB8C4">금리</text>
+      <text x="170" y="16" text-anchor="middle" font-size="11" font-weight="800" fill="#B6B1C0">미국 주식</text>
+      <text x="249" y="16" text-anchor="middle" font-size="11" font-weight="800" fill="#8FBAB7">달러</text>
+      <text x="328" y="16" text-anchor="end" font-size="11" font-weight="800" fill="#A8C6B4">한국</text>
+      <text x="12" y="53" text-anchor="start" font-size="11" font-weight="700" fill="#93A398">밤 21:30</text>
+      <text x="328" y="53" text-anchor="end" font-size="11" font-weight="700" fill="#93A398">이튿날 09:00</text>
+    </svg>
+  </div>
+  <div class="cvidx">
+    <a href="#c1"><b>01</b>한밤의 숫자</a>
+    <a href="#c2"><b>02</b>네 겹으로 읽기</a>
+    <a href="#c3"><b>03</b>다른 답</a>
+  </div>
+</div>
+
+<!-- ══════ 01 ══════ -->
+<div class="ch" id="c1">
+  <div class="chtop"><span class="chn">01</span><span class="chk">이동과 시차</span></div>
+  <h2 class="cht">한밤의 숫자,<br/>아침의 가격</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i><i class="r5"></i></div>
+</div>
+
+<p class="qbig">미국에서 발표된 숫자가<br/>어떻게 서울 개장 가격이 되는가.</p>
+
+<div class="ans">
+  <div class="ak">한 문장 답</div>
+  <div class="av">숫자는 바로 한국에 오지 않는다. 금리·달러·미국 주식이라는 환승역을 거친다.</div>
+  <p class="aw">2026년 7월 14일 밤 미국 물가 발표부터 다음 날 서울 개장까지를 시간 순서로 따라간다.</p>
+</div>
+
+<div class="tl">
+  <div class="tlrow">
+    <div class="tltime"><b>7.14<br/>21:30</b><i>발표</i></div>
+    <div class="tlaxis"><span class="tldot d1"></span></div>
+    <div class="tlbody">
+      <span class="tlst s1">지표</span>
+      <b class="tlh">미국 6월 소비자물가 발표</b>
+      <p>헤드라인 전년비 <b>3.5%</b>로 예상 3.8%를 밑돌았다. 전월비 −0.4%는 <b>2020년 4월 이후 최대 하락</b>. 에너지 −5.7%가 이끌었고 근원 전년비도 2.6%로 낮아졌다.</p>
+    </div>
+  </div>
+
+  <div class="tlrow">
+    <div class="tltime"><b>발표<br/>직후</b><i>채권시장</i></div>
+    <div class="tlaxis"><span class="tldot d2"></span></div>
+    <div class="tlbody">
+      <span class="tlst s2">금리</span>
+      <b class="tlh">금리 경로를 다시 계산했다</b>
+      <p>정책 기대에 민감한 <span class="term">2년물<span class="tip">만기 2년짜리 미국 국채. 향후 1~2년의 정책금리 기대에 특히 민감하게 움직인다</span></span>이 10년물보다 크게 내렸다.</p>
+      <div class="tlnums">
+        <span>2년물 4.191%<b class="down">−7bp</b></span>
+        <span>10년물 4.575%<b class="down">−3bp</b></span>
+      </div>
+      <p><span class="term">FedWatch<span class="tip">연방기금 선물 가격으로 계산한 시장의 기준금리 확률. 연준이 약속한 확률이 아니다</span></span> 기준 3.50~3.75% 동결 확률이 약 58%에서 <b>약 85%</b>로 올랐다. 인상 우려가 물러난 것이지 인하가 정해진 것은 아니다.</p>
+    </div>
+  </div>
+
+  <div class="tlrow">
+    <div class="tltime"><b>7.14 22:30<br/>→ 7.15 05:00</b><i>미국장</i></div>
+    <div class="tlaxis"><span class="tldot d3"></span></div>
+    <div class="tlbody">
+      <span class="tlst s3">미국 주식</span>
+      <b class="tlh">기술주와 반도체가 함께 반등했다</b>
+      <div class="tlnums">
+        <span>나스닥<b class="up">+0.90%</b></span>
+        <span>S&amp;P500<b class="up">+0.38%</b></span>
+        <span>SOX<b class="up">+2.54%</b></span>
+      </div>
+      <p>엔비디아 +4.06% · 마이크론 +4.92% · AMD +2.57%. 방향은 같았어도 <b>상승 폭은 종목마다 달랐다.</b></p>
+    </div>
+  </div>
+
+  <div class="tlrow">
+    <div class="tltime"><b>7.15<br/>05:00</b><i>미국장 종가</i></div>
+    <div class="tlaxis"><span class="tldot d4"></span></div>
+    <div class="tlbody">
+      <span class="tlst s4">달러</span>
+      <b class="tlh">달러는 약해졌다</b>
+      <div class="tlnums">
+        <span>달러인덱스 100.7<b class="down">−0.6%</b></span>
+      </div>
+      <p>달러가 약해지면 원화 강세 여지가 생긴다. <b>원/달러의 실제 반응은 다음 한국장에서 따로 확인한다.</b></p>
+    </div>
+  </div>
+
+  <div class="tlrow">
+    <div class="tltime"><b>7.15<br/>09:00 → 15:30</b><i>한국장</i></div>
+    <div class="tlaxis"><span class="tldot d5"></span></div>
+    <div class="tlbody">
+      <span class="tlst s5">한국 도착</span>
+      <b class="tlh">갭으로 열렸고, 상승은 종가까지 이어졌다</b>
+      <p>개장 직후 <b>매수 사이드카</b>가 걸렸다. 아래 수치는 <b>한국장 종가와 하루 누적 수급</b> 기준이다.</p>
+      <div class="tlnums">
+        <span>코스피 7,284.41<b class="up">+6.24%</b></span>
+        <span>코스피200<b class="up">+6.56%</b></span>
+        <span>코스닥<b class="up">+5.80%</b></span>
+        <span>외국인 현물<b class="up">+2.32조</b></span>
+        <span>상승 711 · 하락 169</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stamp">
+  <div class="sh">숫자마다 시점을 붙여 읽는다</div>
+  <div class="schips">
+    <span>발표 직전</span><span>발표 직후</span><span>미국장 종가</span><span>한국장 개장</span><span>한국장 종가</span>
+  </div>
+  <p>위 숫자들은 같은 순간의 값이 아니다. 채권은 발표 직후, 나스닥과 달러는 미국장 종가, 코스피는 다음 한국장이다. <b>시점이 다른 숫자를 섞으면 없는 인과가 생긴다.</b></p>
+</div>
+
+<div class="gap">
+  <div class="gaph">같은 재료, 다른 크기</div>
+  <div class="gapb">
+    <div><i>나스닥</i><b class="up num">+0.90%</b><em>7.15 새벽 미국장 종가<br/>SOX +2.54%</em></div>
+    <div><i>코스피</i><b class="up num">+6.24%</b><em>7.15 한국장 종가<br/>상승 711 · 하락 169</em></div>
+  </div>
+  <p class="gapf">미국에서도 기술주와 반도체가 올랐다. 그러나 한국의 상승 폭은 훨씬 컸다. <b>전달은 복사되지 않는다. 각 시장의 낙폭·수급·종목 구조를 거치며 증폭되고 변형된다.</b> 두 지수의 차이는 미국 지표 하나만으로 한국장의 크기를 설명하기 어렵다는 단서다. 전일 낙폭과 국내 수급 교대, 반도체 개별 재료가 함께 작용했다.</p>
+</div>
+
+<p class="bridge">경로는 보였다.<br/>이제 <b>출발점의 숫자</b>를 제대로 읽을 차례다.</p>
+
+<!-- ══════ 02 ══════ -->
+<div class="ch" id="c2">
+  <div class="chtop"><span class="chn">02</span><span class="chk">읽는 문법</span></div>
+  <h2 class="cht">숫자는 하나가 아니라<br/>네 겹으로 읽는다</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i><i class="r5"></i></div>
+</div>
+
+<p class="tp">같은 지표를 읽을 때 네 층이 겹쳐 있다. 하나만 떼어 읽으면 방향을 잘못 잡는다.</p>
+
+<div class="layers">
+  <div class="lay">
+    <span class="lno">겹 01</span><b class="lh">실제와 예상의 차이</b>
+    <p>실제치보다 <b>예상에서 얼마나 벗어났는가</b>가 먼저다.</p>
+  </div>
+  <div class="lay">
+    <span class="lno">겹 02</span><b class="lh">전월치와 수정치</b>
+    <p>직전 수치가 크게 <span class="term">수정<span class="tip">이미 발표된 통계를 나중에 더 정확한 자료로 고쳐 다시 내는 것. 고용지표에서 특히 자주 나타난다</span></span>됐다면 경기 그림이 달라진다.</p>
+  </div>
+  <div class="lay">
+    <span class="lno">겹 03</span><b class="lh">헤드라인과 근원</b>
+    <p>헤드라인만 낮고 근원이 높다면 <b>식품·에너지처럼 변동이 큰 항목</b>이 전체 수치를 낮췄을 수 있다.</p>
+  </div>
+  <div class="lay">
+    <span class="lno">겹 04</span><b class="lh">전월비와 전년비</b>
+    <p>전월비는 최근 속도, 전년비는 1년 누적. 물가 <b>수준이 내린 것</b>과 <b>상승률이 둔화한 것</b>은 다르다.</p>
+  </div>
+</div>
+
+<div class="cpit">
+  <div class="cpith"><b>2026년 6월 미국 소비자물가</b><i>2026.07.14 발표 · 실제와 전월은 미국 노동통계국, 예상은 시장 컨센서스</i></div>
+  <div class="cpig">
+    <span class="hd" style="justify-content:flex-start;padding-left:13px">항목</span>
+    <span class="hd">실제</span>
+    <span class="hd">예상</span>
+    <span class="hd">전월</span>
+
+    <span class="rw" style="padding-left:13px">헤드라인 전월비</span>
+    <span class="v act num">−0.4%</span>
+    <span class="v num">−0.2%</span>
+    <span class="v num">+0.5%</span>
+
+    <span class="rw" style="padding-left:13px">헤드라인 전년비</span>
+    <span class="v act num">3.5%</span>
+    <span class="v num">3.8%</span>
+    <span class="v num">4.2%</span>
+
+    <span class="rw" style="padding-left:13px">근원 전월비</span>
+    <span class="v act num">0.0%</span>
+    <span class="v num">+0.2%</span>
+    <span class="v num">+0.2%</span>
+
+    <span class="rw" style="padding-left:13px">근원 전년비</span>
+    <span class="v act num">2.6%</span>
+    <span class="v num">2.9%</span>
+    <span class="v num">2.9%</span>
+  </div>
+  <p class="cpinote">실제는 네 항목 모두 예상을 밑돌았다. 헤드라인 전월비는 에너지가 끌어내렸지만 근원 전년비도 2.9%에서 2.6%로 함께 낮아졌다. <b>헤드라인만 낮았다면 판정이 달라졌을 자리다.</b> 전월비는 계절조정, 전년비는 조정 전 기준.</p>
+</div>
+
+<div class="cons">
+  <div class="ch2">컨센서스는 하나의 숫자가 아니다</div>
+  <div class="cvs">
+    <span>헤드라인 전년비 예상</span>
+    <i>3.8%</i><i>·</i><i>3.9%</i>
+  </div>
+  <p>같은 발표를 두고 조사기관마다 예상이 달랐다. 집계 기관과 시점, 평균과 중앙값 중 무엇을 썼는지에 따라 기준선이 움직인다. <b>컨센서스는 정답이 아니라 시장이 출발한 기준선이다.</b></p>
+</div>
+
+<p class="sech">전달 경로는 갈라진다</p>
+<p class="sesub">같은 발표에서 출발해도 도착지가 늘 같지는 않다. 갈림길은 <b>금리가 왜 내렸는가</b>에서 생긴다.</p>
+
+<div class="route">
+  <div class="rstart"><b>물가 지표가 예상을 밑돌았다</b></div>
+  <div class="rsplit"><span>여기서 갈린다</span></div>
+  <div class="rpaths">
+    <div class="rp a">
+      <div class="rph">경로 A<br/>금리 부담이 풀리는 쪽</div>
+      <div class="rpb">
+        <span class="rstep k1"><b>긴축 우려 후퇴</b> · 금리 하락</span>
+        <span class="rstep k2">달러 약세 · 원화 강세 여지</span>
+        <span class="rstep k3">성장주 밸류에이션 회복</span>
+        <span class="rstep k4">외국인 수급 개선</span>
+      </div>
+    </div>
+    <div class="rp b">
+      <div class="rph">경로 B<br/>경기 공포가 이기는 쪽</div>
+      <div class="rpb">
+        <span class="rstep k1"><b>경기 둔화 우려</b> · 금리 하락</span>
+        <span class="rstep k3">이익 전망 하향 · 주식 하락</span>
+        <span class="rstep k2">위험회피 · 달러 강세 가능</span>
+        <span class="rstep k4">외국인 수급 악화</span>
+      </div>
+    </div>
+  </div>
+  <p class="rwarn">두 경로 모두 금리가 내린다. 그래서 <b>금리 하락 자체는 호재도 악재도 아니다.</b> 화살표는 자주 나타나는 경로이지 자동으로 작동하는 공식이 아니다.</p>
+</div>
+
+<div class="pull">
+  <p>미국 10년물 하락은 호재가 아니라 질문이다.<br/><b>왜 내려갔는지를 먼저 본다.</b></p>
+</div>
+
+<p class="sech">환승역에서 무슨 일이 일어나는가</p>
+<p class="sesub">각 역이 하는 일과 그 역에서 가장 자주 나오는 오해.</p>
+
+<div class="stations">
+  <div class="st rate">
+    <div class="sth"><b>미국 10년물 · FedWatch</b></div>
+    <div class="stb">
+      <p class="sd">미국 정부가 10년간 돈을 빌릴 때 시장이 요구하는 수익률. 오르면 <span class="term">할인율<span class="tip">미래에 벌 돈을 현재 가치로 바꿀 때 쓰는 비율. 높아질수록 먼 미래의 이익이 지금 가치로는 작아진다</span></span>이 높아져 성장주가 먼저 눌린다.</p>
+      <p class="sx">연준의 금리표가 아니다. 성장 기대·국채 수급도 금리를 움직인다. FedWatch도 연준의 약속이 아닌 선물 가격이다. <b>인상 우려 후퇴와 인하 기대 부활은 다른 말이다.</b></p>
+    </div>
+  </div>
+  <div class="st fx">
+    <div class="sth"><b>달러인덱스와 원/달러</b></div>
+    <div class="stb">
+      <p class="sd">달러인덱스는 주요 통화 대비 달러의 종합 가치. 원/달러는 원화와 달러의 직접 교환 가격.</p>
+      <p class="sx">달러인덱스가 내려도 원/달러가 같은 비율로 내리지는 않는다. 수출입·외국인 거래·위안화·한국은행 정책이 함께 들어간다. <b>달러인덱스는 방향, 원/달러는 한국 사정이 더해진 가격이다.</b></p>
+    </div>
+  </div>
+  <div class="st eq">
+    <div class="sth"><b>SOX와 VIX</b></div>
+    <div class="stb">
+      <p class="sd">SOX는 미국 상장 주요 반도체 기업을 모은 지수. VIX는 S&amp;P500 옵션에 반영된 단기 변동성 기대.</p>
+      <p class="sx">SOX 상승이 한국 반도체 전 종목 상승은 아니다. 같은 지수 안에서도 GPU·메모리·장비의 상승 폭이 다르고, 한국 메모리주의 수급과 재료는 또 따로다. VIX는 방향 예측기보다 <b>보험료의 온도계</b>에 가깝다.</p>
+    </div>
+  </div>
+</div>
+
+<p class="bridge">경로를 알았다면 마지막 질문이 남는다.<br/><b>왜 같은 숫자가 다른 결과를 만드는가.</b></p>
+
+<!-- ══════ 03 ══════ -->
+<div class="ch" id="c3">
+  <div class="chtop"><span class="chn">03</span><span class="chk">조건과 판정</span></div>
+  <h2 class="cht">숫자는 같아도<br/>시장의 답은 다르다</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i><i class="r5"></i></div>
+</div>
+
+<p class="tp">시장은 <b>물가와 성장을 함께</b> 가격에 넣는다. 물가와 성장의 두 축을 교차하면 시장은 네 가지 하늘로 갈린다.</p>
+
+<div class="wx">
+  <div class="wxaxis"><span>← 물가 압력 완화</span><span>물가 압력 확대 →</span></div>
+  <div class="wxwrap">
+  <div class="wxrail"><span>성장 견조</span><span>성장 급랭</span></div>
+  <div class="wxg">
+    <div class="wxc">
+      <svg viewBox="0 0 120 38" role="img" aria-label="맑은 하늘">
+        <rect x="0" y="0" width="120" height="38" rx="5" fill="#E4EAE5"/>
+        <circle cx="60" cy="19" r="10" fill="#D9BE97"/>
+        <g stroke="#C9A87C" stroke-width="2" stroke-linecap="round">
+          <line x1="60" y1="3" x2="60" y2="7"/><line x1="60" y1="31" x2="60" y2="35"/>
+          <line x1="44" y1="19" x2="48" y2="19"/><line x1="72" y1="19" x2="76" y2="19"/>
+          <line x1="48" y1="7" x2="51" y2="10"/><line x1="69" y1="28" x2="72" y2="31"/>
+          <line x1="72" y1="7" x2="69" y2="10"/><line x1="51" y1="28" x2="48" y2="31"/>
+        </g>
+      </svg>
+      <span class="wl">물가 완화 · 성장 견조</span>
+      <span class="wt">골디락스 후보</span>
+      <span class="wd">긴축 부담이 풀리고 금리·달러가 안정되면 성장주 회복 여지.</span>
+    </div>
+    <div class="wxc">
+      <svg viewBox="0 0 120 38" role="img" aria-label="바람 부는 하늘">
+        <rect x="0" y="0" width="120" height="38" rx="5" fill="#E4E7EA"/>
+        <g stroke="#8C97A5" stroke-width="2.6" stroke-linecap="round" fill="none">
+          <path d="M24 12 H70 a6 6 0 1 0 -6 -6"/>
+          <path d="M30 20 H80 a5.5 5.5 0 1 1 5.5 5.5"/>
+          <path d="M24 29 H64"/>
+        </g>
+      </svg>
+      <span class="wl">물가 확대 · 성장 견조</span>
+      <span class="wt">금리 부담 우위 가능성</span>
+      <span class="wd">높은 금리가 길어진다. 고PER 성장주가 먼저 눌린다.</span>
+    </div>
+    <div class="wxc">
+      <svg viewBox="0 0 120 38" role="img" aria-label="비 오는 하늘">
+        <rect x="0" y="0" width="120" height="38" rx="5" fill="#E1E5EA"/>
+        <path d="M41 21 a10 10 0 0 1 19 -4.5 a8 8 0 0 1 13.5 4.5 a7 7 0 0 1 -1 5 H44 a7 7 0 0 1 -3 -5 z" fill="#A9B2BD"/>
+        <g stroke="#4F78A8" stroke-width="2.2" stroke-linecap="round">
+          <line x1="48" y1="29" x2="46" y2="34"/><line x1="59" y1="29" x2="57" y2="34"/><line x1="70" y1="29" x2="68" y2="34"/>
+        </g>
+      </svg>
+      <span class="wl">물가 완화 · 성장 급랭</span>
+      <span class="wt">경기 공포 우위 가능성</span>
+      <span class="wd">금리는 내려가나 이익 전망도 꺾인다. 침체 우려가 더 클 수 있다.</span>
+    </div>
+    <div class="wxc">
+      <svg viewBox="0 0 120 38" role="img" aria-label="폭풍우 치는 하늘">
+        <rect x="0" y="0" width="120" height="38" rx="5" fill="#DDDCE0"/>
+        <path d="M38 19 a11 11 0 0 1 21 -5 a9 9 0 0 1 14.5 5 a7 7 0 0 1 -1 5 H41 a7 7 0 0 1 -2.5 -5 z" fill="#8B867E"/>
+        <path d="M61 25 L55 31 L60 31 L56 36" stroke="#B08A5A" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <g stroke="#706D66" stroke-width="2" stroke-linecap="round">
+          <line x1="46" y1="27" x2="44" y2="32"/><line x1="72" y1="27" x2="70" y2="32"/>
+        </g>
+      </svg>
+      <span class="wl">물가 확대 · 성장 급랭</span>
+      <span class="wt">스태그플레이션 우려</span>
+      <span class="wd">금리 부담과 실적 우려가 동시에. 원인에 따라 업종 차이가 커진다.</span>
+    </div>
+  </div>
+  </div>
+  <p class="wxfoot">네 칸 모두 <b>가능성</b>이다. 지표의 이름만으로 호재와 악재를 정하지 않는다. 금리와 주식이 실제로 어떻게 반응했는지가 다음 판정이다.</p>
+</div>
+
+<p class="sech">지표 기사를 만나면 이 순서로</p>
+
+<div class="order">
+  <div class="ord"><span class="on">1</span><div class="ob"><b>실제·예상·전월을 함께 본다</b></div></div>
+  <div class="ord"><span class="on">2</span><div class="ob"><b>헤드라인과 근원, 전월비와 전년비를 나눈다</b></div></div>
+  <div class="ord"><span class="on">3</span><div class="ob"><b>수정치와 세부 항목을 확인한다</b><p>물가는 주거비·서비스·에너지, 고용은 수정치와 임금.</p></div></div>
+  <div class="ord"><span class="on">4</span><div class="ob"><b>금리와 FedWatch의 반응을 본다</b><p>2년물과 10년물이 다르게 움직였는지까지.</p></div></div>
+  <div class="ord"><span class="on">5</span><div class="ob"><b>달러인덱스와 원/달러를 본다</b><p>두 값의 <b>시점을 섞지 않는다.</b></p></div></div>
+  <div class="ord"><span class="on">6</span><div class="ob"><b>나스닥·SOX·VIX를 본다</b><p>지수보다 종목 사이의 차이를 함께.</p></div></div>
+  <div class="ord"><span class="on">7</span><div class="ob"><b>다음 한국장에서 실제로 확인한다</b><p>외국인 선물·현물과 반도체 본주까지 이어졌는지가 마지막 검증이다.</p></div></div>
+</div>
+
+<div class="fomc">
+  <div class="fh">FOMC도 같은 경로를 쓴다</div>
+  <div class="fsteps">
+    <span><b>1</b>기준금리 결정</span>
+    <span><b>2</b>성명서 문구</span>
+    <span><b>3</b>점도표·전망<sup>*</sup></span>
+    <span><b>4</b>의장 기자회견</span>
+    <span><b>5</b>시장의 실제 반응</span>
+  </div>
+  <p>동결도 매파적으로, 인상도 비둘기파적으로 읽힐 수 있다. 결정 하나보다 앞으로의 경로를 어떻게 설명했는지가 가격을 움직인다.</p>
+  <p class="fnote">* 점도표와 경제전망은 발표되는 회의에만 나온다.</p>
+</div>
+
+<div class="prob">
+  <div class="probh">연습 문제 · 가상의 하루</div>
+  <div class="pchips">
+    <div><i>CPI 전년비</i><b>3.5%</b></div>
+    <div><i>예상 3.8 · 전월</i><b>3.9%</b></div>
+    <div><i>미국 10년물</i><b class="down">−8bp</b></div>
+    <div><i>달러인덱스</i><b class="down">−0.7%</b></div>
+  </div>
+  <p class="pline">근원도 예상 하회 · SOX <b>+3.0%</b> · VIX <b>−9%</b> · 역외 원/달러 하락</p>
+  <p class="pq">다음 날 한국 반도체 상승을 확정할 수 있을까?</p>
+  <details class="rev">
+    <summary>판정 확인</summary>
+    <div class="rb">
+      <span class="verdict">유리한 출발 조건 · 확정은 불가</span>
+      물가 예상 하회·금리 하락·달러 약세·반도체 지수 상승·원화 강세 가능성. 다섯 조건이 모두 우호적이다. 그래도 다음을 더 본다.
+      <span class="rl"><i>·</i>SOX 상승이 메모리와 장비까지 퍼졌는지</span>
+      <span class="rl"><i>·</i>삼성전자·SK하이닉스의 개별 뉴스</span>
+      <span class="rl"><i>·</i>한국장 외국인 선물과 현물</span>
+      <span class="rl"><i>·</i>개장 갭 이후에도 매수가 이어지는지</span>
+      <span class="rl"><i>·</i>원/달러가 한국장에서도 안정되는지</span>
+      <span class="rl"><i>·</i>전일 낙폭과 선반영 정도</span>
+      <p class="rend">미국에서 우호적인 전달 경로가 만들어졌다고 말할 수는 있다. 다만 한국장에서 외국인 수급과 반도체 본주가 확인되기 전에는 상승 확정이라고 말할 수 없다.</p>
+    </div>
+  </details>
+</div>
+
+<p class="sech">오해하기 쉬운 문장</p>
+
+<div class="trap">
+  <div class="ti">
+    <div class="tx"><span class="tk">함정 01</span>"CPI가 낮게 나왔으니 금리 인하가 확정됐다."</div>
+    <div class="to">지표 한 번으로 연준 결정을 확정할 수 없다. 고용·성장·연준 발언이 경로를 다시 바꾼다. <b>인상 우려 후퇴와 인하 기대 부활은 다른 말이다.</b></div>
+  </div>
+  <div class="ti">
+    <div class="tx"><span class="tk">함정 02</span>"미국 10년물이 떨어졌으니 성장주에는 무조건 호재다."</div>
+    <div class="to">물가 안정으로 내려갔다면 우호적일 수 있다. <b>침체 공포로 내려갔다면 주식도 함께 떨어진다.</b> 왜 내렸는지를 먼저 본다.</div>
+  </div>
+  <div class="ti">
+    <div class="tx"><span class="tk">함정 03</span>"SOX가 올랐으니 삼성전자와 SK하이닉스도 오른다."</div>
+    <div class="to">지수 안에서도 GPU·메모리·장비가 갈린다. <b>한국 메모리주의 수급과 뉴스는 따로 확인한다.</b></div>
+  </div>
+</div>
+
+<div class="next">
+  <div class="nh">다음 편</div>
+  <p>그런데 금리와 달러가 안정돼도 <b>좋은 회사의 주가는 왜 떨어질까.</b> 시장은 무엇을 먼저 가격에 넣은 것일까.</p>
+  <div class="nt"><b>제4편</b> 좋은 회사가 왜 좋은 주식은 아닌가</div>
+</div>
+
+<div class="foldwrap">
+<details class="fold">
+  <summary>함께 나오는 말 한 줄 사전</summary>
+  <div class="fb">
+    <dl class="gloss">
+      <dt>CPI</dt><dd>소비자물가지수. 가계가 사는 물건과 서비스의 가격 변화를 모은 지표</dd>
+      <dt>헤드라인 CPI</dt><dd>식품과 에너지를 포함한 전체 물가</dd>
+      <dt>근원 CPI</dt><dd>변동이 큰 식품과 에너지를 뺀 물가. 기조적 흐름을 보는 용도</dd>
+      <dt>전월비</dt><dd>MoM. 직전 달 대비 변화로, 최근 속도를 본다</dd>
+      <dt>전년비</dt><dd>YoY. 1년 전 대비 변화로, 누적 결과를 본다</dd>
+      <dt>계절조정</dt><dd>계절적으로 반복되는 변동을 걷어낸 수치. 전월비는 보통 이 기준</dd>
+      <dt>컨센서스</dt><dd>여러 기관 전망을 모은 시장 예상의 대표값. 기관마다 다를 수 있다</dd>
+      <dt>서프라이즈</dt><dd>실제치와 예상치의 차이</dd>
+      <dt>수정치</dt><dd>먼저 발표된 통계를 나중에 고쳐 다시 낸 값</dd>
+      <dt>FOMC</dt><dd>미국 연방공개시장위원회. 기준금리를 정하는 회의</dd>
+      <dt>점도표</dt><dd>FOMC 참석자들이 각자 적절하다고 본 향후 금리 수준을 점으로 찍은 표</dd>
+      <dt>FedWatch</dt><dd>연방기금 선물 가격으로 계산한 시장의 기준금리 확률표</dd>
+      <dt>미국 2년물</dt><dd>만기 2년 국채. 단기 정책금리 기대에 민감하다</dd>
+      <dt>미국 10년물</dt><dd>만기 10년 국채. 성장·물가·금리 위험이 함께 반영된다</dd>
+      <dt>bp</dt><dd>베이시스포인트. 0.01%포인트. 10bp는 0.10%포인트</dd>
+      <dt>달러인덱스</dt><dd>주요 통화 바스켓 대비 달러의 종합 가치</dd>
+      <dt>SOX</dt><dd>미국 상장 주요 반도체 기업을 모은 필라델피아 반도체지수</dd>
+      <dt>VIX</dt><dd>S&amp;P500 옵션에 반영된 단기 변동성 기대</dd>
+      <dt>할인율</dt><dd>미래 이익을 현재 가치로 바꿀 때 쓰는 비율</dd>
+      <dt>위험선호</dt><dd>위험 자산을 사려는 시장의 태도</dd>
+      <dt>선반영</dt><dd>예상되는 재료가 발표 전에 이미 가격에 들어간 상태</dd>
+    </dl>
+  </div>
+</details>
+<details class="fold">
+  <summary>본문에 나온 실제 사례</summary>
+  <div class="fb">
+    <ol>
+      <li><b>2026.07.14 미국 6월 소비자물가</b> · 헤드라인 전월비 −0.4%(계절조정), 전년비 3.5%. 근원 전월비 0.0%, 전년비 2.6%. 전월비 하락폭은 2020년 4월 이후 최대. 에너지 −5.7%, 휘발유 −9.7%. 국제유가는 호르무즈 해협 재개통 이후 약 21% 하락해 배럴당 77달러 부근.</li>
+      <li><b>2026.07.14 발표 직후 ~ 미국장</b> · 미국 2년물 4.191%(약 −7bp), 10년물 4.575%(약 −3bp). 달러인덱스 100.7(−0.6%). S&amp;P500 +0.38%(7,543.89), 나스닥 +0.90%(26,107.01), SOX +2.54%(12,661.93). 엔비디아 +4.06%, 마이크론 +4.92%, AMD +2.57%, 브로드컴 +1.32%.</li>
+      <li><b>2026.07.14 FedWatch</b> · 3.50~3.75% 동결 확률이 전일 약 58%에서 발표 후 약 85%로 상승. 스냅숏 시각에 따라 집계치가 달라진다.</li>
+      <li><b>2026.07.15 한국장</b> · 코스피 7,284.41(+6.24%), 코스피200 +6.56%, 코스닥 +5.80%. 외국인 코스피 현물 +2.32조 원, 개인 −2.47조, 기관 +0.18조. 코스피 상승 711·하락 169. 개장 직후 매수 사이드카.</li>
+    </ol>
+    <p class="miss">이날 상승을 물가 지표 하나로 설명하지 않는다. 미국과 한국은 방향이 같았지만 강도와 확산 범위가 달랐다. 직전까지의 낙폭, 국내 수급 교대, 반도체 개별 재료가 한국장의 반응을 키웠다.</p>
+  </div>
+</details>
+<details class="fold">
+  <summary>출처 및 데이터 기준</summary>
+  <div class="fb">
+    <ol>
+      <li><b>실제치와 전월치</b>: 미국 노동통계국(BLS) 2026년 6월 소비자물가 발표, 2026.07.14 미국 동부시간 08:30(한국시간 21:30). 전월치는 5월분 발표(2026.06.10) 기준.</li>
+      <li><b>예상치</b>: BLS는 예상치를 발표하지 않는다. 표의 예상 열은 시장 컨센서스 집계 보도 기준이며 조사기관마다 다르다. 헤드라인 전년비 예상은 3.8%로 쓴 보도와 3.9%(FactSet 집계)로 쓴 보도가 함께 있었다.</li>
+      <li>미국 금리·달러·주가: 2026.07.14 미국장 기준 보도치. 국채 금리는 발표 후 당일 값이며, 나스닥·S&amp;P500·SOX·달러인덱스는 미국장 종가 기준(한국시간 07.15 새벽).</li>
+      <li>SOX 등락률: 나스닥 공식 지수 이력 기준 2026.07.14 종가 12,661.93(+2.54%).</li>
+      <li>FedWatch 확률: CME FedWatch 기준, 2026.07.14 발표 전후 보도치. 스냅숏 시각에 따라 집계치가 달라져 약 58% → 약 85%로 표기했다.</li>
+      <li>개별 반도체 종목 등락률: 2026.07.14 미국장 기준 보도치. <b>7월 15일 미국장 수치와 혼동하지 않는다.</b> 한국 7월 15일 장에 앞선 미국장은 7월 14일이다.</li>
+      <li>한국 지수·수급·사이드카: 한국거래소 기준, 2026.07.15. 조 단위 금액은 반올림.</li>
+      <li>연습 문제의 수치는 설명을 위해 만든 가상 값이며 실제 시세가 아니다.</li>
+    </ol>
+    <p class="miss">확인하지 못해 본문에 수치를 쓰지 않은 항목: 그날의 VIX 종가와 등락률, 역외 원/달러와 다음 날 서울 환율 종가. 둘은 개념과 확인 순서로만 다뤘다. 확인되지 않은 숫자는 채우지 않는다.</p>
+  </div>
+</details>
+</div>
+
+<p class="disc">본 자료는 경제·주식 용어와 시장 구조의 이해를 돕기 위한 교육 콘텐츠이며 특정 금융상품의 매수·매도 권유가 아님.</p>
+<div class="foot">시장을 읽는 말들 · 제3편 미국의 숫자는 어떻게 한국에 도착하는가</div>
+
+</div><!-- /.app -->
+
+<script>
+(function(){
+  if(window.__mwWords3) return; window.__mwWords3 = true;
+
+  var pg=document.getElementById('pg');
+  function updateProg(){
+    if(!pg) return;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var y=window.scrollY||window.pageYOffset||0;
+    pg.style.width=(h>0?Math.min(100,Math.max(0,y/h*100)):0)+'%';
+  }
+  window.addEventListener('scroll',updateProg,{passive:true});
+  window.addEventListener('resize',updateProg);
+  updateProg();
+
+  function resetTip(el){ var tp=el.querySelector('.tip'); if(tp){ tp.classList.remove('below'); tp.removeAttribute('style'); } }
+  function clampTip(t){
+    var tip=t.querySelector('.tip'); if(!tip) return;
+    var vw=window.innerWidth, pad=12;
+    var w=Math.min(248, vw-2*pad);
+    tip.style.position='fixed'; tip.style.bottom='auto'; tip.style.transform='none';
+    tip.style.width=w+'px'; tip.style.left='0px'; tip.style.top='0px';
+    var tr=t.getBoundingClientRect();
+    var th=tip.getBoundingClientRect().height;
+    var left=tr.left+tr.width/2-w/2;
+    if(left<pad) left=pad;
+    if(left+w>vw-pad) left=vw-pad-w;
+    var top=tr.top-th-9, below=false;
+    if(top<pad+50){ top=tr.bottom+9; below=true; }
+    var vh=window.innerHeight;
+    if(top+th>vh-pad){ top=vh-pad-th; }
+    if(top<pad){ top=pad; }
+    tip.style.left=Math.round(left)+'px';
+    tip.style.top=Math.round(top)+'px';
+    var tb=tip.getBoundingClientRect();
+    var dx=tb.left-left, dy=tb.top-top;
+    if(dx||dy){ tip.style.left=Math.round(left-dx)+'px'; tip.style.top=Math.round(top-dy)+'px'; }
+    tip.classList.toggle('below', below);
+    var ax=tr.left+tr.width/2-left;
+    ax=Math.max(12, Math.min(w-12, ax));
+    tip.style.setProperty('--ax', Math.round(ax)+'px');
+  }
+  function closeTerms(except){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++){ if(open[i]!==except){ open[i].classList.remove('open'); resetTip(open[i]); } }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.term'), function(t){
+    t.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var willOpen=!t.classList.contains('open');
+      closeTerms(t);
+      t.classList.toggle('open', willOpen);
+      if(willOpen) clampTip(t);
+    });
+  });
+  document.addEventListener('click', function(){ closeTerms(null); });
+  window.addEventListener('scroll', function(){ closeTerms(null); }, {passive:true});
+  window.addEventListener('resize', function(){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++) clampTip(open[i]);
+  });
+})();
+</script>
+</body>
+</html>

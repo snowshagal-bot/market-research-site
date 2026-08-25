@@ -15,6 +15,8 @@
     '.page:first-of-type',
     'main'
   ];
+  const SAFE_SELECTOR_TOKEN = /^[A-Za-z_][A-Za-z0-9_-]*$/;
+  const COVER_CLASS_TOKEN = /(?:^|[-_])cover(?:$|[-_])/i;
 
   function selectorMeta(doc) {
     return (doc.querySelector('meta[name="report-cover-selector"]')?.content || '').trim();
@@ -37,6 +39,28 @@
     return { target, selector, source };
   }
 
+  function standaloneCoverSelector(node) {
+    const classes = Array.from(node?.classList || []).filter(className => SAFE_SELECTOR_TOKEN.test(className));
+    const coverClass = classes.find(className => COVER_CLASS_TOKEN.test(className));
+    if (coverClass) return `.${coverClass}`;
+
+    const label = node?.getAttribute?.('aria-label') || '';
+    if (!/(?:cover|커버|표지)/i.test(label)) return '';
+    const id = node?.id || '';
+    if (SAFE_SELECTOR_TOKEN.test(id)) return `#${id}`;
+    return classes[0] ? `.${classes[0]}` : '';
+  }
+
+  function findStandaloneImageCover(doc) {
+    const candidates = Array.from(doc.querySelectorAll?.('body > section, body > div') || []).slice(0, 12);
+    for (const target of candidates) {
+      if (!usableCandidate(target)) continue;
+      const selector = standaloneCoverSelector(target);
+      if (selector) return { target, selector, source: 'heuristic' };
+    }
+    return null;
+  }
+
   function findCaptureTarget(doc) {
     const declared = selectorMeta(doc);
     if (declared) {
@@ -45,7 +69,13 @@
         if (usableCandidate(target)) return normalizeCaptureTarget(target, declared, 'meta');
       } catch (_) {}
     }
-    for (const selector of HEURISTIC_SELECTORS) {
+    for (const selector of HEURISTIC_SELECTORS.slice(0, -2)) {
+      const target = doc.querySelector(selector);
+      if (usableCandidate(target)) return normalizeCaptureTarget(target, selector, 'heuristic');
+    }
+    const standaloneCover = findStandaloneImageCover(doc);
+    if (standaloneCover) return standaloneCover;
+    for (const selector of HEURISTIC_SELECTORS.slice(-2)) {
       const target = doc.querySelector(selector);
       if (usableCandidate(target)) return normalizeCaptureTarget(target, selector, 'heuristic');
     }
@@ -271,6 +301,8 @@
     HEURISTIC_SELECTORS,
     selectorMeta,
     normalizeCaptureTarget,
+    standaloneCoverSelector,
+    findStandaloneImageCover,
     findCaptureTarget,
     fallbackSummary,
     templateData,

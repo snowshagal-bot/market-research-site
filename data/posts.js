@@ -33,6 +33,22 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-24-daily-97jc8s.webp"
   },
   {
+    "id": "2026-08-23-research-1xleg6o",
+    "type": "research",
+    "typeLabel": "비정기 리서치",
+    "lang": "ko",
+    "date": "2026-08-23",
+    "reportDate": "2026-08-23",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-25T14:40:56.666Z",
+    "legacyImport": false,
+    "title": "미국의비싸진 30년",
+    "subtitle": "",
+    "description": "특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.",
+    "href": "reports/비정기리서치_미국의비싸진30년_2026.08.23_커버통합.html",
+    "coverImage": "covers/2026-08-23-research-1xleg6o.webp"
+  },
+  {
     "id": "2026-08-21-daily-16tx7f1",
     "type": "daily",
     "typeLabel": "Daily",
@@ -277,6 +293,22 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-14-daily-dqoisk.webp"
   },
   {
+    "id": "2026-08-13-basics-1qofo4f",
+    "type": "basics",
+    "typeLabel": "시장 공부",
+    "lang": "ko",
+    "date": "2026-08-13",
+    "reportDate": "2026-08-13",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-25T11:10:09.848Z",
+    "legacyImport": false,
+    "title": "미국의 숫자는어떻게 한국에 도착하는가",
+    "subtitle": "",
+    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
+    "href": "reports/시장을읽는말들_3편_미국의숫자는어떻게한국에도착하는가.html",
+    "coverImage": "covers/2026-08-13-basics-1qofo4f.webp"
+  },
+  {
     "id": "2026-08-13-daily-1nnspvd",
     "type": "daily",
     "typeLabel": "Daily",
@@ -310,6 +342,23 @@ window.RESEARCH_POSTS = [
     "summary": "외국인 매수가 삼성전자·SK하이닉스에 집중되며 코스피는 3.56% 급등했지만, 오른 종목은 37%에 그쳤다. 대형 반도체가 끌어올린 지수와 더 약해진 시장 폭의 간극을 살펴본다",
     "href": "reports/8월 13일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-08-13-daily-1tgqr3y.webp"
+  },
+  {
+    "id": "2026-08-10-basics-1rhknmt",
+    "type": "basics",
+    "typeLabel": "시장 공부",
+    "lang": "ko",
+    "date": "2026-08-12",
+    "reportDate": "2026-08-12",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-25T11:08:22.548Z",
+    "legacyImport": false,
+    "title": "현물과 선물이엇갈릴 때",
+    "subtitle": "",
+    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
+    "href": "reports/시장을읽는말들_2편_현물과선물이엇갈릴때.html",
+    "coverImage": "covers/2026-08-10-basics-1rhknmt.webp",
+    "updatedAt": "2026-08-25T11:09:25.060Z"
   },
   {
     "id": "2026-08-12-daily-rk55d0",
