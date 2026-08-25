@@ -44,7 +44,7 @@ test('KO and EN Market pages use only the public latest API at runtime', async (
     assert.match(page, /data-market-preview-fixture="\/contracts\/market_close\/market_close\.example\.json"/);
     assert.match(page, /src="\/assets\/market-close\.js/);
     assert.match(page, /href="\/assets\/market-close\.css/);
-    assert.match(page, /href="\/about\/">About<\/a>|href="\/en\/about\/">About<\/a>/);
+    assert.match(page, /href="\/about\/">소개<\/a>|href="\/en\/about\/">About<\/a>/);
     assert.doesNotMatch(page, /LME|chart\.js|highcharts|plotly/i);
   }
   assert.match(ko, /href="\/market\/" aria-current="page">마켓<\/a>/);

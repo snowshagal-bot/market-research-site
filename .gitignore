@@ -1,0 +1,30 @@
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+.dev.vars
+
+# Tool and dependency caches
+.wrangler/
+node_modules/
+.cache/
+__pycache__/
+*.py[cod]
+
+# Build and test residue
+build/
+dist/
+coverage/
+playwright-report/
+test-results/
+
+# Local captures and logs
+screenshots/
+captures/
+*.log
+*.tmp
+*.bak
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db

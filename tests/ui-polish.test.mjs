@@ -28,7 +28,7 @@ test('homepage exposes category state and has no placeholder footer links', asyn
   assert.match(script, /setAttribute\('aria-pressed',String\(selected\)\)/);
   assert.match(script, /setAttribute\('aria-current','page'\)/);
   assert.doesNotMatch(html, /<footer[\s\S]*?href="#"/);
-  assert.match(html, /<footer[\s\S]*?<a href="\/about\/">About<\/a>/);
+  assert.match(html, /<footer[\s\S]*?href="\/about\/">소개<\/a>/);
   assert.doesNotMatch(html, /<footer[\s\S]*?>Tistory</);
 });
 
