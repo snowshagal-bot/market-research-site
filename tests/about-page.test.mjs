@@ -7,10 +7,11 @@ const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 test('homepage desktop and mobile navigation use the About slot for Market', async () => {
   const html = await read('index.html');
   const desktopNav = html.match(/<nav class="main-nav"[\s\S]*?<\/nav>/)?.[0] || '';
-  const mobileNav = html.match(/<nav class="mobile-nav"[\s\S]*?<\/nav>/)?.[0] || '';
+  const quickNav = html.match(/<nav class="mobile-quick-nav"[\s\S]*?<\/nav>/)?.[0] || '';
   assert.match(desktopNav, /href="\/market\/">마켓<\/a>/);
-  assert.match(mobileNav, /href="\/market\/">마켓<\/a>/);
-  assert.match(html, /<footer[\s\S]*href="\/about\/">About<\/a>/);
+  assert.match(quickNav, /href="\/market\/">마켓<\/a>/);
+  assert.match(html, /<footer[\s\S]*href="\/about\/">소개<\/a>/);
+  assert.match(html, /<footer[\s\S]*href="\/about\/#contact">문의<\/a>/);
 });
 
 test('shared report shell links to Market', async () => {
@@ -19,29 +20,40 @@ test('shared report shell links to Market', async () => {
   assert.match(shell, /href="\$\{marketPath\}">\$\{copy\.market\}<\/a>/);
 });
 
-test('About page remains an empty noindex footer destination', async () => {
+test('About page contains editorial introduction, contact, and simplified footer', async () => {
   const html = await read('about/index.html');
   assert.match(html, /<title>소개 · Market Research<\/title>/);
   assert.match(html, /<meta name="robots" content="noindex,nofollow">/);
   assert.equal((html.match(/href="\/market\/">마켓<\/a>/g) || []).length, 2);
-  assert.match(html, /<footer[\s\S]*href="\/about\/">About<\/a>/);
-  assert.match(html, /<main class="static-page-main"><\/main>/);
+  assert.match(html, /<footer[\s\S]*href="\/about\/">소개<\/a>/);
+  assert.match(html, /<footer[\s\S]*href="\/about\/#contact">문의<\/a>/);
+  assert.match(html, /<footer[\s\S]*contact@snowshagal\.com/);
+  assert.match(html, /<section class="about-section" aria-labelledby="section-about-heading">[\s\S]*?<h2[^>]*>소개<\/h2>/);
+  assert.match(html, /<section id="contact" class="about-section" aria-labelledby="section-contact-heading">[\s\S]*?<h2[^>]*>문의<\/h2>/);
+  assert.doesNotMatch(html, /<h2[^>]*>방법론<\/h2>/);
+  assert.doesNotMatch(html, /<h2[^>]*>정정 원칙<\/h2>/);
+  assert.doesNotMatch(html, /class="about-nav"/);
+  assert.match(html, /mailto:contact@snowshagal\.com/);
   assert.match(html, /data-theme-toggle/);
   assert.match(html, /data-menu-toggle/);
-  assert.match(html, /src="\/assets\/site\.js\?v=20260824-1"/);
-  for (const placeholder of ['준비 중입니다', 'Lorem ipsum', '프로필', '연락처']) {
-    assert.doesNotMatch(html, new RegExp(placeholder));
-  }
+  assert.match(html, /src="\/assets\/site\.js\?v=20260824-5"/);
 });
 
-test('English About page remains a matching empty noindex footer destination', async () => {
+test('English About page contains matching editorial About and Contact sections', async () => {
   const html = await read('en/about/index.html');
   assert.match(html, /<html lang="en" data-site-lang="en">/);
   assert.match(html, /<title>About · Market Research<\/title>/);
   assert.match(html, /<meta name="robots" content="noindex,nofollow">/);
   assert.equal((html.match(/href="\/en\/market\/">Market<\/a>/g) || []).length, 2);
   assert.match(html, /<footer[\s\S]*href="\/en\/about\/">About<\/a>/);
-  assert.match(html, /<main class="static-page-main"><\/main>/);
+  assert.match(html, /<footer[\s\S]*href="\/en\/about\/#contact">Contact<\/a>/);
+  assert.match(html, /<footer[\s\S]*contact@snowshagal\.com/);
+  assert.match(html, /<section class="about-section" aria-labelledby="section-about-heading">[\s\S]*?<h2[^>]*>About<\/h2>/);
+  assert.match(html, /<section id="contact" class="about-section" aria-labelledby="section-contact-heading">[\s\S]*?<h2[^>]*>Contact<\/h2>/);
+  assert.doesNotMatch(html, /<h2[^>]*>Methodology<\/h2>/);
+  assert.doesNotMatch(html, /<h2[^>]*>Corrections Policy<\/h2>/);
+  assert.doesNotMatch(html, /class="about-nav"/);
+  assert.match(html, /mailto:contact@snowshagal\.com/);
   assert.match(html, /data-language-choice="ko"/);
   assert.match(html, /data-language-choice="en"/);
 });
@@ -52,4 +64,53 @@ test('common site script exits before homepage-only initialization on static pag
   assert.ok(guard > script.indexOf("themeBtn?.addEventListener('click'"));
   assert.ok(guard > script.indexOf("menuBtn.addEventListener('click'"));
   assert.ok(script.indexOf('if(!isHomepage) return;', guard) < script.indexOf('renderHighlights();'));
+});
+
+test('mobile hybrid navigation exposes 4 persistent quick links and compressed hamburger menu without duplication', async () => {
+  const [koHome, enHome, koMarket, enMarket, koAbout, enAbout] = await Promise.all([
+    read('index.html'),
+    read('en/index.html'),
+    read('market/index.html'),
+    read('en/market/index.html'),
+    read('about/index.html'),
+    read('en/about/index.html')
+  ]);
+
+  for (const html of [koHome, koMarket, koAbout]) {
+    const quickNav = html.match(/<nav class="mobile-quick-nav"[^>]*>([\s\S]*?)<\/nav>/)?.[1] || '';
+    assert.match(quickNav, /href="\/market\/"[^>]*>마켓<\/a>/);
+    assert.match(quickNav, /data-nav-category="daily"[^>]*>데일리<\/a>/);
+    assert.match(quickNav, /data-nav-category="weekly"[^>]*>위클리<\/a>/);
+    assert.match(quickNav, /data-nav-category="research"[^>]*>리서치<\/a>/);
+
+    const mobileNav = html.match(/<nav class="mobile-nav"[^>]*>([\s\S]*?)<\/nav>/)?.[1] || '';
+    assert.match(mobileNav, /data-nav-category="basics"[^>]*>시장 공부<\/a>/);
+    assert.match(mobileNav, /data-nav-category="note"[^>]*>끄적끄적<\/a>/);
+    assert.match(mobileNav, /href="\/about\/"[^>]*>소개<\/a>/);
+    assert.match(mobileNav, /href="\/about\/#contact"[^>]*>문의<\/a>/);
+
+    assert.doesNotMatch(mobileNav, />마켓<\/a>/);
+    assert.doesNotMatch(mobileNav, />데일리<\/a>/);
+    assert.doesNotMatch(mobileNav, />위클리<\/a>/);
+    assert.doesNotMatch(mobileNav, />리서치<\/a>/);
+  }
+
+  for (const html of [enHome, enMarket, enAbout]) {
+    const quickNav = html.match(/<nav class="mobile-quick-nav"[^>]*>([\s\S]*?)<\/nav>/)?.[1] || '';
+    assert.match(quickNav, /href="\/en\/market\/"[^>]*>Market<\/a>/);
+    assert.match(quickNav, /data-nav-category="daily"[^>]*>Daily<\/a>/);
+    assert.match(quickNav, /data-nav-category="weekly"[^>]*>Weekly<\/a>/);
+    assert.match(quickNav, /data-nav-category="research"[^>]*>Research<\/a>/);
+
+    const mobileNav = html.match(/<nav class="mobile-nav"[^>]*>([\s\S]*?)<\/nav>/)?.[1] || '';
+    assert.match(mobileNav, /data-nav-category="basics"[^>]*>Market Basics<\/a>/);
+    assert.match(mobileNav, /data-nav-category="note"[^>]*>Notes<\/a>/);
+    assert.match(mobileNav, /href="\/en\/about\/"[^>]*>About<\/a>/);
+    assert.match(mobileNav, /href="\/en\/about\/#contact"[^>]*>Contact<\/a>/);
+
+    assert.doesNotMatch(mobileNav, />Market<\/a>/);
+    assert.doesNotMatch(mobileNav, />Daily<\/a>/);
+    assert.doesNotMatch(mobileNav, />Weekly<\/a>/);
+    assert.doesNotMatch(mobileNav, />Research<\/a>/);
+  }
 });
