@@ -131,10 +131,11 @@
   function renderArchive(){
     const query=(search?.value||'').trim().toLowerCase();
     const matched=localeApi?.searchPosts(allPosts, locale, query, active) || localizedPosts.filter(post=>(active==='all'||post.type===active)&&(!query||`${post.title} ${post.subtitle||''} ${post.typeLabel||''} ${post.description||''}`.toLowerCase().includes(query)));
-    const filtered=active==='all'
-      ? (localeApi?.sortPostsByRegistration(matched) || matched.slice().sort((a,b)=>String(b.registeredAt||b.registeredDate||'').localeCompare(String(a.registeredAt||a.registeredDate||''))))
-      : (localeApi?.sortPosts(matched) || matched.slice().sort((a,b)=>String(b.reportDate||b.date||'').localeCompare(String(a.reportDate||a.date||''))));
-    if(archiveOrderLabel) archiveOrderLabel.textContent=active==='all'?messages.registrationOrder:messages.reportOrder;
+    const filtered=localeApi?.sortPosts(matched) || matched.slice().sort((a,b)=>{
+      const byDate=String(b.reportDate||b.date||'').localeCompare(String(a.reportDate||a.date||''));
+      return byDate||String(b.registeredAt||'').localeCompare(String(a.registeredAt||''));
+    });
+    if(archiveOrderLabel) archiveOrderLabel.textContent=messages.reportOrder;
     filters.forEach(button=>{
       const selected=button.dataset.filter===active;
       button.classList.toggle('active',selected);
