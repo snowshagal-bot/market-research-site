@@ -5,6 +5,8 @@ const DEFAULT_RATE_LIMIT_RETRY_MS = 10000;
 const MAX_RATE_LIMIT_RETRY_MS = 15000;
 const RENDER_VIEWPORT = { width: 480, height: 900 };
 const SELECTOR_PRIORITY = ['.cover-frame', '.cover-page', '.mag-cover', '.cover-screen', '.report-cover', '.cover', '.opener'];
+const SAFE_SELECTOR_TOKEN = /^[A-Za-z_][A-Za-z0-9_-]*$/;
+const COVER_CLASS_TOKEN = /(?:^|[-_])cover(?:$|[-_])/i;
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -23,6 +25,52 @@ function classExists(html, selector) {
     if (match[1].split(/\s+/).includes(className)) return true;
   }
   return false;
+}
+
+function idExists(html, selector) {
+  const id = selector.slice(1);
+  const attributes = html.matchAll(/id\s*=\s*["']([^"']*)["']/gi);
+  for (const match of attributes) {
+    if (match[1] === id) return true;
+  }
+  return false;
+}
+
+function standaloneImageCoverSelector(html) {
+  const body = html.match(/<body\b[^>]*>([\s\S]*)/i)?.[1] || html;
+  let candidates = 0;
+  for (const match of body.matchAll(/<(section|div)\b[^>]*>/gi)) {
+    candidates += 1;
+    if (candidates > 12) break;
+
+    const tag = match[0];
+    const classes = tagAttribute(tag, 'class').split(/\s+/).filter(Boolean);
+    const coverClass = classes.find(className => SAFE_SELECTOR_TOKEN.test(className) && COVER_CLASS_TOKEN.test(className));
+    const label = tagAttribute(tag, 'aria-label');
+    const semanticallyLabeled = /(?:cover|커버|표지)/i.test(label);
+    if (!coverClass && !semanticallyLabeled) continue;
+
+    const following = body.slice((match.index || 0) + tag.length);
+    const imageIndex = following.search(/<img\b/i);
+    const closingIndex = following.search(new RegExp(`</${match[1]}\\s*>`, 'i'));
+    if (imageIndex < 0 || (closingIndex >= 0 && imageIndex > closingIndex)) continue;
+
+    if (coverClass) return `.${coverClass}`;
+    const id = tagAttribute(tag, 'id');
+    if (SAFE_SELECTOR_TOKEN.test(id)) return `#${id}`;
+    const safeClass = classes.find(className => SAFE_SELECTOR_TOKEN.test(className));
+    if (safeClass) return `.${safeClass}`;
+  }
+  return '';
+}
+
+function safePreferredSelector(html, preferredSelector) {
+  const preferred = String(preferredSelector || '').trim();
+  const classMatch = preferred.match(/^\.([A-Za-z_][A-Za-z0-9_-]*)$/);
+  if (classMatch && classExists(html, preferred)) return preferred;
+  const idMatch = preferred.match(/^#([A-Za-z_][A-Za-z0-9_-]*)$/);
+  if (idMatch && idExists(html, preferred)) return preferred;
+  return '';
 }
 
 async function secretsMatch(left, right) {
@@ -52,8 +100,7 @@ function selectCaptureSelector(html, preferredSelector = '') {
   for (const selector of SELECTOR_PRIORITY) {
     if (classExists(html, selector)) return selector;
   }
-  const preferred = String(preferredSelector || '').trim();
-  return SELECTOR_PRIORITY.includes(preferred) ? preferred : '';
+  return standaloneImageCoverSelector(html) || safePreferredSelector(html, preferredSelector);
 }
 
 function sanitizedUpstreamError(status) {
@@ -271,5 +318,7 @@ export const __test = {
   rateLimitRetryMs,
   renderingPayload,
   declaredSelector,
+  standaloneImageCoverSelector,
+  safePreferredSelector,
   selectCaptureSelector
 };
