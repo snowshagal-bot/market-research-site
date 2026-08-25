@@ -33,6 +33,22 @@
     "coverImage": "covers/2026-08-24-daily-97jc8s.webp"
   },
   {
+    "id": "2026-08-23-research-1xleg6o",
+    "type": "research",
+    "typeLabel": "비정기 리서치",
+    "lang": "ko",
+    "date": "2026-08-23",
+    "reportDate": "2026-08-23",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-25T14:40:56.666Z",
+    "legacyImport": false,
+    "title": "미국의비싸진 30년",
+    "subtitle": "",
+    "description": "특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.",
+    "href": "reports/비정기리서치_미국의비싸진30년_2026.08.23_커버통합.html",
+    "coverImage": "covers/2026-08-23-research-1xleg6o.webp"
+  },
+  {
     "id": "2026-08-21-daily-16tx7f1",
     "type": "daily",
     "typeLabel": "Daily",
