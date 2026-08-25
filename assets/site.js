@@ -23,8 +23,6 @@
     return String(b.registeredAt||'').localeCompare(String(a.registeredAt||''));
   });
   const themeBtn = document.querySelector('[data-theme-toggle]');
-  const menuBtn = document.querySelector('[data-menu-toggle]');
-  const mobileNav = document.querySelector('.mobile-nav');
   const languageLinks = Array.from(document.querySelectorAll('[data-language-choice]'));
   const list = document.getElementById('report-list');
   const search = document.getElementById('search-input');
@@ -62,11 +60,19 @@
     try { localStorage.setItem('site-theme',next); } catch (_) {}
     applyTheme(next);
   });
-  if(menuBtn && mobileNav) menuBtn.addEventListener('click',()=>{
-    const open = mobileNav.classList.toggle('open');
-    menuBtn.setAttribute('aria-expanded',String(open));
-    menuBtn.setAttribute('aria-label',open ? messages.menuClose : messages.menuOpen);
-  });
+
+  function scrollActiveMobileNavIntoView(){
+    const quickNav = document.querySelector('.mobile-quick-nav');
+    if (!quickNav) return;
+    const activeItem = quickNav.querySelector('a.active, a[aria-current="page"]');
+    if (activeItem) {
+      const navRect = quickNav.getBoundingClientRect();
+      const itemRect = activeItem.getBoundingClientRect();
+      if (itemRect.left < navRect.left || itemRect.right > navRect.right) {
+        quickNav.scrollLeft = Math.max(0, (activeItem.offsetLeft + activeItem.offsetWidth / 2) - (quickNav.clientWidth / 2));
+      }
+    }
+  }
 
   languageLinks.forEach(link=>{
     const target = link.dataset.languageChoice;
@@ -76,6 +82,8 @@
       try { localStorage.setItem('site-language', target); } catch (_) {}
     });
   });
+
+  scrollActiveMobileNavIntoView();
 
   const isHomepage = Boolean(list && search && document.getElementById('latest-category-cards'));
   if(!isHomepage) return;
@@ -113,6 +121,7 @@
       if(current) link.setAttribute('aria-current','page');
       else link.removeAttribute('aria-current');
     });
+    scrollActiveMobileNavIntoView();
   }
 
   function renderArchiveIndex(){

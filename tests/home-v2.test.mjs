@@ -80,32 +80,30 @@ test('official Snowshagal owl branding replaces decorative sparkles without chan
   assert.ok(owlAsset.size > 0);
 });
 
-test('desktop navigation uses the approved order and larger type while mobile sizing stays unchanged', async () => {
+test('desktop and mobile navigation use the approved category order across pages', async () => {
   const pages = [
-    ['index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적'], ['마켓', '데일리', '위클리', '리서치'], ['시장 공부', '끄적끄적', '소개', '문의']],
-    ['en/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes'], ['Market', 'Daily', 'Weekly', 'Research'], ['Market Basics', 'Notes', 'About', 'Contact']],
-    ['market/index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적'], ['마켓', '데일리', '위클리', '리서치'], ['시장 공부', '끄적끄적', '소개', '문의']],
-    ['en/market/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes'], ['Market', 'Daily', 'Weekly', 'Research'], ['Market Basics', 'Notes', 'About', 'Contact']],
-    ['about/index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적'], ['마켓', '데일리', '위클리', '리서치'], ['시장 공부', '끄적끄적', '소개', '문의']],
-    ['en/about/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes'], ['Market', 'Daily', 'Weekly', 'Research'], ['Market Basics', 'Notes', 'About', 'Contact']]
+    ['index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
+    ['en/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']],
+    ['market/index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
+    ['en/market/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']],
+    ['about/index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
+    ['en/about/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']]
   ];
 
-  for (const [path, mainLabels, quickLabels, mobileLabels] of pages) {
+  for (const [path, expectedLabels] of pages) {
     const source = await read(path);
     const mainNav = source.match(/<nav class="main-nav"[\s\S]*?<\/nav>/)?.[0] || '';
-    const mainPositions = mainLabels.map(label => mainNav.indexOf(`>${label}</a>`));
+    const mainPositions = expectedLabels.map(label => mainNav.indexOf(`>${label}</a>`));
     assert.ok(mainPositions.every(position => position >= 0), `${path} main-nav is missing a requested label`);
     assert.deepEqual(mainPositions, [...mainPositions].sort((a, b) => a - b), `${path} main-nav order`);
 
     const quickNav = source.match(/<nav class="mobile-quick-nav"[\s\S]*?<\/nav>/)?.[0] || '';
-    const quickPositions = quickLabels.map(label => quickNav.indexOf(`>${label}</a>`));
+    const quickPositions = expectedLabels.map(label => quickNav.indexOf(`>${label}</a>`));
     assert.ok(quickPositions.every(position => position >= 0), `${path} mobile-quick-nav is missing a requested label`);
     assert.deepEqual(quickPositions, [...quickPositions].sort((a, b) => a - b), `${path} mobile-quick-nav order`);
 
     const mobileNav = source.match(/<nav class="mobile-nav"[\s\S]*?<\/nav>/)?.[0] || '';
-    const mobilePositions = mobileLabels.map(label => mobileNav.indexOf(`>${label}</a>`));
-    assert.ok(mobilePositions.every(position => position >= 0), `${path} mobile-nav is missing a requested label`);
-    assert.deepEqual(mobilePositions, [...mobilePositions].sort((a, b) => a - b), `${path} mobile-nav order`);
+    assert.equal(mobileNav, '', `${path} still contains obsolete mobile-nav`);
   }
 
   const [brandStyles, marketStyles, reportShell] = await Promise.all([
@@ -239,4 +237,47 @@ test('admin exposes an optional validated cover input', async () => {
   assert.match(html, /image\/jpeg,image\/png,image\/webp/);
   assert.match(script, /4 \* 1024 \* 1024/);
   assert.match(script, /form\.append\('cover'/);
+});
+
+test('public pages remove hamburger menu and expose horizontal swipe navigation with language pill and active reveal', async () => {
+  const [home, enHome, market, enMarket, about, enAbout, siteCss, siteJs] = await Promise.all([
+    read('index.html'),
+    read('en/index.html'),
+    read('market/index.html'),
+    read('en/market/index.html'),
+    read('about/index.html'),
+    read('en/about/index.html'),
+    read('assets/site.css'),
+    read('assets/site.js')
+  ]);
+
+  const publicPages = [home, enHome, market, enMarket, about, enAbout];
+
+  for (const page of publicPages) {
+    // 1. No hamburger button or expanded mobile nav
+    assert.doesNotMatch(page, /data-menu-toggle/);
+    assert.doesNotMatch(page, /class="[^"]*mobile-nav[^"]*"/);
+
+    // 2. Language pill present
+    assert.match(page, /class="language-pill"/);
+
+    // 3. Desktop main-nav intact
+    assert.match(page, /<nav class="main-nav"[\s\S]*?<\/nav>/);
+
+    // 4. Mobile quick nav has all 6 items
+    assert.match(page, /<nav class="mobile-quick-nav"[\s\S]*?<\/nav>/);
+  }
+
+  // 5. CSS horizontal scrolling & scrollbar hidden
+  assert.match(siteCss, /\.mobile-quick-nav\s*\{[\s\S]*?overflow-x:\s*auto/);
+  assert.match(siteCss, /\.mobile-quick-nav\s*\{[\s\S]*?white-space:\s*nowrap/);
+  assert.match(siteCss, /\.mobile-quick-nav\s*\{[\s\S]*?scrollbar-width:\s*none/);
+  assert.match(siteCss, /\.mobile-quick-nav::-webkit-scrollbar\s*\{\s*display:\s*none/);
+
+  // 6. Language pill styling
+  assert.match(siteCss, /\.language-pill\s*\{[\s\S]*?min-width:\s*38px/);
+
+  // 7. Active item initial reveal logic
+  assert.match(siteJs, /function scrollActiveMobileNavIntoView\(\)/);
+  assert.match(siteJs, /scrollActiveMobileNavIntoView\(\);/);
 });

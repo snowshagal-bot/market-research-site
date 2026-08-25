@@ -94,12 +94,14 @@ test('report translation counterpart lookup and locale homepage fallback are det
 test('English and Korean page shells expose restrained desktop and mobile language controls', async () => {
   const pages = await Promise.all(['index.html', 'en/index.html', 'about/index.html', 'en/about/index.html'].map(read));
   for (const html of pages) {
-    assert.match(html, /class="language-switch"/);
-    assert.match(html, /class="mobile-language"/);
-    assert.match(html, /data-language-choice="ko"/);
-    assert.match(html, /data-language-choice="en"/);
+    assert.match(html, /class="language-pill"/);
+    assert.doesNotMatch(html, /class="mobile-language"/);
     assert.doesNotMatch(html, /🇰🇷|🇺🇸|🇬🇧/);
   }
+  assert.match(pages[0], /data-language-choice="en"/);
+  assert.match(pages[1], /data-language-choice="ko"/);
+  assert.match(pages[2], /data-language-choice="en"/);
+  assert.match(pages[3], /data-language-choice="ko"/);
   assert.match(pages[1], />Daily</);
   assert.match(pages[1], />Recent Reports</);
   assert.match(pages[1], />All</);
