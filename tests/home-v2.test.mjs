@@ -82,22 +82,30 @@ test('official Snowshagal owl branding replaces decorative sparkles without chan
 
 test('desktop navigation uses the approved order and larger type while mobile sizing stays unchanged', async () => {
   const pages = [
-    ['index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
-    ['en/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']],
-    ['market/index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
-    ['en/market/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']],
-    ['about/index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
-    ['en/about/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']]
+    ['index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적'], ['마켓', '데일리', '위클리', '리서치'], ['시장 공부', '끄적끄적', '소개', '문의']],
+    ['en/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes'], ['Market', 'Daily', 'Weekly', 'Research'], ['Market Basics', 'Notes', 'About', 'Contact']],
+    ['market/index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적'], ['마켓', '데일리', '위클리', '리서치'], ['시장 공부', '끄적끄적', '소개', '문의']],
+    ['en/market/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes'], ['Market', 'Daily', 'Weekly', 'Research'], ['Market Basics', 'Notes', 'About', 'Contact']],
+    ['about/index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적'], ['마켓', '데일리', '위클리', '리서치'], ['시장 공부', '끄적끄적', '소개', '문의']],
+    ['en/about/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes'], ['Market', 'Daily', 'Weekly', 'Research'], ['Market Basics', 'Notes', 'About', 'Contact']]
   ];
 
-  for (const [path, labels] of pages) {
+  for (const [path, mainLabels, quickLabels, mobileLabels] of pages) {
     const source = await read(path);
-    for (const navClass of ['main-nav', 'mobile-nav']) {
-      const nav = source.match(new RegExp(`<nav class="${navClass}"[\\s\\S]*?<\\/nav>`))?.[0] || '';
-      const positions = labels.map(label => nav.indexOf(`>${label}</a>`));
-      assert.ok(positions.every(position => position >= 0), `${path} ${navClass} is missing a requested label`);
-      assert.deepEqual(positions, [...positions].sort((a, b) => a - b), `${path} ${navClass} order`);
-    }
+    const mainNav = source.match(/<nav class="main-nav"[\s\S]*?<\/nav>/)?.[0] || '';
+    const mainPositions = mainLabels.map(label => mainNav.indexOf(`>${label}</a>`));
+    assert.ok(mainPositions.every(position => position >= 0), `${path} main-nav is missing a requested label`);
+    assert.deepEqual(mainPositions, [...mainPositions].sort((a, b) => a - b), `${path} main-nav order`);
+
+    const quickNav = source.match(/<nav class="mobile-quick-nav"[\s\S]*?<\/nav>/)?.[0] || '';
+    const quickPositions = quickLabels.map(label => quickNav.indexOf(`>${label}</a>`));
+    assert.ok(quickPositions.every(position => position >= 0), `${path} mobile-quick-nav is missing a requested label`);
+    assert.deepEqual(quickPositions, [...quickPositions].sort((a, b) => a - b), `${path} mobile-quick-nav order`);
+
+    const mobileNav = source.match(/<nav class="mobile-nav"[\s\S]*?<\/nav>/)?.[0] || '';
+    const mobilePositions = mobileLabels.map(label => mobileNav.indexOf(`>${label}</a>`));
+    assert.ok(mobilePositions.every(position => position >= 0), `${path} mobile-nav is missing a requested label`);
+    assert.deepEqual(mobilePositions, [...mobilePositions].sort((a, b) => a - b), `${path} mobile-nav order`);
   }
 
   const [brandStyles, marketStyles, reportShell] = await Promise.all([
