@@ -20,19 +20,32 @@
 }
 
 .footer-brand {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 15px;
   font-weight: 850;
-  letter-spacing: .16em;
+  letter-spacing: .14em;
   color: var(--text);
   line-height: 1;
 }
 
+.footer-brand-owl {
+  display: block;
+  width: 22px;
+  height: auto;
+  flex: 0 0 auto;
+}
+
+html[data-theme="dark"] .footer-brand-owl {
+  filter: drop-shadow(0 1px 4px rgba(151, 183, 225, .18));
+}
+
 .footer-tagline {
-  margin: 10px 0 0;
+  margin: 9px 0 0;
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.5;
   color: var(--text-2);
   letter-spacing: -.01em;
   word-break: keep-all;
@@ -264,6 +277,15 @@
     align-items: flex-start;
     gap: 18px;
     padding-bottom: 18px;
+  }
+
+  .footer-brand {
+    font-size: 14.5px;
+    gap: 8px;
+  }
+
+  .footer-brand-owl {
+    width: 20px;
   }
 
   .footer-nav-col {
