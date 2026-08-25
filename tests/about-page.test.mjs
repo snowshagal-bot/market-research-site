@@ -35,7 +35,7 @@ test('About page contains editorial introduction, contact, and simplified footer
   assert.doesNotMatch(html, /class="about-nav"/);
   assert.match(html, /mailto:contact@snowshagal\.com/);
   assert.match(html, /data-theme-toggle/);
-  assert.match(html, /data-menu-toggle/);
+  assert.doesNotMatch(html, /data-menu-toggle/);
   assert.match(html, /src="\/assets\/site\.js\?v=20260824-5"/);
 });
 
@@ -55,18 +55,16 @@ test('English About page contains matching editorial About and Contact sections'
   assert.doesNotMatch(html, /class="about-nav"/);
   assert.match(html, /mailto:contact@snowshagal\.com/);
   assert.match(html, /data-language-choice="ko"/);
-  assert.match(html, /data-language-choice="en"/);
 });
 
 test('common site script exits before homepage-only initialization on static pages', async () => {
   const script = await read('assets/site.js');
   const guard = script.indexOf('const isHomepage = Boolean(');
   assert.ok(guard > script.indexOf("themeBtn?.addEventListener('click'"));
-  assert.ok(guard > script.indexOf("menuBtn.addEventListener('click'"));
   assert.ok(script.indexOf('if(!isHomepage) return;', guard) < script.indexOf('renderHighlights();'));
 });
 
-test('mobile hybrid navigation exposes 4 persistent quick links and compressed hamburger menu without duplication', async () => {
+test('mobile navigation exposes 6 horizontal swipe links without hamburger menu', async () => {
   const [koHome, enHome, koMarket, enMarket, koAbout, enAbout] = await Promise.all([
     read('index.html'),
     read('en/index.html'),
@@ -82,17 +80,10 @@ test('mobile hybrid navigation exposes 4 persistent quick links and compressed h
     assert.match(quickNav, /data-nav-category="daily"[^>]*>데일리<\/a>/);
     assert.match(quickNav, /data-nav-category="weekly"[^>]*>위클리<\/a>/);
     assert.match(quickNav, /data-nav-category="research"[^>]*>리서치<\/a>/);
-
-    const mobileNav = html.match(/<nav class="mobile-nav"[^>]*>([\s\S]*?)<\/nav>/)?.[1] || '';
-    assert.match(mobileNav, /data-nav-category="basics"[^>]*>시장 공부<\/a>/);
-    assert.match(mobileNav, /data-nav-category="note"[^>]*>끄적끄적<\/a>/);
-    assert.match(mobileNav, /href="\/about\/"[^>]*>소개<\/a>/);
-    assert.match(mobileNav, /href="\/about\/#contact"[^>]*>문의<\/a>/);
-
-    assert.doesNotMatch(mobileNav, />마켓<\/a>/);
-    assert.doesNotMatch(mobileNav, />데일리<\/a>/);
-    assert.doesNotMatch(mobileNav, />위클리<\/a>/);
-    assert.doesNotMatch(mobileNav, />리서치<\/a>/);
+    assert.match(quickNav, /data-nav-category="basics"[^>]*>시장 공부<\/a>/);
+    assert.match(quickNav, /data-nav-category="note"[^>]*>끄적끄적<\/a>/);
+    assert.doesNotMatch(html, /class="mobile-nav"/);
+    assert.doesNotMatch(html, /data-menu-toggle/);
   }
 
   for (const html of [enHome, enMarket, enAbout]) {
@@ -101,16 +92,9 @@ test('mobile hybrid navigation exposes 4 persistent quick links and compressed h
     assert.match(quickNav, /data-nav-category="daily"[^>]*>Daily<\/a>/);
     assert.match(quickNav, /data-nav-category="weekly"[^>]*>Weekly<\/a>/);
     assert.match(quickNav, /data-nav-category="research"[^>]*>Research<\/a>/);
-
-    const mobileNav = html.match(/<nav class="mobile-nav"[^>]*>([\s\S]*?)<\/nav>/)?.[1] || '';
-    assert.match(mobileNav, /data-nav-category="basics"[^>]*>Market Basics<\/a>/);
-    assert.match(mobileNav, /data-nav-category="note"[^>]*>Notes<\/a>/);
-    assert.match(mobileNav, /href="\/en\/about\/"[^>]*>About<\/a>/);
-    assert.match(mobileNav, /href="\/en\/about\/#contact"[^>]*>Contact<\/a>/);
-
-    assert.doesNotMatch(mobileNav, />Market<\/a>/);
-    assert.doesNotMatch(mobileNav, />Daily<\/a>/);
-    assert.doesNotMatch(mobileNav, />Weekly<\/a>/);
-    assert.doesNotMatch(mobileNav, />Research<\/a>/);
+    assert.match(quickNav, /data-nav-category="basics"[^>]*>Market Basics<\/a>/);
+    assert.match(quickNav, /data-nav-category="note"[^>]*>Notes<\/a>/);
+    assert.doesNotMatch(html, /class="mobile-nav"/);
+    assert.doesNotMatch(html, /data-menu-toggle/);
   }
 });
