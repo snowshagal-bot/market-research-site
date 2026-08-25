@@ -309,6 +309,22 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-16-research-141u5l9.webp"
   },
   {
+    "id": "2026-08-15-basics-1cd8c9w",
+    "type": "basics",
+    "typeLabel": "시장 공부",
+    "lang": "ko",
+    "date": "2026-08-15",
+    "reportDate": "2026-08-15",
+    "registeredDate": "2026-08-26",
+    "registeredAt": "2026-08-25T15:49:32.286Z",
+    "legacyImport": false,
+    "title": "좋은 회사가왜 좋은 주식은 아닌가",
+    "subtitle": "",
+    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
+    "href": "reports/시장을읽는말들_4편_좋은회사가왜좋은주식은아닌가.html",
+    "coverImage": "covers/2026-08-15-basics-1cd8c9w.webp"
+  },
+  {
     "id": "2026-08-14-daily-1yyf33y",
     "type": "daily",
     "typeLabel": "Daily",

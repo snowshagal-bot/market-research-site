@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>시장을 읽는 말들 · 제4편 좋은 회사가 왜 좋은 주식은 아닌가</title>
+<style>
+:root{
+  --surface-page:#ECEAE5;
+  --surface-band:#E3E0D9;
+  --surface-inner:#F1EFEA;
+  --surface-detail:#E8E5DF;
+  --surface-muted:#DAD6CE;
+  --ink:#2E2E2C;
+  --ink2:#43423E;
+  --body:#53514C;
+  --sub:#706D66;
+  --muted:#8B867E;
+  --line:#CEC9BF;
+  --line2:#DCD7CE;
+  /* 판정 전용 · 시리즈 공통 */
+  --green:#46584D;
+  --green-dark:#2F3C34;
+  --green-soft:#DCE3DD;
+  --green-line:#AAB6AC;
+  --green-pale:#A8C6B4;
+  /* 이번 편 두 축 */
+  --co:#46584D;          /* 회사 쪽 */
+  --co-dark:#2F3C34;
+  --co-soft:#DDE4DE;
+  --co-line:#A8B6AB;
+  --mk:#A9714B;          /* 시장 쪽 */
+  --mk-dark:#7A4E30;
+  --mk-soft:#F0E2D5;
+  --mk-line:#D0AE90;
+  /* 가격 방향 전용 */
+  --up:#C74754;
+  --down:#4F78A8;
+  --warn:#7A5444;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:58px;overflow-x:hidden}
+html,body{max-width:100%}
+body{
+  margin:0;background:var(--surface-page);color:var(--ink);
+  font-family:"Pretendard Variable","Pretendard","SUIT","Noto Sans KR","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  line-height:1.58;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;
+  word-break:keep-all;line-break:strict;
+}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(38px + env(safe-area-inset-bottom,0px));width:100%;position:relative}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.up{color:var(--up)}.down{color:var(--down)}
+a{color:inherit;text-decoration:none}
+
+/* ── 상단바 ── */
+.topbar{position:sticky;top:0;z-index:50;margin:0 -16px;
+  background:rgba(236,234,229,.92);-webkit-backdrop-filter:saturate(150%) blur(12px);backdrop-filter:saturate(150%) blur(12px);
+  border-bottom:1px solid rgba(90,84,74,.13)}
+.tbin{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0)) 18px 9px}
+.tbin .brand{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.tbin .brand i{font-style:normal;color:var(--green)}
+.tbin .ep{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.prog{height:2px;background:rgba(90,84,74,.10)}
+.prog i{display:block;height:100%;width:0;background:var(--green);transition:width .1s linear}
+
+/* ── 표지 ── */
+.cover{margin:0 -16px;padding:18px 22px 15px;
+  background:linear-gradient(160deg,#37453C 0%,#2B372F 55%,#232C26 100%);color:#EFEDE7}
+.cvkick{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.06em;
+  color:#BFD2C6;border:1px solid rgba(168,198,180,.34);border-radius:999px;padding:5px 12px}
+.cvkick b{color:#EFEDE7;font-weight:800}
+.cvtitle{margin:12px 0 0;font-size:30px;line-height:1.24;font-weight:800;letter-spacing:-.05em;color:#F4F2ED}
+.cvtitle span{display:block;color:var(--green-pale)}
+.cvsub{margin:12px 0 0;font-size:14px;line-height:1.58;font-weight:600;color:#C6D2CA}
+.cvmotif{margin:12px 0 0}
+.cvmotif svg{display:block;width:100%;height:auto}
+.cvidx{display:flex;gap:6px;margin:12px 0 0;flex-wrap:wrap}
+.cvidx a{font-size:11.5px;font-weight:800;color:#D3DED7;background:rgba(255,255,255,.07);
+  border:1px solid rgba(168,198,180,.22);border-radius:999px;padding:6px 12px}
+.cvidx a b{color:var(--green-pale);font-weight:800;margin-right:5px}
+
+/* ── 챕터 오프너 ── */
+.ch{margin:15px 0 9px}
+.chtop{display:flex;align-items:center;gap:9px;margin-bottom:7px;flex-wrap:wrap}
+.chn{font-size:12px;font-weight:800;color:#EFEDE7;background:var(--ink);border-radius:4px;padding:3px 8px;letter-spacing:.04em}
+.chk{font-size:11.5px;font-weight:800;letter-spacing:.11em;color:var(--sub)}
+.cht{margin:0;font-size:24px;line-height:1.3;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.chrule{display:flex;height:3px;margin-top:12px;gap:2px}
+.chrule i{display:block;height:100%;flex:1}
+.chrule .r1{background:var(--co)}
+.chrule .r2{background:var(--co-line)}
+.chrule .r3{background:var(--mk-line)}
+.chrule .r4{background:var(--mk)}
+
+/* ── 세 문장 표시등 ── */
+.sig{display:flex;gap:5px;margin:9px 0 0;flex-wrap:wrap}
+.sig b{font-size:11.5px;font-weight:800;letter-spacing:-.01em;padding:4px 9px;border-radius:999px;
+  background:var(--surface-detail);color:var(--muted);border:1px solid var(--line2)}
+.sig b.on1{background:var(--co-soft);color:var(--co-dark);border-color:var(--co-line)}
+.sig b.on3{background:var(--mk-soft);color:var(--mk-dark);border-color:var(--mk-line)}
+
+/* ── 큰 질문 · 한 문장 답 ── */
+.qbig{margin:14px 0 0;font-size:22px;line-height:1.44;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.ans{margin:11px -16px 0;padding:15px 22px;background:var(--green);color:#EFEDE7;position:relative;overflow:hidden}
+.ans:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green-pale)}
+.ans .ak{font-size:11px;font-weight:800;letter-spacing:.14em;color:#A8BCAE;margin-bottom:8px}
+.ans .av{font-size:20px;line-height:1.44;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.ans .aw{margin:11px 0 0;padding-top:11px;border-top:1px solid rgba(168,198,180,.24);font-size:13px;line-height:1.6;font-weight:600;color:#CBD8CF}
+
+/* ── 본문 ── */
+.p{margin:9px 0 0;font-size:14px;line-height:1.66;color:var(--body);font-weight:500}
+.p b{color:var(--ink);font-weight:800}
+.p.lead{font-size:15px;color:var(--ink2);font-weight:600}
+.hd{margin:13px 0 0;font-size:16.5px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.44}
+.cap{margin:6px 0 0;font-size:11.5px;line-height:1.55;color:var(--muted);font-weight:600}
+.cap b{color:var(--sub);font-weight:800}
+
+/* ── 세 문장 카드 ── */
+.three{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden;margin:12px 0 0}
+.three .ti{background:var(--surface-inner);padding:9px 13px;display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start}
+.three .no{font-size:14px;font-weight:800;color:var(--muted);line-height:1.4}
+.three .s1 .no{color:var(--co)}
+.three .s3 .no{color:var(--mk)}
+.three .tx{font-size:14.5px;font-weight:800;color:var(--ink);letter-spacing:-.03em;line-height:1.42}
+.three .mt{margin-top:4px;font-size:12.5px;font-weight:600;color:var(--body);line-height:1.55}
+.three .mt i{font-style:normal;font-weight:800;color:var(--sub)}
+
+/* ── 영수증 ── */
+.rcpt{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;
+  padding:14px 16px 15px;position:relative;overflow:hidden}
+.rcpt:before{content:"";position:absolute;left:0;right:0;top:0;height:3px;
+  background:repeating-linear-gradient(90deg,var(--co) 0 7px,transparent 7px 13px)}
+.rch{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding-top:4px}
+.rch b{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.03em}
+.rch i{font-style:normal;font-size:11.5px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+.rcl{margin:11px 0 0;border-top:1px dashed var(--line);padding-top:9px}
+.rrow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:baseline;padding:5px 0;font-variant-numeric:tabular-nums}
+.rrow .k{font-size:13px;font-weight:700;color:var(--body)}
+.rrow .v{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.02em;text-align:right}
+.rrow .t{font-size:11px;font-weight:800;color:#EFEDE7;background:var(--co);border-radius:4px;padding:2px 6px;white-space:nowrap}
+.rrow .t.g{background:var(--mk)}
+.rsep{margin:9px 0 0;border-top:1px dashed var(--line);padding-top:9px}
+.rstamp{margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.rstamp .sv{flex:0 0 auto}
+.rstamp .sv svg{display:block;width:88px;height:88px}
+.rstamp .sx{flex:1 1 auto;min-width:0}
+.rstamp .sx b{display:block;font-size:11.5px;font-weight:800;letter-spacing:.09em;color:var(--muted)}
+.rstamp .sx p{margin:5px 0 0;font-size:13.5px;line-height:1.55;font-weight:700;color:var(--body)}
+.rstamp .sx p em{font-style:normal;font-weight:800;color:var(--ink)}
+
+/* ── 같은 날 시장 카드 ── */
+.mkt{margin:10px 0 0;background:var(--surface-detail);border:1px solid var(--line);border-radius:12px;padding:12px 15px}
+.mkth{display:flex;align-items:center;gap:8px}
+.mkth b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.mkth i{font-style:normal;font-size:11px;font-weight:800;color:#EFEDE7;background:var(--warn);border-radius:4px;padding:2px 7px}
+.mkth i .term{color:#EFEDE7;border-bottom-color:rgba(255,255,255,.55);font-weight:800;padding:1px 2px;margin:-1px -2px}
+.mktg{display:grid;grid-template-columns:1fr auto auto;gap:4px 9px;margin:10px 0 0;font-variant-numeric:tabular-nums;align-items:baseline}
+.mktg .k{font-size:12.5px;font-weight:700;color:var(--body)}
+.mktg .v{font-size:13px;font-weight:800;color:var(--ink)}
+.mktg .d{font-size:13px;font-weight:800;color:var(--down);text-align:right}
+.cb{margin:10px 0 0;padding-top:9px;border-top:1px dashed var(--line);display:grid;gap:4px}
+.cb .r{display:flex;align-items:baseline;gap:8px;font-size:12.5px;font-weight:700;color:var(--body);font-variant-numeric:tabular-nums}
+.cb .r b{font-size:12.5px;font-weight:800;color:var(--ink);flex:0 0 62px}
+.cb .mcap{color:var(--sub);margin-top:2px}
+.cb .note{margin-top:3px;font-size:12px;line-height:1.55;font-weight:800;color:var(--warn)}
+
+/* ── 멈춤 박스 ── */
+.stop{margin:13px -16px 0;padding:15px 22px;background:var(--ink);color:#EFEDE7;position:relative}
+.stop:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--mk)}
+.stop .sk{font-size:11px;font-weight:800;letter-spacing:.14em;color:#A7A29A;margin-bottom:8px}
+.stop .sv{font-size:16px;line-height:1.56;font-weight:800;letter-spacing:-.03em;color:#F4F2ED}
+.stop .sn{margin:11px 0 0;padding-top:11px;border-top:1px solid rgba(230,225,215,.2);font-size:13px;line-height:1.62;font-weight:600;color:#C4BFB6}
+.stop .sn b{color:#F4F2ED;font-weight:800}
+
+/* ── 두 다이얼 ── */
+.dials{display:grid;grid-template-columns:1fr 26px 1fr;gap:7px;align-items:center;margin:12px 0 0}
+.dial{background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:12px 10px 11px;text-align:center}
+.dial.c{border-color:var(--co-line);background:var(--co-soft)}
+.dial.m{border-color:var(--mk-line);background:var(--mk-soft)}
+.dial svg{display:block;width:100%;max-width:118px;height:auto;margin:0 auto}
+.dial .dn{margin:6px 0 0;font-size:14.5px;font-weight:800;letter-spacing:-.03em;color:var(--ink)}
+.dial .dw{margin:3px 0 0;font-size:12px;font-weight:800;line-height:1.4}
+.dial.c .dw{color:var(--co-dark)}
+.dial.m .dw{color:var(--mk-dark)}
+.dial .ds{margin:5px 0 0;font-size:11.5px;font-weight:600;color:var(--sub);line-height:1.45}
+.dx{text-align:center;font-size:20px;font-weight:800;color:var(--muted)}
+.deq{margin:9px 0 0;text-align:center;font-size:14.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em;
+  background:var(--surface-detail);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+.deq b{color:var(--co-dark)}
+.deq i{font-style:normal;color:var(--mk-dark)}
+
+/* ── 세 서류철 ── */
+.fold3{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden;margin:12px 0 0}
+.fold3 .fi{background:var(--surface-inner);padding:8px 13px;display:grid;grid-template-columns:52px 1fr;gap:11px;align-items:center}
+.fold3 .fk{font-size:11.5px;font-weight:800;color:#EFEDE7;background:var(--muted);border-radius:5px;padding:4px 0;text-align:center}
+.fold3 .p1 .fk{background:var(--co-dark)}
+.fold3 .p3 .fk{background:var(--mk)}
+.fold3 .ft{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.fold3 .fs{margin-top:2px;font-size:12px;font-weight:600;color:var(--body);line-height:1.5}
+
+/* ── 계산 박스 ── */
+.calc{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:12px 15px 13px}
+.calc .ch2{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
+.calc .ch2 b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.calc .ch2 i{font-style:normal;font-size:11px;font-weight:800;color:#EFEDE7;background:var(--muted);border-radius:4px;padding:2px 7px}
+.cgrid{display:grid;grid-template-columns:1fr auto auto auto;gap:5px 12px;align-items:baseline;font-variant-numeric:tabular-nums}
+.cgrid .h{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.03em;text-align:right}
+.cgrid .k{font-size:12.5px;font-weight:700;color:var(--body)}
+.cgrid .v{font-size:13.5px;font-weight:800;color:var(--ink);text-align:right}
+.cgrid .c{font-size:12.5px;font-weight:800;text-align:right}
+.cgrid .cc{color:var(--co-dark)}
+.cgrid .cm{color:var(--mk-dark)}
+.cgrid .rule{grid-column:1/-1;height:1px;background:var(--line);margin:3px 0 1px}
+.cgrid .tot{padding-top:1px}
+.cgrid .tot.k,.cgrid .tot.v{color:var(--ink);font-size:14px}
+.calc .cnote{margin:9px 0 0;padding-top:8px;border-top:1px dashed var(--line);font-size:12.5px;line-height:1.6;font-weight:700;color:var(--ink2)}
+
+/* ── 주의 박스 ── */
+.warnb{margin:8px 0 0;padding:10px 13px;background:var(--surface-detail);border:1px solid var(--line);border-radius:10px;
+  font-size:12.5px;line-height:1.6;font-weight:700;color:var(--ink2)}
+.warnb b{color:var(--warn);font-weight:800}
+
+/* ── 좁힐 수 있는 자료 ── */
+.narrow{margin:9px 0 0;padding:11px 14px;background:var(--surface-detail);border:1px solid var(--line);border-radius:12px}
+.narrow .nk{font-size:11.5px;font-weight:800;letter-spacing:.05em;color:var(--co-dark);margin-bottom:8px}
+.narrow .chips{display:flex;flex-wrap:wrap;gap:5px}
+.narrow .chips span{font-size:12px;font-weight:700;color:var(--ink2);background:var(--surface-inner);
+  border:1px solid var(--line2);border-radius:999px;padding:4px 10px}
+.narrow p{margin:8px 0 0;font-size:12.5px;line-height:1.6;font-weight:700;color:var(--body)}
+
+/* ── 하루 게이지 ── */
+.gauge{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:13px 14px 11px}
+.gauge svg{display:block;width:100%;height:auto}
+.gh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:9px}
+.gh b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.gh i{font-style:normal;font-size:11.5px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ── 시각표 ── */
+.clock{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden;margin:11px 0 0}
+.clock .ci{background:var(--surface-inner);padding:8px 13px;display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:start}
+.clock .ct{font-size:12px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.35;padding-top:1px}
+.clock .ct i{display:block;font-style:normal;font-size:11px;font-weight:700;color:var(--muted);margin-top:1px}
+.clock .cd{font-size:13px;font-weight:700;color:var(--body);line-height:1.55}
+.clock .cd b{color:var(--ink);font-weight:800}
+.clock .cd em{font-style:normal;font-weight:800}
+.clock .hi{background:var(--mk-soft)}
+
+/* ── 짧은 사례 ── */
+.mini{margin:12px 0 0;background:var(--surface-detail);border-left:4px solid var(--mk);border-radius:0 12px 12px 0;padding:13px 15px}
+.mini b.mh{display:block;font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.mini .mg{display:grid;grid-template-columns:1fr auto;gap:4px 10px;margin:8px 0 0;font-variant-numeric:tabular-nums}
+.mini .mg span{font-size:12.5px;font-weight:700;color:var(--body)}
+.mini .mg em{font-style:normal;font-size:12.5px;font-weight:800;color:var(--ink);text-align:right}
+.mini .mg em.down{color:var(--down)}
+.mini .mp{margin:9px 0 0;font-size:13px;line-height:1.62;font-weight:700;color:var(--ink2)}
+
+/* ── 두 평가서 ── */
+.sheets{display:grid;gap:8px;margin:12px 0 0}
+.sheet{border-radius:12px;padding:12px 15px;border:1px solid var(--line)}
+.sheet.c{background:var(--co-soft);border-color:var(--co-line)}
+.sheet.m{background:var(--mk-soft);border-color:var(--mk-line)}
+.sheet .sh{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.sheet .sh b{font-size:14.5px;font-weight:800;letter-spacing:-.03em}
+.sheet.c .sh b{color:var(--co-dark)}
+.sheet.m .sh b{color:var(--mk-dark)}
+.sheet .sh i{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.06em;padding:3px 7px;border-radius:999px}
+.sheet.c .sh i{color:var(--co-dark);border:1px solid var(--co-line)}
+.sheet.m .sh i{color:var(--mk-dark);border:1px solid var(--mk-line)}
+.sheet ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.sheet li{font-size:13px;line-height:1.55;font-weight:700;color:var(--ink2);padding-left:20px;position:relative}
+.sheet li:before{content:"";position:absolute;left:0;top:4px;width:12px;height:12px;border-radius:3px;border:1.5px solid currentColor;opacity:.42}
+.noadd{margin:2px 0;display:flex;align-items:center;gap:10px;justify-content:center}
+.noadd svg{display:block;width:34px;height:34px;flex:0 0 auto}
+.noadd b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.03em}
+
+/* ── 여기까지만 ── */
+.limit{margin:13px 0 0;display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden}
+.limit .li{background:var(--surface-inner);padding:11px 15px}
+.limit .lk{font-size:11.5px;font-weight:800;letter-spacing:.05em;margin-bottom:8px}
+.limit .can .lk{color:var(--co-dark)}
+.limit .cant .lk{color:var(--warn)}
+.limit ul{margin:0;padding-left:16px;display:grid;gap:4px}
+.limit li{font-size:12.5px;line-height:1.55;font-weight:700;color:var(--body)}
+.limit .cant li{color:var(--ink2)}
+
+/* ── 풀쿼트 ── */
+.pull{margin:15px -16px 0;padding:20px;background:var(--surface-band);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)}
+.pull p{margin:0;font-size:19px;line-height:1.52;font-weight:800;letter-spacing:-.045em;color:var(--ink)}
+.pull p b{color:var(--co-dark)}
+
+/* ── 다음 편 ── */
+.next{margin:15px -16px 0;padding:18px 22px;background:linear-gradient(150deg,#4A4038 0%,#2F2A25 100%);color:#EDE9E4;position:relative;overflow:hidden}
+.next:before{content:"";position:absolute;right:-40px;bottom:-52px;width:150px;height:150px;border-radius:50%;border:1px solid rgba(200,186,172,.18)}
+.next .nh{position:relative;font-size:11px;font-weight:800;letter-spacing:.12em;color:#B3A697;margin-bottom:10px}
+.next p{position:relative;margin:0;font-size:16px;line-height:1.56;font-weight:800;letter-spacing:-.03em;color:#F0ECE7}
+.next p b{color:#FFFFFF}
+.next .nbridge{font-size:13.5px;line-height:1.6;font-weight:600;color:#C4B8A9;margin-bottom:9px;letter-spacing:-.02em}
+.next .nt{position:relative;margin-top:13px;padding-top:12px;border-top:1px solid rgba(200,186,172,.22);font-size:12.5px;font-weight:800;color:#C4B8A9}
+.next .nt b{color:#F0ECE7;font-weight:800}
+
+/* ── 접힘 ── */
+.foldwrap{margin:12px 0 0}
+details.fold{border:1px solid var(--line);border-radius:12px;background:var(--surface-detail);margin:0 0 8px;overflow:hidden}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:11px 15px;font-size:13px;font-weight:800;color:var(--ink)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary:after{content:"+";font-size:18px;font-weight:800;color:var(--green);line-height:.9}
+details.fold[open]>summary:after{content:"−"}
+details.fold .fb{padding:0 15px 14px}
+.fb p{margin:0 0 8px;font-size:12.5px;line-height:1.65;color:var(--body);font-weight:600}
+.fb p:last-child{margin-bottom:0}
+.fb p b{color:var(--ink);font-weight:800}
+.gloss{display:grid;grid-template-columns:98px 1fr;gap:9px 11px;margin:2px 0 0;font-size:13px}
+.gloss dt{font-weight:850;color:#4B4740}
+.gloss dd{margin:0;color:var(--body);line-height:1.55}
+.fb .miss{margin:10px 0 0;padding:11px 12px;background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;
+  font-size:12px;line-height:1.6;font-weight:700;color:var(--ink2)}
+.csv{display:grid;grid-template-columns:1fr auto auto;gap:4px 9px;margin:9px 0 2px;font-variant-numeric:tabular-nums;align-items:baseline}
+.csv .h{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.03em}
+.csv .k{font-size:12.5px;font-weight:700;color:var(--body)}
+.csv .v{font-size:12.5px;font-weight:800;color:var(--ink);text-align:right}
+.disc{font-size:11.5px;color:var(--muted);text-align:center;line-height:1.55;padding:12px 8px 0;font-weight:500}
+.foot{text-align:center;font-size:11.5px;color:var(--sub);padding:10px 0 4px;font-weight:800;letter-spacing:-.01em}
+
+/* ── 툴팁 ── */
+.term{border-bottom:1.5px dashed #8B867E;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;font-weight:850;color:var(--ink);
+  display:inline-block;padding:3px 4px;margin:-3px -4px;line-height:1.3;
+  touch-action:manipulation;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.term .tip{position:fixed;left:12px;top:0;min-width:160px;max-width:min(248px,calc(100vw - 28px));
+  background:#33322F;color:#F2F0EB;font-size:12px;font-weight:600;line-height:1.52;padding:9px 11px;border-radius:9px;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);z-index:60;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease;white-space:normal;text-align:left}
+.term .tip:after{content:"";position:absolute;top:100%;left:var(--ax,50%);transform:translateX(-50%);border:6px solid transparent;border-top-color:#33322F}
+.term .tip.below:after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#33322F}
+.term.open .tip{opacity:1;visibility:visible;pointer-events:auto}
+
+@media(max-width:360px){
+  .cvtitle{font-size:27px}
+  .qbig{font-size:19px}
+  .ans .av{font-size:18px}
+  .pull p{font-size:17px}
+  .cht{font-size:21px}
+  .dials{grid-template-columns:1fr 20px 1fr;gap:5px}
+  .clock .ci{grid-template-columns:64px 1fr;gap:8px}
+  .fold3 .fi{grid-template-columns:46px 1fr;gap:9px}
+  .gloss{grid-template-columns:86px 1fr}
+  .rstamp .sv svg{width:82px;height:82px}
+}
+
+/* ── 데스크톱 ── */
+@media(min-width:768px){
+  .app{max-width:770px;padding-left:28px;padding-right:28px}
+  .topbar{margin:0 -28px}
+  .cover{margin:0 -28px;padding:44px 40px 34px}
+  .cvtitle{font-size:44px}
+  .cvsub{font-size:15px;max-width:30em}
+  .ch{margin-top:46px}
+  .cht{font-size:29px}
+  .qbig{font-size:26px}
+  .ans{margin-left:-28px;margin-right:-28px;padding:26px 40px}
+  .ans .av{font-size:24px}
+  .stop{margin-left:-28px;margin-right:-28px;padding:26px 40px}
+  .stop .sv{font-size:19px}
+  .pull{margin-left:-28px;margin-right:-28px;padding:32px 40px}
+  .pull p{font-size:25px}
+  .next{margin-left:-28px;margin-right:-28px;padding:28px 40px}
+  .three{grid-template-columns:1fr 1fr 1fr;gap:1.5px}
+  .sheets{grid-template-columns:1fr auto 1fr;align-items:start;gap:12px}
+  .noadd{flex-direction:column;gap:6px;padding-top:44px}
+  .noadd b{text-align:center;font-size:12.5px}
+  .limit{grid-template-columns:1fr 1fr}
+  .dial svg{max-width:140px}
+  .rstamp .sv svg{width:112px;height:112px}
+  .fold3{grid-template-columns:1fr 1fr 1fr}
+  .calc{padding:16px 20px 17px}
+  .narrow .chips span{font-size:12.5px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<span id="top"></span>
+
+<div class="topbar">
+  <div class="tbin">
+    <span class="brand"><i>시장을 읽는 말들</i> · 제4편</span>
+    <span class="ep">04 / 05</span>
+  </div>
+  <div class="prog"><i id="pg"></i></div>
+</div>
+
+<!-- ══════ 표지 ══════ -->
+<div class="cover">
+  <span class="cvkick">경제·주식 용어 연재 <b>04</b></span>
+  <h1 class="cvtitle">좋은 회사가<span>왜 좋은 주식은 아닌가</span></h1>
+  <p class="cvsub">사상 최대 실적을 발표한 날<br/>주가가 내리는 일은 왜 반복될까.</p>
+  <div class="cvmotif">
+    <svg viewBox="0 0 340 74" role="img" aria-label="왼쪽의 회사 실적 서류와 오른쪽의 시장 가격표가 같지 않음을 나타내는 표지 그림">
+      <rect x="14" y="12" width="88" height="50" rx="6" fill="none" stroke="rgba(210,220,213,.5)" stroke-width="1.6"/>
+      <line x1="26" y1="26" x2="76" y2="26" stroke="#A8C6B4" stroke-width="3" stroke-linecap="round"/>
+      <line x1="26" y1="36" x2="90" y2="36" stroke="rgba(210,220,213,.4)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="26" y1="46" x2="64" y2="46" stroke="rgba(210,220,213,.4)" stroke-width="3" stroke-linecap="round"/>
+      <text x="58" y="72" text-anchor="middle" font-size="11.5" font-weight="800" fill="#BFD2C6">회사가 만든 서류</text>
+      <text x="170" y="43" text-anchor="middle" font-size="27" font-weight="800" fill="#EFEDE7">≠</text>
+      <path d="M240 12 L316 12 L326 37 L316 62 L240 62 Z" fill="none" stroke="rgba(224,196,168,.62)" stroke-width="1.6"/>
+      <circle cx="308" cy="37" r="4" fill="#E0C4A8"/>
+      <line x1="254" y1="30" x2="296" y2="30" stroke="#E0C4A8" stroke-width="3" stroke-linecap="round"/>
+      <line x1="254" y1="44" x2="284" y2="44" stroke="rgba(224,196,168,.45)" stroke-width="3" stroke-linecap="round"/>
+      <text x="283" y="72" text-anchor="middle" font-size="11.5" font-weight="800" fill="#DFC7AE">시장이 붙인 가격표</text>
+    </svg>
+  </div>
+  <div class="cvidx">
+    <a href="#p1"><b>01</b>좋은 성적표, 나쁜 종가</a>
+    <a href="#p2"><b>02</b>이익과 가격표</a>
+    <a href="#p3"><b>03</b>두 개의 질문표</a>
+  </div>
+</div>
+
+<!-- ══════ 1페이지 ══════ -->
+<div class="ch" id="p1">
+  <div class="chtop"><span class="chn">01</span><span class="chk">좋은 성적표, 나쁜 종가</span></div>
+  <h2 class="cht">사상 최대인데<br/>왜 내렸을까</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">2026년 7월 29일 아침, 한 회사가 분기 사상 최대 실적을 발표했다. 매출도 영업이익도 <span class="term">영업이익률<span class="tip">매출에서 영업이익이 차지하는 비율. 100원어치를 팔아 얼마가 남았는지를 보여준다.</span></span>도 회사 역사상 가장 좋은 숫자였다. 그날 종가는 9.61% 하락이었다.</p>
+
+<div class="rcpt">
+  <div class="rch"><b>SK하이닉스 2026년 2분기</b><i>07.29 발표</i></div>
+  <div class="rcl">
+    <div class="rrow"><span class="k">매출</span><span class="v num">79조 3,187억</span><span class="t">사상 최대</span></div>
+    <div class="rrow"><span class="k">영업이익</span><span class="v num">60조 5,426억</span><span class="t">사상 최대</span></div>
+    <div class="rrow"><span class="k">영업이익률</span><span class="v num">76.3%</span><span class="t">사상 최대</span></div>
+  </div>
+  <div class="rsep">
+    <div class="rrow"><span class="k"><span class="term">컨센서스<span class="tip">증권사들이 내놓은 추정치의 평균. 어느 기관이 몇 개 증권사를 며칠 기준으로 모았는지에 따라 값이 달라진다.</span></span> 영업이익</span><span class="v num">63조~64조</span><span class="t g">전망치</span></div>
+    <div class="rrow"><span class="k">실제와의 차이</span><span class="v num">−3조 원대</span><span class="t" style="visibility:hidden">전망치</span></div>
+  </div>
+  <div class="rstamp">
+    <div class="sv">
+      <svg viewBox="0 0 100 100" role="img" aria-label="종가 1,401,000원 9.61퍼센트 하락을 나타내는 도장">
+        <g transform="rotate(-9 50 50)">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#4F78A8" stroke-width="3.4" opacity=".9"/>
+          <circle cx="50" cy="50" r="35.5" fill="none" stroke="#4F78A8" stroke-width="1.2" opacity=".55"/>
+          <text x="50" y="38" text-anchor="middle" font-size="12" font-weight="800" fill="#4F78A8" letter-spacing="1">종가</text>
+          <text x="50" y="59" text-anchor="middle" font-size="19" font-weight="800" fill="#4F78A8">−9.61%</text>
+          <text x="50" y="73" text-anchor="middle" font-size="11" font-weight="800" fill="#4F78A8">1,401,000원</text>
+        </g>
+      </svg>
+    </div>
+    <div class="sx">
+      <b>같은 날 찍힌 도장</b>
+      <p>사상 최대라는 도장이 세 번 찍힌 종이 아래에, <em>하락 도장</em>이 하나 찍혔다.</p>
+    </div>
+  </div>
+</div>
+<p class="cap">회사 발표 기준. 컨센서스는 집계 기관에 따라 63조 5,526억 또는 63조 9,868억으로 인용된다.</p>
+
+<h3 class="hd">흔한 설명 하나, 그리고 멈춤</h3>
+<p class="p">가장 자주 붙는 설명은 이것이다. 실적이 시장 전망치를 밑돌았다. 실제로 그랬다. 발표된 영업이익은 <span class="term">컨센서스<span class="tip">증권사들이 내놓은 추정치의 평균. 어느 기관이 몇 개 증권사를 며칠 기준으로 모았는지에 따라 값이 달라진다.</span></span>를 3조 원 넘게 밑돌았다. 신문은 이런 경우를 <span class="term">어닝 쇼크<span class="tip">발표된 실적이 시장 전망치를 크게 밑돈 경우. 반대는 어닝 서프라이즈.</span></span>라고 부른다.</p>
+<p class="p">여기까지는 사실이다. 문제는 <b>그래서 주가가 9.61% 내렸다</b>로 넘어가는 순간이다. 확인된 것과 추측한 것이 한 문장에서 섞인다. 같은 날 시장을 보면 왜 그런지 알 수 있다.</p>
+
+<div class="mkt">
+  <div class="mkth"><b>같은 날 · 2026년 7월 29일 시장 전체</b><i><span class="term">서킷브레이커<span class="tip">지수가 일정 폭 이상 급락할 때 시장 전체의 거래를 일시 정지시키는 제도.</span></span></i></div>
+  <div class="mktg">
+    <span class="k">코스피 종가</span><span class="v num">5,663.24</span><span class="d num">−5.98%</span>
+    <span class="k">코스닥 종가</span><span class="v num">662.68</span><span class="d num">−6.12%</span>
+    <span class="k">코스피 장중 저점</span><span class="v num">5,262.77</span><span class="d num">−11%대</span>
+  </div>
+  <div class="cb">
+    <div class="r"><b>발동 시각</b><span>코스닥 12시 19분 · 코스피 12시 32분</span></div>
+    <div class="note">이틀 연속 양 시장 동반 발동 · 증시 개장 이래 처음</div>
+    <div class="r mcap"><b>시가총액</b><span>이틀 합계 5,958.8조 → 5,037.8조</span></div>
+  </div>
+</div>
+<p class="p">시장 전체가 동시에 급락한 날이었다. 종목 하락 전부를 실적 미달의 영향으로 분리해 계산할 수는 없다.</p>
+
+<div class="stop">
+  <div class="sk">확정하지 않는다</div>
+  <div class="sv">실적 발표와 주가 하락이 같은 날 발생했다는 사실만으로 실적이 하락의 단일 원인이었다고 확정할 수는 없다.</div>
+  <div class="sn">이 종목은 장중 한때 <b>−19.61%</b>까지 내렸다가 <b>−9.61%</b>로 마쳤다. 저가는 1,246,000원. 종가 하나로 하루를 요약하는 것조차 정확하지 않다.</div>
+</div>
+
+<div class="ans">
+  <div class="ak">1페이지의 답</div>
+  <div class="av">좋은 실적이 그날의 종가를 보장하지는 않는다.</div>
+  <div class="aw">이 문장은 원인을 지목하지 않는다. 왜 보장하지 못하는지는 다음 페이지에서 본다.</div>
+</div>
+
+<!-- ══════ 2페이지 ══════ -->
+<div class="ch" id="p2">
+  <div class="chtop"><span class="chn">02</span><span class="chk">이익과 가격표</span></div>
+  <h2 class="cht">이익이 늘어도<br/>가격은 내릴 수 있다</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">주가라는 숫자는 하나지만, 그 안에는 두 개의 눈금이 겹쳐 있다. 회사가 번 이익이 하나, 그 이익에 시장이 붙인 배수가 하나다.</p>
+<h3 class="hd">주가를 이해하는 가장 단순한 분해</h3>
+
+<div class="dials">
+  <div class="dial c">
+    <svg viewBox="0 0 120 84" role="img" aria-label="회사가 돌리는 이피에스 다이얼">
+      <path d="M14 70 A46 46 0 0 1 106 70" fill="none" stroke="#A8B6AB" stroke-width="8" stroke-linecap="round"/>
+      <path d="M14 70 A46 46 0 0 1 78 27" fill="none" stroke="#46584D" stroke-width="8" stroke-linecap="round"/>
+      <line x1="60" y1="70" x2="82" y2="34" stroke="#2F3C34" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="60" cy="70" r="6.5" fill="#2F3C34"/>
+      <text x="60" y="18" text-anchor="middle" font-size="11.5" font-weight="800" fill="#2F3C34">주당순이익</text>
+    </svg>
+    <div class="dn"><span class="term">EPS<span class="tip">주당순이익. 순이익을 발행주식 수로 나눈 값. 주식 한 주에 귀속되는 순이익의 크기.</span></span></div>
+    <div class="dw">사업 성과와 주식 수가 움직인다</div>
+    <div class="ds">영업 성과·영업외손익·세금·발행주식 수가 함께 만든다.</div>
+  </div>
+  <div class="dx">×</div>
+  <div class="dial m">
+    <svg viewBox="0 0 120 84" role="img" aria-label="시장이 돌리는 피이알 다이얼">
+      <path d="M14 70 A46 46 0 0 1 106 70" fill="none" stroke="#D0AE90" stroke-width="8" stroke-linecap="round"/>
+      <path d="M14 70 A46 46 0 0 1 34 33" fill="none" stroke="#A9714B" stroke-width="8" stroke-linecap="round"/>
+      <line x1="60" y1="70" x2="34" y2="40" stroke="#7A4E30" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="60" cy="70" r="6.5" fill="#7A4E30"/>
+      <text x="60" y="18" text-anchor="middle" font-size="11.5" font-weight="800" fill="#7A4E30">주가수익비율</text>
+    </svg>
+    <div class="dn"><span class="term">PER<span class="tip">주가수익비율. 주가를 주당순이익으로 나눈 값. 이익 한 단위에 시장이 매기는 가격.</span></span></div>
+    <div class="dw">성장 기대·금리·위험이 움직인다</div>
+    <div class="ds">회사 밖의 사정이 크게 작용한다. 하루에도 바뀐다.</div>
+  </div>
+</div>
+<div class="deq"><b>주당이익 EPS</b> × <i>그 이익에 붙은 배수 PER</i> = 주가</div>
+<p class="cap">같은 기준의 EPS와 PER을 썼을 때 성립하는 설명용 분해다. 모든 기업의 적정가치를 계산하는 공식은 아니다.</p>
+<p class="p">회사의 실적은 왼쪽 눈금에 더 직접적으로 닿는다. 오른쪽 배수는 시장이 정한다. 그래서 왼쪽이 커져도 오른쪽이 그보다 더 크게 줄면 주가는 내린다. 배수가 몇이어야 적당한지는 여기서 다루지 않는다. 이 글의 질문은 <b>그 배수를 무엇이 움직이는가</b>이다.</p>
+
+<div class="calc">
+  <div class="ch2"><b>숫자로 한 번</b><i>가상의 예시</i></div>
+  <div class="cgrid">
+    <span class="h"></span><span class="h">처음</span><span class="h">이후</span><span class="h">변화</span>
+    <span class="k">주당이익 EPS</span><span class="v num">10</span><span class="v num">12</span><span class="c cc num">+20%</span>
+    <span class="k">배수 PER</span><span class="v num">20배</span><span class="v num">14배</span><span class="c cm num">−30%</span>
+    <span class="rule"></span>
+    <span class="k tot">주가</span><span class="v tot num">200</span><span class="v tot num">168</span><span class="c tot down num">−16%</span>
+  </div>
+  <p class="cnote">주당이익은 늘었다. 그런데 시장이 그 이익에 지불하는 배수가 더 크게 낮아져 주가는 내렸다. 실적이 좋아진 날에도 가격이 내릴 수 있는 한 가지 구조가 여기에 있다.</p>
+</div>
+
+<h3 class="hd">어떤 이익을 쓰고 있는가</h3>
+<div class="fold3">
+  <div class="fi p1"><span class="fk">과거</span><div><div class="ft">확정된 실적</div><div class="fs">이미 발표됐다. <span class="term">과거 PER<span class="tip">이미 발표된 최근 이익을 분모로 쓰는 PER. 후행 PER이라고도 한다.</span></span>은 이 이익을 쓴다.</div></div></div>
+  <div class="fi p2"><span class="fk">현재</span><div><div class="ft">지금의 주가</div><div class="fs">화면에 있다. 두 PER의 분자가 된다.</div></div></div>
+  <div class="fi p3"><span class="fk">미래</span><div><div class="ft">이익 전망</div><div class="fs">아직 없다. <span class="term">선행 PER<span class="tip">앞으로 예상되는 이익을 분모로 쓰는 PER.</span></span>은 이 이익을 쓴다.</div></div></div>
+</div>
+<div class="warnb"><b>섞으면 안 된다.</b> 서로 다른 기간의 EPS와 PER을 곱하면 그 곱은 아무 주가도 가리키지 않는다. 그리고 예상 이익이 하향되면 주가가 그대로여도 선행 PER은 높아진다.</div>
+<p class="p">회사가 발표하는 것은 첫 번째 서류다. 시장이 고쳐 쓰는 것은 세 번째 서류다. 그리고 시장은 <b>첫 번째 서류보다, 세 번째 서류가 얼마나 고쳐졌는지에 더 민감하다.</b> 다음 사례는 그 어긋남이 하루 안에서 벌어진 경우다.</p>
+
+<h3 class="hd">숫자가 이미 나와 있던 날</h3>
+<p class="p">2026년 7월 30일, 삼성전자는 2분기 확정 실적을 발표했다. 영업이익 89조 4,924억, 영업이익률 52.2%. 시장 전망치인 84조~85조 원대를 웃돌았다. 신문 표현으로는 <span class="term">어닝 서프라이즈<span class="tip">발표된 실적이 시장 전망치를 크게 웃돈 경우. 반대는 어닝 쇼크.</span></span>다.</p>
+<p class="p">그런데 그 숫자는 새 정보가 아니었다. <span class="term">잠정 실적<span class="tip">확정 이전에 매출·영업이익 등 일부 항목만 먼저 공시하는 실적.</span></span>으로 3주 전에 이미 나와 있었고, 이번 <span class="term">확정 실적<span class="tip">부문별 수치까지 포함해 최종 확정한 실적.</span></span>은 그와 사실상 같았다.</p>
+
+<div class="clock">
+  <div class="ci"><span class="ct">7월 7일<i>3주 전</i></span><span class="cd">잠정 실적 공시. 영업이익 <b>89조 4,000억</b></span></div>
+  <div class="ci"><span class="ct">7월 30일<i>08시대</i></span><span class="cd">확정 실적 공시. 영업이익 <b>89조 4,924억</b>. 잠정치와 사실상 동일</span></div>
+  <div class="ci hi"><span class="ct">10시경<i>장중</i></span><span class="cd"><span class="term">콘퍼런스콜<span class="tip">실적 발표 뒤 회사가 투자자·애널리스트와 진행하는 설명회. 앞으로의 전망과 질의응답이 오간다.</span></span>에서 <b>“내년 메모리 공급 부족이 올해보다 심해진다”</b>. 주가 <em class="up">장중 +8.39%</em></span></div>
+  <div class="ci"><span class="ct">15시 30분<i>종가</i></span><span class="cd">종가 <b>207,000원</b> · <em class="down">−0.72%</em>. 장중 고점에서 9%포인트 넘게 되돌림</span></div>
+</div>
+
+
+<p class="p">그날 시장이 새로 받은 것은 전망이었다. 되돌림의 원인은 여기서도 확정하지 않는다. 같은 날 코스피 역시 장중 5,976.82까지 올랐다가 종가 5,593.56으로 마쳤으니, 삼성전자만의 일이 아니었다. <b>말할 수 있는 것은 하나다.</b> 확정된 실적이 이미 알려져 있을 때, 가격을 움직인 것은 그 숫자가 아니라 그 숫자 이후에 대한 이야기였다.</p>
+
+<div class="mini">
+  <b class="mh">같은 날 · 삼성전기</b>
+  <div class="mg">
+    <span>매출</span><em class="num">3조 4,572억 · 역대 최대</em>
+    <span>영업이익</span><em class="num">4,404억 · 전년 대비 +107%</em>
+    <span>종가</span><em class="num down">879,000원 · −14.58%</em>
+  </div>
+  <p class="mp">컨센서스를 넘겼다는 사실도 그날의 종가를 보장하지 않는다.</p>
+</div>
+
+<div class="foldwrap">
+  <details class="fold">
+    <summary>컨센서스는 하나의 확정된 숫자가 아니다</summary>
+    <div class="fb">
+      <p>이 편을 쓰면서 확인한 사실을 그대로 적는다. 같은 회사, 같은 분기의 컨센서스가 인용하는 곳마다 달랐다.</p>
+      <div class="csv">
+        <span class="h">SK하이닉스 2분기 영업이익 컨센서스</span><span class="h" style="text-align:right">값</span><span class="h"></span>
+        <span class="k">에프앤가이드 인용 보도</span><span class="v num">63조 9,868억</span><span></span>
+        <span class="k">다른 매체 인용 “시장 전망치”</span><span class="v num">63조 5,526억</span><span></span>
+        <span class="k">삼성전자 2분기 영업이익 컨센서스</span><span class="v num">84조 1,894억 · 85조 494억</span><span></span>
+      </div>
+      <p>차이가 나는 이유는 단순하다. <b>어떤 기관이, 몇 개 증권사의 추정치를, 며칠 기준으로 모았는가</b>가 다르기 때문이다. 발표 직전까지 추정치를 고치는 증권사도 있다.</p>
+      <div class="miss">그래서 “컨센서스를 5% 밑돌았다”는 문장을 읽을 때는 <b>어느 컨센서스인지</b>를 함께 봐야 한다. 기준이 바뀌면 5%는 4.7%가 되기도 하고 5.4%가 되기도 한다. 그 정도 폭에서 갈리는 판단이라면, 그 판단은 애초에 그만큼만 단단하다.</div>
+    </div>
+  </details>
+  <details class="fold">
+    <summary>선반영이라는 말이 뜻하는 것</summary>
+    <div class="fb">
+      <p><span class="term">선반영<span class="tip">앞으로 예상되는 일이 이미 현재 가격에 들어가 있는 상태.</span></span>은 앞으로 벌어질 일이 이미 지금 가격에 들어가 있다는 뜻이다. 좋은 실적이 예상되면 발표 전에 미리 오르고, 발표일에는 그 예상이 맞았다는 확인만 남는다.</p>
+      <p>다만 이 말은 사후에 붙이기 쉬운 설명이기도 하다. 오르면 기대가 컸다고 하고, 내리면 이미 반영됐다고 한다. <b>어디까지가 미리 반영된 것인지는 사전에 잴 수 없다.</b></p>
+<p>반대 방향도 있다. 이익이 줄어도 시장이 회복을 먼저 반영해 배수가 올라가면 주가는 오를 수 있다. 앞의 계산 박스를 거꾸로 돌린 경우다.</p>
+    </div>
+  </details>
+</div>
+
+<div class="pull">
+  <p>회사의 실적은 <b>왼쪽</b>에 더 직접적으로 반영된다.<br/>오른쪽의 배수는 시장이 정한다.</p>
+</div>
+
+<!-- ══════ 3페이지 ══════ -->
+<div class="ch" id="p3">
+  <div class="chtop"><span class="chn">03</span><span class="chk">두 개의 질문표</span></div>
+  <h2 class="cht">따로 채운다.<br/>그리고 더하지 않는다</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">지금까지 나온 이야기는 세 개의 문장으로 정리된다.</p>
+
+<div class="three">
+  <div class="ti s1"><span class="no">①</span><div><div class="tx">이 회사는 좋은 회사다</div><div class="mt">사업 구조와 경쟁력 · <i>회사가 만든다 · 느리게 바뀐다</i></div></div></div>
+  <div class="ti s2"><span class="no">②</span><div><div class="tx">이번 실적은 좋았다</div><div class="mt">지난 분기의 결과 · <i>회사가 발표한다 · 분기마다 바뀐다</i></div></div></div>
+  <div class="ti s3"><span class="no">③</span><div><div class="tx">지금 이 주식은 좋은 가격이다</div><div class="mt">기대와 가격의 관계 · <i>시장이 정한다 · 하루에도 바뀐다</i></div></div></div>
+</div>
+<p class="p">①이 참이어도 ②가 거짓일 수 있다. ①과 ②가 모두 참이어도 ③은 별개의 문제다. 7월 29일과 30일의 세 회사가 그 사례였다. 그래서 질문표도 두 장으로 나눈다.</p>
+
+<div class="sheets">
+  <div class="sheet c">
+    <div class="sh"><b>회사 평가서</b><i>① ②</i></div>
+    <ul>
+      <li>무엇을 팔아서 돈을 버는가</li>
+      <li>그 이익이 몇 분기 이어졌는가</li>
+      <li>경쟁자와 무엇이 다른가</li>
+      <li>이익이 흔들릴 때 무엇이 먼저 흔들리는가</li>
+    </ul>
+  </div>
+  <div class="noadd">
+    <svg viewBox="0 0 40 40" role="img" aria-label="두 표의 점수를 더하지 말라는 표시">
+      <circle cx="20" cy="20" r="17" fill="none" stroke="#7A5444" stroke-width="2.4"/>
+      <line x1="20" y1="11" x2="20" y2="29" stroke="#7A5444" stroke-width="2.8" stroke-linecap="round"/>
+      <line x1="11" y1="20" x2="29" y2="20" stroke="#7A5444" stroke-width="2.8" stroke-linecap="round"/>
+      <line x1="9.5" y1="30.5" x2="30.5" y2="9.5" stroke="#C74754" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <b>두 표의 점수를<br/>더하지 않는다</b>
+  </div>
+  <div class="sheet m">
+    <div class="sh"><b>주식 평가서</b><i>③</i></div>
+    <ul>
+      <li>시장은 이미 무엇을 기대하고 있는가</li>
+      <li>이번 발표는 그 기대를 넘었는가 밑돌았는가</li>
+      <li>회사가 말한 <span class="term">가이던스<span class="tip">회사가 직접 밝히는 앞으로의 실적·업황 전망.</span></span>는 기대를 올렸는가 내렸는가</li>
+      <li>그 기대에 지금 얼마를 지불하고 있는가</li>
+    </ul>
+  </div>
+</div>
+<p class="p">회사 평가서가 모두 채워져도 주식 평가서는 비어 있을 수 있다. 두 표는 다른 질문에 답한다. 더하면 두 답이 함께 흐려진다. 판단할 때는 두 표를 함께 보되, <b>회사 평가의 높은 점수가 주식 평가의 빈칸을 대신하게 해서는 안 된다.</b></p>
+
+<div class="limit">
+  <div class="li can">
+    <div class="lk">여기까지는 말할 수 있다</div>
+    <ul>
+      <li>이번 실적이 시장 전망치를 넘었는지 밑돌았는지</li>
+      <li>회사가 다음 분기에 대해 무엇을 말했는지</li>
+      <li>그날 주가가 어디서 열려 어디서 닫혔는지</li>
+    </ul>
+  </div>
+  <div class="li cant">
+    <div class="lk">여기부터는 추가 자료 없이 확정할 수 없다</div>
+    <ul>
+      <li>그날의 등락을 실적 하나의 영향으로 확정하기</li>
+      <li>PER 하나만 보고 지금 가격이 비싸거나 싸다고 확정하기</li>
+      <li>좋은 실적 다음의 주가 상승을 보장하기</li>
+    </ul>
+  </div>
+</div>
+
+<div class="narrow">
+  <div class="nk">다만 자료를 더 붙이면 범위는 좁혀진다</div>
+  <div class="chips"><span>발표 시각과 장중 가격</span><span>지수·동종업종 대비 초과수익률</span><span>컨센서스 변화와 가이던스</span><span>거래량과 수급</span><span>발표 전 주가 상승률</span></div>
+  <p>증명은 못 한다. 다만 어느 설명이 더 그럴듯한지는 좁혀진다. 가격의 고저도 절대적인 정답은 없지만 비교 기준을 정하면 답할 수 있다.</p>
+</div>
+
+<div class="ans">
+  <div class="ak">제4편의 한 문장</div>
+  <div class="av">주가는 회사의 현재 성적표만 반영하지 않는다. 시장이 이미 기대한 수준, 앞으로의 이익 전망, 그리고 그 기대에 지불한 가격까지 함께 반영한다.</div>
+  <div class="aw">성적표는 회사가 쓰고, 기대와 가격표는 시장이 쓴다. 넷이 한 숫자에 겹쳐 있으니 그 숫자 하나로 회사를 평가할 수는 없다.</div>
+</div>
+
+<p class="p">뉴스는 이 셋을 한 문장에 섞어 쓴다. “좋은 실적에도 주가는 내렸다”에는 ②와 ③이 함께 들어 있다. 읽는 사람이 할 일은 그 문장을 다시 나누는 것이다. 나누고 나면 어느 칸이 비어 있는지가 보인다. 확인되지 않은 칸은 비워두되, 어떤 자료가 있어야 그 칸을 채울 수 있는지는 분명히 적어 둔다.</p>
+
+<div class="foldwrap">
+  <details class="fold">
+    <summary>이번 편에 나온 말 정리</summary>
+    <div class="fb">
+      <dl class="gloss">
+        <dt>컨센서스</dt><dd>증권사들이 낸 추정치의 평균. 집계 기관과 기준일에 따라 값이 달라진다.</dd>
+        <dt>어닝 서프라이즈</dt><dd>발표된 실적이 시장 전망치를 크게 웃돈 경우.</dd>
+        <dt>어닝 쇼크</dt><dd>발표된 실적이 시장 전망치를 크게 밑돈 경우.</dd>
+        <dt>영업이익률</dt><dd>매출에서 영업이익이 차지하는 비율.</dd>
+        <dt>EPS</dt><dd>주당순이익. 순이익을 발행주식 수로 나눈 값.</dd>
+        <dt>PER</dt><dd>주가수익비율. 주가를 주당순이익으로 나눈 값. 이익 한 단위에 시장이 매기는 가격.</dd>
+        <dt>과거 PER</dt><dd>이미 발표된 최근 이익을 분모로 쓰는 PER. 후행 PER이라고도 한다.</dd>
+        <dt>선행 PER</dt><dd>앞으로 예상되는 이익을 분모로 쓰는 PER.</dd>
+        <dt>잠정 실적</dt><dd>확정 이전에 매출·영업이익 등 일부만 먼저 공시하는 실적.</dd>
+        <dt>확정 실적</dt><dd>부문별 수치까지 포함해 최종 확정한 실적.</dd>
+        <dt>가이던스</dt><dd>회사가 직접 밝히는 앞으로의 실적·업황 전망.</dd>
+        <dt>콘퍼런스콜</dt><dd>실적 발표 뒤 회사가 투자자·애널리스트와 진행하는 설명회.</dd>
+        <dt>선반영</dt><dd>앞으로 예상되는 일이 이미 현재 가격에 들어가 있는 상태.</dd>
+        <dt>서킷브레이커</dt><dd>지수가 일정 폭 이상 급락할 때 시장 전체 거래를 일시 중단하는 제도.</dd>
+      </dl>
+    </div>
+  </details>
+  <details class="fold">
+    <summary>이 편에서 쓰지 않은 숫자</summary>
+    <div class="fb">
+      <p>7월 29일과 30일의 투자자별 수급 금액은 보도마다 값이 달라 쓰지 않았다. 삼성전자 7월 30일 장중 고가의 원 단위 금액도 확인된 출처를 찾지 못해 등락률만 적었다.</p>
+      <p>세 회사의 PER 같은 지표도 넣지 않았다. 이 편은 개별 종목의 가격이 비싼지 싼지를 판단하지 않기 때문에, 그 숫자가 있어도 쓸 곳이 없다.</p>
+      <div class="miss">확인되지 않은 숫자는 채우지 않는다. 빈칸으로 두는 편이 채워 넣은 숫자보다 정확하다.</div>
+    </div>
+  </details>
+</div>
+
+<div class="next">
+  <div class="nh">다음 편</div>
+  <p class="nbridge">그런데 좋은 회사의 가격표가 무너지기 시작하면, 왜 하락은 가격에서 끝나지 않고 다음 매도를 부를까.</p>
+  <p>제5편 · <b>급락은 어떻게 더 큰 급락을 만드는가</b></p>
+  <div class="nt">1편은 누가, 2편은 어느 시장에서, 3편은 어디서 출발해, 4편은 무엇을 근거로. 마지막 편은 <b>하락이 스스로 하락을 부르는 구조</b>를 본다. 사람이 새 판단을 내리지 않아도 규칙과 포지션 때문에 매도가 이어지는 부분이다.</div>
+</div>
+
+<p class="disc">이 글은 경제·주식 용어의 뜻과 읽는 방법을 설명하는 교양 자료입니다. 특정 종목의 매매를 권유하지 않으며, 투자 판단과 그 결과는 투자자 본인에게 있습니다.<br/>출처 · 실적은 각 회사 발표, 주가와 지수는 한국거래소 기준 인용 보도, 컨센서스는 집계 기관 인용 보도. 2026년 7월 29일·30일.</p>
+<p class="foot">시장을 읽는 말들 · 04 / 05</p>
+
+</div>
+<script>
+(function(){
+  if(window.__mwWords4) return; window.__mwWords4 = true;
+
+  var pg=document.getElementById('pg');
+  function updateProg(){
+    if(!pg) return;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var y=window.scrollY||window.pageYOffset||0;
+    pg.style.width=(h>0?Math.min(100,Math.max(0,y/h*100)):0)+'%';
+  }
+  window.addEventListener('scroll',updateProg,{passive:true});
+  window.addEventListener('resize',updateProg);
+  updateProg();
+
+  function resetTip(el){ var tp=el.querySelector('.tip'); if(tp){ tp.classList.remove('below'); tp.removeAttribute('style'); } }
+  function clampTip(t){
+    var tip=t.querySelector('.tip'); if(!tip) return;
+    var vw=window.innerWidth, pad=12;
+    var w=Math.min(248, vw-2*pad);
+    tip.style.position='fixed'; tip.style.bottom='auto'; tip.style.transform='none';
+    tip.style.width=w+'px'; tip.style.left='0px'; tip.style.top='0px';
+    var tr=t.getBoundingClientRect();
+    var th=tip.getBoundingClientRect().height;
+    var left=tr.left+tr.width/2-w/2;
+    if(left<pad) left=pad;
+    if(left+w>vw-pad) left=vw-pad-w;
+    var top=tr.top-th-9, below=false;
+    if(top<pad+50){ top=tr.bottom+9; below=true; }
+    var vh=window.innerHeight;
+    if(top+th>vh-pad){ top=vh-pad-th; }
+    if(top<pad){ top=pad; }
+    tip.style.left=Math.round(left)+'px';
+    tip.style.top=Math.round(top)+'px';
+    var tb=tip.getBoundingClientRect();
+    var dx=tb.left-left, dy=tb.top-top;
+    if(dx||dy){ tip.style.left=Math.round(left-dx)+'px'; tip.style.top=Math.round(top-dy)+'px'; }
+    tip.classList.toggle('below', below);
+    var ax=tr.left+tr.width/2-left;
+    ax=Math.max(12, Math.min(w-12, ax));
+    tip.style.setProperty('--ax', Math.round(ax)+'px');
+  }
+  function closeTerms(except){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++){ if(open[i]!==except){ open[i].classList.remove('open'); resetTip(open[i]); } }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.term'), function(t){
+    t.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var willOpen=!t.classList.contains('open');
+      closeTerms(t);
+      t.classList.toggle('open', willOpen);
+      if(willOpen) clampTip(t);
+    });
+  });
+  document.addEventListener('click', function(){ closeTerms(null); });
+  window.addEventListener('scroll', function(){ closeTerms(null); }, {passive:true});
+  window.addEventListener('resize', function(){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++) clampTip(open[i]);
+  });
+})();
+</script>
+</body>
+</html>
