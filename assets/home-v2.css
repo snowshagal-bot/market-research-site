@@ -635,23 +635,23 @@ html[data-theme="dark"] .hero-art img {
 
   .hero-copy {
     min-height: 0;
-    padding: 24px 0 6px;
+    padding: 20px 0 4px;
   }
 
   .hero-copy h1 {
     max-width: none;
-    font-size: clamp(28px, 8.6vw, 38px);
-    line-height: 1.25;
+    font-size: clamp(27px, 8.2vw, 36px);
+    line-height: 1.2;
   }
 
   html[lang="en"] .hero-copy h1 {
     max-width: 11ch;
-    font-size: clamp(34px, 9.8vw, 44px);
-    line-height: 1.08;
+    font-size: clamp(31px, 9vw, 40px);
+    line-height: 1.06;
   }
 
-  .hero-rule { width: 76px; margin: 14px 0 12px; }
-  .hero-description { font-size: 13px; line-height: 1.62; }
+  .hero-rule { width: 72px; margin: 10px 0 9px; }
+  .hero-description { font-size: 12.5px; line-height: 1.55; }
   .hero-description span { display: inline; }
 
   .hero-entries {
@@ -662,7 +662,7 @@ html[data-theme="dark"] .hero-art img {
     position: relative;
     right: auto;
     width: calc(100% + 28px);
-    height: clamp(195px, 54vw, 225px);
+    height: clamp(155px, 42vw, 175px);
     margin: 0 -14px;
     border-radius: 0 0 18px 18px;
   }
@@ -673,11 +673,11 @@ html[data-theme="dark"] .hero-art img {
       linear-gradient(90deg, var(--bg) 0, transparent 10%, transparent 90%, var(--bg) 100%);
   }
 
-  .hero-art img { object-position: 74% 50%; }
+  .hero-art img { object-position: 74% 48%; }
 
-  .site-introduction { padding: 28px 0 16px; }
-  .latest-head { margin-bottom: 14px; }
-  .latest-head h2 { font-size: 23px; }
+  .site-introduction { padding: 22px 0 14px; }
+  .latest-head { margin-bottom: 12px; }
+  .latest-head h2 { font-size: 22px; }
 
   .latest-cards { grid-template-columns: 1fr; gap: 10px; }
   .latest-card {
@@ -742,8 +742,8 @@ html[data-theme="dark"] .hero-art img {
 }
 
 @media (max-width: 380px) {
-  .hero-copy { min-height: 0; padding-top: 20px; }
-  .hero-art { height: 195px; }
+  .hero-copy { min-height: 0; padding-top: 18px; }
+  .hero-art { height: 155px; }
   .latest-head > a { font-size: 10px; }
   .archive-layout .report-item {
     grid-template-columns: 74px minmax(0, 1fr) 18px;

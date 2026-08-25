@@ -163,3 +163,52 @@ test('locale switch preserves Market routes', async () => {
   assert.match(locale, /\/en\\\/market/);
   assert.match(locale, /'\/en\/market\/' : '\/market\/'/);
 });
+
+test('public pages keep mobile navigation elements outside header-row', async () => {
+  function extractDivContent(html, pattern) {
+    const match = html.match(pattern);
+    if (!match) return null;
+    const startIdx = match.index + match[0].length;
+    let depth = 1;
+    let cursor = startIdx;
+    while (depth > 0 && cursor < html.length) {
+      const nextOpen = html.indexOf('<div', cursor);
+      const nextClose = html.indexOf('</div>', cursor);
+      if (nextClose === -1) break;
+      if (nextOpen !== -1 && nextOpen < nextClose) {
+        depth++;
+        cursor = nextOpen + 4;
+      } else {
+        depth--;
+        if (depth === 0) return html.slice(startIdx, nextClose);
+        cursor = nextClose + 6;
+      }
+    }
+    return null;
+  }
+
+  const pages = [
+    'index.html',
+    'en/index.html',
+    'about/index.html',
+    'en/about/index.html',
+    'market/index.html',
+    'en/market/index.html'
+  ];
+
+  for (const pagePath of pages) {
+    const html = await read(pagePath);
+    const headerRow = extractDivContent(html, /<div[^>]*class="[^"]*header-row[^"]*"[^>]*>/);
+    assert.ok(headerRow, `header-row not found in ${pagePath}`);
+    assert.doesNotMatch(
+      headerRow,
+      /class="[^"]*mobile-quick-nav[^"]*"/,
+      `mobile-quick-nav is improperly nested inside header-row in ${pagePath}`
+    );
+    assert.doesNotMatch(
+      headerRow,
+      /class="[^"]*mobile-nav[^"]*"/,
+      `mobile-nav is improperly nested inside header-row in ${pagePath}`
+    );
+  }
+});
