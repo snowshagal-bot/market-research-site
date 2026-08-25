@@ -66,6 +66,23 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-24-daily-97jc8s.webp"
   },
   {
+    "id": "2026-08-23-research-16pvcxp",
+    "type": "research",
+    "typeLabel": "Research",
+    "lang": "en",
+    "date": "2026-08-23",
+    "reportDate": "2026-08-23",
+    "registeredDate": "2026-08-26",
+    "registeredAt": "2026-08-25T15:44:42.398Z",
+    "legacyImport": false,
+    "title": "America’sCostlier 30-Year Money",
+    "subtitle": "",
+    "description": "Independent research on specific industries, companies, policies, and market structure.",
+    "href": "reports/en/비정기리서치_미국의비싸진30년_2026.08.23_커버통합_EN.html",
+    "translationGroup": "2026-08-23-research-1xleg6o",
+    "coverImage": "covers/2026-08-23-research-16pvcxp.webp"
+  },
+  {
     "id": "2026-08-23-research-1xleg6o",
     "type": "research",
     "typeLabel": "비정기 리서치",
