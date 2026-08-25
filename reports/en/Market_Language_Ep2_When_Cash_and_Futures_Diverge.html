@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>The Language of Markets · Episode 2 When Cash and Futures Diverge</title>
+<style>
+:root{
+  --surface-page:#ECEAE5;
+  --surface-band:#E3E0D9;
+  --surface-inner:#F1EFEA;
+  --surface-detail:#E8E5DF;
+  --surface-muted:#DAD6CE;
+  --ink:#2E2E2C;
+  --ink2:#43423E;
+  --body:#53514C;
+  --sub:#706D66;
+  --muted:#8B867E;
+  --line:#CEC9BF;
+  --line2:#DCD7CE;
+  /* 판정·결론 전용 */
+  --green:#46584D;
+  --green-dark:#2F3C34;
+  --green-soft:#DCE3DD;
+  --green-line:#AAB6AC;
+  --green-pale:#A8C6B4;
+  /* 현물 = 슬레이트 네이비 */
+  --spot:#3F4854;
+  --spot-dark:#2B323C;
+  --spot-soft:#DEE2E6;
+  --spot-line:#A9B2BD;
+  /* 선물 = 클레이 브론즈 */
+  --fut:#A87B4E;
+  --fut-dark:#6F4F2F;
+  --fut-soft:#EFE2D0;
+  --fut-line:#D0B187;
+  /* 가격 방향 전용 */
+  --up:#C74754;
+  --down:#4F78A8;
+  --warn:#7A5444;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:58px;overflow-x:hidden}
+html,body{max-width:100%}
+body{
+  margin:0;background:var(--surface-page);color:var(--ink);
+  font-family:"Pretendard Variable","Pretendard","SUIT","Noto Sans KR","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  line-height:1.62;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;
+  word-break:keep-all;line-break:strict;
+}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(46px + env(safe-area-inset-bottom,0px));width:100%;position:relative}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+a{color:inherit;text-decoration:none}
+
+/* ── 상단바 ── */
+.topbar{position:sticky;top:0;z-index:50;margin:0 -16px;
+  background:rgba(236,234,229,.92);-webkit-backdrop-filter:saturate(150%) blur(12px);backdrop-filter:saturate(150%) blur(12px);
+  border-bottom:1px solid rgba(90,84,74,.13)}
+.tbin{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0)) 18px 9px}
+.tbin .brand{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.tbin .brand i{font-style:normal;color:var(--green)}
+.tbin .ep{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.prog{height:2px;background:rgba(90,84,74,.10)}
+.prog i{display:block;height:100%;width:0;background:var(--green);transition:width .1s linear}
+
+/* ── 표지 ── */
+.cover{margin:0 -16px;padding:30px 22px 20px;
+  background:linear-gradient(158deg,#3C4B41 0%,#2F3C34 60%,#28332C 100%);color:#EFEDE7}
+.cvkick{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.06em;
+  color:#BFD2C6;border:1px solid rgba(168,198,180,.34);border-radius:999px;padding:5px 12px}
+.cvkick b{color:#EFEDE7;font-weight:800}
+.cvtitle{margin:18px 0 0;font-size:37px;line-height:1.2;font-weight:800;letter-spacing:-.05em;color:#F4F2ED}
+.cvtitle span{display:block;color:var(--green-pale)}
+.cvsub{margin:14px 0 0;font-size:14px;line-height:1.62;font-weight:600;color:#C6D2CA;max-width:20em}
+.cvmotif{margin:16px 0 0}
+.cvmotif svg{display:block;width:100%;height:auto}
+.cvidx{display:flex;gap:6px;margin:16px 0 0;flex-wrap:wrap}
+.cvidx a{font-size:11.5px;font-weight:800;color:#D3DED7;background:rgba(255,255,255,.07);
+  border:1px solid rgba(168,198,180,.22);border-radius:999px;padding:6px 12px}
+.cvidx a b{color:var(--green-pale);font-weight:800;margin-right:5px}
+
+/* ── 챕터 오프너 (2색 밑줄) ── */
+.ch{margin:26px 0 14px}
+.chtop{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.chn{font-size:12px;font-weight:800;color:#EFEDE7;background:var(--ink);border-radius:4px;padding:3px 8px;letter-spacing:.04em}
+.chk{font-size:11.5px;font-weight:800;letter-spacing:.11em;color:var(--sub)}
+.cht{margin:0;font-size:24px;line-height:1.3;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.chrule{display:flex;height:3px;margin-top:12px}
+.chrule i{display:block;height:100%}
+.chrule .a{width:52%;background:var(--spot)}
+.chrule .b{width:48%;background:var(--fut)}
+
+/* ── 실제 수급 분할 카드 ── */
+.duocard{margin:16px 0 0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface-inner)}
+.duohead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 14px;background:var(--surface-detail);border-bottom:1px solid var(--line)}
+.duohead .dtag{font-size:11.5px;font-weight:800;letter-spacing:.05em;color:var(--green-dark)}
+.duohead .dsub{font-size:11.5px;font-weight:700;color:var(--muted)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:1.5px;background:var(--line)}
+.duo .side{padding:16px 14px 15px}
+.duo .spot{background:var(--spot-soft)}
+.duo .fut{background:var(--fut-soft)}
+.duo .side i{display:block;font-style:normal;font-size:12px;font-weight:800;letter-spacing:.04em;margin-bottom:7px}
+.duo .spot i{color:var(--spot-dark)}
+.duo .fut i{color:var(--fut-dark)}
+.duo .side b{display:block;font-size:29px;font-weight:800;letter-spacing:-.05em;line-height:1;color:var(--ink)}
+.duo .side em{display:block;font-style:normal;font-size:11.5px;font-weight:700;color:var(--body);margin-top:7px;line-height:1.4}
+.duofoot{display:flex;flex-wrap:wrap;gap:7px;padding:11px 14px;border-top:1px solid var(--line)}
+.duofoot span{font-size:11.5px;font-weight:700;color:var(--sub);background:var(--surface-detail);border-radius:6px;padding:5px 10px}
+.duofoot span b{color:var(--ink);font-weight:800;margin-left:3px}
+.duosrc{margin:0;padding:0 14px 13px;font-size:11.5px;line-height:1.5;font-weight:600;color:var(--muted)}
+
+/* ── 큰 질문 · 한 문장 답 ── */
+.qbig{margin:22px 0 0;font-size:23px;line-height:1.42;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.ans{margin:14px -16px 0;padding:18px 22px;background:var(--green);color:#EFEDE7;position:relative;overflow:hidden}
+.ans:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green-pale)}
+.ans .ak{font-size:11px;font-weight:800;letter-spacing:.14em;color:#A8BCAE;margin-bottom:8px}
+.ans .av{font-size:21px;line-height:1.42;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.ans .aw{margin:12px 0 0;padding-top:12px;border-top:1px solid rgba(168,198,180,.24);font-size:13px;line-height:1.6;font-weight:600;color:#CBD8CF}
+
+/* ── 네 컷 ── */
+.toon{margin:20px 0 0;border:1.5px solid var(--ink);border-radius:4px;overflow:hidden;background:var(--ink)}
+.toonhead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;color:#EDEAE4}
+.toonhead b{font-size:12px;font-weight:800;letter-spacing:.03em}
+.toonhead i{font-style:normal;font-size:11.5px;font-weight:700;color:#A9A49B}
+.trow{display:grid;grid-template-columns:1fr 1fr;gap:1.5px}
+.tfull{margin-top:1.5px}
+.tpnl{background:var(--surface-inner);position:relative}
+.tpnl svg{display:block;width:100%;height:auto}
+.tpnl .tno{position:absolute;left:0;top:0;font-size:11px;font-weight:800;color:#EDEAE4;background:var(--ink);padding:3px 8px 4px;border-radius:0 0 6px 0}
+.tcap{padding:8px 12px 10px;font-size:12px;line-height:1.48;font-weight:700;color:var(--ink2);border-top:1px solid var(--line2);background:var(--surface-detail)}
+.tcap b{font-weight:800}
+.tcap .sp{color:var(--spot-dark)}
+.tcap .ft{color:var(--fut-dark)}
+.tpnl.pay .tcap{background:var(--green-soft);color:var(--green-dark);font-size:13px;font-weight:800}
+.toonfoot{padding:8px 12px;color:#A9A49B;font-size:11.5px;font-weight:600}
+
+/* ── 다리 문장 ── */
+.bridge{margin:20px 0 0;font-size:15px;line-height:1.6;font-weight:800;letter-spacing:-.025em;color:var(--ink2)}
+.bridge b{color:var(--green-dark)}
+
+/* ── 본문 ── */
+.tp{margin:11px 0 0;font-size:13.5px;line-height:1.68;color:var(--body);font-weight:600}
+.tp b{color:var(--ink);font-weight:800}
+.dot{margin:8px 0 0;padding-left:14px;position:relative;font-size:13px;line-height:1.62;font-weight:600;color:var(--body)}
+.dot:before{content:"·";position:absolute;left:2px;color:var(--green);font-weight:800}
+.dot b{color:var(--ink);font-weight:800}
+.sech{margin:22px 0 0;font-size:17px;font-weight:800;letter-spacing:-.03em;color:var(--ink)}
+.sesub{margin:5px 0 0;font-size:13px;line-height:1.6;font-weight:600;color:var(--body)}
+.sesub b{color:var(--ink);font-weight:800}
+
+/* ── 짝 모듈 (현물·선물 / 차익·비차익) ── */
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:1.5px;margin:12px 0 0;background:var(--line);border-radius:12px;overflow:hidden}
+.pair .pc{padding:12px 13px}
+.pair .pc.sp{background:var(--spot-soft)}
+.pair .pc.ft{background:var(--fut-soft)}
+.pair .pc.n1,.pair .pc.n2{background:var(--surface-inner)}
+.pair .ph{font-size:14.5px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid rgba(90,84,74,.16)}
+.pair .pc.sp .ph{color:var(--spot-dark)}
+.pair .pc.ft .ph{color:var(--fut-dark)}
+.pair .pc.n1 .ph,.pair .pc.n2 .ph{color:var(--ink)}
+.pair p{margin:0 0 8px;font-size:12.5px;line-height:1.58;font-weight:600;color:var(--body)}
+.pair p:last-child{margin-bottom:0}
+.pair p b{color:var(--ink);font-weight:800}
+
+/* ── 단순 합산 금지 ── */
+.nosum{margin:11px 0 0;border:1px solid var(--fut-line);border-radius:12px;background:var(--fut-soft);padding:12px 14px}
+.nosum .nsh{font-size:14.5px;font-weight:800;color:var(--fut-dark);letter-spacing:-.025em;margin-bottom:8px}
+.nosum .nseq{display:flex;align-items:center;gap:10px;margin-bottom:9px;padding-bottom:9px;border-bottom:1px solid var(--fut-line)}
+.nosum .nseq s{font-size:14.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums;text-decoration-thickness:2px}
+.nosum .nseq i{font-style:normal;font-size:16px;font-weight:800;color:var(--warn);line-height:1}
+.nosum p{margin:0;font-size:12.5px;line-height:1.6;font-weight:600;color:var(--ink2)}
+.nosum p b{color:var(--fut-dark);font-weight:800}
+
+/* ── 매트릭스 ── */
+.mxnote{margin:11px 0 0;padding:10px 14px;background:var(--surface-detail);border-left:3px solid var(--green);border-radius:0 10px 10px 0;font-size:12.5px;line-height:1.6;font-weight:700;color:var(--ink2)}
+.mx{display:grid;grid-template-columns:46px 1fr 1fr;gap:1.5px;margin:10px 0 0;background:var(--line);border-radius:12px;overflow:hidden}
+.mxh{background:var(--fut-soft);display:flex;align-items:center;justify-content:center;text-align:center;
+  font-size:11.5px;font-weight:800;color:var(--fut-dark);padding:9px 3px;line-height:1.3}
+.mxv{background:var(--spot-soft);display:flex;align-items:center;justify-content:center;text-align:center;
+  font-size:11.5px;font-weight:800;color:var(--spot-dark);padding:6px 2px;line-height:1.35}
+.mxcorner{background:var(--surface-detail)}
+.mxc{background:var(--surface-inner);padding:11px 11px}
+.mxc .mxn{display:block;font-size:11.5px;font-weight:800;color:var(--muted);margin-bottom:5px}
+.mxc .mxs{display:block;font-size:12.5px;font-weight:800;color:var(--ink);line-height:1.42;letter-spacing:-.02em}
+.mxc .mxchip{display:inline-block;margin-top:8px;font-size:11.5px;font-weight:800;border-radius:5px;padding:3px 8px;
+  background:var(--surface-muted);color:var(--ink2)}
+.mxc.same .mxchip{background:var(--spot-soft);color:var(--spot-dark)}
+.mxc.cross .mxchip{background:var(--fut-soft);color:var(--fut-dark)}
+.mxc.here{background:var(--green-soft)}
+.mxc.here .mxs{color:var(--green-dark)}
+.mxc.here .mxchip{background:var(--green);color:#EFEDE7}
+.mxfoot{margin:9px 0 0;font-size:12.5px;line-height:1.6;font-weight:600;color:var(--sub)}
+
+/* ── 풀쿼트 ── */
+.pull{margin:20px -16px;padding:24px 22px;background:var(--surface-band);border-top:2px solid var(--ink);border-bottom:2px solid var(--ink)}
+.pull p{margin:0;font-size:20px;line-height:1.48;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.pull p b{color:var(--green-dark)}
+
+/* ── 해석 후보 ── */
+.cands{display:grid;gap:9px;margin:12px 0 0}
+.cand{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface-inner)}
+.candh{padding:9px 14px;border-bottom:1px solid var(--line2);background:var(--surface-detail)}
+.candh b{font-size:13.5px;font-weight:800;letter-spacing:-.02em;color:var(--ink)}
+.candh i{display:block;font-style:normal;font-size:11.5px;font-weight:700;color:var(--muted);margin-top:2px}
+.candb{padding:9px 14px 12px}
+.candb .cl{display:block;margin:4px 0;padding-left:13px;position:relative;font-size:12.5px;line-height:1.55;font-weight:600;color:var(--body)}
+.candb .cl:before{content:"·";position:absolute;left:2px;color:var(--muted);font-weight:800}
+.candv{margin:10px 0 0;padding-top:9px;border-top:1px dashed var(--line);font-size:12.5px;line-height:1.6;font-weight:700;color:var(--green-dark)}
+.candv b{font-weight:800}
+
+/* ── 헤지 ── */
+.hedge{margin:12px 0 0;border:1px solid var(--green-line);border-radius:12px;background:var(--green-soft);padding:14px 15px 13px}
+.hedge .hh{font-size:14.5px;font-weight:800;color:var(--green-dark);letter-spacing:-.02em;margin-bottom:7px}
+.hedge .hd{font-size:13px;line-height:1.6;font-weight:700;color:var(--ink2);margin:0}
+.hflow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0 0}
+.hflow span{font-size:12px;font-weight:800;background:var(--surface-inner);border:1px solid var(--green-line);border-radius:7px;padding:7px 10px;color:var(--ink2)}
+.hflow i{font-style:normal;font-size:12px;font-weight:800;color:var(--green)}
+.hedge .hw{margin:11px 0 0;padding-top:10px;border-top:1px solid var(--green-line);font-size:12.5px;line-height:1.6;font-weight:700;color:var(--green-dark)}
+
+/* ── 베이시스 ── */
+.basis{margin:12px 0 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface-inner)}
+.blegend{display:flex;gap:14px;padding:11px 14px;border-bottom:1px solid var(--line2);background:var(--surface-detail)}
+.blegend span{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;color:var(--ink2)}
+.blegend i{width:14px;height:3px;border-radius:2px;display:inline-block}
+.blegend .isp{background:var(--spot)}
+.blegend .ift{background:var(--fut)}
+.basis .bsv{padding:12px 12px 2px}
+.basis svg{display:block;width:100%;height:auto}
+.bcaps{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5px;background:var(--line);border-top:1px solid var(--line)}
+.bcaps div{background:var(--surface-inner);padding:11px 8px;text-align:center}
+.bcaps b{display:block;font-size:12.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.bcaps span{display:block;font-size:11.5px;font-weight:600;color:var(--sub);margin-top:3px;line-height:1.4}
+
+/* ── 읽는 순서 칩 ── */
+.steps5{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.steps5 span{font-size:12px;font-weight:700;color:var(--ink2);background:var(--surface-inner);
+  border:1px solid var(--line);border-radius:999px;padding:6px 11px}
+.steps5 span b{color:var(--green-dark);font-weight:800;margin-right:5px}
+
+/* ── 프로그램 합산 ── */
+.sum{margin:12px 0 0;border:1px solid var(--line);border-radius:12px;background:var(--surface-inner);padding:12px 14px 10px}
+.sumt{font-size:11.5px;font-weight:800;letter-spacing:.05em;color:var(--muted);margin-bottom:12px}
+.sumrow{display:grid;grid-template-columns:70px 1fr 66px;gap:9px;align-items:center;margin:9px 0}
+.sumrow .sl{font-size:12px;font-weight:800;color:var(--ink2);line-height:1.3}
+.sumtrack{position:relative;height:19px;background:var(--surface-muted);border-radius:4px}
+.sumtrack:before{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1.5px;background:var(--line);transform:translateX(-50%)}
+.sumfill{position:absolute;top:2px;bottom:2px;border-radius:2px}
+.sumrow .sv{font-size:12.5px;font-weight:800;text-align:right;color:var(--ink2)}
+.sumrow.total{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.sumrow.total .sl,.sumrow.total .sv{color:var(--green-dark)}
+.sumnote{margin:12px 0 0;font-size:12.5px;line-height:1.6;font-weight:600;color:var(--body)}
+.sumnote b{color:var(--ink);font-weight:800}
+
+/* ── 판정 순서 ── */
+.order{margin:12px 0 0}
+.ord{display:grid;grid-template-columns:27px 1fr;gap:12px;padding:9px 0;border-bottom:1px solid var(--line2)}
+.ord:last-child{border-bottom:none}
+.ord .on{font-size:12px;font-weight:800;color:#EFEDE7;background:var(--green);border-radius:50%;width:25px;height:25px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ord .ob b{display:block;font-size:14px;font-weight:800;color:var(--ink);margin-bottom:3px;letter-spacing:-.025em}
+.ord .ob p{margin:0;font-size:12.5px;line-height:1.6;color:var(--body);font-weight:600}
+.ord .ob p b{display:inline;font-size:inherit;color:var(--ink);margin:0}
+
+/* ── 연습 문제 ── */
+.prob{margin:16px -16px 0;padding:22px;background:var(--surface-band)}
+.probh{font-size:11.5px;font-weight:800;letter-spacing:.1em;color:var(--green-dark);margin-bottom:12px}
+.pchips{display:grid;grid-template-columns:1fr 1fr;gap:1.5px;background:var(--line);border-radius:10px;overflow:hidden}
+.pchips div{background:var(--surface-inner);padding:11px 12px}
+.pchips i{display:block;font-style:normal;font-size:11.5px;font-weight:700;color:var(--sub);margin-bottom:2px}
+.pchips b{font-size:17px;font-weight:800;letter-spacing:-.035em;color:var(--ink)}
+.pchips b.dn{color:var(--down)}
+.pline{margin:10px 0 0;font-size:12.5px;line-height:1.6;font-weight:700;color:var(--ink2)}
+.pline b{font-weight:800}
+.pq{margin:15px 0 0;font-size:18px;font-weight:800;line-height:1.44;letter-spacing:-.035em;color:var(--ink)}
+details.rev{margin-top:13px;border:1.5px solid var(--green);border-radius:11px;background:var(--surface-inner);overflow:hidden}
+details.rev>summary{list-style:none;cursor:pointer;padding:12px 14px;font-size:13px;font-weight:800;color:var(--green-dark);display:flex;justify-content:space-between;align-items:center}
+details.rev>summary::-webkit-details-marker{display:none}
+details.rev>summary:after{content:"+";font-size:19px;font-weight:800;color:var(--green);line-height:.9}
+details.rev[open]>summary:after{content:"−"}
+details.rev .rb{padding:0 14px 14px;font-size:12.5px;line-height:1.66;color:var(--body);font-weight:600}
+details.rev .rb b{color:var(--ink);font-weight:800}
+.verdict{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.03em;border-radius:999px;padding:4px 11px;margin-bottom:10px;background:var(--green);color:#EFEDE7}
+.rb .rl{display:block;margin:6px 0;padding-left:16px;position:relative}
+.rb .rl i{position:absolute;left:0;font-style:normal;font-weight:800;color:var(--green-dark)}
+.rb .rend{margin:11px 0 0;padding-top:10px;border-top:1px dashed var(--line);font-weight:700;color:var(--green-dark)}
+
+/* ── 함정 ── */
+.trap{margin:12px 0 0;display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden}
+.trap .ti{padding:12px 14px;background:var(--surface-inner)}
+.trap .tk{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.05em;color:var(--warn);background:#EDE2D3;border-radius:3px;padding:2px 7px;margin-bottom:7px}
+.trap .tx{font-size:13.5px;font-weight:800;color:var(--ink);line-height:1.5;letter-spacing:-.02em;margin-bottom:6px}
+.trap .to{font-size:13px;font-weight:600;color:var(--body);line-height:1.6}
+.trap .to b{color:var(--green-dark);font-weight:800}
+
+/* ── 다음 편 ── */
+.next{margin:24px -16px 0;padding:22px;background:linear-gradient(150deg,#454F5C 0%,#2B323C 100%);color:#E9EBEE;position:relative;overflow:hidden}
+.next:before{content:"";position:absolute;right:-40px;bottom:-52px;width:150px;height:150px;border-radius:50%;border:1px solid rgba(180,190,202,.18)}
+.next .nh{position:relative;font-size:11px;font-weight:800;letter-spacing:.12em;color:#A3ACB8;margin-bottom:10px}
+.next p{position:relative;margin:0;font-size:16px;line-height:1.56;font-weight:800;letter-spacing:-.03em;color:#EDEFF2}
+.next p b{color:#FFFFFF}
+.next .nt{position:relative;margin-top:14px;padding-top:12px;border-top:1px solid rgba(180,190,202,.22);font-size:12.5px;font-weight:800;color:#B9C1CB}
+.next .nt b{color:#EDEFF2;font-weight:800}
+
+/* ── 접힘 ── */
+.foldwrap{margin:20px 0 0}
+details.fold{border:1px solid var(--line);border-radius:12px;background:var(--surface-detail);margin:0 0 9px;overflow:hidden}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:13px 15px;font-size:13px;font-weight:800;color:var(--ink)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary:after{content:"+";font-size:18px;font-weight:800;color:var(--green);line-height:.9}
+details.fold[open]>summary:after{content:"−"}
+details.fold .fb{padding:0 15px 14px}
+.gloss{display:grid;grid-template-columns:104px 1fr;gap:9px 11px;margin:2px 0 0;font-size:13px}
+.gloss dt{font-weight:850;color:#4B4740}
+.gloss dd{margin:0;color:var(--body);line-height:1.55}
+.fb .case{padding:11px 0;border-bottom:1px solid var(--line2)}
+.fb .case:last-child{border-bottom:none}
+.fb .case b{display:block;font-size:13px;font-weight:800;color:var(--ink);margin-bottom:4px}
+.fb .case p{margin:0;font-size:12.5px;line-height:1.6;color:var(--body);font-weight:600}
+.fb ol{margin:0;padding-left:17px}
+.fb ol li{font-size:12px;line-height:1.62;color:var(--body);margin:5px 0}
+.disc{font-size:11.5px;color:var(--muted);text-align:center;line-height:1.6;padding:14px 8px 0;font-weight:500}
+.foot{text-align:center;font-size:11.5px;color:var(--sub);padding:14px 0 4px;font-weight:800;letter-spacing:-.01em}
+
+/* ── 툴팁 ── */
+.term{border-bottom:1.5px dashed #8B867E;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;font-weight:850;color:var(--ink);
+  display:inline-block;padding:3px 4px;margin:-3px -4px;line-height:1.3;
+  touch-action:manipulation;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.term .tip{position:fixed;left:12px;top:0;min-width:160px;max-width:min(244px,calc(100vw - 28px));
+  background:#33322F;color:#F2F0EB;font-size:12px;font-weight:600;line-height:1.52;padding:9px 11px;border-radius:9px;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);z-index:60;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease;white-space:normal;text-align:left}
+.term .tip:after{content:"";position:absolute;top:100%;left:var(--ax,50%);transform:translateX(-50%);border:6px solid transparent;border-top-color:#33322F}
+.term .tip.below:after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#33322F}
+.term.open .tip{opacity:1;visibility:visible;pointer-events:auto}
+
+@media(max-width:360px){
+  .cvtitle{font-size:31px}
+  .duo .side b{font-size:25px}
+  .qbig{font-size:20px}
+  .ans .av{font-size:19px}
+  .pull p{font-size:18px}
+  .cht{font-size:21px}
+  .mx{grid-template-columns:40px 1fr 1fr}
+  .gloss{grid-template-columns:88px 1fr}
+}
+
+/* ── 데스크톱 ── */
+@media(min-width:768px){
+  .app{max-width:760px;padding-left:28px;padding-right:28px}
+  .topbar{margin:0 -28px}
+  .cover{margin:0 -28px;padding:46px 40px 36px}
+  .cvtitle{font-size:46px}
+  .cvsub{font-size:15px;max-width:27em}
+  .ch{margin-top:50px}
+  .cht{font-size:29px}
+  .qbig{font-size:27px}
+  .ans{margin-left:-28px;margin-right:-28px;padding:26px 40px}
+  .ans .av{font-size:24px}
+  .pull{margin-left:-28px;margin-right:-28px;padding:32px 40px}
+  .pull p{font-size:25px}
+  .prob{margin-left:-28px;margin-right:-28px;padding:28px 40px}
+  .next{margin-left:-28px;margin-right:-28px;padding:28px 40px}
+  .duo .side b{font-size:34px}
+  .mx{grid-template-columns:64px 1fr 1fr}
+  .mxc{padding:16px 15px}
+  .mxc .mxs{font-size:14px}
+  .cands{grid-template-columns:1fr 1fr;align-items:start}
+  .trap{grid-template-columns:1fr 1fr}
+  .pchips{grid-template-columns:repeat(4,1fr)}
+  .basis .bsv{padding:18px 22px 6px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<span id="top"></span>
+<div class="topbar">
+<div class="tbin">
+<span class="brand"><i>The Language of Markets</i> · Episode 2</span>
+<span class="ep">02 / 05</span>
+</div>
+<div class="prog"><i id="pg"></i></div>
+</div>
+<!-- ══════ 표지 ══════ -->
+<div class="cover">
+<span class="cvkick">ECONOMICS &amp; MARKET TERMS <b>02</b></span>
+<h1 class="cvtitle">When Cash and Futures<span>Diverge</span></h1>
+<p class="cvsub">They sold stocks and bought futures.<br/>Did they leave the market, or simply change their positioning?</p>
+<div class="cvmotif">
+<svg aria-label="Two lines start from one point and split into futures above and cash below" role="img" viewbox="0 0 340 62">
+<path d="M6 31 H148" fill="none" stroke="#7E8F84" stroke-linecap="round" stroke-width="2.5"></path>
+<path d="M148 31 C206 31, 232 11, 298 7" fill="none" stroke="#D9BE97" stroke-linecap="round" stroke-width="2.8"></path>
+<path d="M148 31 C206 31, 232 51, 298 55" fill="none" stroke="#AFBAC5" stroke-linecap="round" stroke-width="2.8"></path>
+<circle cx="148" cy="31" fill="#EFEDE7" r="4"></circle>
+<text fill="#D9BE97" font-size="12" font-weight="800" text-anchor="end" x="336" y="11">FUTURES</text>
+<text fill="#AFBAC5" font-size="12" font-weight="800" text-anchor="end" x="336" y="59">CASH</text>
+</svg>
+</div>
+<div class="cvidx">
+<a href="#c1"><b>01</b>Same Label</a>
+<a href="#c2"><b>02</b>Four Combinations</a>
+<a href="#c3"><b>03</b>The Gap &amp; the Total</a>
+</div>
+</div>
+<!-- ══════ 01 ══════ -->
+<div class="ch" id="c1">
+<div class="chtop"><span class="chn">01</span><span class="chk">THE EVENT &amp; THE QUESTION</span></div>
+<h2 class="cht">Same Label, Different Actions</h2>
+<div class="chrule"><i class="a"></i><i class="b"></i></div>
+</div>
+<div class="duocard">
+<div class="duohead">
+<span class="dtag">2026.07.06 · ACTUAL MARKET</span>
+<span class="dsub">Same day · Same “institutional” label</span>
+</div>
+<div class="duo">
+<div class="side spot">
+<i>CASH</i>
+<b class="num">−₩1.47tn</b>
+<em>Institutional net selling</em>
+</div>
+<div class="side fut">
+<i>FUTURES</i>
+<b class="num">+₩1.07tn</b>
+<em>KOSPI 200 futures net buying</em>
+</div>
+</div>
+<div class="duofoot">
+<span>Basis<b class="num">+10.82pt</b></span>
+<span>Total program trading<b class="num">−₩1.38tn</b></span>
+</div>
+<p class="duosrc">Based on Korea Exchange (KRX) trading by investor type and program-trading data. Trillion-won figures are rounded.</p>
+</div>
+<p class="qbig">Did institutions leave the market,<br/>or were they betting on a rebound?</p>
+<div class="ans">
+<div class="ak">ONE-LINE ANSWER</div>
+<div class="av">These numbers alone prove neither conclusion.</div>
+<p class="aw">When cash equities and futures diverge, it means the analysis is not finished yet.</p>
+</div>
+<div class="toon">
+<div class="toonhead"><b>What Happened at the Two Desks</b><i>Reconstruction of 2026.07.06</i></div>
+<div class="trow">
+<div class="tpnl">
+<span class="tno">01</span>
+<svg aria-label="People placing stocks for sale at a cash-equity desk labeled institutions" role="img" viewbox="0 0 170 134">
+<rect fill="#F1EFEA" height="134" width="170" x="0" y="0"></rect>
+<rect fill="#DEE2E6" height="24" rx="4" stroke="#3F4854" stroke-width="1.4" width="102" x="34" y="6"></rect>
+<text fill="#2B323C" font-size="13" font-weight="800" text-anchor="middle" x="85" y="22">INSTITUTIONS</text>
+<circle cx="46" cy="54" fill="#3F4854" r="7.5"></circle>
+<rect fill="#3F4854" height="24" rx="7" width="16" x="38" y="64"></rect>
+<circle cx="72" cy="50" fill="#3F4854" r="7.5"></circle>
+<rect fill="#3F4854" height="28" rx="7" width="16" x="64" y="60"></rect>
+<circle cx="99" cy="55" fill="#3F4854" r="7.5"></circle>
+<rect fill="#3F4854" height="23" rx="7" width="16" x="91" y="65"></rect>
+<rect fill="#B7B1A6" height="8" rx="2" width="142" x="14" y="92"></rect>
+<rect fill="#E1DED7" height="30" width="142" x="14" y="100"></rect>
+<rect fill="#C3CBD3" height="22" rx="2" stroke="#3F4854" stroke-width="1.2" width="40" x="42" y="103"></rect>
+<text fill="#2B323C" font-size="11" font-weight="800" text-anchor="middle" x="62" y="118">STOCKS</text>
+<rect fill="#C3CBD3" height="22" rx="2" stroke="#3F4854" stroke-width="1.2" width="40" x="92" y="103"></rect>
+<text fill="#2B323C" font-size="11" font-weight="800" text-anchor="middle" x="112" y="118">STOCKS</text>
+</svg>
+<div class="tcap"><b class="sp">Cash-equity desk</b><br/>Stocks are put up for sale</div>
+</div>
+<div class="tpnl">
+<span class="tno">02</span>
+<svg aria-label="Different people buying contracts at a futures desk carrying the same institutional label" role="img" viewbox="0 0 170 134">
+<rect fill="#F1EFEA" height="134" width="170" x="0" y="0"></rect>
+<rect fill="#EFE2D0" height="24" rx="4" stroke="#A87B4E" stroke-width="1.4" width="102" x="34" y="6"></rect>
+<text fill="#6F4F2F" font-size="13" font-weight="800" text-anchor="middle" x="85" y="22">INSTITUTIONS</text>
+<circle cx="48" cy="51" fill="#A87B4E" r="7.5"></circle>
+<rect fill="#A87B4E" height="27" rx="7" width="16" x="40" y="61"></rect>
+<circle cx="75" cy="56" fill="#A87B4E" r="7.5"></circle>
+<rect fill="#A87B4E" height="22" rx="7" width="16" x="67" y="66"></rect>
+<circle cx="102" cy="51" fill="#A87B4E" r="7.5"></circle>
+<rect fill="#A87B4E" height="27" rx="7" width="16" x="94" y="61"></rect>
+<rect fill="#B7B1A6" height="8" rx="2" width="142" x="14" y="92"></rect>
+<rect fill="#E1DED7" height="30" width="142" x="14" y="100"></rect>
+<rect fill="#F6EEE2" height="24" rx="1.5" stroke="#A87B4E" stroke-width="1.2" width="34" x="44" y="102"></rect>
+<line stroke="#D0B187" stroke-width="1.5" x1="50" x2="72" y1="108" y2="108"></line>
+<line stroke="#D0B187" stroke-width="1.5" x1="50" x2="72" y1="113" y2="113"></line>
+<text fill="#6F4F2F" font-size="11" font-weight="800" text-anchor="middle" x="61" y="123">FUT.</text>
+<rect fill="#F6EEE2" height="24" rx="1.5" stroke="#A87B4E" stroke-width="1.2" width="34" x="92" y="102"></rect>
+<line stroke="#D0B187" stroke-width="1.5" x1="98" x2="120" y1="108" y2="108"></line>
+<line stroke="#D0B187" stroke-width="1.5" x1="98" x2="120" y1="113" y2="113"></line>
+<text fill="#6F4F2F" font-size="11" font-weight="800" text-anchor="middle" x="109" y="123">FUT.</text>
+</svg>
+<div class="tcap"><b class="ft">Futures desk</b><br/>Futures contracts are bought</div>
+</div>
+</div>
+<div class="tpnl tfull">
+<span class="tno">03</span>
+<svg aria-label="A reader mistakenly assumes investors switched from one desk to the other" role="img" viewbox="0 0 340 92">
+<rect fill="#F1EFEA" height="92" width="340" x="0" y="0"></rect>
+<circle cx="36" cy="42" fill="#46584D" r="10"></circle>
+<rect fill="#46584D" height="30" rx="9" width="24" x="24" y="55"></rect>
+<rect fill="#E8E5DF" height="44" rx="10" stroke="#CEC9BF" width="180" x="62" y="8"></rect>
+<path d="M74 52 l-9 13 l19 -13 z" fill="#E8E5DF" stroke="#CEC9BF" stroke-width="1"></path>
+<text fill="#2E2E2C" font-size="12" font-weight="800" text-anchor="middle" x="152" y="26">Institutions sold stocks</text>
+<text fill="#2E2E2C" font-size="12" font-weight="800" text-anchor="middle" x="152" y="43">and switched into futures?</text>
+<rect fill="#DEE2E6" height="30" rx="4" stroke="#3F4854" stroke-width="1.3" width="32" x="262" y="14"></rect>
+<text fill="#2B323C" font-size="11.5" font-weight="800" text-anchor="middle" x="278" y="59">CASH</text>
+<rect fill="#EFE2D0" height="30" rx="4" stroke="#A87B4E" stroke-width="1.3" width="32" x="300" y="14"></rect>
+<text fill="#6F4F2F" font-size="11.5" font-weight="800" text-anchor="middle" x="316" y="59">FUT.</text>
+<text fill="#8B867E" font-size="11.5" font-weight="700" text-anchor="middle" x="297" y="80">TWO DESKS</text>
+</svg>
+<div class="tcap">This is where a premature conclusion appears</div>
+</div>
+<div class="tpnl tfull pay">
+<span class="tno">04</span>
+<svg aria-label="Diagram showing pension funds, financial investment firms, investment trusts, insurers, and private funds under the institutional label, each trading for different purposes" role="img" viewbox="0 0 340 134">
+<rect fill="#F1EFEA" height="134" width="340" x="0" y="0"></rect>
+<rect fill="#2E2E2C" height="27" rx="5" width="116" x="112" y="5"></rect>
+<text fill="#EDEAE4" font-size="13.5" font-weight="800" text-anchor="middle" x="170" y="23">INSTITUTIONS</text>
+<path d="M170 32 V45" stroke="#B7B1A6" stroke-width="1.6"></path>
+<path d="M36 45 H304" stroke="#B7B1A6" stroke-width="1.6"></path>
+<path d="M36 45 V60 M103 45 V60 M170 45 V60 M237 45 V60 M304 45 V60" stroke="#B7B1A6" stroke-width="1.6"></path>
+<rect fill="#DEE2E6" height="32" rx="4" stroke="#A9B2BD" stroke-width="1.2" width="56" x="8" y="60"></rect>
+<text fill="#2B323C" font-size="11" font-weight="800" text-anchor="middle" x="36" y="81">Pension</text>
+<rect fill="#DEE2E6" height="32" rx="4" stroke="#A9B2BD" stroke-width="1.2" width="56" x="75" y="60"></rect>
+<text fill="#2B323C" font-size="11" font-weight="800" text-anchor="middle" x="103" y="81">Brokerage</text>
+<rect fill="#DEE2E6" height="32" rx="4" stroke="#A9B2BD" stroke-width="1.2" width="56" x="142" y="60"></rect>
+<text fill="#2B323C" font-size="11" font-weight="800" text-anchor="middle" x="170" y="81">Funds</text>
+<rect fill="#DEE2E6" height="32" rx="4" stroke="#A9B2BD" stroke-width="1.2" width="56" x="209" y="60"></rect>
+<text fill="#2B323C" font-size="11" font-weight="800" text-anchor="middle" x="237" y="81">Insurance</text>
+<rect fill="#DEE2E6" height="32" rx="4" stroke="#A9B2BD" stroke-width="1.2" width="56" x="276" y="60"></rect>
+<text fill="#2B323C" font-size="11" font-weight="800" text-anchor="middle" x="304" y="81">Private</text>
+<text fill="#6F4F2F" font-size="11.5" font-weight="700" text-anchor="middle" x="170" y="110">Different motives: hedging · arbitrage · portfolio shifts</text>
+<text fill="#8B867E" font-size="11.5" font-weight="700" text-anchor="middle" x="170" y="126">Aggregated into one institutional total</text>
+</svg>
+<div class="tcap">The same label does not mean the same investor</div>
+</div>
+<div class="toonfoot">Illustrations simplify the aggregation structure for explanation</div>
+</div>
+<p class="bridge">The two desks represent different markets.<br/><b>Start by learning how to read them together</b>.</p>
+<!-- ══════ 02 ══════ -->
+<div class="ch" id="c2">
+<div class="chtop"><span class="chn">02</span><span class="chk">STRUCTURE &amp; COMBINATIONS</span></div>
+<h2 class="cht">How to Read<br/>Both Markets Together</h2>
+<div class="chrule"><i class="a"></i><i class="b"></i></div>
+</div>
+<div class="pair">
+<div class="pc sp">
+<div class="ph">CASH</div>
+<p>The market where actual shares or stock baskets are bought and sold now.</p>
+<p>If you buy, you <b>actually own the shares.</b></p>
+</div>
+<div class="pc ft">
+<div class="ph">FUTURES</div>
+<p>A contract on price changes in an index such as the <span class="term">KOSPI 200<span class="tip">An index of 200 leading KOSPI stocks; a benchmark for futures, options, and many funds.</span></span>.</p>
+<p>You gain exposure to <b>moves in the KOSPI 200</b> without owning the underlying stocks.</p>
+</div>
+</div>
+<p class="tp"><b>Exposure</b> measures how much the value of your position is affected when the market rises or falls.</p>
+<div class="nosum">
+<div class="nsh">Do Not Simply Add the Two Numbers</div>
+<div class="nseq"><s class="num">−₩1.47tn + ₩1.07tn = −₩0.40tn</s><i>✕</i></div>
+<p>They are aggregates from different markets, and futures buying can include both new positions and position closures. Rather than netting the amounts, <b>read the direction and the context separately.</b></p>
+</div>
+<p class="sech">Four Combinations</p>
+<p class="mxnote">The four cells below show the <b>combination of directions</b> reported in aggregate data. They combine many trades and do not represent one investor’s portfolio.</p>
+<div class="mx">
+<div class="mxcorner"></div>
+<div class="mxh">FUTURES SELL</div>
+<div class="mxh">FUTURES BUY</div>
+<div class="mxv">CASH<br/>BUY</div>
+<div class="mxc cross">
+<span class="mxs">Cash · Futures<br/>Directions diverge</span>
+<span class="mxchip">Needs more analysis</span>
+</div>
+<div class="mxc same">
+<span class="mxs">Cash · Futures<br/>Both net bought</span>
+<span class="mxchip">Buying directions align</span>
+</div>
+<div class="mxv">CASH<br/>SELL</div>
+<div class="mxc same">
+<span class="mxs">Cash · Futures<br/>Both net sold</span>
+<span class="mxchip">Selling directions align</span>
+</div>
+<div class="mxc here">
+<span class="mxs">Cash · Futures<br/>Directions diverge</span>
+<span class="mxchip">Case in this episode</span>
+</div>
+</div>
+<p class="mxfoot">The table reports <b>only buy/sell direction</b>. Whether futures buying represents a new position or the closing of an existing one requires <span class="term">open interest<span class="tip">The number of contracts still open and not yet closed. Changes in open interest help indicate whether positions are being added or unwound.</span></span> changes and more detailed positioning data. Even when both markets point the same way, one day is not enough to confirm a trend.</p>
+<div class="pull">
+<p>Aligned directions are relatively easy to read.<br/><b>Opposite directions create more possible explanations.</b></p>
+</div>
+<div class="cands">
+<div class="cand">
+<div class="candh"><b>Cash Buy · Futures Sell</b><i>Diverging directions · Four possible explanations</i></div>
+<div class="candb">
+<span class="cl">Short-term hedge against risk in existing cash holdings</span>
+<span class="cl">Arbitrage using the price gap between cash and futures</span>
+<span class="cl">Buying individual stocks while staying cautious on the broader market</span>
+<span class="cl">An aggregate of trades by different investors</span>
+<p class="candv">It could be a hedge. But aggregate data alone <b>cannot prove it.</b></p>
+</div>
+</div>
+<div class="cand">
+<div class="candh"><b>Cash Sell · Futures Buy</b><i>This episode’s case · Five possible explanations</i></div>
+<div class="candb">
+<span class="cl">Reducing individual-stock exposure while maintaining market exposure</span>
+<span class="cl">Closing an existing futures short—a <span class="term">short cover<span class="tip">Buying back an existing short position to close it. It appears as buying in aggregate data, but it is not the same as initiating a new bullish position.</span></span></span>
+<span class="cl">Arbitrage using the price gap between cash and futures</span>
+<span class="cl">Expiry · <span class="term">rollover<span class="tip">Moving a futures position that is nearing expiry into a later-dated contract.</span></span>-related trading</span>
+<span class="cl">An aggregate of trades by different investors</span>
+<p class="candv">It can be a clue that positioning is turning more bullish. But <b>futures buying is a clue to direction, not proof of intent.</b></p>
+</div>
+</div>
+</div>
+<div class="hedge">
+<div class="hh">Hedging</div>
+<p class="hd">A trade that offsets part of the price risk in an existing asset with another position. An investor with a ₩10bn portfolio that moves roughly with the KOSPI 200 could do this:</p>
+<div class="hflow">
+<span>Hold a ₩10bn portfolio</span><i>→</i>
+<span>Sell KOSPI 200 futures</span><i>→</i>
+<span>Reduce some downside risk</span>
+</div>
+<p class="hw">But opposite cash and futures directions alone do not prove hedging. You need to know whether the same investor made both trades and what position they held beforehand.</p>
+</div>
+<p class="bridge">Once you understand the combination,<br/>the next step is <b>the distance between the two prices</b>.</p>
+<!-- ══════ 03 ══════ -->
+<div class="ch" id="c3">
+<div class="chtop"><span class="chn">03</span><span class="chk">The Gap &amp; the Total</span></div>
+<h2 class="cht">What Basis and Program Trading<br/>Can Tell You</h2>
+<div class="chrule"><i class="a"></i><i class="b"></i></div>
+</div>
+<p class="tp">Basis is not a conclusion. It is the distance between the cash market and futures.</p>
+<p class="dot"><b>Basis = Futures Price − Cash Index</b></p>
+<p class="dot"><b>Contango</b> means futures trade above the cash index.</p>
+<p class="dot"><b>Backwardation</b> means futures trade below the cash index.</p>
+<div class="basis">
+<div class="blegend">
+<span><i class="isp"></i>Cash index</span>
+<span><i class="ift"></i>Futures price</span>
+</div>
+<div class="bsv">
+<svg aria-label="Three scenes showing the distance between the cash index and futures price changing" role="img" viewbox="0 0 340 104">
+<rect fill="#46584D" height="40" opacity=".10" width="60" x="26" y="32"></rect>
+<line stroke="#3F4854" stroke-linecap="round" stroke-width="3" x1="10" x2="102" y1="72" y2="72"></line>
+<line stroke="#A87B4E" stroke-linecap="round" stroke-width="3" x1="10" x2="102" y1="32" y2="32"></line>
+<line stroke="#6F6C66" stroke-dasharray="3 3" stroke-width="1.3" x1="56" x2="56" y1="34" y2="70"></line>
+<rect fill="#46584D" height="16" opacity=".10" width="60" x="140" y="56"></rect>
+<line stroke="#3F4854" stroke-linecap="round" stroke-width="3" x1="124" x2="216" y1="72" y2="72"></line>
+<line stroke="#A87B4E" stroke-linecap="round" stroke-width="3" x1="124" x2="216" y1="56" y2="56"></line>
+<line stroke="#6F6C66" stroke-dasharray="3 3" stroke-width="1.3" x1="170" x2="170" y1="58" y2="70"></line>
+<rect fill="#46584D" height="24" opacity=".10" width="60" x="254" y="72"></rect>
+<line stroke="#3F4854" stroke-linecap="round" stroke-width="3" x1="238" x2="330" y1="72" y2="72"></line>
+<line stroke="#A87B4E" stroke-linecap="round" stroke-width="3" x1="238" x2="330" y1="96" y2="96"></line>
+<line stroke="#6F6C66" stroke-dasharray="3 3" stroke-width="1.3" x1="284" x2="284" y1="74" y2="94"></line>
+<text fill="#8B867E" font-size="11.5" font-weight="800" text-anchor="middle" x="56" y="16">A</text>
+<text fill="#8B867E" font-size="11.5" font-weight="800" text-anchor="middle" x="170" y="16">B</text>
+<text fill="#8B867E" font-size="11.5" font-weight="800" text-anchor="middle" x="284" y="16">C</text>
+</svg>
+</div>
+<div class="bcaps">
+<div><b>A · CONTANGO</b><span>Futures above cash</span></div>
+<div><b>B · NARROWING</b><span>Gap narrows</span></div>
+<div><b>C · BACKWARDATION</b><span>Futures below cash</span></div>
+</div>
+</div>
+<p class="tp">Do not read bullishness or bearishness from the sign alone. Basis reflects <b>interest rates · dividends · time to expiry · cash/futures flows · arbitrage · rollovers</b> all at once. That is why there is an order to reading it.</p>
+<div class="steps5">
+<span><b>1</b>Sign</span>
+<span><b>2</b>Change vs. prior day</span>
+<span><b>3</b>Recent range</span>
+<span><b>4</b>Arbitrage-program response</span>
+<span><b>5</b>Expiry · ex-dividend effects</span>
+</div>
+<p class="sech">Program Trading</p>
+<p class="sesub">A <b>basket trade</b> that places orders across multiple stocks as a group. KRX classifies it into arbitrage trades that exploit cash-futures price differences and non-arbitrage trades that do not directly target that spread. Orders are often executed rapidly through systems, but “a computer placed the trade” is not what defines program trading.</p>
+<div class="pair">
+<div class="pc n1">
+<div class="ph">Arbitrage Program Trading</div>
+<p>Trades that exploit the price difference between cash and futures.</p>
+<p>When the spread moves outside its usual range, traders seek to profit by selling the relatively expensive side and buying the cheaper side.</p>
+</div>
+<div class="pc n2">
+<div class="ph">Non-Arbitrage Program Trading</div>
+<p>Basket trades that do not directly target the cash-futures spread.</p>
+<p>ETF and index-fund flows, index tracking, portfolio adjustments, and rebalancing fall into this category.</p>
+</div>
+</div>
+<p class="tp"><b>“Non-arbitrage” does not mean “unprofitable.”</b> It is simply a classification meaning the trade is not an arbitrage trade, regardless of its profit or loss.</p>
+<div class="sum">
+<div class="sumt">Hypothetical example · Program trading on one day</div>
+<div class="sumrow">
+<span class="sl">Arbitrage</span>
+<span class="sumtrack"><span class="sumfill" style="left:50%;width:18.75%;background:#8E9A90"></span></span>
+<span class="sv num">+₩300bn</span>
+</div>
+<div class="sumrow">
+<span class="sl">Non-arbitrage</span>
+<span class="sumtrack"><span class="sumfill" style="left:0;width:50%;background:#9A948A"></span></span>
+<span class="sv num">−₩800bn</span>
+</div>
+<div class="sumrow total">
+<span class="sl">Total program trading</span>
+<span class="sumtrack"><span class="sumfill" style="left:18.75%;width:31.25%;background:#2F3C34"></span></span>
+<span class="sv num">−₩500bn</span>
+</div>
+<p class="sumnote">A positive basis does not mean money flowed into cash-equity baskets. <b>Even with arbitrage buying, larger non-arbitrage selling can leave total program trading net negative.</b></p>
+</div>
+<p class="sech">What to Check When the Two Diverge</p>
+<div class="order">
+<div class="ord"><span class="on">1</span><div class="ob"><b>Do the directions align or diverge?</b><p>If they diverge, the set of possible explanations expands immediately.</p></div></div>
+<div class="ord"><span class="on">2</span><div class="ob"><b>Do they represent the same actual investor?</b><p>Aggregate data cannot tell you. The category name combines many investors.</p></div></div>
+<div class="ord"><span class="on">3</span><div class="ob"><b>Is it new buying or the closing of an existing short?</b><p>You need changes in open interest and more detailed position data.</p></div></div>
+<div class="ord"><span class="on">4</span><div class="ob"><b>How did the basis change?</b><p>Look beyond the sign and focus on <b>the direction of change</b>.</p></div></div>
+<div class="ord"><span class="on">5</span><div class="ob"><b>Which was larger: arbitrage or non-arbitrage trading?</b><p>Also look at total program trading after the two are combined.</p></div></div>
+</div>
+<div class="prob">
+<div class="probh">PRACTICE · HYPOTHETICAL DAY</div>
+<div class="pchips">
+<div><i>KOSPI</i><b class="dn num">−1%</b></div>
+<div><i>Basis</i><b>Widening</b></div>
+<div><i>Institutional cash</i><b class="num">−₩1.5tn</b></div>
+<div><i>Institutional futures</i><b class="num">+₩1.1tn</b></div>
+</div>
+<p class="pline">Program · Arbitrage <b>+₩0.3tn</b> · Non-arbitrage <b>−₩1.0tn</b> · Total <b>−₩0.7tn</b></p>
+<p class="pq">Were institutions betting on a rise?</p>
+<details class="rev">
+<summary>CHECK THE READING</summary>
+<div class="rb">
+<span class="verdict">CANNOT CONCLUDE</span>
+<span class="rl"><i>1</i>These data do not tell us whether the “institutions” in cash and futures are the same actual investors.</span>
+<span class="rl"><i>2</i>We cannot tell whether the futures buying was a newly initiated long or the closing of an existing short.</span>
+<span class="rl"><i>3</i>The basis widened and arbitrage buying appeared, but non-arbitrage selling was larger, leaving total program trading net negative.</span>
+<p class="rend">This is as far as the data take us: the institutional category was a net buyer of futures. We cannot say that flows across cash-equity baskets had also turned favorable.</p>
+</div>
+</details>
+</div>
+<p class="sech">Easy-to-Misread Statements</p>
+<div class="trap">
+<div class="ti">
+<div class="tk">TRAP 01</div>
+<div class="tx">“Foreign investors sold cash equities and bought futures. They were hedging downside risk.”</div>
+<div class="to">Unless you know that the same investor made both trades and what position existed beforehand, <b>you cannot conclude that it was a hedge.</b></div>
+</div>
+<div class="ti">
+<div class="tk">TRAP 02</div>
+<div class="tx">“The basis widened into contango. Foreign investors are convinced the market will rise.”</div>
+<div class="to">Basis mixes interest rates, dividends, time to expiry, and arbitrage-related flows. <b>A single sign does not map directly to investor sentiment.</b></div>
+</div>
+</div>
+<div class="next">
+<div class="nh">NEXT</div>
+<p>But why can a single U.S. inflation or rate number change <b>cash, futures, and FX positioning all at once</b>?</p>
+<div class="nt"><b>EPISODE 3</b> How U.S. Data Reaches Korea</div>
+</div>
+<div class="foldwrap">
+<details class="fold">
+<summary>One-Line Glossary</summary>
+<div class="fb">
+<dl class="gloss">
+<dt>INSTITUTIONS</dt><dd>KRX’s aggregate label for domestic institutional investors; the sum of several categories listed below.</dd>
+<dt>Pension funds</dt><dd>Pension funds and other funds, including institutions such as the National Pension Service.</dd>
+<dt>Financial investment</dt><dd>Trading by securities firms and similar institutions using their own capital.</dd>
+<dt>Investment trusts</dt><dd>Investment trusts: public-fund assets managed by asset-management companies.</dd>
+<dt>Private funds</dt><dd>Private-fund capital raised from a limited group of investors.</dd>
+<dt>KOSPI 200</dt><dd>An index of 200 leading KOSPI stocks; a benchmark for futures, options, and many funds.</dd>
+<dt>FUTURES</dt><dd>A contract that settles the price change of a specified index or asset at a set maturity.</dd>
+<dt>Margin</dt><dd>Funds posted in advance to trade futures; only a fraction of the contract’s notional value is required.</dd>
+<dt>open interest</dt><dd>The number of contracts still open. Changes provide clues as to whether positions are being added or unwound.</dd>
+<dt>Long</dt><dd>A position that gains when the price rises.</dd>
+<dt>Short</dt><dd>A position that gains when the price falls.</dd>
+<dt>short cover</dt><dd>Buying back an existing short to close it. It is recorded as buying in aggregate data.</dd>
+<dt>Hedging</dt><dd>A trade that offsets part of the price risk of an existing asset with another position.</dd>
+<dt>rollover</dt><dd>Moving a futures position that is nearing expiry into a later-dated contract.</dd>
+<dt>Basis</dt><dd>Futures price minus the cash index—the distance between the two markets.</dd>
+<dt>Contango</dt><dd>A condition in which futures trade above the cash index.</dd>
+<dt>Backwardation</dt><dd>A condition in which futures trade below the cash index.</dd>
+<dt>Arbitrage Program Trading</dt><dd>Basket trading that exploits the price difference between cash and futures.</dd>
+<dt>Non-Arbitrage Program Trading</dt><dd>Basket trading that does not directly target the spread, including ETF flows and rebalancing.</dd>
+<dt>Program trading</dt><dd>Basket trading that places orders across multiple stocks. KRX reports it as arbitrage and non-arbitrage program trading.</dd>
+</dl>
+</div>
+</details>
+<details class="fold">
+<summary>Actual Market Case Used in This Episode</summary>
+<div class="fb">
+<div class="case"><b>2026.07.06 · Institutional cash −₩1.47tn, institutional KOSPI 200 futures +₩1.07tn</b><p>A day when the two markets pointed in opposite directions. The basis was +10.82pt, indicating contango, while total program trading recorded −₩1.38tn of net selling. Institutions were net buyers in futures, but flows in cash-equity baskets remained tilted toward selling.</p></div>
+<div class="case"><b>What This Case Actually Tells Us</b><p>Only that cash and futures moved in opposite directions. The data do not reveal which investors traded with what intent, or whether the futures buying represented new positions or position closures.</p></div>
+</div>
+</details>
+<details class="fold">
+<summary>Sources &amp; Data Notes</summary>
+<div class="fb">
+<ol>
+<li>Cash/futures flows: Korea Exchange (KRX) trading by investor type (2026.07.06; institutional cash −₩1.47tn, KOSPI 200 futures +₩1.07tn).</li>
+<li>Program trading: KRX program-trading data (2026.07.06; total −₩1.38tn).</li>
+<li>Basis: calculated from the KOSPI 200 futures close and KOSPI 200 cash index (2026.07.06; +10.82pt).</li>
+<li>Trillion-won figures are rounded.</li>
+<li>The program-trading aggregation example on page 3 (arbitrage +₩300bn, non-arbitrage −₩800bn, total −₩500bn) and the practice-problem figures are hypothetical values created for explanation, not actual market data.</li>
+<li>The comic panels and diagrams are simplified to explain the aggregation structure.</li>
+</ol>
+</div>
+</details>
+</div>
+<p class="disc">This material is educational content intended to explain economic and stock-market terminology and market structure. It is not a recommendation to buy or sell any financial product.</p>
+<div class="foot">The Language of Markets · Episode 2 When Cash and Futures Diverge</div>
+</div><!-- /.app -->
+<script>
+(function(){
+  if(window.__mwWords2) return; window.__mwWords2 = true;
+
+  var pg=document.getElementById('pg');
+  function updateProg(){
+    if(!pg) return;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var y=window.scrollY||window.pageYOffset||0;
+    pg.style.width=(h>0?Math.min(100,Math.max(0,y/h*100)):0)+'%';
+  }
+  window.addEventListener('scroll',updateProg,{passive:true});
+  window.addEventListener('resize',updateProg);
+  updateProg();
+
+  function resetTip(el){ var tp=el.querySelector('.tip'); if(tp){ tp.classList.remove('below'); tp.removeAttribute('style'); } }
+  function clampTip(t){
+    var tip=t.querySelector('.tip'); if(!tip) return;
+    var vw=window.innerWidth, pad=12;
+    var w=Math.min(244, vw-2*pad);
+    tip.style.position='fixed'; tip.style.bottom='auto'; tip.style.transform='none';
+    tip.style.width=w+'px'; tip.style.left='0px'; tip.style.top='0px';
+    var tr=t.getBoundingClientRect();
+    var th=tip.getBoundingClientRect().height;
+    var left=tr.left+tr.width/2-w/2;
+    if(left<pad) left=pad;
+    if(left+w>vw-pad) left=vw-pad-w;
+    var top=tr.top-th-9, below=false;
+    if(top<pad+50){ top=tr.bottom+9; below=true; }
+    var vh=window.innerHeight;
+    if(top+th>vh-pad){ top=vh-pad-th; }
+    if(top<pad){ top=pad; }
+    tip.style.left=Math.round(left)+'px';
+    tip.style.top=Math.round(top)+'px';
+    var tb=tip.getBoundingClientRect();
+    var dx=tb.left-left, dy=tb.top-top;
+    if(dx||dy){ tip.style.left=Math.round(left-dx)+'px'; tip.style.top=Math.round(top-dy)+'px'; }
+    tip.classList.toggle('below', below);
+    var ax=tr.left+tr.width/2-left;
+    ax=Math.max(12, Math.min(w-12, ax));
+    tip.style.setProperty('--ax', Math.round(ax)+'px');
+  }
+  function closeTerms(except){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++){ if(open[i]!==except){ open[i].classList.remove('open'); resetTip(open[i]); } }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.term'), function(t){
+    t.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var willOpen=!t.classList.contains('open');
+      closeTerms(t);
+      t.classList.toggle('open', willOpen);
+      if(willOpen) clampTip(t);
+    });
+  });
+  document.addEventListener('click', function(){ closeTerms(null); });
+  window.addEventListener('scroll', function(){ closeTerms(null); }, {passive:true});
+  window.addEventListener('resize', function(){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++) clampTip(open[i]);
+  });
+})();
+</script>
+</body>
+</html>
