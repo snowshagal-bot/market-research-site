@@ -277,6 +277,22 @@
     "coverImage": "covers/2026-08-14-daily-dqoisk.webp"
   },
   {
+    "id": "2026-08-13-basics-1qofo4f",
+    "type": "basics",
+    "typeLabel": "시장 공부",
+    "lang": "ko",
+    "date": "2026-08-13",
+    "reportDate": "2026-08-13",
+    "registeredDate": "2026-08-25",
+    "registeredAt": "2026-08-25T11:10:09.848Z",
+    "legacyImport": false,
+    "title": "미국의 숫자는어떻게 한국에 도착하는가",
+    "subtitle": "",
+    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
+    "href": "reports/시장을읽는말들_3편_미국의숫자는어떻게한국에도착하는가.html",
+    "coverImage": "covers/2026-08-13-basics-1qofo4f.webp"
+  },
+  {
     "id": "2026-08-13-daily-1nnspvd",
     "type": "daily",
     "typeLabel": "Daily",
