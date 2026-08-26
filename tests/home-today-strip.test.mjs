@@ -19,9 +19,13 @@ const SELECTOR_NODES = [
   'meta[name="theme-color"]'
 ];
 
+const DASH = '—';
+
 function makeElement(name) {
+  const attrs = new Map();
   return {
     name,
+    attrs,
     dataset: {},
     textContent: '',
     innerHTML: '',
@@ -36,9 +40,9 @@ function makeElement(name) {
     classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } },
     addEventListener() {},
     removeEventListener() {},
-    setAttribute() {},
-    removeAttribute() {},
-    getAttribute() { return null; },
+    setAttribute(key, val) { attrs.set(key, String(val)); },
+    removeAttribute(key) { attrs.delete(key); },
+    getAttribute(key) { return attrs.has(key) ? attrs.get(key) : null; },
     appendChild() {},
     removeChild() {},
     remove() {},
@@ -122,17 +126,38 @@ function marketPayload(marketDate) {
   };
 }
 
+function deferred() {
+  let resolve;
+  const promise = new Promise(res => { resolve = res; });
+  return { promise, resolve };
+}
+
 /**
- * Run locale.js + site.js against a stub DOM and return the strip nodes.
- * `fetchResult` is either a payload object, or null to simulate a failed
- * /api/market/latest request.
+ * Boot locale.js + site.js against a stub DOM seeded with the neutral markup the
+ * two homepages actually ship. Returns without waiting for the request, so a
+ * test can inspect the DOM while /api/market/latest is still in flight.
+ *
+ * `respond` receives the requested URL and returns a Response-like promise.
  */
-async function runHomepage({ lang = 'ko', fetchResult = null, summary = STATIC_SUMMARY, posts = POSTS } = {}) {
+async function bootHomepage({ lang = 'ko', respond, summary = STATIC_SUMMARY, posts = POSTS } = {}) {
   const [localeScript, siteScript] = await Promise.all([read('assets/locale.js'), read('assets/site.js')]);
 
   const elements = new Map(ELEMENT_IDS.map(id => [id, makeElement(id)]));
   const selectors = new Map(SELECTOR_NODES.map(sel => [sel, makeElement(sel)]));
   const requestedUrls = [];
+
+  // Seed the neutral initial state. tests/home-v2.test.mjs asserts the shipped
+  // HTML matches exactly this.
+  const marketPath = lang === 'en' ? '/en/market/' : '/market/';
+  elements.get('today-strip-date').textContent = DASH;
+  elements.get('today-market-grid').innerHTML = Array.from({ length: 5 }, () => (
+    `<div class="today-item" role="listitem"><span class="today-label">X</span><span class="today-value">${DASH}</span><span class="today-change pending">${DASH}</span></div>`
+  )).join('');
+  elements.get('today-market-grid').setAttribute('aria-busy', 'true');
+  elements.get('today-takeaway-label').textContent = lang === 'en' ? "Today's takeaway" : '오늘의 한 줄';
+  elements.get('today-takeaway-text').textContent = '';
+  elements.get('today-takeaway-link').href = marketPath;
+  selectors.get('.today-takeaway-row').hidden = true;
 
   const document = {
     documentElement: Object.assign(makeElement('html'), { lang, dataset: { siteLang: lang } }),
@@ -159,12 +184,7 @@ async function runHomepage({ lang = 'ko', fetchResult = null, summary = STATIC_S
     history: { replaceState() {} },
     localStorage: { getItem: () => null, setItem() {} },
     matchMedia: () => ({ matches: false, addEventListener() {}, addListener() {} }),
-    fetch: url => {
-      requestedUrls.push(url);
-      return fetchResult
-        ? Promise.resolve({ ok: true, json: () => Promise.resolve(fetchResult) })
-        : Promise.resolve({ ok: false, status: 503, json: () => Promise.reject(new Error('no body')) });
-    },
+    fetch: url => { requestedUrls.push(url); return respond(url); },
     setTimeout,
     clearTimeout,
     Intl,
@@ -175,12 +195,8 @@ async function runHomepage({ lang = 'ko', fetchResult = null, summary = STATIC_S
 
   vm.runInContext(localeScript, context);
   vm.runInContext(siteScript, context);
-  // Let renderTodayMarket's fetch continuation settle.
-  for (let i = 0; i < 5; i += 1) await Promise.resolve();
-  await new Promise(resolve => setImmediate(resolve));
 
-  return {
-    requestedUrls,
+  const nodes = {
     date: elements.get('today-strip-date'),
     grid: elements.get('today-market-grid'),
     label: elements.get('today-takeaway-label'),
@@ -188,6 +204,23 @@ async function runHomepage({ lang = 'ko', fetchResult = null, summary = STATIC_S
     link: elements.get('today-takeaway-link'),
     row: selectors.get('.today-takeaway-row')
   };
+
+  async function flush() {
+    for (let i = 0; i < 6; i += 1) await Promise.resolve();
+    await new Promise(resolve => setImmediate(resolve));
+  }
+
+  return { nodes, flush, requestedUrls };
+}
+
+/** Boot and wait for the request to settle; returns the final strip nodes. */
+async function runHomepage({ fetchResult = null, ...rest } = {}) {
+  const respond = () => (fetchResult
+    ? Promise.resolve({ ok: true, json: () => Promise.resolve(fetchResult) })
+    : Promise.resolve({ ok: false, status: 503, json: () => Promise.reject(new Error('no body')) }));
+  const boot = await bootHomepage({ ...rest, respond });
+  await boot.flush();
+  return { ...boot.nodes, requestedUrls: boot.requestedUrls };
 }
 
 test('A. published Market Close wins over the static fallback and links its own daily report', async () => {
@@ -200,6 +233,7 @@ test('A. published Market Close wins over the static fallback and links its own 
   assert.match(strip.grid.innerHTML, /6,808\.21/);
   assert.match(strip.grid.innerHTML, /▲ 0\.97%/);
   assert.doesNotMatch(strip.grid.innerHTML, /6,742\.74/);
+  assert.equal(strip.grid.getAttribute('aria-busy'), null);
 
   // The one-liner points at the daily report for the displayed session.
   assert.equal(strip.row.hidden, false);
@@ -293,6 +327,109 @@ test('the strip never mixes API numbers with static numbers', async () => {
   assert.equal(strip.date.textContent, 'AUG 25');
   assert.match(strip.grid.innerHTML, /6,742\.74/);
   assert.doesNotMatch(strip.grid.innerHTML, /6,808\.21/);
+});
+
+test('F. while the request is in flight nothing from the static fallback is painted', async () => {
+  const pending = deferred();
+  const { nodes, flush, requestedUrls } = await bootHomepage({
+    respond: () => pending.promise.then(payload => ({ ok: true, json: () => Promise.resolve(payload) }))
+  });
+  // The request is already out; the DOM must still be the neutral placeholder.
+  await flush();
+  assert.deepEqual(requestedUrls, ['/api/market/latest']);
+
+  assert.equal(nodes.date.textContent, DASH);
+  assert.notEqual(nodes.date.textContent, 'AUG 25');
+  assert.doesNotMatch(nodes.grid.innerHTML, /6,742\.74|827\.15|1,386\.10|4\.70%|4,694\.60/);
+  assert.equal(nodes.grid.getAttribute('aria-busy'), 'true');
+  assert.equal(nodes.row.hidden, true);
+  assert.equal(nodes.text.textContent, '');
+  assert.notEqual(nodes.text.textContent, STATIC_SUMMARY.takeaway.ko);
+  assert.equal(nodes.link.href, '/market/');
+  assert.doesNotMatch(nodes.link.href, /reports\//);
+
+  // Only once the published session arrives does anything render.
+  pending.resolve(marketPayload('2026-08-26'));
+  await flush();
+
+  assert.equal(nodes.date.textContent, 'AUG 26');
+  assert.match(nodes.grid.innerHTML, /6,808\.21/);
+  assert.equal(nodes.grid.getAttribute('aria-busy'), null);
+  assert.equal(nodes.row.hidden, false);
+  assert.equal(nodes.link.href, '/reports/2026-08-26-ko.html');
+  assert.doesNotMatch(nodes.grid.innerHTML, /6,742\.74/);
+});
+
+test('F2. the English homepage holds the same neutral state while in flight', async () => {
+  const pending = deferred();
+  const { nodes, flush } = await bootHomepage({
+    lang: 'en',
+    respond: () => pending.promise.then(payload => ({ ok: true, json: () => Promise.resolve(payload) }))
+  });
+  await flush();
+
+  assert.equal(nodes.date.textContent, DASH);
+  assert.equal(nodes.row.hidden, true);
+  assert.equal(nodes.link.href, '/en/market/');
+  assert.doesNotMatch(nodes.grid.innerHTML, /6,742\.74/);
+
+  pending.resolve(marketPayload('2026-08-26'));
+  await flush();
+
+  assert.equal(nodes.date.textContent, 'AUG 26');
+  assert.equal(nodes.link.href, '/reports/en/2026-08-26-en.html');
+});
+
+test('G. the fallback is painted only after the request actually fails', async () => {
+  const pending = deferred();
+  const { nodes, flush } = await bootHomepage({
+    respond: () => pending.promise
+  });
+  await flush();
+
+  // Still neutral: a slow failure is not an excuse to show the fallback early.
+  assert.equal(nodes.date.textContent, DASH);
+  assert.equal(nodes.row.hidden, true);
+  assert.doesNotMatch(nodes.grid.innerHTML, /6,742\.74/);
+
+  pending.resolve({ ok: false, status: 503, json: () => Promise.reject(new Error('no body')) });
+  await flush();
+
+  assert.equal(nodes.date.textContent, 'AUG 25');
+  assert.match(nodes.grid.innerHTML, /6,742\.74/);
+  assert.match(nodes.grid.innerHTML, /827\.15/);
+  assert.match(nodes.grid.innerHTML, /1,386\.10/);
+  assert.match(nodes.grid.innerHTML, /4\.70%/);
+  assert.match(nodes.grid.innerHTML, /4,694\.60/);
+  assert.equal(nodes.grid.getAttribute('aria-busy'), null);
+  assert.equal(nodes.row.hidden, false);
+  assert.equal(nodes.label.textContent, '오늘의 한 줄');
+  assert.equal(nodes.text.textContent, STATIC_SUMMARY.takeaway.ko);
+  assert.equal(nodes.link.href, '/reports/2026-08-25-ko.html');
+});
+
+test('G2. a rejected request also keeps the neutral state until it settles', async () => {
+  const pending = deferred();
+  const { nodes, flush } = await bootHomepage({
+    respond: () => pending.promise.then(() => { throw new Error('network down'); })
+  });
+  await flush();
+  assert.equal(nodes.date.textContent, DASH);
+
+  pending.resolve(null);
+  await flush();
+  assert.equal(nodes.date.textContent, 'AUG 25');
+  assert.equal(nodes.link.href, '/reports/2026-08-25-ko.html');
+});
+
+test('site.js paints the strip exactly once, after the request settles', async () => {
+  const siteJs = await read('assets/site.js');
+  const body = siteJs.slice(siteJs.indexOf('function renderTodayMarket()'));
+  const renderBody = body.slice(0, body.indexOf('\n  }') + 4);
+  // No pre-fetch paint: every paintTodayStrip call sits inside the fetch continuation.
+  assert.doesNotMatch(renderBody, /paintTodayStrip\(todayStripSession\(null\)\)/);
+  assert.equal((renderBody.match(/paintTodayStrip\(/g) || []).length, 1);
+  assert.match(renderBody, /fetchPublishedMarketClose\(\)\.then/);
 });
 
 test('homepage markup exposes the nodes the strip renders into', async () => {

@@ -924,6 +924,7 @@
       gridEl.innerHTML = session.items.map(item => (
         `<div class="today-item" role="listitem"><span class="today-label">${esc(item.label)}</span><span class="today-value">${esc(item.value)}</span><span class="today-change ${item.direction}">${esc(item.change)}</span></div>`
       )).join('');
+      gridEl.removeAttribute('aria-busy');
     }
     paintTodayTakeaway(session.marketDate);
   }
@@ -972,12 +973,15 @@
       .catch(() => null);
   }
 
+  // The markup ships a neutral placeholder, so there is exactly one paint and it
+  // happens after the request settles. Painting the static file first would put
+  // a past session on screen for a frame whenever the network was slow, which is
+  // the opposite of market-summary.js being a failure-only fallback.
   function renderTodayMarket(){
     if (!document.querySelector('.today-strip')) return;
-    paintTodayStrip(todayStripSession(null));
     return fetchPublishedMarketClose().then(payload => {
       const session = todayStripSession(payload);
-      if (session?.live) paintTodayStrip(session);
+      paintTodayStrip(session);
       return session;
     });
   }

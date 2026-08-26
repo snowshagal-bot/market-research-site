@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="/assets/language.css?v=20260812-1">
 <link rel="stylesheet" href="/assets/category-state.css">
 <link rel="stylesheet" href="/assets/ui-polish.css?v=20260811-1">
-<link rel="stylesheet" href="/assets/home-v2.css?v=20260825-1">
+<link rel="stylesheet" href="/assets/home-v2.css?v=20260826-2">
 <link rel="preload" as="image" href="/assets/snowshagal-hero.webp" media="(min-width: 761px)">
 <link rel="preload" as="image" href="/assets/snowshagal-hero-mobile.webp" media="(max-width: 760px)">
 <script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
@@ -89,7 +89,7 @@
         <div class="today-strip-eyebrow" id="today-strip-heading">
           <span class="today-strip-tag">TODAY</span>
           <span class="today-strip-dot" aria-hidden="true">·</span>
-          <span class="today-strip-date" id="today-strip-date">AUG 25</span>
+          <span class="today-strip-date" id="today-strip-date">—</span>
         </div>
         <a class="today-strip-market-link" href="/en/market/">
           <span>MARKET CLOSE</span>
@@ -97,38 +97,38 @@
         </a>
       </div>
       <div class="today-strip-scroll-wrap">
-        <div class="today-strip-grid" id="today-market-grid" role="list">
+        <div class="today-strip-grid" id="today-market-grid" role="list" aria-busy="true">
           <div class="today-item" role="listitem">
             <span class="today-label">KOSPI</span>
-            <span class="today-value">6,742.74</span>
-            <span class="today-change up">▲ 0.68%</span>
+            <span class="today-value">—</span>
+            <span class="today-change pending">—</span>
           </div>
           <div class="today-item" role="listitem">
             <span class="today-label">KOSDAQ</span>
-            <span class="today-value">827.15</span>
-            <span class="today-change up">▲ 1.70%</span>
+            <span class="today-value">—</span>
+            <span class="today-change pending">—</span>
           </div>
           <div class="today-item" role="listitem">
             <span class="today-label">USD/KRW</span>
-            <span class="today-value">1,386.10</span>
-            <span class="today-change up">▲ ₩3.7</span>
+            <span class="today-value">—</span>
+            <span class="today-change pending">—</span>
           </div>
           <div class="today-item" role="listitem">
             <span class="today-label">US 10Y</span>
-            <span class="today-value">4.70%</span>
-            <span class="today-change down">▼ 4bp</span>
+            <span class="today-value">—</span>
+            <span class="today-change pending">—</span>
           </div>
           <div class="today-item" role="listitem">
             <span class="today-label">GOLD</span>
-            <span class="today-value">$4,694.60</span>
-            <span class="today-change up">▲ 1.16%</span>
+            <span class="today-value">—</span>
+            <span class="today-change pending">—</span>
           </div>
         </div>
       </div>
-      <div class="today-takeaway-row">
+      <div class="today-takeaway-row" hidden>
         <span class="today-takeaway-label" id="today-takeaway-label">Today's takeaway</span>
-        <a class="today-takeaway-link" id="today-takeaway-link" href="/reports/en/2026-08-25_KOSPI_Daily_Report_EN_Benchmark.html">
-          <span class="today-takeaway-text" id="today-takeaway-text">The market retraced the selloff, but its center of gravity has yet to return.</span>
+        <a class="today-takeaway-link" id="today-takeaway-link" href="/en/market/">
+          <span class="today-takeaway-text" id="today-takeaway-text"></span>
         </a>
       </div>
     </div>
