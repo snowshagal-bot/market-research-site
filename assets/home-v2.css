@@ -34,6 +34,11 @@ html[data-theme="dark"] {
   background:
     radial-gradient(circle at 82% 0, color-mix(in srgb, var(--green-soft) 48%, transparent), transparent 34rem),
     var(--bg);
+  overflow-x: clip;
+}
+
+.today-strip {
+  overflow-x: clip;
 }
 
 .home-page .site-header {
@@ -1227,22 +1232,26 @@ html[data-theme="dark"] .calendar-preview-link {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
+    max-width: 100%;
   }
   .archive-view-toggle {
     align-self: flex-start;
   }
   .archive-filters {
     width: 100%;
+    max-width: 100%;
     display: flex;
     gap: 6px;
     overflow-x: auto;
     scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
   }
   .archive-filters::-webkit-scrollbar { display: none; }
   .filter-select {
     flex: 1 0 auto;
     font-size: 11px;
     padding: 5px 8px;
+    min-width: 0;
   }
   .filter-reset-btn {
     font-size: 11px;
@@ -1251,13 +1260,28 @@ html[data-theme="dark"] .calendar-preview-link {
   }
   .calendar-card {
     padding: 14px;
+    overflow: hidden;
+    min-width: 0;
   }
   .calendar-day {
     font-size: 12px;
+    min-width: 0;
   }
   .calendar-weekday {
     font-size: 10px;
     padding: 4px 0;
+  }
+  .calendar-preview-card {
+    padding: 12px;
+    min-width: 0;
+  }
+  .calendar-preview-title {
+    font-size: 14px;
+    word-break: keep-all;
+  }
+  .calendar-preview-summary {
+    font-size: 12px;
+    word-break: keep-all;
   }
   .home-page .section-head h2 { font-size: 22px; }
   .archive-layout .report-item {
