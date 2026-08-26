@@ -137,6 +137,20 @@ async function gh(token, path, options = {}) {
   return data;
 }
 
+async function readRepoText(token, path, ref) {
+  const file = await gh(token, `/contents/${encodeRepoPath(path)}?ref=${encodeURIComponent(ref)}`);
+  if (typeof file?.content === 'string' && file.content.trim()) {
+    return decodeBase64Utf8(file.content);
+  }
+  if (!file?.sha) throw new Error(`${path} 파일 내용을 찾을 수 없습니다.`);
+
+  const blob = await gh(token, `/git/blobs/${encodeURIComponent(file.sha)}`);
+  if (blob?.encoding !== 'base64' || typeof blob.content !== 'string' || !blob.content.trim()) {
+    throw new Error(`${path} Git blob 내용을 읽을 수 없습니다.`);
+  }
+  return decodeBase64Utf8(blob.content);
+}
+
 function extractSearchText(html) {
   if (!html) return '';
   let clean = html
@@ -342,8 +356,7 @@ export async function onRequestPost(context) {
   const registeredDate = kstDate(now);
 
   try {
-    const postsFile = await gh(token, `/contents/${encodeRepoPath('data/posts.json')}?ref=${encodeURIComponent(BRANCH)}`);
-    const postsText = decodeBase64Utf8(postsFile.content);
+    const postsText = await readRepoText(token, 'data/posts.json', BRANCH);
     let posts = JSON.parse(postsText);
     if (!Array.isArray(posts)) throw new Error('posts.json 형식이 올바르지 않습니다.');
 
@@ -403,8 +416,8 @@ export async function onRequestPost(context) {
     // Automatic Search Index update (Fail-Closed)
     let searchIndex;
     try {
-      const searchIndexFile = await gh(token, `/contents/${encodeRepoPath('data/search-index.json')}?ref=${encodeURIComponent(BRANCH)}`);
-      searchIndex = JSON.parse(decodeBase64Utf8(searchIndexFile.content));
+      const searchIndexText = await readRepoText(token, 'data/search-index.json', BRANCH);
+      searchIndex = JSON.parse(searchIndexText);
     } catch (err) {
       return reply({
         error: 'SEARCH_INDEX_READ_FAILED',

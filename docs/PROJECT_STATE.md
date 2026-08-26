@@ -63,6 +63,8 @@ Admin page: `/admin/`
 10. Cloudflare Pages automatically deploys the new Git commit.
 11. Admin UI polls `data/posts.json` until the new post appears, then shows completion and redirects to the relevant locale/category.
 
+The publisher and post manager read repository JSON through the Git blob API when a file is too large for the GitHub Contents API to return inline. This keeps the growing full-text search index publishable beyond the Contents API's 1MB inline-content limit.
+
 The publishing UI now warns before the final confirmation when no optional homepage cover is selected. Publishing without a cover remains supported and uses the homepage fallback cover.
 Publish failures remain visible without clearing the selected report or metadata. An invalid administrator key is identified explicitly, marked on the key field, and can be corrected before retrying.
 
