@@ -43,6 +43,7 @@
         <a class="nav-secondary" data-nav-category="note" href="?category=note">Notes</a>
       </nav>
       <div class="header-actions">
+        <button class="icon-btn search-trigger" type="button" data-search-trigger aria-label="Search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></button>
         <a class="language-pill" data-language-choice="ko" href="/" aria-label="Read in Korean">KO</a>
         <button class="icon-btn" type="button" data-theme-toggle aria-label="Switch to dark mode">◐</button>
       </div>
@@ -142,9 +143,12 @@
 
   <section class="section archive-section" aria-labelledby="archive-heading">
     <div class="site-wrap">
-      <div class="section-head"><h2 id="archive-heading">Recent Reports</h2><span id="archive-order-label">Newest report date first</span></div>
-      <div class="toolbar">
-        <label class="search"><span class="sr-only">Search reports</span><input id="search-input" type="search" placeholder="Search titles and summaries"></label>
+      <div class="archive-header-wrap">
+        <p class="archive-eyebrow">ARCHIVE</p>
+        <div class="section-head"><h2 id="archive-heading">Recent Reports</h2><span id="archive-order-label">Newest report date first</span></div>
+        <p class="archive-lead">A library of market thoughts and records. Find the insights you need.</p>
+      </div>
+      <div class="toolbar archive-toolbar">
         <div class="filters" aria-label="Category filters">
           <button class="filter active" data-filter="all" aria-pressed="true">All</button>
           <button class="filter" data-filter="daily" aria-pressed="false">Daily</button>
@@ -153,9 +157,33 @@
           <button class="filter" data-filter="basics" aria-pressed="false">Market Basics</button>
           <button class="filter" data-filter="note" aria-pressed="false">Notes</button>
         </div>
+        <div class="archive-controls">
+          <div class="archive-view-toggle" id="archive-view-toggle" hidden>
+            <button type="button" class="view-toggle-btn active" data-view="list" aria-pressed="true">LIST</button>
+            <button type="button" class="view-toggle-btn" data-view="calendar" aria-pressed="false">CALENDAR</button>
+          </div>
+          <div class="archive-filters" id="archive-filters">
+            <label class="sr-only" for="filter-year">Year</label>
+            <select id="filter-year" class="filter-select" aria-label="Year filter">
+              <option value="all">All Years</option>
+            </select>
+            <label class="sr-only" for="filter-month">Month</label>
+            <select id="filter-month" class="filter-select" aria-label="Month filter">
+              <option value="all">All Months</option>
+            </select>
+            <label class="sr-only" for="filter-tag">Tag</label>
+            <select id="filter-tag" class="filter-select" aria-label="Tag filter">
+              <option value="all">All Tags</option>
+            </select>
+            <button type="button" id="filter-reset-btn" class="filter-reset-btn" aria-label="Reset filters">Reset</button>
+          </div>
+        </div>
       </div>
       <div class="archive-layout">
-        <div id="report-list" class="report-list"></div>
+        <div class="archive-main-column">
+          <div id="report-list" class="report-list"></div>
+          <div id="calendar-container" class="calendar-container" hidden></div>
+        </div>
         <aside class="archive-index" aria-labelledby="archive-index-heading">
           <h3 id="archive-index-heading">Archive</h3>
           <div id="archive-index" class="archive-index-list"></div>
@@ -189,9 +217,35 @@
     </div>
   </div>
 </footer>
+
+<dialog id="search-dialog" class="search-dialog" aria-label="Search">
+  <div class="search-dialog-backdrop" data-search-close></div>
+  <div class="search-dialog-content">
+    <div class="search-dialog-header">
+      <div class="search-input-wrap">
+        <svg class="search-input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input id="global-search-input" type="search" class="search-dialog-input" placeholder="Search reports, summaries, keywords..." autocomplete="off">
+        <button type="button" class="search-clear-btn" id="search-clear-btn" aria-label="Clear search" hidden>×</button>
+      </div>
+      <button type="button" class="search-dialog-close" data-search-close aria-label="Close search">ESC</button>
+    </div>
+    <div class="search-dialog-body">
+      <div class="search-quick-tags" id="search-quick-tags">
+        <span class="search-quick-title">Suggested searches</span>
+        <div class="search-tag-cloud" id="search-tag-cloud"></div>
+      </div>
+      <div class="search-results-list" id="search-results-list" role="list"></div>
+      <div class="search-empty-state" id="search-empty-state" hidden>
+        <p class="search-empty-title">No matching reports found.</p>
+        <p class="search-empty-desc">Try searching with other keywords or tags.</p>
+      </div>
+    </div>
+  </div>
+</dialog>
+
 <script src="/data/posts.js?v=20260824-1"></script>
 <script src="/data/market-summary.js?v=20260826-1"></script>
 <script src="/assets/locale.js?v=20260824-2"></script>
-<script src="/assets/site.js?v=20260826-2"></script>
+<script src="/assets/site.js?v=20260826-3"></script>
 </body>
 </html>

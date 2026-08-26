@@ -128,6 +128,42 @@ function isManagedPath(path, root) {
     && segments.slice(1).every((segment) => segment && segment !== "." && segment !== "..");
 }
 
+function extractSearchText(html) {
+  if (!html) return '';
+  let clean = html
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<svg[\s\S]*?<\/svg>/gi, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<nav\b[\s\S]*?<\/nav>/gi, ' ')
+    .replace(/<header\b[\s\S]*?<\/header>/gi, ' ')
+    .replace(/<footer\b[\s\S]*?<\/footer>/gi, ' ')
+    .replace(/<dialog\b[\s\S]*?<\/dialog>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/[\u200B-\u200D\uFEFF]/g, '');
+
+  const boilerplates = [
+    /SNOWSHAGAL/gi,
+    /MARKET RESEARCH/gi,
+    /시장을 읽어주는 사이트/gi,
+    /본 사이트의 리서치와 해설은 정보 제공을 목적으로 하며[^.]+투자자문[^.]+않습니다\.?/gi,
+    /This site's research and commentary are for informational purposes only[^.]+investment advice[^.]*\.?/gi,
+    /Scroll down for the report/gi,
+    /Read report/gi,
+    /리포트 보기/gi,
+    /리포트 읽기/gi,
+    /Tistory/gi
+  ];
+  for (const bp of boilerplates) clean = clean.replace(bp, ' ');
+  return clean.replace(/\s+/g, ' ').trim();
+}
+
 function sortPosts(posts) {
   return posts.sort((left, right) => {
     const dateOrder = String(right.reportDate || right.date || "").localeCompare(String(left.reportDate || left.date || ""));
@@ -140,8 +176,8 @@ function postsJavaScript(posts) {
   return `window.RESEARCH_POSTS = ${JSON.stringify(posts, null, 2)};\n`;
 }
 
-function metadataEntries(posts) {
-  return [
+function metadataEntries(posts, searchIndex = null) {
+  const entries = [
     {
       path: "data/posts.json",
       mode: "100644",
@@ -155,10 +191,47 @@ function metadataEntries(posts) {
       content: postsJavaScript(posts),
     },
   ];
+
+  if (Array.isArray(searchIndex)) {
+    entries.push(
+      {
+        path: "data/search-index.json",
+        mode: "100644",
+        type: "blob",
+        content: `${JSON.stringify(searchIndex, null, 2)}\n`,
+      },
+      {
+        path: "data/search-index.js",
+        mode: "100644",
+        type: "blob",
+        content: `window.SEARCH_INDEX = ${JSON.stringify(searchIndex)};\n`,
+      }
+    );
+  }
+
+  return entries;
 }
 
 function deletedEntry(path) {
   return { path, mode: "100644", type: "blob", sha: null };
+}
+
+function hasMatchingUniqueIds(posts, searchIndex) {
+  if (!Array.isArray(posts) || !Array.isArray(searchIndex)) return false;
+  const postIds = posts.map(x => x?.id).filter(Boolean);
+  const indexIds = searchIndex.map(x => x?.id).filter(Boolean);
+
+  if (postIds.length !== posts.length) return false;
+  if (indexIds.length !== searchIndex.length) return false;
+
+  const postSet = new Set(postIds);
+  const indexSet = new Set(indexIds);
+
+  if (postSet.size !== postIds.length) return false;
+  if (indexSet.size !== indexIds.length) return false;
+  if (postSet.size !== indexSet.size) return false;
+
+  return [...postSet].every(id => indexSet.has(id));
 }
 
 async function currentRef(token) {
@@ -270,14 +343,53 @@ export async function onRequestPost(context) {
   try {
     const ref = await currentRef(env.GITHUB_TOKEN);
     const baseSha = ref.object.sha;
-    const [parentCommit, postsFile] = await Promise.all([
-      gh(env.GITHUB_TOKEN, `/git/commits/${baseSha}`),
-      gh(env.GITHUB_TOKEN, `/contents/${encodeRepoPath("data/posts.json")}?ref=${encodeURIComponent(baseSha)}`),
-    ]);
+    let parentCommit, postsFile, searchIndexFile;
+    try {
+      [parentCommit, postsFile, searchIndexFile] = await Promise.all([
+        gh(env.GITHUB_TOKEN, `/git/commits/${baseSha}`),
+        gh(env.GITHUB_TOKEN, `/contents/${encodeRepoPath("data/posts.json")}?ref=${encodeURIComponent(baseSha)}`),
+        gh(env.GITHUB_TOKEN, `/contents/${encodeRepoPath("data/search-index.json")}?ref=${encodeURIComponent(baseSha)}`),
+      ]);
+    } catch (err) {
+      return reply({
+        ok: false,
+        error: "SEARCH_INDEX_READ_FAILED",
+        message: `저장소 데이터 또는 검색 인덱스를 읽는 중 오류가 발생했습니다: ${err.message}`
+      }, 500);
+    }
+
     const posts = JSON.parse(decodeBase64Utf8(postsFile.content));
+    let searchIndex;
+    try {
+      searchIndex = JSON.parse(decodeBase64Utf8(searchIndexFile.content));
+    } catch (err) {
+      return reply({
+        ok: false,
+        error: "SEARCH_INDEX_READ_FAILED",
+        message: `검색 인덱스 JSON 파싱에 실패했습니다: ${err.message}`
+      }, 500);
+    }
+
+    if (!hasMatchingUniqueIds(posts, searchIndex)) {
+      return reply({
+        ok: false,
+        error: "SEARCH_INDEX_INTEGRITY_FAILED",
+        message: "기존 게시물과 검색 인덱스의 ID 목록이 일치하지 않거나 중복 ID가 존재합니다."
+      }, 500);
+    }
+
     const postIndex = posts.findIndex((post) => post.id === id);
     if (postIndex < 0) return reply({ ok: false, error: "POST_NOT_FOUND", message: "게시물을 찾을 수 없습니다." }, 404);
     const existing = posts[postIndex];
+
+    const searchIdx = searchIndex.findIndex((item) => item && item.id === id);
+    if (searchIdx < 0) {
+      return reply({
+        ok: false,
+        error: "SEARCH_INDEX_INTEGRITY_FAILED",
+        message: "검색 인덱스에서 해당 게시물 ID를 찾을 수 없습니다."
+      }, 500);
+    }
 
     if (!isManagedPath(existing.href, "reports")) {
       return reply({ ok: false, error: "UNSAFE_REPORT_PATH", message: "안전하지 않은 리포트 경로는 변경할 수 없습니다." }, 400);
@@ -295,9 +407,19 @@ export async function onRequestPost(context) {
 
     if (action === "delete") {
       posts.splice(postIndex, 1);
+      searchIndex.splice(searchIdx, 1);
+
+      if (!hasMatchingUniqueIds(posts, searchIndex)) {
+        return reply({
+          ok: false,
+          error: "SEARCH_INDEX_INTEGRITY_FAILED",
+          message: "삭제 후 데이터 정합성 검증에 실패했습니다."
+        }, 500);
+      }
+
       entries.push(deletedEntry(existing.href));
       if (existing.coverImage) entries.push(deletedEntry(existing.coverImage));
-      entries.push(...metadataEntries(sortPosts(posts)));
+      entries.push(...metadataEntries(sortPosts(posts), searchIndex));
       commitMessage = `Delete ${existing.title}`;
     } else {
       const updated = {
@@ -339,7 +461,28 @@ export async function onRequestPost(context) {
       }
 
       posts[postIndex] = updated;
-      entries.push(...metadataEntries(sortPosts(posts)));
+
+      searchIndex[searchIdx] = {
+        ...searchIndex[searchIdx],
+        category: updated.type,
+        typeLabel: updated.typeLabel,
+        title: updated.title,
+        subtitle: updated.subtitle,
+        date: updated.reportDate,
+        summary: updated.summary || updated.description,
+        coverImage: updated.coverImage ? `/${updated.coverImage.replace(/^\/+/, '')}` : '',
+        ...(replacementHtml !== null ? { bodyText: extractSearchText(replacementHtml) } : {})
+      };
+
+      if (!hasMatchingUniqueIds(posts, searchIndex)) {
+        return reply({
+          ok: false,
+          error: "SEARCH_INDEX_INTEGRITY_FAILED",
+          message: "수정 후 데이터 정합성 검증에 실패했습니다."
+        }, 500);
+      }
+
+      entries.push(...metadataEntries(sortPosts(posts), searchIndex));
       commitMessage = `Update ${updated.title}`;
       resultPost = updated;
     }

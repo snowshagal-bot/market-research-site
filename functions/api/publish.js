@@ -137,6 +137,60 @@ async function gh(token, path, options = {}) {
   return data;
 }
 
+function extractSearchText(html) {
+  if (!html) return '';
+  let clean = html
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<svg[\s\S]*?<\/svg>/gi, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<nav\b[\s\S]*?<\/nav>/gi, ' ')
+    .replace(/<header\b[\s\S]*?<\/header>/gi, ' ')
+    .replace(/<footer\b[\s\S]*?<\/footer>/gi, ' ')
+    .replace(/<dialog\b[\s\S]*?<\/dialog>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/[\u200B-\u200D\uFEFF]/g, '');
+
+  const boilerplates = [
+    /SNOWSHAGAL/gi,
+    /MARKET RESEARCH/gi,
+    /시장을 읽어주는 사이트/gi,
+    /본 사이트의 리서치와 해설은 정보 제공을 목적으로 하며[^.]+투자자문[^.]+않습니다\.?/gi,
+    /This site's research and commentary are for informational purposes only[^.]+investment advice[^.]*\.?/gi,
+    /Scroll down for the report/gi,
+    /Read report/gi,
+    /리포트 보기/gi,
+    /리포트 읽기/gi,
+    /Tistory/gi
+  ];
+  for (const bp of boilerplates) clean = clean.replace(bp, ' ');
+  return clean.replace(/\s+/g, ' ').trim();
+}
+
+function hasMatchingUniqueIds(posts, searchIndex) {
+  if (!Array.isArray(posts) || !Array.isArray(searchIndex)) return false;
+  const postIds = posts.map(x => x?.id).filter(Boolean);
+  const indexIds = searchIndex.map(x => x?.id).filter(Boolean);
+
+  if (postIds.length !== posts.length) return false;
+  if (indexIds.length !== searchIndex.length) return false;
+
+  const postSet = new Set(postIds);
+  const indexSet = new Set(indexIds);
+
+  if (postSet.size !== postIds.length) return false;
+  if (indexSet.size !== indexIds.length) return false;
+  if (postSet.size !== indexSet.size) return false;
+
+  return [...postSet].every(id => indexSet.has(id));
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -249,7 +303,59 @@ export async function onRequestPost(context) {
       ...(coverPath ? { coverImage: coverPath } : {})
     };
 
+    const originalPostsLength = posts.length;
+
+    // Automatic Search Index update (Fail-Closed)
+    let searchIndex;
+    try {
+      const searchIndexFile = await gh(token, `/contents/${encodeRepoPath('data/search-index.json')}?ref=${encodeURIComponent(BRANCH)}`);
+      searchIndex = JSON.parse(decodeBase64Utf8(searchIndexFile.content));
+    } catch (err) {
+      return reply({
+        error: 'SEARCH_INDEX_READ_FAILED',
+        message: `검색 인덱스를 읽는 중 오류가 발생했습니다: ${err.message}`
+      }, 500);
+    }
+
+    if (!hasMatchingUniqueIds(posts, searchIndex)) {
+      return reply({
+        error: 'SEARCH_INDEX_INTEGRITY_FAILED',
+        message: '기존 게시물과 검색 인덱스의 ID 목록이 일치하지 않거나 중복 ID가 존재합니다.'
+      }, 500);
+    }
+
+    const searchEntry = {
+      id,
+      lang,
+      category: type,
+      typeLabel: typeLabel(type, lang),
+      title,
+      subtitle,
+      date: reportDate,
+      registeredAt,
+      summary: summary || description,
+      tags: [],
+      url: `/${href.replace(/^\/+/, '')}`,
+      coverImage: coverPath ? `/${coverPath.replace(/^\/+/, '')}` : '',
+      bodyText: extractSearchText(html)
+    };
+
+    const existingIndexIdx = searchIndex.findIndex(item => item && item.id === id);
+    if (existingIndexIdx >= 0) {
+      searchIndex[existingIndexIdx] = searchEntry;
+    } else {
+      searchIndex.push(searchEntry);
+    }
+
     posts.push(post);
+
+    if (!hasMatchingUniqueIds(posts, searchIndex)) {
+      return reply({
+        error: 'SEARCH_INDEX_INTEGRITY_FAILED',
+        message: '갱신 후 게시물과 검색 인덱스의 ID 정합성 검증에 실패했습니다.'
+      }, 500);
+    }
+
     posts.sort((a, b) => {
       const da = String(a.reportDate || a.date || '');
       const db = String(b.reportDate || b.date || '');
@@ -257,8 +363,17 @@ export async function onRequestPost(context) {
       return String(b.registeredAt || '').localeCompare(String(a.registeredAt || ''));
     });
 
+    searchIndex.sort((a, b) => {
+      const da = String(a.date || '');
+      const db = String(b.date || '');
+      if (da !== db) return db.localeCompare(da);
+      return String(b.registeredAt || '').localeCompare(String(a.registeredAt || ''));
+    });
+
     const postsJson = `${JSON.stringify(posts, null, 2)}\n`;
     const postsJs = `window.RESEARCH_POSTS = ${JSON.stringify(posts, null, 2)};\n`;
+    const searchIndexJson = `${JSON.stringify(searchIndex, null, 2)}\n`;
+    const searchIndexJs = `window.SEARCH_INDEX = ${JSON.stringify(searchIndex)};\n`;
 
     const ref = await gh(token, `/git/ref/heads/${encodeURIComponent(BRANCH)}`);
     const parentSha = ref.object.sha;
@@ -285,7 +400,9 @@ export async function onRequestPost(context) {
           { path: reportPath, mode: '100644', type: 'blob', content: html },
           ...(coverEntry ? [coverEntry] : []),
           { path: 'data/posts.json', mode: '100644', type: 'blob', content: postsJson },
-          { path: 'data/posts.js', mode: '100644', type: 'blob', content: postsJs }
+          { path: 'data/posts.js', mode: '100644', type: 'blob', content: postsJs },
+          { path: 'data/search-index.json', mode: '100644', type: 'blob', content: searchIndexJson },
+          { path: 'data/search-index.js', mode: '100644', type: 'blob', content: searchIndexJs }
         ]
       })
     });

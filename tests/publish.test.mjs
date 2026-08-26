@@ -12,13 +12,26 @@ function base64(text) {
   return btoa(binary);
 }
 
-function githubMock(existingPosts = []) {
+function githubMock(existingPosts = [], { searchIndex = null, searchIndexFail = false } = {}) {
   const calls = [];
+  const defaultIndex = searchIndex !== null ? searchIndex : existingPosts.map(p => ({
+    id: p.id,
+    lang: p.lang || 'ko',
+    category: p.type || 'daily',
+    title: p.title || 'Title',
+    date: p.reportDate || p.date || '2026-08-10',
+    tags: []
+  }));
+
   globalThis.fetch = async (input, options = {}) => {
     const url = new URL(String(input));
     const path = `${url.pathname}${url.search}`;
     const body = options.body ? JSON.parse(options.body) : null;
     calls.push({ path, method: options.method || 'GET', body });
+    if (path.includes('/contents/data/search-index.json')) {
+      if (searchIndexFail) return new Response('Not found', { status: 404 });
+      return new Response(JSON.stringify({ content: base64(`${JSON.stringify(defaultIndex)}\n`) }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
     let payload;
     if (path.includes('/contents/data/posts.json')) payload = { content: base64(`${JSON.stringify(existingPosts)}\n`) };
     else if (path.endsWith('/git/ref/heads/main')) payload = { object: { sha: 'parent-sha' } };
@@ -90,8 +103,10 @@ test('publishing without a cover preserves existing records and omits coverImage
     assert.equal(response.status, 200);
     assert.equal(data.coverImage, null);
     const treeCall = calls.find(call => call.path.endsWith('/git/trees'));
-    assert.equal(treeCall.body.tree.length, 3);
+    assert.equal(treeCall.body.tree.length, 5);
     assert.equal(treeCall.body.tree.some(entry => entry.path.startsWith('covers/')), false);
+    assert.ok(treeCall.body.tree.some(entry => entry.path === 'data/search-index.json'));
+    assert.ok(treeCall.body.tree.some(entry => entry.path === 'data/search-index.js'));
     const postsEntry = treeCall.body.tree.find(entry => entry.path === 'data/posts.json');
     const posts = JSON.parse(postsEntry.content);
     assert.deepEqual(posts.find(post => post.id === 'legacy'), existing[0]);
@@ -186,5 +201,93 @@ test('unsupported and oversized cover files are rejected before GitHub writes', 
     } finally {
       globalThis.fetch = originalFetch;
     }
+  }
+});
+
+test('publish fails closed when search-index fetch fails (no commit created)', async () => {
+  const calls = githubMock([], { searchIndexFail: true });
+  try {
+    const { response, data } = await runPublish();
+    assert.equal(response.status, 500);
+    assert.equal(data.error, 'SEARCH_INDEX_READ_FAILED');
+    assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
+    assert.equal(calls.some(call => call.path.endsWith('/git/commits')), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('publish fails closed when posts and search-index counts mismatch', async () => {
+  const existing = [{ id: 'post-1', href: 'reports/1.html', type: 'daily', title: 'P1' }];
+  // Search index has 0 items while posts has 1
+  const calls = githubMock(existing, { searchIndex: [] });
+  try {
+    const { response, data } = await runPublish();
+    assert.equal(response.status, 500);
+    assert.equal(data.error, 'SEARCH_INDEX_INTEGRITY_FAILED');
+    assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('duplicate search index ID updates existing entry without duplicate append', async () => {
+  // If report has same ID, it replaces the search entry rather than pushing duplicates
+  const existing = [];
+  const calls = githubMock(existing);
+  try {
+    const { response, data } = await runPublish();
+    assert.equal(response.status, 200);
+    const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+    const searchIdxEntry = tree.find(entry => entry.path === 'data/search-index.json');
+    const index = JSON.parse(searchIdxEntry.content);
+    assert.equal(index.length, 1);
+    assert.equal(index[0].id, data.id);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('publish rejects equal-length but mismatched ID sets with SEARCH_INDEX_INTEGRITY_FAILED (no commit created)', async () => {
+  const posts = [
+    { id: 'post-A', href: 'reports/a.html', type: 'daily', title: 'Post A' },
+    { id: 'post-B', href: 'reports/b.html', type: 'daily', title: 'Post B' }
+  ];
+  const searchIndex = [
+    { id: 'post-A', lang: 'ko', category: 'daily', title: 'Post A', date: '2026-08-10', tags: [] },
+    { id: 'post-C', lang: 'ko', category: 'daily', title: 'Post C', date: '2026-08-10', tags: [] }
+  ];
+
+  const calls = githubMock(posts, { searchIndex });
+  try {
+    const { response, data } = await runPublish();
+    assert.equal(response.status, 500);
+    assert.equal(data.error, 'SEARCH_INDEX_INTEGRITY_FAILED');
+    assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
+    assert.equal(calls.some(call => call.path.endsWith('/git/commits')), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('publish rejects duplicate IDs in search index with SEARCH_INDEX_INTEGRITY_FAILED (no commit created)', async () => {
+  const posts = [
+    { id: 'post-A', href: 'reports/a.html', type: 'daily', title: 'Post A' },
+    { id: 'post-B', href: 'reports/b.html', type: 'daily', title: 'Post B' }
+  ];
+  const searchIndex = [
+    { id: 'post-A', lang: 'ko', category: 'daily', title: 'Post A', date: '2026-08-10', tags: [] },
+    { id: 'post-A', lang: 'ko', category: 'daily', title: 'Post A duplicate', date: '2026-08-10', tags: [] }
+  ];
+
+  const calls = githubMock(posts, { searchIndex });
+  try {
+    const { response, data } = await runPublish();
+    assert.equal(response.status, 500);
+    assert.equal(data.error, 'SEARCH_INDEX_INTEGRITY_FAILED');
+    assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
+    assert.equal(calls.some(call => call.path.endsWith('/git/commits')), false);
+  } finally {
+    globalThis.fetch = originalFetch;
   }
 });

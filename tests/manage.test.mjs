@@ -27,14 +27,27 @@ function base64(text) {
   return btoa(binary);
 }
 
-function githubMock(existingPosts = [basePost], { conflict = false } = {}) {
+function githubMock(existingPosts = [basePost], { conflict = false, searchIndex = null, searchIndexFail = false } = {}) {
   const calls = [];
   let refReads = 0;
+  const defaultIndex = searchIndex !== null ? searchIndex : existingPosts.map(p => ({
+    id: p.id,
+    lang: p.lang || 'ko',
+    category: p.type || 'daily',
+    title: p.title || 'Title',
+    date: p.reportDate || p.date || '2026-08-11',
+    tags: []
+  }));
+
   globalThis.fetch = async (input, options = {}) => {
     const url = new URL(String(input));
     const path = `${url.pathname}${url.search}`;
     const body = options.body ? JSON.parse(options.body) : null;
     calls.push({ path, method: options.method || 'GET', body });
+    if (path.includes('/contents/data/search-index.json?ref=base-sha')) {
+      if (searchIndexFail) return new Response('Not found', { status: 404 });
+      return new Response(JSON.stringify({ content: base64(`${JSON.stringify(defaultIndex)}\n`) }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
     let payload;
     if (path.endsWith('/git/ref/heads/main')) {
       refReads += 1;
@@ -287,5 +300,76 @@ test('authentication and server configuration fail before GitHub access', async 
       assert.equal(data.error, error);
       assert.equal(calls.length, 0);
     } finally { globalThis.fetch = originalFetch; }
+  }
+});
+
+test('manage fails closed when search-index fetch fails (no commit created)', async () => {
+  const calls = githubMock([basePost], { searchIndexFail: true });
+  try {
+    const { response, data } = await run();
+    assert.equal(response.status, 500);
+    assert.equal(data.error, 'SEARCH_INDEX_READ_FAILED');
+    assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
+    assert.equal(calls.some(call => call.path.endsWith('/git/commits')), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('manage fails closed when posts and search-index counts mismatch', async () => {
+  // searchIndex is empty while posts has basePost
+  const calls = githubMock([basePost], { searchIndex: [] });
+  try {
+    const { response, data } = await run();
+    assert.equal(response.status, 500);
+    assert.equal(data.error, 'SEARCH_INDEX_INTEGRITY_FAILED');
+    assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
+    assert.equal(calls.some(call => call.path.endsWith('/git/commits')), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('manage rejects equal-length but mismatched ID sets with SEARCH_INDEX_INTEGRITY_FAILED (no commit created)', async () => {
+  const posts = [
+    { ...basePost, id: 'post-A' },
+    { ...basePost, id: 'post-B', href: 'reports/b.html' }
+  ];
+  const searchIndex = [
+    { id: 'post-A', lang: 'ko', category: 'daily', title: 'Post A', date: '2026-08-10', tags: [] },
+    { id: 'post-C', lang: 'ko', category: 'daily', title: 'Post C', date: '2026-08-10', tags: [] }
+  ];
+
+  const calls = githubMock(posts, { searchIndex });
+  try {
+    const { response, data } = await run({ id: 'post-A' });
+    assert.equal(response.status, 500);
+    assert.equal(data.error, 'SEARCH_INDEX_INTEGRITY_FAILED');
+    assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
+    assert.equal(calls.some(call => call.path.endsWith('/git/commits')), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('manage rejects duplicate IDs in search index with SEARCH_INDEX_INTEGRITY_FAILED (no commit created)', async () => {
+  const posts = [
+    { ...basePost, id: 'post-A' },
+    { ...basePost, id: 'post-B', href: 'reports/b.html' }
+  ];
+  const searchIndex = [
+    { id: 'post-A', lang: 'ko', category: 'daily', title: 'Post A', date: '2026-08-10', tags: [] },
+    { id: 'post-A', lang: 'ko', category: 'daily', title: 'Post A duplicate', date: '2026-08-10', tags: [] }
+  ];
+
+  const calls = githubMock(posts, { searchIndex });
+  try {
+    const { response, data } = await run({ id: 'post-A' });
+    assert.equal(response.status, 500);
+    assert.equal(data.error, 'SEARCH_INDEX_INTEGRITY_FAILED');
+    assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
+    assert.equal(calls.some(call => call.path.endsWith('/git/commits')), false);
+  } finally {
+    globalThis.fetch = originalFetch;
   }
 });
