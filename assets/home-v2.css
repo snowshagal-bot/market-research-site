@@ -321,6 +321,166 @@ html[data-theme="dark"] .hero-art img {
   mix-blend-mode: luminosity;
 }
 
+/* TODAY Market Summary Strip */
+.today-strip {
+  padding: 24px 0 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 66%, transparent);
+}
+
+.today-strip-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.today-strip-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.today-strip-tag {
+  color: var(--navy);
+  font-weight: 900;
+}
+
+.today-strip-dot {
+  color: var(--line);
+}
+
+.today-strip-date {
+  color: var(--text-2);
+}
+
+.today-strip-market-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--navy);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-decoration: none;
+  transition: color .15s ease;
+}
+
+.today-strip-market-link:hover {
+  color: var(--text);
+}
+
+.today-strip-arrow {
+  transition: transform .15s ease;
+}
+
+.today-strip-market-link:hover .today-strip-arrow {
+  transform: translateX(3px);
+}
+
+.today-strip-scroll-wrap {
+  position: relative;
+}
+
+.today-strip-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  padding: 4px 0 16px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+}
+
+.today-item {
+  display: flex;
+  flex-direction: column;
+  padding: 0 16px;
+}
+
+.today-item:first-child {
+  padding-left: 0;
+}
+
+.today-item:not(:last-child) {
+  border-right: 1px solid color-mix(in srgb, var(--line) 45%, transparent);
+}
+
+.today-label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.today-value {
+  margin: 4px 0 2px;
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -.01em;
+}
+
+.today-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.today-change.up {
+  color: #c74754;
+}
+
+.today-change.down {
+  color: #2d68ae;
+}
+
+html[data-theme="dark"] .today-change.up {
+  color: #ff868c;
+}
+
+html[data-theme="dark"] .today-change.down {
+  color: #7fb0ea;
+}
+
+.today-takeaway-row {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 13px 0 15px;
+}
+
+.today-takeaway-label {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.today-takeaway-link {
+  display: inline-block;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-decoration: none;
+  transition: color .15s ease;
+}
+
+.today-takeaway-link:hover {
+  color: var(--navy);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .site-introduction {
   padding: 42px 0 28px;
 }
@@ -674,6 +834,67 @@ html[data-theme="dark"] .hero-art img {
   }
 
   .hero-art img { object-position: 74% 48%; }
+
+  .today-strip {
+    padding: 16px 0 0;
+  }
+  .today-strip-head {
+    margin-bottom: 10px;
+  }
+  .today-strip-eyebrow {
+    font-size: 10px;
+    letter-spacing: .12em;
+  }
+  .today-strip-market-link {
+    font-size: 10px;
+    letter-spacing: .1em;
+  }
+  .today-strip-scroll-wrap {
+    margin: 0 -16px;
+    padding: 0 16px;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+    mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+  }
+  .today-strip-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 2px 0 12px;
+    gap: 0;
+  }
+  .today-strip-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .today-item {
+    flex: 0 0 calc((100% - 16px) / 2.45);
+    min-width: 114px;
+    padding: 0 12px;
+    scroll-snap-align: start;
+  }
+  .today-item:first-child {
+    padding-left: 0;
+  }
+  .today-value {
+    font-size: 18px;
+    margin: 3px 0 1px;
+  }
+  .today-takeaway-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 10px 0 12px;
+  }
+  .today-takeaway-label {
+    font-size: 10px;
+  }
+  .today-takeaway-link {
+    font-size: 13px;
+    line-height: 1.45;
+    word-break: keep-all;
+  }
 
   .site-introduction { padding: 22px 0 14px; }
   .latest-head { margin-bottom: 12px; }

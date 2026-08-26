@@ -178,6 +178,38 @@
   }));
   search?.addEventListener('input',renderArchive);
 
+  function renderTodayMarket(){
+    const summary=window.TODAY_MARKET_SUMMARY;
+    if(!summary) return;
+    const dateEl=document.getElementById('today-strip-date');
+    const gridEl=document.getElementById('today-market-grid');
+    const takeawayTextEl=document.getElementById('today-takeaway-text');
+    const takeawayLinkEl=document.getElementById('today-takeaway-link');
+
+    if(dateEl && summary.dateDisplay) {
+      dateEl.textContent=summary.dateDisplay[locale]||summary.dateDisplay.ko||summary.dateDisplay.en||'CLOSE';
+    }
+    if(gridEl && Array.isArray(summary.items)) {
+      gridEl.innerHTML=summary.items.map(item=>{
+        const dirClass=item.direction==='down'?'down':'up';
+        const changeVal=typeof item.change==='object'&&item.change!==null
+          ? (item.change[locale]||item.change.ko||item.change.en||'')
+          : item.change;
+        return `<div class="today-item" role="listitem"><span class="today-label">${esc(item.label)}</span><span class="today-value">${esc(item.value)}</span><span class="today-change ${dirClass}">${esc(changeVal)}</span></div>`;
+      }).join('');
+    }
+    if(takeawayTextEl && summary.takeaway) {
+      takeawayTextEl.textContent=summary.takeaway[locale]||summary.takeaway.ko||summary.takeaway.en||'';
+    }
+    if(takeawayLinkEl) {
+      const latestDaily=latestFor('daily');
+      if(latestDaily) {
+        takeawayLinkEl.href=rootPath(latestDaily.href);
+      }
+    }
+  }
+
+  renderTodayMarket();
   renderHighlights();
   renderArchive();
 })();
