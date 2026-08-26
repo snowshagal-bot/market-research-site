@@ -3,6 +3,13 @@ export const PRODUCTION_ORIGIN = 'https://snowshagal.com';
 // Landscape 1200x630 card used wherever a page has no artwork of its own.
 export const SOCIAL_FALLBACK_IMAGE = '/assets/social/snowshagal-home.jpg';
 
+// og:image for a report that has its own cover. Report covers are 900x1350
+// portrait, and a 1.91:1 unfurler keeps only the middle 35% of them, which cut
+// the report title away on four of five sampled covers and sliced through the
+// glyphs on one. Open Graph carries a landscape card instead; the cover still
+// reaches X through twitter:image, where the summary card does not crop it.
+export const SOCIAL_REPORT_IMAGE = '/assets/social/market-close-share.jpg';
+
 // Uploaded report HTML declares no icon, so the shared shell supplies one.
 export const FAVICON_TAGS = '<link rel="icon" href="/favicon.ico" sizes="any">'
   + '<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">'
@@ -69,11 +76,12 @@ export function reportSeoTags(posts, post) {
   const lang = postLanguage(post);
   const description = String(post.summary || post.description || '').trim();
   const cover = post.coverImage ? absoluteSiteUrl(post.coverImage) : '';
-  const image = cover || absoluteSiteUrl(SOCIAL_FALLBACK_IMAGE);
-  // Report covers are 900x1350 portrait. X centre-crops summary_large_image to
-  // roughly 1.91:1, which would cut the cover title away and leave a middle
-  // band, so a cover keeps the small summary card and only the landscape
-  // fallback earns the large one.
+  // og:image is always a 1200x630 landscape card, so nothing that crops to
+  // 1.91:1 can behead the artwork.
+  const ogImage = absoluteSiteUrl(cover ? SOCIAL_REPORT_IMAGE : SOCIAL_FALLBACK_IMAGE);
+  // X keeps the report's own cover: the summary card shows a small thumbnail
+  // rather than a cropped band, so the portrait artwork survives intact.
+  const twitterImage = cover || absoluteSiteUrl(SOCIAL_FALLBACK_IMAGE);
   const twitterCard = cover ? 'summary' : 'summary_large_image';
   const counterpart = findTranslationCounterpart(posts, post);
   const alternates = reportAlternates(posts, post)
@@ -92,10 +100,12 @@ export function reportSeoTags(posts, post) {
     + `<meta property="og:locale" content="${lang === 'en' ? 'en_US' : 'ko_KR'}">${localeAlternate}`
     + `<meta property="og:title" content="${escapeHtml(post.title)}">`
     + `<meta property="og:url" content="${escapeHtml(canonical)}">`
-    + `<meta property="og:image" content="${escapeHtml(image)}">`
+    + `<meta property="og:image" content="${escapeHtml(ogImage)}">`
+    + `<meta property="og:image:width" content="1200">`
+    + `<meta property="og:image:height" content="630">`
     + `<meta name="twitter:card" content="${twitterCard}">`
     + `<meta name="twitter:title" content="${escapeHtml(post.title)}">`
-    + `<meta name="twitter:image" content="${escapeHtml(image)}">`;
+    + `<meta name="twitter:image" content="${escapeHtml(twitterImage)}">`;
 }
 
 export function sitemapXml(posts) {

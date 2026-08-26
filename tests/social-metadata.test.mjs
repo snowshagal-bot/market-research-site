@@ -5,6 +5,7 @@ import {
   FAVICON_TAGS,
   PRODUCTION_ORIGIN,
   SOCIAL_FALLBACK_IMAGE,
+  SOCIAL_REPORT_IMAGE,
   reportSeoTags,
   sitemapXml
 } from '../functions/_seo.js';
@@ -205,13 +206,23 @@ const bare = {
   href: 'reports/basics.html', reportDate: '2026-08-15'
 };
 
-test('a report with a cover keeps its own artwork and the small X card', async () => {
+test('a report with a cover sends a landscape card to Open Graph and the cover to X', async () => {
   const tags = reportSeoTags([covered], covered);
-  assert.match(tags, /<meta property="og:image" content="https:\/\/snowshagal\.com\/covers\/2026-08-26-daily\.webp">/);
-  assert.match(tags, /<meta name="twitter:image" content="https:\/\/snowshagal\.com\/covers\/2026-08-26-daily\.webp">/);
-  // Covers are 900x1350; summary_large_image would centre-crop the title away.
+  const coverUrl = `${PRODUCTION_ORIGIN}/covers/2026-08-26-daily.webp`;
+
+  // A 1.91:1 unfurler keeps only the middle 35% of a 900x1350 cover, so Open
+  // Graph never receives the portrait artwork.
+  assert.match(tags, new RegExp(`<meta property="og:image" content="${PRODUCTION_ORIGIN}${SOCIAL_REPORT_IMAGE}">`));
+  assert.doesNotMatch(tags, new RegExp(`<meta property="og:image" content="${coverUrl}">`));
+  assert.doesNotMatch(tags, /property="og:image" content="[^"]*\/covers\//);
+
+  // X shows a summary thumbnail rather than a cropped band, so it keeps the cover.
+  assert.match(tags, new RegExp(`<meta name="twitter:image" content="${coverUrl}">`));
   assert.match(tags, /<meta name="twitter:card" content="summary">/);
   assert.doesNotMatch(tags, /summary_large_image/);
+
+  assert.match(tags, /<meta property="og:image:width" content="1200">/);
+  assert.match(tags, /<meta property="og:image:height" content="630">/);
   assert.match(tags, /<meta property="og:site_name" content="Snowshagal">/);
   assert.doesNotMatch(tags, /content="Market Research"/);
   assert.match(tags, /<meta name="twitter:title" content="먼저열리는 밤">/);
@@ -219,14 +230,41 @@ test('a report with a cover keeps its own artwork and the small X card', async (
   assert.match(tags, /<meta property="og:locale" content="ko_KR">/);
 });
 
-test('a report without a cover falls back to the landscape brand card', async () => {
+test('a report without a cover keeps the existing generic fallback on both sides', async () => {
   const tags = reportSeoTags([bare], bare);
   const fallback = `${PRODUCTION_ORIGIN}${SOCIAL_FALLBACK_IMAGE}`;
   assert.match(tags, new RegExp(`<meta property="og:image" content="${fallback}">`));
   assert.match(tags, new RegExp(`<meta name="twitter:image" content="${fallback}">`));
   assert.match(tags, /<meta name="twitter:card" content="summary_large_image">/);
+  assert.match(tags, /<meta property="og:image:width" content="1200">/);
+  assert.match(tags, /<meta property="og:image:height" content="630">/);
   // No summary and no description on this fixture: omit rather than invent one.
   assert.doesNotMatch(tags, /twitter:description|og:description|name="description"/);
+});
+
+test('every report advertises a 1200x630 og:image whatever its cover state', async () => {
+  const landscape = new Set([
+    `${PRODUCTION_ORIGIN}${SOCIAL_REPORT_IMAGE}`,
+    `${PRODUCTION_ORIGIN}${SOCIAL_FALLBACK_IMAGE}`
+  ]);
+  const posts = JSON.parse(await read('data/posts.json'));
+  for (const post of posts) {
+    const tags = reportSeoTags(posts, post);
+    const ogImage = tags.match(/property="og:image" content="([^"]*)"/)[1];
+    assert.ok(landscape.has(ogImage), `${post.id}: og:image ${ogImage} is not a landscape card`);
+    assert.match(tags, /<meta property="og:image:width" content="1200">/, post.id);
+    assert.match(tags, /<meta property="og:image:height" content="630">/, post.id);
+
+    const twitterImage = tags.match(/name="twitter:image" content="([^"]*)"/)[1];
+    const card = tags.match(/name="twitter:card" content="([^"]*)"/)[1];
+    if (post.coverImage) {
+      assert.equal(twitterImage, `${PRODUCTION_ORIGIN}/${post.coverImage}`, post.id);
+      assert.equal(card, 'summary', post.id);
+    } else {
+      assert.equal(twitterImage, `${PRODUCTION_ORIGIN}${SOCIAL_FALLBACK_IMAGE}`, post.id);
+      assert.equal(card, 'summary_large_image', post.id);
+    }
+  }
 });
 
 test('report tags never duplicate and stay on the production origin', () => {
