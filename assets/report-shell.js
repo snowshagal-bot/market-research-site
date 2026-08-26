@@ -1,6 +1,8 @@
 (() => {
   const scriptEl = document.currentScript;
   const active = scriptEl?.dataset.category || '';
+  // Mirrors the homepage: the 끄적끄적 entry point appears once a note exists.
+  const hasNotes = scriptEl?.dataset.notes === '1';
   const locale = scriptEl?.dataset.lang === 'en' || /^\/reports\/en\//i.test(location.pathname) ? 'en' : 'ko';
   const targetLocale = locale === 'en' ? 'ko' : 'en';
   const localeApi = window.MARKET_LOCALE;
@@ -89,7 +91,7 @@
         <a class="${active === 'weekly' ? 'active' : ''}" ${active === 'weekly' ? 'aria-current="true"' : ''} href="${homePath}?category=weekly">${copy.weekly}</a>
         <a class="${active === 'research' ? 'active' : ''}" ${active === 'research' ? 'aria-current="true"' : ''} href="${homePath}?category=research">${copy.research}</a>
         <a class="${active === 'basics' ? 'active' : ''}" ${active === 'basics' ? 'aria-current="true"' : ''} href="${homePath}?category=basics">${copy.basics}</a>
-        <a class="${active === 'note' ? 'active' : ''}" ${active === 'note' ? 'aria-current="true"' : ''} href="${homePath}?category=note">${copy.note}</a>
+        ${hasNotes || active === 'note' ? `<a class="${active === 'note' ? 'active' : ''}" ${active === 'note' ? 'aria-current="true"' : ''} href="${homePath}?category=note">${copy.note}</a>` : ''}
         <a class="language" id="report-language-switch" href="${targetLocale === 'en' ? '/en/' : '/'}" aria-label="${copy.switchLabel}">${copy.switchText}</a>
         <a class="brand" href="${homePath}" aria-label="Snowshagal Market Research"><img src="/assets/brand/snowshagal-owl.webp" alt="" width="232" height="256" aria-hidden="true"><span>SNOWSHAGAL</span></a>
       </div></nav>`;

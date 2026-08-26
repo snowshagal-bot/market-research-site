@@ -1,4 +1,5 @@
 import { searchIndexArtifacts } from './_search-index.js';
+import { SOCIAL_REPORT_CARD_DIR } from '../_seo.js';
 
 const OWNER = 'snowshagal-bot';
 const REPO = 'market-research-site';
@@ -552,6 +553,9 @@ export async function onRequestPost(context) {
 
   const file = form.get('file');
   const cover = form.get('cover');
+  // Composed in the browser from the same cover. Optional: without it the
+  // report simply falls back to the brand card.
+  const shareCard = form.get('shareCard');
   const type = String(form.get('type') || '').trim();
   const lang = String(form.get('lang') || '').trim();
   const translationGroup = String(form.get('translationGroup') || '').trim();
@@ -729,6 +733,19 @@ export async function onRequestPost(context) {
     const parentCommit = await gh(token, `/git/commits/${parentSha}`);
     const baseTree = parentCommit.tree.sha;
 
+    let shareCardEntry = null;
+    if (coverPath && shareCard && typeof shareCard.arrayBuffer === 'function' && Number(shareCard.size || 0) > 0) {
+      if (Number(shareCard.size || 0) <= MAX_COVER_BYTES) {
+        const cardBytes = new Uint8Array(await shareCard.arrayBuffer());
+        const cardBlob = await gh(token, '/git/blobs', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ content: encodeBase64(cardBytes), encoding: 'base64' })
+        });
+        shareCardEntry = { path: `${SOCIAL_REPORT_CARD_DIR}/${id}.jpg`, mode: '100644', type: 'blob', sha: cardBlob.sha };
+      }
+    }
+
     let coverEntry = null;
     if (coverPath) {
       const coverBytes = new Uint8Array(await cover.arrayBuffer());
@@ -748,6 +765,7 @@ export async function onRequestPost(context) {
         tree: [
           { path: reportPath, mode: '100644', type: 'blob', content: html },
           ...(coverEntry ? [coverEntry] : []),
+          ...(shareCardEntry ? [shareCardEntry] : []),
           { path: 'data/posts.json', mode: '100644', type: 'blob', content: postsJson },
           { path: 'data/posts.js', mode: '100644', type: 'blob', content: postsJs },
           ...searchIndexBlobs

@@ -3,16 +3,20 @@ export const PRODUCTION_ORIGIN = 'https://snowshagal.com';
 // Landscape 1200x630 card used wherever a page has no artwork of its own.
 export const SOCIAL_FALLBACK_IMAGE = '/assets/social/snowshagal-home.jpg';
 
-// og:image for a report that has its own cover. Report covers are 900x1350
-// portrait, and a 1.91:1 unfurler keeps only the middle 35% of them, which cut
-// the report title away on four of five sampled covers and sliced through the
-// glyphs on one. Open Graph carries a landscape card instead; the cover still
-// reaches X through twitter:image, where the summary card does not crop it.
+// Report covers are 900x1350 portrait, and a 1.91:1 unfurler keeps only the
+// middle 35% of them, which cut the report title away on four of five sampled
+// covers and sliced through the glyphs on one. So a report with a cover gets a
+// 1200x630 card composed from it — the cover whole on the left, the brand and
+// category on the right — written to this directory at publish time and named
+// after the post id. A report without a cover falls back to the brand card.
 //
-// The card is the neutral brand one rather than the Market Close artwork, which
-// suits Daily but misreads on Weekly, Research and Market Basics. This is the
-// seam a per-report card would plug into once Social Card v2 exists.
-export const SOCIAL_REPORT_IMAGE = '/assets/social/snowshagal-home.jpg';
+// twitter:image is unaffected: X shows a summary thumbnail rather than a
+// cropped band, so it keeps the cover itself.
+export const SOCIAL_REPORT_CARD_DIR = 'covers/share';
+
+export function reportCardPath(post) {
+  return post?.coverImage && post?.id ? `${SOCIAL_REPORT_CARD_DIR}/${post.id}.jpg` : '';
+}
 
 // Uploaded report HTML declares no icon, so the shared shell supplies one.
 export const FAVICON_TAGS = '<link rel="icon" href="/favicon.ico" sizes="any">'
@@ -82,7 +86,8 @@ export function reportSeoTags(posts, post) {
   const cover = post.coverImage ? absoluteSiteUrl(post.coverImage) : '';
   // og:image is always a 1200x630 landscape card, so nothing that crops to
   // 1.91:1 can behead the artwork.
-  const ogImage = absoluteSiteUrl(cover ? SOCIAL_REPORT_IMAGE : SOCIAL_FALLBACK_IMAGE);
+  const card = reportCardPath(post);
+  const ogImage = absoluteSiteUrl(card || SOCIAL_FALLBACK_IMAGE);
   // X keeps the report's own cover: the summary card shows a small thumbnail
   // rather than a cropped band, so the portrait artwork survives intact.
   const twitterImage = cover || absoluteSiteUrl(SOCIAL_FALLBACK_IMAGE);

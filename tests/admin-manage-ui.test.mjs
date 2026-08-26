@@ -145,7 +145,7 @@ test('manage page includes navigation, list controls, immutable metadata, edit f
   assert.match(html, /id="manage-result-home"[^>]*href="\/"/);
   assert.match(html, /id="manage-result-continue"/);
   assert.match(html, /admin-manage\.css\?v=20260824-1/);
-  assert.match(html, /admin-manage\.js\?v=20260824-1/);
+  assert.match(html, /admin-manage\.js\?v=20260827-1/);
 });
 
 test('client list sorting, search, category and language filters, file validation, and Preview safety are deterministic', async () => {
@@ -198,7 +198,7 @@ test('manage editor displays legacy blank summaries and submits edited summary v
   helpers.selectPost(legacy.id);
   assert.equal(elements['manage-summary'].value, '');
   elements['manage-summary'].value = '관리 화면에서 수정한 요약';
-  assert.equal(helpers.buildUpdateForm().get('summary'), '관리 화면에서 수정한 요약');
+  assert.equal((await helpers.buildUpdateForm()).get('summary'), '관리 화면에서 수정한 요약');
 
   const summarized = { ...legacy, id: 'summarized', summary: '저장된 요약' };
   helpers.setPosts([summarized]);
@@ -222,14 +222,14 @@ test('cover replacement is excluded until decode succeeds and remains excluded a
   assert.equal(helpers.coverState().coverDecodePending, true);
   assert.equal(helpers.coverState().selectedCover, null);
   assert.equal(elements['save-post'].disabled, true);
-  assert.equal(Array.from(helpers.buildUpdateForm().keys()).includes('cover'), false);
+  assert.equal(Array.from((await helpers.buildUpdateForm()).keys()).includes('cover'), false);
   await helpers.save({ preventDefault() {} });
   assert.equal(fetchCalls.length, 0);
 
   elements['manage-cover-image'].onerror();
   assert.equal(helpers.coverState().coverDecodePending, false);
   assert.equal(helpers.coverState().selectedCover, null);
-  assert.equal(Array.from(helpers.buildUpdateForm().keys()).includes('cover'), false);
+  assert.equal(Array.from((await helpers.buildUpdateForm()).keys()).includes('cover'), false);
 
   helpers.chooseCover(cover);
   elements['manage-cover-image'].naturalWidth = 900;
@@ -238,7 +238,7 @@ test('cover replacement is excluded until decode succeeds and remains excluded a
   assert.equal(helpers.coverState().coverDecodePending, false);
   assert.equal(helpers.coverState().selectedCover, cover);
   assert.equal(elements['save-post'].disabled, false);
-  assert.equal(Array.from(helpers.buildUpdateForm().keys()).includes('cover'), true);
+  assert.equal(Array.from((await helpers.buildUpdateForm()).keys()).includes('cover'), true);
 });
 
 test('update success opens the deployment overlay without immediately rerendering the editor', async () => {

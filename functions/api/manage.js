@@ -1,4 +1,5 @@
 import { searchIndexArtifacts } from "./_search-index.js";
+import { SOCIAL_REPORT_CARD_DIR } from "../_seo.js";
 
 const OWNER = "snowshagal-bot";
 const REPO = "market-research-site";
@@ -753,7 +754,11 @@ export async function onRequestPost(context) {
       }
 
       entries.push(deletedEntry(existing.href));
-      if (existing.coverImage) entries.push(deletedEntry(existing.coverImage));
+      if (existing.coverImage) {
+        entries.push(deletedEntry(existing.coverImage));
+        // The social card is derived from the cover, so it goes with it.
+        entries.push(deletedEntry(`${SOCIAL_REPORT_CARD_DIR}/${existing.id}.jpg`));
+      }
       entries.push(...metadataEntries(sortPosts(posts), searchIndex));
       commitMessage = `Delete ${existing.title}`;
     } else {
@@ -783,7 +788,12 @@ export async function onRequestPost(context) {
       }
 
       if (coverAction === "remove") {
-        if (existing.coverImage) entries.push(deletedEntry(existing.coverImage));
+        if (existing.coverImage) {
+          entries.push(deletedEntry(existing.coverImage));
+          // Without a cover there is nothing to compose a card from, so the
+          // report falls back to the brand card.
+          entries.push(deletedEntry(`${SOCIAL_REPORT_CARD_DIR}/${existing.id}.jpg`));
+        }
         delete updated.coverImage;
       } else if (coverAction === "replace") {
         if (!/^[A-Za-z0-9._-]+$/.test(existing.id)) {
@@ -798,6 +808,18 @@ export async function onRequestPost(context) {
         });
         entries.push({ path: nextCoverPath, mode: "100644", type: "blob", sha: blob.sha });
         updated.coverImage = nextCoverPath;
+
+        // Recomposed in the browser from the replacement cover. Optional: an
+        // absent card leaves the previous one in place rather than failing.
+        const cardFile = form.get("shareCard");
+        if (cardFile && typeof cardFile.arrayBuffer === "function" && Number(cardFile.size || 0) > 0) {
+          const cardBlob = await gh(env.GITHUB_TOKEN, "/git/blobs", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ content: encodeBase64(await cardFile.arrayBuffer()), encoding: "base64" }),
+          });
+          entries.push({ path: `${SOCIAL_REPORT_CARD_DIR}/${existing.id}.jpg`, mode: "100644", type: "blob", sha: cardBlob.sha });
+        }
       }
 
       posts[postIndex] = updated;

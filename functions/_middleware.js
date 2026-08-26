@@ -53,13 +53,18 @@ export async function onRequest(context) {
   else if (/비정기|소버린|research/i.test(decodedPath)) active = 'research';
   else if (/끄적|note/i.test(decodedPath)) active = 'note';
 
-  const shell = `<script src="/assets/locale.js?v=20260824-2"></script><script src="/assets/report-shell.js?v=20260827-3" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
+  let hasNotes = false;
   let seo = '';
   try {
     const posts = await loadPosts(context.request, context.env);
     const post = findPostByPath(posts, url.pathname);
     if (post) seo = reportSeoTags(posts, post);
+    hasNotes = posts.some((candidate) => candidate?.type === 'note');
   } catch (_) {}
+
+  // Built after the post data is read so the shell knows whether 끄적끄적 has
+  // anything in it, and the fixed report nav matches the homepage.
+  const shell = `<script src="/assets/locale.js?v=20260827-1"></script><script src="/assets/report-shell.js?v=20260827-4" data-category="${active}" data-lang="${lang}" data-notes="${hasNotes ? '1' : '0'}"></script>${engagement}`;
 
   return new HTMLRewriter()
     .on('link[rel="canonical"]', { element(element) { element.remove(); } })

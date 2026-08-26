@@ -715,7 +715,18 @@
     if (translationSource?.value) form.append('translationGroup', translationSource.value);
     const selectedTags = getSelectedTags();
     selectedTags.forEach(tagId => form.append('tags', tagId));
-    if (selectedCover) form.append('cover', selectedCover, selectedCover.name);
+    if (selectedCover) {
+      form.append('cover', selectedCover, selectedCover.name);
+      // The 1200x630 social card is composed from the same cover, so an
+      // unfurler never has to crop the portrait artwork. A failure here must
+      // not block publishing: the report falls back to the brand card.
+      try {
+        const card = await window.SHARE_CARD.renderShareCard(selectedCover, { category: postType, date: date.value });
+        form.append('shareCard', card, 'share-card.jpg');
+      } catch (error) {
+        console.warn('share card generation failed; falling back to the brand card', error);
+      }
+    }
 
     try {
       const key = adminKey.value.trim();

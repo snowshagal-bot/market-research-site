@@ -484,7 +484,7 @@ test('cover preview keeps the optional publish payload and server publisher unch
     read('assets/admin.js'),
     read('functions/api/publish.js')
   ]);
-  assert.match(adminScript, /if \(selectedCover\) form\.append\('cover', selectedCover, selectedCover\.name\)/);
+  assert.match(adminScript, /form\.append\('cover', selectedCover, selectedCover\.name\)/);
   assert.match(adminScript, /const ready = selectedFile && type\.value/);
   assert.doesNotMatch(publishScript, /cover-preview|createObjectURL|revokeObjectURL/);
 });

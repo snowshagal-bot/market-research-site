@@ -26,6 +26,14 @@
   const themeBtn = document.querySelector('[data-theme-toggle]');
   const languageLinks = Array.from(document.querySelectorAll('[data-language-choice]'));
   const navLinks = Array.from(document.querySelectorAll('[data-nav-category]'));
+  // 끄적끄적 is a real category with nothing in it yet. Rather than leading
+  // readers to an empty result, its entry points appear once a note exists.
+  const hasNotes = allPosts.some(post => post.type === 'note');
+  const listedTypes = hasNotes ? [...coreTypes, 'note'] : [...coreTypes];
+  if (!hasNotes) {
+    document.querySelectorAll('[data-nav-category="note"], [data-filter="note"]')
+      .forEach(element => { element.hidden = true; });
+  }
 
   function esc(value){
     return String(value ?? '').replace(/[&<>"']/g,character=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[character]));
@@ -583,11 +591,11 @@
 
   function renderArchiveIndex(){
     if(!archiveIndex) return;
-    const counts=localeApi?.categoryCounts(allPosts, locale, [...coreTypes,'note']) || posts.reduce((result,post)=>{
+    const counts=localeApi?.categoryCounts(allPosts, locale, listedTypes) || posts.reduce((result,post)=>{
       if(coreTypes.includes(post.type)||post.type==='note') result[post.type]=(result[post.type]||0)+1;
       return result;
     },{});
-    archiveIndex.innerHTML=[...coreTypes,'note'].map(type=>{
+    archiveIndex.innerHTML=listedTypes.map(type=>{
       const info=categoryInfo(type);
       const current=type===activeCategory;
       return `<a class="archive-index-item" href="?category=${encodeURIComponent(type)}"${current?' aria-current="page"':''}><span class="archive-index-row"><strong>${esc(info.label)}</strong><b>${counts[type]||0}</b></span><span class="archive-index-description">${esc(info.description)}</span></a>`;
