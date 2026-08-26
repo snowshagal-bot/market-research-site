@@ -373,3 +373,92 @@ test('manage rejects duplicate IDs in search index with SEARCH_INDEX_INTEGRITY_F
     globalThis.fetch = originalFetch;
   }
 });
+
+test('manage updates tags atomically in posts and searchIndex', async () => {
+  const post = { ...basePost, tags: ['flows'], readingMinutes: 5 };
+  const searchIndex = [{ id: post.id, lang: 'ko', category: 'daily', title: post.title, date: '2026-08-11', tags: ['flows'], readingMinutes: 5 }];
+  const calls = githubMock([post], { searchIndex });
+
+  try {
+    const { response, data } = await run({ id: post.id, tags: 'rates, semiconductors' });
+    assert.equal(response.status, 200);
+
+    const tree = treeFrom(calls);
+    const posts = postsFromTree(tree);
+    const searchIdxEntry = tree.find(entry => entry.path === 'data/search-index.json');
+    const updatedIndex = JSON.parse(searchIdxEntry.content);
+
+    assert.deepEqual(posts[0].tags, ['rates', 'semiconductors']);
+    assert.deepEqual(updatedIndex[0].tags, ['rates', 'semiconductors']);
+    assert.equal(posts[0].readingMinutes, 5); // preserved because HTML was not replaced
+    assert.equal(updatedIndex[0].readingMinutes, 5);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('manage recalculates readingMinutes when replacement HTML is uploaded', async () => {
+  const post = { ...basePost, tags: ['flows'], readingMinutes: 2 };
+  const searchIndex = [{ id: post.id, lang: 'ko', category: 'daily', title: post.title, date: '2026-08-11', tags: ['flows'], readingMinutes: 2 }];
+  const calls = githubMock([post], { searchIndex });
+
+  const largeHtml = `<!doctype html><html><body><main><p>${'가'.repeat(2500)}</p></main></body></html>`; // 2500 / 500 = 5 min
+  const file = new File([largeHtml], 'report.html', { type: 'text/html' });
+
+  try {
+    const { response, data } = await run({ id: post.id, file });
+    assert.equal(response.status, 200);
+
+    const tree = treeFrom(calls);
+    const posts = postsFromTree(tree);
+    const searchIdxEntry = tree.find(entry => entry.path === 'data/search-index.json');
+    const updatedIndex = JSON.parse(searchIdxEntry.content);
+
+    assert.equal(posts[0].readingMinutes, 5);
+    assert.equal(updatedIndex[0].readingMinutes, 5);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('manage rejects 4 unique tags with BAD_TAGS 400', async () => {
+  const post = { ...basePost, tags: ['flows'] };
+  const searchIndex = [{ id: post.id, lang: 'ko', category: 'daily', title: post.title, date: '2026-08-11', tags: ['flows'], readingMinutes: 2 }];
+  const calls = githubMock([post], { searchIndex });
+
+  try {
+    const { response, data } = await run({ id: post.id, tags: 'flows, rates, fx, fed' });
+    assert.equal(response.status, 400);
+    assert.equal(data.error, 'BAD_TAGS');
+    assert.equal(calls.length, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('manage normalizes duplicate tags on update and supports removing tags', async () => {
+  const post = { ...basePost, tags: ['flows', 'rates'] };
+  const searchIndex = [{ id: post.id, lang: 'ko', category: 'daily', title: post.title, date: '2026-08-11', tags: ['flows', 'rates'], readingMinutes: 2 }];
+  const calls = githubMock([post], { searchIndex });
+
+  try {
+    // 1. Duplicate normalization
+    const { response, data } = await run({ id: post.id, tags: 'flows, flows, rates' });
+    assert.equal(response.status, 200);
+
+    const tree = treeFrom(calls);
+    const posts = postsFromTree(tree);
+    assert.deepEqual(posts[0].tags, ['flows', 'rates']);
+
+    // 2. Remove all tags
+    calls.length = 0;
+    const { response: resRemove } = await run({ id: post.id, tags: '' });
+    assert.equal(resRemove.status, 200);
+
+    const treeRemove = treeFrom(calls);
+    const postsRemove = postsFromTree(treeRemove);
+    assert.deepEqual(postsRemove[0].tags, []);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

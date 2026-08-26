@@ -604,6 +604,16 @@ html[data-theme="dark"] .today-change.down {
   -webkit-line-clamp: 4;
 }
 
+.latest-card-tags {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 550;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+}
+
 .latest-card-read {
   display: inline-flex;
   align-items: center;
@@ -791,6 +801,36 @@ html[data-theme="dark"] .archive-eyebrow {
 
 .archive-layout .report-title { font-size: 17px; }
 .report-read-label { margin-right: 5px; }
+
+.report-tags {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 550;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+}
+
+.calendar-preview-tags {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 550;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+}
+
+.search-result-tags {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 550;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+}
 
 .archive-layout .report-arrow {
   display: inline-flex;

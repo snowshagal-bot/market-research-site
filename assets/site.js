@@ -35,6 +35,45 @@
   function categoryInfo(type){ return categories[type] || { label: type || (locale === 'en' ? 'Report' : '리포트'), english: 'REPORT', description: '' }; }
   function latestFor(type){ return posts.find(post=>post.type===type) || null; }
 
+  const TAG_REGISTRY = window.TAG_REGISTRY || {
+    "flows": { "ko": "수급", "en": "Flows" },
+    "semiconductors": { "ko": "반도체", "en": "Semiconductors" },
+    "rates": { "ko": "금리", "en": "Rates" },
+    "fx": { "ko": "환율", "en": "FX" },
+    "treasuries": { "ko": "미국채", "en": "U.S. Treasuries" },
+    "fed": { "ko": "연준", "en": "Fed" },
+    "futures": { "ko": "선물·파생", "en": "Futures & Derivatives" },
+    "ai": { "ko": "AI", "en": "AI" },
+    "cloud-datacenter": { "ko": "클라우드·데이터센터", "en": "Cloud & Data Centers" },
+    "stablecoins": { "ko": "스테이블코인", "en": "Stablecoins" },
+    "crypto": { "ko": "가상자산", "en": "Crypto" },
+    "gold": { "ko": "금", "en": "Gold" },
+    "autos": { "ko": "자동차", "en": "Autos" },
+    "energy": { "ko": "에너지", "en": "Energy" },
+    "policy": { "ko": "정책", "en": "Policy" },
+    "geopolitics": { "ko": "지정학", "en": "Geopolitics" }
+  };
+
+  function tagLabel(tagKey, loc) {
+    const l = loc || locale;
+    const entry = TAG_REGISTRY[tagKey];
+    return entry ? (entry[l] || entry.ko || tagKey) : tagKey;
+  }
+
+  function formatTags(tags, loc) {
+    if (!Array.isArray(tags) || !tags.length) return '';
+    return tags.map(t => tagLabel(t, loc)).filter(Boolean).join(' · ');
+  }
+
+  function formatReadingTime(mins, loc) {
+    const m = typeof mins === 'number' && mins > 0 ? mins : 1;
+    const l = loc || locale;
+    if (l === 'en') {
+      return `${m} min read`;
+    }
+    return `약 ${m}분`;
+  }
+
   // Theme Management
   function systemTheme(){ return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
   function savedTheme(){
@@ -263,11 +302,18 @@
       const subtitle = (item.subtitle || '').toLowerCase();
       const summary = (item.summary || item.description || '').toLowerCase();
       const body = (item.bodyText || '').toLowerCase();
-      const tags = (Array.isArray(item.tags) ? item.tags : []).map(t => String(t).toLowerCase());
+      const rawTags = Array.isArray(item.tags) ? item.tags : [];
+      const localizedTagTerms = [];
+      rawTags.forEach(t => {
+        localizedTagTerms.push(String(t).toLowerCase());
+        const entry = TAG_REGISTRY[t];
+        if (entry?.ko) localizedTagTerms.push(entry.ko.toLowerCase());
+        if (entry?.en) localizedTagTerms.push(entry.en.toLowerCase());
+      });
 
       queryWords.forEach(word => {
         if (title.includes(word)) { score += 10; titleMatched = true; }
-        if (tags.some(t => t.includes(word))) { score += 8; tagMatched = true; }
+        if (localizedTagTerms.some(t => t.includes(word))) { score += 8; tagMatched = true; }
         if (subtitle.includes(word) || summary.includes(word)) { score += 5; summaryMatched = true; }
         if (body.includes(word)) { score += 2; bodyMatched = true; }
       });
@@ -306,15 +352,21 @@
         summaryContent = highlightMatches(item.summary || item.description, queryWords);
       }
       const targetUrl = item.url || rootPath(item.href);
+      const readingTimeStr = formatReadingTime(item.readingMinutes, locale);
+      const tagsStr = formatTags(item.tags, locale);
+      const tagsHtml = tagsStr ? `<div class="search-result-tags">${esc(tagsStr)}</div>` : '';
 
       return `
         <a class="search-result-item" href="${esc(targetUrl)}">
           <div class="search-result-title">${highlightedTitle}</div>
           <div class="search-result-summary">${summaryContent}</div>
+          ${tagsHtml}
           <div class="search-result-meta">
             <span class="search-result-type">${esc(info.label)}</span>
             <span>·</span>
             <time datetime="${esc(item.date)}">${esc(item.date)}</time>
+            <span>·</span>
+            <span>${esc(readingTimeStr)}</span>
           </div>
         </a>
       `;
@@ -423,15 +475,16 @@
 
     if (tags.size === 0) {
       filterTag.hidden = true;
-      const tagLabel = filterTag.closest('label');
-      if (tagLabel) tagLabel.hidden = true;
+      const tagLabelEl = filterTag.closest('label');
+      if (tagLabelEl) tagLabelEl.hidden = true;
     } else {
       filterTag.hidden = false;
-      const tagLabel = filterTag.closest('label');
-      if (tagLabel) tagLabel.hidden = false;
+      const tagLabelEl = filterTag.closest('label');
+      if (tagLabelEl) tagLabelEl.hidden = false;
       const tagOptions = ['<option value="all">' + (locale === 'en' ? 'All Tags' : '태그 전체') + '</option>'];
       Array.from(tags).sort().forEach(t => {
-        tagOptions.push(`<option value="${esc(t)}"${t === activeTag ? ' selected' : ''}>#${esc(t)}</option>`);
+        const label = tagLabel(t, locale);
+        tagOptions.push(`<option value="${esc(t)}"${t === activeTag ? ' selected' : ''}>${esc(label)}</option>`);
       });
       filterTag.innerHTML = tagOptions.join('');
     }
@@ -451,7 +504,25 @@
         ? `<span class="latest-card-cover"><img src="${esc(rootPath(post.coverImage))}" alt="" loading="lazy"></span>`
         : '<span class="latest-card-art" aria-hidden="true"></span>';
       const summaryCopy=summary?`<p class="latest-card-summary">${esc(summary)}</p>`:'';
-      return `<a class="latest-card latest-card-${esc(post.type)}" href="${esc(rootPath(post.href))}"><span class="latest-card-meta"><b>${esc(info.english)}</b><time datetime="${esc(reportDate(post))}">${esc(reportDate(post))}</time></span><strong class="latest-card-title">${esc(post.title)}</strong><span class="latest-card-body">${visual}<span class="latest-card-copy">${summaryCopy}<span class="latest-card-read">${esc(readLabel)} <i aria-hidden="true">→</i></span></span></span></a>`;
+      const readingTimeStr = formatReadingTime(post.readingMinutes, locale);
+      const tagsStr = formatTags(post.tags, locale);
+      const tagsHtml = tagsStr ? `<div class="latest-card-tags">${esc(tagsStr)}</div>` : '';
+
+      return `<a class="latest-card latest-card-${esc(post.type)}" href="${esc(rootPath(post.href))}">
+        <span class="latest-card-meta">
+          <b>${esc(info.english)} · ${esc(readingTimeStr)}</b>
+          <time datetime="${esc(reportDate(post))}">${esc(reportDate(post))}</time>
+        </span>
+        <strong class="latest-card-title">${esc(post.title)}</strong>
+        <span class="latest-card-body">
+          ${visual}
+          <span class="latest-card-copy">
+            ${summaryCopy}
+            ${tagsHtml}
+            <span class="latest-card-read">${esc(readLabel)} <i aria-hidden="true">→</i></span>
+          </span>
+        </span>
+      </a>`;
     }).join('');
   }
 
@@ -556,16 +627,21 @@
         <div class="calendar-preview-wrap">
           <h4 class="calendar-preview-heading">${esc(previewHeading)}</h4>
           <div class="calendar-preview-list">
-            ${selectedList.map(p => `
+            ${selectedList.map(p => {
+              const readingTimeStr = formatReadingTime(p.readingMinutes, locale);
+              const tagsStr = formatTags(p.tags, locale);
+              const tagsHtml = tagsStr ? `<div class="calendar-preview-tags">${esc(tagsStr)}</div>` : '';
+              return `
               <div class="calendar-preview-card">
                 <h5 class="calendar-preview-title">${esc(p.title)}</h5>
                 <p class="calendar-preview-summary">${esc(p.summary || p.description || '')}</p>
+                ${tagsHtml}
                 <div class="calendar-preview-meta">
-                  <span>${esc(categoryInfo(p.type).label)} · ${esc(reportDate(p))}</span>
+                  <span>${esc(categoryInfo(p.type).label)} · ${esc(readingTimeStr)}</span>
                   <a class="calendar-preview-link" href="${esc(rootPath(p.href))}">${esc(messages.read)} <span aria-hidden="true">→</span></a>
                 </div>
               </div>
-            `).join('')}
+            `;}).join('')}
           </div>
         </div>
       `;
@@ -662,15 +738,20 @@
     list.innerHTML = filtered.map(post => {
       const info = categoryInfo(post.type);
       const subtitle=post.subtitle?`<div class="report-subtitle">${esc(post.subtitle)}</div>`:'';
+      const readingTimeStr = formatReadingTime(post.readingMinutes, locale);
+      const tagsStr = formatTags(post.tags, locale);
+      const tagsHtml = tagsStr ? `<div class="report-tags">${esc(tagsStr)}</div>` : '';
+
       return `
         <a class="report-item" href="${esc(rootPath(post.href))}">
           <div>
             <span class="report-type ${esc(post.type)}">${esc(info.label)}</span>
-            <span class="report-date">${esc(reportDate(post))}</span>
+            <span class="report-date">${esc(reportDate(post))} · ${esc(readingTimeStr)}</span>
           </div>
           <div>
             <div class="report-title">${esc(post.title)}</div>
             ${subtitle}
+            ${tagsHtml}
           </div>
           <span class="report-arrow">
             <span class="report-read-label">${esc(messages.read)}</span>
