@@ -249,7 +249,12 @@ test('N. cancelling a share is not surfaced as an error', async () => {
 
 test('the desktop popover is wired for expansion, escape, outside click and focus', async () => {
   const shell = await read('assets/report-shell.js');
-  assert.match(shell, /aria-haspopup="true" aria-expanded="false" aria-controls="share-popover"/);
+  assert.match(shell, /id="share-trigger" aria-expanded="false" aria-controls="share-popover"/);
+  // The popover is a role="group", not a menu widget, so aria-haspopup does not apply
+  // and the roles stay group/button rather than menu/menuitem.
+  assert.doesNotMatch(shell, /aria-haspopup/);
+  assert.doesNotMatch(shell, /role="menu"|role="menuitem"/);
+  assert.match(shell, /id="share-popover" role="group"/);
   assert.match(shell, /trigger\.setAttribute\('aria-expanded', 'true'\)/);
   assert.match(shell, /trigger\.setAttribute\('aria-expanded', 'false'\)/);
   assert.match(shell, /items\(\)\[0\]\?\.focus\(\)/);
@@ -274,7 +279,7 @@ test('O. the shell mounts share for every category and both locales', async () =
   for (const category of ['basics', 'daily', 'weekly', 'research', 'note']) {
     assert.match(middleware, new RegExp(`active = '${category}'`));
   }
-  assert.match(middleware, /report-shell\.js\?v=20260827-2/);
+  assert.match(middleware, /report-shell\.js\?v=20260827-3/);
 });
 
 /* --------------------------------------------------------------- P. copy */

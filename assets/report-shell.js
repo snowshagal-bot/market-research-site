@@ -441,7 +441,7 @@
               <button class="btn" type="button" id="share-copy-solo">${SHARE_ICONS.copy}<span>${copy.shareCopy}</span></button>
               <p class="hint">${copy.shareAppsHint}</p>
             ` : `
-              <button class="btn" type="button" id="share-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="share-popover">${SHARE_ICONS.share}<span>${copy.shareAction}</span></button>
+              <button class="btn" type="button" id="share-trigger" aria-expanded="false" aria-controls="share-popover">${SHARE_ICONS.share}<span>${copy.shareAction}</span></button>
               <div class="pop" id="share-popover" role="group" aria-label="${copy.shareHeading}" hidden>
                 <button type="button" data-share-copy>${SHARE_ICONS.copy}<span>${copy.shareCopy}</span></button>
                 <div class="sep" aria-hidden="true"></div>
