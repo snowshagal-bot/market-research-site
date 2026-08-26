@@ -285,24 +285,32 @@ export async function onRequestPost(context) {
       ...(coverPath ? { coverImage: coverPath } : {})
     };
 
-    posts.push(post);
-    posts.sort((a, b) => {
-      const da = String(a.reportDate || a.date || '');
-      const db = String(b.reportDate || b.date || '');
-      if (da !== db) return db.localeCompare(da);
-      return String(b.registeredAt || '').localeCompare(String(a.registeredAt || ''));
-    });
+    const originalPostsLength = posts.length;
 
-    const postsJson = `${JSON.stringify(posts, null, 2)}\n`;
-    const postsJs = `window.RESEARCH_POSTS = ${JSON.stringify(posts, null, 2)};\n`;
-
-    // Automatic Search Index update
-    let searchIndex = [];
+    // Automatic Search Index update (Fail-Closed)
+    let searchIndex;
     try {
       const searchIndexFile = await gh(token, `/contents/${encodeRepoPath('data/search-index.json')}?ref=${encodeURIComponent(BRANCH)}`);
       searchIndex = JSON.parse(decodeBase64Utf8(searchIndexFile.content));
-    } catch (_) {
-      searchIndex = [];
+    } catch (err) {
+      return reply({
+        error: 'SEARCH_INDEX_READ_FAILED',
+        message: `검색 인덱스를 읽는 중 오류가 발생했습니다: ${err.message}`
+      }, 500);
+    }
+
+    if (!Array.isArray(searchIndex)) {
+      return reply({
+        error: 'SEARCH_INDEX_INTEGRITY_FAILED',
+        message: '검색 인덱스 데이터가 올바른 배열 형식이 아닙니다.'
+      }, 500);
+    }
+
+    if (searchIndex.length !== originalPostsLength) {
+      return reply({
+        error: 'SEARCH_INDEX_INTEGRITY_FAILED',
+        message: `기존 게시물 수(${originalPostsLength})와 검색 인덱스 항목 수(${searchIndex.length})가 일치하지 않습니다.`
+      }, 500);
     }
 
     const searchEntry = {
@@ -321,7 +329,28 @@ export async function onRequestPost(context) {
       bodyText: extractSearchText(html)
     };
 
-    searchIndex.push(searchEntry);
+    const existingIndexIdx = searchIndex.findIndex(item => item && item.id === id);
+    if (existingIndexIdx >= 0) {
+      searchIndex[existingIndexIdx] = searchEntry;
+    } else {
+      searchIndex.push(searchEntry);
+    }
+
+    posts.push(post);
+    posts.sort((a, b) => {
+      const da = String(a.reportDate || a.date || '');
+      const db = String(b.reportDate || b.date || '');
+      if (da !== db) return db.localeCompare(da);
+      return String(b.registeredAt || '').localeCompare(String(a.registeredAt || ''));
+    });
+
+    if (searchIndex.length !== posts.length) {
+      return reply({
+        error: 'SEARCH_INDEX_INTEGRITY_FAILED',
+        message: `갱신 후 게시물 수(${posts.length})와 검색 인덱스 항목 수(${searchIndex.length})가 일치하지 않습니다.`
+      }, 500);
+    }
+
     searchIndex.sort((a, b) => {
       const da = String(a.date || '');
       const db = String(b.date || '');
@@ -329,6 +358,8 @@ export async function onRequestPost(context) {
       return String(b.registeredAt || '').localeCompare(String(a.registeredAt || ''));
     });
 
+    const postsJson = `${JSON.stringify(posts, null, 2)}\n`;
+    const postsJs = `window.RESEARCH_POSTS = ${JSON.stringify(posts, null, 2)};\n`;
     const searchIndexJson = `${JSON.stringify(searchIndex, null, 2)}\n`;
     const searchIndexJs = `window.SEARCH_INDEX = ${JSON.stringify(searchIndex)};\n`;
 

@@ -12,16 +12,28 @@ function base64(text) {
   return btoa(binary);
 }
 
-function githubMock(existingPosts = []) {
+function githubMock(existingPosts = [], { searchIndex = null, searchIndexFail = false } = {}) {
   const calls = [];
+  const defaultIndex = searchIndex !== null ? searchIndex : existingPosts.map(p => ({
+    id: p.id,
+    lang: p.lang || 'ko',
+    category: p.type || 'daily',
+    title: p.title || 'Title',
+    date: p.reportDate || p.date || '2026-08-10',
+    tags: []
+  }));
+
   globalThis.fetch = async (input, options = {}) => {
     const url = new URL(String(input));
     const path = `${url.pathname}${url.search}`;
     const body = options.body ? JSON.parse(options.body) : null;
     calls.push({ path, method: options.method || 'GET', body });
+    if (path.includes('/contents/data/search-index.json')) {
+      if (searchIndexFail) return new Response('Not found', { status: 404 });
+      return new Response(JSON.stringify({ content: base64(`${JSON.stringify(defaultIndex)}\n`) }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
     let payload;
     if (path.includes('/contents/data/posts.json')) payload = { content: base64(`${JSON.stringify(existingPosts)}\n`) };
-    else if (path.includes('/contents/data/search-index.json')) payload = { content: base64('[]\n') };
     else if (path.endsWith('/git/ref/heads/main')) payload = { object: { sha: 'parent-sha' } };
     else if (path.endsWith('/git/commits/parent-sha')) payload = { tree: { sha: 'base-tree' } };
     else if (path.endsWith('/git/blobs')) payload = { sha: 'cover-blob-sha' };
@@ -189,5 +201,49 @@ test('unsupported and oversized cover files are rejected before GitHub writes', 
     } finally {
       globalThis.fetch = originalFetch;
     }
+  }
+});
+
+test('publish fails closed when search-index fetch fails (no commit created)', async () => {
+  const calls = githubMock([], { searchIndexFail: true });
+  try {
+    const { response, data } = await runPublish();
+    assert.equal(response.status, 500);
+    assert.equal(data.error, 'SEARCH_INDEX_READ_FAILED');
+    assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
+    assert.equal(calls.some(call => call.path.endsWith('/git/commits')), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('publish fails closed when posts and search-index counts mismatch', async () => {
+  const existing = [{ id: 'post-1', href: 'reports/1.html', type: 'daily', title: 'P1' }];
+  // Search index has 0 items while posts has 1
+  const calls = githubMock(existing, { searchIndex: [] });
+  try {
+    const { response, data } = await runPublish();
+    assert.equal(response.status, 500);
+    assert.equal(data.error, 'SEARCH_INDEX_INTEGRITY_FAILED');
+    assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('duplicate search index ID updates existing entry without duplicate append', async () => {
+  // If report has same ID, it replaces the search entry rather than pushing duplicates
+  const existing = [];
+  const calls = githubMock(existing);
+  try {
+    const { response, data } = await runPublish();
+    assert.equal(response.status, 200);
+    const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+    const searchIdxEntry = tree.find(entry => entry.path === 'data/search-index.json');
+    const index = JSON.parse(searchIdxEntry.content);
+    assert.equal(index.length, 1);
+    assert.equal(index[0].id, data.id);
+  } finally {
+    globalThis.fetch = originalFetch;
   }
 });

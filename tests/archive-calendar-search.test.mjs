@@ -295,3 +295,25 @@ test('automatic search index pipeline simulation test (+1 report indexing & clea
     assert.equal(restoredIndex.length, initialIndexCount, 'Index count must be restored');
   }
 });
+
+test('archive-view-toggle[hidden] is strictly hidden in CSS and global [hidden] is enforced', async () => {
+  const [homeCss, siteCss] = await Promise.all([
+    read('assets/home-v2.css'),
+    read('assets/site.css')
+  ]);
+
+  assert.match(homeCss, /\.archive-view-toggle\[hidden\]\s*\{\s*display:\s*none\s*!important;\s*\}/);
+  assert.match(siteCss, /\[hidden\]\s*\{\s*display:\s*none\s*!important/);
+});
+
+test('assets/site.css has no duplicate :root declaration and retains single base stylesheet', async () => {
+  const siteCss = await read('assets/site.css');
+  const rootMatches = siteCss.match(/:root\s*\{/g);
+  assert.equal(rootMatches?.length, 1, 'assets/site.css should have exactly one :root declaration');
+});
+
+test('_headers configures no-cache revalidation policy for search-index files', async () => {
+  const headers = await read('_headers');
+  assert.match(headers, /\/data\/search-index\.js\s+Cache-Control:\s*no-cache/);
+  assert.match(headers, /\/data\/search-index\.json\s+Cache-Control:\s*no-cache/);
+});

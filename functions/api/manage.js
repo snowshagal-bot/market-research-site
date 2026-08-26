@@ -325,16 +325,61 @@ export async function onRequestPost(context) {
   try {
     const ref = await currentRef(env.GITHUB_TOKEN);
     const baseSha = ref.object.sha;
-    const [parentCommit, postsFile, searchIndexFile] = await Promise.all([
-      gh(env.GITHUB_TOKEN, `/git/commits/${baseSha}`),
-      gh(env.GITHUB_TOKEN, `/contents/${encodeRepoPath("data/posts.json")}?ref=${encodeURIComponent(baseSha)}`),
-      gh(env.GITHUB_TOKEN, `/contents/${encodeRepoPath("data/search-index.json")}?ref=${encodeURIComponent(baseSha)}`).catch(() => null),
-    ]);
+    let parentCommit, postsFile, searchIndexFile;
+    try {
+      [parentCommit, postsFile, searchIndexFile] = await Promise.all([
+        gh(env.GITHUB_TOKEN, `/git/commits/${baseSha}`),
+        gh(env.GITHUB_TOKEN, `/contents/${encodeRepoPath("data/posts.json")}?ref=${encodeURIComponent(baseSha)}`),
+        gh(env.GITHUB_TOKEN, `/contents/${encodeRepoPath("data/search-index.json")}?ref=${encodeURIComponent(baseSha)}`),
+      ]);
+    } catch (err) {
+      return reply({
+        ok: false,
+        error: "SEARCH_INDEX_READ_FAILED",
+        message: `저장소 데이터 또는 검색 인덱스를 읽는 중 오류가 발생했습니다: ${err.message}`
+      }, 500);
+    }
+
     const posts = JSON.parse(decodeBase64Utf8(postsFile.content));
-    let searchIndex = searchIndexFile ? JSON.parse(decodeBase64Utf8(searchIndexFile.content)) : [];
+    let searchIndex;
+    try {
+      searchIndex = JSON.parse(decodeBase64Utf8(searchIndexFile.content));
+    } catch (err) {
+      return reply({
+        ok: false,
+        error: "SEARCH_INDEX_READ_FAILED",
+        message: `검색 인덱스 JSON 파싱에 실패했습니다: ${err.message}`
+      }, 500);
+    }
+
+    if (!Array.isArray(posts) || !Array.isArray(searchIndex)) {
+      return reply({
+        ok: false,
+        error: "SEARCH_INDEX_INTEGRITY_FAILED",
+        message: "게시물 목록 또는 검색 인덱스가 배열 형식이 아닙니다."
+      }, 500);
+    }
+
+    if (posts.length !== searchIndex.length) {
+      return reply({
+        ok: false,
+        error: "SEARCH_INDEX_INTEGRITY_FAILED",
+        message: `기존 게시물 수(${posts.length})와 검색 인덱스 수(${searchIndex.length})가 일치하지 않습니다.`
+      }, 500);
+    }
+
     const postIndex = posts.findIndex((post) => post.id === id);
     if (postIndex < 0) return reply({ ok: false, error: "POST_NOT_FOUND", message: "게시물을 찾을 수 없습니다." }, 404);
     const existing = posts[postIndex];
+
+    const searchIdx = searchIndex.findIndex((item) => item && item.id === id);
+    if (searchIdx < 0) {
+      return reply({
+        ok: false,
+        error: "SEARCH_INDEX_INTEGRITY_FAILED",
+        message: "검색 인덱스에서 해당 게시물 ID를 찾을 수 없습니다."
+      }, 500);
+    }
 
     if (!isManagedPath(existing.href, "reports")) {
       return reply({ ok: false, error: "UNSAFE_REPORT_PATH", message: "안전하지 않은 리포트 경로는 변경할 수 없습니다." }, 400);
@@ -352,8 +397,15 @@ export async function onRequestPost(context) {
 
     if (action === "delete") {
       posts.splice(postIndex, 1);
-      const searchIdx = searchIndex.findIndex((item) => item.id === id);
-      if (searchIdx >= 0) searchIndex.splice(searchIdx, 1);
+      searchIndex.splice(searchIdx, 1);
+
+      if (posts.length !== searchIndex.length) {
+        return reply({
+          ok: false,
+          error: "SEARCH_INDEX_INTEGRITY_FAILED",
+          message: "삭제 후 데이터 정합성 검증에 실패했습니다."
+        }, 500);
+      }
 
       entries.push(deletedEntry(existing.href));
       if (existing.coverImage) entries.push(deletedEntry(existing.coverImage));
@@ -400,19 +452,24 @@ export async function onRequestPost(context) {
 
       posts[postIndex] = updated;
 
-      const searchIdx = searchIndex.findIndex((item) => item.id === id);
-      if (searchIdx >= 0) {
-        searchIndex[searchIdx] = {
-          ...searchIndex[searchIdx],
-          category: updated.type,
-          typeLabel: updated.typeLabel,
-          title: updated.title,
-          subtitle: updated.subtitle,
-          date: updated.reportDate,
-          summary: updated.summary || updated.description,
-          coverImage: updated.coverImage ? `/${updated.coverImage.replace(/^\/+/, '')}` : '',
-          ...(replacementHtml !== null ? { bodyText: extractSearchText(replacementHtml) } : {})
-        };
+      searchIndex[searchIdx] = {
+        ...searchIndex[searchIdx],
+        category: updated.type,
+        typeLabel: updated.typeLabel,
+        title: updated.title,
+        subtitle: updated.subtitle,
+        date: updated.reportDate,
+        summary: updated.summary || updated.description,
+        coverImage: updated.coverImage ? `/${updated.coverImage.replace(/^\/+/, '')}` : '',
+        ...(replacementHtml !== null ? { bodyText: extractSearchText(replacementHtml) } : {})
+      };
+
+      if (posts.length !== searchIndex.length) {
+        return reply({
+          ok: false,
+          error: "SEARCH_INDEX_INTEGRITY_FAILED",
+          message: "수정 후 데이터 정합성 검증에 실패했습니다."
+        }, 500);
       }
 
       entries.push(...metadataEntries(sortPosts(posts), searchIndex));

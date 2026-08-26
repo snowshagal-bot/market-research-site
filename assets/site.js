@@ -109,7 +109,7 @@
     if (isSearchIndexLoading) return;
     isSearchIndexLoading = true;
     const script = document.createElement('script');
-    script.src = '/data/search-index.js?v=20260826-1';
+    script.src = '/data/search-index.js';
     script.onload = () => {
       isSearchIndexLoading = false;
       if (callback) callback(window.SEARCH_INDEX || []);

@@ -703,6 +703,10 @@ html[data-theme="dark"] .archive-eyebrow {
   background: var(--panel);
 }
 
+.archive-view-toggle[hidden] {
+  display: none !important;
+}
+
 .view-toggle-btn {
   font-size: 11px;
   font-weight: 700;
