@@ -216,6 +216,24 @@ function deletedEntry(path) {
   return { path, mode: "100644", type: "blob", sha: null };
 }
 
+function hasMatchingUniqueIds(posts, searchIndex) {
+  if (!Array.isArray(posts) || !Array.isArray(searchIndex)) return false;
+  const postIds = posts.map(x => x?.id).filter(Boolean);
+  const indexIds = searchIndex.map(x => x?.id).filter(Boolean);
+
+  if (postIds.length !== posts.length) return false;
+  if (indexIds.length !== searchIndex.length) return false;
+
+  const postSet = new Set(postIds);
+  const indexSet = new Set(indexIds);
+
+  if (postSet.size !== postIds.length) return false;
+  if (indexSet.size !== indexIds.length) return false;
+  if (postSet.size !== indexSet.size) return false;
+
+  return [...postSet].every(id => indexSet.has(id));
+}
+
 async function currentRef(token) {
   return gh(token, `/git/ref/heads/${BRANCH}`);
 }
@@ -352,19 +370,11 @@ export async function onRequestPost(context) {
       }, 500);
     }
 
-    if (!Array.isArray(posts) || !Array.isArray(searchIndex)) {
+    if (!hasMatchingUniqueIds(posts, searchIndex)) {
       return reply({
         ok: false,
         error: "SEARCH_INDEX_INTEGRITY_FAILED",
-        message: "게시물 목록 또는 검색 인덱스가 배열 형식이 아닙니다."
-      }, 500);
-    }
-
-    if (posts.length !== searchIndex.length) {
-      return reply({
-        ok: false,
-        error: "SEARCH_INDEX_INTEGRITY_FAILED",
-        message: `기존 게시물 수(${posts.length})와 검색 인덱스 수(${searchIndex.length})가 일치하지 않습니다.`
+        message: "기존 게시물과 검색 인덱스의 ID 목록이 일치하지 않거나 중복 ID가 존재합니다."
       }, 500);
     }
 
@@ -399,7 +409,7 @@ export async function onRequestPost(context) {
       posts.splice(postIndex, 1);
       searchIndex.splice(searchIdx, 1);
 
-      if (posts.length !== searchIndex.length) {
+      if (!hasMatchingUniqueIds(posts, searchIndex)) {
         return reply({
           ok: false,
           error: "SEARCH_INDEX_INTEGRITY_FAILED",
@@ -464,7 +474,7 @@ export async function onRequestPost(context) {
         ...(replacementHtml !== null ? { bodyText: extractSearchText(replacementHtml) } : {})
       };
 
-      if (posts.length !== searchIndex.length) {
+      if (!hasMatchingUniqueIds(posts, searchIndex)) {
         return reply({
           ok: false,
           error: "SEARCH_INDEX_INTEGRITY_FAILED",

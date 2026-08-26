@@ -247,3 +247,47 @@ test('duplicate search index ID updates existing entry without duplicate append'
     globalThis.fetch = originalFetch;
   }
 });
+
+test('publish rejects equal-length but mismatched ID sets with SEARCH_INDEX_INTEGRITY_FAILED (no commit created)', async () => {
+  const posts = [
+    { id: 'post-A', href: 'reports/a.html', type: 'daily', title: 'Post A' },
+    { id: 'post-B', href: 'reports/b.html', type: 'daily', title: 'Post B' }
+  ];
+  const searchIndex = [
+    { id: 'post-A', lang: 'ko', category: 'daily', title: 'Post A', date: '2026-08-10', tags: [] },
+    { id: 'post-C', lang: 'ko', category: 'daily', title: 'Post C', date: '2026-08-10', tags: [] }
+  ];
+
+  const calls = githubMock(posts, { searchIndex });
+  try {
+    const { response, data } = await runPublish();
+    assert.equal(response.status, 500);
+    assert.equal(data.error, 'SEARCH_INDEX_INTEGRITY_FAILED');
+    assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
+    assert.equal(calls.some(call => call.path.endsWith('/git/commits')), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('publish rejects duplicate IDs in search index with SEARCH_INDEX_INTEGRITY_FAILED (no commit created)', async () => {
+  const posts = [
+    { id: 'post-A', href: 'reports/a.html', type: 'daily', title: 'Post A' },
+    { id: 'post-B', href: 'reports/b.html', type: 'daily', title: 'Post B' }
+  ];
+  const searchIndex = [
+    { id: 'post-A', lang: 'ko', category: 'daily', title: 'Post A', date: '2026-08-10', tags: [] },
+    { id: 'post-A', lang: 'ko', category: 'daily', title: 'Post A duplicate', date: '2026-08-10', tags: [] }
+  ];
+
+  const calls = githubMock(posts, { searchIndex });
+  try {
+    const { response, data } = await runPublish();
+    assert.equal(response.status, 500);
+    assert.equal(data.error, 'SEARCH_INDEX_INTEGRITY_FAILED');
+    assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
+    assert.equal(calls.some(call => call.path.endsWith('/git/commits')), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

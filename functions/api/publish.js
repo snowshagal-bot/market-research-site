@@ -173,6 +173,24 @@ function extractSearchText(html) {
   return clean.replace(/\s+/g, ' ').trim();
 }
 
+function hasMatchingUniqueIds(posts, searchIndex) {
+  if (!Array.isArray(posts) || !Array.isArray(searchIndex)) return false;
+  const postIds = posts.map(x => x?.id).filter(Boolean);
+  const indexIds = searchIndex.map(x => x?.id).filter(Boolean);
+
+  if (postIds.length !== posts.length) return false;
+  if (indexIds.length !== searchIndex.length) return false;
+
+  const postSet = new Set(postIds);
+  const indexSet = new Set(indexIds);
+
+  if (postSet.size !== postIds.length) return false;
+  if (indexSet.size !== indexIds.length) return false;
+  if (postSet.size !== indexSet.size) return false;
+
+  return [...postSet].every(id => indexSet.has(id));
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -299,17 +317,10 @@ export async function onRequestPost(context) {
       }, 500);
     }
 
-    if (!Array.isArray(searchIndex)) {
+    if (!hasMatchingUniqueIds(posts, searchIndex)) {
       return reply({
         error: 'SEARCH_INDEX_INTEGRITY_FAILED',
-        message: '검색 인덱스 데이터가 올바른 배열 형식이 아닙니다.'
-      }, 500);
-    }
-
-    if (searchIndex.length !== originalPostsLength) {
-      return reply({
-        error: 'SEARCH_INDEX_INTEGRITY_FAILED',
-        message: `기존 게시물 수(${originalPostsLength})와 검색 인덱스 항목 수(${searchIndex.length})가 일치하지 않습니다.`
+        message: '기존 게시물과 검색 인덱스의 ID 목록이 일치하지 않거나 중복 ID가 존재합니다.'
       }, 500);
     }
 
@@ -337,19 +348,20 @@ export async function onRequestPost(context) {
     }
 
     posts.push(post);
+
+    if (!hasMatchingUniqueIds(posts, searchIndex)) {
+      return reply({
+        error: 'SEARCH_INDEX_INTEGRITY_FAILED',
+        message: '갱신 후 게시물과 검색 인덱스의 ID 정합성 검증에 실패했습니다.'
+      }, 500);
+    }
+
     posts.sort((a, b) => {
       const da = String(a.reportDate || a.date || '');
       const db = String(b.reportDate || b.date || '');
       if (da !== db) return db.localeCompare(da);
       return String(b.registeredAt || '').localeCompare(String(a.registeredAt || ''));
     });
-
-    if (searchIndex.length !== posts.length) {
-      return reply({
-        error: 'SEARCH_INDEX_INTEGRITY_FAILED',
-        message: `갱신 후 게시물 수(${posts.length})와 검색 인덱스 항목 수(${searchIndex.length})가 일치하지 않습니다.`
-      }, 500);
-    }
 
     searchIndex.sort((a, b) => {
       const da = String(a.date || '');
