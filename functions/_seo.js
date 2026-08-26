@@ -1,5 +1,14 @@
 export const PRODUCTION_ORIGIN = 'https://snowshagal.com';
 
+// Landscape 1200x630 card used wherever a page has no artwork of its own.
+export const SOCIAL_FALLBACK_IMAGE = '/assets/social/snowshagal-home.jpg';
+
+// Uploaded report HTML declares no icon, so the shared shell supplies one.
+export const FAVICON_TAGS = '<link rel="icon" href="/favicon.ico" sizes="any">'
+  + '<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">'
+  + '<link rel="apple-touch-icon" href="/apple-touch-icon.png">'
+  + '<link rel="manifest" href="/site.webmanifest">';
+
 export function postLanguage(post) {
   return post?.lang === 'en' ? 'en' : 'ko';
 }
@@ -59,16 +68,34 @@ export function reportSeoTags(posts, post) {
   const canonical = reportSiteUrl(post.href);
   const lang = postLanguage(post);
   const description = String(post.summary || post.description || '').trim();
-  const image = post.coverImage ? absoluteSiteUrl(post.coverImage) : '';
+  const cover = post.coverImage ? absoluteSiteUrl(post.coverImage) : '';
+  const image = cover || absoluteSiteUrl(SOCIAL_FALLBACK_IMAGE);
+  // Report covers are 900x1350 portrait. X centre-crops summary_large_image to
+  // roughly 1.91:1, which would cut the cover title away and leave a middle
+  // band, so a cover keeps the small summary card and only the landscape
+  // fallback earns the large one.
+  const twitterCard = cover ? 'summary' : 'summary_large_image';
+  const counterpart = findTranslationCounterpart(posts, post);
   const alternates = reportAlternates(posts, post)
     .map((entry) => `<link rel="alternate" hreflang="${entry.lang}" href="${escapeHtml(entry.href)}">`)
     .join('');
   const descriptionTags = description
-    ? `<meta name="description" content="${escapeHtml(description)}"><meta property="og:description" content="${escapeHtml(description)}">`
+    ? `<meta name="description" content="${escapeHtml(description)}"><meta property="og:description" content="${escapeHtml(description)}"><meta name="twitter:description" content="${escapeHtml(description)}">`
     : '';
-  const imageTag = image ? `<meta property="og:image" content="${escapeHtml(image)}">` : '';
+  const localeAlternate = counterpart
+    ? `<meta property="og:locale:alternate" content="${postLanguage(counterpart) === 'en' ? 'en_US' : 'ko_KR'}">`
+    : '';
 
-  return `<link rel="canonical" href="${escapeHtml(canonical)}">${alternates}${descriptionTags}<meta property="og:type" content="article"><meta property="og:site_name" content="Market Research"><meta property="og:locale" content="${lang === 'en' ? 'en_US' : 'ko_KR'}"><meta property="og:title" content="${escapeHtml(post.title)}"><meta property="og:url" content="${escapeHtml(canonical)}">${imageTag}`;
+  return `<link rel="canonical" href="${escapeHtml(canonical)}">${alternates}${descriptionTags}`
+    + `<meta property="og:type" content="article">`
+    + `<meta property="og:site_name" content="Snowshagal">`
+    + `<meta property="og:locale" content="${lang === 'en' ? 'en_US' : 'ko_KR'}">${localeAlternate}`
+    + `<meta property="og:title" content="${escapeHtml(post.title)}">`
+    + `<meta property="og:url" content="${escapeHtml(canonical)}">`
+    + `<meta property="og:image" content="${escapeHtml(image)}">`
+    + `<meta name="twitter:card" content="${twitterCard}">`
+    + `<meta name="twitter:title" content="${escapeHtml(post.title)}">`
+    + `<meta name="twitter:image" content="${escapeHtml(image)}">`;
 }
 
 export function sitemapXml(posts) {
@@ -79,6 +106,11 @@ export function sitemapXml(posts) {
     { lang: 'ko', href: `${PRODUCTION_ORIGIN}/` },
     { lang: 'en', href: `${PRODUCTION_ORIGIN}/en/` },
     { lang: 'x-default', href: `${PRODUCTION_ORIGIN}/` }
+  ];
+  const aboutAlternates = [
+    { lang: 'ko', href: `${PRODUCTION_ORIGIN}/about/` },
+    { lang: 'en', href: `${PRODUCTION_ORIGIN}/en/about/` },
+    { lang: 'x-default', href: `${PRODUCTION_ORIGIN}/about/` }
   ];
   const marketAlternates = [
     { lang: 'ko', href: `${PRODUCTION_ORIGIN}/market/` },
@@ -97,6 +129,8 @@ export function sitemapXml(posts) {
   const entries = [
     urlEntry(`${PRODUCTION_ORIGIN}/`, '', homeAlternates),
     urlEntry(`${PRODUCTION_ORIGIN}/en/`, '', homeAlternates),
+    urlEntry(`${PRODUCTION_ORIGIN}/about/`, '', aboutAlternates),
+    urlEntry(`${PRODUCTION_ORIGIN}/en/about/`, '', aboutAlternates),
     urlEntry(`${PRODUCTION_ORIGIN}/market/`, '', marketAlternates),
     urlEntry(`${PRODUCTION_ORIGIN}/en/market/`, '', marketAlternates),
     ...validPosts.map((post) => urlEntry(

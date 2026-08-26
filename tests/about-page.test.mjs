@@ -22,8 +22,8 @@ test('shared report shell links to Market', async () => {
 
 test('About page contains editorial introduction, contact, and simplified footer', async () => {
   const html = await read('about/index.html');
-  assert.match(html, /<title>소개 · Market Research<\/title>/);
-  assert.match(html, /<meta name="robots" content="noindex,nofollow">/);
+  assert.match(html, /<title>소개 \| Snowshagal Market Research<\/title>/);
+  assert.doesNotMatch(html, /name="robots"/);
   assert.equal((html.match(/href="\/market\/">마켓<\/a>/g) || []).length, 2);
   assert.match(html, /<footer[\s\S]*href="\/about\/">소개<\/a>/);
   assert.match(html, /<footer[\s\S]*href="\/about\/#contact">문의<\/a>/);
@@ -42,8 +42,8 @@ test('About page contains editorial introduction, contact, and simplified footer
 test('English About page contains matching editorial About and Contact sections', async () => {
   const html = await read('en/about/index.html');
   assert.match(html, /<html lang="en" data-site-lang="en">/);
-  assert.match(html, /<title>About · Market Research<\/title>/);
-  assert.match(html, /<meta name="robots" content="noindex,nofollow">/);
+  assert.match(html, /<title>About \| Snowshagal Market Research<\/title>/);
+  assert.doesNotMatch(html, /name="robots"/);
   assert.equal((html.match(/href="\/en\/market\/">Market<\/a>/g) || []).length, 2);
   assert.match(html, /<footer[\s\S]*href="\/en\/about\/">About<\/a>/);
   assert.match(html, /<footer[\s\S]*href="\/en\/about\/#contact">Contact<\/a>/);
