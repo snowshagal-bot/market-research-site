@@ -52,7 +52,8 @@ test('public locale shells use snowshagal.com canonicals and only real homepage 
     inLanguage: 'ko'
   });
   assert.doesNotMatch(en, /type="application\/ld\+json"/);
-  assert.match(aboutKo, /noindex,nofollow/);
+  assert.doesNotMatch(aboutKo, /name="robots"/);
+  assert.doesNotMatch(aboutEn, /name="robots"/);
   assert.match(aboutKo, /rel="canonical" href="https:\/\/snowshagal\.com\/about\/"/);
   assert.match(aboutEn, /rel="canonical" href="https:\/\/snowshagal\.com\/en\/about\/"/);
 });
@@ -66,7 +67,8 @@ test('Market Close locale pages expose canonical SEO and matching alternates', a
   for (const page of [ko, en]) {
     assert.match(page, /hreflang="ko" href="https:\/\/snowshagal\.com\/market\/"/);
     assert.match(page, /hreflang="en" href="https:\/\/snowshagal\.com\/en\/market\/"/);
-    assert.match(page, /property="og:image" content="https:\/\/snowshagal\.com\/assets\/market-close-mountain\.png"/);
+    assert.match(page, /property="og:image" content="https:\/\/snowshagal\.com\/assets\/social\/market-close-share\.jpg"/);
+    assert.doesNotMatch(page, /property="og:image" content="[^"]*market-close-mountain\.png"/);
     assert.match(page, /type="application\/ld\+json"/);
     assert.doesNotMatch(page, /pages\.dev/);
   }
@@ -94,7 +96,7 @@ test('sitemap contains canonical public locale pages and published reports witho
   assert.match(xml, /hreflang="en" href="https:\/\/snowshagal\.com\/reports\/en\/report"/);
   const unpairedEntry = xml.match(/<url><loc>https:\/\/snowshagal\.com\/reports\/only<\/loc>[\s\S]*?<\/url>/)?.[0] || '';
   assert.doesNotMatch(unpairedEntry, /xhtml:link/);
-  assert.doesNotMatch(xml, /about|pages\.dev/);
+  assert.doesNotMatch(xml, /pages\.dev/);
 });
 
 test('dynamic sitemap reads posts from the Pages asset binding and returns XML', async () => {
@@ -123,6 +125,8 @@ test('repository post metadata references existing public report files without f
   const expectedLocations = [
     `${PRODUCTION_ORIGIN}/`,
     `${PRODUCTION_ORIGIN}/en/`,
+    `${PRODUCTION_ORIGIN}/about/`,
+    `${PRODUCTION_ORIGIN}/en/about/`,
     `${PRODUCTION_ORIGIN}/market/`,
     `${PRODUCTION_ORIGIN}/en/market/`,
     ...posts.map((post) => reportSiteUrl(post.href))
