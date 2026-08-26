@@ -1,6 +1,6 @@
 # Project state
 
-Updated: 2026-08-24
+Updated: 2026-08-27
 
 ## Purpose
 
@@ -26,6 +26,11 @@ Locale structure:
 - browser language never redirects visitors automatically; `site-language` is written only after an explicit KO/EN choice and is read only on `/` to restore an English choice while preserving `?category=`;
 - English can remain empty without mixing Korean posts into its carousel, latest cards, archive, counts, or search.
 
+`/market/` and `/en/market/` are the Market Close pages. They read the published close from
+`GET /api/market/latest`, which serves the newest row of the D1-backed `market_close` table.
+The record is uploaded through `/admin/market/` against the JSON Schema in
+`contracts/market_close/`, and Preview is blocked from writing.
+
 Main categories:
 
 - `daily` → 데일리
@@ -36,7 +41,21 @@ Main categories:
 
 The homepage supports category filtering and search. Its opening surface is now a fixed Snowshagal brand hero rather than a post carousel. The hero keeps the brand promise stable while three concise Daily / Weekly / Research entry points lead into the existing category query flow. `basics` and `note` remain available in the shared navigation, filters, and archive.
 
-`/about/` is a noindex site-shell page reserved for a future user-authored introduction. It currently contains the shared header, navigation, theme control, empty main area, and footer only.
+`/about/` and `/en/about/` carry a written introduction and a contact section. They are
+indexable, declare their own title, description, Open Graph and X metadata, and appear in
+the sitemap with reciprocal `hreflang`. Preview stays non-indexable through the shared
+middleware's `X-Robots-Tag` header rather than a meta tag.
+
+The homepage opens with the brand hero, then a TODAY strip summarising the latest market
+close. `/api/market/latest` is the source of truth for both the strip's numbers and its
+market date; `data/market-summary.js` is a fallback used only when that request fails, and
+it also holds the editorial one-liner. The markup ships a neutral placeholder and the strip
+is painted exactly once, after the request settles, so a past session is never shown while
+the request is in flight. A payload that does not resolve all five items is rejected whole
+rather than topped up, and the one-liner links strictly by `reportDate === displayed
+marketDate`: with no matching daily report it falls back to Market Close instead of opening
+another day's report. Freshness is whatever `market_date` the API returns, never the
+calendar, so a weekend or holiday keeps showing the last trading session as current.
 
 The homepage also provides:
 
@@ -45,7 +64,33 @@ The homepage also provides:
 - post-driven latest DAILY, WEEKLY, and RESEARCH cards using the current localized `posts` data
 - optional post cover images through `coverImage`, with a restrained CSS fallback when no cover exists
 - the existing report archive, URL category filtering, and report-date sorting
+- a paged archive: 20 rows render at a time behind a `더 보기` / `Show more` control that
+  names how many remain. Changing category, year, month or tag, resetting the filters, or
+  navigating back restarts the window
+- a calendar view for `daily` and `weekly`, plus year, month and tag filters
+- topic tags from `data/tags.json`, rendered in the reader's language
+- reading time per report, computed at publish time
 - a denser two-column desktop archive with the recent-report list beside a five-category index whose counts are calculated from the current post data; tablet and mobile stack the index after the list
+
+## Search
+
+A global dialog on every public shell. Every report body is indexed in full, deliberately:
+a keyword deep inside a long report must stay findable, so `bodyText` is never truncated.
+That makes the combined index roughly 2.4MB, so it is published in tiers by
+`functions/api/_search-index.js`:
+
+- `data/search-index-meta.js` (~34KB) — every field except `bodyText`. Loaded when the
+  dialog opens and enough to answer title, tag and summary queries immediately.
+- `data/search-index-body-ko.js` / `-en.js` — report bodies, one shard per locale, loaded in
+  the background. The query re-runs when a shard lands so body-only matches join then. A
+  reader never downloads the other locale's bodies.
+- `data/search-index.json` — the canonical full artifact. Read by the publisher and the post
+  manager, never shipped to the browser.
+
+`scripts/build-search-index.mjs`, `functions/api/publish.js` and `functions/api/manage.js`
+all emit that set through the shared serializer, so the three writers cannot drift apart.
+Scoring weights title over tags over summary over body. If the index cannot be fetched the
+dialog falls back to the post data already on the page.
 
 ## Report publishing flow
 
@@ -122,6 +167,7 @@ The repository root also contains a non-indexable `404.html`. Its presence disab
 
 `assets/report-shell.js` currently provides:
 
+- a share section between the report body and the comments
 - fixed shared navigation bar
 - active category state
 - guest comment UI
@@ -129,7 +175,37 @@ The repository root also contains a non-indexable `404.html`. Its presence disab
 - a KO/EN report switch that opens the matching `translationGroup` report when present and otherwise falls back to the target-language homepage
 - Shadow DOM isolation to reduce style collision with report HTML
 
+The share section shares one canonical URL, never the address bar. A coarse pointer with no
+hover gets `navigator.share` and the operating system sheet, which is how Instagram,
+KakaoTalk and other apps are reached; everything else gets a popover with Copy Link, X,
+Facebook and LinkedIn. The routing decision reads `matchMedia`, never a user agent. No
+Instagram deep link and no Kakao SDK or app key exist in the codebase. Cancelling a share
+is not reported as a failure, and copy falls back from the async clipboard to `execCommand`
+and finally to a selectable field holding the URL.
+
 The shared navigation is fixed at the top and inserts spacing so it does not cover the original report. Public links are `데일리 / 위클리 / 리서치 / 시장 공부 / 끄적끄적 / 소개`.
+
+## Icons, social cards and report metadata
+
+`favicon.ico` (16/32/48), `favicon-32x32.png`, `apple-touch-icon.png` and `site.webmanifest`
+are generated from the existing owl artwork on the brand ivory ground. Browsers request
+`/favicon.ico` from the origin root when a document declares no icon, which already covers
+uploaded reports; the shared middleware also appends the full set to report heads, so no
+report HTML is edited. The manifest declares `display: browser` and there is no service
+worker — this is not a PWA.
+
+Two 1200x630 JPEGs live in `assets/social/`: `snowshagal-home.jpg` for the homepages, About
+and every report, and `market-close-share.jpg` for the Market Close pages. Market keeps its
+PNG/WebP hero on screen and points crawlers only at the share JPEG, so on-screen art and
+crawler art are separate.
+
+Report covers are 900x1350 portrait, and a 1.91:1 unfurl keeps only the middle third of
+them — measured on five representative covers, four lost their title outright. So
+`og:image` always carries a 1200x630 landscape card while `twitter:image` keeps the report's
+own cover under `twitter:card=summary`, where a thumbnail is shown rather than a cropped
+band. `SOCIAL_REPORT_IMAGE` in `functions/_seo.js` is the seam a per-report card would plug
+into if Social Card v2 is ever built. No X handle is claimed: `twitter:site` and
+`twitter:creator` are omitted rather than guessed.
 
 ## Comments feature
 
@@ -183,14 +259,24 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 ## Key files
 
 - `index.html` — homepage shell and category/search markup
-- `about/index.html` — empty noindex About page shell
+- `about/index.html` / `en/about/index.html` — indexable About pages with introduction and contact
 - `assets/site.css` — main site visual styles
 - `assets/home-v2.css` — Snowshagal hero, responsive artwork, latest-card, and archive layout
 - `assets/category-state.css` — category state styles
-- `assets/site.js` — homepage category filtering, featured article, search, theme/menu behavior
+- `assets/site.js` — homepage category filtering, TODAY strip, paged archive, calendar, search dialog, theme/menu behavior
 - `assets/locale.js` — shared locale copy, legacy-language normalization, filtering, URL, and translation-pair helpers
 - `assets/language.css` — restrained desktop/mobile language selector styling
-- `en/index.html` / `en/about/index.html` — English homepage and About shells
+- `en/index.html` — English homepage shell
+- `market/index.html` / `en/market/index.html` — Market Close pages
+- `assets/market-close.js` / `assets/market-close.css` — Market Close rendering
+- `functions/api/market/latest.js` / `publish.js` / `_shared.js` — D1-backed Market Close read, authenticated publish, shared validation
+- `contracts/market_close/` — Market Close JSON Schema, example payload and data contract
+- `admin/market/index.html` / `assets/admin-market.js` — Market Close upload UI
+- `data/market-summary.js` — fallback data and editorial one-liner for the homepage TODAY strip
+- `data/tags.json` / `data/tags.js` — canonical topic tag registry
+- `scripts/build-search-index.mjs` — builds the search index and syncs reading time
+- `functions/api/_search-index.js` — shared search index serializer used by the build script, publisher and manager
+- `data/search-index.json` — canonical full index; `data/search-index-meta.js` and `data/search-index-body-{ko,en}.js` are the browser tiers
 - `data/posts.json` — canonical post metadata used by publishing flow and deployment checks
 - `data/posts.js` — browser-consumable post data
 - `admin/index.html` — report publishing admin UI
@@ -203,8 +289,11 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `functions/api/analytics.js` — authenticated, schema-discovered GraphQL Analytics aggregation endpoint
 - `assets/engagement.js` / `functions/api/engagement.js` / `functions/api/engagement-stats.js` — privacy-minimal Production-only reading-session tracker, D1 writer, and authenticated aggregate endpoint
 - `functions/api/_engagement.js` — shared Engagement schema, validation, date-range, and aggregation helpers
-- `functions/_middleware.js` — injects shared report shell into `/reports/` HTML
-- `assets/report-shell.js` — isolated navigation + comments UI for report pages
+- `functions/_middleware.js` — injects the shared report shell, favicon set and report SEO into `/reports/` HTML, and marks non-Production hosts noindex
+- `functions/_seo.js` — canonical URLs, report metadata, sitemap and shared social constants
+- `favicon.ico` / `favicon-32x32.png` / `apple-touch-icon.png` / `site.webmanifest` — icon set
+- `assets/social/` — 1200x630 social cards
+- `assets/report-shell.js` — isolated navigation, share section and comments UI for report pages
 - `functions/api/comments.js` — D1-backed guest comment API
 - `covers/` — optional separately stored homepage cover assets created by the publisher
 - `reports/` — uploaded standalone report HTML files
@@ -217,6 +306,12 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - Market ticker is not currently a priority. Free/delayed data may be added later; paid market data is not required.
 - `snowshagal.com` is the sole Production and SEO canonical origin; Pages Preview subdomains are development-only.
 - No major framework migration planned unless the current architecture becomes a real blocker.
+- Report bodies are indexed in full. Truncating `bodyText` to shrink the index would remove a
+  working feature and is covered by a test.
+- Share targets are Copy Link, X, Facebook and LinkedIn plus the operating system sheet. No
+  Instagram deep link and no Kakao SDK, app key or custom scheme.
+- Per-report social cards are not generated. Social Card v2 remains a candidate, not a plan.
+- Existing Korean report URLs are not renamed; only future reports could take ASCII slugs.
 
 ## Known operational principle
 
