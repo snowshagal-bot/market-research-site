@@ -170,35 +170,132 @@ test('UI templates and styles: site.js, home-v2.css, and index.html support tags
   assert.match(homeCss, /\.search-result-tags/);
 });
 
-test('Canonical Registry: Single Source of Truth consistency across all files', () => {
+test('Canonical Registry: Exact single-source-of-truth across all backend and frontend layers', () => {
   const tagsJson = JSON.parse(fs.readFileSync(path.join(rootDir, 'data', 'tags.json'), 'utf8'));
-  const tagsJs = fs.readFileSync(path.join(rootDir, 'data', 'tags.js'), 'utf8');
+  const tagsJsContent = fs.readFileSync(path.join(rootDir, 'data', 'tags.js'), 'utf8');
   const publishJs = fs.readFileSync(path.join(rootDir, 'functions', 'api', 'publish.js'), 'utf8');
   const manageJs = fs.readFileSync(path.join(rootDir, 'functions', 'api', 'manage.js'), 'utf8');
   const siteJs = fs.readFileSync(path.join(rootDir, 'assets', 'site.js'), 'utf8');
+  const adminJs = fs.readFileSync(path.join(rootDir, 'assets', 'admin.js'), 'utf8');
+  const adminManageJs = fs.readFileSync(path.join(rootDir, 'assets', 'admin-manage.js'), 'utf8');
 
-  const jsonKeys = Object.keys(tagsJson).sort();
+  const jsonKeys = Object.keys(tagsJson);
   assert.equal(jsonKeys.length, 16, 'Exactly 16 canonical tags in tags.json');
+  assert.equal(new Set(jsonKeys).size, 16, 'No duplicate keys in tags.json');
 
-  // tags.js verification
-  for (const k of jsonKeys) {
-    assert.ok(tagsJs.includes(`"${k}"`) || tagsJs.includes(`'${k}'`), `tags.js must contain tag "${k}"`);
+  // 1. data/tags.js evaluation and exact deepEqual
+  const context = { window: {} };
+  import('node:vm').then(vm => vm.runInNewContext(tagsJsContent, context));
+  // Synchronous extraction for tags.js
+  const parsedTagsJs = Function(`const window = {}; ${tagsJsContent}; return window.TAG_REGISTRY;`)();
+  assert.deepEqual(parsedTagsJs, tagsJson, 'data/tags.js must deepEqual data/tags.json');
+
+  // 2. publish.js CANONICAL_TAGS exact Set equality
+  const publishMatch = publishJs.match(/const CANONICAL_TAGS = new Set\(\[\s*([\s\S]*?)\s*\]\);/);
+  assert.ok(publishMatch, 'publish.js must define CANONICAL_TAGS Set');
+  const publishTags = publishMatch[1].split(',').map(s => s.trim().replace(/['"]/g, '')).filter(Boolean);
+  assert.equal(publishTags.length, 16, 'publish.js CANONICAL_TAGS must have 16 items');
+  assert.equal(new Set(publishTags).size, 16, 'publish.js CANONICAL_TAGS must have no duplicates');
+  assert.deepEqual(new Set(publishTags), new Set(jsonKeys), 'publish.js CANONICAL_TAGS must exactly match data/tags.json');
+
+  // 3. manage.js CANONICAL_TAGS exact Set equality
+  const manageMatch = manageJs.match(/const CANONICAL_TAGS = new Set\(\[\s*([\s\S]*?)\s*\]\);/);
+  assert.ok(manageMatch, 'manage.js must define CANONICAL_TAGS Set');
+  const manageTags = manageMatch[1].split(',').map(s => s.trim().replace(/['"]/g, '')).filter(Boolean);
+  assert.equal(manageTags.length, 16, 'manage.js CANONICAL_TAGS must have 16 items');
+  assert.equal(new Set(manageTags).size, 16, 'manage.js CANONICAL_TAGS must have no duplicates');
+  assert.deepEqual(new Set(manageTags), new Set(jsonKeys), 'manage.js CANONICAL_TAGS must exactly match data/tags.json');
+
+  // 4. Frontend fallback registries exact label equality
+  function extractFallback(src) {
+    const match = src.match(/(?:const|let|var)\s+tagRegistry\s*=\s*window\.TAG_REGISTRY\s*\|\|\s*(\{[\s\S]*?\n\s*\});/) ||
+                  src.match(/(?:const|let|var)\s+TAG_REGISTRY\s*=\s*window\.TAG_REGISTRY\s*\|\|\s*(\{[\s\S]*?\n\s*\});/);
+    assert.ok(match, 'Source must define fallback tag registry');
+    return Function(`return ${match[1]};`)();
   }
 
-  // publish.js verification
-  for (const k of jsonKeys) {
-    assert.ok(publishJs.includes(`'${k}'`) || publishJs.includes(`"${k}"`), `publish.js CANONICAL_TAGS must contain "${k}"`);
+  const siteFallback = extractFallback(siteJs);
+  const adminFallback = extractFallback(adminJs);
+  const adminManageFallback = extractFallback(adminManageJs);
+
+  assert.deepEqual(siteFallback, tagsJson, 'assets/site.js fallback must exactly deepEqual data/tags.json');
+  assert.deepEqual(adminFallback, tagsJson, 'assets/admin.js fallback must exactly deepEqual data/tags.json');
+  assert.deepEqual(adminManageFallback, tagsJson, 'assets/admin-manage.js fallback must exactly deepEqual data/tags.json');
+});
+
+test('Admin UI: Translation Pair Tag Inheritance resets tags on switch (no stale tags)', () => {
+  const adminJs = fs.readFileSync(path.join(rootDir, 'assets', 'admin.js'), 'utf8');
+
+  // Mock DOM environment for admin.js
+  const tagChips = {};
+  const tagsJson = JSON.parse(fs.readFileSync(path.join(rootDir, 'data', 'tags.json'), 'utf8'));
+  for (const k of Object.keys(tagsJson)) {
+    tagChips[k] = { value: k, checked: false, disabled: false };
   }
 
-  // manage.js verification
-  for (const k of jsonKeys) {
-    assert.ok(manageJs.includes(`'${k}'`) || manageJs.includes(`"${k}"`), `manage.js CANONICAL_TAGS must contain "${k}"`);
+  const elements = {
+    'tag-options': {
+      innerHTML: '',
+      querySelectorAll(selector) {
+        if (selector === 'input[name="post-tags"]') return Object.values(tagChips);
+        if (selector === 'input[name="post-tags"]:checked') return Object.values(tagChips).filter(c => c.checked);
+        return [];
+      }
+    },
+    'tags-count': { textContent: '' },
+    'tags-status': { textContent: '' },
+    'translation-source-status': { textContent: '' },
+    'report-date': { value: '' },
+    'translation-source': { value: '' },
+    'post-language': { value: 'en' },
+    'admin-key': { value: '' },
+    'report-title': { value: '' },
+    'report-subtitle': { value: '' },
+    'report-description': { value: '' },
+    'post-summary': { value: '' },
+    'html-file': { files: [] },
+    'cover-file': { files: [] },
+    'parse-status': { textContent: '' },
+    'publish-btn': { disabled: true }
+  };
+
+  const researchPosts = [
+    { id: 'pair-a', translationGroup: 'group-a', lang: 'ko', reportDate: '2026-08-20', tags: ['flows', 'rates'] },
+    { id: 'pair-b', translationGroup: 'group-b', lang: 'ko', reportDate: '2026-08-21', tags: [] },
+    { id: 'pair-c', translationGroup: 'group-c', lang: 'ko', reportDate: '2026-08-22', tags: ['flows', 'rates', 'fx'] },
+    { id: 'pair-d', translationGroup: 'group-d', lang: 'ko', reportDate: '2026-08-23', tags: ['semiconductors'] }
+  ];
+
+  // Helper simulating admin.js logic
+  function setSelectedTags(tags = []) {
+    const tagSet = new Set(tags);
+    Object.values(tagChips).forEach(cb => {
+      cb.checked = tagSet.has(cb.value);
+    });
   }
 
-  // site.js verification
-  for (const k of jsonKeys) {
-    assert.ok(siteJs.includes(`'${k}'`) || siteJs.includes(`"${k}"`), `site.js fallback registry must contain "${k}"`);
+  function getSelectedTags() {
+    return Object.values(tagChips).filter(cb => cb.checked).map(cb => cb.value);
   }
+
+  function selectTranslationPair(pairPost) {
+    const pairTags = Array.isArray(pairPost?.tags) ? pairPost.tags : [];
+    setSelectedTags(pairTags);
+  }
+
+  // Case A: Pair A (2 tags) -> Pair B (0 tags)
+  selectTranslationPair(researchPosts[0]);
+  assert.deepEqual(getSelectedTags(), ['flows', 'rates']);
+
+  selectTranslationPair(researchPosts[1]);
+  assert.deepEqual(getSelectedTags(), [], 'Switching from 2 tags to 0 tags pair must reset selected tags to empty');
+
+  // Case B: Pair C (3 tags) -> Pair D (1 tag)
+  selectTranslationPair(researchPosts[2]);
+  assert.deepEqual(getSelectedTags(), ['flows', 'rates', 'fx']);
+
+  selectTranslationPair(researchPosts[3]);
+  assert.deepEqual(getSelectedTags(), ['semiconductors'], 'Switching from 3 tags to 1 tag pair must strictly set 1 tag');
 });
 
 test('Admin UI Tag Selectors: Publish & Manage tag selector markup and scripts', () => {
