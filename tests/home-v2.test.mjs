@@ -9,6 +9,7 @@ test('homepage presents the Snowshagal brand hero before latest reports and arch
   const order = [
     html.indexOf('class="site-header"'),
     html.indexOf('class="brand-hero"'),
+    html.indexOf('class="today-strip"'),
     html.indexOf('class="site-introduction"'),
     html.indexOf('class="section archive-section"'),
     html.indexOf('class="footer"')
@@ -28,8 +29,10 @@ test('homepage presents the Snowshagal brand hero before latest reports and arch
   assert.match(englishHtml, /home-v2\.css\?v=20260825-1/);
   assert.match(html, /locale\.js\?v=20260824-2/);
   assert.match(englishHtml, /locale\.js\?v=20260824-2/);
-  assert.match(html, /site\.js\?v=20260826-1/);
-  assert.match(englishHtml, /site\.js\?v=20260826-1/);
+  assert.match(html, /site\.js\?v=20260826-2/);
+  assert.match(englishHtml, /site\.js\?v=20260826-2/);
+  assert.match(html, /market-summary\.js\?v=20260826-1/);
+  assert.match(englishHtml, /market-summary\.js\?v=20260826-1/);
 });
 
 test('homepage serves a smaller eager hero asset on mobile without changing desktop art', async () => {
@@ -283,3 +286,55 @@ test('public pages remove hamburger menu and expose horizontal swipe navigation 
   assert.match(siteJs, /function scrollActiveMobileNavIntoView\(\)/);
   assert.match(siteJs, /scrollActiveMobileNavIntoView\(\);/);
 });
+
+test('homepage presents TODAY market summary strip between brand hero and latest reports with mobile swipe', async () => {
+  const [home, enHome, homeCss, siteJs, marketData] = await Promise.all([
+    read('index.html'),
+    read('en/index.html'),
+    read('assets/home-v2.css'),
+    read('assets/site.js'),
+    read('data/market-summary.js')
+  ]);
+
+  // 1. Structure in both pages
+  for (const page of [home, enHome]) {
+    assert.match(page, /<section class="today-strip" aria-labelledby="today-strip-heading">/);
+    assert.match(page, /class="today-strip-head"/);
+    assert.match(page, /class="today-strip-eyebrow"/);
+    assert.match(page, /class="today-strip-tag">TODAY<\/span>/);
+    assert.match(page, /class="today-strip-market-link"/);
+    assert.match(page, /class="today-strip-scroll-wrap"/);
+    assert.match(page, /id="today-market-grid"/);
+    assert.match(page, /class="today-takeaway-row"/);
+    assert.match(page, /id="today-takeaway-link"/);
+    assert.match(page, /id="today-takeaway-text"/);
+  }
+
+  // 2. Korean specifics
+  assert.match(home, /href="\/market\/"/);
+  assert.match(home, /class="today-takeaway-label">오늘의 한 줄<\/span>/);
+  assert.match(home, /낙차를 되감았지만, 시장의 무게중심은 아직 돌아오지 않았다\./);
+
+  // 3. English specifics
+  assert.match(enHome, /href="\/en\/market\/"/);
+  assert.match(enHome, /class="today-takeaway-label">Today's takeaway<\/span>/);
+  assert.match(enHome, /The market retraced the selloff, but its center of gravity has yet to return\./);
+
+  // 4. 5 core indices in markup and data
+  for (const sym of ['KOSPI', 'KOSDAQ', 'USD/KRW', 'US 10Y', 'GOLD']) {
+    assert.match(home, new RegExp(`<span class="today-label">${sym.replace('/', '\\/')}</span>`));
+    assert.match(marketData, new RegExp(`label:\\s*"${sym.replace('/', '\\/')}"`));
+  }
+
+  // 5. CSS Desktop & Mobile swipe
+  assert.match(homeCss, /\.today-strip\s*\{/);
+  assert.match(homeCss, /\.today-strip-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(5,\s*1fr\)/);
+  assert.match(homeCss, /\.today-strip-grid\s*\{[\s\S]*?overflow-x:\s*auto/);
+  assert.match(homeCss, /\.today-strip-grid\s*\{[\s\S]*?scroll-snap-type:\s*x proximity/);
+  assert.match(homeCss, /\.today-strip-scroll-wrap\s*\{[\s\S]*?mask-image:\s*linear-gradient/);
+
+  // 6. JS dynamic renderer
+  assert.match(siteJs, /function renderTodayMarket\(\)/);
+  assert.match(siteJs, /renderTodayMarket\(\);/);
+});
+
