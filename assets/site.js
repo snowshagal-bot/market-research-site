@@ -28,7 +28,7 @@
   const navLinks = Array.from(document.querySelectorAll('[data-nav-category]'));
   // 끄적끄적 is a real category with nothing in it yet. Rather than leading
   // readers to an empty result, its entry points appear once a note exists.
-  const hasNotes = allPosts.some(post => post.type === 'note');
+  const hasNotes = posts.some(post => post.type === 'note');
   const listedTypes = hasNotes ? [...coreTypes, 'note'] : [...coreTypes];
   if (!hasNotes) {
     document.querySelectorAll('[data-nav-category="note"], [data-filter="note"]')

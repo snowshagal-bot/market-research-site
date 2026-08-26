@@ -634,6 +634,13 @@ export async function onRequestPost(context) {
 
     const id = `${reportDate}-${type}-${simpleHash(`${lang}|${filename}|${title}|${reportDate}`)}`;
     const coverPath = hasCover ? `covers/${id}.${coverExt}` : null;
+    // A cover does not imply a card: composing one can fail and publishing
+    // continues without it, so the metadata records only what is committed.
+    const hasShareCard = Boolean(
+      coverPath && shareCard && typeof shareCard.arrayBuffer === 'function'
+      && Number(shareCard.size || 0) > 0 && Number(shareCard.size || 0) <= MAX_COVER_BYTES
+    );
+    const shareCardPath = hasShareCard ? `${SOCIAL_REPORT_CARD_DIR}/${id}.jpg` : null;
     const post = {
       id,
       type,
@@ -652,7 +659,8 @@ export async function onRequestPost(context) {
       readingMinutes,
       href,
       ...(translationGroup ? { translationGroup } : {}),
-      ...(coverPath ? { coverImage: coverPath } : {})
+      ...(coverPath ? { coverImage: coverPath } : {}),
+      ...(shareCardPath ? { shareCardImage: shareCardPath } : {})
     };
 
     const originalPostsLength = posts.length;
@@ -734,16 +742,14 @@ export async function onRequestPost(context) {
     const baseTree = parentCommit.tree.sha;
 
     let shareCardEntry = null;
-    if (coverPath && shareCard && typeof shareCard.arrayBuffer === 'function' && Number(shareCard.size || 0) > 0) {
-      if (Number(shareCard.size || 0) <= MAX_COVER_BYTES) {
-        const cardBytes = new Uint8Array(await shareCard.arrayBuffer());
-        const cardBlob = await gh(token, '/git/blobs', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ content: encodeBase64(cardBytes), encoding: 'base64' })
-        });
-        shareCardEntry = { path: `${SOCIAL_REPORT_CARD_DIR}/${id}.jpg`, mode: '100644', type: 'blob', sha: cardBlob.sha };
-      }
+    if (shareCardPath) {
+      const cardBytes = new Uint8Array(await shareCard.arrayBuffer());
+      const cardBlob = await gh(token, '/git/blobs', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ content: encodeBase64(cardBytes), encoding: 'base64' })
+      });
+      shareCardEntry = { path: shareCardPath, mode: '100644', type: 'blob', sha: cardBlob.sha };
     }
 
     let coverEntry = null;

@@ -754,11 +754,9 @@ export async function onRequestPost(context) {
       }
 
       entries.push(deletedEntry(existing.href));
-      if (existing.coverImage) {
-        entries.push(deletedEntry(existing.coverImage));
-        // The social card is derived from the cover, so it goes with it.
-        entries.push(deletedEntry(`${SOCIAL_REPORT_CARD_DIR}/${existing.id}.jpg`));
-      }
+      if (existing.coverImage) entries.push(deletedEntry(existing.coverImage));
+      // Only a card that was recorded exists to delete.
+      if (existing.shareCardImage) entries.push(deletedEntry(existing.shareCardImage));
       entries.push(...metadataEntries(sortPosts(posts), searchIndex));
       commitMessage = `Delete ${existing.title}`;
     } else {
@@ -788,13 +786,12 @@ export async function onRequestPost(context) {
       }
 
       if (coverAction === "remove") {
-        if (existing.coverImage) {
-          entries.push(deletedEntry(existing.coverImage));
-          // Without a cover there is nothing to compose a card from, so the
-          // report falls back to the brand card.
-          entries.push(deletedEntry(`${SOCIAL_REPORT_CARD_DIR}/${existing.id}.jpg`));
-        }
+        if (existing.coverImage) entries.push(deletedEntry(existing.coverImage));
+        // Nothing to compose a card from any more, so the report falls back to
+        // the brand card and the stale card is removed rather than orphaned.
+        if (existing.shareCardImage) entries.push(deletedEntry(existing.shareCardImage));
         delete updated.coverImage;
+        delete updated.shareCardImage;
       } else if (coverAction === "replace") {
         if (!/^[A-Za-z0-9._-]+$/.test(existing.id)) {
           return reply({ ok: false, error: "UNSAFE_POST_ID", message: "안전하지 않은 게시물 ID에는 커버를 저장할 수 없습니다." }, 400);
@@ -809,16 +806,22 @@ export async function onRequestPost(context) {
         entries.push({ path: nextCoverPath, mode: "100644", type: "blob", sha: blob.sha });
         updated.coverImage = nextCoverPath;
 
-        // Recomposed in the browser from the replacement cover. Optional: an
-        // absent card leaves the previous one in place rather than failing.
+        // Recomposed in the browser from the replacement cover. If that failed
+        // the previous card is deleted rather than left beside artwork it no
+        // longer depicts; the report falls back to the brand card.
         const cardFile = form.get("shareCard");
+        const nextCardPath = `${SOCIAL_REPORT_CARD_DIR}/${existing.id}.jpg`;
         if (cardFile && typeof cardFile.arrayBuffer === "function" && Number(cardFile.size || 0) > 0) {
           const cardBlob = await gh(env.GITHUB_TOKEN, "/git/blobs", {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({ content: encodeBase64(await cardFile.arrayBuffer()), encoding: "base64" }),
           });
-          entries.push({ path: `${SOCIAL_REPORT_CARD_DIR}/${existing.id}.jpg`, mode: "100644", type: "blob", sha: cardBlob.sha });
+          entries.push({ path: nextCardPath, mode: "100644", type: "blob", sha: cardBlob.sha });
+          updated.shareCardImage = nextCardPath;
+        } else {
+          if (existing.shareCardImage) entries.push(deletedEntry(existing.shareCardImage));
+          delete updated.shareCardImage;
         }
       }
 

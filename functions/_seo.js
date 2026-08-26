@@ -14,8 +14,14 @@ export const SOCIAL_FALLBACK_IMAGE = '/assets/social/snowshagal-home.jpg';
 // cropped band, so it keeps the cover itself.
 export const SOCIAL_REPORT_CARD_DIR = 'covers/share';
 
+// Having a cover does not mean a card exists: composing one can fail, and
+// publishing continues without it. Only `shareCardImage`, written when a card
+// was actually committed, may be trusted — and only when it names the card
+// this post owns, so metadata can never point the crawler somewhere else.
 export function reportCardPath(post) {
-  return post?.coverImage && post?.id ? `${SOCIAL_REPORT_CARD_DIR}/${post.id}.jpg` : '';
+  const declared = String(post?.shareCardImage || '').replace(/^\/+/, '');
+  if (!declared || !post?.id) return '';
+  return declared === `${SOCIAL_REPORT_CARD_DIR}/${post.id}.jpg` ? declared : '';
 }
 
 // Uploaded report HTML declares no icon, so the shared shell supplies one.

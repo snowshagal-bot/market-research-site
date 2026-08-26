@@ -207,13 +207,17 @@ const bare = {
 };
 
 test('a report with a cover sends a landscape card to Open Graph and the cover to X', async () => {
-  const tags = reportSeoTags([covered], covered);
+  const withCard = { ...covered, shareCardImage: `covers/share/${covered.id}.jpg` };
+  const tags = reportSeoTags([withCard], withCard);
   const coverUrl = `${PRODUCTION_ORIGIN}/covers/2026-08-26-daily.webp`;
 
   // A 1.91:1 unfurler keeps only the middle 35% of a 900x1350 cover, so Open
   // Graph receives a landscape card composed from that cover instead.
-  assert.equal(reportCardPath(covered), `covers/share/${covered.id}.jpg`);
+  assert.equal(reportCardPath({ ...covered, shareCardImage: `covers/share/${covered.id}.jpg` }), `covers/share/${covered.id}.jpg`);
   assert.match(tags, new RegExp(`<meta property="og:image" content="${PRODUCTION_ORIGIN}/covers/share/${covered.id}\.jpg">`));
+  // A cover alone proves nothing: without a recorded card the brand card is used.
+  assert.match(reportSeoTags([covered], covered),
+    new RegExp(`<meta property="og:image" content="${PRODUCTION_ORIGIN}${SOCIAL_FALLBACK_IMAGE}">`));
   assert.doesNotMatch(tags, new RegExp(`<meta property="og:image" content="${coverUrl}">`));
   // The portrait cover itself must never be the Open Graph image.
   assert.doesNotMatch(tags, /property="og:image" content="[^"]*\/covers\/[^\/"]*\.webp"/);
@@ -250,7 +254,7 @@ test('every report advertises a 1200x630 og:image whatever its cover state', asy
   for (const post of posts) {
     const tags = reportSeoTags(posts, post);
     const ogImage = tags.match(/property="og:image" content="([^"]*)"/)[1];
-    const expected = post.coverImage
+    const expected = post.shareCardImage
       ? `${PRODUCTION_ORIGIN}/covers/share/${post.id}.jpg`
       : `${PRODUCTION_ORIGIN}${SOCIAL_FALLBACK_IMAGE}`;
     assert.equal(ogImage, expected, post.id);

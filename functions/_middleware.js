@@ -59,7 +59,11 @@ export async function onRequest(context) {
     const posts = await loadPosts(context.request, context.env);
     const post = findPostByPath(posts, url.pathname);
     if (post) seo = reportSeoTags(posts, post);
-    hasNotes = posts.some((candidate) => candidate?.type === 'note');
+    // Scoped to the report's own language, so the fixed nav matches the
+    // homepage a reader would land on.
+    hasNotes = posts.some((candidate) => (
+      candidate?.type === 'note' && (candidate?.lang === 'en' ? 'en' : 'ko') === lang
+    ));
   } catch (_) {}
 
   // Built after the post data is read so the shell knows whether 끄적끄적 has
