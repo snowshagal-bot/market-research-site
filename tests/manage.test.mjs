@@ -373,3 +373,50 @@ test('manage rejects duplicate IDs in search index with SEARCH_INDEX_INTEGRITY_F
     globalThis.fetch = originalFetch;
   }
 });
+
+test('manage updates tags atomically in posts and searchIndex', async () => {
+  const post = { ...basePost, tags: ['flows'], readingMinutes: 5 };
+  const searchIndex = [{ id: post.id, lang: 'ko', category: 'daily', title: post.title, date: '2026-08-11', tags: ['flows'], readingMinutes: 5 }];
+  const calls = githubMock([post], { searchIndex });
+
+  try {
+    const { response, data } = await run({ id: post.id, tags: 'rates, semiconductors' });
+    assert.equal(response.status, 200);
+
+    const tree = treeFrom(calls);
+    const posts = postsFromTree(tree);
+    const searchIdxEntry = tree.find(entry => entry.path === 'data/search-index.json');
+    const updatedIndex = JSON.parse(searchIdxEntry.content);
+
+    assert.deepEqual(posts[0].tags, ['rates', 'semiconductors']);
+    assert.deepEqual(updatedIndex[0].tags, ['rates', 'semiconductors']);
+    assert.equal(posts[0].readingMinutes, 5); // preserved because HTML was not replaced
+    assert.equal(updatedIndex[0].readingMinutes, 5);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('manage recalculates readingMinutes when replacement HTML is uploaded', async () => {
+  const post = { ...basePost, tags: ['flows'], readingMinutes: 2 };
+  const searchIndex = [{ id: post.id, lang: 'ko', category: 'daily', title: post.title, date: '2026-08-11', tags: ['flows'], readingMinutes: 2 }];
+  const calls = githubMock([post], { searchIndex });
+
+  const largeHtml = `<!doctype html><html><body><main><p>${'가'.repeat(2500)}</p></main></body></html>`; // 2500 / 500 = 5 min
+  const file = new File([largeHtml], 'report.html', { type: 'text/html' });
+
+  try {
+    const { response, data } = await run({ id: post.id, file });
+    assert.equal(response.status, 200);
+
+    const tree = treeFrom(calls);
+    const posts = postsFromTree(tree);
+    const searchIdxEntry = tree.find(entry => entry.path === 'data/search-index.json');
+    const updatedIndex = JSON.parse(searchIdxEntry.content);
+
+    assert.equal(posts[0].readingMinutes, 5);
+    assert.equal(updatedIndex[0].readingMinutes, 5);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

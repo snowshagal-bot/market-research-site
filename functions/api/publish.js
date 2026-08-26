@@ -173,6 +173,82 @@ function extractSearchText(html) {
   return clean.replace(/\s+/g, ' ').trim();
 }
 
+const CANONICAL_TAGS = new Set([
+  'flows', 'semiconductors', 'rates', 'fx', 'treasuries', 'fed',
+  'futures', 'ai', 'cloud-datacenter', 'stablecoins', 'crypto',
+  'gold', 'autos', 'energy', 'policy', 'geopolitics'
+]);
+
+function extractReadingText(html) {
+  if (!html) return '';
+  let clean = html
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<svg[\s\S]*?<\/svg>/gi, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<nav\b[\s\S]*?<\/nav>/gi, ' ')
+    .replace(/<header\b[\s\S]*?<\/header>/gi, ' ')
+    .replace(/<footer\b[\s\S]*?<\/footer>/gi, ' ')
+    .replace(/<dialog\b[\s\S]*?<\/dialog>/gi, ' ')
+    .replace(/<details(?![^>]*\bopen\b)[^>]*>[\s\S]*?<\/details>/gi, ' ')
+    .replace(/<([a-z0-9]+)[^>]*\bhidden\b[^>]*>[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/[\u200B-\u200D\uFEFF]/g, '');
+
+  const boilerplates = [
+    /SNOWSHAGAL/gi,
+    /MARKET RESEARCH/gi,
+    /시장을 읽어주는 사이트/gi,
+    /본 사이트의 리서치와 해설은 정보 제공을 목적으로 하며[^.]+투자자문[^.]+않습니다\.?/gi,
+    /This site's research and commentary are for informational purposes only[^.]+investment advice[^.]*\.?/gi,
+    /Scroll down for the report/gi,
+    /Read report/gi,
+    /리포트 보기/gi,
+    /리포트 읽기/gi,
+    /Tistory/gi
+  ];
+  for (const bp of boilerplates) clean = clean.replace(bp, ' ');
+  return clean.replace(/\s+/g, ' ').trim();
+}
+
+function calculateReadingMinutes(html, lang = 'ko') {
+  const readingText = extractReadingText(html);
+  if (!readingText) return 1;
+  const isEn = lang === 'en';
+  if (isEn) {
+    const words = readingText.split(/\s+/).filter(Boolean).length;
+    return Math.max(1, Math.ceil(words / 220));
+  } else {
+    const nonWsChars = readingText.replace(/\s+/g, '').length;
+    return Math.max(1, Math.ceil(nonWsChars / 500));
+  }
+}
+
+function parseAndValidateTags(inputTags, counterpartTags = []) {
+  let rawTags = [];
+  if (Array.isArray(inputTags)) {
+    rawTags = inputTags;
+  } else if (typeof inputTags === 'string') {
+    rawTags = inputTags.split(/[,\s]+/).map(t => t.trim()).filter(Boolean);
+  }
+  if (!rawTags.length && Array.isArray(counterpartTags) && counterpartTags.length) {
+    rawTags = counterpartTags;
+  }
+  const normalized = Array.from(new Set(rawTags.map(t => String(t).trim().toLowerCase()))).filter(Boolean);
+  for (const t of normalized) {
+    if (!CANONICAL_TAGS.has(t)) {
+      return { error: `허용되지 않은 태그입니다: ${t}` };
+    }
+  }
+  return { tags: normalized.slice(0, 3) };
+}
+
 function hasMatchingUniqueIds(posts, searchIndex) {
   if (!Array.isArray(posts) || !Array.isArray(searchIndex)) return false;
   const postIds = posts.map(x => x?.id).filter(Boolean);
@@ -249,6 +325,12 @@ export async function onRequestPost(context) {
     return reply({ error: 'NOT_HTML', message: '독립 실행형 HTML 파일인지 확인하세요.' }, 400);
   }
 
+  const rawInputTags = form.getAll('tags').length > 1 ? form.getAll('tags') : form.get('tags');
+  const initialTagValidation = parseAndValidateTags(rawInputTags);
+  if (initialTagValidation.error) {
+    return reply({ error: 'BAD_TAGS', message: initialTagValidation.error }, 400);
+  }
+
   const token = env.GITHUB_TOKEN;
   const reportPath = lang === 'en' ? `reports/en/${filename}` : `reports/${filename}`;
   const href = reportPath;
@@ -262,9 +344,10 @@ export async function onRequestPost(context) {
     let posts = JSON.parse(postsText);
     if (!Array.isArray(posts)) throw new Error('posts.json 형식이 올바르지 않습니다.');
 
+    let pairedPost = null;
     if (translationGroup) {
       const targetLanguage = lang === 'en' ? 'ko' : 'en';
-      const pairedPost = posts.find(post => {
+      pairedPost = posts.find(post => {
         const postLanguage = post?.lang === 'en' ? 'en' : 'ko';
         const postTranslationKey = String(post?.translationGroup || post?.id || '');
         return postLanguage === targetLanguage && postTranslationKey === translationGroup;
@@ -277,6 +360,13 @@ export async function onRequestPost(context) {
         return reply({ error: 'PAIR_DATE_MISMATCH', message: `리포트 기준일은 번역 짝과 같은 ${pairedDate || '날짜'}이어야 합니다.` }, 400);
       }
     }
+
+    const tagValidation = parseAndValidateTags(rawInputTags, pairedPost?.tags);
+    if (tagValidation.error) {
+      return reply({ error: 'BAD_TAGS', message: tagValidation.error }, 400);
+    }
+    const tags = tagValidation.tags;
+    const readingMinutes = calculateReadingMinutes(html, lang);
 
     if (posts.some(p => p.href === href)) {
       return reply({ error: 'DUPLICATE', message: '같은 파일명의 리포트가 이미 등록되어 있습니다. 파일명을 확인하세요.' }, 409);
@@ -298,6 +388,8 @@ export async function onRequestPost(context) {
       subtitle,
       description,
       ...(summary ? { summary } : {}),
+      tags,
+      readingMinutes,
       href,
       ...(translationGroup ? { translationGroup } : {}),
       ...(coverPath ? { coverImage: coverPath } : {})
@@ -334,7 +426,8 @@ export async function onRequestPost(context) {
       date: reportDate,
       registeredAt,
       summary: summary || description,
-      tags: [],
+      tags,
+      readingMinutes,
       url: `/${href.replace(/^\/+/, '')}`,
       coverImage: coverPath ? `/${coverPath.replace(/^\/+/, '')}` : '',
       bodyText: extractSearchText(html)

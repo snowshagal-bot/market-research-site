@@ -262,6 +262,79 @@ async function updateRef(token, originalSha, commitSha) {
   return true;
 }
 
+const CANONICAL_TAGS = new Set([
+  'flows', 'semiconductors', 'rates', 'fx', 'treasuries', 'fed',
+  'futures', 'ai', 'cloud-datacenter', 'stablecoins', 'crypto',
+  'gold', 'autos', 'energy', 'policy', 'geopolitics'
+]);
+
+function extractReadingText(html) {
+  if (!html) return '';
+  let clean = html
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<svg[\s\S]*?<\/svg>/gi, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<nav\b[\s\S]*?<\/nav>/gi, ' ')
+    .replace(/<header\b[\s\S]*?<\/header>/gi, ' ')
+    .replace(/<footer\b[\s\S]*?<\/footer>/gi, ' ')
+    .replace(/<dialog\b[\s\S]*?<\/dialog>/gi, ' ')
+    .replace(/<details(?![^>]*\bopen\b)[^>]*>[\s\S]*?<\/details>/gi, ' ')
+    .replace(/<([a-z0-9]+)[^>]*\bhidden\b[^>]*>[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/[\u200B-\u200D\uFEFF]/g, '');
+
+  const boilerplates = [
+    /SNOWSHAGAL/gi,
+    /MARKET RESEARCH/gi,
+    /시장을 읽어주는 사이트/gi,
+    /본 사이트의 리서치와 해설은 정보 제공을 목적으로 하며[^.]+투자자문[^.]+않습니다\.?/gi,
+    /This site's research and commentary are for informational purposes only[^.]+investment advice[^.]*\.?/gi,
+    /Scroll down for the report/gi,
+    /Read report/gi,
+    /리포트 보기/gi,
+    /리포트 읽기/gi,
+    /Tistory/gi
+  ];
+  for (const bp of boilerplates) clean = clean.replace(bp, ' ');
+  return clean.replace(/\s+/g, ' ').trim();
+}
+
+function calculateReadingMinutes(html, lang = 'ko') {
+  const readingText = extractReadingText(html);
+  if (!readingText) return 1;
+  const isEn = lang === 'en';
+  if (isEn) {
+    const words = readingText.split(/\s+/).filter(Boolean).length;
+    return Math.max(1, Math.ceil(words / 220));
+  } else {
+    const nonWsChars = readingText.replace(/\s+/g, '').length;
+    return Math.max(1, Math.ceil(nonWsChars / 500));
+  }
+}
+
+function parseAndValidateTags(inputTags) {
+  let rawTags = [];
+  if (Array.isArray(inputTags)) {
+    rawTags = inputTags;
+  } else if (typeof inputTags === 'string') {
+    rawTags = inputTags.split(/[,\s]+/).map(t => t.trim()).filter(Boolean);
+  }
+  const normalized = Array.from(new Set(rawTags.map(t => String(t).trim().toLowerCase()))).filter(Boolean);
+  for (const t of normalized) {
+    if (!CANONICAL_TAGS.has(t)) {
+      return { error: `허용되지 않은 태그입니다: ${t}` };
+    }
+  }
+  return { tags: normalized.slice(0, 3) };
+}
+
 function validateEditableFields(form) {
   const type = String(form.get("type") || "");
   const reportDate = String(form.get("reportDate") || "");
@@ -269,6 +342,17 @@ function validateEditableFields(form) {
   if (!TYPE_LABELS[type]) return { error: "지원하지 않는 카테고리입니다." };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(reportDate)) return { error: "리포트 날짜를 확인해 주세요." };
   if (!title) return { error: "제목을 입력해 주세요." };
+
+  let tagsProvided = false;
+  let tags = [];
+  if (form.has("tags")) {
+    tagsProvided = true;
+    const rawInputTags = form.getAll('tags').length > 1 ? form.getAll('tags') : form.get('tags');
+    const tagRes = parseAndValidateTags(rawInputTags);
+    if (tagRes.error) return { error: tagRes.error };
+    tags = tagRes.tags;
+  }
+
   return {
     type,
     reportDate,
@@ -277,6 +361,8 @@ function validateEditableFields(form) {
     description: String(form.get("description") || "").trim(),
     summaryProvided: form.has("summary"),
     summary: String(form.get("summary") || "").trim().slice(0, 500),
+    tagsProvided,
+    tags,
   };
 }
 
@@ -438,8 +524,13 @@ export async function onRequestPost(context) {
         else delete updated.summary;
       }
 
+      if (editFields.tagsProvided) {
+        updated.tags = editFields.tags;
+      }
+
       if (replacementHtml !== null) {
         entries.push({ path: existing.href, mode: "100644", type: "blob", content: replacementHtml });
+        updated.readingMinutes = calculateReadingMinutes(replacementHtml, postLanguage(existing));
       }
 
       if (coverAction === "remove") {
@@ -470,6 +561,8 @@ export async function onRequestPost(context) {
         subtitle: updated.subtitle,
         date: updated.reportDate,
         summary: updated.summary || updated.description,
+        tags: Array.isArray(updated.tags) ? updated.tags : [],
+        readingMinutes: typeof updated.readingMinutes === 'number' ? updated.readingMinutes : 1,
         coverImage: updated.coverImage ? `/${updated.coverImage.replace(/^\/+/, '')}` : '',
         ...(replacementHtml !== null ? { bodyText: extractSearchText(replacementHtml) } : {})
       };

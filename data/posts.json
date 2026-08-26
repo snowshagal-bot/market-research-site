@@ -14,7 +14,13 @@
     "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
     "href": "reports/en/2026-08-25_KOSPI_Daily_Report_EN_Benchmark.html",
     "translationGroup": "2026-08-25-daily-13engmv",
-    "coverImage": "covers/2026-08-25-daily-bmu64e.webp"
+    "coverImage": "covers/2026-08-25-daily-bmu64e.webp",
+    "tags": [
+      "flows",
+      "semiconductors",
+      "rates"
+    ],
+    "readingMinutes": 17
   },
   {
     "id": "2026-08-25-daily-13engmv",
@@ -30,7 +36,13 @@
     "subtitle": "",
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "href": "reports/8월 25일 주식리포트_커버통합.html",
-    "coverImage": "covers/2026-08-25-daily-13engmv.webp"
+    "coverImage": "covers/2026-08-25-daily-13engmv.webp",
+    "tags": [
+      "flows",
+      "semiconductors",
+      "rates"
+    ],
+    "readingMinutes": 16
   },
   {
     "id": "2026-08-24-daily-ya1ru9",
@@ -47,7 +59,13 @@
     "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
     "href": "reports/en/2026-08-24_KOSPI_Daily_Report_EN_Benchmark.html",
     "translationGroup": "2026-08-24-daily-97jc8s",
-    "coverImage": "covers/2026-08-24-daily-ya1ru9.png"
+    "coverImage": "covers/2026-08-24-daily-ya1ru9.png",
+    "tags": [
+      "futures",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 15
   },
   {
     "id": "2026-08-24-daily-97jc8s",
@@ -63,7 +81,13 @@
     "subtitle": "",
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "href": "reports/8월 24일 주식 리포트_커버 통합.html",
-    "coverImage": "covers/2026-08-24-daily-97jc8s.webp"
+    "coverImage": "covers/2026-08-24-daily-97jc8s.webp",
+    "tags": [
+      "futures",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 14
   },
   {
     "id": "2026-08-23-research-16pvcxp",
@@ -80,7 +104,13 @@
     "description": "Independent research on specific industries, companies, policies, and market structure.",
     "href": "reports/en/비정기리서치_미국의비싸진30년_2026.08.23_커버통합_EN.html",
     "translationGroup": "2026-08-23-research-1xleg6o",
-    "coverImage": "covers/2026-08-23-research-16pvcxp.webp"
+    "coverImage": "covers/2026-08-23-research-16pvcxp.webp",
+    "tags": [
+      "rates",
+      "treasuries",
+      "policy"
+    ],
+    "readingMinutes": 25
   },
   {
     "id": "2026-08-23-research-1xleg6o",
@@ -96,7 +126,13 @@
     "subtitle": "",
     "description": "특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.",
     "href": "reports/비정기리서치_미국의비싸진30년_2026.08.23_커버통합.html",
-    "coverImage": "covers/2026-08-23-research-1xleg6o.webp"
+    "coverImage": "covers/2026-08-23-research-1xleg6o.webp",
+    "tags": [
+      "rates",
+      "treasuries",
+      "policy"
+    ],
+    "readingMinutes": 22
   },
   {
     "id": "2026-08-21-daily-16tx7f1",
@@ -114,7 +150,13 @@
     "summary": "193 stocks up.683 stocks down.",
     "href": "reports/en/2026-08-21_KOSPI_Daily_Report_EN_Benchmark.html",
     "translationGroup": "2026-08-21-daily-1i56f22",
-    "coverImage": "covers/2026-08-21-daily-16tx7f1.webp"
+    "coverImage": "covers/2026-08-21-daily-16tx7f1.webp",
+    "tags": [
+      "fx",
+      "rates",
+      "flows"
+    ],
+    "readingMinutes": 14
   },
   {
     "id": "2026-08-21-daily-1i56f22",
@@ -132,7 +174,13 @@
     "href": "reports/8월 21일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-08-21-daily-1i56f22.webp",
     "updatedAt": "2026-08-23T08:25:49.091Z",
-    "summary": "삼성전자·SK하이닉스가 반등하며 코스피는 0.88% 올랐지만, 오른 종목은 21.3%에 그쳤고 코스닥은 4.63% 급락했다. 대형 반도체 두 종목이 지수를 받친 반면 반도체 업종 171개 중 152개가 하락한, 지수와 종목 전반의 흐름이 다시 갈라진 하루를 살펴본다."
+    "summary": "삼성전자·SK하이닉스가 반등하며 코스피는 0.88% 올랐지만, 오른 종목은 21.3%에 그쳤고 코스닥은 4.63% 급락했다. 대형 반도체 두 종목이 지수를 받친 반면 반도체 업종 171개 중 152개가 하락한, 지수와 종목 전반의 흐름이 다시 갈라진 하루를 살펴본다.",
+    "tags": [
+      "fx",
+      "rates",
+      "flows"
+    ],
+    "readingMinutes": 14
   },
   {
     "id": "2026-08-20-daily-1ctu7fr",
@@ -149,7 +197,13 @@
     "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
     "summary": "Prior-session high 6,614.39.Today's open 6,680.34.",
     "href": "reports/en/2026-08-20_KOSPI_Daily_Report_EN_Benchmark (1).html",
-    "coverImage": "covers/2026-08-20-daily-1ctu7fr.webp"
+    "coverImage": "covers/2026-08-20-daily-1ctu7fr.webp",
+    "tags": [
+      "semiconductors",
+      "flows",
+      "futures"
+    ],
+    "readingMinutes": 15
   },
   {
     "id": "2026-08-20-daily-c6eow2",
@@ -167,7 +221,13 @@
     "href": "reports/8월 20일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-08-20-daily-c6eow2.webp",
     "updatedAt": "2026-08-23T08:26:11.525Z",
-    "summary": "미 장기금리 후퇴와 SK하이닉스 40조 원 자사주 취득·소각이 겹치며 코스피는 하루 만에 5.89% 반등했다. 외국인이 대형 메모리를 다시 사들이고 상승 종목 비율도 57.8%까지 회복한 가운데, 전날과 수급 방향이 통째로 뒤집힌 하루를 살펴본다."
+    "summary": "미 장기금리 후퇴와 SK하이닉스 40조 원 자사주 취득·소각이 겹치며 코스피는 하루 만에 5.89% 반등했다. 외국인이 대형 메모리를 다시 사들이고 상승 종목 비율도 57.8%까지 회복한 가운데, 전날과 수급 방향이 통째로 뒤집힌 하루를 살펴본다.",
+    "tags": [
+      "semiconductors",
+      "flows",
+      "futures"
+    ],
+    "readingMinutes": 15
   },
   {
     "id": "2026-08-19-daily-otvpwu",
@@ -185,7 +245,13 @@
     "summary": "As the 30-year yield hit a high,the biggest prior winners were sold first",
     "href": "reports/en/2026-08-19_KOSPI_Daily_Report_EN_Benchmark.html",
     "translationGroup": "2026-08-19-daily-kuhjks",
-    "coverImage": "covers/2026-08-19-daily-otvpwu.webp"
+    "coverImage": "covers/2026-08-19-daily-otvpwu.webp",
+    "tags": [
+      "rates",
+      "treasuries",
+      "flows"
+    ],
+    "readingMinutes": 14
   },
   {
     "id": "2026-08-19-daily-kuhjks",
@@ -203,7 +269,13 @@
     "href": "reports/8월 19일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-08-19-daily-kuhjks.webp",
     "updatedAt": "2026-08-23T08:26:28.075Z",
-    "summary": "미 30년물이 장중 5.33%대까지 오르고 미국 반도체주가 급락하자 삼성전자·SK하이닉스를 중심으로 코스피가 5.80% 무너졌다. 외국인이 3.49조 원을 팔고 개인이 4.64조 원을 받아낸 가운데, 높은 금리가 가장 많이 오른 대형 메모리부터 압박한 하루를 분석한다."
+    "summary": "미 30년물이 장중 5.33%대까지 오르고 미국 반도체주가 급락하자 삼성전자·SK하이닉스를 중심으로 코스피가 5.80% 무너졌다. 외국인이 3.49조 원을 팔고 개인이 4.64조 원을 받아낸 가운데, 높은 금리가 가장 많이 오른 대형 메모리부터 압박한 하루를 분석한다.",
+    "tags": [
+      "rates",
+      "treasuries",
+      "flows"
+    ],
+    "readingMinutes": 13
   },
   {
     "id": "2026-08-18-daily-tfmejq",
@@ -221,7 +293,13 @@
     "summary": "The memory catalyststayed with SK Hynix,while institutional and non-arbitrage sellingcut breadth to 22%.",
     "href": "reports/en/2026-08-18_KOSPI_Daily_Report_EN_Benchmark.html",
     "translationGroup": "2026-08-18-daily-1burfko",
-    "coverImage": "covers/2026-08-18-daily-tfmejq.webp"
+    "coverImage": "covers/2026-08-18-daily-tfmejq.webp",
+    "tags": [
+      "semiconductors",
+      "ai",
+      "flows"
+    ],
+    "readingMinutes": 13
   },
   {
     "id": "2026-08-18-weekly-11u1873",
@@ -238,7 +316,13 @@
     "description": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
     "href": "reports/en/2026-08-18_08-21_Korea_Weekly_Report_EN.html",
     "translationGroup": "2026-08-18-weekly-n6uraz",
-    "coverImage": "covers/2026-08-18-weekly-11u1873.webp"
+    "coverImage": "covers/2026-08-18-weekly-11u1873.webp",
+    "tags": [
+      "rates",
+      "fx",
+      "fed"
+    ],
+    "readingMinutes": 26
   },
   {
     "id": "2026-08-18-weekly-n6uraz",
@@ -254,7 +338,13 @@
     "subtitle": "",
     "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
     "href": "reports/8월 3주차 위클리 분석.html",
-    "coverImage": "covers/2026-08-18-weekly-n6uraz.webp"
+    "coverImage": "covers/2026-08-18-weekly-n6uraz.webp",
+    "tags": [
+      "rates",
+      "fx",
+      "fed"
+    ],
+    "readingMinutes": 23
   },
   {
     "id": "2026-08-18-daily-1burfko",
@@ -272,7 +362,13 @@
     "href": "reports/8월 18일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-08-18-daily-1burfko.webp",
     "updatedAt": "2026-08-23T08:26:42.448Z",
-    "summary": "메모리 호재로 장중 7,200선을 넘었던 코스피는 기관·비차익 매도에 밀려 1.55% 하락했고, 오른 종목은 22%에 그쳤다. 외국인 매수는 이어졌지만 규모가 급감한 가운데, 호재가 SK하이닉스에만 남고 시장 전반으로 퍼지지 못한 하루를 살펴본다"
+    "summary": "메모리 호재로 장중 7,200선을 넘었던 코스피는 기관·비차익 매도에 밀려 1.55% 하락했고, 오른 종목은 22%에 그쳤다. 외국인 매수는 이어졌지만 규모가 급감한 가운데, 호재가 SK하이닉스에만 남고 시장 전반으로 퍼지지 못한 하루를 살펴본다",
+    "tags": [
+      "semiconductors",
+      "ai",
+      "flows"
+    ],
+    "readingMinutes": 13
   },
   {
     "id": "2026-08-16-research-1b9x09d",
@@ -289,7 +385,13 @@
     "description": "Independent research on specific industries, companies, policies, and market structure.",
     "href": "reports/en/2026-08-16_Can_a_GPU_Become_a_Bond_EN.html",
     "translationGroup": "2026-08-16-research-141u5l9",
-    "coverImage": "covers/2026-08-16-research-1b9x09d.webp"
+    "coverImage": "covers/2026-08-16-research-1b9x09d.webp",
+    "tags": [
+      "ai",
+      "cloud-datacenter",
+      "semiconductors"
+    ],
+    "readingMinutes": 12
   },
   {
     "id": "2026-08-16-research-141u5l9",
@@ -306,7 +408,13 @@
     "description": "특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.",
     "summary": "GPU는 채권이 될 수 있을까?\r\n칩 위에 붙은 이자를 알아보자.",
     "href": "reports/비정기리서치_GPU는채권이될수있는가_2026.08.16_수정본.html",
-    "coverImage": "covers/2026-08-16-research-141u5l9.webp"
+    "coverImage": "covers/2026-08-16-research-141u5l9.webp",
+    "tags": [
+      "ai",
+      "cloud-datacenter",
+      "semiconductors"
+    ],
+    "readingMinutes": 11
   },
   {
     "id": "2026-08-15-basics-1cd8c9w",
@@ -322,7 +430,12 @@
     "subtitle": "",
     "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
     "href": "reports/시장을읽는말들_4편_좋은회사가왜좋은주식은아닌가.html",
-    "coverImage": "covers/2026-08-15-basics-1cd8c9w.webp"
+    "coverImage": "covers/2026-08-15-basics-1cd8c9w.webp",
+    "tags": [
+      "policy",
+      "flows"
+    ],
+    "readingMinutes": 8
   },
   {
     "id": "2026-08-14-daily-1yyf33y",
@@ -340,7 +453,13 @@
     "summary": "The Main Current Holds",
     "href": "reports/en/2026-08-14_KOSPI_Daily_Report_EN_Benchmark.html",
     "translationGroup": "2026-08-14-daily-dqoisk",
-    "coverImage": "covers/2026-08-14-daily-1yyf33y.webp"
+    "coverImage": "covers/2026-08-14-daily-1yyf33y.webp",
+    "tags": [
+      "fx",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 13
   },
   {
     "id": "2026-08-14-daily-dqoisk",
@@ -356,7 +475,13 @@
     "subtitle": "",
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "href": "reports/8월 14일 주식리포트_커버통합.html",
-    "coverImage": "covers/2026-08-14-daily-dqoisk.webp"
+    "coverImage": "covers/2026-08-14-daily-dqoisk.webp",
+    "tags": [
+      "fx",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 12
   },
   {
     "id": "2026-08-13-basics-1cmfur2",
@@ -372,7 +497,13 @@
     "subtitle": "",
     "description": "A clear guide to the essential concepts behind markets, economics, and investing.",
     "href": "reports/en/Market_Language_Ep3_How_US_Data_Reaches_Korea.html",
-    "coverImage": "covers/2026-08-13-basics-1cmfur2.webp"
+    "coverImage": "covers/2026-08-13-basics-1cmfur2.webp",
+    "tags": [
+      "rates",
+      "fx",
+      "fed"
+    ],
+    "readingMinutes": 9
   },
   {
     "id": "2026-08-13-basics-1qofo4f",
@@ -388,7 +519,13 @@
     "subtitle": "",
     "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
     "href": "reports/시장을읽는말들_3편_미국의숫자는어떻게한국에도착하는가.html",
-    "coverImage": "covers/2026-08-13-basics-1qofo4f.webp"
+    "coverImage": "covers/2026-08-13-basics-1qofo4f.webp",
+    "tags": [
+      "rates",
+      "fx",
+      "fed"
+    ],
+    "readingMinutes": 8
   },
   {
     "id": "2026-08-13-daily-1nnspvd",
@@ -406,7 +543,13 @@
     "summary": "The Index Rose Like the Tide533 Left in the Mudflats",
     "href": "reports/en/2026-08-13_KOSPI_Daily_Report_EN_Benchmark (1).html",
     "translationGroup": "2026-08-13-daily-1tgqr3y",
-    "coverImage": "covers/2026-08-13-daily-1nnspvd.webp"
+    "coverImage": "covers/2026-08-13-daily-1nnspvd.webp",
+    "tags": [
+      "flows",
+      "futures",
+      "semiconductors"
+    ],
+    "readingMinutes": 12
   },
   {
     "id": "2026-08-13-daily-1tgqr3y",
@@ -423,7 +566,13 @@
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "summary": "외국인 매수가 삼성전자·SK하이닉스에 집중되며 코스피는 3.56% 급등했지만, 오른 종목은 37%에 그쳤다. 대형 반도체가 끌어올린 지수와 더 약해진 시장 폭의 간극을 살펴본다",
     "href": "reports/8월 13일 주식리포트_커버통합.html",
-    "coverImage": "covers/2026-08-13-daily-1tgqr3y.webp"
+    "coverImage": "covers/2026-08-13-daily-1tgqr3y.webp",
+    "tags": [
+      "flows",
+      "futures",
+      "semiconductors"
+    ],
+    "readingMinutes": 12
   },
   {
     "id": "2026-08-10-basics-1rhknmt",
@@ -440,7 +589,12 @@
     "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
     "href": "reports/시장을읽는말들_2편_현물과선물이엇갈릴때.html",
     "coverImage": "covers/2026-08-10-basics-1rhknmt.webp",
-    "updatedAt": "2026-08-25T11:09:25.060Z"
+    "updatedAt": "2026-08-25T11:09:25.060Z",
+    "tags": [
+      "futures",
+      "flows"
+    ],
+    "readingMinutes": 6
   },
   {
     "id": "2026-08-12-daily-rk55d0",
@@ -458,7 +612,13 @@
     "summary": "Two Semiconductor Giants,Waiting to Revisit Their Highs",
     "href": "reports/en/2026-08-12_KOSPI_Daily_Report_EN_Benchmark.html",
     "translationGroup": "2026-08-12-daily-15kwiwr",
-    "coverImage": "covers/2026-08-12-daily-rk55d0.webp"
+    "coverImage": "covers/2026-08-12-daily-rk55d0.webp",
+    "tags": [
+      "rates",
+      "fx",
+      "flows"
+    ],
+    "readingMinutes": 11
   },
   {
     "id": "2026-08-12-daily-15kwiwr",
@@ -476,7 +636,13 @@
     "href": "reports/8월 12일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-08-12-daily-15kwiwr.webp",
     "updatedAt": "2026-08-13T14:36:30.744Z",
-    "summary": "외국인 2.84조 원이 삼성전자·SK하이닉스 등 대형 IT에 집중되며 코스피는 3.68% 급등했다. 하지만 오른 종목은 절반에도 못 미쳐, 대형 반도체가 끌어올린 지수와 시장 전체의 온도차를 살펴본다."
+    "summary": "외국인 2.84조 원이 삼성전자·SK하이닉스 등 대형 IT에 집중되며 코스피는 3.68% 급등했다. 하지만 오른 종목은 절반에도 못 미쳐, 대형 반도체가 끌어올린 지수와 시장 전체의 온도차를 살펴본다.",
+    "tags": [
+      "rates",
+      "fx",
+      "flows"
+    ],
+    "readingMinutes": 11
   },
   {
     "id": "2026-08-11-basics-1bmtot3",
@@ -492,7 +658,12 @@
     "subtitle": "",
     "description": "A clear guide to the essential concepts behind markets, economics, and investing.",
     "href": "reports/en/Market_Language_Ep2_When_Cash_and_Futures_Diverge.html",
-    "coverImage": "covers/2026-08-11-basics-1bmtot3.webp"
+    "coverImage": "covers/2026-08-11-basics-1bmtot3.webp",
+    "tags": [
+      "futures",
+      "flows"
+    ],
+    "readingMinutes": 7
   },
   {
     "id": "2026-08-11-daily-yxlmio",
@@ -510,7 +681,13 @@
     "summary": "One ship on the ripples.The waters ahead are still dark.",
     "href": "reports/en/2026-08-11_KOSPI_Daily_Report_EN_Benchmark.html",
     "translationGroup": "2026-08-11-daily-12vx8a7",
-    "coverImage": "covers/2026-08-11-daily-yxlmio.webp"
+    "coverImage": "covers/2026-08-11-daily-yxlmio.webp",
+    "tags": [
+      "flows",
+      "semiconductors",
+      "fx"
+    ],
+    "readingMinutes": 16
   },
   {
     "id": "2026-08-11-basics-1e0xeuz",
@@ -524,7 +701,12 @@
     "title": "주가는 누가 움직이는가",
     "subtitle": "",
     "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
-    "href": "reports/시장을읽는말들_1편_주가는누가움직이는가.html"
+    "href": "reports/시장을읽는말들_1편_주가는누가움직이는가.html",
+    "tags": [
+      "futures",
+      "flows"
+    ],
+    "readingMinutes": 5
   },
   {
     "id": "2026-08-11-daily-12vx8a7",
@@ -540,7 +722,13 @@
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "href": "reports/8월 11일 주식리포트_커버통합.html",
     "updatedAt": "2026-08-11T15:03:02.337Z",
-    "coverImage": "covers/2026-08-11-daily-12vx8a7.png"
+    "coverImage": "covers/2026-08-11-daily-12vx8a7.png",
+    "tags": [
+      "flows",
+      "semiconductors",
+      "fx"
+    ],
+    "readingMinutes": 15
   },
   {
     "id": "2026-08-10-basics-f7gadj",
@@ -556,7 +744,12 @@
     "subtitle": "",
     "description": "A clear guide to the essential concepts behind markets, economics, and investing.",
     "href": "reports/en/Market_Language_Ep1_Who_Moves_Stock_Prices.html",
-    "coverImage": "covers/2026-08-10-basics-f7gadj.webp"
+    "coverImage": "covers/2026-08-10-basics-f7gadj.webp",
+    "tags": [
+      "flows",
+      "futures"
+    ],
+    "readingMinutes": 6
   },
   {
     "id": "2026-08-10-daily-1bb8z4p",
@@ -574,7 +767,13 @@
     "summary": "With Samsung Electronics and SK Hynixtaking a breather,KOSDAQ and small- and mid-cap stocksbroadened the market first.",
     "href": "reports/en/2026-08-10_KOSPI_Daily_Report_EN_Benchmark.html",
     "translationGroup": "2026-08-10-weekly-1rva1f6",
-    "coverImage": "covers/2026-08-10-daily-1bb8z4p.webp"
+    "coverImage": "covers/2026-08-10-daily-1bb8z4p.webp",
+    "tags": [
+      "fx",
+      "rates",
+      "flows"
+    ],
+    "readingMinutes": 11
   },
   {
     "id": "2026-08-10-weekly-hez6ok",
@@ -591,7 +790,13 @@
     "description": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
     "href": "reports/en/2026-08-10_08-14_Korea_Weekly_Report_EN.html",
     "translationGroup": "2026-08-10-weekly-1rva1f6",
-    "coverImage": "covers/2026-08-10-weekly-hez6ok.webp"
+    "coverImage": "covers/2026-08-10-weekly-hez6ok.webp",
+    "tags": [
+      "fed",
+      "rates",
+      "fx"
+    ],
+    "readingMinutes": 25
   },
   {
     "id": "2026-08-10-weekly-1rva1f6",
@@ -607,7 +812,13 @@
     "subtitle": "",
     "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
     "href": "reports/8월 2주차 위클리 분석.html",
-    "coverImage": "covers/2026-08-10-weekly-1rva1f6.webp"
+    "coverImage": "covers/2026-08-10-weekly-1rva1f6.webp",
+    "tags": [
+      "fed",
+      "rates",
+      "fx"
+    ],
+    "readingMinutes": 22
   },
   {
     "id": "2026-08-10-daily-1evguss",
@@ -622,7 +833,13 @@
     "subtitle": "",
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "href": "reports/8월 10일 주식리포트_커버통합.html",
-    "coverImage": "covers/2026-08-10-daily-1evguss.webp"
+    "coverImage": "covers/2026-08-10-daily-1evguss.webp",
+    "tags": [
+      "fx",
+      "rates",
+      "flows"
+    ],
+    "readingMinutes": 11
   },
   {
     "id": "2026-08-09-research-12sm7v2",
@@ -639,7 +856,13 @@
     "description": "Independent research on specific industries, companies, policies, and market structure.",
     "href": "reports/en/2026-08-09_Sovereign_AI_Who_Holds_the_Keys_EN.html",
     "translationGroup": "2026-08-09-sovereign-ai",
-    "coverImage": "covers/2026-08-09-research-12sm7v2.webp"
+    "coverImage": "covers/2026-08-09-research-12sm7v2.webp",
+    "tags": [
+      "ai",
+      "policy",
+      "geopolitics"
+    ],
+    "readingMinutes": 17
   },
   {
     "id": "2026-08-09-sovereign-ai",
@@ -655,7 +878,13 @@
     "description": "모델·컴퓨트·데이터·운영권 가운데 어느 층을 가져야 ‘우리 AI’가 되는지를 국가·기업 사례로 살펴본 비정기 리서치.",
     "href": "reports/비정기리서치_소버린AI_누가열쇠를쥐는가_2026.08.09_커버통합.html",
     "coverImage": "covers/2026-08-09-sovereign-ai.webp",
-    "featured": true
+    "featured": true,
+    "tags": [
+      "ai",
+      "policy",
+      "geopolitics"
+    ],
+    "readingMinutes": 16
   },
   {
     "id": "2026-08-07-daily-cjwe8f",
@@ -673,7 +902,13 @@
     "summary": "The two market leaders diverged,and the index held its ground in between.",
     "href": "reports/en/8월 7일 주식리포트_커버통합_en.html",
     "translationGroup": "2026-08-07-daily",
-    "coverImage": "covers/2026-08-07-daily-cjwe8f.webp"
+    "coverImage": "covers/2026-08-07-daily-cjwe8f.webp",
+    "tags": [
+      "fx",
+      "flows",
+      "futures"
+    ],
+    "readingMinutes": 17
   },
   {
     "id": "2026-08-07-daily",
@@ -689,7 +924,13 @@
     "description": "당일 시장의 핵심 서사, 수급, 업종, 매크로와 다음 거래일 시나리오를 정리한 데일리 리포트.",
     "href": "reports/8월 7일 주식리포트_커버통합.html",
     "updatedAt": "2026-08-12T08:55:08.003Z",
-    "summary": "대형 반도체가 흔들린 자리를 2차전지와 정유가 메웠고, 기관은 닷새 만에 현물 매수로 돌아섰다. 지수는 하락했지만 상승 종목이 더 많았던 장에서 칩에서 다른 대형주로 이동한 자금의 방향을 추적한다."
+    "summary": "대형 반도체가 흔들린 자리를 2차전지와 정유가 메웠고, 기관은 닷새 만에 현물 매수로 돌아섰다. 지수는 하락했지만 상승 종목이 더 많았던 장에서 칩에서 다른 대형주로 이동한 자금의 방향을 추적한다.",
+    "tags": [
+      "fx",
+      "flows",
+      "futures"
+    ],
+    "readingMinutes": 14
   },
   {
     "id": "2026-08-06-daily-1d9zin0",
@@ -706,7 +947,13 @@
     "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
     "href": "reports/en/8월 6일 주식리포트_커버통합_en.html",
     "translationGroup": "2026-08-06-daily-94w8bi",
-    "coverImage": "covers/2026-08-06-daily-1d9zin0.webp"
+    "coverImage": "covers/2026-08-06-daily-1d9zin0.webp",
+    "tags": [
+      "semiconductors",
+      "flows",
+      "rates"
+    ],
+    "readingMinutes": 17
   },
   {
     "id": "2026-08-06-daily-94w8bi",
@@ -724,7 +971,13 @@
     "href": "reports/8월 6일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-08-06-daily-94w8bi.webp",
     "updatedAt": "2026-08-13T14:41:25.927Z",
-    "summary": "삼성전자·SK하이닉스 급락으로 코스피는 4.58% 밀렸지만, 오른 종목은 493개로 하락 종목보다 많았다. 대형 반도체에 집중된 충격과 외국인 3.33조 원 현물 매도·선물 매수 전환이 함께 나타난 하루를 살펴본다"
+    "summary": "삼성전자·SK하이닉스 급락으로 코스피는 4.58% 밀렸지만, 오른 종목은 493개로 하락 종목보다 많았다. 대형 반도체에 집중된 충격과 외국인 3.33조 원 현물 매도·선물 매수 전환이 함께 나타난 하루를 살펴본다",
+    "tags": [
+      "semiconductors",
+      "flows",
+      "rates"
+    ],
+    "readingMinutes": 15
   },
   {
     "id": "2026-08-24-daily-og5aig",
@@ -742,7 +995,13 @@
     "summary": "As oil prices and interest rates cool.Returning hands.",
     "href": "reports/en/8월 5일 주식리포트_커버통합_en.html",
     "translationGroup": "2026-08-05-daily-oq9vps",
-    "coverImage": "covers/2026-08-24-daily-og5aig.webp"
+    "coverImage": "covers/2026-08-24-daily-og5aig.webp",
+    "tags": [
+      "futures",
+      "flows",
+      "fx"
+    ],
+    "readingMinutes": 17
   },
   {
     "id": "2026-08-05-daily-oq9vps",
@@ -758,7 +1017,13 @@
     "subtitle": "",
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "href": "reports/8월 5일 주식리포트_커버통합.html",
-    "coverImage": "covers/2026-08-05-daily-oq9vps.webp"
+    "coverImage": "covers/2026-08-05-daily-oq9vps.webp",
+    "tags": [
+      "futures",
+      "flows",
+      "fx"
+    ],
+    "readingMinutes": 15
   },
   {
     "id": "2026-08-24-daily-1nyohtr",
@@ -776,7 +1041,13 @@
     "summary": "Large-cap semiconductors stalled,while the rest of the market drove the index recovery.",
     "href": "reports/en/8월 4일 주식리포트_커버통합_en.html",
     "translationGroup": "2026-08-04-daily-wfcoi4",
-    "coverImage": "covers/2026-08-24-daily-1nyohtr.webp"
+    "coverImage": "covers/2026-08-24-daily-1nyohtr.webp",
+    "tags": [
+      "futures",
+      "flows",
+      "fx"
+    ],
+    "readingMinutes": 16
   },
   {
     "id": "2026-08-04-daily-wfcoi4",
@@ -793,7 +1064,13 @@
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "summary": "장중 2.83%까지 밀렸던 코스피는 오후 들어 낙폭을 모두 되돌렸고, 219개 테마 중 218개가 상승했다. 대형 반도체가 멈춘 사이 넓어진 상승 폭이 지수를 다시 끌어올린 하루를 살펴본다.",
     "href": "reports/8월 4일 주식리포트_커버통합.html",
-    "coverImage": "covers/2026-08-04-daily-wfcoi4.webp"
+    "coverImage": "covers/2026-08-04-daily-wfcoi4.webp",
+    "tags": [
+      "futures",
+      "flows",
+      "fx"
+    ],
+    "readingMinutes": 14
   },
   {
     "id": "2026-08-03-weekly-yqni0t",
@@ -810,7 +1087,13 @@
     "description": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
     "href": "reports/en/2026-08-03_08-07_Korea_Weekly_Report_EN.html",
     "translationGroup": "2026-08-week1-weekly",
-    "coverImage": "covers/2026-08-03-weekly-yqni0t.webp"
+    "coverImage": "covers/2026-08-03-weekly-yqni0t.webp",
+    "tags": [
+      "fed",
+      "rates",
+      "flows"
+    ],
+    "readingMinutes": 24
   },
   {
     "id": "2026-08-03-daily-ely1wy",
@@ -827,7 +1110,13 @@
     "description": "A daily report on market breadth, investor flows, sectors, and macro drivers.",
     "href": "reports/en/2026-08-03_KOSPI_Daily_Report_EN.html",
     "coverImage": "covers/2026-08-03-daily-ely1wy.webp",
-    "summary": "Two heavyweight stocks dragged the index, while the rest of the market went its own way."
+    "summary": "Two heavyweight stocks dragged the index, while the rest of the market went its own way.",
+    "tags": [
+      "rates",
+      "treasuries",
+      "flows"
+    ],
+    "readingMinutes": 12
   },
   {
     "id": "2026-08-03-daily-181n1pj",
@@ -843,7 +1132,13 @@
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "href": "reports/8월 3일 주식리포트_커버통합.html",
     "updatedAt": "2026-08-12T08:54:11.084Z",
-    "summary": "대형 반도체 급락과 외국인 매도로 코스피는 크게 밀렸지만, 코스닥은 오르고 상승 종목도 더 많았다. 지수의 급락과 시장 전체의 방향이 갈라진 이유, 그리고 대형 메모리 밖 성장주로 이동한 자금을 살펴본다"
+    "summary": "대형 반도체 급락과 외국인 매도로 코스피는 크게 밀렸지만, 코스닥은 오르고 상승 종목도 더 많았다. 지수의 급락과 시장 전체의 방향이 갈라진 이유, 그리고 대형 메모리 밖 성장주로 이동한 자금을 살펴본다",
+    "tags": [
+      "rates",
+      "treasuries",
+      "flows"
+    ],
+    "readingMinutes": 12
   },
   {
     "id": "2026-08-week1-weekly",
@@ -858,7 +1153,13 @@
     "subtitle": "2026.08.03–08.07",
     "description": "지난주 시장을 복기하고 다음 주 변수와 주도 업종의 조건을 정리한 주간 리포트.",
     "href": "reports/8월 1주차 위클리 분석.html",
-    "coverImage": "covers/2026-08-week1-weekly.webp"
+    "coverImage": "covers/2026-08-week1-weekly.webp",
+    "tags": [
+      "fed",
+      "rates",
+      "flows"
+    ],
+    "readingMinutes": 23
   },
   {
     "id": "2026-07-31-daily-lr4ely",
@@ -875,7 +1176,13 @@
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "summary": "외국인 7.24조 원 매수와 반도체 전면 반등으로 코스피는 사흘간 낙폭의 86%를 하루 만에 되돌렸고, SK하이닉스는 상한가를 기록했다. 지수·시장 폭·수급이 함께 반등한 가운데, 급등 뒤에도 남은 선물 베이시스의 불안을 살펴본다.",
     "href": "reports/7월 31일 주식리포트_커버통합.html",
-    "coverImage": "covers/2026-07-31-daily-lr4ely.webp"
+    "coverImage": "covers/2026-07-31-daily-lr4ely.webp",
+    "tags": [
+      "semiconductors",
+      "flows",
+      "fx"
+    ],
+    "readingMinutes": 12
   },
   {
     "id": "2026-07-30-daily-10k99v5",
@@ -892,7 +1199,13 @@
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "summary": "삼성전자 사상 최대 실적과 외국인 1.34조 원 매수 전환에도 코스피는 장중 6,000 문턱에서 밀려 상승분을 모두 반납했다. 지수와 달리 상승 종목은 613개로 넓어진 가운데, 좋은 실적이 확인되는 순간 차익 매물이 나온 이유를 살펴본다.",
     "href": "reports/7월 30일 주식리포트_커버통합.html",
-    "coverImage": "covers/2026-07-30-daily-10k99v5.webp"
+    "coverImage": "covers/2026-07-30-daily-10k99v5.webp",
+    "tags": [
+      "fed",
+      "rates",
+      "flows"
+    ],
+    "readingMinutes": 10
   },
   {
     "id": "2026-07-29-research-4eg0o9",
@@ -910,7 +1223,13 @@
     "href": "reports/en/2026-07-29_Special_Research_Two_Illusions_EN.html",
     "translationGroup": "2026-07-29-research-m2ef0m",
     "coverImage": "covers/2026-07-29-research-4eg0o9.webp",
-    "summary": "The first mistakes two different metrics for the same number; the second confuses the cause with the amplifier. Beneath the visible flows, we read the submerged structure."
+    "summary": "The first mistakes two different metrics for the same number; the second confuses the cause with the amplifier. Beneath the visible flows, we read the submerged structure.",
+    "tags": [
+      "stablecoins",
+      "crypto",
+      "fx"
+    ],
+    "readingMinutes": 13
   },
   {
     "id": "2026-07-29-daily-mo0iu1",
@@ -927,7 +1246,12 @@
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "summary": "SK하이닉스가 사상 최대 실적과 76% 영업이익률을 발표했지만 주가는 9.61% 하락했고, 코스피는 이틀 연속 서킷브레이커를 맞았다. 이익의 크기보다 지속성과 주주환원으로 시장의 질문이 옮겨간 가운데, 기관 3.16조 원 매수가 저점 이후 400포인트를 되돌린 흐름을 살펴본다.",
     "href": "reports/7월 29일 주식리포트.html",
-    "coverImage": "covers/2026-07-29-daily-mo0iu1.webp"
+    "coverImage": "covers/2026-07-29-daily-mo0iu1.webp",
+    "tags": [
+      "semiconductors",
+      "flows"
+    ],
+    "readingMinutes": 12
   },
   {
     "id": "2026-07-29-research-m2ef0m",
@@ -943,7 +1267,13 @@
     "subtitle": "",
     "description": "특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.",
     "summary": "외국인은 대규모로 팔았는데 보유비중은 오르고, 급락의 범인으로 지목된 레버리지는 단독 원인으로 보기 어렵다. 외국인 수급·대형주 쏠림·레버리지 리밸런싱을 따라가며 **숫자 뒤에 숨은 시장 구조**를 살펴본다.",
-    "href": "reports/7월 29일 비정기 리서치_두 개의 착시.html"
+    "href": "reports/7월 29일 비정기 리서치_두 개의 착시.html",
+    "tags": [
+      "stablecoins",
+      "crypto",
+      "fx"
+    ],
+    "readingMinutes": 12
   },
   {
     "id": "2026-07-28-daily-g24k4s",
@@ -960,7 +1290,12 @@
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "summary": "삼성전자·SK하이닉스 급락과 외국인 4.97조 원 매도로 코스피는 10.84% 무너졌고 양시장 서킷브레이커가 발동했다. 반도체 재평가가 시총 집중도·레버리지 구조와 겹치며 79개 업종 전부로 충격이 번진 하루를 분석한다.",
     "href": "reports/7월 28일 주식리포트_커버통합.html",
-    "coverImage": "covers/2026-07-28-daily-g24k4s.webp"
+    "coverImage": "covers/2026-07-28-daily-g24k4s.webp",
+    "tags": [
+      "rates",
+      "flows"
+    ],
+    "readingMinutes": 12
   },
   {
     "id": "2026-07-27-daily-1og5hu",
@@ -977,7 +1312,12 @@
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "summary": "외국인 2.88조 원 매도가 이어졌지만 기관과 개인의 흡수가 넓어지며 코스피는 0.97% 반등했다. 유가 하락과 AI 투자 재료가 지수를 밀어 올린 가운데, 가격 회복과 아직 복구되지 않은 외국인 수급의 간극을 살펴본다.",
     "href": "reports/7월 27일 주식리포트_커버통합.html",
-    "coverImage": "covers/2026-07-27-daily-1og5hu.webp"
+    "coverImage": "covers/2026-07-27-daily-1og5hu.webp",
+    "tags": [
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 10
   },
   {
     "id": "2026-08-12-weekly-1macab6",
@@ -994,7 +1334,13 @@
     "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
     "summary": "연준은 금리를 동결했지만 장기금리는 올랐고, 빅테크의 AI 투자는 매출과 비용을 동시에 키웠다. 메모리 재고가 줄어든 가운데 애플과 삼성전자·SK하이닉스·마이크론의 협상력이 어떻게 달라졌는지, 다음 주 금리와 전기전자 수급까지 연결해 살펴본다.",
     "href": "reports/7월 5주차 위클리 분석.html",
-    "coverImage": "covers/2026-08-12-weekly-1macab6.webp"
+    "coverImage": "covers/2026-08-12-weekly-1macab6.webp",
+    "tags": [
+      "rates",
+      "fed",
+      "treasuries"
+    ],
+    "readingMinutes": 25
   },
   {
     "id": "2026-07-20-weekly-1u5gndk",
@@ -1011,7 +1357,13 @@
     "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
     "summary": "나흘간 외국인 매수로 반등하던 코스피는 금요일 5.72% 급락하며 흐름이 뒤집혔다. FOMC·SK하이닉스·빅테크 실적을 통해 좋은 실적이 다시 주가를 움직일 수 있는지, 그리고 메모리·전력 인프라로 돈이 향할 조건을 점검한다.",
     "href": "reports/7월 4주차 위클리 분석_에디토리얼형.html",
-    "coverImage": "covers/2026-07-20-weekly-1u5gndk.webp"
+    "coverImage": "covers/2026-07-20-weekly-1u5gndk.webp",
+    "tags": [
+      "semiconductors",
+      "flows",
+      "rates"
+    ],
+    "readingMinutes": 18
   },
   {
     "id": "2026-07-13-weekly-um5mnf",
@@ -1027,7 +1379,13 @@
     "subtitle": "",
     "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
     "href": "reports/7월 2주차 위클리 분석1.html",
-    "coverImage": "covers/2026-07-13-weekly-um5mnf.png"
+    "coverImage": "covers/2026-07-13-weekly-um5mnf.png",
+    "tags": [
+      "rates",
+      "fed",
+      "treasuries"
+    ],
+    "readingMinutes": 11
   },
   {
     "id": "2026-07-06-weekly-a0ek97",
@@ -1044,6 +1402,12 @@
     "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
     "summary": "외국인 매도는 크게 줄었는데 코스피 낙폭은 오히려 커졌다. 개인의 흡수가 멈춘 날 급락하고 기관이 들어오자 반등한 흐름을 통해, ‘누가 파느냐’보다 ‘누가 받아주느냐’가 중요해진 수급 구조와 다음 주 관문을 짚는다.",
     "href": "reports/7월 1주차 위클리 분석.html",
-    "coverImage": "covers/2026-07-06-weekly-a0ek97.png"
+    "coverImage": "covers/2026-07-06-weekly-a0ek97.png",
+    "tags": [
+      "rates",
+      "fx",
+      "geopolitics"
+    ],
+    "readingMinutes": 10
   }
 ]

@@ -46,15 +46,19 @@ function githubMock(existingPosts = [], { searchIndex = null, searchIndexFail = 
   return calls;
 }
 
-function publishRequest({ type = 'daily', cover = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary } = {}, url = 'https://snowshagal.com/api/publish') {
+function publishRequest({ type = 'daily', cover = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, tags = null } = {}, url = 'https://snowshagal.com/api/publish') {
   const form = new FormData();
-  form.append('file', new File(['<!doctype html><html><body>report</body></html>'], 'report.html', { type: 'text/html' }));
+  form.append('file', new File(['<!doctype html><html><body>report content with some words</body></html>'], 'report.html', { type: 'text/html' }));
   form.append('type', type);
   form.append('reportDate', reportDate);
   form.append('title', type === 'basics' ? '시장을 읽는 기본' : '테스트 리포트');
   form.append('subtitle', '테스트 부제');
   form.append('description', '테스트 설명');
   if (summary !== undefined) form.append('summary', summary);
+  if (tags !== null) {
+    if (Array.isArray(tags)) tags.forEach(t => form.append('tags', t));
+    else form.append('tags', tags);
+  }
   form.append('filename', `${type}-report.html`);
   form.append('lang', lang);
   if (translationGroup) form.append('translationGroup', translationGroup);
@@ -287,6 +291,77 @@ test('publish rejects duplicate IDs in search index with SEARCH_INDEX_INTEGRITY_
     assert.equal(data.error, 'SEARCH_INDEX_INTEGRITY_FAILED');
     assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
     assert.equal(calls.some(call => call.path.endsWith('/git/commits')), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('publish validates canonical tags and rejects unknown tags', async () => {
+  const calls = githubMock();
+  try {
+    const { response, data } = await runPublish({ tags: ['rates', 'invalid_random_tag'] });
+    assert.equal(response.status, 400);
+    assert.equal(data.error, 'BAD_TAGS');
+    assert.equal(calls.length, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('publish automatically calculates readingMinutes and synchronizes tags in posts and searchIndex', async () => {
+  const calls = githubMock();
+  try {
+    const { response, data } = await runPublish({ tags: ['rates', 'semiconductors'] });
+    assert.equal(response.status, 200);
+
+    const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+    const postsEntry = tree.find(entry => entry.path === 'data/posts.json');
+    const searchIdxEntry = tree.find(entry => entry.path === 'data/search-index.json');
+
+    const posts = JSON.parse(postsEntry.content);
+    const searchIndex = JSON.parse(searchIdxEntry.content);
+
+    assert.equal(posts.length, 1);
+    assert.equal(searchIndex.length, 1);
+
+    assert.deepEqual(posts[0].tags, ['rates', 'semiconductors']);
+    assert.deepEqual(searchIndex[0].tags, ['rates', 'semiconductors']);
+    assert.equal(posts[0].readingMinutes, 1);
+    assert.equal(searchIndex[0].readingMinutes, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('publish inherits canonical tags from translation counterpart when not specified', async () => {
+  const existingPost = {
+    id: '2026-08-10-daily-ko-item',
+    type: 'daily',
+    lang: 'ko',
+    reportDate: '2026-08-10',
+    translationGroup: 'daily-2026-08-10',
+    title: '한국어 원본',
+    tags: ['flows', 'rates'],
+    readingMinutes: 3,
+    href: 'reports/ko.html'
+  };
+  const calls = githubMock([existingPost]);
+  try {
+    const { response, data } = await runPublish({
+      lang: 'en',
+      reportDate: '2026-08-10',
+      translationGroup: 'daily-2026-08-10'
+      // tags is omitted -> should inherit from existingPost
+    });
+    assert.equal(response.status, 200);
+
+    const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+    const postsEntry = tree.find(entry => entry.path === 'data/posts.json');
+    const posts = JSON.parse(postsEntry.content);
+
+    const enPost = posts.find(p => p.lang === 'en');
+    assert.ok(enPost);
+    assert.deepEqual(enPost.tags, ['flows', 'rates']);
   } finally {
     globalThis.fetch = originalFetch;
   }
