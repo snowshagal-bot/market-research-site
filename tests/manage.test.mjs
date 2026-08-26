@@ -419,7 +419,7 @@ test('manage recalculates readingMinutes when replacement HTML is uploaded', asy
   const searchIndex = [{ id: post.id, lang: 'ko', category: 'daily', title: post.title, date: '2026-08-11', tags: ['flows'], readingMinutes: 2 }];
   const calls = githubMock([post], { searchIndex });
 
-  const largeHtml = `<!doctype html><html><body><main><p>${'가'.repeat(2500)}</p></main></body></html>`; // 2500 / 500 = 5 min
+  const largeHtml = `<!doctype html><html><body><main><p>${'가'.repeat(6000)}</p></main></body></html>`; // 6000 / 600 = 10 raw min -> 10 - 5 = 5 min
   const file = new File([largeHtml], 'report.html', { type: 'text/html' });
 
   try {

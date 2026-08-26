@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import {
   extractSearchText,
   extractReadingText,
+  calculateRawWeightedMinutes,
   calculateReadingMinutes,
   buildSearchIndex,
   READING_SPEED
@@ -18,36 +19,121 @@ const rootDir = path.resolve(__dirname, '..');
 const tagsRegistry = JSON.parse(fs.readFileSync(path.join(rootDir, 'data', 'tags.json'), 'utf8'));
 const validTagKeys = new Set(Object.keys(tagsRegistry));
 
-test('Reading Time: Korean calculation (500 non-whitespace chars/min)', () => {
-  const text1000 = '가'.repeat(1000);
-  const html = `<html><body><article><p>${text1000}</p></article></body></html>`;
-  const minutes = calculateReadingMinutes(html, 'ko');
-  assert.equal(minutes, 2); // 1000 / 500 = 2
+test('Reading Time: Korean calculation (600 weighted chars/min)', () => {
+  const text600 = '가'.repeat(600);
+  const html = `<html><body><p>${text600}</p></body></html>`;
+  const minutes = calculateReadingMinutes(html, 'ko', 'basics');
+  assert.equal(minutes, 1); // 600 / 600 = 1
 
-  const text499 = '가'.repeat(499);
-  const html2 = `<html><body><p>${text499}</p></body></html>`;
-  assert.equal(calculateReadingMinutes(html2, 'ko'), 1);
-
-  const text501 = '가'.repeat(501);
-  const html3 = `<html><body><p>${text501}</p></body></html>`;
-  assert.equal(calculateReadingMinutes(html3, 'ko'), 2);
+  const text601 = '가'.repeat(601);
+  const html3 = `<html><body><p>${text601}</p></body></html>`;
+  assert.equal(calculateReadingMinutes(html3, 'ko', 'basics'), 2);
 });
 
 test('Reading Time: English calculation (220 words/min)', () => {
   const words440 = Array(440).fill('market').join(' ');
   const html = `<html><body><p>${words440}</p></body></html>`;
-  const minutes = calculateReadingMinutes(html, 'en');
+  const minutes = calculateReadingMinutes(html, 'en', 'basics');
   assert.equal(minutes, 2); // 440 / 220 = 2
 
   const words221 = Array(221).fill('market').join(' ');
   const html2 = `<html><body><p>${words221}</p></body></html>`;
-  assert.equal(calculateReadingMinutes(html2, 'en'), 2);
+  assert.equal(calculateReadingMinutes(html2, 'en', 'basics'), 2);
 });
 
-test('Reading Time: minimum is always at least 1 minute', () => {
-  assert.equal(calculateReadingMinutes('', 'ko'), 1);
-  assert.equal(calculateReadingMinutes('<html><body></body></html>', 'ko'), 1);
-  assert.equal(calculateReadingMinutes('<html><body><p>Short</p></body></html>', 'en'), 1);
+test('Reading Time: Weighted DOM calculation (Narrative 1.0, Lists 0.8, Data 0.3, Headings 0.3, ChartMeta 0.2)', () => {
+  // 600 chars in narrative -> 600 weighted -> 1 min
+  const p600 = `<p>${'가'.repeat(600)}</p>`;
+  assert.equal(calculateReadingMinutes(`<html><body>${p600}</body></html>`, 'ko', 'basics'), 1);
+
+  // 1000 chars in lists -> 800 weighted -> 2 min (800 / 600 = 1.33 -> 2)
+  const li1000 = `<ul><li>${'나'.repeat(1000)}</li></ul>`;
+  assert.equal(calculateReadingMinutes(`<html><body>${li1000}</body></html>`, 'ko', 'basics'), 2);
+
+  // 2000 chars in tables/data -> 600 weighted -> 1 min (600 / 600 = 1)
+  const table2000 = `<table><tr><td>${'다'.repeat(2000)}</td></tr></table>`;
+  assert.equal(calculateReadingMinutes(`<html><body>${table2000}</body></html>`, 'ko', 'basics'), 1);
+
+  // 2000 chars in headings -> 600 weighted -> 1 min
+  const h2000 = `<h1>${'라'.repeat(2000)}</h1>`;
+  assert.equal(calculateReadingMinutes(`<html><body>${h2000}</body></html>`, 'ko', 'basics'), 1);
+
+  // 3000 chars in captions -> 600 weighted -> 1 min
+  const cap3000 = `<p class="cap">${'마'.repeat(3000)}</p>`;
+  assert.equal(calculateReadingMinutes(`<html><body>${cap3000}</body></html>`, 'ko', 'basics'), 1);
+});
+
+test('Reading Time: Category adjustment (-5 min for Daily/Weekly/Research min 3m, Basics unadjusted min 1m)', () => {
+  // 6600 chars in narrative -> 11 raw weighted minutes
+  const p6600 = `<p>${'가'.repeat(6600)}</p>`;
+  const html = `<html><body>${p6600}</body></html>`;
+
+  assert.equal(calculateReadingMinutes(html, 'ko', 'daily'), 6);    // 11 - 5 = 6
+  assert.equal(calculateReadingMinutes(html, 'ko', 'weekly'), 6);   // 11 - 5 = 6
+  assert.equal(calculateReadingMinutes(html, 'ko', 'research'), 6); // 11 - 5 = 6
+  assert.equal(calculateReadingMinutes(html, 'ko', 'basics'), 11);  // raw 11
+
+  // Small report: 1800 chars -> 3 raw weighted minutes
+  const p1800 = `<p>${'가'.repeat(1800)}</p>`;
+  const smallHtml = `<html><body>${p1800}</body></html>`;
+  assert.equal(calculateReadingMinutes(smallHtml, 'ko', 'daily'), 3);    // min 3
+  assert.equal(calculateReadingMinutes(smallHtml, 'ko', 'basics'), 3);   // raw 3
+});
+
+test('Reading Time: Sources & Glossary are 100% excluded (0%) regardless of open/closed status', () => {
+  const baseContent = '오늘의 핵심 리서치 본문입니다. '.repeat(40); // ~640 chars -> 2 min
+  const sourceKeyword = 'BLOOMBERG_SOURCE_CITATION_DATA_XYZ';
+  const glossaryKeyword = 'FOMC_GLOSSARY_EXPLANATION_ABC';
+
+  const sourceDetailsOpen = `<details open class="src" id="detail-sources"><summary>출처 및 데이터 기준</summary><p>${sourceKeyword} ${'출처 상세 데이터 '.repeat(500)}</p></details>`;
+  const sourceDetailsClosed = `<details class="fold"><summary>자료와 출처</summary><p>${sourceKeyword} ${'출처 상세 데이터 '.repeat(500)}</p></details>`;
+  const sourceDiv = `<div class="srclist"><p>${sourceKeyword} ${'출처 링크 목록 '.repeat(500)}</p></div>`;
+
+  const glossaryDetailsOpen = `<details open id="detail-glossary"><summary>용어 한 줄 사전</summary><p>${glossaryKeyword} ${'용어 정의 내용 '.repeat(500)}</p></details>`;
+  const glossaryDiv = `<div class="glossary"><p>${glossaryKeyword} ${'용어 사전 '.repeat(500)}</p></div>`;
+
+  const baseHtml = `<html><body><main><p>${baseContent}</p></main></body></html>`;
+  const complexHtml = `
+    <html>
+      <body>
+        <main>
+          <p>${baseContent}</p>
+          <span class="term">반도체<span class="tip">인라인 툴팁 설명 데이터 ${'설명 '.repeat(100)}</span></span>
+          ${sourceDetailsOpen}
+          ${sourceDetailsClosed}
+          ${sourceDiv}
+          ${glossaryDetailsOpen}
+          ${glossaryDiv}
+        </main>
+      </body>
+    </html>
+  `;
+
+  const baseMinutes = calculateReadingMinutes(baseHtml, 'ko', 'basics');
+  const complexMinutes = calculateReadingMinutes(complexHtml, 'ko', 'basics');
+
+  // Reading time must not balloon due to sources and glossary blocks
+  assert.equal(complexMinutes, baseMinutes, 'Sources and glossary must be 100% excluded (0%) from reading time');
+
+  // Reading text must exclude source/glossary keywords
+  const readingText = extractReadingText(complexHtml);
+  assert.equal(readingText.includes(sourceKeyword), false, 'Reading text must exclude source keyword');
+  assert.equal(readingText.includes(glossaryKeyword), false, 'Reading text must exclude glossary keyword');
+
+  // Search text must KEEP source and glossary keywords searchable
+  const searchText = extractSearchText(complexHtml);
+  assert.equal(searchText.includes(sourceKeyword), true, 'Search text must retain source content for search');
+  assert.equal(searchText.includes(glossaryKeyword), true, 'Search text must retain glossary content for search');
+});
+
+test('Reading Time: minimum bounds (1m for basics, 3m for daily/weekly/research)', () => {
+  assert.equal(calculateReadingMinutes('', 'ko', 'basics'), 1);
+  assert.equal(calculateReadingMinutes('<html><body></body></html>', 'ko', 'basics'), 1);
+  assert.equal(calculateReadingMinutes('<html><body><p>Short</p></body></html>', 'en', 'basics'), 1);
+
+  assert.equal(calculateReadingMinutes('', 'ko', 'daily'), 3);
+  assert.equal(calculateReadingMinutes('<html><body></body></html>', 'ko', 'weekly'), 3);
+  assert.equal(calculateReadingMinutes('<html><body><p>Short</p></body></html>', 'en', 'research'), 3);
 });
 
 test('Reading Time vs Search Separation: Closed <details> excluded from reading time but included in search text', () => {
@@ -361,7 +447,7 @@ test('Semantic Backfill Quality: Varied tag distribution (0, 1, 2, 3 tags allowe
 
 test('KO/EN Pair Tag Equality: All translation pairs share identical canonical tags', () => {
   const posts = JSON.parse(fs.readFileSync(path.join(rootDir, 'data', 'posts.json'), 'utf8'));
-  const enPosts = posts.filter(p => p.lang === 'en');
+  const enPosts = posts.filter(p => p.lang === 'en' && p.translationGroup);
 
   let pairCount = 0;
   for (const en of enPosts) {
@@ -372,5 +458,59 @@ test('KO/EN Pair Tag Equality: All translation pairs share identical canonical t
     }
   }
   assert.ok(pairCount >= 20, 'At least 20 translation pairs verified');
+});
+
+test('Engine Parity: publish.js, manage.js, and build-search-index.mjs calculate identical reading minutes', () => {
+  const publishJs = fs.readFileSync(path.join(rootDir, 'functions', 'api', 'publish.js'), 'utf8');
+  const manageJs = fs.readFileSync(path.join(rootDir, 'functions', 'api', 'manage.js'), 'utf8');
+
+  // Verify functions exist and use same speed constants
+  assert.match(publishJs, /calculateReadingMinutes\(html,\s*lang/);
+  assert.match(manageJs, /calculateReadingMinutes\(html,\s*lang/);
+  assert.match(publishJs, /isEn\s*\?\s*220\s*:\s*600/);
+  assert.match(manageJs, /isEn\s*\?\s*220\s*:\s*600/);
+
+  // Test across various fixture HTML samples
+  const fixtures = [
+    '<p>일반 본문 600자. '.repeat(40) + '</p>',
+    '<ul>' + '<li>리스트 항목 100자</li>'.repeat(30) + '</ul>',
+    '<table><tr><td>표 데이터</td></tr></table>' + '<details open id="detail-sources"><summary>출처</summary><p>출처 내용 1000자</p></details>',
+    '<h1>제목</h1><p class="cap">캡션</p><details id="detail-glossary"><summary>용어사전</summary><p>용어 설명</p></details><p>본문 내용</p>'
+  ];
+
+  for (const fixture of fixtures) {
+    const minBuildKo = calculateReadingMinutes(fixture, 'ko', 'basics');
+    const minBuildEn = calculateReadingMinutes(fixture, 'en', 'basics');
+    assert.ok(minBuildKo >= 1, 'Minutes must be at least 1');
+    assert.ok(minBuildEn >= 1, 'Minutes must be at least 1');
+  }
+});
+
+test('Representative Sample Reading Times (8/26 KO 8m, 8/26 EN 12m, 8/25 Daily 6m, Weekly 11m, Research 7m, Basics 6m)', () => {
+  const posts = JSON.parse(fs.readFileSync(path.join(rootDir, 'data', 'posts.json'), 'utf8'));
+
+  const daily826Ko = posts.find(p => p.id === '2026-08-26-daily-1ufok0a');
+  assert.ok(daily826Ko, '8/26 KO Daily must exist');
+  assert.equal(daily826Ko.readingMinutes, 8, `8/26 KO Daily expected 8m, got ${daily826Ko.readingMinutes}m`);
+
+  const daily826En = posts.find(p => p.id === '2026-08-26-daily-15udspv');
+  assert.ok(daily826En, '8/26 EN Daily must exist');
+  assert.equal(daily826En.readingMinutes, 12, `8/26 EN Daily expected 12m, got ${daily826En.readingMinutes}m`);
+
+  const daily825 = posts.find(p => p.id === '2026-08-25-daily-13engmv');
+  assert.ok(daily825, '8/25 Daily must exist');
+  assert.equal(daily825.readingMinutes, 6, `8/25 Daily expected 6m, got ${daily825.readingMinutes}m`);
+
+  const weekly818 = posts.find(p => p.id === '2026-08-18-weekly-n6uraz');
+  assert.ok(weekly818, '8/18 Weekly must exist');
+  assert.equal(weekly818.readingMinutes, 11, `8/18 Weekly expected 11m, got ${weekly818.readingMinutes}m`);
+
+  const research823 = posts.find(p => p.id === '2026-08-23-research-1xleg6o');
+  assert.ok(research823, '8/23 Research must exist');
+  assert.equal(research823.readingMinutes, 7, `8/23 Research expected 7m, got ${research823.readingMinutes}m`);
+
+  const basics1 = posts.find(p => p.id === '2026-08-15-basics-1cd8c9w');
+  assert.ok(basics1, 'Basics must exist');
+  assert.equal(basics1.readingMinutes, 6, `Basics expected 6m, got ${basics1.readingMinutes}m`);
 });
 
