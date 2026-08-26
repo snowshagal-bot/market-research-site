@@ -438,6 +438,10 @@ html[data-theme="dark"] .hero-art img {
   font-weight: 750;
 }
 
+.today-change.pending {
+  color: var(--muted);
+}
+
 .today-change.up {
   color: #c74754;
 }

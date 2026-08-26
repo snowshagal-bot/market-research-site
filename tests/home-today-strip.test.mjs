@@ -1,0 +1,444 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import test from 'node:test';
+import vm from 'node:vm';
+
+const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
+
+const ELEMENT_IDS = [
+  'archive-index', 'archive-order-label', 'archive-view-toggle', 'cal-next-btn', 'cal-prev-btn',
+  'calendar-container', 'filter-month', 'filter-reset-btn', 'filter-tag', 'filter-year',
+  'global-search-input', 'latest-category-cards', 'report-list', 'search-clear-btn', 'search-dialog',
+  'search-empty-state', 'search-quick-tags', 'search-results-list', 'search-tag-cloud',
+  'today-market-grid', 'today-strip-date', 'today-takeaway-label', 'today-takeaway-link',
+  'today-takeaway-text'
+];
+
+const SELECTOR_NODES = [
+  '.today-strip', '.today-takeaway-row', '.mobile-quick-nav', '[data-theme-toggle]',
+  'meta[name="theme-color"]'
+];
+
+const DASH = '—';
+
+function makeElement(name) {
+  const attrs = new Map();
+  return {
+    name,
+    attrs,
+    dataset: {},
+    textContent: '',
+    innerHTML: '',
+    href: '',
+    value: '',
+    hidden: false,
+    style: {},
+    offsetLeft: 0,
+    offsetWidth: 0,
+    clientWidth: 0,
+    scrollLeft: 0,
+    classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } },
+    addEventListener() {},
+    removeEventListener() {},
+    setAttribute(key, val) { attrs.set(key, String(val)); },
+    removeAttribute(key) { attrs.delete(key); },
+    getAttribute(key) { return attrs.has(key) ? attrs.get(key) : null; },
+    appendChild() {},
+    removeChild() {},
+    remove() {},
+    focus() {},
+    blur() {},
+    scrollIntoView() {},
+    showModal() {},
+    close() {},
+    querySelector() { return null; },
+    querySelectorAll() { return []; },
+    closest() { return null; },
+    getBoundingClientRect() { return { left: 0, right: 0, top: 0, bottom: 0, width: 0, height: 0 }; }
+  };
+}
+
+// The daily reports the strip is allowed to link to. 08-27 is deliberately absent
+// so an unmatched market date has nothing to fall onto.
+const POSTS = [
+  {
+    id: 'ko-0826', type: 'daily', typeLabel: '주식 리포트', lang: 'ko',
+    date: '2026-08-26', reportDate: '2026-08-26', registeredAt: '2026-08-26T04:00:00.000Z',
+    title: '먼저열리는 밤', description: '', tags: [], href: 'reports/2026-08-26-ko.html'
+  },
+  {
+    id: 'ko-0825', type: 'daily', typeLabel: '주식 리포트', lang: 'ko',
+    date: '2026-08-25', reportDate: '2026-08-25', registeredAt: '2026-08-25T04:00:00.000Z',
+    title: '낙차를 되감다', description: '', tags: [], href: 'reports/2026-08-25-ko.html'
+  },
+  {
+    id: 'ko-0828', type: 'daily', typeLabel: '주식 리포트', lang: 'ko',
+    date: '2026-08-28', reportDate: '2026-08-28', registeredAt: '2026-08-28T04:00:00.000Z',
+    title: '금요일의 종가', description: '', tags: [], href: 'reports/2026-08-28-ko.html'
+  },
+  {
+    id: 'en-0826', type: 'daily', typeLabel: 'Daily', lang: 'en',
+    date: '2026-08-26', reportDate: '2026-08-26', registeredAt: '2026-08-26T05:00:00.000Z',
+    title: 'The Night Opens First', description: '', tags: [], href: 'reports/en/2026-08-26-en.html'
+  },
+  {
+    id: 'en-0825', type: 'daily', typeLabel: 'Daily', lang: 'en',
+    date: '2026-08-25', reportDate: '2026-08-25', registeredAt: '2026-08-25T05:00:00.000Z',
+    title: 'Rewinding the Drop', description: '', tags: [], href: 'reports/en/2026-08-25-en.html'
+  }
+];
+
+// data/market-summary.js stand-in: the fallback, one session behind the API.
+const STATIC_SUMMARY = {
+  marketDate: '2026-08-25',
+  dateDisplay: { ko: 'AUG 25', en: 'AUG 25' },
+  takeaway: {
+    ko: '낙차를 되감았지만, 시장의 무게중심은 아직 돌아오지 않았다.',
+    en: 'The market retraced the selloff, but its center of gravity has yet to return.'
+  },
+  items: [
+    { id: 'kospi', label: 'KOSPI', value: '6,742.74', change: '▲ 0.68%', direction: 'up' },
+    { id: 'kosdaq', label: 'KOSDAQ', value: '827.15', change: '▲ 1.70%', direction: 'up' },
+    { id: 'usdkrw', label: 'USD/KRW', value: '1,386.10', change: { ko: '▲ 3.7원', en: '▲ ₩3.7' }, direction: 'up' },
+    { id: 'us10y', label: 'US 10Y', value: '4.70%', change: '▼ 4bp', direction: 'down' },
+    { id: 'gold', label: 'GOLD', value: '$4,694.60', change: '▲ 1.16%', direction: 'up' }
+  ]
+};
+
+function quote(close, change, changePct) {
+  return { close, current: close, change, change_pct: changePct, previous_close: close - change };
+}
+
+function marketPayload(marketDate) {
+  return {
+    meta: { market_date: marketDate, schema_version: '1.0.1', status: 'final' },
+    indices: {
+      KOSPI: quote(6808.21, 65.47, 0.9709702583816112),
+      KOSDAQ: quote(826.87, -0.28, -0.03385117572386783)
+    },
+    rates_fx_volatility: {
+      USDKRW: quote(1384.7, -1.31, -0.09451659451659059),
+      US10Y: quote(4.638999938964844, -0.065, -1.381802641114245)
+    },
+    commodities_crypto: {
+      GOLD: quote(4689.7001953125, 51.6, 1.1125223961816726)
+    }
+  };
+}
+
+function deferred() {
+  let resolve;
+  const promise = new Promise(res => { resolve = res; });
+  return { promise, resolve };
+}
+
+/**
+ * Boot locale.js + site.js against a stub DOM seeded with the neutral markup the
+ * two homepages actually ship. Returns without waiting for the request, so a
+ * test can inspect the DOM while /api/market/latest is still in flight.
+ *
+ * `respond` receives the requested URL and returns a Response-like promise.
+ */
+async function bootHomepage({ lang = 'ko', respond, summary = STATIC_SUMMARY, posts = POSTS } = {}) {
+  const [localeScript, siteScript] = await Promise.all([read('assets/locale.js'), read('assets/site.js')]);
+
+  const elements = new Map(ELEMENT_IDS.map(id => [id, makeElement(id)]));
+  const selectors = new Map(SELECTOR_NODES.map(sel => [sel, makeElement(sel)]));
+  const requestedUrls = [];
+
+  // Seed the neutral initial state. tests/home-v2.test.mjs asserts the shipped
+  // HTML matches exactly this.
+  const marketPath = lang === 'en' ? '/en/market/' : '/market/';
+  elements.get('today-strip-date').textContent = DASH;
+  elements.get('today-market-grid').innerHTML = Array.from({ length: 5 }, () => (
+    `<div class="today-item" role="listitem"><span class="today-label">X</span><span class="today-value">${DASH}</span><span class="today-change pending">${DASH}</span></div>`
+  )).join('');
+  elements.get('today-market-grid').setAttribute('aria-busy', 'true');
+  elements.get('today-takeaway-label').textContent = lang === 'en' ? "Today's takeaway" : '오늘의 한 줄';
+  elements.get('today-takeaway-text').textContent = '';
+  elements.get('today-takeaway-link').href = marketPath;
+  selectors.get('.today-takeaway-row').hidden = true;
+
+  const document = {
+    documentElement: Object.assign(makeElement('html'), { lang, dataset: { siteLang: lang } }),
+    head: makeElement('head'),
+    body: makeElement('body'),
+    readyState: 'complete',
+    addEventListener() {},
+    createElement: () => makeElement('created'),
+    getElementById: id => elements.get(id) || null,
+    querySelector: sel => selectors.get(sel) || null,
+    querySelectorAll: () => []
+  };
+
+  const window = {
+    RESEARCH_POSTS: posts,
+    TODAY_MARKET_SUMMARY: summary,
+    addEventListener() {}
+  };
+
+  const context = vm.createContext({
+    window,
+    document,
+    location: { pathname: lang === 'en' ? '/en/' : '/', search: '', href: 'https://snowshagal.com/', replace() {} },
+    history: { replaceState() {} },
+    localStorage: { getItem: () => null, setItem() {} },
+    matchMedia: () => ({ matches: false, addEventListener() {}, addListener() {} }),
+    fetch: url => { requestedUrls.push(url); return respond(url); },
+    setTimeout,
+    clearTimeout,
+    Intl,
+    URL,
+    URLSearchParams,
+    console
+  });
+
+  vm.runInContext(localeScript, context);
+  vm.runInContext(siteScript, context);
+
+  const nodes = {
+    date: elements.get('today-strip-date'),
+    grid: elements.get('today-market-grid'),
+    label: elements.get('today-takeaway-label'),
+    text: elements.get('today-takeaway-text'),
+    link: elements.get('today-takeaway-link'),
+    row: selectors.get('.today-takeaway-row')
+  };
+
+  async function flush() {
+    for (let i = 0; i < 6; i += 1) await Promise.resolve();
+    await new Promise(resolve => setImmediate(resolve));
+  }
+
+  return { nodes, flush, requestedUrls };
+}
+
+/** Boot and wait for the request to settle; returns the final strip nodes. */
+async function runHomepage({ fetchResult = null, ...rest } = {}) {
+  const respond = () => (fetchResult
+    ? Promise.resolve({ ok: true, json: () => Promise.resolve(fetchResult) })
+    : Promise.resolve({ ok: false, status: 503, json: () => Promise.reject(new Error('no body')) }));
+  const boot = await bootHomepage({ ...rest, respond });
+  await boot.flush();
+  return { ...boot.nodes, requestedUrls: boot.requestedUrls };
+}
+
+test('A. published Market Close wins over the static fallback and links its own daily report', async () => {
+  const strip = await runHomepage({ fetchResult: marketPayload('2026-08-26') });
+
+  assert.deepEqual(strip.requestedUrls, ['/api/market/latest']);
+  assert.equal(strip.date.textContent, 'AUG 26');
+
+  // Numbers come from the API, not from the 08-25 static file.
+  assert.match(strip.grid.innerHTML, /6,808\.21/);
+  assert.match(strip.grid.innerHTML, /▲ 0\.97%/);
+  assert.doesNotMatch(strip.grid.innerHTML, /6,742\.74/);
+  assert.equal(strip.grid.getAttribute('aria-busy'), null);
+
+  // The one-liner points at the daily report for the displayed session.
+  assert.equal(strip.row.hidden, false);
+  assert.equal(strip.link.href, '/reports/2026-08-26-ko.html');
+  assert.equal(strip.text.textContent, '먼저열리는 밤');
+  assert.equal(strip.label.textContent, '오늘의 리포트');
+});
+
+test('A2. the stale 08-25 editorial line is never shown beside 08-26 numbers', async () => {
+  const strip = await runHomepage({ fetchResult: marketPayload('2026-08-26') });
+  assert.notEqual(strip.text.textContent, STATIC_SUMMARY.takeaway.ko);
+});
+
+test('B. a failed market request falls back to the static file and links that same date', async () => {
+  const strip = await runHomepage({ fetchResult: null });
+
+  assert.equal(strip.date.textContent, 'AUG 25');
+  assert.match(strip.grid.innerHTML, /6,742\.74/);
+  assert.doesNotMatch(strip.grid.innerHTML, /6,808\.21/);
+
+  // The 08-25 editorial line is valid here, and must not open the 08-26 report.
+  assert.equal(strip.row.hidden, false);
+  assert.equal(strip.text.textContent, STATIC_SUMMARY.takeaway.ko);
+  assert.equal(strip.label.textContent, '오늘의 한 줄');
+  assert.equal(strip.link.href, '/reports/2026-08-25-ko.html');
+  assert.doesNotMatch(strip.link.href, /2026-08-26/);
+});
+
+test('C. a weekend market date is current data, not stale data', async () => {
+  // Friday's close is what the API returns all weekend; nothing may downgrade it.
+  const strip = await runHomepage({ fetchResult: marketPayload('2026-08-28') });
+
+  assert.equal(strip.date.textContent, 'AUG 28');
+  assert.match(strip.grid.innerHTML, /6,808\.21/);
+  assert.equal(strip.row.hidden, false);
+  assert.equal(strip.link.href, '/reports/2026-08-28-ko.html');
+
+  // Freshness is decided by the API's market_date alone, never by the calendar.
+  const siteJs = await read('assets/site.js');
+  assert.doesNotMatch(siteJs, /Asia\/Seoul/);
+});
+
+test('D. a market date with no matching daily report links Market Close, not another day', async () => {
+  const strip = await runHomepage({ fetchResult: marketPayload('2026-08-27') });
+
+  assert.equal(strip.date.textContent, 'AUG 27');
+  // No 08-27 daily and no 08-27 editorial line: the row carries nothing.
+  assert.equal(strip.row.hidden, true);
+  assert.doesNotMatch(strip.link.href, /reports\//);
+});
+
+test('D2. an unmatched date still refuses the newest daily report', async () => {
+  const strip = await runHomepage({
+    fetchResult: marketPayload('2026-08-27'),
+    summary: { ...STATIC_SUMMARY, marketDate: '2026-08-27', items: STATIC_SUMMARY.items }
+  });
+
+  // The editorial line now belongs to the displayed session, so it shows, but
+  // there is still no 08-27 report to open.
+  assert.equal(strip.row.hidden, false);
+  assert.equal(strip.link.href, '/market/');
+  assert.doesNotMatch(strip.link.href, /2026-08-26|2026-08-28/);
+});
+
+test('E. Korean and English render the same session and the same date', async () => {
+  const payload = marketPayload('2026-08-26');
+  const [ko, en] = await Promise.all([
+    runHomepage({ lang: 'ko', fetchResult: payload }),
+    runHomepage({ lang: 'en', fetchResult: payload })
+  ]);
+
+  assert.equal(ko.date.textContent, en.date.textContent);
+  assert.equal(en.date.textContent, 'AUG 26');
+  assert.equal(en.link.href, '/reports/en/2026-08-26-en.html');
+  assert.equal(en.text.textContent, 'The Night Opens First');
+  assert.equal(en.label.textContent, "Today's report");
+});
+
+test('E2. English falls back to the English Market Close page', async () => {
+  const strip = await runHomepage({ lang: 'en', fetchResult: marketPayload('2026-08-27') });
+  assert.equal(strip.row.hidden, true);
+  assert.doesNotMatch(strip.link.href, /reports\//);
+});
+
+test('the strip never mixes API numbers with static numbers', async () => {
+  // An incomplete payload is rejected as a whole rather than topped up.
+  const partial = marketPayload('2026-08-26');
+  delete partial.commodities_crypto.GOLD;
+  const strip = await runHomepage({ fetchResult: partial });
+
+  assert.equal(strip.date.textContent, 'AUG 25');
+  assert.match(strip.grid.innerHTML, /6,742\.74/);
+  assert.doesNotMatch(strip.grid.innerHTML, /6,808\.21/);
+});
+
+test('F. while the request is in flight nothing from the static fallback is painted', async () => {
+  const pending = deferred();
+  const { nodes, flush, requestedUrls } = await bootHomepage({
+    respond: () => pending.promise.then(payload => ({ ok: true, json: () => Promise.resolve(payload) }))
+  });
+  // The request is already out; the DOM must still be the neutral placeholder.
+  await flush();
+  assert.deepEqual(requestedUrls, ['/api/market/latest']);
+
+  assert.equal(nodes.date.textContent, DASH);
+  assert.notEqual(nodes.date.textContent, 'AUG 25');
+  assert.doesNotMatch(nodes.grid.innerHTML, /6,742\.74|827\.15|1,386\.10|4\.70%|4,694\.60/);
+  assert.equal(nodes.grid.getAttribute('aria-busy'), 'true');
+  assert.equal(nodes.row.hidden, true);
+  assert.equal(nodes.text.textContent, '');
+  assert.notEqual(nodes.text.textContent, STATIC_SUMMARY.takeaway.ko);
+  assert.equal(nodes.link.href, '/market/');
+  assert.doesNotMatch(nodes.link.href, /reports\//);
+
+  // Only once the published session arrives does anything render.
+  pending.resolve(marketPayload('2026-08-26'));
+  await flush();
+
+  assert.equal(nodes.date.textContent, 'AUG 26');
+  assert.match(nodes.grid.innerHTML, /6,808\.21/);
+  assert.equal(nodes.grid.getAttribute('aria-busy'), null);
+  assert.equal(nodes.row.hidden, false);
+  assert.equal(nodes.link.href, '/reports/2026-08-26-ko.html');
+  assert.doesNotMatch(nodes.grid.innerHTML, /6,742\.74/);
+});
+
+test('F2. the English homepage holds the same neutral state while in flight', async () => {
+  const pending = deferred();
+  const { nodes, flush } = await bootHomepage({
+    lang: 'en',
+    respond: () => pending.promise.then(payload => ({ ok: true, json: () => Promise.resolve(payload) }))
+  });
+  await flush();
+
+  assert.equal(nodes.date.textContent, DASH);
+  assert.equal(nodes.row.hidden, true);
+  assert.equal(nodes.link.href, '/en/market/');
+  assert.doesNotMatch(nodes.grid.innerHTML, /6,742\.74/);
+
+  pending.resolve(marketPayload('2026-08-26'));
+  await flush();
+
+  assert.equal(nodes.date.textContent, 'AUG 26');
+  assert.equal(nodes.link.href, '/reports/en/2026-08-26-en.html');
+});
+
+test('G. the fallback is painted only after the request actually fails', async () => {
+  const pending = deferred();
+  const { nodes, flush } = await bootHomepage({
+    respond: () => pending.promise
+  });
+  await flush();
+
+  // Still neutral: a slow failure is not an excuse to show the fallback early.
+  assert.equal(nodes.date.textContent, DASH);
+  assert.equal(nodes.row.hidden, true);
+  assert.doesNotMatch(nodes.grid.innerHTML, /6,742\.74/);
+
+  pending.resolve({ ok: false, status: 503, json: () => Promise.reject(new Error('no body')) });
+  await flush();
+
+  assert.equal(nodes.date.textContent, 'AUG 25');
+  assert.match(nodes.grid.innerHTML, /6,742\.74/);
+  assert.match(nodes.grid.innerHTML, /827\.15/);
+  assert.match(nodes.grid.innerHTML, /1,386\.10/);
+  assert.match(nodes.grid.innerHTML, /4\.70%/);
+  assert.match(nodes.grid.innerHTML, /4,694\.60/);
+  assert.equal(nodes.grid.getAttribute('aria-busy'), null);
+  assert.equal(nodes.row.hidden, false);
+  assert.equal(nodes.label.textContent, '오늘의 한 줄');
+  assert.equal(nodes.text.textContent, STATIC_SUMMARY.takeaway.ko);
+  assert.equal(nodes.link.href, '/reports/2026-08-25-ko.html');
+});
+
+test('G2. a rejected request also keeps the neutral state until it settles', async () => {
+  const pending = deferred();
+  const { nodes, flush } = await bootHomepage({
+    respond: () => pending.promise.then(() => { throw new Error('network down'); })
+  });
+  await flush();
+  assert.equal(nodes.date.textContent, DASH);
+
+  pending.resolve(null);
+  await flush();
+  assert.equal(nodes.date.textContent, 'AUG 25');
+  assert.equal(nodes.link.href, '/reports/2026-08-25-ko.html');
+});
+
+test('site.js paints the strip exactly once, after the request settles', async () => {
+  const siteJs = await read('assets/site.js');
+  const body = siteJs.slice(siteJs.indexOf('function renderTodayMarket()'));
+  const renderBody = body.slice(0, body.indexOf('\n  }') + 4);
+  // No pre-fetch paint: every paintTodayStrip call sits inside the fetch continuation.
+  assert.doesNotMatch(renderBody, /paintTodayStrip\(todayStripSession\(null\)\)/);
+  assert.equal((renderBody.match(/paintTodayStrip\(/g) || []).length, 1);
+  assert.match(renderBody, /fetchPublishedMarketClose\(\)\.then/);
+});
+
+test('homepage markup exposes the nodes the strip renders into', async () => {
+  const [home, enHome] = await Promise.all([read('index.html'), read('en/index.html')]);
+  for (const page of [home, enHome]) {
+    assert.match(page, /id="today-strip-date"/);
+    assert.match(page, /id="today-market-grid"/);
+    assert.match(page, /id="today-takeaway-label"/);
+    assert.match(page, /id="today-takeaway-link"/);
+    assert.match(page, /id="today-takeaway-text"/);
+  }
+});

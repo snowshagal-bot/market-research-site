@@ -817,35 +817,173 @@
     renderArchive();
   });
 
-  function renderTodayMarket(){
+  /* Today strip -------------------------------------------------------------
+     `/api/market/latest` is the single source of truth for both the numbers and
+     the market date, so the strip shows the same session that /market/ renders.
+     data/market-summary.js is used only when that request fails, and then its
+     own `marketDate` is what gets displayed.
+
+     A render is atomic: date, numbers and the one-liner are always painted from
+     one session, so the strip can never show one date's numbers next to another
+     date's report. The one-liner link resolves strictly by
+     `reportDate === displayed marketDate`; with no such daily report it falls
+     back to Market Close instead of opening a different day's report.
+
+     Freshness is whatever `market_date` the API returns. The calendar date is
+     never consulted: on a weekend or holiday the last trading session is the
+     current data, not stale data.
+  -------------------------------------------------------------------------- */
+  const MARKET_LATEST_ENDPOINT = '/api/market/latest';
+  const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+  const TODAY_STRIP_ITEMS = [
+    { label: 'KOSPI', group: 'indices', key: 'KOSPI', format: 'index' },
+    { label: 'KOSDAQ', group: 'indices', key: 'KOSDAQ', format: 'index' },
+    { label: 'USD/KRW', group: 'rates_fx_volatility', key: 'USDKRW', format: 'won' },
+    { label: 'US 10Y', group: 'rates_fx_volatility', key: 'US10Y', format: 'rate' },
+    { label: 'GOLD', group: 'commodities_crypto', key: 'GOLD', format: 'usd' }
+  ];
+
+  function finiteNumber(value){ return typeof value === 'number' && Number.isFinite(value); }
+  function isoDate(value){ return ISO_DATE.test(String(value || '')) ? String(value) : ''; }
+  function decimal(value, digits){
+    return new Intl.NumberFormat(locale === 'en' ? 'en-US' : 'ko-KR', { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
+  }
+  function stripDateLabel(value){
+    const date = isoDate(value);
+    if (!date) return '';
+    const [year, month, day] = date.split('-').map(Number);
+    return new Intl.DateTimeFormat('en-US', { month: 'short', day: '2-digit', timeZone: 'UTC' })
+      .format(new Date(Date.UTC(year, month - 1, day))).toUpperCase();
+  }
+
+  // Build the strip from a published Market Close payload. Returns null unless
+  // every item resolves, so a changed contract falls back to the static file as
+  // a whole instead of mixing two sources into one row.
+  function publishedStripItems(payload){
+    const items = TODAY_STRIP_ITEMS.map(spec => {
+      const quote = payload?.[spec.group]?.[spec.key];
+      if (!quote || !finiteNumber(quote.close)) return null;
+      const movement = spec.format === 'index' || spec.format === 'usd' ? quote.change_pct : quote.change;
+      if (!finiteNumber(movement)) return null;
+      const arrow = movement < 0 ? '▼' : '▲';
+      const size = Math.abs(movement);
+      let value = '';
+      let change = '';
+      if (spec.format === 'index') {
+        value = decimal(quote.close, 2);
+        change = `${arrow} ${decimal(size, 2)}%`;
+      } else if (spec.format === 'usd') {
+        value = `$${decimal(quote.close, 2)}`;
+        change = `${arrow} ${decimal(size, 2)}%`;
+      } else if (spec.format === 'won') {
+        value = decimal(quote.close, 2);
+        change = locale === 'en' ? `${arrow} ₩${decimal(size, 1)}` : `${arrow} ${decimal(size, 1)}원`;
+      } else {
+        value = `${decimal(quote.close, 2)}%`;
+        change = `${arrow} ${Math.round(size * 100)}bp`;
+      }
+      return { label: spec.label, value, change, direction: movement < 0 ? 'down' : 'up' };
+    }).filter(Boolean);
+    return items.length === TODAY_STRIP_ITEMS.length ? items : null;
+  }
+
+  function staticStripItems(summary){
+    if (!Array.isArray(summary?.items) || !summary.items.length) return null;
+    return summary.items.map(item => ({
+      label: item.label,
+      value: item.value,
+      change: typeof item.change === 'object' && item.change !== null
+        ? (item.change[locale] || item.change.ko || item.change.en || '')
+        : item.change,
+      direction: item.direction === 'down' ? 'down' : 'up'
+    }));
+  }
+
+  // One session in, one consistent strip out.
+  function todayStripSession(payload){
     const summary = window.TODAY_MARKET_SUMMARY;
-    if (!summary) return;
+    const publishedDate = isoDate(payload?.meta?.market_date);
+    if (publishedDate) {
+      const items = publishedStripItems(payload);
+      if (items) return { marketDate: publishedDate, items, live: true };
+    }
+    const staticItems = staticStripItems(summary);
+    if (!staticItems) return null;
+    return { marketDate: isoDate(summary?.marketDate), items: staticItems, live: false };
+  }
+
+  function paintTodayStrip(session){
+    if (!session) return;
     const dateEl = document.getElementById('today-strip-date');
     const gridEl = document.getElementById('today-market-grid');
-    const takeawayTextEl = document.getElementById('today-takeaway-text');
-    const takeawayLinkEl = document.getElementById('today-takeaway-link');
+    const dateLabel = stripDateLabel(session.marketDate)
+      || window.TODAY_MARKET_SUMMARY?.dateDisplay?.[locale]
+      || '';
+    if (dateEl && dateLabel) dateEl.textContent = dateLabel;
+    if (gridEl) {
+      gridEl.innerHTML = session.items.map(item => (
+        `<div class="today-item" role="listitem"><span class="today-label">${esc(item.label)}</span><span class="today-value">${esc(item.value)}</span><span class="today-change ${item.direction}">${esc(item.change)}</span></div>`
+      )).join('');
+      gridEl.removeAttribute('aria-busy');
+    }
+    paintTodayTakeaway(session.marketDate);
+  }
 
-    if (dateEl && summary.dateDisplay) {
-      dateEl.textContent = summary.dateDisplay[locale] || summary.dateDisplay.ko || summary.dateDisplay.en || 'CLOSE';
+  // The one-liner belongs to the session on screen or it is not shown at all.
+  function paintTodayTakeaway(marketDate){
+    const summary = window.TODAY_MARKET_SUMMARY;
+    const rowEl = document.querySelector('.today-takeaway-row');
+    const labelEl = document.getElementById('today-takeaway-label');
+    const textEl = document.getElementById('today-takeaway-text');
+    const linkEl = document.getElementById('today-takeaway-link');
+    const daily = marketDate
+      ? posts.find(post => post.type === 'daily' && reportDate(post) === marketDate) || null
+      : null;
+    const editorial = isoDate(summary?.marketDate) === marketDate && marketDate
+      ? (summary?.takeaway?.[locale] || summary?.takeaway?.ko || summary?.takeaway?.en || '')
+      : '';
+
+    // Editorial line for this session, else that session's daily title, else nothing.
+    let label = '';
+    let text = '';
+    if (editorial) {
+      label = messages.takeawayLabel;
+      text = editorial;
+    } else if (daily) {
+      label = messages.dailyReportLabel;
+      text = daily.title || '';
     }
-    if (gridEl && Array.isArray(summary.items)) {
-      gridEl.innerHTML = summary.items.map(item => {
-        const dirClass = item.direction === 'down' ? 'down' : 'up';
-        const changeVal = typeof item.change === 'object' && item.change !== null
-          ? (item.change[locale] || item.change.ko || item.change.en || '')
-          : item.change;
-        return `<div class="today-item" role="listitem"><span class="today-label">${esc(item.label)}</span><span class="today-value">${esc(item.value)}</span><span class="today-change ${dirClass}">${esc(changeVal)}</span></div>`;
-      }).join('');
+    // Rewrite the href on every paint, the hidden one included. Leaving the
+    // previous session's href in place would keep a link to another day's
+    // report one CSS rule away from being clickable.
+    if (linkEl) linkEl.href = daily ? rootPath(daily.href) : (locale === 'en' ? '/en/market/' : '/market/');
+    if (!text) {
+      if (rowEl) rowEl.hidden = true;
+      return;
     }
-    if (takeawayTextEl && summary.takeaway) {
-      takeawayTextEl.textContent = summary.takeaway[locale] || summary.takeaway.ko || summary.takeaway.en || '';
-    }
-    if (takeawayLinkEl) {
-      const latestDaily = latestFor('daily');
-      if (latestDaily) {
-        takeawayLinkEl.href = rootPath(latestDaily.href);
-      }
-    }
+    if (rowEl) rowEl.hidden = false;
+    if (labelEl) labelEl.textContent = label;
+    if (textEl) textEl.textContent = text;
+  }
+
+  function fetchPublishedMarketClose(){
+    if (typeof fetch !== 'function') return Promise.resolve(null);
+    return fetch(MARKET_LATEST_ENDPOINT, { headers: { Accept: 'application/json' } })
+      .then(response => (response.ok ? response.json() : null))
+      .catch(() => null);
+  }
+
+  // The markup ships a neutral placeholder, so there is exactly one paint and it
+  // happens after the request settles. Painting the static file first would put
+  // a past session on screen for a frame whenever the network was slow, which is
+  // the opposite of market-summary.js being a failure-only fallback.
+  function renderTodayMarket(){
+    if (!document.querySelector('.today-strip')) return;
+    return fetchPublishedMarketClose().then(payload => {
+      const session = todayStripSession(payload);
+      paintTodayStrip(session);
+      return session;
+    });
   }
 
   populateFilterOptions();

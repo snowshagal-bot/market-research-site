@@ -25,12 +25,12 @@ test('homepage presents the Snowshagal brand hero before latest reports and arch
   assert.doesNotMatch(html, /Login|data-carousel|featured-slide/);
   assert.match(html, /<footer[^>]*>[\s\S]*?<span[^>]*>SNOWSHAGAL<\/span>/);
   assert.doesNotMatch(html, /Independent Market Research/);
-  assert.match(html, /home-v2\.css\?v=20260825-1/);
-  assert.match(englishHtml, /home-v2\.css\?v=20260825-1/);
-  assert.match(html, /locale\.js\?v=20260824-2/);
-  assert.match(englishHtml, /locale\.js\?v=20260824-2/);
-  assert.match(html, /site\.js\?v=20260826-3/);
-  assert.match(englishHtml, /site\.js\?v=20260826-3/);
+  assert.match(html, /home-v2\.css\?v=20260826-2/);
+  assert.match(englishHtml, /home-v2\.css\?v=20260826-2/);
+  assert.match(html, /locale\.js\?v=20260826-4/);
+  assert.match(englishHtml, /locale\.js\?v=20260826-4/);
+  assert.match(html, /site\.js\?v=20260826-4/);
+  assert.match(englishHtml, /site\.js\?v=20260826-4/);
   assert.match(html, /market-summary\.js\?v=20260826-1/);
   assert.match(englishHtml, /market-summary\.js\?v=20260826-1/);
 });
@@ -305,20 +305,20 @@ test('homepage presents TODAY market summary strip between brand hero and latest
     assert.match(page, /class="today-strip-market-link"/);
     assert.match(page, /class="today-strip-scroll-wrap"/);
     assert.match(page, /id="today-market-grid"/);
-    assert.match(page, /class="today-takeaway-row"/);
+    assert.match(page, /class="today-takeaway-row" hidden>/);
     assert.match(page, /id="today-takeaway-link"/);
     assert.match(page, /id="today-takeaway-text"/);
   }
 
   // 2. Korean specifics
   assert.match(home, /href="\/market\/"/);
-  assert.match(home, /class="today-takeaway-label">오늘의 한 줄<\/span>/);
-  assert.match(home, /낙차를 되감았지만, 시장의 무게중심은 아직 돌아오지 않았다\./);
+  assert.match(home, /class="today-takeaway-label" id="today-takeaway-label">오늘의 한 줄<\/span>/);
+  assert.match(home, /id="today-takeaway-link" href="\/market\/">/);
 
   // 3. English specifics
   assert.match(enHome, /href="\/en\/market\/"/);
-  assert.match(enHome, /class="today-takeaway-label">Today's takeaway<\/span>/);
-  assert.match(enHome, /The market retraced the selloff, but its center of gravity has yet to return\./);
+  assert.match(enHome, /class="today-takeaway-label" id="today-takeaway-label">Today's takeaway<\/span>/);
+  assert.match(enHome, /id="today-takeaway-link" href="\/en\/market\/">/);
 
   // 4. 5 core indices in markup and data
   for (const sym of ['KOSPI', 'KOSDAQ', 'USD/KRW', 'US 10Y', 'GOLD']) {
@@ -336,5 +336,28 @@ test('homepage presents TODAY market summary strip between brand hero and latest
   // 6. JS dynamic renderer
   assert.match(siteJs, /function renderTodayMarket\(\)/);
   assert.match(siteJs, /renderTodayMarket\(\);/);
+
+  // 7. Neutral first paint: the markup carries no past trading session at all.
+  //    Values arrive only after /api/market/latest settles.
+  for (const page of [home, enHome]) {
+    assert.match(page, /id="today-strip-date">\u2014<\/span>/);
+    assert.match(page, /id="today-market-grid" role="list" aria-busy="true"/);
+    assert.equal((page.match(/<span class="today-value">\u2014<\/span>/g) || []).length, 5);
+    assert.equal((page.match(/<span class="today-change pending">\u2014<\/span>/g) || []).length, 5);
+    assert.match(page, /id="today-takeaway-text"><\/span>/);
+    assert.doesNotMatch(page, /class="today-change (?:up|down)"/);
+    assert.doesNotMatch(page, /today-takeaway-link" href="\/reports\//);
+  }
+  // The values the fallback file holds must not be pre-rendered anywhere.
+  const summary = JSON.parse(marketData.slice(marketData.indexOf('{'), marketData.lastIndexOf('}') + 1)
+    .replace(/([{,]\s*)([A-Za-z_][A-Za-z0-9_]*)\s*:/g, '$1"$2":'));
+  for (const item of summary.items) {
+    assert.doesNotMatch(home, new RegExp(item.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.doesNotMatch(enHome, new RegExp(item.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
+  assert.doesNotMatch(home, new RegExp(summary.takeaway.ko.slice(0, 12)));
+  assert.doesNotMatch(enHome, new RegExp(summary.takeaway.en.slice(0, 20)));
+  assert.doesNotMatch(home, new RegExp(summary.dateDisplay.ko));
+  assert.doesNotMatch(enHome, new RegExp(summary.dateDisplay.en));
 });
 
