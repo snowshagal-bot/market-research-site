@@ -25,12 +25,12 @@ test('homepage presents the Snowshagal brand hero before latest reports and arch
   assert.doesNotMatch(html, /Login|data-carousel|featured-slide/);
   assert.match(html, /<footer[^>]*>[\s\S]*?<span[^>]*>SNOWSHAGAL<\/span>/);
   assert.doesNotMatch(html, /Independent Market Research/);
-  assert.match(html, /home-v2\.css\?v=20260826-2/);
-  assert.match(englishHtml, /home-v2\.css\?v=20260826-2/);
-  assert.match(html, /locale\.js\?v=20260826-4/);
-  assert.match(englishHtml, /locale\.js\?v=20260826-4/);
-  assert.match(html, /site\.js\?v=20260826-4/);
-  assert.match(englishHtml, /site\.js\?v=20260826-4/);
+  assert.match(html, /home-v2\.css\?v=20260827-1/);
+  assert.match(englishHtml, /home-v2\.css\?v=20260827-1/);
+  assert.match(html, /locale\.js\?v=20260827-1/);
+  assert.match(englishHtml, /locale\.js\?v=20260827-1/);
+  assert.match(html, /site\.js\?v=20260827-1/);
+  assert.match(englishHtml, /site\.js\?v=20260827-1/);
   assert.match(html, /market-summary\.js\?v=20260826-1/);
   assert.match(englishHtml, /market-summary\.js\?v=20260826-1/);
 });

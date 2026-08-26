@@ -1,3 +1,5 @@
+import { searchIndexArtifacts } from "./_search-index.js";
+
 const OWNER = "snowshagal-bot";
 const REPO = "market-research-site";
 const BRANCH = "main";
@@ -207,20 +209,12 @@ function metadataEntries(posts, searchIndex = null) {
   ];
 
   if (Array.isArray(searchIndex)) {
-    entries.push(
-      {
-        path: "data/search-index.json",
-        mode: "100644",
-        type: "blob",
-        content: `${JSON.stringify(searchIndex, null, 2)}\n`,
-      },
-      {
-        path: "data/search-index.js",
-        mode: "100644",
-        type: "blob",
-        content: `window.SEARCH_INDEX = ${JSON.stringify(searchIndex)};\n`,
-      }
-    );
+    entries.push(...searchIndexArtifacts(searchIndex).map((artifact) => ({
+      path: artifact.path,
+      mode: "100644",
+      type: "blob",
+      content: artifact.content,
+    })));
   }
 
   return entries;

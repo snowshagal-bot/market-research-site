@@ -11,17 +11,43 @@ const rootDir = path.resolve(__dirname, '..');
 const read = (relPath) => readFile(path.join(rootDir, relPath), 'utf8');
 
 test('search index has integrity, required fields, and valid report URLs without duplicates', async () => {
-  const [postsRaw, indexRaw, indexJs] = await Promise.all([
+  const [postsRaw, indexRaw, metaJs, bodyKoJs, bodyEnJs] = await Promise.all([
     read('data/posts.json'),
     read('data/search-index.json'),
-    read('data/search-index.js')
+    read('data/search-index-meta.js'),
+    read('data/search-index-body-ko.js'),
+    read('data/search-index-body-en.js')
   ]);
 
   const posts = JSON.parse(postsRaw);
   const searchIndex = JSON.parse(indexRaw);
 
   assert.equal(searchIndex.length, posts.length);
-  assert.match(indexJs, /^window\.SEARCH_INDEX = \[/);
+  assert.match(metaJs, /^window\.SEARCH_INDEX_META = \[/);
+  assert.match(bodyKoJs, /^window\.SEARCH_INDEX_BODY = Object\.assign\(/);
+  assert.match(bodyEnJs, /^window\.SEARCH_INDEX_BODY = Object\.assign\(/);
+
+  // The metadata tier is what the dialog loads first, so it must stay small:
+  // every field except the report body, which lives in the locale shards.
+  const meta = JSON.parse(metaJs.slice(metaJs.indexOf('['), metaJs.lastIndexOf(']') + 1));
+  assert.equal(meta.length, posts.length);
+  assert.ok(meta.every(entry => entry.bodyText === undefined), 'metadata must not carry bodyText');
+  assert.ok(metaJs.length < 200 * 1024, `metadata tier is ${Math.round(metaJs.length / 1024)}KB`);
+
+  const parseBodies = (source) => {
+    const map = source.match(/Object\.assign\(window\.SEARCH_INDEX_BODY \|\| \{\}, ([\s\S]*)\);\s*$/);
+    assert.ok(map, 'body shard must be a single Object.assign merge');
+    return JSON.parse(map[1]);
+  };
+  const shards = { ko: parseBodies(bodyKoJs), en: parseBodies(bodyEnJs) };
+  for (const item of searchIndex) {
+    const shard = shards[item.lang === 'en' ? 'en' : 'ko'];
+    assert.ok(item.id in shard, `${item.id} missing from its locale body shard`);
+  }
+  // Each report body lives in exactly one shard, so a reader downloads only
+  // the locale they are reading.
+  assert.equal(Object.keys(shards.ko).length + Object.keys(shards.en).length, searchIndex.length);
+  for (const id of Object.keys(shards.ko)) assert.ok(!(id in shards.en), `${id} duplicated across shards`);
 
   const seenUrls = new Set();
   for (const item of searchIndex) {
@@ -320,6 +346,8 @@ test('assets/site.css has no duplicate :root declaration and retains single base
 
 test('_headers configures no-cache revalidation policy for search-index files', async () => {
   const headers = await read('_headers');
-  assert.match(headers, /\/data\/search-index\.js\s+Cache-Control:\s*no-cache/);
+  assert.match(headers, /\/data\/search-index-meta\.js\s+Cache-Control:\s*no-cache/);
+  assert.match(headers, /\/data\/search-index-body-ko\.js\s+Cache-Control:\s*no-cache/);
+  assert.match(headers, /\/data\/search-index-body-en\.js\s+Cache-Control:\s*no-cache/);
   assert.match(headers, /\/data\/search-index\.json\s+Cache-Control:\s*no-cache/);
 });

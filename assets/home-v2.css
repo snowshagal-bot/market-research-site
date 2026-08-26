@@ -1381,3 +1381,37 @@ html[data-theme="dark"] .calendar-preview-link {
 @media (prefers-reduced-motion: reduce) {
   .latest-card { transition: none; }
 }
+
+/* Archive paging: the list renders a page at a time as the archive grows. */
+.archive-more {
+  display: block;
+  width: 100%;
+  min-height: 52px;
+  margin: 0;
+  padding: 0 16px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  cursor: pointer;
+}
+
+.archive-more:hover {
+  background: color-mix(in srgb, var(--panel-2) 45%, transparent);
+  color: var(--text);
+}
+
+.archive-more span {
+  margin-left: 6px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.archive-more:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: -2px;
+}

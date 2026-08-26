@@ -1,3 +1,5 @@
+import { searchIndexArtifacts } from './_search-index.js';
+
 const OWNER = 'snowshagal-bot';
 const REPO = 'market-research-site';
 const BRANCH = 'main';
@@ -719,8 +721,8 @@ export async function onRequestPost(context) {
 
     const postsJson = `${JSON.stringify(posts, null, 2)}\n`;
     const postsJs = `window.RESEARCH_POSTS = ${JSON.stringify(posts, null, 2)};\n`;
-    const searchIndexJson = `${JSON.stringify(searchIndex, null, 2)}\n`;
-    const searchIndexJs = `window.SEARCH_INDEX = ${JSON.stringify(searchIndex)};\n`;
+    const searchIndexBlobs = searchIndexArtifacts(searchIndex)
+      .map((artifact) => ({ path: artifact.path, mode: '100644', type: 'blob', content: artifact.content }));
 
     const ref = await gh(token, `/git/ref/heads/${encodeURIComponent(BRANCH)}`);
     const parentSha = ref.object.sha;
@@ -748,8 +750,7 @@ export async function onRequestPost(context) {
           ...(coverEntry ? [coverEntry] : []),
           { path: 'data/posts.json', mode: '100644', type: 'blob', content: postsJson },
           { path: 'data/posts.js', mode: '100644', type: 'blob', content: postsJs },
-          { path: 'data/search-index.json', mode: '100644', type: 'blob', content: searchIndexJson },
-          { path: 'data/search-index.js', mode: '100644', type: 'blob', content: searchIndexJs }
+          ...searchIndexBlobs
         ]
       })
     });
