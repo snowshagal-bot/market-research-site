@@ -41,6 +41,78 @@
   const resultDetail = $('manage-result-detail');
   const resultHome = $('manage-result-home');
   const resultContinue = $('manage-result-continue');
+  const manageTagOptions = $('manage-tag-options');
+  const manageTagsCount = $('manage-tags-count');
+  const tagRegistry = window.TAG_REGISTRY || {
+    flows: { ko: '수급', en: 'Flows' },
+    semiconductors: { ko: '반도체', en: 'Semiconductors' },
+    rates: { ko: '금리', en: 'Rates' },
+    fx: { ko: '환율', en: 'FX' },
+    treasuries: { ko: '미국채', en: 'U.S. Treasuries' },
+    fed: { ko: '연준', en: 'Fed' },
+    futures: { ko: '선물·파생', en: 'Futures & Derivatives' },
+    ai: { ko: 'AI', en: 'AI' },
+    'cloud-datacenter': { ko: '클라우드·데이터센터', en: 'Cloud & Datacenters' },
+    stablecoins: { ko: '스테이블코인', en: 'Stablecoins' },
+    crypto: { ko: '크립토', en: 'Crypto' },
+    gold: { ko: '금', en: 'Gold' },
+    autos: { ko: '자동차', en: 'Automotive' },
+    energy: { ko: '에너지', en: 'Energy' },
+    policy: { ko: '정책', en: 'Policy' },
+    geopolitics: { ko: '지정학', en: 'Geopolitics' }
+  };
+
+  function escapeHtml(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function renderManageTagSelector() {
+    if (!manageTagOptions) return;
+    manageTagOptions.innerHTML = Object.entries(tagRegistry).map(([id, info]) => `
+      <label class="tag-chip">
+        <input type="checkbox" name="manage-tags" value="${escapeHtml(id)}">
+        <span>${escapeHtml(info.ko || id)}</span>
+      </label>
+    `).join('');
+
+    if (typeof manageTagOptions.querySelectorAll === 'function') {
+      manageTagOptions.querySelectorAll('input[name="manage-tags"]').forEach(cb => {
+        cb.addEventListener('change', () => updateManageTagSelection());
+      });
+    }
+    updateManageTagSelection();
+  }
+
+  function getSelectedManageTags() {
+    if (!manageTagOptions || typeof manageTagOptions.querySelectorAll !== 'function') return [];
+    return [...manageTagOptions.querySelectorAll('input[name="manage-tags"]:checked')].map(cb => cb.value);
+  }
+
+  function setSelectedManageTags(tags = []) {
+    if (!manageTagOptions || typeof manageTagOptions.querySelectorAll !== 'function') return;
+    const tagSet = new Set(tags);
+    manageTagOptions.querySelectorAll('input[name="manage-tags"]').forEach(cb => {
+      cb.checked = tagSet.has(cb.value);
+    });
+    updateManageTagSelection();
+  }
+
+  function updateManageTagSelection() {
+    const selected = getSelectedManageTags();
+    const count = selected.length;
+    if (manageTagsCount) manageTagsCount.textContent = `${count}/3`;
+
+    if (manageTagOptions && typeof manageTagOptions.querySelectorAll === 'function') {
+      manageTagOptions.querySelectorAll('input[name="manage-tags"]').forEach(cb => {
+        if (!cb.checked) {
+          cb.disabled = count >= 3;
+        } else {
+          cb.disabled = false;
+        }
+      });
+    }
+  }
+
   let posts = [];
   let activeFilter = 'all';
   let activeLanguage = 'all';
@@ -246,6 +318,7 @@
     $('manage-description').value = next.description || '';
     $('manage-summary').value = next.summary || '';
     $('current-report-link').href = `../../${next.href}`;
+    setSelectedManageTags(next.tags || []);
     document.querySelector('input[name="cover-action"][value="keep"]').checked = true;
     deleteConfirmation.hidden = true;
     deleteTitleConfirm.value = '';
@@ -327,6 +400,11 @@
     body.append('description', $('manage-description').value.trim());
     body.append('summary', $('manage-summary').value.trim());
     body.append('coverAction', coverAction());
+    const selectedTags = getSelectedManageTags();
+    selectedTags.forEach(tagId => body.append('tags', tagId));
+    if (selectedTags.length === 0) {
+      body.append('tags', '');
+    }
     if (selectedHtml) body.append('file', selectedHtml, selectedHtml.name);
     if (coverAction() === 'replace' && selectedCover) body.append('cover', selectedCover, selectedCover.name);
     return body;
@@ -578,7 +656,11 @@
     deploymentPostMatches,
     setPosts(items) { posts = items; },
     coverState() { return { selectedCover, coverDecodePending }; },
-    deploymentState() { return { activeOperation, redirectTimer }; }
+    deploymentState() { return { activeOperation, redirectTimer }; },
+    getSelectedManageTags,
+    setSelectedManageTags,
+    renderManageTagSelector
   };
+  renderManageTagSelector();
   loadPosts();
 })();

@@ -366,3 +366,34 @@ test('publish inherits canonical tags from translation counterpart when not spec
     globalThis.fetch = originalFetch;
   }
 });
+
+test('publish rejects 4 unique tags with BAD_TAGS 400', async () => {
+  const calls = githubMock([]);
+  try {
+    const { response, data } = await runPublish({
+      tags: ['flows', 'rates', 'fx', 'fed']
+    });
+    assert.equal(response.status, 400);
+    assert.equal(data.error, 'BAD_TAGS');
+    assert.equal(calls.length, 0, 'No GitHub calls should be made on validation failure');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('publish normalizes duplicate tags without rejecting', async () => {
+  const calls = githubMock([]);
+  try {
+    const { response, data } = await runPublish({
+      tags: ['flows', 'flows', 'rates']
+    });
+    assert.equal(response.status, 200);
+
+    const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+    const postsEntry = tree.find(entry => entry.path === 'data/posts.json');
+    const posts = JSON.parse(postsEntry.content);
+    assert.deepEqual(posts[0].tags, ['flows', 'rates']);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

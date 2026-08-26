@@ -106,8 +106,8 @@ window.RESEARCH_POSTS = [
     "translationGroup": "2026-08-23-research-1xleg6o",
     "coverImage": "covers/2026-08-23-research-16pvcxp.webp",
     "tags": [
-      "rates",
       "treasuries",
+      "rates",
       "policy"
     ],
     "readingMinutes": 25
@@ -128,8 +128,8 @@ window.RESEARCH_POSTS = [
     "href": "reports/비정기리서치_미국의비싸진30년_2026.08.23_커버통합.html",
     "coverImage": "covers/2026-08-23-research-1xleg6o.webp",
     "tags": [
-      "rates",
       "treasuries",
+      "rates",
       "policy"
     ],
     "readingMinutes": 22
@@ -152,8 +152,7 @@ window.RESEARCH_POSTS = [
     "translationGroup": "2026-08-21-daily-1i56f22",
     "coverImage": "covers/2026-08-21-daily-16tx7f1.webp",
     "tags": [
-      "fx",
-      "rates",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 14
@@ -176,8 +175,7 @@ window.RESEARCH_POSTS = [
     "updatedAt": "2026-08-23T08:25:49.091Z",
     "summary": "삼성전자·SK하이닉스가 반등하며 코스피는 0.88% 올랐지만, 오른 종목은 21.3%에 그쳤고 코스닥은 4.63% 급락했다. 대형 반도체 두 종목이 지수를 받친 반면 반도체 업종 171개 중 152개가 하락한, 지수와 종목 전반의 흐름이 다시 갈라진 하루를 살펴본다.",
     "tags": [
-      "fx",
-      "rates",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 14
@@ -199,9 +197,9 @@ window.RESEARCH_POSTS = [
     "href": "reports/en/2026-08-20_KOSPI_Daily_Report_EN_Benchmark (1).html",
     "coverImage": "covers/2026-08-20-daily-1ctu7fr.webp",
     "tags": [
-      "semiconductors",
       "flows",
-      "futures"
+      "semiconductors",
+      "rates"
     ],
     "readingMinutes": 15
   },
@@ -225,7 +223,7 @@ window.RESEARCH_POSTS = [
     "tags": [
       "semiconductors",
       "flows",
-      "futures"
+      "treasuries"
     ],
     "readingMinutes": 15
   },
@@ -247,9 +245,9 @@ window.RESEARCH_POSTS = [
     "translationGroup": "2026-08-19-daily-kuhjks",
     "coverImage": "covers/2026-08-19-daily-otvpwu.webp",
     "tags": [
-      "rates",
       "treasuries",
-      "flows"
+      "rates",
+      "semiconductors"
     ],
     "readingMinutes": 14
   },
@@ -271,9 +269,9 @@ window.RESEARCH_POSTS = [
     "updatedAt": "2026-08-23T08:26:28.075Z",
     "summary": "미 30년물이 장중 5.33%대까지 오르고 미국 반도체주가 급락하자 삼성전자·SK하이닉스를 중심으로 코스피가 5.80% 무너졌다. 외국인이 3.49조 원을 팔고 개인이 4.64조 원을 받아낸 가운데, 높은 금리가 가장 많이 오른 대형 메모리부터 압박한 하루를 분석한다.",
     "tags": [
-      "rates",
       "treasuries",
-      "flows"
+      "rates",
+      "semiconductors"
     ],
     "readingMinutes": 13
   },
@@ -296,7 +294,6 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-18-daily-tfmejq.webp",
     "tags": [
       "semiconductors",
-      "ai",
       "flows"
     ],
     "readingMinutes": 13
@@ -320,7 +317,7 @@ window.RESEARCH_POSTS = [
     "tags": [
       "rates",
       "fx",
-      "fed"
+      "geopolitics"
     ],
     "readingMinutes": 26
   },
@@ -342,7 +339,7 @@ window.RESEARCH_POSTS = [
     "tags": [
       "rates",
       "fx",
-      "fed"
+      "geopolitics"
     ],
     "readingMinutes": 23
   },
@@ -365,7 +362,6 @@ window.RESEARCH_POSTS = [
     "summary": "메모리 호재로 장중 7,200선을 넘었던 코스피는 기관·비차익 매도에 밀려 1.55% 하락했고, 오른 종목은 22%에 그쳤다. 외국인 매수는 이어졌지만 규모가 급감한 가운데, 호재가 SK하이닉스에만 남고 시장 전반으로 퍼지지 못한 하루를 살펴본다",
     "tags": [
       "semiconductors",
-      "ai",
       "flows"
     ],
     "readingMinutes": 13
@@ -431,10 +427,7 @@ window.RESEARCH_POSTS = [
     "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
     "href": "reports/시장을읽는말들_4편_좋은회사가왜좋은주식은아닌가.html",
     "coverImage": "covers/2026-08-15-basics-1cd8c9w.webp",
-    "tags": [
-      "policy",
-      "flows"
-    ],
+    "tags": [],
     "readingMinutes": 8
   },
   {
@@ -499,9 +492,9 @@ window.RESEARCH_POSTS = [
     "href": "reports/en/Market_Language_Ep3_How_US_Data_Reaches_Korea.html",
     "coverImage": "covers/2026-08-13-basics-1cmfur2.webp",
     "tags": [
-      "rates",
-      "fx",
-      "fed"
+      "flows",
+      "semiconductors",
+      "rates"
     ],
     "readingMinutes": 9
   },
@@ -545,9 +538,8 @@ window.RESEARCH_POSTS = [
     "translationGroup": "2026-08-13-daily-1tgqr3y",
     "coverImage": "covers/2026-08-13-daily-1nnspvd.webp",
     "tags": [
-      "flows",
-      "futures",
-      "semiconductors"
+      "semiconductors",
+      "flows"
     ],
     "readingMinutes": 12
   },
@@ -568,9 +560,8 @@ window.RESEARCH_POSTS = [
     "href": "reports/8월 13일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-08-13-daily-1tgqr3y.webp",
     "tags": [
-      "flows",
-      "futures",
-      "semiconductors"
+      "semiconductors",
+      "flows"
     ],
     "readingMinutes": 12
   },
@@ -614,8 +605,7 @@ window.RESEARCH_POSTS = [
     "translationGroup": "2026-08-12-daily-15kwiwr",
     "coverImage": "covers/2026-08-12-daily-rk55d0.webp",
     "tags": [
-      "rates",
-      "fx",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 11
@@ -638,8 +628,7 @@ window.RESEARCH_POSTS = [
     "updatedAt": "2026-08-13T14:36:30.744Z",
     "summary": "외국인 2.84조 원이 삼성전자·SK하이닉스 등 대형 IT에 집중되며 코스피는 3.68% 급등했다. 하지만 오른 종목은 절반에도 못 미쳐, 대형 반도체가 끌어올린 지수와 시장 전체의 온도차를 살펴본다.",
     "tags": [
-      "rates",
-      "fx",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 11
@@ -660,8 +649,9 @@ window.RESEARCH_POSTS = [
     "href": "reports/en/Market_Language_Ep2_When_Cash_and_Futures_Diverge.html",
     "coverImage": "covers/2026-08-11-basics-1bmtot3.webp",
     "tags": [
-      "futures",
-      "flows"
+      "flows",
+      "semiconductors",
+      "rates"
     ],
     "readingMinutes": 7
   },
@@ -683,9 +673,7 @@ window.RESEARCH_POSTS = [
     "translationGroup": "2026-08-11-daily-12vx8a7",
     "coverImage": "covers/2026-08-11-daily-yxlmio.webp",
     "tags": [
-      "flows",
-      "semiconductors",
-      "fx"
+      "flows"
     ],
     "readingMinutes": 16
   },
@@ -703,7 +691,6 @@ window.RESEARCH_POSTS = [
     "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
     "href": "reports/시장을읽는말들_1편_주가는누가움직이는가.html",
     "tags": [
-      "futures",
       "flows"
     ],
     "readingMinutes": 5
@@ -724,9 +711,7 @@ window.RESEARCH_POSTS = [
     "updatedAt": "2026-08-11T15:03:02.337Z",
     "coverImage": "covers/2026-08-11-daily-12vx8a7.png",
     "tags": [
-      "flows",
-      "semiconductors",
-      "fx"
+      "flows"
     ],
     "readingMinutes": 15
   },
@@ -747,7 +732,8 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-10-basics-f7gadj.webp",
     "tags": [
       "flows",
-      "futures"
+      "semiconductors",
+      "rates"
     ],
     "readingMinutes": 6
   },
@@ -769,9 +755,9 @@ window.RESEARCH_POSTS = [
     "translationGroup": "2026-08-10-weekly-1rva1f6",
     "coverImage": "covers/2026-08-10-daily-1bb8z4p.webp",
     "tags": [
-      "fx",
-      "rates",
-      "flows"
+      "semiconductors",
+      "autos",
+      "energy"
     ],
     "readingMinutes": 11
   },
@@ -792,9 +778,9 @@ window.RESEARCH_POSTS = [
     "translationGroup": "2026-08-10-weekly-1rva1f6",
     "coverImage": "covers/2026-08-10-weekly-hez6ok.webp",
     "tags": [
-      "fed",
-      "rates",
-      "fx"
+      "semiconductors",
+      "autos",
+      "energy"
     ],
     "readingMinutes": 25
   },
@@ -814,9 +800,9 @@ window.RESEARCH_POSTS = [
     "href": "reports/8월 2주차 위클리 분석.html",
     "coverImage": "covers/2026-08-10-weekly-1rva1f6.webp",
     "tags": [
-      "fed",
-      "rates",
-      "fx"
+      "semiconductors",
+      "autos",
+      "energy"
     ],
     "readingMinutes": 22
   },
@@ -835,8 +821,7 @@ window.RESEARCH_POSTS = [
     "href": "reports/8월 10일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-08-10-daily-1evguss.webp",
     "tags": [
-      "fx",
-      "rates",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 11
@@ -904,9 +889,9 @@ window.RESEARCH_POSTS = [
     "translationGroup": "2026-08-07-daily",
     "coverImage": "covers/2026-08-07-daily-cjwe8f.webp",
     "tags": [
-      "fx",
-      "flows",
-      "futures"
+      "semiconductors",
+      "energy",
+      "flows"
     ],
     "readingMinutes": 17
   },
@@ -926,9 +911,9 @@ window.RESEARCH_POSTS = [
     "updatedAt": "2026-08-12T08:55:08.003Z",
     "summary": "대형 반도체가 흔들린 자리를 2차전지와 정유가 메웠고, 기관은 닷새 만에 현물 매수로 돌아섰다. 지수는 하락했지만 상승 종목이 더 많았던 장에서 칩에서 다른 대형주로 이동한 자금의 방향을 추적한다.",
     "tags": [
-      "fx",
-      "flows",
-      "futures"
+      "semiconductors",
+      "energy",
+      "flows"
     ],
     "readingMinutes": 14
   },
@@ -951,7 +936,7 @@ window.RESEARCH_POSTS = [
     "tags": [
       "semiconductors",
       "flows",
-      "rates"
+      "futures"
     ],
     "readingMinutes": 17
   },
@@ -975,7 +960,7 @@ window.RESEARCH_POSTS = [
     "tags": [
       "semiconductors",
       "flows",
-      "rates"
+      "futures"
     ],
     "readingMinutes": 15
   },
@@ -997,9 +982,9 @@ window.RESEARCH_POSTS = [
     "translationGroup": "2026-08-05-daily-oq9vps",
     "coverImage": "covers/2026-08-24-daily-og5aig.webp",
     "tags": [
-      "futures",
-      "flows",
-      "fx"
+      "energy",
+      "rates",
+      "flows"
     ],
     "readingMinutes": 17
   },
@@ -1019,9 +1004,9 @@ window.RESEARCH_POSTS = [
     "href": "reports/8월 5일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-08-05-daily-oq9vps.webp",
     "tags": [
-      "futures",
-      "flows",
-      "fx"
+      "energy",
+      "rates",
+      "flows"
     ],
     "readingMinutes": 15
   },
@@ -1043,9 +1028,8 @@ window.RESEARCH_POSTS = [
     "translationGroup": "2026-08-04-daily-wfcoi4",
     "coverImage": "covers/2026-08-24-daily-1nyohtr.webp",
     "tags": [
-      "futures",
-      "flows",
-      "fx"
+      "semiconductors",
+      "flows"
     ],
     "readingMinutes": 16
   },
@@ -1066,9 +1050,8 @@ window.RESEARCH_POSTS = [
     "href": "reports/8월 4일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-08-04-daily-wfcoi4.webp",
     "tags": [
-      "futures",
-      "flows",
-      "fx"
+      "semiconductors",
+      "flows"
     ],
     "readingMinutes": 14
   },
@@ -1089,8 +1072,8 @@ window.RESEARCH_POSTS = [
     "translationGroup": "2026-08-week1-weekly",
     "coverImage": "covers/2026-08-03-weekly-yqni0t.webp",
     "tags": [
-      "fed",
       "rates",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 24
@@ -1112,9 +1095,9 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-03-daily-ely1wy.webp",
     "summary": "Two heavyweight stocks dragged the index, while the rest of the market went its own way.",
     "tags": [
-      "rates",
-      "treasuries",
-      "flows"
+      "flows",
+      "semiconductors",
+      "rates"
     ],
     "readingMinutes": 12
   },
@@ -1134,8 +1117,7 @@ window.RESEARCH_POSTS = [
     "updatedAt": "2026-08-12T08:54:11.084Z",
     "summary": "대형 반도체 급락과 외국인 매도로 코스피는 크게 밀렸지만, 코스닥은 오르고 상승 종목도 더 많았다. 지수의 급락과 시장 전체의 방향이 갈라진 이유, 그리고 대형 메모리 밖 성장주로 이동한 자금을 살펴본다",
     "tags": [
-      "rates",
-      "treasuries",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 12
@@ -1155,8 +1137,8 @@ window.RESEARCH_POSTS = [
     "href": "reports/8월 1주차 위클리 분석.html",
     "coverImage": "covers/2026-08-week1-weekly.webp",
     "tags": [
-      "fed",
       "rates",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 23
@@ -1180,7 +1162,7 @@ window.RESEARCH_POSTS = [
     "tags": [
       "semiconductors",
       "flows",
-      "fx"
+      "futures"
     ],
     "readingMinutes": 12
   },
@@ -1201,8 +1183,7 @@ window.RESEARCH_POSTS = [
     "href": "reports/7월 30일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-07-30-daily-10k99v5.webp",
     "tags": [
-      "fed",
-      "rates",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 10
@@ -1225,9 +1206,8 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-07-29-research-4eg0o9.webp",
     "summary": "The first mistakes two different metrics for the same number; the second confuses the cause with the amplifier. Beneath the visible flows, we read the submerged structure.",
     "tags": [
-      "stablecoins",
-      "crypto",
-      "fx"
+      "flows",
+      "futures"
     ],
     "readingMinutes": 13
   },
@@ -1269,9 +1249,8 @@ window.RESEARCH_POSTS = [
     "summary": "외국인은 대규모로 팔았는데 보유비중은 오르고, 급락의 범인으로 지목된 레버리지는 단독 원인으로 보기 어렵다. 외국인 수급·대형주 쏠림·레버리지 리밸런싱을 따라가며 **숫자 뒤에 숨은 시장 구조**를 살펴본다.",
     "href": "reports/7월 29일 비정기 리서치_두 개의 착시.html",
     "tags": [
-      "stablecoins",
-      "crypto",
-      "fx"
+      "flows",
+      "futures"
     ],
     "readingMinutes": 12
   },
@@ -1292,7 +1271,7 @@ window.RESEARCH_POSTS = [
     "href": "reports/7월 28일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-07-28-daily-g24k4s.webp",
     "tags": [
-      "rates",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 12
@@ -1315,7 +1294,8 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-07-27-daily-1og5hu.webp",
     "tags": [
       "flows",
-      "semiconductors"
+      "energy",
+      "ai"
     ],
     "readingMinutes": 10
   },
@@ -1336,9 +1316,9 @@ window.RESEARCH_POSTS = [
     "href": "reports/7월 5주차 위클리 분석.html",
     "coverImage": "covers/2026-08-12-weekly-1macab6.webp",
     "tags": [
+      "semiconductors",
       "rates",
-      "fed",
-      "treasuries"
+      "ai"
     ],
     "readingMinutes": 25
   },
@@ -1359,9 +1339,9 @@ window.RESEARCH_POSTS = [
     "href": "reports/7월 4주차 위클리 분석_에디토리얼형.html",
     "coverImage": "covers/2026-07-20-weekly-1u5gndk.webp",
     "tags": [
+      "fed",
       "semiconductors",
-      "flows",
-      "rates"
+      "cloud-datacenter"
     ],
     "readingMinutes": 18
   },
@@ -1381,9 +1361,9 @@ window.RESEARCH_POSTS = [
     "href": "reports/7월 2주차 위클리 분석1.html",
     "coverImage": "covers/2026-07-13-weekly-um5mnf.png",
     "tags": [
+      "semiconductors",
       "rates",
-      "fed",
-      "treasuries"
+      "energy"
     ],
     "readingMinutes": 11
   },
@@ -1404,9 +1384,7 @@ window.RESEARCH_POSTS = [
     "href": "reports/7월 1주차 위클리 분석.html",
     "coverImage": "covers/2026-07-06-weekly-a0ek97.png",
     "tags": [
-      "rates",
-      "fx",
-      "geopolitics"
+      "flows"
     ],
     "readingMinutes": 10
   }

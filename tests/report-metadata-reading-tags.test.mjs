@@ -1,4 +1,4 @@
-﻿import test from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -169,3 +169,111 @@ test('UI templates and styles: site.js, home-v2.css, and index.html support tags
   assert.match(homeCss, /\.calendar-preview-tags/);
   assert.match(homeCss, /\.search-result-tags/);
 });
+
+test('Canonical Registry: Single Source of Truth consistency across all files', () => {
+  const tagsJson = JSON.parse(fs.readFileSync(path.join(rootDir, 'data', 'tags.json'), 'utf8'));
+  const tagsJs = fs.readFileSync(path.join(rootDir, 'data', 'tags.js'), 'utf8');
+  const publishJs = fs.readFileSync(path.join(rootDir, 'functions', 'api', 'publish.js'), 'utf8');
+  const manageJs = fs.readFileSync(path.join(rootDir, 'functions', 'api', 'manage.js'), 'utf8');
+  const siteJs = fs.readFileSync(path.join(rootDir, 'assets', 'site.js'), 'utf8');
+
+  const jsonKeys = Object.keys(tagsJson).sort();
+  assert.equal(jsonKeys.length, 16, 'Exactly 16 canonical tags in tags.json');
+
+  // tags.js verification
+  for (const k of jsonKeys) {
+    assert.ok(tagsJs.includes(`"${k}"`) || tagsJs.includes(`'${k}'`), `tags.js must contain tag "${k}"`);
+  }
+
+  // publish.js verification
+  for (const k of jsonKeys) {
+    assert.ok(publishJs.includes(`'${k}'`) || publishJs.includes(`"${k}"`), `publish.js CANONICAL_TAGS must contain "${k}"`);
+  }
+
+  // manage.js verification
+  for (const k of jsonKeys) {
+    assert.ok(manageJs.includes(`'${k}'`) || manageJs.includes(`"${k}"`), `manage.js CANONICAL_TAGS must contain "${k}"`);
+  }
+
+  // site.js verification
+  for (const k of jsonKeys) {
+    assert.ok(siteJs.includes(`'${k}'`) || siteJs.includes(`"${k}"`), `site.js fallback registry must contain "${k}"`);
+  }
+});
+
+test('Admin UI Tag Selectors: Publish & Manage tag selector markup and scripts', () => {
+  const adminHtml = fs.readFileSync(path.join(rootDir, 'admin', 'index.html'), 'utf8');
+  const adminJs = fs.readFileSync(path.join(rootDir, 'assets', 'admin.js'), 'utf8');
+  const manageHtml = fs.readFileSync(path.join(rootDir, 'admin', 'manage', 'index.html'), 'utf8');
+  const manageJs = fs.readFileSync(path.join(rootDir, 'assets', 'admin-manage.js'), 'utf8');
+
+  // Admin Publish
+  assert.match(adminHtml, /id="tag-options"/);
+  assert.match(adminHtml, /id="tags-count"/);
+  assert.match(adminHtml, /data\/tags\.js/);
+  assert.match(adminJs, /renderTagSelector/);
+  assert.match(adminJs, /getSelectedTags/);
+  assert.match(adminJs, /setSelectedTags/);
+  assert.match(adminJs, /form\.append\('tags'/);
+
+  // Admin Manage
+  assert.match(manageHtml, /id="manage-tag-options"/);
+  assert.match(manageHtml, /id="manage-tags-count"/);
+  assert.match(manageHtml, /data\/tags\.js/);
+  assert.match(manageJs, /renderManageTagSelector/);
+  assert.match(manageJs, /getSelectedManageTags/);
+  assert.match(manageJs, /setSelectedManageTags/);
+  assert.match(manageJs, /body\.append\('tags'/);
+});
+
+test('Semantic Backfill Quality: Varied tag distribution (0, 1, 2, 3 tags allowed)', () => {
+  const posts = JSON.parse(fs.readFileSync(path.join(rootDir, 'data', 'posts.json'), 'utf8'));
+  const counts = { 0: 0, 1: 0, 2: 0, 3: 0, '4+': 0 };
+
+  for (const post of posts) {
+    const len = post.tags.length;
+    if (len === 0) counts[0]++;
+    else if (len === 1) counts[1]++;
+    else if (len === 2) counts[2]++;
+    else if (len === 3) counts[3]++;
+    else counts['4+']++;
+  }
+
+  assert.equal(counts['4+'], 0, 'No post can have more than 3 tags');
+  assert.ok(counts[0] > 0, '0-tag posts exist where no taxonomy fit exists');
+  assert.ok(counts[1] > 0, '1-tag posts exist where 1 core topic fits');
+  assert.ok(counts[2] > 0, '2-tag posts exist');
+  assert.ok(counts[3] > 0, '3-tag posts exist');
+
+  // Specific semantic checks requested by user
+  const twoWires = posts.find(p => p.id === '2026-08-21-daily-1i56f22');
+  assert.ok(twoWires.tags.includes('semiconductors'), '"두 개의 와이어" must include semiconductors');
+
+  const godot = posts.find(p => p.id === '2026-08-12-daily-15kwiwr');
+  assert.ok(godot.tags.includes('semiconductors'), '"고도(高度)를 기다리며" must include semiconductors');
+
+  const twoPauses = posts.find(p => p.id === '2026-08-10-daily-1evguss');
+  assert.ok(twoPauses.tags.includes('semiconductors'), '"멈춘 두 줄기, 번지는 들판" must include semiconductors');
+
+  const semiNext = posts.find(p => p.id === '2026-08-10-weekly-1rva1f6');
+  assert.ok(semiNext.tags.includes('semiconductors'), '"반도체 다음의 자리" must include semiconductors');
+
+  const goodCompany = posts.find(p => p.id === '2026-08-15-basics-1cd8c9w');
+  assert.equal(goodCompany.tags.length, 0, '"좋은 회사가 왜 좋은 주식은 아닌가" has 0 tags since general valuation concepts do not match narrow topics');
+});
+
+test('KO/EN Pair Tag Equality: All translation pairs share identical canonical tags', () => {
+  const posts = JSON.parse(fs.readFileSync(path.join(rootDir, 'data', 'posts.json'), 'utf8'));
+  const enPosts = posts.filter(p => p.lang === 'en');
+
+  let pairCount = 0;
+  for (const en of enPosts) {
+    const ko = posts.find(p => p.lang !== 'en' && (p.translationGroup === en.translationGroup || p.id === en.translationGroup));
+    if (ko) {
+      assert.deepEqual(en.tags, ko.tags, `Pair mismatch: KO(${ko.id}) vs EN(${en.id})`);
+      pairCount++;
+    }
+  }
+  assert.ok(pairCount >= 20, 'At least 20 translation pairs verified');
+});
+

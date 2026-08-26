@@ -241,12 +241,15 @@ function parseAndValidateTags(inputTags, counterpartTags = []) {
     rawTags = counterpartTags;
   }
   const normalized = Array.from(new Set(rawTags.map(t => String(t).trim().toLowerCase()))).filter(Boolean);
+  if (normalized.length > 3) {
+    return { error: '태그는 최대 3개까지만 지정할 수 있습니다.' };
+  }
   for (const t of normalized) {
     if (!CANONICAL_TAGS.has(t)) {
       return { error: `허용되지 않은 태그입니다: ${t}` };
     }
   }
-  return { tags: normalized.slice(0, 3) };
+  return { tags: normalized };
 }
 
 function hasMatchingUniqueIds(posts, searchIndex) {

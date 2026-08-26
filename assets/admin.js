@@ -18,6 +18,9 @@
   const subtitle = $('post-subtitle');
   const description = $('post-description');
   const postSummary = $('post-summary');
+  const tagOptionsContainer = $('tag-options');
+  const tagsCount = $('tags-count');
+  const tagsStatus = $('tags-status');
   const filename = $('post-filename');
   const coverInput = $('cover-file');
   const coverInfo = $('cover-info');
@@ -123,6 +126,72 @@
     return /^20\d{2}-\d{2}-\d{2}$/.test(value) ? value : '';
   }
 
+  const tagRegistry = window.TAG_REGISTRY || {
+    flows: { ko: '수급', en: 'Flows' },
+    semiconductors: { ko: '반도체', en: 'Semiconductors' },
+    rates: { ko: '금리', en: 'Rates' },
+    fx: { ko: '환율', en: 'FX' },
+    treasuries: { ko: '미국채', en: 'U.S. Treasuries' },
+    fed: { ko: '연준', en: 'Fed' },
+    futures: { ko: '선물·파생', en: 'Futures & Derivatives' },
+    ai: { ko: 'AI', en: 'AI' },
+    'cloud-datacenter': { ko: '클라우드·데이터센터', en: 'Cloud & Datacenters' },
+    stablecoins: { ko: '스테이블코인', en: 'Stablecoins' },
+    crypto: { ko: '크립토', en: 'Crypto' },
+    gold: { ko: '금', en: 'Gold' },
+    autos: { ko: '자동차', en: 'Automotive' },
+    energy: { ko: '에너지', en: 'Energy' },
+    policy: { ko: '정책', en: 'Policy' },
+    geopolitics: { ko: '지정학', en: 'Geopolitics' }
+  };
+
+  function renderTagSelector() {
+    if (!tagOptionsContainer) return;
+    tagOptionsContainer.innerHTML = Object.entries(tagRegistry).map(([id, info]) => `
+      <label class="tag-chip">
+        <input type="checkbox" name="post-tags" value="${escapeHtml(id)}">
+        <span>${escapeHtml(info.ko || id)}</span>
+      </label>
+    `).join('');
+
+    if (typeof tagOptionsContainer.querySelectorAll === 'function') {
+      tagOptionsContainer.querySelectorAll('input[name="post-tags"]').forEach(cb => {
+        cb.addEventListener('change', () => updateTagSelection());
+      });
+    }
+    updateTagSelection();
+  }
+
+  function getSelectedTags() {
+    if (!tagOptionsContainer || typeof tagOptionsContainer.querySelectorAll !== 'function') return [];
+    return [...tagOptionsContainer.querySelectorAll('input[name="post-tags"]:checked')].map(cb => cb.value);
+  }
+
+  function setSelectedTags(tags = []) {
+    if (!tagOptionsContainer || typeof tagOptionsContainer.querySelectorAll !== 'function') return;
+    const tagSet = new Set(tags);
+    tagOptionsContainer.querySelectorAll('input[name="post-tags"]').forEach(cb => {
+      cb.checked = tagSet.has(cb.value);
+    });
+    updateTagSelection();
+  }
+
+  function updateTagSelection() {
+    const selected = getSelectedTags();
+    const count = selected.length;
+    if (tagsCount) tagsCount.textContent = `${count}/3`;
+
+    if (tagOptionsContainer && typeof tagOptionsContainer.querySelectorAll === 'function') {
+      tagOptionsContainer.querySelectorAll('input[name="post-tags"]').forEach(cb => {
+        if (!cb.checked) {
+          cb.disabled = count >= 3;
+        } else {
+          cb.disabled = false;
+        }
+      });
+    }
+  }
+
   function syncPairedReportDate() {
     const pair = pairedTranslationPost();
     if (!pair) {
@@ -136,6 +205,13 @@
       return;
     }
     date.value = pairDate;
+    if (Array.isArray(pair.tags) && pair.tags.length) {
+      setSelectedTags(pair.tags);
+      if (tagsStatus) {
+        const localizedNames = pair.tags.map(t => tagRegistry[t]?.ko || t).join(', ');
+        tagsStatus.textContent = `번역 짝의 주제 태그(${localizedNames})를 자동 반영했습니다.`;
+      }
+    }
     if (translationSourceStatus) {
       translationSourceStatus.textContent = `번역 짝의 리포트 기준일 ${pairDate}을 자동 적용했습니다.`;
     }
@@ -611,6 +687,8 @@
     form.append('filename', filename.value.trim());
     form.append('lang', language);
     if (translationSource?.value) form.append('translationGroup', translationSource.value);
+    const selectedTags = getSelectedTags();
+    selectedTags.forEach(tagId => form.append('tags', tagId));
     if (selectedCover) form.append('cover', selectedCover, selectedCover.name);
 
     try {
@@ -705,6 +783,7 @@
 
   window.addEventListener('pagehide', revokeCoverPreviewUrl);
 
+  renderTagSelector();
   setLanguage(postLanguage?.value || 'ko');
   if (isPreviewHost(location.hostname)) status.textContent = 'Preview와 로컬 환경에서는 실제 게시가 비활성화됩니다.';
   updatePublishState();

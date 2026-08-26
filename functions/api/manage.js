@@ -327,12 +327,15 @@ function parseAndValidateTags(inputTags) {
     rawTags = inputTags.split(/[,\s]+/).map(t => t.trim()).filter(Boolean);
   }
   const normalized = Array.from(new Set(rawTags.map(t => String(t).trim().toLowerCase()))).filter(Boolean);
+  if (normalized.length > 3) {
+    return { error: '태그는 최대 3개까지만 지정할 수 있습니다.' };
+  }
   for (const t of normalized) {
     if (!CANONICAL_TAGS.has(t)) {
       return { error: `허용되지 않은 태그입니다: ${t}` };
     }
   }
-  return { tags: normalized.slice(0, 3) };
+  return { tags: normalized };
 }
 
 function validateEditableFields(form) {
@@ -349,7 +352,7 @@ function validateEditableFields(form) {
     tagsProvided = true;
     const rawInputTags = form.getAll('tags').length > 1 ? form.getAll('tags') : form.get('tags');
     const tagRes = parseAndValidateTags(rawInputTags);
-    if (tagRes.error) return { error: tagRes.error };
+    if (tagRes.error) return { error: tagRes.error, errorCode: "BAD_TAGS" };
     tags = tagRes.tags;
   }
 
@@ -400,7 +403,7 @@ export async function onRequestPost(context) {
 
   if (action === "update") {
     editFields = validateEditableFields(form);
-    if (editFields.error) return reply({ ok: false, error: "INVALID_INPUT", message: editFields.error }, 400);
+    if (editFields.error) return reply({ ok: false, error: editFields.errorCode || "INVALID_INPUT", message: editFields.error }, 400);
 
     const file = form.get("file");
     if (isFile(file) && file.size > 0) {

@@ -90,8 +90,8 @@
     "registeredAt": "2026-08-25T15:44:42.398Z",
     "summary": "Independent research on specific industries, companies, policies, and market structure.",
     "tags": [
-      "rates",
       "treasuries",
+      "rates",
       "policy"
     ],
     "readingMinutes": 25,
@@ -110,8 +110,8 @@
     "registeredAt": "2026-08-25T14:40:56.666Z",
     "summary": "특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.",
     "tags": [
-      "rates",
       "treasuries",
+      "rates",
       "policy"
     ],
     "readingMinutes": 22,
@@ -130,8 +130,7 @@
     "registeredAt": "2026-08-24T18:25:49.152Z",
     "summary": "193 stocks up.683 stocks down.",
     "tags": [
-      "fx",
-      "rates",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 14,
@@ -150,8 +149,7 @@
     "registeredAt": "2026-08-23T07:29:22.905Z",
     "summary": "삼성전자·SK하이닉스가 반등하며 코스피는 0.88% 올랐지만, 오른 종목은 21.3%에 그쳤고 코스닥은 4.63% 급락했다. 대형 반도체 두 종목이 지수를 받친 반면 반도체 업종 171개 중 152개가 하락한, 지수와 종목 전반의 흐름이 다시 갈라진 하루를 살펴본다.",
     "tags": [
-      "fx",
-      "rates",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 14,
@@ -170,9 +168,9 @@
     "registeredAt": "2026-08-24T17:10:54.138Z",
     "summary": "Prior-session high 6,614.39.Today's open 6,680.34.",
     "tags": [
-      "semiconductors",
       "flows",
-      "futures"
+      "semiconductors",
+      "rates"
     ],
     "readingMinutes": 15,
     "url": "/reports/en/2026-08-20_KOSPI_Daily_Report_EN_Benchmark (1).html",
@@ -192,7 +190,7 @@
     "tags": [
       "semiconductors",
       "flows",
-      "futures"
+      "treasuries"
     ],
     "readingMinutes": 15,
     "url": "/reports/8월 20일 주식리포트_커버통합.html",
@@ -210,9 +208,9 @@
     "registeredAt": "2026-08-24T18:19:10.656Z",
     "summary": "As the 30-year yield hit a high,the biggest prior winners were sold first",
     "tags": [
-      "rates",
       "treasuries",
-      "flows"
+      "rates",
+      "semiconductors"
     ],
     "readingMinutes": 14,
     "url": "/reports/en/2026-08-19_KOSPI_Daily_Report_EN_Benchmark.html",
@@ -230,9 +228,9 @@
     "registeredAt": "2026-08-23T07:26:58.512Z",
     "summary": "미 30년물이 장중 5.33%대까지 오르고 미국 반도체주가 급락하자 삼성전자·SK하이닉스를 중심으로 코스피가 5.80% 무너졌다. 외국인이 3.49조 원을 팔고 개인이 4.64조 원을 받아낸 가운데, 높은 금리가 가장 많이 오른 대형 메모리부터 압박한 하루를 분석한다.",
     "tags": [
-      "rates",
       "treasuries",
-      "flows"
+      "rates",
+      "semiconductors"
     ],
     "readingMinutes": 13,
     "url": "/reports/8월 19일 주식리포트_커버통합.html",
@@ -251,7 +249,6 @@
     "summary": "The memory catalyststayed with SK Hynix,while institutional and non-arbitrage sellingcut breadth to 22%.",
     "tags": [
       "semiconductors",
-      "ai",
       "flows"
     ],
     "readingMinutes": 13,
@@ -272,7 +269,7 @@
     "tags": [
       "rates",
       "fx",
-      "fed"
+      "geopolitics"
     ],
     "readingMinutes": 26,
     "url": "/reports/en/2026-08-18_08-21_Korea_Weekly_Report_EN.html",
@@ -292,7 +289,7 @@
     "tags": [
       "rates",
       "fx",
-      "fed"
+      "geopolitics"
     ],
     "readingMinutes": 23,
     "url": "/reports/8월 3주차 위클리 분석.html",
@@ -311,7 +308,6 @@
     "summary": "메모리 호재로 장중 7,200선을 넘었던 코스피는 기관·비차익 매도에 밀려 1.55% 하락했고, 오른 종목은 22%에 그쳤다. 외국인 매수는 이어졌지만 규모가 급감한 가운데, 호재가 SK하이닉스에만 남고 시장 전반으로 퍼지지 못한 하루를 살펴본다",
     "tags": [
       "semiconductors",
-      "ai",
       "flows"
     ],
     "readingMinutes": 13,
@@ -369,10 +365,7 @@
     "date": "2026-08-15",
     "registeredAt": "2026-08-25T15:49:32.286Z",
     "summary": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
-    "tags": [
-      "policy",
-      "flows"
-    ],
+    "tags": [],
     "readingMinutes": 8,
     "url": "/reports/시장을읽는말들_4편_좋은회사가왜좋은주식은아닌가.html",
     "coverImage": "/covers/2026-08-15-basics-1cd8c9w.webp",
@@ -429,9 +422,9 @@
     "registeredAt": "2026-08-25T15:51:11.804Z",
     "summary": "A clear guide to the essential concepts behind markets, economics, and investing.",
     "tags": [
-      "rates",
-      "fx",
-      "fed"
+      "flows",
+      "semiconductors",
+      "rates"
     ],
     "readingMinutes": 9,
     "url": "/reports/en/Market_Language_Ep3_How_US_Data_Reaches_Korea.html",
@@ -469,9 +462,8 @@
     "registeredAt": "2026-08-24T18:03:24.015Z",
     "summary": "The Index Rose Like the Tide533 Left in the Mudflats",
     "tags": [
-      "flows",
-      "futures",
-      "semiconductors"
+      "semiconductors",
+      "flows"
     ],
     "readingMinutes": 12,
     "url": "/reports/en/2026-08-13_KOSPI_Daily_Report_EN_Benchmark (1).html",
@@ -489,9 +481,8 @@
     "registeredAt": "2026-08-13T14:26:33.160Z",
     "summary": "외국인 매수가 삼성전자·SK하이닉스에 집중되며 코스피는 3.56% 급등했지만, 오른 종목은 37%에 그쳤다. 대형 반도체가 끌어올린 지수와 더 약해진 시장 폭의 간극을 살펴본다",
     "tags": [
-      "flows",
-      "futures",
-      "semiconductors"
+      "semiconductors",
+      "flows"
     ],
     "readingMinutes": 12,
     "url": "/reports/8월 13일 주식리포트_커버통합.html",
@@ -528,8 +519,7 @@
     "registeredAt": "2026-08-24T16:18:52.772Z",
     "summary": "Two Semiconductor Giants,Waiting to Revisit Their Highs",
     "tags": [
-      "rates",
-      "fx",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 11,
@@ -548,8 +538,7 @@
     "registeredAt": "2026-08-13T14:33:16.534Z",
     "summary": "외국인 2.84조 원이 삼성전자·SK하이닉스 등 대형 IT에 집중되며 코스피는 3.68% 급등했다. 하지만 오른 종목은 절반에도 못 미쳐, 대형 반도체가 끌어올린 지수와 시장 전체의 온도차를 살펴본다.",
     "tags": [
-      "rates",
-      "fx",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 11,
@@ -568,8 +557,9 @@
     "registeredAt": "2026-08-25T15:47:11.805Z",
     "summary": "A clear guide to the essential concepts behind markets, economics, and investing.",
     "tags": [
-      "futures",
-      "flows"
+      "flows",
+      "semiconductors",
+      "rates"
     ],
     "readingMinutes": 7,
     "url": "/reports/en/Market_Language_Ep2_When_Cash_and_Futures_Diverge.html",
@@ -587,9 +577,7 @@
     "registeredAt": "2026-08-24T16:17:30.596Z",
     "summary": "One ship on the ripples.The waters ahead are still dark.",
     "tags": [
-      "flows",
-      "semiconductors",
-      "fx"
+      "flows"
     ],
     "readingMinutes": 16,
     "url": "/reports/en/2026-08-11_KOSPI_Daily_Report_EN_Benchmark.html",
@@ -607,7 +595,6 @@
     "registeredAt": "2026-08-11T17:01:07.192Z",
     "summary": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
     "tags": [
-      "futures",
       "flows"
     ],
     "readingMinutes": 5,
@@ -626,9 +613,7 @@
     "registeredAt": "2026-08-11T10:06:02.296Z",
     "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "tags": [
-      "flows",
-      "semiconductors",
-      "fx"
+      "flows"
     ],
     "readingMinutes": 15,
     "url": "/reports/8월 11일 주식리포트_커버통합.html",
@@ -647,7 +632,8 @@
     "summary": "A clear guide to the essential concepts behind markets, economics, and investing.",
     "tags": [
       "flows",
-      "futures"
+      "semiconductors",
+      "rates"
     ],
     "readingMinutes": 6,
     "url": "/reports/en/Market_Language_Ep1_Who_Moves_Stock_Prices.html",
@@ -665,9 +651,9 @@
     "registeredAt": "2026-08-24T15:01:44.842Z",
     "summary": "With Samsung Electronics and SK Hynixtaking a breather,KOSDAQ and small- and mid-cap stocksbroadened the market first.",
     "tags": [
-      "fx",
-      "rates",
-      "flows"
+      "semiconductors",
+      "autos",
+      "energy"
     ],
     "readingMinutes": 11,
     "url": "/reports/en/2026-08-10_KOSPI_Daily_Report_EN_Benchmark.html",
@@ -685,9 +671,9 @@
     "registeredAt": "2026-08-23T18:01:50.087Z",
     "summary": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
     "tags": [
-      "fed",
-      "rates",
-      "fx"
+      "semiconductors",
+      "autos",
+      "energy"
     ],
     "readingMinutes": 25,
     "url": "/reports/en/2026-08-10_08-14_Korea_Weekly_Report_EN.html",
@@ -705,9 +691,9 @@
     "registeredAt": "2026-08-23T17:56:47.515Z",
     "summary": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
     "tags": [
-      "fed",
-      "rates",
-      "fx"
+      "semiconductors",
+      "autos",
+      "energy"
     ],
     "readingMinutes": 22,
     "url": "/reports/8월 2주차 위클리 분석.html",
@@ -725,8 +711,7 @@
     "registeredAt": "2026-08-10T09:56:35.777Z",
     "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "tags": [
-      "fx",
-      "rates",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 11,
@@ -785,9 +770,9 @@
     "registeredAt": "2026-08-24T14:08:52.539Z",
     "summary": "The two market leaders diverged,and the index held its ground in between.",
     "tags": [
-      "fx",
-      "flows",
-      "futures"
+      "semiconductors",
+      "energy",
+      "flows"
     ],
     "readingMinutes": 17,
     "url": "/reports/en/8월 7일 주식리포트_커버통합_en.html",
@@ -805,9 +790,9 @@
     "registeredAt": "",
     "summary": "대형 반도체가 흔들린 자리를 2차전지와 정유가 메웠고, 기관은 닷새 만에 현물 매수로 돌아섰다. 지수는 하락했지만 상승 종목이 더 많았던 장에서 칩에서 다른 대형주로 이동한 자금의 방향을 추적한다.",
     "tags": [
-      "fx",
-      "flows",
-      "futures"
+      "semiconductors",
+      "energy",
+      "flows"
     ],
     "readingMinutes": 14,
     "url": "/reports/8월 7일 주식리포트_커버통합.html",
@@ -827,7 +812,7 @@
     "tags": [
       "semiconductors",
       "flows",
-      "rates"
+      "futures"
     ],
     "readingMinutes": 17,
     "url": "/reports/en/8월 6일 주식리포트_커버통합_en.html",
@@ -847,7 +832,7 @@
     "tags": [
       "semiconductors",
       "flows",
-      "rates"
+      "futures"
     ],
     "readingMinutes": 15,
     "url": "/reports/8월 6일 주식리포트_커버통합.html",
@@ -865,9 +850,9 @@
     "registeredAt": "2026-08-24T11:42:40.621Z",
     "summary": "As oil prices and interest rates cool.Returning hands.",
     "tags": [
-      "futures",
-      "flows",
-      "fx"
+      "energy",
+      "rates",
+      "flows"
     ],
     "readingMinutes": 17,
     "url": "/reports/en/8월 5일 주식리포트_커버통합_en.html",
@@ -885,9 +870,9 @@
     "registeredAt": "2026-08-13T14:42:18.890Z",
     "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "tags": [
-      "futures",
-      "flows",
-      "fx"
+      "energy",
+      "rates",
+      "flows"
     ],
     "readingMinutes": 15,
     "url": "/reports/8월 5일 주식리포트_커버통합.html",
@@ -905,9 +890,8 @@
     "registeredAt": "2026-08-24T11:42:15.423Z",
     "summary": "Large-cap semiconductors stalled,while the rest of the market drove the index recovery.",
     "tags": [
-      "futures",
-      "flows",
-      "fx"
+      "semiconductors",
+      "flows"
     ],
     "readingMinutes": 16,
     "url": "/reports/en/8월 4일 주식리포트_커버통합_en.html",
@@ -925,9 +909,8 @@
     "registeredAt": "2026-08-13T14:43:09.609Z",
     "summary": "장중 2.83%까지 밀렸던 코스피는 오후 들어 낙폭을 모두 되돌렸고, 219개 테마 중 218개가 상승했다. 대형 반도체가 멈춘 사이 넓어진 상승 폭이 지수를 다시 끌어올린 하루를 살펴본다.",
     "tags": [
-      "futures",
-      "flows",
-      "fx"
+      "semiconductors",
+      "flows"
     ],
     "readingMinutes": 14,
     "url": "/reports/8월 4일 주식리포트_커버통합.html",
@@ -945,8 +928,8 @@
     "registeredAt": "2026-08-23T17:33:36.749Z",
     "summary": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
     "tags": [
-      "fed",
       "rates",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 24,
@@ -965,9 +948,9 @@
     "registeredAt": "2026-08-23T15:19:07.737Z",
     "summary": "Two heavyweight stocks dragged the index, while the rest of the market went its own way.",
     "tags": [
-      "rates",
-      "treasuries",
-      "flows"
+      "flows",
+      "semiconductors",
+      "rates"
     ],
     "readingMinutes": 12,
     "url": "/reports/en/2026-08-03_KOSPI_Daily_Report_EN.html",
@@ -985,8 +968,7 @@
     "registeredAt": "2026-08-09T14:52:47.752Z",
     "summary": "대형 반도체 급락과 외국인 매도로 코스피는 크게 밀렸지만, 코스닥은 오르고 상승 종목도 더 많았다. 지수의 급락과 시장 전체의 방향이 갈라진 이유, 그리고 대형 메모리 밖 성장주로 이동한 자금을 살펴본다",
     "tags": [
-      "rates",
-      "treasuries",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 12,
@@ -1005,8 +987,8 @@
     "registeredAt": "",
     "summary": "지난주 시장을 복기하고 다음 주 변수와 주도 업종의 조건을 정리한 주간 리포트.",
     "tags": [
-      "fed",
       "rates",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 23,
@@ -1027,7 +1009,7 @@
     "tags": [
       "semiconductors",
       "flows",
-      "fx"
+      "futures"
     ],
     "readingMinutes": 12,
     "url": "/reports/7월 31일 주식리포트_커버통합.html",
@@ -1045,8 +1027,7 @@
     "registeredAt": "2026-08-13T14:50:27.388Z",
     "summary": "삼성전자 사상 최대 실적과 외국인 1.34조 원 매수 전환에도 코스피는 장중 6,000 문턱에서 밀려 상승분을 모두 반납했다. 지수와 달리 상승 종목은 613개로 넓어진 가운데, 좋은 실적이 확인되는 순간 차익 매물이 나온 이유를 살펴본다.",
     "tags": [
-      "fed",
-      "rates",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 10,
@@ -1065,9 +1046,8 @@
     "registeredAt": "2026-08-23T15:47:04.685Z",
     "summary": "The first mistakes two different metrics for the same number; the second confuses the cause with the amplifier. Beneath the visible flows, we read the submerged structure.",
     "tags": [
-      "stablecoins",
-      "crypto",
-      "fx"
+      "flows",
+      "futures"
     ],
     "readingMinutes": 13,
     "url": "/reports/en/2026-07-29_Special_Research_Two_Illusions_EN.html",
@@ -1104,9 +1084,8 @@
     "registeredAt": "2026-08-12T08:08:46.956Z",
     "summary": "외국인은 대규모로 팔았는데 보유비중은 오르고, 급락의 범인으로 지목된 레버리지는 단독 원인으로 보기 어렵다. 외국인 수급·대형주 쏠림·레버리지 리밸런싱을 따라가며 **숫자 뒤에 숨은 시장 구조**를 살펴본다.",
     "tags": [
-      "stablecoins",
-      "crypto",
-      "fx"
+      "flows",
+      "futures"
     ],
     "readingMinutes": 12,
     "url": "/reports/7월 29일 비정기 리서치_두 개의 착시.html",
@@ -1124,7 +1103,7 @@
     "registeredAt": "2026-08-13T14:47:21.696Z",
     "summary": "삼성전자·SK하이닉스 급락과 외국인 4.97조 원 매도로 코스피는 10.84% 무너졌고 양시장 서킷브레이커가 발동했다. 반도체 재평가가 시총 집중도·레버리지 구조와 겹치며 79개 업종 전부로 충격이 번진 하루를 분석한다.",
     "tags": [
-      "rates",
+      "semiconductors",
       "flows"
     ],
     "readingMinutes": 12,
@@ -1144,7 +1123,8 @@
     "summary": "외국인 2.88조 원 매도가 이어졌지만 기관과 개인의 흡수가 넓어지며 코스피는 0.97% 반등했다. 유가 하락과 AI 투자 재료가 지수를 밀어 올린 가운데, 가격 회복과 아직 복구되지 않은 외국인 수급의 간극을 살펴본다.",
     "tags": [
       "flows",
-      "semiconductors"
+      "energy",
+      "ai"
     ],
     "readingMinutes": 10,
     "url": "/reports/7월 27일 주식리포트_커버통합.html",
@@ -1162,9 +1142,9 @@
     "registeredAt": "2026-08-12T17:54:55.860Z",
     "summary": "연준은 금리를 동결했지만 장기금리는 올랐고, 빅테크의 AI 투자는 매출과 비용을 동시에 키웠다. 메모리 재고가 줄어든 가운데 애플과 삼성전자·SK하이닉스·마이크론의 협상력이 어떻게 달라졌는지, 다음 주 금리와 전기전자 수급까지 연결해 살펴본다.",
     "tags": [
+      "semiconductors",
       "rates",
-      "fed",
-      "treasuries"
+      "ai"
     ],
     "readingMinutes": 25,
     "url": "/reports/7월 5주차 위클리 분석.html",
@@ -1182,9 +1162,9 @@
     "registeredAt": "2026-08-12T17:53:38.237Z",
     "summary": "나흘간 외국인 매수로 반등하던 코스피는 금요일 5.72% 급락하며 흐름이 뒤집혔다. FOMC·SK하이닉스·빅테크 실적을 통해 좋은 실적이 다시 주가를 움직일 수 있는지, 그리고 메모리·전력 인프라로 돈이 향할 조건을 점검한다.",
     "tags": [
+      "fed",
       "semiconductors",
-      "flows",
-      "rates"
+      "cloud-datacenter"
     ],
     "readingMinutes": 18,
     "url": "/reports/7월 4주차 위클리 분석_에디토리얼형.html",
@@ -1202,9 +1182,9 @@
     "registeredAt": "2026-08-12T17:51:16.570Z",
     "summary": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
     "tags": [
+      "semiconductors",
       "rates",
-      "fed",
-      "treasuries"
+      "energy"
     ],
     "readingMinutes": 11,
     "url": "/reports/7월 2주차 위클리 분석1.html",
@@ -1222,9 +1202,7 @@
     "registeredAt": "2026-08-12T17:47:08.947Z",
     "summary": "외국인 매도는 크게 줄었는데 코스피 낙폭은 오히려 커졌다. 개인의 흡수가 멈춘 날 급락하고 기관이 들어오자 반등한 흐름을 통해, ‘누가 파느냐’보다 ‘누가 받아주느냐’가 중요해진 수급 구조와 다음 주 관문을 짚는다.",
     "tags": [
-      "rates",
-      "fx",
-      "geopolitics"
+      "flows"
     ],
     "readingMinutes": 10,
     "url": "/reports/7월 1주차 위클리 분석.html",
