@@ -44,6 +44,8 @@
   const overlayText = $('publish-state-text');
   const overlayDetail = $('publish-state-detail');
   const overlayLinks = $('publish-links');
+  const overlayErrorActions = $('publish-error-actions');
+  const overlayErrorClose = $('publish-error-close');
   const reportLink = $('published-report-link');
   const homeLink = $('published-home-link');
   const html = document.documentElement;
@@ -539,11 +541,30 @@
   function showOverlay(titleText, bodyText, detailText = '') {
     if (!overlay) return;
     overlay.classList.add('on');
-    overlay.classList.remove('done');
+    overlay.classList.remove('done', 'error');
+    overlay.setAttribute('role', 'status');
+    overlay.setAttribute('aria-live', 'polite');
     overlayTitle.textContent = titleText;
     overlayText.textContent = bodyText;
     overlayDetail.textContent = detailText;
+    if (overlayErrorActions) overlayErrorActions.hidden = true;
     overlayLinks.hidden = true;
+  }
+
+  function showPublishError(message, { authentication = false } = {}) {
+    if (!overlay) return;
+    overlay.classList.add('on', 'error');
+    overlay.classList.remove('done');
+    overlay.setAttribute('role', 'alertdialog');
+    overlay.setAttribute('aria-live', 'assertive');
+    overlayTitle.textContent = '게시되지 않았습니다.';
+    overlayText.textContent = message;
+    overlayDetail.textContent = authentication
+      ? 'Production에 설정한 관리자 키를 다시 입력한 후 게시해 주세요.'
+      : '입력한 리포트와 게시 정보는 유지했습니다. 안내를 확인한 후 다시 시도해 주세요.';
+    overlayLinks.hidden = true;
+    if (overlayErrorActions) overlayErrorActions.hidden = false;
+    if (overlayErrorClose) overlayErrorClose.textContent = authentication ? '관리자 키 다시 입력' : '확인';
   }
 
   function sleep(ms) {
@@ -676,6 +697,8 @@
     publishing = true;
     updatePublishState();
     publishBtn.textContent = '게시 중…';
+    status.classList.remove('error');
+    adminKey.removeAttribute('aria-invalid');
     status.textContent = 'HTML과 게시 목록을 GitHub에 반영하는 중…';
     showOverlay('게시 처리 중', '리포트 HTML과 홈페이지 목록을 GitHub에 저장하고 있습니다.', '창을 닫지 않아도 됩니다.');
 
@@ -703,7 +726,15 @@
         body: form
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.message || data.error || `게시 실패 (${res.status})`);
+      if (!res.ok) {
+        const authentication = res.status === 401 || data.error === 'UNAUTHORIZED';
+        const message = authentication
+          ? '관리자 키가 올바르지 않아 게시하지 못했습니다.'
+          : (data.message || data.error || `게시 실패 (${res.status})`);
+        const error = new Error(message);
+        error.authentication = authentication;
+        throw error;
+      }
 
       registeredDate.value = data.registeredDate || '등록 완료';
       status.textContent = `게시 완료 · 등록일 ${data.registeredDate}. Cloudflare 재배포 확인 중…`;
@@ -711,8 +742,11 @@
       publishBtn.disabled = true;
       await waitForDeployment(data.id, data.reportUrl, postType, data.registeredDate || '등록 완료', language);
     } catch (err) {
-      if (overlay) overlay.classList.remove('on');
-      status.textContent = err.message || '게시 중 오류가 발생했습니다.';
+      const message = err.message || '게시 중 오류가 발생했습니다.';
+      showPublishError(message, { authentication: Boolean(err.authentication) });
+      status.textContent = err.authentication ? `게시되지 않음 · ${message}` : message;
+      status.classList.add('error');
+      if (err.authentication) adminKey.setAttribute('aria-invalid', 'true');
       publishBtn.textContent = '게시';
       publishing = false;
       updatePublishState();
@@ -775,7 +809,18 @@
     });
   });
   translationSource?.addEventListener('change', syncPairedReportDate);
+  adminKey?.addEventListener('input', () => {
+    if (adminKey.getAttribute('aria-invalid') !== 'true') return;
+    adminKey.removeAttribute('aria-invalid');
+    status.classList.remove('error');
+    status.textContent = '관리자 키를 수정했습니다. 다시 게시해 주세요.';
+  });
   adminKey?.addEventListener('change', () => { try { sessionStorage.setItem('mrs-admin-key', adminKey.value.trim()); } catch (_) {} });
+  overlayErrorClose?.addEventListener('click', () => {
+    const authentication = adminKey.getAttribute('aria-invalid') === 'true';
+    overlay?.classList.remove('on', 'error');
+    (authentication ? adminKey : publishBtn)?.focus();
+  });
   publishBtn?.addEventListener('click', publish);
 
   themeBtn?.addEventListener('click', () => {

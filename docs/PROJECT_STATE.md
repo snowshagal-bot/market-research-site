@@ -64,6 +64,7 @@ Admin page: `/admin/`
 11. Admin UI polls `data/posts.json` until the new post appears, then shows completion and redirects to the relevant locale/category.
 
 The publishing UI now warns before the final confirmation when no optional homepage cover is selected. Publishing without a cover remains supported and uses the homepage fallback cover.
+Publish failures remain visible without clearing the selected report or metadata. An invalid administrator key is identified explicitly, marked on the key field, and can be corrected before retrying.
 
 ## Existing post management
 
