@@ -1,5 +1,28 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-26-daily-15udspv",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-26",
+    "reportDate": "2026-08-26",
+    "registeredDate": "2026-08-26",
+    "registeredAt": "2026-08-26T14:03:00.177Z",
+    "legacyImport": false,
+    "title": "The NightOpens First",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "rates",
+      "ai",
+      "cloud-datacenter"
+    ],
+    "readingMinutes": 21,
+    "href": "reports/en/2026-08-26_KOSPI_Daily_Report_EN.html",
+    "translationGroup": "2026-08-26-daily-1ufok0a",
+    "coverImage": "covers/2026-08-26-daily-15udspv.webp"
+  },
+  {
     "id": "2026-08-26-daily-1ufok0a",
     "type": "daily",
     "typeLabel": "주식 리포트",
