@@ -27,10 +27,10 @@ test('homepage presents the Snowshagal brand hero before latest reports and arch
   assert.doesNotMatch(html, /Independent Market Research/);
   assert.match(html, /home-v2\.css\?v=20260825-1/);
   assert.match(englishHtml, /home-v2\.css\?v=20260825-1/);
-  assert.match(html, /locale\.js\?v=20260824-2/);
-  assert.match(englishHtml, /locale\.js\?v=20260824-2/);
-  assert.match(html, /site\.js\?v=20260826-3/);
-  assert.match(englishHtml, /site\.js\?v=20260826-3/);
+  assert.match(html, /locale\.js\?v=20260826-4/);
+  assert.match(englishHtml, /locale\.js\?v=20260826-4/);
+  assert.match(html, /site\.js\?v=20260826-4/);
+  assert.match(englishHtml, /site\.js\?v=20260826-4/);
   assert.match(html, /market-summary\.js\?v=20260826-1/);
   assert.match(englishHtml, /market-summary\.js\?v=20260826-1/);
 });
@@ -312,12 +312,12 @@ test('homepage presents TODAY market summary strip between brand hero and latest
 
   // 2. Korean specifics
   assert.match(home, /href="\/market\/"/);
-  assert.match(home, /class="today-takeaway-label">오늘의 한 줄<\/span>/);
+  assert.match(home, /class="today-takeaway-label" id="today-takeaway-label">오늘의 한 줄<\/span>/);
   assert.match(home, /낙차를 되감았지만, 시장의 무게중심은 아직 돌아오지 않았다\./);
 
   // 3. English specifics
   assert.match(enHome, /href="\/en\/market\/"/);
-  assert.match(enHome, /class="today-takeaway-label">Today's takeaway<\/span>/);
+  assert.match(enHome, /class="today-takeaway-label" id="today-takeaway-label">Today's takeaway<\/span>/);
   assert.match(enHome, /The market retraced the selloff, but its center of gravity has yet to return\./);
 
   // 4. 5 core indices in markup and data

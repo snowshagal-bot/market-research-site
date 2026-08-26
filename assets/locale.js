@@ -20,7 +20,9 @@
       reportOrder: '리포트 기준일 최신순',
       basicsEmpty: '시장 공부 글이 아직 없습니다.',
       empty: '조건에 맞는 글이 없습니다.',
-      read: '읽기'
+      read: '읽기',
+      takeawayLabel: '오늘의 한 줄',
+      dailyReportLabel: '오늘의 리포트'
     },
     en: {
       categories: {
@@ -40,7 +42,9 @@
       reportOrder: 'Newest report date first',
       basicsEmpty: 'No Market Basics posts yet.',
       empty: 'No English reports match these filters yet.',
-      read: 'Read'
+      read: 'Read',
+      takeawayLabel: "Today's takeaway",
+      dailyReportLabel: "Today's report"
     }
   };
 
