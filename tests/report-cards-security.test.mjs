@@ -117,7 +117,10 @@ test('_headers sets frame and permissions policy without pinning HSTS', async ()
 
   assert.match(headers, /^\/\*\r?\n(?:.*\r?\n)*?\s+X-Frame-Options: SAMEORIGIN/m);
   assert.match(headers, /Permissions-Policy: camera=\(\), microphone=\(\), geolocation=\(\)/);
-  assert.match(headers, /^\/admin\/\*\r?\n\s+X-Frame-Options: DENY/m);
+  // A second X-Frame-Options would collide with the site-wide one; frame-ancestors
+  // is specified to take precedence when both are present, so it wins cleanly.
+  assert.match(headers, /^\/admin\/\*\r?\n(?:.*\r?\n)*?\s+Content-Security-Policy: frame-ancestors 'none'/m);
+  assert.equal((headers.match(/X-Frame-Options:/g) || []).length, 1, 'only one X-Frame-Options rule');
 
   // HSTS is hard to reverse and is better toggled from the Cloudflare dashboard
   // than pinned in the repository, so it is deliberately absent.
