@@ -7,11 +7,17 @@
   const copy = locale === 'en' ? {
     navLabel: 'Report site menu', home: '← Home', daily: 'Daily', weekly: 'Weekly', research: 'Research', basics: 'Market Basics', note: 'Notes', market: 'Market', switchLabel: 'Read in Korean', switchText: 'KO',
     comments: 'Comments', write: 'Write a comment', close: 'Close', nickname: 'Nickname', password: 'Deletion password', body: 'Write a comment.', website: 'Website', noteText: 'No account required · The password is used only for deletion.', submit: 'Post comment', loading: 'Loading comments…', empty: 'No comments yet.', delete: 'Delete',
-    loadError: 'Could not load comments.', dbTitle: 'Comments are being prepared', dbText: 'Comments will be available after the database is connected.', retry: 'Please try again later.', posting: 'Posting…', postError: 'Could not post the comment.', posted: 'Comment posted.', deletePrompt: 'Enter the deletion password.', deleteError: 'Could not delete the comment.'
+    loadError: 'Could not load comments.', dbTitle: 'Comments are being prepared', dbText: 'Comments will be available after the database is connected.', retry: 'Please try again later.', posting: 'Posting…', postError: 'Could not post the comment.', posted: 'Comment posted.', deletePrompt: 'Enter the deletion password.', deleteError: 'Could not delete the comment.',
+    shareHeading: 'Share', sharePrompt: 'Share this report', shareAction: 'Share', shareCopy: 'Copy link',
+    shareCopied: 'Link copied', shareCopyManual: 'Copy this link:', shareFailed: 'Could not share this report.',
+    shareAppsHint: 'Use your device share menu for Instagram and other apps'
   } : {
     navLabel: '리포트 사이트 메뉴', home: '← 홈', daily: '데일리', weekly: '위클리', research: '리서치', basics: '시장 공부', note: '끄적끄적', market: '마켓', switchLabel: '영어로 읽기', switchText: 'EN',
     comments: '댓글', write: '댓글 쓰기', close: '닫기', nickname: '닉네임', password: '삭제용 비밀번호', body: '댓글을 입력하세요.', website: '웹사이트', noteText: '회원가입 없이 작성 · 비밀번호는 삭제할 때만 사용됩니다.', submit: '댓글 등록', loading: '댓글을 불러오는 중…', empty: '아직 댓글이 없습니다.', delete: '삭제',
-    loadError: '댓글을 불러오지 못했습니다.', dbTitle: '댓글 기능 준비 중', dbText: '데이터베이스 연결 후 사용할 수 있습니다.', retry: '잠시 후 다시 시도해주세요.', posting: '등록 중…', postError: '댓글을 등록하지 못했습니다.', posted: '댓글이 등록되었습니다.', deletePrompt: '댓글 삭제 비밀번호를 입력하세요.', deleteError: '댓글을 삭제하지 못했습니다.'
+    loadError: '댓글을 불러오지 못했습니다.', dbTitle: '댓글 기능 준비 중', dbText: '데이터베이스 연결 후 사용할 수 있습니다.', retry: '잠시 후 다시 시도해주세요.', posting: '등록 중…', postError: '댓글을 등록하지 못했습니다.', posted: '댓글이 등록되었습니다.', deletePrompt: '댓글 삭제 비밀번호를 입력하세요.', deleteError: '댓글을 삭제하지 못했습니다.',
+    shareHeading: '공유', sharePrompt: '이 리포트를 공유하기', shareAction: '공유하기', shareCopy: '링크 복사',
+    shareCopied: '링크를 복사했습니다', shareCopyManual: '아래 링크를 복사하세요:', shareFailed: '공유하지 못했습니다.',
+    shareAppsHint: 'Instagram·KakaoTalk 등은 기기 공유 메뉴에서 선택'
   };
   const homePath = locale === 'en' ? '/en/' : '/';
   const marketPath = locale === 'en' ? '/en/market/' : '/market/';
@@ -305,8 +311,274 @@
     load();
   }
 
+  /* Share ---------------------------------------------------------------------
+     One editorial share section per report, injected between the report body
+     and the comments. The URL builders are pure and exported on
+     window.REPORT_SHELL so tests can assert real output instead of grepping
+     this source; Korean titles and Korean report paths are the cases that
+     actually break, and only real encoding catches them.
+  -------------------------------------------------------------------------- */
+
+  // Share the canonical URL, never the address bar: a report reached through
+  // ?category= or #section must still share as one stable link.
+  function canonicalShareUrl(doc = document, loc = location) {
+    const link = doc.querySelector('link[rel="canonical"]');
+    const declared = link?.getAttribute('href');
+    if (declared) {
+      try { return new URL(declared, loc.href).href; } catch (_) {}
+    }
+    try {
+      const url = new URL(loc.href);
+      url.search = '';
+      url.hash = '';
+      return url.href;
+    } catch (_) {
+      return String(loc.href || '').split('#')[0].split('?')[0];
+    }
+  }
+
+  function metaContent(doc, selector) {
+    return (doc.querySelector(selector)?.getAttribute('content') || '').trim();
+  }
+
+  function shareTitle(doc = document) {
+    return metaContent(doc, 'meta[property="og:title"]') || (doc.title || '').trim();
+  }
+
+  function shareText(doc = document) {
+    return metaContent(doc, 'meta[name="description"]')
+      || metaContent(doc, 'meta[property="og:description"]');
+  }
+
+  // Copy Link / X / Facebook / LinkedIn only. Everything else reaches its app
+  // through the operating system share sheet.
+  function shareLinks(url, title) {
+    const query = (params) => new URLSearchParams(params).toString();
+    return {
+      x: `https://x.com/intent/tweet?${query({ text: title, url })}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?${query({ u: url })}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?${query({ url })}`
+    };
+  }
+
+  // Capability, not user agent: a coarse pointer with no hover is a phone or a
+  // tablet, where the system share sheet is the better experience. Desktop uses
+  // the popover even where navigator.share exists.
+  function prefersNativeShare(nav = typeof navigator === 'undefined' ? null : navigator) {
+    if (typeof nav?.share !== 'function') return false;
+    try { return matchMedia('(pointer: coarse) and (hover: none)').matches; }
+    catch (_) { return false; }
+  }
+
+  async function copyText(value) {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+        return true;
+      }
+    } catch (_) {}
+    try {
+      const field = document.createElement('textarea');
+      field.value = value;
+      field.setAttribute('readonly', '');
+      field.style.setProperty('position', 'fixed', 'important');
+      field.style.setProperty('top', '-1000px', 'important');
+      field.style.setProperty('opacity', '0', 'important');
+      document.body.appendChild(field);
+      field.select();
+      field.setSelectionRange(0, value.length);
+      const copied = document.execCommand('copy');
+      field.remove();
+      if (copied) return true;
+    } catch (_) {}
+    return false;
+  }
+
+  window.REPORT_SHELL = { canonicalShareUrl, shareTitle, shareText, shareLinks, prefersNativeShare };
+
+  const SHARE_ICONS = {
+    copy: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
+    x: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M17.5 3h3.2l-7 8 8.2 10h-6.4l-5-6.1L4.7 21H1.5l7.5-8.6L1.2 3h6.6l4.5 5.6L17.5 3Zm-1.1 16h1.8L7.7 4.9H5.8l10.6 14.1Z"/></svg>',
+    facebook: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.7-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12Z"/></svg>',
+    linkedin: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9h4v12H3V9Zm7 0h3.8v1.7h.1c.5-1 1.8-2 3.7-2 3.9 0 4.6 2.6 4.6 5.9V21h-4v-5.6c0-1.3 0-3-1.9-3s-2.2 1.4-2.2 2.9V21h-4V9Z"/></svg>',
+    share: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="m8 8 4-4 4 4"/><path d="M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>'
+  };
+
+  function mountShare() {
+    if (document.getElementById('mrs-share-host')) return;
+
+    const host = document.createElement('section');
+    host.id = 'mrs-share-host';
+    host.setAttribute('aria-label', copy.shareHeading);
+    shellHosts.push(host);
+    applyShellTheme();
+    const hostStyles = {
+      all: 'initial', display: 'block', position: 'relative', width: '100%', maxWidth: '100%',
+      clear: 'both', flex: '0 0 100%', margin: '0', padding: '0', border: '0', boxSizing: 'border-box'
+    };
+    for (const [key, value] of Object.entries(hostStyles)) host.style.setProperty(key, value, 'important');
+    document.body.appendChild(host);
+
+    const root = host.attachShadow({ mode: 'open' });
+    const native = prefersNativeShare();
+
+    root.innerHTML = `
+      <style>
+        :host{all:initial;--sh-bg:#f7f3eb;--sh-panel:#fbf8f1;--sh-hover:#eee8dd;--sh-text:#22241f;--sh-text-2:#535850;--sh-muted:#7d7d75;--sh-line:#d8d0c2;--sh-focus:#344b40}
+        :host([data-theme="dark"]){--sh-bg:#1c1f1c;--sh-panel:#222622;--sh-hover:#2b302b;--sh-text:#edf0ec;--sh-text-2:#b9c0ba;--sh-muted:#8f968f;--sh-line:#3b423c;--sh-focus:#a8c1b1}
+        *{box-sizing:border-box}
+        .wrap{background:var(--sh-bg);color:var(--sh-text);border-top:1px solid var(--sh-line);padding:30px 20px 30px;font-family:Inter,Pretendard,'Noto Sans KR','Apple SD Gothic Neo',system-ui,-apple-system,sans-serif;line-height:1.55}
+        .inner{width:min(820px,100%);margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+        .lede{min-width:0}
+        .eyebrow{display:block;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--sh-muted)}
+        .prompt{margin:5px 0 0;font-size:14px;font-weight:700;letter-spacing:-.02em;color:var(--sh-text-2)}
+        .actions{position:relative;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+        .btn{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:0 14px;border:1px solid var(--sh-line);border-radius:999px;background:var(--sh-panel);color:var(--sh-text-2);font:inherit;font-size:12px;font-weight:800;letter-spacing:-.01em;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background .15s ease,color .15s ease,border-color .15s ease}
+        .btn:hover{background:var(--sh-hover);color:var(--sh-text)}
+        .btn:focus-visible,.pop a:focus-visible,.pop button:focus-visible{outline:2px solid var(--sh-focus);outline-offset:2px}
+        .pop{position:absolute;right:0;bottom:calc(100% + 8px);z-index:5;min-width:186px;padding:6px;border:1px solid var(--sh-line);border-radius:12px;background:var(--sh-panel);box-shadow:0 12px 34px rgba(20,24,21,.11);display:grid;gap:1px}
+        :host([data-theme="dark"]) .pop{box-shadow:0 12px 34px rgba(0,0,0,.4)}
+        .pop[hidden]{display:none}
+        .pop a,.pop button{display:flex;align-items:center;gap:9px;width:100%;min-height:36px;padding:0 10px;border:0;border-radius:8px;background:none;color:var(--sh-text-2);font:inherit;font-size:12.5px;font-weight:700;text-align:left;text-decoration:none;cursor:pointer}
+        .pop a:hover,.pop button:hover{background:var(--sh-hover);color:var(--sh-text)}
+        .pop svg{flex:0 0 auto;opacity:.8}
+        .sep{height:1px;margin:4px 2px;background:var(--sh-line)}
+        .hint{flex-basis:100%;margin:0;font-size:11px;color:var(--sh-muted)}
+        .status{width:min(820px,100%);margin:10px auto 0;min-height:17px;font-size:11px;color:var(--sh-muted)}
+        .status input{width:100%;margin-top:5px;padding:7px 9px;border:1px solid var(--sh-line);border-radius:8px;background:var(--sh-panel);color:var(--sh-text);font:inherit;font-size:11px}
+        @media(max-width:600px){
+          .wrap{padding:24px 14px}
+          .inner{align-items:flex-start;flex-direction:column;gap:12px}
+          .actions{width:100%}
+          .btn{flex:1 1 auto;justify-content:center}
+          .pop{right:auto;left:0;width:100%}
+        }
+      </style>
+      <div class="wrap">
+        <div class="inner">
+          <div class="lede">
+            <span class="eyebrow">${copy.shareHeading}</span>
+            <p class="prompt">${copy.sharePrompt}</p>
+          </div>
+          <div class="actions">
+            ${native ? `
+              <button class="btn" type="button" id="share-native">${SHARE_ICONS.share}<span>${copy.shareAction}</span></button>
+              <button class="btn" type="button" id="share-copy-solo">${SHARE_ICONS.copy}<span>${copy.shareCopy}</span></button>
+              <p class="hint">${copy.shareAppsHint}</p>
+            ` : `
+              <button class="btn" type="button" id="share-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="share-popover">${SHARE_ICONS.share}<span>${copy.shareAction}</span></button>
+              <div class="pop" id="share-popover" role="group" aria-label="${copy.shareHeading}" hidden>
+                <button type="button" data-share-copy>${SHARE_ICONS.copy}<span>${copy.shareCopy}</span></button>
+                <div class="sep" aria-hidden="true"></div>
+                <a data-share-net="x" href="#" target="_blank" rel="noopener noreferrer">${SHARE_ICONS.x}<span>X</span></a>
+                <a data-share-net="facebook" href="#" target="_blank" rel="noopener noreferrer">${SHARE_ICONS.facebook}<span>Facebook</span></a>
+                <a data-share-net="linkedin" href="#" target="_blank" rel="noopener noreferrer">${SHARE_ICONS.linkedin}<span>LinkedIn</span></a>
+              </div>
+            `}
+          </div>
+        </div>
+        <p class="status" role="status" aria-live="polite"></p>
+      </div>`;
+
+    const statusEl = root.querySelector('.status');
+    let statusTimer = 0;
+    function setStatus(message) {
+      clearTimeout(statusTimer);
+      statusEl.textContent = message;
+      if (message) statusTimer = setTimeout(() => { statusEl.textContent = ''; }, 2400);
+    }
+    function showUrlForManualCopy(url) {
+      clearTimeout(statusTimer);
+      statusEl.textContent = copy.shareCopyManual;
+      const field = document.createElement('input');
+      field.type = 'text';
+      field.readOnly = true;
+      field.value = url;
+      field.setAttribute('aria-label', copy.shareCopyManual);
+      statusEl.appendChild(field);
+      field.select();
+    }
+
+    async function runCopy() {
+      const url = canonicalShareUrl();
+      if (await copyText(url)) setStatus(copy.shareCopied);
+      else showUrlForManualCopy(url);
+    }
+
+    root.getElementById('share-native')?.addEventListener('click', async () => {
+      const url = canonicalShareUrl();
+      const title = shareTitle();
+      const text = shareText();
+      const payload = { title, url };
+      // Only add text when it says something the title does not, so targets that
+      // concatenate the fields do not repeat themselves.
+      if (text && text !== title) payload.text = text;
+      try {
+        await navigator.share(payload);
+      } catch (error) {
+        // Cancelling a share is not a failure.
+        if (error?.name !== 'AbortError') setStatus(copy.shareFailed);
+      }
+    });
+    root.getElementById('share-copy-solo')?.addEventListener('click', runCopy);
+
+    const trigger = root.getElementById('share-trigger');
+    const popover = root.getElementById('share-popover');
+    if (trigger && popover) {
+      const items = () => Array.from(popover.querySelectorAll('a,button'));
+
+      function openPopover() {
+        const url = canonicalShareUrl();
+        const links = shareLinks(url, shareTitle());
+        popover.querySelectorAll('[data-share-net]').forEach(link => {
+          link.href = links[link.dataset.shareNet] || url;
+        });
+        popover.hidden = false;
+        trigger.setAttribute('aria-expanded', 'true');
+        items()[0]?.focus();
+      }
+
+      function closePopover({ returnFocus = true } = {}) {
+        if (popover.hidden) return;
+        const hadFocus = root.activeElement && popover.contains(root.activeElement);
+        popover.hidden = true;
+        trigger.setAttribute('aria-expanded', 'false');
+        if (returnFocus || hadFocus) trigger.focus();
+      }
+
+      trigger.addEventListener('click', () => {
+        if (popover.hidden) openPopover();
+        else closePopover();
+      });
+
+      popover.querySelector('[data-share-copy]')?.addEventListener('click', async () => {
+        closePopover();
+        await runCopy();
+      });
+      popover.querySelectorAll('[data-share-net]').forEach(link => {
+        link.addEventListener('click', () => { closePopover({ returnFocus: false }); });
+      });
+
+      root.addEventListener('keydown', event => {
+        if (event.key !== 'Escape' || popover.hidden) return;
+        event.stopPropagation();
+        closePopover();
+      });
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') closePopover({ returnFocus: false });
+      });
+      document.addEventListener('click', event => {
+        if (popover.hidden) return;
+        const path = event.composedPath ? event.composedPath() : [];
+        if (path.includes(popover) || path.includes(trigger)) return;
+        closePopover({ returnFocus: false });
+      });
+    }
+  }
+
   function mount() {
     mountReportNav();
+    mountShare();
     mountComments();
   }
 
