@@ -27,7 +27,7 @@ function base64(text) {
   return btoa(binary);
 }
 
-function githubMock(existingPosts = [basePost], { conflict = false, searchIndex = null, searchIndexFail = false } = {}) {
+function githubMock(existingPosts = [basePost], { conflict = false, searchIndex = null, searchIndexFail = false, searchIndexViaBlob = false } = {}) {
   const calls = [];
   let refReads = 0;
   const defaultIndex = searchIndex !== null ? searchIndex : existingPosts.map(p => ({
@@ -46,6 +46,9 @@ function githubMock(existingPosts = [basePost], { conflict = false, searchIndex 
     calls.push({ path, method: options.method || 'GET', body });
     if (path.includes('/contents/data/search-index.json?ref=base-sha')) {
       if (searchIndexFail) return new Response('Not found', { status: 404 });
+      if (searchIndexViaBlob) {
+        return new Response(JSON.stringify({ content: '', encoding: 'none', sha: 'search-index-sha', size: 2434318 }), { status: 200, headers: { 'content-type': 'application/json' } });
+      }
       return new Response(JSON.stringify({ content: base64(`${JSON.stringify(defaultIndex)}\n`) }), { status: 200, headers: { 'content-type': 'application/json' } });
     }
     let payload;
@@ -54,6 +57,7 @@ function githubMock(existingPosts = [basePost], { conflict = false, searchIndex 
       payload = { object: { sha: conflict && refReads > 1 ? 'new-main-sha' : 'base-sha' } };
     } else if (path.endsWith('/git/commits/base-sha')) payload = { tree: { sha: 'base-tree' } };
     else if (path.includes('/contents/data/posts.json?ref=base-sha')) payload = { content: base64(`${JSON.stringify(existingPosts)}\n`) };
+    else if (path.endsWith('/git/blobs/search-index-sha')) payload = { content: base64(`${JSON.stringify(defaultIndex)}\n`), encoding: 'base64', sha: 'search-index-sha' };
     else if (path.endsWith('/git/blobs')) payload = { sha: 'cover-blob-sha' };
     else if (path.endsWith('/git/trees')) payload = { sha: 'tree-sha' };
     else if (path.endsWith('/git/commits')) payload = { sha: 'commit-sha' };
@@ -311,6 +315,19 @@ test('manage fails closed when search-index fetch fails (no commit created)', as
     assert.equal(data.error, 'SEARCH_INDEX_READ_FAILED');
     assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
     assert.equal(calls.some(call => call.path.endsWith('/git/commits')), false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('manage reads an oversized search index through the Git blob fallback', async () => {
+  const calls = githubMock([basePost], { searchIndexViaBlob: true });
+  try {
+    const { response, data } = await run();
+    assert.equal(response.status, 200);
+    assert.equal(data.ok, true);
+    assert.equal(calls.some(call => call.path.endsWith('/git/blobs/search-index-sha')), true);
+    assert.equal(calls.some(call => call.path.endsWith('/git/trees')), true);
   } finally {
     globalThis.fetch = originalFetch;
   }

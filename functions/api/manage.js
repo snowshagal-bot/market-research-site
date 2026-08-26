@@ -101,6 +101,20 @@ async function gh(token, path, options = {}) {
   return body;
 }
 
+async function readRepoText(token, path, ref) {
+  const file = await gh(token, `/contents/${encodeRepoPath(path)}?ref=${encodeURIComponent(ref)}`);
+  if (typeof file?.content === "string" && file.content.trim()) {
+    return decodeBase64Utf8(file.content);
+  }
+  if (!file?.sha) throw new Error(`${path} 파일 내용을 찾을 수 없습니다.`);
+
+  const blob = await gh(token, `/git/blobs/${encodeURIComponent(file.sha)}`);
+  if (blob?.encoding !== "base64" || typeof blob.content !== "string" || !blob.content.trim()) {
+    throw new Error(`${path} Git blob 내용을 읽을 수 없습니다.`);
+  }
+  return decodeBase64Utf8(blob.content);
+}
+
 function isFile(value) {
   return value && typeof value === "object" && typeof value.arrayBuffer === "function";
 }
@@ -432,12 +446,12 @@ export async function onRequestPost(context) {
   try {
     const ref = await currentRef(env.GITHUB_TOKEN);
     const baseSha = ref.object.sha;
-    let parentCommit, postsFile, searchIndexFile;
+    let parentCommit, postsText, searchIndexText;
     try {
-      [parentCommit, postsFile, searchIndexFile] = await Promise.all([
+      [parentCommit, postsText, searchIndexText] = await Promise.all([
         gh(env.GITHUB_TOKEN, `/git/commits/${baseSha}`),
-        gh(env.GITHUB_TOKEN, `/contents/${encodeRepoPath("data/posts.json")}?ref=${encodeURIComponent(baseSha)}`),
-        gh(env.GITHUB_TOKEN, `/contents/${encodeRepoPath("data/search-index.json")}?ref=${encodeURIComponent(baseSha)}`),
+        readRepoText(env.GITHUB_TOKEN, "data/posts.json", baseSha),
+        readRepoText(env.GITHUB_TOKEN, "data/search-index.json", baseSha),
       ]);
     } catch (err) {
       return reply({
@@ -447,10 +461,10 @@ export async function onRequestPost(context) {
       }, 500);
     }
 
-    const posts = JSON.parse(decodeBase64Utf8(postsFile.content));
+    const posts = JSON.parse(postsText);
     let searchIndex;
     try {
-      searchIndex = JSON.parse(decodeBase64Utf8(searchIndexFile.content));
+      searchIndex = JSON.parse(searchIndexText);
     } catch (err) {
       return reply({
         ok: false,
