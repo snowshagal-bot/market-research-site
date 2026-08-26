@@ -109,7 +109,7 @@
     if (isSearchIndexLoading) return;
     isSearchIndexLoading = true;
     const script = document.createElement('script');
-    script.src = `/data/search-index.js?v=${Date.now()}`;
+    script.src = '/data/search-index.js?v=20260826-1';
     script.onload = () => {
       isSearchIndexLoading = false;
       if (callback) callback(window.SEARCH_INDEX || []);
@@ -179,6 +179,27 @@
     return esc(text).replace(regex, '<span class="search-highlight">$1</span>');
   }
 
+  function extractBodySnippet(bodyText, queryWords, snippetLength = 140) {
+    if (!bodyText || !queryWords.length) return '';
+    const lowerBody = bodyText.toLowerCase();
+    let firstIdx = -1;
+    for (const w of queryWords) {
+      const idx = lowerBody.indexOf(w.toLowerCase());
+      if (idx !== -1 && (firstIdx === -1 || idx < firstIdx)) {
+        firstIdx = idx;
+      }
+    }
+    if (firstIdx === -1) {
+      return bodyText.slice(0, snippetLength) + (bodyText.length > snippetLength ? '…' : '');
+    }
+    const start = Math.max(0, firstIdx - 50);
+    const end = Math.min(bodyText.length, firstIdx + snippetLength - 50);
+    let snippet = bodyText.slice(start, end).trim();
+    if (start > 0) snippet = '…' + snippet;
+    if (end < bodyText.length) snippet = snippet + '…';
+    return snippet;
+  }
+
   function renderSearchTagCloud(){
     if (!searchTagCloud) return;
     const indexData = window.SEARCH_INDEX || allPosts;
@@ -193,10 +214,11 @@
     });
     let tags = Object.keys(tagCountMap).sort((a,b) => tagCountMap[b] - tagCountMap[a]);
     if (!tags.length) {
-      tags = locale === 'en' ? ['KOSPI', 'FX', 'Rates', 'Semiconductor', 'AI'] : ['KOSPI', '환율', '금리', '반도체', '수급', '연준'];
+      // Suggested searches curated list
+      tags = locale === 'en' ? ['KOSPI', 'FX', 'Rates', 'Semiconductor', 'Fed'] : ['KOSPI', '환율', '금리', '반도체', '수급', '연준'];
     }
     searchTagCloud.innerHTML = tags.slice(0, 8).map(tag => {
-      return `<button type="button" class="search-tag-chip" data-search-tag="${esc(tag)}">#${esc(tag)}</button>`;
+      return `<button type="button" class="search-tag-chip" data-search-tag="${esc(tag)}">${esc(tag)}</button>`;
     }).join('');
 
     searchTagCloud.querySelectorAll('[data-search-tag]').forEach(chip => {
@@ -232,6 +254,11 @@
     const scored = [];
     indexData.forEach(item => {
       let score = 0;
+      let titleMatched = false;
+      let tagMatched = false;
+      let summaryMatched = false;
+      let bodyMatched = false;
+
       const title = (item.title || '').toLowerCase();
       const subtitle = (item.subtitle || '').toLowerCase();
       const summary = (item.summary || item.description || '').toLowerCase();
@@ -239,14 +266,18 @@
       const tags = (Array.isArray(item.tags) ? item.tags : []).map(t => String(t).toLowerCase());
 
       queryWords.forEach(word => {
-        if (title.includes(word)) score += 10;
-        if (tags.some(t => t.includes(word))) score += 8;
-        if (subtitle.includes(word) || summary.includes(word)) score += 5;
-        if (body.includes(word)) score += 2;
+        if (title.includes(word)) { score += 10; titleMatched = true; }
+        if (tags.some(t => t.includes(word))) { score += 8; tagMatched = true; }
+        if (subtitle.includes(word) || summary.includes(word)) { score += 5; summaryMatched = true; }
+        if (body.includes(word)) { score += 2; bodyMatched = true; }
       });
 
       if (score > 0) {
-        scored.push({ item, score });
+        scored.push({
+          item,
+          score,
+          isBodyOnlyMatch: bodyMatched && !titleMatched && !tagMatched && !summaryMatched
+        });
       }
     });
 
@@ -264,16 +295,22 @@
     }
 
     if (searchEmptyState) searchEmptyState.hidden = true;
-    searchResultsList.innerHTML = scored.map(({ item }) => {
+    searchResultsList.innerHTML = scored.map(({ item, isBodyOnlyMatch }) => {
       const info = categoryInfo(item.category || item.type);
       const highlightedTitle = highlightMatches(item.title, queryWords);
-      const highlightedSummary = highlightMatches(item.summary || item.description, queryWords);
+      let summaryContent = '';
+      if (isBodyOnlyMatch && item.bodyText) {
+        const rawSnippet = extractBodySnippet(item.bodyText, queryWords, 150);
+        summaryContent = highlightMatches(rawSnippet, queryWords);
+      } else {
+        summaryContent = highlightMatches(item.summary || item.description, queryWords);
+      }
       const targetUrl = item.url || rootPath(item.href);
 
       return `
         <a class="search-result-item" href="${esc(targetUrl)}">
           <div class="search-result-title">${highlightedTitle}</div>
-          <div class="search-result-summary">${highlightedSummary}</div>
+          <div class="search-result-summary">${summaryContent}</div>
           <div class="search-result-meta">
             <span class="search-result-type">${esc(info.label)}</span>
             <span>·</span>
@@ -384,11 +421,20 @@
     }
     filterMonth.innerHTML = monthOptions.join('');
 
-    const tagOptions = ['<option value="all">' + (locale === 'en' ? 'All Tags' : '태그 전체') + '</option>'];
-    Array.from(tags).sort().forEach(t => {
-      tagOptions.push(`<option value="${esc(t)}"${t === activeTag ? ' selected' : ''}>#${esc(t)}</option>`);
-    });
-    filterTag.innerHTML = tagOptions.join('');
+    if (tags.size === 0) {
+      filterTag.hidden = true;
+      const tagLabel = filterTag.closest('label');
+      if (tagLabel) tagLabel.hidden = true;
+    } else {
+      filterTag.hidden = false;
+      const tagLabel = filterTag.closest('label');
+      if (tagLabel) tagLabel.hidden = false;
+      const tagOptions = ['<option value="all">' + (locale === 'en' ? 'All Tags' : '태그 전체') + '</option>'];
+      Array.from(tags).sort().forEach(t => {
+        tagOptions.push(`<option value="${esc(t)}"${t === activeTag ? ' selected' : ''}>#${esc(t)}</option>`);
+      });
+      filterTag.innerHTML = tagOptions.join('');
+    }
   }
 
   function renderHighlights(){

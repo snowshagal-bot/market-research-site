@@ -137,6 +137,42 @@ async function gh(token, path, options = {}) {
   return data;
 }
 
+function extractSearchText(html) {
+  if (!html) return '';
+  let clean = html
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<svg[\s\S]*?<\/svg>/gi, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<nav\b[\s\S]*?<\/nav>/gi, ' ')
+    .replace(/<header\b[\s\S]*?<\/header>/gi, ' ')
+    .replace(/<footer\b[\s\S]*?<\/footer>/gi, ' ')
+    .replace(/<dialog\b[\s\S]*?<\/dialog>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/[\u200B-\u200D\uFEFF]/g, '');
+
+  const boilerplates = [
+    /SNOWSHAGAL/gi,
+    /MARKET RESEARCH/gi,
+    /시장을 읽어주는 사이트/gi,
+    /본 사이트의 리서치와 해설은 정보 제공을 목적으로 하며[^.]+투자자문[^.]+않습니다\.?/gi,
+    /This site's research and commentary are for informational purposes only[^.]+investment advice[^.]*\.?/gi,
+    /Scroll down for the report/gi,
+    /Read report/gi,
+    /리포트 보기/gi,
+    /리포트 읽기/gi,
+    /Tistory/gi
+  ];
+  for (const bp of boilerplates) clean = clean.replace(bp, ' ');
+  return clean.replace(/\s+/g, ' ').trim();
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -260,6 +296,42 @@ export async function onRequestPost(context) {
     const postsJson = `${JSON.stringify(posts, null, 2)}\n`;
     const postsJs = `window.RESEARCH_POSTS = ${JSON.stringify(posts, null, 2)};\n`;
 
+    // Automatic Search Index update
+    let searchIndex = [];
+    try {
+      const searchIndexFile = await gh(token, `/contents/${encodeRepoPath('data/search-index.json')}?ref=${encodeURIComponent(BRANCH)}`);
+      searchIndex = JSON.parse(decodeBase64Utf8(searchIndexFile.content));
+    } catch (_) {
+      searchIndex = [];
+    }
+
+    const searchEntry = {
+      id,
+      lang,
+      category: type,
+      typeLabel: typeLabel(type, lang),
+      title,
+      subtitle,
+      date: reportDate,
+      registeredAt,
+      summary: summary || description,
+      tags: [],
+      url: `/${href.replace(/^\/+/, '')}`,
+      coverImage: coverPath ? `/${coverPath.replace(/^\/+/, '')}` : '',
+      bodyText: extractSearchText(html)
+    };
+
+    searchIndex.push(searchEntry);
+    searchIndex.sort((a, b) => {
+      const da = String(a.date || '');
+      const db = String(b.date || '');
+      if (da !== db) return db.localeCompare(da);
+      return String(b.registeredAt || '').localeCompare(String(a.registeredAt || ''));
+    });
+
+    const searchIndexJson = `${JSON.stringify(searchIndex, null, 2)}\n`;
+    const searchIndexJs = `window.SEARCH_INDEX = ${JSON.stringify(searchIndex)};\n`;
+
     const ref = await gh(token, `/git/ref/heads/${encodeURIComponent(BRANCH)}`);
     const parentSha = ref.object.sha;
     const parentCommit = await gh(token, `/git/commits/${parentSha}`);
@@ -285,7 +357,9 @@ export async function onRequestPost(context) {
           { path: reportPath, mode: '100644', type: 'blob', content: html },
           ...(coverEntry ? [coverEntry] : []),
           { path: 'data/posts.json', mode: '100644', type: 'blob', content: postsJson },
-          { path: 'data/posts.js', mode: '100644', type: 'blob', content: postsJs }
+          { path: 'data/posts.js', mode: '100644', type: 'blob', content: postsJs },
+          { path: 'data/search-index.json', mode: '100644', type: 'blob', content: searchIndexJson },
+          { path: 'data/search-index.js', mode: '100644', type: 'blob', content: searchIndexJs }
         ]
       })
     });

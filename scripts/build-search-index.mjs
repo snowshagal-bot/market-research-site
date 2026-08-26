@@ -1,20 +1,23 @@
-﻿import fs from 'node:fs';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const rootDir = path.resolve(__dirname, '..');
-const postsPath = path.join(rootDir, 'data', 'posts.json');
-const outJsonPath = path.join(rootDir, 'data', 'search-index.json');
-const outJsPath = path.join(rootDir, 'data', 'search-index.js');
-
-function extractText(html) {
+export function extractReportText(html) {
   if (!html) return '';
-  return html
+  
+  // 1. Remove non-content blocks and templates
+  let clean = html
     .replace(/<style[\s\S]*?<\/style>/gi, ' ')
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
     .replace(/<svg[\s\S]*?<\/svg>/gi, ' ')
     .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<nav\b[\s\S]*?<\/nav>/gi, ' ')
+    .replace(/<header\b[\s\S]*?<\/header>/gi, ' ')
+    .replace(/<footer\b[\s\S]*?<\/footer>/gi, ' ')
+    .replace(/<dialog\b[\s\S]*?<\/dialog>/gi, ' ');
+
+  // 2. Strip HTML tags
+  clean = clean
     .replace(/<[^>]+>/g, ' ')
     .replace(/&nbsp;/gi, ' ')
     .replace(/&amp;/gi, '&')
@@ -22,21 +25,45 @@ function extractText(html) {
     .replace(/&gt;/gi, '>')
     .replace(/&quot;/gi, '"')
     .replace(/&#39;/gi, "'")
-    .replace(/\s+/g, ' ')
-    .trim();
+    .replace(/[\u200B-\u200D\uFEFF]/g, '');
+
+  // 3. Remove common repetitive boilerplate noise
+  const boilerplates = [
+    /SNOWSHAGAL/gi,
+    /MARKET RESEARCH/gi,
+    /시장을 읽어주는 사이트/gi,
+    /본 사이트의 리서치와 해설은 정보 제공을 목적으로 하며[^.]+투자자문[^.]+않습니다\.?/gi,
+    /This site's research and commentary are for informational purposes only[^.]+investment advice[^.]*\.?/gi,
+    /Scroll down for the report/gi,
+    /Read report/gi,
+    /리포트 보기/gi,
+    /리포트 읽기/gi,
+    /Tistory/gi
+  ];
+  for (const bp of boilerplates) {
+    clean = clean.replace(bp, ' ');
+  }
+
+  // 4. Normalize spaces without truncating
+  return clean.replace(/\s+/g, ' ').trim();
 }
 
-function buildIndex() {
+export function buildSearchIndex(targetRootDir) {
+  const root = targetRootDir || path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const postsPath = path.join(root, 'data', 'posts.json');
+  const outJsonPath = path.join(root, 'data', 'search-index.json');
+  const outJsPath = path.join(root, 'data', 'search-index.js');
+
   const postsRaw = fs.readFileSync(postsPath, 'utf8');
   const posts = JSON.parse(postsRaw);
 
   const searchIndex = posts.map(post => {
     const reportRelativePath = post.href ? post.href.replace(/^\/+/, '') : '';
-    const reportFullPath = path.join(rootDir, reportRelativePath);
+    const reportFullPath = path.join(root, reportRelativePath);
     let bodyText = '';
     if (reportRelativePath && fs.existsSync(reportFullPath)) {
       const html = fs.readFileSync(reportFullPath, 'utf8');
-      bodyText = extractText(html);
+      bodyText = extractReportText(html);
     }
 
     return {
@@ -52,13 +79,16 @@ function buildIndex() {
       tags: Array.isArray(post.tags) ? post.tags : [],
       url: post.href ? `/${post.href.replace(/^\/+/, '')}` : '',
       coverImage: post.coverImage ? `/${post.coverImage.replace(/^\/+/, '')}` : '',
-      bodyText: bodyText.slice(0, 10000)
+      bodyText: bodyText // Full text indexing without 10,000 char truncation
     };
   });
 
   fs.writeFileSync(outJsonPath, JSON.stringify(searchIndex, null, 2), 'utf8');
   fs.writeFileSync(outJsPath, `window.SEARCH_INDEX = ${JSON.stringify(searchIndex)};\n`, 'utf8');
-  console.log(`Successfully built search index with ${searchIndex.length} reports.`);
+  return searchIndex;
 }
 
-buildIndex();
+if (process.argv[1] && process.argv[1].endsWith('build-search-index.mjs')) {
+  const index = buildSearchIndex();
+  console.log(`Successfully built search index with ${index.length} reports.`);
+}

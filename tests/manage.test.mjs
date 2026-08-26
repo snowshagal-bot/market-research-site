@@ -41,6 +41,7 @@ function githubMock(existingPosts = [basePost], { conflict = false } = {}) {
       payload = { object: { sha: conflict && refReads > 1 ? 'new-main-sha' : 'base-sha' } };
     } else if (path.endsWith('/git/commits/base-sha')) payload = { tree: { sha: 'base-tree' } };
     else if (path.includes('/contents/data/posts.json?ref=base-sha')) payload = { content: base64(`${JSON.stringify(existingPosts)}\n`) };
+    else if (path.includes('/contents/data/search-index.json?ref=base-sha')) payload = { content: base64('[]\n') };
     else if (path.endsWith('/git/blobs')) payload = { sha: 'cover-blob-sha' };
     else if (path.endsWith('/git/trees')) payload = { sha: 'tree-sha' };
     else if (path.endsWith('/git/commits')) payload = { sha: 'commit-sha' };

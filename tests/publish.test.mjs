@@ -21,6 +21,7 @@ function githubMock(existingPosts = []) {
     calls.push({ path, method: options.method || 'GET', body });
     let payload;
     if (path.includes('/contents/data/posts.json')) payload = { content: base64(`${JSON.stringify(existingPosts)}\n`) };
+    else if (path.includes('/contents/data/search-index.json')) payload = { content: base64('[]\n') };
     else if (path.endsWith('/git/ref/heads/main')) payload = { object: { sha: 'parent-sha' } };
     else if (path.endsWith('/git/commits/parent-sha')) payload = { tree: { sha: 'base-tree' } };
     else if (path.endsWith('/git/blobs')) payload = { sha: 'cover-blob-sha' };
@@ -90,8 +91,10 @@ test('publishing without a cover preserves existing records and omits coverImage
     assert.equal(response.status, 200);
     assert.equal(data.coverImage, null);
     const treeCall = calls.find(call => call.path.endsWith('/git/trees'));
-    assert.equal(treeCall.body.tree.length, 3);
+    assert.equal(treeCall.body.tree.length, 5);
     assert.equal(treeCall.body.tree.some(entry => entry.path.startsWith('covers/')), false);
+    assert.ok(treeCall.body.tree.some(entry => entry.path === 'data/search-index.json'));
+    assert.ok(treeCall.body.tree.some(entry => entry.path === 'data/search-index.js'));
     const postsEntry = treeCall.body.tree.find(entry => entry.path === 'data/posts.json');
     const posts = JSON.parse(postsEntry.content);
     assert.deepEqual(posts.find(post => post.id === 'legacy'), existing[0]);
