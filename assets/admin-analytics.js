@@ -12,6 +12,17 @@
     return new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 1 }).format(Number(value || 0));
   }
 
+  function formatDuration(value) {
+    const seconds = Math.max(0, Math.round(Number(value || 0) / 1000));
+    const minutes = Math.floor(seconds / 60);
+    const remainder = seconds % 60;
+    return minutes ? `${minutes}분 ${remainder}초` : `${remainder}초`;
+  }
+
+  function formatPercent(value) {
+    return `${formatNumber(value)}%`;
+  }
+
   function setStatus(message, error = false) {
     status.textContent = message;
     status.classList.toggle('error', error);
@@ -106,6 +117,84 @@
     dashboard.hidden = false;
   }
 
+  function appendCell(row, value, className = '') {
+    const cell = document.createElement('td');
+    cell.textContent = value;
+    if (className) cell.className = className;
+    row.appendChild(cell);
+    return cell;
+  }
+
+  function renderEngagementTable(id, items, country = false) {
+    const body = $(id);
+    if (!body) return;
+    clearList(body);
+    if (!items?.length) {
+      const row = document.createElement('tr');
+      const cell = appendCell(row, '표시할 데이터가 없습니다.', 'table-empty');
+      cell.setAttribute('colspan', country ? '5' : '8');
+      body.appendChild(row);
+      return;
+    }
+    items.forEach((item) => {
+      const row = document.createElement('tr');
+      if (country) {
+        appendCell(row, `${displayCountry(item.country)} (${item.country})`);
+      } else {
+        const page = appendCell(row, '', 'page-cell');
+        const title = document.createElement('strong');
+        const path = document.createElement('small');
+        title.textContent = item.title || item.path;
+        path.textContent = item.path;
+        page.append(title, path);
+        appendCell(row, String(item.lang || '').toUpperCase());
+      }
+      appendCell(row, formatNumber(item.sessions));
+      appendCell(row, formatDuration(item.medianActiveMs));
+      appendCell(row, formatDuration(item.avgActiveMs));
+      appendCell(row, formatPercent(item.avgMaxScroll));
+      if (!country) {
+        appendCell(row, formatPercent(item.over1mRate));
+        appendCell(row, formatPercent(item.over90ScrollRate));
+      }
+      body.appendChild(row);
+    });
+  }
+
+  function renderEngagement(data) {
+    if (!data?.overall) throw new Error('읽기 행동 통계 응답 형식이 올바르지 않습니다.');
+    const overall = data.overall;
+    $('engagement-sessions').textContent = formatNumber(overall.sessions);
+    $('engagement-average').textContent = formatDuration(overall.avgActiveMs);
+    $('engagement-median').textContent = formatDuration(overall.medianActiveMs);
+    $('engagement-scroll').textContent = formatPercent(overall.avgMaxScroll);
+    $('engagement-30s').textContent = formatPercent(overall.over30sRate);
+    $('engagement-1m').textContent = formatPercent(overall.over1mRate);
+    $('engagement-3m').textContent = formatPercent(overall.over3mRate);
+    $('engagement-90').textContent = formatPercent(overall.over90ScrollRate);
+    $('engagement-empty').hidden = !data.empty;
+    renderEngagementTable('engagement-pages', data.pages, false);
+    renderEngagementTable('engagement-countries', data.countries, true);
+    $('engagement-source').textContent = `Snowshagal Engagement · Reading sessions · ${data.range.from} — ${data.range.to} ${data.range.timezone} · ${data.generatedAt}`;
+    dashboard.hidden = false;
+  }
+
+  async function responseData(response, label) {
+    const responseText = await response.text();
+    let data;
+    try { data = JSON.parse(responseText); }
+    catch (_) {
+      const contentType = response.headers.get('content-type') || 'unknown content-type';
+      const cfRay = response.headers.get('cf-ray') || 'unknown';
+      data = { message: `${label} API 응답 오류 · HTTP ${response.status} · ${contentType} · CF-Ray ${cfRay}` };
+    }
+    if (!response.ok) {
+      const stage = data.stage && data.stage !== 'unknown' ? ` · 단계 ${data.stage}` : '';
+      throw new Error(`${data.message || `${label} 데이터를 불러오지 못했습니다.`}${stage}`);
+    }
+    return data;
+  }
+
   async function loadAnalytics(range = selectedRange) {
     const key = keyInput.value.trim();
     if (!key) {
@@ -118,28 +207,37 @@
     selectedRange = Number(range);
     loadButton.disabled = true;
     rangeButtons.forEach((button) => { button.disabled = true; });
-    setStatus('Cloudflare Web Analytics 데이터를 불러오는 중입니다.');
+    setStatus('방문 및 읽기 행동 통계를 불러오는 중입니다.');
+    if ($('engagement-status')) {
+      $('engagement-status').textContent = '읽기 행동 통계를 불러오는 중입니다.';
+      $('engagement-status').classList.toggle('error', false);
+    }
     try {
       sessionStorage.setItem('mrs-admin-key', key);
-      const response = await fetch(`/api/analytics?range=${selectedRange}`, {
-        headers: { 'X-Admin-Key': key },
-        cache: 'no-store'
-      });
-      const responseText = await response.text();
-      let data;
-      try { data = JSON.parse(responseText); }
-      catch (_) {
-        const contentType = response.headers.get('content-type') || 'unknown content-type';
-        const cfRay = response.headers.get('cf-ray') || 'unknown';
-        data = { message: `통계 API 응답 오류 · HTTP ${response.status} · ${contentType} · CF-Ray ${cfRay}` };
+      const options = { headers: { 'X-Admin-Key': key }, cache: 'no-store' };
+      const [webResult, engagementResult] = await Promise.allSettled([
+        fetch(`/api/analytics?range=${selectedRange}`, options).then((response) => responseData(response, '방문 통계')),
+        fetch(`/api/engagement-stats?days=${selectedRange}`, options).then((response) => responseData(response, '읽기 행동 통계'))
+      ]);
+      if (webResult.status === 'fulfilled') render(webResult.value);
+      let engagementError = engagementResult.status === 'rejected' ? engagementResult.reason : null;
+      if (engagementResult.status === 'fulfilled') {
+        try {
+          renderEngagement(engagementResult.value);
+          if ($('engagement-status')) $('engagement-status').textContent = engagementResult.value.empty ? '정상 조회됐으며 아직 수집된 읽기 세션이 없습니다.' : '읽기 행동 통계를 불러왔습니다.';
+        } catch (error) { engagementError = error; }
       }
-      if (!response.ok) {
-        const stage = data.stage && data.stage !== 'unknown' ? ` · 단계 ${data.stage}` : '';
-        throw new Error(`${data.message || '통계 데이터를 불러오지 못했습니다.'}${stage}`);
+      if (engagementError && $('engagement-status')) {
+        $('engagement-status').textContent = engagementError.message || '읽기 행동 통계를 불러오지 못했습니다.';
+        $('engagement-status').classList.toggle('error', true);
       }
-      render(data);
+      if (webResult.status === 'rejected' && engagementError) throw webResult.reason;
       rangeButtons.forEach((button) => button.setAttribute('aria-pressed', String(Number(button.dataset.range) === selectedRange)));
-      setStatus(data.empty ? '조회는 정상적으로 완료됐지만 아직 수집된 데이터가 없습니다.' : '통계 조회가 완료됐습니다.');
+      if (webResult.status === 'fulfilled') {
+        setStatus(webResult.value.empty ? '통계 조회가 완료됐습니다. 방문 데이터는 아직 없습니다.' : '통계 조회가 완료됐습니다.');
+      } else {
+        setStatus(`읽기 행동 통계는 조회됐지만 방문 통계 조회에 실패했습니다. ${webResult.reason?.message || ''}`, true);
+      }
     } catch (error) {
       setStatus(error.message || '통계 데이터를 불러오지 못했습니다.', true);
     } finally {
@@ -162,5 +260,5 @@
   });
 
   try { keyInput.value = sessionStorage.getItem('mrs-admin-key') || ''; } catch (_) {}
-  window.__adminAnalyticsTest = { formatNumber, displayCountry, render, loadAnalytics };
+  window.__adminAnalyticsTest = { formatNumber, formatDuration, formatPercent, displayCountry, render, renderEngagement, loadAnalytics };
 })();

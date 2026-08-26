@@ -156,6 +156,19 @@ test('shared middleware marks Preview responses noindex while preserving Product
   });
   assert.equal(preview.headers.get('x-robots-tag'), 'noindex, nofollow');
   assert.equal(production.headers.get('x-robots-tag'), null);
+  assert.doesNotMatch(await preview.text(), /engagement\.js/);
+  const productionBody = await production.text();
+  assert.doesNotMatch(productionBody, /engagement\.js/);
+});
+
+test('shared middleware injects engagement only into successful Production public HTML', async () => {
+  const next = async () => new Response('<!doctype html><html><body>Home</body></html>', { headers: { 'content-type': 'text/html; charset=utf-8' } });
+  const production = await middlewareRequest({ request: new Request('https://snowshagal.com/'), next, env: {} });
+  const preview = await middlewareRequest({ request: new Request('https://branch.market-research-site.pages.dev/'), next, env: {} });
+  const admin = await middlewareRequest({ request: new Request('https://snowshagal.com/admin/'), next, env: {} });
+  assert.match(await production.text(), /assets\/engagement\.js[^>]+defer/);
+  assert.doesNotMatch(await preview.text(), /engagement\.js/);
+  assert.doesNotMatch(await admin.text(), /engagement\.js/);
 });
 
 test('custom 404 is non-indexable and does not claim a canonical URL', async () => {

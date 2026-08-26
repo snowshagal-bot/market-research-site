@@ -1,14 +1,22 @@
 # Roadmap
 
-Updated: 2026-08-24
+Updated: 2026-08-26
 
 This roadmap records implementation order, not a promise to build every future idea. Keep the current site small until traffic and actual needs justify added complexity.
 
 ## Next action
 
-Review the Snowshagal homepage redesign Draft PR in Cloudflare Preview at 360px, 430px, and 1280px in light and dark modes. Confirm category links, localized post cards, search, filters, archive, KO/EN switching, theme, and the mobile menu without merging to Production.
+Review the Engagement Analytics Draft PR in Cloudflare Preview at 360px, 390–430px, and 1280px. Confirm the existing Web Analytics dashboard remains intact, the new empty state and responsive table containers render correctly, and Preview never writes engagement data before Production approval.
 
 ## In progress
+
+### 14. Privacy-minimal Engagement Analytics
+
+- retain Cloudflare Web Analytics and add independent page-load reading sessions backed by the existing `COMMENTS_DB` binding;
+- collect only foreground active time, maximum scroll, path, locale, temporary UUID, server timestamps, and server-derived connection country;
+- exclude Preview and administrator/API paths, use no cookie or persistent visitor identity, and perform no historical backfill;
+- expose authenticated 1/7/28-day overall, page, and country aggregates inside `/admin/analytics/`;
+- validate all existing tests and responsive Preview UI before Production merge.
 
 ### 13. Snowshagal homepage brand redesign
 

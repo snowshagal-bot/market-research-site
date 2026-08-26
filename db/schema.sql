@@ -28,3 +28,23 @@ CREATE TABLE IF NOT EXISTS market_close_snapshots (
 
 CREATE INDEX IF NOT EXISTS idx_market_close_generated
   ON market_close_snapshots (generated_at);
+
+CREATE TABLE IF NOT EXISTS engagement_sessions (
+  session_id TEXT PRIMARY KEY,
+  path TEXT NOT NULL,
+  country TEXT,
+  lang TEXT,
+  started_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  active_ms INTEGER NOT NULL DEFAULT 0,
+  max_scroll INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_engagement_started
+  ON engagement_sessions (started_at);
+
+CREATE INDEX IF NOT EXISTS idx_engagement_path_started
+  ON engagement_sessions (path, started_at);
+
+CREATE INDEX IF NOT EXISTS idx_engagement_country_started
+  ON engagement_sessions (country, started_at);

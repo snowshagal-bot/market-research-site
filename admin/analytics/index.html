@@ -8,7 +8,7 @@
 <title>방문 통계 · Market Research</title>
 <link rel="stylesheet" href="../../assets/site.css">
 <link rel="stylesheet" href="../../assets/ui-polish.css?v=20260810-2">
-<link rel="stylesheet" href="../../assets/admin-analytics.css?v=20260823-2">
+<link rel="stylesheet" href="../../assets/admin-analytics.css?v=20260826-1">
 <script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
 </head>
 <body>
@@ -49,8 +49,38 @@
       <section class="card ranking-card" aria-labelledby="os-title"><div class="section-head"><div><h2 id="os-title">Operating system</h2><p>운영체제별 Page views</p></div></div><ol id="top-os" class="ranking-list"></ol></section>
     </div>
     <p class="analytics-source" id="analytics-source"></p>
+
+    <section class="engagement-section" aria-labelledby="engagement-title">
+      <div class="engagement-heading"><div><span class="section-kicker">READING BEHAVIOR</span><h2 id="engagement-title">읽기 행동 / Engagement</h2><p>JavaScript tracker가 실행된 페이지 로드별 활성 읽기와 최대 스크롤을 집계합니다.</p></div><p class="engagement-deploy-note">읽기 행동 통계는 수집 기능 배포 이후 데이터부터 제공됩니다.</p></div>
+      <p class="traffic-scope"><strong>Reading sessions</strong>는 방문자 수가 아니라 페이지 로드 단위의 임시 읽기 세션입니다. 쿠키나 영구 방문자 ID를 사용하지 않습니다.<br><strong>접속 국가/지역은 네트워크 접속 위치이며 사용자의 국적을 의미하지 않습니다.</strong></p>
+      <div class="analytics-status engagement-status" id="engagement-status" role="status" aria-live="polite">읽기 행동 통계를 함께 불러옵니다.</div>
+
+      <div class="engagement-summary-grid" aria-label="읽기 행동 요약">
+        <article class="card metric-card"><span>Reading sessions</span><strong id="engagement-sessions">0</strong><small>페이지 로드 세션</small></article>
+        <article class="card metric-card"><span>평균 활성 읽기시간</span><strong id="engagement-average">0초</strong><small>foreground 누적</small></article>
+        <article class="card metric-card"><span>중앙값 활성 읽기시간</span><strong id="engagement-median">0초</strong><small>극단값 영향 완화</small></article>
+        <article class="card metric-card"><span>평균 최대 스크롤</span><strong id="engagement-scroll">0%</strong><small>세션별 최대값</small></article>
+        <article class="card metric-card"><span>30초 이상</span><strong id="engagement-30s">0%</strong><small>활성 읽기시간</small></article>
+        <article class="card metric-card"><span>1분 이상</span><strong id="engagement-1m">0%</strong><small>활성 읽기시간</small></article>
+        <article class="card metric-card"><span>3분 이상</span><strong id="engagement-3m">0%</strong><small>활성 읽기시간</small></article>
+        <article class="card metric-card"><span>90% 이상 스크롤</span><strong id="engagement-90">0%</strong><small>최대 스크롤</small></article>
+      </div>
+
+      <div class="empty-state card engagement-empty" id="engagement-empty" hidden>이 기간에는 아직 수집된 읽기 행동 데이터가 없습니다.</div>
+
+      <section class="card engagement-table-card" aria-labelledby="engagement-pages-title">
+        <div class="section-head"><div><h2 id="engagement-pages-title">페이지별 읽기 행동</h2><p>세션 수 기준 Top 20 · 한국어와 영어 페이지를 분리 집계</p></div></div>
+        <div class="table-scroll"><table class="engagement-table"><thead><tr><th>페이지</th><th>언어</th><th>세션</th><th>중앙값 읽기</th><th>평균 읽기</th><th>평균 스크롤</th><th>1분+</th><th>90%+</th></tr></thead><tbody id="engagement-pages"></tbody></table></div>
+      </section>
+
+      <section class="card engagement-table-card" aria-labelledby="engagement-countries-title">
+        <div class="section-head"><div><h2 id="engagement-countries-title">국가별 읽기 행동</h2><p>접속 네트워크 위치 기준이며 사용자 국적을 뜻하지 않습니다.</p></div></div>
+        <div class="table-scroll"><table class="engagement-table country-table"><thead><tr><th>국가/지역</th><th>세션</th><th>중앙값 읽기</th><th>평균 읽기</th><th>평균 스크롤</th></tr></thead><tbody id="engagement-countries"></tbody></table></div>
+      </section>
+      <p class="analytics-source" id="engagement-source"></p>
+    </section>
   </section>
 </div></main>
-<script src="../../assets/admin-analytics.js?v=20260823-4"></script>
+<script src="../../assets/admin-analytics.js?v=20260826-1"></script>
 </body>
 </html>
