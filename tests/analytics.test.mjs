@@ -317,11 +317,16 @@ test('analytics page keeps secrets server-side and renders Bots excluded versus 
   assert.match(html, /모든 자동화 트래픽이 제거됐다는 의미는 아닙니다/);
   assert.match(html, /Exclude Bots = Yes/);
   assert.match(html, /All traffic/);
+  assert.match(html, /읽기 행동 \/ Engagement/);
+  assert.match(html, /Reading sessions/);
+  assert.match(html, /수집 기능 배포 이후 데이터부터 제공/);
+  assert.match(html, /접속 국가\/지역은 네트워크 접속 위치이며 사용자의 국적을 의미하지 않습니다/);
+  assert.match(html, /class="table-scroll"/);
   assert.doesNotMatch(`${html}\n${client}`, /Human only/);
   assert.match(html, /href="\.\.\/manage\/">게시물 관리/);
   assert.doesNotMatch(`${html}\n${client}`, /CLOUDFLARE_(?:ACCOUNT_ID|ANALYTICS_API_TOKEN|WEB_ANALYTICS_SITE_TAG)|analytics-token-secret|site-tag-secret/);
 
-  const ids = ['analytics-admin-key', 'analytics-load', 'analytics-dashboard', 'analytics-status', 'metric-visits', 'metric-pageviews', 'metric-depth', 'metric-visits-all', 'metric-pageviews-all', 'metric-depth-all', 'analytics-period', 'analytics-empty', 'trend-chart', 'top-pages', 'top-referers', 'top-countries', 'top-devices', 'top-browsers', 'top-os', 'analytics-source'];
+  const ids = ['analytics-admin-key', 'analytics-load', 'analytics-dashboard', 'analytics-status', 'metric-visits', 'metric-pageviews', 'metric-depth', 'metric-visits-all', 'metric-pageviews-all', 'metric-depth-all', 'analytics-period', 'analytics-empty', 'trend-chart', 'top-pages', 'top-referers', 'top-countries', 'top-devices', 'top-browsers', 'top-os', 'analytics-source', 'engagement-status', 'engagement-sessions', 'engagement-average', 'engagement-median', 'engagement-scroll', 'engagement-30s', 'engagement-1m', 'engagement-3m', 'engagement-90', 'engagement-empty', 'engagement-pages', 'engagement-countries', 'engagement-source'];
   const elements = Object.fromEntries(ids.map((id) => [id, element(id)]));
   elements['analytics-dashboard'].hidden = true;
   const ranges = [1, 7, 28].map((range) => { const button = element(); button.dataset.range = String(range); return button; });
@@ -329,7 +334,13 @@ test('analytics page keeps secrets server-side and renders Bots excluded versus 
   const context = {
     console,
     Intl,
-    fetch: async () => Response.json({
+    fetch: async (url) => Response.json(String(url).includes('engagement-stats') ? {
+      ok: true, generatedAt: '2026-08-23T00:00:00.000Z', empty: false,
+      range: { days: 7, from: '2026-08-17', to: '2026-08-23', timezone: 'UTC' },
+      overall: { sessions: 3, avgActiveMs: 98000, medianActiveMs: 42000, avgMaxScroll: 76.5, over30sRate: 66.7, over1mRate: 33.3, over3mRate: 0, over90ScrollRate: 33.3 },
+      pages: [{ path: '/reports/sample', lang: 'ko', title: '샘플 리포트', sessions: 3, avgActiveMs: 98000, medianActiveMs: 42000, avgMaxScroll: 76.5, over1mRate: 33.3, over90ScrollRate: 33.3 }],
+      countries: [{ country: 'KR', sessions: 3, avgActiveMs: 98000, medianActiveMs: 42000, avgMaxScroll: 76.5 }]
+    } : {
       ok: true, generatedAt: '2026-08-23T00:00:00.000Z', empty: false,
       range: { days: 7, from: '2026-08-17', to: '2026-08-23', timezone: 'UTC' },
       totals: { visits: 1, pageViews: 2 }, allTrafficTotals: { visits: 2, pageViews: 3 }, trend: [], topPages: [], referrers: [], countries: [], devices: [], browsers: [], operatingSystems: [],
@@ -355,6 +366,16 @@ test('analytics page keeps secrets server-side and renders Bots excluded versus 
   assert.equal(elements['metric-pageviews'].textContent, '2');
   assert.equal(elements['metric-visits-all'].textContent, '2');
   assert.equal(elements['metric-pageviews-all'].textContent, '3');
+  assert.equal(elements['engagement-sessions'].textContent, '3');
+  assert.equal(elements['engagement-average'].textContent, '1분 38초');
+  assert.equal(elements['engagement-median'].textContent, '42초');
+  assert.equal(elements['engagement-pages'].children.length, 1);
+  assert.equal(elements['engagement-countries'].children.length, 1);
+  context.window.__adminAnalyticsTest.renderTrend([{ date: '2026-08-26', visits: 7, pageViews: 12 }]);
+  const trendColumn = elements['trend-chart'].children[0];
+  assert.equal(trendColumn.tabIndex, 0);
+  assert.equal(trendColumn['aria-label'], '2026-08-26, Visits 7, Page views 12');
+  assert.equal(trendColumn.children.some((child) => child.className === 'trend-tooltip'), true);
   assert.match(elements['analytics-source'].textContent, /Bots excluded: Exclude Bots = Yes/);
   assert.match(elements['analytics-status'].textContent, /통계 조회가 완료됐습니다/);
 

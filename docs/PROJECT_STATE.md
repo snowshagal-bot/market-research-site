@@ -93,6 +93,14 @@ The lightweight analytics dashboard reuses the existing `ADMIN_KEY` and `mrs-adm
 
 The UI offers today, 7-day, and 28-day views for Visits, Page views, trend, top paths, referers, connection-location countries, device types, browsers, and operating systems. An empty dataset is a successful empty state; configuration, schema, timeout, and upstream failures remain visible errors rather than fake zeroes. Country copy explicitly describes connection location, not nationality.
 
+### Engagement Analytics
+
+The same `/admin/analytics/` page also contains an independent `읽기 행동 / Engagement` section. `/assets/engagement.js` creates one temporary UUID per public page load, counts only foreground active time, retains the maximum scroll depth, and sends changed values at roughly 30-second intervals plus a final background/page-hide update. `functions/_middleware.js` injects the deferred tracker into successful public HTML only when the request hostname is exactly `snowshagal.com`; Preview hosts and `/admin/*`, `/api/*`, and `/cdn-cgi/*` are never tracked.
+
+`POST /api/engagement` validates and UPSERTs one row per page-load session into `engagement_sessions`. `GET /api/engagement-stats?days=1|7|28` reuses `ADMIN_KEY`, returns private/no-store aggregates, and maps report paths to titles using `data/posts.json` where possible. Reading sessions are tracker page loads, not people or Cloudflare Visits. The dashboard reports average and median active time, average maximum scroll, reading/scroll thresholds, and page/country breakdowns. Collection starts only after Production deployment; no historical backfill is inferred.
+
+The tracker stores no IP address, cookie, name, email, login data, fingerprint, advertising ID, persistent visitor ID, or cross-site identifier. Country is supplied only by the server-side `request.cf.country` connection location (or `XX`), and does not represent nationality.
+
 Important date semantics:
 
 - `reportDate`: date the report itself belongs to / was authored or issued.
@@ -190,6 +198,8 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `functions/api/manage.js` — authenticated atomic update/delete commits with ref-conflict protection
 - `admin/analytics/index.html` / `assets/admin-analytics.js` / `assets/admin-analytics.css` — authenticated lightweight Cloudflare Web Analytics dashboard
 - `functions/api/analytics.js` — authenticated, schema-discovered GraphQL Analytics aggregation endpoint
+- `assets/engagement.js` / `functions/api/engagement.js` / `functions/api/engagement-stats.js` — privacy-minimal Production-only reading-session tracker, D1 writer, and authenticated aggregate endpoint
+- `functions/api/_engagement.js` — shared Engagement schema, validation, date-range, and aggregation helpers
 - `functions/_middleware.js` — injects shared report shell into `/reports/` HTML
 - `assets/report-shell.js` — isolated navigation + comments UI for report pages
 - `functions/api/comments.js` — D1-backed guest comment API

@@ -82,6 +82,16 @@ The binding has been created/saved in Cloudflare as of 2026-08-09. Cloudflare in
 
 The API inspects and prepares the comments schema on first use, so a manual schema paste is not required for initial setup. If it finds an incompatible pre-release `comments` table, it preserves that table as `comments_legacy_v1` and then creates the current table and indexes. `db/schema.sql` remains the schema reference.
 
+### Engagement Analytics on the existing D1 binding
+
+Engagement Analytics reuses `COMMENTS_DB`; do not create another database or change the binding name. Its tables are isolated with the `engagement_*` prefix. `POST /api/engagement` safely creates `engagement_sessions` and its `started_at`, `path + started_at`, and `country + started_at` indexes on first use, independently of the comments schema. `db/schema.sql` is the reference definition; no destructive migration or historical backfill is required.
+
+The shared middleware injects `/assets/engagement.js` only into successful public HTML responses on the exact `snowshagal.com` hostname. Preview hosts do not load the tracker, and the write API independently rejects non-Production hostnames. `/admin/*`, `/api/*`, and `/cdn-cgi/*` are excluded. Once the feature reaches Production, the first tracked public page load initializes the table and begins collection; earlier reading-time data does not exist.
+
+Each row represents one temporary page-load UUID and contains only path, connection-location country code, page language, server timestamps, foreground active milliseconds, and maximum scroll percentage. Country comes only from `request.cf.country` (fallback `XX`). The system does not store IP addresses, cookies, names, emails, login data, fingerprints, advertising IDs, persistent visitor IDs, or cross-site identifiers. Country is network location, not nationality.
+
+`GET /api/engagement-stats?days=1|7|28` uses the existing `ADMIN_KEY`, reads the same D1 binding, and returns `private, no-store` aggregates to `/admin/analytics/`. No new secret or manual database action is needed when the Production `COMMENTS_DB` and `ADMIN_KEY` bindings already exist.
+
 ## Report publishing dependencies
 
 For `/admin/` publishing to work, production needs:
