@@ -4,7 +4,13 @@
 /data/posts.json
   Cache-Control: no-cache, no-store, must-revalidate
 
-/data/search-index.js
+/data/search-index-meta.js
+  Cache-Control: no-cache
+
+/data/search-index-body-ko.js
+  Cache-Control: no-cache
+
+/data/search-index-body-en.js
   Cache-Control: no-cache
 
 /data/search-index.json

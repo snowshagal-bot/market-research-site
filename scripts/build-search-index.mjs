@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { searchIndexArtifacts } from '../functions/api/_search-index.js';
 
 function cleanInlineText(str) {
   return String(str || '')
@@ -341,8 +342,8 @@ export function buildSearchIndex(targetRootDir) {
   const root = targetRootDir || path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
   const postsPath = path.join(root, 'data', 'posts.json');
   const postsJsPath = path.join(root, 'data', 'posts.js');
-  const outJsonPath = path.join(root, 'data', 'search-index.json');
-  const outJsPath = path.join(root, 'data', 'search-index.js');
+  // Output paths come from searchIndexArtifacts so the build script, the
+  // publisher and the post manager all emit the same set of files.
 
   const postsRaw = fs.readFileSync(postsPath, 'utf8');
   const posts = JSON.parse(postsRaw);
@@ -396,8 +397,9 @@ export function buildSearchIndex(targetRootDir) {
     };
   });
 
-  fs.writeFileSync(outJsonPath, JSON.stringify(searchIndex, null, 2) + '\n', 'utf8');
-  fs.writeFileSync(outJsPath, `window.SEARCH_INDEX = ${JSON.stringify(searchIndex)};\n`, 'utf8');
+  for (const artifact of searchIndexArtifacts(searchIndex)) {
+    fs.writeFileSync(path.join(root, artifact.path), artifact.content, 'utf8');
+  }
   return searchIndex;
 }
 

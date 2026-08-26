@@ -111,10 +111,14 @@ test('publishing without a cover preserves existing records and omits coverImage
     assert.equal(response.status, 200);
     assert.equal(data.coverImage, null);
     const treeCall = calls.find(call => call.path.endsWith('/git/trees'));
-    assert.equal(treeCall.body.tree.length, 5);
+    // report + posts.json + posts.js + the four search index artifacts
+    assert.equal(treeCall.body.tree.length, 7);
     assert.equal(treeCall.body.tree.some(entry => entry.path.startsWith('covers/')), false);
     assert.ok(treeCall.body.tree.some(entry => entry.path === 'data/search-index.json'));
-    assert.ok(treeCall.body.tree.some(entry => entry.path === 'data/search-index.js'));
+    assert.ok(treeCall.body.tree.some(entry => entry.path === 'data/search-index-meta.js'));
+    assert.ok(treeCall.body.tree.some(entry => entry.path === 'data/search-index-body-ko.js'));
+    assert.ok(treeCall.body.tree.some(entry => entry.path === 'data/search-index-body-en.js'));
+    assert.equal(treeCall.body.tree.some(entry => entry.path === 'data/search-index.js'), false);
     const postsEntry = treeCall.body.tree.find(entry => entry.path === 'data/posts.json');
     const posts = JSON.parse(postsEntry.content);
     assert.deepEqual(posts.find(post => post.id === 'legacy'), existing[0]);

@@ -138,43 +138,83 @@
   const searchQuickTags = document.getElementById('search-quick-tags');
   const searchTagCloud = document.getElementById('search-tag-cloud');
   let lastActiveTrigger = null;
-  let isSearchIndexLoading = false;
 
-  function loadSearchIndex(callback){
-    if (window.SEARCH_INDEX && Array.isArray(window.SEARCH_INDEX)) {
-      if (callback) callback(window.SEARCH_INDEX);
-      return;
-    }
-    if (isSearchIndexLoading) return;
-    isSearchIndexLoading = true;
-    const script = document.createElement('script');
-    script.src = '/data/search-index.js';
-    script.onload = () => {
-      isSearchIndexLoading = false;
-      if (callback) callback(window.SEARCH_INDEX || []);
-    };
-    script.onerror = () => {
-      isSearchIndexLoading = false;
-      window.SEARCH_INDEX = allPosts.map(p => ({
-        ...p,
-        category: p.type,
-        date: p.reportDate || p.date,
-        summary: p.summary || p.description || '',
-        tags: p.tags || [],
-        url: p.href ? `/${p.href.replace(/^\/+/, '')}` : '',
-        bodyText: ''
-      }));
-      if (callback) callback(window.SEARCH_INDEX);
-    };
-    document.head.appendChild(script);
+  /* Search index ------------------------------------------------------------
+     Two tiers. The metadata file is ~34KB and answers title, tag and summary
+     queries immediately; report bodies are ~1.2MB per locale and load in the
+     background, so a body-only match appears a moment later instead of holding
+     the whole dialog hostage. A Korean reader never downloads English bodies.
+  -------------------------------------------------------------------------- */
+  const SEARCH_META_SRC = '/data/search-index-meta.js?v=20260827-1';
+  const SEARCH_BODY_SRC = `/data/search-index-body-${locale}.js?v=20260827-1`;
+  let searchMetaState = '';
+  let searchBodyState = '';
+
+  function loadScriptOnce(src){
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error(src));
+      document.head.appendChild(script);
+    });
+  }
+
+  // Without the index the dialog still searches what the page already has.
+  function searchMetaFallback(){
+    return allPosts.map(post => ({
+      ...post,
+      category: post.type,
+      date: post.reportDate || post.date,
+      summary: post.summary || post.description || '',
+      tags: post.tags || [],
+      url: post.href ? `/${post.href.replace(/^\/+/, '')}` : ''
+    }));
+  }
+
+  function loadSearchMeta(onReady){
+    if (searchMetaState === 'ready') { onReady(); return; }
+    if (searchMetaState === 'loading') return;
+    searchMetaState = 'loading';
+    loadScriptOnce(SEARCH_META_SRC)
+      .catch(() => { window.SEARCH_INDEX_META = searchMetaFallback(); })
+      .then(() => {
+        if (!Array.isArray(window.SEARCH_INDEX_META)) window.SEARCH_INDEX_META = searchMetaFallback();
+        searchMetaState = 'ready';
+        onReady();
+      });
+  }
+
+  // Fetched for its own sake, not awaited: results are already on screen.
+  function loadSearchBodies(onReady){
+    if (searchBodyState === 'ready' || searchBodyState === 'loading') return;
+    searchBodyState = 'loading';
+    loadScriptOnce(SEARCH_BODY_SRC)
+      .catch(() => { window.SEARCH_INDEX_BODY = window.SEARCH_INDEX_BODY || {}; })
+      .then(() => {
+        window.SEARCH_INDEX_BODY = window.SEARCH_INDEX_BODY || {};
+        searchBodyState = 'ready';
+        onReady();
+      });
+  }
+
+  function searchEntries(){
+    const entries = Array.isArray(window.SEARCH_INDEX_META) ? window.SEARCH_INDEX_META : searchMetaFallback();
+    return entries.filter(entry => (entry.lang === 'en' ? 'en' : 'ko') === locale);
+  }
+
+  function searchBodyText(entry){
+    return (window.SEARCH_INDEX_BODY && window.SEARCH_INDEX_BODY[entry.id]) || '';
   }
 
   function openSearchDialog(trigger){
     if (!searchDialog) return;
     lastActiveTrigger = trigger || null;
-    loadSearchIndex(() => {
+    loadSearchMeta(() => {
       renderSearchTagCloud();
       performSearch(globalSearchInput?.value || '');
+      // Re-run once report bodies land so body-only matches join the list.
+      loadSearchBodies(() => performSearch(globalSearchInput?.value || ''));
     });
     if (typeof searchDialog.showModal === 'function') {
       searchDialog.showModal();
@@ -241,8 +281,7 @@
 
   function renderSearchTagCloud(){
     if (!searchTagCloud) return;
-    const indexData = window.SEARCH_INDEX || allPosts;
-    const targetPosts = indexData.filter(p => (p.lang === 'en' ? 'en' : 'ko') === locale);
+    const targetPosts = searchEntries();
     const tagCountMap = {};
     targetPosts.forEach(p => {
       if (Array.isArray(p.tags)) {
@@ -287,7 +326,7 @@
 
     if (searchQuickTags) searchQuickTags.hidden = true;
 
-    const indexData = (window.SEARCH_INDEX || allPosts).filter(p => (p.lang === 'en' ? 'en' : 'ko') === locale);
+    const indexData = searchEntries();
     const queryWords = query.split(/\s+/).filter(Boolean);
 
     const scored = [];
@@ -301,7 +340,7 @@
       const title = (item.title || '').toLowerCase();
       const subtitle = (item.subtitle || '').toLowerCase();
       const summary = (item.summary || item.description || '').toLowerCase();
-      const body = (item.bodyText || '').toLowerCase();
+      const body = searchBodyText(item).toLowerCase();
       const rawTags = Array.isArray(item.tags) ? item.tags : [];
       const localizedTagTerms = [];
       rawTags.forEach(t => {
@@ -345,8 +384,9 @@
       const info = categoryInfo(item.category || item.type);
       const highlightedTitle = highlightMatches(item.title, queryWords);
       let summaryContent = '';
-      if (isBodyOnlyMatch && item.bodyText) {
-        const rawSnippet = extractBodySnippet(item.bodyText, queryWords, 150);
+      const itemBody = searchBodyText(item);
+      if (isBodyOnlyMatch && itemBody) {
+        const rawSnippet = extractBodySnippet(itemBody, queryWords, 150);
         summaryContent = highlightMatches(rawSnippet, queryWords);
       } else {
         summaryContent = highlightMatches(item.summary || item.description, queryWords);
@@ -408,6 +448,10 @@
   let activeYear = urlParams.get('year') || 'all';
   let activeMonth = urlParams.get('month') || 'all';
   let activeTag = urlParams.get('tag') || 'all';
+  // The archive grows by a report a day, so only the first page is rendered
+  // and the reader asks for more. Any change to the result set starts over.
+  const ARCHIVE_PAGE = 20;
+  let archiveShown = ARCHIVE_PAGE;
   let activeView = (activeCategory === 'daily' || activeCategory === 'weekly') && urlParams.get('view') === 'calendar' ? 'calendar' : 'list';
   let currentCalMonth = urlParams.get('calMonth') || '';
   let selectedCalDate = '';
@@ -735,7 +779,9 @@
       return;
     }
 
-    list.innerHTML = filtered.map(post => {
+    const visible = filtered.slice(0, archiveShown);
+    const remaining = filtered.length - visible.length;
+    list.innerHTML = visible.map(post => {
       const info = categoryInfo(post.type);
       const subtitle=post.subtitle?`<div class="report-subtitle">${esc(post.subtitle)}</div>`:'';
       const readingTimeStr = formatReadingTime(post.readingMinutes, locale);
@@ -759,11 +805,24 @@
           </span>
         </a>
       `;
-    }).join('');
+    }).join('') + (remaining > 0
+      ? `<button type="button" class="archive-more" id="archive-more">${esc(messages.archiveMore)} <span>${remaining}</span></button>`
+      : '');
+
+    const moreButton = list.querySelector('#archive-more');
+    moreButton?.addEventListener('click', () => {
+      const revealedFrom = visible.length;
+      archiveShown += ARCHIVE_PAGE;
+      renderArchive();
+      // Send the reader to the first row that just appeared rather than
+      // leaving focus on a button that may no longer exist.
+      list.querySelectorAll('.report-item')[revealedFrom]?.focus();
+    });
   }
 
   filters.forEach(button => button.addEventListener('click', () => {
     activeCategory = button.dataset.filter;
+    archiveShown = ARCHIVE_PAGE;
     if (activeCategory !== 'daily' && activeCategory !== 'weekly') {
       activeView = 'list';
     }
@@ -779,16 +838,19 @@
 
   filterYear?.addEventListener('change', (e) => {
     activeYear = e.target.value;
+    archiveShown = ARCHIVE_PAGE;
     updateUrlState();
     renderArchive();
   });
   filterMonth?.addEventListener('change', (e) => {
     activeMonth = e.target.value;
+    archiveShown = ARCHIVE_PAGE;
     updateUrlState();
     renderArchive();
   });
   filterTag?.addEventListener('change', (e) => {
     activeTag = e.target.value;
+    archiveShown = ARCHIVE_PAGE;
     updateUrlState();
     renderArchive();
   });
@@ -796,6 +858,7 @@
     activeYear = 'all';
     activeMonth = 'all';
     activeTag = 'all';
+    archiveShown = ARCHIVE_PAGE;
     if (filterYear) filterYear.value = 'all';
     if (filterMonth) filterMonth.value = 'all';
     if (filterTag) filterTag.value = 'all';
@@ -809,6 +872,7 @@
     activeYear = params.get('year') || 'all';
     activeMonth = params.get('month') || 'all';
     activeTag = params.get('tag') || 'all';
+    archiveShown = ARCHIVE_PAGE;
     activeView = (activeCategory === 'daily' || activeCategory === 'weekly') && params.get('view') === 'calendar' ? 'calendar' : 'list';
     currentCalMonth = params.get('calMonth') || '';
     if (filterYear) filterYear.value = activeYear;
