@@ -343,8 +343,8 @@ test('publish automatically calculates readingMinutes and synchronizes tags in p
 
     assert.deepEqual(posts[0].tags, ['rates', 'semiconductors']);
     assert.deepEqual(searchIndex[0].tags, ['rates', 'semiconductors']);
-    assert.equal(posts[0].readingMinutes, 1);
-    assert.equal(searchIndex[0].readingMinutes, 1);
+    assert.equal(posts[0].readingMinutes, 3);
+    assert.equal(searchIndex[0].readingMinutes, 3);
   } finally {
     globalThis.fetch = originalFetch;
   }

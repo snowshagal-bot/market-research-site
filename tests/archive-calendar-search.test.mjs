@@ -234,13 +234,17 @@ test('search relevance weights title > tags > summary > body, separates locales,
 
 test('automatic search index pipeline simulation test (+1 report indexing & cleanup)', async () => {
   const postsPath = path.join(rootDir, 'data', 'posts.json');
-  const originalPostsRaw = readFileSync(postsPath, 'utf8');
-  const posts = JSON.parse(originalPostsRaw);
-  const initialIndexCount = posts.length;
-
-  const tempReportFile = path.join(rootDir, 'reports', '_temp_test_simulation_report.html');
   const tempUniqueKeyword = 'XY_UNIQUE_FULL_BODY_SEARCH_KEYWORD_2026_TEST';
   const tempTitle = '임시 시뮬레이션 리포트 제목';
+
+  const { mkdtempSync, rmSync, mkdirSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const tempDir = mkdtempSync(path.join(tmpdir(), 'srch-test-'));
+  mkdirSync(path.join(tempDir, 'data'), { recursive: true });
+  mkdirSync(path.join(tempDir, 'reports'), { recursive: true });
+
+  const tempPostsPath = path.join(tempDir, 'data', 'posts.json');
+  const tempReportFile = path.join(tempDir, 'reports', '_temp_test_simulation_report.html');
 
   // Generate a long HTML file (>12,000 characters) with the unique keyword near the end
   const paddingText = '대한민국 주식시장 반도체 2차전지 금융 매크로 분석 '.repeat(300);
@@ -256,10 +260,14 @@ test('automatic search index pipeline simulation test (+1 report indexing & clea
 </html>`;
 
   try {
-    // 1. Write temp HTML file
+    // 1. Copy current posts.json to temp directory
+    const currentPosts = JSON.parse(readFileSync(postsPath, 'utf8'));
+    const initialIndexCount = currentPosts.length;
+
+    // 2. Write temp HTML file
     writeFileSync(tempReportFile, tempHtmlContent, 'utf8');
 
-    // 2. Add temp post to posts.json
+    // 3. Add temp post to temp posts.json
     const tempPost = {
       id: '2026-08-99-daily-temp-simulation',
       type: 'daily',
@@ -272,27 +280,25 @@ test('automatic search index pipeline simulation test (+1 report indexing & clea
       title: tempTitle,
       subtitle: '시뮬레이션 부제목',
       description: '시뮬레이션 설명',
+      tags: ['flows'],
       href: 'reports/_temp_test_simulation_report.html'
     };
-    posts.push(tempPost);
-    writeFileSync(postsPath, JSON.stringify(posts, null, 2) + '\n', 'utf8');
+    currentPosts.push(tempPost);
+    writeFileSync(tempPostsPath, JSON.stringify(currentPosts, null, 2) + '\n', 'utf8');
 
-    // 3. Run buildSearchIndex pipeline
-    const newIndex = buildSearchIndex(rootDir);
+    // 4. Run buildSearchIndex pipeline in isolated tempDir
+    const newIndex = buildSearchIndex(tempDir);
 
-    // 4. Assert count increased by +1
+    // 5. Assert count increased by +1
     assert.equal(newIndex.length, initialIndexCount + 1, 'Index count must increase by 1');
 
-    // 5. Assert unique keyword in body (>10k chars) is searchable
+    // 6. Assert unique keyword in body (>10k chars) is searchable
     const matched = newIndex.filter(item => item.bodyText && item.bodyText.includes(tempUniqueKeyword));
     assert.equal(matched.length, 1, 'Must find the newly added report by its deep body keyword');
     assert.equal(matched[0].id, tempPost.id);
   } finally {
-    // 6. Cleanup temp fixture and restore original posts.json & search index
-    if (existsSync(tempReportFile)) unlink(tempReportFile).catch(() => {});
-    writeFileSync(postsPath, originalPostsRaw, 'utf8');
-    const restoredIndex = buildSearchIndex(rootDir);
-    assert.equal(restoredIndex.length, initialIndexCount, 'Index count must be restored');
+    // 7. Cleanup temp directory
+    try { rmSync(tempDir, { recursive: true, force: true }); } catch (_) {}
   }
 });
 
