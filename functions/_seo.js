@@ -8,7 +8,11 @@ export const SOCIAL_FALLBACK_IMAGE = '/assets/social/snowshagal-home.jpg';
 // the report title away on four of five sampled covers and sliced through the
 // glyphs on one. Open Graph carries a landscape card instead; the cover still
 // reaches X through twitter:image, where the summary card does not crop it.
-export const SOCIAL_REPORT_IMAGE = '/assets/social/market-close-share.jpg';
+//
+// The card is the neutral brand one rather than the Market Close artwork, which
+// suits Daily but misreads on Weekly, Research and Market Basics. This is the
+// seam a per-report card would plug into once Social Card v2 exists.
+export const SOCIAL_REPORT_IMAGE = '/assets/social/snowshagal-home.jpg';
 
 // Uploaded report HTML declares no icon, so the shared shell supplies one.
 export const FAVICON_TAGS = '<link rel="icon" href="/favicon.ico" sizes="any">'

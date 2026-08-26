@@ -211,10 +211,13 @@ test('a report with a cover sends a landscape card to Open Graph and the cover t
   const coverUrl = `${PRODUCTION_ORIGIN}/covers/2026-08-26-daily.webp`;
 
   // A 1.91:1 unfurler keeps only the middle 35% of a 900x1350 cover, so Open
-  // Graph never receives the portrait artwork.
+  // Graph never receives the portrait artwork. The card is the neutral brand
+  // one: Market Close artwork would misread on Weekly, Research and Basics.
+  assert.equal(SOCIAL_REPORT_IMAGE, SOCIAL_FALLBACK_IMAGE);
   assert.match(tags, new RegExp(`<meta property="og:image" content="${PRODUCTION_ORIGIN}${SOCIAL_REPORT_IMAGE}">`));
   assert.doesNotMatch(tags, new RegExp(`<meta property="og:image" content="${coverUrl}">`));
   assert.doesNotMatch(tags, /property="og:image" content="[^"]*\/covers\//);
+  assert.doesNotMatch(tags, /property="og:image" content="[^"]*market-close-share/);
 
   // X shows a summary thumbnail rather than a cropped band, so it keeps the cover.
   assert.match(tags, new RegExp(`<meta name="twitter:image" content="${coverUrl}">`));
