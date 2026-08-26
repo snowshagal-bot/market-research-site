@@ -1,5 +1,27 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-26-daily-1ufok0a",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-08-26",
+    "reportDate": "2026-08-26",
+    "registeredDate": "2026-08-26",
+    "registeredAt": "2026-08-26T13:58:29.784Z",
+    "legacyImport": false,
+    "title": "먼저열리는 밤",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "tags": [
+      "rates",
+      "ai",
+      "cloud-datacenter"
+    ],
+    "readingMinutes": 18,
+    "href": "reports/8월 26일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-08-26-daily-1ufok0a.webp"
+  },
+  {
     "id": "2026-08-25-daily-bmu64e",
     "type": "daily",
     "typeLabel": "Daily",
