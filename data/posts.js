@@ -738,7 +738,7 @@ window.RESEARCH_POSTS = [
     "tags": [
       "flows"
     ],
-    "readingMinutes": 4
+    "readingMinutes": 2
   },
   {
     "id": "2026-08-11-daily-12vx8a7",
@@ -780,7 +780,7 @@ window.RESEARCH_POSTS = [
       "semiconductors",
       "rates"
     ],
-    "readingMinutes": 5
+    "readingMinutes": 3
   },
   {
     "id": "2026-08-10-daily-1bb8z4p",

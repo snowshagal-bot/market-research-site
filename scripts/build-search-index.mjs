@@ -58,6 +58,110 @@ export function extractReportText(html) {
 
 export const extractSearchText = extractReportText;
 
+export function removeSourceGlossaryContainers(html) {
+  if (!html) return '';
+
+  let raw = String(html);
+
+  // 1. Details elements handling (parser/depth tracking)
+  let cursor = 0;
+  let result = '';
+  const detailsPattern = /<details\b([^>]*)>/gi;
+  let dMatch;
+
+  while ((dMatch = detailsPattern.exec(raw)) !== null) {
+    const startIndex = dMatch.index;
+    result += raw.slice(cursor, startIndex);
+
+    const attrs = dMatch[1];
+    const isOpen = /\bopen\b/i.test(attrs);
+
+    let depth = 1;
+    let pos = detailsPattern.lastIndex;
+    const subPattern = /<\/?details\b[^>]*>/gi;
+    subPattern.lastIndex = pos;
+
+    let subMatch;
+    let endIndex = raw.length;
+    while ((subMatch = subPattern.exec(raw)) !== null) {
+      if (subMatch[0].startsWith('</')) {
+        depth--;
+        if (depth === 0) {
+          endIndex = subMatch.index + subMatch[0].length;
+          break;
+        }
+      } else if (!subMatch[0].endsWith('/>')) {
+        depth++;
+      }
+    }
+
+    const fullDetails = raw.slice(startIndex, endIndex);
+    cursor = endIndex;
+    detailsPattern.lastIndex = cursor;
+
+    const summaryMatch = fullDetails.match(/<summary\b[^>]*>([\s\S]*?)<\/summary>/i);
+    const summaryText = summaryMatch ? summaryMatch[1].replace(/<[^>]+>/g, '').trim() : '';
+
+    const isSource = /출처|자료와\s*출처|데이터\s*기준|참고자료|sources?|references?|citations?|cited\s*material/i.test(summaryText) ||
+                     /id=["'](?:detail-sources|src)["']|class=["'][^"']*\bsrc\b/i.test(attrs);
+    const isGlossary = /용어|glossary|key\s*terms?|definitions?/i.test(summaryText) ||
+                       /id=["']detail-glossary["']|class=["'][^"']*\bgloss\b/i.test(attrs);
+
+    if (!isSource && !isGlossary && isOpen) {
+      const inner = fullDetails.replace(/^<details\b[^>]*>/i, '').replace(/<\/details>$/i, '');
+      result += ' ' + inner + ' ';
+    } else {
+      result += ' ';
+    }
+  }
+  result += raw.slice(cursor);
+  raw = result;
+
+  // 2. Container blocks with source/glossary classes or ids (nested tag safe)
+  const targetTagNames = ['section', 'div', 'aside', 'dl', 'ul', 'ol', 'p', 'article'];
+  const containerPattern = new RegExp(`<(${targetTagNames.join('|')})\\b([^>]*(?:id|class)=["'][^"']*(?:detail-sources|detail-glossary|sourcecopy|termblk|srclist|glossary|srcs\\b)[^"']*["'][^>]*)>`, 'gi');
+
+  cursor = 0;
+  result = '';
+  let cMatch;
+
+  while ((cMatch = containerPattern.exec(raw)) !== null) {
+    const startIndex = cMatch.index;
+    result += raw.slice(cursor, startIndex);
+
+    const tagName = cMatch[1].toLowerCase();
+    let depth = 1;
+    let pos = containerPattern.lastIndex;
+    const subPattern = new RegExp(`<\/?${tagName}\\b[^>]*>`, 'gi');
+    subPattern.lastIndex = pos;
+
+    let subMatch;
+    let endIndex = raw.length;
+    while ((subMatch = subPattern.exec(raw)) !== null) {
+      if (subMatch[0].startsWith('</')) {
+        depth--;
+        if (depth === 0) {
+          endIndex = subMatch.index + subMatch[0].length;
+          break;
+        }
+      } else if (!subMatch[0].endsWith('/>')) {
+        depth++;
+      }
+    }
+
+    cursor = endIndex;
+    containerPattern.lastIndex = cursor;
+    result += ' ';
+  }
+  result += raw.slice(cursor);
+  raw = result;
+
+  // 3. Inline tip spans
+  raw = raw.replace(/<span\s+class=["']tip["']>([\s\S]*?)<\/span>/gi, ' ');
+
+  return raw;
+}
+
 export function extractReadingText(html) {
   if (!html) return '';
 
@@ -89,27 +193,8 @@ export function extractReadingText(html) {
   ];
   for (const bp of boilerplates) raw = raw.replace(bp, ' ');
 
-  // 2. Identify and strip Source & Glossary blocks (0%) and closed details (0%)
-  raw = raw.replace(/<details\b([^>]*)>([\s\S]*?)<\/details>/gi, (match, attrs, inner) => {
-    const summaryMatch = inner.match(/<summary\b[^>]*>([\s\S]*?)<\/summary>/i);
-    const summaryText = summaryMatch ? summaryMatch[1].replace(/<[^>]+>/g, '').trim() : '';
-    const isSource = /출처|자료와\s*출처|데이터\s*기준|참고자료|sources?|references?|citations?|cited\s*material/i.test(summaryText) ||
-                     /id=["'](?:detail-sources|src)["']|class=["'][^"']*\bsrc\b/i.test(attrs);
-    const isGlossary = /용어|glossary|key\s*terms?|definitions?/i.test(summaryText) ||
-                       /id=["']detail-glossary["']|class=["'][^"']*\bgloss\b/i.test(attrs);
-    const isOpen = /\bopen\b/i.test(attrs);
-
-    if (isSource || isGlossary || !isOpen) {
-      return ' ';
-    }
-    return inner;
-  });
-
-  const sourceGlossaryPattern = /<(?:section|div|aside|dl|ul|ol|p)\b([^>]*(?:id|class)=["'][^"']*(?:detail-sources|detail-glossary|sourcecopy|termblk|srclist|glossary|srcs\b)[^"']*["'][^>]*)>[\s\S]*?<\/(?:section|div|aside|dl|ul|ol|p)>/gi;
-  for (let pass = 0; pass < 3; pass++) {
-    raw = raw.replace(sourceGlossaryPattern, ' ');
-  }
-  raw = raw.replace(/<span\s+class=["']tip["']>([\s\S]*?)<\/span>/gi, ' ');
+  // 2. Safely remove Source & Glossary containers (nested safe) & closed details (0%)
+  raw = removeSourceGlossaryContainers(raw);
 
   return cleanInlineText(raw);
 }
@@ -151,27 +236,8 @@ export function calculateRawWeightedMinutes(html, lang = 'ko') {
   ];
   for (const bp of boilerplates) raw = raw.replace(bp, ' ');
 
-  // 2. Identify and strip Source & Glossary blocks (0%) and closed details (0%)
-  raw = raw.replace(/<details\b([^>]*)>([\s\S]*?)<\/details>/gi, (match, attrs, inner) => {
-    const summaryMatch = inner.match(/<summary\b[^>]*>([\s\S]*?)<\/summary>/i);
-    const summaryText = summaryMatch ? summaryMatch[1].replace(/<[^>]+>/g, '').trim() : '';
-    const isSource = /출처|자료와\s*출처|데이터\s*기준|참고자료|sources?|references?|citations?|cited\s*material/i.test(summaryText) ||
-                     /id=["'](?:detail-sources|src)["']|class=["'][^"']*\bsrc\b/i.test(attrs);
-    const isGlossary = /용어|glossary|key\s*terms?|definitions?/i.test(summaryText) ||
-                       /id=["']detail-glossary["']|class=["'][^"']*\bgloss\b/i.test(attrs);
-    const isOpen = /\bopen\b/i.test(attrs);
-
-    if (isSource || isGlossary || !isOpen) {
-      return ' ';
-    }
-    return inner;
-  });
-
-  const sourceGlossaryPattern = /<(?:section|div|aside|dl|ul|ol|p)\b([^>]*(?:id|class)=["'][^"']*(?:detail-sources|detail-glossary|sourcecopy|termblk|srclist|glossary|srcs\b)[^"']*["'][^>]*)>[\s\S]*?<\/(?:section|div|aside|dl|ul|ol|p)>/gi;
-  for (let pass = 0; pass < 3; pass++) {
-    raw = raw.replace(sourceGlossaryPattern, ' ');
-  }
-  raw = raw.replace(/<span\s+class=["']tip["']>([\s\S]*?)<\/span>/gi, ' ');
+  // 2. Safely remove Source & Glossary containers (nested safe) & closed details (0%)
+  raw = removeSourceGlossaryContainers(raw);
 
   // 3. Extract Categories into Weighted Buckets
   let narrativeText = '';
@@ -239,17 +305,36 @@ export function calculateRawWeightedMinutes(html, lang = 'ko') {
   return Math.max(1, Math.ceil(weightedEquivalent / speed));
 }
 
+export function calculateLegacyReadingMinutes(html, lang = 'ko') {
+  const readingText = extractReadingText(html);
+  if (!readingText) return 1;
+  const isEn = lang === 'en';
+  if (isEn) {
+    const words = readingText.split(/\s+/).filter(Boolean).length;
+    return Math.max(1, Math.ceil(words / 220));
+  } else {
+    const nonWsChars = readingText.replace(/\s+/g, '').length;
+    return Math.max(1, Math.ceil(nonWsChars / 500));
+  }
+}
+
 export function calculateReadingMinutes(html, lang = 'ko', type = 'daily') {
-  const rawWeighted = calculateRawWeightedMinutes(html, lang);
   const normalizedType = String(type || 'daily').toLowerCase();
 
-  // Daily, Weekly, Research: -5 minutes perceptual adjustment (minimum 3 min)
+  // 1. Daily, Weekly, Research: v2 Weighted with -5 min adjustment (min 3)
   if (normalizedType === 'daily' || normalizedType === 'weekly' || normalizedType === 'research') {
+    const rawWeighted = calculateRawWeightedMinutes(html, lang);
     return Math.max(3, rawWeighted - 5);
   }
 
-  // Basics or other categories: raw weighted calculation without -5 min reduction (minimum 1 min)
-  return Math.max(1, rawWeighted);
+  // 2. Basics: v2 Weighted without -5 min adjustment (min 1)
+  if (normalizedType === 'basics') {
+    const rawWeighted = calculateRawWeightedMinutes(html, lang);
+    return Math.max(1, rawWeighted);
+  }
+
+  // 3. Market, Notes: Explicitly excluded from Reading Time v2, preserving legacy calculation
+  return calculateLegacyReadingMinutes(html, lang);
 }
 
 export function buildSearchIndex(targetRootDir) {

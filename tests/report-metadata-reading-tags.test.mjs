@@ -126,6 +126,94 @@ test('Reading Time: Sources & Glossary are 100% excluded (0%) regardless of open
   assert.equal(searchText.includes(glossaryKeyword), true, 'Search text must retain glossary content for search');
 });
 
+test('Reading Time: Nested Multi-Child Source and Glossary Container Exclusion (Fixtures A, B, C)', () => {
+  const baseContent = '안녕하세요. 오늘의 핵심 시장 분석 본문입니다. '.repeat(40); // ~960 chars
+  const baseHtml = `<html><body><main><p>${baseContent}</p></main></body></html>`;
+  const baseMinutes = calculateReadingMinutes(baseHtml, 'ko', 'basics');
+
+  // Fixture A: Nested div.srclist with multiple child p tags
+  const fixtureA = `
+    <div class="srclist">
+      <p>SOURCE_A 출처 상세 내용 한국거래소 블룸버그 연방준비제도 데이터</p>
+      <p>SOURCE_B 추가 출처 세부 각주 및 레퍼런스 링크 리스트</p>
+    </div>
+  `;
+
+  // Fixture B: Nested section#detail-glossary with inner div and p tags
+  const fixtureB = `
+    <section id="detail-glossary">
+      <div>
+        <p>TERM_A 용어 설명: 국채 금리와 인플레이션 기대 심리</p>
+        <p>TERM_B 용어 정의: 하이퍼스케일러 데이터센터 자본지출</p>
+      </div>
+    </section>
+  `;
+
+  // Fixture C: Nested div.sourcecopy with ul, li, and p tags
+  const fixtureC = `
+    <div class="sourcecopy">
+      <ul>
+        <li>SOURCE_C 글로벌 금융기관 보고서 인용</li>
+        <li>SOURCE_D 미국 재무부 발행 통계 자료</li>
+      </ul>
+      <p>SOURCE_E 데이터 기준일 및 업데이트 주기 안내</p>
+    </div>
+  `;
+
+  const complexHtml = `
+    <html>
+      <body>
+        <main>
+          <p>${baseContent}</p>
+          ${fixtureA}
+          ${fixtureB}
+          ${fixtureC}
+        </main>
+      </body>
+    </html>
+  `;
+
+  // 1. Reading Text must contain 0 occurrences of SOURCE_A~E and TERM_A~B
+  const readingText = extractReadingText(complexHtml);
+  const keywords = ['SOURCE_A', 'SOURCE_B', 'TERM_A', 'TERM_B', 'SOURCE_C', 'SOURCE_D', 'SOURCE_E'];
+  for (const kw of keywords) {
+    assert.equal(readingText.includes(kw), false, `Reading text must NOT contain nested source/glossary keyword: ${kw}`);
+  }
+
+  // 2. Reading Time impact must be 0
+  const complexMinutes = calculateReadingMinutes(complexHtml, 'ko', 'basics');
+  assert.equal(complexMinutes, baseMinutes, 'Nested sources and glossary must have 0 impact on reading time');
+
+  // 3. Search Text must retain ALL keywords (100% searchable)
+  const searchText = extractSearchText(complexHtml);
+  for (const kw of keywords) {
+    assert.equal(searchText.includes(kw), true, `Search text MUST retain keyword for deep searchability: ${kw}`);
+  }
+});
+
+test('Reading Time: Explicit Exclusion of Market and Notes Categories (Preserving Legacy Simple Calculation)', () => {
+  // Construct HTML with 6,000 narrative chars and 10,000 data/table chars
+  const narrative = `<p>${'가'.repeat(6000)}</p>`;
+  const dataTable = `<table><tr><td>${'나'.repeat(10000)}</td></tr></table>`;
+  const html = `<html><body><main>${narrative}${dataTable}</main></body></html>`;
+
+  // Daily (v2 Weighted): narrative 6000(100%) + data 10000(30%=3000) = 9000 weighted chars / 600 = 15m -> 15 - 5 = 10m
+  const dailyMinutes = calculateReadingMinutes(html, 'ko', 'daily');
+  assert.equal(dailyMinutes, 10, 'Daily must use v2 weighted calculation with -5 min reduction');
+
+  // Basics (v2 Weighted): 9000 weighted chars / 600 = 15m (no reduction)
+  const basicsMinutes = calculateReadingMinutes(html, 'ko', 'basics');
+  assert.equal(basicsMinutes, 15, 'Basics must use v2 weighted calculation without reduction');
+
+  // Market: EXPLICITLY excluded from v2. Uses legacy simple non-weighted characters: 16000 total chars / 500 = 32m
+  const marketMinutes = calculateReadingMinutes(html, 'ko', 'market');
+  assert.equal(marketMinutes, 32, 'Market must use legacy simple calculation (no v2 weighting or category reduction)');
+
+  // Notes: EXPLICITLY excluded from v2. Uses legacy simple non-weighted characters: 16000 total chars / 500 = 32m
+  const notesMinutes = calculateReadingMinutes(html, 'ko', 'notes');
+  assert.equal(notesMinutes, 32, 'Notes must use legacy simple calculation (no v2 weighting or category reduction)');
+});
+
 test('Reading Time: minimum bounds (1m for basics, 3m for daily/weekly/research)', () => {
   assert.equal(calculateReadingMinutes('', 'ko', 'basics'), 1);
   assert.equal(calculateReadingMinutes('<html><body></body></html>', 'ko', 'basics'), 1);
