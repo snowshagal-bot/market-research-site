@@ -371,6 +371,11 @@ test('analytics page keeps secrets server-side and renders Bots excluded versus 
   assert.equal(elements['engagement-median'].textContent, '42초');
   assert.equal(elements['engagement-pages'].children.length, 1);
   assert.equal(elements['engagement-countries'].children.length, 1);
+  context.window.__adminAnalyticsTest.renderTrend([{ date: '2026-08-26', visits: 7, pageViews: 12 }]);
+  const trendColumn = elements['trend-chart'].children[0];
+  assert.equal(trendColumn.tabIndex, 0);
+  assert.equal(trendColumn['aria-label'], '2026-08-26, Visits 7, Page views 12');
+  assert.equal(trendColumn.children.some((child) => child.className === 'trend-tooltip'), true);
   assert.match(elements['analytics-source'].textContent, /Bots excluded: Exclude Bots = Yes/);
   assert.match(elements['analytics-status'].textContent, /통계 조회가 완료됐습니다/);
 

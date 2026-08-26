@@ -79,18 +79,28 @@
       const bars = document.createElement('div');
       const visits = document.createElement('i');
       const views = document.createElement('i');
+      const tooltip = document.createElement('span');
+      const tooltipDate = document.createElement('strong');
+      const tooltipValues = document.createElement('span');
       const label = document.createElement('small');
       column.className = 'trend-column';
+      column.tabIndex = 0;
       bars.className = 'trend-bars';
       visits.className = 'trend-bar';
       views.className = 'trend-bar views';
+      tooltip.className = 'trend-tooltip';
       visits.style.height = `${Math.max(2, Number(item.visits || 0) / max * 100)}%`;
       views.style.height = `${Math.max(2, Number(item.pageViews || 0) / max * 100)}%`;
       visits.title = `${item.date} · Visits ${formatNumber(item.visits)}`;
       views.title = `${item.date} · Page views ${formatNumber(item.pageViews)}`;
+      tooltipDate.textContent = item.date;
+      tooltipValues.textContent = `Visits ${formatNumber(item.visits)} · Page views ${formatNumber(item.pageViews)}`;
+      tooltip.append(tooltipDate, tooltipValues);
+      tooltip.setAttribute('aria-hidden', 'true');
+      column.setAttribute('aria-label', `${item.date}, Visits ${formatNumber(item.visits)}, Page views ${formatNumber(item.pageViews)}`);
       label.textContent = item.date.slice(5).replace('-', '.');
       bars.append(visits, views);
-      column.append(bars, label);
+      column.append(bars, tooltip, label);
       chart.appendChild(column);
     });
   }
@@ -260,5 +270,5 @@
   });
 
   try { keyInput.value = sessionStorage.getItem('mrs-admin-key') || ''; } catch (_) {}
-  window.__adminAnalyticsTest = { formatNumber, formatDuration, formatPercent, displayCountry, render, renderEngagement, loadAnalytics };
+  window.__adminAnalyticsTest = { formatNumber, formatDuration, formatPercent, displayCountry, renderTrend, render, renderEngagement, loadAnalytics };
 })();
