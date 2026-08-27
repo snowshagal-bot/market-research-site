@@ -1,4 +1,20 @@
-import { FAVICON_TAGS, PRODUCTION_ORIGIN, findPostByPath, loadPosts, reportSeoTags } from './_seo.js';
+import {
+  FAVICON_TAGS,
+  PRODUCTION_ORIGIN,
+  categoryLandingFromPath,
+  categoryReportLinks,
+  findPostByPath,
+  homepageLatestLinks,
+  homepageReportLinks,
+  loadPosts,
+  reportSeoTags
+} from './_seo.js';
+
+function replaceElementContentsById(body, id, markup) {
+  const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(`(<[^>]+id=["']${escaped}["'][^>]*>)[\\s\\S]*?(<\\/[^>]+>)`, 'i');
+  return body.replace(pattern, `$1${markup}$2`);
+}
 
 export async function onRequest(context) {
   const url = new URL(context.request.url);
@@ -26,20 +42,51 @@ export async function onRequest(context) {
     : '';
 
   if (!url.pathname.startsWith('/reports/')) {
-    if (!engagement) return response;
+    const homeLang = url.pathname === '/' ? 'ko' : (/^\/en\/?$/.test(url.pathname) ? 'en' : '');
+    const landing = categoryLandingFromPath(url.pathname);
+    let posts = null;
+    if ((homeLang || landing) && context.env?.ASSETS?.fetch) {
+      try { posts = await loadPosts(context.request, context.env); } catch (_) {}
+    }
+
+    if (!engagement && !posts) return response;
     if (typeof HTMLRewriter === 'undefined') {
-      const body = await response.text();
+      let body = await response.text();
+      if (posts && homeLang) {
+        body = replaceElementContentsById(body, 'latest-category-cards', homepageLatestLinks(posts, homeLang));
+        body = replaceElementContentsById(body, 'report-list', homepageReportLinks(posts, homeLang));
+      }
+      if (posts && landing) {
+        body = replaceElementContentsById(body, 'category-report-list', categoryReportLinks(posts, landing.type, landing.lang));
+      }
+      if (engagement) body = body.replace(/<\/body>/i, `${engagement}</body>`);
       const headers = new Headers(response.headers);
       headers.delete('content-length');
-      return new Response(body.replace(/<\/body>/i, `${engagement}</body>`), {
+      return new Response(body, {
         status: response.status,
         statusText: response.statusText,
         headers
       });
     }
-    return new HTMLRewriter()
-      .on('body', { element(element) { element.append(engagement, { html: true }); } })
-      .transform(response);
+
+    let rewriter = new HTMLRewriter();
+    if (posts && homeLang) {
+      const latest = homepageLatestLinks(posts, homeLang);
+      const archive = homepageReportLinks(posts, homeLang);
+      rewriter = rewriter
+        .on('#latest-category-cards', { element(element) { element.setInnerContent(latest, { html: true }); } })
+        .on('#report-list', { element(element) { element.setInnerContent(archive, { html: true }); } });
+    }
+    if (posts && landing) {
+      const categoryLinks = categoryReportLinks(posts, landing.type, landing.lang);
+      rewriter = rewriter.on('#category-report-list', {
+        element(element) { element.setInnerContent(categoryLinks, { html: true }); }
+      });
+    }
+    if (engagement) {
+      rewriter = rewriter.on('body', { element(element) { element.append(engagement, { html: true }); } });
+    }
+    return rewriter.transform(response);
   }
 
   let decodedPath = url.pathname;
@@ -71,6 +118,7 @@ export async function onRequest(context) {
   const shell = `<script src="/assets/locale.js?v=20260827-2"></script><script src="/assets/report-shell.js?v=20260827-4" data-category="${active}" data-lang="${lang}" data-notes="${hasNotes ? '1' : '0'}"></script>${engagement}`;
 
   return new HTMLRewriter()
+    .on('title', { element(element) { if (seo) element.remove(); } })
     .on('link[rel="canonical"]', { element(element) { element.remove(); } })
     .on('link[rel="alternate"][hreflang]', { element(element) { element.remove(); } })
     .on('meta[name="description"]', { element(element) { if (seo) element.remove(); } })
