@@ -155,6 +155,21 @@ async function readRepoText(token, path, ref) {
   return decodeBase64Utf8(blob.content);
 }
 
+async function currentRef(token) {
+  return gh(token, `/git/ref/heads/${encodeURIComponent(BRANCH)}`);
+}
+
+async function updateRef(token, originalSha, commitSha) {
+  const latestRef = await currentRef(token);
+  if (latestRef.object.sha !== originalSha) return false;
+  await gh(token, `/git/refs/heads/${encodeURIComponent(BRANCH)}`, {
+    method: 'PATCH',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ sha: commitSha, force: false })
+  });
+  return true;
+}
+
 function extractSearchText(html) {
   if (!html) return '';
   let clean = html
@@ -606,7 +621,12 @@ export async function onRequestPost(context) {
   const registeredDate = kstDate(now);
 
   try {
-    const postsText = await readRepoText(token, 'data/posts.json', BRANCH);
+    const ref = await currentRef(token);
+    const baseSha = ref.object.sha;
+    const [parentCommit, postsText] = await Promise.all([
+      gh(token, `/git/commits/${baseSha}`),
+      readRepoText(token, 'data/posts.json', baseSha)
+    ]);
     let posts = JSON.parse(postsText);
     if (!Array.isArray(posts)) throw new Error('posts.json 형식이 올바르지 않습니다.');
 
@@ -677,7 +697,7 @@ export async function onRequestPost(context) {
     // Automatic Search Index update (Fail-Closed)
     let searchIndex;
     try {
-      const searchIndexText = await readRepoText(token, 'data/search-index.json', BRANCH);
+      const searchIndexText = await readRepoText(token, 'data/search-index.json', baseSha);
       searchIndex = JSON.parse(searchIndexText);
     } catch (err) {
       return reply({
@@ -745,9 +765,6 @@ export async function onRequestPost(context) {
     const searchIndexBlobs = searchIndexArtifacts(searchIndex)
       .map((artifact) => ({ path: artifact.path, mode: '100644', type: 'blob', content: artifact.content }));
 
-    const ref = await gh(token, `/git/ref/heads/${encodeURIComponent(BRANCH)}`);
-    const parentSha = ref.object.sha;
-    const parentCommit = await gh(token, `/git/commits/${parentSha}`);
     const baseTree = parentCommit.tree.sha;
 
     let shareCardEntry = null;
@@ -794,15 +811,16 @@ export async function onRequestPost(context) {
       body: JSON.stringify({
         message: `Publish ${reportDate} ${typeLabel(type, lang)}: ${title}`,
         tree: tree.sha,
-        parents: [parentSha]
+        parents: [baseSha]
       })
     });
 
-    await gh(token, `/git/refs/heads/${encodeURIComponent(BRANCH)}`, {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ sha: commit.sha, force: false })
-    });
+    if (!(await updateRef(token, baseSha, commit.sha))) {
+      return reply({
+        error: 'REPOSITORY_CHANGED',
+        message: '저장소가 변경되었습니다. 새로고침 후 다시 게시하세요.'
+      }, 409);
+    }
 
     return reply({
       ok: true,
@@ -822,7 +840,7 @@ export async function onRequestPost(context) {
       return reply({ error: 'GITHUB_AUTH', message: 'GitHub 토큰 권한을 확인하세요. 저장소 Contents 쓰기 권한이 필요합니다.' }, 502);
     }
     if (err.status === 409 || err.status === 422) {
-      return reply({ error: 'GITHUB_CONFLICT', message: '동시에 저장소가 변경되었습니다. 새로고침 후 다시 게시하세요.' }, 409);
+      return reply({ error: 'REPOSITORY_CHANGED', message: '저장소가 변경되었습니다. 새로고침 후 다시 게시하세요.' }, 409);
     }
     return reply({ error: 'PUBLISH_FAILED', message: err.message || '게시 처리 중 오류가 발생했습니다.' }, 500);
   }
