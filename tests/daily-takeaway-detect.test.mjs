@@ -73,7 +73,10 @@ function stubDocument(map) {
  */
 function htmlDocument(html) {
   const findByClass = (source, className) => {
-    const pattern = new RegExp(`<(\\w+)([^>]*\\bclass="[^"]*\\b${className}\\b[^"]*"[^>]*)>`, 'i');
+    // Class attributes are token lists: .cv-line must not match cv-line-label,
+    // the way a browser's selector engine would not.
+    const token = `(?:[^"]*\\s)?${className}(?:\\s[^"]*)?`;
+    const pattern = new RegExp(`<(\\w+)([^>]*\\sclass="${token}"[^>]*)>`, 'i');
     const open = pattern.exec(source);
     if (!open) return null;
     const tag = open[1];
@@ -96,6 +99,25 @@ function htmlDocument(html) {
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>');
 
+  /**
+   * A node that still knows its own markup, so cloning it and replacing its
+   * <br> elements behaves the way a real document does.
+   */
+  const nodeFrom = markup => {
+    let inner = markup;
+    return {
+      get textContent() { return textOf(inner); },
+      cloneNode() { return nodeFrom(inner); },
+      getAttribute() { return null; },
+      querySelectorAll(selector) {
+        if (selector !== 'br') return [];
+        return [...inner.matchAll(/<br\s*\/?>/gi)].map(match => ({
+          replaceWith(text) { inner = inner.replace(match[0], text); }
+        }));
+      }
+    };
+  };
+
   return {
     title: (/<title>([\s\S]*?)<\/title>/i.exec(html)?.[1] || '').trim(),
     body: makeElement(),
@@ -110,9 +132,8 @@ function htmlDocument(html) {
       if (selector === '[data-report-takeaway]') {
         const found = /<(\w+)([^>]*\bdata-report-takeaway(?:="([^"]*)")?[^>]*)>([\s\S]*?)<\/\1>/i.exec(html);
         if (!found) return null;
-        const node = makeElement();
-        node.textContent = textOf(found[4]);
-        node.setAttribute('data-report-takeaway', found[3] || '');
+        const node = nodeFrom(found[4]);
+        node.getAttribute = () => found[3] || '';
         return node;
       }
       // Only class paths are understood here; any other selector is absent,
@@ -126,9 +147,7 @@ function htmlDocument(html) {
         if (!last) return null;
         scope = last.inner;
       }
-      const node = makeElement();
-      node.textContent = textOf(last.inner);
-      return node;
+      return nodeFrom(last.inner);
     }
   };
 }
@@ -268,15 +287,20 @@ test('a Daily with no marked line reports none, and invents nothing', async () =
   assert.doesNotMatch(status.textContent, /제목이|설명이|본문 첫 문장/);
 });
 
-test('the detector reads only the four marked places', async () => {
+test('the detector reads only the five marked places, in order', async () => {
   const script = await read('assets/admin.js');
   const body = /function detectTakeaway\(doc\)[\s\S]*?\n  }/.exec(script)?.[0] || '';
   assert.ok(body, 'detectTakeaway must exist');
-  for (const allowed of ['report-takeaway', 'data-report-takeaway', '.cover-hint .cv-one', '.cover-oneline']) {
-    assert.ok(body.includes(allowed), `${allowed} must be one of the sources`);
+
+  const order = ['report-takeaway', 'data-report-takeaway', '.cv-line', '.cover-hint .cv-one', '.cover-oneline'];
+  let at = -1;
+  for (const source of order) {
+    const found = body.indexOf(source);
+    assert.ok(found > at, `${source} must come after the source before it`);
+    at = found;
   }
   // Title, description and body prose are never consulted.
-  assert.doesNotMatch(body, /doc\.title|report-summary|description|querySelectorAll|\bp\b\s*,/);
+  assert.doesNotMatch(body, /doc\.title|report-summary|description/);
 });
 
 /* ------------------------------------------------- Daily and Daily only */
@@ -345,4 +369,101 @@ test('an over-long line is cut to the stored limit, not sent whole', async () =>
   await app.ready({ title: '데일리', filename: 'daily.html' });
   await app.get('publish-btn').fire('click');
   assert.equal(app.submissions.at(-1).form.get('takeaway').length, 400);
+});
+
+test('the lightweight 8/27 layout is detected through its head tag alone', async () => {
+  const app = harness();
+  // No .cover-hint, no .cover-oneline: exactly the layout that came up empty
+  // before the head tag existed.
+  await app.analyze(`<!doctype html><html lang="ko"><head>
+      <meta charset="utf-8">
+      <meta name="report-type" content="daily">
+      <meta name="report-date" content="2026-08-27">
+      <meta name="report-takeaway" content="지수는 되돌렸지만 거래대금은 따라오지 않았다.">
+      <meta name="description" content="설명이 한 줄을 대신하면 안 된다.">
+      <title>2026.08.27 코스피 데일리 리포트</title>
+    </head><body><section class="cover"><h1>두 개의 와이어</h1></section>
+    <main><p>본문 첫 문장이 한 줄을 대신하면 안 된다.</p></main></body></html>`,
+  '8월 27일 주식리포트_커버통합.html');
+
+  assert.equal(app.get('takeaway-status').hidden, false);
+  assert.equal(app.get('takeaway-status').textContent, 'TODAY 한 줄 자동 감지 · "지수는 되돌렸지만 거래대금은 따라오지 않았다."');
+
+  await app.ready({ title: '두 개의 와이어', filename: '8월 27일 주식리포트_커버통합.html' });
+  await app.get('publish-btn').fire('click');
+  const form = app.submissions.at(-1).form;
+  assert.equal(form.get('type'), 'daily');
+  assert.equal(form.get('takeaway'), '지수는 되돌렸지만 거래대금은 따라오지 않았다.');
+});
+
+/* ------------------------------- Editorial Ledger v2 keeps its own field */
+
+/** The v2 cover: the line has a field of its own, under a label naming it. */
+const LEDGER_V2 = (line, extraHead = '') => `<!doctype html><html lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="report-type" content="daily">
+    <meta name="report-date" content="2026-08-27">
+    <meta name="description" content="설명이 한 줄을 대신하면 안 된다.">${extraHead}
+    <title>2026.08.27 Snowshagal KOSPI Daily · Editorial Ledger v2</title>
+  </head><body>
+    <div class="cv-copy">
+      <h1 class="cv-title">The 7,000 Threshold</h1>
+      <div class="cv-line-label">ONE LINE TODAY</div>
+      <p class="cv-line">${line}</p>
+    </div>
+    <main><p>본문 첫 문장이 한 줄을 대신하면 안 된다.</p></main>
+  </body></html>`;
+
+test('the v2 cover field is read on its own', async () => {
+  const app = harness();
+  await app.analyze(LEDGER_V2('Nearly reached it, but never broke through'));
+  assert.equal(app.get('takeaway-status').textContent,
+    'TODAY 한 줄 자동 감지 · "Nearly reached it, but never broke through"');
+});
+
+test('a line broken across two rows comes back as one sentence', async () => {
+  const app = harness();
+  // Exactly what the shipped 8/27 report writes.
+  await app.analyze(LEDGER_V2('Nearly reached it,<br/>but never broke through'));
+  assert.equal(app.get('takeaway-status').textContent,
+    'TODAY 한 줄 자동 감지 · "Nearly reached it, but never broke through"',
+    'the break must become a space, not disappear');
+});
+
+test('several breaks and stray spacing collapse to single spaces', async () => {
+  const app = harness();
+  await app.analyze(LEDGER_V2('  지수는<br>되돌렸지만<br />\n  거래대금은​   따라오지 않았다.  '));
+  assert.equal(app.get('takeaway-status').textContent,
+    'TODAY 한 줄 자동 감지 · "지수는 되돌렸지만 거래대금은 따라오지 않았다."');
+});
+
+test('a head tag still outranks the v2 field', async () => {
+  const app = harness();
+  await app.analyze(LEDGER_V2(
+    'Nearly reached it,<br/>but never broke through',
+    '\n    <meta name="report-takeaway" content="헤드 태그가 이깁니다.">'
+  ));
+  assert.equal(app.get('takeaway-status').textContent, 'TODAY 한 줄 자동 감지 · "헤드 태그가 이깁니다."');
+});
+
+test('a v2 Daily sends its line, and a v2 Weekly sends none', async () => {
+  const daily = harness();
+  await daily.analyze(LEDGER_V2('Nearly reached it,<br/>but never broke through'));
+  await daily.ready({ title: 'The 7,000 Threshold', filename: '2026-08-27_EN.html' });
+  await daily.get('publish-btn').fire('click');
+  assert.equal(daily.submissions.at(-1).form.get('takeaway'), 'Nearly reached it, but never broke through');
+
+  // The same cover markup under another category claims nothing.
+  const weekly = harness();
+  await weekly.analyze(LEDGER_V2('위클리 커버에 있는 문장').replace('content="daily"', 'content="weekly"'));
+  assert.equal(weekly.get('takeaway-status').hidden, true);
+  await weekly.ready({ title: '위클리', filename: 'weekly.html' });
+  await weekly.get('publish-btn').fire('click');
+  assert.equal(weekly.submissions.at(-1).form.has('takeaway'), false);
+});
+
+test('an empty v2 field is no line at all', async () => {
+  const app = harness();
+  await app.analyze(LEDGER_V2('   '));
+  assert.equal(app.get('takeaway-status').textContent, 'TODAY 한 줄 감지 없음 · 홈페이지에서는 한 줄이 숨겨집니다.');
 });
