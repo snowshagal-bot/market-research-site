@@ -1,6 +1,9 @@
 import {
   FAVICON_TAGS,
   PRODUCTION_ORIGIN,
+  CATEGORY_SLUGS,
+  categoryAlternateTags,
+  categoryHasPosts,
   categoryLandingFromPath,
   categoryReportLinks,
   findPostByPath,
@@ -14,6 +17,19 @@ function replaceElementContentsById(body, id, markup) {
   const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const pattern = new RegExp(`(<[^>]+id=["']${escaped}["'][^>]*>)[\\s\\S]*?(<\\/[^>]+>)`, 'i');
   return body.replace(pattern, `$1${markup}$2`);
+}
+
+function removeCategoryNavLinks(body, types) {
+  return types.reduce((html, type) => {
+    const escaped = type.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = new RegExp(`<a\\b(?=[^>]*\\bdata-nav-category=["']${escaped}["'])[^>]*>[\\s\\S]*?<\\/a>`, 'gi');
+    return html.replace(pattern, '');
+  }, body);
+}
+
+function replaceCategoryAlternates(body, markup) {
+  const withoutAlternates = body.replace(/<link\b(?=[^>]*\brel=["']alternate["'])(?=[^>]*\bhreflang=["'][^"']+["'])[^>]*>/gi, '');
+  return markup ? withoutAlternates.replace(/<\/head>/i, `${markup}</head>`) : withoutAlternates;
 }
 
 export async function onRequest(context) {
@@ -49,6 +65,21 @@ export async function onRequest(context) {
       try { posts = await loadPosts(context.request, context.env); } catch (_) {}
     }
 
+    const pageLang = homeLang || landing?.lang || '';
+    const unavailableCategories = posts && pageLang
+      ? Object.keys(CATEGORY_SLUGS).filter((type) => !categoryHasPosts(posts, type, pageLang))
+      : [];
+    const landingAlternates = posts && landing ? categoryAlternateTags(posts, landing.type) : '';
+    if (isProduction && posts && landing && !categoryHasPosts(posts, landing.type, landing.lang)) {
+      const headers = new Headers(response.headers);
+      headers.set('x-robots-tag', 'noindex, follow');
+      response = new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers
+      });
+    }
+
     if (!engagement && !posts) return response;
     if (typeof HTMLRewriter === 'undefined') {
       let body = await response.text();
@@ -58,7 +89,9 @@ export async function onRequest(context) {
       }
       if (posts && landing) {
         body = replaceElementContentsById(body, 'category-report-list', categoryReportLinks(posts, landing.type, landing.lang));
+        body = replaceCategoryAlternates(body, landingAlternates);
       }
+      if (posts && pageLang) body = removeCategoryNavLinks(body, unavailableCategories);
       if (engagement) body = body.replace(/<\/body>/i, `${engagement}</body>`);
       const headers = new Headers(response.headers);
       headers.delete('content-length');
@@ -79,8 +112,16 @@ export async function onRequest(context) {
     }
     if (posts && landing) {
       const categoryLinks = categoryReportLinks(posts, landing.type, landing.lang);
-      rewriter = rewriter.on('#category-report-list', {
-        element(element) { element.setInnerContent(categoryLinks, { html: true }); }
+      rewriter = rewriter
+        .on('#category-report-list', {
+          element(element) { element.setInnerContent(categoryLinks, { html: true }); }
+        })
+        .on('link[rel="alternate"][hreflang]', { element(element) { element.remove(); } })
+        .on('head', { element(element) { if (landingAlternates) element.append(landingAlternates, { html: true }); } });
+    }
+    for (const type of unavailableCategories) {
+      rewriter = rewriter.on(`[data-nav-category="${type}"]`, {
+        element(element) { element.remove(); }
       });
     }
     if (engagement) {

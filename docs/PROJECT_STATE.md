@@ -39,12 +39,12 @@ Main categories:
 - `basics` → 시장 공부 / Market Basics
 - `note` → 끄적끄적
 
-Each category also has an indexable landing URL in both locales:
+Each category also has a landing route in both locales:
 
 - Korean: `/daily/`, `/weekly/`, `/research/`, `/basics/`, `/notes/`
 - English: `/en/daily/`, `/en/weekly/`, `/en/research/`, `/en/basics/`, `/en/notes/`
 
-The existing homepage `?category=` filters remain supported for bookmarks and in-page archive controls. Primary homepage category links lead to the landing URLs, and both surfaces consume the same current post data.
+Indexability follows current locale content in `data/posts.json`: an empty locale route returns `X-Robots-Tag: noindex, follow`, stays out of the sitemap and crawlable category navigation, and is not declared as an `hreflang` counterpart. Publishing the first post restores all four automatically. The existing homepage `?category=` filters remain supported for bookmarks and in-page archive controls. Primary homepage category links lead to the landing URLs, and both surfaces consume the same current post data.
 
 The homepage supports category filtering and search. Its opening surface is now a fixed Snowshagal brand hero rather than a post carousel. The hero keeps the brand promise stable while three concise Daily / Weekly / Research entry points lead to their category landing pages. `basics` and `note` remain available in the shared navigation, filters, and archive, and legacy `?category=` URLs remain functional.
 
@@ -168,9 +168,9 @@ Files under `reports/` are standalone HTML documents that may contain their own 
 
 `functions/_middleware.js` intercepts HTML responses under `/reports/` and injects `/assets/report-shell.js`.
 
-The same middleware injects canonical `snowshagal.com` metadata into published report responses and marks non-Production hosts `noindex, nofollow` by response header. It generates the report `<title>` from the real report date, category, and editorial title. Description prefers `summary`, then `description`, then `subtitle`, with a localized title/category fallback. It adds `hreflang` only when both sides of an explicit `translationGroup` exist, so untranslated reports never point to invented English pages.
+The same middleware injects canonical `snowshagal.com` metadata into published report responses and marks non-Production hosts `noindex, nofollow` by response header. It generates the report `<title>` from the real report date, category, and editorial title. Description preserves an explicit `summary`; otherwise it prefixes the available `description`, `subtitle`, or localized default with the report date and title so generic editorial copy remains report-specific. Missing date/title values retain the safe fallback. It adds `hreflang` only when both sides of an explicit `translationGroup` exist, so untranslated reports never point to invented English pages.
 
-For the homepage and category landings, the middleware reads the current `data/posts.json` asset and places real report `<a href>` elements in the HTML response before client JavaScript runs. `assets/site.js` and `assets/category-landing.js` then render the interactive views from `data/posts.js`, preserving search, filters, list/calendar modes, and category browsing without duplicating post data. Static KO/EN home and category shells declare self-canonicals and reciprocal alternates. The data-driven `/sitemap.xml` lists public locale/category pages and current published reports. `/robots.txt` allows public crawling and excludes administrator/API routes.
+For the homepage and category landings, the middleware reads the current `data/posts.json` asset and places real report `<a href>` elements in the HTML response before client JavaScript runs. `assets/site.js` and `assets/category-landing.js` then render the interactive views from `data/posts.js`, preserving search, filters, list/calendar modes, and category browsing without duplicating post data. Static KO/EN category shells keep self-canonicals, while locale alternates, navigation exposure and sitemap inclusion are generated only for populated locale categories. The data-driven `/sitemap.xml` lists eligible locale/category pages and current published reports. `/robots.txt` allows public crawling and excludes administrator/API routes.
 
 The repository root also contains a non-indexable `404.html`. Its presence disables Cloudflare Pages' homepage SPA fallback for unknown paths, so missing public and report URLs return HTTP 404. The shared middleware preserves redirects and error statuses without injecting the report shell or report SEO metadata.
 

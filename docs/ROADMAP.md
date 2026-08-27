@@ -14,9 +14,9 @@ Review the SEO Foundation PR in Cloudflare Preview. Verify HTML source and rende
 
 - server-render crawlable report anchors into homepage Latest/Archive without replacing the existing interactive list/calendar/search behavior;
 - add KO and EN landing pages for Daily, Weekly, Research, Market Basics, and Notes from shared metadata and the current post dataset;
-- generate unique report titles and non-empty descriptions in the common middleware while preserving editorial titles inside report content;
+- generate unique report titles and report-specific descriptions in the common middleware while preserving explicit summaries and editorial report content;
 - keep self-canonicals and emit reciprocal report hreflang only for real `translationGroup` pairs;
-- extend the dynamic sitemap with category landing URLs and validate source HTML, links, desktop, and mobile in Preview before any Production merge.
+- gate each locale category's indexability, sitemap entry, crawlable nav and `hreflang` from current post availability, then validate source HTML, links, desktop, and mobile in Preview before any Production merge.
 
 ### 14. Privacy-minimal Engagement Analytics
 

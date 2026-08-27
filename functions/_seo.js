@@ -131,6 +131,31 @@ export function categoryLandingFromPath(pathname) {
   return type ? { type, lang, path: categoryLandingPath(type, lang) } : null;
 }
 
+export function categoryHasPosts(posts, type, lang) {
+  return (Array.isArray(posts) ? posts : []).some((post) => (
+    post?.type === type
+    && postLanguage(post) === lang
+    && normalizeSitePath(post?.href)
+  ));
+}
+
+export function categoryAlternates(posts, type) {
+  if (!categoryHasPosts(posts, type, 'ko') || !categoryHasPosts(posts, type, 'en')) return [];
+  const ko = `${PRODUCTION_ORIGIN}${categoryLandingPath(type, 'ko')}`;
+  const en = `${PRODUCTION_ORIGIN}${categoryLandingPath(type, 'en')}`;
+  return [
+    { lang: 'ko', href: ko },
+    { lang: 'en', href: en },
+    { lang: 'x-default', href: ko }
+  ];
+}
+
+export function categoryAlternateTags(posts, type) {
+  return categoryAlternates(posts, type)
+    .map((entry) => `<link rel="alternate" hreflang="${entry.lang}" href="${escapeHtml(entry.href)}">`)
+    .join('');
+}
+
 export function normalizeSitePath(value) {
   let path = String(value || '').split(/[?#]/, 1)[0].replace(/^\/+/, '');
   try { path = decodeURIComponent(path); } catch (_) {}
@@ -212,14 +237,38 @@ export function reportSeoTitle(post) {
 }
 
 export function reportDescription(post) {
-  const supplied = String(post?.summary || post?.description || post?.subtitle || '').replace(/\s+/g, ' ').trim();
-  if (supplied) return supplied;
+  const normalize = (value) => String(value || '').replace(/\s+/g, ' ').trim();
+  const limit = (value, max = 180) => {
+    const text = normalize(value);
+    if (text.length <= max) return text;
+    const clipped = text.slice(0, max - 1).replace(/[\s,;:·\-]+\S*$/, '').trim();
+    return `${clipped || text.slice(0, max - 1).trim()}…`;
+  };
+  const summary = normalize(post?.summary);
+  if (summary) return limit(summary);
+
   const lang = postLanguage(post);
-  const title = String(post?.title || '').replace(/\s+/g, ' ').trim();
+  const title = normalize(post?.title);
+  const date = reportDateLabel(post, lang);
+  const supplied = normalize(post?.description || post?.subtitle);
   const category = CATEGORY_LANDINGS[post?.type]?.[lang]?.heading || (lang === 'en' ? 'market report' : '시장 리포트');
-  return lang === 'en'
+  let context = category;
+  if (post?.type === 'daily') context = lang === 'en' ? 'Korean market daily report' : '한국 주식시장 데일리';
+  if (post?.type === 'weekly') context = lang === 'en' ? 'Korean market weekly outlook' : '주간 시장 전망';
+  if (date && title) {
+    const detail = supplied || (lang === 'en'
+      ? `A Snowshagal ${category.toLowerCase()} covering the market context and key variables.`
+      : `시장 흐름과 핵심 변수를 정리한 Snowshagal의 ${category} 콘텐츠입니다.`);
+    const cleanDetail = detail.replace(/[.!?。]+$/, '');
+    return limit(lang === 'en'
+      ? `${context} — ${date}: ${title}. ${cleanDetail}.`
+      : `${date} ${context} — ${title}. ${cleanDetail}.`);
+  }
+
+  if (supplied) return limit(supplied);
+  return limit(lang === 'en'
     ? `${title || 'This report'} — a Snowshagal ${category.toLowerCase()}.`
-    : `${title || '이 글'} — Snowshagal의 ${category} 콘텐츠입니다.`;
+    : `${title || '이 글'} — Snowshagal의 ${category} 콘텐츠입니다.`);
 }
 
 function reportRowMarkup(post, lang) {
@@ -263,7 +312,12 @@ export function homepageLatestLinks(posts, lang) {
     .sort((left, right) => String(right?.reportDate || right?.date || '').localeCompare(String(left?.reportDate || left?.date || '')));
   return ['daily', 'weekly', 'research'].map((type) => localized.find((post) => post?.type === type)).filter(Boolean)
     .map((post) => {
-      const summary = reportDescription(post);
+      // Keep homepage card copy editorial-only. SEO descriptions add dated
+      // context when summary is absent, but that context must not change the
+      // approved card design or duplicate the visible card title.
+      const summary = String(post?.summary || post?.description || post?.subtitle || '')
+        .replace(/\s+/g, ' ')
+        .trim();
       const cover = normalizeSitePath(post?.coverImage);
       const visual = cover
         ? `<span class="latest-card-cover"><img src="/${escapeHtml(cover)}" alt="" loading="lazy"></span>`
@@ -342,14 +396,14 @@ export function sitemapXml(posts) {
     return `<url><loc>${escapeHtml(loc)}</loc>${modified}${alternateTags}</url>`;
   };
   const categoryEntries = Object.keys(CATEGORY_SLUGS).flatMap((type) => {
-    const ko = `${PRODUCTION_ORIGIN}${categoryLandingPath(type, 'ko')}`;
-    const en = `${PRODUCTION_ORIGIN}${categoryLandingPath(type, 'en')}`;
-    const alternates = [
-      { lang: 'ko', href: ko },
-      { lang: 'en', href: en },
-      { lang: 'x-default', href: ko }
-    ];
-    return [urlEntry(ko, '', alternates), urlEntry(en, '', alternates)];
+    const alternates = categoryAlternates(validPosts, type);
+    return ['ko', 'en']
+      .filter((lang) => categoryHasPosts(validPosts, type, lang))
+      .map((lang) => urlEntry(
+        `${PRODUCTION_ORIGIN}${categoryLandingPath(type, lang)}`,
+        '',
+        alternates
+      ));
   });
   const entries = [
     urlEntry(`${PRODUCTION_ORIGIN}/`, '', homeAlternates),

@@ -6,8 +6,8 @@ import {
   FAVICON_TAGS,
   PRODUCTION_ORIGIN,
   SOCIAL_FALLBACK_IMAGE,
-  categoryLandingPath,
   reportCardPath,
+  reportDescription,
   reportSeoTags,
   sitemapXml
 } from '../functions/_seo.js';
@@ -248,9 +248,12 @@ test('a report without a cover keeps the generic image and receives a safe descr
   assert.match(tags, /<meta name="twitter:card" content="summary_large_image">/);
   assert.match(tags, /<meta property="og:image:width" content="1200">/);
   assert.match(tags, /<meta property="og:image:height" content="630">/);
-  assert.ok(tags.includes('<meta name="description" content="좋은 회사가 왜 좋은 주식은 아닌가 — Snowshagal의 시장 리포트 콘텐츠입니다.">'));
-  assert.ok(tags.includes('<meta property="og:description" content="좋은 회사가 왜 좋은 주식은 아닌가 — Snowshagal의 시장 리포트 콘텐츠입니다.">'));
-  assert.ok(tags.includes('<meta name="twitter:description" content="좋은 회사가 왜 좋은 주식은 아닌가 — Snowshagal의 시장 리포트 콘텐츠입니다.">'));
+  const description = reportDescription(bare);
+  assert.match(description, /2026년 8월 15일/);
+  assert.match(description, /좋은 회사가 왜 좋은 주식은 아닌가/);
+  assert.ok(tags.includes(`<meta name="description" content="${description}">`));
+  assert.ok(tags.includes(`<meta property="og:description" content="${description}">`));
+  assert.ok(tags.includes(`<meta name="twitter:description" content="${description}">`));
 });
 
 test('every report advertises a 1200x630 og:image whatever its cover state', async () => {
@@ -307,7 +310,7 @@ test('the middleware removes report-supplied social meta so nothing duplicates',
 
 /* ---------- sitemap ---------- */
 
-test('the sitemap lists both About pages with reciprocal alternates and no duplicates', () => {
+test('the sitemap keeps global locale pages when no category has posts', () => {
   const xml = sitemapXml([]);
   const locations = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
   assert.deepEqual(locations, [
@@ -316,11 +319,7 @@ test('the sitemap lists both About pages with reciprocal alternates and no dupli
     `${PRODUCTION_ORIGIN}/about/`,
     `${PRODUCTION_ORIGIN}/en/about/`,
     `${PRODUCTION_ORIGIN}/market/`,
-    `${PRODUCTION_ORIGIN}/en/market/`,
-    ...Object.keys(CATEGORY_SLUGS).flatMap((type) => [
-      `${PRODUCTION_ORIGIN}${categoryLandingPath(type, 'ko')}`,
-      `${PRODUCTION_ORIGIN}${categoryLandingPath(type, 'en')}`
-    ])
+    `${PRODUCTION_ORIGIN}/en/market/`
   ]);
   assert.equal(new Set(locations).size, locations.length, 'duplicate sitemap URL');
 
