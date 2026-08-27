@@ -1,14 +1,22 @@
 # Roadmap
 
-Updated: 2026-08-26
+Updated: 2026-08-27
 
 This roadmap records implementation order, not a promise to build every future idea. Keep the current site small until traffic and actual needs justify added complexity.
 
 ## Next action
 
-Review the Engagement Analytics Draft PR in Cloudflare Preview at 360px, 390–430px, and 1280px. Confirm the existing Web Analytics dashboard remains intact, the new empty state and responsive table containers render correctly, and Preview never writes engagement data before Production approval.
+Review the SEO Foundation PR in Cloudflare Preview. Verify HTML source and rendered output for the KO/EN homepages, all ten category landings, and representative paired/unpaired reports without merging to Production.
 
 ## In progress
+
+### 15. SEO Foundation
+
+- server-render crawlable report anchors into homepage Latest/Archive without replacing the existing interactive list/calendar/search behavior;
+- add KO and EN landing pages for Daily, Weekly, Research, Market Basics, and Notes from shared metadata and the current post dataset;
+- generate unique report titles and non-empty descriptions in the common middleware while preserving editorial titles inside report content;
+- keep self-canonicals and emit reciprocal report hreflang only for real `translationGroup` pairs;
+- extend the dynamic sitemap with category landing URLs and validate source HTML, links, desktop, and mobile in Preview before any Production merge.
 
 ### 14. Privacy-minimal Engagement Analytics
 

@@ -1,6 +1,6 @@
 # Deployment and environment
 
-Updated: 2026-08-23
+Updated: 2026-08-27
 
 ## GitHub
 
@@ -116,6 +116,8 @@ Cloudflare Preview validation must not perform real `/api/manage` mutations. Bot
 ## Search indexing
 
 The apex custom domain is the only SEO canonical origin. Static locale pages declare their own canonical and real KO/EN alternates. Report responses receive canonical, metadata, and any real `translationGroup` alternates from the shared Pages middleware, without modifying uploaded report HTML. Canonical report URLs omit the stored `.html` suffix because Cloudflare Pages redirects those file URLs to its extensionless Clean URLs. `/sitemap.xml` is generated from `data/posts.json`; repository tests ensure every listed report path exists. `/robots.txt` permits public pages, excludes `/admin/` and `/api/`, and advertises the apex sitemap. The shared middleware also sends `X-Robots-Tag: noindex, nofollow` outside `snowshagal.com`, keeping branch Preview responses available for QA without making them index candidates.
+
+The middleware also server-renders current report anchors into the homepage Latest/Archive containers and the ten KO/EN category landing pages. This makes discovery independent of client JavaScript while keeping `data/posts.json` as the server-side source and `data/posts.js` as the existing interactive client source. Category canonicals use trailing slashes; report canonicals continue to use extensionless Clean URLs. If shared category metadata or chrome changes, run `node scripts/build-category-pages.mjs` and commit the regenerated landing files together.
 
 Search Console should use a Domain property for `snowshagal.com`, verified with its Google-provided DNS TXT record. After verification, submit `sitemap.xml` and inspect the apex homepage. Do not commit a verification token or add it to application secrets.
 
