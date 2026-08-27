@@ -19,6 +19,14 @@
   function rootPath(path) {
     return `/${String(path || '').replace(/^\/+/, '')}`;
   }
+  function cleanReportUrl(href) {
+    const str = String(href || '').trim();
+    const match = str.match(/^([^?#]*)([?#].*)?$/);
+    const pathPart = (match && match[1]) || '';
+    const suffix = (match && match[2]) || '';
+    const p = rootPath(pathPart);
+    return /^\/reports\//i.test(p) ? `${p.replace(/\.html?$/i, '')}${suffix}` : `${p}${suffix}`;
+  }
 
   function readingTime(post) {
     const minutes = typeof post?.readingMinutes === 'number' && post.readingMinutes > 0 ? post.readingMinutes : 0;
@@ -54,7 +62,7 @@
       : (copy?.categories?.[post.type]?.label || (lang === 'en' ? 'Report' : '리포트'));
     const isLatestAttr = idx === 0 ? ' data-latest="true"' : '';
 
-    return `<a class="report-item"${isLatestAttr} href="${esc(rootPath(post.href))}">
+    return `<a class="report-item"${isLatestAttr} href="${esc(cleanReportUrl(post.href))}">
       <div><span class="report-type ${esc(post.type)}">${esc(label)}</span><span class="report-date">${esc(date)}${esc(readingTime(post))}</span></div>
       <div><div class="report-title">${esc(post.title)}</div>${subtitleMarkup}${tagsMarkup}</div>
       <span class="report-arrow"><span class="report-read-label">${lang === 'en' ? 'Read' : '읽기'}</span><span aria-hidden="true">→</span></span>

@@ -713,6 +713,11 @@ export async function onRequestPost(context) {
       }, 500);
     }
 
+    const normalizedReportHref = href.replace(/^\/+/, '');
+    const cleanPublicUrl = normalizedReportHref.startsWith('reports/')
+      ? `/${normalizedReportHref.replace(/\.html?$/i, '')}`
+      : `/${normalizedReportHref}`;
+
     const searchEntry = {
       id,
       lang,
@@ -725,7 +730,7 @@ export async function onRequestPost(context) {
       summary: summary || description,
       tags,
       readingMinutes,
-      url: `/${href.replace(/^\/+/, '')}`,
+      url: cleanPublicUrl,
       coverImage: coverPath ? `/${coverPath.replace(/^\/+/, '')}` : '',
       bodyText: extractSearchText(html)
     };

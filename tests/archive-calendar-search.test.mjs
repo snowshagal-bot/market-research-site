@@ -63,7 +63,7 @@ test('search index has integrity, required fields, and valid report URLs without
     seenUrls.add(item.url);
 
     const relativeReportPath = item.url.replace(/^\/+/, '');
-    const fullPath = path.join(rootDir, relativeReportPath);
+    const fullPath = path.join(rootDir, relativeReportPath.endsWith('.html') ? relativeReportPath : `${relativeReportPath}.html`);
     assert.ok(existsSync(fullPath), `report file must exist on disk: ${fullPath}`);
   }
 });

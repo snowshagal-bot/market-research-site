@@ -391,7 +391,7 @@ export function buildSearchIndex(targetRootDir) {
       summary: post.summary || post.description || '',
       tags: Array.isArray(post.tags) ? post.tags : [],
       readingMinutes: post.readingMinutes,
-      url: post.href ? `/${post.href.replace(/^\/+/, '')}` : '',
+      url: post.href ? (post.href.replace(/^\/+/, '').startsWith('reports/') ? `/${post.href.replace(/^\/+/, '').replace(/\.html?$/i, '')}` : `/${post.href.replace(/^\/+/, '')}`) : '',
       coverImage: post.coverImage ? `/${post.coverImage.replace(/^\/+/, '')}` : '',
       bodyText: bodyText // Full text indexing without truncation
     };

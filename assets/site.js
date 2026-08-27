@@ -40,6 +40,14 @@
   }
   function reportDate(post){ return post.reportDate || post.date || ''; }
   function rootPath(path){ return `/${String(path || '').replace(/^\/+/, '')}`; }
+  function cleanReportUrl(href){
+    const str = String(href || '').trim();
+    const match = str.match(/^([^?#]*)([?#].*)?$/);
+    const pathPart = (match && match[1]) || '';
+    const suffix = (match && match[2]) || '';
+    const p = rootPath(pathPart);
+    return /^\/reports\//i.test(p) ? `${p.replace(/\.html?$/i, '')}${suffix}` : `${p}${suffix}`;
+  }
   function categoryInfo(type){ return categories[type] || { label: type || (locale === 'en' ? 'Report' : '리포트'), english: 'REPORT', description: '' }; }
   function latestFor(type){ return posts.find(post=>post.type===type) || null; }
 
@@ -176,7 +184,7 @@
       date: post.reportDate || post.date,
       summary: post.summary || post.description || '',
       tags: post.tags || [],
-      url: post.href ? `/${post.href.replace(/^\/+/, '')}` : ''
+      url: post.href ? cleanReportUrl(post.href) : ''
     }));
   }
 
@@ -399,7 +407,7 @@
       } else {
         summaryContent = highlightMatches(item.summary || item.description, queryWords);
       }
-      const targetUrl = item.url || rootPath(item.href);
+      const targetUrl = cleanReportUrl(item.url || item.href);
       const readingTimeStr = formatReadingTime(item.readingMinutes, locale);
       const tagsStr = formatTags(item.tags, locale);
       const tagsHtml = tagsStr ? `<div class="search-result-tags">${esc(tagsStr)}</div>` : '';
@@ -561,7 +569,7 @@
       const tagsStr = formatTags(post.tags, locale);
       const tagsHtml = tagsStr ? `<div class="latest-card-tags">${esc(tagsStr)}</div>` : '';
 
-      return `<a class="latest-card latest-card-${esc(post.type)}" href="${esc(rootPath(post.href))}">
+      return `<a class="latest-card latest-card-${esc(post.type)}" href="${esc(cleanReportUrl(post.href))}">
         <span class="latest-card-meta">
           <b>${esc(info.english)}${esc(readingSuffix)}</b>
           <time datetime="${esc(reportDate(post))}">${esc(reportDate(post))}</time>
@@ -691,7 +699,7 @@
                 ${tagsHtml}
                 <div class="calendar-preview-meta">
                   <span>${esc(categoryInfo(p.type).label)} · ${esc(readingTimeStr)}</span>
-                  <a class="calendar-preview-link" href="${esc(rootPath(p.href))}">${esc(messages.read)} <span aria-hidden="true">→</span></a>
+                  <a class="calendar-preview-link" href="${esc(cleanReportUrl(p.href))}">${esc(messages.read)} <span aria-hidden="true">→</span></a>
                 </div>
               </div>
             `;}).join('')}
@@ -798,7 +806,7 @@
       const tagsHtml = tagsStr ? `<div class="report-tags">${esc(tagsStr)}</div>` : '';
 
       return `
-        <a class="report-item" href="${esc(rootPath(post.href))}">
+        <a class="report-item" href="${esc(cleanReportUrl(post.href))}">
           <div>
             <span class="report-type ${esc(post.type)}">${esc(info.label)}</span>
             <span class="report-date">${esc(reportDate(post))} · ${esc(readingTimeStr)}</span>
@@ -1064,7 +1072,7 @@
     // Rewrite the href on every paint, the hidden one included. Leaving the
     // previous session's href in place would keep a link to another day's
     // report one CSS rule away from being clickable.
-    if (linkEl) linkEl.href = daily ? rootPath(daily.href) : (locale === 'en' ? '/en/market/' : '/market/');
+    if (linkEl) linkEl.href = daily ? cleanReportUrl(daily.href) : (locale === 'en' ? '/en/market/' : '/market/');
     if (!text) {
       if (rowEl) rowEl.hidden = true;
       // Clear it as well as hide it, for the same reason the href is always
@@ -1125,7 +1133,7 @@
       const imgLink = document.getElementById('hero-featured-img-link');
       const imgEl = document.getElementById('hero-featured-img');
 
-      const href = rootPath(latestResearch.href);
+      const href = cleanReportUrl(latestResearch.href);
       const dateStr = reportDate(latestResearch);
       const readingStr = formatReadingTime(latestResearch.readingMinutes, locale);
       const copySnippet = String(latestResearch.summary || latestResearch.subtitle || latestResearch.description || '').trim();

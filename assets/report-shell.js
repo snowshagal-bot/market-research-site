@@ -26,6 +26,14 @@
   const homePath = locale === 'en' ? '/en/' : '/';
   const marketPath = locale === 'en' ? '/en/market/' : '/market/';
   const BAR_H = 52;
+  function cleanReportUrl(href) {
+    const str = String(href || '').trim();
+    const match = str.match(/^([^?#]*)([?#].*)?$/);
+    const pathPart = (match && match[1]) || '';
+    const suffix = (match && match[2]) || '';
+    const p = `/${pathPart.replace(/^\/+/, '')}`;
+    return /^\/reports\//i.test(p) ? `${p.replace(/\.html?$/i, '')}${suffix}` : `${p}${suffix}`;
+  }
   const themeMedia = matchMedia('(prefers-color-scheme: dark)');
   const shellHosts = [];
 
@@ -114,7 +122,7 @@
       if (!response.ok) return;
       const posts = await response.json();
       const counterpart = localeApi.findCounterpart(posts, location.pathname, targetLocale);
-      if (counterpart?.href) link.href = `/${String(counterpart.href).replace(/^\/+/, '')}`;
+      if (counterpart?.href) link.href = cleanReportUrl(counterpart.href);
     } catch (_) {}
   }
 
@@ -671,7 +679,7 @@
         const prevMeta = [prev.reportDate || prev.date, prevRead].filter(Boolean).join(' · ');
         prevnextHtml += `
           <div class="nav-col col-prev-wrap">
-            <a class="nav-link col-prev" href="/${String(prev.href).replace(/^\/+/, '')}" rel="prev">
+            <a class="nav-link col-prev" href="${cleanReportUrl(prev.href)}" rel="prev">
               <span class="nav-dir">${copy.prevLabel}</span>
               <strong class="nav-title">← ${escapeHtml(prev.title)}</strong>
               <span class="nav-meta">${escapeHtml(prevMeta)}</span>
@@ -687,7 +695,7 @@
         const nextMeta = [next.reportDate || next.date, nextRead].filter(Boolean).join(' · ');
         prevnextHtml += `
           <div class="nav-col col-next-wrap">
-            <a class="nav-link col-next" href="/${String(next.href).replace(/^\/+/, '')}" rel="next">
+            <a class="nav-link col-next" href="${cleanReportUrl(next.href)}" rel="next">
               <span class="nav-dir">${copy.nextLabel}</span>
               <strong class="nav-title">${escapeHtml(next.title)} →</strong>
               <span class="nav-meta">${escapeHtml(nextMeta)}</span>
@@ -714,7 +722,7 @@
           const tags = formatTags(item.tags, locale);
           const metaParts = [item.reportDate || item.date, readTime, tags].filter(Boolean);
           return `
-            <a class="related-item" href="/${String(item.href).replace(/^\/+/, '')}">
+            <a class="related-item" href="${cleanReportUrl(item.href)}">
               <span class="related-num">${num}</span>
               <div class="related-content">
                 <strong class="related-title">${escapeHtml(item.title)}</strong>

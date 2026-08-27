@@ -137,10 +137,10 @@ test('Slide 02 Featured Research: KO homepage picks latest KO Research even if n
 
   assert.equal(elements['hero-featured-date'].textContent, '2026-08-27');
   assert.equal(elements['hero-featured-title-link'].textContent, '한국 밸류업 프로그램 분석');
-  assert.equal(elements['hero-featured-title-link'].href, '/reports/valueup.html');
+  assert.equal(elements['hero-featured-title-link'].href, '/reports/valueup');
   assert.equal(elements['hero-featured-snippet'].textContent, '밸류업의 핵심 정책과 수혜 업종 분석');
   assert.equal(elements['hero-featured-reading'].textContent, '약 14분');
-  assert.equal(elements['hero-featured-action-btn'].href, '/reports/valueup.html');
+  assert.equal(elements['hero-featured-action-btn'].href, '/reports/valueup');
   assert.equal(elements['hero-featured-img'].src, '/covers/valueup.jpg');
 });
 
@@ -155,7 +155,7 @@ test('Slide 02 Featured Research: EN homepage picks latest EN Research without m
   assert.equal(elements['hero-featured-title-link'].textContent, 'Semiconductor Cycle Deep Dive');
   assert.equal(elements['hero-featured-reading'].textContent, '18 min read');
   assert.equal(elements['hero-featured-snippet'].textContent, 'Analyzing the next memory cycle.');
-  assert.equal(elements['hero-featured-action-btn'].href, '/reports/semi-en.html');
+  assert.equal(elements['hero-featured-action-btn'].href, '/reports/semi-en');
   assert.equal(elements['hero-featured-img'].src, '/covers/semi.jpg');
 });
 
