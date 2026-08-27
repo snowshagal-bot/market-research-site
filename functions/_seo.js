@@ -305,6 +305,52 @@ function reportRowMarkup(post, lang, isLatest = false) {
     + `<span class="report-arrow"><span class="report-read-label">${lang === 'en' ? 'Read' : '읽기'}</span><span aria-hidden="true">→</span></span></a>`;
 }
 
+export function categoryFeaturedCards(posts, type, lang) {
+  const categoryMetaLabels = {
+    daily: 'DAILY',
+    weekly: 'WEEKLY',
+    research: 'RESEARCH',
+    basics: 'MARKET BASICS',
+    note: 'NOTES'
+  };
+  return (Array.isArray(posts) ? posts : [])
+    .filter((post) => postLanguage(post) === lang && post?.type === type && normalizeSitePath(post?.href))
+    .sort((left, right) => {
+      const byDate = String(right?.reportDate || right?.date || '').localeCompare(String(left?.reportDate || left?.date || ''));
+      return byDate || String(right?.registeredAt || '').localeCompare(String(left?.registeredAt || ''));
+    })
+    .slice(0, 3)
+    .map((post) => {
+      const summary = String(post?.summary || post?.description || post?.subtitle || '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const cover = normalizeSitePath(post?.coverImage);
+      const visual = cover
+        ? `<span class="latest-card-cover"><img src="/${escapeHtml(cover)}" alt="" loading="lazy"></span>`
+        : '<span class="latest-card-art" aria-hidden="true"></span>';
+      const mins = typeof post?.readingMinutes === 'number' && post.readingMinutes > 0 ? post.readingMinutes : 0;
+      const readingSuffix = mins > 0 ? (lang === 'en' ? ` · ${mins} min read` : ` · 약 ${mins}분`) : '';
+      const metaLabel = categoryMetaLabels[post.type] || post.type.toUpperCase();
+      return `<a class="latest-card latest-card-${escapeHtml(post.type)}" href="${escapeHtml(cleanReportHref(post.href))}">`
+        + `<span class="latest-card-meta"><b>${escapeHtml(metaLabel)}${escapeHtml(readingSuffix)}</b><time datetime="${escapeHtml(post.reportDate || post.date || '')}">${escapeHtml(post.reportDate || post.date || '')}</time></span>`
+        + `<strong class="latest-card-title">${escapeHtml(post.title || '')}</strong>`
+        + `<span class="latest-card-body">${visual}<span class="latest-card-copy"><p class="latest-card-summary">${escapeHtml(summary)}</p>`
+        + `<span class="latest-card-read">${lang === 'en' ? 'Read report' : '리포트 보기'} <i aria-hidden="true">→</i></span></span></span></a>`;
+    }).join('');
+}
+
+export function categoryArchiveLinks(posts, type, lang) {
+  return (Array.isArray(posts) ? posts : [])
+    .filter((post) => postLanguage(post) === lang && post?.type === type && normalizeSitePath(post?.href))
+    .sort((left, right) => {
+      const byDate = String(right?.reportDate || right?.date || '').localeCompare(String(left?.reportDate || left?.date || ''));
+      return byDate || String(right?.registeredAt || '').localeCompare(String(left?.registeredAt || ''));
+    })
+    .slice(3)
+    .map((post) => reportRowMarkup(post, lang, false))
+    .join('');
+}
+
 export function categoryReportLinks(posts, type, lang) {
   return (Array.isArray(posts) ? posts : [])
     .filter((post) => postLanguage(post) === lang && post?.type === type && normalizeSitePath(post?.href))
