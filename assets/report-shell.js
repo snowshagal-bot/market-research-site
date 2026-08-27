@@ -398,8 +398,8 @@
     return false;
   }
 
-  // Discovery: Previous/Next Navigation and Related Reading
-  const TAG_REGISTRY = {
+  // Canonical Topic Tags: uses window.TAG_REGISTRY when provided by tags.js, with fallback
+  const TAG_REGISTRY = window.TAG_REGISTRY || {
     "flows": { "ko": "수급", "en": "Flows" },
     "semiconductors": { "ko": "반도체", "en": "Semiconductors" },
     "rates": { "ko": "금리", "en": "Rates" },
@@ -586,19 +586,21 @@
     root.innerHTML = `
       <style>
         :host{all:initial}*{box-sizing:border-box}
-        .wrap{background:#f7f3eb;color:#22241f;border-top:1px solid #d8d0c2;padding:48px 20px 52px;font-family:Inter,Pretendard,'Noto Sans KR','Apple SD Gothic Neo',system-ui,-apple-system,sans-serif;line-height:1.55}
+        .wrap{background:#f7f3eb;color:#22241f;border-top:1px solid #d8d0c2;padding:44px 20px 52px;font-family:Inter,Pretendard,'Noto Sans KR','Apple SD Gothic Neo',system-ui,-apple-system,sans-serif;line-height:1.55}
         .inner{width:min(820px,100%);margin:0 auto}
         
-        /* Previous / Next Grid */
-        .prevnext{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding-bottom:44px;border-bottom:1px solid #d8d0c2}
+        /* Previous / Next: Editorial Thin-Rule Style */
+        .prevnext{display:grid;grid-template-columns:1fr 1fr;gap:32px;padding-bottom:36px;border-bottom:1px solid #d8d0c2}
         .nav-col{min-width:0}
+        .nav-col.col-prev-wrap{padding-right:16px;border-right:1px solid #e0d9ce}
+        .nav-col.col-next-wrap{padding-left:16px}
         .nav-col.empty-slot{display:block}
-        .nav-link{display:flex;flex-direction:column;gap:6px;padding:16px 18px;border:1px solid #d8d0c2;border-radius:12px;background:#fbf8f1;text-decoration:none;color:inherit;transition:background .15s ease,border-color .15s ease,transform .15s ease}
-        .nav-link:hover{background:#eee8dd;border-color:#b8b0a2;transform:translateY(-1px)}
+        .nav-link{display:flex;flex-direction:column;gap:6px;padding:0;background:none;border:0;text-decoration:none;color:inherit;transition:opacity .15s ease}
+        .nav-link:hover .nav-title{color:#000;text-decoration:underline;text-underline-offset:3px}
         .nav-link.col-next{text-align:right;align-items:flex-end}
         .nav-link.col-prev{text-align:left;align-items:flex-start}
-        .nav-dir{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#7d7d75}
-        .nav-title{font-family:Georgia,'Noto Serif KR',serif;font-size:16px;font-weight:600;line-height:1.35;color:#22241f;word-break:keep-all;overflow-wrap:anywhere}
+        .nav-dir{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7d7d75}
+        .nav-title{font-family:Georgia,'Noto Serif KR',serif;font-size:17px;font-weight:600;line-height:1.35;color:#22241f;word-break:keep-all;overflow-wrap:anywhere}
         .nav-meta{font-size:12px;color:#7d7d75}
 
         /* Related Reading */
@@ -617,29 +619,32 @@
         .related-tags{color:#535850}
 
         @media(max-width:680px){
-          .wrap{padding:34px 14px 40px}
-          .prevnext{grid-template-columns:1fr;gap:14px;padding-bottom:34px}
+          .wrap{padding:32px 14px 40px}
+          .prevnext{grid-template-columns:1fr;gap:20px;padding-bottom:28px}
+          .nav-col.col-prev-wrap{padding-right:0;border-right:0;padding-bottom:16px;border-bottom:1px solid #e0d9ce}
+          .nav-col.col-next-wrap{padding-left:0}
           .nav-link.col-next{text-align:left;align-items:flex-start}
           .nav-col.empty-slot{display:none}
-          .nav-title{font-size:15px}
+          .nav-title{font-size:15.5px}
           .related{padding-top:30px}
           .related-item{grid-template-columns:28px 1fr;gap:12px;padding:16px 0}
           .related-title{font-size:15.5px}
         }
       </style>
       <style>
-        :host{--disc-bg:#f7f3eb;--disc-panel:#fbf8f1;--disc-hover:#eee8dd;--disc-text:#22241f;--disc-text-2:#535850;--disc-muted:#7d7d75;--disc-line:#d8d0c2;--disc-border:#e0d9ce;--disc-focus:#344b40}
-        :host([data-theme="dark"]){--disc-bg:#1c1f1c;--disc-panel:#222622;--disc-hover:#2b302b;--disc-text:#edf0ec;--disc-text-2:#b9c0ba;--disc-muted:#8f968f;--disc-line:#3b423c;--disc-border:#2e342f;--disc-focus:#a8c1b1}
+        :host{--disc-bg:#f7f3eb;--disc-text:#22241f;--disc-text-2:#535850;--disc-muted:#7d7d75;--disc-line:#d8d0c2;--disc-border:#e0d9ce;--disc-focus:#344b40}
+        :host([data-theme="dark"]){--disc-bg:#1c1f1c;--disc-text:#edf0ec;--disc-text-2:#b9c0ba;--disc-muted:#8f968f;--disc-line:#3b423c;--disc-border:#2e342f;--disc-focus:#a8c1b1}
         .wrap{background:var(--disc-bg);color:var(--disc-text);border-top-color:var(--disc-line)}
         .prevnext{border-bottom-color:var(--disc-line)}
-        .nav-link{background:var(--disc-panel);border-color:var(--disc-line);color:var(--disc-text)}
-        .nav-link:hover{background:var(--disc-hover)}
+        .nav-col.col-prev-wrap{border-right-color:var(--disc-border)}
         .nav-title{color:var(--disc-text)}
         .nav-dir,.nav-meta,.related-heading,.related-num{color:var(--disc-muted)}
         .related-item{border-bottom-color:var(--disc-border)}
         .related-title{color:var(--disc-text)}
         .related-summary,.related-tags{color:var(--disc-text-2)}
-        .nav-link:focus-visible,.related-item:focus-visible{outline:2px solid var(--disc-focus);outline-offset:2px}
+        :host([data-theme="dark"]) .nav-link:hover .nav-title,:host([data-theme="dark"]) .related-item:hover .related-title{color:#fff}
+        @media(max-width:680px){.nav-col.col-prev-wrap{border-bottom-color:var(--disc-border)}}
+        .nav-link:focus-visible,.related-item:focus-visible{outline:2px solid var(--disc-focus);outline-offset:3px}
       </style>
       <div class="wrap" id="discovery-wrap" hidden>
         <div class="inner">
@@ -665,7 +670,7 @@
         const prevRead = formatReadingTime(prev.readingMinutes, locale);
         const prevMeta = [prev.reportDate || prev.date, prevRead].filter(Boolean).join(' · ');
         prevnextHtml += `
-          <div class="nav-col">
+          <div class="nav-col col-prev-wrap">
             <a class="nav-link col-prev" href="/${String(prev.href).replace(/^\/+/, '')}" rel="prev">
               <span class="nav-dir">${copy.prevLabel}</span>
               <strong class="nav-title">← ${escapeHtml(prev.title)}</strong>
@@ -674,14 +679,14 @@
           </div>
         `;
       } else {
-        prevnextHtml += `<div class="nav-col empty-slot" aria-hidden="true"></div>`;
+        prevnextHtml += `<div class="nav-col col-prev-wrap empty-slot" aria-hidden="true"></div>`;
       }
 
       if (next) {
         const nextRead = formatReadingTime(next.readingMinutes, locale);
         const nextMeta = [next.reportDate || next.date, nextRead].filter(Boolean).join(' · ');
         prevnextHtml += `
-          <div class="nav-col">
+          <div class="nav-col col-next-wrap">
             <a class="nav-link col-next" href="/${String(next.href).replace(/^\/+/, '')}" rel="next">
               <span class="nav-dir">${copy.nextLabel}</span>
               <strong class="nav-title">${escapeHtml(next.title)} →</strong>
@@ -690,7 +695,7 @@
           </div>
         `;
       } else {
-        prevnextHtml += `<div class="nav-col empty-slot" aria-hidden="true"></div>`;
+        prevnextHtml += `<div class="nav-col col-next-wrap empty-slot" aria-hidden="true"></div>`;
       }
 
       if (prev || next) {
