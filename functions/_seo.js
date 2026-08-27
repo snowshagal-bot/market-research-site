@@ -153,11 +153,12 @@ export function findPostByPath(posts, pathname) {
 }
 
 export function findTranslationCounterpart(posts, post) {
-  const group = String(post?.translationGroup || '').trim();
+  const groupKey = (candidate) => String(candidate?.translationGroup || candidate?.id || '').trim();
+  const group = groupKey(post);
   if (!group) return null;
   const lang = postLanguage(post);
   const grouped = (Array.isArray(posts) ? posts : []).filter((candidate) => (
-    String(candidate?.translationGroup || '').trim() === group
+    groupKey(candidate) === group
   ));
   const korean = grouped.filter((candidate) => postLanguage(candidate) === 'ko');
   const english = grouped.filter((candidate) => postLanguage(candidate) === 'en');

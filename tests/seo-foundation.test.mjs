@@ -130,10 +130,16 @@ test('report hreflang is reciprocal only for real KO and EN translation pairs', 
   const byHref = new Map(posts.map((post) => [reportSiteUrl(post.href), post]));
   for (const post of posts) {
     const alternates = reportAlternates(posts, post);
-    if (!alternates.length) {
+    const group = String(post.translationGroup || post.id || '').trim();
+    const grouped = posts.filter((candidate) => String(candidate.translationGroup || candidate.id || '').trim() === group);
+    const hasExactPair = grouped.filter((candidate) => postLanguage(candidate) === 'ko').length === 1
+      && grouped.filter((candidate) => postLanguage(candidate) === 'en').length === 1;
+    if (!hasExactPair) {
+      assert.deepEqual(alternates, []);
       assert.doesNotMatch(reportSeoTags(posts, post), /hreflang=/);
       continue;
     }
+    assert.ok(alternates.length, `${post.id} real translation pair was omitted`);
     const locales = new Set(alternates.map((entry) => entry.lang));
     assert.deepEqual(locales, new Set(['ko', 'en', 'x-default']));
     for (const entry of alternates.filter((item) => item.lang !== 'x-default')) {
