@@ -269,8 +269,8 @@ test('O. the shell mounts share for every category and both locales', async () =
   const shell = await read('assets/report-shell.js');
   const middleware = await read('functions/_middleware.js');
 
-  // Share sits between the report body and the comments.
-  assert.match(shell, /mountReportNav\(\);\s*mountShare\(\);\s*mountComments\(\);/);
+  // Share sits between the report body/discovery and the comments.
+  assert.match(shell, /mountReportNav\(\);\s*(?:mountDiscovery\(\);\s*)?mountShare\(\);\s*mountComments\(\);/);
   // Nothing in mountShare is conditional on the category.
   const body = shell.slice(shell.indexOf('function mountShare()'), shell.indexOf('function mount()'));
   assert.doesNotMatch(body, /active ===/);

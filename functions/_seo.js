@@ -271,13 +271,18 @@ export function reportDescription(post) {
     : `${title || '이 글'} — Snowshagal의 ${category} 콘텐츠입니다.`);
 }
 
-function reportRowMarkup(post, lang) {
+function reportRowMarkup(post, lang, isLatest = false) {
   const date = String(post?.reportDate || post?.date || '');
-  const category = CATEGORY_LANDINGS[post?.type]?.[lang]?.heading || (lang === 'en' ? 'Report' : '리포트');
-  const subtitle = String(post?.subtitle || '').trim();
-  return `<a class="report-item" href="${escapeHtml(`/${normalizeSitePath(post?.href)}`)}">`
+  const category = isLatest
+    ? (lang === 'en' ? 'LATEST' : '최신 리포트')
+    : (CATEGORY_LANDINGS[post?.type]?.[lang]?.heading || (lang === 'en' ? 'Report' : '리포트'));
+  const subtitle = String(post?.subtitle || post?.summary || post?.description || '').trim();
+  const mins = typeof post?.readingMinutes === 'number' && post.readingMinutes > 0 ? post.readingMinutes : 0;
+  const readLabel = mins > 0 ? (lang === 'en' ? ` · ${mins} min read` : ` · 약 ${mins}분`) : '';
+  const latestAttr = isLatest ? ' data-latest="true"' : '';
+  return `<a class="report-item"${latestAttr} href="${escapeHtml(`/${normalizeSitePath(post?.href)}`)}">`
     + `<div><span class="report-type ${escapeHtml(post?.type || '')}">${escapeHtml(category)}</span>`
-    + `<span class="report-date">${escapeHtml(date)}</span></div>`
+    + `<span class="report-date">${escapeHtml(date)}${escapeHtml(readLabel)}</span></div>`
     + `<div><div class="report-title">${escapeHtml(post?.title || '')}</div>`
     + `${subtitle ? `<div class="report-subtitle">${escapeHtml(subtitle)}</div>` : ''}</div>`
     + `<span class="report-arrow"><span class="report-read-label">${lang === 'en' ? 'Read' : '읽기'}</span><span aria-hidden="true">→</span></span></a>`;
@@ -290,7 +295,7 @@ export function categoryReportLinks(posts, type, lang) {
       const byDate = String(right?.reportDate || right?.date || '').localeCompare(String(left?.reportDate || left?.date || ''));
       return byDate || String(right?.registeredAt || '').localeCompare(String(left?.registeredAt || ''));
     })
-    .map((post) => reportRowMarkup(post, lang))
+    .map((post, idx) => reportRowMarkup(post, lang, idx === 0))
     .join('');
 }
 
@@ -322,8 +327,10 @@ export function homepageLatestLinks(posts, lang) {
       const visual = cover
         ? `<span class="latest-card-cover"><img src="/${escapeHtml(cover)}" alt="" loading="lazy"></span>`
         : '<span class="latest-card-art" aria-hidden="true"></span>';
+      const mins = typeof post?.readingMinutes === 'number' && post.readingMinutes > 0 ? post.readingMinutes : 0;
+      const readingSuffix = mins > 0 ? (lang === 'en' ? ` · ${mins} min read` : ` · 약 ${mins}분`) : '';
       return `<a class="latest-card latest-card-${escapeHtml(post.type)}" href="/${escapeHtml(normalizeSitePath(post.href))}">`
-        + `<span class="latest-card-meta"><b>${escapeHtml(post.type.toUpperCase())}</b><time datetime="${escapeHtml(post.reportDate || post.date || '')}">${escapeHtml(post.reportDate || post.date || '')}</time></span>`
+        + `<span class="latest-card-meta"><b>${escapeHtml(post.type.toUpperCase())}${escapeHtml(readingSuffix)}</b><time datetime="${escapeHtml(post.reportDate || post.date || '')}">${escapeHtml(post.reportDate || post.date || '')}</time></span>`
         + `<strong class="latest-card-title">${escapeHtml(post.title || '')}</strong>`
         + `<span class="latest-card-body">${visual}<span class="latest-card-copy"><p class="latest-card-summary">${escapeHtml(summary)}</p>`
         + `<span class="latest-card-read">${lang === 'en' ? 'Read report' : '리포트 보기'} <i aria-hidden="true">→</i></span></span></span></a>`;

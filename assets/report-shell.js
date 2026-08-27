@@ -12,14 +12,16 @@
     loadError: 'Could not load comments.', dbTitle: 'Comments are being prepared', dbText: 'Comments will be available after the database is connected.', retry: 'Please try again later.', posting: 'Posting…', postError: 'Could not post the comment.', posted: 'Comment posted.', deletePrompt: 'Enter the deletion password.', deleteError: 'Could not delete the comment.',
     shareHeading: 'Share', sharePrompt: 'Share this report', shareAction: 'Share', shareCopy: 'Copy link',
     shareCopied: 'Link copied', shareCopyManual: 'Copy this link:', shareFailed: 'Could not share this report.',
-    shareAppsHint: 'Use your device share menu for Instagram and other apps'
+    shareAppsHint: 'Use your device share menu for Instagram and other apps',
+    prevLabel: 'PREVIOUS', nextLabel: 'NEXT', relatedHeading: 'RELATED READING', readMinSuffix: 'min read'
   } : {
     navLabel: '리포트 사이트 메뉴', home: '← 홈', daily: '데일리', weekly: '위클리', research: '리서치', basics: '시장 공부', note: '끄적끄적', market: '마켓', switchLabel: '영어로 읽기', switchText: 'EN',
     comments: '댓글', write: '댓글 쓰기', close: '닫기', nickname: '닉네임', password: '삭제용 비밀번호', body: '댓글을 입력하세요.', website: '웹사이트', noteText: '회원가입 없이 작성 · 비밀번호는 삭제할 때만 사용됩니다.', submit: '댓글 등록', loading: '댓글을 불러오는 중…', empty: '아직 댓글이 없습니다.', delete: '삭제',
     loadError: '댓글을 불러오지 못했습니다.', dbTitle: '댓글 기능 준비 중', dbText: '데이터베이스 연결 후 사용할 수 있습니다.', retry: '잠시 후 다시 시도해주세요.', posting: '등록 중…', postError: '댓글을 등록하지 못했습니다.', posted: '댓글이 등록되었습니다.', deletePrompt: '댓글 삭제 비밀번호를 입력하세요.', deleteError: '댓글을 삭제하지 못했습니다.',
     shareHeading: '공유', sharePrompt: '이 리포트를 공유하기', shareAction: '공유하기', shareCopy: '링크 복사',
     shareCopied: '링크를 복사했습니다', shareCopyManual: '아래 링크를 복사하세요:', shareFailed: '공유하지 못했습니다.',
-    shareAppsHint: 'Instagram·KakaoTalk 등은 기기 공유 메뉴에서 선택'
+    shareAppsHint: 'Instagram·KakaoTalk 등은 기기 공유 메뉴에서 선택',
+    prevLabel: '이전 글', nextLabel: '다음 글', relatedHeading: '이어서 읽기', readMinSuffix: '분'
   };
   const homePath = locale === 'en' ? '/en/' : '/';
   const marketPath = locale === 'en' ? '/en/market/' : '/market/';
@@ -396,7 +398,361 @@
     return false;
   }
 
+  // Canonical Topic Tags: uses window.TAG_REGISTRY when provided by tags.js, with fallback
+  const TAG_REGISTRY = window.TAG_REGISTRY || {
+    "flows": { "ko": "수급", "en": "Flows" },
+    "semiconductors": { "ko": "반도체", "en": "Semiconductors" },
+    "rates": { "ko": "금리", "en": "Rates" },
+    "fx": { "ko": "환율", "en": "FX" },
+    "treasuries": { "ko": "미국채", "en": "U.S. Treasuries" },
+    "fed": { "ko": "연준", "en": "Fed" },
+    "futures": { "ko": "선물·파생", "en": "Futures & Derivatives" },
+    "ai": { "ko": "AI", "en": "AI" },
+    "cloud-datacenter": { "ko": "클라우드·데이터센터", "en": "Cloud & Data Centers" },
+    "stablecoins": { "ko": "스테이블코인", "en": "Stablecoins" },
+    "crypto": { "ko": "가상자산", "en": "Crypto" },
+    "gold": { "ko": "금", "en": "Gold" },
+    "autos": { "ko": "자동차", "en": "Autos" },
+    "energy": { "ko": "에너지", "en": "Energy" },
+    "policy": { "ko": "정책", "en": "Policy" },
+    "geopolitics": { "ko": "지정학", "en": "Geopolitics" }
+  };
+
+  function tagLabel(tagKey, loc) {
+    const l = loc || locale;
+    const entry = TAG_REGISTRY[tagKey];
+    return entry ? (entry[l] || entry.ko || tagKey) : tagKey;
+  }
+
+  function formatTags(tags, loc) {
+    if (!Array.isArray(tags) || !tags.length) return '';
+    return tags.map(t => tagLabel(t, loc)).filter(Boolean).join(' · ');
+  }
+
+  function formatReadingTime(mins, loc) {
+    if (typeof mins !== 'number' || mins <= 0) return '';
+    const l = loc || locale;
+    if (l === 'en') return `${mins} min read`;
+    return `약 ${mins}분`;
+  }
+
+  function normalizeReportPath(value) {
+    let path = String(value || '').split(/[?#]/, 1)[0].replace(/^\/+/, '');
+    try { path = decodeURIComponent(path); } catch (_) {}
+    return path.toLowerCase();
+  }
+
+  function postLang(post) {
+    return post?.lang === 'en' ? 'en' : 'ko';
+  }
+
+  function findAdjacentReports(allPosts, currentPath, targetLang) {
+    const list = Array.isArray(allPosts) ? allPosts : [];
+    const normalizedTarget = normalizeReportPath(currentPath);
+    const current = list.find(p => normalizeReportPath(p.href) === normalizedTarget) || null;
+    if (!current) return { prev: null, next: null, current: null };
+
+    const lang = targetLang || postLang(current);
+    const category = current.type;
+
+    const sameCategoryPosts = list.filter(p => postLang(p) === lang && p.type === category && p.href);
+
+    sameCategoryPosts.sort((a, b) => {
+      const dateA = String(a.reportDate || a.date || '');
+      const dateB = String(b.reportDate || b.date || '');
+      const cmp = dateA.localeCompare(dateB);
+      if (cmp !== 0) return cmp;
+      return String(a.registeredAt || '').localeCompare(String(b.registeredAt || ''));
+    });
+
+    const index = sameCategoryPosts.findIndex(p => p.id === current.id || normalizeReportPath(p.href) === normalizedTarget);
+    if (index === -1) return { prev: null, next: null, current };
+
+    const prev = index > 0 ? sameCategoryPosts[index - 1] : null;
+    const next = index < sameCategoryPosts.length - 1 ? sameCategoryPosts[index + 1] : null;
+
+    return { prev, next, current };
+  }
+
+  function rankRelatedReports(allPosts, currentPost, targetLang, limit = 3) {
+    const list = Array.isArray(allPosts) ? allPosts : [];
+    if (!currentPost) return [];
+
+    const lang = targetLang || postLang(currentPost);
+    const currentTags = Array.isArray(currentPost.tags) ? currentPost.tags : [];
+    const currentId = currentPost.id;
+    const currentHref = normalizeReportPath(currentPost.href);
+
+    const candidates = list.filter(p => {
+      if (postLang(p) !== lang) return false;
+      if (p.id && currentId && p.id === currentId) return false;
+      if (normalizeReportPath(p.href) === currentHref) return false;
+      return Boolean(p.href);
+    });
+
+    const scored = candidates.map(candidate => {
+      const candidateTags = Array.isArray(candidate.tags) ? candidate.tags : [];
+      const sharedCount = candidateTags.filter(t => currentTags.includes(t)).length;
+      let score = sharedCount * 10;
+      if (candidate.type === currentPost.type) score += 2;
+      return { post: candidate, score, sharedCount };
+    });
+
+    scored.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      const dateA = String(a.post.reportDate || a.post.date || '');
+      const dateB = String(b.post.reportDate || b.post.date || '');
+      const cmp = dateB.localeCompare(dateA);
+      if (cmp !== 0) return cmp;
+      return String(b.post.registeredAt || '').localeCompare(String(a.post.registeredAt || ''));
+    });
+
+    const results = [];
+    const chosenIds = new Set();
+
+    for (const item of scored) {
+      if (results.length >= limit) break;
+      if (item.score > 0) {
+        results.push(item.post);
+        chosenIds.add(item.post.id);
+      }
+    }
+
+    if (results.length < limit) {
+      const sameCatLatest = candidates
+        .filter(p => p.type === currentPost.type && !chosenIds.has(p.id))
+        .sort((a, b) => {
+          const dateA = String(a.reportDate || a.date || '');
+          const dateB = String(b.reportDate || b.date || '');
+          const cmp = dateB.localeCompare(dateA);
+          return cmp !== 0 ? cmp : String(b.registeredAt || '').localeCompare(String(a.registeredAt || ''));
+        });
+      for (const p of sameCatLatest) {
+        if (results.length >= limit) break;
+        results.push(p);
+        chosenIds.add(p.id);
+      }
+    }
+
+    if (results.length < limit) {
+      const otherCatLatest = candidates
+        .filter(p => !chosenIds.has(p.id))
+        .sort((a, b) => {
+          const dateA = String(a.reportDate || a.date || '');
+          const dateB = String(b.reportDate || b.date || '');
+          const cmp = dateB.localeCompare(dateA);
+          return cmp !== 0 ? cmp : String(b.registeredAt || '').localeCompare(String(a.registeredAt || ''));
+        });
+      for (const p of otherCatLatest) {
+        if (results.length >= limit) break;
+        results.push(p);
+        chosenIds.add(p.id);
+      }
+    }
+
+    return results.slice(0, limit);
+  }
+
+  let cachedPostsPromise = null;
+  function fetchAllPosts() {
+    if (Array.isArray(window.RESEARCH_POSTS) && window.RESEARCH_POSTS.length) {
+      return Promise.resolve(window.RESEARCH_POSTS);
+    }
+    if (!cachedPostsPromise) {
+      cachedPostsPromise = fetch('/data/posts.json')
+        .then(r => r.ok ? r.json() : [])
+        .catch(() => []);
+    }
+    return cachedPostsPromise;
+  }
+
+  function mountDiscovery() {
+    if (document.getElementById('mrs-discovery-host')) return;
+
+    const host = document.createElement('section');
+    host.id = 'mrs-discovery-host';
+    host.setAttribute('aria-label', locale === 'en' ? 'Report Navigation and Related Reading' : '리포트 이전/다음 및 관련 글');
+    shellHosts.push(host);
+    applyShellTheme();
+
+    const hostStyles = {
+      all: 'initial', display: 'block', position: 'relative', width: '100%', maxWidth: '100%',
+      clear: 'both', flex: '0 0 100%', margin: '0', padding: '0', border: '0', boxSizing: 'border-box'
+    };
+    for (const [key, value] of Object.entries(hostStyles)) host.style.setProperty(key, value, 'important');
+    document.body.appendChild(host);
+
+    const root = host.attachShadow({ mode: 'open' });
+    root.innerHTML = `
+      <style>
+        :host{all:initial}*{box-sizing:border-box}
+        .wrap{background:#f7f3eb;color:#22241f;border-top:1px solid #d8d0c2;padding:44px 20px 52px;font-family:Inter,Pretendard,'Noto Sans KR','Apple SD Gothic Neo',system-ui,-apple-system,sans-serif;line-height:1.55}
+        .inner{width:min(820px,100%);margin:0 auto}
+        
+        /* Previous / Next: Editorial Thin-Rule Style */
+        .prevnext{display:grid;grid-template-columns:1fr 1fr;gap:32px;padding-bottom:36px;border-bottom:1px solid #d8d0c2}
+        .nav-col{min-width:0}
+        .nav-col.col-prev-wrap{padding-right:16px;border-right:1px solid #e0d9ce}
+        .nav-col.col-next-wrap{padding-left:16px}
+        .nav-col.empty-slot{display:block}
+        .nav-link{display:flex;flex-direction:column;gap:6px;padding:0;background:none;border:0;text-decoration:none;color:inherit;transition:opacity .15s ease}
+        .nav-link:hover .nav-title{color:#000;text-decoration:underline;text-underline-offset:3px}
+        .nav-link.col-next{text-align:right;align-items:flex-end}
+        .nav-link.col-prev{text-align:left;align-items:flex-start}
+        .nav-dir{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7d7d75}
+        .nav-title{font-family:Georgia,'Noto Serif KR',serif;font-size:17px;font-weight:600;line-height:1.35;color:#22241f;word-break:keep-all;overflow-wrap:anywhere}
+        .nav-meta{font-size:12px;color:#7d7d75}
+
+        /* Related Reading */
+        .related{padding-top:40px}
+        .related-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:20px}
+        .related-heading{margin:0;font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#7d7d75}
+        .related-list{display:flex;flex-direction:column}
+        .related-item{display:grid;grid-template-columns:36px 1fr;gap:16px;align-items:baseline;padding:20px 0;border-bottom:1px solid #e0d9ce;text-decoration:none;color:inherit;transition:background .15s ease}
+        .related-item:last-child{border-bottom:0}
+        .related-item:hover .related-title{color:#000;text-decoration:underline;text-underline-offset:3px}
+        .related-num{font-family:Georgia,serif;font-size:15px;font-weight:600;color:#949088;letter-spacing:.05em}
+        .related-content{min-width:0;display:flex;flex-direction:column;gap:5px}
+        .related-title{font-family:Georgia,'Noto Serif KR',serif;font-size:17px;font-weight:600;line-height:1.35;color:#22241f;word-break:keep-all;overflow-wrap:anywhere}
+        .related-summary{margin:0;font-size:13px;color:#535850;line-height:1.5;overflow-wrap:anywhere}
+        .related-meta{font-size:12px;color:#7d7d75;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+        .related-tags{color:#535850}
+
+        @media(max-width:680px){
+          .wrap{padding:32px 14px 40px}
+          .prevnext{grid-template-columns:1fr;gap:20px;padding-bottom:28px}
+          .nav-col.col-prev-wrap{padding-right:0;border-right:0;padding-bottom:16px;border-bottom:1px solid #e0d9ce}
+          .nav-col.col-next-wrap{padding-left:0}
+          .nav-link.col-next{text-align:left;align-items:flex-start}
+          .nav-col.empty-slot{display:none}
+          .nav-title{font-size:15.5px}
+          .related{padding-top:30px}
+          .related-item{grid-template-columns:28px 1fr;gap:12px;padding:16px 0}
+          .related-title{font-size:15.5px}
+        }
+      </style>
+      <style>
+        :host{--disc-bg:#f7f3eb;--disc-text:#22241f;--disc-text-2:#535850;--disc-muted:#7d7d75;--disc-line:#d8d0c2;--disc-border:#e0d9ce;--disc-focus:#344b40}
+        :host([data-theme="dark"]){--disc-bg:#1c1f1c;--disc-text:#edf0ec;--disc-text-2:#b9c0ba;--disc-muted:#8f968f;--disc-line:#3b423c;--disc-border:#2e342f;--disc-focus:#a8c1b1}
+        .wrap{background:var(--disc-bg);color:var(--disc-text);border-top-color:var(--disc-line)}
+        .prevnext{border-bottom-color:var(--disc-line)}
+        .nav-col.col-prev-wrap{border-right-color:var(--disc-border)}
+        .nav-title{color:var(--disc-text)}
+        .nav-dir,.nav-meta,.related-heading,.related-num{color:var(--disc-muted)}
+        .related-item{border-bottom-color:var(--disc-border)}
+        .related-title{color:var(--disc-text)}
+        .related-summary,.related-tags{color:var(--disc-text-2)}
+        :host([data-theme="dark"]) .nav-link:hover .nav-title,:host([data-theme="dark"]) .related-item:hover .related-title{color:#fff}
+        @media(max-width:680px){.nav-col.col-prev-wrap{border-bottom-color:var(--disc-border)}}
+        .nav-link:focus-visible,.related-item:focus-visible{outline:2px solid var(--disc-focus);outline-offset:3px}
+      </style>
+      <div class="wrap" id="discovery-wrap" hidden>
+        <div class="inner">
+          <nav class="prevnext" id="prevnext-container" aria-label="${locale === 'en' ? 'Previous and Next Reports' : '이전/다음 리포트'}"></nav>
+          <section class="related" id="related-container" aria-labelledby="related-heading"></section>
+        </div>
+      </div>
+    `;
+
+    fetchAllPosts().then(allPosts => {
+      if (!allPosts || !allPosts.length) return;
+      const currentPath = location.pathname;
+      const { prev, next, current } = findAdjacentReports(allPosts, currentPath, locale);
+      if (!current) return;
+
+      const wrap = root.getElementById('discovery-wrap');
+      const prevnextContainer = root.getElementById('prevnext-container');
+      const relatedContainer = root.getElementById('related-container');
+
+      // Render Prev / Next
+      let prevnextHtml = '';
+      if (prev) {
+        const prevRead = formatReadingTime(prev.readingMinutes, locale);
+        const prevMeta = [prev.reportDate || prev.date, prevRead].filter(Boolean).join(' · ');
+        prevnextHtml += `
+          <div class="nav-col col-prev-wrap">
+            <a class="nav-link col-prev" href="/${String(prev.href).replace(/^\/+/, '')}" rel="prev">
+              <span class="nav-dir">${copy.prevLabel}</span>
+              <strong class="nav-title">← ${escapeHtml(prev.title)}</strong>
+              <span class="nav-meta">${escapeHtml(prevMeta)}</span>
+            </a>
+          </div>
+        `;
+      } else {
+        prevnextHtml += `<div class="nav-col col-prev-wrap empty-slot" aria-hidden="true"></div>`;
+      }
+
+      if (next) {
+        const nextRead = formatReadingTime(next.readingMinutes, locale);
+        const nextMeta = [next.reportDate || next.date, nextRead].filter(Boolean).join(' · ');
+        prevnextHtml += `
+          <div class="nav-col col-next-wrap">
+            <a class="nav-link col-next" href="/${String(next.href).replace(/^\/+/, '')}" rel="next">
+              <span class="nav-dir">${copy.nextLabel}</span>
+              <strong class="nav-title">${escapeHtml(next.title)} →</strong>
+              <span class="nav-meta">${escapeHtml(nextMeta)}</span>
+            </a>
+          </div>
+        `;
+      } else {
+        prevnextHtml += `<div class="nav-col col-next-wrap empty-slot" aria-hidden="true"></div>`;
+      }
+
+      if (prev || next) {
+        prevnextContainer.innerHTML = prevnextHtml;
+      } else {
+        prevnextContainer.hidden = true;
+      }
+
+      // Render Related Reading
+      const related = rankRelatedReports(allPosts, current, locale, 3);
+      if (related && related.length) {
+        const itemsHtml = related.map((item, idx) => {
+          const num = String(idx + 1).padStart(2, '0');
+          const summary = String(item.subtitle || item.summary || item.description || '').trim();
+          const readTime = formatReadingTime(item.readingMinutes, locale);
+          const tags = formatTags(item.tags, locale);
+          const metaParts = [item.reportDate || item.date, readTime, tags].filter(Boolean);
+          return `
+            <a class="related-item" href="/${String(item.href).replace(/^\/+/, '')}">
+              <span class="related-num">${num}</span>
+              <div class="related-content">
+                <strong class="related-title">${escapeHtml(item.title)}</strong>
+                ${summary ? `<p class="related-summary">${escapeHtml(summary)}</p>` : ''}
+                <div class="related-meta">
+                  <span>${escapeHtml(metaParts.join(' · '))}</span>
+                </div>
+              </div>
+            </a>
+          `;
+        }).join('');
+
+        relatedContainer.innerHTML = `
+          <div class="related-head">
+            <h3 class="related-heading" id="related-heading">${copy.relatedHeading}</h3>
+          </div>
+          <div class="related-list">
+            ${itemsHtml}
+          </div>
+        `;
+      } else {
+        relatedContainer.hidden = true;
+      }
+
+      if (prev || next || (related && related.length)) {
+        wrap.hidden = false;
+      }
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[c]);
+  }
+
   window.REPORT_SHELL = { canonicalShareUrl, shareTitle, shareText, shareLinks, prefersNativeShare };
+  window.REPORT_DISCOVERY = { findAdjacentReports, rankRelatedReports, normalizeReportPath };
 
   const SHARE_ICONS = {
     copy: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
@@ -555,6 +911,7 @@
 
   function mount() {
     mountReportNav();
+    mountDiscovery();
     mountShare();
     mountComments();
   }

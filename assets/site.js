@@ -74,12 +74,12 @@
   }
 
   function formatReadingTime(mins, loc) {
-    const m = typeof mins === 'number' && mins > 0 ? mins : 1;
+    if (typeof mins !== 'number' || mins <= 0) return '';
     const l = loc || locale;
     if (l === 'en') {
-      return `${m} min read`;
+      return `${mins} min read`;
     }
-    return `약 ${m}분`;
+    return `약 ${mins}분`;
   }
 
   // Theme Management
@@ -557,12 +557,13 @@
         : '<span class="latest-card-art" aria-hidden="true"></span>';
       const summaryCopy=summary?`<p class="latest-card-summary">${esc(summary)}</p>`:'';
       const readingTimeStr = formatReadingTime(post.readingMinutes, locale);
+      const readingSuffix = readingTimeStr ? ` · ${readingTimeStr}` : '';
       const tagsStr = formatTags(post.tags, locale);
       const tagsHtml = tagsStr ? `<div class="latest-card-tags">${esc(tagsStr)}</div>` : '';
 
       return `<a class="latest-card latest-card-${esc(post.type)}" href="${esc(rootPath(post.href))}">
         <span class="latest-card-meta">
-          <b>${esc(info.english)} · ${esc(readingTimeStr)}</b>
+          <b>${esc(info.english)}${esc(readingSuffix)}</b>
           <time datetime="${esc(reportDate(post))}">${esc(reportDate(post))}</time>
         </span>
         <strong class="latest-card-title">${esc(post.title)}</strong>

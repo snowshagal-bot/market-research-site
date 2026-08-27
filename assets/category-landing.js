@@ -21,8 +21,9 @@
   }
 
   function readingTime(post) {
-    const minutes = typeof post?.readingMinutes === 'number' && post.readingMinutes > 0 ? post.readingMinutes : 1;
-    return lang === 'en' ? `${minutes} min read` : `약 ${minutes}분`;
+    const minutes = typeof post?.readingMinutes === 'number' && post.readingMinutes > 0 ? post.readingMinutes : 0;
+    if (minutes <= 0) return '';
+    return lang === 'en' ? ` · ${minutes} min read` : ` · 약 ${minutes}분`;
   }
 
   function tagLabel(key) {
@@ -42,15 +43,20 @@
     return;
   }
 
-  host.innerHTML = posts.map((post) => {
-    const subtitle = post.subtitle ? `<div class="report-subtitle">${esc(post.subtitle)}</div>` : '';
+  host.innerHTML = posts.map((post, idx) => {
+    const subtitle = String(post.subtitle || post.summary || post.description || '').trim();
+    const subtitleMarkup = subtitle ? `<div class="report-subtitle">${esc(subtitle)}</div>` : '';
     const tags = Array.isArray(post.tags) ? post.tags.map(tagLabel).filter(Boolean).join(' · ') : '';
     const tagsMarkup = tags ? `<div class="report-tags">${esc(tags)}</div>` : '';
     const date = post.reportDate || post.date || '';
-    const label = copy?.categories?.[post.type]?.label || (lang === 'en' ? 'Report' : '리포트');
-    return `<a class="report-item" href="${esc(rootPath(post.href))}">
-      <div><span class="report-type ${esc(post.type)}">${esc(label)}</span><span class="report-date">${esc(date)} · ${esc(readingTime(post))}</span></div>
-      <div><div class="report-title">${esc(post.title)}</div>${subtitle}${tagsMarkup}</div>
+    const label = idx === 0 
+      ? (lang === 'en' ? 'LATEST' : '최신 리포트')
+      : (copy?.categories?.[post.type]?.label || (lang === 'en' ? 'Report' : '리포트'));
+    const isLatestAttr = idx === 0 ? ' data-latest="true"' : '';
+
+    return `<a class="report-item"${isLatestAttr} href="${esc(rootPath(post.href))}">
+      <div><span class="report-type ${esc(post.type)}">${esc(label)}</span><span class="report-date">${esc(date)}${esc(readingTime(post))}</span></div>
+      <div><div class="report-title">${esc(post.title)}</div>${subtitleMarkup}${tagsMarkup}</div>
       <span class="report-arrow"><span class="report-read-label">${lang === 'en' ? 'Read' : '읽기'}</span><span aria-hidden="true">→</span></span>
     </a>`;
   }).join('');
