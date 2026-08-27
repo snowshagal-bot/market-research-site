@@ -244,8 +244,8 @@ test('the broken foreignObject rasterization path is no longer used', async () =
 test('admin connects generated files to the existing cover preview and publish payload', async () => {
   const [html, admin] = await Promise.all([read('admin/index.html'), read('assets/admin.js')]);
   assert.match(html, /id="generate-cover-btn"[^>]*disabled>HTML에서 커버 자동 생성/);
-  assert.match(html, /cover-generator\.js\?v=20260825-1/);
-  assert.match(html, /admin\.js\?v=20260827-2/);
+  assert.match(html, /cover-generator\.js\?v=[a-f0-9]{10}/);
+  assert.match(html, /admin\.js\?v=[a-f0-9]{10}/);
   assert.match(admin, /adminKey: adminKey\.value\.trim\(\)/);
   assert.match(admin, /showCoverPreview\(result\.file, generationReportVersion\)/);
   assert.match(admin, /generationReportVersion !== reportSelectionVersion/);

@@ -36,7 +36,7 @@ test('About page contains editorial introduction, contact, and simplified footer
   assert.match(html, /mailto:contact@snowshagal\.com/);
   assert.match(html, /data-theme-toggle/);
   assert.doesNotMatch(html, /data-menu-toggle/);
-  assert.match(html, /src="\/assets\/site\.js\?v=20260827-5"/);
+  assert.match(html, /src="\/assets\/site\.js\?v=[a-f0-9]{10}"/);
 });
 
 test('English About page contains matching editorial About and Contact sections', async () => {

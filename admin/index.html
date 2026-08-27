@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#f5f0e6">
 <title>Report Admin · Market Research</title>
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="../assets/site.css">
-<link rel="stylesheet" href="../assets/ui-polish.css?v=20260810-2">
+<link rel="stylesheet" href="/assets/site.css?v=1efc69cb5c">
+<link rel="stylesheet" href="/assets/ui-polish.css?v=26a4fe9976">
 <style>
 .admin{padding:54px 0 80px}.admin-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:28px}.admin-head h1{margin:0;font-size:clamp(30px,5vw,52px);line-height:1.08;letter-spacing:-.05em}.admin-head p{margin:10px 0 0;color:var(--text-2);font-size:14px}.admin-note{font-size:11px;color:var(--muted);text-align:right}.admin-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:22px;align-items:start}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}.card h2{font-size:16px;margin:0 0 16px;letter-spacing:-.03em}.drop{display:grid;place-items:center;min-height:220px;border:1px dashed color-mix(in srgb,var(--line) 75%,var(--text));border-radius:14px;background:color-mix(in srgb,var(--panel-2) 42%,transparent);text-align:center;padding:24px;cursor:pointer;transition:border-color .15s ease,background .15s ease}.drop.drag{border-color:var(--green);background:var(--green-soft)}.drop strong{display:block;font-size:17px;margin-bottom:6px}.drop span{display:block;color:var(--muted);font-size:12px}.drop input{display:none}.file-info{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--text-2);display:none}.file-info.on{display:block}.file-info b{color:var(--text)}.form{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:11px;font-weight:850;color:var(--text-2)}.field small{font-size:10px;color:var(--muted)}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);padding:10px 12px;outline:none}.field textarea{min-height:88px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green)}.field input[readonly]{color:var(--muted)}.actions{display:grid;grid-template-columns:1fr auto;align-items:end;gap:12px;border-top:1px solid var(--line);margin-top:18px;padding-top:18px}.status{font-size:11px;color:var(--muted);min-height:18px}.status.error{color:var(--brown)}.auth{display:grid;gap:6px}.auth label{font-size:11px;font-weight:850;color:var(--text-2)}.auth input{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);padding:10px 12px;outline:none}.auth input[aria-invalid="true"]{border-color:var(--brown);box-shadow:0 0 0 2px color-mix(in srgb,var(--brown) 18%,transparent)}.btn{border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:999px;padding:11px 18px;font-weight:850;font-size:12px;cursor:pointer;min-width:110px}.btn.primary{background:var(--text);color:var(--bg);border-color:var(--text)}.btn:disabled{opacity:.38;cursor:not-allowed}.preview-card{grid-column:1/-1}.preview-wrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;min-height:400px}.preview-wrap iframe{display:block;width:100%;height:70vh;min-height:520px;border:0}.preview-empty{height:400px;display:grid;place-items:center;color:var(--muted);font-size:13px}.toplink{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:var(--text-2)}.toplink:hover{color:var(--text)}.date-note{grid-column:1/-1;padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--green-soft) 55%,transparent);font-size:11px;color:var(--text-2)}
 .admin-nav{display:flex;gap:8px;margin:-6px 0 22px}.admin-nav a{display:inline-flex;align-items:center;min-height:40px;padding:0 16px;border:1px solid var(--line);border-radius:999px;color:var(--text-2);font-size:12px;font-weight:850}.admin-nav a[aria-current="page"]{background:var(--text);border-color:var(--text);color:var(--bg)}
@@ -54,11 +54,11 @@
 <div class="publish-overlay" id="publish-overlay" role="status" aria-live="polite" aria-modal="true">
   <div class="publish-box"><div class="publish-spinner" aria-hidden="true"></div><h2 id="publish-state-title">게시 처리 중</h2><p id="publish-state-text">리포트를 GitHub에 저장하고 있습니다.</p><p class="publish-detail" id="publish-state-detail"></p><div class="publish-error-actions" id="publish-error-actions" hidden><button class="btn primary" id="publish-error-close" type="button">확인</button></div><div class="publish-links" id="publish-links" hidden><a id="published-report-link" href="#" target="_blank" rel="noopener">게시된 리포트 열기</a><a class="primary" id="published-home-link" href="../">홈페이지로 이동</a></div></div>
 </div>
-<script src="../data/tags.js?v=20260826-1"></script>
-<script src="../data/posts.js?v=20260824-1"></script>
-<script src="../assets/locale.js?v=20260827-2"></script>
-<script src="../assets/cover-generator.js?v=20260825-1"></script>
-<script src="../assets/share-card.js?v=20260827-1"></script>
-<script src="../assets/admin.js?v=20260827-2"></script>
+<script src="/data/tags.js?v=636e50700f"></script>
+<script src="/data/posts.js"></script>
+<script src="/assets/locale.js?v=c9e75896a6"></script>
+<script src="/assets/cover-generator.js?v=b50ab86361"></script>
+<script src="/assets/share-card.js?v=3f0995dbae"></script>
+<script src="/assets/admin.js?v=136444dc1f"></script>
 </body>
 </html>

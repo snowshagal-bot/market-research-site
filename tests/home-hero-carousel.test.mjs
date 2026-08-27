@@ -46,6 +46,7 @@ function element(id = '') {
     appendChild() {},
     querySelector(sel) {
       if (sel === '#archive-more') return element('archive-more');
+      if (sel === '.hero-carousel-controls') return element('hero-carousel-controls');
       return element();
     },
     querySelectorAll() { return []; },
@@ -68,6 +69,7 @@ async function loadSiteScriptContext(initialPosts = [], currentLocale = 'ko') {
   const elements = Object.fromEntries(ids.map((id) => [id, element(id)]));
   elements['hero-slide-1'].classList.add('active');
   const heroSection = element('brand-hero');
+  const controlsEl = element('hero-carousel-controls');
   const context = {
     console,
     URLSearchParams,
@@ -82,6 +84,7 @@ async function loadSiteScriptContext(initialPosts = [], currentLocale = 'ko') {
       getElementById: (id) => elements[id] || element(id),
       querySelector: (sel) => {
         if (sel === '.brand-hero') return heroSection;
+        if (sel === '.hero-carousel-controls') return controlsEl;
         if (sel === '.today-strip') return element('today-strip');
         if (sel === '.today-takeaway-row') return element('today-takeaway-row');
         if (sel === '#report-list') return elements['report-list'];
@@ -116,71 +119,81 @@ async function loadSiteScriptContext(initialPosts = [], currentLocale = 'ko') {
   };
   vm.createContext(context);
   vm.runInContext(source, context);
-  return { context, elements, heroSection };
+  return { context, elements, heroSection, controlsEl };
 }
 
 // -------------------------------------------------------------
 // TESTS
 // -------------------------------------------------------------
 
-test('TASK B: KO homepage picks latest KO Daily and binds fields properly', async () => {
+test('Slide 02 Featured Research: KO homepage picks latest KO Research even if newer Daily exists', async () => {
   const samplePosts = [
-    { id: '2026-08-27-research', type: 'research', lang: 'ko', title: '연구글', reportDate: '2026-08-27', href: 'reports/res.html' },
-    { id: '2026-08-27-daily-en', type: 'daily', lang: 'en', title: 'EN Daily', reportDate: '2026-08-27', href: 'reports/en-daily.html' },
-    { id: '2026-08-27-daily-ko', type: 'daily', lang: 'ko', title: 'KO 데일리 8/27', reportDate: '2026-08-27', takeaway: '7,000의 문턱', readingMinutes: 8, coverImage: 'covers/2026-08-27.jpg', href: 'reports/ko-daily-827.html' },
-    { id: '2026-08-26-daily-ko', type: 'daily', lang: 'ko', title: 'KO 데일리 8/26', reportDate: '2026-08-26', summary: '이전 글', href: 'reports/ko-daily-826.html' }
+    { id: '2026-08-28-daily-ko', type: 'daily', lang: 'ko', title: '더 최신 KO 데일리', reportDate: '2026-08-28', takeaway: '데일리 요약', readingMinutes: 5, href: 'reports/ko-daily-828.html' },
+    { id: '2026-08-27-research-ko', type: 'research', lang: 'ko', title: '한국 밸류업 프로그램 분석', reportDate: '2026-08-27', summary: '밸류업의 핵심 정책과 수혜 업종 분석', readingMinutes: 14, coverImage: 'covers/valueup.jpg', href: 'reports/valueup.html' },
+    { id: '2026-08-20-research-ko', type: 'research', lang: 'ko', title: '이전 리서치', reportDate: '2026-08-20', summary: '이전 글', href: 'reports/prev-res.html' }
   ];
 
   const { elements } = await loadSiteScriptContext(samplePosts, 'ko');
 
   assert.equal(elements['hero-featured-date'].textContent, '2026-08-27');
-  assert.equal(elements['hero-featured-title-link'].textContent, 'KO 데일리 8/27');
-  assert.equal(elements['hero-featured-title-link'].href, '/reports/ko-daily-827.html');
-  assert.equal(elements['hero-featured-snippet'].textContent, '7,000의 문턱');
-  assert.equal(elements['hero-featured-reading'].textContent, '약 8분');
-  assert.equal(elements['hero-featured-action-btn'].href, '/reports/ko-daily-827.html');
-  assert.equal(elements['hero-featured-img'].src, '/covers/2026-08-27.jpg');
+  assert.equal(elements['hero-featured-title-link'].textContent, '한국 밸류업 프로그램 분석');
+  assert.equal(elements['hero-featured-title-link'].href, '/reports/valueup.html');
+  assert.equal(elements['hero-featured-snippet'].textContent, '밸류업의 핵심 정책과 수혜 업종 분석');
+  assert.equal(elements['hero-featured-reading'].textContent, '약 14분');
+  assert.equal(elements['hero-featured-action-btn'].href, '/reports/valueup.html');
+  assert.equal(elements['hero-featured-img'].src, '/covers/valueup.jpg');
 });
 
-test('TASK B: EN homepage picks latest EN Daily without mixed locale', async () => {
+test('Slide 02 Featured Research: EN homepage picks latest EN Research without mixed locale', async () => {
   const samplePosts = [
-    { id: '2026-08-27-daily-ko', type: 'daily', lang: 'ko', title: 'KO 데일리 8/27', reportDate: '2026-08-27', href: 'reports/ko-daily-827.html' },
-    { id: '2026-08-27-daily-en', type: 'daily', lang: 'en', title: 'Nearly Reached It', reportDate: '2026-08-27', takeaway: 'Market closed lower', readingMinutes: 12, coverImage: 'covers/en-827.jpg', href: 'reports/en-daily-827.html' }
+    { id: '2026-08-27-research-ko', type: 'research', lang: 'ko', title: 'KO 리서치', reportDate: '2026-08-27', href: 'reports/ko-res.html' },
+    { id: '2026-08-26-research-en', type: 'research', lang: 'en', title: 'Semiconductor Cycle Deep Dive', reportDate: '2026-08-26', summary: 'Analyzing the next memory cycle.', readingMinutes: 18, coverImage: 'covers/semi.jpg', href: 'reports/semi-en.html' }
   ];
 
   const { elements } = await loadSiteScriptContext(samplePosts, 'en');
 
-  assert.equal(elements['hero-featured-title-link'].textContent, 'Nearly Reached It');
-  assert.equal(elements['hero-featured-reading'].textContent, '12 min read');
-  assert.equal(elements['hero-featured-snippet'].textContent, 'Market closed lower');
-  assert.equal(elements['hero-featured-action-btn'].href, '/reports/en-daily-827.html');
+  assert.equal(elements['hero-featured-title-link'].textContent, 'Semiconductor Cycle Deep Dive');
+  assert.equal(elements['hero-featured-reading'].textContent, '18 min read');
+  assert.equal(elements['hero-featured-snippet'].textContent, 'Analyzing the next memory cycle.');
+  assert.equal(elements['hero-featured-action-btn'].href, '/reports/semi-en.html');
+  assert.equal(elements['hero-featured-img'].src, '/covers/semi.jpg');
 });
 
-test('TASK B: Copy fallback priority: takeaway -> summary -> subtitle -> description', async () => {
+test('Slide 02 Featured Research: Copy fallback priority: summary -> subtitle -> description', async () => {
   const postWithSummary = [
-    { id: '1', type: 'daily', lang: 'ko', title: '글 1', reportDate: '2026-08-27', summary: '요약문', subtitle: '부제', description: '설명', href: 'reports/1.html' }
+    { id: '1', type: 'research', lang: 'ko', title: '글 1', reportDate: '2026-08-27', takeaway: '데일리용', summary: '리서치 요약문', subtitle: '부제', description: '설명', href: 'reports/1.html' }
   ];
   const { elements: el1 } = await loadSiteScriptContext(postWithSummary, 'ko');
-  assert.equal(el1['hero-featured-snippet'].textContent, '요약문');
+  assert.equal(el1['hero-featured-snippet'].textContent, '리서치 요약문');
 
   const postWithSubtitle = [
-    { id: '2', type: 'daily', lang: 'ko', title: '글 2', reportDate: '2026-08-27', subtitle: '부제문구', description: '설명문구', href: 'reports/2.html' }
+    { id: '2', type: 'research', lang: 'ko', title: '글 2', reportDate: '2026-08-27', subtitle: '부제문구', description: '설명문구', href: 'reports/2.html' }
   ];
   const { elements: el2 } = await loadSiteScriptContext(postWithSubtitle, 'ko');
   assert.equal(el2['hero-featured-snippet'].textContent, '부제문구');
 });
 
-test('TASK B: Fallback cover image when coverImage is missing', async () => {
+test('Slide 02 Featured Research: Fallback when 0 research posts exist (hide slide 2 and controls)', async () => {
+  const postsNoResearch = [
+    { id: '1', type: 'daily', lang: 'ko', title: '데일리만 있음', reportDate: '2026-08-27', href: 'reports/1.html' }
+  ];
+  const { elements, controlsEl } = await loadSiteScriptContext(postsNoResearch, 'ko');
+
+  assert.equal(elements['hero-slide-2'].hidden, true);
+  assert.equal(controlsEl.hidden, true);
+});
+
+test('Slide 02 Featured Research: Fallback cover image when coverImage is missing', async () => {
   const postWithoutCover = [
-    { id: '1', type: 'daily', lang: 'ko', title: '커버없는 글', reportDate: '2026-08-27', href: 'reports/1.html' }
+    { id: '1', type: 'research', lang: 'ko', title: '커버없는 리서치', reportDate: '2026-08-27', href: 'reports/1.html' }
   ];
   const { elements } = await loadSiteScriptContext(postWithoutCover, 'ko');
   assert.equal(elements['hero-featured-img'].src, '/assets/social/snowshagal-home.jpg');
 });
 
-test('TASK B: Manual carousel navigation (click, keyboard, swipe, no autoplay)', async () => {
+test('Slide 02 Featured Research: Manual carousel navigation (click, keyboard, swipe, no autoplay)', async () => {
   const samplePosts = [
-    { id: '1', type: 'daily', lang: 'ko', title: '데일리', reportDate: '2026-08-27', href: 'reports/1.html' }
+    { id: '1', type: 'research', lang: 'ko', title: '리서치 글', reportDate: '2026-08-27', href: 'reports/1.html' }
   ];
   const { context, elements, heroSection } = await loadSiteScriptContext(samplePosts, 'ko');
   const controller = context.window.__heroCarouselTest;

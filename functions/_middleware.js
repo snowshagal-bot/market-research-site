@@ -54,7 +54,7 @@ export async function onRequest(context) {
   const contentType = response.headers.get('content-type') || '';
   if (!contentType.includes('text/html')) return response;
   const engagement = isProduction && !/^\/(?:admin|api|cdn-cgi)(?:\/|$)/i.test(url.pathname)
-    ? '<script src="/assets/engagement.js?v=20260826-1" defer></script>'
+    ? '<script src="/assets/engagement.js?v=4fd1735fcd" defer></script>'
     : '';
 
   if (!url.pathname.startsWith('/reports/')) {
@@ -156,7 +156,7 @@ export async function onRequest(context) {
 
   // Built after the post data is read so the shell knows whether 끄적끄적 has
   // anything in it, and the fixed report nav matches the homepage.
-  const shell = `<script src="/assets/locale.js?v=20260827-2"></script><script src="/assets/report-shell.js?v=20260827-4" data-category="${active}" data-lang="${lang}" data-notes="${hasNotes ? '1' : '0'}"></script>${engagement}`;
+  const shell = `<script src="/assets/locale.js?v=c9e75896a6"></script><script src="/assets/report-shell.js?v=53b59fd4af" data-category="${active}" data-lang="${lang}" data-notes="${hasNotes ? '1' : '0'}"></script>${engagement}`;
 
   return new HTMLRewriter()
     .on('title', { element(element) { if (seo) element.remove(); } })
