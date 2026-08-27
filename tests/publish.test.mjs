@@ -50,7 +50,110 @@ function githubMock(existingPosts = [], { searchIndex = null, searchIndexFail = 
   return calls;
 }
 
-function publishRequest({ type = 'daily', cover = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, takeaway, tags = null } = {}, url = 'https://snowshagal.com/api/publish') {
+function atomicGithubMock({
+  existingPosts = [],
+  advancedPosts = [],
+  advancedSha = 'advanced-sha',
+  advanceAfterSnapshot = false,
+  concurrentInitialRefs = 0
+} = {}) {
+  const calls = [];
+  const commits = new Map();
+  const trees = new Map();
+  const defaultIndex = existingPosts.map(post => ({
+    id: post.id,
+    lang: post.lang || 'ko',
+    category: post.type || 'daily',
+    title: post.title || 'Title',
+    date: post.reportDate || post.date || '2026-08-10',
+    tags: post.tags || []
+  }));
+  let branchSha = 'base-sha';
+  let contentReads = 0;
+  let treeCounter = 0;
+  let commitCounter = 0;
+  let blobCounter = 0;
+  let initialRefReads = 0;
+  let releaseInitialRefs;
+  const initialRefGate = concurrentInitialRefs > 0
+    ? new Promise(resolve => { releaseInitialRefs = resolve; })
+    : null;
+
+  globalThis.fetch = async (input, options = {}) => {
+    const url = new URL(String(input));
+    const path = `${url.pathname}${url.search}`;
+    const method = options.method || 'GET';
+    const body = options.body ? JSON.parse(options.body) : null;
+    calls.push({ path, method, body });
+
+    if (path.endsWith('/git/ref/heads/main')) {
+      if (concurrentInitialRefs > 0 && contentReads === 0 && initialRefReads < concurrentInitialRefs) {
+        initialRefReads += 1;
+        if (initialRefReads === concurrentInitialRefs) releaseInitialRefs();
+        await initialRefGate;
+        return Response.json({ object: { sha: 'base-sha' } });
+      }
+      if (advanceAfterSnapshot && contentReads >= 2 && branchSha === 'base-sha') branchSha = advancedSha;
+      return Response.json({ object: { sha: branchSha } });
+    }
+
+    if (path.includes('/contents/data/posts.json')) {
+      contentReads += 1;
+      const ref = url.searchParams.get('ref');
+      const posts = ref === advancedSha ? advancedPosts : existingPosts;
+      return Response.json({ content: base64(`${JSON.stringify(posts)}\n`) });
+    }
+    if (path.includes('/contents/data/search-index.json')) {
+      contentReads += 1;
+      return Response.json({ content: base64(`${JSON.stringify(defaultIndex)}\n`) });
+    }
+    if (method === 'GET' && path.includes('/git/commits/')) {
+      const sha = path.split('/').pop();
+      if (sha === 'base-sha') return Response.json({ tree: { sha: 'base-tree' } });
+      if (sha === advancedSha) return Response.json({ tree: { sha: 'advanced-tree' } });
+      throw new Error(`Unexpected commit read: ${path}`);
+    }
+    if (method === 'POST' && path.endsWith('/git/blobs')) {
+      blobCounter += 1;
+      return Response.json({ sha: `blob-${blobCounter}` });
+    }
+    if (method === 'POST' && path.endsWith('/git/trees')) {
+      treeCounter += 1;
+      const sha = `tree-${treeCounter}`;
+      trees.set(sha, body);
+      return Response.json({ sha });
+    }
+    if (method === 'POST' && path.endsWith('/git/commits')) {
+      commitCounter += 1;
+      const sha = `commit-${commitCounter}`;
+      commits.set(sha, body);
+      return Response.json({ sha });
+    }
+    if (method === 'PATCH' && path.endsWith('/git/refs/heads/main')) {
+      const candidate = commits.get(body.sha);
+      if (!candidate || candidate.parents[0] !== branchSha) {
+        return Response.json({ message: 'Update is not a fast forward' }, { status: 422 });
+      }
+      branchSha = body.sha;
+      return Response.json({ object: { sha: branchSha } });
+    }
+    throw new Error(`Unexpected GitHub request: ${path}`);
+  };
+
+  return {
+    calls,
+    commits,
+    trees,
+    advancedPosts,
+    get branchSha() { return branchSha; },
+    branchTree() {
+      const commit = commits.get(branchSha);
+      return commit ? trees.get(commit.tree) : null;
+    }
+  };
+}
+
+function publishRequest({ type = 'daily', cover = null, shareCard = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, takeaway, tags = null } = {}, url = 'https://snowshagal.com/api/publish') {
   const form = new FormData();
   form.append('file', new File(['<!doctype html><html><body>report content with some words</body></html>'], 'report.html', { type: 'text/html' }));
   form.append('type', type);
@@ -68,6 +171,7 @@ function publishRequest({ type = 'daily', cover = null, lang = 'ko', translation
   form.append('lang', lang);
   if (translationGroup) form.append('translationGroup', translationGroup);
   if (cover) form.append('cover', cover, cover.name);
+  if (shareCard) form.append('shareCard', shareCard, shareCard.name);
   return new Request(url, {
     method: 'POST',
     headers: { 'x-admin-key': ADMIN_KEY },
@@ -79,6 +183,161 @@ async function runPublish(options = {}) {
   const response = await onRequestPost({ request: publishRequest(options), env: { GITHUB_TOKEN: 'token', ADMIN_KEY } });
   return { response, data: await response.json() };
 }
+
+function repositoryReadRefs(calls) {
+  return calls
+    .filter(call => call.path.includes('/contents/data/posts.json') || call.path.includes('/contents/data/search-index.json'))
+    .map(call => new URL(`https://api.github.test${call.path}`).searchParams.get('ref'));
+}
+
+test('atomic snapshot rejects an intervening publish and preserves its metadata', async () => {
+  const interveningPost = {
+    id: 'intervening-post',
+    type: 'daily',
+    lang: 'ko',
+    reportDate: '2026-08-11',
+    title: '먼저 게시된 리포트',
+    href: 'reports/intervening.html'
+  };
+  const github = atomicGithubMock({
+    advanceAfterSnapshot: true,
+    advancedSha: 'intervening-publish-sha',
+    advancedPosts: [interveningPost]
+  });
+  try {
+    const { response, data } = await runPublish();
+    assert.equal(response.status, 409);
+    assert.equal(data.error, 'REPOSITORY_CHANGED');
+    assert.equal(data.message, '저장소가 변경되었습니다. 새로고침 후 다시 게시하세요.');
+    assert.deepEqual(repositoryReadRefs(github.calls), ['base-sha', 'base-sha']);
+    assert.equal(github.branchSha, 'intervening-publish-sha');
+    assert.deepEqual(github.advancedPosts, [interveningPost]);
+    assert.equal(github.calls.some(call => call.method === 'PATCH'), false);
+    const commit = [...github.commits.values()][0];
+    assert.deepEqual(commit.parents, ['base-sha']);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('atomic snapshot rejects an unrelated PR advance and leaves the PR tree untouched', async () => {
+  const github = atomicGithubMock({
+    advanceAfterSnapshot: true,
+    advancedSha: 'unrelated-pr-sha'
+  });
+  try {
+    const { response, data } = await runPublish({ type: 'weekly' });
+    assert.equal(response.status, 409);
+    assert.equal(data.error, 'REPOSITORY_CHANGED');
+    assert.deepEqual(repositoryReadRefs(github.calls), ['base-sha', 'base-sha']);
+    assert.equal(github.branchSha, 'unrelated-pr-sha');
+    assert.equal(github.calls.some(call => call.method === 'PATCH'), false);
+    assert.equal([...github.trees.values()][0].base_tree, 'base-tree');
+    assert.deepEqual([...github.commits.values()][0].parents, ['base-sha']);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('unchanged main publishes every artifact in one exact-SHA commit', async () => {
+  const github = atomicGithubMock();
+  try {
+    const { response, data } = await runPublish();
+    assert.equal(response.status, 200);
+    assert.equal(data.ok, true);
+    assert.deepEqual(repositoryReadRefs(github.calls), ['base-sha', 'base-sha']);
+    const firstRef = github.calls.findIndex(call => call.path.endsWith('/git/ref/heads/main'));
+    const firstContent = github.calls.findIndex(call => call.path.includes('/contents/data/'));
+    assert.ok(firstRef >= 0 && firstRef < firstContent, 'baseSha must be fixed before repository data is read');
+    assert.equal(github.commits.size, 1);
+    assert.equal(github.trees.size, 1);
+    const [commit] = github.commits.values();
+    const [tree] = github.trees.values();
+    assert.deepEqual(commit.parents, ['base-sha']);
+    assert.equal(tree.base_tree, 'base-tree');
+    assert.deepEqual(
+      tree.tree.map(entry => entry.path).sort(),
+      [
+        'data/posts.js',
+        'data/posts.json',
+        'data/search-index-body-en.js',
+        'data/search-index-body-ko.js',
+        'data/search-index-meta.js',
+        'data/search-index.json',
+        'reports/daily-report.html'
+      ].sort()
+    );
+    const patch = github.calls.find(call => call.method === 'PATCH');
+    assert.deepEqual(patch.body, { sha: data.commitSha, force: false });
+    assert.equal(github.branchSha, data.commitSha);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('concurrent publishes allow one winner and return 409 for the loser without metadata loss', async () => {
+  const github = atomicGithubMock({ concurrentInitialRefs: 2 });
+  try {
+    const results = await Promise.all([
+      runPublish({ type: 'daily' }),
+      runPublish({ type: 'weekly' })
+    ]);
+    const success = results.find(result => result.response.status === 200);
+    const conflict = results.find(result => result.response.status === 409);
+    assert.ok(success);
+    assert.ok(conflict);
+    assert.equal(conflict.data.error, 'REPOSITORY_CHANGED');
+    assert.equal(github.branchSha, success.data.commitSha);
+    const winningTree = github.branchTree();
+    assert.ok(winningTree, 'the branch must point at the successful atomic tree');
+    const publishedPosts = JSON.parse(winningTree.tree.find(entry => entry.path === 'data/posts.json').content);
+    assert.equal(publishedPosts.length, 1);
+    assert.equal(publishedPosts[0].id, success.data.id);
+    assert.equal(github.commits.get(github.branchSha).parents[0], 'base-sha');
+    for (const call of github.calls.filter(call => call.method === 'PATCH')) {
+      assert.equal(call.body.force, false);
+    }
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('atomic publish preserves pairing, inherited tags, reading time, cover, and share card behavior', async () => {
+  const pairedPost = {
+    id: 'ko-paired',
+    type: 'daily',
+    lang: 'ko',
+    translationGroup: 'daily-pair',
+    reportDate: '2026-08-10',
+    title: '한국어 원문',
+    tags: ['flows', 'rates'],
+    readingMinutes: 3,
+    href: 'reports/paired.html'
+  };
+  const github = atomicGithubMock({ existingPosts: [pairedPost] });
+  const cover = new File([new Uint8Array([1, 2, 3])], 'cover.webp', { type: 'image/webp' });
+  const shareCard = new File([new Uint8Array([4, 5, 6])], 'share.jpg', { type: 'image/jpeg' });
+  try {
+    const { response, data } = await runPublish({
+      type: 'daily',
+      lang: 'en',
+      translationGroup: 'daily-pair',
+      cover,
+      shareCard
+    });
+    assert.equal(response.status, 200);
+    const tree = github.branchTree().tree;
+    const posts = JSON.parse(tree.find(entry => entry.path === 'data/posts.json').content);
+    const published = posts.find(post => post.id === data.id);
+    assert.equal(published.translationGroup, 'daily-pair');
+    assert.deepEqual(published.tags, ['flows', 'rates']);
+    assert.equal(published.readingMinutes, 3);
+    assert.match(published.coverImage, /^covers\/.+\.webp$/);
+    assert.match(published.shareCardImage, /^covers\/share\/.+\.jpg$/);
+    assert.ok(tree.some(entry => entry.path === published.coverImage));
+    assert.ok(tree.some(entry => entry.path === published.shareCardImage));
+    assert.ok(tree.some(entry => entry.path === 'reports/en/daily-report.html'));
+    const fromJs = JSON.parse(tree.find(entry => entry.path === 'data/posts.js').content.replace(/^window\.RESEARCH_POSTS = /, '').replace(/;\s*$/, ''));
+    assert.deepEqual(fromJs, posts);
+    assert.ok(tree.some(entry => entry.path === 'data/search-index.json'));
+    assert.ok(tree.some(entry => entry.path === 'data/search-index-meta.js'));
+    assert.ok(tree.some(entry => entry.path === 'data/search-index-body-ko.js'));
+    assert.ok(tree.some(entry => entry.path === 'data/search-index-body-en.js'));
+    assert.deepEqual(github.commits.get(github.branchSha).parents, ['base-sha']);
+  } finally { globalThis.fetch = originalFetch; }
+});
 
 test('Preview, former production, and local publish requests are rejected before GitHub access', async () => {
   for (const url of ['https://branch.market-research-site.pages.dev/api/publish', 'https://market-research-site.pages.dev/api/publish', 'http://localhost:8788/api/publish']) {
