@@ -1,5 +1,30 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-27-daily-xslavx",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-27",
+    "reportDate": "2026-08-27",
+    "registeredDate": "2026-08-27",
+    "registeredAt": "2026-08-27T13:14:22.915Z",
+    "legacyImport": false,
+    "title": "The 7,000 Threshold",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "takeaway": "Nearly reached it, but never broke through",
+    "tags": [
+      "rates",
+      "ai",
+      "policy"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-08-27_KOSPI_Daily_Report_EN_polished.html",
+    "translationGroup": "2026-08-27-daily-cpna7g",
+    "coverImage": "covers/2026-08-27-daily-xslavx.webp",
+    "shareCardImage": "covers/share/2026-08-27-daily-xslavx.jpg"
+  },
+  {
     "id": "2026-08-27-daily-cpna7g",
     "type": "daily",
     "typeLabel": "주식 리포트",
