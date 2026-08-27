@@ -31,8 +31,8 @@ test('homepage presents the Snowshagal brand hero before latest reports and arch
   assert.match(englishHtml, /locale\.js\?v=[a-f0-9]{10}/);
   assert.match(html, /site\.js\?v=[a-f0-9]{10}/);
   assert.match(englishHtml, /site\.js\?v=[a-f0-9]{10}/);
-  assert.match(html, /market-summary\.js\?v=[a-f0-9]{10}/);
-  assert.match(englishHtml, /market-summary\.js\?v=[a-f0-9]{10}/);
+  assert.match(html, /src="\/data\/market-summary\.js"/);
+  assert.match(englishHtml, /src="\/data\/market-summary\.js"/);
 });
 
 test('homepage serves a smaller eager hero asset on mobile without changing desktop art', async () => {
@@ -229,9 +229,9 @@ test('homepage post metadata bypasses stale browser caches now and on later publ
     read('admin/index.html'),
     read('_headers')
   ]);
-  assert.match(home, /\/data\/posts\.js\?v=[a-f0-9]{10}/);
-  assert.match(englishHome, /\/data\/posts\.js\?v=[a-f0-9]{10}/);
-  assert.match(admin, /(?:\/|\.\.\/)data\/posts\.js\?v=[a-f0-9]{10}/);
+  assert.match(home, /src="\/data\/posts\.js"/);
+  assert.match(englishHome, /src="\/data\/posts\.js"/);
+  assert.match(admin, /src="\/data\/posts\.js"/);
   assert.match(headers, /\/data\/posts\.js\s+Cache-Control: no-cache, no-store, must-revalidate/);
   assert.match(headers, /\/data\/posts\.json\s+Cache-Control: no-cache, no-store, must-revalidate/);
 });

@@ -144,8 +144,8 @@ test('manage page includes navigation, list controls, immutable metadata, edit f
   assert.match(html, /id="manage-result-overlay"[^>]*role="dialog"[^>]*aria-modal="true"/);
   assert.match(html, /id="manage-result-home"[^>]*href="\/"/);
   assert.match(html, /id="manage-result-continue"/);
-  assert.match(html, /admin-manage\.css\?v=20260824-1/);
-  assert.match(html, /admin-manage\.js\?v=20260827-1/);
+  assert.match(html, /admin-manage\.css\?v=[a-f0-9]{10}/);
+  assert.match(html, /admin-manage\.js\?v=[a-f0-9]{10}/);
 });
 
 test('client list sorting, search, category and language filters, file validation, and Preview safety are deterministic', async () => {

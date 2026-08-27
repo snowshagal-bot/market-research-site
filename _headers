@@ -27,3 +27,6 @@
 
 /data/search-index.json
   Cache-Control: no-cache
+
+/data/market-summary.js
+  Cache-Control: no-cache

@@ -153,8 +153,8 @@
      background, so a body-only match appears a moment later instead of holding
      the whole dialog hostage. A Korean reader never downloads English bodies.
   -------------------------------------------------------------------------- */
-  const SEARCH_META_SRC = '/data/search-index-meta.js?v=20260827-1';
-  const SEARCH_BODY_SRC = `/data/search-index-body-${locale}.js?v=20260827-1`;
+  const SEARCH_META_SRC = '/data/search-index-meta.js';
+  const SEARCH_BODY_SRC = `/data/search-index-body-${locale}.js`;
   let searchMetaState = '';
   let searchBodyState = '';
 

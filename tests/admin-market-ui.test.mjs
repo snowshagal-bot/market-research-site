@@ -9,7 +9,7 @@ test('Market admin exposes file selection, contract status, preview, auth, and p
   for (const id of ['market-json-file', 'market-meta-date', 'market-meta-version', 'market-meta-status', 'market-meta-validation', 'market-admin-key', 'market-publish-button', 'market-preview-root']) assert.match(html, new RegExp(`id="${id}"`));
   assert.match(html, /accept="\.json,application\/json"/);
   assert.match(html, /meta name="robots" content="noindex,nofollow"/);
-  assert.match(html, /src="\.\.\/\.\.\/assets\/admin-market\.js/);
+  assert.match(html, /src="(?:(?:\.\.\/)+|\/)assets\/admin-market\.js/);
 });
 
 test('all admin pages link to the Market Close uploader', async () => {
