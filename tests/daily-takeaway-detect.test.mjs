@@ -346,3 +346,28 @@ test('an over-long line is cut to the stored limit, not sent whole', async () =>
   await app.get('publish-btn').fire('click');
   assert.equal(app.submissions.at(-1).form.get('takeaway').length, 400);
 });
+
+test('the lightweight 8/27 layout is detected through its head tag alone', async () => {
+  const app = harness();
+  // No .cover-hint, no .cover-oneline: exactly the layout that came up empty
+  // before the head tag existed.
+  await app.analyze(`<!doctype html><html lang="ko"><head>
+      <meta charset="utf-8">
+      <meta name="report-type" content="daily">
+      <meta name="report-date" content="2026-08-27">
+      <meta name="report-takeaway" content="지수는 되돌렸지만 거래대금은 따라오지 않았다.">
+      <meta name="description" content="설명이 한 줄을 대신하면 안 된다.">
+      <title>2026.08.27 코스피 데일리 리포트</title>
+    </head><body><section class="cover"><h1>두 개의 와이어</h1></section>
+    <main><p>본문 첫 문장이 한 줄을 대신하면 안 된다.</p></main></body></html>`,
+  '8월 27일 주식리포트_커버통합.html');
+
+  assert.equal(app.get('takeaway-status').hidden, false);
+  assert.equal(app.get('takeaway-status').textContent, 'TODAY 한 줄 자동 감지 · "지수는 되돌렸지만 거래대금은 따라오지 않았다."');
+
+  await app.ready({ title: '두 개의 와이어', filename: '8월 27일 주식리포트_커버통합.html' });
+  await app.get('publish-btn').fire('click');
+  const form = app.submissions.at(-1).form;
+  assert.equal(form.get('type'), 'daily');
+  assert.equal(form.get('takeaway'), '지수는 되돌렸지만 거래대금은 따라오지 않았다.');
+});
