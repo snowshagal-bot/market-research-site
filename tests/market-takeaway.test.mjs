@@ -174,6 +174,11 @@ test('the Market Close admin submits the line with the same market_date', async 
   assert.match(markup, /maxlength="400"/);
   // The form says what an empty language means, so it is a choice not an accident.
   assert.match(markup, /손대지 않은 언어는 그대로 유지되고, 직접 지우고 게시하면 그 언어만 삭제/);
+  // The everyday path is automatic, so the form has to say that this box is
+  // the exception rather than the daily chore.
+  assert.match(markup, /3\. 오늘의 한 줄 · 수동 Override/);
+  assert.match(markup, /일반적으로 같은 날짜의 Daily 리포트에서 자동 연동됩니다/);
+  assert.match(markup, /여기 입력한 문구가 있으면 자동 문구보다 우선합니다/);
 
   // One request carries the numbers and the lines, so they cannot be saved
   // under different dates.
@@ -193,7 +198,7 @@ test('the static file survives only as the emergency fallback', async () => {
   assert.match(summary, /takeaway:/);
 
   // A live session takes its line from the payload, never from the static file.
-  assert.match(site, /return \{ marketDate: publishedDate, items, takeaway: localeTakeaway\(payload\?\.takeaway\), live: true \}/);
+  assert.match(site, /takeaway: override \|\| postTakeaway\(daily\), daily, live: true/);
   // The fallback record is used whole: its date, numbers and line together.
   assert.match(site, /takeaway: localeTakeaway\(summary\?\.takeaway\)/);
   // Locales never substitute for one another.
