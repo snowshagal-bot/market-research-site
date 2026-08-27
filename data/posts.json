@@ -1,5 +1,28 @@
 [
   {
+    "id": "2026-08-27-daily-cpna7g",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-08-27",
+    "reportDate": "2026-08-27",
+    "registeredDate": "2026-08-27",
+    "registeredAt": "2026-08-27T13:10:35.606Z",
+    "legacyImport": false,
+    "title": "7,000의 문턱",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "tags": [
+      "rates",
+      "ai",
+      "policy"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/8월 27일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-08-27-daily-cpna7g.webp",
+    "shareCardImage": "covers/share/2026-08-27-daily-cpna7g.jpg"
+  },
+  {
     "id": "2026-08-26-daily-15udspv",
     "type": "daily",
     "typeLabel": "Daily",
