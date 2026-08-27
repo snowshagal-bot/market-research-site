@@ -431,13 +431,18 @@ html[lang="en"] .hero-copy h1 {
 
 .featured-cover-wrap {
   position: relative;
-  width: min(100%, 360px);
-  aspect-ratio: 16 / 10;
-  max-height: 250px;
+  width: auto;
+  max-width: 220px;
+  max-height: 280px;
+  aspect-ratio: 2 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(20, 35, 55, 0.09);
+  background: var(--panel);
 }
 
 .featured-cover-wrap a {
@@ -449,7 +454,8 @@ html[lang="en"] .hero-copy h1 {
 .featured-cover-wrap img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: var(--panel);
   transition: transform .25s ease;
 }
 
@@ -470,7 +476,7 @@ html[lang="en"] .hero-copy h1 {
   letter-spacing: .08em;
 }
 
-/* Editorial Carousel Controls */
+/* Minimal Editorial Carousel Controls */
 .hero-carousel-controls {
   position: absolute;
   right: 0;
@@ -479,19 +485,17 @@ html[lang="en"] .hero-copy h1 {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  padding: 5px 12px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--panel) 88%, transparent);
-  backdrop-filter: blur(8px);
+  padding: 0;
+  border: none;
+  background: none;
 }
 
 .carousel-counter {
   color: var(--muted);
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  letter-spacing: .12em;
+  letter-spacing: .1em;
 }
 
 .carousel-current {
@@ -501,36 +505,40 @@ html[lang="en"] .hero-copy h1 {
 
 .carousel-sep {
   margin: 0 2px;
-  opacity: .5;
+  color: var(--muted);
+  opacity: .6;
 }
 
 .carousel-arrows {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
 .carousel-btn {
-  display: grid;
-  width: 24px;
-  height: 24px;
-  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
-  border-radius: 50%;
-  background: var(--panel);
-  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 4px;
+  border: none;
+  background: none;
+  color: var(--muted);
   cursor: pointer;
-  place-items: center;
-  transition: all .15s ease;
+  transition: color .15s ease, opacity .15s ease;
 }
 
 .carousel-btn:hover:not(:disabled) {
-  border-color: var(--text);
-  background: var(--text);
-  color: var(--bg);
+  color: var(--text);
+}
+
+.carousel-btn:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .carousel-btn:disabled {
-  opacity: .35;
+  opacity: .25;
   cursor: not-allowed;
 }
 
@@ -1471,13 +1479,15 @@ html[data-theme="dark"] .calendar-preview-link {
     width: 100%;
     height: auto;
     justify-content: flex-start;
-    margin-top: 4px;
+    margin-top: 8px;
   }
 
   .featured-cover-wrap {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    max-height: 180px;
+    width: auto;
+    max-width: 140px;
+    max-height: 200px;
+    aspect-ratio: 2 / 3;
+    box-shadow: 0 6px 20px rgba(20, 35, 55, 0.08);
   }
 
   .hero-carousel-controls {

@@ -231,6 +231,23 @@ test('TASK C: Category Icon scale-up and 44px tap target css rules exist', async
   assert.ok(homeCss.includes('min-height: 44px'));
 });
 
+test('Slide 02: Vertical cover contain and no forced landscape crop', async () => {
+  const homeCss = await read('assets/home-v2.css');
+  assert.ok(homeCss.includes('.featured-cover-wrap img'));
+  assert.ok(homeCss.includes('object-fit: contain'));
+  assert.ok(homeCss.includes('aspect-ratio: 2 / 3'));
+  assert.equal(homeCss.includes('aspect-ratio: 16 / 10'), false);
+  assert.equal(homeCss.includes('aspect-ratio: 16 / 9'), false);
+});
+
+test('Carousel controls: Minimal editorial controls without pill background or circular buttons', async () => {
+  const homeCss = await read('assets/home-v2.css');
+  assert.ok(homeCss.includes('.hero-carousel-controls'));
+  assert.ok(homeCss.includes('.carousel-btn:focus-visible'));
+  assert.equal(homeCss.includes('backdrop-filter: blur'), false);
+  assert.ok(homeCss.includes('background: none;'));
+});
+
 test('TASK D: Report List read label has nowrap and proper grid template', async () => {
   const [siteCss, catCss, homeCss] = await Promise.all([
     read('assets/site.css'),
