@@ -100,16 +100,51 @@ html[data-theme="dark"] {
 }
 
 .brand-hero {
+  position: relative;
   overflow: hidden;
   border-bottom: 1px solid color-mix(in srgb, var(--line) 66%, transparent);
+}
+
+.hero-carousel-wrap {
+  position: relative;
+}
+
+.hero-slides {
+  position: relative;
+  width: 100%;
+}
+
+.hero-slide {
+  display: none;
+  width: 100%;
+}
+
+.hero-slide.active {
+  display: block;
+  animation: heroFade .2s ease-out;
+}
+
+@keyframes heroFade {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide.active {
+    animation: none;
+  }
 }
 
 .hero-shell {
   position: relative;
   display: grid;
-  min-height: 460px;
-  grid-template-columns: minmax(390px, .84fr) minmax(500px, 1.16fr);
+  min-height: 380px;
+  grid-template-columns: minmax(370px, .88fr) minmax(460px, 1.12fr);
   align-items: stretch;
+}
+
+.hero-shell-featured {
+  align-items: center;
 }
 
 .hero-copy {
@@ -119,7 +154,7 @@ html[data-theme="dark"] {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  padding: 38px 0 32px;
+  padding: 24px 0 20px;
 }
 
 .hero-copy h1 {
@@ -127,10 +162,10 @@ html[data-theme="dark"] {
   margin: 0;
   color: var(--text);
   font-family: Georgia, "Noto Serif KR", "Nanum Myeongjo", serif;
-  font-size: clamp(44px, 3.8vw, 56px);
+  font-size: clamp(40px, 3.5vw, 52px);
   font-weight: 500;
-  letter-spacing: -.065em;
-  line-height: 1.2;
+  letter-spacing: -.06em;
+  line-height: 1.18;
   word-break: keep-all;
 }
 
@@ -141,7 +176,7 @@ html[data-theme="dark"] {
 
 html[lang="en"] .hero-copy h1 {
   max-width: 12ch;
-  font-size: clamp(42px, 3.8vw, 58px);
+  font-size: clamp(38px, 3.4vw, 52px);
   letter-spacing: -.045em;
   line-height: 1.08;
 }
@@ -149,9 +184,9 @@ html[lang="en"] .hero-copy h1 {
 .hero-rule {
   position: relative;
   display: block;
-  width: 116px;
+  width: 100px;
   height: 1px;
-  margin: 18px 0 16px;
+  margin: 12px 0 10px;
   background: color-mix(in srgb, var(--navy) 72%, transparent);
 }
 
@@ -169,8 +204,8 @@ html[lang="en"] .hero-copy h1 {
 .hero-description {
   margin: 0;
   color: var(--text-2);
-  font-size: 15px;
-  line-height: 1.7;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 .hero-description span {
@@ -179,14 +214,16 @@ html[lang="en"] .hero-copy h1 {
 
 .hero-entries {
   display: flex;
-  gap: clamp(22px, 3.5vw, 44px);
-  margin-top: 24px;
+  gap: clamp(18px, 2.6vw, 38px);
+  margin-top: 18px;
 }
 
 .hero-entries a {
   display: inline-grid;
-  min-width: 92px;
-  grid-template-columns: 27px auto;
+  min-width: 96px;
+  min-height: 44px;
+  padding: 2px 4px;
+  grid-template-columns: 32px auto;
   gap: 10px;
   align-items: center;
   color: var(--navy);
@@ -197,28 +234,31 @@ html[lang="en"] .hero-copy h1 {
 }
 
 .hero-entries strong {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 900;
-  letter-spacing: .11em;
+  letter-spacing: .12em;
 }
 
 .hero-entries small {
   margin-top: 3px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 9.5px;
   white-space: nowrap;
 }
 
+/* Scaled Icons (TASK C) */
 .entry-symbol {
   position: relative;
   display: block;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   color: currentColor;
 }
 
 .entry-daily {
-  border: 1.5px solid currentColor;
+  width: 26px;
+  height: 24px;
+  border: 1.8px solid currentColor;
   border-radius: 4px;
 }
 
@@ -226,22 +266,22 @@ html[lang="en"] .hero-copy h1 {
 .entry-daily::after {
   position: absolute;
   top: -4px;
-  width: 1.5px;
+  width: 1.8px;
   height: 7px;
   background: currentColor;
   content: "";
 }
 
-.entry-daily::before { left: 6px; }
-.entry-daily::after { right: 6px; }
+.entry-daily::before { left: 5px; }
+.entry-daily::after { right: 5px; }
 
 .entry-weekly::before,
 .entry-weekly::after {
   position: absolute;
   top: 2px;
   bottom: 2px;
-  width: 12px;
-  border: 1.5px solid currentColor;
+  width: 13px;
+  border: 1.8px solid currentColor;
   content: "";
 }
 
@@ -257,11 +297,11 @@ html[lang="en"] .hero-copy h1 {
 
 .entry-research::before {
   position: absolute;
-  top: 0;
+  top: 1px;
   left: 4px;
-  width: 14px;
-  height: 16px;
-  border: 1.5px solid currentColor;
+  width: 16px;
+  height: 18px;
+  border: 1.8px solid currentColor;
   border-radius: 50% 50% 45% 45%;
   content: "";
 }
@@ -270,16 +310,228 @@ html[lang="en"] .hero-copy h1 {
   position: absolute;
   bottom: 1px;
   left: 9px;
-  width: 6px;
+  width: 7px;
   height: 4px;
-  border-top: 1.5px solid currentColor;
-  border-bottom: 1.5px solid currentColor;
+  border-top: 1.8px solid currentColor;
+  border-bottom: 1.8px solid currentColor;
   content: "";
 }
 
 .hero-entries a:hover strong,
 .hero-entries a:hover small {
   color: var(--text);
+}
+
+/* Slide 02 Featured Daily Layout */
+.featured-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 0 20px;
+}
+
+.featured-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.featured-badge {
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--green-soft) 80%, transparent);
+  color: var(--green);
+  font-weight: 850;
+}
+
+.featured-dot {
+  color: var(--line);
+}
+
+.featured-date {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.featured-reading {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.featured-title {
+  margin: 0 0 10px;
+  font-family: Georgia, "Noto Serif KR", "Nanum Myeongjo", serif;
+  font-size: clamp(28px, 2.6vw, 36px);
+  font-weight: 500;
+  letter-spacing: -.045em;
+  line-height: 1.25;
+  word-break: keep-all;
+}
+
+.featured-title a {
+  color: var(--text);
+  transition: color .18s ease;
+}
+
+.featured-title a:hover {
+  color: var(--green);
+}
+
+.featured-snippet {
+  max-width: 48ch;
+  margin: 0 0 16px;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.featured-action {
+  display: flex;
+  align-items: center;
+}
+
+.featured-action .btn-editorial {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 3px;
+  border-bottom: 1.5px solid var(--text);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  transition: color .18s ease, border-color .18s ease;
+}
+
+.featured-action .btn-editorial:hover {
+  color: var(--green);
+  border-color: var(--green);
+}
+
+.featured-art {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.featured-cover-wrap {
+  position: relative;
+  width: min(100%, 360px);
+  aspect-ratio: 16 / 10;
+  max-height: 250px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.featured-cover-wrap a {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.featured-cover-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .25s ease;
+}
+
+.featured-cover-wrap:hover img {
+  transform: scale(1.02);
+}
+
+.featured-cover-fallback {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--panel-2) 60%, transparent);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+/* Editorial Carousel Controls */
+.hero-carousel-controls {
+  position: absolute;
+  right: 0;
+  bottom: 16px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.carousel-counter {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .12em;
+}
+
+.carousel-current {
+  color: var(--text);
+  font-weight: 900;
+}
+
+.carousel-sep {
+  margin: 0 2px;
+  opacity: .5;
+}
+
+.carousel-arrows {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.carousel-btn {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+  place-items: center;
+  transition: all .15s ease;
+}
+
+.carousel-btn:hover:not(:disabled) {
+  border-color: var(--text);
+  background: var(--text);
+  color: var(--bg);
+}
+
+.carousel-btn:disabled {
+  opacity: .35;
+  cursor: not-allowed;
 }
 
 .hero-art {
@@ -839,11 +1091,17 @@ html[data-theme="dark"] .archive-eyebrow {
 .archive-layout .report-arrow {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   justify-self: end;
   color: var(--muted);
   font-size: 11px;
   font-weight: 800;
   white-space: nowrap;
+}
+
+.report-read-label {
+  white-space: nowrap;
+  word-break: keep-all;
 }
 
 /* Calendar View */
@@ -1098,16 +1356,16 @@ html[data-theme="dark"] .calendar-preview-link {
 
 @media (max-width: 1040px) {
   .hero-shell {
-    min-height: 610px;
-    grid-template-columns: minmax(350px, .9fr) minmax(440px, 1.1fr);
+    min-height: 380px;
+    grid-template-columns: minmax(340px, .92fr) minmax(400px, 1.08fr);
   }
 
   .hero-art {
-    right: -140px;
-    width: 880px;
+    right: -80px;
+    width: 720px;
   }
 
-  .hero-entries { gap: 24px; }
+  .hero-entries { gap: 20px; }
 }
 
 @media (max-width: 960px) {
@@ -1144,36 +1402,88 @@ html[data-theme="dark"] .calendar-preview-link {
 
   .hero-copy {
     min-height: 0;
-    padding: 20px 0 4px;
+    padding: 16px 0 4px;
   }
 
   .hero-copy h1 {
     max-width: none;
-    font-size: clamp(27px, 8.2vw, 36px);
-    line-height: 1.2;
+    font-size: clamp(26px, 8vw, 34px);
+    line-height: 1.18;
   }
 
   html[lang="en"] .hero-copy h1 {
     max-width: 11ch;
-    font-size: clamp(31px, 9vw, 40px);
+    font-size: clamp(28px, 8.5vw, 36px);
     line-height: 1.06;
   }
 
-  .hero-rule { width: 72px; margin: 10px 0 9px; }
-  .hero-description { font-size: 12.5px; line-height: 1.55; }
+  .hero-rule { width: 68px; margin: 8px 0 8px; }
+  .hero-description { font-size: 12.5px; line-height: 1.5; }
   .hero-description span { display: inline; }
 
   .hero-entries {
-    display: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    margin-top: 14px;
+  }
+
+  .hero-entries a {
+    min-height: 44px;
+    min-width: 88px;
+    grid-template-columns: 28px auto;
+    gap: 8px;
+    padding: 2px 4px;
+  }
+
+  .entry-symbol {
+    width: 26px;
+    height: 26px;
   }
 
   .hero-art {
     position: relative;
     right: auto;
     width: calc(100% + 28px);
-    height: clamp(155px, 42vw, 175px);
-    margin: 0 -14px;
+    height: clamp(120px, 32vw, 150px);
+    margin: 4px -14px 0;
     border-radius: 0 0 18px 18px;
+  }
+
+  /* Slide 02 Featured Daily Mobile */
+  .featured-copy {
+    padding: 16px 0 10px;
+  }
+
+  .featured-title {
+    font-size: clamp(22px, 6vw, 28px);
+    line-height: 1.25;
+    margin: 0 0 8px;
+  }
+
+  .featured-snippet {
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0 0 12px;
+  }
+
+  .featured-art {
+    width: 100%;
+    height: auto;
+    justify-content: flex-start;
+    margin-top: 4px;
+  }
+
+  .featured-cover-wrap {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    max-height: 180px;
+  }
+
+  .hero-carousel-controls {
+    position: static;
+    margin: 12px 0 4px;
+    align-self: flex-start;
   }
 
   .hero-art::after {

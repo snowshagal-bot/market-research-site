@@ -1098,7 +1098,128 @@
     });
   }
 
+  /* Hero Carousel -----------------------------------------------------------
+     Two-slide manual editorial carousel on the homepage:
+     - Slide 01: Brand Hero (static SSR copy & entries)
+     - Slide 02: Latest Daily report (dynamically bound from locale posts)
+     Manual controls only (no automatic timers). Supports click, keyboard, and touch swipe.
+  -------------------------------------------------------------------------- */
+  function initHeroCarousel() {
+    const heroSection = document.querySelector('.brand-hero');
+    const slide1 = document.getElementById('hero-slide-1');
+    const slide2 = document.getElementById('hero-slide-2');
+    const prevBtn = document.getElementById('hero-carousel-prev');
+    const nextBtn = document.getElementById('hero-carousel-next');
+    const counterCurrent = document.getElementById('carousel-current');
+    if (!heroSection || !slide1 || !slide2) return null;
+
+    // Find the latest daily for this locale
+    const latestDaily = posts.find(p => p.type === 'daily');
+
+    if (latestDaily) {
+      const dateEl = document.getElementById('hero-featured-date');
+      const readingEl = document.getElementById('hero-featured-reading');
+      const titleLink = document.getElementById('hero-featured-title-link');
+      const snippetEl = document.getElementById('hero-featured-snippet');
+      const actionBtn = document.getElementById('hero-featured-action-btn');
+      const imgLink = document.getElementById('hero-featured-img-link');
+      const imgEl = document.getElementById('hero-featured-img');
+
+      const href = rootPath(latestDaily.href);
+      const dateStr = reportDate(latestDaily);
+      const readingStr = formatReadingTime(latestDaily.readingMinutes, locale);
+      const copySnippet = String(latestDaily.takeaway || latestDaily.summary || latestDaily.subtitle || latestDaily.description || '').trim();
+
+      if (dateEl) dateEl.textContent = dateStr || '—';
+      if (readingEl) {
+        if (readingStr) {
+          readingEl.textContent = readingStr;
+          readingEl.hidden = false;
+        } else {
+          readingEl.hidden = true;
+        }
+      }
+      if (titleLink) {
+        titleLink.textContent = latestDaily.title || '';
+        titleLink.href = href;
+      }
+      if (snippetEl) snippetEl.textContent = copySnippet;
+      if (actionBtn) actionBtn.href = href;
+      if (imgLink) imgLink.href = href;
+      if (imgEl) {
+        imgEl.src = latestDaily.coverImage ? rootPath(latestDaily.coverImage) : '/assets/social/snowshagal-home.jpg';
+        imgEl.alt = latestDaily.title || '';
+      }
+    } else {
+      // If there are no daily posts at all, hide slide 2 and controls
+      const controls = document.querySelector('.hero-carousel-controls');
+      if (controls) controls.hidden = true;
+      slide2.hidden = true;
+    }
+
+    let activeIndex = 0;
+
+    function goTo(index) {
+      activeIndex = Math.max(0, Math.min(1, index));
+      if (activeIndex === 0) {
+        slide1.classList.add('active');
+        slide1.setAttribute('aria-hidden', 'false');
+        slide2.classList.remove('active');
+        slide2.setAttribute('aria-hidden', 'true');
+        if (prevBtn) { prevBtn.disabled = true; prevBtn.setAttribute('aria-disabled', 'true'); }
+        if (nextBtn) { nextBtn.disabled = false; nextBtn.setAttribute('aria-disabled', 'false'); }
+        if (counterCurrent) counterCurrent.textContent = '01';
+      } else {
+        slide1.classList.remove('active');
+        slide1.setAttribute('aria-hidden', 'true');
+        slide2.classList.add('active');
+        slide2.setAttribute('aria-hidden', 'false');
+        if (prevBtn) { prevBtn.disabled = false; prevBtn.setAttribute('aria-disabled', 'false'); }
+        if (nextBtn) { nextBtn.disabled = true; nextBtn.setAttribute('aria-disabled', 'true'); }
+        if (counterCurrent) counterCurrent.textContent = '02';
+      }
+    }
+
+    prevBtn?.addEventListener('click', () => goTo(0));
+    nextBtn?.addEventListener('click', () => goTo(1));
+
+    // Keyboard navigation
+    heroSection.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        goTo(0);
+      } else if (e.key === 'ArrowRight') {
+        goTo(1);
+      }
+    });
+
+    // Touch / swipe for mobile
+    let touchStartX = 0;
+    let touchStartY = 0;
+    heroSection.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0]?.clientX || 0;
+      touchStartY = e.touches[0]?.clientY || 0;
+    }, { passive: true });
+
+    heroSection.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0]?.clientX || 0;
+      const touchEndY = e.changedTouches[0]?.clientY || 0;
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = touchEndY - touchStartY;
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 40) {
+        if (deltaX < 0) goTo(1); // Swipe left -> Next
+        else goTo(0); // Swipe right -> Prev
+      }
+    }, { passive: true });
+
+    goTo(0);
+
+    const controller = { goTo, getActiveIndex: () => activeIndex, latestDaily };
+    window.__heroCarouselTest = controller;
+    return controller;
+  }
+
   populateFilterOptions();
+  initHeroCarousel();
   renderTodayMarket();
   renderHighlights();
   renderArchive();

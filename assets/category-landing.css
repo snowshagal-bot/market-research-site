@@ -118,6 +118,19 @@
   letter-spacing: -.01em;
 }
 
+.category-page .report-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  justify-self: end;
+}
+
+.category-page .report-read-label {
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
 @media (max-width: 680px) {
   .category-landing-hero {
     padding-top: 36px;
