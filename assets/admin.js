@@ -1,4 +1,5 @@
 (() => {
+  const MAX_TAKEAWAY_LENGTH = 400;
   const $ = (id) => document.getElementById(id);
   const fileInput = $('html-file');
   const dropZone = $('drop-zone');
@@ -22,6 +23,7 @@
   const tagsCount = $('tags-count');
   const tagsStatus = $('tags-status');
   const filename = $('post-filename');
+  const takeawayStatus = $('takeaway-status');
   const coverInput = $('cover-file');
   const coverInfo = $('cover-info');
   const generateCoverBtn = $('generate-cover-btn');
@@ -54,6 +56,9 @@
   let selectedCover = null;
   let selectedHtmlText = '';
   let selectedHtmlDocument = null;
+  // Read from the report, never typed. Kept whatever the category is, and
+  // only sent when the category is still Daily at publish time.
+  let detectedTakeaway = '';
   let generatingCover = false;
   let coverGenerationVersion = 0;
   let coverDecodePending = false;
@@ -367,6 +372,52 @@
     return '';
   }
 
+  // The TODAY one-liner is a sentence the report marks as such, not a summary
+  // of it. Nothing here guesses: the title, the description and the opening
+  // sentence are all off limits, so a report with no marked line simply has no
+  // one-liner and the homepage hides that row rather than showing words the
+  // editor never chose.
+  function normalizeTakeaway(value) {
+    return String(value || '')
+      // Zero-width characters sit inside the cover copy as break hints.
+      .replace(/[\u200B-\u200D\uFEFF]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, MAX_TAKEAWAY_LENGTH);
+  }
+
+  function detectTakeaway(doc) {
+    const declared = normalizeTakeaway(doc?.querySelector('meta[name="report-takeaway"]')?.content);
+    if (declared) return declared;
+    const marked = doc?.querySelector('[data-report-takeaway]');
+    if (marked) {
+      // The attribute either carries the line or just marks the element.
+      const text = normalizeTakeaway(marked.getAttribute?.('data-report-takeaway')) || normalizeTakeaway(marked.textContent);
+      if (text) return text;
+    }
+    // Where the shipping Daily cover puts it, beside the scroll nudge.
+    for (const selector of ['.cover-hint .cv-one', '.cover-oneline']) {
+      const text = normalizeTakeaway(doc?.querySelector(selector)?.textContent);
+      if (text) return text;
+    }
+    return '';
+  }
+
+  // Read-only: there is no box to fill in here. The Daily carries the line, or
+  // the homepage hides the row.
+  function renderTakeawayStatus() {
+    if (!takeawayStatus) return;
+    if (!selectedHtmlDocument || type.value !== 'daily') {
+      takeawayStatus.textContent = '';
+      takeawayStatus.hidden = true;
+      return;
+    }
+    takeawayStatus.hidden = false;
+    takeawayStatus.textContent = detectedTakeaway
+      ? `TODAY 한 줄 자동 감지 · "${detectedTakeaway}"`
+      : 'TODAY 한 줄 감지 없음 · 홈페이지에서는 한 줄이 숨겨집니다.';
+  }
+
   function safeFilename(original) {
     return original.replace(/[\\/:*?"<>|]/g,'-').replace(/\s+/g,' ').trim();
   }
@@ -399,6 +450,8 @@
       else if (source === 'manual' && value) categoryStatus.textContent = `직접 선택: ${labels[value]}`;
       else if (source === 'auto') categoryStatus.textContent = '카테고리를 자동으로 판단하지 못했습니다. 직접 선택해 주세요.';
     }
+    // Switching away from Daily withdraws the one-liner along with it.
+    renderTakeawayStatus();
     updatePublishState();
   }
 
@@ -630,6 +683,8 @@
     selectedFile = file;
     selectedHtmlText = '';
     selectedHtmlDocument = null;
+    detectedTakeaway = '';
+    renderTakeawayStatus();
     registeredDate.value = '게시 시 자동 기록';
     status.textContent = 'HTML을 분석하는 중…';
     const text = await file.text();
@@ -642,6 +697,7 @@
     const detectedTitle = detectTitle(file.name, doc);
     const detectedSubtitle = detectSubtitle(doc);
     const detectedSummary = detectSummary(doc);
+    detectedTakeaway = detectTakeaway(doc);
 
     setCategory(detectedType, 'auto');
     date.value = detectedDate;
@@ -650,6 +706,7 @@
     subtitle.value = detectedSubtitle;
     description.value = defaultDescription(detectedType);
     postSummary.value = detectedSummary;
+    renderTakeawayStatus();
     filename.value = safeFilename(file.name);
 
     fileInfo.classList.add('on');
@@ -710,6 +767,8 @@
     form.append('subtitle', subtitle.value.trim());
     form.append('description', description.value.trim());
     form.append('summary', postSummary.value.trim());
+    // Daily only, and only when the report actually carried a line.
+    if (postType === 'daily' && detectedTakeaway) form.append('takeaway', detectedTakeaway);
     form.append('filename', filename.value.trim());
     form.append('lang', language);
     if (translationSource?.value) form.append('translationGroup', translationSource.value);
@@ -748,7 +807,8 @@
       }
 
       registeredDate.value = data.registeredDate || '등록 완료';
-      status.textContent = `게시 완료 · 등록일 ${data.registeredDate}. Cloudflare 재배포 확인 중…`;
+      const takeawayNote = postType === 'daily' && detectedTakeaway ? ' · TODAY 한 줄 자동 연동됨' : '';
+      status.textContent = `게시 완료 · 등록일 ${data.registeredDate}${takeawayNote}. Cloudflare 재배포 확인 중…`;
       publishBtn.textContent = '게시 완료';
       publishBtn.disabled = true;
       await waitForDeployment(data.id, data.reportUrl, postType, data.registeredDate || '등록 완료', language);

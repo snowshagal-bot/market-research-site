@@ -230,3 +230,24 @@ generated and published timestamps, and the two lines. Republishing the same
 document with a new line therefore changes the ETag, and a client holding the
 previous tag is served the new body rather than a `304`.
 
+### Where the TODAY one-liner comes from
+
+With a live session the homepage strip resolves the line in this order, per
+language:
+
+1. `takeaway_ko` / `takeaway_en` on the D1 row — the manual override typed
+   into `/admin/market/`. It exists only when someone chose to write one.
+2. The `takeaway` field on that same day's Daily report, in that same
+   language. Report publishing reads it out of the report HTML itself (a
+   `report-takeaway` meta tag, a `data-report-takeaway` element, or the
+   cover's `.cover-hint .cv-one`), so the everyday path needs no typing.
+3. Neither: the row is hidden and the numbers stand alone.
+
+A Daily qualifies only on an exact `reportDate === market_date` match in the
+reader's own language. A neighbouring date, the newest Daily, or the other
+language never stands in. Only Dailies carry the field at all.
+
+When `/api/market/latest` fails outright, `data/market-summary.js` answers as
+one whole record — date, numbers and line together — and no Daily metadata is
+mixed into it.
+

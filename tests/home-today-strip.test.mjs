@@ -515,3 +515,159 @@ test('homepage markup exposes the nodes the strip renders into', async () => {
     assert.match(page, /id="today-takeaway-text"/);
   }
 });
+
+/* ==========================================================================
+   P4.1 — the same day's Daily supplies the one-liner by itself.
+   ======================================================================== */
+
+const DAILY_KO_LINE = '지수는 되돌렸지만 거래대금은 따라오지 않았다.';
+const DAILY_EN_LINE = 'The index recovered; turnover did not follow.';
+const OVERRIDE_KO = '편집자가 직접 고쳐 쓴 한 줄.';
+
+/** Dailies that carry their own takeaway, the way P4.1 publishes them. */
+const LINKED_POSTS = [
+  {
+    id: 'ko-0827', type: 'daily', typeLabel: '주식 리포트', lang: 'ko',
+    date: '2026-08-27', reportDate: '2026-08-27', registeredAt: '2026-08-27T04:00:00.000Z',
+    title: '두 개의 와이어', description: '', tags: [], href: 'reports/2026-08-27-ko.html',
+    takeaway: DAILY_KO_LINE
+  },
+  {
+    id: 'en-0827', type: 'daily', typeLabel: 'Daily', lang: 'en',
+    date: '2026-08-27', reportDate: '2026-08-27', registeredAt: '2026-08-27T05:00:00.000Z',
+    title: 'Two Wires', description: '', tags: [], href: 'reports/en/2026-08-27-en.html',
+    takeaway: DAILY_EN_LINE
+  },
+  {
+    // The day before: close enough to be tempting, and still the wrong session.
+    id: 'ko-0826', type: 'daily', typeLabel: '주식 리포트', lang: 'ko',
+    date: '2026-08-26', reportDate: '2026-08-26', registeredAt: '2026-08-26T04:00:00.000Z',
+    title: '먼저 열리는 밤', description: '', tags: [], href: 'reports/2026-08-26-ko.html',
+    takeaway: '어제의 한 줄이다.'
+  }
+];
+
+test('I. a Daily supplies the one-liner when nobody typed an override', async () => {
+  const strip = await runHomepage({
+    posts: LINKED_POSTS,
+    fetchResult: marketPayload('2026-08-27')
+  });
+  assert.equal(strip.row.hidden, false);
+  assert.equal(strip.text.textContent, DAILY_KO_LINE);
+  assert.equal(strip.link.href, '/reports/2026-08-27-ko.html');
+});
+
+test('I2. English reads its own Daily, not the Korean one', async () => {
+  const strip = await runHomepage({
+    lang: 'en',
+    posts: LINKED_POSTS,
+    fetchResult: marketPayload('2026-08-27')
+  });
+  assert.equal(strip.text.textContent, DAILY_EN_LINE);
+  assert.equal(strip.link.href, '/reports/en/2026-08-27-en.html');
+});
+
+test('J. a typed override outranks the Daily, and still links the Daily', async () => {
+  const strip = await runHomepage({
+    posts: LINKED_POSTS,
+    fetchResult: marketPayload('2026-08-27', { ko: OVERRIDE_KO, en: '' })
+  });
+  assert.equal(strip.text.textContent, OVERRIDE_KO);
+  assert.equal(strip.link.href, '/reports/2026-08-27-ko.html');
+
+  // The override is per language: English had none, so its Daily still speaks.
+  const english = await runHomepage({
+    lang: 'en',
+    posts: LINKED_POSTS,
+    fetchResult: marketPayload('2026-08-27', { ko: OVERRIDE_KO, en: '' })
+  });
+  assert.equal(english.text.textContent, DAILY_EN_LINE);
+});
+
+test('K. yesterday’s Daily never speaks for today’s numbers', async () => {
+  // Only the 26th and 27th exist; the session is the 29th.
+  const strip = await runHomepage({
+    posts: LINKED_POSTS,
+    fetchResult: marketPayload('2026-08-29')
+  });
+  assert.equal(strip.row.hidden, true, 'a different date must not supply the line');
+  assert.equal(strip.link.href, '/market/');
+});
+
+test('L. a Daily in the other language is not borrowed', async () => {
+  // The English daily for the 27th exists; the Korean one does not.
+  const englishOnly = LINKED_POSTS.filter(post => post.lang === 'en');
+  const strip = await runHomepage({
+    posts: englishOnly,
+    fetchResult: marketPayload('2026-08-27')
+  });
+  assert.equal(strip.row.hidden, true, 'Korean must not read the English daily');
+  assert.equal(strip.link.href, '/market/');
+});
+
+test('M. a same-date Daily with no line hides the row but keeps the link', async () => {
+  const withoutLine = LINKED_POSTS.map(post => (
+    post.id === 'ko-0827' ? { ...post, takeaway: '' } : post
+  ));
+  const strip = await runHomepage({
+    posts: withoutLine,
+    fetchResult: marketPayload('2026-08-27')
+  });
+  assert.equal(strip.row.hidden, true);
+  assert.equal(strip.link.href, '/reports/2026-08-27-ko.html', 'the report is still worth linking');
+});
+
+test('N. with the API down the static record answers alone', async () => {
+  const posts = LINKED_POSTS.map(post => (
+    // A daily for the static record's own date, carrying a different line.
+    post.id === 'ko-0827'
+      ? { ...post, id: 'ko-0825', date: '2026-08-25', reportDate: '2026-08-25', href: 'reports/2026-08-25-ko.html', takeaway: '데일리가 들고 있는 다른 문장.' }
+      : post
+  ));
+  const strip = await runHomepage({ posts, fetchResult: null });
+
+  assert.equal(strip.date.textContent, 'AUG 25');
+  // The static record's own line, not the daily's, even though one matches.
+  assert.equal(strip.text.textContent, STATIC_SUMMARY.takeaway.ko);
+  assert.notEqual(strip.text.textContent, '데일리가 들고 있는 다른 문장.');
+});
+
+test('O. before the Daily is published the strip points at Market Close', async () => {
+  const strip = await runHomepage({
+    posts: LINKED_POSTS.filter(post => post.reportDate !== '2026-08-27'),
+    fetchResult: marketPayload('2026-08-27')
+  });
+  assert.equal(strip.row.hidden, true);
+  assert.equal(strip.link.href, '/market/');
+});
+
+test('P. publishing the Daily later fills the row on the next load', async () => {
+  const payload = marketPayload('2026-08-27');
+  const before = await runHomepage({
+    posts: LINKED_POSTS.filter(post => post.reportDate !== '2026-08-27'),
+    fetchResult: payload
+  });
+  assert.equal(before.row.hidden, true);
+
+  const after = await runHomepage({ posts: LINKED_POSTS, fetchResult: payload });
+  assert.equal(after.row.hidden, false);
+  assert.equal(after.text.textContent, DAILY_KO_LINE);
+  assert.equal(after.link.href, '/reports/2026-08-27-ko.html');
+});
+
+test('Q. a Daily line is normalized before it reaches the strip', async () => {
+  const messy = LINKED_POSTS.map(post => (
+    post.id === 'ko-0827' ? { ...post, takeaway: '  줄바꿈과\n  여백이   섞인 문장.  ' } : post
+  ));
+  const strip = await runHomepage({ posts: messy, fetchResult: marketPayload('2026-08-27') });
+  assert.equal(strip.text.textContent, '줄바꿈과 여백이 섞인 문장.');
+});
+
+test('R. a hidden row keeps no text from the session before it', async () => {
+  const strip = await runHomepage({
+    posts: LINKED_POSTS,
+    fetchResult: marketPayload('2026-08-29')
+  });
+  assert.equal(strip.row.hidden, true);
+  assert.equal(strip.text.textContent, '', 'the sentence must go when the row does');
+});

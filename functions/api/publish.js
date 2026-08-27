@@ -8,6 +8,7 @@ const PRODUCTION_HOSTNAME = 'snowshagal.com';
 const API_VERSION = '2026-03-10';
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const MAX_COVER_BYTES = 4 * 1024 * 1024;
+const MAX_TAKEAWAY_LENGTH = 400;
 
 const TYPE_LABELS = {
   daily: '주식 리포트',
@@ -564,6 +565,11 @@ export async function onRequestPost(context) {
   const subtitle = String(form.get('subtitle') || '').trim().slice(0, 240);
   const description = String(form.get('description') || '').trim().slice(0, 700);
   const summary = String(form.get('summary') || '').trim().slice(0, 500);
+  // The TODAY one-liner the report itself carried. Only a Daily has one:
+  // the strip shows a market session, and nothing else stands in for it.
+  const takeaway = type === 'daily'
+    ? String(form.get('takeaway') || '').replace(/\s+/g, ' ').trim().slice(0, MAX_TAKEAWAY_LENGTH)
+    : '';
   const filename = safeFilename(form.get('filename') || file?.name || 'report.html');
 
   if (!file || typeof file.text !== 'function') return reply({ error: 'NO_FILE', message: 'HTML 파일이 없습니다.' }, 400);
@@ -655,6 +661,9 @@ export async function onRequestPost(context) {
       subtitle,
       description,
       ...(summary ? { summary } : {}),
+      // Distinct from summary: one is a description of the report, the
+      // other is the sentence the homepage strip shows for that session.
+      ...(takeaway ? { takeaway } : {}),
       tags,
       readingMinutes,
       href,

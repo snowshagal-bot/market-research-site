@@ -901,6 +901,11 @@
      `reportDate === displayed marketDate`; with no such daily report it falls
      back to Market Close instead of opening a different day's report.
 
+     With a live session the one-liner comes from D1 when an editor typed one
+     there, and otherwise from that same day's daily report in this same
+     locale. Neither a different date nor a different language can supply it,
+     and with the API down the static record answers alone.
+
      Freshness is whatever `market_date` the API returns. The calendar date is
      never consulted: on a weekend or holiday the last trading session is the
      current data, not stale data.
@@ -981,21 +986,45 @@
   // One session in, one consistent strip out. The published record carries its
   // own one-liner, so a live session never borrows the static file's — that is
   // what would put an older sentence under today's numbers.
+  // Only this locale's daily for exactly this session's date. `posts` is
+  // already scoped to the locale, so a Korean home never reads an English
+  // daily; and the date must match, so yesterday's report never speaks for
+  // today's numbers.
+  function dailyForDate(marketDate){
+    if (!marketDate) return null;
+    return posts.find(post => post.type === 'daily' && reportDate(post) === marketDate) || null;
+  }
+  function postTakeaway(post){
+    return String(post?.takeaway || '').replace(/\s+/g, ' ').trim();
+  }
+
   function todayStripSession(payload){
     const summary = window.TODAY_MARKET_SUMMARY;
     const publishedDate = isoDate(payload?.meta?.market_date);
     if (publishedDate) {
       const items = publishedStripItems(payload);
-      if (items) return { marketDate: publishedDate, items, takeaway: localeTakeaway(payload?.takeaway), live: true };
+      if (items) {
+        const daily = dailyForDate(publishedDate);
+        // What the editor typed into /admin/market/ wins, because it exists
+        // only when someone chose to override. Otherwise the same session's
+        // daily supplies the line by itself, which is the everyday path.
+        const override = localeTakeaway(payload?.takeaway);
+        return { marketDate: publishedDate, items, takeaway: override || postTakeaway(daily), daily, live: true };
+      }
     }
     // Emergency fallback only, and then the whole static record is used: its
     // date, its numbers and its one-liner together, never mixed with the API.
     const staticItems = staticStripItems(summary);
     if (!staticItems) return null;
+    const staticDate = isoDate(summary?.marketDate);
     return {
-      marketDate: isoDate(summary?.marketDate),
+      marketDate: staticDate,
       items: staticItems,
+      // The static record's own line and nothing else. With the API down
+      // there is no live session to match a daily against, so pulling one
+      // in would be the mixing this fallback exists to avoid.
       takeaway: localeTakeaway(summary?.takeaway),
+      daily: dailyForDate(staticDate),
       live: false
     };
   }
@@ -1027,17 +1056,20 @@
     // The one-liner belongs to the session on screen, so it needs no date
     // comparison: it either came with these numbers or there is none.
     const text = session?.takeaway || '';
-    // Link the daily report for this same session; with none, Market Close.
-    // A later daily published under this date is picked up on the next load.
-    const daily = marketDate
-      ? posts.find(post => post.type === 'daily' && reportDate(post) === marketDate) || null
-      : null;
+    // The daily for this same session; with none, Market Close. A daily
+    // published later under this date is picked up on the next load, and it
+    // brings its one-liner with it.
+    const daily = session?.daily || null;
     // Rewrite the href on every paint, the hidden one included. Leaving the
     // previous session's href in place would keep a link to another day's
     // report one CSS rule away from being clickable.
     if (linkEl) linkEl.href = daily ? rootPath(daily.href) : (locale === 'en' ? '/en/market/' : '/market/');
     if (!text) {
       if (rowEl) rowEl.hidden = true;
+      // Clear it as well as hide it, for the same reason the href is always
+      // rewritten: a hidden row holding another session's sentence is one
+      // stylesheet away from showing it.
+      if (textEl) textEl.textContent = '';
       return;
     }
     if (rowEl) rowEl.hidden = false;

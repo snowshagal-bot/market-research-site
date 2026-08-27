@@ -50,7 +50,7 @@ function githubMock(existingPosts = [], { searchIndex = null, searchIndexFail = 
   return calls;
 }
 
-function publishRequest({ type = 'daily', cover = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, tags = null } = {}, url = 'https://snowshagal.com/api/publish') {
+function publishRequest({ type = 'daily', cover = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, takeaway, tags = null } = {}, url = 'https://snowshagal.com/api/publish') {
   const form = new FormData();
   form.append('file', new File(['<!doctype html><html><body>report content with some words</body></html>'], 'report.html', { type: 'text/html' }));
   form.append('type', type);
@@ -59,6 +59,7 @@ function publishRequest({ type = 'daily', cover = null, lang = 'ko', translation
   form.append('subtitle', '테스트 부제');
   form.append('description', '테스트 설명');
   if (summary !== undefined) form.append('summary', summary);
+  if (takeaway !== undefined) form.append('takeaway', takeaway);
   if (tags !== null) {
     if (Array.isArray(tags)) tags.forEach(t => form.append('tags', t));
     else form.append('tags', tags);
@@ -417,4 +418,84 @@ test('publish normalizes duplicate tags without rejecting', async () => {
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+/* ------------------------------- the TODAY one-liner rides with a Daily */
+
+test('a Daily stores its TODAY one-liner beside, not instead of, the summary', async () => {
+  const calls = githubMock();
+  try {
+    const { response, data } = await runPublish({
+      type: 'daily',
+      summary: '리포트 전체를 두세 문장으로 설명하는 요약.',
+      takeaway: '  지수는  되돌렸지만\n 거래대금은 따라오지 않았다.  '
+    });
+    assert.equal(response.status, 200);
+    const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+
+    const fromJson = JSON.parse(tree.find(entry => entry.path === 'data/posts.json').content).find(item => item.id === data.id);
+    assert.equal(fromJson.takeaway, '지수는 되돌렸지만 거래대금은 따라오지 않았다.');
+    // Two fields, two meanings: the summary is untouched by the addition.
+    assert.equal(fromJson.summary, '리포트 전체를 두세 문장으로 설명하는 요약.');
+
+    // posts.js is generated from the same array, so it must agree.
+    const js = tree.find(entry => entry.path === 'data/posts.js').content;
+    const fromJs = JSON.parse(js.replace(/^window\.RESEARCH_POSTS = /, '').replace(/;\s*$/, '')).find(item => item.id === data.id);
+    assert.deepEqual(fromJs, fromJson);
+
+    // The search index keeps its own contract; the one-liner is not part of it.
+    const index = JSON.parse(tree.find(entry => entry.path === 'data/search-index.json').content).find(item => item.id === data.id);
+    assert.equal(index.summary, '리포트 전체를 두세 문장으로 설명하는 요약.');
+    assert.equal('takeaway' in index, false);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('only a Daily is allowed to carry one', async () => {
+  for (const type of ['weekly', 'research', 'basics', 'note']) {
+    const calls = githubMock();
+    try {
+      const { response, data } = await runPublish({ type, takeaway: '이 문구는 저장되면 안 된다.' });
+      assert.equal(response.status, 200);
+      const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+      const post = JSON.parse(tree.find(entry => entry.path === 'data/posts.json').content).find(item => item.id === data.id);
+      assert.equal('takeaway' in post, false, `${type} must not store a TODAY one-liner`);
+    } finally { globalThis.fetch = originalFetch; }
+  }
+});
+
+test('a Daily with no one-liner simply has no field', async () => {
+  const calls = githubMock();
+  try {
+    const { response, data } = await runPublish({ type: 'daily' });
+    assert.equal(response.status, 200);
+    const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+    const post = JSON.parse(tree.find(entry => entry.path === 'data/posts.json').content).find(item => item.id === data.id);
+    assert.equal('takeaway' in post, false);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('an over-long one-liner is cut at the stored limit', async () => {
+  const calls = githubMock();
+  try {
+    const { response, data } = await runPublish({ type: 'daily', takeaway: '가'.repeat(520) });
+    assert.equal(response.status, 200);
+    const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+    const post = JSON.parse(tree.find(entry => entry.path === 'data/posts.json').content).find(item => item.id === data.id);
+    assert.equal(post.takeaway.length, 400);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('existing posts are not backfilled', async () => {
+  const existing = [
+    { id: 'ko-old', href: 'reports/old.html', type: 'daily', lang: 'ko', title: '지난 리포트', reportDate: '2026-08-05' }
+  ];
+  const calls = githubMock(existing);
+  try {
+    const { response } = await runPublish({ type: 'daily', takeaway: '새 리포트의 한 줄.' });
+    assert.equal(response.status, 200);
+    const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+    const posts = JSON.parse(tree.find(entry => entry.path === 'data/posts.json').content);
+    const old = posts.find(item => item.id === 'ko-old');
+    assert.equal('takeaway' in old, false, 'past reports keep whatever they had');
+  } finally { globalThis.fetch = originalFetch; }
 });
