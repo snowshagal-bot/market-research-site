@@ -6,6 +6,8 @@ import { onRequest as middlewareRequest } from '../functions/_middleware.js';
 import { onRequestGet as sitemapRequest } from '../functions/sitemap.xml.js';
 import {
   PRODUCTION_ORIGIN,
+  CATEGORY_SLUGS,
+  categoryLandingPath,
   findPostByPath,
   reportAlternates,
   reportSeoTags,
@@ -129,6 +131,9 @@ test('repository post metadata references existing public report files without f
     `${PRODUCTION_ORIGIN}/en/about/`,
     `${PRODUCTION_ORIGIN}/market/`,
     `${PRODUCTION_ORIGIN}/en/market/`,
+    ...Object.keys(CATEGORY_SLUGS).flatMap((type) => ['ko', 'en']
+      .filter((lang) => posts.some((post) => post.type === type && (post.lang === 'en' ? 'en' : 'ko') === lang))
+      .map((lang) => `${PRODUCTION_ORIGIN}${categoryLandingPath(type, lang)}`)),
     ...posts.map((post) => reportSiteUrl(post.href))
   ];
   assert.deepEqual(new Set(sitemapLocations), new Set(expectedLocations));

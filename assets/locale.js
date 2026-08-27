@@ -144,6 +144,11 @@
     if (/^\/en\/market\/?$/i.test(path) || /^\/market\/?$/i.test(path)) {
       return targetLanguage === 'en' ? '/en/market/' : '/market/';
     }
+    const categoryMatch = path.match(/^\/(?:en\/)?(daily|weekly|research|basics|notes)\/?$/i);
+    if (categoryMatch) {
+      const slug = categoryMatch[1].toLowerCase();
+      return targetLanguage === 'en' ? `/en/${slug}/` : `/${slug}/`;
+    }
     return homepagePath(targetLanguage, category);
   }
 

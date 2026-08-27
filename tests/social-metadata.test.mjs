@@ -2,10 +2,12 @@ import assert from 'node:assert/strict';
 import { readFile, stat } from 'node:fs/promises';
 import test from 'node:test';
 import {
+  CATEGORY_SLUGS,
   FAVICON_TAGS,
   PRODUCTION_ORIGIN,
   SOCIAL_FALLBACK_IMAGE,
   reportCardPath,
+  reportDescription,
   reportSeoTags,
   sitemapXml
 } from '../functions/_seo.js';
@@ -17,7 +19,8 @@ const sizeOf = async path => (await stat(new URL(`../${path}`, import.meta.url))
 const PUBLIC_PAGES = [
   'index.html', 'en/index.html',
   'about/index.html', 'en/about/index.html',
-  'market/index.html', 'en/market/index.html'
+  'market/index.html', 'en/market/index.html',
+  ...Object.values(CATEGORY_SLUGS).flatMap((slug) => [`${slug}/index.html`, `en/${slug}/index.html`])
 ];
 
 const HOME_CARD = '/assets/social/snowshagal-home.jpg';
@@ -237,7 +240,7 @@ test('a report with a cover sends a landscape card to Open Graph and the cover t
   assert.match(tags, /<meta property="og:locale" content="ko_KR">/);
 });
 
-test('a report without a cover keeps the existing generic fallback on both sides', async () => {
+test('a report without a cover keeps the generic image and receives a safe description fallback', async () => {
   const tags = reportSeoTags([bare], bare);
   const fallback = `${PRODUCTION_ORIGIN}${SOCIAL_FALLBACK_IMAGE}`;
   assert.match(tags, new RegExp(`<meta property="og:image" content="${fallback}">`));
@@ -245,8 +248,12 @@ test('a report without a cover keeps the existing generic fallback on both sides
   assert.match(tags, /<meta name="twitter:card" content="summary_large_image">/);
   assert.match(tags, /<meta property="og:image:width" content="1200">/);
   assert.match(tags, /<meta property="og:image:height" content="630">/);
-  // No summary and no description on this fixture: omit rather than invent one.
-  assert.doesNotMatch(tags, /twitter:description|og:description|name="description"/);
+  const description = reportDescription(bare);
+  assert.match(description, /2026년 8월 15일/);
+  assert.match(description, /좋은 회사가 왜 좋은 주식은 아닌가/);
+  assert.ok(tags.includes(`<meta name="description" content="${description}">`));
+  assert.ok(tags.includes(`<meta property="og:description" content="${description}">`));
+  assert.ok(tags.includes(`<meta name="twitter:description" content="${description}">`));
 });
 
 test('every report advertises a 1200x630 og:image whatever its cover state', async () => {
@@ -303,7 +310,7 @@ test('the middleware removes report-supplied social meta so nothing duplicates',
 
 /* ---------- sitemap ---------- */
 
-test('the sitemap lists both About pages with reciprocal alternates and no duplicates', () => {
+test('the sitemap keeps global locale pages when no category has posts', () => {
   const xml = sitemapXml([]);
   const locations = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
   assert.deepEqual(locations, [
