@@ -1,0 +1,200 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import test from 'node:test';
+import { onRequestPost as publishRequest } from '../functions/api/market/publish.js';
+import { onRequestGet as latestRequest } from '../functions/api/market/latest.js';
+import { MAX_TAKEAWAY_LENGTH, TABLE_NAME } from '../functions/api/market/_shared.js';
+
+const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
+
+const PAYLOAD = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+const SCHEMA = await read('contracts/market_close/market_close.schema.json');
+
+/**
+ * Minimal D1 stand-in: one table, keyed by market_date, with the columns the
+ * shared schema creates plus whatever ALTER TABLE adds.
+ */
+function fakeDb({ withTakeawayColumns = true } = {}) {
+  const rows = new Map();
+  const statements = [];
+  return {
+    rows,
+    statements,
+    prepare(sql) {
+      statements.push(sql);
+      return {
+        bind(...args) { return this._bound(args); },
+        _bound(args) {
+          return {
+            async run() {
+              if (/^INSERT INTO/.test(sql)) {
+                const [market_date, schema_version, generated_at, status, payload_json, published_at, auth_source, takeaway_ko, takeaway_en] = args;
+                rows.set(market_date, { market_date, schema_version, generated_at, status, payload_json, published_at, auth_source, takeaway_ko, takeaway_en });
+              }
+              return { success: true };
+            },
+            async first() {
+              if (/SELECT market_date FROM/.test(sql)) return rows.get(args[0]) || null;
+              return null;
+            }
+          };
+        },
+        async run() {
+          if (/ALTER TABLE/.test(sql) && !withTakeawayColumns) throw new Error('duplicate column name');
+          return { success: true };
+        },
+        async first() {
+          const all = [...rows.values()].sort((a, b) => b.market_date.localeCompare(a.market_date));
+          if (/ORDER BY market_date DESC/.test(sql)) return all[0] || null;
+          if (/SELECT market_date FROM/.test(sql)) return all[0] || null;
+          return null;
+        }
+      };
+    }
+  };
+}
+
+function env(db) {
+  return {
+    COMMENTS_DB: db,
+    ADMIN_KEY: 'secret',
+    ASSETS: { fetch: async () => new Response(SCHEMA, { headers: { 'content-type': 'application/json' } }) }
+  };
+}
+
+function publish(db, body) {
+  return publishRequest({
+    request: new Request('https://snowshagal.com/api/market/publish', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-admin-key': 'secret' },
+      body: JSON.stringify(body)
+    }),
+    env: env(db)
+  });
+}
+
+const latest = db => latestRequest({ request: new Request('https://snowshagal.com/api/market/latest'), env: env(db) });
+
+/* ------------------------------------------------------- storing the line */
+
+test('the one-liner is stored on the same row as the session it describes', async () => {
+  const db = fakeDb();
+  const response = await publish(db, {
+    market: PAYLOAD,
+    takeaway: { ko: '한 줄 요약', en: 'One line' }
+  });
+  assert.ok(response.status === 200 || response.status === 201, `status ${response.status}`);
+  assert.deepEqual((await response.json()).takeaway, { ko: true, en: true });
+
+  const row = db.rows.get(PAYLOAD.meta.market_date);
+  assert.equal(row.takeaway_ko, '한 줄 요약');
+  assert.equal(row.takeaway_en, 'One line');
+  // The machine-generated document is stored unchanged beside it.
+  assert.deepEqual(JSON.parse(row.payload_json), PAYLOAD);
+});
+
+test('the bare contract document still publishes, with no line', async () => {
+  const db = fakeDb();
+  const response = await publish(db, PAYLOAD);
+  assert.ok(response.ok, `status ${response.status}`);
+  const row = db.rows.get(PAYLOAD.meta.market_date);
+  assert.equal(row.takeaway_ko, '');
+  assert.equal(row.takeaway_en, '');
+});
+
+test('each language is stored independently', async () => {
+  const db = fakeDb();
+  await publish(db, { market: PAYLOAD, takeaway: { ko: '한국어만' } });
+  const row = db.rows.get(PAYLOAD.meta.market_date);
+  assert.equal(row.takeaway_ko, '한국어만');
+  // A missing English line is empty, never filled from Korean.
+  assert.equal(row.takeaway_en, '');
+});
+
+test('an over-long line is refused rather than truncated', async () => {
+  const db = fakeDb();
+  const response = await publish(db, { market: PAYLOAD, takeaway: { ko: 'ㄱ'.repeat(MAX_TAKEAWAY_LENGTH + 1) } });
+  assert.equal(response.status, 422);
+  assert.equal((await response.json()).error, 'TAKEAWAY_TOO_LONG');
+  assert.equal(db.rows.size, 0, 'nothing may be stored on a rejected publish');
+});
+
+test('republishing the same date replaces the line', async () => {
+  const db = fakeDb();
+  await publish(db, { market: PAYLOAD, takeaway: { ko: '처음', en: 'first' } });
+  await publish(db, { market: PAYLOAD, takeaway: { ko: '고침', en: 'second' } });
+  const row = db.rows.get(PAYLOAD.meta.market_date);
+  assert.equal(row.takeaway_ko, '고침');
+  assert.equal(row.takeaway_en, 'second');
+});
+
+test('a table created before the line existed gains the columns', async () => {
+  const shared = await read('functions/api/market/_shared.js');
+  assert.match(shared, /takeaway_ko TEXT NOT NULL DEFAULT ''/);
+  assert.match(shared, /ALTER TABLE \$\{TABLE_NAME\} ADD COLUMN \$\{column\} TEXT NOT NULL DEFAULT ''/);
+  // A duplicate-column error on an already-migrated table must not be fatal.
+  const db = fakeDb({ withTakeawayColumns: false });
+  const response = await publish(db, { market: PAYLOAD, takeaway: { ko: '이주 후' } });
+  assert.ok(response.ok, `status ${response.status}`);
+  assert.equal(db.rows.get(PAYLOAD.meta.market_date).takeaway_ko, '이주 후');
+  assert.ok(TABLE_NAME.length > 0);
+});
+
+/* ------------------------------------------------------- serving the line */
+
+test('the latest session hands back its own line', async () => {
+  const db = fakeDb();
+  await publish(db, { market: PAYLOAD, takeaway: { ko: '한 줄', en: 'One line' } });
+
+  const response = await latest(db);
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.equal(body.meta.market_date, PAYLOAD.meta.market_date);
+  assert.deepEqual(body.takeaway, { ko: '한 줄', en: 'One line' });
+  // The market data itself is untouched by the addition.
+  assert.deepEqual(body.indices, PAYLOAD.indices);
+});
+
+test('a session published without a line returns empty strings, not nulls', async () => {
+  const db = fakeDb();
+  await publish(db, PAYLOAD);
+  const body = await (await latest(db)).json();
+  assert.deepEqual(body.takeaway, { ko: '', en: '' });
+});
+
+/* ---------------------------------------------- the admin writes them both */
+
+test('the Market Close admin submits the line with the same market_date', async () => {
+  const [script, markup] = await Promise.all([read('assets/admin-market.js'), read('admin/market/index.html')]);
+
+  assert.match(markup, /id="market-takeaway-ko"/);
+  assert.match(markup, /id="market-takeaway-en"/);
+  assert.match(markup, /maxlength="400"/);
+  // The form says what an empty language means, so it is a choice not an accident.
+  assert.match(markup, /한 줄만 숨겨지고 숫자는 그대로/);
+
+  // One request carries both, so they cannot be saved under different dates.
+  assert.match(script, /market: payload,/);
+  assert.match(script, /takeaway: \{ ko: takeawayKo\?\.value\.trim\(\) \|\| '', en: takeawayEn\?\.value\.trim\(\) \|\| '' \}/);
+  assert.match(script, /body: envelope/);
+  assert.doesNotMatch(script, /body: raw \}/);
+});
+
+/* ------------------------------------------------- the static file's role */
+
+test('the static file survives only as the emergency fallback', async () => {
+  const [site, summary] = await Promise.all([read('assets/site.js'), read('data/market-summary.js')]);
+
+  // Still present, so a total API failure has something to show.
+  assert.match(summary, /window\.TODAY_MARKET_SUMMARY = \{/);
+  assert.match(summary, /marketDate:/);
+  assert.match(summary, /takeaway:/);
+
+  // A live session takes its line from the payload, never from the static file.
+  assert.match(site, /return \{ marketDate: publishedDate, items, takeaway: localeTakeaway\(payload\?\.takeaway\), live: true \}/);
+  // The fallback record is used whole: its date, numbers and line together.
+  assert.match(site, /takeaway: localeTakeaway\(summary\?\.takeaway\)/);
+  // Locales never substitute for one another.
+  assert.match(site, /return String\(source\?\.\[locale\] \|\| ''\)\.trim\(\);/);
+  assert.doesNotMatch(site, /summary\?\.takeaway\?\.ko \|\| summary\?\.takeaway\?\.en/);
+});

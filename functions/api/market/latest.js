@@ -3,7 +3,7 @@ import { TABLE_NAME, MarketDbError, ensureMarketTable, json } from './_shared.js
 export async function onRequestGet({ request, env }) {
   try {
     const db = await ensureMarketTable(env);
-    const row = await db.prepare(`SELECT market_date, generated_at, payload_json FROM ${TABLE_NAME} ORDER BY market_date DESC LIMIT 1`).first();
+    const row = await db.prepare(`SELECT market_date, generated_at, payload_json, takeaway_ko, takeaway_en FROM ${TABLE_NAME} ORDER BY market_date DESC LIMIT 1`).first();
     if (!row) return json({ error: 'NO_MARKET_DATA', message: '아직 게시된 Market Close 데이터가 없습니다.' }, 404, 'public, max-age=30, s-maxage=60');
     const etag = `W/"market-${row.market_date}-${String(row.generated_at).replace(/[^0-9]/g, '')}"`;
     if (request.headers.get('if-none-match') === etag) return new Response(null, { status: 304, headers: { etag, 'cache-control': 'public, max-age=30, s-maxage=120, stale-while-revalidate=300' } });
@@ -13,6 +13,9 @@ export async function onRequestGet({ request, env }) {
       console.error('stored market close payload is invalid', error);
       return json({ error: 'INVALID_STORED_DATA', message: '저장된 Market Close 데이터를 읽을 수 없습니다.' }, 500);
     }
+    // The one-liner travels with the session it describes, so a consumer can
+    // never pair it with another date's numbers.
+    payload.takeaway = { ko: String(row.takeaway_ko || ''), en: String(row.takeaway_en || '') };
     return json(payload, 200, 'public, max-age=30, s-maxage=120, stale-while-revalidate=300', { etag });
   } catch (error) {
     if (error instanceof MarketDbError) return json({ error: error.code, message: error.message }, error.status);

@@ -972,16 +972,32 @@
   }
 
   // One session in, one consistent strip out.
+  function localeTakeaway(source){
+    // Locales are independent: an empty Korean line is never filled with the
+    // English one, or the other way round.
+    return String(source?.[locale] || '').trim();
+  }
+
+  // One session in, one consistent strip out. The published record carries its
+  // own one-liner, so a live session never borrows the static file's — that is
+  // what would put an older sentence under today's numbers.
   function todayStripSession(payload){
     const summary = window.TODAY_MARKET_SUMMARY;
     const publishedDate = isoDate(payload?.meta?.market_date);
     if (publishedDate) {
       const items = publishedStripItems(payload);
-      if (items) return { marketDate: publishedDate, items, live: true };
+      if (items) return { marketDate: publishedDate, items, takeaway: localeTakeaway(payload?.takeaway), live: true };
     }
+    // Emergency fallback only, and then the whole static record is used: its
+    // date, its numbers and its one-liner together, never mixed with the API.
     const staticItems = staticStripItems(summary);
     if (!staticItems) return null;
-    return { marketDate: isoDate(summary?.marketDate), items: staticItems, live: false };
+    return {
+      marketDate: isoDate(summary?.marketDate),
+      items: staticItems,
+      takeaway: localeTakeaway(summary?.takeaway),
+      live: false
+    };
   }
 
   function paintTodayStrip(session){
@@ -998,33 +1014,24 @@
       )).join('');
       gridEl.removeAttribute('aria-busy');
     }
-    paintTodayTakeaway(session.marketDate);
+    paintTodayTakeaway(session);
   }
 
   // The one-liner belongs to the session on screen or it is not shown at all.
-  function paintTodayTakeaway(marketDate){
-    const summary = window.TODAY_MARKET_SUMMARY;
+  function paintTodayTakeaway(session){
+    const marketDate = session?.marketDate || '';
     const rowEl = document.querySelector('.today-takeaway-row');
     const labelEl = document.getElementById('today-takeaway-label');
     const textEl = document.getElementById('today-takeaway-text');
     const linkEl = document.getElementById('today-takeaway-link');
+    // The one-liner belongs to the session on screen, so it needs no date
+    // comparison: it either came with these numbers or there is none.
+    const text = session?.takeaway || '';
+    // Link the daily report for this same session; with none, Market Close.
+    // A later daily published under this date is picked up on the next load.
     const daily = marketDate
       ? posts.find(post => post.type === 'daily' && reportDate(post) === marketDate) || null
       : null;
-    const editorial = isoDate(summary?.marketDate) === marketDate && marketDate
-      ? (summary?.takeaway?.[locale] || summary?.takeaway?.ko || summary?.takeaway?.en || '')
-      : '';
-
-    // Editorial line for this session, else that session's daily title, else nothing.
-    let label = '';
-    let text = '';
-    if (editorial) {
-      label = messages.takeawayLabel;
-      text = editorial;
-    } else if (daily) {
-      label = messages.dailyReportLabel;
-      text = daily.title || '';
-    }
     // Rewrite the href on every paint, the hidden one included. Leaving the
     // previous session's href in place would keep a link to another day's
     // report one CSS rule away from being clickable.
@@ -1034,7 +1041,7 @@
       return;
     }
     if (rowEl) rowEl.hidden = false;
-    if (labelEl) labelEl.textContent = label;
+    if (labelEl) labelEl.textContent = messages.takeawayLabel;
     if (textEl) textEl.textContent = text;
   }
 

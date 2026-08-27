@@ -181,3 +181,28 @@ powershell -ExecutionPolicy Bypass -File .\register_market_close_task.ps1
 등록 결과에는 정시 트리거 10개와 2분 지연된 부팅·로그온 복구 트리거 2개가 포함되어야 한다. Task Scheduler의 **예약된 시작을 놓친 경우 가능한 한 빨리 작업 실행**은 `StartWhenAvailable`로 활성화된다.
 
 Snowshagal 자동 전송 단계에서는 `MarketCloseExporter.export()`가 `final`을 반환한 직후, 또는 `data/market_close/latest.json`을 읽는 별도 uploader를 연결한다. Exporter에는 네트워크 전송 책임을 추가하지 않는다.
+
+## Publish envelope
+
+`POST /api/market/publish` accepts either shape:
+
+- the bare Market Close document, exactly as this contract describes it;
+- or an envelope that carries the editorial one-liner alongside it:
+
+```json
+{
+  "market": { "meta": { ... }, "indices": { ... } },
+  "takeaway": { "ko": "…", "en": "…" }
+}
+```
+
+Only `market` is validated against the schema, and only `market` is stored as
+`payload_json`, so the machine-generated document stays exactly as produced. The
+one-liner is written by hand, so it lives beside the session on the same row
+rather than inside the contract.
+
+Both fields are optional and each is capped at 400 characters. `GET
+/api/market/latest` returns them as a top-level `takeaway` object, so a consumer
+receives the sentence and the numbers it describes together and can never pair
+one date's figures with another date's line. An empty language is left empty:
+the homepage hides that row rather than substituting the other language.

@@ -59,6 +59,7 @@
     validationBox.textContent = valid ? '기본 게시 조건을 통과했습니다. 서버에서 JSON Schema 전체 검증 후 저장합니다.' : errors.join('\n');
     preview.className = 'market-close-page';
     window.MARKET_CLOSE?.render(payload, preview);
+    renderTakeawayState();
     updateButton();
   }
 
@@ -71,17 +72,43 @@
   drop.addEventListener('drop', event => selectFile(event.dataTransfer?.files?.[0]));
   keyInput.addEventListener('input', () => { try { sessionStorage.setItem('market-admin-key', keyInput.value); } catch (_) {} updateButton(); });
 
+  // The one-liner is written by hand and travels with the machine-generated
+  // payload, so both reach D1 under the same market_date.
+  const takeawayKo = document.getElementById('market-takeaway-ko');
+  const takeawayEn = document.getElementById('market-takeaway-en');
+  const takeawayCount = document.getElementById('market-takeaway-count');
+  const takeawayDate = document.getElementById('market-takeaway-date');
+
+  function renderTakeawayState() {
+    if (takeawayDate) takeawayDate.textContent = payload?.meta?.market_date || 'market date';
+    if (!takeawayCount) return;
+    const ko = takeawayKo?.value.trim() || '';
+    const en = takeawayEn?.value.trim() || '';
+    const parts = [];
+    parts.push(ko ? `한국어 ${ko.length}자` : '한국어 없음 — KO 홈에서 한 줄 숨김');
+    parts.push(en ? `English ${en.length}자` : 'English 없음 — EN 홈에서 한 줄 숨김');
+    takeawayCount.textContent = parts.join(' · ');
+  }
+  [takeawayKo, takeawayEn].forEach(field => field?.addEventListener('input', renderTakeawayState));
+  renderTakeawayState();
+
   publishButton.addEventListener('click', async () => {
     if (!valid || !raw) return;
     publishButton.disabled = true;
     publishStatus.className = 'market-publish-status';
     publishStatus.textContent = '서버 계약 검증과 D1 저장을 진행 중입니다…';
     try {
-      const response = await fetch('/api/market/publish', { method: 'POST', headers: { 'content-type': 'application/json', 'x-admin-key': keyInput.value.trim() }, body: raw });
+      const envelope = JSON.stringify({
+        market: payload,
+        takeaway: { ko: takeawayKo?.value.trim() || '', en: takeawayEn?.value.trim() || '' }
+      });
+      const response = await fetch('/api/market/publish', { method: 'POST', headers: { 'content-type': 'application/json', 'x-admin-key': keyInput.value.trim() }, body: envelope });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error([result.message, ...(result.details || []).slice(0, 3)].filter(Boolean).join(' · ') || `게시 실패 (${response.status})`);
       publishStatus.className = 'market-publish-status success';
-      publishStatus.textContent = `${result.market_date} 저장 완료 · ${result.action === 'created' ? '신규' : '동일 날짜 갱신'}${result.is_latest ? ' · latest 반영' : ' · 과거 날짜 보관'}`;
+      const saved = [result.takeaway?.ko ? 'KO' : null, result.takeaway?.en ? 'EN' : null].filter(Boolean);
+      const takeawayNote = saved.length ? ` · 한 줄 ${saved.join('/')}` : ' · 한 줄 없음';
+      publishStatus.textContent = `${result.market_date} 저장 완료 · ${result.action === 'created' ? '신규' : '동일 날짜 갱신'}${result.is_latest ? ' · latest 반영' : ' · 과거 날짜 보관'}${takeawayNote}`;
     } catch (error) {
       publishStatus.className = 'market-publish-status error';
       publishStatus.textContent = error.message || '게시하지 못했습니다.';

@@ -2,6 +2,11 @@ export const SCHEMA_VERSION = '1.0.1';
 export const MAX_PAYLOAD_BYTES = 512 * 1024;
 export const TABLE_NAME = 'market_close_snapshots';
 export const SCHEMA_PATH = '/contracts/market_close/market_close.schema.json';
+// The editorial one-liner is written by hand while the market payload is
+// machine-generated, so it is stored beside the session rather than inside
+// the contract. Keeping them on one row is what makes it impossible for the
+// homepage to show one date's numbers under another date's sentence.
+export const MAX_TAKEAWAY_LENGTH = 400;
 
 const schemaPromises = new WeakMap();
 
@@ -50,8 +55,15 @@ export async function ensureMarketTable(env) {
         status TEXT NOT NULL,
         payload_json TEXT NOT NULL,
         published_at TEXT NOT NULL,
-        auth_source TEXT NOT NULL
+        auth_source TEXT NOT NULL,
+        takeaway_ko TEXT NOT NULL DEFAULT '',
+        takeaway_en TEXT NOT NULL DEFAULT ''
       )`).run();
+      // Tables created before the one-liner existed need the columns added.
+      for (const column of ['takeaway_ko', 'takeaway_en']) {
+        try { await db.prepare(`ALTER TABLE ${TABLE_NAME} ADD COLUMN ${column} TEXT NOT NULL DEFAULT ''`).run(); }
+        catch (_) { /* already present */ }
+      }
       await db.prepare(`CREATE INDEX IF NOT EXISTS idx_market_close_generated ON ${TABLE_NAME} (generated_at)`).run();
     })().catch(error => {
       schemaPromises.delete(db);

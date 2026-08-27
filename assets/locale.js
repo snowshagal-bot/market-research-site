@@ -22,8 +22,7 @@
       empty: '조건에 맞는 글이 없습니다.',
       read: '읽기',
       archiveMore: '더 보기',
-      takeawayLabel: '오늘의 한 줄',
-      dailyReportLabel: '오늘의 리포트'
+      takeawayLabel: '오늘의 한 줄'
     },
     en: {
       categories: {
@@ -45,8 +44,7 @@
       empty: 'No English reports match these filters yet.',
       read: 'Read',
       archiveMore: 'Show more',
-      takeawayLabel: "Today's takeaway",
-      dailyReportLabel: "Today's report"
+      takeawayLabel: "Today's takeaway"
     }
   };
 

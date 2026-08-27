@@ -109,8 +109,13 @@ function quote(close, change, changePct) {
   return { close, current: close, change, change_pct: changePct, previous_close: close - change };
 }
 
-function marketPayload(marketDate) {
+const KO_LINE = '낙차를 되감았지만, 시장의 무게중심은 아직 돌아오지 않았다.';
+const EN_LINE = 'The market retraced the selloff, but its centre of gravity has yet to return.';
+
+/** The published session, optionally carrying its own editorial one-liner. */
+function marketPayload(marketDate, takeaway) {
   return {
+    ...(takeaway ? { takeaway } : {}),
     meta: { market_date: marketDate, schema_version: '1.0.1', status: 'final' },
     indices: {
       KOSPI: quote(6808.21, 65.47, 0.9709702583816112),
@@ -224,7 +229,7 @@ async function runHomepage({ fetchResult = null, ...rest } = {}) {
 }
 
 test('A. published Market Close wins over the static fallback and links its own daily report', async () => {
-  const strip = await runHomepage({ fetchResult: marketPayload('2026-08-26') });
+  const strip = await runHomepage({ fetchResult: marketPayload('2026-08-26', { ko: KO_LINE, en: EN_LINE }) });
 
   assert.deepEqual(strip.requestedUrls, ['/api/market/latest']);
   assert.equal(strip.date.textContent, 'AUG 26');
@@ -238,12 +243,29 @@ test('A. published Market Close wins over the static fallback and links its own 
   // The one-liner points at the daily report for the displayed session.
   assert.equal(strip.row.hidden, false);
   assert.equal(strip.link.href, '/reports/2026-08-26-ko.html');
-  assert.equal(strip.text.textContent, '먼저열리는 밤');
-  assert.equal(strip.label.textContent, '오늘의 리포트');
+  // The line comes with the session, not from the static file.
+  assert.equal(strip.text.textContent, KO_LINE);
+  assert.equal(strip.label.textContent, '오늘의 한 줄');
 });
 
-test('A2. the stale 08-25 editorial line is never shown beside 08-26 numbers', async () => {
+test('A2. a live session with no line of its own never borrows the static one', async () => {
+  // 08-26 numbers, no takeaway published yet, 08-25 line still in the static file.
   const strip = await runHomepage({ fetchResult: marketPayload('2026-08-26') });
+
+  assert.equal(strip.date.textContent, 'AUG 26');
+  assert.match(strip.grid.innerHTML, /6,808\.21/);
+  // Numbers stay; only the one-liner row goes.
+  assert.equal(strip.row.hidden, true);
+  assert.equal(strip.text.textContent, '');
+  assert.notEqual(strip.text.textContent, STATIC_SUMMARY.takeaway.ko);
+  // The link is still resolved for this session, never left on a stale value.
+  assert.equal(strip.link.href, '/reports/2026-08-26-ko.html');
+});
+
+test('A3. a published line replaces whatever the static file says', async () => {
+  const fresh = '오늘은 지수보다 수급이 먼저 움직였다.';
+  const strip = await runHomepage({ fetchResult: marketPayload('2026-08-26', { ko: fresh, en: EN_LINE }) });
+  assert.equal(strip.text.textContent, fresh);
   assert.notEqual(strip.text.textContent, STATIC_SUMMARY.takeaway.ko);
 });
 
@@ -254,7 +276,8 @@ test('B. a failed market request falls back to the static file and links that sa
   assert.match(strip.grid.innerHTML, /6,742\.74/);
   assert.doesNotMatch(strip.grid.innerHTML, /6,808\.21/);
 
-  // The 08-25 editorial line is valid here, and must not open the 08-26 report.
+  // Emergency fallback: the whole static record is used together — its date,
+  // its numbers and its line — and must not open the 08-26 report.
   assert.equal(strip.row.hidden, false);
   assert.equal(strip.text.textContent, STATIC_SUMMARY.takeaway.ko);
   assert.equal(strip.label.textContent, '오늘의 한 줄');
@@ -264,7 +287,7 @@ test('B. a failed market request falls back to the static file and links that sa
 
 test('C. a weekend market date is current data, not stale data', async () => {
   // Friday's close is what the API returns all weekend; nothing may downgrade it.
-  const strip = await runHomepage({ fetchResult: marketPayload('2026-08-28') });
+  const strip = await runHomepage({ fetchResult: marketPayload('2026-08-28', { ko: KO_LINE, en: EN_LINE }) });
 
   assert.equal(strip.date.textContent, 'AUG 28');
   assert.match(strip.grid.innerHTML, /6,808\.21/);
@@ -285,21 +308,19 @@ test('D. a market date with no matching daily report links Market Close, not ano
   assert.doesNotMatch(strip.link.href, /reports\//);
 });
 
-test('D2. an unmatched date still refuses the newest daily report', async () => {
-  const strip = await runHomepage({
-    fetchResult: marketPayload('2026-08-27'),
-    summary: { ...STATIC_SUMMARY, marketDate: '2026-08-27', items: STATIC_SUMMARY.items }
-  });
+test('D2. a session with a line but no daily report links Market Close', async () => {
+  const strip = await runHomepage({ fetchResult: marketPayload('2026-08-27', { ko: KO_LINE, en: EN_LINE }) });
 
-  // The editorial line now belongs to the displayed session, so it shows, but
-  // there is still no 08-27 report to open.
+  // The line belongs to the displayed session so it shows, but there is still
+  // no 08-27 report to open.
   assert.equal(strip.row.hidden, false);
+  assert.equal(strip.text.textContent, KO_LINE);
   assert.equal(strip.link.href, '/market/');
   assert.doesNotMatch(strip.link.href, /2026-08-26|2026-08-28/);
 });
 
 test('E. Korean and English render the same session and the same date', async () => {
-  const payload = marketPayload('2026-08-26');
+  const payload = marketPayload('2026-08-26', { ko: KO_LINE, en: EN_LINE });
   const [ko, en] = await Promise.all([
     runHomepage({ lang: 'ko', fetchResult: payload }),
     runHomepage({ lang: 'en', fetchResult: payload })
@@ -308,25 +329,76 @@ test('E. Korean and English render the same session and the same date', async ()
   assert.equal(ko.date.textContent, en.date.textContent);
   assert.equal(en.date.textContent, 'AUG 26');
   assert.equal(en.link.href, '/reports/en/2026-08-26-en.html');
-  assert.equal(en.text.textContent, 'The Night Opens First');
-  assert.equal(en.label.textContent, "Today's report");
+  assert.equal(en.text.textContent, EN_LINE);
+  assert.equal(ko.text.textContent, KO_LINE);
+  assert.equal(en.label.textContent, "Today's takeaway");
 });
 
 test('E2. English falls back to the English Market Close page', async () => {
-  const strip = await runHomepage({ lang: 'en', fetchResult: marketPayload('2026-08-27') });
-  assert.equal(strip.row.hidden, true);
+  const strip = await runHomepage({ lang: 'en', fetchResult: marketPayload('2026-08-27', { ko: KO_LINE, en: EN_LINE }) });
+  assert.equal(strip.row.hidden, false);
+  assert.equal(strip.link.href, '/en/market/');
   assert.doesNotMatch(strip.link.href, /reports\//);
+});
+
+/* ------------------------------------------- locales are independent */
+
+test('H. a Korean-only line shows in Korean and hides in English', async () => {
+  const payload = marketPayload('2026-08-26', { ko: KO_LINE, en: '' });
+  const ko = await runHomepage({ lang: 'ko', fetchResult: payload });
+  const en = await runHomepage({ lang: 'en', fetchResult: payload });
+
+  assert.equal(ko.row.hidden, false);
+  assert.equal(ko.text.textContent, KO_LINE);
+  // The Korean sentence must never stand in for the missing English one.
+  assert.equal(en.row.hidden, true);
+  assert.equal(en.text.textContent, '');
+  // Numbers and the link are unaffected on both sides.
+  assert.equal(en.date.textContent, 'AUG 26');
+  assert.match(en.grid.innerHTML, /6,808\.21/);
+  assert.equal(en.link.href, '/reports/en/2026-08-26-en.html');
+});
+
+test('H2. an English-only line shows in English and hides in Korean', async () => {
+  const payload = marketPayload('2026-08-26', { ko: '', en: EN_LINE });
+  const ko = await runHomepage({ lang: 'ko', fetchResult: payload });
+  const en = await runHomepage({ lang: 'en', fetchResult: payload });
+
+  assert.equal(en.row.hidden, false);
+  assert.equal(en.text.textContent, EN_LINE);
+  assert.equal(ko.row.hidden, true);
+  assert.equal(ko.text.textContent, '');
+  assert.equal(ko.date.textContent, 'AUG 26');
+  assert.equal(ko.link.href, '/reports/2026-08-26-ko.html');
+});
+
+test('H3. a daily published later is picked up without touching the line', async () => {
+  // 08-27 has a line but no report yet.
+  const payload = marketPayload('2026-08-27', { ko: KO_LINE, en: EN_LINE });
+  const before = await runHomepage({ fetchResult: payload });
+  assert.equal(before.link.href, '/market/');
+
+  // The same session once an 08-27 daily exists.
+  const after = await runHomepage({
+    fetchResult: payload,
+    posts: [...POSTS, { id: 'ko-0827', type: 'daily', lang: 'ko', date: '2026-08-27', reportDate: '2026-08-27', registeredAt: '2026-08-27T04:00:00.000Z', title: '새 데일리', description: '', tags: [], href: 'reports/2026-08-27-ko.html' }]
+  });
+  assert.equal(after.link.href, '/reports/2026-08-27-ko.html');
+  assert.equal(after.text.textContent, KO_LINE);
 });
 
 test('the strip never mixes API numbers with static numbers', async () => {
   // An incomplete payload is rejected as a whole rather than topped up.
-  const partial = marketPayload('2026-08-26');
+  const partial = marketPayload('2026-08-26', { ko: '살아남으면 안 되는 문장', en: 'must not survive' });
   delete partial.commodities_crypto.GOLD;
   const strip = await runHomepage({ fetchResult: partial });
 
   assert.equal(strip.date.textContent, 'AUG 25');
   assert.match(strip.grid.innerHTML, /6,742\.74/);
   assert.doesNotMatch(strip.grid.innerHTML, /6,808\.21/);
+  // Falling back means the whole static record, so the rejected payload's line
+  // must not come along with it either.
+  assert.equal(strip.text.textContent, STATIC_SUMMARY.takeaway.ko);
 });
 
 test('F. while the request is in flight nothing from the static fallback is painted', async () => {
@@ -349,13 +421,14 @@ test('F. while the request is in flight nothing from the static fallback is pain
   assert.doesNotMatch(nodes.link.href, /reports\//);
 
   // Only once the published session arrives does anything render.
-  pending.resolve(marketPayload('2026-08-26'));
+  pending.resolve(marketPayload('2026-08-26', { ko: KO_LINE, en: EN_LINE }));
   await flush();
 
   assert.equal(nodes.date.textContent, 'AUG 26');
   assert.match(nodes.grid.innerHTML, /6,808\.21/);
   assert.equal(nodes.grid.getAttribute('aria-busy'), null);
   assert.equal(nodes.row.hidden, false);
+  assert.equal(nodes.text.textContent, KO_LINE);
   assert.equal(nodes.link.href, '/reports/2026-08-26-ko.html');
   assert.doesNotMatch(nodes.grid.innerHTML, /6,742\.74/);
 });
@@ -373,7 +446,7 @@ test('F2. the English homepage holds the same neutral state while in flight', as
   assert.equal(nodes.link.href, '/en/market/');
   assert.doesNotMatch(nodes.grid.innerHTML, /6,742\.74/);
 
-  pending.resolve(marketPayload('2026-08-26'));
+  pending.resolve(marketPayload('2026-08-26', { ko: KO_LINE, en: EN_LINE }));
   await flush();
 
   assert.equal(nodes.date.textContent, 'AUG 26');
