@@ -171,3 +171,25 @@ test('KO and EN Homepage parity: identical tracked assets use identical content 
     assert.equal(koMatch[1], enMatch[1], `${asset} must have matching content hash between KO and EN`);
   }
 });
+
+test('_headers Cache-Control Guard: all dynamic search and data assets declare no-cache, no-store, must-revalidate', async () => {
+  const headersContent = await read('_headers');
+
+  for (const asset of DYNAMIC_DATA_ASSETS) {
+    const escaped = asset.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`\\/${escaped}\\s+Cache-Control:\\s+([^\\r\\n]+)`);
+    const match = headersContent.match(regex);
+    assert.ok(match, `_headers must explicitly declare Cache-Control rule for /${asset}`);
+    const cacheControlValue = match[1].trim();
+    assert.equal(
+      cacheControlValue,
+      'no-cache, no-store, must-revalidate',
+      `/${asset} in _headers must be "no-cache, no-store, must-revalidate", found "${cacheControlValue}"`
+    );
+    assert.doesNotMatch(
+      cacheControlValue,
+      /max-age=\d+/,
+      `/${asset} in _headers must not declare a long max-age policy`
+    );
+  }
+});
