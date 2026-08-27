@@ -59,7 +59,10 @@
     validationBox.textContent = valid ? '기본 게시 조건을 통과했습니다. 서버에서 JSON Schema 전체 검증 후 저장합니다.' : errors.join('\n');
     preview.className = 'market-close-page';
     window.MARKET_CLOSE?.render(payload, preview);
+    adoptTakeawayDate(payload.meta?.market_date);
+    renderTakeawayState();
     updateButton();
+    loadStoredTakeaway(payload.meta?.market_date);
   }
 
   fileInput.addEventListener('change', () => selectFile(fileInput.files?.[0]));
@@ -71,17 +74,107 @@
   drop.addEventListener('drop', event => selectFile(event.dataTransfer?.files?.[0]));
   keyInput.addEventListener('input', () => { try { sessionStorage.setItem('market-admin-key', keyInput.value); } catch (_) {} updateButton(); });
 
+  // The one-liner is written by hand and travels with the machine-generated
+  // payload, so both reach D1 under the same market_date.
+  const takeawayKo = document.getElementById('market-takeaway-ko');
+  const takeawayEn = document.getElementById('market-takeaway-en');
+  const takeawayCount = document.getElementById('market-takeaway-count');
+  const takeawayDate = document.getElementById('market-takeaway-date');
+  const takeawayLoaded = document.getElementById('market-takeaway-loaded');
+  const takeawayFields = { ko: takeawayKo, en: takeawayEn };
+  // Which date the boxes currently belong to, which languages the editor has
+  // actually written in for that date, and a counter that retires the answer
+  // to a lookup the editor has already moved past.
+  let takeawayDateKey = null;
+  let prefillToken = 0;
+  const touched = new Set();
+
+  // Switching to another day starts over. Carrying yesterday's sentence into
+  // today's boxes would file it under the wrong market_date on publish.
+  function adoptTakeawayDate(marketDate) {
+    const key = marketDate || null;
+    prefillToken += 1;
+    if (key === takeawayDateKey) return;
+    takeawayDateKey = key;
+    touched.clear();
+    if (takeawayKo) takeawayKo.value = '';
+    if (takeawayEn) takeawayEn.value = '';
+    if (takeawayLoaded) { takeawayLoaded.hidden = true; takeawayLoaded.textContent = ''; }
+  }
+
+  function renderTakeawayState() {
+    if (takeawayDate) takeawayDate.textContent = payload?.meta?.market_date || 'market date';
+    if (!takeawayCount) return;
+    const parts = [];
+    for (const [lang, field] of Object.entries(takeawayFields)) {
+      const label = lang === 'ko' ? '한국어' : 'English';
+      const home = lang === 'ko' ? 'KO' : 'EN';
+      const text = field?.value.trim() || '';
+      if (text) parts.push(`${label} ${text.length}자`);
+      // An untouched box is left out of the request entirely, so the stored
+      // line survives; an emptied one is sent as '' and erases it.
+      else if (touched.has(lang)) parts.push(`${label} 삭제 — ${home} 홈에서 한 줄 숨김`);
+      else parts.push(`${label} 입력 없음 — 저장된 문구 유지`);
+    }
+    takeawayCount.textContent = parts.join(' · ');
+  }
+  Object.entries(takeawayFields).forEach(([lang, field]) => field?.addEventListener('input', () => {
+    touched.add(lang);
+    renderTakeawayState();
+  }));
+
+  async function loadStoredTakeaway(marketDate) {
+    if (takeawayLoaded) takeawayLoaded.hidden = true;
+    if (!marketDate) return;
+    const token = prefillToken;
+    let stored;
+    try {
+      const response = await fetch('/api/market/latest', { headers: { 'cache-control': 'no-cache' } });
+      if (!response.ok) return;
+      const body = await response.json();
+      if (body?.meta?.market_date !== marketDate) return;
+      stored = body.takeaway;
+    } catch (_) { return; }
+    // A slow answer for a day the editor has left must not land in the boxes
+    // now showing another one.
+    if (token !== prefillToken || marketDate !== takeawayDateKey) return;
+    if (payload?.meta?.market_date !== marketDate || !stored) return;
+    const filled = [];
+    for (const [lang, field] of Object.entries(takeawayFields)) {
+      if (!field || touched.has(lang) || !stored[lang]) continue;
+      field.value = stored[lang];
+      filled.push(lang.toUpperCase());
+    }
+    renderTakeawayState();
+    if (!takeawayLoaded || !filled.length) return;
+    takeawayLoaded.hidden = false;
+    takeawayLoaded.textContent = `${marketDate}에 저장된 ${filled.join('/')} 문구를 불러왔습니다. 그대로 두면 유지되고, 지우고 게시하면 삭제됩니다.`;
+  }
+  renderTakeawayState();
+
   publishButton.addEventListener('click', async () => {
     if (!valid || !raw) return;
     publishButton.disabled = true;
     publishStatus.className = 'market-publish-status';
     publishStatus.textContent = '서버 계약 검증과 D1 저장을 진행 중입니다…';
     try {
-      const response = await fetch('/api/market/publish', { method: 'POST', headers: { 'content-type': 'application/json', 'x-admin-key': keyInput.value.trim() }, body: raw });
+      // Only a language the editor actually wrote in for this date is sent.
+      // An untouched box says nothing, and the server keeps what it has; an
+      // emptied box says '' and erases it.
+      const sameDate = payload?.meta?.market_date === takeawayDateKey;
+      const takeaway = {};
+      for (const [lang, field] of Object.entries(takeawayFields)) {
+        if (!sameDate || !touched.has(lang)) continue;
+        takeaway[lang] = field?.value.trim() || '';
+      }
+      const envelope = JSON.stringify({ market: payload, takeaway });
+      const response = await fetch('/api/market/publish', { method: 'POST', headers: { 'content-type': 'application/json', 'x-admin-key': keyInput.value.trim() }, body: envelope });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error([result.message, ...(result.details || []).slice(0, 3)].filter(Boolean).join(' · ') || `게시 실패 (${response.status})`);
       publishStatus.className = 'market-publish-status success';
-      publishStatus.textContent = `${result.market_date} 저장 완료 · ${result.action === 'created' ? '신규' : '동일 날짜 갱신'}${result.is_latest ? ' · latest 반영' : ' · 과거 날짜 보관'}`;
+      const saved = [result.takeaway?.ko ? 'KO' : null, result.takeaway?.en ? 'EN' : null].filter(Boolean);
+      const takeawayNote = saved.length ? ` · 한 줄 ${saved.join('/')}` : ' · 한 줄 없음';
+      publishStatus.textContent = `${result.market_date} 저장 완료 · ${result.action === 'created' ? '신규' : '동일 날짜 갱신'}${result.is_latest ? ' · latest 반영' : ' · 과거 날짜 보관'}${takeawayNote}`;
     } catch (error) {
       publishStatus.className = 'market-publish-status error';
       publishStatus.textContent = error.message || '게시하지 못했습니다.';
