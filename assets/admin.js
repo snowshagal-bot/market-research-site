@@ -386,18 +386,33 @@
       .slice(0, MAX_TAKEAWAY_LENGTH);
   }
 
+  // A cover can set its line across two rows with <br>. Reading textContent
+  // straight off the element would run "it," into "but", so the breaks become
+  // spaces on a copy first and the document itself is left alone.
+  function elementTakeaway(element) {
+    if (!element) return '';
+    const clone = element.cloneNode ? element.cloneNode(true) : null;
+    if (clone && typeof clone.querySelectorAll === 'function') {
+      clone.querySelectorAll('br').forEach(br => { br.replaceWith(' '); });
+      return normalizeTakeaway(clone.textContent);
+    }
+    return normalizeTakeaway(element.textContent);
+  }
+
   function detectTakeaway(doc) {
     const declared = normalizeTakeaway(doc?.querySelector('meta[name="report-takeaway"]')?.content);
     if (declared) return declared;
     const marked = doc?.querySelector('[data-report-takeaway]');
     if (marked) {
       // The attribute either carries the line or just marks the element.
-      const text = normalizeTakeaway(marked.getAttribute?.('data-report-takeaway')) || normalizeTakeaway(marked.textContent);
+      const text = normalizeTakeaway(marked.getAttribute?.('data-report-takeaway')) || elementTakeaway(marked);
       if (text) return text;
     }
-    // Where the shipping Daily cover puts it, beside the scroll nudge.
-    for (const selector of ['.cover-hint .cv-one', '.cover-oneline']) {
-      const text = normalizeTakeaway(doc?.querySelector(selector)?.textContent);
+    // Where the covers put it. Editorial Ledger v2 gives the line its own
+    // field under an ONE LINE TODAY label; the older covers wrote it beside
+    // the scroll nudge, and those reports are still published.
+    for (const selector of ['.cv-line', '.cover-hint .cv-one', '.cover-oneline']) {
+      const text = elementTakeaway(doc?.querySelector(selector));
       if (text) return text;
     }
     return '';
