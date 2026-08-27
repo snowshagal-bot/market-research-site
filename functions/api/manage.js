@@ -8,6 +8,7 @@ const PRODUCTION_HOSTNAME = "snowshagal.com";
 const API_VERSION = "2026-03-10";
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const MAX_COVER_BYTES = 4 * 1024 * 1024;
+const MAX_TAKEAWAY_LENGTH = 400;
 
 const TYPE_LABELS = {
   daily: "주식 리포트",
@@ -613,6 +614,8 @@ function validateEditableFields(form) {
     summary: String(form.get("summary") || "").trim().slice(0, 500),
     tagsProvided,
     tags,
+    takeawayProvided: form.has("takeaway"),
+    takeaway: String(form.get("takeaway") || "").replace(/\s+/g, " ").trim().slice(0, MAX_TAKEAWAY_LENGTH),
   };
 }
 
@@ -774,6 +777,17 @@ export async function onRequestPost(context) {
       if (editFields.summaryProvided) {
         if (editFields.summary) updated.summary = editFields.summary;
         else delete updated.summary;
+      }
+
+      if (editFields.type === 'daily') {
+        if (editFields.takeawayProvided) {
+          if (editFields.takeaway) updated.takeaway = editFields.takeaway;
+          else delete updated.takeaway;
+        } else if (existing.takeaway) {
+          updated.takeaway = existing.takeaway;
+        }
+      } else {
+        delete updated.takeaway;
       }
 
       if (editFields.tagsProvided) {
