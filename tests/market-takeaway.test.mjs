@@ -198,3 +198,21 @@ test('the static file survives only as the emergency fallback', async () => {
   assert.match(site, /return String\(source\?\.\[locale\] \|\| ''\)\.trim\(\);/);
   assert.doesNotMatch(site, /summary\?\.takeaway\?\.ko \|\| summary\?\.takeaway\?\.en/);
 });
+
+/* ------------------------------------- every surface asks for the same file */
+
+test('report pages request the same locale.js build as the rest of the site', async () => {
+  const files = [
+    'index.html', 'en/index.html', 'market/index.html', 'en/market/index.html',
+    'about/index.html', 'en/about/index.html', 'admin/index.html', 'admin/market/index.html',
+    'functions/_middleware.js'
+  ];
+  const versions = new Set();
+  for (const file of files) {
+    const source = await read(file);
+    for (const [, version] of source.matchAll(/locale\.js\?v=([\w-]+)/g)) versions.add(version);
+  }
+  // Reports get their locale.js from the middleware rather than their own HTML,
+  // so a bump made only in the page templates leaves readers on a stale copy.
+  assert.equal(versions.size, 1, `locale.js is pinned to several builds: ${[...versions].join(', ')}`);
+});
