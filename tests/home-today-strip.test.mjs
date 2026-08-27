@@ -242,7 +242,7 @@ test('A. published Market Close wins over the static fallback and links its own 
 
   // The one-liner points at the daily report for the displayed session.
   assert.equal(strip.row.hidden, false);
-  assert.equal(strip.link.href, '/reports/2026-08-26-ko.html');
+  assert.equal(strip.link.href, '/reports/2026-08-26-ko');
   // The line comes with the session, not from the static file.
   assert.equal(strip.text.textContent, KO_LINE);
   assert.equal(strip.label.textContent, '오늘의 한 줄');
@@ -259,7 +259,7 @@ test('A2. a live session with no line of its own never borrows the static one', 
   assert.equal(strip.text.textContent, '');
   assert.notEqual(strip.text.textContent, STATIC_SUMMARY.takeaway.ko);
   // The link is still resolved for this session, never left on a stale value.
-  assert.equal(strip.link.href, '/reports/2026-08-26-ko.html');
+  assert.equal(strip.link.href, '/reports/2026-08-26-ko');
 });
 
 test('A3. a published line replaces whatever the static file says', async () => {
@@ -281,7 +281,7 @@ test('B. a failed market request falls back to the static file and links that sa
   assert.equal(strip.row.hidden, false);
   assert.equal(strip.text.textContent, STATIC_SUMMARY.takeaway.ko);
   assert.equal(strip.label.textContent, '오늘의 한 줄');
-  assert.equal(strip.link.href, '/reports/2026-08-25-ko.html');
+  assert.equal(strip.link.href, '/reports/2026-08-25-ko');
   assert.doesNotMatch(strip.link.href, /2026-08-26/);
 });
 
@@ -292,7 +292,7 @@ test('C. a weekend market date is current data, not stale data', async () => {
   assert.equal(strip.date.textContent, 'AUG 28');
   assert.match(strip.grid.innerHTML, /6,808\.21/);
   assert.equal(strip.row.hidden, false);
-  assert.equal(strip.link.href, '/reports/2026-08-28-ko.html');
+  assert.equal(strip.link.href, '/reports/2026-08-28-ko');
 
   // Freshness is decided by the API's market_date alone, never by the calendar.
   const siteJs = await read('assets/site.js');
@@ -328,7 +328,7 @@ test('E. Korean and English render the same session and the same date', async ()
 
   assert.equal(ko.date.textContent, en.date.textContent);
   assert.equal(en.date.textContent, 'AUG 26');
-  assert.equal(en.link.href, '/reports/en/2026-08-26-en.html');
+  assert.equal(en.link.href, '/reports/en/2026-08-26-en');
   assert.equal(en.text.textContent, EN_LINE);
   assert.equal(ko.text.textContent, KO_LINE);
   assert.equal(en.label.textContent, "Today's takeaway");
@@ -356,7 +356,7 @@ test('H. a Korean-only line shows in Korean and hides in English', async () => {
   // Numbers and the link are unaffected on both sides.
   assert.equal(en.date.textContent, 'AUG 26');
   assert.match(en.grid.innerHTML, /6,808\.21/);
-  assert.equal(en.link.href, '/reports/en/2026-08-26-en.html');
+  assert.equal(en.link.href, '/reports/en/2026-08-26-en');
 });
 
 test('H2. an English-only line shows in English and hides in Korean', async () => {
@@ -369,7 +369,7 @@ test('H2. an English-only line shows in English and hides in Korean', async () =
   assert.equal(ko.row.hidden, true);
   assert.equal(ko.text.textContent, '');
   assert.equal(ko.date.textContent, 'AUG 26');
-  assert.equal(ko.link.href, '/reports/2026-08-26-ko.html');
+  assert.equal(ko.link.href, '/reports/2026-08-26-ko');
 });
 
 test('H3. a daily published later is picked up without touching the line', async () => {
@@ -383,7 +383,7 @@ test('H3. a daily published later is picked up without touching the line', async
     fetchResult: payload,
     posts: [...POSTS, { id: 'ko-0827', type: 'daily', lang: 'ko', date: '2026-08-27', reportDate: '2026-08-27', registeredAt: '2026-08-27T04:00:00.000Z', title: '새 데일리', description: '', tags: [], href: 'reports/2026-08-27-ko.html' }]
   });
-  assert.equal(after.link.href, '/reports/2026-08-27-ko.html');
+  assert.equal(after.link.href, '/reports/2026-08-27-ko');
   assert.equal(after.text.textContent, KO_LINE);
 });
 
@@ -429,7 +429,7 @@ test('F. while the request is in flight nothing from the static fallback is pain
   assert.equal(nodes.grid.getAttribute('aria-busy'), null);
   assert.equal(nodes.row.hidden, false);
   assert.equal(nodes.text.textContent, KO_LINE);
-  assert.equal(nodes.link.href, '/reports/2026-08-26-ko.html');
+  assert.equal(nodes.link.href, '/reports/2026-08-26-ko');
   assert.doesNotMatch(nodes.grid.innerHTML, /6,742\.74/);
 });
 
@@ -450,7 +450,7 @@ test('F2. the English homepage holds the same neutral state while in flight', as
   await flush();
 
   assert.equal(nodes.date.textContent, 'AUG 26');
-  assert.equal(nodes.link.href, '/reports/en/2026-08-26-en.html');
+  assert.equal(nodes.link.href, '/reports/en/2026-08-26-en');
 });
 
 test('G. the fallback is painted only after the request actually fails', async () => {
@@ -478,7 +478,7 @@ test('G. the fallback is painted only after the request actually fails', async (
   assert.equal(nodes.row.hidden, false);
   assert.equal(nodes.label.textContent, '오늘의 한 줄');
   assert.equal(nodes.text.textContent, STATIC_SUMMARY.takeaway.ko);
-  assert.equal(nodes.link.href, '/reports/2026-08-25-ko.html');
+  assert.equal(nodes.link.href, '/reports/2026-08-25-ko');
 });
 
 test('G2. a rejected request also keeps the neutral state until it settles', async () => {
@@ -492,7 +492,7 @@ test('G2. a rejected request also keeps the neutral state until it settles', asy
   pending.resolve(null);
   await flush();
   assert.equal(nodes.date.textContent, 'AUG 25');
-  assert.equal(nodes.link.href, '/reports/2026-08-25-ko.html');
+  assert.equal(nodes.link.href, '/reports/2026-08-25-ko');
 });
 
 test('site.js paints the strip exactly once, after the request settles', async () => {
@@ -554,7 +554,7 @@ test('I. a Daily supplies the one-liner when nobody typed an override', async ()
   });
   assert.equal(strip.row.hidden, false);
   assert.equal(strip.text.textContent, DAILY_KO_LINE);
-  assert.equal(strip.link.href, '/reports/2026-08-27-ko.html');
+  assert.equal(strip.link.href, '/reports/2026-08-27-ko');
 });
 
 test('I2. English reads its own Daily, not the Korean one', async () => {
@@ -564,7 +564,7 @@ test('I2. English reads its own Daily, not the Korean one', async () => {
     fetchResult: marketPayload('2026-08-27')
   });
   assert.equal(strip.text.textContent, DAILY_EN_LINE);
-  assert.equal(strip.link.href, '/reports/en/2026-08-27-en.html');
+  assert.equal(strip.link.href, '/reports/en/2026-08-27-en');
 });
 
 test('J. a typed override outranks the Daily, and still links the Daily', async () => {
@@ -573,7 +573,7 @@ test('J. a typed override outranks the Daily, and still links the Daily', async 
     fetchResult: marketPayload('2026-08-27', { ko: OVERRIDE_KO, en: '' })
   });
   assert.equal(strip.text.textContent, OVERRIDE_KO);
-  assert.equal(strip.link.href, '/reports/2026-08-27-ko.html');
+  assert.equal(strip.link.href, '/reports/2026-08-27-ko');
 
   // The override is per language: English had none, so its Daily still speaks.
   const english = await runHomepage({
@@ -614,7 +614,7 @@ test('M. a same-date Daily with no line hides the row but keeps the link', async
     fetchResult: marketPayload('2026-08-27')
   });
   assert.equal(strip.row.hidden, true);
-  assert.equal(strip.link.href, '/reports/2026-08-27-ko.html', 'the report is still worth linking');
+  assert.equal(strip.link.href, '/reports/2026-08-27-ko', 'the report is still worth linking');
 });
 
 test('N. with the API down the static record answers alone', async () => {
@@ -652,7 +652,7 @@ test('P. publishing the Daily later fills the row on the next load', async () =>
   const after = await runHomepage({ posts: LINKED_POSTS, fetchResult: payload });
   assert.equal(after.row.hidden, false);
   assert.equal(after.text.textContent, DAILY_KO_LINE);
-  assert.equal(after.link.href, '/reports/2026-08-27-ko.html');
+  assert.equal(after.link.href, '/reports/2026-08-27-ko');
 });
 
 test('Q. a Daily line is normalized before it reaches the strip', async () => {

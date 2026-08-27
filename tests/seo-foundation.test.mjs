@@ -10,6 +10,7 @@ import {
   categoryHasPosts,
   categoryLandingPath,
   categoryReportLinks,
+  cleanReportHref,
   homepageLatestLinks,
   homepageReportLinks,
   postLanguage,
@@ -87,10 +88,11 @@ test('homepage discovery renderers expose real localized report anchors', async 
     for (const href of [...latestHrefs, ...archiveHrefs]) {
       assert.match(href, /^\/reports\/.+/);
       assert.doesNotMatch(href, /\/\/|\\|\?|#/);
+      assert.doesNotMatch(href, /\.html?$/i, 'internal links must use clean URLs');
       const decoded = decodeURIComponent(href.replace(/^\//, ''));
-      await access(fileURLToPath(new URL(`../${decoded}`, import.meta.url)));
+      await access(fileURLToPath(new URL(`../${decoded}.html`, import.meta.url)));
     }
-    const localizedPaths = new Set(posts.filter((post) => postLanguage(post) === lang).map((post) => `/${post.href}`));
+    const localizedPaths = new Set(posts.filter((post) => postLanguage(post) === lang).map((post) => cleanReportHref(post.href)));
     for (const href of [...latestHrefs, ...archiveHrefs]) assert.ok(localizedPaths.has(href), `${lang}: ${href}`);
   }
 });
@@ -115,7 +117,7 @@ test('middleware puts crawlable report links into homepage and category source',
   });
   const landingHtml = await landing.text();
   assert.match(landingHtml, /id="category-report-list"><a class="report-item"/);
-  const expected = new Set(posts.filter((post) => postLanguage(post) === 'ko' && post.type === 'daily').map((post) => `/${post.href}`));
+  const expected = new Set(posts.filter((post) => postLanguage(post) === 'ko' && post.type === 'daily').map((post) => cleanReportHref(post.href)));
   for (const href of hrefs(landingHtml)) assert.ok(expected.has(href), `daily landing leaked ${href}`);
 });
 
@@ -146,7 +148,7 @@ test('category lists contain only their locale and category and every link resol
     for (const lang of ['ko', 'en']) {
       const links = hrefs(categoryReportLinks(posts, type, lang));
       const expected = posts.filter((post) => postLanguage(post) === lang && post.type === type);
-      assert.deepEqual(new Set(links), new Set(expected.map((post) => `/${post.href}`)));
+      assert.deepEqual(new Set(links), new Set(expected.map((post) => cleanReportHref(post.href))));
       for (const post of expected) await access(fileURLToPath(new URL(`../${post.href}`, import.meta.url)));
     }
   }

@@ -172,6 +172,23 @@ export function reportSiteUrl(path) {
   return new URL(`/${normalized}`, PRODUCTION_ORIGIN).href;
 }
 
+/**
+ * Strip .html extension from a report href for internal navigation links.
+ * Returns a root-relative path like "/reports/foo" (no .html).
+ * Only applies to paths under reports/; other paths pass through unchanged.
+ */
+export function cleanReportHref(href) {
+  const str = String(href || '').trim();
+  const match = str.match(/^([^?#]*)([?#].*)?$/);
+  const pathPart = (match && match[1]) || '';
+  const suffix = (match && match[2]) || '';
+  const normalized = normalizeSitePath(pathPart);
+  if (/^reports\//i.test(normalized)) {
+    return `/${normalized.replace(/\.html?$/i, '')}${suffix}`;
+  }
+  return `/${normalized}${suffix}`;
+}
+
 export function findPostByPath(posts, pathname) {
   const normalized = normalizeSitePath(pathname).replace(/\.html?$/i, '');
   return posts.find((post) => normalizeSitePath(post?.href).replace(/\.html?$/i, '') === normalized) || null;
@@ -280,7 +297,7 @@ function reportRowMarkup(post, lang, isLatest = false) {
   const mins = typeof post?.readingMinutes === 'number' && post.readingMinutes > 0 ? post.readingMinutes : 0;
   const readLabel = mins > 0 ? (lang === 'en' ? ` · ${mins} min read` : ` · 약 ${mins}분`) : '';
   const latestAttr = isLatest ? ' data-latest="true"' : '';
-  return `<a class="report-item"${latestAttr} href="${escapeHtml(`/${normalizeSitePath(post?.href)}`)}">`
+  return `<a class="report-item"${latestAttr} href="${escapeHtml(cleanReportHref(post?.href))}">`
     + `<div><span class="report-type ${escapeHtml(post?.type || '')}">${escapeHtml(category)}</span>`
     + `<span class="report-date">${escapeHtml(date)}${escapeHtml(readLabel)}</span></div>`
     + `<div><div class="report-title">${escapeHtml(post?.title || '')}</div>`
@@ -329,7 +346,7 @@ export function homepageLatestLinks(posts, lang) {
         : '<span class="latest-card-art" aria-hidden="true"></span>';
       const mins = typeof post?.readingMinutes === 'number' && post.readingMinutes > 0 ? post.readingMinutes : 0;
       const readingSuffix = mins > 0 ? (lang === 'en' ? ` · ${mins} min read` : ` · 약 ${mins}분`) : '';
-      return `<a class="latest-card latest-card-${escapeHtml(post.type)}" href="/${escapeHtml(normalizeSitePath(post.href))}">`
+      return `<a class="latest-card latest-card-${escapeHtml(post.type)}" href="${escapeHtml(cleanReportHref(post.href))}">`
         + `<span class="latest-card-meta"><b>${escapeHtml(post.type.toUpperCase())}${escapeHtml(readingSuffix)}</b><time datetime="${escapeHtml(post.reportDate || post.date || '')}">${escapeHtml(post.reportDate || post.date || '')}</time></span>`
         + `<strong class="latest-card-title">${escapeHtml(post.title || '')}</strong>`
         + `<span class="latest-card-body">${visual}<span class="latest-card-copy"><p class="latest-card-summary">${escapeHtml(summary)}</p>`
