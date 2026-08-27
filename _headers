@@ -1,3 +1,15 @@
+/*
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+
+/admin/*
+  # _headers merges rules, so a second X-Frame-Options here would leave two
+  # conflicting values and undefined behaviour. frame-ancestors is specified to
+  # take precedence over X-Frame-Options when both are present, so it wins
+  # unambiguously. Only frame-ancestors is declared: a full CSP is impractical
+  # while uploaded reports carry inline scripts.
+  Content-Security-Policy: frame-ancestors 'none'
+
 /data/posts.js
   Cache-Control: no-cache, no-store, must-revalidate
 

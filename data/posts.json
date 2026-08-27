@@ -20,7 +20,8 @@
     "readingMinutes": 12,
     "href": "reports/en/2026-08-26_KOSPI_Daily_Report_EN.html",
     "translationGroup": "2026-08-26-daily-1ufok0a",
-    "coverImage": "covers/2026-08-26-daily-15udspv.webp"
+    "coverImage": "covers/2026-08-26-daily-15udspv.webp",
+    "shareCardImage": "covers/share/2026-08-26-daily-15udspv.jpg"
   },
   {
     "id": "2026-08-26-daily-1ufok0a",
@@ -42,7 +43,8 @@
     ],
     "readingMinutes": 8,
     "href": "reports/8월 26일 주식리포트_커버통합.html",
-    "coverImage": "covers/2026-08-26-daily-1ufok0a.webp"
+    "coverImage": "covers/2026-08-26-daily-1ufok0a.webp",
+    "shareCardImage": "covers/share/2026-08-26-daily-1ufok0a.jpg"
   },
   {
     "id": "2026-08-25-daily-bmu64e",
@@ -65,7 +67,8 @@
       "semiconductors",
       "rates"
     ],
-    "readingMinutes": 9
+    "readingMinutes": 9,
+    "shareCardImage": "covers/share/2026-08-25-daily-bmu64e.jpg"
   },
   {
     "id": "2026-08-25-daily-13engmv",
@@ -87,7 +90,8 @@
       "semiconductors",
       "rates"
     ],
-    "readingMinutes": 6
+    "readingMinutes": 6,
+    "shareCardImage": "covers/share/2026-08-25-daily-13engmv.jpg"
   },
   {
     "id": "2026-08-24-daily-ya1ru9",
@@ -110,7 +114,8 @@
       "flows",
       "semiconductors"
     ],
-    "readingMinutes": 7
+    "readingMinutes": 7,
+    "shareCardImage": "covers/share/2026-08-24-daily-ya1ru9.jpg"
   },
   {
     "id": "2026-08-24-daily-97jc8s",
@@ -132,7 +137,8 @@
       "flows",
       "semiconductors"
     ],
-    "readingMinutes": 4
+    "readingMinutes": 4,
+    "shareCardImage": "covers/share/2026-08-24-daily-97jc8s.jpg"
   },
   {
     "id": "2026-08-23-research-16pvcxp",
@@ -155,7 +161,8 @@
       "rates",
       "policy"
     ],
-    "readingMinutes": 11
+    "readingMinutes": 11,
+    "shareCardImage": "covers/share/2026-08-23-research-16pvcxp.jpg"
   },
   {
     "id": "2026-08-23-research-1xleg6o",
@@ -177,7 +184,8 @@
       "rates",
       "policy"
     ],
-    "readingMinutes": 7
+    "readingMinutes": 7,
+    "shareCardImage": "covers/share/2026-08-23-research-1xleg6o.jpg"
   },
   {
     "id": "2026-08-21-daily-16tx7f1",
@@ -200,7 +208,8 @@
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 6
+    "readingMinutes": 6,
+    "shareCardImage": "covers/share/2026-08-21-daily-16tx7f1.jpg"
   },
   {
     "id": "2026-08-21-daily-1i56f22",
@@ -223,7 +232,8 @@
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 4
+    "readingMinutes": 4,
+    "shareCardImage": "covers/share/2026-08-21-daily-1i56f22.jpg"
   },
   {
     "id": "2026-08-20-daily-1ctu7fr",
@@ -246,7 +256,8 @@
       "semiconductors",
       "rates"
     ],
-    "readingMinutes": 6
+    "readingMinutes": 6,
+    "shareCardImage": "covers/share/2026-08-20-daily-1ctu7fr.jpg"
   },
   {
     "id": "2026-08-20-daily-c6eow2",
@@ -270,7 +281,8 @@
       "flows",
       "treasuries"
     ],
-    "readingMinutes": 4
+    "readingMinutes": 4,
+    "shareCardImage": "covers/share/2026-08-20-daily-c6eow2.jpg"
   },
   {
     "id": "2026-08-19-daily-otvpwu",
@@ -294,7 +306,8 @@
       "rates",
       "semiconductors"
     ],
-    "readingMinutes": 5
+    "readingMinutes": 5,
+    "shareCardImage": "covers/share/2026-08-19-daily-otvpwu.jpg"
   },
   {
     "id": "2026-08-19-daily-kuhjks",
@@ -318,7 +331,8 @@
       "rates",
       "semiconductors"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-08-19-daily-kuhjks.jpg"
   },
   {
     "id": "2026-08-18-daily-tfmejq",
@@ -341,7 +355,8 @@
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 5
+    "readingMinutes": 5,
+    "shareCardImage": "covers/share/2026-08-18-daily-tfmejq.jpg"
   },
   {
     "id": "2026-08-18-weekly-11u1873",
@@ -364,7 +379,8 @@
       "fx",
       "geopolitics"
     ],
-    "readingMinutes": 17
+    "readingMinutes": 17,
+    "shareCardImage": "covers/share/2026-08-18-weekly-11u1873.jpg"
   },
   {
     "id": "2026-08-18-weekly-n6uraz",
@@ -386,7 +402,8 @@
       "fx",
       "geopolitics"
     ],
-    "readingMinutes": 11
+    "readingMinutes": 11,
+    "shareCardImage": "covers/share/2026-08-18-weekly-n6uraz.jpg"
   },
   {
     "id": "2026-08-18-daily-1burfko",
@@ -409,7 +426,8 @@
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-08-18-daily-1burfko.jpg"
   },
   {
     "id": "2026-08-16-research-1b9x09d",
@@ -432,7 +450,8 @@
       "cloud-datacenter",
       "semiconductors"
     ],
-    "readingMinutes": 4
+    "readingMinutes": 4,
+    "shareCardImage": "covers/share/2026-08-16-research-1b9x09d.jpg"
   },
   {
     "id": "2026-08-16-research-141u5l9",
@@ -455,7 +474,8 @@
       "cloud-datacenter",
       "semiconductors"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-08-16-research-141u5l9.jpg"
   },
   {
     "id": "2026-08-15-basics-1cd8c9w",
@@ -473,7 +493,8 @@
     "href": "reports/시장을읽는말들_4편_좋은회사가왜좋은주식은아닌가.html",
     "coverImage": "covers/2026-08-15-basics-1cd8c9w.webp",
     "tags": [],
-    "readingMinutes": 6
+    "readingMinutes": 6,
+    "shareCardImage": "covers/share/2026-08-15-basics-1cd8c9w.jpg"
   },
   {
     "id": "2026-08-14-daily-1yyf33y",
@@ -497,7 +518,8 @@
       "flows",
       "semiconductors"
     ],
-    "readingMinutes": 4
+    "readingMinutes": 4,
+    "shareCardImage": "covers/share/2026-08-14-daily-1yyf33y.jpg"
   },
   {
     "id": "2026-08-14-daily-dqoisk",
@@ -519,7 +541,8 @@
       "flows",
       "semiconductors"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-08-14-daily-dqoisk.jpg"
   },
   {
     "id": "2026-08-13-basics-1cmfur2",
@@ -541,7 +564,8 @@
       "semiconductors",
       "rates"
     ],
-    "readingMinutes": 8
+    "readingMinutes": 8,
+    "shareCardImage": "covers/share/2026-08-13-basics-1cmfur2.jpg"
   },
   {
     "id": "2026-08-13-basics-1qofo4f",
@@ -563,7 +587,8 @@
       "fx",
       "fed"
     ],
-    "readingMinutes": 6
+    "readingMinutes": 6,
+    "shareCardImage": "covers/share/2026-08-13-basics-1qofo4f.jpg"
   },
   {
     "id": "2026-08-13-daily-1nnspvd",
@@ -586,7 +611,8 @@
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-08-13-daily-1nnspvd.jpg"
   },
   {
     "id": "2026-08-13-daily-1tgqr3y",
@@ -608,7 +634,8 @@
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-08-13-daily-1tgqr3y.jpg"
   },
   {
     "id": "2026-08-10-basics-1rhknmt",
@@ -630,7 +657,8 @@
       "futures",
       "flows"
     ],
-    "readingMinutes": 4
+    "readingMinutes": 4,
+    "shareCardImage": "covers/share/2026-08-10-basics-1rhknmt.jpg"
   },
   {
     "id": "2026-08-12-daily-rk55d0",
@@ -653,7 +681,8 @@
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-08-12-daily-rk55d0.jpg"
   },
   {
     "id": "2026-08-12-daily-15kwiwr",
@@ -676,7 +705,8 @@
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-08-12-daily-15kwiwr.jpg"
   },
   {
     "id": "2026-08-11-basics-1bmtot3",
@@ -698,7 +728,8 @@
       "semiconductors",
       "rates"
     ],
-    "readingMinutes": 6
+    "readingMinutes": 6,
+    "shareCardImage": "covers/share/2026-08-11-basics-1bmtot3.jpg"
   },
   {
     "id": "2026-08-11-daily-yxlmio",
@@ -720,7 +751,8 @@
     "tags": [
       "flows"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-08-11-daily-yxlmio.jpg"
   },
   {
     "id": "2026-08-11-basics-1e0xeuz",
@@ -758,7 +790,8 @@
     "tags": [
       "flows"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-08-11-daily-12vx8a7.jpg"
   },
   {
     "id": "2026-08-10-basics-f7gadj",
@@ -780,7 +813,8 @@
       "semiconductors",
       "rates"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-08-10-basics-f7gadj.jpg"
   },
   {
     "id": "2026-08-10-daily-1bb8z4p",
@@ -804,7 +838,8 @@
       "autos",
       "energy"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-08-10-daily-1bb8z4p.jpg"
   },
   {
     "id": "2026-08-10-weekly-hez6ok",
@@ -827,7 +862,8 @@
       "autos",
       "energy"
     ],
-    "readingMinutes": 16
+    "readingMinutes": 16,
+    "shareCardImage": "covers/share/2026-08-10-weekly-hez6ok.jpg"
   },
   {
     "id": "2026-08-10-weekly-1rva1f6",
@@ -849,7 +885,8 @@
       "autos",
       "energy"
     ],
-    "readingMinutes": 11
+    "readingMinutes": 11,
+    "shareCardImage": "covers/share/2026-08-10-weekly-1rva1f6.jpg"
   },
   {
     "id": "2026-08-10-daily-1evguss",
@@ -869,7 +906,8 @@
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-08-10-daily-1evguss.jpg"
   },
   {
     "id": "2026-08-09-research-12sm7v2",
@@ -892,7 +930,8 @@
       "policy",
       "geopolitics"
     ],
-    "readingMinutes": 9
+    "readingMinutes": 9,
+    "shareCardImage": "covers/share/2026-08-09-research-12sm7v2.jpg"
   },
   {
     "id": "2026-08-09-sovereign-ai",
@@ -914,7 +953,8 @@
       "policy",
       "geopolitics"
     ],
-    "readingMinutes": 6
+    "readingMinutes": 6,
+    "shareCardImage": "covers/share/2026-08-09-sovereign-ai.jpg"
   },
   {
     "id": "2026-08-07-daily-cjwe8f",
@@ -938,7 +978,8 @@
       "energy",
       "flows"
     ],
-    "readingMinutes": 6
+    "readingMinutes": 6,
+    "shareCardImage": "covers/share/2026-08-07-daily-cjwe8f.jpg"
   },
   {
     "id": "2026-08-07-daily",
@@ -983,7 +1024,8 @@
       "flows",
       "futures"
     ],
-    "readingMinutes": 6
+    "readingMinutes": 6,
+    "shareCardImage": "covers/share/2026-08-06-daily-1d9zin0.jpg"
   },
   {
     "id": "2026-08-06-daily-94w8bi",
@@ -1007,7 +1049,8 @@
       "flows",
       "futures"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-08-06-daily-94w8bi.jpg"
   },
   {
     "id": "2026-08-24-daily-og5aig",
@@ -1031,7 +1074,8 @@
       "rates",
       "flows"
     ],
-    "readingMinutes": 6
+    "readingMinutes": 6,
+    "shareCardImage": "covers/share/2026-08-24-daily-og5aig.jpg"
   },
   {
     "id": "2026-08-05-daily-oq9vps",
@@ -1053,7 +1097,8 @@
       "rates",
       "flows"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-08-05-daily-oq9vps.jpg"
   },
   {
     "id": "2026-08-24-daily-1nyohtr",
@@ -1076,7 +1121,8 @@
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 6
+    "readingMinutes": 6,
+    "shareCardImage": "covers/share/2026-08-24-daily-1nyohtr.jpg"
   },
   {
     "id": "2026-08-04-daily-wfcoi4",
@@ -1098,7 +1144,8 @@
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-08-04-daily-wfcoi4.jpg"
   },
   {
     "id": "2026-08-03-weekly-yqni0t",
@@ -1121,7 +1168,8 @@
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 16
+    "readingMinutes": 16,
+    "shareCardImage": "covers/share/2026-08-03-weekly-yqni0t.jpg"
   },
   {
     "id": "2026-08-03-daily-ely1wy",
@@ -1144,7 +1192,8 @@
       "semiconductors",
       "rates"
     ],
-    "readingMinutes": 4
+    "readingMinutes": 4,
+    "shareCardImage": "covers/share/2026-08-03-daily-ely1wy.jpg"
   },
   {
     "id": "2026-08-03-daily-181n1pj",
@@ -1186,7 +1235,8 @@
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 12
+    "readingMinutes": 12,
+    "shareCardImage": "covers/share/2026-08-week1-weekly.jpg"
   },
   {
     "id": "2026-07-31-daily-lr4ely",
@@ -1209,7 +1259,8 @@
       "flows",
       "futures"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-07-31-daily-lr4ely.jpg"
   },
   {
     "id": "2026-07-30-daily-10k99v5",
@@ -1231,7 +1282,8 @@
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-07-30-daily-10k99v5.jpg"
   },
   {
     "id": "2026-07-29-research-4eg0o9",
@@ -1254,7 +1306,8 @@
       "flows",
       "futures"
     ],
-    "readingMinutes": 6
+    "readingMinutes": 6,
+    "shareCardImage": "covers/share/2026-07-29-research-4eg0o9.jpg"
   },
   {
     "id": "2026-07-29-daily-mo0iu1",
@@ -1276,7 +1329,8 @@
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-07-29-daily-mo0iu1.jpg"
   },
   {
     "id": "2026-07-29-research-m2ef0m",
@@ -1319,7 +1373,8 @@
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-07-28-daily-g24k4s.jpg"
   },
   {
     "id": "2026-07-27-daily-1og5hu",
@@ -1342,7 +1397,8 @@
       "energy",
       "ai"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-07-27-daily-1og5hu.jpg"
   },
   {
     "id": "2026-08-12-weekly-1macab6",
@@ -1365,7 +1421,8 @@
       "rates",
       "ai"
     ],
-    "readingMinutes": 14
+    "readingMinutes": 14,
+    "shareCardImage": "covers/share/2026-08-12-weekly-1macab6.jpg"
   },
   {
     "id": "2026-07-20-weekly-1u5gndk",
@@ -1388,7 +1445,8 @@
       "semiconductors",
       "cloud-datacenter"
     ],
-    "readingMinutes": 7
+    "readingMinutes": 7,
+    "shareCardImage": "covers/share/2026-07-20-weekly-1u5gndk.jpg"
   },
   {
     "id": "2026-07-13-weekly-um5mnf",
@@ -1410,7 +1468,8 @@
       "rates",
       "energy"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-07-13-weekly-um5mnf.jpg"
   },
   {
     "id": "2026-07-06-weekly-a0ek97",
@@ -1431,6 +1490,7 @@
     "tags": [
       "flows"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "shareCardImage": "covers/share/2026-07-06-weekly-a0ek97.jpg"
   }
 ]

@@ -389,7 +389,7 @@
     coverImage.src = objectUrl;
   }
 
-  function buildUpdateForm() {
+  async function buildUpdateForm() {
     const body = new FormData();
     body.append('action', 'update');
     body.append('id', selectedPost.id);
@@ -406,7 +406,16 @@
       body.append('tags', '');
     }
     if (selectedHtml) body.append('file', selectedHtml, selectedHtml.name);
-    if (coverAction() === 'replace' && selectedCover) body.append('cover', selectedCover, selectedCover.name);
+    if (coverAction() === 'replace' && selectedCover) {
+      body.append('cover', selectedCover, selectedCover.name);
+      // Keep the social card in step with the cover it is composed from.
+      try {
+        const card = await window.SHARE_CARD.renderShareCard(selectedCover, { category: $('manage-type').value, date: $('manage-date').value });
+        body.append('shareCard', card, 'share-card.jpg');
+      } catch (error) {
+        console.warn('share card generation failed; the previous card is kept', error);
+      }
+    }
     return body;
   }
 
@@ -547,7 +556,7 @@
     updateSaveButton();
     status.textContent = '변경사항을 저장하는 중입니다…';
     try {
-      const data = await mutate(buildUpdateForm());
+      const data = await mutate(await buildUpdateForm());
       status.textContent = `GitHub 저장 완료 · commit ${data.commit.slice(0, 7)}`;
       void beginDeploymentCheck({ action: 'update', id: data.post.id, post: data.post, commit: data.commit });
     } catch (error) {

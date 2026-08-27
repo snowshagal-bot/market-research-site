@@ -250,7 +250,7 @@ test('admin connects generated files to the existing cover preview and publish p
   assert.match(admin, /showCoverPreview\(result\.file, generationReportVersion\)/);
   assert.match(admin, /generationReportVersion !== reportSelectionVersion/);
   assert.match(admin, /coverPreviewImage\.onload = \(\) => \{[\s\S]*selectedCover = file/);
-  assert.match(admin, /if \(selectedCover\) form\.append\('cover', selectedCover, selectedCover\.name\)/);
+  assert.match(admin, /form\.append\('cover', selectedCover, selectedCover\.name\)/);
   assert.match(admin, /const coverWarning = selectedCover \? ''/);
 });
 
