@@ -1,23 +1,16 @@
 # Roadmap
 
-Updated: 2026-08-28
+Updated: 2026-08-27
 
 This roadmap records implementation order, not a promise to build every future idea. Keep the current site small until traffic and actual needs justify added complexity.
 
 ## Next action
 
-Review the Internal Report Clean URL Consistency PR (#65) in Cloudflare Preview (`https://34841e56.market-research-site.pages.dev`). Verify internal link navigation direct 200 responses without 308 redirect hops before user approval for Production merge.
+Review the SEO Foundation PR in Cloudflare Preview. Verify HTML source and rendered output for the KO/EN homepages, all ten category landings, and representative paired/unpaired reports without merging to Production.
 
 ## In progress
 
-### 16. Internal Report Clean URL Consistency
-
-- Separate physical storage paths (`data/posts.json` `href: reports/...html`) from public navigation URLs (`/reports/...`).
-- Render canonical Clean URLs across homepage Latest, Hero Slide 02, Archive, Category landings, Today Takeaway, Prev/Next, and Related Reading.
-- Preserve query parameters and hash anchors where present.
-- Emit clean report URLs in the search index metadata tier.
-- Retain raw `.html` storage paths for Admin and file management operations.
-- Verify 0 `.html` internal navigation links in Preview without 308 redirects.
+### 15. SEO Foundation
 
 - server-render crawlable report anchors into homepage Latest/Archive without replacing the existing interactive list/calendar/search behavior;
 - add KO and EN landing pages for Daily, Weekly, Research, Market Basics, and Notes from shared metadata and the current post dataset;

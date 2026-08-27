@@ -407,7 +407,7 @@
       } else {
         summaryContent = highlightMatches(item.summary || item.description, queryWords);
       }
-      const targetUrl = item.url || cleanReportUrl(item.href);
+      const targetUrl = cleanReportUrl(item.url || item.href);
       const readingTimeStr = formatReadingTime(item.readingMinutes, locale);
       const tagsStr = formatTags(item.tags, locale);
       const tagsHtml = tagsStr ? `<div class="search-result-tags">${esc(tagsStr)}</div>` : '';

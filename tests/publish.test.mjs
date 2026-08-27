@@ -758,3 +758,84 @@ test('existing posts are not backfilled', async () => {
     assert.equal('takeaway' in old, false, 'past reports keep whatever they had');
   } finally { globalThis.fetch = originalFetch; }
 });
+
+test('publish creates raw physical href in posts.json/posts.js and clean public URL in search index without .html extension', async () => {
+  const calls = githubMock();
+  try {
+    const { response, data } = await runPublish({
+      type: 'daily',
+      lang: 'ko',
+      title: '테스트 리포트',
+      reportDate: '2026-08-28'
+    });
+    assert.equal(response.status, 200);
+
+    const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+
+    // 1. posts.json: href must keep raw .html path
+    const postsJsonContent = tree.find(entry => entry.path === 'data/posts.json').content;
+    const posts = JSON.parse(postsJsonContent);
+    const publishedPost = posts.find(item => item.id === data.id);
+    assert.ok(publishedPost);
+    assert.match(publishedPost.href, /^reports\/.+\.html$/i, 'posts.json must store physical .html href');
+    assert.equal(publishedPost.href, 'reports/daily-report.html');
+
+    // 2. posts.js: href must agree with posts.json
+    const postsJsContent = tree.find(entry => entry.path === 'data/posts.js').content;
+    const postsFromJs = JSON.parse(postsJsContent.replace(/^window\.RESEARCH_POSTS\s*=\s*/, '').replace(/;\s*$/, ''));
+    const postInJs = postsFromJs.find(item => item.id === data.id);
+    assert.ok(postInJs);
+    assert.equal(postInJs.href, publishedPost.href);
+
+    // 3. search-index.json: url must be clean URL without .html
+    const searchIndexJsonContent = tree.find(entry => entry.path === 'data/search-index.json').content;
+    const searchIndex = JSON.parse(searchIndexJsonContent);
+    const searchItem = searchIndex.find(item => item.id === data.id);
+    assert.ok(searchItem);
+    assert.equal(searchItem.url, '/reports/daily-report');
+    assert.doesNotMatch(searchItem.url, /\.html?($|[?#])/i, 'search-index.json url must be clean URL without .html');
+
+    // 4. search-index-meta.js: url must be clean URL without .html
+    const searchMetaJsContent = tree.find(entry => entry.path === 'data/search-index-meta.js').content;
+    const searchMeta = JSON.parse(searchMetaJsContent.replace(/^window\.SEARCH_INDEX_META\s*=\s*/, '').replace(/;\s*$/, ''));
+    const metaItem = searchMeta.find(item => item.id === data.id);
+    assert.ok(metaItem);
+    assert.equal(metaItem.url, '/reports/daily-report');
+    assert.doesNotMatch(metaItem.url, /\.html?($|[?#])/i, 'search-index-meta.js url must be clean URL without .html');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('publish English report creates reports/en/...html in posts.json and /reports/en/... in search index', async () => {
+  const calls = githubMock();
+  try {
+    const { response, data } = await runPublish({
+      type: 'research',
+      lang: 'en',
+      title: 'English Research Report',
+      reportDate: '2026-08-28'
+    });
+    assert.equal(response.status, 200);
+
+    const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+
+    // posts.json: physical href under reports/en/...
+    const posts = JSON.parse(tree.find(entry => entry.path === 'data/posts.json').content);
+    const publishedPost = posts.find(item => item.id === data.id);
+    assert.match(publishedPost.href, /^reports\/en\/.+\.html$/i);
+
+    // search-index.json & search-index-meta.js: clean URL /reports/en/...
+    const searchIndex = JSON.parse(tree.find(entry => entry.path === 'data/search-index.json').content);
+    const searchItem = searchIndex.find(item => item.id === data.id);
+    assert.match(searchItem.url, /^\/reports\/en\//);
+    assert.doesNotMatch(searchItem.url, /\.html?($|[?#])/i);
+
+    const searchMeta = JSON.parse(tree.find(entry => entry.path === 'data/search-index-meta.js').content.replace(/^window\.SEARCH_INDEX_META\s*=\s*/, '').replace(/;\s*$/, ''));
+    const metaItem = searchMeta.find(item => item.id === data.id);
+    assert.equal(metaItem.url, searchItem.url);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
