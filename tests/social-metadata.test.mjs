@@ -2,9 +2,11 @@ import assert from 'node:assert/strict';
 import { readFile, stat } from 'node:fs/promises';
 import test from 'node:test';
 import {
+  CATEGORY_SLUGS,
   FAVICON_TAGS,
   PRODUCTION_ORIGIN,
   SOCIAL_FALLBACK_IMAGE,
+  categoryLandingPath,
   reportCardPath,
   reportSeoTags,
   sitemapXml
@@ -17,7 +19,8 @@ const sizeOf = async path => (await stat(new URL(`../${path}`, import.meta.url))
 const PUBLIC_PAGES = [
   'index.html', 'en/index.html',
   'about/index.html', 'en/about/index.html',
-  'market/index.html', 'en/market/index.html'
+  'market/index.html', 'en/market/index.html',
+  ...Object.values(CATEGORY_SLUGS).flatMap((slug) => [`${slug}/index.html`, `en/${slug}/index.html`])
 ];
 
 const HOME_CARD = '/assets/social/snowshagal-home.jpg';
@@ -237,7 +240,7 @@ test('a report with a cover sends a landscape card to Open Graph and the cover t
   assert.match(tags, /<meta property="og:locale" content="ko_KR">/);
 });
 
-test('a report without a cover keeps the existing generic fallback on both sides', async () => {
+test('a report without a cover keeps the generic image and receives a safe description fallback', async () => {
   const tags = reportSeoTags([bare], bare);
   const fallback = `${PRODUCTION_ORIGIN}${SOCIAL_FALLBACK_IMAGE}`;
   assert.match(tags, new RegExp(`<meta property="og:image" content="${fallback}">`));
@@ -245,8 +248,9 @@ test('a report without a cover keeps the existing generic fallback on both sides
   assert.match(tags, /<meta name="twitter:card" content="summary_large_image">/);
   assert.match(tags, /<meta property="og:image:width" content="1200">/);
   assert.match(tags, /<meta property="og:image:height" content="630">/);
-  // No summary and no description on this fixture: omit rather than invent one.
-  assert.doesNotMatch(tags, /twitter:description|og:description|name="description"/);
+  assert.ok(tags.includes('<meta name="description" content="좋은 회사가 왜 좋은 주식은 아닌가 — Snowshagal의 시장 리포트 콘텐츠입니다.">'));
+  assert.ok(tags.includes('<meta property="og:description" content="좋은 회사가 왜 좋은 주식은 아닌가 — Snowshagal의 시장 리포트 콘텐츠입니다.">'));
+  assert.ok(tags.includes('<meta name="twitter:description" content="좋은 회사가 왜 좋은 주식은 아닌가 — Snowshagal의 시장 리포트 콘텐츠입니다.">'));
 });
 
 test('every report advertises a 1200x630 og:image whatever its cover state', async () => {
@@ -312,7 +316,11 @@ test('the sitemap lists both About pages with reciprocal alternates and no dupli
     `${PRODUCTION_ORIGIN}/about/`,
     `${PRODUCTION_ORIGIN}/en/about/`,
     `${PRODUCTION_ORIGIN}/market/`,
-    `${PRODUCTION_ORIGIN}/en/market/`
+    `${PRODUCTION_ORIGIN}/en/market/`,
+    ...Object.keys(CATEGORY_SLUGS).flatMap((type) => [
+      `${PRODUCTION_ORIGIN}${categoryLandingPath(type, 'ko')}`,
+      `${PRODUCTION_ORIGIN}${categoryLandingPath(type, 'en')}`
+    ])
   ]);
   assert.equal(new Set(locations).size, locations.length, 'duplicate sitemap URL');
 
