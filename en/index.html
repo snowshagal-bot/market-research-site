@@ -71,26 +71,68 @@
   </div>
 </header>
 <main>
-  <section class="brand-hero" aria-labelledby="home-hero-heading">
-    <div class="site-wrap hero-shell">
-      <div class="hero-copy">
-        <h1 id="home-hero-heading"><span>From today's moves</span><span>to what comes next.</span></h1>
-        <span class="hero-rule" aria-hidden="true"></span>
-        <p class="hero-description">
-          <span>Daily reviews of the Korean market, weekly outlooks,</span>
-          <span>and thoughtful insights for long-term investors.</span>
-        </p>
-        <nav class="hero-entries" aria-label="Explore research">
-          <a href="/en/daily/"><span class="entry-symbol entry-daily" aria-hidden="true"></span><span><strong>DAILY</strong><small>Today's market</small></span></a>
-          <a href="/en/weekly/"><span class="entry-symbol entry-weekly" aria-hidden="true"></span><span><strong>WEEKLY</strong><small>The week ahead</small></span></a>
-          <a href="/en/research/"><span class="entry-symbol entry-research" aria-hidden="true"></span><span><strong>RESEARCH</strong><small>Deeper reads</small></span></a>
-        </nav>
+  <section class="brand-hero" aria-roledescription="carousel" aria-label="Research Highlights">
+    <div class="site-wrap hero-carousel-wrap">
+      <div class="hero-slides" id="hero-slides">
+        <div class="hero-slide active" id="hero-slide-1" role="group" aria-roledescription="slide" aria-label="1 of 2: Brand Introduction">
+          <div class="hero-shell">
+            <div class="hero-copy">
+              <h1 id="home-hero-heading"><span>From today's moves</span><span>to what comes next.</span></h1>
+              <span class="hero-rule" aria-hidden="true"></span>
+              <p class="hero-description">
+                <span>Daily reviews of the Korean market, weekly outlooks,</span>
+                <span>and thoughtful insights for long-term investors.</span>
+              </p>
+              <nav class="hero-entries" aria-label="Explore research">
+                <a href="/en/daily/"><span class="entry-symbol entry-daily" aria-hidden="true"></span><span><strong>DAILY</strong><small>Today's market</small></span></a>
+                <a href="/en/weekly/"><span class="entry-symbol entry-weekly" aria-hidden="true"></span><span><strong>WEEKLY</strong><small>The week ahead</small></span></a>
+                <a href="/en/research/"><span class="entry-symbol entry-research" aria-hidden="true"></span><span><strong>RESEARCH</strong><small>Deeper reads</small></span></a>
+              </nav>
+            </div>
+            <div class="hero-art" aria-hidden="true">
+              <picture>
+                <source media="(max-width: 760px)" srcset="/assets/snowshagal-hero-mobile.webp">
+                <img src="/assets/snowshagal-hero.webp" alt="" width="1536" height="1024" fetchpriority="high">
+              </picture>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-slide" id="hero-slide-2" role="group" aria-roledescription="slide" aria-label="2 of 2: Latest Daily" aria-hidden="true">
+          <div class="hero-shell hero-shell-featured">
+            <div class="featured-copy">
+              <div class="featured-eyebrow">
+                <span class="featured-badge">LATEST DAILY</span>
+                <span class="featured-dot" aria-hidden="true">·</span>
+                <span class="featured-date" id="hero-featured-date">—</span>
+                <span class="featured-dot" aria-hidden="true">·</span>
+                <span class="featured-reading" id="hero-featured-reading">—</span>
+              </div>
+              <h2 class="featured-title"><a id="hero-featured-title-link" href="/en/daily/">—</a></h2>
+              <p class="featured-snippet" id="hero-featured-snippet">—</p>
+              <div class="featured-action">
+                <a class="btn-editorial" id="hero-featured-action-btn" href="/en/daily/">
+                  <span>Read report</span> <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </div>
+            <div class="featured-art">
+              <div class="featured-cover-wrap">
+                <a id="hero-featured-img-link" href="/en/daily/" tabindex="-1" aria-hidden="true">
+                  <img id="hero-featured-img" src="/assets/social/snowshagal-home.jpg" alt="" loading="lazy">
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="hero-art" aria-hidden="true">
-        <picture>
-          <source media="(max-width: 760px)" srcset="/assets/snowshagal-hero-mobile.webp">
-          <img src="/assets/snowshagal-hero.webp" alt="" width="1536" height="1024" fetchpriority="high">
-        </picture>
+
+      <div class="hero-carousel-controls" aria-label="Carousel navigation">
+        <span class="carousel-counter" aria-live="polite"><span class="carousel-current" id="carousel-current">01</span><span class="carousel-sep">/</span><span class="carousel-total">02</span></span>
+        <div class="carousel-arrows">
+          <button type="button" class="carousel-btn prev" id="hero-carousel-prev" aria-label="Previous slide" disabled><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+          <button type="button" class="carousel-btn next" id="hero-carousel-next" aria-label="Next slide"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+        </div>
       </div>
     </div>
   </section>

@@ -72,26 +72,68 @@
   </div>
 </header>
 <main>
-  <section class="brand-hero" aria-labelledby="home-hero-heading">
-    <div class="site-wrap hero-shell">
-      <div class="hero-copy">
-        <h1 id="home-hero-heading"><span>하루의 움직임에서,</span><span>다음 흐름까지.</span></h1>
-        <span class="hero-rule" aria-hidden="true"></span>
-        <p class="hero-description">
-          <span>한국 시장의 데일리 복기부터 위클리 전망,</span>
-          <span>그리고 투자에 참고할 만한 인사이트까지.</span>
-        </p>
-        <nav class="hero-entries" aria-label="주요 리서치 바로가기">
-          <a href="/daily/"><span class="entry-symbol entry-daily" aria-hidden="true"></span><span><strong>DAILY</strong><small>오늘의 시장</small></span></a>
-          <a href="/weekly/"><span class="entry-symbol entry-weekly" aria-hidden="true"></span><span><strong>WEEKLY</strong><small>한 주의 흐름</small></span></a>
-          <a href="/research/"><span class="entry-symbol entry-research" aria-hidden="true"></span><span><strong>RESEARCH</strong><small>깊이 읽기</small></span></a>
-        </nav>
+  <section class="brand-hero" aria-roledescription="carousel" aria-label="주요 리서치 하이라이트">
+    <div class="site-wrap hero-carousel-wrap">
+      <div class="hero-slides" id="hero-slides">
+        <div class="hero-slide active" id="hero-slide-1" role="group" aria-roledescription="slide" aria-label="1 of 2: 브랜드 소개">
+          <div class="hero-shell">
+            <div class="hero-copy">
+              <h1 id="home-hero-heading"><span>하루의 움직임에서,</span><span>다음 흐름까지.</span></h1>
+              <span class="hero-rule" aria-hidden="true"></span>
+              <p class="hero-description">
+                <span>한국 시장의 데일리 복기부터 위클리 전망,</span>
+                <span>그리고 투자에 참고할 만한 인사이트까지.</span>
+              </p>
+              <nav class="hero-entries" aria-label="주요 리서치 바로가기">
+                <a href="/daily/"><span class="entry-symbol entry-daily" aria-hidden="true"></span><span><strong>DAILY</strong><small>오늘의 시장</small></span></a>
+                <a href="/weekly/"><span class="entry-symbol entry-weekly" aria-hidden="true"></span><span><strong>WEEKLY</strong><small>한 주의 흐름</small></span></a>
+                <a href="/research/"><span class="entry-symbol entry-research" aria-hidden="true"></span><span><strong>RESEARCH</strong><small>깊이 읽기</small></span></a>
+              </nav>
+            </div>
+            <div class="hero-art" aria-hidden="true">
+              <picture>
+                <source media="(max-width: 760px)" srcset="/assets/snowshagal-hero-mobile.webp">
+                <img src="/assets/snowshagal-hero.webp" alt="" width="1536" height="1024" fetchpriority="high">
+              </picture>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-slide" id="hero-slide-2" role="group" aria-roledescription="slide" aria-label="2 of 2: 최신 데일리 리포트" aria-hidden="true">
+          <div class="hero-shell hero-shell-featured">
+            <div class="featured-copy">
+              <div class="featured-eyebrow">
+                <span class="featured-badge">LATEST DAILY</span>
+                <span class="featured-dot" aria-hidden="true">·</span>
+                <span class="featured-date" id="hero-featured-date">—</span>
+                <span class="featured-dot" aria-hidden="true">·</span>
+                <span class="featured-reading" id="hero-featured-reading">—</span>
+              </div>
+              <h2 class="featured-title"><a id="hero-featured-title-link" href="/daily/">—</a></h2>
+              <p class="featured-snippet" id="hero-featured-snippet">—</p>
+              <div class="featured-action">
+                <a class="btn-editorial" id="hero-featured-action-btn" href="/daily/">
+                  <span>리포트 읽기</span> <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </div>
+            <div class="featured-art">
+              <div class="featured-cover-wrap">
+                <a id="hero-featured-img-link" href="/daily/" tabindex="-1" aria-hidden="true">
+                  <img id="hero-featured-img" src="/assets/social/snowshagal-home.jpg" alt="" loading="lazy">
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="hero-art" aria-hidden="true">
-        <picture>
-          <source media="(max-width: 760px)" srcset="/assets/snowshagal-hero-mobile.webp">
-          <img src="/assets/snowshagal-hero.webp" alt="" width="1536" height="1024" fetchpriority="high">
-        </picture>
+
+      <div class="hero-carousel-controls" aria-label="슬라이드 탐색">
+        <span class="carousel-counter" aria-live="polite"><span class="carousel-current" id="carousel-current">01</span><span class="carousel-sep">/</span><span class="carousel-total">02</span></span>
+        <div class="carousel-arrows">
+          <button type="button" class="carousel-btn prev" id="hero-carousel-prev" aria-label="이전 슬라이드" disabled><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+          <button type="button" class="carousel-btn next" id="hero-carousel-next" aria-label="다음 슬라이드"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+        </div>
       </div>
     </div>
   </section>
