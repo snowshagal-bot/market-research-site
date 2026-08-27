@@ -279,7 +279,7 @@ test('O. the shell mounts share for every category and both locales', async () =
   for (const category of ['basics', 'daily', 'weekly', 'research', 'note']) {
     assert.match(middleware, new RegExp(`active = '${category}'`));
   }
-  assert.match(middleware, /report-shell\.js\?v=20260827-4/);
+  assert.match(middleware, /report-shell\.js\?v=[a-f0-9]{10}/);
 });
 
 /* --------------------------------------------------------------- P. copy */
