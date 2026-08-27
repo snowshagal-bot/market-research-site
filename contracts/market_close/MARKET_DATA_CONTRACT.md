@@ -241,9 +241,10 @@ language:
    language. Report publishing reads it out of the report HTML itself (a
    `report-takeaway` meta tag, a `data-report-takeaway` element, or the
    cover's `.cover-hint .cv-one`), so the everyday path needs no typing.
-   New Dailies must carry the meta tag — see
-   [`docs/DAILY_REPORT_METADATA.md`](../../docs/DAILY_REPORT_METADATA.md) — because
-   the cover markup changes with the layout and the head does not.
+   Editorial Ledger v2 covers give the line its own `.cv-line` field; the
+   meta tag is the long-term standard because the head survives a redesign
+   and a class name does not. See
+   [`docs/DAILY_REPORT_METADATA.md`](../../docs/DAILY_REPORT_METADATA.md).
 3. Neither: the row is hidden and the numbers stand alone.
 
 A Daily qualifies only on an exact `reportDate === market_date` match in the

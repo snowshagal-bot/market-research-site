@@ -88,58 +88,6 @@ test('the CRLF convention of the file is kept', () => {
   assert.doesNotMatch(html.replace(/\r\n/g, ''), /\n/, 'no lone LF is introduced');
 });
 
-/* ------------------------------- what the publishing admin makes of them */
-
-/**
- * Mirrors assets/admin.js detectTakeaway against a document, so the four
- * required outcomes are asserted on the same priority order the admin uses.
- * The admin itself is exercised end to end in daily-takeaway-detect.test.mjs.
- */
-function detectFrom(html) {
-  const meta = /<meta[^>]*name="report-takeaway"[^>]*>/i.exec(html);
-  if (meta) {
-    const content = /content="([\s\S]*?)"/i.exec(meta[0])?.[1] || '';
-    const text = normalizeTakeaway(content.replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
-    if (text) return { text, source: 'meta' };
-  }
-  const cvOne = /<span[^>]*class="[^"]*\bcv-one\b[^"]*"[^>]*>([\s\S]*?)<\/span>\s*<span/i.exec(html);
-  if (cvOne) {
-    const text = normalizeTakeaway(cvOne[1].replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' '));
-    if (text) return { text, source: '.cover-hint .cv-one' };
-  }
-  return { text: '', source: 'none' };
-}
-
-test('1. the new lightweight Daily is detected through its head tag', () => {
-  const { html } = stampTakeaway(LIGHTWEIGHT_DAILY, LINE);
-  assert.deepEqual(detectFrom(html), { text: LINE, source: 'meta' });
-});
-
-test('2. the published 8/26 Daily is still detected through its cover', async () => {
-  const html = await read('reports/8월 26일 주식리포트_커버통합.html');
-  assert.equal(readTakeaway(html), '', 'it carries no head tag');
-  const found = detectFrom(html);
-  assert.equal(found.source, '.cover-hint .cv-one', 'the old path must keep working');
-  assert.equal(found.text, 'PCE· 엔비디아· 금통위가 한 장에 겹친다');
-});
-
-test('3. with both present the head tag wins', async () => {
-  const published = await read('reports/8월 26일 주식리포트_커버통합.html');
-  const { html } = stampTakeaway(published, '헤드 태그가 이깁니다.');
-  const found = detectFrom(html);
-  assert.equal(found.source, 'meta');
-  assert.equal(found.text, '헤드 태그가 이깁니다.');
-  // The cover text is untouched; it is simply outranked.
-  assert.match(html, /PCE/);
-});
-
-test('4. neither tag nor marker means no line at all', () => {
-  const found = detectFrom(LIGHTWEIGHT_DAILY);
-  assert.deepEqual(found, { text: '', source: 'none' });
-  // Not the title, not the description, not the first sentence.
-  assert.doesNotMatch(LIGHTWEIGHT_DAILY.slice(0, 0) + found.text, /코스피 데일리|설명이|본문 첫 문장/);
-});
-
 /* ----------------------------------------------- the admin agrees with us */
 
 test('the admin and the stamper normalize identically', async () => {
@@ -150,4 +98,15 @@ test('the admin and the stamper normalize identically', async () => {
     assert.ok(adminNormalize.includes(rule), `${rule} must be part of it`);
   }
   assert.match(script, /const MAX_TAKEAWAY_LENGTH = 400;/);
+});
+
+test('the stamper is a repair tool, and the docs say so', async () => {
+  const doc = await read('docs/DAILY_REPORT_METADATA.md');
+  // Publishing a Daily must not require running a script by hand.
+  assert.match(doc, /일상 발행 절차가 아니다/);
+  assert.match(doc, /긴급 보완/);
+  // Both routes are written down, with the long-term standard named as such.
+  assert.match(doc, /장기 표준/);
+  assert.match(doc, /`\.cv-line`/);
+  assert.match(doc, /Editorial Ledger v2/);
 });
