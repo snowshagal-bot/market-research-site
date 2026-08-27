@@ -43,6 +43,9 @@
   const resultContinue = $('manage-result-continue');
   const manageTagOptions = $('manage-tag-options');
   const manageTagsCount = $('manage-tags-count');
+  const takeawayField = $('manage-takeaway-field');
+  const takeawayInput = $('manage-takeaway');
+  const typeSelect = $('manage-type');
   const tagRegistry = window.TAG_REGISTRY || {
     "flows": { "ko": "수급", "en": "Flows" },
     "semiconductors": { "ko": "반도체", "en": "Semiconductors" },
@@ -111,6 +114,11 @@
         }
       });
     }
+  }
+
+  function updateTakeawayVisibility(type) {
+    if (!takeawayField) return;
+    takeawayField.hidden = type !== 'daily';
   }
 
   let posts = [];
@@ -317,6 +325,8 @@
     $('manage-subtitle').value = next.subtitle || '';
     $('manage-description').value = next.description || '';
     $('manage-summary').value = next.summary || '';
+    if (takeawayInput) takeawayInput.value = (next.type === 'daily' && next.takeaway) ? next.takeaway : '';
+    updateTakeawayVisibility(next.type || '');
     $('current-report-link').href = `../../${next.href}`;
     setSelectedManageTags(next.tags || []);
     document.querySelector('input[name="cover-action"][value="keep"]').checked = true;
@@ -393,12 +403,19 @@
     const body = new FormData();
     body.append('action', 'update');
     body.append('id', selectedPost.id);
-    body.append('type', $('manage-type').value);
+    const currentType = $('manage-type').value;
+    body.append('type', currentType);
     body.append('reportDate', $('manage-date').value);
     body.append('title', $('manage-title').value.trim());
     body.append('subtitle', $('manage-subtitle').value.trim());
     body.append('description', $('manage-description').value.trim());
     body.append('summary', $('manage-summary').value.trim());
+    if (currentType === 'daily') {
+      const takeawayVal = takeawayInput ? takeawayInput.value.replace(/\s+/g, ' ').trim().slice(0, 400) : '';
+      body.append('takeaway', takeawayVal);
+    } else {
+      body.append('takeaway', '');
+    }
     body.append('coverAction', coverAction());
     const selectedTags = getSelectedManageTags();
     selectedTags.forEach(tagId => body.append('tags', tagId));
@@ -625,6 +642,7 @@
   }));
   htmlInput.addEventListener('change', () => chooseHtml(htmlInput.files?.[0] || null));
   coverInput.addEventListener('change', () => chooseCover(coverInput.files?.[0] || null));
+  typeSelect?.addEventListener('change', () => updateTakeawayVisibility(typeSelect.value));
   document.querySelectorAll('input[name="cover-action"]').forEach((input) => input.addEventListener('change', syncCoverAction));
   previewModes.forEach((button) => button.addEventListener('click', () => {
     $('manage-cover-preview').dataset.previewMode = button.dataset.previewMode;
@@ -659,6 +677,7 @@
     save,
     deletePost,
     selectPost,
+    updateTakeawayVisibility,
     beginDeploymentCheck,
     waitForDeployment,
     continueManagement,
