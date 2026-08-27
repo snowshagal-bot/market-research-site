@@ -1113,10 +1113,10 @@
     const counterCurrent = document.getElementById('carousel-current');
     if (!heroSection || !slide1 || !slide2) return null;
 
-    // Find the latest daily for this locale
-    const latestDaily = posts.find(p => p.type === 'daily');
+    // Find the latest research for this locale
+    const latestResearch = posts.find(p => p.type === 'research');
 
-    if (latestDaily) {
+    if (latestResearch) {
       const dateEl = document.getElementById('hero-featured-date');
       const readingEl = document.getElementById('hero-featured-reading');
       const titleLink = document.getElementById('hero-featured-title-link');
@@ -1125,10 +1125,10 @@
       const imgLink = document.getElementById('hero-featured-img-link');
       const imgEl = document.getElementById('hero-featured-img');
 
-      const href = rootPath(latestDaily.href);
-      const dateStr = reportDate(latestDaily);
-      const readingStr = formatReadingTime(latestDaily.readingMinutes, locale);
-      const copySnippet = String(latestDaily.takeaway || latestDaily.summary || latestDaily.subtitle || latestDaily.description || '').trim();
+      const href = rootPath(latestResearch.href);
+      const dateStr = reportDate(latestResearch);
+      const readingStr = formatReadingTime(latestResearch.readingMinutes, locale);
+      const copySnippet = String(latestResearch.summary || latestResearch.subtitle || latestResearch.description || '').trim();
 
       if (dateEl) dateEl.textContent = dateStr || '—';
       if (readingEl) {
@@ -1140,18 +1140,18 @@
         }
       }
       if (titleLink) {
-        titleLink.textContent = latestDaily.title || '';
+        titleLink.textContent = latestResearch.title || '';
         titleLink.href = href;
       }
       if (snippetEl) snippetEl.textContent = copySnippet;
       if (actionBtn) actionBtn.href = href;
       if (imgLink) imgLink.href = href;
       if (imgEl) {
-        imgEl.src = latestDaily.coverImage ? rootPath(latestDaily.coverImage) : '/assets/social/snowshagal-home.jpg';
-        imgEl.alt = latestDaily.title || '';
+        imgEl.src = latestResearch.coverImage ? rootPath(latestResearch.coverImage) : '/assets/social/snowshagal-home.jpg';
+        imgEl.alt = latestResearch.title || '';
       }
     } else {
-      // If there are no daily posts at all, hide slide 2 and controls
+      // If there are no research posts at all, hide slide 2 and controls
       const controls = document.querySelector('.hero-carousel-controls');
       if (controls) controls.hidden = true;
       slide2.hidden = true;
@@ -1213,7 +1213,7 @@
 
     goTo(0);
 
-    const controller = { goTo, getActiveIndex: () => activeIndex, latestDaily };
+    const controller = { goTo, getActiveIndex: () => activeIndex, latestResearch };
     window.__heroCarouselTest = controller;
     return controller;
   }
