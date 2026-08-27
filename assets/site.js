@@ -1066,6 +1066,10 @@
     if (linkEl) linkEl.href = daily ? rootPath(daily.href) : (locale === 'en' ? '/en/market/' : '/market/');
     if (!text) {
       if (rowEl) rowEl.hidden = true;
+      // Clear it as well as hide it, for the same reason the href is always
+      // rewritten: a hidden row holding another session's sentence is one
+      // stylesheet away from showing it.
+      if (textEl) textEl.textContent = '';
       return;
     }
     if (rowEl) rowEl.hidden = false;

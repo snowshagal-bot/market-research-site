@@ -662,3 +662,12 @@ test('Q. a Daily line is normalized before it reaches the strip', async () => {
   const strip = await runHomepage({ posts: messy, fetchResult: marketPayload('2026-08-27') });
   assert.equal(strip.text.textContent, '줄바꿈과 여백이 섞인 문장.');
 });
+
+test('R. a hidden row keeps no text from the session before it', async () => {
+  const strip = await runHomepage({
+    posts: LINKED_POSTS,
+    fetchResult: marketPayload('2026-08-29')
+  });
+  assert.equal(strip.row.hidden, true);
+  assert.equal(strip.text.textContent, '', 'the sentence must go when the row does');
+});
