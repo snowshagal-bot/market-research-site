@@ -220,8 +220,9 @@ publishing paths from fighting over the same row:
 
 The unattended pipeline posts the bare document, so re-running it for a date
 that already has an editorial line leaves that line alone. The admin form
-always submits both keys, which is why an empty box there is read as a
-deliberate erasure rather than as "no opinion". Surrounding whitespace is
+names a language only when the editor has actually written in that box for
+the date on screen: an untouched box is left out of the request entirely, and
+a box the editor emptied is sent as `""` and erases. Surrounding whitespace is
 trimmed first, so a line of spaces erases too.
 
 `GET /api/market/latest` tags its response with the market date, the

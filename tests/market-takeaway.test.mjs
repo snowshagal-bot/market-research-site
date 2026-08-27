@@ -173,11 +173,11 @@ test('the Market Close admin submits the line with the same market_date', async 
   assert.match(markup, /id="market-takeaway-en"/);
   assert.match(markup, /maxlength="400"/);
   // The form says what an empty language means, so it is a choice not an accident.
-  assert.match(markup, /한 줄만 숨겨지고 숫자는 그대로/);
+  assert.match(markup, /손대지 않은 언어는 그대로 유지되고, 직접 지우고 게시하면 그 언어만 삭제/);
 
-  // One request carries both, so they cannot be saved under different dates.
-  assert.match(script, /market: payload,/);
-  assert.match(script, /takeaway: \{ ko: takeawayKo\?\.value\.trim\(\) \|\| '', en: takeawayEn\?\.value\.trim\(\) \|\| '' \}/);
+  // One request carries the numbers and the lines, so they cannot be saved
+  // under different dates.
+  assert.match(script, /const envelope = JSON\.stringify\(\{ market: payload, takeaway \}\);/);
   assert.match(script, /body: envelope/);
   assert.doesNotMatch(script, /body: raw \}/);
 });
@@ -314,21 +314,16 @@ test('a duplicate column is ignored but a real migration failure is not', async 
   assert.equal(db.rows.size, 0, 'a failed migration must not write rows');
 });
 
-test('the admin loads the stored lines back into the form before republishing', async () => {
+test('the admin form is wired to the preservation rule', async () => {
   const [script, markup] = await Promise.all([read('assets/admin-market.js'), read('admin/market/index.html')]);
 
-  // Publishing writes whatever the boxes hold, so opening the page with them
-  // blank would erase the stored lines on the next publish of the same date.
-  assert.match(script, /loadStoredTakeaway\(payload\.meta\?\.market_date\)/);
-  assert.match(script, /if \(body\?\.meta\?\.market_date !== marketDate\) return;/);
-  // Only untouched boxes are filled, so the editor's own typing always wins.
-  assert.match(script, /!touched\.has\(takeawayKo\)/);
-  assert.match(script, /!touched\.has\(takeawayEn\)/);
-  // The form says what leaving a box empty will now do.
-  assert.match(script, /지우고 게시하면 삭제됩니다/);
+  // How the form behaves is covered by tests/admin-market-takeaway.test.mjs,
+  // which runs this script against a stub DOM. These are the two ends of the
+  // wire: the markup it needs, and the request shape the server rule expects.
   assert.match(markup, /id="market-takeaway-loaded"/);
-
-  // A preview deployment has no D1, so the lookup must fail quietly.
-  assert.match(script, /catch \(_\) \{ return; \}/);
+  assert.match(script, /loadStoredTakeaway\(payload\.meta\?\.market_date\)/);
+  assert.match(script, /const envelope = JSON\.stringify\(\{ market: payload, takeaway \}\);/);
+  // An untouched language must be omitted, never sent as an empty string.
+  assert.doesNotMatch(script, /takeaway: \{ ko: takeawayKo/);
 });
 
