@@ -14,7 +14,7 @@ const SCHEMA = await read('contracts/market_close/market_close.schema.json');
  * Minimal D1 stand-in: one table, keyed by market_date, with the columns the
  * shared schema creates plus whatever ALTER TABLE adds.
  */
-function fakeDb({ withTakeawayColumns = true } = {}) {
+function fakeDb({ alterError = null } = {}) {
   const rows = new Map();
   const statements = [];
   return {
@@ -34,19 +34,18 @@ function fakeDb({ withTakeawayColumns = true } = {}) {
               return { success: true };
             },
             async first() {
-              if (/SELECT market_date FROM/.test(sql)) return rows.get(args[0]) || null;
+              if (/WHERE market_date = \?/.test(sql)) return rows.get(args[0]) || null;
               return null;
             }
           };
         },
         async run() {
-          if (/ALTER TABLE/.test(sql) && !withTakeawayColumns) throw new Error('duplicate column name');
+          if (/ALTER TABLE/.test(sql) && alterError) throw alterError;
           return { success: true };
         },
         async first() {
           const all = [...rows.values()].sort((a, b) => b.market_date.localeCompare(a.market_date));
           if (/ORDER BY market_date DESC/.test(sql)) return all[0] || null;
-          if (/SELECT market_date FROM/.test(sql)) return all[0] || null;
           return null;
         }
       };
@@ -73,7 +72,10 @@ function publish(db, body) {
   });
 }
 
-const latest = db => latestRequest({ request: new Request('https://snowshagal.com/api/market/latest'), env: env(db) });
+function latest(db, ifNoneMatch) {
+  const headers = ifNoneMatch ? { 'if-none-match': ifNoneMatch } : {};
+  return latestRequest({ request: new Request('https://snowshagal.com/api/market/latest', { headers }), env: env(db) });
+}
 
 /* ------------------------------------------------------- storing the line */
 
@@ -133,7 +135,7 @@ test('a table created before the line existed gains the columns', async () => {
   assert.match(shared, /takeaway_ko TEXT NOT NULL DEFAULT ''/);
   assert.match(shared, /ALTER TABLE \$\{TABLE_NAME\} ADD COLUMN \$\{column\} TEXT NOT NULL DEFAULT ''/);
   // A duplicate-column error on an already-migrated table must not be fatal.
-  const db = fakeDb({ withTakeawayColumns: false });
+  const db = fakeDb({ alterError: new Error('duplicate column name: takeaway_ko') });
   const response = await publish(db, { market: PAYLOAD, takeaway: { ko: '이주 후' } });
   assert.ok(response.ok, `status ${response.status}`);
   assert.equal(db.rows.get(PAYLOAD.meta.market_date).takeaway_ko, '이주 후');
@@ -216,3 +218,117 @@ test('report pages request the same locale.js build as the rest of the site', as
   // so a bump made only in the page templates leaves readers on a stale copy.
   assert.equal(versions.size, 1, `locale.js is pinned to several builds: ${[...versions].join(', ')}`);
 });
+
+/* ------------------------------------------- a cached copy goes stale */
+
+test('editing only the one-liner moves the ETag and re-sends the body', async () => {
+  const db = fakeDb();
+  await publish(db, { market: PAYLOAD, takeaway: { ko: '첫 문장', en: 'First line' } });
+  const first = await latest(db);
+  const etagA = first.headers.get('etag');
+  assert.ok(etagA, 'the response must carry an ETag');
+  assert.deepEqual((await first.json()).takeaway, { ko: '첫 문장', en: 'First line' });
+
+  // Same Market Close document, same market_date, only the line is different.
+  await publish(db, { market: PAYLOAD, takeaway: { ko: '고친 문장', en: 'Second line' } });
+  const second = await latest(db);
+  const etagB = second.headers.get('etag');
+  assert.notEqual(etagB, etagA, 'the tag must move when the line changes');
+
+  // A reader holding the old tag gets the new line, not a 304.
+  const revalidated = await latest(db, etagA);
+  assert.equal(revalidated.status, 200);
+  assert.deepEqual((await revalidated.json()).takeaway, { ko: '고친 문장', en: 'Second line' });
+  assert.equal(revalidated.headers.get('etag'), etagB);
+});
+
+test('an unchanged session still answers 304 to its own tag', async () => {
+  const db = fakeDb();
+  await publish(db, { market: PAYLOAD, takeaway: { ko: '그대로' } });
+  const etag = (await latest(db)).headers.get('etag');
+  const again = await latest(db, etag);
+  assert.equal(again.status, 304, 'caching must still work when nothing moved');
+});
+
+/* ------------------------------- who is allowed to change which language */
+
+test('the automated pipeline republishing bare numbers keeps the editor’s lines', async () => {
+  const db = fakeDb();
+  await publish(db, { market: PAYLOAD, takeaway: { ko: '지켜져야 한다', en: 'must survive' } });
+
+  // The unattended job posts the contract document with no envelope.
+  const response = await publish(db, PAYLOAD);
+  assert.ok(response.ok, `status ${response.status}`);
+  const row = db.rows.get(PAYLOAD.meta.market_date);
+  assert.equal(row.takeaway_ko, '지켜져야 한다');
+  assert.equal(row.takeaway_en, 'must survive');
+  assert.deepEqual((await response.json()).takeaway, { ko: true, en: true });
+});
+
+test('an envelope naming one language leaves the other untouched', async () => {
+  const db = fakeDb();
+  await publish(db, { market: PAYLOAD, takeaway: { ko: '옛 한국어', en: 'old english' } });
+
+  // Only ko is named, so only ko moves.
+  await publish(db, { market: PAYLOAD, takeaway: { ko: '새 한국어' } });
+  const row = db.rows.get(PAYLOAD.meta.market_date);
+  assert.equal(row.takeaway_ko, '새 한국어');
+  assert.equal(row.takeaway_en, 'old english');
+});
+
+test('an explicit empty string erases that language', async () => {
+  const db = fakeDb();
+  await publish(db, { market: PAYLOAD, takeaway: { ko: '지울 문장', en: 'keep me' } });
+
+  // The admin form always sends both keys, so an empty box is a decision.
+  const response = await publish(db, { market: PAYLOAD, takeaway: { ko: '', en: 'keep me' } });
+  const row = db.rows.get(PAYLOAD.meta.market_date);
+  assert.equal(row.takeaway_ko, '');
+  assert.equal(row.takeaway_en, 'keep me');
+  assert.deepEqual((await response.json()).takeaway, { ko: false, en: true });
+
+  // And the homepage sees the erasure rather than a stale line.
+  assert.deepEqual((await (await latest(db)).json()).takeaway, { ko: '', en: 'keep me' });
+});
+
+test('whitespace is not a line', async () => {
+  const db = fakeDb();
+  await publish(db, { market: PAYLOAD, takeaway: { ko: '실제 문장' } });
+  await publish(db, { market: PAYLOAD, takeaway: { ko: '   ' } });
+  assert.equal(db.rows.get(PAYLOAD.meta.market_date).takeaway_ko, '');
+});
+
+/* --------------------------------------------- migration failure handling */
+
+test('a duplicate column is ignored but a real migration failure is not', async () => {
+  const shared = await read('functions/api/market/_shared.js');
+  assert.match(shared, /if \(!isDuplicateColumnError\(error\)\) throw error;/);
+  assert.match(shared, /duplicate column name/i);
+  // The old blanket catch would have hidden a broken table.
+  assert.doesNotMatch(shared, /catch \(_\) \{ \/\* already present \*\/ \}/);
+
+  const db = fakeDb({ alterError: new Error('database disk image is malformed') });
+  const response = await publish(db, { market: PAYLOAD, takeaway: { ko: '실패해야 한다' } });
+  assert.equal(response.status, 500);
+  assert.equal((await response.json()).error, 'DB_INIT_FAILED');
+  assert.equal(db.rows.size, 0, 'a failed migration must not write rows');
+});
+
+test('the admin loads the stored lines back into the form before republishing', async () => {
+  const [script, markup] = await Promise.all([read('assets/admin-market.js'), read('admin/market/index.html')]);
+
+  // Publishing writes whatever the boxes hold, so opening the page with them
+  // blank would erase the stored lines on the next publish of the same date.
+  assert.match(script, /loadStoredTakeaway\(payload\.meta\?\.market_date\)/);
+  assert.match(script, /if \(body\?\.meta\?\.market_date !== marketDate\) return;/);
+  // Only untouched boxes are filled, so the editor's own typing always wins.
+  assert.match(script, /!touched\.has\(takeawayKo\)/);
+  assert.match(script, /!touched\.has\(takeawayEn\)/);
+  // The form says what leaving a box empty will now do.
+  assert.match(script, /지우고 게시하면 삭제됩니다/);
+  assert.match(markup, /id="market-takeaway-loaded"/);
+
+  // A preview deployment has no D1, so the lookup must fail quietly.
+  assert.match(script, /catch \(_\) \{ return; \}/);
+});
+

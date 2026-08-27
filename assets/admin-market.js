@@ -61,6 +61,7 @@
     window.MARKET_CLOSE?.render(payload, preview);
     renderTakeawayState();
     updateButton();
+    loadStoredTakeaway(payload.meta?.market_date);
   }
 
   fileInput.addEventListener('change', () => selectFile(fileInput.files?.[0]));
@@ -78,6 +79,12 @@
   const takeawayEn = document.getElementById('market-takeaway-en');
   const takeawayCount = document.getElementById('market-takeaway-count');
   const takeawayDate = document.getElementById('market-takeaway-date');
+  const takeawayLoaded = document.getElementById('market-takeaway-loaded');
+  // Publishing writes whatever these boxes hold, so an empty box erases the
+  // stored line. Anything the editor has not typed into is filled from D1
+  // first, which is what makes leaving one empty a decision rather than an
+  // accident of opening the page.
+  const touched = new Set();
 
   function renderTakeawayState() {
     if (takeawayDate) takeawayDate.textContent = payload?.meta?.market_date || 'market date';
@@ -89,7 +96,31 @@
     parts.push(en ? `English ${en.length}자` : 'English 없음 — EN 홈에서 한 줄 숨김');
     takeawayCount.textContent = parts.join(' · ');
   }
-  [takeawayKo, takeawayEn].forEach(field => field?.addEventListener('input', renderTakeawayState));
+  [takeawayKo, takeawayEn].forEach(field => field?.addEventListener('input', () => {
+    touched.add(field);
+    renderTakeawayState();
+  }));
+
+  async function loadStoredTakeaway(marketDate) {
+    if (takeawayLoaded) takeawayLoaded.hidden = true;
+    if (!marketDate) return;
+    let stored;
+    try {
+      const response = await fetch('/api/market/latest', { headers: { 'cache-control': 'no-cache' } });
+      if (!response.ok) return;
+      const body = await response.json();
+      if (body?.meta?.market_date !== marketDate) return;
+      stored = body.takeaway;
+    } catch (_) { return; }
+    if (!stored) return;
+    const filled = [];
+    if (takeawayKo && !touched.has(takeawayKo) && stored.ko) { takeawayKo.value = stored.ko; filled.push('KO'); }
+    if (takeawayEn && !touched.has(takeawayEn) && stored.en) { takeawayEn.value = stored.en; filled.push('EN'); }
+    renderTakeawayState();
+    if (!takeawayLoaded || !filled.length) return;
+    takeawayLoaded.hidden = false;
+    takeawayLoaded.textContent = `${marketDate}에 저장된 ${filled.join('/')} 문구를 불러왔습니다. 그대로 두면 유지되고, 지우고 게시하면 삭제됩니다.`;
+  }
   renderTakeawayState();
 
   publishButton.addEventListener('click', async () => {

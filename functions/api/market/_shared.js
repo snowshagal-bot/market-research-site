@@ -43,6 +43,13 @@ export function authorizePublish(request, env) {
   return '';
 }
 
+// D1 reports an existing column as "duplicate column name: <column>".
+// Matching the message is the only signal available: no error code is
+// surfaced for it.
+function isDuplicateColumnError(error) {
+  return /duplicate column name/i.test(String(error?.message || error || ''));
+}
+
 export async function ensureMarketTable(env) {
   const db = env.COMMENTS_DB;
   if (!db) throw new MarketDbError('DB_NOT_CONFIGURED', 'Market Close 데이터베이스가 연결되지 않았습니다.', 503);
@@ -60,9 +67,14 @@ export async function ensureMarketTable(env) {
         takeaway_en TEXT NOT NULL DEFAULT ''
       )`).run();
       // Tables created before the one-liner existed need the columns added.
+      // A column that is already there is the expected case on every boot
+      // but the first; anything else is a real failure and must not be
+      // swallowed, or a broken table would masquerade as a migrated one.
       for (const column of ['takeaway_ko', 'takeaway_en']) {
         try { await db.prepare(`ALTER TABLE ${TABLE_NAME} ADD COLUMN ${column} TEXT NOT NULL DEFAULT ''`).run(); }
-        catch (_) { /* already present */ }
+        catch (error) {
+          if (!isDuplicateColumnError(error)) throw error;
+        }
       }
       await db.prepare(`CREATE INDEX IF NOT EXISTS idx_market_close_generated ON ${TABLE_NAME} (generated_at)`).run();
     })().catch(error => {

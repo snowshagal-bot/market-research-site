@@ -24,14 +24,19 @@ export async function onRequestPost(context) {
   const isEnvelope = Boolean(body && typeof body === 'object' && body.market && typeof body.market === 'object');
   const payload = isEnvelope ? body.market : body;
   const payloadText = isEnvelope ? JSON.stringify(payload) : raw;
-  const takeaway = {
-    ko: String(isEnvelope ? body.takeaway?.ko ?? '' : '').trim(),
-    en: String(isEnvelope ? body.takeaway?.en ?? '' : '').trim()
-  };
-  for (const [lang, text] of Object.entries(takeaway)) {
+  // A language changes only when the request names it. The automated
+  // pipeline posts the bare contract document and must leave an editor's
+  // lines alone; the admin form always sends both keys, so sending an empty
+  // string there is a deliberate erasure and is honoured as one.
+  const submitted = isEnvelope && body.takeaway && typeof body.takeaway === 'object' ? body.takeaway : null;
+  const takeaway = {};
+  for (const lang of ['ko', 'en']) {
+    if (!submitted || submitted[lang] === undefined) continue;
+    const text = String(submitted[lang] ?? '').trim();
     if (text.length > MAX_TAKEAWAY_LENGTH) {
       return json({ error: 'TAKEAWAY_TOO_LONG', message: `오늘의 한 줄(${lang})은 ${MAX_TAKEAWAY_LENGTH}자 이하여야 합니다.` }, 422);
     }
+    takeaway[lang] = text;
   }
   let schema;
   try { schema = await loadMarketSchema(request, env); }
@@ -44,9 +49,13 @@ export async function onRequestPost(context) {
 
   try {
     const db = await ensureMarketTable(env);
-    const existing = await db.prepare(`SELECT market_date FROM ${TABLE_NAME} WHERE market_date = ? LIMIT 1`).bind(payload.meta.market_date).first();
+    const existing = await db.prepare(`SELECT market_date, takeaway_ko, takeaway_en FROM ${TABLE_NAME} WHERE market_date = ? LIMIT 1`).bind(payload.meta.market_date).first();
     const latestBefore = await db.prepare(`SELECT market_date FROM ${TABLE_NAME} ORDER BY market_date DESC LIMIT 1`).first();
     const publishedAt = new Date().toISOString();
+    const stored = {
+      ko: takeaway.ko ?? String(existing?.takeaway_ko || ''),
+      en: takeaway.en ?? String(existing?.takeaway_en || '')
+    };
     await db.prepare(`INSERT INTO ${TABLE_NAME} (market_date, schema_version, generated_at, status, payload_json, published_at, auth_source, takeaway_ko, takeaway_en)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(market_date) DO UPDATE SET
@@ -58,9 +67,9 @@ export async function onRequestPost(context) {
         auth_source = excluded.auth_source,
         takeaway_ko = excluded.takeaway_ko,
         takeaway_en = excluded.takeaway_en`)
-      .bind(payload.meta.market_date, payload.meta.schema_version, payload.meta.generated_at, payload.meta.status, payloadText, publishedAt, authSource, takeaway.ko, takeaway.en).run();
+      .bind(payload.meta.market_date, payload.meta.schema_version, payload.meta.generated_at, payload.meta.status, payloadText, publishedAt, authSource, stored.ko, stored.en).run();
     const isLatest = !latestBefore?.market_date || payload.meta.market_date >= latestBefore.market_date;
-    return json({ ok: true, market_date: payload.meta.market_date, schema_version: payload.meta.schema_version, action: existing ? 'updated' : 'created', is_latest: isLatest, takeaway: { ko: Boolean(takeaway.ko), en: Boolean(takeaway.en) } }, existing ? 200 : 201);
+    return json({ ok: true, market_date: payload.meta.market_date, schema_version: payload.meta.schema_version, action: existing ? 'updated' : 'created', is_latest: isLatest, takeaway: { ko: Boolean(stored.ko), en: Boolean(stored.en) } }, existing ? 200 : 201);
   } catch (error) {
     if (error instanceof MarketDbError) return json({ error: error.code, message: error.message }, error.status);
     console.error('market close publish failed', error);
