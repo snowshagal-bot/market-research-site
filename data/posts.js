@@ -1,5 +1,29 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-29-research-15pk9zq",
+    "type": "research",
+    "typeLabel": "Research",
+    "lang": "en",
+    "date": "2026-08-29",
+    "reportDate": "2026-08-29",
+    "registeredDate": "2026-08-29",
+    "registeredAt": "2026-08-28T20:00:01.843Z",
+    "legacyImport": false,
+    "title": "Behind the CoinAre Treasuries",
+    "subtitle": "",
+    "description": "Independent research on specific industries, companies, policies, and market structure.",
+    "tags": [
+      "treasuries",
+      "stablecoins",
+      "crypto"
+    ],
+    "readingMinutes": 20,
+    "href": "reports/en/2026-08-29_Stablecoins_Treasuries_Research_EN.html",
+    "translationGroup": "2026-08-29-research-178u9g5",
+    "coverImage": "covers/2026-08-29-research-15pk9zq.webp",
+    "shareCardImage": "covers/share/2026-08-29-research-15pk9zq.jpg"
+  },
+  {
     "id": "2026-08-29-research-178u9g5",
     "type": "research",
     "typeLabel": "비정기 리서치",
