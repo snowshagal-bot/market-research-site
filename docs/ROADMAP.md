@@ -1,194 +1,109 @@
 # Roadmap
 
-Updated: 2026-08-27
+Updated: 2026-08-28
 
-This roadmap records implementation order, not a promise to build every future idea. Keep the current site small until traffic and actual needs justify added complexity.
+This roadmap records implementation order, completed capabilities, and operational priorities, not a promise to build every future idea. Keep the current site small and stable until real traffic, indexing, and operational needs justify added complexity.
 
-## Next action
+## Current Stage & Next Action
 
-Review the SEO Foundation PR in Cloudflare Preview. Verify HTML source and rendered output for the KO/EN homepages, all ten category landings, and representative paired/unpaired reports without merging to Production.
+The core site architecture, bilingual structure, SEO/clean URLs, category discovery, analytics, and publishing pipeline are fully implemented and running in Production. The project is currently in the **Search indexing + traffic observation + operational stabilization** stage.
 
-## In progress
+### Next action
 
-### 15. SEO Foundation
+1. **Google Search Console Domain property confirmation & Sitemap monitoring**:
+   - Verify `snowshagal.com` DNS Domain-property in Google Search Console.
+   - Confirm `/sitemap.xml` coverage, indexing status, and crawl rates for KO/EN homepages, category landings, and published reports.
+2. **Observe real visitor traffic & reading engagement**:
+   - Accumulate baseline data across `/admin/analytics/` (Cloudflare Web Analytics: Visits, Page views, referrers, devices, connection countries; and Privacy-minimal Engagement Analytics: active reading time, scroll depth, session completion).
+3. **Operational stabilization**:
+   - Defer large feature additions; focus on publishing rhythm and monitor for real friction in day-to-day writing and report management.
 
-- server-render crawlable report anchors into homepage Latest/Archive without replacing the existing interactive list/calendar/search behavior;
-- add KO and EN landing pages for Daily, Weekly, Research, Market Basics, and Notes from shared metadata and the current post dataset;
-- generate unique report titles and report-specific descriptions in the common middleware while preserving explicit summaries and editorial report content;
-- keep self-canonicals and emit reciprocal report hreflang only for real `translationGroup` pairs;
-- gate each locale category's indexability, sitemap entry, crawlable nav and `hreflang` from current post availability, then validate source HTML, links, desktop, and mobile in Preview before any Production merge.
+## Near-term Priorities
 
-### 14. Privacy-minimal Engagement Analytics
+Focus on operational observation and incremental refinement rather than new product features:
 
-- retain Cloudflare Web Analytics and add independent page-load reading sessions backed by the existing `COMMENTS_DB` binding;
-- collect only foreground active time, maximum scroll, path, locale, temporary UUID, server timestamps, and server-derived connection country;
-- exclude Preview and administrator/API paths, use no cookie or persistent visitor identity, and perform no historical backfill;
-- expose authenticated 1/7/28-day overall, page, and country aggregates inside `/admin/analytics/`;
-- validate all existing tests and responsive Preview UI before Production merge.
+### 1. Search Indexing & Discovery
+- Monitor Search Console indexing coverage, canonical resolution, and search appearance for both Korean and English reports.
+- Validate that all newly published reports are smoothly indexed with extensionless Clean URLs.
 
-### 13. Snowshagal homepage brand redesign
+### 2. Traffic & Engagement Data Accumulation
+- Observe real visitor behavior across desktop and mobile devices without tracking personal data or adding intrusive scripts.
+- Track which categories and reports attract meaningful active reading time and deep scroll engagement.
 
-- replace the rotating report-led opener with a fixed Snowshagal brand hero and the approved Korean copy;
-- use one original watercolor illustration with desktop and mobile-specific crops;
-- keep Daily / Weekly / Research entry points concise while preserving every existing category, search, archive, locale, theme, and mobile-menu path;
-- keep latest report content driven by the current localized post data and leave SEO, Pages Functions, Analytics, admin, and publishing behavior unchanged;
-- validate the Draft PR in Cloudflare Preview on desktop and mobile before Production merge.
+### 3. Publishing Workflow Refinement (Friction-Driven Only)
+Refine `/admin/` and `/admin/manage/` only when recurring operational pain points are observed:
+- Clearer duplicate-file / existing-slug warnings at publish time;
+- Potential manual slug or filename customization if needed for future reports;
+- Standardized metadata support in incoming HTML report templates (`report-title`, `report-date`, `report-type`, `report-summary`, `report-subtitle`);
+- Parser adjustments for evolving chart or table formats.
+- *Guardrail*: Preserve the current lightweight GitHub-backed publisher; do not replace it with a heavyweight CMS.
 
-### 12. Lightweight admin Web Analytics
+### 4. Distribution Channel Strategy
+- Use external platforms (X/Twitter, Tistory, newsletters, social links) as distribution channels that route readers back to canonical `snowshagal.com` report URLs.
+- Automated cross-posting remains low priority; prioritize editorial quality and direct link sharing.
 
-- add `/admin/analytics/` with today, 7-day, and 28-day Visits/Page views and lightweight trend/ranking views;
-- protect `/api/analytics` with the existing `ADMIN_KEY` and keep every Cloudflare credential server-only;
-- discover and validate the account's `rumPageloadEventsAdaptiveGroups` schema before querying;
-- distinguish empty data, configuration, schema, timeout, authentication, and upstream failures;
-- validate responsive light/dark UI and read-only Preview behavior without report mutations.
+## Completed Milestones
 
-### 11. Explicit Cloudflare Pages 404 handling
+### Category Landing & Public Navigation Redesign (2026-08)
+- **Category Landing UX Revamp** (PR #66): Converted `/daily/`, `/weekly/`, `/research/`, `/basics/`, and `/notes/` (and `/en/...`) from raw archive lists into an editorial layout featuring **Latest 3 Featured Cards** + a quiet **Previous Reports Archive** list. Total post counts <= 3 automatically hide the archive section to prevent empty boxes.
+- **Mobile Horizontal Swipe Carousel** (PR #66): Implemented CSS native scroll-snap horizontal carousel (~85% card width with clear swipe affordance) and compact 2-column internal card layout on mobile (`<=680px`), eliminating text clipping and page-level overflow.
+- **Canonical Public Navigation** (PR #66, #68): Added explicit `홈 / Home` navigation item before Market across desktop `main-nav` and mobile `mobile-quick-nav`. All global category links now route directly to canonical landing pages (`/daily/`, etc.), while preserving `?category=` for in-page filtering and legacy bookmark compatibility.
+- **SSR / CSR Card Parity** (PR #66): Synchronized server-side HTML generation (`functions/_seo.js`) and client rendering (`category-landing.js`, `site.js`) to render identical metadata, tags, summaries, reading times, and Clean URLs without layout shifts.
 
-- add a minimal, non-indexable root `404.html` so unknown paths no longer receive the homepage with HTTP 200;
-- preserve 404 and redirect responses in the shared middleware without report-shell injection;
-- validate real Preview HTTP status and SEO regressions without Production mutations.
+### Routing, Caching & Resilience Infrastructure (2026-08)
+- **Internal Clean URL Consistency** (PR #65): Converted all internal report links across homepages, category landings, search results, previous/next bars, and related reading to canonical extensionless Clean URLs (`/reports/...`), while legacy `.html` requests redirect via HTTP 308. Physical `.html` paths remain safely preserved in `data/posts.json`.
+- **Search Index & Dynamic Data Freshness** (PR #64): Enforced strict `Cache-Control: no-cache, no-store, must-revalidate` in `_headers` for dynamic data artifacts (`posts.json`, `posts.js`, `search-index*.js`, `market-summary.js`), preventing stale CDN/browser caching after new report publications.
+- **Publishing Concurrency & Atomic Snapshot** (PR #63): Added snapshot-atomic publishing in `functions/api/publish.js`, detecting repository state changes before Git ref updates and returning HTTP 409 conflict errors to prevent silent overwrites.
+- **Automated Content-Hash Asset Versioning** (PR #62): Implemented automated content-hash stamping (`scripts/stamp-asset-versions.mjs`) for mutable CSS/JS assets (`?v=<hash>`), eliminating stale asset caching during production deployments.
 
-### 10. Korean / English site structure
+### Homepage Brand & Content Presentation (2026-08)
+- **Compact Brand Hero & 2-Slide Editorial Carousel** (PR #61, #62): Evolved homepage header from previous iterations into a compact brand hero featuring a 2-slide manual carousel (PR #61: Slide 01 Snowshagal brand mission, scaled owl icon, and action labels; PR #62: Slide 02 latest Research highlight refinement and automated asset hashing integration).
+- **TODAY Market Close Strip & Takeaway Pipeline** (PR #49, #54, #55, #56, #60, #67): Integrated D1-backed Market Close summary (`/api/market/latest`), dynamic TODAY strip, and published daily takeaway management in `/admin/manage/`.
 
-In the current Draft PR:
+### Internal Discovery UX (2026-08)
+- **Previous / Next Navigation & Related Reading** (PR #59): Added isolated bottom navigation to all reports in `assets/report-shell.js`, providing chronologically adjacent report links and contextually relevant recommendations based on shared topic tags and category.
 
-- add `/en/` and `/en/about/` while keeping Korean as the default locale;
-- isolate carousel, latest cards, archive counts, search, and filters by post language, with missing `lang` treated as Korean;
-- add explicit desktop/mobile KO/EN controls without automatic browser-language redirects;
-- support `translationGroup` report counterparts and localized report-shell/comment copy without editing uploaded report HTML;
-- publish English HTML under `reports/en/`, expose a simple optional pair selector, and preserve locale metadata in management updates.
+### SEO Foundation & Public Shells (2026-08)
+- **SEO Foundation** (PR #57): Server-rendered crawlable report anchors, 10 static KO/EN category landing shells, dynamic metadata generation (`<title>`, `<meta name="description">`), self-canonicals, reciprocal `hreflang` for translation pairs, dynamic `sitemap.xml`, and crawler-friendly `robots.txt`.
+- **Explicit 404 Handling**: Root `404.html` with `X-Robots-Tag: noindex` prevents Cloudflare Pages SPA fallback on missing routes.
+- **Bilingual Structure (KO/EN)**: Dedicated `/en/` and `/en/about/` shells, language isolation for archive/search/filters, and `translationGroup` pair linkages.
+- **Favicon Set & Share Cards** (PR #50, #53): Multi-size favicon/manifest suite and 1200x630 share card generator at publish time (`covers/share/`).
 
-## Completed
+### Analytics & Privacy (2026-08)
+- **Lightweight Admin Web Analytics**: Authenticated `/admin/analytics/` reading Cloudflare Web Analytics GraphQL RUM dataset for Visits, Page views, referrers, countries, and devices.
+- **Privacy-Minimal Engagement Analytics**: Independent page-load reading session tracking via `assets/engagement.js` and D1 database `market-research-comments`, measuring active reading time and maximum scroll depth with zero persistent visitor identification.
 
-### 9. Homepage archive density and admin category selection
+### V1 Baseline & Core Features (2026-08)
+- **Report Reading Time & Canonical Topic Tags** (PR #44, #48): Weighted DOM reading time calculation with category adjustments, canonical tag registry (`data/tags.json` / `data/tags.js`), and tag filtering.
+- **Full-Text Tiered Search Index** (PR #47, #52): Sharded search index (`search-index-meta.js`, `search-index-body-ko.js`, `search-index-body-en.js`) with Git blob reading for large index files.
+- **Social Sharing Section** (PR #51): Shadow DOM report share bar supporting native OS share sheet and desktop copy/social links.
+- **Post Management Flow** (PR #10, #11): `/admin/manage/` supporting post metadata editing, HTML/cover replacement, exact-title deletion confirmation, and deployment polling.
+- **Guest Comments System**: D1-backed salt-and-hash PBKDF2 guest comment system with rate limiting and responsive Shadow DOM UI.
 
-Squash-merged and deployed to Production on 2026-08-12. The homepage now uses a dynamic five-category archive index beside compact recent-report rows on desktop and stacked below on smaller screens. The new-report admin keeps five accessible category chips visible, with conservative automatic detection and manual override.
+## Maintenance / When Needed
 
-### 8. Post-management deployment feedback
+- **Comment Moderation & Spam Protection**: Monitor guest comments; add lightweight moderation or rate-limit tightening only if real spam or abusive content appears.
+- **D1 Database Maintenance**: Periodic review of comment and engagement storage metrics.
 
-Squash-merged and deployed to Production on 2026-08-11. Successful update/delete actions keep the editor stable, show a centered completion overlay, poll Production metadata and covers, support automatic homepage redirect or continued management, and present deployment timeouts as delayed confirmation rather than failed saves.
+## Later, When Traffic Justifies It
 
-### 7. Existing post management
+- **Community Discussion Layer**: Separate data model from owner reports (`community_posts`, `comments`); do not store user-submitted posts as raw HTML.
+- **Market Indicators**: Optional free/delayed index indicators (KOSPI, KOSDAQ, Nasdaq, USD/KRW). Never introduce paid real-time market data subscriptions.
+- **International Expansion**: Publish English reports via authenticated translation pairing as translations become ready; avoid bulk machine translation.
 
-Squash-merged and deployed to Production on 2026-08-11. `/admin/manage/` provides list/search/filter/edit, optional HTML and cover replacement, exact-title deletion confirmation, atomic GitHub updates, Preview write blocking, and managed-path safety.
+## Explicit Non-priorities Now
 
-### 6. Admin cover preview
+- User membership / login / accounts
+- Paid subscriptions / paywalls / donations
+- Large frontend framework migration (preserve static HTML + Pages Functions)
+- Paid real-time market data feeds
+- Public view counters, ranking systems, or competitive popularity UI (internal analytics remain available in `/admin/analytics/`)
+- Automated Tistory cross-posting
+- Unnecessary CMS or backend rewrite
 
-Squash-merged and deployed to Production on 2026-08-11. The new-report admin provides local PC 1280, mobile 430, and mobile 360 homepage crop previews, clears undecodable images before publishing, and keeps the optional fallback-cover path.
+## Architecture Guardrails
 
-### 5. Representative report covers
-
-Squash-merged and deployed to Production on 2026-08-11. The latest representative DAILY, WEEKLY, and RESEARCH posts use rendered 900×1350 WebP covers, synchronized metadata, and the existing homepage crop while the fallback remains available for posts without a cover.
-
-### 4. Homepage cleanup and About page shell
-
-Squash-merged and deployed to Production on 2026-08-11. The homepage introduction copy was removed, full-width latest-category cards were retained, `소개` was added to public navigation, and the empty noindex `/about/` common shell was added without changing report content.
-
-### 3. Homepage v2 editorial redesign
-
-Squash-merged and deployed to Production on 2026-08-11. Production validation covered the category-representative carousel, light/dark mode, search and filters, 360px/430px/1280px layouts, mobile swipe/menu behavior, existing report shell/comments, and the admin Market Basics/optional-cover controls.
-
-### 1. Finish guest comments validation
-
-Completed on 2026-08-10. The D1 database `market-research-comments` and Production binding `COMMENTS_DB` are active.
-
-Production validation confirmed:
-
-- desktop comment creation succeeded and persisted after refresh;
-- wrong-password deletion was rejected;
-- correct-password deletion succeeded;
-- mobile comment creation and deletion succeeded;
-- mobile and desktop report layouts showed no regressions.
-
-### 2. Basic site polish
-
-Completed and deployed to Production on 2026-08-10. The work stabilized the existing site as the v1 baseline without adding features or redesigning the product.
-
-Validation and polish covered:
-
-- light and dark modes across the homepage, admin page, and shared report shell;
-- site-controlled shared shell theming without changing original report designs;
-- common light-mode text contrast, keyboard focus visibility, and category/form accessibility semantics;
-- Android-sized layouts at 360px and 430px;
-- desktop layout at 1280px;
-- horizontal overflow, fixed/sticky UI spacing, hover/pointer behavior, and representative daily/weekly/research reports;
-- guest comments regression coverage after the UI changes.
-
-## Near-term priorities
-
-### 6. Improve publishing workflow only where friction appears
-
-Current `/admin/` publishing already supports HTML parsing, metadata review, secure server-side publishing, deployment progress, and redirect.
-
-Potential incremental improvements:
-
-- clearer duplicate-file handling;
-- optional manual slug/file rename if needed;
-- better extraction rules for future report HTML templates;
-- optional standard metadata in new report templates (`report-title`, `report-date`, `report-type`, `report-subtitle`).
-
-Do not replace the working publisher with a large CMS unless the current flow becomes a real bottleneck.
-
-## Maintenance / when needed
-
-### Harden comment operations
-
-The guest comment flow has passed Production E2E validation and has no currently observed operational issues. Continue hardening only when a real need is observed:
-
-- review rate-limit behavior or user-facing error messages if they cause operational friction;
-- add simple admin moderation only if abusive comments create a real moderation need;
-- add lightweight spam controls only if real spam appears;
-- avoid CAPTCHA or account requirements unless necessary.
-
-## Later, when traffic justifies it
-
-### Community board
-
-Future community posts should use a data model separate from owner reports. Do not store visitor community posts as arbitrary HTML.
-
-Possible future entities:
-
-- `community_posts`
-- `comments`
-- optional `users` / roles later
-
-The current guest-comment system should not block future membership, but membership is not a current requirement.
-
-### Market indicators
-
-Possible header indicators: KOSPI, KOSDAQ, Nasdaq, Dow, USD/KRW, Bitcoin.
-
-Priority rule: use free data only. Delayed data is acceptable if clearly labeled. If reliable display requires paid market-data licensing, omit the feature rather than add recurring cost at the current stage.
-
-### Custom domain and search indexing
-
-`snowshagal.com` is connected as the Production apex and the former Pages Production URL redirects to it. Canonical metadata, real KO/EN alternates, a data-driven sitemap, and robots policy now use the apex domain. The remaining manual operation is Domain-property DNS verification and sitemap submission in Google Search Console.
-
-### Tistory and social
-
-Tistory does not need automatic cross-posting. Use Tistory/social posts as distribution channels linking back to the canonical website.
-
-### International expansion follow-ups
-
-Add actual English reports only through the authenticated publishing flow when translations are ready. `hreflang` connects report pages only after an explicit `translationGroup` has real KO and EN records; do not bulk-translate or duplicate existing production records merely to populate the English archive.
-
-### Ads / donations / paid access
-
-Not current priorities.
-
-The architecture should remain extensible enough for future premium/member roles, donations, or advertising, but do not add payment/account complexity now. Any future paid investment-research model should receive a separate legal/regulatory review before implementation.
-
-## Explicit non-priorities now
-
-- popular posts
-- view counts
-- ranking systems
-- automatic Tistory posting
-- paid real-time market data
-- user membership/login
-- paid subscription
-- large frontend framework migration
-
-## Architecture guardrail
-
-When a future feature seems to require a rewrite, first ask whether it can be added as a small isolated layer around the current static-site + Pages Functions architecture. Preserve working report HTML and the publishing path unless there is a concrete reason not to.
+- **Static HTML + Cloudflare Pages Functions**: Keep the foundation simple, fast, and serverless.
+- **Preserve Report Integrity**: Never bulk-modify uploaded HTML files in `reports/`. Use the shared `report-shell.js` and middleware for common UI layers.
+- **Isolated Feature Additions**: Implement new features as small, independent, isolated layers rather than rewriting core infrastructure.
+- **Friction-Driven Evolution**: Refactor or extend publisher/admin tools only when concrete operational friction is identified.
