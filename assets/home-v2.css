@@ -477,7 +477,6 @@ html[lang="en"] .hero-copy h1 {
 }
 
 /* Minimal Editorial Carousel Controls */
-/* Minimal Editorial Carousel Controls */
 .hero-carousel-controls {
   position: absolute;
   left: 0;
@@ -550,7 +549,7 @@ html[lang="en"] .hero-copy h1 {
   position: absolute;
   z-index: 1;
   top: 0;
-  right: min(-2vw, -12px);
+  right: clamp(-28px, -2vw, -12px);
   bottom: 0;
   width: min(65vw, 780px);
   pointer-events: none;
