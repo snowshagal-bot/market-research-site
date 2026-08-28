@@ -1,7 +1,15 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { CATEGORY_LANDINGS, CATEGORY_SLUGS, PRODUCTION_ORIGIN, categoryLandingPath, escapeHtml } from '../functions/_seo.js';
+import {
+  CATEGORY_LANDINGS,
+  CATEGORY_SLUGS,
+  PRODUCTION_ORIGIN,
+  categoryLandingPath,
+  categoryStructuredData,
+  escapeHtml,
+  structuredDataScript
+} from '../functions/_seo.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -66,6 +74,7 @@ function page(type, lang) {
 <meta name="description" content="${escapeHtml(text.description)}">
 <link rel="canonical" href="${PRODUCTION_ORIGIN}${canonicalPath}">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Snowshagal"><meta property="og:locale" content="${en ? 'en_US' : 'ko_KR'}"><meta property="og:title" content="${escapeHtml(text.title)}"><meta property="og:description" content="${escapeHtml(text.description)}"><meta property="og:url" content="${PRODUCTION_ORIGIN}${canonicalPath}"><meta property="og:image" content="${PRODUCTION_ORIGIN}/assets/social/snowshagal-home.jpg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${escapeHtml(text.title)}"><meta name="twitter:description" content="${escapeHtml(text.description)}"><meta name="twitter:image" content="${PRODUCTION_ORIGIN}/assets/social/snowshagal-home.jpg">
+${structuredDataScript(categoryStructuredData(type, lang))}
 <link rel="stylesheet" href="/assets/site.css?v=1efc69cb5c"><link rel="stylesheet" href="/assets/brand.css?v=890e1e5732"><link rel="stylesheet" href="/assets/language.css?v=0c4ca7f4fc"><link rel="stylesheet" href="/assets/category-state.css?v=4328e4b8c2"><link rel="stylesheet" href="/assets/ui-polish.css?v=26a4fe9976"><link rel="stylesheet" href="/assets/home-v2.css?v=c5771a69b0"><link rel="stylesheet" href="/assets/category-landing.css?v=0bdc34df9b">
 <script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
 </head>

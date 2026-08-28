@@ -436,6 +436,187 @@ export function homepageLatestLinks(posts, lang) {
     }).join('');
 }
 
+export const ORGANIZATION_ID = `${PRODUCTION_ORIGIN}/#organization`;
+export const WEBSITE_ID = `${PRODUCTION_ORIGIN}/#website`;
+export const BRAND_LOGO_URL = `${PRODUCTION_ORIGIN}/assets/brand/snowshagal-owl.webp`;
+
+export const CATEGORY_BREADCRUMB_NAMES = Object.freeze({
+  daily: { ko: '데일리', en: 'Daily' },
+  weekly: { ko: '위클리', en: 'Weekly' },
+  research: { ko: '리서치', en: 'Research' },
+  basics: { ko: '시장 공부', en: 'Market Basics' },
+  note: { ko: '끄적끄적', en: 'Notes' }
+});
+
+export function serializeJsonLd(data) {
+  return JSON.stringify(data)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
+}
+
+export function structuredDataScript(data) {
+  if (!data) return '';
+  return `<script type="application/ld+json">${serializeJsonLd(data)}</script>`;
+}
+
+export function organizationStructuredData(lang = 'ko') {
+  return {
+    '@type': 'Organization',
+    '@id': ORGANIZATION_ID,
+    'name': 'Snowshagal',
+    'url': `${PRODUCTION_ORIGIN}/`,
+    'logo': BRAND_LOGO_URL,
+    'description': lang === 'en'
+      ? 'A market research publication offering daily market reviews, weekly outlooks, deep-dive research, and market explainers.'
+      : '한국 시장의 데일리 복기와 위클리 전망, 주요 경제·시장 이슈와 투자에 참고할 만한 인사이트를 정리하는 시장 리서치 사이트입니다.'
+  };
+}
+
+export function websiteStructuredData() {
+  return {
+    '@type': 'WebSite',
+    '@id': WEBSITE_ID,
+    'url': `${PRODUCTION_ORIGIN}/`,
+    'name': 'Snowshagal',
+    'alternateName': 'snowshagal.com',
+    'publisher': { '@id': ORGANIZATION_ID }
+  };
+}
+
+export function homepageStructuredData(lang = 'ko') {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      organizationStructuredData(lang),
+      websiteStructuredData()
+    ]
+  };
+}
+
+export function categoryStructuredData(type, lang = 'ko') {
+  const landingPath = categoryLandingPath(type, lang);
+  const categoryName = CATEGORY_BREADCRUMB_NAMES[type]?.[lang] || type;
+  const homeName = lang === 'en' ? 'Home' : '홈';
+  const homeUrl = lang === 'en' ? `${PRODUCTION_ORIGIN}/en/` : `${PRODUCTION_ORIGIN}/`;
+  const canonical = `${PRODUCTION_ORIGIN}${landingPath}`;
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      organizationStructuredData(lang),
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${canonical}#breadcrumb`,
+        'itemListElement': [
+          {
+            '@type': 'ListItem',
+            'position': 1,
+            'name': homeName,
+            'item': homeUrl
+          },
+          {
+            '@type': 'ListItem',
+            'position': 2,
+            'name': categoryName,
+            'item': canonical
+          }
+        ]
+      }
+    ]
+  };
+}
+
+export function reportArticleImage(post) {
+  const card = reportCardPath(post);
+  if (card) return absoluteSiteUrl(card);
+  const cover = normalizeSitePath(post?.coverImage);
+  if (cover) return absoluteSiteUrl(cover);
+  return '';
+}
+
+export function reportArticleStructuredData(post) {
+  const canonical = reportSiteUrl(post.href);
+  const lang = postLanguage(post);
+  const title = String(post?.title || '').replace(/\s+/g, ' ').trim();
+  const description = reportDescription(post);
+  const datePublished = String(post?.reportDate || post?.date || '').slice(0, 10);
+  const section = CATEGORY_LANDINGS[post?.type]?.[lang]?.heading || post?.typeLabel || '';
+  const image = reportArticleImage(post);
+
+  const article = {
+    '@type': 'Article',
+    '@id': `${canonical}#article`,
+    'url': canonical,
+    'mainEntityOfPage': canonical,
+    'headline': title,
+    'description': description,
+    'datePublished': datePublished,
+    'inLanguage': lang === 'en' ? 'en' : 'ko-KR',
+    'publisher': { '@id': ORGANIZATION_ID },
+    'author': {
+      '@type': 'Organization',
+      '@id': ORGANIZATION_ID,
+      'name': 'Snowshagal',
+      'url': `${PRODUCTION_ORIGIN}/`
+    }
+  };
+
+  if (section) article.articleSection = section;
+  if (image) article.image = image;
+
+  return article;
+}
+
+export function reportBreadcrumbStructuredData(post) {
+  const canonical = reportSiteUrl(post.href);
+  const lang = postLanguage(post);
+  const categoryType = post?.type || 'daily';
+  const categoryName = CATEGORY_BREADCRUMB_NAMES[categoryType]?.[lang] || categoryType;
+  const landingPath = categoryLandingPath(categoryType, lang);
+  const categoryUrl = `${PRODUCTION_ORIGIN}${landingPath}`;
+  const homeName = lang === 'en' ? 'Home' : '홈';
+  const homeUrl = lang === 'en' ? `${PRODUCTION_ORIGIN}/en/` : `${PRODUCTION_ORIGIN}/`;
+  const title = String(post?.title || '').replace(/\s+/g, ' ').trim();
+
+  return {
+    '@type': 'BreadcrumbList',
+    '@id': `${canonical}#breadcrumb`,
+    'itemListElement': [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': homeName,
+        'item': homeUrl
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': categoryName,
+        'item': categoryUrl
+      },
+      {
+        '@type': 'ListItem',
+        'position': 3,
+        'name': title,
+        'item': canonical
+      }
+    ]
+  };
+}
+
+export function reportStructuredData(post) {
+  const lang = postLanguage(post);
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      organizationStructuredData(lang),
+      reportArticleStructuredData(post),
+      reportBreadcrumbStructuredData(post)
+    ]
+  };
+}
+
 export function reportSeoTags(posts, post) {
   const canonical = reportSiteUrl(post.href);
   const lang = postLanguage(post);
@@ -458,6 +639,7 @@ export function reportSeoTags(posts, post) {
   const localeAlternate = counterpart
     ? `<meta property="og:locale:alternate" content="${postLanguage(counterpart) === 'en' ? 'en_US' : 'ko_KR'}">`
     : '';
+  const jsonLd = structuredDataScript(reportStructuredData(post));
 
   return `<title>${escapeHtml(title)}</title><link rel="canonical" href="${escapeHtml(canonical)}">${alternates}${descriptionTags}`
     + `<meta property="og:type" content="article">`
@@ -470,7 +652,8 @@ export function reportSeoTags(posts, post) {
     + `<meta property="og:image:height" content="630">`
     + `<meta name="twitter:card" content="${twitterCard}">`
     + `<meta name="twitter:title" content="${escapeHtml(post.title)}">`
-    + `<meta name="twitter:image" content="${escapeHtml(twitterImage)}">`;
+    + `<meta name="twitter:image" content="${escapeHtml(twitterImage)}">`
+    + jsonLd;
 }
 
 export function sitemapXml(posts) {
