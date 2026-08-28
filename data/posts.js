@@ -1,5 +1,28 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-29-research-178u9g5",
+    "type": "research",
+    "typeLabel": "비정기 리서치",
+    "lang": "ko",
+    "date": "2026-08-29",
+    "reportDate": "2026-08-29",
+    "registeredDate": "2026-08-29",
+    "registeredAt": "2026-08-28T19:57:57.475Z",
+    "legacyImport": false,
+    "title": "코인의 뒷면에는국채가 있다",
+    "subtitle": "",
+    "description": "특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.",
+    "tags": [
+      "treasuries",
+      "stablecoins",
+      "crypto"
+    ],
+    "readingMinutes": 13,
+    "href": "reports/리서치_NO.05_코인의뒷면에는국채가있다_2026.08.29.html",
+    "coverImage": "covers/2026-08-29-research-178u9g5.webp",
+    "shareCardImage": "covers/share/2026-08-29-research-178u9g5.jpg"
+  },
+  {
     "id": "2026-08-28-daily-o8t6vj",
     "type": "daily",
     "typeLabel": "Daily",
