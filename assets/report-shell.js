@@ -25,6 +25,11 @@
   };
   const homePath = locale === 'en' ? '/en/' : '/';
   const marketPath = locale === 'en' ? '/en/market/' : '/market/';
+  function categoryPath(type) {
+    const prefix = locale === 'en' ? '/en' : '';
+    const slug = type === 'note' ? 'notes' : type;
+    return `${prefix}/${slug}/`;
+  }
   const BAR_H = 52;
   function cleanReportUrl(href) {
     const str = String(href || '').trim();
@@ -97,11 +102,11 @@
       <nav class="bar" aria-label="${copy.navLabel}"><div class="inner">
         <a class="home" href="${homePath}">${copy.home}</a><span class="divider" aria-hidden="true"></span>
         <a href="${marketPath}">${copy.market}</a>
-        <a class="${active === 'daily' ? 'active' : ''}" ${active === 'daily' ? 'aria-current="true"' : ''} href="${homePath}?category=daily">${copy.daily}</a>
-        <a class="${active === 'weekly' ? 'active' : ''}" ${active === 'weekly' ? 'aria-current="true"' : ''} href="${homePath}?category=weekly">${copy.weekly}</a>
-        <a class="${active === 'research' ? 'active' : ''}" ${active === 'research' ? 'aria-current="true"' : ''} href="${homePath}?category=research">${copy.research}</a>
-        <a class="${active === 'basics' ? 'active' : ''}" ${active === 'basics' ? 'aria-current="true"' : ''} href="${homePath}?category=basics">${copy.basics}</a>
-        ${hasNotes || active === 'note' ? `<a class="${active === 'note' ? 'active' : ''}" ${active === 'note' ? 'aria-current="true"' : ''} href="${homePath}?category=note">${copy.note}</a>` : ''}
+        <a class="${active === 'daily' ? 'active' : ''}" ${active === 'daily' ? 'aria-current="true"' : ''} href="${categoryPath('daily')}">${copy.daily}</a>
+        <a class="${active === 'weekly' ? 'active' : ''}" ${active === 'weekly' ? 'aria-current="true"' : ''} href="${categoryPath('weekly')}">${copy.weekly}</a>
+        <a class="${active === 'research' ? 'active' : ''}" ${active === 'research' ? 'aria-current="true"' : ''} href="${categoryPath('research')}">${copy.research}</a>
+        <a class="${active === 'basics' ? 'active' : ''}" ${active === 'basics' ? 'aria-current="true"' : ''} href="${categoryPath('basics')}">${copy.basics}</a>
+        ${hasNotes || active === 'note' ? `<a class="${active === 'note' ? 'active' : ''}" ${active === 'note' ? 'aria-current="true"' : ''} href="${categoryPath('note')}">${copy.note}</a>` : ''}
         <a class="language" id="report-language-switch" href="${targetLocale === 'en' ? '/en/' : '/'}" aria-label="${copy.switchLabel}">${copy.switchText}</a>
         <a class="brand" href="${homePath}" aria-label="Snowshagal Market Research"><img src="/assets/brand/snowshagal-owl.webp" alt="" width="232" height="256" aria-hidden="true"><span>SNOWSHAGAL</span></a>
       </div></nav>`;
