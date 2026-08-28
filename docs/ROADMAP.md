@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated: 2026-08-28
+Updated: 2026-08-29
 
 This roadmap records implementation order, completed capabilities, and operational priorities, not a promise to build every future idea. Keep the current site small and stable until real traffic, indexing, and operational needs justify added complexity.
 
@@ -17,6 +17,11 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
    - Accumulate baseline data across `/admin/analytics/` (Cloudflare Web Analytics: Visits, Page views, referrers, devices, connection countries; and Privacy-minimal Engagement Analytics: active reading time, scroll depth, session completion).
 3. **Operational stabilization**:
    - Defer large feature additions; focus on publishing rhythm and monitor for real friction in day-to-day writing and report management.
+4. **Preview D1 parity (manual Cloudflare dependency)**:
+   - Code-level Production/Preview smoke and exact-SHA Cloudflare deployment waiting are implemented on the deployment reliability branch.
+   - The currently inspected Preview still returns `503 DB_NOT_CONFIGURED` for Market and comments GET.
+   - An authenticated operator must bind `COMMENTS_DB` in the Preview environment to an existing Preview-only D1 database, verify that its database ID differs from Production, reuse `db/schema.sql`, and avoid copying Production data.
+   - Do not mark Preview parity complete until the branch Preview passes `node scripts/smoke-site.mjs --origin <preview-url> --mode preview`.
 
 ## Near-term Priorities
 
@@ -112,3 +117,4 @@ Refine `/admin/` and `/admin/manage/` only when recurring operational pain point
 - **Preserve Report Integrity**: Never bulk-modify uploaded HTML files in `reports/`. Use the shared `report-shell.js` and middleware for common UI layers.
 - **Isolated Feature Additions**: Implement new features as small, independent, isolated layers rather than rewriting core infrastructure.
 - **Friction-Driven Evolution**: Refactor or extend publisher/admin tools only when concrete operational friction is identified.
+- **Fail-Closed Deployment Detection**: Production smoke must wait for Cloudflare's success check on the exact main SHA. If that signal is absent or times out, fail without testing the previous Production. Repository verification remains network-free.

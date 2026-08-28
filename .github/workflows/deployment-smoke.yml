@@ -1,0 +1,48 @@
+name: Deployment Smoke
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: read
+
+concurrency:
+  group: production-deployment-smoke
+  cancel-in-progress: true
+
+jobs:
+  production-smoke:
+    name: Production Deployment Smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Require the Production branch
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "Production smoke may only run from refs/heads/main."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Wait for this commit's Cloudflare Production deployment
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          node scripts/wait-for-cloudflare-deployment.mjs
+          --repository "${{ github.repository }}"
+          --sha "${{ github.sha }}"
+
+      - name: Run read-only Production smoke
+        run: node scripts/smoke-site.mjs --origin https://snowshagal.com --mode production
