@@ -1,5 +1,30 @@
 [
   {
+    "id": "2026-08-28-daily-o8t6vj",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-28",
+    "reportDate": "2026-08-28",
+    "registeredDate": "2026-08-28",
+    "registeredAt": "2026-08-28T11:07:27.630Z",
+    "legacyImport": false,
+    "title": "Clear Skies Beyond the Index",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "takeaway": "Index -1.79% 642 stocks rose",
+    "tags": [
+      "ai",
+      "cloud-datacenter",
+      "policy"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-08-28_KOSPI_Daily_Report_EN.html",
+    "translationGroup": "2026-08-28-daily-1a6ign1",
+    "coverImage": "covers/2026-08-28-daily-o8t6vj.webp",
+    "shareCardImage": "covers/share/2026-08-28-daily-o8t6vj.jpg"
+  },
+  {
     "id": "2026-08-28-daily-1a6ign1",
     "type": "daily",
     "typeLabel": "주식 리포트",
