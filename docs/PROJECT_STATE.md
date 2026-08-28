@@ -47,10 +47,12 @@ Production smoke. A missing or timed-out check fails closed, so an older Product
 be inspected and reported as the new commit. There is no automatic rollback.
 
 Preview Functions must use the same `COMMENTS_DB` binding name as Production while pointing
-to a different Preview-only D1 database. Production data is never copied. The last inspected
-Preview still returned `503 DB_NOT_CONFIGURED` for Market and comments GET, and the
-authenticated Dashboard could not be inspected; the binding and database-ID separation
-therefore remain a documented manual Cloudflare step rather than a completed setting.
+to a different Preview-only D1 database. This parity is complete: Preview uses
+`market-research-comments-preview`, Production uses `market-research-comments`, and no
+Production data was copied. The Preview schema is initialized, with one clearly marked
+`1900-01-01` / `preview-smoke-test` Market Close fixture used only for read verification.
+Preview Market and comments GET both return HTTP 200, and the shared Preview smoke passes
+20/20.
 
 Main categories:
 

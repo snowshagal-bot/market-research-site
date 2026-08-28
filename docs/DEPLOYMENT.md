@@ -97,27 +97,24 @@ The schema source of truth remains `db/schema.sql`. The comments and Market Clos
 also perform the same guarded `CREATE TABLE`/index initialization at runtime; do not create a
 second migration system for Preview.
 
-As of 2026-08-29, the latest inspected branch Preview returned HTTP 503
-`DB_NOT_CONFIGURED` from both `/api/market/latest` and comments GET. The authenticated
-Cloudflare Dashboard was not available in the implementation environment, so Preview D1
-configuration is **not complete** and Production/Preview database-ID separation has **not
-been Dashboard-verified**.
+As of 2026-08-29, Preview D1 parity is complete. Preview `COMMENTS_DB` points to
+`market-research-comments-preview`, while Production `COMMENTS_DB` continues to point to
+`market-research-comments`; the databases are isolated and no Production data was copied.
+The Preview database was initialized from `db/schema.sql` and contains `comments`,
+`market_close_snapshots`, and `engagement_sessions`.
 
-Manual Cloudflare step required:
+Preview contains one explicit Market Close smoke fixture only: `market_date=1900-01-01`
+with `auth_source=preview-smoke-test`. It is not Production market data. On Preview deployment
+`34877694`, `/api/market/latest` and comments GET both returned HTTP 200, and the shared
+Preview smoke completed 20/20.
 
-1. Open Cloudflare Dashboard -> Workers & Pages -> `market-research-site` -> Settings ->
-   Bindings and select the Preview environment.
-2. Add a D1 database binding with variable name `COMMENTS_DB`.
-3. Select an existing Preview-only D1 database. Confirm its database ID differs from the
-   Production binding without copying either ID into Git or the PR. If no Preview-only D1
-   already exists, stop rather than creating another database under this change.
-4. Redeploy the Preview branch so the binding takes effect.
-5. Apply/reuse `db/schema.sql` on that Preview-only database. Do not export or import
-   Production data.
-6. If a 200 Market API response is required, insert only the explicit synthetic fixture
-   described above; comments may stay empty.
-7. Run `node scripts/smoke-site.mjs --origin <preview-url> --mode preview`. A 503 from either
-   D1-backed GET endpoint is a failure, not an accepted empty state.
+If the Preview database is recreated, repeat the isolation procedure: configure the Preview
+environment's `COMMENTS_DB` binding to a Preview-only database, verify that its database ID
+differs from Production without recording either ID in Git, initialize it from
+`db/schema.sql`, copy no Production data, add only the explicit synthetic Market Close
+fixture if the read smoke requires one, redeploy, and rerun
+`node scripts/smoke-site.mjs --origin <preview-url> --mode preview`. A 503 from either
+D1-backed GET endpoint is a failure, not an accepted empty state.
 
 `functions/api/comments.js` reads the database through `env.COMMENTS_DB`.
 

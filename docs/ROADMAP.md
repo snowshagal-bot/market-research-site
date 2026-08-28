@@ -17,11 +17,11 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
    - Accumulate baseline data across `/admin/analytics/` (Cloudflare Web Analytics: Visits, Page views, referrers, devices, connection countries; and Privacy-minimal Engagement Analytics: active reading time, scroll depth, session completion).
 3. **Operational stabilization**:
    - Defer large feature additions; focus on publishing rhythm and monitor for real friction in day-to-day writing and report management.
-4. **Preview D1 parity (manual Cloudflare dependency)**:
+4. **Preview D1 parity (complete)**:
    - Code-level Production/Preview smoke and exact-SHA Cloudflare deployment waiting are implemented on the deployment reliability branch.
-   - The currently inspected Preview still returns `503 DB_NOT_CONFIGURED` for Market and comments GET.
-   - An authenticated operator must bind `COMMENTS_DB` in the Preview environment to an existing Preview-only D1 database, verify that its database ID differs from Production, reuse `db/schema.sql`, and avoid copying Production data.
-   - Do not mark Preview parity complete until the branch Preview passes `node scripts/smoke-site.mjs --origin <preview-url> --mode preview`.
+   - Preview `COMMENTS_DB` uses the isolated `market-research-comments-preview` database; Production continues to use `market-research-comments`, and no Production data was copied.
+   - The Preview schema is initialized and contains one explicit `1900-01-01` / `preview-smoke-test` Market Close fixture solely for read smoke validation.
+   - Preview Market/comments GET and the complete shared Preview smoke are verified at HTTP 200 and 20/20 PASS.
 
 ## Near-term Priorities
 
