@@ -116,9 +116,9 @@ runStep(2, 'Validating JavaScript & MJS syntax', () => {
 });
 
 // -----------------------------------------------------------------------------
-// [3/4] Repository invariants & integrity
+// [3/4] Repository invariants & integrity (including committed + uncommitted diffs)
 // -----------------------------------------------------------------------------
-runStep(3, 'Checking repository invariants & generated artifact integrity', () => {
+runStep(3, 'Checking repository invariants & git diff whitespace checks', () => {
   // A. posts.json & posts.js sanity & synchronization
   const postsJsonPath = path.join(rootDir, 'data/posts.json');
   const postsJsPath = path.join(rootDir, 'data/posts.js');
@@ -183,16 +183,100 @@ runStep(3, 'Checking repository invariants & generated artifact integrity', () =
     }
   }
 
-  // D. git diff --check (whitespace & conflict markers)
-  console.log('  Running git diff --check for whitespace/conflict markers...');
-  const gitDiff = spawnSync('git', ['diff', '--check'], {
+  // D. Git Diff Checks (both Committed Changes and Uncommitted Working Tree)
+  function getGitOutput(args) {
+    const res = spawnSync('git', args, { cwd: rootDir, encoding: 'utf8' });
+    return res.status === 0 ? res.stdout.trim() : null;
+  }
+
+  // 1. Resolve base ref for committed diff comparison
+  let baseRef = null;
+  if (process.env.VERIFY_BASE_REF && process.env.VERIFY_BASE_REF !== '0000000000000000000000000000000000000000') {
+    if (getGitOutput(['rev-parse', '--verify', process.env.VERIFY_BASE_REF])) {
+      baseRef = process.env.VERIFY_BASE_REF;
+    }
+  }
+
+  if (!baseRef && process.env.GITHUB_BASE_REF) {
+    const remoteRef = `origin/${process.env.GITHUB_BASE_REF}`;
+    if (getGitOutput(['rev-parse', '--verify', remoteRef])) {
+      baseRef = remoteRef;
+    } else if (getGitOutput(['rev-parse', '--verify', process.env.GITHUB_BASE_REF])) {
+      baseRef = process.env.GITHUB_BASE_REF;
+    }
+  }
+
+  if (!baseRef) {
+    if (getGitOutput(['rev-parse', '--verify', 'origin/main'])) {
+      baseRef = 'origin/main';
+    } else if (getGitOutput(['rev-parse', '--verify', 'main'])) {
+      baseRef = 'main';
+    } else if (getGitOutput(['rev-parse', '--verify', 'HEAD~1'])) {
+      baseRef = 'HEAD~1';
+    }
+  }
+
+  // 2. Committed changes check
+  if (baseRef) {
+    const headSha = getGitOutput(['rev-parse', 'HEAD']);
+    const baseSha = getGitOutput(['rev-parse', baseRef]);
+    const mergeBase = getGitOutput(['merge-base', baseRef, 'HEAD']);
+
+    let committedRange;
+    if (mergeBase && mergeBase !== headSha) {
+      committedRange = `${baseRef}...HEAD`;
+    } else if (getGitOutput(['rev-parse', '--verify', 'HEAD~1'])) {
+      committedRange = 'HEAD~1...HEAD';
+    } else {
+      committedRange = 'HEAD^!';
+    }
+
+    console.log(`  Running git diff --check on committed changes (${committedRange})...`);
+    const committedDiff = spawnSync('git', ['diff', '--check', committedRange], {
+      cwd: rootDir,
+      encoding: 'utf8'
+    });
+
+    if (committedDiff.status !== 0) {
+      const err = new Error(`git diff --check detected whitespace or conflict markers in committed changes (${committedRange})`);
+      err.details = (committedDiff.stdout || committedDiff.stderr || '').trim();
+      throw err;
+    }
+  } else {
+    console.log('  Running git diff-tree --check on HEAD commit...');
+    const diffTree = spawnSync('git', ['diff-tree', '--check', 'HEAD'], {
+      cwd: rootDir,
+      encoding: 'utf8'
+    });
+    if (diffTree.status !== 0) {
+      const err = new Error('git diff-tree --check detected whitespace/conflict errors in HEAD commit');
+      err.details = (diffTree.stdout || diffTree.stderr || '').trim();
+      throw err;
+    }
+  }
+
+  // 3. Uncommitted working tree check
+  console.log('  Running git diff --check on uncommitted working tree...');
+  const workingTreeDiff = spawnSync('git', ['diff', '--check'], {
     cwd: rootDir,
     encoding: 'utf8'
   });
 
-  if (gitDiff.status !== 0) {
-    const err = new Error('git diff --check detected errors');
-    err.details = (gitDiff.stdout || gitDiff.stderr || '').trim();
+  if (workingTreeDiff.status !== 0) {
+    const err = new Error('git diff --check detected errors in uncommitted working tree');
+    err.details = (workingTreeDiff.stdout || workingTreeDiff.stderr || '').trim();
+    throw err;
+  }
+
+  // 4. Staged index check
+  const stagedDiff = spawnSync('git', ['diff', '--cached', '--check'], {
+    cwd: rootDir,
+    encoding: 'utf8'
+  });
+
+  if (stagedDiff.status !== 0) {
+    const err = new Error('git diff --cached --check detected errors in staged changes');
+    err.details = (stagedDiff.stdout || stagedDiff.stderr || '').trim();
     throw err;
   }
 });
