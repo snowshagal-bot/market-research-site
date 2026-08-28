@@ -576,6 +576,26 @@
     "shareCardImage": "covers/share/2026-08-16-research-141u5l9.jpg"
   },
   {
+    "id": "2026-08-15-basics-ntseyw",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-08-15",
+    "reportDate": "2026-08-15",
+    "registeredDate": "2026-08-29",
+    "registeredAt": "2026-08-28T16:30:43.438Z",
+    "legacyImport": false,
+    "title": "A Good CompanyIsn’t Always a Good Stock",
+    "subtitle": "",
+    "description": "A clear guide to the essential concepts behind markets, economics, and investing.",
+    "tags": [],
+    "readingMinutes": 7,
+    "href": "reports/en/Market_Language_Ep4_Why_a_Good_Company_Isnt_Always_a_Good_Stock.html",
+    "translationGroup": "2026-08-15-basics-1cd8c9w",
+    "coverImage": "covers/2026-08-15-basics-ntseyw.webp",
+    "shareCardImage": "covers/share/2026-08-15-basics-ntseyw.jpg"
+  },
+  {
     "id": "2026-08-15-basics-1cd8c9w",
     "type": "basics",
     "typeLabel": "시장 공부",
