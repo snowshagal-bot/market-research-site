@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>시장을 읽는 말들 · 제5편 급락은 어떻게 더 큰 급락을 만드는가</title>
+<style>
+:root{
+  --surface-page:#ECEAE5;
+  --surface-band:#E3E0D9;
+  --surface-inner:#F1EFEA;
+  --surface-detail:#E8E5DF;
+  --surface-muted:#DAD6CE;
+  --ink:#2E2E2C;
+  --ink2:#43423E;
+  --body:#53514C;
+  --sub:#706D66;
+  --muted:#8B867E;
+  --line:#CEC9BF;
+  --line2:#DCD7CE;
+  /* 시리즈 공통 */
+  --green:#46584D;
+  --green-dark:#2F3C34;
+  --green-soft:#DCE3DD;
+  --green-line:#AAB6AC;
+  --green-pale:#A8C6B4;
+  /* 이번 편 네 역할 */
+  --eq:#46584D;          /* 자기자본·정상 */
+  --eq-dark:#2F3C34;
+  --eq-soft:#DDE4DE;
+  --eq-line:#A8B6AB;
+  --dbt:#A9784A;         /* 빚·담보 경계선 */
+  --dbt-dark:#7A5A34;
+  --dbt-soft:#EFE2CF;
+  --dbt-line:#D2B48C;
+  --fs:#3A3632;          /* 강제매도·경고 */
+  --fs-warm:#7A3F44;
+  --fs-soft:#E4DEDC;
+  /* 가격 방향 전용 */
+  --up:#C74754;
+  --down:#4F78A8;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:58px;overflow-x:hidden}
+html,body{max-width:100%}
+body{
+  margin:0;background:var(--surface-page);color:var(--ink);
+  font-family:"Pretendard Variable","Pretendard","SUIT","Noto Sans KR","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  line-height:1.58;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;
+  word-break:keep-all;line-break:strict;
+}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(38px + env(safe-area-inset-bottom,0px));width:100%;position:relative}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.up{color:var(--up)}.down{color:var(--down)}
+a{color:inherit;text-decoration:none}
+
+/* ── 상단바 ── */
+.topbar{position:sticky;top:0;z-index:50;margin:0 -16px;
+  background:rgba(236,234,229,.92);-webkit-backdrop-filter:saturate(150%) blur(12px);backdrop-filter:saturate(150%) blur(12px);
+  border-bottom:1px solid rgba(90,84,74,.13)}
+.tbin{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0)) 18px 9px}
+.tbin .brand{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.tbin .brand i{font-style:normal;color:var(--green)}
+.tbin .ep{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.prog{height:2px;background:rgba(90,84,74,.10)}
+.prog i{display:block;height:100%;width:0;background:var(--green);transition:width .1s linear}
+
+/* ── 표지 ── */
+.cover{margin:0 -16px;padding:18px 22px 15px;
+  background:linear-gradient(158deg,#36443B 0%,#2A362E 52%,#1F2721 100%);color:#EFEDE7}
+.cvkick{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.06em;
+  color:#BFD2C6;border:1px solid rgba(168,198,180,.34);border-radius:999px;padding:5px 12px}
+.cvkick b{color:#EFEDE7;font-weight:800}
+.cvtitle{margin:11px 0 0;font-size:30px;line-height:1.22;font-weight:800;letter-spacing:-.05em;color:#F4F2ED}
+.cvtitle span{display:block;color:var(--green-pale)}
+.cvsub{margin:11px 0 0;font-size:14px;line-height:1.58;font-weight:600;color:#C6D2CA}
+.cvmotif{margin:10px 0 0}
+.cvmotif svg{display:block;width:100%;height:auto}
+.cvidx{display:flex;gap:6px;margin:12px 0 0;flex-wrap:wrap}
+.cvidx a{font-size:11.5px;font-weight:800;color:#D3DED7;background:rgba(255,255,255,.07);
+  border:1px solid rgba(168,198,180,.22);border-radius:999px;padding:6px 12px}
+.cvidx a b{color:var(--green-pale);font-weight:800;margin-right:5px}
+
+/* ── 챕터 오프너 ── */
+.ch{margin:14px 0 8px}
+.chtop{display:flex;align-items:center;gap:9px;margin-bottom:7px;flex-wrap:wrap}
+.chn{font-size:12px;font-weight:800;color:#EFEDE7;background:var(--ink);border-radius:4px;padding:3px 8px;letter-spacing:.04em}
+.chk{font-size:11.5px;font-weight:800;letter-spacing:.11em;color:var(--sub)}
+.cht{margin:0;font-size:24px;line-height:1.3;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.chrule{display:flex;height:3px;margin-top:11px;gap:2px}
+.chrule i{display:block;height:100%;flex:1}
+.chrule .r1{background:var(--eq)}
+.chrule .r2{background:var(--dbt)}
+.chrule .r3{background:var(--fs)}
+.chrule .r4{background:var(--down)}
+
+/* ── 본문 ── */
+.p{margin:8px 0 0;font-size:14px;line-height:1.62;color:var(--body);font-weight:500}
+.p b{color:var(--ink);font-weight:800}
+.p.lead{font-size:15px;color:var(--ink2);font-weight:600}
+.hd{margin:11px 0 0;font-size:16.5px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.44}
+.cap{margin:5px 0 0;font-size:11.5px;line-height:1.5;color:var(--muted);font-weight:600}
+.q{margin:10px 0 0;font-size:19px;line-height:1.45;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+
+/* ── 가상 배지 ── */
+.vb{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;letter-spacing:.03em;
+  color:#4A4438;background:var(--dbt-soft);border:1px solid var(--dbt-line);border-radius:999px;padding:3px 9px;white-space:nowrap}
+
+/* ── 한 문장 답 ── */
+.ans{margin:10px -16px 0;padding:13px 22px;background:var(--green);color:#EFEDE7;position:relative;overflow:hidden}
+.ans:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green-pale)}
+.ans .ak{font-size:11px;font-weight:800;letter-spacing:.14em;color:#A8BCAE;margin-bottom:8px}
+.ans .av{font-size:19px;line-height:1.46;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.ans .aw{margin:9px 0 0;padding-top:9px;border-top:1px solid rgba(168,198,180,.24);font-size:13px;line-height:1.6;font-weight:600;color:#CBD8CF}
+
+/* ── 강조 박스 (차콜) ── */
+.stop{margin:10px -16px 0;padding:12px 22px;background:var(--fs);color:#EFEDE7;position:relative}
+.stop:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--dbt)}
+.stop .sk{font-size:11px;font-weight:800;letter-spacing:.14em;color:#A9A29A;margin-bottom:8px}
+.stop .sv{font-size:16.5px;line-height:1.54;font-weight:800;letter-spacing:-.03em;color:#F4F2ED}
+.stop .sn{margin:9px 0 0;padding-top:9px;border-top:1px solid rgba(230,225,215,.2);font-size:13px;line-height:1.6;font-weight:600;color:#C4BFB6}
+.stop .sn b{color:#F4F2ED;font-weight:800}
+
+/* ── 계좌 막대 ── */
+.acct{margin:11px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:12px 15px 13px}
+.ahd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.ahd b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.abars{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:11px 0 0;position:relative}
+.acol{display:flex;flex-direction:column;align-items:center}
+.atot{font-size:11.5px;font-weight:800;color:var(--sub);margin-bottom:4px;font-variant-numeric:tabular-nums}
+.atot b{color:var(--ink);font-size:13.5px}
+.abar{width:100%;max-width:126px;height:120px;display:flex;flex-direction:column;justify-content:flex-end;
+  border-radius:8px 8px 0 0;overflow:hidden}
+.seg{display:flex;align-items:center;justify-content:space-between;padding:0 9px;font-variant-numeric:tabular-nums}
+.seg b{font-size:11.5px;font-weight:800}
+.seg em{font-style:normal;font-size:14px;font-weight:800}
+.seg.mine{background:var(--eq);color:#EAEFEA}
+.seg.mine b{color:#B7C8BC}
+.seg.debt{background:var(--dbt-soft);color:var(--dbt-dark);border-top:2px solid var(--dbt)}
+.seg.debt b{color:#8B6B45}
+.alab{margin-top:6px;font-size:12px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.adelta{margin:10px 0 0;padding-top:9px;border-top:1px dashed var(--line);display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.adelta div{text-align:center}
+.adelta span{display:block;font-size:11.5px;font-weight:700;color:var(--sub)}
+.adelta em.warn{color:var(--fs-warm)}
+.adelta em{display:block;font-style:normal;font-size:18px;font-weight:800;letter-spacing:-.03em;margin-top:2px;font-variant-numeric:tabular-nums}
+.anote{margin:8px 0 0;font-size:12.3px;line-height:1.52;font-weight:700;color:var(--ink2)}
+.anote b{color:var(--dbt-dark)}
+
+/* ── 담보 경계선 ── */
+.gate{margin:10px 0 0}
+.ghd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.ghd b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.glist{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden}
+.gi{display:flex;align-items:center;gap:10px;padding:6px 13px;background:var(--surface-inner)}
+.gi .gd{flex:0 0 auto;width:9px;height:9px;border-radius:50%}
+.gi b{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.g1 .gd{background:var(--eq)}
+.g2 .gd{background:#8C9A78}
+.g3 .gd{background:var(--dbt)}
+.g4 .gd{background:#8A6046}
+.g5 .gd{background:var(--fs-warm)}
+.g5 b{color:var(--fs-warm)}
+.gnote{margin:6px 0 0;padding:8px 12px;background:var(--surface-detail);border:1px solid var(--line);border-radius:10px;
+  font-size:12px;line-height:1.58;font-weight:700;color:var(--ink2)}
+
+/* ── 두 문장 대비 ── */
+.duo{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden;margin:11px 0 0}
+.duo .di{margin:0;background:var(--surface-inner);padding:9px 14px;font-size:13.5px;font-weight:800;
+  color:var(--ink);letter-spacing:-.03em;line-height:1.45}
+.duo .di b{font-size:11px;font-weight:800;color:#EFEDE7;border-radius:4px;padding:2px 7px;margin-right:8px;
+  letter-spacing:-.01em;white-space:nowrap;vertical-align:1.5px}
+.duo .d1 b{background:var(--eq)}
+.duo .d2{color:var(--fs)}
+.duo .d2 b{background:var(--fs)}
+
+/* ── 세 가지 구분 ── */
+.trio{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden;margin:10px 0 0}
+.trio .ti{background:var(--surface-inner);padding:8px 14px}
+.trio .th{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.trio .th b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.trio .th i{font-style:normal;font-size:11px;font-weight:800;color:var(--sub);background:var(--surface-detail);
+  border:1px solid var(--line2);border-radius:999px;padding:2px 8px}
+.trio .td{margin-top:4px;font-size:12.5px;line-height:1.56;font-weight:600;color:var(--body)}
+.trio .td b{color:var(--ink);font-weight:800}
+
+/* ── 단계 블록 ── */
+.stg{margin:10px 0 0;padding:9px 0 9px 13px;border-left:3px solid var(--line)}
+.stg.s1{border-left-color:var(--down)}
+.stg.s2{border-left-color:var(--dbt-line)}
+.stg.s3{border-left-color:var(--fs)}
+.stg.s4{border-left-color:var(--dbt)}
+.stg.s5{border-left-color:var(--fs-warm)}
+.sgh{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.sgh .sn2{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.sgh b{font-size:15.5px;font-weight:800;color:var(--ink);letter-spacing:-.03em}
+.sgp{margin:6px 0 0;font-size:13.5px;line-height:1.6;color:var(--body);font-weight:500}
+.sgp b{color:var(--ink);font-weight:800}
+.sgkey{margin:6px 0 0;padding:8px 12px;background:var(--surface-detail);border-radius:9px;
+  font-size:13.5px;line-height:1.56;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.chips{margin:4px 0 0;font-size:12.3px;line-height:1.48;font-weight:700;color:var(--sub)}
+.chips b{color:var(--muted);font-weight:800;font-size:11px;letter-spacing:.04em;margin-right:5px}
+.chips span{color:var(--ink2)}
+.chips span+span:before{content:" · ";color:var(--line)}
+
+/* ── 가격 사다리 ── */
+.book{margin:10px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.bhd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.bhd b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.bsub{margin:6px 0 0;font-size:13px;font-weight:800;color:var(--fs);letter-spacing:-.02em}
+.bsub span{display:block;margin-top:3px;font-size:12px;font-weight:600;color:var(--body);line-height:1.5;letter-spacing:-.01em}
+.bgrid{display:grid;grid-template-columns:58px 54px 1fr;gap:0 8px;margin:9px 0 0;align-items:center;font-variant-numeric:tabular-nums}
+.bgrid .h{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.02em;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.brow{display:contents}
+.bgrid .px{font-size:13.5px;font-weight:800;color:var(--ink);padding:6px 0}
+.bgrid .qt{font-size:12.5px;font-weight:700;color:var(--body);padding:6px 0}
+.bgrid .fl{font-size:12.5px;font-weight:800;padding:6px 0;display:flex;align-items:center;gap:6px}
+.bgrid .fl .bar{flex:0 0 auto;width:44px;height:8px;border-radius:3px;background:var(--eq-soft);overflow:hidden;display:flex}
+.bgrid .fl .bar i{display:block;height:100%;background:var(--fs)}
+.bgrid .fl .tx{color:var(--fs)}
+.bgrid .fl .tx.left{color:var(--eq-dark)}
+.bgrid .r1 span,.bgrid .r2 span{border-bottom:1px solid var(--line2)}
+.brem{margin:8px 0 0;padding-top:8px;border-top:1px dashed var(--line);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.brem b{font-size:11.5px;font-weight:800;color:var(--muted);letter-spacing:.03em}
+.brem span{font-size:12.5px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.brem i{font-style:normal;color:var(--muted);font-weight:700}
+.bres{margin:8px 0 0;padding:9px 12px;background:var(--fs);border-radius:9px;color:#EFEDE7;
+  font-size:12.8px;line-height:1.52;font-weight:700}
+.bres b{color:#FFFFFF;font-weight:800;font-variant-numeric:tabular-nums}
+
+.keyb{margin:10px 0 0;padding:11px 14px;background:var(--fs);color:#F4F2ED;border-radius:10px;
+  font-size:15px;line-height:1.5;font-weight:800;letter-spacing:-.03em}
+
+/* ── 비상계단 ── */
+.stairs{margin:11px 0 0}
+.stnote{margin:0 0 7px;padding:8px 12px;background:var(--surface-detail);border:1px solid var(--line);border-radius:10px;
+  font-size:12.5px;line-height:1.58;font-weight:700;color:var(--ink2)}
+.stlgd{margin:0 0 5px;font-size:11.5px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px}
+.stlgd i{font-style:normal;font-size:11px;letter-spacing:1.5px;color:var(--dbt-dark)}
+.stlgd b{flex:0 0 auto;width:22px;height:1px;background:var(--line);margin:0 2px}
+.stwrap{display:grid;gap:2px}
+.st{margin-left:calc(var(--i) * 7px);display:flex;align-items:center;gap:9px;padding:6px 11px;border-radius:8px;
+  border-left:3px solid var(--line)}
+.st .stn{flex:0 0 auto;font-size:11px;font-weight:800;width:17px;height:17px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;background:rgba(120,112,100,.2)}
+.st .stt{font-size:12.5px;font-weight:800;letter-spacing:-.02em;line-height:1.35}
+.st .dots{margin-left:auto;font-style:normal;font-size:11px;letter-spacing:1.5px;white-space:nowrap;opacity:.75}
+.n1{background:#F2F0EB;color:#43423E;border-left-color:var(--down)}
+.n2{background:#EAE7E1;color:#43423E;border-left-color:var(--down)}
+.n3{background:#E1DCD3;color:#3E3A34;border-left-color:var(--dbt-line)}
+.n4{background:#CFC5B4;color:#3A342B;border-left-color:var(--dbt)}
+.n5{background:#9E9384;color:#F4F2ED;border-left-color:var(--dbt-dark)}
+.n5 .stn,.n6 .stn,.n7 .stn{background:rgba(255,255,255,.22)}
+.n6{background:#6D655A;color:#F4F2ED;border-left-color:var(--fs-warm)}
+.n7{background:#413C36;color:#F4F2ED;border-left-color:var(--fs-warm)}
+.loopzone{position:relative;display:grid;gap:2px;margin-left:21px;padding-left:11px;
+  border-left:2px dashed var(--fs-warm)}
+.loopzone:before{content:"";position:absolute;left:-6px;top:5px;width:10px;height:10px;
+  border-left:2px solid var(--fs-warm);border-top:2px solid var(--fs-warm);transform:rotate(45deg)}
+.stloop{margin:4px 0 0;padding:7px 12px;border-radius:8px;background:var(--fs-soft);
+  border:1px dashed var(--fs-warm);font-size:12.5px;line-height:1.5;font-weight:800;color:var(--fs-warm)}
+
+/* ── 서킷브레이커 2열 ── */
+.cbx{margin:2px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden}
+.cbx .ci{background:var(--surface-inner);padding:10px 12px}
+.cbx .ck{font-size:11.5px;font-weight:800;letter-spacing:.05em;margin-bottom:7px}
+.cbx .yes .ck{color:var(--eq-dark)}
+.cbx .no .ck{color:var(--fs-warm)}
+.cbx ul{margin:0;padding-left:14px;display:grid;gap:4px}
+.cbx li{font-size:12px;line-height:1.5;font-weight:700;color:var(--body)}
+
+/* ── 네 질문 ── */
+.qlist{margin:10px 0 0;display:grid;gap:8px}
+.qi{border-left:3px solid var(--eq-line);padding:1px 0 1px 12px}
+.qi .qt i{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--muted);margin-right:8px;vertical-align:2px}
+.qi .qt{margin:1px 0 0;font-size:15.5px;font-weight:800;color:var(--ink);letter-spacing:-.03em;line-height:1.4}
+.qi .qk{margin:5px 0 0;padding:7px 11px;background:var(--surface-detail);border-radius:9px;
+  font-size:12.8px;line-height:1.52;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.qi .qk b{color:var(--fs-warm)}
+
+/* ── 연습 문제 ── */
+.drill{margin:11px -16px 0;padding:13px 22px;background:var(--surface-band);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)}
+.drill .dh{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.drill .dh b{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.dfacts{display:grid;gap:3px 10px;grid-template-columns:1fr;margin:0 0 9px}
+.dfacts span{font-size:12.3px;line-height:1.46;font-weight:700;color:var(--body);padding-left:13px;position:relative}
+.dfacts span:before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:var(--dbt-line)}
+.dq{font-size:14.5px;font-weight:800;color:var(--ink);letter-spacing:-.03em;line-height:1.5}
+.dv{margin:7px 0 0;padding:9px 13px;background:var(--fs);color:#F4F2ED;border-radius:9px;
+  font-size:14.5px;font-weight:800;letter-spacing:-.03em}
+.dmix{display:grid;gap:8px;margin:10px 0 0}
+.dmc{background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+.dmc b{display:block;font-size:12px;font-weight:800;color:var(--sub);letter-spacing:.02em;margin-bottom:5px}
+.dmc p{margin:0;font-size:12.2px;line-height:1.48;font-weight:700;color:var(--ink2)}
+.dfin{margin:9px 0 0;font-size:13.2px;line-height:1.56;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+
+/* ── 함정 ── */
+.trap{margin:12px 0 0;display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden}
+.trap .ti{padding:8px 13px;background:var(--surface-inner)}
+.trap .tx{font-size:13.5px;font-weight:800;color:var(--fs-warm);line-height:1.5;letter-spacing:-.02em}
+.trap .to{margin-top:4px;font-size:12.3px;font-weight:600;color:var(--body);line-height:1.5}
+.trap .to b{color:var(--ink);font-weight:800}
+
+/* ── 엔딩 ── */
+.final{margin:12px -16px 0;padding:18px 22px;background:linear-gradient(155deg,#36443B 0%,#232C26 100%);color:#EFEDE7;position:relative;overflow:hidden}
+.final:before{content:"";position:absolute;right:-46px;bottom:-58px;width:160px;height:160px;border-radius:50%;border:1px solid rgba(168,198,180,.18)}
+.final .fk{position:relative;font-size:11px;font-weight:800;letter-spacing:.13em;color:#A0B4A6;margin-bottom:10px}
+.final p{position:relative;margin:0;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.final .f1{font-size:19px;line-height:1.5}
+.final .f2{margin-top:11px;padding-top:10px;border-top:1px solid rgba(168,198,180,.22);font-size:15.5px;line-height:1.56;color:#DCE6DE}
+.final p b{color:var(--green-pale)}
+.final .ft{position:relative;margin-top:11px;padding-top:10px;border-top:1px solid rgba(168,198,180,.22);font-size:12.5px;font-weight:800;color:#B4C4B8}
+
+/* ── 접힘 ── */
+.foldwrap{margin:11px 0 0}
+details.fold{border:1px solid var(--line);border-radius:12px;background:var(--surface-detail);margin:0 0 8px;overflow:hidden}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:10px 15px;font-size:13px;font-weight:800;color:var(--ink)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary:after{content:"+";font-size:18px;font-weight:800;color:var(--green);line-height:.9}
+details.fold[open]>summary:after{content:"−"}
+details.fold .fb{padding:0 15px 14px}
+.fb p{margin:0 0 8px;font-size:12.5px;line-height:1.62;color:var(--body);font-weight:600}
+.fb p:last-child{margin-bottom:0}
+.fb p b{color:var(--ink);font-weight:800}
+.gloss{display:grid;grid-template-columns:96px 1fr;gap:7px 11px;margin:2px 0 0;font-size:12.5px}
+.gloss dt{font-weight:850;color:#4B4740}
+.gloss dd{margin:0;color:var(--body);line-height:1.52}
+.nextlist{display:grid;gap:6px;margin:2px 0 0}
+.nextlist span{font-size:12.5px;font-weight:700;color:var(--ink2);background:var(--surface-inner);
+  border:1px solid var(--line2);border-radius:8px;padding:8px 11px;line-height:1.45}
+.nextlist span b{color:var(--eq-dark);font-weight:800;margin-right:6px}
+.disc{font-size:11.5px;color:var(--muted);text-align:center;line-height:1.48;padding:10px 8px 0;font-weight:500}
+.foot{text-align:center;font-size:11.5px;color:var(--sub);padding:9px 0 4px;font-weight:800;letter-spacing:-.01em}
+
+/* ── 툴팁 ── */
+.term{border-bottom:1.5px dashed #8B867E;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;font-weight:850;color:var(--ink);
+  display:inline-block;padding:3px 4px;margin:-3px -4px;line-height:1.3;
+  touch-action:manipulation;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.term .tip{position:fixed;left:12px;top:0;min-width:160px;max-width:min(248px,calc(100vw - 28px));
+  background:#33322F;color:#F2F0EB;font-size:12px;font-weight:600;line-height:1.52;padding:9px 11px;border-radius:9px;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);z-index:60;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease;white-space:normal;text-align:left}
+.term .tip:after{content:"";position:absolute;top:100%;left:var(--ax,50%);transform:translateX(-50%);border:6px solid transparent;border-top-color:#33322F}
+.term .tip.below:after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#33322F}
+.term.open .tip{opacity:1;visibility:visible;pointer-events:auto}
+
+@media(max-width:360px){
+  .cvtitle{font-size:27px}
+  .q{font-size:17px}
+  .ans .av{font-size:17.5px}
+  .endb p{font-size:18px}
+  .final p{font-size:16.5px}
+  .cht{font-size:21px}
+  .abars{gap:8px}
+  .abar{height:138px}
+  .bgrid{grid-template-columns:50px 48px 1fr;gap:0 6px}
+  .bgrid .fl .bar{width:34px}
+  .st{margin-left:calc(var(--i) * 5px);gap:7px;padding:8px 9px}
+  .loopzone{margin-left:15px;padding-left:8px}
+  .st .stt{font-size:12px}
+  .duo .di{grid-template-columns:56px 1fr;gap:9px}
+  .gloss{grid-template-columns:84px 1fr}
+}
+
+/* ── 데스크톱 ── */
+@media(min-width:768px){
+  .app{max-width:770px;padding-left:28px;padding-right:28px}
+  .topbar{margin:0 -28px}
+  .cover{margin:0 -28px;padding:44px 40px 34px}
+  .cvtitle{font-size:44px}
+  .cvsub{font-size:15px;max-width:30em}
+  .ch{margin-top:44px}
+  .cht{font-size:29px}
+  .q{font-size:24px}
+  .ans{margin-left:-28px;margin-right:-28px;padding:26px 40px}
+  .ans .av{font-size:23px}
+  .stop{margin-left:-28px;margin-right:-28px;padding:26px 40px}
+  .stop .sv{font-size:19px}
+  .drill{margin-left:-28px;margin-right:-28px;padding:28px 40px}
+  .final{margin-left:-28px;margin-right:-28px;padding:32px 40px}
+  .final .f1{font-size:25px}
+  .final .f2{font-size:18px}
+  .abar{max-width:170px;height:186px}
+  .trio{grid-template-columns:1fr 1fr 1fr}
+  .qlist{grid-template-columns:1fr 1fr;gap:14px 20px}
+  .trap{grid-template-columns:1fr 1fr 1fr}
+  .dfacts{grid-template-columns:1fr 1fr}
+  .st{margin-left:calc(var(--i) * 14px);padding:11px 14px}
+  .loopzone{margin-left:42px;padding-left:16px}
+  .nextlist{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<span id="top"></span>
+
+<div class="topbar">
+  <div class="tbin">
+    <span class="brand"><i>시장을 읽는 말들</i> · 제5편</span>
+    <span class="ep">05 / 05</span>
+  </div>
+  <div class="prog"><i id="pg"></i></div>
+</div>
+
+<!-- ══════ 표지 ══════ -->
+<div class="cover">
+  <span class="cvkick">경제·주식 용어 연재 <b>05</b></span>
+  <h1 class="cvtitle">급락은 어떻게<span>더 큰 급락을 만드는가</span></h1>
+  <p class="cvsub">아무도 새로 나쁜 판단을 하지 않았는데<br/>왜 매도는 계속 늘어날까.</p>
+  <div class="cvmotif">
+    <svg viewBox="0 0 340 66" role="img" aria-label="아래로 내려가는 일곱 계단과 마지막 단에서 다시 위쪽 단으로 돌아가는 화살표">
+      <rect x="10" y="6" width="52" height="7" rx="2" fill="rgba(216,224,218,.55)"/>
+      <rect x="53" y="15" width="52" height="7" rx="2" fill="rgba(216,224,218,.46)"/>
+      <rect x="96" y="24" width="50" height="7" rx="2" fill="rgba(210,180,140,.60)"/>
+      <rect x="137" y="33" width="48" height="7" rx="2" fill="rgba(210,180,140,.72)"/>
+      <rect x="176" y="42" width="45" height="7" rx="2" fill="rgba(196,150,110,.72)"/>
+      <rect x="212" y="51" width="42" height="7" rx="2" fill="rgba(170,120,90,.68)"/>
+      <rect x="245" y="60" width="38" height="7" rx="2" fill="rgba(150,100,80,.62)"/>
+      <path d="M292 60 C322 56 326 34 300 31 L172 31" fill="none" stroke="rgba(168,198,180,.55)" stroke-width="1.6" stroke-dasharray="4 4"/>
+      <path d="M172 31 L180 27 M172 31 L180 35" stroke="rgba(168,198,180,.75)" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      
+    </svg>
+  </div>
+  <div class="cvidx">
+    <a href="#p1"><b>01</b>내 몫이 더 크게</a>
+    <a href="#p2"><b>02</b>다음 매도</a>
+    <a href="#p3"><b>03</b>왜 팔아야 했는가</a>
+  </div>
+</div>
+
+<!-- ══════ 1페이지 ══════ -->
+<div class="ch" id="p1">
+  <div class="chtop"><span class="chn">01</span><span class="chk">계좌 안에서 벌어지는 일</span></div>
+  <h2 class="cht">가격보다 더 크게<br/>내 몫이 줄어든다</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">시장 전체가 급락하고 거래가 멈추기도 했던 날, 한 가지 질문이 남았다. 첫 하락 뒤에 나온 매도는 모두 새로운 판단이었을까.</p>
+<p class="q">주가가 20% 내렸는데<br/>왜 내 돈은 40% 줄었을까.</p>
+
+<div class="acct">
+  <div class="ahd"><b>한 계좌의 안쪽</b><span class="vb">설명용 가상 계좌</span></div>
+  <div class="abars">
+    <div class="acol">
+      <div class="atot">자산 <b class="num">200</b></div>
+      <div class="abar">
+        <div class="seg mine" style="height:60px"><b>내 몫</b><em class="num">100</em></div>
+        <div class="seg debt" style="height:60px"><b>빚</b><em class="num">100</em></div>
+      </div>
+      <div class="alab">매수 시</div>
+    </div>
+    <div class="acol">
+      <div class="atot">자산 <b class="num">160</b></div>
+      <div class="abar">
+        <div class="seg mine" style="height:36px"><b>내 몫</b><em class="num">60</em></div>
+        <div class="seg debt" style="height:60px"><b>빚</b><em class="num">100</em></div>
+      </div>
+      <div class="alab">20% 하락 후</div>
+    </div>
+  </div>
+  <div class="adelta">
+    <div><span>자산</span><em class="num down">−20%</em></div>
+    <div><span><span class="term">자기자본<span class="tip">전체 자산에서 빚을 뺀 금액. 실제로 내 몫인 부분.</span></span></span><em class="num warn">−40%</em></div>
+  </div>
+  <p class="anote">자산은 40 줄었는데 <b>빚 100은 그대로다.</b> 줄어든 40이 통째로 내 몫에서 빠진다. 왼쪽 숫자는 가격의 방향, 오른쪽은 계좌 안의 일이라 색을 나눴다.</p>
+</div>
+
+<p class="p">주가가 내려도 빚은 함께 줄어들지 않는다.</p>
+<div class="keyb"><span class="term">레버리지<span class="tip">내 돈보다 큰 자산을 보유하는 구조. 빌린 돈이나 증거금을 이용해 자기 자금보다 큰 금액을 굴린다.</span></span>는 내 돈보다 큰 자산을 보유하는 구조다. 상승할 때 수익이 커질 수 있지만, 하락할 때 자기자본은 더 빠르게 줄어든다.</div>
+
+<h3 class="hd">계좌 안에는 경계선이 있다</h3>
+<p class="p">내 몫이 줄면 계좌의 상태가 바뀐다. 아래에서는 <b>이 계좌가 계약상 경계선을 통과했다고 가정한다.</b> 어떤 지점을 지나면 투자자의 판단보다 계좌의 규칙이 먼저 작동할 수 있다.</p>
+
+<div class="gate">
+  <div class="ghd"><b>계좌 상태의 다섯 구간</b><span class="vb">가상 조건</span></div>
+  <div class="glist">
+    <div class="gi g1"><span class="gd"></span><b>정상</b></div>
+    <div class="gi g2"><span class="gd"></span><b>경고</b></div>
+    <div class="gi g3"><span class="gd"></span><b>추가 자금 필요</b></div>
+    <div class="gi g4"><span class="gd"></span><b>포지션 축소 가능</b></div>
+    <div class="gi g5"><span class="gd"></span><b>강제매도 가능</b></div>
+  </div>
+  <p class="gnote">위 경계선은 구조를 설명하기 위한 가상 조건이다. <b>실제 담보 기준과 처분 방식은 금융회사와 상품마다 다르다.</b> 그래서 실제 비율 수치는 넣지 않았다.</p>
+</div>
+
+<div class="duo">
+  <p class="di d1"><b>투자자</b>회사는 아직 괜찮은 것 같은데.</p>
+  <p class="di d2"><b>계좌의 규칙</b>회사 판단은 나중이다. 먼저 빚을 줄여야 한다.</p>
+</div>
+
+<h3 class="hd">비슷해 보이는 세 가지</h3>
+<div class="trio">
+  <div class="ti">
+    <div class="th"><b><span class="term">추가담보 요구<span class="tip">증거금이나 담보 부족을 해소하라는 요구. 추가 자금을 넣거나 포지션을 줄이는 방식으로 대응할 수 있다. 마진콜이라고도 한다.</span></span></b><i>금융회사가 요구</i></div>
+    <div class="td">담보를 더 넣으라는 <b>요구</b>. 곧바로 전량 처분을 뜻하지 않는다.</div>
+  </div>
+  <div class="ti">
+    <div class="th"><b><span class="term">강제매도<span class="tip">담보 부족이 해소되지 않았거나 계약상 조건이 충족됐을 때, 채권자나 시스템이 위험을 줄이려고 보유 자산을 처분하는 것. 반대매매·강제처분·강제청산은 상품과 제도에 따라 범위가 조금씩 다르다.</span></span></b><i>채권자·시스템이 실행</i></div>
+    <div class="td">조건이 충족되면 위험을 줄이려고 자산을 <b>처분</b>한다.</div>
+  </div>
+  <div class="ti">
+    <div class="th"><b><span class="term">손절<span class="tip">투자자가 미리 정해 둔 손실 기준에 따라 스스로 매도하는 것.</span></span></b><i>투자자가 스스로</i></div>
+    <div class="td">정해 둔 손실 기준에서 <b>본인이 판단해</b> 매도한다.</div>
+  </div>
+</div>
+<p class="p">셋 다 매도를 만들지만 주체와 강제성이 다르다. <b>손절은 투자자의 규칙이고, 강제매도는 계좌 계약의 규칙이다.</b></p>
+
+<div class="ans">
+  <div class="ak">1페이지의 답</div>
+  <div class="av">레버리지는 상승률만 키우는 장치가 아니다. 가격이 내려갈 때 자기자본이 더 빠르게 줄어드는 구조다.</div>
+  <div class="aw">한 계좌의 손실은 여기서 끝나지 않는다. 그 계좌가 내놓은 매도가 시장의 다음 가격이 된다.</div>
+</div>
+
+<!-- ══════ 2페이지 ══════ -->
+<div class="ch" id="p2">
+  <div class="chtop"><span class="chn">02</span><span class="chk">계좌에서 시장으로</span></div>
+  <h2 class="cht">한 번의 매도가<br/>다음 매도를 깨운다</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">한 사람의 계좌 문제는 어떻게 시장 전체의 가격이 되는가. 다섯 단계로 따라간다.</p>
+
+<div class="stg s1">
+  <div class="sgh"><span class="sn2">1단계</span><b>최초 충격</b></div>
+  <p class="chips" style="margin-top:5px"><b>출발점</b><span>실적</span><span>금리</span><span>정책</span><span>전쟁</span><span>대형 투자자의 매도</span><span>매수·매도 불균형</span></p>
+  <div class="sgkey">처음 가격을 내린 이유와, 그 뒤 하락을 키운 이유는 다를 수 있다.</div>
+</div>
+
+<div class="stg s2">
+  <div class="sgh"><span class="sn2">2단계</span><b>계좌의 경계선 통과</b></div>
+  <p class="sgp">자기자본·담보 상태·손실 한도·손절 기준이 함께 나빠진다.</p>
+  <div class="sgkey">가격 하락은 계좌의 결과이면서, 다음 매도의 조건이 된다.</div>
+</div>
+
+<div class="stg s3">
+  <div class="sgh"><span class="sn2">3단계</span><b>가격을 따지지 않는 매도</b></div>
+  <p class="sgp">강제매도는 적정가치를 묻지 않는다. 회사가 나빠져서 파는 것이 아닐 수 있다. <b>계좌를 살리기 위해</b> 파는 것일 수 있다. 다만 모든 강제매도가 <span class="term">시장가 주문<span class="tip">원하는 가격을 지정하기보다 현재 시장에서 가능한 가격으로 빠르게 체결하려는 주문.</span></span>으로 실행되지는 않는다. 주문 방식은 금융회사·상품·상황에 따라 다르다.</p>
+  <div class="sgkey">강제매도는 가격보다 포지션 축소가 우선되는 주문이 되기 쉽다.</div>
+</div>
+
+<div class="stg s4">
+  <div class="sgh"><span class="sn2">4단계</span><b>얇아진 호가를 밀어낸다</b></div>
+  <p class="sgp">앞 페이지의 그 계좌가 400주를 내놓았다고 하자. 가격보다 체결을 우선한 주문이다. <span class="term">호가<span class="tip">사겠다 또는 팔겠다고 올려 둔 가격과 수량. 매수 호가는 사겠다는 쪽, 매도 호가는 팔겠다는 쪽이다.</span></span>창은 이렇게 쌓여 있다.</p>
+</div>
+
+<div class="book">
+  <div class="bhd"><b>매수 대기 물량</b><span class="vb">설명용 가상 호가창</span></div>
+  <div class="bsub">즉시 체결 매도 400주<span>가격보다 빠른 체결을 우선하는 주문이라고 하자. 현재 매수호가를 연속해서 받아간다.</span></div>
+  <div class="bgrid">
+    <span class="h">매수 대기</span><span class="h">잔량</span><span class="h">체결 결과</span>
+    <span class="px num">100원</span><span class="qt num">100주</span><span class="fl"><i class="bar"><i style="width:100%"></i></i><span class="tx num">100주 소진</span></span>
+    <span class="px num">99원</span><span class="qt num">150주</span><span class="fl"><i class="bar"><i style="width:100%"></i></i><span class="tx num">150주 소진</span></span>
+    <span class="px num">98원</span><span class="qt num">200주</span><span class="fl"><i class="bar"><i style="width:75%"></i></i><span class="tx left num">150주 · 50주 남음</span></span>
+  </div>
+  <div class="brem"><b>남은 매도 주문</b><span class="num">400</span><i>→</i><span class="num">300</span><i>→</i><span class="num">150</span><i>→</i><span class="num">0</span></div>
+  <div class="bres">마지막 거래가격 <b>98원</b> · 평균 체결가 <b>98.875원</b>. 400주가 모두 100원에 팔리지 않는다. 100원 주문이 소진되면 다음 가격으로 내려가 체결된다.</div>
+</div>
+<p class="cap">체결 합계 100 + 150 + 150 = 400주. 첫 호가와 평균 체결가의 차이를 <span class="term">슬리피지<span class="tip">주문을 낼 때 기대한 가격과 실제 체결된 가격의 차이.</span></span>라고 부른다.</p>
+
+<p class="p">같은 매도 물량도 받아줄 주문이 적을수록 가격을 더 멀리 밀어낸다. <span class="term">유동성<span class="tip">원하는 때에 가격을 크게 흔들지 않고 사고팔 수 있는 정도.</span></span>은 가격을 크게 흔들지 않고 사고팔 수 있는 정도다. <b>거래량이 많다는 것과 같은 뜻이 아니다.</b> 급락장에서는 이런 일이 동시에 벌어진다.</p>
+<p class="chips"><b>동시에</b><span>팔려는 주문 증가</span><span>기다리던 매수 주문 취소</span><span>매수 주문이 더 낮은 가격으로 이동</span><span>호가 사이 간격 확대</span><span>같은 매도의 가격 충격 확대</span></p>
+
+<div class="keyb">급락장에서는 매도만 늘어나는 것이 아니다. 받아줄 가격도 아래로 물러난다.</div>
+
+<div class="stg s5">
+  <div class="sgh"><span class="sn2">5단계</span><b>새 가격이 다음 계좌를 건드린다</b></div>
+  <p class="sgp">98원은 시장의 새로운 체결가격이 된다. 이 가격은 많은 계좌의 평가손익과 담보 상태에 반영돼 <b>다음 경계선을 건드릴 수 있다.</b> 다만 위험관리에 쓰는 <span class="term">평가가격<span class="tip">보유 자산의 가치와 위험을 계산할 때 쓰는 기준가격. 최근 체결가·종가·별도 기준가격 등 상품과 기관에 따라 다를 수 있다.</span></span>은 상품과 기관마다 다르다.</p>
+  <div class="sgkey">첫 번째 계좌가 밀어낸 가격이 두 번째 계좌의 경계선을 건드릴 수 있다.</div>
+</div>
+
+<div class="stairs">
+  <p class="stnote"><b>이 계단은 어느 단에서든 멈출 수 있다.</b> 무엇이 멈추게 하는지는 3페이지에서 본다.</p>
+  <p class="stlgd"><i>●●●●●</i> 매수 대기 두꺼움<b></b><i>●</i> 얇음</p>
+  <div class="stwrap">
+    <div class="st n1" style="--i:0"><span class="stn">1</span><span class="stt">최초 충격</span><i class="dots">●●●●●</i></div>
+    <div class="st n2" style="--i:1"><span class="stn">2</span><span class="stt">평가손실</span><i class="dots">●●●●●</i></div>
+    <div class="st n3" style="--i:2"><span class="stn">3</span><span class="stt">담보·손실 기준 접근</span><i class="dots">●●●●</i></div>
+    <div class="loopzone">
+      <div class="st n4" style="--i:0"><span class="stn">4</span><span class="stt">강제매도</span><i class="dots">●●●</i></div>
+      <div class="st n5" style="--i:1"><span class="stn">5</span><span class="stt">매수 호가 소진</span><i class="dots">●●</i></div>
+      <div class="st n6" style="--i:2"><span class="stn">6</span><span class="stt">추가 하락</span><i class="dots">●</i></div>
+      <div class="st n7" style="--i:3"><span class="stn">7</span><span class="stt">다음 계좌의 기준 통과</span><i class="dots">●</i></div>
+      <div class="stloop">7단은 다시 4단의 조건을 만든다</div>
+    </div>
+  </div>
+  <p class="cap">오른쪽 점은 받아줄 매수 주문의 두께다.</p>
+</div>
+
+<div class="stop">
+  <div class="sk">2페이지의 중심</div>
+  <div class="sv">급락은 직선이 아니라 <span class="term">되먹임<span class="tip">결과가 다시 원인으로 돌아가 같은 움직임을 강화하는 구조.</span></span> 고리다.</div>
+  <div class="sn">가격은 계좌를 바꾸고, 바뀐 계좌는 주문을 바꾸며, <b>그 주문이 다시 가격을 바꾼다.</b></div>
+</div>
+
+<h3 class="hd">멈추는 것과 멈추지 않는 것</h3>
+<p class="p"><span class="term">서킷브레이커<span class="tip">지수가 일정 폭 이상 급락할 때 시장 전체의 거래를 일시 정지시키는 제도.</span></span>는 하락을 없애지 않는다. 잠시 거래를 멈춰 주문과 정보를 정리할 시간을 산다. <b>이미 난 손실과 담보 부족은 그동안에도 사라지지 않는다.</b></p>
+<div class="foldwrap">
+  <details class="fold">
+    <summary>거래가 멈출 때 멈추는 것과 멈추지 않는 것</summary>
+    <div class="fb">
+      <div class="cbx">
+        <div class="ci yes">
+          <div class="ck">멈추는 것</div>
+          <ul>
+            <li>일정 시간 동안의 연속적인 체결</li>
+            <li>체결가격이 계속 갱신되는 과정</li>
+            <li>주문과 정보를 다시 볼 틈 없이 거래가 이어지는 상황</li>
+          </ul>
+        </div>
+        <div class="ci no">
+          <div class="ck">멈추지 않는 것</div>
+          <ul>
+            <li>이미 발생한 평가손실</li>
+            <li>담보 부족 상태</li>
+            <li>포지션을 줄여야 할 필요</li>
+            <li>재개 뒤 다시 나올 수 있는 매도 주문</li>
+          </ul>
+        </div>
+      </div>
+      <p style="margin:9px 0 0">발동 기준·단계·지속 시간은 제도와 시장에 따라 다르므로 여기에 적지 않는다. 별도 편에서 다룬다.</p>
+    </div>
+  </details>
+</div>
+
+<!-- ══════ 3페이지 ══════ -->
+<div class="ch" id="p3">
+  <div class="chtop"><span class="chn">03</span><span class="chk">급락장을 읽는 네 질문</span></div>
+  <h2 class="cht">누가 팔았는가보다<br/>왜 팔아야 했는가</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">바닥을 맞히는 방법은 여기에 없다. 재평가와 포지션 정리가 뒤섞인 장을 읽을 때 확인할 질문 네 개를 둔다.</p>
+
+<div class="qlist">
+  <div class="qi">
+    <div class="qt"><i>질문 1</i>새로운 악재가 계속 추가됐는가</div>
+    <p class="chips"><b>확인</b><span>실적 전망 하향</span><span>신용 사건</span><span>정책 변화</span><span>전쟁 확대</span><span>규제</span><span>연속된 부정적 공시</span></p>
+    <div class="qk">가격이 계속 내려간다는 사실과, 새로운 악재가 계속 나온다는 사실은 같은 말이 아니다.</div>
+  </div>
+  <div class="qi">
+    <div class="qt"><i>질문 2</i>하락이 시장 전체로 확산됐는가</div>
+    <p class="chips"><b>확인</b><span>하락 종목 수</span><span>상승과 하락의 비율</span><span>거래량 변화</span><span>업종 간 동조화</span><span>대형주와 소형주의 동반 하락</span><span>방어적 자산까지 내렸는지</span></p>
+    <div class="qk">시장 전체 확산은 <b>개별 악재만으로 설명하기 어렵다는 단서다.</b> 기계적 매도 여부는 거래량·호가·수급을 더 확인한다.</div>
+  </div>
+  <div class="qi">
+    <div class="qt"><i>질문 3</i>좋은 자산과 나쁜 자산이 함께 팔렸는가</div>
+    <p class="p">급하게 현금을 만들어야 하는 투자자는 <b>지금 팔 수 있는 자산</b>을 먼저 팔 수 있다. 제4편에서 본 좋은 회사라는 평가가 급락장의 매도 압력에서 자동으로 보호해주지는 않는다.</p>
+    <div class="qk">위기에는 나쁜 자산만 팔리는 것이 아니라, 팔 수 있는 자산이 팔린다.</div>
+    <p class="cap">좋은 자산이 내렸다는 이유만으로 강제매도 때문이라고 확정할 수는 없다. 좋은 회사니까 언젠가 오른다는 결론도 여기서 나오지 않는다.</p>
+  </div>
+  <div class="qi">
+    <div class="qt"><i>질문 4</i>무엇이 고리를 멈출 수 있는가</div>
+    <p class="chips"><b>가능</b><span>강제매도 물량 소진</span><span>새로운 악재의 중단</span><span>현금 보유자의 매수</span><span>매수 호가 회복</span><span>담보 상태 안정</span><span>위험 한도 안정</span><span>거래 중단을 통한 시간 확보</span></p>
+    <div class="qk">급반등이 나왔다고 기업 가치가 하루 만에 회복된 것은 아닐 수 있다. 그렇다고 하락 원인이 모두 해소됐다고 확정할 수도 없다.</div>
+  </div>
+</div>
+
+<div class="drill">
+  <div class="dh"><b>연습 문제</b><span class="vb">가상 시장</span></div>
+  <div class="dfacts">
+    <span>기업 가치에 관한 새 악재는 추가되지 않음</span>
+    <span>지수 −4% · 거래량 평소의 3배 · 상승 80종목 대 하락 850종목</span>
+    <span>신용 사용이 많았던 종목군이 더 크게 하락하고, 장 후반에는 우량 대형주도 동반 급락</span>
+    <span>다음 날 새 호재 없이 장 초반 +5% 반등</span>
+  </div>
+  <p class="dq">기업 가치가 하루 만에 나빠졌다가 다시 좋아졌다고 볼 수 있을까.</p>
+  <div class="dv">그렇게 확정할 수 없다.</div>
+  <div class="dmix">
+    <div class="dmc"><b>전날 하락에 섞였을 수 있는 것</b><p>담보 기준 악화 · 손실 한도 도달 · 현금 확보 매도 · 호가 부족 · 강제매도 물량 출회</p>
+    <b style="margin-top:7px">다음 날 반등에 섞였을 수 있는 것</b><p>강제매도 물량 소진 · 매수 호가 회복 · 가격 충격의 되돌림 · 포지션 축소 완료</p></div>
+  </div>
+  <p class="dfin">둘 다 기업 가치 변화만으로 설명되지 않을 수 있다. 가격뿐 아니라 거래량 · <span class="term">시장 폭<span class="tip">오른 종목과 내린 종목의 수처럼 움직임이 얼마나 넓게 퍼졌는지 보는 지표.</span></span> · 호가 · 수급 · 새 정보의 유무를 함께 본다.</p>
+</div>
+
+<h3 class="hd">오해하기 쉬운 문장 셋</h3>
+<div class="trap">
+  <div class="ti">
+    <div class="tx">“강제매도가 나왔으니 주가는 실제 가치보다 싸다”</div>
+    <div class="to">강제매도는 <b>가격 왜곡 가능성</b>을 만들 수 있지만 적정가치를 알려주지는 않는다. 기업 가치가 동시에 훼손됐을 수도 있다.</div>
+  </div>
+  <div class="ti">
+    <div class="tx">“거래량이 많으니 유동성이 좋다”</div>
+    <div class="to">거래량이 많아도 <b>호가가 얇고 가격 충격이 크면</b> 원하는 가격에 거래하기 어렵다.</div>
+  </div>
+  <div class="ti">
+    <div class="tx">“서킷브레이커가 걸렸으니 하락은 끝났다”</div>
+    <div class="to">거래가 잠시 멈춘 것이지 <b>매도 필요가 사라진 것은 아니다.</b> 재개 뒤 매도가 이어질 수도 있다.</div>
+  </div>
+</div>
+
+<div class="final">
+  <div class="fk">시리즈를 닫으며</div>
+  <p class="f1">시장에는 판단으로 나오는 주문이 있다.<br/>규칙 때문에 나오는 주문도 있다.<br/><b>급락장에서는 둘을 구분해야 한다.</b></p>
+  <p class="f2">가격은 사람의 생각만으로 움직이지 않는다. 생각이 만든 포지션과, <b>그 포지션에 붙은 규칙까지 함께 움직인다.</b></p>
+  <div class="ft">시장을 읽는 말들 · 제1편에서 제5편까지</div>
+</div>
+
+<div class="foldwrap">
+  <details class="fold">
+    <summary>이번 편에 나온 말 정리</summary>
+    <div class="fb">
+      <dl class="gloss">
+        <dt>레버리지</dt><dd>내 돈보다 큰 자산을 보유하는 구조.</dd>
+        <dt>자기자본</dt><dd>전체 자산에서 빚을 뺀 금액. 실제로 내 몫인 부분.</dd>
+        <dt>담보</dt><dd>빌린 돈을 갚지 못할 경우에 대비해 맡기는 자산.</dd>
+        <dt>담보 부족</dt><dd>담보 가치가 계약이 요구하는 수준 아래로 내려간 상태.</dd>
+        <dt>추가담보 요구</dt><dd>증거금이나 담보 부족을 해소하라는 요구. 마진콜이라고도 한다.</dd>
+        <dt>마진콜</dt><dd>증거금이나 담보 부족을 해소하라는 요구. 추가 자금을 넣거나 포지션을 줄이는 방식으로 대응할 수 있다.</dd>
+        <dt>반대매매</dt><dd>미수금 미납이나 담보 부족 등 약정상 조건이 충족됐을 때 금융회사가 보유 자산을 처분하는 것.</dd>
+        <dt>강제처분</dt><dd>계약 조건에 따라 보유 자산을 강제로 매도하는 것.</dd>
+        <dt>강제청산</dt><dd>주로 파생상품에서 증거금 부족 시 포지션을 강제로 정리하는 것.</dd>
+        <dt>강제매도</dt><dd>위 세 가지를 아우르는 이 글의 용어. 투자자의 새 판단 없이 계약이나 시스템이 만들어내는 매도.</dd>
+        <dt>손절</dt><dd>투자자가 미리 정한 손실 기준에 따라 스스로 매도하는 것.</dd>
+        <dt>시장가 주문</dt><dd>가격을 지정하기보다 지금 가능한 가격으로 빠르게 체결하려는 주문.</dd>
+        <dt>지정가 주문</dt><dd>원하는 가격을 정해 두고 그 가격에 도달해야 체결되는 주문.</dd>
+        <dt>호가</dt><dd>사겠다 또는 팔겠다고 올려 둔 가격과 수량.</dd>
+        <dt>매수 호가</dt><dd>사겠다고 올려 둔 가격.</dd>
+        <dt>매도 호가</dt><dd>팔겠다고 올려 둔 가격.</dd>
+        <dt>호가 잔량</dt><dd>각 가격에 남아 있는 주문 수량.</dd>
+        <dt>유동성</dt><dd>원하는 때에 가격을 크게 흔들지 않고 사고팔 수 있는 정도.</dd>
+        <dt>슬리피지</dt><dd>기대한 가격과 실제 체결 가격의 차이.</dd>
+        <dt>평가가격</dt><dd>보유 자산의 가치와 위험을 계산할 때 쓰는 기준가격. 최근 체결가·종가·별도 기준가격 등 상품과 기관에 따라 다를 수 있다.</dd>
+        <dt>시장 폭</dt><dd>오른 종목과 내린 종목의 수처럼 움직임이 얼마나 넓게 퍼졌는지 보는 지표.</dd>
+        <dt>서킷브레이커</dt><dd>지수가 일정 폭 이상 급락할 때 시장 전체 거래를 일시 중단하는 제도.</dd>
+        <dt>되먹임</dt><dd>결과가 다시 원인으로 돌아가 같은 움직임을 강화하는 구조.</dd>
+      </dl>
+    </div>
+  </details>
+  <details class="fold">
+    <summary>다루지 않은 것, 그리고 다음 이야기</summary>
+    <div class="fb">
+      <p>시장에는 강제매도 외에도 <b>ETF 재조정·옵션 헤지·위험 한도</b>처럼 가격 하락에 반응해 매도를 늘리는 장치가 있다. 한 편에 모두 넣으면 어느 것도 정확해지지 않으므로 각각은 별도의 편에서 다룬다.</p>
+      <p>실제 담보비율, 청산가격 계산식, 증권사별 처분 방식도 넣지 않았다. 회사와 상품마다 다르고, 일반 규칙처럼 제시하면 읽는 사람이 자기 계좌의 기준으로 오해하기 쉽다.</p>
+      <div class="nextlist" style="margin-top:11px">
+        <span><b>제6편</b>레버리지 ETF는 왜 오래 들고 있으면 다른 결과가 나는가</span>
+        <span><b>제7편</b>옵션시장의 헤지가 현물 가격을 움직이는 순간</span>
+        <span><b>특별편</b>공매도는 하락을 만드는가, 하락을 따라가는가</span>
+        <span><b>특별편</b>서킷브레이커가 멈추는 것과 멈추지 못하는 것</span>
+        <span><b>특별편</b>거래량은 많은데 왜 팔기 어려운가</span>
+      </div>
+    </div>
+  </details>
+</div>
+
+<p class="disc">이 글은 경제·주식 용어의 뜻과 읽는 방법을 설명하는 교양 자료입니다. 특정 종목의 매매를 권유하지 않으며, 투자 판단과 그 결과는 투자자 본인에게 있습니다. 본문의 계좌·호가창·시장 수치는 모두 구조를 설명하기 위한 가상 사례이며, 실제 금융회사의 담보 기준이나 처분 방식과 무관합니다.</p>
+<p class="foot">시장을 읽는 말들 · 05 / 05</p>
+
+</div>
+<script>
+(function(){
+  if(window.__mwWords5) return; window.__mwWords5 = true;
+
+  var pg=document.getElementById('pg');
+  function updateProg(){
+    if(!pg) return;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var y=window.scrollY||window.pageYOffset||0;
+    pg.style.width=(h>0?Math.min(100,Math.max(0,y/h*100)):0)+'%';
+  }
+  window.addEventListener('scroll',updateProg,{passive:true});
+  window.addEventListener('resize',updateProg);
+  updateProg();
+
+  function resetTip(el){ var tp=el.querySelector('.tip'); if(tp){ tp.classList.remove('below'); tp.removeAttribute('style'); } }
+  function clampTip(t){
+    var tip=t.querySelector('.tip'); if(!tip) return;
+    var vw=window.innerWidth, pad=12;
+    var w=Math.min(248, vw-2*pad);
+    tip.style.position='fixed'; tip.style.bottom='auto'; tip.style.transform='none';
+    tip.style.width=w+'px'; tip.style.left='0px'; tip.style.top='0px';
+    var tr=t.getBoundingClientRect();
+    var th=tip.getBoundingClientRect().height;
+    var left=tr.left+tr.width/2-w/2;
+    if(left<pad) left=pad;
+    if(left+w>vw-pad) left=vw-pad-w;
+    var top=tr.top-th-9, below=false;
+    if(top<pad+50){ top=tr.bottom+9; below=true; }
+    var vh=window.innerHeight;
+    if(top+th>vh-pad){ top=vh-pad-th; }
+    if(top<pad){ top=pad; }
+    tip.style.left=Math.round(left)+'px';
+    tip.style.top=Math.round(top)+'px';
+    var tb=tip.getBoundingClientRect();
+    var dx=tb.left-left, dy=tb.top-top;
+    if(dx||dy){ tip.style.left=Math.round(left-dx)+'px'; tip.style.top=Math.round(top-dy)+'px'; }
+    tip.classList.toggle('below', below);
+    var ax=tr.left+tr.width/2-left;
+    ax=Math.max(12, Math.min(w-12, ax));
+    tip.style.setProperty('--ax', Math.round(ax)+'px');
+  }
+  function closeTerms(except){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++){ if(open[i]!==except){ open[i].classList.remove('open'); resetTip(open[i]); } }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.term'), function(t){
+    t.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var willOpen=!t.classList.contains('open');
+      closeTerms(t);
+      t.classList.toggle('open', willOpen);
+      if(willOpen) clampTip(t);
+    });
+  });
+  document.addEventListener('click', function(){ closeTerms(null); });
+  window.addEventListener('scroll', function(){ closeTerms(null); }, {passive:true});
+  window.addEventListener('resize', function(){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++) clampTip(open[i]);
+  });
+})();
+</script>
+</body>
+</html>

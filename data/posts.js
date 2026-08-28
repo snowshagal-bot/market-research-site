@@ -381,6 +381,28 @@ window.RESEARCH_POSTS = [
     "shareCardImage": "covers/share/2026-08-21-daily-1i56f22.jpg"
   },
   {
+    "id": "2026-08-20-basics-1jqzwpd",
+    "type": "basics",
+    "typeLabel": "시장 공부",
+    "lang": "ko",
+    "date": "2026-08-20",
+    "reportDate": "2026-08-20",
+    "registeredDate": "2026-08-29",
+    "registeredAt": "2026-08-28T20:02:13.999Z",
+    "legacyImport": false,
+    "title": "급락은 어떻게더 큰 급락을 만드는가",
+    "subtitle": "",
+    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
+    "tags": [
+      "flows",
+      "futures"
+    ],
+    "readingMinutes": 6,
+    "href": "reports/시장을읽는말들_5편_급락은어떻게더큰급락을만드는가.html",
+    "coverImage": "covers/2026-08-20-basics-1jqzwpd.webp",
+    "shareCardImage": "covers/share/2026-08-20-basics-1jqzwpd.jpg"
+  },
+  {
     "id": "2026-08-20-daily-1ctu7fr",
     "type": "daily",
     "typeLabel": "Daily",
