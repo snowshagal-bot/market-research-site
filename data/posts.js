@@ -381,6 +381,29 @@ window.RESEARCH_POSTS = [
     "shareCardImage": "covers/share/2026-08-21-daily-1i56f22.jpg"
   },
   {
+    "id": "2026-08-20-basics-1txn8bp",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-08-20",
+    "reportDate": "2026-08-20",
+    "registeredDate": "2026-08-29",
+    "registeredAt": "2026-08-28T20:03:42.497Z",
+    "legacyImport": false,
+    "title": "How a SelloffFeeds on Itself",
+    "subtitle": "",
+    "description": "A clear guide to the essential concepts behind markets, economics, and investing.",
+    "tags": [
+      "flows",
+      "futures"
+    ],
+    "readingMinutes": 8,
+    "href": "reports/en/Market_Language_Ep5_How_a_Selloff_Feeds_on_Itself.html",
+    "translationGroup": "2026-08-20-basics-1jqzwpd",
+    "coverImage": "covers/2026-08-20-basics-1txn8bp.webp",
+    "shareCardImage": "covers/share/2026-08-20-basics-1txn8bp.jpg"
+  },
+  {
     "id": "2026-08-20-basics-1jqzwpd",
     "type": "basics",
     "typeLabel": "시장 공부",

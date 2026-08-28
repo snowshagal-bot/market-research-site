@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>The Language of Markets · Episode 5 How a Selloff Feeds on Itself</title>
+<style>
+:root{
+  --surface-page:#ECEAE5;
+  --surface-band:#E3E0D9;
+  --surface-inner:#F1EFEA;
+  --surface-detail:#E8E5DF;
+  --surface-muted:#DAD6CE;
+  --ink:#2E2E2C;
+  --ink2:#43423E;
+  --body:#53514C;
+  --sub:#706D66;
+  --muted:#8B867E;
+  --line:#CEC9BF;
+  --line2:#DCD7CE;
+  /* 시리즈 공통 */
+  --green:#46584D;
+  --green-dark:#2F3C34;
+  --green-soft:#DCE3DD;
+  --green-line:#AAB6AC;
+  --green-pale:#A8C6B4;
+  /* 이번 편 네 역할 */
+  --eq:#46584D;          /* 자기자본·정상 */
+  --eq-dark:#2F3C34;
+  --eq-soft:#DDE4DE;
+  --eq-line:#A8B6AB;
+  --dbt:#A9784A;         /* 빚·담보 경계선 */
+  --dbt-dark:#7A5A34;
+  --dbt-soft:#EFE2CF;
+  --dbt-line:#D2B48C;
+  --fs:#3A3632;          /* 강제매도·경고 */
+  --fs-warm:#7A3F44;
+  --fs-soft:#E4DEDC;
+  /* 가격 방향 전용 */
+  --up:#C74754;
+  --down:#4F78A8;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:58px;overflow-x:hidden}
+html,body{max-width:100%}
+body{
+  margin:0;background:var(--surface-page);color:var(--ink);
+  font-family:"Pretendard Variable","Pretendard","SUIT","Noto Sans KR","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  line-height:1.58;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;
+  word-break:keep-all;line-break:strict;
+}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(38px + env(safe-area-inset-bottom,0px));width:100%;position:relative}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.up{color:var(--up)}.down{color:var(--down)}
+a{color:inherit;text-decoration:none}
+
+/* ── 상단바 ── */
+.topbar{position:sticky;top:0;z-index:50;margin:0 -16px;
+  background:rgba(236,234,229,.92);-webkit-backdrop-filter:saturate(150%) blur(12px);backdrop-filter:saturate(150%) blur(12px);
+  border-bottom:1px solid rgba(90,84,74,.13)}
+.tbin{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0)) 18px 9px}
+.tbin .brand{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.tbin .brand i{font-style:normal;color:var(--green)}
+.tbin .ep{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.prog{height:2px;background:rgba(90,84,74,.10)}
+.prog i{display:block;height:100%;width:0;background:var(--green);transition:width .1s linear}
+
+/* ── 표지 ── */
+.cover{margin:0 -16px;padding:18px 22px 15px;
+  background:linear-gradient(158deg,#36443B 0%,#2A362E 52%,#1F2721 100%);color:#EFEDE7}
+.cvkick{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.06em;
+  color:#BFD2C6;border:1px solid rgba(168,198,180,.34);border-radius:999px;padding:5px 12px}
+.cvkick b{color:#EFEDE7;font-weight:800}
+.cvtitle{margin:11px 0 0;font-size:30px;line-height:1.22;font-weight:800;letter-spacing:-.05em;color:#F4F2ED}
+.cvtitle span{display:block;color:var(--green-pale)}
+.cvsub{margin:11px 0 0;font-size:14px;line-height:1.58;font-weight:600;color:#C6D2CA}
+.cvmotif{margin:10px 0 0}
+.cvmotif svg{display:block;width:100%;height:auto}
+.cvidx{display:flex;gap:6px;margin:12px 0 0;flex-wrap:wrap}
+.cvidx a{font-size:11.5px;font-weight:800;color:#D3DED7;background:rgba(255,255,255,.07);
+  border:1px solid rgba(168,198,180,.22);border-radius:999px;padding:6px 12px}
+.cvidx a b{color:var(--green-pale);font-weight:800;margin-right:5px}
+
+/* ── 챕터 오프너 ── */
+.ch{margin:14px 0 8px}
+.chtop{display:flex;align-items:center;gap:9px;margin-bottom:7px;flex-wrap:wrap}
+.chn{font-size:12px;font-weight:800;color:#EFEDE7;background:var(--ink);border-radius:4px;padding:3px 8px;letter-spacing:.04em}
+.chk{font-size:11.5px;font-weight:800;letter-spacing:.11em;color:var(--sub)}
+.cht{margin:0;font-size:24px;line-height:1.3;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.chrule{display:flex;height:3px;margin-top:11px;gap:2px}
+.chrule i{display:block;height:100%;flex:1}
+.chrule .r1{background:var(--eq)}
+.chrule .r2{background:var(--dbt)}
+.chrule .r3{background:var(--fs)}
+.chrule .r4{background:var(--down)}
+
+/* ── 본문 ── */
+.p{margin:8px 0 0;font-size:14px;line-height:1.62;color:var(--body);font-weight:500}
+.p b{color:var(--ink);font-weight:800}
+.p.lead{font-size:15px;color:var(--ink2);font-weight:600}
+.hd{margin:11px 0 0;font-size:16.5px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.44}
+.cap{margin:5px 0 0;font-size:11.5px;line-height:1.5;color:var(--muted);font-weight:600}
+.q{margin:10px 0 0;font-size:19px;line-height:1.45;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+
+/* ── 가상 배지 ── */
+.vb{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;letter-spacing:.03em;
+  color:#4A4438;background:var(--dbt-soft);border:1px solid var(--dbt-line);border-radius:999px;padding:3px 9px;white-space:nowrap}
+
+/* ── 한 문장 답 ── */
+.ans{margin:10px -16px 0;padding:13px 22px;background:var(--green);color:#EFEDE7;position:relative;overflow:hidden}
+.ans:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green-pale)}
+.ans .ak{font-size:11px;font-weight:800;letter-spacing:.14em;color:#A8BCAE;margin-bottom:8px}
+.ans .av{font-size:19px;line-height:1.46;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.ans .aw{margin:9px 0 0;padding-top:9px;border-top:1px solid rgba(168,198,180,.24);font-size:13px;line-height:1.6;font-weight:600;color:#CBD8CF}
+
+/* ── 강조 박스 (차콜) ── */
+.stop{margin:10px -16px 0;padding:12px 22px;background:var(--fs);color:#EFEDE7;position:relative}
+.stop:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--dbt)}
+.stop .sk{font-size:11px;font-weight:800;letter-spacing:.14em;color:#A9A29A;margin-bottom:8px}
+.stop .sv{font-size:16.5px;line-height:1.54;font-weight:800;letter-spacing:-.03em;color:#F4F2ED}
+.stop .sn{margin:9px 0 0;padding-top:9px;border-top:1px solid rgba(230,225,215,.2);font-size:13px;line-height:1.6;font-weight:600;color:#C4BFB6}
+.stop .sn b{color:#F4F2ED;font-weight:800}
+
+/* ── 계좌 막대 ── */
+.acct{margin:11px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:12px 15px 13px}
+.ahd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.ahd b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.abars{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:11px 0 0;position:relative}
+.acol{display:flex;flex-direction:column;align-items:center}
+.atot{font-size:11.5px;font-weight:800;color:var(--sub);margin-bottom:4px;font-variant-numeric:tabular-nums}
+.atot b{color:var(--ink);font-size:13.5px}
+.abar{width:100%;max-width:126px;height:120px;display:flex;flex-direction:column;justify-content:flex-end;
+  border-radius:8px 8px 0 0;overflow:hidden}
+.seg{display:flex;align-items:center;justify-content:space-between;padding:0 9px;font-variant-numeric:tabular-nums}
+.seg b{font-size:11.5px;font-weight:800}
+.seg em{font-style:normal;font-size:14px;font-weight:800}
+.seg.mine{background:var(--eq);color:#EAEFEA}
+.seg.mine b{color:#B7C8BC}
+.seg.debt{background:var(--dbt-soft);color:var(--dbt-dark);border-top:2px solid var(--dbt)}
+.seg.debt b{color:#8B6B45}
+.alab{margin-top:6px;font-size:12px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.adelta{margin:10px 0 0;padding-top:9px;border-top:1px dashed var(--line);display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.adelta div{text-align:center}
+.adelta span{display:block;font-size:11.5px;font-weight:700;color:var(--sub)}
+.adelta em.warn{color:var(--fs-warm)}
+.adelta em{display:block;font-style:normal;font-size:18px;font-weight:800;letter-spacing:-.03em;margin-top:2px;font-variant-numeric:tabular-nums}
+.anote{margin:8px 0 0;font-size:12.3px;line-height:1.52;font-weight:700;color:var(--ink2)}
+.anote b{color:var(--dbt-dark)}
+
+/* ── 담보 경계선 ── */
+.gate{margin:10px 0 0}
+.ghd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.ghd b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.glist{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden}
+.gi{display:flex;align-items:center;gap:10px;padding:6px 13px;background:var(--surface-inner)}
+.gi .gd{flex:0 0 auto;width:9px;height:9px;border-radius:50%}
+.gi b{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.g1 .gd{background:var(--eq)}
+.g2 .gd{background:#8C9A78}
+.g3 .gd{background:var(--dbt)}
+.g4 .gd{background:#8A6046}
+.g5 .gd{background:var(--fs-warm)}
+.g5 b{color:var(--fs-warm)}
+.gnote{margin:6px 0 0;padding:8px 12px;background:var(--surface-detail);border:1px solid var(--line);border-radius:10px;
+  font-size:12px;line-height:1.58;font-weight:700;color:var(--ink2)}
+
+/* ── 두 문장 대비 ── */
+.duo{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden;margin:11px 0 0}
+.duo .di{margin:0;background:var(--surface-inner);padding:9px 14px;font-size:13.5px;font-weight:800;
+  color:var(--ink);letter-spacing:-.03em;line-height:1.45}
+.duo .di b{font-size:11px;font-weight:800;color:#EFEDE7;border-radius:4px;padding:2px 7px;margin-right:8px;
+  letter-spacing:-.01em;white-space:nowrap;vertical-align:1.5px}
+.duo .d1 b{background:var(--eq)}
+.duo .d2{color:var(--fs)}
+.duo .d2 b{background:var(--fs)}
+
+/* ── 세 가지 구분 ── */
+.trio{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden;margin:10px 0 0}
+.trio .ti{background:var(--surface-inner);padding:8px 14px}
+.trio .th{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.trio .th b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.trio .th i{font-style:normal;font-size:11px;font-weight:800;color:var(--sub);background:var(--surface-detail);
+  border:1px solid var(--line2);border-radius:999px;padding:2px 8px}
+.trio .td{margin-top:4px;font-size:12.5px;line-height:1.56;font-weight:600;color:var(--body)}
+.trio .td b{color:var(--ink);font-weight:800}
+
+/* ── 단계 블록 ── */
+.stg{margin:10px 0 0;padding:9px 0 9px 13px;border-left:3px solid var(--line)}
+.stg.s1{border-left-color:var(--down)}
+.stg.s2{border-left-color:var(--dbt-line)}
+.stg.s3{border-left-color:var(--fs)}
+.stg.s4{border-left-color:var(--dbt)}
+.stg.s5{border-left-color:var(--fs-warm)}
+.sgh{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.sgh .sn2{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.sgh b{font-size:15.5px;font-weight:800;color:var(--ink);letter-spacing:-.03em}
+.sgp{margin:6px 0 0;font-size:13.5px;line-height:1.6;color:var(--body);font-weight:500}
+.sgp b{color:var(--ink);font-weight:800}
+.sgkey{margin:6px 0 0;padding:8px 12px;background:var(--surface-detail);border-radius:9px;
+  font-size:13.5px;line-height:1.56;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.chips{margin:4px 0 0;font-size:12.3px;line-height:1.48;font-weight:700;color:var(--sub)}
+.chips b{color:var(--muted);font-weight:800;font-size:11px;letter-spacing:.04em;margin-right:5px}
+.chips span{color:var(--ink2)}
+.chips span+span:before{content:" · ";color:var(--line)}
+
+/* ── 가격 사다리 ── */
+.book{margin:10px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.bhd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.bhd b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.bsub{margin:6px 0 0;font-size:13px;font-weight:800;color:var(--fs);letter-spacing:-.02em}
+.bsub span{display:block;margin-top:3px;font-size:12px;font-weight:600;color:var(--body);line-height:1.5;letter-spacing:-.01em}
+.bgrid{display:grid;grid-template-columns:58px 54px 1fr;gap:0 8px;margin:9px 0 0;align-items:center;font-variant-numeric:tabular-nums}
+.bgrid .h{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.02em;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.brow{display:contents}
+.bgrid .px{font-size:13.5px;font-weight:800;color:var(--ink);padding:6px 0}
+.bgrid .qt{font-size:12.5px;font-weight:700;color:var(--body);padding:6px 0}
+.bgrid .fl{font-size:12.5px;font-weight:800;padding:6px 0;display:flex;align-items:center;gap:6px}
+.bgrid .fl .bar{flex:0 0 auto;width:44px;height:8px;border-radius:3px;background:var(--eq-soft);overflow:hidden;display:flex}
+.bgrid .fl .bar i{display:block;height:100%;background:var(--fs)}
+.bgrid .fl .tx{color:var(--fs)}
+.bgrid .fl .tx.left{color:var(--eq-dark)}
+.bgrid .r1 span,.bgrid .r2 span{border-bottom:1px solid var(--line2)}
+.brem{margin:8px 0 0;padding-top:8px;border-top:1px dashed var(--line);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.brem b{font-size:11.5px;font-weight:800;color:var(--muted);letter-spacing:.03em}
+.brem span{font-size:12.5px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.brem i{font-style:normal;color:var(--muted);font-weight:700}
+.bres{margin:8px 0 0;padding:9px 12px;background:var(--fs);border-radius:9px;color:#EFEDE7;
+  font-size:12.8px;line-height:1.52;font-weight:700}
+.bres b{color:#FFFFFF;font-weight:800;font-variant-numeric:tabular-nums}
+
+.keyb{margin:10px 0 0;padding:11px 14px;background:var(--fs);color:#F4F2ED;border-radius:10px;
+  font-size:15px;line-height:1.5;font-weight:800;letter-spacing:-.03em}
+
+/* ── 비상계단 ── */
+.stairs{margin:11px 0 0}
+.stnote{margin:0 0 7px;padding:8px 12px;background:var(--surface-detail);border:1px solid var(--line);border-radius:10px;
+  font-size:12.5px;line-height:1.58;font-weight:700;color:var(--ink2)}
+.stlgd{margin:0 0 5px;font-size:11.5px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px}
+.stlgd i{font-style:normal;font-size:11px;letter-spacing:1.5px;color:var(--dbt-dark)}
+.stlgd b{flex:0 0 auto;width:22px;height:1px;background:var(--line);margin:0 2px}
+.stwrap{display:grid;gap:2px}
+.st{margin-left:calc(var(--i) * 7px);display:flex;align-items:center;gap:9px;padding:6px 11px;border-radius:8px;
+  border-left:3px solid var(--line)}
+.st .stn{flex:0 0 auto;font-size:11px;font-weight:800;width:17px;height:17px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;background:rgba(120,112,100,.2)}
+.st .stt{font-size:12.5px;font-weight:800;letter-spacing:-.02em;line-height:1.35}
+.st .dots{margin-left:auto;font-style:normal;font-size:11px;letter-spacing:1.5px;white-space:nowrap;opacity:.75}
+.n1{background:#F2F0EB;color:#43423E;border-left-color:var(--down)}
+.n2{background:#EAE7E1;color:#43423E;border-left-color:var(--down)}
+.n3{background:#E1DCD3;color:#3E3A34;border-left-color:var(--dbt-line)}
+.n4{background:#CFC5B4;color:#3A342B;border-left-color:var(--dbt)}
+.n5{background:#9E9384;color:#F4F2ED;border-left-color:var(--dbt-dark)}
+.n5 .stn,.n6 .stn,.n7 .stn{background:rgba(255,255,255,.22)}
+.n6{background:#6D655A;color:#F4F2ED;border-left-color:var(--fs-warm)}
+.n7{background:#413C36;color:#F4F2ED;border-left-color:var(--fs-warm)}
+.loopzone{position:relative;display:grid;gap:2px;margin-left:21px;padding-left:11px;
+  border-left:2px dashed var(--fs-warm)}
+.loopzone:before{content:"";position:absolute;left:-6px;top:5px;width:10px;height:10px;
+  border-left:2px solid var(--fs-warm);border-top:2px solid var(--fs-warm);transform:rotate(45deg)}
+.stloop{margin:4px 0 0;padding:7px 12px;border-radius:8px;background:var(--fs-soft);
+  border:1px dashed var(--fs-warm);font-size:12.5px;line-height:1.5;font-weight:800;color:var(--fs-warm)}
+
+/* ── 서킷브레이커 2열 ── */
+.cbx{margin:2px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden}
+.cbx .ci{background:var(--surface-inner);padding:10px 12px}
+.cbx .ck{font-size:11.5px;font-weight:800;letter-spacing:.05em;margin-bottom:7px}
+.cbx .yes .ck{color:var(--eq-dark)}
+.cbx .no .ck{color:var(--fs-warm)}
+.cbx ul{margin:0;padding-left:14px;display:grid;gap:4px}
+.cbx li{font-size:12px;line-height:1.5;font-weight:700;color:var(--body)}
+
+/* ── 네 질문 ── */
+.qlist{margin:10px 0 0;display:grid;gap:8px}
+.qi{border-left:3px solid var(--eq-line);padding:1px 0 1px 12px}
+.qi .qt i{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--muted);margin-right:8px;vertical-align:2px}
+.qi .qt{margin:1px 0 0;font-size:15.5px;font-weight:800;color:var(--ink);letter-spacing:-.03em;line-height:1.4}
+.qi .qk{margin:5px 0 0;padding:7px 11px;background:var(--surface-detail);border-radius:9px;
+  font-size:12.8px;line-height:1.52;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.qi .qk b{color:var(--fs-warm)}
+
+/* ── 연습 문제 ── */
+.drill{margin:11px -16px 0;padding:13px 22px;background:var(--surface-band);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)}
+.drill .dh{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.drill .dh b{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.dfacts{display:grid;gap:3px 10px;grid-template-columns:1fr;margin:0 0 9px}
+.dfacts span{font-size:12.3px;line-height:1.46;font-weight:700;color:var(--body);padding-left:13px;position:relative}
+.dfacts span:before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:var(--dbt-line)}
+.dq{font-size:14.5px;font-weight:800;color:var(--ink);letter-spacing:-.03em;line-height:1.5}
+.dv{margin:7px 0 0;padding:9px 13px;background:var(--fs);color:#F4F2ED;border-radius:9px;
+  font-size:14.5px;font-weight:800;letter-spacing:-.03em}
+.dmix{display:grid;gap:8px;margin:10px 0 0}
+.dmc{background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+.dmc b{display:block;font-size:12px;font-weight:800;color:var(--sub);letter-spacing:.02em;margin-bottom:5px}
+.dmc p{margin:0;font-size:12.2px;line-height:1.48;font-weight:700;color:var(--ink2)}
+.dfin{margin:9px 0 0;font-size:13.2px;line-height:1.56;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+
+/* ── 함정 ── */
+.trap{margin:12px 0 0;display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden}
+.trap .ti{padding:8px 13px;background:var(--surface-inner)}
+.trap .tx{font-size:13.5px;font-weight:800;color:var(--fs-warm);line-height:1.5;letter-spacing:-.02em}
+.trap .to{margin-top:4px;font-size:12.3px;font-weight:600;color:var(--body);line-height:1.5}
+.trap .to b{color:var(--ink);font-weight:800}
+
+/* ── 엔딩 ── */
+.final{margin:12px -16px 0;padding:18px 22px;background:linear-gradient(155deg,#36443B 0%,#232C26 100%);color:#EFEDE7;position:relative;overflow:hidden}
+.final:before{content:"";position:absolute;right:-46px;bottom:-58px;width:160px;height:160px;border-radius:50%;border:1px solid rgba(168,198,180,.18)}
+.final .fk{position:relative;font-size:11px;font-weight:800;letter-spacing:.13em;color:#A0B4A6;margin-bottom:10px}
+.final p{position:relative;margin:0;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.final .f1{font-size:19px;line-height:1.5}
+.final .f2{margin-top:11px;padding-top:10px;border-top:1px solid rgba(168,198,180,.22);font-size:15.5px;line-height:1.56;color:#DCE6DE}
+.final p b{color:var(--green-pale)}
+.final .ft{position:relative;margin-top:11px;padding-top:10px;border-top:1px solid rgba(168,198,180,.22);font-size:12.5px;font-weight:800;color:#B4C4B8}
+
+/* ── 접힘 ── */
+.foldwrap{margin:11px 0 0}
+details.fold{border:1px solid var(--line);border-radius:12px;background:var(--surface-detail);margin:0 0 8px;overflow:hidden}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:10px 15px;font-size:13px;font-weight:800;color:var(--ink)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary:after{content:"+";font-size:18px;font-weight:800;color:var(--green);line-height:.9}
+details.fold[open]>summary:after{content:"−"}
+details.fold .fb{padding:0 15px 14px}
+.fb p{margin:0 0 8px;font-size:12.5px;line-height:1.62;color:var(--body);font-weight:600}
+.fb p:last-child{margin-bottom:0}
+.fb p b{color:var(--ink);font-weight:800}
+.gloss{display:grid;grid-template-columns:96px 1fr;gap:7px 11px;margin:2px 0 0;font-size:12.5px}
+.gloss dt{font-weight:850;color:#4B4740}
+.gloss dd{margin:0;color:var(--body);line-height:1.52}
+.nextlist{display:grid;gap:6px;margin:2px 0 0}
+.nextlist span{font-size:12.5px;font-weight:700;color:var(--ink2);background:var(--surface-inner);
+  border:1px solid var(--line2);border-radius:8px;padding:8px 11px;line-height:1.45}
+.nextlist span b{color:var(--eq-dark);font-weight:800;margin-right:6px}
+.disc{font-size:11.5px;color:var(--muted);text-align:center;line-height:1.48;padding:10px 8px 0;font-weight:500}
+.foot{text-align:center;font-size:11.5px;color:var(--sub);padding:9px 0 4px;font-weight:800;letter-spacing:-.01em}
+
+/* ── 툴팁 ── */
+.term{border-bottom:1.5px dashed #8B867E;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;font-weight:850;color:var(--ink);
+  display:inline-block;padding:3px 4px;margin:-3px -4px;line-height:1.3;
+  touch-action:manipulation;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.term .tip{position:fixed;left:12px;top:0;min-width:160px;max-width:min(248px,calc(100vw - 28px));
+  background:#33322F;color:#F2F0EB;font-size:12px;font-weight:600;line-height:1.52;padding:9px 11px;border-radius:9px;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);z-index:60;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease;white-space:normal;text-align:left}
+.term .tip:after{content:"";position:absolute;top:100%;left:var(--ax,50%);transform:translateX(-50%);border:6px solid transparent;border-top-color:#33322F}
+.term .tip.below:after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#33322F}
+.term.open .tip{opacity:1;visibility:visible;pointer-events:auto}
+
+@media(max-width:360px){
+  .cvtitle{font-size:27px}
+  .q{font-size:17px}
+  .ans .av{font-size:17.5px}
+  .endb p{font-size:18px}
+  .final p{font-size:16.5px}
+  .cht{font-size:21px}
+  .abars{gap:8px}
+  .abar{height:138px}
+  .bgrid{grid-template-columns:50px 48px 1fr;gap:0 6px}
+  .bgrid .fl .bar{width:34px}
+  .st{margin-left:calc(var(--i) * 5px);gap:7px;padding:8px 9px}
+  .loopzone{margin-left:15px;padding-left:8px}
+  .st .stt{font-size:12px}
+  .duo .di{grid-template-columns:56px 1fr;gap:9px}
+  .gloss{grid-template-columns:84px 1fr}
+}
+
+/* ── 데스크톱 ── */
+@media(min-width:768px){
+  .app{max-width:770px;padding-left:28px;padding-right:28px}
+  .topbar{margin:0 -28px}
+  .cover{margin:0 -28px;padding:44px 40px 34px}
+  .cvtitle{font-size:44px}
+  .cvsub{font-size:15px;max-width:30em}
+  .ch{margin-top:44px}
+  .cht{font-size:29px}
+  .q{font-size:24px}
+  .ans{margin-left:-28px;margin-right:-28px;padding:26px 40px}
+  .ans .av{font-size:23px}
+  .stop{margin-left:-28px;margin-right:-28px;padding:26px 40px}
+  .stop .sv{font-size:19px}
+  .drill{margin-left:-28px;margin-right:-28px;padding:28px 40px}
+  .final{margin-left:-28px;margin-right:-28px;padding:32px 40px}
+  .final .f1{font-size:25px}
+  .final .f2{font-size:18px}
+  .abar{max-width:170px;height:186px}
+  .trio{grid-template-columns:1fr 1fr 1fr}
+  .qlist{grid-template-columns:1fr 1fr;gap:14px 20px}
+  .trap{grid-template-columns:1fr 1fr 1fr}
+  .dfacts{grid-template-columns:1fr 1fr}
+  .st{margin-left:calc(var(--i) * 14px);padding:11px 14px}
+  .loopzone{margin-left:42px;padding-left:16px}
+  .nextlist{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<span id="top"></span>
+<div class="topbar">
+<div class="tbin">
+<span class="brand"><i>The Language of Markets</i> · Episode 5</span>
+<span class="ep">05 / 05</span>
+</div>
+<div class="prog"><i id="pg"></i></div>
+</div>
+<!-- ══════ 표지 ══════ -->
+<div class="cover">
+<span class="cvkick">ECONOMICS &amp; MARKET TERMS <b>05</b></span>
+<h1 class="cvtitle">How a Selloff<span>Feeds on Itself</span></h1>
+<p class="cvsub">No one made a fresh bearish call—<br/>so why did the selling keep growing?</p>
+<div class="cvmotif">
+<svg aria-label="Seven descending steps with an arrow looping from the final step back toward an earlier step" role="img" viewbox="0 0 340 66">
+<rect fill="rgba(216,224,218,.55)" height="7" rx="2" width="52" x="10" y="6"></rect>
+<rect fill="rgba(216,224,218,.46)" height="7" rx="2" width="52" x="53" y="15"></rect>
+<rect fill="rgba(210,180,140,.60)" height="7" rx="2" width="50" x="96" y="24"></rect>
+<rect fill="rgba(210,180,140,.72)" height="7" rx="2" width="48" x="137" y="33"></rect>
+<rect fill="rgba(196,150,110,.72)" height="7" rx="2" width="45" x="176" y="42"></rect>
+<rect fill="rgba(170,120,90,.68)" height="7" rx="2" width="42" x="212" y="51"></rect>
+<rect fill="rgba(150,100,80,.62)" height="7" rx="2" width="38" x="245" y="60"></rect>
+<path d="M292 60 C322 56 326 34 300 31 L172 31" fill="none" stroke="rgba(168,198,180,.55)" stroke-dasharray="4 4" stroke-width="1.6"></path>
+<path d="M172 31 L180 27 M172 31 L180 35" fill="none" stroke="rgba(168,198,180,.75)" stroke-linecap="round" stroke-width="1.6"></path>
+</svg>
+</div>
+<div class="cvidx">
+<a href="#p1"><b>01</b>EQUITY FALLS FASTER</a>
+<a href="#p2"><b>02</b>THE NEXT WAVE</a>
+<a href="#p3"><b>03</b>Not Just Who Sold</a>
+</div>
+</div>
+<!-- ══════ 1페이지 ══════ -->
+<div class="ch" id="p1">
+<div class="chtop"><span class="chn">01</span><span class="chk">WHAT HAPPENS INSIDE AN ACCOUNT</span></div>
+<h2 class="cht">Your Equity Can Fall Faster<br/>Than the Asset Price</h2>
+<div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+<p class="p lead">On a day when the entire market plunged and trading was even halted, one question remained: was every sell order after the initial drop the result of a new bearish judgment?</p>
+<p class="q">The stock fell 20%.<br/>Why did my equity fall 40%?</p>
+<div class="acct">
+<div class="ahd"><b>Inside One Account</b><span class="vb">HYPOTHETICAL ACCOUNT</span></div>
+<div class="abars">
+<div class="acol">
+<div class="atot">Assets <b class="num">200</b></div>
+<div class="abar">
+<div class="seg mine" style="height:60px"><b>Equity</b><em class="num">100</em></div>
+<div class="seg debt" style="height:60px"><b>Debt</b><em class="num">100</em></div>
+</div>
+<div class="alab">At purchase</div>
+</div>
+<div class="acol">
+<div class="atot">Assets <b class="num">160</b></div>
+<div class="abar">
+<div class="seg mine" style="height:36px"><b>Equity</b><em class="num">60</em></div>
+<div class="seg debt" style="height:60px"><b>Debt</b><em class="num">100</em></div>
+</div>
+<div class="alab">After a 20% decline</div>
+</div>
+</div>
+<div class="adelta">
+<div><span>Assets</span><em class="num down">−20%</em></div>
+<div><span><span class="term">Equity<span class="tip">Total assets minus debt—the portion that actually belongs to the investor.</span></span></span><em class="num warn">−40%</em></div>
+</div>
+<p class="anote">Assets fell by 40, but <b>the debt remains 100.</b> The entire 40 decline comes out of equity. The colors separate the asset-price move on the left from what happens inside the account on the right.</p>
+</div>
+<p class="p">Debt does not fall just because the stock price does.</p>
+<div class="keyb"><span class="term">leverage<span class="tip">A structure that lets you hold assets larger than your own capital, using borrowed money or margin to control a larger position.</span></span> means holding assets larger than your own capital. It can amplify gains on the way up, but it makes equity shrink faster on the way down.</div>
+<h3 class="hd">Accounts Have Thresholds</h3>
+<p class="p">As equity falls, the status of the account changes. In the example below, <b>assume the account crosses contractual risk thresholds.</b> Once certain thresholds are crossed, the rules of the account can take precedence over the investor’s own judgment.</p>
+<div class="gate">
+<div class="ghd"><b>Five Account States</b><span class="vb">HYPOTHETICAL</span></div>
+<div class="glist">
+<div class="gi g1"><span class="gd"></span><b>Normal</b></div>
+<div class="gi g2"><span class="gd"></span><b>Warning</b></div>
+<div class="gi g3"><span class="gd"></span><b>Additional funds required</b></div>
+<div class="gi g4"><span class="gd"></span><b>Position reduction possible</b></div>
+<div class="gi g5"><span class="gd"></span><b>Forced selling possible</b></div>
+</div>
+<p class="gnote">These thresholds are hypothetical and used only to explain the mechanism. <b>Actual collateral requirements and liquidation procedures vary by financial institution and product.</b> That is why no real-world percentage thresholds are shown.</p>
+</div>
+<div class="duo">
+<p class="di d1"><b>INVESTOR</b>“The company still looks fine.”</p>
+<p class="di d2"><b>ACCOUNT RULES</b>“The company view can wait. First, reduce the debt.”</p>
+</div>
+<h3 class="hd">Three Similar-Looking Terms</h3>
+<div class="trio">
+<div class="ti">
+<div class="th"><b><span class="term">Margin call<span class="tip">A demand to cure a margin or collateral shortfall, typically by adding funds or reducing the position.</span></span></b><i>Requested by the lender or broker</i></div>
+<div class="td">A <b>demand</b>. It does not automatically mean immediate full liquidation.</div>
+</div>
+<div class="ti">
+<div class="th"><b><span class="term">Forced selling<span class="tip">The sale of assets by a lender, broker, or system to reduce risk when a collateral shortfall is not cured or contractual conditions are met. The exact scope of broker-initiated selling, forced disposal, and forced liquidation varies by product and market rules.</span></span></b><i>Executed by lender, broker, or system</i></div>
+<div class="td">When the trigger is met, assets are <b>sold</b> to reduce risk.</div>
+</div>
+<div class="ti">
+<div class="th"><b><span class="term">Stop-loss<span class="tip">A sale initiated by the investor according to a pre-set loss threshold.</span></span></b><i>Initiated by the investor</i></div>
+<div class="td">At a pre-set loss level, the investor <b>chooses to</b> sell.</div>
+</div>
+</div>
+<p class="p">All three can create sell orders, but the decision-maker and degree of compulsion differ. <b>A stop-loss follows the investor’s rule; forced selling follows the account contract’s rule.</b></p>
+<div class="ans">
+<div class="ak">PAGE 1 ANSWER</div>
+<div class="av">Leverage does not only amplify upside. It is a structure in which equity can shrink faster than the asset price when prices fall.</div>
+<div class="aw">The loss does not stop inside one account. The sell order generated by that account can become the market’s next price.</div>
+</div>
+<!-- ══════ 2페이지 ══════ -->
+<div class="ch" id="p2">
+<div class="chtop"><span class="chn">02</span><span class="chk">FROM ACCOUNT TO MARKET</span></div>
+<h2 class="cht">One Sell Order Can<br/>Wake the Next One</h2>
+<div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+<p class="p lead">How does one investor’s account problem become a marketwide price move? Follow the chain in five steps.</p>
+<div class="stg s1">
+<div class="sgh"><span class="sn2">STEP 1</span><b>Initial shock</b></div>
+<p class="chips" style="margin-top:5px"><b>STARTING POINT</b><span>Earnings</span><span>Rates</span><span>Policy</span><span>War</span><span>Large-investor selling</span><span>Order imbalance</span></p>
+<div class="sgkey">The reason the price first fell can be different from the reason the decline later accelerated.</div>
+</div>
+<div class="stg s2">
+<div class="sgh"><span class="sn2">STEP 2</span><b>Account thresholds are crossed</b></div>
+<p class="sgp">Equity, collateral status, loss limits, and stop-loss thresholds all deteriorate together.</p>
+<div class="sgkey">A falling price is both an outcome for the account and a condition for the next round of selling.</div>
+</div>
+<div class="stg s3">
+<div class="sgh"><span class="sn2">STEP 3</span><b>Selling that prioritizes exit over price</b></div>
+<p class="sgp">Forced selling does not ask what fair value is. The asset may be sold even if the company itself has not deteriorated. It may be sold simply <b>to stabilize the account.</b> But not every forced sale is executed as a <span class="term">market order<span class="tip">An order intended to execute quickly at the best prices currently available rather than at a specified price.</span></span>; order type depends on the institution, product, and situation.</p>
+<div class="sgkey">Forced selling often prioritizes reducing exposure over obtaining a particular price.</div>
+</div>
+<div class="stg s4">
+<div class="sgh"><span class="sn2">STEP 4</span><b>Selling sweeps through a thin order book</b></div>
+<p class="sgp">Suppose the account from the previous page has to sell 400 shares, prioritizing execution over price. <span class="term">quote<span class="tip">A posted price and quantity to buy or sell. A bid is a buy quote; an ask is a sell quote.</span></span> The bid side of the order book looks like this.</p>
+</div>
+<div class="book">
+<div class="bhd"><b>Standing Bids</b><span class="vb">HYPOTHETICAL ORDER BOOK</span></div>
+<div class="bsub">Immediate-execution sell order · 400 shares<span>Assume the seller prioritizes fast execution over price. The order consumes the available bids one level at a time.</span></div>
+<div class="bgrid">
+<span class="h">Bid price</span><span class="h">Size</span><span class="h">Execution</span>
+<span class="px num">₩100</span><span class="qt num">100 sh.</span><span class="fl"><i class="bar"><i style="width:100%"></i></i><span class="tx num">100 filled</span></span>
+<span class="px num">₩99</span><span class="qt num">150 sh.</span><span class="fl"><i class="bar"><i style="width:100%"></i></i><span class="tx num">150 filled</span></span>
+<span class="px num">₩98</span><span class="qt num">200 sh.</span><span class="fl"><i class="bar"><i style="width:75%"></i></i><span class="tx left num">150 filled · 50 left</span></span>
+</div>
+<div class="brem"><b>SELL ORDER LEFT</b><span class="num">400</span><i>→</i><span class="num">300</span><i>→</i><span class="num">150</span><i>→</i><span class="num">0</span></div>
+<div class="bres">Last trade <b>₩98</b> · Average fill <b>₩98.875</b>. The entire 400-share order does not execute at ₩100. Once the ₩100 bid is exhausted, execution moves down to the next price level.</div>
+</div>
+<p class="cap">Total filled: 100 + 150 + 150 = 400 shares. The gap between the initial quoted price and the average execution price is called <span class="term">slippage<span class="tip">The difference between the price expected when an order is placed and the price actually received.</span></span>.</p>
+<p class="p">The same sell order moves the price farther when fewer bids are available to absorb it. <span class="term">liquidity<span class="tip">The ability to buy or sell when desired without moving the price substantially.</span></span> is the ability to trade without moving the price substantially. <b>It is not the same thing as high trading volume.</b> During a sharp selloff, several things can happen at once.</p>
+<p class="chips"><b>AT THE SAME TIME</b><span>More sell orders</span><span>Standing bids are canceled</span><span>Buy orders move to lower prices</span><span>Bid-ask gaps widen</span><span>The same sell size creates more price impact</span></p>
+<div class="keyb">In a selloff, it is not just that selling increases. The prices willing to absorb that selling also retreat.</div>
+<div class="stg s5">
+<div class="sgh"><span class="sn2">STEP 5</span><b>The new price hits the next account</b></div>
+<p class="sgp">₩98 becomes the market’s new transaction price. That price can feed into P&amp;L and collateral calculations across many accounts and <b>trigger the next threshold.</b> But the <span class="term">valuation price<span class="tip">The reference price used to calculate the value and risk of a position. Depending on the product or institution, it may be the latest trade, the close, or another specified mark.</span></span> used for risk management varies by product and institution.</p>
+<div class="sgkey">The price pushed down by the first account can hit the risk threshold of a second account.</div>
+</div>
+<div class="stairs">
+<p class="stnote"><b>This chain can stop at any step.</b> Page 3 examines what can stop it.</p>
+<p class="stlgd"><i>●●●●●</i> Bid depth: thick<b></b><i>●</i> thin</p>
+<div class="stwrap">
+<div class="st n1" style="--i:0"><span class="stn">1</span><span class="stt">Initial shock</span><i class="dots">●●●●●</i></div>
+<div class="st n2" style="--i:1"><span class="stn">2</span><span class="stt">Mark-to-market loss</span><i class="dots">●●●●●</i></div>
+<div class="st n3" style="--i:2"><span class="stn">3</span><span class="stt">Approach collateral/loss limits</span><i class="dots">●●●●</i></div>
+<div class="loopzone">
+<div class="st n4" style="--i:0"><span class="stn">4</span><span class="stt">Forced selling</span><i class="dots">●●●</i></div>
+<div class="st n5" style="--i:1"><span class="stn">5</span><span class="stt">Bid depth is consumed</span><i class="dots">●●</i></div>
+<div class="st n6" style="--i:2"><span class="stn">6</span><span class="stt">Further decline</span><i class="dots">●</i></div>
+<div class="st n7" style="--i:3"><span class="stn">7</span><span class="stt">Next account crosses a threshold</span><i class="dots">●</i></div>
+<div class="stloop">Step 7 can recreate the conditions for Step 4</div>
+</div>
+</div>
+<p class="cap">The dots on the right represent the depth of bids available to absorb selling.</p>
+</div>
+<div class="stop">
+<div class="sk">CORE IDEA · PAGE 2</div>
+<div class="sv">A sharp selloff is not a straight line. It is a <span class="term">feedback<span class="tip">A process in which an outcome feeds back into the cause and reinforces the same movement.</span></span> loop.</div>
+<div class="sn">Prices change accounts; changed accounts change orders; <b>those orders change prices again.</b></div>
+</div>
+<h3 class="hd">What Stops—and What Does Not</h3>
+<p class="p"><span class="term">circuit breaker<span class="tip">A mechanism that temporarily halts marketwide trading when an index falls beyond a specified threshold.</span></span> does not erase a decline. It pauses trading and buys time for orders and information to be reassessed. <b>Losses already incurred and collateral shortfalls do not disappear during the halt.</b></p>
+<div class="foldwrap">
+<details class="fold">
+<summary>When Trading Stops: What Pauses and What Remains</summary>
+<div class="fb">
+<div class="cbx">
+<div class="ci yes">
+<div class="ck">WHAT PAUSES</div>
+<ul>
+<li>Continuous transaction matching for a period of time</li>
+<li>The continuous updating of transaction prices</li>
+<li>Trading without time to reassess orders and information</li>
+</ul>
+</div>
+<div class="ci no">
+<div class="ck">WHAT REMAINS</div>
+<ul>
+<li>Existing mark-to-market losses</li>
+<li>Collateral shortfalls</li>
+<li>The need to reduce positions</li>
+<li>Sell orders that may return after trading resumes</li>
+</ul>
+</div>
+</div>
+<p style="margin:9px 0 0">Trigger thresholds, stages, and halt durations differ by market and rule set, so they are not listed here. They belong in a separate episode.</p>
+</div>
+</details>
+</div>
+<!-- ══════ 3페이지 ══════ -->
+<div class="ch" id="p3">
+<div class="chtop"><span class="chn">03</span><span class="chk">FOUR QUESTIONS FOR A SELLOFF</span></div>
+<h2 class="cht">Ask Why They Had to Sell,<br/>Not Just Who Sold</h2>
+<div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+<p class="p lead">This is not a method for calling the bottom. It is a four-question framework for reading a market where fundamental repricing and position unwinds are mixed together.</p>
+<div class="qlist">
+<div class="qi">
+<div class="qt"><i>QUESTION 1</i>Did New Negative Information Keep Arriving?</div>
+<p class="chips"><b>CHECK</b><span>Earnings downgrades</span><span>Credit events</span><span>Policy changes</span><span>War escalation</span><span>Regulation</span><span>Repeated negative disclosures</span></p>
+<div class="qk">A price that keeps falling is not the same thing as a stream of new negative information.</div>
+</div>
+<div class="qi">
+<div class="qt"><i>QUESTION 2</i>Did the Decline Spread Across the Market?</div>
+<p class="chips"><b>CHECK</b><span>Number of decliners</span><span>Advance/decline ratio</span><span>Volume changes</span><span>Cross-sector correlation</span><span>Large- and small-cap stocks falling together</span><span>Whether defensive assets also fell</span></p>
+<div class="qk">Broad marketwide selling is <b>a clue that stock-specific bad news alone may not explain the move.</b> To assess whether mechanical selling is involved, also check volume, the order book, and investor flows.</div>
+</div>
+<div class="qi">
+<div class="qt"><i>QUESTION 3</i>Were Good and Bad Assets Sold Together?</div>
+<p class="p">An investor who urgently needs cash may sell <b>what can be sold now</b> first. A “good company” assessment from Episode 4 does not automatically protect the stock from selling pressure in a liquidation-driven market.</p>
+<div class="qk">In a crisis, investors do not sell only bad assets. They sell assets that are liquid enough to sell.</div>
+<p class="cap">A good asset falling does not prove forced selling caused the decline. Nor does “good company” imply the stock must eventually rise.</p>
+</div>
+<div class="qi">
+<div class="qt"><i>QUESTION 4</i>What Can Break the Loop?</div>
+<p class="chips"><b>POSSIBLE</b><span>Forced-selling supply is exhausted</span><span>No new negative catalysts</span><span>Cash-rich buyers step in</span><span>Bid depth recovers</span><span>Collateral conditions stabilize</span><span>Risk limits stabilize</span><span>A trading halt buys time</span></p>
+<div class="qk">A sharp rebound does not necessarily mean enterprise value recovered in a day. Nor does it prove every cause of the decline has disappeared.</div>
+</div>
+</div>
+<div class="drill">
+<div class="dh"><b>PRACTICE</b><span class="vb">HYPOTHETICAL MARKET</span></div>
+<div class="dfacts">
+<span>No new negative news about business value</span>
+<span>Index −4% · volume 3× normal · 80 advancers vs. 850 decliners</span>
+<span>Heavily leveraged stocks fall more; late in the session, high-quality large caps also plunge</span>
+<span>Next morning: +5% rebound without a new positive catalyst</span>
+</div>
+<p class="dq">Can we conclude that business value deteriorated and then recovered within a single day?</p>
+<div class="dv">No. That cannot be concluded.</div>
+<div class="dmix">
+<div class="dmc"><b>What may have contributed to the prior day’s decline</b><p>Worsening collateral ratios · loss limits hit · cash-raising sales · thin bids · forced-selling supply</p>
+<b style="margin-top:7px">What may have contributed to the next-day rebound</b><p>Forced-selling supply exhausted · bid depth recovers · price impact reverses · position reductions finish</p></div>
+</div>
+<p class="dfin">Neither move may be explained by changes in business value alone. Alongside price, check volume · <span class="term">market breadth<span class="tip">A measure of how widely a move is distributed across the market, such as the number of advancing and declining stocks.</span></span> · the order book · investor flows · and whether new information appeared.</p>
+</div>
+<h3 class="hd">Three Easy-to-Misread Statements</h3>
+<div class="trap">
+<div class="ti">
+<div class="tx">“Forced selling occurred, so the stock is below fair value.”</div>
+<div class="to">Forced selling can create <b>the possibility of price distortion</b> but it does not tell you what fair value is. The company’s underlying value may also have deteriorated at the same time.</div>
+</div>
+<div class="ti">
+<div class="tx">“Volume is high, so liquidity is good.”</div>
+<div class="to">Even with heavy volume, <b>if the order book is thin and price impact is large,</b> it can still be difficult to trade near the price you want.</div>
+</div>
+<div class="ti">
+<div class="tx">“A circuit breaker was triggered, so the decline is over.”</div>
+<div class="to">Trading paused temporarily; <b>the need to sell did not disappear.</b> Selling can resume after the halt.</div>
+</div>
+</div>
+<div class="final">
+<div class="fk">CLOSING THE SERIES</div>
+<p class="f1">Some orders come from judgment.<br/>Others come from rules.<br/><b>In a sharp selloff, you need to distinguish between them.</b></p>
+<p class="f2">Prices do not move on human opinions alone. Positions are created by those opinions—and <b>the rules attached to those positions move with them.</b></p>
+<div class="ft">The Language of Markets · Episodes 1–5</div>
+</div>
+<div class="foldwrap">
+<details class="fold">
+<summary>Key Terms in This Episode</summary>
+<div class="fb">
+<dl class="gloss">
+<dt>Leverage</dt><dd>A structure that lets you hold assets larger than your own capital.</dd>
+<dt>Equity</dt><dd>Total assets minus debt—the portion that actually belongs to the investor.</dd>
+<dt>Collateral</dt><dd>Assets pledged to protect a lender if borrowed money cannot be repaid.</dd>
+<dt>Collateral shortfall</dt><dd>A state in which collateral value falls below the level required by the contract.</dd>
+<dt>Additional Collateral Request</dt><dd>A demand to cure a margin or collateral shortfall. Also called a margin call.</dd>
+<dt>Margin call</dt><dd>A demand to cure a margin or collateral shortfall, typically by adding funds or reducing the position.</dd>
+<dt>Broker-initiated liquidation</dt><dd>A broker’s sale of assets when contractual conditions such as an unpaid settlement obligation or collateral shortfall are met.</dd>
+<dt>Forced disposal</dt><dd>A compulsory sale of assets under contractual terms.</dd>
+<dt>Forced liquidation</dt><dd>The compulsory closing of a position, often in derivatives, when margin is insufficient.</dd>
+<dt>Forced selling</dt><dd>The umbrella term used in this article for the three mechanisms above: selling generated by a contract or system without a fresh discretionary decision by the investor.</dd>
+<dt>Stop-loss</dt><dd>A sale initiated by the investor at a pre-set loss threshold.</dd>
+<dt>Market order</dt><dd>An order intended to execute quickly at currently available prices rather than at a specified price.</dd>
+<dt>Limit order</dt><dd>An order that executes only at the specified price or better.</dd>
+<dt>Quote</dt><dd>A posted price and quantity to buy or sell.</dd>
+<dt>Bid</dt><dd>A posted price at which someone is willing to buy.</dd>
+<dt>Ask</dt><dd>A posted price at which someone is willing to sell.</dd>
+<dt>Order-book depth</dt><dd>The quantity of orders still resting at each price level.</dd>
+<dt>Liquidity</dt><dd>The ability to buy or sell when desired without moving the price substantially.</dd>
+<dt>Slippage</dt><dd>The difference between the expected price and the actual execution price.</dd>
+<dt>Valuation price</dt><dd>The reference price used to calculate the value and risk of a position. Depending on the product or institution, it may be the latest trade, the close, or another specified mark.</dd>
+<dt>Market breadth</dt><dd>A measure of how widely a move is distributed across the market, such as the number of advancing and declining stocks.</dd>
+<dt>Circuit breaker</dt><dd>A mechanism that temporarily halts marketwide trading when an index falls beyond a specified threshold.</dd>
+<dt>Feedback loop</dt><dd>A process in which an outcome feeds back into the cause and reinforces the same movement.</dd>
+</dl>
+</div>
+</details>
+<details class="fold">
+<summary>What This Episode Leaves for Later</summary>
+<div class="fb">
+<p>Beyond forced selling, markets also contain mechanisms such as <b>ETF rebalancing · options hedging · risk limits</b> that can increase selling in response to falling prices. Covering all of them here would make each one less precise, so they are left for separate episodes.</p>
+<p>Actual collateral ratios, liquidation-price formulas, and broker-specific disposal procedures are also omitted. They differ by institution and product, and presenting them as universal rules could mislead readers about their own accounts.</p>
+<div class="nextlist" style="margin-top:11px">
+<span><b>EPISODE 6</b>Why Leveraged ETFs Behave Differently Over Time</span>
+<span><b>EPISODE 7</b>When Options Hedging Moves the Cash Market</span>
+<span><b>SPECIAL</b>Does Short Selling Cause Declines—or Follow Them?</span>
+<span><b>SPECIAL</b>What Circuit Breakers Can—and Cannot—Stop</span>
+<span><b>SPECIAL</b>Why Can It Be Hard to Sell Even When Volume Is High?</span>
+</div>
+</div>
+</details>
+</div>
+<p class="disc">This material is educational content explaining financial-market terms and how to interpret them. It is not a recommendation to buy or sell any security, and investment decisions and outcomes remain the investor’s responsibility. All account, order-book, and market figures in the article are hypothetical examples used to explain structure and do not represent the collateral rules or liquidation procedures of any actual financial institution.</p>
+<p class="foot">The Language of Markets · 05 / 05</p>
+</div>
+<script>
+(function(){
+  if(window.__mwWords5) return; window.__mwWords5 = true;
+
+  var pg=document.getElementById('pg');
+  function updateProg(){
+    if(!pg) return;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var y=window.scrollY||window.pageYOffset||0;
+    pg.style.width=(h>0?Math.min(100,Math.max(0,y/h*100)):0)+'%';
+  }
+  window.addEventListener('scroll',updateProg,{passive:true});
+  window.addEventListener('resize',updateProg);
+  updateProg();
+
+  function resetTip(el){ var tp=el.querySelector('.tip'); if(tp){ tp.classList.remove('below'); tp.removeAttribute('style'); } }
+  function clampTip(t){
+    var tip=t.querySelector('.tip'); if(!tip) return;
+    var vw=window.innerWidth, pad=12;
+    var w=Math.min(248, vw-2*pad);
+    tip.style.position='fixed'; tip.style.bottom='auto'; tip.style.transform='none';
+    tip.style.width=w+'px'; tip.style.left='0px'; tip.style.top='0px';
+    var tr=t.getBoundingClientRect();
+    var th=tip.getBoundingClientRect().height;
+    var left=tr.left+tr.width/2-w/2;
+    if(left<pad) left=pad;
+    if(left+w>vw-pad) left=vw-pad-w;
+    var top=tr.top-th-9, below=false;
+    if(top<pad+50){ top=tr.bottom+9; below=true; }
+    var vh=window.innerHeight;
+    if(top+th>vh-pad){ top=vh-pad-th; }
+    if(top<pad){ top=pad; }
+    tip.style.left=Math.round(left)+'px';
+    tip.style.top=Math.round(top)+'px';
+    var tb=tip.getBoundingClientRect();
+    var dx=tb.left-left, dy=tb.top-top;
+    if(dx||dy){ tip.style.left=Math.round(left-dx)+'px'; tip.style.top=Math.round(top-dy)+'px'; }
+    tip.classList.toggle('below', below);
+    var ax=tr.left+tr.width/2-left;
+    ax=Math.max(12, Math.min(w-12, ax));
+    tip.style.setProperty('--ax', Math.round(ax)+'px');
+  }
+  function closeTerms(except){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++){ if(open[i]!==except){ open[i].classList.remove('open'); resetTip(open[i]); } }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.term'), function(t){
+    t.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var willOpen=!t.classList.contains('open');
+      closeTerms(t);
+      t.classList.toggle('open', willOpen);
+      if(willOpen) clampTip(t);
+    });
+  });
+  document.addEventListener('click', function(){ closeTerms(null); });
+  window.addEventListener('scroll', function(){ closeTerms(null); }, {passive:true});
+  window.addEventListener('resize', function(){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++) clampTip(open[i]);
+  });
+})();
+</script>
+</body>
+</html>
