@@ -53,11 +53,11 @@ Refine `/admin/` and `/admin/manage/` only when recurring operational pain point
 ### Routing, Caching & Resilience Infrastructure (2026-08)
 - **Internal Clean URL Consistency** (PR #65): Converted all internal report links across homepages, category landings, search results, previous/next bars, and related reading to canonical extensionless Clean URLs (`/reports/...`), while legacy `.html` requests redirect via HTTP 308. Physical `.html` paths remain safely preserved in `data/posts.json`.
 - **Search Index & Dynamic Data Freshness** (PR #64): Enforced strict `Cache-Control: no-cache, no-store, must-revalidate` in `_headers` for dynamic data artifacts (`posts.json`, `posts.js`, `search-index*.js`, `market-summary.js`), preventing stale CDN/browser caching after new report publications.
-- **Publishing Concurrency & Atomic Snapshot** (PR #63): Added snapshot-atomic publishing in `functions/api/publish.js` and `manage.js`, detecting repository state changes before Git ref updates and returning HTTP 409 conflict errors to prevent silent overwrites.
-- **Automated Content-Hash Asset Versioning** (PR #61, #62): Implemented automated content-hash stamping (`scripts/stamp-asset-versions.mjs`) for mutable CSS/JS assets (`?v=<hash>`), eliminating stale asset caching during production deployments.
+- **Publishing Concurrency & Atomic Snapshot** (PR #63): Added snapshot-atomic publishing in `functions/api/publish.js`, detecting repository state changes before Git ref updates and returning HTTP 409 conflict errors to prevent silent overwrites.
+- **Automated Content-Hash Asset Versioning** (PR #62): Implemented automated content-hash stamping (`scripts/stamp-asset-versions.mjs`) for mutable CSS/JS assets (`?v=<hash>`), eliminating stale asset caching during production deployments.
 
 ### Homepage Brand & Content Presentation (2026-08)
-- **Compact Brand Hero & 2-Slide Editorial Carousel** (PR #61, #62): Evolved homepage header from previous iterations into a compact brand hero featuring a 2-slide manual carousel (Slide 01: Snowshagal brand mission, Slide 02: Latest Research highlight), scaled owl icon, and responsive watercolor artwork.
+- **Compact Brand Hero & 2-Slide Editorial Carousel** (PR #61, #62): Evolved homepage header from previous iterations into a compact brand hero featuring a 2-slide manual carousel (PR #61: Slide 01 Snowshagal brand mission, scaled owl icon, and action labels; PR #62: Slide 02 latest Research highlight refinement and automated asset hashing integration).
 - **TODAY Market Close Strip & Takeaway Pipeline** (PR #49, #54, #55, #56, #60, #67): Integrated D1-backed Market Close summary (`/api/market/latest`), dynamic TODAY strip, and published daily takeaway management in `/admin/manage/`.
 
 ### Internal Discovery UX (2026-08)
@@ -77,7 +77,7 @@ Refine `/admin/` and `/admin/manage/` only when recurring operational pain point
 - **Report Reading Time & Canonical Topic Tags** (PR #44, #48): Weighted DOM reading time calculation with category adjustments, canonical tag registry (`data/tags.json` / `data/tags.js`), and tag filtering.
 - **Full-Text Tiered Search Index** (PR #47, #52): Sharded search index (`search-index-meta.js`, `search-index-body-ko.js`, `search-index-body-en.js`) with Git blob reading for large index files.
 - **Social Sharing Section** (PR #51): Shadow DOM report share bar supporting native OS share sheet and desktop copy/social links.
-- **Post Management Flow** (PR #6, #7, #8): `/admin/manage/` supporting post metadata editing, HTML/cover replacement, exact-title deletion confirmation, and deployment polling.
+- **Post Management Flow** (PR #10, #11): `/admin/manage/` supporting post metadata editing, HTML/cover replacement, exact-title deletion confirmation, and deployment polling.
 - **Guest Comments System**: D1-backed salt-and-hash PBKDF2 guest comment system with rate limiting and responsive Shadow DOM UI.
 
 ## Maintenance / When Needed
