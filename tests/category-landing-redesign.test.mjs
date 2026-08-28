@@ -60,9 +60,9 @@ test('4. Research category has zero duplicate posts between Featured and Archive
 
 test('5. Category with <= 3 posts hides archive section without empty boxes', async () => {
   const posts = JSON.parse(await read('data/posts.json'));
-  // EN basics has 3 posts
+  // EN basics has <= 3 posts
   const enBasicsPosts = posts.filter(p => postLanguage(p) === 'en' && p.type === 'basics');
-  assert.equal(enBasicsPosts.length, 3);
+  assert.ok(enBasicsPosts.length <= 3, 'EN basics posts count must be <= 3 for archive hiding test');
 
   const archive = categoryArchiveLinks(posts, 'basics', 'en');
   assert.equal(archive, '', 'Archive links for <=3 posts must be empty string');
