@@ -181,3 +181,26 @@ test('15. Category landing hero eyebrow is editorial uppercase without ARCHIVE',
   assert.match(enWeekly, /<p class="category-landing-eyebrow">WEEKLY<\/p>/);
   assert.doesNotMatch(enWeekly, />ARCHIVE</);
 });
+
+test('16. SSR Featured cards include tags matching tag registry', async () => {
+  const posts = JSON.parse(await read('data/posts.json'));
+  const dailyKo = categoryFeaturedCards(posts, 'daily', 'ko');
+  assert.match(dailyKo, /<div class="latest-card-tags">/);
+  const researchEn = categoryFeaturedCards(posts, 'research', 'en');
+  assert.match(researchEn, /<div class="latest-card-tags">/);
+});
+
+test('17. Desktop Featured 3 cards grid styling is preserved', async () => {
+  const css = await read('assets/home-v2.css');
+  assert.match(css, /\.latest-cards\s*\{[^}]*grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\);/);
+});
+
+test('18. Mobile CSS contains horizontal swipe carousel and scroll-snap rules', async () => {
+  const catCss = await read('assets/category-landing.css');
+  assert.match(catCss, /\.category-page\s+\.latest-cards\s*\{[^}]*display:\s*flex;/);
+  assert.match(catCss, /\.category-page\s+\.latest-cards\s*\{[^}]*overflow-x:\s*auto;/);
+  assert.match(catCss, /\.category-page\s+\.latest-cards\s*\{[^}]*scroll-snap-type:\s*x mandatory;/);
+  assert.match(catCss, /\.category-page\s+\.latest-card\s*\{[^}]*flex:\s*0 0 85%;/);
+  assert.match(catCss, /\.category-page\s+\.latest-card\s*\{[^}]*scroll-snap-align:\s*start;/);
+  assert.match(catCss, /\.category-page\s+\.latest-card-copy\s*\{[^}]*min-width:\s*0;/);
+});
