@@ -44,15 +44,14 @@ test('public locale shells use snowshagal.com canonicals and only real homepage 
     assert.match(html, /hreflang="x-default"/);
     assert.doesNotMatch(html, /pages\.dev/);
   }
-  for (const html of [ko, en]) {
-    const jsonLdMatch = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1];
-    assert.ok(jsonLdMatch);
-    const data = JSON.parse(jsonLdMatch);
-    assert.equal(data['@context'], 'https://schema.org');
-    assert.ok(Array.isArray(data['@graph']));
-    assert.ok(data['@graph'].some((n) => n['@type'] === 'WebSite' && n.url === 'https://snowshagal.com/'));
-    assert.ok(data['@graph'].some((n) => n['@type'] === 'Organization' && n.url === 'https://snowshagal.com/'));
-  }
+  const websiteJson = ko.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1];
+  assert.ok(websiteJson);
+  const data = JSON.parse(websiteJson);
+  assert.equal(data['@context'], 'https://schema.org');
+  assert.ok(Array.isArray(data['@graph']));
+  assert.ok(data['@graph'].some((n) => n['@type'] === 'WebSite' && n.url === 'https://snowshagal.com/'));
+  assert.ok(data['@graph'].some((n) => n['@type'] === 'Organization' && n.url === 'https://snowshagal.com/'));
+  assert.doesNotMatch(en, /type="application\/ld\+json"/);
   assert.doesNotMatch(aboutKo, /name="robots"/);
   assert.doesNotMatch(aboutEn, /name="robots"/);
   assert.match(aboutKo, /rel="canonical" href="https:\/\/snowshagal\.com\/about\/"/);

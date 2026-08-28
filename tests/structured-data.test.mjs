@@ -14,6 +14,7 @@ import {
   organizationStructuredData,
   websiteStructuredData,
   homepageStructuredData,
+  categoryBreadcrumbStructuredData,
   categoryStructuredData,
   reportArticleImage,
   reportArticleStructuredData,
@@ -28,37 +29,39 @@ import { onRequest as middlewareOnRequest } from '../functions/_middleware.js';
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const posts = JSON.parse(fs.readFileSync(path.join(rootDir, 'data/posts.json'), 'utf8'));
 
-test('1-4. Structured Data: Homepage has valid WebSite and Organization nodes', () => {
+test('1-4. Structured Data: Homepage has WebSite and Organization nodes; /en/ has no site-level WebSite JSON-LD', () => {
   const koHtml = fs.readFileSync(path.join(rootDir, 'index.html'), 'utf8');
   const enHtml = fs.readFileSync(path.join(rootDir, 'en/index.html'), 'utf8');
 
-  for (const html of [koHtml, enHtml]) {
-    const jsonLdMatch = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
-    assert.ok(jsonLdMatch, 'Homepage must contain application/ld+json script');
-    const data = JSON.parse(jsonLdMatch[1]);
-    assert.equal(data['@context'], 'https://schema.org');
-    assert.ok(Array.isArray(data['@graph']));
+  // Root homepage KO
+  const jsonLdMatch = koHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+  assert.ok(jsonLdMatch, 'Homepage must contain application/ld+json script');
+  const data = JSON.parse(jsonLdMatch[1]);
+  assert.equal(data['@context'], 'https://schema.org');
+  assert.ok(Array.isArray(data['@graph']));
 
-    const orgNodes = data['@graph'].filter((n) => n['@type'] === 'Organization');
-    const siteNodes = data['@graph'].filter((n) => n['@type'] === 'WebSite');
+  const orgNodes = data['@graph'].filter((n) => n['@type'] === 'Organization');
+  const siteNodes = data['@graph'].filter((n) => n['@type'] === 'WebSite');
 
-    assert.equal(orgNodes.length, 1, 'Exactly one Organization node');
-    assert.equal(siteNodes.length, 1, 'Exactly one WebSite node');
+  assert.equal(orgNodes.length, 1, 'Exactly one Organization node');
+  assert.equal(siteNodes.length, 1, 'Exactly one WebSite node');
 
-    const org = orgNodes[0];
-    assert.equal(org['@id'], 'https://snowshagal.com/#organization');
-    assert.equal(org.name, 'Snowshagal');
-    assert.equal(org.url, 'https://snowshagal.com/');
-    assert.equal(org.logo, 'https://snowshagal.com/assets/brand/snowshagal-owl.webp');
-    assert.ok(typeof org.description === 'string' && org.description.length > 0);
+  const org = orgNodes[0];
+  assert.equal(org['@id'], 'https://snowshagal.com/#organization');
+  assert.equal(org.name, 'Snowshagal');
+  assert.equal(org.url, 'https://snowshagal.com/');
+  assert.equal(org.logo, 'https://snowshagal.com/assets/brand/snowshagal-owl.webp');
+  assert.ok(typeof org.description === 'string' && org.description.length > 0);
 
-    const site = siteNodes[0];
-    assert.equal(site['@id'], 'https://snowshagal.com/#website');
-    assert.equal(site.url, 'https://snowshagal.com/');
-    assert.equal(site.name, 'Snowshagal');
-    assert.equal(site.alternateName, 'snowshagal.com');
-    assert.deepEqual(site.publisher, { '@id': 'https://snowshagal.com/#organization' });
-  }
+  const site = siteNodes[0];
+  assert.equal(site['@id'], 'https://snowshagal.com/#website');
+  assert.equal(site.url, 'https://snowshagal.com/');
+  assert.equal(site.name, 'Snowshagal');
+  assert.equal(site.alternateName, 'snowshagal.com');
+  assert.deepEqual(site.publisher, { '@id': 'https://snowshagal.com/#organization' });
+
+  // /en/ homepage has NO site-level WebSite or JSON-LD script tag
+  assert.doesNotMatch(enHtml, /<script type="application\/ld\+json">/);
 });
 
 test('5-14. Structured Data: Representative KO & EN reports have Article with correct fields', () => {
@@ -171,7 +174,7 @@ test('18-20. Structured Data: Report BreadcrumbList hierarchy (KO & EN & Notes)'
   assert.equal(noteDataEN.itemListElement[1].name, 'Notes');
 });
 
-test('21. Structured Data: Category landings have BreadcrumbList but no Article', () => {
+test('21. Structured Data: Category landings have BreadcrumbList ONLY (no Article, no Organization)', () => {
   const landingFiles = [
     'daily/index.html',
     'weekly/index.html',
@@ -191,21 +194,16 @@ test('21. Structured Data: Category landings have BreadcrumbList but no Article'
     assert.ok(jsonLdMatch, `Category landing ${file} must have JSON-LD`);
     const data = JSON.parse(jsonLdMatch[1]);
     assert.equal(data['@context'], 'https://schema.org');
-    assert.ok(Array.isArray(data['@graph']));
+    assert.equal(data['@type'], 'BreadcrumbList');
+    assert.equal(data.itemListElement.length, 2);
+    assert.equal(data.itemListElement[0].position, 1);
+    assert.equal(data.itemListElement[1].position, 2);
+    assert.doesNotMatch(data.itemListElement[0].item, /\.html?$/i);
+    assert.doesNotMatch(data.itemListElement[1].item, /\.html?$/i);
 
-    const breadcrumbs = data['@graph'].filter((n) => n['@type'] === 'BreadcrumbList');
-    const articles = data['@graph'].filter((n) => n['@type'] === 'Article');
-    const orgs = data['@graph'].filter((n) => n['@type'] === 'Organization');
-
-    assert.equal(breadcrumbs.length, 1, `Category landing ${file} must have BreadcrumbList`);
-    assert.equal(articles.length, 0, `Category landing ${file} must NOT have Article`);
-    assert.equal(orgs.length, 1, `Category landing ${file} must have Organization`);
-
-    assert.equal(breadcrumbs[0].itemListElement.length, 2);
-    assert.equal(breadcrumbs[0].itemListElement[0].position, 1);
-    assert.equal(breadcrumbs[0].itemListElement[1].position, 2);
-    assert.doesNotMatch(breadcrumbs[0].itemListElement[0].item, /\.html?$/i);
-    assert.doesNotMatch(breadcrumbs[0].itemListElement[1].item, /\.html?$/i);
+    // No Article, no Organization
+    assert.doesNotMatch(html, /"Organization"/);
+    assert.doesNotMatch(html, /"Article"/);
   }
 });
 

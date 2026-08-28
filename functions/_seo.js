@@ -494,7 +494,7 @@ export function homepageStructuredData(lang = 'ko') {
   };
 }
 
-export function categoryStructuredData(type, lang = 'ko') {
+export function categoryBreadcrumbStructuredData(type, lang = 'ko') {
   const landingPath = categoryLandingPath(type, lang);
   const categoryName = CATEGORY_BREADCRUMB_NAMES[type]?.[lang] || type;
   const homeName = lang === 'en' ? 'Home' : '홈';
@@ -502,28 +502,29 @@ export function categoryStructuredData(type, lang = 'ko') {
   const canonical = `${PRODUCTION_ORIGIN}${landingPath}`;
 
   return {
-    '@context': 'https://schema.org',
-    '@graph': [
-      organizationStructuredData(lang),
+    '@type': 'BreadcrumbList',
+    '@id': `${canonical}#breadcrumb`,
+    'itemListElement': [
       {
-        '@type': 'BreadcrumbList',
-        '@id': `${canonical}#breadcrumb`,
-        'itemListElement': [
-          {
-            '@type': 'ListItem',
-            'position': 1,
-            'name': homeName,
-            'item': homeUrl
-          },
-          {
-            '@type': 'ListItem',
-            'position': 2,
-            'name': categoryName,
-            'item': canonical
-          }
-        ]
+        '@type': 'ListItem',
+        'position': 1,
+        'name': homeName,
+        'item': homeUrl
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': categoryName,
+        'item': canonical
       }
     ]
+  };
+}
+
+export function categoryStructuredData(type, lang = 'ko') {
+  return {
+    '@context': 'https://schema.org',
+    ...categoryBreadcrumbStructuredData(type, lang)
   };
 }
 

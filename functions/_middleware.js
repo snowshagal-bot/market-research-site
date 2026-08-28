@@ -194,7 +194,6 @@ export async function onRequest(context) {
     .on('meta[name="description"]', { element(element) { if (seo) element.remove(); } })
     .on('meta[property^="og:"]', { element(element) { if (seo) element.remove(); } })
     .on('meta[name^="twitter:"]', { element(element) { if (seo) element.remove(); } })
-    .on('script[type="application/ld+json"]', { element(element) { if (seo) element.remove(); } })
     // Uploaded report HTML carries no icon of its own.
     .on('link[rel~="icon"]', { element(element) { element.remove(); } })
     .on('link[rel="apple-touch-icon"]', { element(element) { element.remove(); } })
