@@ -277,3 +277,32 @@ test('TASK D: Report List read label has nowrap and proper grid template', async
   assert.ok(homeCss.includes('.report-read-label'));
   assert.ok(homeCss.includes('white-space: nowrap'));
 });
+
+test('PR #73 Hero Composition: Controls positioned on left under copy with 44px touch targets and 12px counter', async () => {
+  const [homeCss, koHtml, enHtml] = await Promise.all([
+    read('assets/home-v2.css'),
+    read('index.html'),
+    read('en/index.html')
+  ]);
+
+  // Controls positioned left under copy
+  assert.ok(homeCss.includes('.hero-carousel-controls'));
+  assert.ok(homeCss.includes('left: 0;'));
+  assert.ok(homeCss.includes('bottom: 18px;'));
+
+  // Counter 12px
+  assert.ok(homeCss.includes('font-size: 12px;'));
+
+  // Touch target 44px min
+  assert.ok(homeCss.includes('min-width: 44px;'));
+  assert.ok(homeCss.includes('min-height: 44px;'));
+
+  // SVGs upgraded to 16px with crisp stroke width in both KO and EN HTML
+  assert.ok(koHtml.includes('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"'));
+  assert.ok(enHtml.includes('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"'));
+
+  // Hero artwork offset adjusted for balanced composition
+  assert.ok(homeCss.includes('right: clamp(-28px, -2vw, -12px);'));
+  assert.ok(homeCss.includes('width: min(65vw, 780px);'));
+  assert.ok(homeCss.includes('object-position: 63% 36%;'));
+});
