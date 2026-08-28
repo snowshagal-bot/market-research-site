@@ -1,6 +1,6 @@
 # Project state
 
-Updated: 2026-08-27
+Updated: 2026-08-29
 
 ## Purpose
 
@@ -30,6 +30,29 @@ Locale structure:
 `GET /api/market/latest`, which serves the newest row of the D1-backed `market_close` table.
 The record is uploaded through `/admin/market/` against the JSON Schema in
 `contracts/market_close/`, and Preview is blocked from writing.
+
+## Deployment verification
+
+Repository and deployment verification are separate by design. `scripts/verify.mjs` remains
+the hermetic repository gate and never requests a deployed website. `scripts/smoke-site.mjs`
+is a Node built-in-fetch smoke engine for GET-only Production or Preview validation. It
+selects current report URLs from `data/posts.json`, checks the public locale/category/report
+surface, redirect/404/sitemap/canonical behavior, and validates the public Market/comments
+read contracts without pinning changing values or requiring any comment to exist.
+
+`.github/workflows/deployment-smoke.yml` is the post-deployment detection layer. On a main
+push it waits, with a three-minute bound, for the exact commit SHA's `Cloudflare Pages`
+check-run from Cloudflare's GitHub App to report success. Only then does it run the
+Production smoke. A missing or timed-out check fails closed, so an older Production cannot
+be inspected and reported as the new commit. There is no automatic rollback.
+
+Preview Functions must use the same `COMMENTS_DB` binding name as Production while pointing
+to a different Preview-only D1 database. This parity is complete: Preview uses
+`market-research-comments-preview`, Production uses `market-research-comments`, and no
+Production data was copied. The Preview schema is initialized, with one clearly marked
+`1900-01-01` / `preview-smoke-test` Market Close fixture used only for read verification.
+Preview Market and comments GET both return HTTP 200, and the shared Preview smoke passes
+20/20.
 
 Main categories:
 
@@ -303,6 +326,9 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `functions/_seo.js` — canonical URLs, category metadata, report title/description, crawlable discovery markup, hreflang, sitemap and social constants
 - `scripts/verify.mjs` — single official repository verification gate running all test suites, JS/MJS syntax validation, and integrity invariants
 - `.github/workflows/verify.yml` — lightweight GitHub Actions CI running `node scripts/verify.mjs` and `git diff --check` on pull requests and main pushes
+- `.github/workflows/deployment-smoke.yml` — waits for the exact main SHA's Cloudflare Pages success check before GET-only Production smoke
+- `scripts/smoke-site.mjs` — shared Production/Preview deployed-site smoke engine using current post data
+- `scripts/wait-for-cloudflare-deployment.mjs` — bounded GitHub check-run poller that prevents pre-deployment Production PASS
 - `scripts/build-category-pages.mjs` — regenerates the ten static KO/EN category landing shells from shared metadata
 - `favicon.ico` / `favicon-32x32.png` / `apple-touch-icon.png` / `site.webmanifest` — icon set
 - `assets/social/` — 1200x630 social cards

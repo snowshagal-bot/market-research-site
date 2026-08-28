@@ -1,6 +1,6 @@
 # Deployment and environment
 
-Updated: 2026-08-27
+Updated: 2026-08-29
 
 ## GitHub
 
@@ -78,6 +78,44 @@ Pages binding name: `COMMENTS_DB`
 
 The binding has been created/saved in Cloudflare as of 2026-08-09. Cloudflare indicates binding changes take effect on the next deployment, so production comment validation must happen after a new deployment.
 
+### Preview D1 isolation
+
+Production and Preview must use the same binding name, `COMMENTS_DB`, but they must not
+point to the same D1 database. The required topology is:
+
+- Production `COMMENTS_DB` -> Production `market-research-comments` D1;
+- Preview `COMMENTS_DB` -> an already-existing Preview-only D1 database with a different
+  database ID.
+
+Do not copy Production comments, engagement sessions, or Market Close rows into Preview.
+Preview may remain empty for comments. If `/api/market/latest` must pass the deployment
+smoke, seed only a clearly synthetic Market Close row based on the checked-in
+`contracts/market_close/market_close.example.json`, with an operator-visible source such as
+`preview-smoke-test`. Do not use a real comment as a fixture.
+
+The schema source of truth remains `db/schema.sql`. The comments and Market Close Functions
+also perform the same guarded `CREATE TABLE`/index initialization at runtime; do not create a
+second migration system for Preview.
+
+As of 2026-08-29, Preview D1 parity is complete. Preview `COMMENTS_DB` points to
+`market-research-comments-preview`, while Production `COMMENTS_DB` continues to point to
+`market-research-comments`; the databases are isolated and no Production data was copied.
+The Preview database was initialized from `db/schema.sql` and contains `comments`,
+`market_close_snapshots`, and `engagement_sessions`.
+
+Preview contains one explicit Market Close smoke fixture only: `market_date=1900-01-01`
+with `auth_source=preview-smoke-test`. It is not Production market data. On Preview deployment
+`34877694`, `/api/market/latest` and comments GET both returned HTTP 200, and the shared
+Preview smoke completed 20/20.
+
+If the Preview database is recreated, repeat the isolation procedure: configure the Preview
+environment's `COMMENTS_DB` binding to a Preview-only database, verify that its database ID
+differs from Production without recording either ID in Git, initialize it from
+`db/schema.sql`, copy no Production data, add only the explicit synthetic Market Close
+fixture if the read smoke requires one, redeploy, and rerun
+`node scripts/smoke-site.mjs --origin <preview-url> --mode preview`. A 503 from either
+D1-backed GET endpoint is a failure, not an accepted empty state.
+
 `functions/api/comments.js` reads the database through `env.COMMENTS_DB`.
 
 The API inspects and prepares the comments schema on first use, so a manual schema paste is not required for initial setup. If it finds an incompatible pre-release `comments` table, it preserves that table as `comments_legacy_v1` and then creates the current table and indexes. `db/schema.sql` remains the schema reference.
@@ -151,3 +189,36 @@ After changing a Secret, Binding, Function behavior, or Pages build setting:
 3. smoke-test the affected endpoint/UI;
 4. test both mobile and desktop if the change affects visible UI;
 5. update `docs/ROADMAP.md` if a manual step is still pending.
+
+## Deployment smoke layers
+
+Repository verification and deployed-site smoke are intentionally separate:
+
+- `node scripts/verify.mjs` is hermetic, local, and read-only. It does not contact
+  Production or Preview.
+- `node scripts/smoke-site.mjs --origin https://snowshagal.com --mode production` performs
+  GET-only Production checks.
+- `node scripts/smoke-site.mjs --origin <branch-preview-url> --mode preview` runs the same
+  checks and additionally requires the existing Preview `X-Robots-Tag: noindex` policy.
+
+The smoke engine loads current `data/posts.json` to select the latest real KO and EN report;
+it does not hardcode a report URL. It verifies the two homepages, all ten locale/category
+routes, latest Clean report URLs, legacy `.html` 308 redirects and destinations, a
+deterministic 404, dynamic sitemap structure/current populated categories, report/home
+canonicals, `/api/market/latest`, and comments GET. API numbers and comment counts are not
+fixed. No POST, PUT, PATCH, or DELETE request is made.
+
+`.github/workflows/deployment-smoke.yml` runs on `push` to `main` and may also be dispatched
+manually from `main`. It does **not** smoke Production immediately after the push. The job
+queries GitHub check-runs for the exact `${GITHUB_SHA}` and waits for the check named
+`Cloudflare Pages` from the `cloudflare-workers-and-pages` GitHub App to complete with
+`conclusion=success`. Polling is bounded to 36 attempts at five-second intervals (about
+three minutes). A missing, failed, cancelled, or timed-out Cloudflare check stops the job
+before Production smoke begins.
+
+This is the repository's available deployment-completion signal: Cloudflare's GitHub App
+reports that the exact main commit finished deploying and exposes its deployment ID. The
+public site does not currently expose an independent commit/version marker, so the smoke
+cannot prove the served HTML SHA by reading the site itself. If Cloudflare skips the build
+and therefore creates no check-run, the workflow fails rather than inspecting the previous
+Production and reporting PASS. Automatic rollback is deliberately out of scope.
