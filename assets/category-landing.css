@@ -36,8 +36,18 @@
   line-height: 1.7;
 }
 
+.category-landing-featured-section {
+  padding: clamp(36px, 5vw, 56px) 0 clamp(28px, 4vw, 44px);
+  border-bottom: 1px solid var(--line);
+}
+
+.category-landing-featured-section[hidden],
+.category-landing-list-section[hidden] {
+  display: none !important;
+}
+
 .category-landing-list-section {
-  padding: clamp(36px, 5vw, 60px) 0 clamp(64px, 8vw, 100px);
+  padding: clamp(36px, 5vw, 56px) 0 clamp(64px, 8vw, 100px);
 }
 
 .category-landing-list-head {
@@ -131,6 +141,19 @@
   word-break: keep-all;
 }
 
+.latest-card-daily .latest-card-meta b { color: var(--navy); }
+.latest-card-weekly .latest-card-meta b { color: var(--green); }
+.latest-card-research .latest-card-meta b { color: var(--brown); }
+.latest-card-basics .latest-card-meta b { color: var(--accent); }
+.latest-card-note .latest-card-meta b { color: var(--muted); }
+
+.category-page .empty {
+  padding: 48px 0;
+  color: var(--muted);
+  font-size: 15px;
+  text-align: center;
+}
+
 @media (max-width: 680px) {
   .category-landing-hero {
     padding-top: 36px;
@@ -140,6 +163,79 @@
     align-items: flex-start;
     flex-direction: column;
     gap: 8px;
+  }
+
+  /* Task 1: Mobile Horizontal Swipe Carousel */
+  .category-page .latest-cards {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 12px;
+    padding-bottom: 8px;
+    margin: 0;
+    scrollbar-width: none;
+  }
+
+  .category-page .latest-cards::-webkit-scrollbar {
+    display: none;
+  }
+
+  .category-page .latest-card {
+    flex: 0 0 85%;
+    max-width: 85%;
+    min-width: 260px;
+    scroll-snap-align: start;
+    box-sizing: border-box;
+    padding: 16px;
+    border-radius: 14px;
+    min-height: 0;
+  }
+
+  .category-page .latest-card-title {
+    min-height: 0;
+    margin-top: 10px;
+    font-size: 17px;
+    line-height: 1.38;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  /* Task 2: Mobile Card Internal Layout (Option A - compact cover + robust text column) */
+  .category-page .latest-card-body {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    margin-top: 11px;
+  }
+
+  .category-page .latest-card-copy {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .category-page .latest-card-summary {
+    font-size: 11.5px;
+    line-height: 1.55;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    -webkit-line-clamp: 3;
+  }
+
+  .category-page .latest-card-tags {
+    margin-top: 6px;
+    font-size: 11px;
+    line-height: 1.4;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+
+  .category-page .latest-card-read {
+    margin-top: 9px;
+    font-size: 10.5px;
+    white-space: nowrap;
   }
 
   .category-page .report-item {

@@ -64,7 +64,7 @@ test('common site script exits before homepage-only initialization on static pag
   assert.ok(script.indexOf('if(!isHomepage) return;', guard) < script.indexOf('renderHighlights();'));
 });
 
-test('mobile navigation exposes 6 horizontal swipe links without hamburger menu', async () => {
+test('mobile navigation exposes 7 horizontal swipe links without hamburger menu', async () => {
   const [koHome, enHome, koMarket, enMarket, koAbout, enAbout] = await Promise.all([
     read('index.html'),
     read('en/index.html'),
@@ -76,6 +76,7 @@ test('mobile navigation exposes 6 horizontal swipe links without hamburger menu'
 
   for (const html of [koHome, koMarket, koAbout]) {
     const quickNav = html.match(/<nav class="mobile-quick-nav"[^>]*>([\s\S]*?)<\/nav>/)?.[1] || '';
+    assert.match(quickNav, /href="\/"[^>]*>홈<\/a>/);
     assert.match(quickNav, /href="\/market\/"[^>]*>마켓<\/a>/);
     assert.match(quickNav, /data-nav-category="daily"[^>]*>데일리<\/a>/);
     assert.match(quickNav, /data-nav-category="weekly"[^>]*>위클리<\/a>/);
@@ -88,6 +89,7 @@ test('mobile navigation exposes 6 horizontal swipe links without hamburger menu'
 
   for (const html of [enHome, enMarket, enAbout]) {
     const quickNav = html.match(/<nav class="mobile-quick-nav"[^>]*>([\s\S]*?)<\/nav>/)?.[1] || '';
+    assert.match(quickNav, /href="\/en\/"[^>]*>Home<\/a>/);
     assert.match(quickNav, /href="\/en\/market\/"[^>]*>Market<\/a>/);
     assert.match(quickNav, /data-nav-category="daily"[^>]*>Daily<\/a>/);
     assert.match(quickNav, /data-nav-category="weekly"[^>]*>Weekly<\/a>/);

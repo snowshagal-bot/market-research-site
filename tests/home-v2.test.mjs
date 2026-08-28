@@ -85,12 +85,12 @@ test('official Snowshagal owl branding replaces decorative sparkles without chan
 
 test('desktop and mobile navigation use the approved category order across pages', async () => {
   const pages = [
-    ['index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
-    ['en/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']],
-    ['market/index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
-    ['en/market/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']],
-    ['about/index.html', ['마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
-    ['en/about/index.html', ['Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']]
+    ['index.html', ['홈', '마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
+    ['en/index.html', ['Home', 'Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']],
+    ['market/index.html', ['홈', '마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
+    ['en/market/index.html', ['Home', 'Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']],
+    ['about/index.html', ['홈', '마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
+    ['en/about/index.html', ['Home', 'Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']]
   ];
 
   for (const [path, expectedLabels] of pages) {

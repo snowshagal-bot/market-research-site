@@ -5,11 +5,15 @@ import {
   categoryAlternateTags,
   categoryHasPosts,
   categoryLandingFromPath,
+  categoryFeaturedCards,
+  categoryArchiveLinks,
   categoryReportLinks,
   findPostByPath,
   homepageLatestLinks,
   homepageReportLinks,
   loadPosts,
+  postLanguage,
+  normalizeSitePath,
   reportSeoTags
 } from './_seo.js';
 
@@ -88,7 +92,16 @@ export async function onRequest(context) {
         body = replaceElementContentsById(body, 'report-list', homepageReportLinks(posts, homeLang));
       }
       if (posts && landing) {
-        body = replaceElementContentsById(body, 'category-report-list', categoryReportLinks(posts, landing.type, landing.lang));
+        const categoryPosts = (Array.isArray(posts) ? posts : [])
+          .filter((p) => postLanguage(p) === landing.lang && p?.type === landing.type && normalizeSitePath(p?.href));
+        body = replaceElementContentsById(body, 'category-featured-cards', categoryFeaturedCards(posts, landing.type, landing.lang));
+        body = replaceElementContentsById(body, 'category-report-list', categoryArchiveLinks(posts, landing.type, landing.lang));
+        if (categoryPosts.length <= 3) {
+          body = body.replace(/(<section\b[^>]*\bid=["']category-archive-section["'][^>]*)/i, '$1 hidden');
+        }
+        if (categoryPosts.length === 0) {
+          body = body.replace(/(<section\b[^>]*\bid=["']category-featured-section["'][^>]*)/i, '$1 hidden');
+        }
         body = replaceCategoryAlternates(body, landingAlternates);
       }
       if (posts && pageLang) body = removeCategoryNavLinks(body, unavailableCategories);
@@ -111,13 +124,29 @@ export async function onRequest(context) {
         .on('#report-list', { element(element) { element.setInnerContent(archive, { html: true }); } });
     }
     if (posts && landing) {
-      const categoryLinks = categoryReportLinks(posts, landing.type, landing.lang);
+      const categoryPosts = (Array.isArray(posts) ? posts : [])
+        .filter((p) => postLanguage(p) === landing.lang && p?.type === landing.type && normalizeSitePath(p?.href));
+      const featuredCards = categoryFeaturedCards(posts, landing.type, landing.lang);
+      const archiveLinks = categoryArchiveLinks(posts, landing.type, landing.lang);
       rewriter = rewriter
+        .on('#category-featured-cards', {
+          element(element) { element.setInnerContent(featuredCards, { html: true }); }
+        })
         .on('#category-report-list', {
-          element(element) { element.setInnerContent(categoryLinks, { html: true }); }
+          element(element) { element.setInnerContent(archiveLinks, { html: true }); }
         })
         .on('link[rel="alternate"][hreflang]', { element(element) { element.remove(); } })
         .on('head', { element(element) { if (landingAlternates) element.append(landingAlternates, { html: true }); } });
+      if (categoryPosts.length <= 3) {
+        rewriter = rewriter.on('#category-archive-section', {
+          element(element) { element.setAttribute('hidden', ''); }
+        });
+      }
+      if (categoryPosts.length === 0) {
+        rewriter = rewriter.on('#category-featured-section', {
+          element(element) { element.setAttribute('hidden', ''); }
+        });
+      }
     }
     for (const type of unavailableCategories) {
       rewriter = rewriter.on(`[data-nav-category="${type}"]`, {
