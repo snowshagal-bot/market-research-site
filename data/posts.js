@@ -1,5 +1,29 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-28-daily-1a6ign1",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-08-28",
+    "reportDate": "2026-08-28",
+    "registeredDate": "2026-08-28",
+    "registeredAt": "2026-08-28T11:05:50.258Z",
+    "legacyImport": false,
+    "title": "지수 밖은 맑았다",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "takeaway": "지수는 -1.79% 오른 종목은 642개",
+    "tags": [
+      "ai",
+      "cloud-datacenter",
+      "policy"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/8월 28일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-08-28-daily-1a6ign1.webp",
+    "shareCardImage": "covers/share/2026-08-28-daily-1a6ign1.jpg"
+  },
+  {
     "id": "2026-08-27-daily-xslavx",
     "type": "daily",
     "typeLabel": "Daily",
