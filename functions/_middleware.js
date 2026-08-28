@@ -185,7 +185,7 @@ export async function onRequest(context) {
 
   // Built after the post data is read so the shell knows whether 끄적끄적 has
   // anything in it, and the fixed report nav matches the homepage.
-  const shell = `<script src="/assets/locale.js?v=c9e75896a6"></script><script src="/assets/report-shell.js?v=58c24701a9" data-category="${active}" data-lang="${lang}" data-notes="${hasNotes ? '1' : '0'}"></script>${engagement}`;
+  const shell = `<script src="/assets/locale.js?v=c9e75896a6"></script><script src="/assets/report-shell.js?v=5d566fd0c8" data-category="${active}" data-lang="${lang}" data-notes="${hasNotes ? '1' : '0'}"></script>${engagement}`;
 
   return new HTMLRewriter()
     .on('title', { element(element) { if (seo) element.remove(); } })

@@ -119,7 +119,7 @@ test('desktop and mobile navigation use the approved category order across pages
   assert.match(marketStyles, /@media\(max-width:1060px\)\{\.market-close-page \.main-nav\{gap:12px;font-size:13px\}/);
   assert.match(reportShell, /a\{[\s\S]*?font-size:14px/);
   assert.match(reportShell, /@media\(max-width:680px\)[\s\S]*?font-size:12px/);
-  assert.ok(reportShell.indexOf('<a href="${marketPath}">${copy.market}</a>') < reportShell.indexOf('?category=daily'));
+  assert.ok(reportShell.indexOf('<a href="${marketPath}">${copy.market}</a>') < reportShell.indexOf("categoryPath('daily')"));
 });
 
 test('basics is added without replacing notes across public and admin controls', async () => {
