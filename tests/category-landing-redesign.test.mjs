@@ -59,16 +59,17 @@ test('4. Research category has zero duplicate posts between Featured and Archive
 });
 
 test('5. Category with <= 3 posts hides archive section without empty boxes', async () => {
-  const posts = JSON.parse(await read('data/posts.json'));
-  // EN basics has 3 posts
-  const enBasicsPosts = posts.filter(p => postLanguage(p) === 'en' && p.type === 'basics');
-  assert.equal(enBasicsPosts.length, 3);
+  const testPosts = [
+    { id: 'b1', type: 'basics', lang: 'en', reportDate: '2026-08-13', title: 'B1', href: 'reports/en/b1.html' },
+    { id: 'b2', type: 'basics', lang: 'en', reportDate: '2026-08-11', title: 'B2', href: 'reports/en/b2.html' },
+    { id: 'b3', type: 'basics', lang: 'en', reportDate: '2026-08-10', title: 'B3', href: 'reports/en/b3.html' }
+  ];
 
-  const archive = categoryArchiveLinks(posts, 'basics', 'en');
+  const archive = categoryArchiveLinks(testPosts, 'basics', 'en');
   assert.equal(archive, '', 'Archive links for <=3 posts must be empty string');
 
   // Test middleware SSR hiding
-  const assets = { fetch: async () => Response.json(posts) };
+  const assets = { fetch: async () => Response.json(testPosts) };
   const res = await middlewareRequest({
     request: new Request('https://branch.market-research-site.pages.dev/en/basics/'),
     env: { ASSETS: assets },

@@ -301,6 +301,8 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `functions/api/_engagement.js` — shared Engagement schema, validation, date-range, and aggregation helpers
 - `functions/_middleware.js` — injects crawlable homepage/category report links, the shared report shell, favicon set and report SEO, and marks non-Production hosts noindex
 - `functions/_seo.js` — canonical URLs, category metadata, report title/description, crawlable discovery markup, hreflang, sitemap and social constants
+- `scripts/verify.mjs` — single official repository verification gate running all test suites, JS/MJS syntax validation, and integrity invariants
+- `.github/workflows/verify.yml` — lightweight GitHub Actions CI running `node scripts/verify.mjs` and `git diff --check` on pull requests and main pushes
 - `scripts/build-category-pages.mjs` — regenerates the ten static KO/EN category landing shells from shared metadata
 - `favicon.ico` / `favicon-32x32.png` / `apple-touch-icon.png` / `site.webmanifest` — icon set
 - `assets/social/` — 1200x630 social cards
