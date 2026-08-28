@@ -134,8 +134,13 @@ function normalizeOrigin(origin) {
 }
 
 function validateModeOrigin(origin, mode) {
-  const hostname = new URL(origin).hostname;
-  if (mode === 'production' && hostname !== 'snowshagal.com') {
+  const url = new URL(origin);
+  const hostname = url.hostname;
+  if (mode === 'production' && (
+    url.protocol !== 'https:' ||
+    hostname !== 'snowshagal.com' ||
+    url.port !== ''
+  )) {
     throw new Error('Production smoke is restricted to https://snowshagal.com.');
   }
   if (mode === 'preview' && hostname === 'snowshagal.com') {

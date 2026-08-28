@@ -163,6 +163,19 @@ test('Preview mode requires and accepts the existing noindex policy', async () =
   });
 });
 
+test('Production mode rejects HTTP, another hostname, and a non-default port', async () => {
+  for (const origin of [
+    'http://snowshagal.com',
+    'https://example.com',
+    'https://snowshagal.com:8443'
+  ]) {
+    await assert.rejects(
+      runSmoke({ origin, mode: 'production', posts, logger: quiet }),
+      /restricted to https:\/\/snowshagal\.com/
+    );
+  }
+});
+
 test('deployment smoke rejects an unexpected page 500', async () => {
   await expectFailure({ page500: true }, 'category /weekly/', /expected HTTP 200, received 500/);
 });
