@@ -1,5 +1,29 @@
 [
   {
+    "id": "2026-08-29-weekly-4xkdij",
+    "type": "weekly",
+    "typeLabel": "Weekly",
+    "lang": "en",
+    "date": "2026-08-29",
+    "reportDate": "2026-08-29",
+    "registeredDate": "2026-08-29",
+    "registeredAt": "2026-08-29T09:30:15.250Z",
+    "legacyImport": false,
+    "title": "While One PillarTook a Breather",
+    "subtitle": "",
+    "description": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
+    "tags": [
+      "semiconductors",
+      "cloud-datacenter",
+      "policy"
+    ],
+    "readingMinutes": 11,
+    "href": "reports/en/2026-08-29_Korea_Weekly_Report_EN.html",
+    "translationGroup": "2026-08-04-weekly-q9jryh",
+    "coverImage": "covers/2026-08-29-weekly-4xkdij.webp",
+    "shareCardImage": "covers/share/2026-08-29-weekly-4xkdij.jpg"
+  },
+  {
     "id": "2026-08-04-weekly-q9jryh",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
