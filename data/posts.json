@@ -1,5 +1,29 @@
 [
   {
+    "id": "2026-08-04-weekly-q9jryh",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-08-29",
+    "reportDate": "2026-08-29",
+    "registeredDate": "2026-08-29",
+    "registeredAt": "2026-08-29T09:24:15.928Z",
+    "legacyImport": false,
+    "title": "한 축이쉬는 동안",
+    "subtitle": "",
+    "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "tags": [
+      "semiconductors",
+      "cloud-datacenter",
+      "policy"
+    ],
+    "readingMinutes": 7,
+    "href": "reports/위클리_2026.08.4주차 위클리.html",
+    "coverImage": "covers/2026-08-04-weekly-q9jryh.webp",
+    "shareCardImage": "covers/share/2026-08-04-weekly-q9jryh.jpg",
+    "updatedAt": "2026-08-29T09:27:13.061Z"
+  },
+  {
     "id": "2026-08-29-research-15pk9zq",
     "type": "research",
     "typeLabel": "Research",
@@ -1309,29 +1333,6 @@
     ],
     "readingMinutes": 3,
     "shareCardImage": "covers/share/2026-08-05-daily-oq9vps.jpg"
-  },
-  {
-    "id": "2026-08-04-weekly-q9jryh",
-    "type": "weekly",
-    "typeLabel": "위클리 리포트",
-    "lang": "ko",
-    "date": "2026-08-04",
-    "reportDate": "2026-08-04",
-    "registeredDate": "2026-08-29",
-    "registeredAt": "2026-08-29T09:24:15.928Z",
-    "legacyImport": false,
-    "title": "한 축이쉬는 동안",
-    "subtitle": "",
-    "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
-    "tags": [
-      "semiconductors",
-      "cloud-datacenter",
-      "policy"
-    ],
-    "readingMinutes": 7,
-    "href": "reports/위클리_2026.08.4주차 위클리.html",
-    "coverImage": "covers/2026-08-04-weekly-q9jryh.webp",
-    "shareCardImage": "covers/share/2026-08-04-weekly-q9jryh.jpg"
   },
   {
     "id": "2026-08-24-daily-1nyohtr",
