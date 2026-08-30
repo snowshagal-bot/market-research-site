@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
-import { onRequestGet } from '../functions/api/market/latest.js';
+import { onRequestGet as onRequestGetLatest } from '../functions/api/market/latest.js';
+import { onRequestGet as onRequestGetDate } from '../functions/api/market/date.js';
+import { onRequestGet as onRequestGetDates } from '../functions/api/market/dates.js';
 import { onRequestPost } from '../functions/api/market/publish.js';
-import { MAX_PAYLOAD_BYTES, validateMarketPayload } from '../functions/api/market/_shared.js';
+import { MAX_PAYLOAD_BYTES, isValidMarketDate, validateMarketPayload } from '../functions/api/market/_shared.js';
 
 const fixture = JSON.parse(await readFile(new URL('../contracts/market_close/market_close.example.json', import.meta.url), 'utf8'));
 const schema = JSON.parse(await readFile(new URL('../contracts/market_close/market_close.schema.json', import.meta.url), 'utf8'));
@@ -28,11 +30,18 @@ class MockStatement {
     }
     return null;
   }
+  async all() {
+    if (/SELECT market_date FROM/i.test(this.sql)) {
+      const sortedKeys = [...this.db.rows.keys()].sort().reverse();
+      return { results: sortedKeys.map(k => ({ market_date: k })) };
+    }
+    return { results: [] };
+  }
   async run() {
     this.db.calls.push({ sql: this.sql, args: this.args });
     if (/INSERT INTO market_close_snapshots/i.test(this.sql)) {
-      const [market_date, schema_version, generated_at, status, payload_json, published_at, auth_source] = this.args;
-      this.db.rows.set(market_date, { market_date, schema_version, generated_at, status, payload_json, published_at, auth_source });
+      const [market_date, schema_version, generated_at, status, payload_json, published_at, auth_source, takeaway_ko, takeaway_en] = this.args;
+      this.db.rows.set(market_date, { market_date, schema_version, generated_at, status, payload_json, published_at, auth_source, takeaway_ko, takeaway_en });
     }
     return { success: true };
   }
@@ -70,7 +79,7 @@ test('legacy v1.0.1 payload can be stored and read back without krx_groups', asy
     env: environment(db)
   });
   assert.equal(published.status, 201);
-  const response = await onRequestGet({ request: new Request('https://snowshagal.com/api/market/latest'), env: environment(db) });
+  const response = await onRequestGetLatest({ request: new Request('https://snowshagal.com/api/market/latest'), env: environment(db) });
   const payload = await response.json();
   assert.equal(payload.meta.schema_version, '1.0.1');
   assert.equal(Object.hasOwn(payload, 'krx_groups'), false);
@@ -136,7 +145,7 @@ test('publish accepts automated and admin auth, upserts same dates, and never ro
   assert.equal(response.status, 201);
   assert.equal((await response.json()).is_latest, false);
 
-  const latest = await onRequestGet({ request: new Request('https://snowshagal.com/api/market/latest'), env: environment(db) });
+  const latest = await onRequestGetLatest({ request: new Request('https://snowshagal.com/api/market/latest'), env: environment(db) });
   assert.equal(latest.status, 200);
   const latestPayload = await latest.json();
   assert.equal(latestPayload.meta.market_date, fixture.meta.market_date);
@@ -156,16 +165,16 @@ test('branch Preview accepts authenticated writes only into its supplied Preview
 
 test('latest returns an explicit empty state, cache headers, and ETag revalidation', async () => {
   const db = new MockDb();
-  let response = await onRequestGet({ request: new Request('https://preview.pages.dev/api/market/latest'), env: environment(db) });
+  let response = await onRequestGetLatest({ request: new Request('https://preview.pages.dev/api/market/latest'), env: environment(db) });
   assert.equal(response.status, 404);
   assert.equal((await response.json()).error, 'NO_MARKET_DATA');
 
   await onRequestPost({ request: publishRequest(fixture, { 'x-market-publish-key': 'market-secret' }), env: environment(db) });
-  response = await onRequestGet({ request: new Request('https://snowshagal.com/api/market/latest'), env: environment(db) });
+  response = await onRequestGetLatest({ request: new Request('https://snowshagal.com/api/market/latest'), env: environment(db) });
   assert.match(response.headers.get('cache-control'), /s-maxage=120/);
   const etag = response.headers.get('etag');
   assert.ok(etag);
-  const cached = await onRequestGet({ request: new Request('https://snowshagal.com/api/market/latest', { headers: { 'if-none-match': etag } }), env: environment(db) });
+  const cached = await onRequestGetLatest({ request: new Request('https://snowshagal.com/api/market/latest', { headers: { 'if-none-match': etag } }), env: environment(db) });
   assert.equal(cached.status, 304);
 });
 
@@ -177,4 +186,116 @@ test('invalid final payload is rejected before D1 writes', async () => {
   const result = await response.json();
   assert.equal(result.error, 'VALIDATION_FAILED');
   assert.equal(db.calls.length, 0);
+});
+
+test('isValidMarketDate validates calendar integrity strictly', () => {
+  assert.equal(isValidMarketDate('2026-08-28'), true);
+  assert.equal(isValidMarketDate('1900-01-01'), true);
+  assert.equal(isValidMarketDate('2024-02-29'), true); // leap year
+  assert.equal(isValidMarketDate('2025-02-29'), false); // non-leap year
+  assert.equal(isValidMarketDate('2026-02-30'), false);
+  assert.equal(isValidMarketDate('2026-99-99'), false);
+  assert.equal(isValidMarketDate('abc'), false);
+  assert.equal(isValidMarketDate(''), false);
+  assert.equal(isValidMarketDate(null), false);
+  assert.equal(isValidMarketDate(undefined), false);
+});
+
+test('GET /api/market/date validates date format and returns 400 on malformed or impossible dates', async () => {
+  const db = new MockDb();
+  let res = await onRequestGetDate({ request: new Request('https://snowshagal.com/api/market/date?date=abc'), env: environment(db) });
+  assert.equal(res.status, 400);
+  assert.equal((await res.json()).error, 'INVALID_DATE');
+
+  res = await onRequestGetDate({ request: new Request('https://snowshagal.com/api/market/date?date=2026-99-99'), env: environment(db) });
+  assert.equal(res.status, 400);
+  assert.equal((await res.json()).error, 'INVALID_DATE');
+
+  res = await onRequestGetDate({ request: new Request('https://snowshagal.com/api/market/date?date=2026-02-30'), env: environment(db) });
+  assert.equal(res.status, 400);
+  assert.equal((await res.json()).error, 'INVALID_DATE');
+
+  res = await onRequestGetDate({ request: new Request('https://snowshagal.com/api/market/date'), env: environment(db) });
+  assert.equal(res.status, 400);
+  assert.equal((await res.json()).error, 'INVALID_DATE');
+});
+
+test('GET /api/market/date returns 404 on missing date without falling back to latest', async () => {
+  const db = new MockDb();
+  await onRequestPost({ request: publishRequest(fixture, { 'x-market-publish-key': 'market-secret' }), env: environment(db) });
+
+  const res = await onRequestGetDate({ request: new Request('https://snowshagal.com/api/market/date?date=2026-08-20'), env: environment(db) });
+  assert.equal(res.status, 404);
+  const body = await res.json();
+  assert.equal(body.error, 'MARKET_DATE_NOT_FOUND');
+});
+
+test('GET /api/market/date returns exact row with paired takeaway and supports ETag revalidation', async () => {
+  const db = new MockDb();
+  const envelope = {
+    market: fixture,
+    takeaway: { ko: '8월 28일 마감 코멘트', en: 'August 28 market comment' }
+  };
+  await onRequestPost({ request: publishRequest(envelope, { 'x-market-publish-key': 'market-secret' }), env: environment(db) });
+
+  const res = await onRequestGetDate({ request: new Request(`https://snowshagal.com/api/market/date?date=${fixture.meta.market_date}`), env: environment(db) });
+  assert.equal(res.status, 200);
+  const data = await res.json();
+  assert.equal(data.meta.market_date, fixture.meta.market_date);
+  assert.equal(data.takeaway.ko, '8월 28일 마감 코멘트');
+  assert.equal(data.takeaway.en, 'August 28 market comment');
+  assert.equal(data.krx_groups.sectors.length, 46);
+  assert.equal(data.krx_groups.themes.length, 39);
+
+  const etag = res.headers.get('etag');
+  assert.ok(etag);
+  const cached = await onRequestGetDate({
+    request: new Request(`https://snowshagal.com/api/market/date?date=${fixture.meta.market_date}`, { headers: { 'if-none-match': etag } }),
+    env: environment(db)
+  });
+  assert.equal(cached.status, 304);
+});
+
+test('GET /api/market/date reads legacy v1.0.1 snapshots seamlessly', async () => {
+  const db = new MockDb();
+  await onRequestPost({ request: publishRequest(legacyFixture, { 'x-market-publish-key': 'market-secret' }), env: environment(db) });
+
+  const res = await onRequestGetDate({ request: new Request(`https://snowshagal.com/api/market/date?date=${legacyFixture.meta.market_date}`), env: environment(db) });
+  assert.equal(res.status, 200);
+  const data = await res.json();
+  assert.equal(data.meta.market_date, legacyFixture.meta.market_date);
+  assert.equal(data.meta.schema_version, '1.0.1');
+  assert.equal(Object.hasOwn(data, 'krx_groups'), false);
+});
+
+test('GET /api/market/dates returns DESC sorted dates with latest and earliest bounds, and handles empty DB', async () => {
+  const db = new MockDb();
+  // Empty DB
+  let res = await onRequestGetDates({ request: new Request('https://snowshagal.com/api/market/dates'), env: environment(db) });
+  assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), { dates: [], latest: null, earliest: null });
+
+  // Add 3 dates
+  const d1 = clone(fixture); d1.meta.market_date = '2026-08-26'; alignGroupDate(d1, '2026-08-26');
+  const d2 = clone(fixture); d2.meta.market_date = '2026-08-27'; alignGroupDate(d2, '2026-08-27');
+  const d3 = clone(fixture); d3.meta.market_date = '2026-08-28'; alignGroupDate(d3, '2026-08-28');
+
+  await onRequestPost({ request: publishRequest(d1, { 'x-market-publish-key': 'market-secret' }), env: environment(db) });
+  await onRequestPost({ request: publishRequest(d2, { 'x-market-publish-key': 'market-secret' }), env: environment(db) });
+  await onRequestPost({ request: publishRequest(d3, { 'x-market-publish-key': 'market-secret' }), env: environment(db) });
+
+  res = await onRequestGetDates({ request: new Request('https://snowshagal.com/api/market/dates'), env: environment(db) });
+  assert.equal(res.status, 200);
+  const list = await res.json();
+  assert.deepEqual(list.dates, ['2026-08-28', '2026-08-27', '2026-08-26']);
+  assert.equal(list.latest, '2026-08-28');
+  assert.equal(list.earliest, '2026-08-26');
+
+  const etag = res.headers.get('etag');
+  assert.ok(etag);
+  const cached = await onRequestGetDates({
+    request: new Request('https://snowshagal.com/api/market/dates', { headers: { 'if-none-match': etag } }),
+    env: environment(db)
+  });
+  assert.equal(cached.status, 304);
 });

@@ -60,7 +60,7 @@ test('Market renderer distinguishes loading, empty, and retryable error states',
   assert.match(script, /response\.status === 404/);
   assert.match(script, /function renderEmpty/);
   assert.match(script, /class="market-retry"/);
-  assert.match(script, /addEventListener\('click', init/);
+  assert.match(script, /data-market-action="retry"/);
   assert.match(script, /pages\\\.dev/);
   assert.match(script, /localhost\|127\\\.0\\\.0\\\.1/);
   assert.match(script, /market-preview-notice/);
@@ -161,10 +161,92 @@ test('Market layout explicitly supports dark mode, compact mobile widths, and re
   assert.ok(mobileHero.size <= 150_000);
 });
 
-test('locale switch preserves Market routes', async () => {
-  const locale = await read('assets/locale.js');
-  assert.match(locale, /\/en\\\/market/);
-  assert.match(locale, /'\/en\/market\/' : '\/market\/'/);
+test('locale switch preserves Market routes and date query parameters', async () => {
+  const localeScript = await read('assets/locale.js');
+  const window = {};
+  const context = vm.createContext({ window, Intl, Date, Set, URLSearchParams });
+  vm.runInContext(localeScript, context);
+  const localeApi = window.MARKET_LOCALE;
+
+  assert.equal(localeApi.pageLanguagePath('/market/', 'en', ''), '/en/market/');
+  assert.equal(localeApi.pageLanguagePath('/en/market/', 'ko', ''), '/market/');
+  assert.equal(localeApi.pageLanguagePath('/market/', 'en', '?date=2026-08-27'), '/en/market/?date=2026-08-27');
+  assert.equal(localeApi.pageLanguagePath('/en/market/', 'ko', '?date=2026-08-27'), '/market/?date=2026-08-27');
+});
+
+test('Market History UI renders navigation strip, previous/next trading days, and calendar drawer', async () => {
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+  const runtime = await marketRuntime('ko');
+  runtime.state.dates = ['2026-08-28', '2026-08-27', '2026-08-26'];
+  runtime.state.latestDate = '2026-08-28';
+  runtime.state.earliestDate = '2026-08-26';
+
+  const target = { innerHTML: '', addEventListener() {} };
+  runtime.render(data, target);
+
+  assert.match(target.innerHTML, /class="market-history-strip"/);
+  assert.match(target.innerHTML, /data-market-action="today"/);
+  assert.match(target.innerHTML, /data-market-action="toggle-calendar"/);
+  assert.match(target.innerHTML, /class="market-calendar-drawer"/);
+  assert.match(target.innerHTML, /class="market-calendar-panel"/);
+  assert.match(target.innerHTML, /class="market-cal-weekday"/);
+  assert.match(target.innerHTML, /data-target-date="2026-08-27"/);
+});
+
+test('findExactDaily strictly matches post.reportDate and locale with zero fallback to latest daily', async () => {
+  const script = await read('assets/market-close.js');
+  const mockPosts = [
+    { type: 'daily', reportDate: '2026-08-28', lang: 'ko', href: 'reports/daily-0828.html', title: '8/28 Daily KO' },
+    { type: 'daily', reportDate: '2026-08-28', lang: 'en', href: 'reports/en/daily-0828.html', title: '8/28 Daily EN' },
+    { type: 'daily', reportDate: '2026-08-26', lang: 'ko', href: 'reports/daily-0826.html', title: '8/26 Daily KO' }
+  ];
+
+  const window = { RESEARCH_POSTS: mockPosts };
+  const document = {
+    documentElement: { dataset: { siteLang: 'ko' } },
+    body: { dataset: {} },
+    readyState: 'loading',
+    addEventListener() {},
+    getElementById() { return null; }
+  };
+  const context = vm.createContext({ window, document, location: { hostname: 'localhost' }, Intl, Date, Set, console });
+  vm.runInContext(script, context);
+  const runtime = window.MARKET_CLOSE;
+
+  // 1. Exact match on 2026-08-28
+  const daily0828 = runtime.findExactDaily('2026-08-28');
+  assert.ok(daily0828);
+  assert.equal(daily0828.reportDate, '2026-08-28');
+  assert.equal(daily0828.lang, 'ko');
+
+  // 2. Exact match on 2026-08-26
+  const daily0826 = runtime.findExactDaily('2026-08-26');
+  assert.ok(daily0826);
+  assert.equal(daily0826.reportDate, '2026-08-26');
+
+  // 3. No match on 2026-08-27 -> MUST be null, NEVER fallback to 0828
+  const daily0827 = runtime.findExactDaily('2026-08-27');
+  assert.equal(daily0827, null, 'Must NOT fallback to latest daily when date is missing');
+
+  // 4. Render CTA behavior on historical date with vs without Daily
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+  runtime.state.latestDate = '2026-08-28';
+
+  // Render on 2026-08-26 (historical date with matching daily)
+  const d26 = JSON.parse(JSON.stringify(data));
+  d26.meta.market_date = '2026-08-26';
+  const targetWithDaily = { innerHTML: '', addEventListener() {} };
+  runtime.render(d26, targetWithDaily);
+  assert.match(targetWithDaily.innerHTML, /이날의 데일리 리포트 보기/);
+  assert.match(targetWithDaily.innerHTML, /reports\/daily-0826\.html/);
+
+  // Render on 2026-08-27 (historical date without matching daily)
+  const d27 = JSON.parse(JSON.stringify(data));
+  d27.meta.market_date = '2026-08-27';
+  const targetWithoutDaily = { innerHTML: '', addEventListener() {} };
+  runtime.render(d27, targetWithoutDaily);
+  assert.match(targetWithoutDaily.innerHTML, /이날 발행된 데일리 리포트가 없습니다\./);
+  assert.doesNotMatch(targetWithoutDaily.innerHTML, /reports\/daily-0828\.html/);
 });
 
 test('public pages keep mobile navigation elements outside header-row', async () => {
@@ -214,4 +296,161 @@ test('public pages keep mobile navigation elements outside header-row', async ()
       `mobile-nav is improperly nested inside header-row in ${pagePath}`
     );
   }
+});
+
+test('retry click triggers init/load exactly once without duplicate calls', async () => {
+  const script = await read('assets/market-close.js');
+  let fetchCount = 0;
+  const mockFetch = async (url) => {
+    fetchCount++;
+    if (url.includes('/api/market/dates')) {
+      return { ok: true, json: async () => ({ dates: ['2026-08-28'], latest: '2026-08-28', earliest: '2026-08-28' }) };
+    }
+    return { ok: true, json: async () => JSON.parse(await read('contracts/market_close/market_close.example.json')) };
+  };
+
+  let rootClickListener = null;
+  const rootElement = {
+    id: 'market-close-root',
+    innerHTML: '',
+    addEventListener(event, handler) {
+      if (event === 'click') rootClickListener = handler;
+    },
+    removeEventListener() {}
+  };
+
+  const document = {
+    documentElement: { dataset: { siteLang: 'ko' } },
+    body: { dataset: {} },
+    readyState: 'complete',
+    getElementById(id) {
+      if (id === 'market-close-root') return rootElement;
+      return null;
+    },
+    querySelectorAll() { return []; },
+    addEventListener() {}
+  };
+
+  const windowListeners = new Map();
+  const window = {
+    addEventListener(type, listener) {
+      if (!windowListeners.has(type)) windowListeners.set(type, new Set());
+      windowListeners.get(type).add(listener);
+    },
+    removeEventListener(type, listener) {
+      if (windowListeners.has(type)) windowListeners.get(type).delete(listener);
+    }
+  };
+
+  const context = vm.createContext({
+    window,
+    document,
+    location: { pathname: '/market/', search: '', hostname: 'localhost' },
+    fetch: mockFetch,
+    Intl,
+    Date,
+    Set,
+    URLSearchParams,
+    console
+  });
+  vm.runInContext(script, context);
+  const runtime = window.MARKET_CLOSE;
+  await runtime.init();
+
+  assert.ok(rootClickListener, 'click listener should be bound to root');
+  const initialFetches = fetchCount;
+
+  // Simulate clicking retry
+  const retryEvent = {
+    target: {
+      closest(sel) {
+        if (sel === '[data-market-action]') return { dataset: { marketAction: 'retry' } };
+        return null;
+      }
+    }
+  };
+
+  await rootClickListener(retryEvent);
+  await new Promise(r => setTimeout(r, 10));
+  assert.equal(fetchCount - initialFetches, 2, 'Retry click should trigger exactly 1 init sequence (dates + latest)');
+});
+
+test('repeated retries do not accumulate popstate listeners and popstate triggers load exactly once', async () => {
+  const script = await read('assets/market-close.js');
+  let fetchCount = 0;
+  const mockFetch = async (url) => {
+    fetchCount++;
+    if (url.includes('/api/market/dates')) {
+      return { ok: true, json: async () => ({ dates: ['2026-08-28'], latest: '2026-08-28', earliest: '2026-08-28' }) };
+    }
+    return { ok: true, json: async () => JSON.parse(await read('contracts/market_close/market_close.example.json')) };
+  };
+
+  let rootClickListener = null;
+  const rootElement = {
+    id: 'market-close-root',
+    innerHTML: '',
+    addEventListener(event, handler) {
+      if (event === 'click') rootClickListener = handler;
+    },
+    removeEventListener() {}
+  };
+
+  const document = {
+    documentElement: { dataset: { siteLang: 'ko' } },
+    body: { dataset: {} },
+    readyState: 'complete',
+    getElementById(id) {
+      if (id === 'market-close-root') return rootElement;
+      return null;
+    },
+    querySelectorAll() { return []; },
+    addEventListener() {}
+  };
+
+  const windowListeners = new Map();
+  const window = {
+    addEventListener(type, listener) {
+      if (!windowListeners.has(type)) windowListeners.set(type, new Set());
+      windowListeners.get(type).add(listener);
+    },
+    removeEventListener(type, listener) {
+      if (windowListeners.has(type)) windowListeners.get(type).delete(listener);
+    }
+  };
+
+  const location = { pathname: '/market/', search: '', hostname: 'localhost' };
+  const context = vm.createContext({
+    window,
+    document,
+    location,
+    fetch: mockFetch,
+    Intl,
+    Date,
+    Set,
+    URLSearchParams,
+    console
+  });
+  vm.runInContext(script, context);
+  const runtime = window.MARKET_CLOSE;
+
+  // Call init 5 times (simulating 5 repeated retries)
+  for (let i = 0; i < 5; i++) {
+    await runtime.init();
+  }
+
+  // Exactly 1 popstate listener registered
+  const popstateListeners = windowListeners.get('popstate') || new Set();
+  assert.equal(popstateListeners.size, 1, 'Exactly one popstate listener must remain registered');
+
+  // Trigger popstate event once
+  const fetchesBeforePopstate = fetchCount;
+  location.search = '?date=2026-08-27';
+  for (const listener of popstateListeners) {
+    listener();
+  }
+  await new Promise(r => setImmediate(r));
+
+  // Exactly 1 loadAndRender triggered (1 fetch for /api/market/date?date=2026-08-27)
+  assert.equal(fetchCount - fetchesBeforePopstate, 1, 'Popstate must trigger exactly 1 load call without duplicate execution');
 });
