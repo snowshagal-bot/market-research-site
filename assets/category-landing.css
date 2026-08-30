@@ -175,27 +175,33 @@
 }
 
 .category-featured-cover-wrap {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   aspect-ratio: 16 / 10;
   overflow: hidden;
   border-radius: 4px;
-  background: color-mix(in srgb, var(--panel-2) 60%, transparent);
+  background: color-mix(in srgb, var(--panel-2) 65%, var(--bg));
   border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
 }
 
 .category-featured-cover {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
 }
 
 .category-featured-cover img {
   display: block;
+  max-width: 100%;
+  max-height: 100%;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center top;
+  object-fit: contain;
+  object-position: center;
   transition: transform .3s ease;
 }
 
