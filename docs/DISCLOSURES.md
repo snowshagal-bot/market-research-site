@@ -19,6 +19,8 @@ The design goal is not to reproduce DART. It is to reduce the amount of disclosu
 7. `functions/api/disclosures/_llm.js` calls the configured LLM adapter and stores structured JSON beside the filing.
 8. `/admin/disclosures/` reads stored results through the authenticated `GET /api/disclosures/latest` endpoint. A single stored filing can be re-analyzed through `POST /api/disclosures/analyze`.
 
+Every filing is keyed by OpenDART `rcept_no`. The insert path uses `ON CONFLICT DO NOTHING` followed by a metadata-only update for an existing key, so concurrent syncs cannot create duplicate rows and an already completed AI result is not silently requeued.
+
 The public website does not call OpenDART or an LLM when a reader loads a page. API consumption occurs only during an authenticated sync or explicit administrator re-analysis.
 
 ## Free-tier guardrails
@@ -34,7 +36,9 @@ Default internal limits:
 - default corporation classes: `Y,K` (KOSPI and KOSDAQ);
 - default lookback window: `7` days.
 
-Every upstream OpenDART request reserves one source request before calling the provider. Every AI analysis job reserves one AI request before calling the provider. Usage is stored in `disclosure_usage_daily`, so repeated clicks cannot bypass the app-side daily ceiling.
+Every upstream OpenDART request reserves one source request before calling the provider. Every AI analysis job reserves one AI request before calling the provider. The reservation is one conditional D1 `UPSERT ... RETURNING` statement, not a `SELECT` followed by an increment, so simultaneous requests cannot all pass the same stale quota check. Usage is stored in `disclosure_usage_daily`, and repeated clicks cannot bypass the app-side daily ceiling.
+
+AI queue rows are atomically claimed by changing `ai_status` to `processing`. A second sync or repeated analyze click cannot claim the same live row. A claim older than ten minutes is considered abandoned and may be recovered on a later run; provider/configuration exhaustion releases the row back to `pending`, while a real provider/output failure leaves it `error` for later retry.
 
 These are safety budgets, not statements of OpenDART or Gemini's contractual quota. They may be lowered without code changes.
 
@@ -58,7 +62,7 @@ Routine periodic and procedural filings are down-weighted unless another materia
 
 V1 gives the LLM only disclosure-list metadata: company, stock code, disclosure title, filer, receipt date, remarks and deterministic rule reasons. It does not pretend that this metadata is the filing body.
 
-The prompt explicitly prohibits inventing amounts, counterparties, contract periods, earnings figures or other facts absent from the metadata. The saved result contains a headline, short summary, impact label, urgency, confidence, watch points and a limitation notice. The DART original link remains the source of truth.
+The prompt explicitly prohibits inventing amounts, counterparties, contract periods, earnings figures or other facts absent from the metadata. Local output validation also rejects a generated numeric token in the headline, summary or watch points unless that token appears in the supplied metadata. Required text, enums, integer confidence bounds and watch-point shape are validated again after JSON parsing. The saved result contains a headline, short summary, impact label, urgency, confidence, watch points and a limitation notice. The DART original link remains the source of truth.
 
 A future phase can add type-specific OpenDART detail endpoints before AI analysis. That should be a separate adapter/data-contract change, not a prompt-only change.
 
@@ -75,6 +79,8 @@ Gemini primary configuration:
 - `GEMINI_API_KEY`
 - `DISCLOSURE_LLM_PROVIDER=gemini`
 - `DISCLOSURE_LLM_MODEL=gemini-3.1-flash-lite`
+
+The model ID and integration were rechecked against Google's official Gemini documentation on 2026-08-30. `gemini-3.1-flash-lite` is a stable model ID that supports structured output. The adapter uses `POST https://generativelanguage.googleapis.com/v1beta/interactions` with top-level `response_format` (`application/json` plus JSON Schema), `generation_config`, and `store=false`. Google's published free-tier availability can change and is not treated as the application's quota; Snowshagal's smaller internal budgets remain authoritative.
 
 Optional scheduler credential:
 
@@ -111,7 +117,7 @@ A fallback can be configured while retaining Gemini as primary:
 - `DISCLOSURE_LLM_FALLBACK_PROVIDER=openai-compatible`
 - `DISCLOSURE_LLM_FALLBACK_MODEL=<provider-model>`
 
-The fallback is attempted only for retryable upstream failures such as rate limiting or server errors. Provider authentication values never reach the browser.
+The fallback is attempted only for retryable upstream failures such as rate limiting, server errors, timeouts or malformed structured output. Authentication/configuration failures do not fall through to another provider and hide the real setup problem. Upstream errors are sanitized before they can reach the API response; provider authentication values and full upstream URLs never reach the browser.
 
 For a provider that is not OpenAI-compatible, add one provider function in `_llm.js`, normalize its response to the existing analysis contract, and route it through `callProvider()`. No downstream code should change.
 
@@ -150,6 +156,8 @@ Initial Production activation:
 6. verify source counts, D1 usage counters, rule classifications, AI budget and DART original links before enabling any scheduler.
 
 Do not schedule automatic sync until a successful manual Production run has been inspected. The endpoint already supports a separate `DISCLOSURE_SYNC_KEY`, so a future scheduler can be added without exposing `ADMIN_KEY`.
+
+For the current Draft PR, configure and test Preview first with Preview-scoped `OPENDART_API_KEY` and `GEMINI_API_KEY` values. Preview must continue using the isolated Preview `COMMENTS_DB`. Do not copy Production disclosure rows into Preview, do not enable a scheduler, and do not merge to `main` until the manual source/AI results and usage counters have been reviewed.
 
 ## Failure behavior
 

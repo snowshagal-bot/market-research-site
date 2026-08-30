@@ -2,9 +2,11 @@ import {
   DisclosureError,
   FILINGS_TABLE,
   authorizeAdmin,
+  claimFilingForAnalysis,
   ensureDisclosureSchema,
   json,
-  publicFiling
+  publicFiling,
+  releaseAnalysisClaim
 } from './_shared.js';
 import { analyzeWithLlm } from './_llm.js';
 
@@ -45,15 +47,24 @@ export async function onRequestPost({ request, env }) {
     const db = await ensureDisclosureSchema(env);
     const row = await db.prepare(`SELECT * FROM ${FILINGS_TABLE} WHERE rcept_no = ? LIMIT 1`).bind(rceptNo).first();
     if (!row) return json({ ok: false, error: 'NOT_FOUND', message: '저장된 공시를 찾지 못했습니다.' }, 404);
+    if (!row.ai_eligible) return json({ ok: false, error: 'NOT_AI_ELIGIBLE', message: '규칙 기준상 AI 분석 대상이 아닌 공시입니다.' }, 409);
+    const claimed = await claimFilingForAnalysis(db, rceptNo, { allowDone: true });
+    if (!claimed) return json({ ok: false, error: 'ANALYSIS_IN_PROGRESS', message: '이 공시는 이미 AI 분석 중입니다.' }, 409);
 
-    const output = await analyzeWithLlm({ filing: filingForAnalysis(row), env, db });
-    const now = new Date().toISOString();
-    await db.prepare(`UPDATE ${FILINGS_TABLE}
-      SET ai_status = 'done', ai_provider = ?, ai_model = ?, ai_json = ?, ai_error = '', ai_analyzed_at = ?, updated_at = ?
-      WHERE rcept_no = ?`)
-      .bind(output.provider, output.model, JSON.stringify(output.result), now, now, rceptNo).run();
-    const updated = await db.prepare(`SELECT * FROM ${FILINGS_TABLE} WHERE rcept_no = ? LIMIT 1`).bind(rceptNo).first();
-    return json({ ok: true, filing: publicFiling(updated) });
+    try {
+      const output = await analyzeWithLlm({ filing: filingForAnalysis(claimed), env, db });
+      const now = new Date().toISOString();
+      await db.prepare(`UPDATE ${FILINGS_TABLE}
+        SET ai_status = 'done', ai_provider = ?, ai_model = ?, ai_json = ?, ai_error = '', ai_analyzed_at = ?, updated_at = ?
+        WHERE rcept_no = ? AND ai_status = 'processing'`)
+        .bind(output.provider, output.model, JSON.stringify(output.result), now, now, rceptNo).run();
+      const updated = await db.prepare(`SELECT * FROM ${FILINGS_TABLE} WHERE rcept_no = ? LIMIT 1`).bind(rceptNo).first();
+      return json({ ok: true, filing: publicFiling(updated) });
+    } catch (error) {
+      const pending = error?.code === 'LLM_NOT_CONFIGURED' || error?.code === 'LLM_BUDGET_EXHAUSTED';
+      await releaseAnalysisClaim(db, rceptNo, pending ? 'pending' : 'error', pending ? '' : error?.message || 'AI 분석 실패');
+      throw error;
+    }
   } catch (error) {
     if (error instanceof DisclosureError) return json({ ok: false, error: error.code, message: error.message }, error.status);
     console.error('disclosure analyze failed', error);

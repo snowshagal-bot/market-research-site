@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated: 2026-08-29
+Updated: 2026-08-30
 
 This roadmap records implementation order, completed capabilities, and operational priorities, not a promise to build every future idea. Keep the current site small and stable until real traffic, indexing, and operational needs justify added complexity.
 
@@ -23,6 +23,11 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
    - The Preview schema is initialized and contains one explicit `1900-01-01` / `preview-smoke-test` Market Close fixture solely for read smoke validation.
    - Preview Market/comments GET and the complete shared Preview smoke are verified at HTTP 200 and 20/20 PASS.
    - The Market Close publish API now permits authenticated branch-Preview writes to that isolated D1 for contract E2E; no Production row is copied or written during Preview validation.
+5. **OpenDART disclosure monitor (Draft PR #79, Preview/manual validation only)**:
+   - Continue from the existing adapter/rule/D1/LLM/admin implementation; do not build a parallel framework.
+   - Repository hardening covers atomic app-side quota reservation, duplicate-safe `rcept_no` storage, one-row AI claims, abandoned-claim recovery, strict metadata-only AI output validation, provider fallback boundaries and admin navigation parity.
+   - Next manual gate is one real Preview OpenDART sync plus duplicate re-sync and, only when Preview `GEMINI_API_KEY` exists, at most the configured per-run Gemini analyses with usage/output review.
+   - Automatic 16:00–17:00 KST scheduling, public disclosure pages, English disclosure translation and Production merge remain deferred until the owner approves observed data quality and API consumption.
 
 ## Near-term Priorities
 

@@ -1,6 +1,6 @@
 # Project state
 
-Updated: 2026-08-29
+Updated: 2026-08-30
 
 ## Purpose
 
@@ -181,6 +181,21 @@ The same `/admin/analytics/` page also contains an independent `읽기 행동 / 
 
 The tracker stores no IP address, cookie, name, email, login data, fingerprint, advertising ID, persistent visitor ID, or cross-site identifier. Country is supplied only by the server-side `request.cf.country` connection location (or `XX`), and does not represent nationality.
 
+## Admin Disclosure Monitor (Draft PR #79)
+
+Admin page: `/admin/disclosures/`
+
+The Draft implementation reuses `COMMENTS_DB` and keeps collection, deterministic triage and optional AI classification as separate layers:
+
+- `functions/api/disclosures/_source.js` implements the OpenDART list adapter with `Y,K` defaults, pagination, a configurable page cap and app-side daily request budget;
+- `functions/api/disclosures/_shared.js` owns normalization, deterministic scoring, D1 schema, idempotent `rcept_no` UPSERTs and atomic usage/AI claim primitives;
+- `functions/api/disclosures/_llm.js` implements Gemini Interactions structured output plus an OpenAI-compatible fallback adapter without exposing provider formats downstream;
+- `sync.js`, `latest.js` and `analyze.js` provide authenticated collection, admin read/search and one-row reanalysis APIs;
+- AI failures never remove a saved filing or DART source link, and no public page load calls OpenDART or an LLM;
+- all five admin pages expose the same restrained navigation destination, with 360–430px and 1280px layouts covered by repository tests.
+
+The feature remains Preview/manual-only. No automatic scheduler or public disclosure page is enabled, and Production merge requires a separate owner approval after actual Preview provider validation.
+
 Important date semantics:
 
 - `reportDate`: date the report itself belongs to / was authored or issued.
@@ -336,6 +351,8 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `assets/social/` — 1200x630 social cards
 - `assets/report-shell.js` — isolated navigation, share section and comments UI for report pages
 - `functions/api/comments.js` — D1-backed guest comment API
+- `admin/disclosures/index.html` / `functions/api/disclosures/` — authenticated OpenDART disclosure monitor, deterministic triage, D1 storage and optional swappable LLM analysis
+- `docs/DISCLOSURES.md` — provider, budget, failure, concurrency and activation contract for the disclosure monitor
 - `covers/` — optional separately stored homepage cover assets created by the publisher
 - `reports/` — uploaded standalone report HTML files
 

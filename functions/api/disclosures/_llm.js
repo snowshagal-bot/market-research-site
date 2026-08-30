@@ -11,14 +11,15 @@ const REQUEST_TIMEOUT_MS = 25000;
 const MAX_PROMPT_CHARS = 6000;
 const ANALYSIS_SCHEMA = {
   type: 'object',
+  additionalProperties: false,
   properties: {
-    headline: { type: 'string' },
-    summary: { type: 'string' },
+    headline: { type: 'string', description: 'Metadata-only headline without invented facts or figures.' },
+    summary: { type: 'string', description: 'Conservative metadata-only summary without invented facts or figures.' },
     impact: { type: 'string', enum: ['positive', 'negative', 'mixed', 'neutral'] },
     urgency: { type: 'string', enum: ['critical', 'high', 'medium', 'low'] },
     confidence: { type: 'integer', minimum: 0, maximum: 100 },
     watch_points: { type: 'array', items: { type: 'string' }, maxItems: 4 },
-    limitation: { type: 'string' }
+    limitation: { type: 'string', description: 'State that the filing body was not provided and must be checked.' }
   },
   required: ['headline', 'summary', 'impact', 'urgency', 'confidence', 'watch_points', 'limitation']
 };
@@ -32,33 +33,74 @@ function safeJson(text) {
   try { return JSON.parse(match[0]); } catch (_) { return null; }
 }
 
-function normalizedAnalysis(value) {
+function figureTokens(value) {
+  return String(value || '').match(/\d[\d,.]*%?/g) || [];
+}
+
+function assertNoUnsupportedFigures(result, filing) {
+  if (!filing) return;
+  const sourceText = [
+    filing.corpName, filing.stockCode, filing.corpCls, filing.reportName, filing.filerName,
+    filing.receiptDate, filing.remarks, filing.ruleScore, ...(filing.ruleReasons || [])
+  ].join(' ');
+  const allowed = new Set(figureTokens(sourceText));
+  const generated = figureTokens([result.headline, result.summary, ...(result.watch_points || [])].join(' '));
+  const unsupported = generated.filter(token => !allowed.has(token));
+  if (unsupported.length) {
+    throw new DisclosureError('LLM_UNSUPPORTED_FIGURE', 'AI 응답에 제공된 메타데이터로 확인할 수 없는 수치가 포함되었습니다.', 502);
+  }
+}
+
+function normalizedAnalysis(value, filing = null) {
   if (!value || typeof value !== 'object') throw new DisclosureError('LLM_BAD_OUTPUT', 'AI 응답을 구조화된 JSON으로 읽지 못했습니다.', 502);
-  const impact = ['positive', 'negative', 'mixed', 'neutral'].includes(value.impact) ? value.impact : 'neutral';
-  const urgency = ['critical', 'high', 'medium', 'low'].includes(value.urgency) ? value.urgency : 'low';
-  const confidence = Math.max(0, Math.min(100, Math.round(Number(value.confidence) || 0)));
+  if (!['positive', 'negative', 'mixed', 'neutral'].includes(value.impact)) throw new DisclosureError('LLM_BAD_OUTPUT', 'AI impact 값이 계약과 다릅니다.', 502);
+  if (!['critical', 'high', 'medium', 'low'].includes(value.urgency)) throw new DisclosureError('LLM_BAD_OUTPUT', 'AI urgency 값이 계약과 다릅니다.', 502);
+  if (!Number.isInteger(value.confidence) || value.confidence < 0 || value.confidence > 100) throw new DisclosureError('LLM_BAD_OUTPUT', 'AI confidence 값이 계약과 다릅니다.', 502);
+  if (!Array.isArray(value.watch_points) || value.watch_points.length > 4) throw new DisclosureError('LLM_BAD_OUTPUT', 'AI watch_points 값이 계약과 다릅니다.', 502);
   const clean = input => String(input || '').replace(/\s+/g, ' ').trim();
-  const bullets = Array.isArray(value.watch_points) ? value.watch_points.map(clean).filter(Boolean).slice(0, 4) : [];
-  return {
+  const result = {
     headline: clean(value.headline).slice(0, 180),
     summary: clean(value.summary).slice(0, 700),
-    impact,
-    urgency,
-    confidence,
-    watch_points: bullets,
-    limitation: clean(value.limitation || '공시 제목과 메타데이터만 기반으로 한 1차 분류입니다. 원문 확인이 필요합니다.').slice(0, 260)
+    impact: value.impact,
+    urgency: value.urgency,
+    confidence: value.confidence,
+    watch_points: value.watch_points.map(clean).filter(Boolean).slice(0, 4),
+    limitation: clean(value.limitation).slice(0, 260)
   };
+  if (!result.headline || !result.summary || !result.limitation) throw new DisclosureError('LLM_BAD_OUTPUT', 'AI 필수 텍스트가 비어 있습니다.', 502);
+  assertNoUnsupportedFigures(result, filing);
+  return result;
 }
 
 function analysisPrompt(filing) {
-  return `당신은 한국 주식시장 공시를 분류하는 보조 분석기다. 아래 정보는 OpenDART 공시 목록의 메타데이터이며 공시 원문이 아니다.\n\n회사: ${filing.corpName}\n종목코드: ${filing.stockCode || '없음'}\n시장구분: ${filing.corpCls}\n공시명: ${filing.reportName}\n제출인: ${filing.filerName || '없음'}\n접수일: ${filing.receiptDate}\n비고: ${filing.remarks || '없음'}\n규칙 점수: ${filing.ruleScore}\n규칙 사유: ${(filing.ruleReasons || []).join(', ') || '없음'}\n\n투자판단을 대신하지 말고, 제목과 메타데이터에서 확실히 알 수 있는 범위만 요약하라. 금액, 계약상대, 기간, 실적 수치 등 원문에 없는 정보를 절대 추정하지 마라.`.slice(0, MAX_PROMPT_CHARS);
+  return `당신은 한국 주식시장 공시를 분류하는 보조 분석기다. 아래 정보는 OpenDART 공시 목록의 메타데이터이며 공시 원문이 아니다.\n\n회사: ${filing.corpName}\n종목코드: ${filing.stockCode || '없음'}\n시장구분: ${filing.corpCls}\n공시명: ${filing.reportName}\n제출인: ${filing.filerName || '없음'}\n접수일: ${filing.receiptDate}\n비고: ${filing.remarks || '없음'}\n규칙 점수: ${filing.ruleScore}\n규칙 사유: ${(filing.ruleReasons || []).join(', ') || '없음'}\n\n투자판단을 대신하지 말고, 제목과 메타데이터에서 확실히 알 수 있는 범위만 요약하라. 금액, 계약상대, 기간, 실적 수치 등 원문에 없는 정보를 절대 추정하지 마라. 위 메타데이터에 실제로 적힌 숫자가 아니라면 headline, summary, watch_points에 어떤 숫자도 쓰지 마라. limitation에는 반드시 공시 원문이 제공되지 않았고 DART 원문 확인이 필요하다고 밝혀라.`.slice(0, MAX_PROMPT_CHARS);
 }
 
 async function fetchWithTimeout(url, options) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try { return await fetch(url, { ...options, signal: controller.signal }); }
+  catch (error) {
+    if (error?.name === 'AbortError') throw new DisclosureError('LLM_TIMEOUT', 'AI 공급자 응답 시간이 초과되었습니다.', 504, { upstreamStatus: 504 });
+    throw error;
+  }
   finally { clearTimeout(timer); }
+}
+
+function safeUpstreamMessage(value, fallback) {
+  const safe = String(value || fallback || 'AI 공급자 요청 실패')
+    .replace(/https?:\/\/\S+/gi, '[upstream-url]')
+    .replace(/AIza[0-9A-Za-z_-]{20,}/g, '[redacted]')
+    .replace(/(?:api[_-]?key|key|token|authorization)\s*[:=]\s*[^\s,;]+/gi, '$1=[redacted]')
+    .replace(/[\r\n]+/g, ' ')
+    .trim();
+  return safe.slice(0, 220);
+}
+
+function retryableProviderError(error) {
+  const upstream = Number(error?.upstreamStatus || 0);
+  return error?.code === 'LLM_TIMEOUT' || error?.code === 'LLM_BAD_OUTPUT' || error?.code === 'LLM_UNSUPPORTED_FIGURE'
+    || upstream === 429 || upstream >= 500;
 }
 
 function interactionOutputText(payload) {
@@ -105,12 +147,12 @@ async function geminiAnalyze(filing, env, model) {
   });
   const payload = await response.json().catch(() => null);
   if (!response.ok) {
-    const message = String(payload?.error?.message || `Gemini HTTP ${response.status}`).slice(0, 220);
+    const message = safeUpstreamMessage(payload?.error?.message, `Gemini HTTP ${response.status}`);
     const error = new DisclosureError('GEMINI_API_ERROR', message, response.status === 429 ? 429 : 502);
     error.upstreamStatus = response.status;
     throw error;
   }
-  const parsed = normalizedAnalysis(safeJson(interactionOutputText(payload)));
+  const parsed = normalizedAnalysis(safeJson(interactionOutputText(payload)), filing);
   return {
     provider: 'gemini',
     model: String(payload?.model || resolvedModel),
@@ -140,7 +182,7 @@ async function openAiCompatibleAnalyze(filing, env, model, config) {
   });
   const payload = await response.json().catch(() => null);
   if (!response.ok) {
-    const message = String(payload?.error?.message || `LLM HTTP ${response.status}`).slice(0, 220);
+    const message = safeUpstreamMessage(payload?.error?.message, `LLM HTTP ${response.status}`);
     const error = new DisclosureError('OPENAI_COMPATIBLE_API_ERROR', message, response.status === 429 ? 429 : 502);
     error.upstreamStatus = response.status;
     throw error;
@@ -149,7 +191,7 @@ async function openAiCompatibleAnalyze(filing, env, model, config) {
   return {
     provider: 'openai-compatible',
     model: String(payload?.model || model),
-    result: normalizedAnalysis(safeJson(text)),
+    result: normalizedAnalysis(safeJson(text), filing),
     inputTokens: Number(payload?.usage?.prompt_tokens || 0),
     outputTokens: Number(payload?.usage?.completion_tokens || 0)
   };
@@ -194,7 +236,7 @@ export async function analyzeWithLlm({ filing, env, db, now = new Date() }) {
       return output;
     } catch (error) {
       lastError = error;
-      const retryable = error?.status === 429 || error?.status >= 500;
+      const retryable = retryableProviderError(error);
       if (!retryable) break;
     }
   }
@@ -207,7 +249,10 @@ export const __test = {
   analysisPrompt,
   safeJson,
   normalizedAnalysis,
+  assertNoUnsupportedFigures,
   interactionOutputText,
   geminiModelName,
-  providerConfigured
+  providerConfigured,
+  retryableProviderError,
+  safeUpstreamMessage
 };

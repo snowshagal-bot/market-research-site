@@ -8,6 +8,7 @@ export const DEFAULT_LLM_PER_RUN = 2;
 export const DEFAULT_MAX_PAGES_PER_CLASS = 10;
 export const DEFAULT_LOOKBACK_DAYS = 7;
 export const DEFAULT_LATEST_LIMIT = 100;
+export const ANALYSIS_CLAIM_TIMEOUT_MS = 10 * 60 * 1000;
 
 const schemaPromises = new WeakMap();
 
@@ -119,7 +120,8 @@ export function isIsoDate(value) {
 }
 
 export function dateDaysAgo(days, now = new Date()) {
-  const current = new Date(now);
+  const currentKstDate = kstDate(now);
+  const current = new Date(`${currentKstDate}T00:00:00Z`);
   current.setUTCDate(current.getUTCDate() - Math.max(0, Number(days) || 0));
   return current.toISOString().slice(0, 10).replace(/-/g, '');
 }
@@ -194,18 +196,21 @@ export async function ensureDisclosureSchema(env) {
 
 export async function reserveRequest(db, usageDate, kind, limit) {
   const safeLimit = Math.max(0, Number(limit) || 0);
-  const current = await db.prepare(`SELECT request_count FROM ${USAGE_TABLE} WHERE usage_date = ? AND kind = ? LIMIT 1`)
-    .bind(usageDate, kind).first();
-  const count = Number(current?.request_count || 0);
-  if (count >= safeLimit) return { allowed: false, count, limit: safeLimit };
   const now = new Date().toISOString();
-  await db.prepare(`INSERT INTO ${USAGE_TABLE} (usage_date, kind, request_count, input_tokens, output_tokens, updated_at)
-    VALUES (?, ?, 1, 0, 0, ?)
+  const result = await db.prepare(`INSERT INTO ${USAGE_TABLE} (usage_date, kind, request_count, input_tokens, output_tokens, updated_at)
+    SELECT ?, ?, 1, 0, 0, ?
+    WHERE ? > 0
     ON CONFLICT(usage_date, kind) DO UPDATE SET
       request_count = ${USAGE_TABLE}.request_count + 1,
-      updated_at = excluded.updated_at`)
-    .bind(usageDate, kind, now).run();
-  return { allowed: true, count: count + 1, limit: safeLimit };
+      updated_at = excluded.updated_at
+    WHERE ${USAGE_TABLE}.request_count < ?
+    RETURNING request_count`)
+    .bind(usageDate, kind, now, safeLimit, safeLimit).all();
+  const reserved = result?.results?.[0];
+  if (reserved) return { allowed: true, count: Number(reserved.request_count || 0), limit: safeLimit };
+  const current = await db.prepare(`SELECT request_count FROM ${USAGE_TABLE} WHERE usage_date = ? AND kind = ? LIMIT 1`)
+    .bind(usageDate, kind).first();
+  return { allowed: false, count: Number(current?.request_count || 0), limit: safeLimit };
 }
 
 export async function recordRequest(db, usageDate, kind) {
@@ -334,38 +339,68 @@ export function normalizeFiling(item = {}, now = new Date()) {
 
 export async function upsertFiling(db, filing) {
   if (!/^\d{14}$/.test(filing.rceptNo)) return false;
-  const existing = await db.prepare(`SELECT rcept_no FROM ${FILINGS_TABLE} WHERE rcept_no = ? LIMIT 1`).bind(filing.rceptNo).first();
   const initialAiStatus = filing.aiEligible ? 'pending' : 'skipped';
-  await db.prepare(`INSERT INTO ${FILINGS_TABLE} (
+  const inserted = await db.prepare(`INSERT INTO ${FILINGS_TABLE} (
       rcept_no, corp_cls, corp_name, corp_code, stock_code, report_nm, flr_nm, rcept_dt, rm, source_url,
       rule_score, rule_priority, rule_reasons_json, ai_eligible, ai_status, first_seen_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ON CONFLICT(rcept_no) DO UPDATE SET
-      corp_cls = excluded.corp_cls,
-      corp_name = excluded.corp_name,
-      corp_code = excluded.corp_code,
-      stock_code = excluded.stock_code,
-      report_nm = excluded.report_nm,
-      flr_nm = excluded.flr_nm,
-      rcept_dt = excluded.rcept_dt,
-      rm = excluded.rm,
-      source_url = excluded.source_url,
-      rule_score = excluded.rule_score,
-      rule_priority = excluded.rule_priority,
-      rule_reasons_json = excluded.rule_reasons_json,
-      ai_eligible = excluded.ai_eligible,
-      ai_status = CASE
-        WHEN ${FILINGS_TABLE}.ai_status = 'done' THEN 'done'
-        WHEN excluded.ai_eligible = 1 THEN 'pending'
-        ELSE 'skipped'
-      END,
-      updated_at = excluded.updated_at`)
+    ON CONFLICT(rcept_no) DO NOTHING
+    RETURNING rcept_no`)
     .bind(
       filing.rceptNo, filing.corpCls, filing.corpName, filing.corpCode, filing.stockCode, filing.reportName,
       filing.filerName, filing.receiptDate, filing.remarks, filing.sourceUrl, filing.ruleScore, filing.rulePriority,
       JSON.stringify(filing.ruleReasons), filing.aiEligible ? 1 : 0, initialAiStatus, filing.firstSeenAt, filing.updatedAt
+    ).all();
+  if (inserted?.results?.length) return true;
+  await db.prepare(`UPDATE ${FILINGS_TABLE} SET
+      corp_cls = ?,
+      corp_name = ?,
+      corp_code = ?,
+      stock_code = ?,
+      report_nm = ?,
+      flr_nm = ?,
+      rcept_dt = ?,
+      rm = ?,
+      source_url = ?,
+      rule_score = ?,
+      rule_priority = ?,
+      rule_reasons_json = ?,
+      ai_eligible = ?,
+      ai_status = CASE
+        WHEN ? = 0 THEN 'skipped'
+        WHEN ${FILINGS_TABLE}.ai_status IN ('done', 'processing') THEN ${FILINGS_TABLE}.ai_status
+        ELSE 'pending'
+      END,
+      updated_at = ?
+    WHERE rcept_no = ?`)
+    .bind(
+      filing.corpCls, filing.corpName, filing.corpCode, filing.stockCode, filing.reportName,
+      filing.filerName, filing.receiptDate, filing.remarks, filing.sourceUrl, filing.ruleScore,
+      filing.rulePriority, JSON.stringify(filing.ruleReasons), filing.aiEligible ? 1 : 0,
+      filing.aiEligible ? 1 : 0, filing.updatedAt, filing.rceptNo
     ).run();
-  return !existing;
+  return false;
+}
+
+export async function claimFilingForAnalysis(db, rceptNo, { allowDone = false, now = new Date() } = {}) {
+  const claimedAt = now.toISOString();
+  const staleBefore = new Date(now.getTime() - ANALYSIS_CLAIM_TIMEOUT_MS).toISOString();
+  const statuses = allowDone ? "'pending', 'error', 'done'" : "'pending', 'error'";
+  const result = await db.prepare(`UPDATE ${FILINGS_TABLE}
+    SET ai_status = 'processing', ai_error = '', updated_at = ?
+    WHERE rcept_no = ? AND ai_eligible = 1 AND (
+      ai_status IN (${statuses}) OR (ai_status = 'processing' AND updated_at < ?)
+    )
+    RETURNING *`).bind(claimedAt, rceptNo, staleBefore).all();
+  return result?.results?.[0] || null;
+}
+
+export async function releaseAnalysisClaim(db, rceptNo, status, errorMessage = '', now = new Date()) {
+  const safeStatus = status === 'error' ? 'error' : 'pending';
+  await db.prepare(`UPDATE ${FILINGS_TABLE}
+    SET ai_status = ?, ai_error = ?, updated_at = ?
+    WHERE rcept_no = ? AND ai_status = 'processing'`)
+    .bind(safeStatus, String(errorMessage || '').slice(0, 300), now.toISOString(), rceptNo).run();
 }
 
 export function parseJsonArray(value) {

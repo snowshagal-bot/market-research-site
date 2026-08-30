@@ -37,8 +37,14 @@ export async function onRequestGet({ request, env }) {
       params.push(like, like, like);
     }
     params.push(limit);
-    const result = await db.prepare(`SELECT * FROM ${FILINGS_TABLE} ${where}
-      ORDER BY rcept_dt DESC, rule_score DESC, rcept_no DESC LIMIT ?`).bind(...params).all();
+    const [result, totals] = await Promise.all([
+      db.prepare(`SELECT * FROM ${FILINGS_TABLE} ${where}
+        ORDER BY rcept_dt DESC, rule_score DESC, rcept_no DESC LIMIT ?`).bind(...params).all(),
+      db.prepare(`SELECT COUNT(*) AS stored,
+        SUM(CASE WHEN ai_eligible = 1 THEN 1 ELSE 0 END) AS eligible,
+        SUM(CASE WHEN ai_status = 'done' THEN 1 ELSE 0 END) AS analyzed
+        FROM ${FILINGS_TABLE}`).first()
+    ]);
 
     const config = disclosureConfig(env);
     const usageDate = kstDate(new Date());
@@ -47,6 +53,11 @@ export async function onRequestGet({ request, env }) {
       ok: true,
       generatedAt: new Date().toISOString(),
       filings: (result?.results || []).map(publicFiling),
+      stats: {
+        stored: Number(totals?.stored || 0),
+        eligible: Number(totals?.eligible || 0),
+        analyzed: Number(totals?.analyzed || 0)
+      },
       usageDate,
       usage,
       state,

@@ -54,7 +54,11 @@ async function openDartRequest(env, db, config, usageDate, query) {
     const status = String(payload?.status || '');
     if (status === '013') return { list: [], totalPage: 0, totalCount: 0 };
     if (status !== '000') {
-      const safeMessage = String(payload?.message || 'OpenDART 요청 실패').slice(0, 180);
+      const safeMessage = String(payload?.message || 'OpenDART 요청 실패').replace(/[\r\n]+/g, ' ').slice(0, 180);
+      if (['010', '011', '012', '901'].includes(status)) {
+        throw new DisclosureError('OPENDART_AUTH_ERROR', `${safeMessage} (${status})`, 503);
+      }
+      if (status === '100') throw new DisclosureError('OPENDART_BAD_REQUEST', `${safeMessage} (${status})`, 502);
       throw new DisclosureError('OPENDART_API_ERROR', `${safeMessage} (${status || 'unknown'})`, status === '020' ? 429 : 502);
     }
     return {
@@ -123,4 +127,4 @@ export async function fetchDisclosureSource({ env, db, beginDate = '', endDate =
   throw new DisclosureError('SOURCE_PROVIDER_UNSUPPORTED', `지원하지 않는 공시 공급자입니다: ${provider}`, 503);
 }
 
-export const __test = { OPENDART_LIST_URL, PAGE_COUNT, sourceProvider, buildOpenDartUrl };
+export const __test = { OPENDART_LIST_URL, PAGE_COUNT, sourceProvider, buildOpenDartUrl, openDartRequest, fetchOpenDart };

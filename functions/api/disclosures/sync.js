@@ -1,12 +1,15 @@
 import {
+  ANALYSIS_CLAIM_TIMEOUT_MS,
   DisclosureError,
   FILINGS_TABLE,
   authorizeSync,
+  claimFilingForAnalysis,
   disclosureConfig,
   ensureDisclosureSchema,
   json,
   kstDate,
   publicFiling,
+  releaseAnalysisClaim,
   setState,
   upsertFiling,
   usageSnapshot
@@ -35,32 +38,37 @@ function filingForAnalysis(row) {
 
 async function analyzeQueue(db, env, limit, now) {
   if (limit <= 0) return { attempted: 0, completed: 0, failed: 0, skipped: 'per-run budget is zero' };
+  const staleBefore = new Date(now.getTime() - ANALYSIS_CLAIM_TIMEOUT_MS).toISOString();
   const rows = await db.prepare(`SELECT * FROM ${FILINGS_TABLE}
-    WHERE ai_eligible = 1 AND ai_status IN ('pending', 'error')
+    WHERE ai_eligible = 1 AND (
+      ai_status IN ('pending', 'error') OR (ai_status = 'processing' AND updated_at < ?)
+    )
     ORDER BY rule_score DESC, rcept_dt DESC, rcept_no DESC
-    LIMIT ?`).bind(limit).all();
+    LIMIT ?`).bind(staleBefore, Math.max(limit, limit * 3)).all();
 
   let completed = 0;
   let failed = 0;
   let attempted = 0;
   let stopReason = '';
   for (const row of rows?.results || []) {
+    if (attempted >= limit) break;
+    const claimed = await claimFilingForAnalysis(db, row.rcept_no, { now });
+    if (!claimed) continue;
     attempted += 1;
     try {
-      const output = await analyzeWithLlm({ filing: filingForAnalysis(row), env, db, now });
+      const output = await analyzeWithLlm({ filing: filingForAnalysis(claimed), env, db, now });
       await db.prepare(`UPDATE ${FILINGS_TABLE}
         SET ai_status = 'done', ai_provider = ?, ai_model = ?, ai_json = ?, ai_error = '', ai_analyzed_at = ?, updated_at = ?
-        WHERE rcept_no = ?`)
-        .bind(output.provider, output.model, JSON.stringify(output.result), new Date().toISOString(), new Date().toISOString(), row.rcept_no).run();
+        WHERE rcept_no = ? AND ai_status = 'processing'`)
+        .bind(output.provider, output.model, JSON.stringify(output.result), new Date().toISOString(), new Date().toISOString(), claimed.rcept_no).run();
       completed += 1;
     } catch (error) {
       if (error?.code === 'LLM_NOT_CONFIGURED' || error?.code === 'LLM_BUDGET_EXHAUSTED') {
         stopReason = error.code;
+        await releaseAnalysisClaim(db, claimed.rcept_no, 'pending', '', now);
         break;
       }
-      await db.prepare(`UPDATE ${FILINGS_TABLE}
-        SET ai_status = 'error', ai_error = ?, updated_at = ? WHERE rcept_no = ?`)
-        .bind(String(error?.message || 'AI 분석 실패').slice(0, 300), new Date().toISOString(), row.rcept_no).run();
+      await releaseAnalysisClaim(db, claimed.rcept_no, 'error', error?.message || 'AI 분석 실패');
       failed += 1;
     }
   }
