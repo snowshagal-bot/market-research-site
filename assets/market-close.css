@@ -110,6 +110,9 @@ body.market-close-page:has(.market-loading)>.footer{visibility:hidden}
 .range-return{font-family:Georgia,"Times New Roman",serif;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;min-width:60px;text-align:right}
 .range-sub-change{font-size:9px;font-weight:700;font-variant-numeric:tabular-nums}
 .range-breadth-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
+.range-breadth-stats .market-metric{display:block}
+.range-breadth-stats .market-metric span{display:block;font-size:8px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.range-breadth-stats .market-metric strong{display:block;font-size:12px;margin-top:2px;font-variant-numeric:tabular-nums}
 .range-breadth-sub{font-size:8px;color:var(--muted);margin:8px 0 0;text-align:right}
 .market-group-empty{padding:14px 0;border-top:1px solid color-mix(in srgb,var(--line) 62%,transparent);border-radius:0;background:transparent}
 .group-empty-title{font-family:Georgia,"Noto Serif KR",serif;font-size:13px;font-weight:600;color:var(--market-ink);margin:0 0 4px}
