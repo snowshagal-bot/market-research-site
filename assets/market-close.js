@@ -499,6 +499,7 @@
           ${section(10, copy.sections[9], dataTable([copy.rank, copy.stock, copy.price, copy.change, copy.marketCap], marketCapRows, 'market-cap-table'))}
           <aside class="market-note"><span class="note-quote" aria-hidden="true">“</span><h2>${copy.noteTitle}</h2><p>${copy.noteBody}</p>${reportCtaHtml}</aside>
         </div>
+        ${ko ? `
         <section id="market-disclosures-section" class="market-section market-disclosures-section" aria-label="${copy.disclosureTitle}">
           <div class="market-disclosure-header">
             <h2><span>11</span> ${copy.disclosureTitle}</h2>
@@ -506,14 +507,15 @@
           </div>
           <p class="market-disclosure-sub">${copy.disclosureSubtitle}</p>
           <div id="market-disclosures-mount" class="market-disclosures-mount" role="region" aria-live="polite">
-            <div class="disclosure-loading-state"><p>${ko ? '주요 공시를 불러오는 중입니다...' : 'Loading key disclosures...'}</p></div>
+            <div class="disclosure-loading-state"><p>주요 공시를 불러오는 중입니다...</p></div>
           </div>
         </section>
+        ` : ''}
         <div class="market-data-note"><p>${copy.source}: ${html(Array.from(sourceSet).map(item => item.split(' · ')[0]).filter((item, index, all) => all.indexOf(item) === index).join(', '))}</p><p>${copy.generated}: ${html(data.meta?.generated_at || '--')} · ${html(data.meta?.schema_version || '')}</p></div>
       </div>`;
     target.innerHTML = output;
     bindEvents(target);
-    if (typeof target?.querySelector === 'function') {
+    if (ko && typeof target?.querySelector === 'function') {
       loadAndRenderDisclosures(marketDate, target.querySelector('#market-disclosures-mount'));
     }
   }

@@ -63,7 +63,7 @@ test('OpenDART adapter: list request contains only provider-specific query param
 });
 
 test('LLM adapter: Gemini Interactions output text is extracted and JSON normalized', () => {
-  const text = llmTest.interactionOutputText({ steps: [{ type: 'model_output', content: [{ type: 'text', text: '{"summary":"공급계약 체결 요약","key_figures":[],"what_it_means":"시장 영향 해설","impact":"mixed","importance":"high","watch_points":["대금 지급 조건 확인"],"limitation":"DART 원문 확인 필요"}' }] }] });
+  const text = llmTest.interactionOutputText({ steps: [{ type: 'model_output', content: [{ type: 'text', text: '{"summary":"공급계약 체결 요약","what_it_means":"시장 영향 해설","impact":"mixed","importance":"high","watch_points":["대금 지급 조건 확인"],"limitation":"DART 원문 확인 필요"}' }] }] });
   const parsed = llmTest.safeJson(text);
   const normalized = llmTest.normalizedAnalysis(parsed);
   assert.equal(normalized.summary, '공급계약 체결 요약');

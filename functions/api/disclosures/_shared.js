@@ -515,8 +515,7 @@ export async function removeWatchlistCompany(db, stockCode, now = new Date()) {
   const nowStr = now.toISOString();
   await db.prepare(`DELETE FROM ${WATCHLIST_TABLE} WHERE stock_code = ?`).bind(safeStock).run();
   await db.prepare(`UPDATE ${FILINGS_TABLE} SET is_watchlist = 0, updated_at = ? WHERE stock_code = ?`).bind(nowStr, safeStock).run();
-  // Unpublish auto-published filings for removed company
-  await db.prepare(`UPDATE ${FILINGS_TABLE} SET publish_status = 'admin_only', updated_at = ? WHERE stock_code = ? AND publish_status = 'auto'`).bind(nowStr, safeStock).run();
+  // Existing auto/manual published filings remain published (irreversible preservation)
   return { stockCode: safeStock, deleted: true };
 }
 
@@ -529,9 +528,7 @@ export async function toggleWatchlistActive(db, stockCode, active, now = new Dat
     .bind(isActive ? 1 : 0, nowStr, safeStock).run();
   await db.prepare(`UPDATE ${FILINGS_TABLE} SET is_watchlist = ?, updated_at = ? WHERE stock_code = ?`)
     .bind(isActive ? 1 : 0, nowStr, safeStock).run();
-  if (!isActive) {
-    await db.prepare(`UPDATE ${FILINGS_TABLE} SET publish_status = 'admin_only', updated_at = ? WHERE stock_code = ? AND publish_status = 'auto'`).bind(nowStr, safeStock).run();
-  } else {
+  if (isActive) {
     // Auto-publish eligible high score filings for TODAY ONLY
     await db.prepare(`UPDATE ${FILINGS_TABLE} SET
         publish_status = 'auto',
@@ -603,13 +600,13 @@ export async function upsertFiling(db, filing, { watchlistCodes = null, now = ne
         is_watchlist = ?,
         publish_status = CASE
           WHEN ${FILINGS_TABLE}.publish_status = 'manual' THEN 'manual'
+          WHEN ${FILINGS_TABLE}.publish_status = 'auto' THEN 'auto'
           WHEN ? = 1 AND ? >= 7 AND ? = 1 THEN 'auto'
-          WHEN ${FILINGS_TABLE}.publish_status = 'auto' AND (? = 0 OR ? < 7 OR ? = 0) THEN 'admin_only'
           ELSE ${FILINGS_TABLE}.publish_status
         END,
         published_at = CASE
-          WHEN ${FILINGS_TABLE}.publish_status = 'manual' THEN ${FILINGS_TABLE}.published_at
-          WHEN ? = 1 AND ? >= 7 AND ? = 1 AND (${FILINGS_TABLE}.published_at = '' OR ${FILINGS_TABLE}.published_at IS NULL) THEN ?
+          WHEN (${FILINGS_TABLE}.published_at != '' AND ${FILINGS_TABLE}.published_at IS NOT NULL) THEN ${FILINGS_TABLE}.published_at
+          WHEN ? = 1 AND ? >= 7 AND ? = 1 THEN ?
           ELSE ${FILINGS_TABLE}.published_at
         END,
         ai_status = CASE
@@ -625,7 +622,7 @@ export async function upsertFiling(db, filing, { watchlistCodes = null, now = ne
         filing.filerName, filing.receiptDate, filing.remarks, filing.sourceUrl, filing.ruleScore,
         filing.rulePriority, JSON.stringify(filing.ruleReasons), filing.aiEligible ? 1 : 0,
         isWatchlist,
-        isWatchlist, filing.ruleScore, isToday ? 1 : 0, isWatchlist, filing.ruleScore, isToday ? 1 : 0,
+        isWatchlist, filing.ruleScore, isToday ? 1 : 0,
         isWatchlist, filing.ruleScore, isToday ? 1 : 0, filing.updatedAt,
         filing.aiEligible ? 1 : 0, filing.updatedAt, filing.rceptNo
       ).run();

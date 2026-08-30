@@ -103,7 +103,7 @@ async function analyzeQueue(db, env, config, now) {
   return { attempted, completed, failed, stopReason };
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, now = new Date() }) {
   const authSource = authorizeSync(request, env);
   if (!authSource) return json({ ok: false, error: 'UNAUTHORIZED', message: '공시 동기화 인증에 실패했습니다.' }, 401);
 
@@ -115,7 +115,7 @@ export async function onRequestPost({ request, env }) {
     try { input = JSON.parse(raw); } catch (_) { return json({ ok: false, error: 'INVALID_JSON' }, 400); }
   }
 
-  const now = input.now ? new Date(input.now) : new Date();
+  // Server clock is strictly enforced. Client-supplied input.now in request body is intentionally ignored.
   const config = disclosureConfig(env);
   try {
     const db = await ensureDisclosureSchema(env);
