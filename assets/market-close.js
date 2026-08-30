@@ -19,6 +19,15 @@
     previewFixture: 'PREVIEW FIXTURE · 실제 게시 데이터가 아닙니다.', emptyTitle: '첫 마감 데이터를 준비하고 있습니다.', emptyBody: '데이터가 게시되면 이곳에서 최신 한국 시장 마감을 확인할 수 있습니다.',
     dateNotFoundTitle: '해당 날짜의 Market Close 데이터가 없습니다.', returnToLatest: '최신 시장으로 돌아가기',
     loadError: '마감 데이터를 불러오지 못했습니다.', retry: '다시 시도',
+    rangeLoadError: '기간 데이터를 불러오지 못했습니다.',
+    recent5Days: '최근 5거래일', recent20Days: '최근 20거래일',
+    sectorThemeBuilding: '업종 · 테마 기간 데이터 축적 중',
+    sectorThemeBuildingDesc: (used, total) => `현재 ${used} / ${total} 거래일 · KRX 공식 업종·테마는 v1.1.0 스냅샷부터 누적됩니다.`,
+    strongest: '상승 상위', weakest: '하락 상위',
+    avgRiseRatio: '평균 상승비율', avgFallRatio: '평균 하락비율',
+    advancerDominant: '상승 우세', declinerDominant: '하락 우세', neutralDominant: '중립',
+    sessionCount: n => `${n}일`,
+    avgCounts: (r, f) => `평균 상승 ${r}개 · 하락 ${f}개`,
     weekdays: ['월', '화', '수', '목', '금', '토', '일'],
     monthFormat: (y, m) => `${y}년 ${m}월`
   } : {
@@ -38,6 +47,15 @@
     previewFixture: 'PREVIEW FIXTURE · Not published market data.', emptyTitle: 'The first market close is being prepared.', emptyBody: 'The latest Korean market close will appear here once it is published.',
     dateNotFoundTitle: 'No market close data for this date.', returnToLatest: 'Return to latest market',
     loadError: 'Could not load the market close.', retry: 'Try again',
+    rangeLoadError: 'Could not load the period data.',
+    recent5Days: 'Last 5 Sessions', recent20Days: 'Last 20 Sessions',
+    sectorThemeBuilding: 'Sector & theme history is building',
+    sectorThemeBuildingDesc: (used, total) => `Currently ${used} / ${total} sessions available`,
+    strongest: 'STRONGEST', weakest: 'WEAKEST',
+    avgRiseRatio: 'Avg. advance ratio', avgFallRatio: 'Avg. decline ratio',
+    advancerDominant: 'Advancer dominant', declinerDominant: 'Decliner dominant', neutralDominant: 'Neutral',
+    sessionCount: n => `${n} sessions`,
+    avgCounts: (r, f) => `Avg ${r} adv · ${f} dec`,
     weekdays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
     monthFormat: (y, m) => {
       const names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -171,9 +189,10 @@
   }
 
   /* ==========================================================================
-     Market Close History State & Utilities
+     Market Close History & Period State & Utilities
      ========================================================================== */
   const state = {
+    mode: 'today', // 'today' | '1w' | '1m' | 'history'
     dates: [],
     latestDate: null,
     earliestDate: null,
@@ -182,8 +201,25 @@
     calendarOpen: false,
     calYear: null,
     calMonth: null,
-    currentPayload: null
+    currentPayload: null,
+    rangeData: null,
+    rangeWindow: null,
+    popstateBound: false
   };
+
+  function parseUrlState() {
+    const searchParams = new URLSearchParams(location.search);
+    const dateParam = searchParams.get('date');
+    const viewParam = searchParams.get('view');
+
+    if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+      return { mode: 'history', date: dateParam, view: null };
+    }
+    if (!dateParam && (viewParam === '1w' || viewParam === '1m')) {
+      return { mode: viewParam, date: null, view: viewParam };
+    }
+    return { mode: 'today', date: null, view: null };
+  }
 
   function findExactDaily(marketDate) {
     if (!marketDate) return null;
@@ -219,20 +255,41 @@
     const nextDate = canGoNext ? state.dates[currentIndex - 1] : '';
     const prevDate = canGoPrev ? state.dates[currentIndex + 1] : '';
 
+    const isTodayActive = state.mode === 'today' && !state.calendarOpen;
+    const is1wActive = state.mode === '1w';
+    const is1mActive = state.mode === '1m';
+    const isHistoryActive = (state.mode === 'history' || state.calendarOpen) && !is1wActive && !is1mActive;
+
+    let rightNavHtml = '';
+    if (state.mode === '1w' || state.mode === '1m') {
+      const w = state.rangeWindow;
+      const badgeText = w?.start_date && w?.end_date
+        ? `${dateText(w.start_date)} — ${dateText(w.end_date)} · ${w.sessions_used || 0}/${w.required_sessions || (state.mode === '1w' ? 5 : 20)}`
+        : '';
+      rightNavHtml = `<span class="market-range-badge">${badgeText}</span>`;
+    } else {
+      rightNavHtml = `
+        <button class="market-nav-step" type="button" data-market-action="nav-date" data-target-date="${prevDate}" ${!canGoPrev ? 'disabled' : ''} aria-label="${copy.prevDay}">‹</button>
+        <span class="market-current-date">${dateText(state.currentDate)}</span>
+        <button class="market-nav-step" type="button" data-market-action="nav-date" data-target-date="${nextDate}" ${!canGoNext ? 'disabled' : ''} aria-label="${copy.nextDay}">›</button>
+        <button class="market-calendar-toggle ${state.calendarOpen ? 'active' : ''}" type="button" data-market-action="toggle-calendar" aria-label="${copy.calendarToggle}" aria-expanded="${state.calendarOpen}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        </button>`;
+    }
+
     return `
-      <div class="market-history-strip" role="toolbar" aria-label="Market date navigation">
+      <div class="market-history-strip" role="toolbar" aria-label="Market navigation">
         <div class="market-history-modes">
-          <button class="market-mode-btn ${state.isLatest && !state.calendarOpen ? 'active' : ''}" type="button" data-market-action="today" ${state.isLatest && !state.calendarOpen ? 'aria-pressed="true"' : ''}>${copy.todayMode}</button>
+          <button class="market-mode-btn ${isTodayActive ? 'active' : ''}" type="button" data-market-action="today" ${isTodayActive ? 'aria-current="page"' : ''}>${copy.todayMode}</button>
           <span class="market-mode-divider" aria-hidden="true"></span>
-          <button class="market-mode-btn ${!state.isLatest || state.calendarOpen ? 'active' : ''}" type="button" data-market-action="toggle-calendar" aria-expanded="${state.calendarOpen}">${copy.historyMode}</button>
+          <button class="market-mode-btn ${is1wActive ? 'active' : ''}" type="button" data-market-action="view-1w" ${is1wActive ? 'aria-current="page"' : ''}>1W</button>
+          <span class="market-mode-divider" aria-hidden="true"></span>
+          <button class="market-mode-btn ${is1mActive ? 'active' : ''}" type="button" data-market-action="view-1m" ${is1mActive ? 'aria-current="page"' : ''}>1M</button>
+          <span class="market-mode-divider" aria-hidden="true"></span>
+          <button class="market-mode-btn ${isHistoryActive ? 'active' : ''}" type="button" data-market-action="toggle-calendar" aria-expanded="${state.calendarOpen}">${copy.historyMode}</button>
         </div>
         <div class="market-history-nav">
-          <button class="market-nav-step" type="button" data-market-action="nav-date" data-target-date="${prevDate}" ${!canGoPrev ? 'disabled' : ''} aria-label="${copy.prevDay}">‹</button>
-          <span class="market-current-date">${dateText(state.currentDate)}</span>
-          <button class="market-nav-step" type="button" data-market-action="nav-date" data-target-date="${nextDate}" ${!canGoNext ? 'disabled' : ''} aria-label="${copy.nextDay}">›</button>
-          <button class="market-calendar-toggle ${state.calendarOpen ? 'active' : ''}" type="button" data-market-action="toggle-calendar" aria-label="${copy.calendarToggle}" aria-expanded="${state.calendarOpen}">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          </button>
+          ${rightNavHtml}
         </div>
       </div>
       <div id="market-calendar-drawer" class="market-calendar-drawer" ${state.calendarOpen ? '' : 'hidden'}>
@@ -251,9 +308,7 @@
     const year = state.calYear;
     const month = state.calMonth; // 1-12
 
-    // First day of month (0 = Sunday, 1 = Monday, ...)
     const firstDayIndex = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
-    // Monday-first index: Monday=0, Tuesday=1, ..., Sunday=6
     const startOffset = (firstDayIndex + 6) % 7;
 
     const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
@@ -288,7 +343,6 @@
       }
     }
 
-    // Next month padding to fill complete weeks
     const totalCells = dayCells.length;
     const remainder = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
     for (let d = 1; d <= remainder; d++) {
@@ -299,81 +353,111 @@
       <div class="market-calendar-panel" role="region" aria-label="${copy.selectDate}">
         <div class="market-cal-header">
           <button class="market-cal-nav-btn" type="button" data-market-action="prev-month" aria-label="Previous month">‹</button>
-          <span class="market-cal-month-title">${copy.monthFormat(year, month)}</span>
+          <span class="market-cal-month-label">${copy.monthFormat(year, month)}</span>
           <button class="market-cal-nav-btn" type="button" data-market-action="next-month" aria-label="Next month">›</button>
         </div>
         <div class="market-cal-grid">
-          ${copy.weekdays.map(w => `<span class="market-cal-weekday" aria-hidden="true">${html(w)}</span>`).join('')}
+          ${copy.weekdays.map(w => `<span class="market-cal-weekday" aria-hidden="true">${w}</span>`).join('')}
           ${dayCells.join('')}
         </div>
       </div>`;
   }
 
+  /* ==========================================================================
+     TODAY & HISTORY Daily Snapshot Renderer
+     ========================================================================== */
   function render(data, target = document.getElementById('market-close-root')) {
-    if (!target) return;
+    if (!target || !data || typeof data !== 'object') return;
+
     state.currentPayload = data;
-    state.currentDate = data.meta?.market_date;
-    state.isLatest = (!state.latestDate || state.currentDate === state.latestDate);
+    const marketDate = data.meta?.market_date || state.currentDate;
+    const isHistory = (state.mode === 'history' || (marketDate && state.latestDate && marketDate !== state.latestDate)) && (!state.isLatest || (state.latestDate && marketDate !== state.latestDate));
 
-    // Sync calendar view month with current date
-    if (state.currentDate && /^\d{4}-\d{2}-\d{2}$/.test(state.currentDate)) {
-      const [y, m] = state.currentDate.split('-').map(Number);
-      state.calYear = y;
-      state.calMonth = m;
-    }
-
-    const i = data.indices || {};
-    const rate = data.rates_fx_volatility || {};
-    const commodity = data.commodities_crypto || {};
-    const investor = data.krx_investor_trading?.markets || {};
-    const five = data.recent_5d_flows?.markets || {};
+    const indices = data.indices || {};
+    const rates = data.rates_fx_volatility || {};
+    const commodities = data.commodities_crypto || {};
+    const flows = data.krx_investor_trading || {};
+    const recentFlows = data.recent_5d_flows || {};
     const breadth = data.market_breadth || {};
     const program = data.program_basis || {};
     const internals = data.market_internals || {};
     const shorts = data.short_selling || {};
-    const marketCap = Array.isArray(data.market_cap_top10) ? data.market_cap_top10 : [];
-
-    // Exact Daily matching for the current market date
-    const daily = findExactDaily(state.currentDate);
+    const marketCap = data.market_cap_top10 || [];
 
     const sourceSet = new Set();
-    [...Object.values(i), ...Object.values(rate), ...Object.values(commodity)].forEach(item => item?.source && sourceSet.add(item.source));
+    const collect = obj => {
+      Object.values(obj || {}).forEach(item => {
+        if (item?.source) sourceSet.add(item.source);
+      });
+    };
+    collect(indices); collect(rates); collect(commodities);
 
-    const investorRows = ['KOSPI', 'KOSDAQ', 'KOSPI200선물'].map(market => {
-      const values = investor[market]?.investors || {};
-      return [html(localName(market)), `<span class="${signClass(values['외국인']?.net_buy)}">${flow(values['외국인']?.net_buy)}</span>`, `<span class="${signClass(values['기관']?.net_buy)}">${flow(values['기관']?.net_buy)}</span>`, `<span class="${signClass(values['개인']?.net_buy)}">${flow(values['개인']?.net_buy)}</span>`];
+    const investorRows = ['KOSPI', 'KOSDAQ', 'KOSPI200선물'].map(marketKey => {
+      const marketName = marketKey === 'KOSPI200선물' ? (ko ? '선물' : 'KOSPI 200 Futures') : marketKey;
+      const inv = flows.markets?.[marketKey]?.investors || {};
+      return [marketName, flow(inv['외국인']?.net_buy), flow(inv['기관']?.net_buy), flow(inv['개인']?.net_buy)];
     });
-    const fiveRows = ['KOSPI', 'KOSDAQ', 'KOSPI200선물'].map(market => [html(localName(market)), ...['외국인', '기관', '개인'].map(kind => `<span class="${signClass(five[market]?.[kind])}">${flow(five[market]?.[kind])}</span>`)]);
-    const programRows = ['차익', '비차익', '전체'].map(kind => [html(localName(kind)), `<span class="${signClass(program.program_trading?.[kind]?.net_buy_won)}">${won(program.program_trading?.[kind]?.net_buy_won)}</span>`]);
+
+    const fiveRows = ['KOSPI', 'KOSDAQ', 'KOSPI200선물'].map(marketKey => {
+      const marketName = marketKey === 'KOSPI200선물' ? (ko ? '선물' : 'KOSPI 200 Futures') : marketKey;
+      const inv = recentFlows.markets?.[marketKey] || {};
+      return [marketName, flow(inv['외국인']), flow(inv['기관']), flow(inv['개인'])];
+    });
+
+    const programRows = ['차익', '비차익', '전체'].map(key => [
+      localName(key),
+      valid(program.program_trading?.[key]?.net_buy_won) ? `${won(program.program_trading[key].net_buy_won)}` : '--'
+    ]);
+
     const concentration = internals.concentration || {};
     const concentrationItems = [
-      [copy.foreignBuy, concentration['외국인']?.buy], [copy.foreignSell, concentration['외국인']?.sell], [copy.institutionBuy, concentration['기관']?.buy], [copy.institutionSell, concentration['기관']?.sell]
-    ];
-    const shortList = (items, ratioMode = false) => `<ol class="rank-list">${(items || []).map(item => `<li><span><b>${html(companyName(item))}</b><small>${html(item.market)}</small></span><strong>${ratioMode ? ratioPct(item.short_value_ratio) : won(item.short_value_won)}</strong></li>`).join('')}</ol>`;
-    const marketCapRows = marketCap.map(item => [integer(item.rank), `<span class="stock-name"><b>${html(companyName(item))}</b><small>${html(item.ticker)}</small></span>`, integer(item.close), `<span class="${signClass(item.change_pct)}">${pct(item.change_pct)}</span>`, won(item.market_cap_won)]);
+      [copy.foreignBuy, concentration['외국인']?.buy],
+      [copy.foreignSell, concentration['외국인']?.sell],
+      [copy.institutionBuy, concentration['기관']?.buy],
+      [copy.institutionSell, concentration['기관']?.sell]
+    ].filter(entry => entry[1]);
 
+    const shortList = (items, isRatio = false) => `<ol class="rank-list">${(items || []).map((item, index) => `<li><span>${index + 1}. <b>${html(companyName(item))}</b><small>${html(item?.market || '')}</small></span><strong>${isRatio ? ratioPct(item?.short_value_ratio) : won(item?.short_value_won)}</strong></li>`).join('')}</ol>`;
+
+    const marketCapRows = marketCap.map(item => [
+      item?.rank ?? '--',
+      `<span class="stock-name"><b>${html(companyName(item))}</b><small>${html(item?.market || '')} · ${html(item?.ticker || '')}</small></span>`,
+      valid(item?.close) ? `${number(item.close, 0)}${ko ? '원' : ''}` : '--',
+      `<span class="${signClass(item?.change_pct)}">${pct(item?.change_pct)}</span>`,
+      won(item?.market_cap_won)
+    ]);
+
+    // Exact Daily Report CTA matching
     let reportCtaHtml = '';
-    if (daily) {
-      const ctaLabel = state.isLatest ? copy.latestReport : copy.historyReport;
-      const dateBadge = state.isLatest ? '' : ` <small class="cta-date-badge">(${dateText(state.currentDate)} Daily)</small>`;
-      reportCtaHtml = `<a class="market-report-cta ${state.isLatest ? '' : 'history-cta'}" href="/${html(String(daily.href).replace(/^\/+/, ''))}">${ctaLabel}${dateBadge} <span aria-hidden="true">→</span></a>`;
-    } else if (!state.isLatest) {
+    const exactDaily = findExactDaily(marketDate);
+
+    if (exactDaily) {
+      const ctaLabel = isHistory ? copy.historyReport : copy.latestReport;
+      const cleanHref = exactDaily.href ? exactDaily.href : '#';
+      reportCtaHtml = `
+        <a class="market-report-cta" href="${html(cleanHref)}">
+          <span>${html(ctaLabel)}</span>
+          <span class="cta-date-badge" aria-hidden="true">${dateText(exactDaily.reportDate || exactDaily.date)}</span>
+          <span aria-hidden="true">→</span>
+        </a>`;
+    } else if (isHistory) {
       reportCtaHtml = `<p class="market-report-unavailable">${copy.noDailyReport}</p>`;
     }
 
     const output = `
       <section class="market-hero" aria-labelledby="market-close-heading"><div class="market-wrap market-hero-inner"><div class="market-hero-copy">
         <p class="market-eyebrow">SNOWSHAGAL</p><h1 id="market-close-heading">${copy.title}</h1><p class="market-subtitle">${copy.subtitle}</p>
-        <p class="market-date">${dateText(data.meta?.market_date)} · ${copy.closeBasis}</p><p class="market-overseas">${copy.overseas}</p>
+        <p class="market-date">${dateText(data.meta?.market_date)} · ${copy.closeBasis}</p>
+        <p class="market-overseas">${copy.overseas}</p>
       </div><div class="market-mountain" aria-hidden="true"></div></div></section>
       <div class="market-wrap">
         ${renderHistoryStrip()}
       </div>
-      <div class="market-wrap market-dashboard" id="market-dashboard-view">
-        ${section(1, copy.sections[0], `<div class="major-index-grid">${['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500'].map(key => instrumentCard(key, i[key], true)).join('')}</div>`, 'section-wide')}
-        <div class="market-pair market-pair-top">
-          ${section(2, copy.sections[1], `<div class="mini-instrument-grid">${['SOX', 'VIX', 'US10Y', 'USDKRW', 'JPYKRW', 'DXY'].map(key => instrumentCard(key, rate[key])).join('')}</div>`)}
-          ${section(3, copy.sections[2], `<div class="mini-instrument-grid commodity-grid">${['WTI', 'GOLD', 'BITCOIN'].map(key => instrumentCard(key, commodity[key])).join('')}</div>`)}
+      <div id="market-dashboard-view" class="market-wrap market-dashboard">
+        ${section(1, copy.sections[0], `<div class="major-index-grid">${['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500'].map(key => instrumentCard(key, indices[key], true)).join('')}</div>`)}
+        <div class="market-pair">
+          ${section(2, copy.sections[1], `<div class="mini-instrument-grid">${['SOX', 'VIX', 'US10Y', 'USDKRW', 'JPYKRW', 'DXY'].map(key => instrumentCard(key, rates[key])).join('')}</div>`)}
+          ${section(3, copy.sections[2], `<div class="mini-instrument-grid commodity-grid">${['WTI', 'GOLD', 'BITCOIN'].map(key => instrumentCard(key, commodities[key])).join('')}</div>`)}
         </div>
         ${section(4, copy.sections[3], `<div class="breadth-grid">${['KOSPI', 'KOSDAQ'].map(key => breadthCard(key, breadth[key])).join('')}</div>`)}
         <div class="market-pair market-pair-tables">
@@ -395,6 +479,247 @@
     bindEvents(target);
   }
 
+  /* ==========================================================================
+     1W & 1M Range Aggregation Renderer
+     ========================================================================== */
+  function renderRangeInstrumentRow(key, item) {
+    if (!item) return '';
+    const name = instrumentName(key, item);
+    const baseline = valid(item.baseline_value) ? number(item.baseline_value, 2) : '--';
+    const end = valid(item.end_value) ? number(item.end_value, 2) : '--';
+    const returnStr = valid(item.return_pct) ? `${signed(item.return_pct, 2)}%` : '--';
+    const returnCls = signClass(item.return_pct);
+    const highLow = (valid(item.period_high) && valid(item.period_low))
+      ? `<span class="range-hl">H ${number(item.period_high, 2)} · L ${number(item.period_low, 2)}</span>`
+      : '';
+
+    return `
+      <div class="range-item-row">
+        <div class="range-item-name">
+          <strong>${html(name)}</strong>
+          ${highLow}
+        </div>
+        <div class="range-item-values">
+          <span class="range-path">${baseline} <span class="range-arrow">→</span> ${end}</span>
+          <strong class="range-return ${returnCls}">${returnStr}</strong>
+        </div>
+      </div>`;
+  }
+
+  function renderRangeRatesFxRow(key, item) {
+    if (!item) return '';
+    const name = instrumentName(key, item);
+    const isUs10y = key === 'US10Y';
+    const isFx = key === 'USDKRW' || key === 'JPYKRW';
+
+    let baseline = valid(item.baseline_value) ? number(item.baseline_value, isUs10y ? 3 : 2) : '--';
+    let end = valid(item.end_value) ? number(item.end_value, isUs10y ? 3 : 2) : '--';
+    if (isUs10y && valid(item.baseline_value)) baseline += '%';
+    if (isUs10y && valid(item.end_value)) end += '%';
+
+    let mainChange = '';
+    let subChange = '';
+    let returnCls = 'neutral';
+
+    if (isUs10y) {
+      mainChange = valid(item.change_bp) ? `${signed(item.change_bp, 1)}bp` : '--';
+      subChange = valid(item.return_pct) ? `(${signed(item.return_pct, 2)}%)` : '';
+      returnCls = signClass(item.change_bp);
+    } else if (isFx) {
+      mainChange = valid(item.change) ? signed(item.change, 2) : '--';
+      subChange = valid(item.return_pct) ? `(${signed(item.return_pct, 2)}%)` : '';
+      returnCls = signClass(item.change);
+    } else {
+      mainChange = valid(item.return_pct) ? `${signed(item.return_pct, 2)}%` : '--';
+      returnCls = signClass(item.return_pct);
+    }
+
+    return `
+      <div class="range-item-row">
+        <div class="range-item-name">
+          <strong>${html(name)}</strong>
+        </div>
+        <div class="range-item-values">
+          <span class="range-path">${baseline} <span class="range-arrow">→</span> ${end}</span>
+          <div class="range-change-wrap">
+            <strong class="range-return ${returnCls}">${mainChange}</strong>
+            ${subChange ? `<span class="range-sub-change ${returnCls}">${subChange}</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderRangeFlows(flows) {
+    const markets = ['KOSPI', 'KOSDAQ', 'KOSPI200선물'];
+    const headings = [copy.market, copy.foreign, copy.institution, copy.individual];
+    const rows = markets.map(mKey => {
+      const mName = mKey === 'KOSPI200선물' ? (ko ? '선물' : 'KOSPI 200 Futures') : mKey;
+      const mData = flows?.markets?.[mKey] || {};
+      const cells = ['외국인', '기관', '개인'].map(invKey => {
+        const invData = mData[invKey];
+        if (!invData || !valid(invData.net_buy)) return '--';
+        return `<span class="${signClass(invData.net_buy)}">${flow(invData.net_buy)}</span>`;
+      });
+      return [mName, ...cells];
+    });
+
+    return `
+      <div class="market-table-wrap">
+        <table class="market-table">
+          <thead>
+            <tr>${headings.map(h => `<th scope="col">${html(h)}</th>`).join('')}</tr>
+          </thead>
+          <tbody>
+            ${rows.map(row => `<tr>${row.map((cell, idx) => idx === 0 ? `<th scope="row">${html(cell)}</th>` : `<td>${cell}</td>`).join('')}</tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <p class="unit-note">${ko ? '단위: 원화 · 기간 누적' : 'Unit: KRW · Cumulative'}</p>`;
+  }
+
+  function renderRangeBreadthCard(marketKey, bData) {
+    if (!bData) return '';
+    const advPct = valid(bData.avg_rise_ratio) ? ratioPct(bData.avg_rise_ratio) : '--';
+    const decPct = valid(bData.avg_fall_ratio) ? ratioPct(bData.avg_fall_ratio) : '--';
+    const advSessions = valid(bData.advancer_dominant_sessions) ? copy.sessionCount(bData.advancer_dominant_sessions) : '--';
+    const decSessions = valid(bData.decliner_dominant_sessions) ? copy.sessionCount(bData.decliner_dominant_sessions) : '--';
+    const neutralSessions = valid(bData.neutral_sessions) ? copy.sessionCount(bData.neutral_sessions) : '--';
+    const countsNote = (valid(bData.avg_rise_count) && valid(bData.avg_fall_count))
+      ? copy.avgCounts(integer(bData.avg_rise_count), integer(bData.avg_fall_count))
+      : '';
+
+    return `
+      <article class="breadth-card">
+        <h3>${marketKey}</h3>
+        <div class="range-breadth-stats">
+          <div class="market-metric"><span>${copy.avgRiseRatio}</span><strong class="up">${advPct}</strong></div>
+          <div class="market-metric"><span>${copy.advancerDominant}</span><strong>${advSessions}</strong></div>
+          <div class="market-metric"><span>${copy.declinerDominant}</span><strong>${decSessions}</strong></div>
+          <div class="market-metric"><span>${copy.neutralDominant}</span><strong>${neutralSessions}</strong></div>
+        </div>
+        <div class="breadth-bar" aria-hidden="true">
+          <span class="advance" style="width:${valid(bData.avg_rise_ratio) ? bData.avg_rise_ratio * 100 : 0}%"></span>
+          <span class="decline" style="width:${valid(bData.avg_fall_ratio) ? bData.avg_fall_ratio * 100 : 0}%"></span>
+        </div>
+        ${countsNote ? `<p class="range-breadth-sub">${html(countsNote)}</p>` : ''}
+      </article>`;
+  }
+
+  function renderRangeGroups(groups, windowData) {
+    if (!groups?.coverage_complete) {
+      const sData = groups?.sessions_with_data || 0;
+      const req = windowData?.required_sessions || 5;
+      return `
+        <div class="market-group-empty">
+          <p class="group-empty-title">${copy.sectorThemeBuilding}</p>
+          <p class="group-empty-desc">${copy.sectorThemeBuildingDesc(sData, req)}</p>
+        </div>`;
+    }
+
+    function renderRankList(title, items, type) {
+      return `
+        <div class="range-rank-block">
+          <h4 class="range-rank-title ${type}">${title}</h4>
+          <ul class="rank-list">
+            ${items.map(it => `
+              <li>
+                <span>
+                  <b>${html(it.name)}</b>
+                  ${it.market ? `<small>${html(it.market)}</small>` : ''}
+                </span>
+                <strong class="${signClass(it.return_pct)}">${signed(it.return_pct, 2)}%</strong>
+              </li>`).join('')}
+          </ul>
+        </div>`;
+    }
+
+    const validSectors = (groups.sectors || []).filter(s => s.complete && valid(s.return_pct));
+    validSectors.sort((a, b) => b.return_pct - a.return_pct);
+    const topSectors = validSectors.slice(0, 5);
+    const bottomSectors = validSectors.length >= 10
+      ? validSectors.slice(-5).reverse()
+      : validSectors.slice(5).reverse();
+
+    const validThemes = (groups.themes || []).filter(t => t.complete && valid(t.return_pct));
+    validThemes.sort((a, b) => b.return_pct - a.return_pct);
+    const topThemes = validThemes.slice(0, 5);
+    const bottomThemes = validThemes.length >= 10
+      ? validThemes.slice(-5).reverse()
+      : validThemes.slice(5).reverse();
+
+    return `
+      <div class="range-groups-grid">
+        <div class="range-group-col">
+          <h3 class="group-category-title">${ko ? '업종 (SECTORS)' : 'SECTORS'}</h3>
+          <div class="range-rank-pair">
+            ${renderRankList(copy.strongest, topSectors, 'up')}
+            ${renderRankList(copy.weakest, bottomSectors, 'down')}
+          </div>
+        </div>
+        <div class="range-group-col">
+          <h3 class="group-category-title">${ko ? '테마 (THEMES)' : 'THEMES'}</h3>
+          <div class="range-rank-pair">
+            ${renderRankList(copy.strongest, topThemes, 'up')}
+            ${renderRankList(copy.weakest, bottomThemes, 'down')}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderRangeView(data, period, target = document.getElementById('market-close-root')) {
+    if (!target || !data || typeof data !== 'object') return;
+
+    state.rangeData = data;
+    state.rangeWindow = data.window || null;
+
+    const pTitle = period === '1w' ? copy.recent5Days : copy.recent20Days;
+    const w = data.window || {};
+    const dateRangeStr = w.start_date && w.end_date ? `${dateText(w.start_date)} — ${dateText(w.end_date)}` : '';
+    const statusNote = w.complete
+      ? (ko ? `${w.required_sessions}거래일 기준` : `${w.required_sessions}-session window`)
+      : (ko ? `현재 누적 · ${w.sessions_used || 0} / ${w.required_sessions || (period === '1w' ? 5 : 20)} 거래일` : `Partial · ${w.sessions_used || 0} / ${w.required_sessions || (period === '1w' ? 5 : 20)} sessions`);
+
+    const indices = data.instruments?.indices || {};
+    const rates = data.instruments?.rates_fx_volatility || {};
+    const commodities = data.instruments?.commodities_crypto || {};
+
+    const output = `
+      <section class="market-hero" aria-labelledby="market-range-heading"><div class="market-wrap market-hero-inner"><div class="market-hero-copy">
+        <p class="market-eyebrow">SNOWSHAGAL</p><h1 id="market-range-heading">${html(pTitle)}</h1><p class="market-subtitle">${dateRangeStr}</p>
+        <p class="market-date">${html(statusNote)}</p>
+      </div><div class="market-mountain" aria-hidden="true"></div></div></section>
+      <div class="market-wrap">
+        ${renderHistoryStrip()}
+      </div>
+      <div id="market-dashboard-view" class="market-wrap market-dashboard market-range-dashboard">
+        ${section('01', ko ? '주요 지수' : 'Major Indices', `
+          <div class="range-items-grid">
+            ${['KOSPI', 'KOSDAQ', 'NASDAQ', 'SP500', 'SOX'].map(k => k === 'SOX' ? renderRangeInstrumentRow(k, rates[k]) : renderRangeInstrumentRow(k, indices[k])).join('')}
+          </div>`)}
+        <div class="market-pair">
+          ${section('02', ko ? '금리 · 환율 · 변동성' : 'Rates · FX · Volatility', `
+            <div class="range-items-grid">
+              ${['US10Y', 'USDKRW', 'JPYKRW', 'DXY', 'VIX'].map(k => renderRangeRatesFxRow(k, rates[k])).join('')}
+            </div>`)}
+          ${section('03', ko ? '자산별 성과' : 'Cross Asset Performance', `
+            <div class="range-items-grid">
+              ${['WTI', 'GOLD', 'BITCOIN'].map(k => renderRangeInstrumentRow(k, commodities[k])).join('')}
+            </div>`)}
+        </div>
+        <div class="market-pair market-pair-tables">
+          ${section('04', ko ? '투자자 누적 수급' : 'Cumulative Investor Flows', renderRangeFlows(data.flows))}
+          ${section('05', ko ? '시장 폭 (평균)' : 'Market Breadth', `
+            <div class="breadth-grid">
+              ${['KOSPI', 'KOSDAQ'].map(k => renderRangeBreadthCard(k, data.breadth?.[k])).join('')}
+            </div>`)}
+        </div>
+        ${section('06', ko ? 'KRX 업종 · 테마' : 'KRX Sectors & Themes', renderRangeGroups(data.krx_groups, data.window))}
+      </div>`;
+
+    target.innerHTML = output;
+    bindEvents(target);
+  }
+
   function bindEvents(container) {
     if (typeof container?.addEventListener === 'function') {
       container.removeEventListener?.('click', onContainerClick);
@@ -410,7 +735,13 @@
 
     if (action === 'today') {
       state.calendarOpen = false;
-      navigateToDate(null);
+      navigateToMode('today');
+    } else if (action === 'view-1w') {
+      state.calendarOpen = false;
+      navigateToMode('1w');
+    } else if (action === 'view-1m') {
+      state.calendarOpen = false;
+      navigateToMode('1m');
     } else if (action === 'toggle-calendar') {
       state.calendarOpen = !state.calendarOpen;
       const drawer = document.getElementById('market-calendar-drawer');
@@ -419,8 +750,10 @@
         drawer.innerHTML = renderCalendarPanel();
       }
       const modes = document.querySelectorAll('.market-history-modes .market-mode-btn');
-      if (modes[0]) modes[0].classList.toggle('active', state.isLatest && !state.calendarOpen);
-      if (modes[1]) modes[1].classList.toggle('active', !state.isLatest || state.calendarOpen);
+      if (modes[0]) modes[0].classList.toggle('active', state.mode === 'today' && !state.calendarOpen);
+      if (modes[1]) modes[1].classList.toggle('active', state.mode === '1w' && !state.calendarOpen);
+      if (modes[2]) modes[2].classList.toggle('active', state.mode === '1m' && !state.calendarOpen);
+      if (modes[3]) modes[3].classList.toggle('active', (state.mode === 'history' || state.calendarOpen) && state.mode !== '1w' && state.mode !== '1m');
       const toggleBtn = document.querySelector('.market-calendar-toggle');
       if (toggleBtn) {
         toggleBtn.classList.toggle('active', state.calendarOpen);
@@ -448,29 +781,43 @@
       const targetDate = button.dataset.targetDate;
       if (targetDate) {
         state.calendarOpen = false;
-        navigateToDate(targetDate);
+        navigateToMode('history', targetDate);
       }
     } else if (action === 'retry') {
       init();
     }
   }
 
-  async function navigateToDate(targetDate, replaceState = false) {
-    const isReturningToLatest = !targetDate || targetDate === state.latestDate;
-    const nextSearch = isReturningToLatest ? '' : `?date=${encodeURIComponent(targetDate)}`;
-    const nextUrl = `${location.pathname}${nextSearch}`;
+  async function navigateToMode(mode, targetDate = null, replaceState = false) {
+    let nextSearch = '';
+    if (mode === 'history' && targetDate) {
+      nextSearch = `?date=${encodeURIComponent(targetDate)}`;
+    } else if (mode === '1w') {
+      nextSearch = '?view=1w';
+    } else if (mode === '1m') {
+      nextSearch = '?view=1m';
+    } else {
+      nextSearch = '';
+    }
 
+    const nextUrl = `${location.pathname}${nextSearch}`;
     if (!replaceState) {
       history.pushState(null, '', nextUrl);
+    } else {
+      history.replaceState(null, '', nextUrl);
     }
     updateLanguageLinks(nextSearch);
 
-    await loadAndRender(targetDate);
+    await loadAndRender(mode, targetDate);
   }
 
-  async function loadAndRender(targetDate) {
+  async function loadAndRender(mode = 'today', targetDate = null) {
     const rootEl = document.getElementById('market-close-root');
     if (!rootEl) return;
+
+    state.mode = mode;
+    state.currentDate = targetDate;
+    state.isLatest = mode === 'today';
 
     const dashboardView = document.getElementById('market-dashboard-view');
     if (dashboardView) {
@@ -478,19 +825,15 @@
     }
 
     try {
-      let data;
-      if (!targetDate) {
-        // Load latest
-        const source = document.body.dataset.marketSource || '/api/market/latest';
-        const response = await fetch(source, { headers: { Accept: 'application/json' } });
+      if (mode === '1w' || mode === '1m') {
+        const endpoint = `/api/market/range?period=${mode}`;
+        const response = await fetch(endpoint, { headers: { Accept: 'application/json' } });
         if (!response.ok) {
-          if (await renderPreviewFixture(rootEl)) return;
-          if (response.status === 404) return renderEmpty(rootEl);
-          throw new Error(`HTTP ${response.status}`);
+          return renderRangeError(mode, rootEl);
         }
-        data = await response.json();
-      } else {
-        // Load specific date
+        const data = await response.json();
+        renderRangeView(data, mode, rootEl);
+      } else if (mode === 'history' && targetDate) {
         const dateEndpoint = `/api/market/date?date=${encodeURIComponent(targetDate)}`;
         const response = await fetch(dateEndpoint, { headers: { Accept: 'application/json' } });
         if (!response.ok) {
@@ -499,10 +842,21 @@
           }
           throw new Error(`HTTP ${response.status}`);
         }
-        data = await response.json();
+        const data = await response.json();
+        render(data, rootEl);
+      } else {
+        // Today
+        const source = document.body.dataset.marketSource || '/api/market/latest';
+        const response = await fetch(source, { headers: { Accept: 'application/json' } });
+        if (!response.ok) {
+          if (await renderPreviewFixture(rootEl)) return;
+          if (response.status === 404) return renderEmpty(rootEl);
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        state.currentDate = data.meta?.market_date || null;
+        render(data, rootEl);
       }
-
-      render(data, rootEl);
     } catch (error) {
       console.error('Failed to load market close data', error);
       renderError(rootEl);
@@ -525,6 +879,26 @@
           <h1>${copy.dateNotFoundTitle}</h1>
           <p>${dateText(dateStr)}</p>
           <button class="market-return-btn" type="button" data-market-action="today">${copy.returnToLatest}</button>
+        </section>
+      </div>`;
+    bindEvents(target);
+  }
+
+  function renderRangeError(period, target = document.getElementById('market-close-root')) {
+    if (!target) return;
+    const pTitle = period === '1w' ? copy.recent5Days : copy.recent20Days;
+    target.innerHTML = `
+      <section class="market-hero" aria-labelledby="market-range-heading"><div class="market-wrap market-hero-inner"><div class="market-hero-copy">
+        <p class="market-eyebrow">SNOWSHAGAL</p><h1 id="market-range-heading">${html(pTitle)}</h1><p class="market-subtitle">—</p>
+      </div><div class="market-mountain" aria-hidden="true"></div></div></section>
+      <div class="market-wrap">
+        ${renderHistoryStrip()}
+      </div>
+      <div class="market-wrap">
+        <section class="market-state" role="alert">
+          <img class="market-state-owl" src="/assets/brand/snowshagal-owl.webp" alt="" width="232" height="256" aria-hidden="true">
+          <h1>${copy.rangeLoadError}</h1>
+          <button class="market-retry" type="button" data-market-action="retry">${copy.retry}</button>
         </section>
       </div>`;
     bindEvents(target);
@@ -557,6 +931,7 @@
         state.latestDate = data.meta.market_date;
         state.earliestDate = data.meta.market_date;
       }
+      state.currentDate = data.meta?.market_date || null;
       render(data, target);
       target.insertAdjacentHTML('afterbegin', `<div class="market-preview-notice" role="status">${copy.previewFixture}</div>`);
       return true;
@@ -576,10 +951,9 @@
   }
 
   function onPopState() {
-    const params = new URLSearchParams(location.search);
-    const d = params.get('date');
+    const { mode, date } = parseUrlState();
     updateLanguageLinks(location.search);
-    loadAndRender(d);
+    loadAndRender(mode, date);
   }
 
   async function init() {
@@ -593,20 +967,20 @@
 
     await initDatesList();
 
-    const searchParams = new URLSearchParams(location.search);
-    const dateQuery = searchParams.get('date');
-
+    const { mode, date } = parseUrlState();
     updateLanguageLinks(location.search);
-
-    await loadAndRender(dateQuery);
+    await loadAndRender(mode, date);
   }
 
   root.MARKET_CLOSE = {
     render,
+    renderRangeView,
     format: { number, pct, ratioPct, won, flow },
     displayValue,
     companyName,
     findExactDaily,
+    parseUrlState,
+    navigateToMode,
     init,
     loadAndRender,
     onPopState,
