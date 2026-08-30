@@ -23,11 +23,12 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
    - The Preview schema is initialized and contains one explicit `1900-01-01` / `preview-smoke-test` Market Close fixture solely for read smoke validation.
    - Preview Market/comments GET and the complete shared Preview smoke are verified at HTTP 200 and 20/20 PASS.
    - The Market Close publish API now permits authenticated branch-Preview writes to that isolated D1 for contract E2E; no Production row is copied or written during Preview validation.
-5. **OpenDART disclosure monitor (Draft PR #79, Preview/manual validation only)**:
-   - Continue from the existing adapter/rule/D1/LLM/admin implementation; do not build a parallel framework.
-   - Repository hardening covers atomic app-side quota reservation, duplicate-safe `rcept_no` storage, one-row AI claims, abandoned-claim recovery, strict metadata-only AI output validation, provider fallback boundaries and admin navigation parity.
-   - Next manual gate is one real Preview OpenDART sync plus duplicate re-sync and, only when Preview `GEMINI_API_KEY` exists, at most the configured per-run Gemini analyses with usage/output review.
-   - Automatic 16:00–17:00 KST scheduling, public disclosure pages, English disclosure translation and Production merge remain deferred until the owner approves observed data quality and API consumption.
+5. **OpenDART Disclosure Watchlist & MARKET Public Feed (PR #79)**:
+   - **Admin Management**: Broad collection and full search/filter across OpenDART filings with Watchlist manager (seed of ~30 core Korean companies) and manual publish toggles.
+   - **Selective MARKET Feed**: Auto-publishes Watchlist companies with High/Critical priority (Rule Score >= 7) to public `/market/` Section 11 (`/api/disclosures/feed`); routine filings remain `admin_only`.
+   - **AI Reader Insight Layer**: On-demand and budget-guarded Gemini 3.5 Flash-Lite structured output providing reader-facing explanation (Fact Summary, Key Figures, What It Means, Watch Points, Impact badge, and Limitation note). Decoupled from internal report preparation.
+   - **Error Isolation**: AI and location errors are fully isolated, ensuring OpenDART collection, D1 storage, and public feed display succeed independently.
+
 
 ## Near-term Priorities
 
