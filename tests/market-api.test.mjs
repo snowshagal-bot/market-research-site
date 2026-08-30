@@ -4,6 +4,8 @@ import test from 'node:test';
 import { onRequestGet as onRequestGetLatest } from '../functions/api/market/latest.js';
 import { onRequestGet as onRequestGetDate } from '../functions/api/market/date.js';
 import { onRequestGet as onRequestGetDates } from '../functions/api/market/dates.js';
+import { onRequestGet as onRequestGetRange } from '../functions/api/market/range.js';
+import { computeMarketRange } from '../functions/api/market/_aggregate.js';
 import { onRequestPost } from '../functions/api/market/publish.js';
 import { MAX_PAYLOAD_BYTES, isValidMarketDate, validateMarketPayload } from '../functions/api/market/_shared.js';
 
@@ -34,6 +36,16 @@ class MockStatement {
     if (/SELECT market_date FROM/i.test(this.sql)) {
       const sortedKeys = [...this.db.rows.keys()].sort().reverse();
       return { results: sortedKeys.map(k => ({ market_date: k })) };
+    }
+    if (/WHERE market_date <= \?/i.test(this.sql)) {
+      const [endDate, limit] = this.args;
+      const sortedKeys = [...this.db.rows.keys()].filter(k => k <= endDate).sort().reverse().slice(0, limit);
+      return { results: sortedKeys.map(k => this.db.rows.get(k)) };
+    }
+    if (/ORDER BY market_date DESC LIMIT \?/i.test(this.sql)) {
+      const [limit] = this.args;
+      const sortedKeys = [...this.db.rows.keys()].sort().reverse().slice(0, limit);
+      return { results: sortedKeys.map(k => this.db.rows.get(k)) };
     }
     return { results: [] };
   }
@@ -298,4 +310,365 @@ test('GET /api/market/dates returns DESC sorted dates with latest and earliest b
     env: environment(db)
   });
   assert.equal(cached.status, 304);
+});
+
+test('GET /api/market/range validates period and end parameters, and enforces 400/404 errors', async () => {
+  const db = new MockDb();
+  const env = environment(db);
+
+  // Missing period -> 400
+  let res = await onRequestGetRange({ request: new Request('https://snowshagal.com/api/market/range'), env });
+  assert.equal(res.status, 400);
+  assert.equal((await res.json()).error, 'INVALID_PERIOD');
+
+  // Invalid period -> 400
+  res = await onRequestGetRange({ request: new Request('https://snowshagal.com/api/market/range?period=3m'), env });
+  assert.equal(res.status, 400);
+  assert.equal((await res.json()).error, 'INVALID_PERIOD');
+
+  // Malformed end date -> 400
+  res = await onRequestGetRange({ request: new Request('https://snowshagal.com/api/market/range?period=1w&end=abc'), env });
+  assert.equal(res.status, 400);
+  assert.equal((await res.json()).error, 'INVALID_DATE');
+
+  // Impossible end date -> 400
+  res = await onRequestGetRange({ request: new Request('https://snowshagal.com/api/market/range?period=1w&end=2026-02-30'), env });
+  assert.equal(res.status, 400);
+  assert.equal((await res.json()).error, 'INVALID_DATE');
+
+  // Empty DB -> 404 NO_MARKET_DATA
+  res = await onRequestGetRange({ request: new Request('https://snowshagal.com/api/market/range?period=1w'), env });
+  assert.equal(res.status, 404);
+  assert.equal((await res.json()).error, 'NO_MARKET_DATA');
+
+  // Valid date but missing from DB -> 404 MARKET_DATE_NOT_FOUND
+  const d1 = clone(fixture); d1.meta.market_date = '2026-08-28'; alignGroupDate(d1, '2026-08-28');
+  await onRequestPost({ request: publishRequest(d1, { 'x-market-publish-key': 'market-secret' }), env });
+
+  res = await onRequestGetRange({ request: new Request('https://snowshagal.com/api/market/range?period=1w&end=2026-08-20'), env });
+  assert.equal(res.status, 404);
+  assert.equal((await res.json()).error, 'MARKET_DATE_NOT_FOUND');
+});
+
+test('GET /api/market/range calculates window completeness for 1w (5 sessions) and 1m (20 sessions)', async () => {
+  const db = new MockDb();
+  const env = environment(db);
+
+  // Seed 4 snapshots (like current Production)
+  const dates = ['2026-08-25', '2026-08-26', '2026-08-27', '2026-08-28'];
+  for (const d of dates) {
+    const snap = clone(fixture);
+    snap.meta.market_date = d;
+    alignGroupDate(snap, d);
+    await onRequestPost({ request: publishRequest(snap, { 'x-market-publish-key': 'market-secret' }), env });
+  }
+
+  // 1w with 4 rows -> sessions_used: 4, required_sessions: 5, complete: false
+  let res = await onRequestGetRange({ request: new Request('https://snowshagal.com/api/market/range?period=1w'), env });
+  assert.equal(res.status, 200);
+  let data = await res.json();
+  assert.equal(data.aggregation_version, '1.0.0');
+  assert.equal(data.period, '1w');
+  assert.deepEqual(data.window, {
+    start_date: '2026-08-25',
+    end_date: '2026-08-28',
+    dates: ['2026-08-25', '2026-08-26', '2026-08-27', '2026-08-28'],
+    sessions_used: 4,
+    required_sessions: 5,
+    complete: false
+  });
+
+  // 1m with 4 rows -> sessions_used: 4, required_sessions: 20, complete: false
+  res = await onRequestGetRange({ request: new Request('https://snowshagal.com/api/market/range?period=1m'), env });
+  assert.equal(res.status, 200);
+  data = await res.json();
+  assert.equal(data.window.sessions_used, 4);
+  assert.equal(data.window.required_sessions, 20);
+  assert.equal(data.window.complete, false);
+
+  // Add 5th date -> 1w complete: true
+  const snap5 = clone(fixture);
+  snap5.meta.market_date = '2026-08-29';
+  alignGroupDate(snap5, '2026-08-29');
+  await onRequestPost({ request: publishRequest(snap5, { 'x-market-publish-key': 'market-secret' }), env });
+
+  res = await onRequestGetRange({ request: new Request('https://snowshagal.com/api/market/range?period=1w'), env });
+  assert.equal(res.status, 200);
+  data = await res.json();
+  assert.equal(data.window.sessions_used, 5);
+  assert.equal(data.window.required_sessions, 5);
+  assert.equal(data.window.complete, true);
+  assert.equal(data.window.start_date, '2026-08-25');
+  assert.equal(data.window.end_date, '2026-08-29');
+
+  // Query historical end=2026-08-27 -> 3 sessions (25, 26, 27)
+  res = await onRequestGetRange({ request: new Request('https://snowshagal.com/api/market/range?period=1w&end=2026-08-27'), env });
+  assert.equal(res.status, 200);
+  data = await res.json();
+  assert.equal(data.window.end_date, '2026-08-27');
+  assert.equal(data.window.sessions_used, 3);
+  assert.equal(data.window.complete, false);
+});
+
+test('Multi-session return prevents off-by-one errors using first session previous_close baseline', () => {
+  // Synthetic 5-day series
+  // D1: prev_close = 100, close = 101, high = 102, low = 99
+  // D2: prev_close = 101, close = 102, high = 103, low = 101
+  // D3: prev_close = 102, close = 103, high = 104, low = 102
+  // D4: prev_close = 103, close = 104, high = 105, low = 103
+  // D5: prev_close = 104, close = 105, high = 106, low = 104
+  const snapshots = [
+    {
+      meta: { market_date: '2026-08-24', schema_version: '1.1.0' },
+      indices: {
+        KOSPI: { close: 101, previous_close: 100, high: 102, low: 99, source_date: '2026-08-24' }
+      }
+    },
+    {
+      meta: { market_date: '2026-08-25', schema_version: '1.1.0' },
+      indices: {
+        KOSPI: { close: 102, previous_close: 101, high: 103, low: 101, source_date: '2026-08-25' }
+      }
+    },
+    {
+      meta: { market_date: '2026-08-26', schema_version: '1.1.0' },
+      indices: {
+        KOSPI: { close: 103, previous_close: 102, high: 104, low: 102, source_date: '2026-08-26' }
+      }
+    },
+    {
+      meta: { market_date: '2026-08-27', schema_version: '1.1.0' },
+      indices: {
+        KOSPI: { close: 104, previous_close: 103, high: 105, low: 103, source_date: '2026-08-27' }
+      }
+    },
+    {
+      meta: { market_date: '2026-08-28', schema_version: '1.1.0' },
+      indices: {
+        KOSPI: { close: 105, previous_close: 104, high: 106, low: 104, source_date: '2026-08-28' }
+      }
+    }
+  ];
+
+  const res = computeMarketRange(snapshots, '1w', 5);
+  const kospi = res.instruments.indices.KOSPI;
+
+  assert.equal(kospi.baseline_value, 100);
+  assert.equal(kospi.end_value, 105);
+  assert.equal(kospi.change, 5);
+  // Correct 5-session return: (105 / 100 - 1) * 100 = 5.0%
+  // Erroneous off-by-one 4-session return would have been: (105 / 101 - 1) * 100 = 3.960396...%
+  assert.ok(Math.abs(kospi.return_pct - 5) < 1e-9);
+  assert.equal(kospi.period_high, 106);
+  assert.equal(kospi.period_low, 99);
+  assert.equal(kospi.observations, 5);
+  assert.equal(kospi.complete, true);
+});
+
+test('Investor flows sum daily raw net_buy and are strictly decoupled from recent_5d_flows', () => {
+  // 5 daily foreign KOSPI net_buy: +100, -200, +300, -50, +25 -> sum = +175
+  const netBuys = [100, -200, 300, -50, 25];
+  const snapshots = netBuys.map((nb, i) => ({
+    meta: { market_date: `2026-08-2${i + 1}`, schema_version: '1.1.0' },
+    krx_investor_trading: {
+      unit: 'KRW billion',
+      markets: {
+        KOSPI: {
+          investors: {
+            외국인: { net_buy: nb },
+            기관: { net_buy: 10 },
+            개인: { net_buy: -nb - 10 }
+          }
+        },
+        KOSDAQ: {
+          investors: {
+            외국인: { net_buy: 5 },
+            기관: { net_buy: 5 },
+            개인: { net_buy: -10 }
+          }
+        },
+        KOSPI200선물: {
+          investors: {
+            외국인: { net_buy: 20 },
+            기관: { net_buy: -20 },
+            개인: { net_buy: 0 }
+          }
+        }
+      }
+    },
+    // Poisoned recent_5d_flows to verify that the aggregation engine never touches this field!
+    recent_5d_flows: {
+      markets: {
+        KOSPI: { 외국인: 99999999, 기관: 99999999, 개인: 99999999 }
+      }
+    }
+  }));
+
+  const res = computeMarketRange(snapshots, '1w', 5);
+  const foreignKospi = res.flows.markets.KOSPI.외국인;
+
+  assert.equal(foreignKospi.net_buy, 175, 'Foreign KOSPI net_buy must be exactly 175');
+  assert.equal(foreignKospi.observations, 5);
+  assert.equal(foreignKospi.complete, true);
+  assert.equal(res.flows.unit, 'KRW billion');
+});
+
+test('Market breadth averages ratios and counts, and tracks session dominance accurately', () => {
+  const breadthSeries = [
+    { rise_ratio: 0.60, fall_ratio: 0.35, rise_count: 600, fall_count: 350 }, // advancer
+    { rise_ratio: 0.55, fall_ratio: 0.40, rise_count: 550, fall_count: 400 }, // advancer
+    { rise_ratio: 0.40, fall_ratio: 0.55, rise_count: 400, fall_count: 550 }, // decliner
+    { rise_ratio: 0.70, fall_ratio: 0.25, rise_count: 700, fall_count: 250 }, // advancer
+    { rise_ratio: 0.50, fall_ratio: 0.50, rise_count: 500, fall_count: 500 }  // neutral
+  ];
+
+  const snapshots = breadthSeries.map((b, i) => ({
+    meta: { market_date: `2026-08-2${i + 1}`, schema_version: '1.1.0' },
+    market_breadth: {
+      KOSPI: b,
+      KOSDAQ: b
+    }
+  }));
+
+  const res = computeMarketRange(snapshots, '1w', 5);
+  const breadth = res.breadth.KOSPI;
+
+  assert.equal(breadth.avg_rise_ratio, 0.55);
+  assert.equal(breadth.avg_fall_ratio, 0.41);
+  assert.equal(breadth.avg_rise_count, 550);
+  assert.equal(breadth.avg_fall_count, 410);
+  assert.equal(breadth.advancer_dominant_sessions, 3);
+  assert.equal(breadth.decliner_dominant_sessions, 1);
+  assert.equal(breadth.neutral_sessions, 1);
+  assert.equal(breadth.observations, 5);
+  assert.equal(breadth.complete, true);
+});
+
+test('US10Y provides accurate change_bp basis-point calculation', () => {
+  const snapshots = [
+    {
+      meta: { market_date: '2026-08-24', schema_version: '1.1.0' },
+      rates_fx_volatility: {
+        US10Y: { close: 4.61, previous_close: 4.60, high: 4.65, low: 4.59, source_date: '2026-08-24' }
+      }
+    },
+    {
+      meta: { market_date: '2026-08-28', schema_version: '1.1.0' },
+      rates_fx_volatility: {
+        US10Y: { close: 4.72, previous_close: 4.70, high: 4.74, low: 4.68, source_date: '2026-08-28' }
+      }
+    }
+  ];
+
+  const res = computeMarketRange(snapshots, '1w', 2);
+  const us10y = res.instruments.rates_fx_volatility.US10Y;
+
+  assert.equal(us10y.baseline_value, 4.60);
+  assert.equal(us10y.end_value, 4.72);
+  assert.ok(Math.abs(us10y.change - 0.12) < 1e-9);
+  assert.ok(Math.abs(us10y.change_bp - 12) < 1e-9);
+});
+
+test('KRX groups multi-session returns require full coverage across sessions and index_code identity', () => {
+  // A. 5 v1.1.0 snapshots with complete group code
+  // D1: close = 100, change = 2 -> baseline = 98
+  // D5: close = 110 -> return_pct = (110 / 98 - 1) * 100 = 12.244897959183675%
+  const completeSnapshots = [1, 2, 3, 4, 5].map(day => ({
+    meta: { market_date: `2026-08-2${day}`, schema_version: '1.1.0' },
+    krx_groups: {
+      sectors: [
+        { index_code: 'KGS04P', name: '화학', market: 'KOSPI', close: 100 + (day - 1) * 2.5, change: 2 },
+        { index_code: 'QGS03P', name: '건설', market: 'KOSDAQ', close: 50 + (day - 1), change: 1 }
+      ],
+      themes: [
+        { index_code: 'KT001', name: '2차전지', close: 200 + (day - 1) * 5, change: 4 }
+      ]
+    }
+  }));
+
+  const completeRes = computeMarketRange(completeSnapshots, '1w', 5);
+  assert.equal(completeRes.krx_groups.coverage_complete, true);
+  assert.equal(completeRes.krx_groups.sessions_with_data, 5);
+
+  const chemSector = completeRes.krx_groups.sectors.find(s => s.index_code === 'KGS04P');
+  assert.ok(chemSector);
+  assert.equal(chemSector.baseline_value, 98);
+  assert.equal(chemSector.end_value, 110);
+  assert.ok(Math.abs(chemSector.return_pct - ((110 / 98 - 1) * 100)) < 1e-9);
+  assert.equal(chemSector.complete, true);
+
+  // Sector sorting: market ASC ('KOSDAQ' then 'KOSPI'), then index_code ASC
+  assert.equal(completeRes.krx_groups.sectors[0].market, 'KOSDAQ');
+  assert.equal(completeRes.krx_groups.sectors[1].market, 'KOSPI');
+
+  // B. Code missing on day 3 -> code complete: false, return_pct: null
+  const partialSnapshots = clone(completeSnapshots);
+  partialSnapshots[2].krx_groups.sectors = partialSnapshots[2].krx_groups.sectors.filter(s => s.index_code !== 'KGS04P');
+
+  const partialRes = computeMarketRange(partialSnapshots, '1w', 5);
+  const missingCodeChem = partialRes.krx_groups.sectors.find(s => s.index_code === 'KGS04P');
+  assert.equal(missingCodeChem.observations, 4);
+  assert.equal(missingCodeChem.complete, false);
+  assert.equal(missingCodeChem.return_pct, null);
+});
+
+test('Mixed schema windows (v1.0.1 and v1.1.0) aggregate gracefully with coverage reporting', () => {
+  const mixedSnapshots = [
+    {
+      meta: { market_date: '2026-08-25', schema_version: '1.0.1' },
+      indices: { KOSPI: { close: 100, previous_close: 99, source_date: '2026-08-25' } }
+    },
+    {
+      meta: { market_date: '2026-08-26', schema_version: '1.0.1' },
+      indices: { KOSPI: { close: 101, previous_close: 100, source_date: '2026-08-26' } }
+    },
+    {
+      meta: { market_date: '2026-08-27', schema_version: '1.1.0' },
+      indices: { KOSPI: { close: 102, previous_close: 101, source_date: '2026-08-27' } },
+      krx_groups: {
+        sectors: [{ index_code: 'KGS04P', name: '화학', market: 'KOSPI', close: 100, change: 2 }]
+      }
+    }
+  ];
+
+  const res = computeMarketRange(mixedSnapshots, '1w', 5);
+  assert.deepEqual(res.coverage.schema_versions, { '1.0.1': 2, '1.1.0': 1 });
+  assert.equal(res.krx_groups.sessions_with_data, 1);
+  assert.equal(res.krx_groups.sessions_used, 3);
+  assert.equal(res.krx_groups.coverage_complete, false);
+  assert.equal(res.instruments.indices.KOSPI.observations, 3);
+});
+
+test('GET /api/market/range supports ETag caching and revalidates on snapshot republish', async () => {
+  const db = new MockDb();
+  const env = environment(db);
+
+  const d1 = clone(fixture); d1.meta.market_date = '2026-08-27'; alignGroupDate(d1, '2026-08-27');
+  const d2 = clone(fixture); d2.meta.market_date = '2026-08-28'; alignGroupDate(d2, '2026-08-28');
+
+  await onRequestPost({ request: publishRequest(d1, { 'x-market-publish-key': 'market-secret' }), env });
+  await onRequestPost({ request: publishRequest(d2, { 'x-market-publish-key': 'market-secret' }), env });
+
+  const res = await onRequestGetRange({ request: new Request('https://snowshagal.com/api/market/range?period=1w'), env });
+  assert.equal(res.status, 200);
+  const etag = res.headers.get('etag');
+  assert.ok(etag);
+  assert.equal(res.headers.get('cache-control'), 'public, max-age=30, s-maxage=120, stale-while-revalidate=300');
+
+  // Revalidate unchanged -> 304
+  const cached = await onRequestGetRange({
+    request: new Request('https://snowshagal.com/api/market/range?period=1w', { headers: { 'if-none-match': etag } }),
+    env
+  });
+  assert.equal(cached.status, 304);
+
+  // Republish d2 with updated generated_at -> new ETag generated
+  const d2Updated = clone(d2);
+  d2Updated.meta.generated_at = '2026-08-30T18:00:00.000000+07:00';
+  await onRequestPost({ request: publishRequest(d2Updated, { 'x-market-publish-key': 'market-secret' }), env });
+
+  const refreshed = await onRequestGetRange({ request: new Request('https://snowshagal.com/api/market/range?period=1w'), env });
+  assert.equal(refreshed.status, 200);
+  const newEtag = refreshed.headers.get('etag');
+  assert.notEqual(newEtag, etag, 'ETag must change when a constituent snapshot is updated');
 });
