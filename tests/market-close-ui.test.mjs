@@ -60,7 +60,7 @@ test('Market renderer distinguishes loading, empty, and retryable error states',
   assert.match(script, /response\.status === 404/);
   assert.match(script, /function renderEmpty/);
   assert.match(script, /class="market-retry"/);
-  assert.match(script, /addEventListener\('click', init/);
+  assert.match(script, /data-market-action="retry"/);
   assert.match(script, /pages\\\.dev/);
   assert.match(script, /localhost\|127\\\.0\\\.0\\\.1/);
   assert.match(script, /market-preview-notice/);
@@ -296,4 +296,161 @@ test('public pages keep mobile navigation elements outside header-row', async ()
       `mobile-nav is improperly nested inside header-row in ${pagePath}`
     );
   }
+});
+
+test('retry click triggers init/load exactly once without duplicate calls', async () => {
+  const script = await read('assets/market-close.js');
+  let fetchCount = 0;
+  const mockFetch = async (url) => {
+    fetchCount++;
+    if (url.includes('/api/market/dates')) {
+      return { ok: true, json: async () => ({ dates: ['2026-08-28'], latest: '2026-08-28', earliest: '2026-08-28' }) };
+    }
+    return { ok: true, json: async () => JSON.parse(await read('contracts/market_close/market_close.example.json')) };
+  };
+
+  let rootClickListener = null;
+  const rootElement = {
+    id: 'market-close-root',
+    innerHTML: '',
+    addEventListener(event, handler) {
+      if (event === 'click') rootClickListener = handler;
+    },
+    removeEventListener() {}
+  };
+
+  const document = {
+    documentElement: { dataset: { siteLang: 'ko' } },
+    body: { dataset: {} },
+    readyState: 'complete',
+    getElementById(id) {
+      if (id === 'market-close-root') return rootElement;
+      return null;
+    },
+    querySelectorAll() { return []; },
+    addEventListener() {}
+  };
+
+  const windowListeners = new Map();
+  const window = {
+    addEventListener(type, listener) {
+      if (!windowListeners.has(type)) windowListeners.set(type, new Set());
+      windowListeners.get(type).add(listener);
+    },
+    removeEventListener(type, listener) {
+      if (windowListeners.has(type)) windowListeners.get(type).delete(listener);
+    }
+  };
+
+  const context = vm.createContext({
+    window,
+    document,
+    location: { pathname: '/market/', search: '', hostname: 'localhost' },
+    fetch: mockFetch,
+    Intl,
+    Date,
+    Set,
+    URLSearchParams,
+    console
+  });
+  vm.runInContext(script, context);
+  const runtime = window.MARKET_CLOSE;
+  await runtime.init();
+
+  assert.ok(rootClickListener, 'click listener should be bound to root');
+  const initialFetches = fetchCount;
+
+  // Simulate clicking retry
+  const retryEvent = {
+    target: {
+      closest(sel) {
+        if (sel === '[data-market-action]') return { dataset: { marketAction: 'retry' } };
+        return null;
+      }
+    }
+  };
+
+  await rootClickListener(retryEvent);
+  await new Promise(r => setTimeout(r, 10));
+  assert.equal(fetchCount - initialFetches, 2, 'Retry click should trigger exactly 1 init sequence (dates + latest)');
+});
+
+test('repeated retries do not accumulate popstate listeners and popstate triggers load exactly once', async () => {
+  const script = await read('assets/market-close.js');
+  let fetchCount = 0;
+  const mockFetch = async (url) => {
+    fetchCount++;
+    if (url.includes('/api/market/dates')) {
+      return { ok: true, json: async () => ({ dates: ['2026-08-28'], latest: '2026-08-28', earliest: '2026-08-28' }) };
+    }
+    return { ok: true, json: async () => JSON.parse(await read('contracts/market_close/market_close.example.json')) };
+  };
+
+  let rootClickListener = null;
+  const rootElement = {
+    id: 'market-close-root',
+    innerHTML: '',
+    addEventListener(event, handler) {
+      if (event === 'click') rootClickListener = handler;
+    },
+    removeEventListener() {}
+  };
+
+  const document = {
+    documentElement: { dataset: { siteLang: 'ko' } },
+    body: { dataset: {} },
+    readyState: 'complete',
+    getElementById(id) {
+      if (id === 'market-close-root') return rootElement;
+      return null;
+    },
+    querySelectorAll() { return []; },
+    addEventListener() {}
+  };
+
+  const windowListeners = new Map();
+  const window = {
+    addEventListener(type, listener) {
+      if (!windowListeners.has(type)) windowListeners.set(type, new Set());
+      windowListeners.get(type).add(listener);
+    },
+    removeEventListener(type, listener) {
+      if (windowListeners.has(type)) windowListeners.get(type).delete(listener);
+    }
+  };
+
+  const location = { pathname: '/market/', search: '', hostname: 'localhost' };
+  const context = vm.createContext({
+    window,
+    document,
+    location,
+    fetch: mockFetch,
+    Intl,
+    Date,
+    Set,
+    URLSearchParams,
+    console
+  });
+  vm.runInContext(script, context);
+  const runtime = window.MARKET_CLOSE;
+
+  // Call init 5 times (simulating 5 repeated retries)
+  for (let i = 0; i < 5; i++) {
+    await runtime.init();
+  }
+
+  // Exactly 1 popstate listener registered
+  const popstateListeners = windowListeners.get('popstate') || new Set();
+  assert.equal(popstateListeners.size, 1, 'Exactly one popstate listener must remain registered');
+
+  // Trigger popstate event once
+  const fetchesBeforePopstate = fetchCount;
+  location.search = '?date=2026-08-27';
+  for (const listener of popstateListeners) {
+    listener();
+  }
+  await new Promise(r => setImmediate(r));
+
+  // Exactly 1 loadAndRender triggered (1 fetch for /api/market/date?date=2026-08-27)
+  assert.equal(fetchCount - fetchesBeforePopstate, 1, 'Popstate must trigger exactly 1 load call without duplicate execution');
 });

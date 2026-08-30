@@ -201,9 +201,9 @@
 
   function updateLanguageLinks(currentSearch = location.search) {
     const localeApi = root.MARKET_LOCALE;
-    const links = document.querySelectorAll('[data-language-choice]');
+    const links = typeof document?.querySelectorAll === 'function' ? document.querySelectorAll('[data-language-choice]') : [];
     links.forEach(link => {
-      const target = link.dataset.languageChoice;
+      const target = link.dataset?.languageChoice;
       if (localeApi?.pageLanguagePath) {
         link.href = localeApi.pageLanguagePath(location.pathname, target, currentSearch);
       }
@@ -533,7 +533,6 @@
   function renderError(target = document.getElementById('market-close-root')) {
     if (!target) return;
     target.innerHTML = `<section class="market-state" role="alert"><img class="market-state-owl" src="/assets/brand/snowshagal-owl.webp" alt="" width="232" height="256" aria-hidden="true"><h1>${copy.loadError}</h1><button class="market-retry" type="button" data-market-action="retry">${copy.retry}</button></section>`;
-    target.querySelector?.('.market-retry')?.addEventListener('click', init, { once: true });
     bindEvents(target);
   }
 
@@ -576,8 +575,21 @@
     } catch (_) {}
   }
 
+  function onPopState() {
+    const params = new URLSearchParams(location.search);
+    const d = params.get('date');
+    updateLanguageLinks(location.search);
+    loadAndRender(d);
+  }
+
   async function init() {
     if (!document.getElementById('market-close-root')) return;
+
+    if (!state.popstateBound && typeof window?.addEventListener === 'function') {
+      window.removeEventListener?.('popstate', onPopState);
+      window.addEventListener('popstate', onPopState);
+      state.popstateBound = true;
+    }
 
     await initDatesList();
 
@@ -585,13 +597,6 @@
     const dateQuery = searchParams.get('date');
 
     updateLanguageLinks(location.search);
-
-    window.addEventListener('popstate', () => {
-      const params = new URLSearchParams(location.search);
-      const d = params.get('date');
-      updateLanguageLinks(location.search);
-      loadAndRender(d);
-    });
 
     await loadAndRender(dateQuery);
   }
@@ -602,6 +607,9 @@
     displayValue,
     companyName,
     findExactDaily,
+    init,
+    loadAndRender,
+    onPopState,
     state
   };
 
