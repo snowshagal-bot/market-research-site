@@ -38,7 +38,7 @@ export async function onRequestPost({ request, env }) {
 
   try {
     const db = await ensureDisclosureSchema(env);
-    const targetStatus = action === 'publish' ? 'manual' : 'admin_only';
+    const targetStatus = action === 'publish' ? 'manual' : 'suppressed';
     const filing = await setFilingPublishStatus(db, rceptNo, targetStatus, new Date());
     return json({ ok: true, action, filing });
   } catch (error) {

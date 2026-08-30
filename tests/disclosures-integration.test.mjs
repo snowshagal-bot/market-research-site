@@ -620,7 +620,7 @@ test('manual publish endpoint allows publishing any filing and unpublishing', as
     env: envFor(db)
   });
   assert.equal(unpubRes.status, 200);
-  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE}`).publish_status, 'admin_only');
+  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE}`).publish_status, 'suppressed');
   db.close();
 });
 
@@ -902,7 +902,7 @@ test('auto 게시 → Watchlist 삭제 → 과거 게시물은 auto 유지', asy
   db.close();
 });
 
-test('명시적 관리자 unpublish → admin_only', async () => {
+test('명시적 관리자 unpublish → suppressed', async () => {
   const db = await seededDb([
     item('20260830000001', { corp_name: '삼성전자', stock_code: '005930', report_nm: '자기주식취득 결정', rcept_dt: '20260830' })
   ]);
@@ -919,7 +919,118 @@ test('명시적 관리자 unpublish → admin_only', async () => {
     env: envFor(db)
   });
   assert.equal(unpubRes.status, 200);
-  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`).publish_status, 'admin_only');
+  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`).publish_status, 'suppressed');
+  db.close();
+});
+
+test('auto → 관리자 unpublish → 같은 날 재Sync → suppressed 유지 및 Feed 미노출', async () => {
+  const db = await seededDb();
+  // 1. Initial sync auto-publishes today's critical watchlist filing
+  globalThis.fetch = async (url) => {
+    if (String(url).includes('opendart')) {
+      return new Response(JSON.stringify({
+        status: '000', message: '정상', page_no: 1, page_count: 100, total_count: 1, total_page: 1,
+        list: [item('20260830000001', { corp_name: '삼성전자', stock_code: '005930', report_nm: '자기주식취득 결정', rcept_dt: '20260830' })]
+      }));
+    }
+    return geminiResponse();
+  };
+
+  const sync1 = await syncPost({
+    request: adminRequest('/api/disclosures/sync', { method: 'POST', body: '{}' }),
+    env: envFor(db),
+    now: NOW
+  });
+  assert.equal(sync1.status, 200);
+  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`).publish_status, 'auto');
+
+  // 2. Admin unpublishes the filing -> status becomes suppressed
+  const unpubRes = await publishPost({
+    request: adminRequest('/api/disclosures/publish', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ rceptNo: '20260830000001', action: 'unpublish' })
+    }),
+    env: envFor(db)
+  });
+  assert.equal(unpubRes.status, 200);
+  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`).publish_status, 'suppressed');
+
+  // 3. Same day re-sync happens with the same filing
+  const sync2 = await syncPost({
+    request: adminRequest('/api/disclosures/sync', { method: 'POST', body: '{}' }),
+    env: envFor(db),
+    now: NOW
+  });
+  assert.equal(sync2.status, 200);
+
+  // 4. Must stay suppressed (never auto-promoted back!)
+  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`).publish_status, 'suppressed');
+
+  // 5. Public feed must NOT include suppressed filings
+  const feedRes = await feedGet({
+    request: new Request('https://market-research-site.pages.dev/api/disclosures/feed?date=2026-08-30'),
+    env: envFor(db)
+  });
+  assert.equal(feedRes.status, 200);
+  const feedData = await feedRes.json();
+  assert.equal(feedData.totalPublished, 0);
+  assert.equal(feedData.items.length, 0);
+
+  // 6. Explicit admin publish can re-publish it as manual
+  const pubRes = await publishPost({
+    request: adminRequest('/api/disclosures/publish', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ rceptNo: '20260830000001', action: 'publish' })
+    }),
+    env: envFor(db)
+  });
+  assert.equal(pubRes.status, 200);
+  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`).publish_status, 'manual');
+  db.close();
+});
+
+test('공개 공시 12건 fixture → 기본 10건(hasMore true) → all=1 파라미터 시 12건 전체 반환', async () => {
+  const items = Array.from({ length: 12 }, (_, i) => {
+    const num = String(i + 1).padStart(6, '0');
+    return item(`20260830${num}`, {
+      corp_name: `기업${i + 1}`,
+      stock_code: `0000${i + 1}`.slice(-6),
+      report_nm: `주요사항보고서 ${i + 1}`,
+      rcept_dt: '20260830',
+      rule_score: 10 - Math.min(i, 5)
+    });
+  });
+
+  const db = await seededDb(items);
+  // Mark all 12 as published (auto)
+  db.database.prepare(`UPDATE ${FILINGS_TABLE} SET publish_status = 'auto'`).run();
+
+  // 1. Default fetch: returns 10 items with hasMore = true
+  const feed1 = await feedGet({
+    request: new Request('https://market-research-site.pages.dev/api/disclosures/feed?date=2026-08-30'),
+    env: envFor(db)
+  });
+  assert.equal(feed1.status, 200);
+  const data1 = await feed1.json();
+  assert.equal(data1.totalPublished, 12);
+  assert.equal(data1.items.length, 10);
+  assert.equal(data1.hasMore, true);
+  assert.equal(data1.showingCount, 10);
+
+  // 2. Fetch with all=1: returns all 12 items with hasMore = false
+  const feed2 = await feedGet({
+    request: new Request('https://market-research-site.pages.dev/api/disclosures/feed?date=2026-08-30&all=1'),
+    env: envFor(db)
+  });
+  assert.equal(feed2.status, 200);
+  const data2 = await feed2.json();
+  assert.equal(data2.totalPublished, 12);
+  assert.equal(data2.items.length, 12);
+  assert.equal(data2.hasMore, false);
+  assert.equal(data2.showingCount, 12);
+
   db.close();
 });
 

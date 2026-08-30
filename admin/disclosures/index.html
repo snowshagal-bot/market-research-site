@@ -163,7 +163,7 @@
               ${f.isCorrection ? `<span class="tag-pill" style="background:#e8f0fe;color:#1a73e8;font-weight:700;">${esc(f.correctionType || '[정정]')}</span>` : ''}
               ${f.isSuperseded ? `<span class="tag-pill" style="background:#fce8e6;color:#c5221f;font-weight:700;">대체됨</span>` : ''}
               ${f.isWatchlist ? `<span class="tag-pill tag-watchlist">WATCHLIST</span>` : ''}
-              ${isPublished ? `<span class="tag-pill tag-market-live">MARKET 공개</span>` : ''}
+              ${isPublished ? `<span class="tag-pill tag-market-live">MARKET 공개</span>` : (f.publishStatus === 'suppressed' ? `<span class="tag-pill" style="background:#fef7e0;color:#b06000;font-weight:700;">비공개 (수동취소)</span>` : '')}
             </div>
             <p class="report">${esc(f.reportName)}</p>
             <div class="reasons">${reasons}</div>

@@ -541,12 +541,12 @@ export async function toggleWatchlistActive(db, stockCode, active, now = new Dat
 }
 
 export async function setFilingPublishStatus(db, rceptNo, publishStatus, now = new Date()) {
-  const safeStatus = (publishStatus === 'manual' || publishStatus === 'auto') ? publishStatus : 'admin_only';
+  const safeStatus = (publishStatus === 'manual' || publishStatus === 'auto' || publishStatus === 'suppressed') ? publishStatus : 'admin_only';
   const timestamp = now.toISOString();
-  const publishedAtVal = safeStatus === 'admin_only' ? '' : timestamp;
+  const publishedAtVal = (safeStatus === 'admin_only' || safeStatus === 'suppressed') ? '' : timestamp;
   const result = await db.prepare(`UPDATE ${FILINGS_TABLE} SET
       publish_status = ?,
-      published_at = CASE WHEN ? = 'admin_only' THEN '' ELSE (CASE WHEN published_at != '' AND published_at IS NOT NULL THEN published_at ELSE ? END) END,
+      published_at = CASE WHEN ? IN ('admin_only', 'suppressed') THEN '' ELSE (CASE WHEN published_at != '' AND published_at IS NOT NULL THEN published_at ELSE ? END) END,
       updated_at = ?
     WHERE rcept_no = ?
     RETURNING *`)
@@ -600,13 +600,14 @@ export async function upsertFiling(db, filing, { watchlistCodes = null, now = ne
         is_watchlist = ?,
         publish_status = CASE
           WHEN ${FILINGS_TABLE}.publish_status = 'manual' THEN 'manual'
+          WHEN ${FILINGS_TABLE}.publish_status = 'suppressed' THEN 'suppressed'
           WHEN ${FILINGS_TABLE}.publish_status = 'auto' THEN 'auto'
-          WHEN ? = 1 AND ? >= 7 AND ? = 1 THEN 'auto'
+          WHEN ${FILINGS_TABLE}.publish_status = 'admin_only' AND ? = 1 AND ? >= 7 AND ? = 1 THEN 'auto'
           ELSE ${FILINGS_TABLE}.publish_status
         END,
         published_at = CASE
           WHEN (${FILINGS_TABLE}.published_at != '' AND ${FILINGS_TABLE}.published_at IS NOT NULL) THEN ${FILINGS_TABLE}.published_at
-          WHEN ? = 1 AND ? >= 7 AND ? = 1 THEN ?
+          WHEN ${FILINGS_TABLE}.publish_status = 'admin_only' AND ? = 1 AND ? >= 7 AND ? = 1 THEN ?
           ELSE ${FILINGS_TABLE}.published_at
         END,
         ai_status = CASE

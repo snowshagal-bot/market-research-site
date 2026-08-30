@@ -918,7 +918,17 @@
       disclosuresExpanded = !disclosuresExpanded;
       const mount = document.getElementById('market-disclosures-mount');
       const marketDate = state.currentPayload?.meta?.market_date || state.currentDate;
-      const feedData = disclosureCache.get(marketDate);
+      let feedData = disclosureCache.get(marketDate);
+      if (disclosuresExpanded && feedData && (feedData.hasMore || (feedData.showingCount && feedData.totalPublished && feedData.showingCount < feedData.totalPublished))) {
+        try {
+          const url = marketDate ? `/api/disclosures/feed?date=${encodeURIComponent(marketDate)}&all=1` : '/api/disclosures/feed?all=1';
+          const res = await fetch(url);
+          if (res.ok) {
+            feedData = await res.json();
+            disclosureCache.set(marketDate, feedData);
+          }
+        } catch (_) {}
+      }
       if (mount && feedData) {
         renderDisclosuresMount(mount, feedData, disclosuresExpanded);
       }
