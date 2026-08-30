@@ -65,6 +65,9 @@ CREATE TABLE IF NOT EXISTS disclosure_filings (
   rule_reasons_json TEXT NOT NULL DEFAULT '[]',
   ai_eligible INTEGER NOT NULL DEFAULT 0,
   ai_status TEXT NOT NULL DEFAULT 'skipped',
+  publish_status TEXT NOT NULL DEFAULT 'admin_only',
+  is_watchlist INTEGER NOT NULL DEFAULT 0,
+  published_at TEXT NOT NULL DEFAULT '',
   ai_provider TEXT NOT NULL DEFAULT '',
   ai_model TEXT NOT NULL DEFAULT '',
   ai_json TEXT NOT NULL DEFAULT '',
@@ -79,6 +82,23 @@ CREATE INDEX IF NOT EXISTS idx_disclosure_date_priority
 
 CREATE INDEX IF NOT EXISTS idx_disclosure_ai_queue
   ON disclosure_filings (ai_eligible, ai_status, rcept_dt DESC, rule_score DESC);
+
+CREATE INDEX IF NOT EXISTS idx_disclosure_published
+  ON disclosure_filings (publish_status, rcept_dt DESC, rule_score DESC);
+
+CREATE TABLE IF NOT EXISTS disclosure_watchlist (
+  stock_code TEXT PRIMARY KEY,
+  corp_code TEXT NOT NULL DEFAULT '',
+  corp_name TEXT NOT NULL,
+  corp_cls TEXT NOT NULL DEFAULT 'Y',
+  active INTEGER NOT NULL DEFAULT 1,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_disclosure_watchlist_active
+  ON disclosure_watchlist (active, sort_order, corp_name);
 
 CREATE TABLE IF NOT EXISTS disclosure_usage_daily (
   usage_date TEXT NOT NULL,

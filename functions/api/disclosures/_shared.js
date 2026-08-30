@@ -1,4 +1,5 @@
 export const FILINGS_TABLE = 'disclosure_filings';
+export const WATCHLIST_TABLE = 'disclosure_watchlist';
 export const USAGE_TABLE = 'disclosure_usage_daily';
 export const STATE_TABLE = 'disclosure_state';
 
@@ -11,6 +12,39 @@ export const DEFAULT_MAX_PAGES_PER_CLASS = 10;
 export const DEFAULT_LOOKBACK_DAYS = 1;
 export const DEFAULT_LATEST_LIMIT = 100;
 export const ANALYSIS_CLAIM_TIMEOUT_MS = 10 * 60 * 1000;
+
+export const DEFAULT_WATCHLIST = [
+  { stockCode: '005930', corpCode: '00126380', corpName: '삼성전자', corpCls: 'Y', sortOrder: 1 },
+  { stockCode: '000660', corpCode: '00164779', corpName: 'SK하이닉스', corpCls: 'Y', sortOrder: 2 },
+  { stockCode: '373220', corpCode: '01515323', corpName: 'LG에너지솔루션', corpCls: 'Y', sortOrder: 3 },
+  { stockCode: '207940', corpCode: '00877059', corpName: '삼성바이오로직스', corpCls: 'Y', sortOrder: 4 },
+  { stockCode: '005380', corpCode: '00164742', corpName: '현대차', corpCls: 'Y', sortOrder: 5 },
+  { stockCode: '000270', corpCode: '00106641', corpName: '기아', corpCls: 'Y', sortOrder: 6 },
+  { stockCode: '068270', corpCode: '00413046', corpName: '셀트리온', corpCls: 'Y', sortOrder: 7 },
+  { stockCode: '005490', corpCode: '00149944', corpName: 'POSCO홀딩스', corpCls: 'Y', sortOrder: 8 },
+  { stockCode: '035420', corpCode: '00266961', corpName: 'NAVER', corpCls: 'Y', sortOrder: 9 },
+  { stockCode: '035720', corpCode: '00258801', corpName: '카카오', corpCls: 'Y', sortOrder: 10 },
+  { stockCode: '105560', corpCode: '00858365', corpName: 'KB금융', corpCls: 'Y', sortOrder: 11 },
+  { stockCode: '055550', corpCode: '00382199', corpName: '신한지주', corpCls: 'Y', sortOrder: 12 },
+  { stockCode: '051910', corpCode: '00373847', corpName: 'LG화학', corpCls: 'Y', sortOrder: 13 },
+  { stockCode: '006400', corpCode: '00138279', corpName: '삼성SDI', corpCls: 'Y', sortOrder: 14 },
+  { stockCode: '012330', corpCode: '00164788', corpName: '현대모비스', corpCls: 'Y', sortOrder: 15 },
+  { stockCode: '028260', corpCode: '00149953', corpName: '삼성물산', corpCls: 'Y', sortOrder: 16 },
+  { stockCode: '086790', corpCode: '00561565', corpName: '하나금융지주', corpCls: 'Y', sortOrder: 17 },
+  { stockCode: '032830', corpCode: '00138288', corpName: '삼성생명', corpCls: 'Y', sortOrder: 18 },
+  { stockCode: '066570', corpCode: '00401731', corpName: 'LG전자', corpCls: 'Y', sortOrder: 19 },
+  { stockCode: '034730', corpCode: '00181443', corpName: 'SK', corpCls: 'Y', sortOrder: 20 },
+  { stockCode: '247540', corpCode: '01198425', corpName: '에코프로비엠', corpCls: 'K', sortOrder: 21 },
+  { stockCode: '086520', corpCode: '00628286', corpName: '에코프로', corpCls: 'K', sortOrder: 22 },
+  { stockCode: '196170', corpCode: '00984951', corpName: '알테오젠', corpCls: 'K', sortOrder: 23 },
+  { stockCode: '028300', corpCode: '00299491', corpName: 'HLB', corpCls: 'K', sortOrder: 24 },
+  { stockCode: '042700', corpCode: '00356372', corpName: '한미반도체', corpCls: 'Y', sortOrder: 25 },
+  { stockCode: '034020', corpCode: '00164478', corpName: '두산에너빌리티', corpCls: 'Y', sortOrder: 26 },
+  { stockCode: '259960', corpCode: '01309854', corpName: '크래프톤', corpCls: 'Y', sortOrder: 27 },
+  { stockCode: '003670', corpCode: '00138260', corpName: '포스코퓨처엠', corpCls: 'Y', sortOrder: 28 },
+  { stockCode: '010130', corpCode: '00164751', corpName: '고려아연', corpCls: 'Y', sortOrder: 29 },
+  { stockCode: '018260', corpCode: '00164760', corpName: '삼성에스디에스', corpCls: 'Y', sortOrder: 30 }
+];
 
 const schemaPromises = new WeakMap();
 
@@ -139,52 +173,99 @@ export class DisclosureError extends Error {
   }
 }
 
+async function runSchemaMigration(db) {
+  await db.batch([
+    db.prepare(`CREATE TABLE IF NOT EXISTS ${FILINGS_TABLE} (
+      rcept_no TEXT PRIMARY KEY,
+      corp_cls TEXT NOT NULL,
+      corp_name TEXT NOT NULL,
+      corp_code TEXT NOT NULL,
+      stock_code TEXT NOT NULL DEFAULT '',
+      report_nm TEXT NOT NULL,
+      flr_nm TEXT NOT NULL DEFAULT '',
+      rcept_dt TEXT NOT NULL,
+      rm TEXT NOT NULL DEFAULT '',
+      source_url TEXT NOT NULL,
+      rule_score INTEGER NOT NULL DEFAULT 0,
+      rule_priority TEXT NOT NULL DEFAULT 'low',
+      rule_reasons_json TEXT NOT NULL DEFAULT '[]',
+      ai_eligible INTEGER NOT NULL DEFAULT 0,
+      ai_status TEXT NOT NULL DEFAULT 'skipped',
+      publish_status TEXT NOT NULL DEFAULT 'admin_only',
+      is_watchlist INTEGER NOT NULL DEFAULT 0,
+      published_at TEXT NOT NULL DEFAULT '',
+      ai_provider TEXT NOT NULL DEFAULT '',
+      ai_model TEXT NOT NULL DEFAULT '',
+      ai_json TEXT NOT NULL DEFAULT '',
+      ai_error TEXT NOT NULL DEFAULT '',
+      ai_analyzed_at TEXT NOT NULL DEFAULT '',
+      first_seen_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_disclosure_date_priority ON ${FILINGS_TABLE} (rcept_dt DESC, rule_score DESC)`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_disclosure_ai_queue ON ${FILINGS_TABLE} (ai_eligible, ai_status, rcept_dt DESC, rule_score DESC)`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_disclosure_published ON ${FILINGS_TABLE} (publish_status, rcept_dt DESC, rule_score DESC)`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS ${WATCHLIST_TABLE} (
+      stock_code TEXT PRIMARY KEY,
+      corp_code TEXT NOT NULL DEFAULT '',
+      corp_name TEXT NOT NULL,
+      corp_cls TEXT NOT NULL DEFAULT 'Y',
+      active INTEGER NOT NULL DEFAULT 1,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_disclosure_watchlist_active ON ${WATCHLIST_TABLE} (active, sort_order, corp_name)`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS ${USAGE_TABLE} (
+      usage_date TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      request_count INTEGER NOT NULL DEFAULT 0,
+      input_tokens INTEGER NOT NULL DEFAULT 0,
+      output_tokens INTEGER NOT NULL DEFAULT 0,
+      updated_at TEXT NOT NULL,
+      PRIMARY KEY (usage_date, kind)
+    )`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS ${STATE_TABLE} (
+      state_key TEXT PRIMARY KEY,
+      state_value TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )`)
+  ]);
+
+  // Ensure new columns exist for preexisting tables
+  try {
+    const tableInfo = await db.prepare(`PRAGMA table_info(${FILINGS_TABLE})`).all();
+    const existingCols = new Set((tableInfo?.results || []).map(r => r.name));
+    if (!existingCols.has('publish_status')) {
+      await db.prepare(`ALTER TABLE ${FILINGS_TABLE} ADD COLUMN publish_status TEXT NOT NULL DEFAULT 'admin_only'`).run();
+    }
+    if (!existingCols.has('is_watchlist')) {
+      await db.prepare(`ALTER TABLE ${FILINGS_TABLE} ADD COLUMN is_watchlist INTEGER NOT NULL DEFAULT 0`).run();
+    }
+    if (!existingCols.has('published_at')) {
+      await db.prepare(`ALTER TABLE ${FILINGS_TABLE} ADD COLUMN published_at TEXT NOT NULL DEFAULT ''`).run();
+    }
+  } catch (_) {}
+
+  // Seed default watchlist if empty
+  try {
+    const countRow = await db.prepare(`SELECT count(*) as count FROM ${WATCHLIST_TABLE}`).first();
+    if (Number(countRow?.count || 0) === 0) {
+      const now = new Date().toISOString();
+      const seedStatements = DEFAULT_WATCHLIST.map(item =>
+        db.prepare(`INSERT OR IGNORE INTO ${WATCHLIST_TABLE} (stock_code, corp_code, corp_name, corp_cls, active, sort_order, created_at, updated_at)
+          VALUES (?, ?, ?, ?, 1, ?, ?, ?)`).bind(item.stockCode, item.corpCode, item.corpName, item.corpCls, item.sortOrder, now, now)
+      );
+      if (seedStatements.length) await db.batch(seedStatements);
+    }
+  } catch (_) {}
+}
+
 export async function ensureDisclosureSchema(env) {
   const db = env?.COMMENTS_DB;
   if (!db) throw new DisclosureError('DB_NOT_CONFIGURED', '공시 모니터 데이터베이스가 연결되지 않았습니다.', 503);
   if (!schemaPromises.has(db)) {
-    const promise = db.batch([
-      db.prepare(`CREATE TABLE IF NOT EXISTS ${FILINGS_TABLE} (
-        rcept_no TEXT PRIMARY KEY,
-        corp_cls TEXT NOT NULL,
-        corp_name TEXT NOT NULL,
-        corp_code TEXT NOT NULL,
-        stock_code TEXT NOT NULL DEFAULT '',
-        report_nm TEXT NOT NULL,
-        flr_nm TEXT NOT NULL DEFAULT '',
-        rcept_dt TEXT NOT NULL,
-        rm TEXT NOT NULL DEFAULT '',
-        source_url TEXT NOT NULL,
-        rule_score INTEGER NOT NULL DEFAULT 0,
-        rule_priority TEXT NOT NULL DEFAULT 'low',
-        rule_reasons_json TEXT NOT NULL DEFAULT '[]',
-        ai_eligible INTEGER NOT NULL DEFAULT 0,
-        ai_status TEXT NOT NULL DEFAULT 'skipped',
-        ai_provider TEXT NOT NULL DEFAULT '',
-        ai_model TEXT NOT NULL DEFAULT '',
-        ai_json TEXT NOT NULL DEFAULT '',
-        ai_error TEXT NOT NULL DEFAULT '',
-        ai_analyzed_at TEXT NOT NULL DEFAULT '',
-        first_seen_at TEXT NOT NULL,
-        updated_at TEXT NOT NULL
-      )`),
-      db.prepare(`CREATE INDEX IF NOT EXISTS idx_disclosure_date_priority ON ${FILINGS_TABLE} (rcept_dt DESC, rule_score DESC)`),
-      db.prepare(`CREATE INDEX IF NOT EXISTS idx_disclosure_ai_queue ON ${FILINGS_TABLE} (ai_eligible, ai_status, rcept_dt DESC, rule_score DESC)`),
-      db.prepare(`CREATE TABLE IF NOT EXISTS ${USAGE_TABLE} (
-        usage_date TEXT NOT NULL,
-        kind TEXT NOT NULL,
-        request_count INTEGER NOT NULL DEFAULT 0,
-        input_tokens INTEGER NOT NULL DEFAULT 0,
-        output_tokens INTEGER NOT NULL DEFAULT 0,
-        updated_at TEXT NOT NULL,
-        PRIMARY KEY (usage_date, kind)
-      )`),
-      db.prepare(`CREATE TABLE IF NOT EXISTS ${STATE_TABLE} (
-        state_key TEXT PRIMARY KEY,
-        state_value TEXT NOT NULL,
-        updated_at TEXT NOT NULL
-      )`)
-    ]).catch(error => {
+    const promise = runSchemaMigration(db).catch(error => {
       schemaPromises.delete(db);
       throw error;
     });
@@ -354,21 +435,126 @@ export function normalizeFiling(item = {}, now = new Date()) {
   };
 }
 
-export async function upsertFiling(db, filing) {
+export async function getWatchlist(db) {
+  const result = await db.prepare(`SELECT stock_code, corp_code, corp_name, corp_cls, active, sort_order, created_at, updated_at
+    FROM ${WATCHLIST_TABLE}
+    ORDER BY sort_order ASC, corp_name ASC`).all();
+  return (result?.results || []).map(row => ({
+    stockCode: row.stock_code,
+    corpCode: row.corp_code,
+    corpName: row.corp_name,
+    corpCls: row.corp_cls,
+    active: Boolean(row.active),
+    sortOrder: Number(row.sort_order || 0),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  }));
+}
+
+export async function getWatchlistStockCodes(db) {
+  const result = await db.prepare(`SELECT stock_code FROM ${WATCHLIST_TABLE} WHERE active = 1`).all();
+  return new Set((result?.results || []).map(r => r.stock_code));
+}
+
+export async function addWatchlistCompany(db, { stockCode, corpCode = '', corpName, corpCls = 'Y', sortOrder = 0 }) {
+  const safeStock = String(stockCode || '').trim();
+  const safeName = String(corpName || '').trim();
+  if (!safeStock || !safeName) throw new DisclosureError('INVALID_INPUT', '종목코드와 회사명은 필수입니다.', 400);
+  const now = new Date().toISOString();
+  await db.prepare(`INSERT INTO ${WATCHLIST_TABLE} (stock_code, corp_code, corp_name, corp_cls, active, sort_order, created_at, updated_at)
+    VALUES (?, ?, ?, ?, 1, ?, ?, ?)
+    ON CONFLICT(stock_code) DO UPDATE SET
+      corp_name = excluded.corp_name,
+      corp_code = CASE WHEN excluded.corp_code != '' THEN excluded.corp_code ELSE ${WATCHLIST_TABLE}.corp_code END,
+      corp_cls = excluded.corp_cls,
+      active = 1,
+      updated_at = excluded.updated_at`)
+    .bind(safeStock, String(corpCode || '').trim(), safeName, String(corpCls || 'Y').trim().toUpperCase(), Number(sortOrder) || 0, now, now).run();
+
+  // Update existing filings for this stock code to is_watchlist = 1
+  await db.prepare(`UPDATE ${FILINGS_TABLE} SET is_watchlist = 1, updated_at = ? WHERE stock_code = ?`).bind(now, safeStock).run();
+  // Auto-publish eligible high score filings
+  await db.prepare(`UPDATE ${FILINGS_TABLE} SET
+      publish_status = 'auto',
+      published_at = CASE WHEN published_at = '' OR published_at IS NULL THEN ? ELSE published_at END,
+      updated_at = ?
+    WHERE stock_code = ? AND rule_score >= 7 AND publish_status = 'admin_only'`)
+    .bind(now, now, safeStock).run();
+
+  return { stockCode: safeStock, corpName: safeName, active: true };
+}
+
+export async function removeWatchlistCompany(db, stockCode) {
+  const safeStock = String(stockCode || '').trim();
+  if (!safeStock) throw new DisclosureError('INVALID_INPUT', '종목코드가 필요합니다.', 400);
+  const now = new Date().toISOString();
+  await db.prepare(`DELETE FROM ${WATCHLIST_TABLE} WHERE stock_code = ?`).bind(safeStock).run();
+  await db.prepare(`UPDATE ${FILINGS_TABLE} SET is_watchlist = 0, updated_at = ? WHERE stock_code = ?`).bind(now, safeStock).run();
+  // Unpublish auto-published filings for removed company
+  await db.prepare(`UPDATE ${FILINGS_TABLE} SET publish_status = 'admin_only', updated_at = ? WHERE stock_code = ? AND publish_status = 'auto'`).bind(now, safeStock).run();
+  return { stockCode: safeStock, deleted: true };
+}
+
+export async function toggleWatchlistActive(db, stockCode, active) {
+  const safeStock = String(stockCode || '').trim();
+  const isActive = Boolean(active);
+  const now = new Date().toISOString();
+  await db.prepare(`UPDATE ${WATCHLIST_TABLE} SET active = ?, updated_at = ? WHERE stock_code = ?`)
+    .bind(isActive ? 1 : 0, now, safeStock).run();
+  await db.prepare(`UPDATE ${FILINGS_TABLE} SET is_watchlist = ?, updated_at = ? WHERE stock_code = ?`)
+    .bind(isActive ? 1 : 0, now, safeStock).run();
+  if (!isActive) {
+    await db.prepare(`UPDATE ${FILINGS_TABLE} SET publish_status = 'admin_only', updated_at = ? WHERE stock_code = ? AND publish_status = 'auto'`).bind(now, safeStock).run();
+  } else {
+    await db.prepare(`UPDATE ${FILINGS_TABLE} SET
+        publish_status = 'auto',
+        published_at = CASE WHEN published_at = '' OR published_at IS NULL THEN ? ELSE published_at END,
+        updated_at = ?
+      WHERE stock_code = ? AND rule_score >= 7 AND publish_status = 'admin_only'`)
+      .bind(now, now, safeStock).run();
+  }
+  return { stockCode: safeStock, active: isActive };
+}
+
+export async function setFilingPublishStatus(db, rceptNo, publishStatus, now = new Date()) {
+  const safeStatus = (publishStatus === 'manual' || publishStatus === 'auto') ? publishStatus : 'admin_only';
+  const timestamp = now.toISOString();
+  const publishedAtVal = safeStatus === 'admin_only' ? '' : timestamp;
+  const result = await db.prepare(`UPDATE ${FILINGS_TABLE} SET
+      publish_status = ?,
+      published_at = CASE WHEN ? = 'admin_only' THEN '' ELSE (CASE WHEN published_at != '' AND published_at IS NOT NULL THEN published_at ELSE ? END) END,
+      updated_at = ?
+    WHERE rcept_no = ?
+    RETURNING *`)
+    .bind(safeStatus, safeStatus, publishedAtVal, timestamp, rceptNo).all();
+  const row = result?.results?.[0];
+  if (!row) throw new DisclosureError('NOT_FOUND', '해당 공시를 찾을 수 없습니다.', 404);
+  return publicFiling(row);
+}
+
+export async function upsertFiling(db, filing, { watchlistCodes = null } = {}) {
   if (!/^\d{14}$/.test(filing.rceptNo)) return false;
   const initialAiStatus = filing.aiEligible ? 'available' : 'skipped';
+  const isWatchlist = watchlistCodes ? (watchlistCodes.has(filing.stockCode) ? 1 : 0) : 0;
+  const autoPublish = Boolean(isWatchlist && filing.ruleScore >= 7);
+  const initialPublishStatus = autoPublish ? 'auto' : 'admin_only';
+  const initialPublishedAt = autoPublish ? filing.firstSeenAt : '';
+
   const inserted = await db.prepare(`INSERT INTO ${FILINGS_TABLE} (
       rcept_no, corp_cls, corp_name, corp_code, stock_code, report_nm, flr_nm, rcept_dt, rm, source_url,
-      rule_score, rule_priority, rule_reasons_json, ai_eligible, ai_status, first_seen_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      rule_score, rule_priority, rule_reasons_json, ai_eligible, ai_status, publish_status, is_watchlist,
+      published_at, first_seen_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(rcept_no) DO NOTHING
     RETURNING rcept_no`)
     .bind(
       filing.rceptNo, filing.corpCls, filing.corpName, filing.corpCode, filing.stockCode, filing.reportName,
       filing.filerName, filing.receiptDate, filing.remarks, filing.sourceUrl, filing.ruleScore, filing.rulePriority,
-      JSON.stringify(filing.ruleReasons), filing.aiEligible ? 1 : 0, initialAiStatus, filing.firstSeenAt, filing.updatedAt
+      JSON.stringify(filing.ruleReasons), filing.aiEligible ? 1 : 0, initialAiStatus, initialPublishStatus, isWatchlist,
+      initialPublishedAt, filing.firstSeenAt, filing.updatedAt
     ).all();
   if (inserted?.results?.length) return true;
+
   await db.prepare(`UPDATE ${FILINGS_TABLE} SET
       corp_cls = ?,
       corp_name = ?,
@@ -383,6 +569,18 @@ export async function upsertFiling(db, filing) {
       rule_priority = ?,
       rule_reasons_json = ?,
       ai_eligible = ?,
+      is_watchlist = ?,
+      publish_status = CASE
+        WHEN ${FILINGS_TABLE}.publish_status = 'manual' THEN 'manual'
+        WHEN ? = 1 AND ? >= 7 THEN 'auto'
+        WHEN ${FILINGS_TABLE}.publish_status = 'auto' AND (? = 0 OR ? < 7) THEN 'admin_only'
+        ELSE ${FILINGS_TABLE}.publish_status
+      END,
+      published_at = CASE
+        WHEN ${FILINGS_TABLE}.publish_status = 'manual' THEN ${FILINGS_TABLE}.published_at
+        WHEN ? = 1 AND ? >= 7 AND (${FILINGS_TABLE}.published_at = '' OR ${FILINGS_TABLE}.published_at IS NULL) THEN ?
+        ELSE ${FILINGS_TABLE}.published_at
+      END,
       ai_status = CASE
         WHEN ? = 0 THEN 'skipped'
         WHEN ${FILINGS_TABLE}.ai_status IN ('done', 'processing') THEN ${FILINGS_TABLE}.ai_status
@@ -395,6 +593,9 @@ export async function upsertFiling(db, filing) {
       filing.corpCls, filing.corpName, filing.corpCode, filing.stockCode, filing.reportName,
       filing.filerName, filing.receiptDate, filing.remarks, filing.sourceUrl, filing.ruleScore,
       filing.rulePriority, JSON.stringify(filing.ruleReasons), filing.aiEligible ? 1 : 0,
+      isWatchlist,
+      isWatchlist, filing.ruleScore, isWatchlist, filing.ruleScore,
+      isWatchlist, filing.ruleScore, filing.updatedAt,
       filing.aiEligible ? 1 : 0, filing.updatedAt, filing.rceptNo
     ).run();
   return false;
@@ -447,6 +648,9 @@ export function publicFiling(row) {
     receiptDate: row.rcept_dt,
     remarks: row.rm,
     sourceUrl: row.source_url,
+    publishStatus: row.publish_status || 'admin_only',
+    isWatchlist: Boolean(row.is_watchlist),
+    publishedAt: row.published_at || '',
     rule: {
       score: Number(row.rule_score || 0),
       priority: row.rule_priority || 'low',
@@ -472,6 +676,7 @@ export const __test = {
   MAJOR_REPORT_RULE,
   ROUTINE_REPORT,
   CORRECTION,
+  DEFAULT_WATCHLIST,
   boundedInteger,
   normalizedProvider,
   parseCorpClasses,
