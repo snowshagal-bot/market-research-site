@@ -28,11 +28,13 @@ test('authoritative Market Close contract copies remain internally consistent', 
   ]);
   const schema = JSON.parse(schemaText);
   const example = JSON.parse(exampleText);
-  assert.equal(example.meta.schema_version, '1.0.1');
+  assert.equal(example.meta.schema_version, '1.1.0');
   assert.equal(example.meta.status, 'final');
   assert.equal(example.validation.passed, true);
   assert.deepEqual(example.validation.errors, []);
-  assert.equal(schema.properties.meta.properties.schema_version.const, '1.0.1');
+  assert.deepEqual(schema.properties.meta.properties.schema_version.enum, ['1.0.1', '1.1.0']);
+  assert.equal(example.krx_groups.sectors.length, 46);
+  assert.equal(example.krx_groups.themes.length, 39);
   assert.match(contract, /schema_version/);
 });
 
@@ -77,7 +79,7 @@ test('Market renderer covers every contract section without inventing an intrada
   assert.doesNotMatch(script, /LME|canvas|getContext|chart\.js|highcharts|plotly/i);
 });
 
-test('KRX flow values use the Contract v1.0.1 KRW billion unit', async () => {
+test('KRX flow values keep the Contract KRW billion unit', async () => {
   const [ko, en] = await Promise.all([marketRuntime('ko'), marketRuntime('en')]);
   assert.equal(ko.format.flow(-3676), '−3.68조원');
   assert.equal(ko.format.flow(242), '+2,420억원');
@@ -94,9 +96,9 @@ test('FX close/current and US10Y basis-point changes render without mixing value
     const runtime = await marketRuntime(lang);
     const target = { innerHTML: '' };
     runtime.render(data, target);
-    assert.match(target.innerHTML, lang === 'ko' ? /1,381\.70원[\s\S]*15:30 확정[\s\S]*현재[\s\S]*1,383\.36원[\s\S]*▼ 2\.44/ : /₩1,381\.70[\s\S]*15:30 close[\s\S]*Latest[\s\S]*₩1,383\.36[\s\S]*▼ 2\.44/);
-    assert.match(target.innerHTML, lang === 'ko' ? /869\.27원[\s\S]*15:30 확정[\s\S]*현재[\s\S]*867\.30원[\s\S]*▼ 4\.52/ : /₩869\.27[\s\S]*15:30 close[\s\S]*Latest[\s\S]*₩867\.30[\s\S]*▼ 4\.52/);
-    assert.match(target.innerHTML, /4\.692%[\s\S]*▼ 4\.6bp/);
+    assert.match(target.innerHTML, lang === 'ko' ? /1,372\.50원[\s\S]*15:30 확정[\s\S]*현재[\s\S]*1,372\.65원[\s\S]*▼ 7\.95/ : /₩1,372\.50[\s\S]*15:30 close[\s\S]*Latest[\s\S]*₩1,372\.65[\s\S]*▼ 7\.95/);
+    assert.match(target.innerHTML, lang === 'ko' ? /860\.64원[\s\S]*15:30 확정[\s\S]*현재[\s\S]*858\.40원[\s\S]*▼ 7\.99/ : /₩860\.64[\s\S]*15:30 close[\s\S]*Latest[\s\S]*₩858\.40[\s\S]*▼ 7\.99/);
+    assert.match(target.innerHTML, /4\.672%[\s\S]*▲ 0\.8bp/);
     assert.doesNotMatch(target.innerHTML, /4\.6bp[\s\S]{0,40}\(-0\.97%\)/);
   }
 });
@@ -106,8 +108,8 @@ test('flow concentration renders TOP1 and TOP5 together', async () => {
   const runtime = await marketRuntime('en');
   const target = { innerHTML: '' };
   runtime.render(data, target);
-  assert.match(target.innerHTML, /TOP1 5\.6% · TOP5 17\.4%/);
-  assert.match(target.innerHTML, /TOP1 41\.0% · TOP5 87\.2%/);
+  assert.match(target.innerHTML, /TOP1 20\.6% · TOP5 38\.4%/);
+  assert.match(target.innerHTML, /TOP1 31\.2% · TOP5 72\.5%/);
 });
 
 test('English company resolver covers every fixture ticker and never leaks Korean company names', async () => {
@@ -117,7 +119,8 @@ test('English company resolver covers every fixture ticker and never leaks Korea
     ['005930', 'Samsung Electronics'], ['000660', 'SK hynix'], ['005935', 'Samsung Electronics Pref.'], ['402340', 'SK Square'],
     ['009150', 'Samsung Electro-Mechanics'], ['005380', 'Hyundai Motor'], ['373220', 'LG Energy Solution'], ['207940', 'Samsung Biologics'],
     ['028260', 'Samsung C&T'], ['105560', 'KB Financial Group'], ['042700', 'Hanmi Semiconductor'], ['047810', 'Korea Aerospace Industries'],
-    ['095570', 'AJ Networks'], ['095340', 'ISC'], ['013890', 'Zinus'], ['035420', 'NAVER']
+    ['095570', 'AJ Networks'], ['095340', 'ISC'], ['013890', 'Zinus'], ['035420', 'NAVER'],
+    ['012750', '012750'], ['032830', '032830'], ['056190', 'SFA'], ['330590', '330590']
   ]);
   const companies = [
     ...data.market_cap_top10,

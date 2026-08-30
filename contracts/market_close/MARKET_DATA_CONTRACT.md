@@ -4,7 +4,7 @@
 
 이 계약은 개인용 글로벌 시장/KRX 대시보드가 Snowshagal 홈페이지의 **Market Close / EOD Snapshot**에 전달할 공개 JSON 형식을 고정한다. 실시간 시세 API가 아니며, 한국시장 거래일의 검증된 마감본만 `latest.json`으로 승격한다.
 
-- 현재 버전: `1.0.1`
+- 현재 버전: `1.1.0`
 - 정식 스키마: `market_close.schema.json`
 - 실제 형식 예제: `market_close.example.json`
 - 운영 출력: `data/market_close/YYYY-MM-DD.json`, `data/market_close/latest.json`
@@ -54,7 +54,7 @@ Windows 작업 스케줄러가 14:00, 14:05, 14:10, 14:15, 14:20 ICT에 독립 �
 기존 Provider와 Collector의 날짜·상태·산식 검증
                          │
                          ▼
-MarketSnapshot + KrxMarketOverviewResult + KrxReportResult
+MarketSnapshot + KrxMarketOverviewResult + KrxReportResult + KrxGroupsSnapshot
              ├──────────────► 기존 UI / Excel
              └──────────────► MarketCloseExporter
                                       │
@@ -62,7 +62,7 @@ MarketSnapshot + KrxMarketOverviewResult + KrxReportResult
                          YYYY-MM-DD.json / latest.json
 ```
 
-Exporter는 원천 웹 페이지를 직접 파싱하지 않는다. UI가 받는 세 최종 객체의 허용 필드만 명시적으로 직렬화한다.
+Exporter는 원천 웹 페이지를 직접 파싱하지 않는다. UI와 TXT 저장 경로가 사용하는 검증 완료 객체만 명시적으로 직렬화한다. 업종·테마는 `KrxGroupCollector.fetch_snapshot()`이 KRX 공식 최신 거래일을 요청 `market_date`와 대조한 뒤 전달한다.
 
 ## 최종 확정 조건
 
@@ -79,6 +79,7 @@ Exporter는 원천 웹 페이지를 직접 파싱하지 않는다. UI가 받는 
 - KOSPI200 현물·선물·Basis와 차익·비차익·전체 프로그램이 당일 `확정`
 - KOSPI·KOSDAQ 공매도 요약과 TOP5 원자료가 당일 확정
 - 시가총액 상위 10개가 모두 당일 정규장 종가 확정
+- KRX 업종 최소 40개와 공식 테마 최소 35개가 존재하고, 지수 코드가 각 배열 안에서 유일하며 기준일이 `market_date`와 일치
 
 검증 실패 원인은 `validation.errors`에 기록한다. 전 거래일 KRX 값은 당일 값으로 승격되지 않는다.
 
@@ -97,7 +98,23 @@ Exporter는 원천 웹 페이지를 직접 파싱하지 않는다. UI가 받는 
 | `market_internals` | 시장 거래대금과 외국인·기관 매수/매도 집중도 |
 | `short_selling` | 시장 요약, 거래대금 TOP5, 비중 TOP5 |
 | `market_cap_top10` | KOSPI·KOSDAQ 통합 시가총액 상위 10 |
+| `krx_groups` | KRX 공식 업종 전체와 공식 테마 전체. v1.1.0부터 필수 |
 | `validation` | 최종 승격 여부와 실패 사유 |
+
+## KRX 업종·테마
+
+`krx_groups.sectors`와 `krx_groups.themes`는 순위 요약이 아니라 해당 거래일에 KRX가 제공한 전체 목록이다. 2026-08-28 회귀 기준은 업종 46개·테마 39개이며, KRX 분류 개편 가능성 때문에 이 숫자를 영구 계약 상수로 고정하지 않는다.
+
+- 공통 필드: `index_code`, `name`, `close`, `change`, `change_pct`, `source_date`, `retrieved_at`, `source`
+- 업종만 `market`을 가지며 값은 `KOSPI` 또는 `KOSDAQ`이다.
+- 테마는 KRX 공식 테마지수 자체이므로 KOSPI/KOSDAQ 시장값을 임의로 붙이지 않는다.
+- `index_code`는 KRX 공식 지수 ID이고 배열 안에서 유일해야 한다.
+- `source_date`는 반드시 `meta.market_date`와 같고 `source`는 항상 `KRX`다.
+- 숫자는 유한한 JSON number여야 하며 빈 이름·빈 코드는 허용하지 않는다.
+- 기존 날짜별/주간 TXT는 계속 생성하지만 홈페이지의 데이터 원천은 Snapshot JSON이다.
+- 향후 홈페이지 1W/1M 등 기간 집계는 각 거래일 Daily Snapshot을 누적해 계산하며, 주간 TXT를 primary source로 사용하지 않는다.
+
+Snowshagal 수신 측은 기존 v1.0.1 payload에 `krx_groups`가 없어도 게시·저장·조회할 수 있어야 한다. v1.1.0 payload에는 `krx_groups`가 반드시 있어야 한다.
 
 ## 시장 항목 의미
 
@@ -181,77 +198,3 @@ powershell -ExecutionPolicy Bypass -File .\register_market_close_task.ps1
 등록 결과에는 정시 트리거 10개와 2분 지연된 부팅·로그온 복구 트리거 2개가 포함되어야 한다. Task Scheduler의 **예약된 시작을 놓친 경우 가능한 한 빨리 작업 실행**은 `StartWhenAvailable`로 활성화된다.
 
 Snowshagal 자동 전송 단계에서는 `MarketCloseExporter.export()`가 `final`을 반환한 직후, 또는 `data/market_close/latest.json`을 읽는 별도 uploader를 연결한다. Exporter에는 네트워크 전송 책임을 추가하지 않는다.
-
-## Publish envelope
-
-`POST /api/market/publish` accepts either shape:
-
-- the bare Market Close document, exactly as this contract describes it;
-- or an envelope that carries the editorial one-liner alongside it:
-
-```json
-{
-  "market": { "meta": { ... }, "indices": { ... } },
-  "takeaway": { "ko": "…", "en": "…" }
-}
-```
-
-Only `market` is validated against the schema, and only `market` is stored as
-`payload_json`, so the machine-generated document stays exactly as produced. The
-one-liner is written by hand, so it lives beside the session on the same row
-rather than inside the contract.
-
-Both fields are optional and each is capped at 400 characters. `GET
-/api/market/latest` returns them as a top-level `takeaway` object, so a consumer
-receives the sentence and the numbers it describes together and can never pair
-one date's figures with another date's line. An empty language is left empty:
-the homepage hides that row rather than substituting the other language.
-
-### Which language a request may change
-
-A language is written only when the request names it. This keeps the two
-publishing paths from fighting over the same row:
-
-| Request | `takeaway_ko` | `takeaway_en` |
-| --- | --- | --- |
-| bare document (no envelope) | unchanged | unchanged |
-| `{ market, takeaway: { ko: "…" } }` | replaced | unchanged |
-| `{ market, takeaway: { ko: "", en: "…" } }` | erased | replaced |
-
-The unattended pipeline posts the bare document, so re-running it for a date
-that already has an editorial line leaves that line alone. The admin form
-names a language only when the editor has actually written in that box for
-the date on screen: an untouched box is left out of the request entirely, and
-a box the editor emptied is sent as `""` and erases. Surrounding whitespace is
-trimmed first, so a line of spaces erases too.
-
-`GET /api/market/latest` tags its response with the market date, the
-generated and published timestamps, and the two lines. Republishing the same
-document with a new line therefore changes the ETag, and a client holding the
-previous tag is served the new body rather than a `304`.
-
-### Where the TODAY one-liner comes from
-
-With a live session the homepage strip resolves the line in this order, per
-language:
-
-1. `takeaway_ko` / `takeaway_en` on the D1 row — the manual override typed
-   into `/admin/market/`. It exists only when someone chose to write one.
-2. The `takeaway` field on that same day's Daily report, in that same
-   language. Report publishing reads it out of the report HTML itself (a
-   `report-takeaway` meta tag, a `data-report-takeaway` element, or the
-   cover's `.cover-hint .cv-one`), so the everyday path needs no typing.
-   Editorial Ledger v2 covers give the line its own `.cv-line` field; the
-   meta tag is the long-term standard because the head survives a redesign
-   and a class name does not. See
-   [`docs/DAILY_REPORT_METADATA.md`](../../docs/DAILY_REPORT_METADATA.md).
-3. Neither: the row is hidden and the numbers stand alone.
-
-A Daily qualifies only on an exact `reportDate === market_date` match in the
-reader's own language. A neighbouring date, the newest Daily, or the other
-language never stands in. Only Dailies carry the field at all.
-
-When `/api/market/latest` fails outright, `data/market-summary.js` answers as
-one whole record — date, numbers and line together — and no Daily metadata is
-mixed into it.
-

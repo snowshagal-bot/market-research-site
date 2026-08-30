@@ -103,6 +103,13 @@ As of 2026-08-29, Preview D1 parity is complete. Preview `COMMENTS_DB` points to
 The Preview database was initialized from `db/schema.sql` and contains `comments`,
 `market_close_snapshots`, and `engagement_sessions`.
 
+`POST /api/market/publish` is the sole mutation exception permitted on a branch Preview
+hostname matching `*.market-research-site.pages.dev`. It still requires `MARKET_PUBLISH_KEY`
+or `ADMIN_KEY` and writes only through the Preview `COMMENTS_DB` binding. The bare
+`market-research-site.pages.dev` hostname, other Pages projects, localhost, and all existing
+report/manage/engagement mutations retain their fail-closed rules. Preview E2E tests must
+verify the binding is the isolated Preview database before posting a real dated fixture.
+
 Preview contains one explicit Market Close smoke fixture only: `market_date=1900-01-01`
 with `auth_source=preview-smoke-test`. It is not Production market data. On Preview deployment
 `34877694`, `/api/market/latest` and comments GET both returned HTTP 200, and the shared

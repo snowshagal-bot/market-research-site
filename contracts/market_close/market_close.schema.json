@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://snowshagal.com/schemas/market_close-1.0.1.schema.json",
+  "$id": "https://snowshagal.com/schemas/market_close-1.1.0.schema.json",
   "title": "Snowshagal Market Close EOD Snapshot",
   "description": "글로벌 시장/KRX 대시보드에서 생성하는 공개용 일일 마감 데이터 계약. 계약 변경 시 meta.schema_version과 이 스키마의 $id/const를 함께 갱신해야 한다.",
   "type": "object",
@@ -21,7 +21,7 @@
         "generated_at": {"$ref": "#/$defs/dateTime"},
         "timezone": {"const": "Asia/Bangkok"},
         "status": {"enum": ["final", "incomplete"]},
-        "schema_version": {"const": "1.0.1"}
+        "schema_version": {"enum": ["1.0.1", "1.1.0"]}
       }
     },
     "indices": {
@@ -166,6 +166,9 @@
       "maxItems": 10,
       "items": {"$ref": "#/$defs/marketCapStock"}
     },
+    "krx_groups": {
+      "anyOf": [{"$ref": "#/$defs/krxGroups"}, {"type": "null"}]
+    },
     "validation": {
       "type": "object",
       "additionalProperties": false,
@@ -233,6 +236,7 @@
             }
           },
           "market_cap_top10": {"minItems": 10, "maxItems": 10},
+          "krx_groups": {"$ref": "#/$defs/krxGroups"},
           "validation": {
             "properties": {
               "passed": {"const": true},
@@ -241,6 +245,18 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "meta": {
+            "properties": {"schema_version": {"const": "1.1.0"}},
+            "required": ["schema_version"]
+          }
+        },
+        "required": ["meta"]
+      },
+      "then": {"required": ["krx_groups"]}
     }
   ],
   "$defs": {
@@ -494,6 +510,60 @@
         "source_date": {"$ref": "#/$defs/date"},
         "as_of": {"$ref": "#/$defs/dateTime"},
         "data_state": {"type": "string"}
+      }
+    },
+    "krxSector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "index_code", "name", "market", "close", "change", "change_pct",
+        "source_date", "retrieved_at", "source"
+      ],
+      "properties": {
+        "index_code": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "market": {"enum": ["KOSPI", "KOSDAQ"]},
+        "close": {"type": "number"},
+        "change": {"type": "number"},
+        "change_pct": {"type": "number"},
+        "source_date": {"$ref": "#/$defs/date"},
+        "retrieved_at": {"$ref": "#/$defs/dateTime"},
+        "source": {"const": "KRX"}
+      }
+    },
+    "krxTheme": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "index_code", "name", "close", "change", "change_pct",
+        "source_date", "retrieved_at", "source"
+      ],
+      "properties": {
+        "index_code": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "close": {"type": "number"},
+        "change": {"type": "number"},
+        "change_pct": {"type": "number"},
+        "source_date": {"$ref": "#/$defs/date"},
+        "retrieved_at": {"$ref": "#/$defs/dateTime"},
+        "source": {"const": "KRX"}
+      }
+    },
+    "krxGroups": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sectors", "themes"],
+      "properties": {
+        "sectors": {
+          "type": "array",
+          "minItems": 40,
+          "items": {"$ref": "#/$defs/krxSector"}
+        },
+        "themes": {
+          "type": "array",
+          "minItems": 35,
+          "items": {"$ref": "#/$defs/krxTheme"}
+        }
       }
     }
   }

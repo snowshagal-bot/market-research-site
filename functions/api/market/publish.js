@@ -1,8 +1,8 @@
-import { MAX_PAYLOAD_BYTES, MAX_TAKEAWAY_LENGTH, TABLE_NAME, MarketDbError, authorizePublish, ensureMarketTable, isProductionRequest, json, loadMarketSchema, validateMarketPayload } from './_shared.js';
+import { MAX_PAYLOAD_BYTES, MAX_TAKEAWAY_LENGTH, TABLE_NAME, MarketDbError, authorizePublish, ensureMarketTable, isMarketWriteRequest, json, loadMarketSchema, validateMarketPayload } from './_shared.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
-  if (!isProductionRequest(request)) return json({ error: 'PRODUCTION_ONLY', message: 'Market Close 게시는 Production에서만 허용됩니다.' }, 403);
+  if (!isMarketWriteRequest(request)) return json({ error: 'WRITE_HOST_BLOCKED', message: 'Market Close 게시는 Production 또는 격리된 branch Preview에서만 허용됩니다.' }, 403);
   const authSource = authorizePublish(request, env);
   if (!authSource) return json({ error: 'UNAUTHORIZED', message: '인증에 실패했습니다.' }, 401);
 

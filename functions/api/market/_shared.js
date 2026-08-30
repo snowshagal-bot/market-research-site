@@ -1,4 +1,5 @@
-export const SCHEMA_VERSION = '1.0.1';
+export const SCHEMA_VERSION = '1.1.0';
+export const SUPPORTED_SCHEMA_VERSIONS = Object.freeze(['1.0.1', '1.1.0']);
 export const MAX_PAYLOAD_BYTES = 512 * 1024;
 export const TABLE_NAME = 'market_close_snapshots';
 export const SCHEMA_PATH = '/contracts/market_close/market_close.schema.json';
@@ -24,6 +25,17 @@ export function json(body, status = 200, cacheControl = 'no-store', extraHeaders
 export function isProductionRequest(request) {
   try { return new URL(request.url).hostname === 'snowshagal.com'; }
   catch (_) { return false; }
+}
+
+export function isMarketWriteRequest(request) {
+  try {
+    const hostname = new URL(request.url).hostname;
+    if (hostname === 'snowshagal.com') return true;
+    // A branch Preview uses its isolated Preview D1 binding. The bare Pages
+    // production hostname remains blocked, and authentication is still
+    // mandatory before any write is attempted.
+    return /^[a-z0-9-]+\.market-research-site\.pages\.dev$/i.test(hostname);
+  } catch (_) { return false; }
 }
 
 function constantTimeEqual(left, right) {
@@ -105,7 +117,8 @@ export async function loadMarketSchema(request, env) {
     const response = await env.ASSETS.fetch(new Request(new URL(SCHEMA_PATH, request.url), { headers: { accept: 'application/json' } }));
     if (!response.ok) throw new Error(`SCHEMA_HTTP_${response.status}`);
     const schema = await response.json();
-    if (schema?.properties?.meta?.properties?.schema_version?.const !== SCHEMA_VERSION) throw new Error('SCHEMA_VERSION_MISMATCH');
+    const versions = schema?.properties?.meta?.properties?.schema_version?.enum;
+    if (!Array.isArray(versions) || !SUPPORTED_SCHEMA_VERSIONS.every(version => versions.includes(version))) throw new Error('SCHEMA_VERSION_MISMATCH');
     return schema;
   } catch (error) {
     console.error('market close schema load failed', error);
@@ -177,6 +190,7 @@ function validateNode(value, schema, path, errors, rootSchema) {
     if (schema.minimum !== undefined && value < schema.minimum) errors.push(`${path}: 최소값은 ${schema.minimum}입니다.`);
     if (schema.maximum !== undefined && value > schema.maximum) errors.push(`${path}: 최대값은 ${schema.maximum}입니다.`);
   }
+  if (typeof value === 'string' && schema.minLength !== undefined && value.length < schema.minLength) errors.push(`${path}: 최소 ${schema.minLength}자여야 합니다.`);
   if (Array.isArray(value)) {
     if (schema.minItems !== undefined && value.length < schema.minItems) errors.push(`${path}: 항목이 최소 ${schema.minItems}개 필요합니다.`);
     if (schema.maxItems !== undefined && value.length > schema.maxItems) errors.push(`${path}: 항목은 최대 ${schema.maxItems}개입니다.`);
@@ -208,8 +222,21 @@ export function validateMarketPayload(payload, schema) {
   if (!schema || typeof schema !== 'object') errors.push('$: JSON Schema가 없습니다.');
   else validateNode(payload, schema, '$', errors, schema);
   if (payload?.meta?.status !== 'final') errors.push('$.meta.status: publish API는 final 데이터만 허용합니다.');
-  if (payload?.meta?.schema_version !== SCHEMA_VERSION) errors.push(`$.meta.schema_version: ${SCHEMA_VERSION}이어야 합니다.`);
+  if (!SUPPORTED_SCHEMA_VERSIONS.includes(payload?.meta?.schema_version)) errors.push(`$.meta.schema_version: 지원 버전(${SUPPORTED_SCHEMA_VERSIONS.join(', ')})이어야 합니다.`);
   if (payload?.validation?.passed !== true) errors.push('$.validation.passed: true여야 합니다.');
   if (!Array.isArray(payload?.validation?.errors) || payload.validation.errors.length !== 0) errors.push('$.validation.errors: 비어 있어야 합니다.');
+  if (payload?.krx_groups) {
+    for (const [kind, rows] of Object.entries(payload.krx_groups)) {
+      if (!Array.isArray(rows)) continue;
+      const codes = new Set();
+      rows.forEach((row, index) => {
+        const path = `$.krx_groups.${kind}[${index}]`;
+        if (codes.has(row?.index_code)) errors.push(`${path}.index_code: 중복된 KRX 지수 코드입니다.`);
+        codes.add(row?.index_code);
+        if (row?.source_date !== payload?.meta?.market_date) errors.push(`${path}.source_date: market_date와 일치해야 합니다.`);
+        if (row?.source !== 'KRX') errors.push(`${path}.source: KRX여야 합니다.`);
+      });
+    }
+  }
   return { passed: errors.length === 0, errors: Array.from(new Set(errors)).slice(0, 100) };
 }

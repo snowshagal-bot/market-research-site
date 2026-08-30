@@ -8,6 +8,14 @@ import { MAX_PAYLOAD_BYTES, validateMarketPayload } from '../functions/api/marke
 const fixture = JSON.parse(await readFile(new URL('../contracts/market_close/market_close.example.json', import.meta.url), 'utf8'));
 const schema = JSON.parse(await readFile(new URL('../contracts/market_close/market_close.schema.json', import.meta.url), 'utf8'));
 const clone = value => JSON.parse(JSON.stringify(value));
+const legacyFixture = clone(fixture);
+legacyFixture.meta.schema_version = '1.0.1';
+delete legacyFixture.krx_groups;
+const alignGroupDate = (payload, marketDate) => {
+  for (const rows of Object.values(payload.krx_groups || {})) {
+    for (const row of rows) row.source_date = marketDate;
+  }
+};
 
 class MockStatement {
   constructor(db, sql) { this.db = db; this.sql = sql; this.args = []; }
@@ -51,6 +59,23 @@ test('authoritative example passes the schema-backed final validator', () => {
   assert.deepEqual(validateMarketPayload(fixture, schema), { passed: true, errors: [] });
 });
 
+test('legacy v1.0.1 payload remains publishable without krx_groups', () => {
+  assert.deepEqual(validateMarketPayload(legacyFixture, schema), { passed: true, errors: [] });
+});
+
+test('legacy v1.0.1 payload can be stored and read back without krx_groups', async () => {
+  const db = new MockDb();
+  const published = await onRequestPost({
+    request: publishRequest(legacyFixture, { 'x-market-publish-key': 'market-secret' }),
+    env: environment(db)
+  });
+  assert.equal(published.status, 201);
+  const response = await onRequestGet({ request: new Request('https://snowshagal.com/api/market/latest'), env: environment(db) });
+  const payload = await response.json();
+  assert.equal(payload.meta.schema_version, '1.0.1');
+  assert.equal(Object.hasOwn(payload, 'krx_groups'), false);
+});
+
 test('validator rejects contract drift, incomplete data, wrong types, and final cardinality failures', () => {
   const extra = clone(fixture); extra.indices.KOSPI.invented = 1;
   assert.equal(validateMarketPayload(extra, schema).passed, false);
@@ -62,11 +87,23 @@ test('validator rejects contract drift, incomplete data, wrong types, and final 
   assert.match(validateMarketPayload(shortList, schema).errors.join('\n'), /최소 5개/);
   const missing = clone(fixture); delete missing.market_internals.turnover.KOSDAQ;
   assert.match(validateMarketPayload(missing, schema).errors.join('\n'), /KOSDAQ/);
+  const duplicate = clone(fixture); duplicate.krx_groups.sectors[1].index_code = duplicate.krx_groups.sectors[0].index_code;
+  assert.match(validateMarketPayload(duplicate, schema).errors.join('\n'), /중복/);
+  const duplicateTheme = clone(fixture); duplicateTheme.krx_groups.themes[1].index_code = duplicateTheme.krx_groups.themes[0].index_code;
+  assert.match(validateMarketPayload(duplicateTheme, schema).errors.join('\n'), /중복/);
+  const wrongDate = clone(fixture); wrongDate.krx_groups.themes[0].source_date = '2026-08-27';
+  assert.match(validateMarketPayload(wrongDate, schema).errors.join('\n'), /market_date/);
+  const nonFinite = clone(fixture); nonFinite.krx_groups.sectors[0].close = 'NaN';
+  assert.match(validateMarketPayload(nonFinite, schema).errors.join('\n'), /number/);
+  const missingGroups = clone(fixture); delete missingGroups.krx_groups;
+  assert.match(validateMarketPayload(missingGroups, schema).errors.join('\n'), /krx_groups/);
 });
 
 test('publish fails closed on Preview, missing auth, invalid JSON, and oversized bodies', async () => {
   const db = new MockDb();
   let response = await onRequestPost({ request: publishRequest(fixture, { 'x-market-publish-key': 'market-secret' }, 'preview.pages.dev'), env: environment(db) });
+  assert.equal(response.status, 403);
+  response = await onRequestPost({ request: publishRequest(fixture, { 'x-market-publish-key': 'market-secret' }, 'market-research-site.pages.dev'), env: environment(db) });
   assert.equal(response.status, 403);
   response = await onRequestPost({ request: publishRequest(fixture), env: environment(db) });
   assert.equal(response.status, 401);
@@ -90,16 +127,31 @@ test('publish accepts automated and admin auth, upserts same dates, and never ro
   assert.equal(response.status, 200);
   result = await response.json();
   assert.equal(result.action, 'updated');
+  assert.equal(db.rows.size, 1);
 
   const older = clone(fixture);
-  older.meta.market_date = '2026-08-21';
+  older.meta.market_date = '2026-08-27';
+  alignGroupDate(older, older.meta.market_date);
   response = await onRequestPost({ request: publishRequest(older, { 'x-market-publish-key': 'market-secret' }), env: environment(db) });
   assert.equal(response.status, 201);
   assert.equal((await response.json()).is_latest, false);
 
   const latest = await onRequestGet({ request: new Request('https://snowshagal.com/api/market/latest'), env: environment(db) });
   assert.equal(latest.status, 200);
-  assert.equal((await latest.json()).meta.market_date, '2026-08-24');
+  const latestPayload = await latest.json();
+  assert.equal(latestPayload.meta.market_date, fixture.meta.market_date);
+  assert.deepEqual(latestPayload.krx_groups, repeated.krx_groups);
+});
+
+test('branch Preview accepts authenticated writes only into its supplied Preview DB', async () => {
+  const previewDb = new MockDb();
+  const response = await onRequestPost({
+    request: publishRequest(fixture, { 'x-market-publish-key': 'market-secret' }, 'feat-market-krx-groups.market-research-site.pages.dev'),
+    env: environment(previewDb)
+  });
+  assert.equal(response.status, 201);
+  assert.equal(previewDb.rows.size, 1);
+  assert.equal(previewDb.rows.get(fixture.meta.market_date).payload_json, JSON.stringify(fixture));
 });
 
 test('latest returns an explicit empty state, cache headers, and ETag revalidation', async () => {
