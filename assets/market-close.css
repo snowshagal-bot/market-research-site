@@ -73,7 +73,7 @@ html[data-theme="dark"] .market-mountain{opacity:.42;filter:saturate(.56) contra
 .market-calendar-toggle.active{background:var(--market-ink);color:var(--bg);border-color:var(--market-ink)}
 .market-calendar-toggle:hover:not(.active){background:color-mix(in srgb,var(--panel-2) 60%,transparent)}
 .market-calendar-drawer{position:relative;height:0;margin-bottom:0;z-index:20}
-.market-calendar-panel{position:absolute;top:4px;right:0;width:320px;max-width:320px;border:1px solid var(--line);border-radius:8px;background:var(--market-card);padding:14px}
+.market-calendar-panel{position:absolute;top:4px;right:0;width:320px;max-width:320px;border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:14px}
 .market-cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--market-ink)}
 .market-cal-nav-btn{background:none;border:0;font-size:15px;line-height:1;color:var(--market-ink);cursor:pointer;padding:2px 8px;border-radius:4px}
 .market-cal-nav-btn:hover{background:color-mix(in srgb,var(--panel-2) 60%,transparent)}
