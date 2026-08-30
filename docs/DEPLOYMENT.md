@@ -1,6 +1,6 @@
 # Deployment and environment
 
-Updated: 2026-08-29
+Updated: 2026-08-30
 
 ## GitHub
 
@@ -61,6 +61,38 @@ Read-only API token used by `/api/analytics` to query Cloudflare GraphQL Analyti
 The Web Analytics site tag for `snowshagal.com`, used server-side to isolate the RUM dataset to this site.
 
 Do not commit any secret or environment-variable value.
+
+## Disclosure Monitor dependencies (Draft PR #79)
+
+The disclosure monitor reuses the existing `COMMENTS_DB` binding. Do not create a second D1 database for this feature. Configure Preview and Production independently; the current Draft PR must be exercised in Preview first and must not be merged or scheduled automatically without owner approval.
+
+Required for OpenDART collection:
+
+- Secret `OPENDART_API_KEY`
+
+Required when Gemini analysis is enabled:
+
+- Secret `GEMINI_API_KEY`
+- Env `DISCLOSURE_LLM_PROVIDER=gemini`
+- Env `DISCLOSURE_LLM_MODEL=gemini-3.5-flash-lite`
+
+Recommended source and budget env values:
+
+- `DISCLOSURE_SOURCE_PROVIDER=opendart`
+- `DISCLOSURE_CORP_CLASSES=Y,K`
+- `DISCLOSURE_DART_DAILY_BUDGET=1000`
+- `DISCLOSURE_DART_MAX_PAGES_PER_CLASS=10`
+- `DISCLOSURE_LOOKBACK_DAYS=7`
+- `DISCLOSURE_LLM_DAILY_BUDGET=24`
+- `DISCLOSURE_LLM_PER_RUN=2`
+
+Optional future scheduler credential:
+
+- Secret `DISCLOSURE_SYNC_KEY`
+
+Do not use `ADMIN_KEY` for a future scheduler. Scheduler activation is intentionally out of scope. In the current phase, use `/admin/disclosures/` for one manual Preview sync, verify D1 counts, duplicate-free re-sync, rule scores, at most two AI jobs, structured output, DART links and usage counters, then stop. Missing provider secrets must be reported as configuration errors; they are not a reason to place values in Git or client JavaScript.
+
+The Gemini adapter was checked against the official API on 2026-08-30 and uses the `v1beta/interactions` endpoint with structured JSON output for stable model ID `gemini-3.5-flash-lite`. Provider pricing and free-tier policy remain external and changeable; the repository's internal budgets are deliberately lower and configurable.
 
 ## Web Analytics dependencies
 
