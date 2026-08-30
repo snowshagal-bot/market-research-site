@@ -332,6 +332,20 @@ test('AI-disabled sync leaves eligible rows pending instead of failing collectio
   db.close();
 });
 
+test('missing OpenDART secret fails with an explicit configuration error before quota use', async () => {
+  const db = await seededDb();
+  await assert.rejects(
+    fetchDisclosureSource({
+      env: envFor(db, { OPENDART_API_KEY: '', DISCLOSURE_CORP_CLASSES: 'Y' }),
+      db,
+      now: NOW
+    }),
+    error => error.code === 'OPENDART_NOT_CONFIGURED' && error.status === 503
+  );
+  assert.equal(db.row(`SELECT COUNT(*) AS count FROM disclosure_usage_daily`).count, 0);
+  db.close();
+});
+
 test('provider failure does not roll back collected filings and repeated sync stays duplicate-free', async () => {
   const db = await seededDb();
   globalThis.fetch = async url => {
