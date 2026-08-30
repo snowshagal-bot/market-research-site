@@ -454,3 +454,392 @@ test('repeated retries do not accumulate popstate listeners and popstate trigger
   // Exactly 1 loadAndRender triggered (1 fetch for /api/market/date?date=2026-08-27)
   assert.equal(fetchCount - fetchesBeforePopstate, 1, 'Popstate must trigger exactly 1 load call without duplicate execution');
 });
+
+test('URL state parsing prioritizes date over view and handles invalid combinations', async () => {
+  const script = await read('assets/market-close.js');
+
+  function parseFor(search) {
+    const window = {};
+    const context = vm.createContext({
+      window,
+      document: { documentElement: { dataset: { siteLang: 'ko' } }, body: { dataset: {} }, readyState: 'loading', addEventListener() {}, getElementById() { return null; } },
+      location: { search, pathname: '/market/' },
+      Intl, Date, Set, URLSearchParams, console
+    });
+    vm.runInContext(script, context);
+    const res = window.MARKET_CLOSE.parseUrlState();
+    return { mode: res.mode, date: res.date, view: res.view };
+  }
+
+  assert.deepEqual(parseFor(''), { mode: 'today', date: null, view: null });
+  assert.deepEqual(parseFor('?view=1w'), { mode: '1w', date: null, view: '1w' });
+  assert.deepEqual(parseFor('?view=1m'), { mode: '1m', date: null, view: '1m' });
+  assert.deepEqual(parseFor('?date=2026-08-27'), { mode: 'history', date: '2026-08-27', view: null });
+  assert.deepEqual(parseFor('?date=2026-08-27&view=1w'), { mode: 'history', date: '2026-08-27', view: null });
+  assert.deepEqual(parseFor('?view=invalid'), { mode: 'today', date: null, view: null });
+});
+
+test('locale.js preserves date and view queries across language transitions', async () => {
+  const script = await read('assets/locale.js');
+  const window = {};
+  const context = vm.createContext({ window, Intl, Date, Set, URLSearchParams, console });
+  vm.runInContext(script, context);
+  const localeApi = window.MARKET_LOCALE;
+
+  // 1W query preservation
+  assert.equal(localeApi.pageLanguagePath('/market/', 'en', '?view=1w'), '/en/market/?view=1w');
+  assert.equal(localeApi.pageLanguagePath('/en/market/', 'ko', '?view=1w'), '/market/?view=1w');
+
+  // 1M query preservation
+  assert.equal(localeApi.pageLanguagePath('/market/', 'en', '?view=1m'), '/en/market/?view=1m');
+  assert.equal(localeApi.pageLanguagePath('/en/market/', 'ko', '?view=1m'), '/market/?view=1m');
+
+  // Date query preservation
+  assert.equal(localeApi.pageLanguagePath('/market/', 'en', '?date=2026-08-27'), '/en/market/?date=2026-08-27');
+  assert.equal(localeApi.pageLanguagePath('/en/market/', 'ko', '?date=2026-08-27'), '/market/?date=2026-08-27');
+
+  // Base market without queries
+  assert.equal(localeApi.pageLanguagePath('/market/', 'en', ''), '/en/market/');
+  assert.equal(localeApi.pageLanguagePath('/en/market/', 'ko', ''), '/market/');
+});
+
+test('renderRangeView formats complete vs incomplete windows, instruments, rates, flows and breadth', async () => {
+  const script = await read('assets/market-close.js');
+
+  const partialPayload = {
+    aggregation_version: '1.0.0',
+    period: '1w',
+    window: {
+      start_date: '2026-08-25',
+      end_date: '2026-08-28',
+      dates: ['2026-08-25', '2026-08-26', '2026-08-27', '2026-08-28'],
+      sessions_used: 4,
+      required_sessions: 5,
+      complete: false
+    },
+    instruments: {
+      indices: {
+        KOSPI: { baseline_value: 6696.96, end_value: 6788.88, return_pct: 1.37, period_high: 6996.12, period_low: 6408.82, observations: 4, complete: false }
+      },
+      rates_fx_volatility: {
+        SOX: { baseline_value: 11500, end_value: 11882.17, return_pct: 3.32, observations: 4, complete: false },
+        US10Y: { baseline_value: 4.60, end_value: 4.72, change_bp: 12.0, return_pct: 2.61, observations: 4, complete: false },
+        USDKRW: { baseline_value: 1370.0, end_value: 1380.0, change: 10.0, return_pct: 0.73, observations: 4, complete: false }
+      },
+      commodities_crypto: {
+        WTI: { baseline_value: 75.0, end_value: 77.25, return_pct: 3.0, observations: 4, complete: false }
+      }
+    },
+    flows: {
+      unit: 'KRW billion',
+      sessions_used: 4,
+      markets: {
+        KOSPI: {
+          외국인: { net_buy: -5551, observations: 4, complete: false },
+          기관: { net_buy: 1200, observations: 4, complete: false },
+          개인: { net_buy: 4351, observations: 4, complete: false }
+        }
+      }
+    },
+    breadth: {
+      KOSPI: {
+        avg_rise_ratio: 0.603,
+        avg_fall_ratio: 0.352,
+        avg_rise_count: 548,
+        avg_fall_count: 320,
+        advancer_dominant_sessions: 3,
+        decliner_dominant_sessions: 1,
+        neutral_sessions: 0,
+        observations: 4,
+        complete: false
+      }
+    },
+    krx_groups: {
+      sessions_with_data: 0,
+      sessions_used: 4,
+      coverage_complete: false,
+      sectors: [],
+      themes: []
+    }
+  };
+
+  for (const lang of ['ko', 'en']) {
+    const window = {};
+    const context = vm.createContext({
+      window,
+      document: { documentElement: { dataset: { siteLang: lang } }, body: { dataset: {} }, readyState: 'loading', addEventListener() {}, getElementById() { return null; } },
+      location: { search: '?view=1w', pathname: '/market/' },
+      Intl, Date, Set, URLSearchParams, console
+    });
+    vm.runInContext(script, context);
+    const runtime = window.MARKET_CLOSE;
+
+    const target = { innerHTML: '', addEventListener() {} };
+    runtime.renderRangeView(partialPayload, '1w', target);
+    const html = target.innerHTML;
+
+    // Window partial status
+    assert.match(html, lang === 'ko' ? /현재 누적 · 4 \/ 5 거래일/ : /Partial · 4 \/ 5 sessions/);
+    assert.match(html, lang === 'ko' ? /최근 5거래일/ : /Last 5 Sessions/);
+
+    // KOSPI index & SOX
+    assert.match(html, /6,696\.96/);
+    assert.match(html, /6,788\.88/);
+    assert.match(html, /\+1\.37%/);
+    assert.match(html, /11,882\.17/);
+
+    // Rates US10Y bp
+    assert.match(html, /\+12\.0bp/);
+    assert.match(html, /4\.600%[\s\S]*→[\s\S]*4\.720%/);
+
+    // FX USDKRW
+    assert.match(html, /\+10\.00/);
+
+    // Money flows
+    assert.match(html, lang === 'ko' ? /−5\.55조원/ : /KRW −5\.55tn/);
+
+    // Breadth
+    assert.match(html, /60\.3%/);
+    assert.match(html, /35\.2%/);
+    assert.match(html, lang === 'ko' ? /3일/ : /3 sessions/);
+
+    // Groups incomplete empty state
+    assert.match(html, /market-group-empty/);
+    assert.match(html, lang === 'ko' ? /업종 · 테마 기간 데이터 축적 중/ : /Sector & theme history is building/);
+  }
+});
+
+test('renderRangeFlows suppresses numeric sum when observations are less than sessions_used', async () => {
+  const script = await read('assets/market-close.js');
+  const window = {};
+  const context = vm.createContext({
+    window,
+    document: { documentElement: { dataset: { siteLang: 'ko' } }, body: { dataset: {} }, readyState: 'loading', addEventListener() {}, getElementById() { return null; } },
+    location: { search: '?view=1w', pathname: '/market/' },
+    Intl, Date, Set, URLSearchParams, console
+  });
+  vm.runInContext(script, context);
+  const runtime = window.MARKET_CLOSE;
+
+  const payload = {
+    aggregation_version: '1.0.0',
+    period: '1w',
+    window: { start_date: '2026-08-25', end_date: '2026-08-28', dates: ['2026-08-25', '2026-08-26', '2026-08-27', '2026-08-28'], sessions_used: 4, required_sessions: 5, complete: false },
+    instruments: { indices: {}, rates_fx_volatility: {}, commodities_crypto: {} },
+    flows: {
+      unit: 'KRW billion',
+      sessions_used: 4,
+      markets: {
+        KOSPI: {
+          외국인: { net_buy: -5551, observations: 4, complete: false },
+          기관: { net_buy: 1200, observations: 3, complete: false },
+          개인: { net_buy: 4351, observations: 4, complete: false }
+        }
+      }
+    },
+    breadth: {},
+    krx_groups: { sessions_with_data: 0, sessions_used: 4, coverage_complete: false, sectors: [], themes: [] }
+  };
+
+  const target = { innerHTML: '', addEventListener() {} };
+  runtime.renderRangeView(payload, '1w', target);
+  const html = target.innerHTML;
+
+  assert.match(html, /−5\.55조원/, 'foreign with 4/4 observations in 4-session window is rendered');
+  assert.match(html, /<td>--<\/td>/, 'institution with 3/4 observations in 4-session window is hidden as --');
+});
+
+test('history strip active states and aria-current reflect calendar open and history mode', async () => {
+  const script = await read('assets/market-close.js');
+  const window = {};
+  const context = vm.createContext({
+    window,
+    document: { documentElement: { dataset: { siteLang: 'ko' } }, body: { dataset: {} }, readyState: 'loading', addEventListener() {}, getElementById() { return null; } },
+    location: { search: '?view=1w', pathname: '/market/' },
+    Intl, Date, Set, URLSearchParams, console
+  });
+  vm.runInContext(script, context);
+  const runtime = window.MARKET_CLOSE;
+
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+
+  // 1. In 1W mode, calendar closed
+  runtime.state.mode = '1w';
+  runtime.state.calendarOpen = false;
+  const target1 = { innerHTML: '', addEventListener() {} };
+  runtime.renderRangeView({ aggregation_version: '1.0.0', period: '1w', window: { sessions_used: 4, required_sessions: 5 }, instruments: { indices: {}, rates_fx_volatility: {}, commodities_crypto: {} }, flows: { markets: {} }, breadth: {}, krx_groups: { coverage_complete: false } }, '1w', target1);
+  assert.match(target1.innerHTML, /class="market-mode-btn active" type="button" data-market-action="view-1w" aria-current="page">1W/);
+  assert.doesNotMatch(target1.innerHTML, /class="market-mode-btn active" type="button" data-market-action="toggle-calendar"/);
+
+  // 2. In 1W mode, calendar OPEN -> 1W inactive, HISTORY active
+  runtime.state.mode = '1w';
+  runtime.state.calendarOpen = true;
+  const target2 = { innerHTML: '', addEventListener() {} };
+  runtime.renderRangeView({ aggregation_version: '1.0.0', period: '1w', window: { sessions_used: 4, required_sessions: 5 }, instruments: { indices: {}, rates_fx_volatility: {}, commodities_crypto: {} }, flows: { markets: {} }, breadth: {}, krx_groups: { coverage_complete: false } }, '1w', target2);
+  assert.doesNotMatch(target2.innerHTML, /class="market-mode-btn active" type="button" data-market-action="view-1w"/);
+  assert.match(target2.innerHTML, /class="market-mode-btn active" type="button" data-market-action="toggle-calendar" aria-expanded="true"/);
+
+  // 3. In HISTORY mode (date selected) -> HISTORY has aria-current="page"
+  runtime.state.mode = 'history';
+  runtime.state.currentDate = '2026-08-27';
+  runtime.state.calendarOpen = false;
+  const target3 = { innerHTML: '', addEventListener() {} };
+  runtime.render(data, target3);
+  assert.match(target3.innerHTML, /class="market-mode-btn active" type="button" data-market-action="toggle-calendar" aria-expanded="false" aria-current="page"/);
+});
+
+test('renderRangeView with complete coverage renders strongest and weakest sector/theme rankings', async () => {
+  const script = await read('assets/market-close.js');
+
+  const completePayload = {
+    aggregation_version: '1.0.0',
+    period: '1w',
+    window: {
+      start_date: '2026-08-24',
+      end_date: '2026-08-28',
+      dates: ['2026-08-24', '2026-08-25', '2026-08-26', '2026-08-27', '2026-08-28'],
+      sessions_used: 5,
+      required_sessions: 5,
+      complete: true
+    },
+    instruments: { indices: {}, rates_fx_volatility: {}, commodities_crypto: {} },
+    flows: { markets: {} },
+    breadth: {},
+    krx_groups: {
+      sessions_with_data: 5,
+      sessions_used: 5,
+      coverage_complete: true,
+      sectors: [
+        { index_code: 'KGS01', name: '화학', market: 'KOSPI', return_pct: 4.5, complete: true },
+        { index_code: 'KGS02', name: '반도체', market: 'KOSPI', return_pct: 3.2, complete: true },
+        { index_code: 'KGS03', name: '건설', market: 'KOSPI', return_pct: -2.8, complete: true },
+        { index_code: 'KGS04', name: '불완전업종', market: 'KOSPI', return_pct: 5.0, complete: false } // must be excluded
+      ],
+      themes: [
+        { index_code: 'KT01', name: '2차전지', return_pct: 6.1, complete: true },
+        { index_code: 'KT02', name: '바이오', return_pct: -3.5, complete: true }
+      ]
+    }
+  };
+
+  const window = {};
+  const context = vm.createContext({
+    window,
+    document: { documentElement: { dataset: { siteLang: 'ko' } }, body: { dataset: {} }, readyState: 'loading', addEventListener() {}, getElementById() { return null; } },
+    location: { search: '?view=1w', pathname: '/market/' },
+    Intl, Date, Set, URLSearchParams, console
+  });
+  vm.runInContext(script, context);
+  const runtime = window.MARKET_CLOSE;
+
+  const target = { innerHTML: '', addEventListener() {} };
+  runtime.renderRangeView(completePayload, '1w', target);
+  const html = target.innerHTML;
+
+  assert.match(html, /5거래일 기준/);
+  assert.match(html, /range-groups-grid/);
+  assert.match(html, /화학/);
+  assert.match(html, /\+4\.50%/);
+  assert.match(html, /건설/);
+  assert.match(html, /−2\.80%/);
+  assert.match(html, /2차전지/);
+  assert.doesNotMatch(html, /불완전업종/, 'Incomplete sector must not be included in ranking');
+});
+
+test('toggle-calendar click dynamically switches active state from 1W to HISTORY and back on close', async () => {
+  const script = await read('assets/market-close.js');
+
+  class ClassList {
+    constructor() { this.classes = new Set(); }
+    toggle(cls, force) {
+      if (force === undefined) {
+        if (this.classes.has(cls)) this.classes.delete(cls);
+        else this.classes.add(cls);
+      } else if (force) {
+        this.classes.add(cls);
+      } else {
+        this.classes.delete(cls);
+      }
+    }
+    contains(cls) { return this.classes.has(cls); }
+  }
+
+  const modeButtons = [
+    { dataset: { marketAction: 'today' }, classList: new ClassList(), setAttribute() {} },
+    { dataset: { marketAction: 'view-1w' }, classList: new ClassList(), setAttribute() {} },
+    { dataset: { marketAction: 'view-1m' }, classList: new ClassList(), setAttribute() {} },
+    { dataset: { marketAction: 'toggle-calendar' }, classList: new ClassList(), setAttribute() {} }
+  ];
+
+  let rootClickListener = null;
+  const drawerEl = { hidden: true, innerHTML: '' };
+  const toggleBtn = { classList: new ClassList(), setAttribute() {} };
+  const rootElement = {
+    id: 'market-close-root',
+    innerHTML: '',
+    addEventListener(event, handler) {
+      if (event === 'click') rootClickListener = handler;
+    }
+  };
+
+  const document = {
+    documentElement: { dataset: { siteLang: 'ko' } },
+    body: { dataset: {} },
+    readyState: 'complete',
+    getElementById(id) {
+      if (id === 'market-close-root') return rootElement;
+      if (id === 'market-calendar-drawer') return drawerEl;
+      return null;
+    },
+    querySelector(sel) {
+      if (sel === '.market-calendar-toggle') return toggleBtn;
+      return null;
+    },
+    querySelectorAll(sel) {
+      if (sel === '.market-history-modes .market-mode-btn') return modeButtons;
+      return [];
+    },
+    addEventListener() {}
+  };
+
+  const window = {};
+  const context = vm.createContext({
+    window,
+    document,
+    location: { pathname: '/market/', search: '?view=1w', hostname: 'localhost' },
+    fetch: async () => ({ ok: true, json: async () => ({ dates: ['2026-08-28'] }) }),
+    Intl, Date, Set, URLSearchParams, console
+  });
+  vm.runInContext(script, context);
+  const runtime = window.MARKET_CLOSE;
+
+  // Initialize in 1W mode
+  runtime.state.mode = '1w';
+  runtime.state.calendarOpen = false;
+  runtime.renderRangeView({ aggregation_version: '1.0.0', period: '1w', window: { sessions_used: 4, required_sessions: 5 }, instruments: { indices: {}, rates_fx_volatility: {}, commodities_crypto: {} }, flows: { markets: {} }, breadth: {}, krx_groups: { coverage_complete: false } }, '1w', rootElement);
+  modeButtons[1].classList.toggle('active', true);
+
+  // 1. Simulate clicking toggle-calendar
+  const clickToggleEvent = {
+    target: {
+      closest(sel) {
+        if (sel === '[data-market-action]') return { dataset: { marketAction: 'toggle-calendar' } };
+        return null;
+      }
+    }
+  };
+
+  await rootClickListener(clickToggleEvent);
+
+  // Check state & classes after open
+  assert.equal(runtime.state.calendarOpen, true, 'calendar must be open');
+  assert.equal(modeButtons[1].classList.contains('active'), false, '1W must be inactive when calendar is open');
+  assert.equal(modeButtons[3].classList.contains('active'), true, 'HISTORY must be active when calendar is open');
+
+  // 2. Click toggle-calendar again to close
+  await rootClickListener(clickToggleEvent);
+
+  assert.equal(runtime.state.calendarOpen, false, 'calendar must be closed');
+  assert.equal(modeButtons[1].classList.contains('active'), true, '1W must be restored to active when calendar is closed');
+  assert.equal(modeButtons[3].classList.contains('active'), false, 'HISTORY must be inactive when calendar is closed in 1W mode');
+});

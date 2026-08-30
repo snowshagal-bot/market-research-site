@@ -144,8 +144,11 @@
     if (/^\/en\/market\/?$/i.test(path) || /^\/market\/?$/i.test(path)) {
       const searchParams = new URLSearchParams(String(search || '').replace(/^\?/, ''));
       const date = searchParams.get('date');
+      const view = searchParams.get('view');
       const base = targetLanguage === 'en' ? '/en/market/' : '/market/';
-      return date ? `${base}?date=${encodeURIComponent(date)}` : base;
+      if (date) return `${base}?date=${encodeURIComponent(date)}`;
+      if (view === '1w' || view === '1m') return `${base}?view=${encodeURIComponent(view)}`;
+      return base;
     }
     const categoryMatch = path.match(/^\/(?:en\/)?(daily|weekly|research|basics|notes)\/?$/i);
     if (categoryMatch) {
