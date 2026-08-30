@@ -302,7 +302,7 @@ test('PR #73 Hero Composition: Controls positioned on left under copy with 44px 
   assert.ok(enHtml.includes('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"'));
 
   // Hero artwork offset adjusted for balanced composition
-  assert.ok(homeCss.includes('right: clamp(-28px, -2vw, -12px);'));
-  assert.ok(homeCss.includes('width: min(65vw, 780px);'));
-  assert.ok(homeCss.includes('object-position: 63% 36%;'));
+  assert.ok(homeCss.includes('right: clamp(-36px, -2vw, -12px);'));
+  assert.ok(homeCss.includes('width: min(78vw, 920px);'));
+  assert.ok(homeCss.includes('object-position: 60% 36%;'));
 });

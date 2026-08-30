@@ -71,39 +71,37 @@
     return;
   }
 
-  const featuredPosts = posts.slice(0, 3);
-  const archivePosts = posts.slice(3);
+  const featuredPosts = posts.slice(0, 2);
+  const archivePosts = posts.slice(2);
 
-  // Render Featured Cards (1-3 cards)
+  // Render Featured Cards (1-2 cards)
   if (featuredHost) {
     if (featuredSection) featuredSection.hidden = false;
     featuredHost.innerHTML = featuredPosts.map((post) => {
       const summary = String(post.summary || post.description || post.subtitle || '').trim();
       const readLabel = lang === 'en' ? 'Read report' : '리포트 보기';
       const visual = post.coverImage
-        ? `<span class="latest-card-cover"><img src="${esc(rootPath(post.coverImage))}" alt="" loading="lazy"></span>`
-        : '<span class="latest-card-art" aria-hidden="true"></span>';
-      const summaryCopy = summary ? `<p class="latest-card-summary">${esc(summary)}</p>` : '';
+        ? `<span class="category-featured-cover"><img src="${esc(rootPath(post.coverImage))}" alt="" loading="lazy"></span>`
+        : '<span class="category-featured-art" aria-hidden="true"></span>';
+      const summaryCopy = summary ? `<p class="category-featured-summary">${esc(summary)}</p>` : '';
       const readingTimeStr = formatReadingTime(post.readingMinutes, lang);
       const readingSuffix = readingTimeStr ? ` · ${readingTimeStr}` : '';
       const tagsStr = Array.isArray(post.tags) ? post.tags.map(tagLabel).filter(Boolean).join(' · ') : '';
-      const tagsHtml = tagsStr ? `<div class="latest-card-tags">${esc(tagsStr)}</div>` : '';
+      const tagsHtml = tagsStr ? `<div class="category-featured-tags">${esc(tagsStr)}</div>` : '';
       const date = post.reportDate || post.date || '';
       const metaType = categoryMetaLabels[post.type] || post.type.toUpperCase();
 
-      return `<a class="latest-card latest-card-${esc(post.type)}" href="${esc(cleanReportUrl(post.href))}">
-        <span class="latest-card-meta">
-          <b>${esc(metaType)}${esc(readingSuffix)}</b>
-          <time datetime="${esc(date)}">${esc(date)}</time>
-        </span>
-        <strong class="latest-card-title">${esc(post.title)}</strong>
-        <span class="latest-card-body">
-          ${visual}
-          <span class="latest-card-copy">
-            ${summaryCopy}
-            ${tagsHtml}
-            <span class="latest-card-read">${esc(readLabel)} <i aria-hidden="true">→</i></span>
+      return `<a class="category-featured-card category-featured-card-${esc(post.type)}" href="${esc(cleanReportUrl(post.href))}">
+        <span class="category-featured-cover-wrap">${visual}</span>
+        <span class="category-featured-content">
+          <span class="category-featured-meta">
+            <b>${esc(metaType)}${esc(readingSuffix)}</b>
+            <time datetime="${esc(date)}">${esc(date)}</time>
           </span>
+          <strong class="category-featured-title">${esc(post.title)}</strong>
+          ${summaryCopy}
+          ${tagsHtml}
+          <span class="category-featured-action"><span class="category-featured-read">${esc(readLabel)} <i aria-hidden="true">→</i></span></span>
         </span>
       </a>`;
     }).join('');

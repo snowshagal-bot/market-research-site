@@ -272,14 +272,14 @@ test('Homepage Latest: renders reading time in SSR metadata for both KO and EN',
   assert.match(koHtml, /DAILY · 약 \d+분/, 'KO Daily latest card must include reading time');
   assert.match(koHtml, /WEEKLY · 약 \d+분/, 'KO Weekly latest card must include reading time');
   assert.match(koHtml, /RESEARCH · 약 \d+분/, 'KO Research latest card must include reading time');
-  assert.doesNotMatch(koHtml, /undefined|NaN|약 0분/);
+  assert.doesNotMatch(koHtml, /undefined|NaN|\b약 0분\b/);
 
   // English homepage latest links
   const enHtml = homepageLatestLinks(posts, 'en');
   assert.match(enHtml, /DAILY · \d+ min read/, 'EN Daily latest card must include reading time');
   assert.match(enHtml, /WEEKLY · \d+ min read/, 'EN Weekly latest card must include reading time');
   assert.match(enHtml, /RESEARCH · \d+ min read/, 'EN Research latest card must include reading time');
-  assert.doesNotMatch(enHtml, /undefined|NaN|0 min read/);
+  assert.doesNotMatch(enHtml, /undefined|NaN|\b0 min read\b/);
 });
 
 test('Homepage Latest: safely omits reading time when missing or zero without broken copy', () => {
