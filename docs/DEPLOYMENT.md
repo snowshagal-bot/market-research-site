@@ -74,7 +74,7 @@ Required when Gemini analysis is enabled:
 
 - Secret `GEMINI_API_KEY`
 - Env `DISCLOSURE_LLM_PROVIDER=gemini`
-- Env `DISCLOSURE_LLM_MODEL=gemini-3.1-flash-lite`
+- Env `DISCLOSURE_LLM_MODEL=gemini-3.5-flash-lite`
 
 Recommended source and budget env values:
 
@@ -92,7 +92,7 @@ Optional future scheduler credential:
 
 Do not use `ADMIN_KEY` for a future scheduler. Scheduler activation is intentionally out of scope. In the current phase, use `/admin/disclosures/` for one manual Preview sync, verify D1 counts, duplicate-free re-sync, rule scores, at most two AI jobs, structured output, DART links and usage counters, then stop. Missing provider secrets must be reported as configuration errors; they are not a reason to place values in Git or client JavaScript.
 
-The Gemini adapter was checked against the official API on 2026-08-30 and uses the `v1beta/interactions` endpoint with structured JSON output for stable model ID `gemini-3.1-flash-lite`. Provider pricing and free-tier policy remain external and changeable; the repository's internal budgets are deliberately lower and configurable.
+The Gemini adapter was checked against the official API on 2026-08-30 and uses the `v1beta/interactions` endpoint with structured JSON output for stable model ID `gemini-3.5-flash-lite`. Provider pricing and free-tier policy remain external and changeable; the repository's internal budgets are deliberately lower and configurable.
 
 ## Web Analytics dependencies
 

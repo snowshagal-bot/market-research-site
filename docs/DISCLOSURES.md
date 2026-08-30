@@ -78,9 +78,9 @@ Gemini primary configuration:
 
 - `GEMINI_API_KEY`
 - `DISCLOSURE_LLM_PROVIDER=gemini`
-- `DISCLOSURE_LLM_MODEL=gemini-3.1-flash-lite`
+- `DISCLOSURE_LLM_MODEL=gemini-3.5-flash-lite`
 
-The model ID and integration were rechecked against Google's official Gemini documentation on 2026-08-30. `gemini-3.1-flash-lite` is a stable model ID that supports structured output. The adapter uses `POST https://generativelanguage.googleapis.com/v1beta/interactions` with top-level `response_format` (`application/json` plus JSON Schema), `generation_config`, and `store=false`. Google's published free-tier availability can change and is not treated as the application's quota; Snowshagal's smaller internal budgets remain authoritative.
+The model ID and integration were rechecked against Google's official Gemini documentation on 2026-08-30. `gemini-3.5-flash-lite` is the recommended successor stable model ID that supports structured output. The adapter uses `POST https://generativelanguage.googleapis.com/v1beta/interactions` with top-level `response_format` (`application/json` plus JSON Schema), `generation_config`, and `store=false`. Google's published free-tier availability can change and is not treated as the application's quota; Snowshagal's smaller internal budgets remain authoritative.
 
 Optional scheduler credential:
 

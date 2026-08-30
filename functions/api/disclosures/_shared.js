@@ -78,7 +78,7 @@ export function disclosureConfig(env = {}) {
     : env.GEMINI_API_KEY ? 'gemini' : 'none';
   const primaryProvider = inferredPrimary;
   const fallbackProvider = normalizedProvider(env.DISCLOSURE_LLM_FALLBACK_PROVIDER || 'none');
-  const defaultModel = primaryProvider === 'gemini' ? 'gemini-3.1-flash-lite' : '';
+  const defaultModel = primaryProvider === 'gemini' ? 'gemini-3.5-flash-lite' : '';
   return {
     corpClasses: parseCorpClasses(env.DISCLOSURE_CORP_CLASSES),
     dartDailyBudget: boundedInteger(env.DISCLOSURE_DART_DAILY_BUDGET, DEFAULT_DART_DAILY_BUDGET, 50, 19000),

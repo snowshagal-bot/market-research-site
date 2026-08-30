@@ -95,7 +95,7 @@ function envFor(db, extra = {}) {
     OPENDART_API_KEY: OPENDART_KEY,
     GEMINI_API_KEY: GEMINI_KEY,
     DISCLOSURE_LLM_PROVIDER: 'gemini',
-    DISCLOSURE_LLM_MODEL: 'gemini-3.1-flash-lite',
+    DISCLOSURE_LLM_MODEL: 'gemini-3.5-flash-lite',
     ...extra
   };
 }
@@ -130,7 +130,7 @@ function validAnalysis(overrides = {}) {
 
 function geminiResponse(analysis = validAnalysis(), status = 200) {
   return new Response(JSON.stringify(status === 200 ? {
-    model: 'models/gemini-3.1-flash-lite',
+    model: 'models/gemini-3.5-flash-lite',
     steps: [{ type: 'model_output', content: [{ type: 'text', text: JSON.stringify(analysis) }] }],
     usage: { total_input_tokens: 100, total_output_tokens: 50 }
   } : { error: { message: 'upstream failure' } }), {
