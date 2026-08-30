@@ -15,14 +15,13 @@ const ANALYSIS_SCHEMA = {
   additionalProperties: false,
   properties: {
     summary: { type: 'string', description: 'Conservative metadata-only summary without invented facts or figures.' },
-    key_figures: { type: 'array', items: { type: 'string' }, description: 'Key figures mentioned strictly in metadata. Empty array if none.' },
     what_it_means: { type: 'string', description: 'Brief reader-facing explanation of what this disclosure means for shareholders and market.' },
     watch_points: { type: 'array', items: { type: 'string' }, maxItems: 4, description: 'Points and conditions to verify in the original DART filing.' },
     impact: { type: 'string', enum: ['positive', 'negative', 'mixed', 'neutral'] },
     importance: { type: 'string', enum: ['high', 'medium', 'low'] },
     limitation: { type: 'string', description: 'Disclaimer that this is a metadata-based explanation and the original DART filing must be reviewed.' }
   },
-  required: ['summary', 'key_figures', 'what_it_means', 'watch_points', 'impact', 'importance', 'limitation']
+  required: ['summary', 'what_it_means', 'watch_points', 'impact', 'importance', 'limitation']
 };
 
 function safeJson(text) {
@@ -45,7 +44,7 @@ function assertNoUnsupportedFigures(result, filing) {
     filing.receiptDate, filing.remarks, filing.ruleScore, ...(filing.ruleReasons || [])
   ].join(' ');
   const allowed = new Set(figureTokens(sourceText));
-  const generated = figureTokens([result.summary, ...(result.key_figures || [])].join(' '));
+  const generated = figureTokens([result.summary, result.what_it_means].join(' '));
   const unsupported = generated.filter(token => !allowed.has(token));
   if (unsupported.length) {
     throw new DisclosureError('LLM_UNSUPPORTED_FIGURE', 'AI 응답에 제공된 메타데이터로 확인할 수 없는 수치가 포함되었습니다.', 502);
@@ -59,12 +58,10 @@ function normalizedAnalysis(value, filing = null) {
     value.importance = 'medium';
   }
   const clean = input => String(input || '').replace(/\s+/g, ' ').trim();
-  const rawKeyFigures = Array.isArray(value.key_figures) ? value.key_figures : (value.key_figures ? [String(value.key_figures)] : []);
   const rawWatchPoints = Array.isArray(value.watch_points) ? value.watch_points : (value.watch_points ? [String(value.watch_points)] : []);
 
   const result = {
     summary: clean(value.summary).slice(0, 700),
-    key_figures: rawKeyFigures.map(clean).filter(Boolean).slice(0, 6),
     what_it_means: clean(value.what_it_means || value.meaning).slice(0, 700),
     watch_points: rawWatchPoints.map(clean).filter(Boolean).slice(0, 4),
     impact: value.impact,
@@ -78,6 +75,7 @@ function normalizedAnalysis(value, filing = null) {
 
 function analysisPrompt(filing) {
   return `당신은 Snowshagal 마켓 독자를 위한 공시 해설 도우미다. 아래 정보는 OpenDART 공시 목록의 메타데이터(제목 및 속성)이다.
+공시 본문 전체가 아닌 제목과 메타데이터만 주어졌으므로, 본문에 있을 법한 구체적인 금액이나 비율 등 숫자를 절대 지어내지 말 것.
 
 [공시 메타데이터]
 - 회사명: ${filing.corpName} (${filing.stockCode || '종목코드 없음'})
@@ -91,12 +89,11 @@ function analysisPrompt(filing) {
 
 [작성 지침]
 1. summary (핵심 사실): 메타데이터에 기재된 사실만 1~2문장으로 객관적 요약.
-2. key_figures (핵심 숫자): 제목/메타데이터에 적힌 수치만 배열로 추출(예: "유상증자 500억원", "비율 10%"). 메타데이터에 숫자가 전혀 없다면 빈 배열([]) 반환. 숫자를 절대 추정하거나 지어내지 말 것.
-3. what_it_means (무엇을 의미하나): 일반 투자자가 이해하기 쉽게 시장 및 주주 관점에서의 의미와 영향을 짧게 해설.
-4. watch_points (확인할 것): DART 원문에서 추가로 점검해야 할 조건(전환가액, 조달 목적, 보호예수, 계약기간 등)을 2~4개 리스트로 제시.
-5. impact: positive / negative / mixed / neutral 중 선택.
-6. importance: high / medium / low 중 선택.
-7. limitation: "DART 공시 메타데이터 기반의 이해 보조 해설이며, 세부 조건과 최종 수치는 DART 원문을 확인해야 합니다."`.slice(0, MAX_PROMPT_CHARS);
+2. what_it_means (무엇을 의미하나): 일반 투자자가 이해하기 쉽게 시장 및 주주 관점에서의 의미와 영향을 짧게 해설 (원문에 없는 숫자 창작 금지).
+3. watch_points (확인할 것): DART 원문에서 추가로 점검해야 할 조건(전환가액, 조달 목적, 보호예수, 계약상대방 등)을 2~4개 리스트로 제시.
+4. impact: positive / negative / mixed / neutral 중 선택.
+5. importance: high / medium / low 중 선택.
+6. limitation: "DART 공시 메타데이터 기반의 이해 보조 해설이며, 세부 조건과 최종 수치는 DART 원문을 확인해야 합니다."`.slice(0, MAX_PROMPT_CHARS);
 }
 
 async function fetchWithTimeout(url, options) {

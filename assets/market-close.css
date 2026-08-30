@@ -138,6 +138,7 @@ body.market-close-page:has(.market-loading)>.footer{visibility:hidden}
 .disclosure-corp-group{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap}
 .disclosure-corp-name{font-size:13px;font-weight:800;color:var(--market-ink)}
 .disclosure-stock-code{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.disclosure-correction-tag{font-size:8.5px;font-weight:800;padding:2px 5px;border-radius:3px;background:color-mix(in srgb,var(--market-blue) 14%,transparent);color:var(--market-blue);border:1px solid color-mix(in srgb,var(--market-blue) 30%,transparent)}
 .disclosure-priority-tag{font-size:8.5px;font-weight:850;padding:2px 5px;border-radius:3px;letter-spacing:.04em}
 .tag-critical{background:#ffebee;color:#c62828}
 .tag-high{background:#fff3e0;color:#e65100}

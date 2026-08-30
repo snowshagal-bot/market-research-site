@@ -2,6 +2,8 @@ import {
   FILINGS_TABLE,
   compactDate,
   ensureDisclosureSchema,
+  extractBaseReportName,
+  extractCorrectionType,
   json,
   kstDate,
   parseJsonArray,
@@ -21,19 +23,24 @@ export async function onRequestGet({ request, env }) {
     let targetReceiptDate = queryDate ? compactDate(queryDate) : '';
 
     if (!targetReceiptDate || !/^20\d{6}$/.test(targetReceiptDate)) {
-      // Find latest date with published disclosures
+      // Find latest date with published, non-superseded disclosures
       const latestRow = await db.prepare(`SELECT rcept_dt FROM ${FILINGS_TABLE}
         WHERE publish_status IN ('auto', 'manual')
+          AND (superseded_by = '' OR superseded_by IS NULL)
         ORDER BY rcept_dt DESC LIMIT 1`).first();
       targetReceiptDate = latestRow?.rcept_dt || compactDate(todayKst);
     }
 
     const countRow = await db.prepare(`SELECT count(*) as total FROM ${FILINGS_TABLE}
-      WHERE publish_status IN ('auto', 'manual') AND rcept_dt = ?`).bind(targetReceiptDate).first();
+      WHERE publish_status IN ('auto', 'manual')
+        AND (superseded_by = '' OR superseded_by IS NULL)
+        AND rcept_dt = ?`).bind(targetReceiptDate).first();
     const totalPublished = Number(countRow?.total || 0);
 
     const rows = await db.prepare(`SELECT * FROM ${FILINGS_TABLE}
-      WHERE publish_status IN ('auto', 'manual') AND rcept_dt = ?
+      WHERE publish_status IN ('auto', 'manual')
+        AND (superseded_by = '' OR superseded_by IS NULL)
+        AND rcept_dt = ?
       ORDER BY rule_score DESC, rcept_no DESC
       LIMIT ?`).bind(targetReceiptDate, limit).all();
 
@@ -43,12 +50,19 @@ export async function onRequestGet({ request, env }) {
 
     const items = (rows?.results || []).map(row => {
       const aiResult = parseJsonObject(row.ai_json);
+      const baseReportName = extractBaseReportName(row.report_nm);
+      const correctionType = extractCorrectionType(row.report_nm);
+      const isCorrection = Boolean(correctionType);
+
       return {
         rceptNo: row.rcept_no,
         corpName: row.corp_name,
         stockCode: row.stock_code,
         corpCls: row.corp_cls,
         reportName: row.report_nm,
+        baseReportName,
+        isCorrection,
+        correctionType,
         filerName: row.flr_nm,
         receiptDate: row.rcept_dt,
         formattedDate,
@@ -60,15 +74,25 @@ export async function onRequestGet({ request, env }) {
         priority: row.rule_priority || 'low',
         score: Number(row.rule_score || 0),
         reasons: parseJsonArray(row.rule_reasons_json),
-        ai: row.ai_status === 'done' && aiResult ? {
+        fact: {
+          corpName: row.corp_name,
+          stockCode: row.stock_code,
+          reportName: row.report_nm,
+          baseReportName,
+          isCorrection,
+          correctionType,
+          receiptDate: row.rcept_dt,
+          formattedDate,
+          sourceUrl: row.source_url
+        },
+        ai: (row.ai_status === 'done' && aiResult) ? {
           status: 'done',
           summary: aiResult.summary || '',
-          keyFigures: Array.isArray(aiResult.key_figures) ? aiResult.key_figures : (aiResult.key_figures ? [String(aiResult.key_figures)] : []),
           whatItMeans: aiResult.what_it_means || '',
           watchPoints: Array.isArray(aiResult.watch_points) ? aiResult.watch_points : [],
           impact: aiResult.impact || 'neutral',
           importance: aiResult.importance || 'medium',
-          limitation: aiResult.limitation || ''
+          limitation: aiResult.limitation || 'DART 공시 메타데이터 기반 해설이며 세부 조건은 DART 원문을 확인해야 합니다.'
         } : null
       };
     });

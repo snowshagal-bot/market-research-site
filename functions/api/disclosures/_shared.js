@@ -194,6 +194,7 @@ async function runSchemaMigration(db) {
       publish_status TEXT NOT NULL DEFAULT 'admin_only',
       is_watchlist INTEGER NOT NULL DEFAULT 0,
       published_at TEXT NOT NULL DEFAULT '',
+      superseded_by TEXT NOT NULL DEFAULT '',
       ai_provider TEXT NOT NULL DEFAULT '',
       ai_model TEXT NOT NULL DEFAULT '',
       ai_json TEXT NOT NULL DEFAULT '',
@@ -244,11 +245,15 @@ async function runSchemaMigration(db) {
     if (!existingCols.has('published_at')) {
       await db.prepare(`ALTER TABLE ${FILINGS_TABLE} ADD COLUMN published_at TEXT NOT NULL DEFAULT ''`).run();
     }
+    if (!existingCols.has('superseded_by')) {
+      await db.prepare(`ALTER TABLE ${FILINGS_TABLE} ADD COLUMN superseded_by TEXT NOT NULL DEFAULT ''`).run();
+    }
   } catch (_) {}
 
-  // Index on publish_status after column is guaranteed to exist
+  // Index on publish_status and superseded_by after columns are guaranteed to exist
   try {
     await db.prepare(`CREATE INDEX IF NOT EXISTS idx_disclosure_published ON ${FILINGS_TABLE} (publish_status, rcept_dt DESC, rule_score DESC)`).run();
+    await db.prepare(`CREATE INDEX IF NOT EXISTS idx_disclosure_superseded ON ${FILINGS_TABLE} (superseded_by, publish_status)`).run();
   } catch (_) {}
 
   // Seed default watchlist if empty
@@ -371,7 +376,17 @@ const SPECIFIC_RULES = [
 
 const MAJOR_REPORT_RULE = { points: 5, label: '주요사항보고', re: /주요사항보고서/i };
 const ROUTINE_REPORT = /(사업보고서|반기보고서|분기보고서|주주총회소집공고|의결권대리행사권유|임원.?주요주주.*소유상황보고서|기업지배구조보고서)/i;
-const CORRECTION = /^\[(?:기재정정|첨부정정|첨부추가|변경등록|발행조건확정|정정제출요구|정정명령부과)\]/i;
+export const CORRECTION_PATTERN = /^\[(?:기재정정|첨부정정|첨부추가|변경등록|발행조건확정|정정제출요구|정정명령부과)\]/i;
+const CORRECTION = CORRECTION_PATTERN;
+
+export function extractBaseReportName(reportName) {
+  return String(reportName || '').replace(CORRECTION_PATTERN, '').trim();
+}
+
+export function extractCorrectionType(reportName) {
+  const match = String(reportName || '').match(CORRECTION_PATTERN);
+  return match ? match[0] : '';
+}
 
 export function scoreDisclosure(filing = {}) {
   const reportName = String(filing.report_nm || filing.reportName || '').trim();
@@ -419,13 +434,18 @@ export function scoreDisclosure(filing = {}) {
 export function normalizeFiling(item = {}, now = new Date()) {
   const rule = scoreDisclosure(item);
   const rceptNo = String(item.rcept_no || '').trim();
+  const reportName = String(item.report_nm || '').trim().slice(0, 500);
+  const correctionType = extractCorrectionType(reportName);
   return {
     rceptNo,
     corpCls: String(item.corp_cls || '').trim(),
     corpName: String(item.corp_name || '').trim().slice(0, 160),
     corpCode: String(item.corp_code || '').trim(),
     stockCode: String(item.stock_code || '').trim(),
-    reportName: String(item.report_nm || '').trim().slice(0, 500),
+    reportName,
+    baseReportName: extractBaseReportName(reportName),
+    isCorrection: Boolean(correctionType),
+    correctionType,
     filerName: String(item.flr_nm || '').trim().slice(0, 160),
     receiptDate: String(item.rcept_dt || '').trim(),
     remarks: String(item.rm || '').trim().slice(0, 80),
@@ -460,11 +480,12 @@ export async function getWatchlistStockCodes(db) {
   return new Set((result?.results || []).map(r => r.stock_code));
 }
 
-export async function addWatchlistCompany(db, { stockCode, corpCode = '', corpName, corpCls = 'Y', sortOrder = 0 }) {
+export async function addWatchlistCompany(db, { stockCode, corpCode = '', corpName, corpCls = 'Y', sortOrder = 0 }, now = new Date()) {
   const safeStock = String(stockCode || '').trim();
   const safeName = String(corpName || '').trim();
   if (!safeStock || !safeName) throw new DisclosureError('INVALID_INPUT', '종목코드와 회사명은 필수입니다.', 400);
-  const now = new Date().toISOString();
+  const nowStr = now.toISOString();
+  const todayReceiptDate = compactDate(kstDate(now));
   await db.prepare(`INSERT INTO ${WATCHLIST_TABLE} (stock_code, corp_code, corp_name, corp_cls, active, sort_order, created_at, updated_at)
     VALUES (?, ?, ?, ?, 1, ?, ?, ?)
     ON CONFLICT(stock_code) DO UPDATE SET
@@ -473,49 +494,51 @@ export async function addWatchlistCompany(db, { stockCode, corpCode = '', corpNa
       corp_cls = excluded.corp_cls,
       active = 1,
       updated_at = excluded.updated_at`)
-    .bind(safeStock, String(corpCode || '').trim(), safeName, String(corpCls || 'Y').trim().toUpperCase(), Number(sortOrder) || 0, now, now).run();
+    .bind(safeStock, String(corpCode || '').trim(), safeName, String(corpCls || 'Y').trim().toUpperCase(), Number(sortOrder) || 0, nowStr, nowStr).run();
 
   // Update existing filings for this stock code to is_watchlist = 1
-  await db.prepare(`UPDATE ${FILINGS_TABLE} SET is_watchlist = 1, updated_at = ? WHERE stock_code = ?`).bind(now, safeStock).run();
-  // Auto-publish eligible high score filings
+  await db.prepare(`UPDATE ${FILINGS_TABLE} SET is_watchlist = 1, updated_at = ? WHERE stock_code = ?`).bind(nowStr, safeStock).run();
+  // Auto-publish eligible high score filings for TODAY ONLY
   await db.prepare(`UPDATE ${FILINGS_TABLE} SET
       publish_status = 'auto',
       published_at = CASE WHEN published_at = '' OR published_at IS NULL THEN ? ELSE published_at END,
       updated_at = ?
-    WHERE stock_code = ? AND rule_score >= 7 AND publish_status = 'admin_only'`)
-    .bind(now, now, safeStock).run();
+    WHERE stock_code = ? AND rule_score >= 7 AND rcept_dt = ? AND publish_status = 'admin_only'`)
+    .bind(nowStr, nowStr, safeStock, todayReceiptDate).run();
 
   return { stockCode: safeStock, corpName: safeName, active: true };
 }
 
-export async function removeWatchlistCompany(db, stockCode) {
+export async function removeWatchlistCompany(db, stockCode, now = new Date()) {
   const safeStock = String(stockCode || '').trim();
   if (!safeStock) throw new DisclosureError('INVALID_INPUT', '종목코드가 필요합니다.', 400);
-  const now = new Date().toISOString();
+  const nowStr = now.toISOString();
   await db.prepare(`DELETE FROM ${WATCHLIST_TABLE} WHERE stock_code = ?`).bind(safeStock).run();
-  await db.prepare(`UPDATE ${FILINGS_TABLE} SET is_watchlist = 0, updated_at = ? WHERE stock_code = ?`).bind(now, safeStock).run();
+  await db.prepare(`UPDATE ${FILINGS_TABLE} SET is_watchlist = 0, updated_at = ? WHERE stock_code = ?`).bind(nowStr, safeStock).run();
   // Unpublish auto-published filings for removed company
-  await db.prepare(`UPDATE ${FILINGS_TABLE} SET publish_status = 'admin_only', updated_at = ? WHERE stock_code = ? AND publish_status = 'auto'`).bind(now, safeStock).run();
+  await db.prepare(`UPDATE ${FILINGS_TABLE} SET publish_status = 'admin_only', updated_at = ? WHERE stock_code = ? AND publish_status = 'auto'`).bind(nowStr, safeStock).run();
   return { stockCode: safeStock, deleted: true };
 }
 
-export async function toggleWatchlistActive(db, stockCode, active) {
+export async function toggleWatchlistActive(db, stockCode, active, now = new Date()) {
   const safeStock = String(stockCode || '').trim();
   const isActive = Boolean(active);
-  const now = new Date().toISOString();
+  const nowStr = now.toISOString();
+  const todayReceiptDate = compactDate(kstDate(now));
   await db.prepare(`UPDATE ${WATCHLIST_TABLE} SET active = ?, updated_at = ? WHERE stock_code = ?`)
-    .bind(isActive ? 1 : 0, now, safeStock).run();
+    .bind(isActive ? 1 : 0, nowStr, safeStock).run();
   await db.prepare(`UPDATE ${FILINGS_TABLE} SET is_watchlist = ?, updated_at = ? WHERE stock_code = ?`)
-    .bind(isActive ? 1 : 0, now, safeStock).run();
+    .bind(isActive ? 1 : 0, nowStr, safeStock).run();
   if (!isActive) {
-    await db.prepare(`UPDATE ${FILINGS_TABLE} SET publish_status = 'admin_only', updated_at = ? WHERE stock_code = ? AND publish_status = 'auto'`).bind(now, safeStock).run();
+    await db.prepare(`UPDATE ${FILINGS_TABLE} SET publish_status = 'admin_only', updated_at = ? WHERE stock_code = ? AND publish_status = 'auto'`).bind(nowStr, safeStock).run();
   } else {
+    // Auto-publish eligible high score filings for TODAY ONLY
     await db.prepare(`UPDATE ${FILINGS_TABLE} SET
         publish_status = 'auto',
         published_at = CASE WHEN published_at = '' OR published_at IS NULL THEN ? ELSE published_at END,
         updated_at = ?
-      WHERE stock_code = ? AND rule_score >= 7 AND publish_status = 'admin_only'`)
-      .bind(now, now, safeStock).run();
+      WHERE stock_code = ? AND rule_score >= 7 AND rcept_dt = ? AND publish_status = 'admin_only'`)
+      .bind(nowStr, nowStr, safeStock, todayReceiptDate).run();
   }
   return { stockCode: safeStock, active: isActive };
 }
@@ -536,19 +559,21 @@ export async function setFilingPublishStatus(db, rceptNo, publishStatus, now = n
   return publicFiling(row);
 }
 
-export async function upsertFiling(db, filing, { watchlistCodes = null } = {}) {
+export async function upsertFiling(db, filing, { watchlistCodes = null, now = new Date() } = {}) {
   if (!/^\d{14}$/.test(filing.rceptNo)) return false;
+  const todayReceiptDate = compactDate(kstDate(now));
+  const isToday = filing.receiptDate === todayReceiptDate;
   const initialAiStatus = filing.aiEligible ? 'available' : 'skipped';
   const isWatchlist = watchlistCodes ? (watchlistCodes.has(filing.stockCode) ? 1 : 0) : 0;
-  const autoPublish = Boolean(isWatchlist && filing.ruleScore >= 7);
+  const autoPublish = Boolean(isWatchlist && filing.ruleScore >= 7 && isToday);
   const initialPublishStatus = autoPublish ? 'auto' : 'admin_only';
   const initialPublishedAt = autoPublish ? filing.firstSeenAt : '';
 
   const inserted = await db.prepare(`INSERT INTO ${FILINGS_TABLE} (
       rcept_no, corp_cls, corp_name, corp_code, stock_code, report_nm, flr_nm, rcept_dt, rm, source_url,
       rule_score, rule_priority, rule_reasons_json, ai_eligible, ai_status, publish_status, is_watchlist,
-      published_at, first_seen_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      published_at, superseded_by, first_seen_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '', ?, ?)
     ON CONFLICT(rcept_no) DO NOTHING
     RETURNING rcept_no`)
     .bind(
@@ -557,52 +582,73 @@ export async function upsertFiling(db, filing, { watchlistCodes = null } = {}) {
       JSON.stringify(filing.ruleReasons), filing.aiEligible ? 1 : 0, initialAiStatus, initialPublishStatus, isWatchlist,
       initialPublishedAt, filing.firstSeenAt, filing.updatedAt
     ).all();
-  if (inserted?.results?.length) return true;
 
-  await db.prepare(`UPDATE ${FILINGS_TABLE} SET
-      corp_cls = ?,
-      corp_name = ?,
-      corp_code = ?,
-      stock_code = ?,
-      report_nm = ?,
-      flr_nm = ?,
-      rcept_dt = ?,
-      rm = ?,
-      source_url = ?,
-      rule_score = ?,
-      rule_priority = ?,
-      rule_reasons_json = ?,
-      ai_eligible = ?,
-      is_watchlist = ?,
-      publish_status = CASE
-        WHEN ${FILINGS_TABLE}.publish_status = 'manual' THEN 'manual'
-        WHEN ? = 1 AND ? >= 7 THEN 'auto'
-        WHEN ${FILINGS_TABLE}.publish_status = 'auto' AND (? = 0 OR ? < 7) THEN 'admin_only'
-        ELSE ${FILINGS_TABLE}.publish_status
-      END,
-      published_at = CASE
-        WHEN ${FILINGS_TABLE}.publish_status = 'manual' THEN ${FILINGS_TABLE}.published_at
-        WHEN ? = 1 AND ? >= 7 AND (${FILINGS_TABLE}.published_at = '' OR ${FILINGS_TABLE}.published_at IS NULL) THEN ?
-        ELSE ${FILINGS_TABLE}.published_at
-      END,
-      ai_status = CASE
-        WHEN ? = 0 THEN 'skipped'
-        WHEN ${FILINGS_TABLE}.ai_status IN ('done', 'processing') THEN ${FILINGS_TABLE}.ai_status
-        WHEN ${FILINGS_TABLE}.ai_status = 'error' THEN 'error'
-        ELSE 'available'
-      END,
-      updated_at = ?
-    WHERE rcept_no = ?`)
-    .bind(
-      filing.corpCls, filing.corpName, filing.corpCode, filing.stockCode, filing.reportName,
-      filing.filerName, filing.receiptDate, filing.remarks, filing.sourceUrl, filing.ruleScore,
-      filing.rulePriority, JSON.stringify(filing.ruleReasons), filing.aiEligible ? 1 : 0,
-      isWatchlist,
-      isWatchlist, filing.ruleScore, isWatchlist, filing.ruleScore,
-      isWatchlist, filing.ruleScore, filing.updatedAt,
-      filing.aiEligible ? 1 : 0, filing.updatedAt, filing.rceptNo
-    ).run();
-  return false;
+  const isNewInsert = Boolean(inserted?.results?.length);
+
+  if (!isNewInsert) {
+    await db.prepare(`UPDATE ${FILINGS_TABLE} SET
+        corp_cls = ?,
+        corp_name = ?,
+        corp_code = ?,
+        stock_code = ?,
+        report_nm = ?,
+        flr_nm = ?,
+        rcept_dt = ?,
+        rm = ?,
+        source_url = ?,
+        rule_score = ?,
+        rule_priority = ?,
+        rule_reasons_json = ?,
+        ai_eligible = ?,
+        is_watchlist = ?,
+        publish_status = CASE
+          WHEN ${FILINGS_TABLE}.publish_status = 'manual' THEN 'manual'
+          WHEN ? = 1 AND ? >= 7 AND ? = 1 THEN 'auto'
+          WHEN ${FILINGS_TABLE}.publish_status = 'auto' AND (? = 0 OR ? < 7 OR ? = 0) THEN 'admin_only'
+          ELSE ${FILINGS_TABLE}.publish_status
+        END,
+        published_at = CASE
+          WHEN ${FILINGS_TABLE}.publish_status = 'manual' THEN ${FILINGS_TABLE}.published_at
+          WHEN ? = 1 AND ? >= 7 AND ? = 1 AND (${FILINGS_TABLE}.published_at = '' OR ${FILINGS_TABLE}.published_at IS NULL) THEN ?
+          ELSE ${FILINGS_TABLE}.published_at
+        END,
+        ai_status = CASE
+          WHEN ? = 0 THEN 'skipped'
+          WHEN ${FILINGS_TABLE}.ai_status IN ('done', 'processing') THEN ${FILINGS_TABLE}.ai_status
+          WHEN ${FILINGS_TABLE}.ai_status = 'error' THEN 'error'
+          ELSE 'available'
+        END,
+        updated_at = ?
+      WHERE rcept_no = ?`)
+      .bind(
+        filing.corpCls, filing.corpName, filing.corpCode, filing.stockCode, filing.reportName,
+        filing.filerName, filing.receiptDate, filing.remarks, filing.sourceUrl, filing.ruleScore,
+        filing.rulePriority, JSON.stringify(filing.ruleReasons), filing.aiEligible ? 1 : 0,
+        isWatchlist,
+        isWatchlist, filing.ruleScore, isToday ? 1 : 0, isWatchlist, filing.ruleScore, isToday ? 1 : 0,
+        isWatchlist, filing.ruleScore, isToday ? 1 : 0, filing.updatedAt,
+        filing.aiEligible ? 1 : 0, filing.updatedAt, filing.rceptNo
+      ).run();
+  }
+
+  // Supersession check: If this is a correction filing, mark older matching filings as superseded
+  if (filing.isCorrection && (filing.stockCode || filing.corpCode)) {
+    const baseName = extractBaseReportName(filing.reportName);
+    if (baseName) {
+      const targetCorpClause = filing.stockCode ? 'stock_code = ?' : 'corp_code = ?';
+      const targetCorpVal = filing.stockCode || filing.corpCode;
+      await db.prepare(`UPDATE ${FILINGS_TABLE} SET
+          superseded_by = ?,
+          updated_at = ?
+        WHERE ${targetCorpClause}
+          AND rcept_no < ?
+          AND (report_nm = ? OR report_nm LIKE '%]' || ?)
+          AND (superseded_by = '' OR superseded_by IS NULL)`)
+        .bind(filing.rceptNo, filing.updatedAt, targetCorpVal, filing.rceptNo, baseName, baseName).run();
+    }
+  }
+
+  return isNewInsert;
 }
 
 export async function claimFilingForAnalysis(db, rceptNo, { allowDone = false, now = new Date() } = {}) {
@@ -641,6 +687,8 @@ export function parseJsonObject(value) {
 }
 
 export function publicFiling(row) {
+  const baseReportName = extractBaseReportName(row.report_nm);
+  const correctionType = extractCorrectionType(row.report_nm);
   return {
     rceptNo: row.rcept_no,
     corpCls: row.corp_cls,
@@ -648,6 +696,9 @@ export function publicFiling(row) {
     corpCode: row.corp_code,
     stockCode: row.stock_code,
     reportName: row.report_nm,
+    baseReportName,
+    isCorrection: Boolean(correctionType),
+    correctionType,
     filerName: row.flr_nm,
     receiptDate: row.rcept_dt,
     remarks: row.rm,
@@ -655,6 +706,8 @@ export function publicFiling(row) {
     publishStatus: row.publish_status || 'admin_only',
     isWatchlist: Boolean(row.is_watchlist),
     publishedAt: row.published_at || '',
+    supersededBy: row.superseded_by || '',
+    isSuperseded: Boolean(row.superseded_by),
     rule: {
       score: Number(row.rule_score || 0),
       priority: row.rule_priority || 'low',
@@ -680,7 +733,10 @@ export const __test = {
   MAJOR_REPORT_RULE,
   ROUTINE_REPORT,
   CORRECTION,
+  CORRECTION_PATTERN,
   DEFAULT_WATCHLIST,
+  extractBaseReportName,
+  extractCorrectionType,
   boundedInteger,
   normalizedProvider,
   parseCorpClasses,

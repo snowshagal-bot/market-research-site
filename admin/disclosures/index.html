@@ -127,9 +127,6 @@
 
       let aiBlock = '';
       if (ai) {
-        const keyFiguresHtml = (ai.key_figures || []).length
-          ? `<div class="ai-figures"><span style="color:var(--muted);font-size:9.5px;">수치:</span>${ai.key_figures.map(x=>`<span class="ai-figure-tag">${esc(x)}</span>`).join('')}</div>`
-          : '';
         const watchPointsHtml = (ai.watch_points || []).length
           ? `<ul class="ai-watchpoints">${ai.watch_points.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`
           : '';
@@ -138,8 +135,7 @@
           <div class="ai-box is-done">
             <div>
               <div class="ai-section-title">핵심 사실 (Fact)</div>
-              <p>${esc(ai.summary || '')}</p>
-              ${keyFiguresHtml}
+              <p>${esc(ai.summary || f.reportName)}</p>
             </div>
             <div>
               <div class="ai-section-title" style="color:var(--market-blue,#2d68ae);">AI 시장 해설 <small style="font-weight:normal;color:var(--muted);">· 독자 이해 보조</small></div>
@@ -156,7 +152,7 @@
         aiBlock = `
           <div class="ai-box">
             <div class="ai-section-title">${f.rule?.aiEligible ? '독자용 AI 해설 생성 가능' : '메타데이터 기본 공시'}</div>
-            <p>${f.ai?.error ? `<span style="color:var(--brown,#c62828);">${esc(f.ai.error)}</span>` : 'DART 원문에서 핵심 사실·숫자·의미·확인할 조건을 추출합니다.'}</p>
+            <p>${f.ai?.error ? `<span style="color:var(--brown,#c62828);">${esc(f.ai.error)}</span>` : 'DART 공시에서 핵심 사실·시장 의미·확인할 조건을 추출합니다.'}</p>
           </div>`;
       }
 
@@ -167,6 +163,8 @@
             <div class="corp-line">
               <span class="corp">${esc(f.corpName)}</span>
               ${f.stockCode ? `<span class="stock">${esc(f.stockCode)}</span>` : ''}
+              ${f.isCorrection ? `<span class="tag-pill" style="background:#e8f0fe;color:#1a73e8;font-weight:700;">${esc(f.correctionType || '[정정]')}</span>` : ''}
+              ${f.isSuperseded ? `<span class="tag-pill" style="background:#fce8e6;color:#c5221f;font-weight:700;">대체됨</span>` : ''}
               ${f.isWatchlist ? `<span class="tag-pill tag-watchlist">WATCHLIST</span>` : ''}
               ${isPublished ? `<span class="tag-pill tag-market-live">MARKET 공개</span>` : ''}
             </div>

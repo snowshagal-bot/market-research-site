@@ -36,7 +36,6 @@
     viewLessDisclosures: '접기 ▴',
     noDisclosures: '오늘 시장에 선별된 주요 공시가 없습니다.',
     factHeading: '핵심 사실',
-    keyFigures: '핵심 수치',
     whatItMeans: '무엇을 의미하나',
     watchPoints: '확인할 것',
     aiExplanation: 'AI 시장 해설',
@@ -81,14 +80,13 @@
     viewLessDisclosures: 'Collapse ▴',
     noDisclosures: 'No key disclosures selected for this session.',
     factHeading: 'Key Facts',
-    keyFigures: 'Key Figures',
     whatItMeans: 'What It Means',
     watchPoints: 'Watch Points',
     aiExplanation: 'AI Market Insight',
     aiAssistNote: 'Reader assistance',
     dartOriginal: 'DART Original ↗',
     expandExplanation: 'Details ▾',
-    collapseExplanation: 'Close ▾'
+    collapseExplanation: 'Collapse ▴'
   };
 
   const names = {
@@ -568,6 +566,7 @@
               <div class="disclosure-corp-group">
                 <strong class="disclosure-corp-name">${html(item.corpName)}</strong>
                 ${item.stockCode ? `<span class="disclosure-stock-code">${html(item.stockCode)}</span>` : ''}
+                ${item.isCorrection ? `<span class="disclosure-correction-tag">${html(item.correctionType || (ko ? '[기재정정]' : '[Correction]'))}</span>` : ''}
                 <span class="disclosure-priority-tag tag-${priorityClass}">${priorityUpper}</span>
               </div>
               <time class="disclosure-time">${formattedTime}</time>
@@ -588,15 +587,7 @@
             <div class="disclosure-ai-panel" id="ai-panel-${rceptNo}" hidden>
               <div class="disclosure-fact-box">
                 <h4 class="fact-box-title">${copy.factHeading}</h4>
-                <p class="fact-summary-text">${html(item.ai.summary || '')}</p>
-                ${item.ai.keyFigures && item.ai.keyFigures.length ? `
-                  <div class="fact-figures-list">
-                    <span class="figures-title">${copy.keyFigures}:</span>
-                    <div class="figures-tags">
-                      ${item.ai.keyFigures.map(f => `<span class="figure-tag">${html(f)}</span>`).join('')}
-                    </div>
-                  </div>
-                ` : ''}
+                <p class="fact-summary-text">${html(item.ai.summary || item.reportName)}</p>
               </div>
               <div class="disclosure-insight-box">
                 <div class="insight-box-header">

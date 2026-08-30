@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS disclosure_filings (
   publish_status TEXT NOT NULL DEFAULT 'admin_only',
   is_watchlist INTEGER NOT NULL DEFAULT 0,
   published_at TEXT NOT NULL DEFAULT '',
+  superseded_by TEXT NOT NULL DEFAULT '',
   ai_provider TEXT NOT NULL DEFAULT '',
   ai_model TEXT NOT NULL DEFAULT '',
   ai_json TEXT NOT NULL DEFAULT '',
@@ -85,6 +86,9 @@ CREATE INDEX IF NOT EXISTS idx_disclosure_ai_queue
 
 CREATE INDEX IF NOT EXISTS idx_disclosure_published
   ON disclosure_filings (publish_status, rcept_dt DESC, rule_score DESC);
+
+CREATE INDEX IF NOT EXISTS idx_disclosure_superseded
+  ON disclosure_filings (superseded_by, publish_status);
 
 CREATE TABLE IF NOT EXISTS disclosure_watchlist (
   stock_code TEXT PRIMARY KEY,

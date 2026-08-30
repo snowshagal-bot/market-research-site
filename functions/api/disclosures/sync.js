@@ -130,7 +130,7 @@ export async function onRequestPost({ request, env }) {
 
     let created = 0;
     for (const filing of source.filings) {
-      if (await upsertFiling(db, filing, { watchlistCodes })) created += 1;
+      if (await upsertFiling(db, filing, { watchlistCodes, now })) created += 1;
     }
 
     const ai = await analyzeQueue(db, env, config, now);
