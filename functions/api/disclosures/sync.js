@@ -4,12 +4,14 @@ import {
   FILINGS_TABLE,
   authorizeSync,
   claimFilingForAnalysis,
+  compactDate,
   disclosureConfig,
   ensureDisclosureSchema,
   json,
   kstDate,
   publicFiling,
   releaseAnalysisClaim,
+  reserveRequest,
   setState,
   upsertFiling,
   usageSnapshot
@@ -36,15 +38,23 @@ function filingForAnalysis(row) {
   };
 }
 
-async function analyzeQueue(db, env, limit, now) {
+async function analyzeQueue(db, env, config, now) {
+  const limit = Math.max(0, Number(config.llmPerRun || 0));
   if (limit <= 0) return { attempted: 0, completed: 0, failed: 0, skipped: 'per-run budget is zero' };
+  const usageDate = kstDate(now);
+  const todayReceiptDate = compactDate(usageDate);
+  const autoScoreFloor = Number(config.llmAutoScoreFloor ?? 10);
   const staleBefore = new Date(now.getTime() - ANALYSIS_CLAIM_TIMEOUT_MS).toISOString();
+
   const rows = await db.prepare(`SELECT * FROM ${FILINGS_TABLE}
-    WHERE ai_eligible = 1 AND (
-      ai_status IN ('pending', 'error') OR (ai_status = 'processing' AND updated_at < ?)
-    )
-    ORDER BY rule_score DESC, rcept_dt DESC, rcept_no DESC
-    LIMIT ?`).bind(staleBefore, Math.max(limit, limit * 3)).all();
+    WHERE rcept_dt = ?
+      AND ai_eligible = 1
+      AND rule_score >= ?
+      AND (
+        ai_status IN ('available', 'pending', 'error') OR (ai_status = 'processing' AND updated_at < ?)
+      )
+    ORDER BY rule_score DESC, rcept_no DESC
+    LIMIT ?`).bind(todayReceiptDate, autoScoreFloor, staleBefore, Math.max(limit, limit * 3)).all();
 
   let completed = 0;
   let failed = 0;
@@ -52,6 +62,13 @@ async function analyzeQueue(db, env, limit, now) {
   let stopReason = '';
   for (const row of rows?.results || []) {
     if (attempted >= limit) break;
+
+    const autoBudget = await reserveRequest(db, usageDate, 'llm:auto', config.llmAutoDailyBudget);
+    if (!autoBudget.allowed) {
+      stopReason = 'LLM_AUTO_BUDGET_EXHAUSTED';
+      break;
+    }
+
     const claimed = await claimFilingForAnalysis(db, row.rcept_no, { now });
     if (!claimed) continue;
     attempted += 1;
@@ -63,9 +80,9 @@ async function analyzeQueue(db, env, limit, now) {
         .bind(output.provider, output.model, JSON.stringify(output.result), new Date().toISOString(), new Date().toISOString(), claimed.rcept_no).run();
       completed += 1;
     } catch (error) {
-      if (error?.code === 'LLM_NOT_CONFIGURED' || error?.code === 'LLM_BUDGET_EXHAUSTED') {
+      if (error?.code === 'LLM_NOT_CONFIGURED' || error?.code === 'LLM_BUDGET_EXHAUSTED' || error?.code === 'LLM_AUTO_BUDGET_EXHAUSTED') {
         stopReason = error.code;
-        await releaseAnalysisClaim(db, claimed.rcept_no, 'pending', '', now);
+        await releaseAnalysisClaim(db, claimed.rcept_no, 'available', '', now);
         break;
       }
       await releaseAnalysisClaim(db, claimed.rcept_no, 'error', error?.message || 'AI 분석 실패');
@@ -108,7 +125,7 @@ export async function onRequestPost({ request, env }) {
       if (await upsertFiling(db, filing)) created += 1;
     }
 
-    const ai = await analyzeQueue(db, env, config.llmPerRun, now);
+    const ai = await analyzeQueue(db, env, config, now);
     const syncedAt = new Date().toISOString();
     await setState(db, 'last_sync_at', syncedAt);
     await setState(db, 'last_sync_source', source.provider);

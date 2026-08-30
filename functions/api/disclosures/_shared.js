@@ -3,10 +3,12 @@ export const USAGE_TABLE = 'disclosure_usage_daily';
 export const STATE_TABLE = 'disclosure_state';
 
 export const DEFAULT_DART_DAILY_BUDGET = 1000;
-export const DEFAULT_LLM_DAILY_BUDGET = 24;
+export const DEFAULT_LLM_DAILY_BUDGET = 12;
+export const DEFAULT_LLM_AUTO_DAILY_BUDGET = 4;
+export const DEFAULT_LLM_AUTO_SCORE_FLOOR = 10;
 export const DEFAULT_LLM_PER_RUN = 2;
 export const DEFAULT_MAX_PAGES_PER_CLASS = 10;
-export const DEFAULT_LOOKBACK_DAYS = 7;
+export const DEFAULT_LOOKBACK_DAYS = 1;
 export const DEFAULT_LATEST_LIMIT = 100;
 export const ANALYSIS_CLAIM_TIMEOUT_MS = 10 * 60 * 1000;
 
@@ -83,6 +85,8 @@ export function disclosureConfig(env = {}) {
     corpClasses: parseCorpClasses(env.DISCLOSURE_CORP_CLASSES),
     dartDailyBudget: boundedInteger(env.DISCLOSURE_DART_DAILY_BUDGET, DEFAULT_DART_DAILY_BUDGET, 50, 19000),
     llmDailyBudget: boundedInteger(env.DISCLOSURE_LLM_DAILY_BUDGET, DEFAULT_LLM_DAILY_BUDGET, 0, 500),
+    llmAutoDailyBudget: boundedInteger(env.DISCLOSURE_LLM_AUTO_DAILY_BUDGET, DEFAULT_LLM_AUTO_DAILY_BUDGET, 0, 100),
+    llmAutoScoreFloor: boundedInteger(env.DISCLOSURE_LLM_AUTO_SCORE_FLOOR, DEFAULT_LLM_AUTO_SCORE_FLOOR, 0, 20),
     llmPerRun: boundedInteger(env.DISCLOSURE_LLM_PER_RUN, DEFAULT_LLM_PER_RUN, 0, 10),
     maxPagesPerClass: boundedInteger(env.DISCLOSURE_DART_MAX_PAGES_PER_CLASS, DEFAULT_MAX_PAGES_PER_CLASS, 1, 20),
     lookbackDays: boundedInteger(env.DISCLOSURE_LOOKBACK_DAYS, DEFAULT_LOOKBACK_DAYS, 1, 30),
@@ -268,19 +272,19 @@ export async function stateSnapshot(db) {
   return state;
 }
 
-const RULES = [
+const SPECIFIC_RULES = [
   { points: 10, label: '상장·감사 리스크', re: /(상장폐지|관리종목|거래정지|감사의견|감사보고서.*의견|부도|회생절차|파산|횡령|배임|영업정지)/i },
   { points: 8, label: '지배구조·사업구조 변경', re: /(최대주주.*변경|합병|회사분할|분할합병|주식교환|주식이전|영업양수|영업양도)/i },
   { points: 7, label: '자본조달·주식수 변화', re: /(유상증자|무상증자|감자|전환사채|신주인수권부사채|교환사채|증권신고서.*지분|자기주식.*취득|자기주식.*처분)/i },
   { points: 7, label: '대형 계약·투자', re: /(단일판매|공급계약|타법인.*주식.*취득|타법인.*주식.*처분|유형자산.*양수|유형자산.*양도|신규시설투자|시설투자)/i },
   { points: 6, label: '실적 변화', re: /(잠정.*실적|영업.*실적|매출액.*손익구조|실적.*전망|영업이익.*변동)/i },
   { points: 6, label: '법적·재무 부담', re: /(소송|채무보증|담보제공|금전대여|채무인수|채권은행.*관리절차|생산중단)/i },
-  { points: 5, label: '주요사항보고', re: /주요사항보고서/i },
   { points: 4, label: '주주환원', re: /(현금.*배당|현물.*배당|주식배당|자기주식.*소각)/i },
   { points: 3, label: '경영진 변화', re: /(대표이사.*변경|대표집행임원.*변경)/i },
   { points: 2, label: '투자판단 공시', re: /(투자판단|공정공시)/i }
 ];
 
+const MAJOR_REPORT_RULE = { points: 5, label: '주요사항보고', re: /주요사항보고서/i };
 const ROUTINE_REPORT = /(사업보고서|반기보고서|분기보고서|주주총회소집공고|의결권대리행사권유|임원.?주요주주.*소유상황보고서|기업지배구조보고서)/i;
 const CORRECTION = /^\[(?:기재정정|첨부정정|첨부추가|변경등록|발행조건확정|정정제출요구|정정명령부과)\]/i;
 
@@ -292,19 +296,32 @@ export function scoreDisclosure(filing = {}) {
 
   let score = 0;
   const reasons = [];
-  for (const rule of RULES) {
+  let specificMatched = false;
+
+  for (const rule of SPECIFIC_RULES) {
     if (!rule.re.test(reportName)) continue;
     score += rule.points;
     reasons.push(rule.label);
+    specificMatched = true;
   }
+
+  if (!specificMatched && MAJOR_REPORT_RULE.re.test(reportName)) {
+    score += MAJOR_REPORT_RULE.points;
+    reasons.push(MAJOR_REPORT_RULE.label);
+  } else if (specificMatched && MAJOR_REPORT_RULE.re.test(reportName)) {
+    reasons.push(MAJOR_REPORT_RULE.label);
+  }
+
   if (CORRECTION.test(reportName) && score > 0) {
     score += 1;
     reasons.push('중요 공시 정정');
   }
+
   if (ROUTINE_REPORT.test(reportName) && score < 6) {
     score = Math.min(score, 2);
     if (!reasons.length) reasons.push('정기·절차 공시');
   }
+
   const priority = score >= 10 ? 'critical' : score >= 7 ? 'high' : score >= 5 ? 'medium' : 'low';
   return {
     score,
@@ -339,7 +356,7 @@ export function normalizeFiling(item = {}, now = new Date()) {
 
 export async function upsertFiling(db, filing) {
   if (!/^\d{14}$/.test(filing.rceptNo)) return false;
-  const initialAiStatus = filing.aiEligible ? 'pending' : 'skipped';
+  const initialAiStatus = filing.aiEligible ? 'available' : 'skipped';
   const inserted = await db.prepare(`INSERT INTO ${FILINGS_TABLE} (
       rcept_no, corp_cls, corp_name, corp_code, stock_code, report_nm, flr_nm, rcept_dt, rm, source_url,
       rule_score, rule_priority, rule_reasons_json, ai_eligible, ai_status, first_seen_at, updated_at
@@ -369,7 +386,8 @@ export async function upsertFiling(db, filing) {
       ai_status = CASE
         WHEN ? = 0 THEN 'skipped'
         WHEN ${FILINGS_TABLE}.ai_status IN ('done', 'processing') THEN ${FILINGS_TABLE}.ai_status
-        ELSE 'pending'
+        WHEN ${FILINGS_TABLE}.ai_status = 'error' THEN 'error'
+        ELSE 'available'
       END,
       updated_at = ?
     WHERE rcept_no = ?`)
@@ -385,7 +403,7 @@ export async function upsertFiling(db, filing) {
 export async function claimFilingForAnalysis(db, rceptNo, { allowDone = false, now = new Date() } = {}) {
   const claimedAt = now.toISOString();
   const staleBefore = new Date(now.getTime() - ANALYSIS_CLAIM_TIMEOUT_MS).toISOString();
-  const statuses = allowDone ? "'pending', 'error', 'done'" : "'pending', 'error'";
+  const statuses = allowDone ? "'available', 'pending', 'error', 'done'" : "'available', 'pending', 'error'";
   const result = await db.prepare(`UPDATE ${FILINGS_TABLE}
     SET ai_status = 'processing', ai_error = '', updated_at = ?
     WHERE rcept_no = ? AND ai_eligible = 1 AND (
@@ -396,7 +414,7 @@ export async function claimFilingForAnalysis(db, rceptNo, { allowDone = false, n
 }
 
 export async function releaseAnalysisClaim(db, rceptNo, status, errorMessage = '', now = new Date()) {
-  const safeStatus = status === 'error' ? 'error' : 'pending';
+  const safeStatus = status === 'error' ? 'error' : (status === 'available' || status === 'pending' ? 'available' : 'available');
   await db.prepare(`UPDATE ${FILINGS_TABLE}
     SET ai_status = ?, ai_error = ?, updated_at = ?
     WHERE rcept_no = ? AND ai_status = 'processing'`)
@@ -449,7 +467,9 @@ export function publicFiling(row) {
 }
 
 export const __test = {
-  RULES,
+  RULES: SPECIFIC_RULES,
+  SPECIFIC_RULES,
+  MAJOR_REPORT_RULE,
   ROUTINE_REPORT,
   CORRECTION,
   boundedInteger,

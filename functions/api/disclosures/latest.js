@@ -42,7 +42,8 @@ export async function onRequestGet({ request, env }) {
         ORDER BY rcept_dt DESC, rule_score DESC, rcept_no DESC LIMIT ?`).bind(...params).all(),
       db.prepare(`SELECT COUNT(*) AS stored,
         SUM(CASE WHEN ai_eligible = 1 THEN 1 ELSE 0 END) AS eligible,
-        SUM(CASE WHEN ai_status = 'done' THEN 1 ELSE 0 END) AS analyzed
+        SUM(CASE WHEN ai_status = 'done' THEN 1 ELSE 0 END) AS analyzed,
+        SUM(CASE WHEN ai_eligible = 1 AND ai_status IN ('available', 'pending') THEN 1 ELSE 0 END) AS available
         FROM ${FILINGS_TABLE}`).first()
     ]);
 
@@ -56,7 +57,8 @@ export async function onRequestGet({ request, env }) {
       stats: {
         stored: Number(totals?.stored || 0),
         eligible: Number(totals?.eligible || 0),
-        analyzed: Number(totals?.analyzed || 0)
+        analyzed: Number(totals?.analyzed || 0),
+        available: Number(totals?.available || 0)
       },
       usageDate,
       usage,
@@ -70,7 +72,10 @@ export async function onRequestGet({ request, env }) {
         llmFallbackProvider: config.fallbackProvider,
         llmFallbackModel: config.fallbackModel,
         llmDailyBudget: config.llmDailyBudget,
+        llmAutoDailyBudget: config.llmAutoDailyBudget,
+        llmAutoScoreFloor: config.llmAutoScoreFloor,
         llmPerRun: config.llmPerRun,
+        lookbackDays: config.lookbackDays,
         sourceConfigured: config.opendartConfigured,
         llmConfigured: config.primaryProvider === 'gemini'
           ? config.geminiConfigured

@@ -61,8 +61,8 @@ export async function onRequestPost({ request, env }) {
       const updated = await db.prepare(`SELECT * FROM ${FILINGS_TABLE} WHERE rcept_no = ? LIMIT 1`).bind(rceptNo).first();
       return json({ ok: true, filing: publicFiling(updated) });
     } catch (error) {
-      const pending = error?.code === 'LLM_NOT_CONFIGURED' || error?.code === 'LLM_BUDGET_EXHAUSTED';
-      await releaseAnalysisClaim(db, rceptNo, pending ? 'pending' : 'error', pending ? '' : error?.message || 'AI 분석 실패');
+      const available = error?.code === 'LLM_NOT_CONFIGURED' || error?.code === 'LLM_BUDGET_EXHAUSTED';
+      await releaseAnalysisClaim(db, rceptNo, available ? 'available' : 'error', available ? '' : error?.message || 'AI 분석 실패');
       throw error;
     }
   } catch (error) {

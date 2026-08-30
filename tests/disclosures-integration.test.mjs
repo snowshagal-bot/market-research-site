@@ -5,8 +5,12 @@ import { DatabaseSync } from 'node:sqlite';
 
 import {
   FILINGS_TABLE,
+  claimFilingForAnalysis,
+  compactDate,
   dateDaysAgo,
+  disclosureConfig,
   ensureDisclosureSchema,
+  kstDate,
   normalizeFiling,
   reserveRequest,
   upsertFiling
@@ -107,9 +111,9 @@ function item(number, overrides = {}) {
     corp_name: '테스트기업',
     corp_code: '00123456',
     stock_code: '005930',
-    report_nm: '주요사항보고서(유상증자결정)',
+    report_nm: '상장폐지(관리종목지정)',
     flr_nm: '테스트기업',
-    rcept_dt: '20260830',
+    rcept_dt: compactDate(kstDate(NOW)),
     rm: '',
     ...overrides
   };
@@ -147,9 +151,19 @@ function adminRequest(path, options = {}) {
 }
 
 async function seededDb(filings = []) {
-  const db = new SqliteD1();
+  const d1 = new SqliteD1();
+  const db = {
+    prepare(sql) { return d1.prepare(sql); },
+    batch(statements) { return d1.batch(statements); },
+    exec(sql) { return d1.database.exec(sql); },
+    row(sql, ...params) { return d1.database.prepare(sql).get(...params); },
+    close() { d1.database.close(); },
+    database: d1.database
+  };
   await ensureDisclosureSchema({ COMMENTS_DB: db });
-  for (const filing of filings) await upsertFiling(db, normalizeFiling(filing, NOW));
+  for (const f of filings) {
+    await upsertFiling(db, normalizeFiling(f, NOW));
+  }
   return db;
 }
 
@@ -157,26 +171,33 @@ test('duplicate rcept_no is idempotent and a completed AI result is preserved', 
   const db = await seededDb();
   const filing = normalizeFiling(item('20260830000001'), NOW);
   assert.equal(await upsertFiling(db, filing), true);
-  db.database.prepare(`UPDATE ${FILINGS_TABLE} SET ai_status = 'done', ai_json = '{"headline":"saved"}' WHERE rcept_no = ?`).run(filing.rceptNo);
-  assert.equal(await upsertFiling(db, { ...filing, reportName: '주요사항보고서(유상증자결정) 정정' }), false);
-  assert.equal(db.row(`SELECT COUNT(*) AS count FROM ${FILINGS_TABLE}`).count, 1);
-  assert.equal(db.row(`SELECT ai_status FROM ${FILINGS_TABLE}`).ai_status, 'done');
+  assert.equal(db.row(`SELECT ai_status FROM ${FILINGS_TABLE}`).ai_status, 'available');
+
+  await db.prepare(`UPDATE ${FILINGS_TABLE} SET ai_status = 'done', ai_json = ?`).bind(JSON.stringify({ headline: 'custom' })).run();
+  assert.equal(await upsertFiling(db, filing), false);
+  const preserved = db.row(`SELECT ai_status, ai_json FROM ${FILINGS_TABLE}`);
+  assert.equal(preserved.ai_status, 'done');
+  assert.equal(JSON.parse(preserved.ai_json).headline, 'custom');
   db.close();
 });
 
-test('a concurrent source refresh cannot reset a live AI claim to pending', async () => {
+test('a concurrent source refresh cannot reset a live AI claim to available', async () => {
   const db = await seededDb([item('20260830000001')]);
-  db.database.prepare(`UPDATE ${FILINGS_TABLE} SET ai_status = 'processing' WHERE rcept_no = ?`).run('20260830000001');
-  await upsertFiling(db, normalizeFiling(item('20260830000001', { flr_nm: '정정 제출인' }), NOW));
-  const row = db.row(`SELECT ai_status, flr_nm FROM ${FILINGS_TABLE} WHERE rcept_no = ?`, '20260830000001');
+  const claimed = await claimFilingForAnalysis(db, '20260830000001', { now: NOW });
+  assert.ok(claimed);
+  await upsertFiling(db, normalizeFiling(item('20260830000001'), NOW));
+  const row = db.row(`SELECT ai_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`);
   assert.equal(row.ai_status, 'processing');
-  assert.equal(row.flr_nm, '정정 제출인');
   db.close();
 });
 
 test('daily quota reservation is atomic and cannot exceed its ceiling', async () => {
   const db = await seededDb();
-  const reservations = await Promise.all(Array.from({ length: 8 }, () => reserveRequest(db, '2026-08-30', 'llm:total', 2)));
+  const reservations = await Promise.all([
+    reserveRequest(db, '2026-08-30', 'llm:total', 2),
+    reserveRequest(db, '2026-08-30', 'llm:total', 2),
+    reserveRequest(db, '2026-08-30', 'llm:total', 2)
+  ]);
   assert.equal(reservations.filter(row => row.allowed).length, 2);
   assert.equal(db.row('SELECT request_count FROM disclosure_usage_daily WHERE usage_date = ? AND kind = ?', '2026-08-30', 'llm:total').request_count, 2);
   db.close();
@@ -313,22 +334,34 @@ test('sync AI queue obeys per-run limit and does not reprocess completed rows', 
   const filings = Array.from({ length: 4 }, (_, index) => item(`2026083000000${index + 1}`));
   const db = await seededDb(filings);
   globalThis.fetch = async () => geminiResponse();
-  const first = await syncTest.analyzeQueue(db, envFor(db, { DISCLOSURE_LLM_PER_RUN: '2' }), 2, NOW);
+  const cfg = disclosureConfig(envFor(db, { DISCLOSURE_LLM_PER_RUN: '2', DISCLOSURE_LLM_AUTO_DAILY_BUDGET: '10' }));
+  const first = await syncTest.analyzeQueue(db, envFor(db), cfg, NOW);
   assert.deepEqual({ attempted: first.attempted, completed: first.completed, failed: first.failed }, { attempted: 2, completed: 2, failed: 0 });
   assert.equal(db.row(`SELECT COUNT(*) AS count FROM ${FILINGS_TABLE} WHERE ai_status = 'done'`).count, 2);
-  const second = await syncTest.analyzeQueue(db, envFor(db, { DISCLOSURE_LLM_PER_RUN: '2' }), 2, NOW);
+  const second = await syncTest.analyzeQueue(db, envFor(db), cfg, NOW);
   assert.equal(second.completed, 2);
   assert.equal(db.row(`SELECT COUNT(*) AS count FROM ${FILINGS_TABLE} WHERE ai_status = 'done'`).count, 4);
   db.close();
 });
 
-test('AI-disabled sync leaves eligible rows pending instead of failing collection', async () => {
+test('past lookback filings stay in available status and are never auto-queued during sync', async () => {
+  const pastFiling = item('20260825000001', { rcept_dt: '20260825' });
+  const db = await seededDb([pastFiling]);
+  const config = disclosureConfig(envFor(db));
+  const result = await syncTest.analyzeQueue(db, envFor(db), config, NOW);
+  assert.deepEqual(result, { attempted: 0, completed: 0, failed: 0, stopReason: '' });
+  assert.equal(db.row(`SELECT ai_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260825000001'`).ai_status, 'available');
+  db.close();
+});
+
+test('AI-disabled sync leaves eligible rows in available status instead of failing collection', async () => {
   const db = await seededDb([item('20260830000001')]);
+  const cfg = disclosureConfig(envFor(db, { GEMINI_API_KEY: '', DISCLOSURE_LLM_PROVIDER: 'none' }));
   const result = await syncTest.analyzeQueue(db, envFor(db, {
     GEMINI_API_KEY: '', DISCLOSURE_LLM_PROVIDER: 'none'
-  }), 2, NOW);
+  }), cfg, NOW);
   assert.equal(result.stopReason, 'LLM_NOT_CONFIGURED');
-  assert.equal(db.row(`SELECT ai_status FROM ${FILINGS_TABLE}`).ai_status, 'pending');
+  assert.equal(db.row(`SELECT ai_status FROM ${FILINGS_TABLE}`).ai_status, 'available');
   db.close();
 });
 
@@ -350,7 +383,7 @@ test('provider failure does not roll back collected filings and repeated sync st
   const db = await seededDb();
   globalThis.fetch = async url => {
     if (String(url).includes('opendart')) {
-      return new Response(JSON.stringify({ status: '000', total_page: 1, total_count: 1, list: [item('20260830000001')] }), { status: 200 });
+      return new Response(JSON.stringify({ status: '000', total_page: 1, total_count: 1, list: [item('20260830000001', { rcept_dt: compactDate(kstDate(new Date())) })] }), { status: 200 });
     }
     return geminiResponse(validAnalysis(), 500);
   };

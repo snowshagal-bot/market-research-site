@@ -30,15 +30,17 @@ Provider quotas change independently of this repository. The application therefo
 Default internal limits:
 
 - OpenDART upstream requests: `1000` per Korea date;
-- AI analysis jobs: `24` per Korea date;
+- Total AI analysis jobs: `12` per Korea date;
+- Auto AI analysis jobs: `4` per Korea date;
+- Auto AI score floor: `10` (Critical priority);
 - AI jobs performed by one sync: `2`;
 - OpenDART pages per corporation class per sync: `10`, at `100` rows per page;
 - default corporation classes: `Y,K` (KOSPI and KOSDAQ);
-- default lookback window: `7` days.
+- default lookback window: `1` day (today only for automated runs; expandable up to 30 for backfill).
 
 Every upstream OpenDART request reserves one source request before calling the provider. Every AI analysis job reserves one AI request before calling the provider. The reservation is one conditional D1 `UPSERT ... RETURNING` statement, not a `SELECT` followed by an increment, so simultaneous requests cannot all pass the same stale quota check. Usage is stored in `disclosure_usage_daily`, and repeated clicks cannot bypass the app-side daily ceiling.
 
-AI queue rows are atomically claimed by changing `ai_status` to `processing`. A second sync or repeated analyze click cannot claim the same live row. A claim older than ten minutes is considered abandoned and may be recovered on a later run; provider/configuration exhaustion releases the row back to `pending`, while a real provider/output failure leaves it `error` for later retry.
+AI queue rows are atomically claimed by changing `ai_status` from `available` to `processing`. A second sync or repeated analyze click cannot claim the same live row. A claim older than ten minutes is considered abandoned and may be recovered on a later run; provider/configuration exhaustion releases the row back to `available`, while a real provider/output failure leaves it `error` for later retry. Past lookback filings or non-critical eligible filings remain `available` without creating an automatic processing backlog.
 
 These are safety budgets, not statements of OpenDART or Gemini's contractual quota. They may be lowered without code changes.
 
@@ -46,17 +48,18 @@ These are safety budgets, not statements of OpenDART or Gemini's contractual quo
 
 The rule engine is intentionally deterministic and runs before AI. Current high-value groups include:
 
-- listing/audit/default/legal survival risk;
-- controlling shareholder, merger, split and business-transfer changes;
-- rights issues, capital reduction, CB/BW/EB and treasury-stock actions;
-- material supply contracts, investments and asset transfers;
-- earnings changes;
-- litigation, guarantees, collateral and production suspension;
-- major event reports and shareholder returns.
+- listing/audit/default/legal survival risk (10 pts);
+- controlling shareholder, merger, split and business-transfer changes (8 pts);
+- rights issues, capital reduction, CB/BW/EB and treasury-stock actions (7 pts);
+- material supply contracts, investments and asset transfers (7 pts);
+- earnings changes (6 pts);
+- litigation, guarantees, collateral and production suspension (6 pts);
+- major event reports (5 pts generic fallback if no specific rule matches) and shareholder returns (4 pts);
+- management changes (3 pts) and investment guidance disclosures (2 pts).
 
-Routine periodic and procedural filings are down-weighted unless another material rule matches. Withdrawn filings are not sent to AI.
+Specific event rules take precedence so generic major event report points (+5) are not double-counted. Routine periodic and procedural filings are down-weighted unless another material rule matches. Withdrawn filings are not sent to AI.
 
-`score >= 5` is currently AI-eligible. The score is a triage device, not investment advice or a prediction of share-price direction.
+`score >= 5` is currently AI-eligible (`ai_status = 'available'`). Automatic AI during sync selects only today's Critical filings (`score >= 10`). The score is a triage device, not investment advice or a prediction of share-price direction.
 
 ## AI safety boundary
 
@@ -92,14 +95,16 @@ Optional source controls:
 - `DISCLOSURE_CORP_CLASSES=Y,K`
 - `DISCLOSURE_DART_DAILY_BUDGET=1000`
 - `DISCLOSURE_DART_MAX_PAGES_PER_CLASS=10`
-- `DISCLOSURE_LOOKBACK_DAYS=7`
+- `DISCLOSURE_LOOKBACK_DAYS=1`
 
 Optional LLM controls:
 
-- `DISCLOSURE_LLM_DAILY_BUDGET=24`
+- `DISCLOSURE_LLM_DAILY_BUDGET=12`
+- `DISCLOSURE_LLM_AUTO_DAILY_BUDGET=4`
+- `DISCLOSURE_LLM_AUTO_SCORE_FLOOR=10`
 - `DISCLOSURE_LLM_PER_RUN=2`
 
-If `DISCLOSURE_LLM_PROVIDER` is omitted but `GEMINI_API_KEY` exists, Gemini is selected automatically. If no LLM is configured, source sync and deterministic scoring still work; AI queue items remain pending.
+If `DISCLOSURE_LLM_PROVIDER` is omitted but `GEMINI_API_KEY` exists, Gemini is selected automatically. If no LLM is configured, source sync and deterministic scoring still work; AI queue items remain available.
 
 ## Replacing the LLM provider
 
