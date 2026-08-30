@@ -9,6 +9,19 @@ import {
 const GEMINI_INTERACTIONS_URL = 'https://generativelanguage.googleapis.com/v1beta/interactions';
 const REQUEST_TIMEOUT_MS = 25000;
 const MAX_PROMPT_CHARS = 6000;
+const ANALYSIS_SCHEMA = {
+  type: 'object',
+  properties: {
+    headline: { type: 'string' },
+    summary: { type: 'string' },
+    impact: { type: 'string', enum: ['positive', 'negative', 'mixed', 'neutral'] },
+    urgency: { type: 'string', enum: ['critical', 'high', 'medium', 'low'] },
+    confidence: { type: 'integer', minimum: 0, maximum: 100 },
+    watch_points: { type: 'array', items: { type: 'string' }, maxItems: 4 },
+    limitation: { type: 'string' }
+  },
+  required: ['headline', 'summary', 'impact', 'urgency', 'confidence', 'watch_points', 'limitation']
+};
 
 function safeJson(text) {
   const raw = String(text || '').trim();
@@ -38,7 +51,7 @@ function normalizedAnalysis(value) {
 }
 
 function analysisPrompt(filing) {
-  return `당신은 한국 주식시장 공시를 분류하는 보조 분석기다. 아래 정보는 OpenDART 공시 목록의 메타데이터이며 공시 원문이 아니다.\n\n회사: ${filing.corpName}\n종목코드: ${filing.stockCode || '없음'}\n시장구분: ${filing.corpCls}\n공시명: ${filing.reportName}\n제출인: ${filing.filerName || '없음'}\n접수일: ${filing.receiptDate}\n비고: ${filing.remarks || '없음'}\n규칙 점수: ${filing.ruleScore}\n규칙 사유: ${(filing.ruleReasons || []).join(', ') || '없음'}\n\n투자판단을 대신하지 말고, 제목과 메타데이터에서 확실히 알 수 있는 범위만 요약하라. 금액, 계약상대, 기간, 실적 수치 등 원문에 없는 정보를 절대 추정하지 마라.\n반드시 JSON 객체 하나만 반환한다. 스키마:\n{"headline":"한 문장 핵심","summary":"2~3문장 요약","impact":"positive|negative|mixed|neutral","urgency":"critical|high|medium|low","confidence":0,"watch_points":["원문에서 확인할 항목"],"limitation":"메타데이터 기반 한계"}`.slice(0, MAX_PROMPT_CHARS);
+  return `당신은 한국 주식시장 공시를 분류하는 보조 분석기다. 아래 정보는 OpenDART 공시 목록의 메타데이터이며 공시 원문이 아니다.\n\n회사: ${filing.corpName}\n종목코드: ${filing.stockCode || '없음'}\n시장구분: ${filing.corpCls}\n공시명: ${filing.reportName}\n제출인: ${filing.filerName || '없음'}\n접수일: ${filing.receiptDate}\n비고: ${filing.remarks || '없음'}\n규칙 점수: ${filing.ruleScore}\n규칙 사유: ${(filing.ruleReasons || []).join(', ') || '없음'}\n\n투자판단을 대신하지 말고, 제목과 메타데이터에서 확실히 알 수 있는 범위만 요약하라. 금액, 계약상대, 기간, 실적 수치 등 원문에 없는 정보를 절대 추정하지 마라.`.slice(0, MAX_PROMPT_CHARS);
 }
 
 async function fetchWithTimeout(url, options) {
@@ -49,6 +62,7 @@ async function fetchWithTimeout(url, options) {
 }
 
 function interactionOutputText(payload) {
+  if (payload?.output_text) return String(payload.output_text).trim();
   const outputs = [];
   for (const step of Array.isArray(payload?.steps) ? payload.steps : []) {
     if (step?.type !== 'model_output') continue;
@@ -59,8 +73,15 @@ function interactionOutputText(payload) {
   return outputs.join('\n').trim();
 }
 
+function geminiModelName(model) {
+  const value = String(model || '').trim();
+  if (!value) return '';
+  return value.startsWith('models/') ? value : `models/${value}`;
+}
+
 async function geminiAnalyze(filing, env, model) {
   if (!env.GEMINI_API_KEY) throw new DisclosureError('GEMINI_NOT_CONFIGURED', 'GEMINI_API_KEY가 설정되지 않았습니다.', 503);
+  const resolvedModel = geminiModelName(model);
   const response = await fetchWithTimeout(GEMINI_INTERACTIONS_URL, {
     method: 'POST',
     headers: {
@@ -68,8 +89,17 @@ async function geminiAnalyze(filing, env, model) {
       'x-goog-api-key': env.GEMINI_API_KEY
     },
     body: JSON.stringify({
-      model,
+      model: resolvedModel,
       input: analysisPrompt(filing),
+      response_format: {
+        type: 'text',
+        mime_type: 'application/json',
+        schema: ANALYSIS_SCHEMA
+      },
+      generation_config: {
+        max_output_tokens: 700,
+        thinking_level: 'minimal'
+      },
       store: false
     })
   });
@@ -83,7 +113,7 @@ async function geminiAnalyze(filing, env, model) {
   const parsed = normalizedAnalysis(safeJson(interactionOutputText(payload)));
   return {
     provider: 'gemini',
-    model: String(payload?.model || model),
+    model: String(payload?.model || resolvedModel),
     result: parsed,
     inputTokens: Number(payload?.usage?.total_input_tokens || 0),
     outputTokens: Number(payload?.usage?.total_output_tokens || 0)
@@ -126,7 +156,7 @@ async function openAiCompatibleAnalyze(filing, env, model, config) {
 }
 
 async function callProvider(provider, filing, env, model, config) {
-  if (provider === 'gemini') return geminiAnalyze(filing, env, model, config);
+  if (provider === 'gemini') return geminiAnalyze(filing, env, model);
   if (provider === 'openai-compatible') return openAiCompatibleAnalyze(filing, env, model, config);
   throw new DisclosureError('LLM_PROVIDER_UNSUPPORTED', `지원하지 않는 LLM 공급자입니다: ${provider}`, 503);
 }
@@ -173,9 +203,11 @@ export async function analyzeWithLlm({ filing, env, db, now = new Date() }) {
 
 export const __test = {
   GEMINI_INTERACTIONS_URL,
+  ANALYSIS_SCHEMA,
   analysisPrompt,
   safeJson,
   normalizedAnalysis,
   interactionOutputText,
+  geminiModelName,
   providerConfigured
 };
