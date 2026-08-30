@@ -626,7 +626,8 @@ test('Mixed schema windows (v1.0.1 and v1.1.0) aggregate gracefully with coverag
       meta: { market_date: '2026-08-27', schema_version: '1.1.0' },
       indices: { KOSPI: { close: 102, previous_close: 101, source_date: '2026-08-27' } },
       krx_groups: {
-        sectors: [{ index_code: 'KGS04P', name: '화학', market: 'KOSPI', close: 100, change: 2 }]
+        sectors: [{ index_code: 'KGS04P', name: '화학', market: 'KOSPI', close: 100, change: 2 }],
+        themes: []
       }
     }
   ];
@@ -671,4 +672,171 @@ test('GET /api/market/range supports ETag caching and revalidates on snapshot re
   assert.equal(refreshed.status, 200);
   const newEtag = refreshed.headers.get('etag');
   assert.notEqual(newEtag, etag, 'ETag must change when a constituent snapshot is updated');
+});
+
+test('Unified complete semantics: 1W with 4 rows marks window, instruments, flows, breadth, and groups complete=false', () => {
+  const snapshots = [1, 2, 3, 4].map(day => ({
+    meta: { market_date: `2026-08-2${day}`, schema_version: '1.1.0' },
+    indices: {
+      KOSPI: { close: 100 + day, previous_close: 99 + day, high: 105, low: 95, source_date: `2026-08-2${day}` }
+    },
+    krx_investor_trading: {
+      unit: 'KRW billion',
+      markets: {
+        KOSPI: { investors: { 외국인: { net_buy: 100 }, 기관: { net_buy: 50 }, 개인: { net_buy: -150 } } }
+      }
+    },
+    market_breadth: {
+      KOSPI: { rise_count: 500, fall_count: 300, rise_ratio: 0.6, fall_ratio: 0.35 }
+    },
+    krx_groups: {
+      sectors: [{ index_code: 'KGS04P', name: '화학', market: 'KOSPI', close: 100 + day, change: 1 }],
+      themes: [{ index_code: 'KT001', name: '2차전지', close: 200 + day, change: 2 }]
+    }
+  }));
+
+  const res = computeMarketRange(snapshots, '1w', 5);
+
+  // 1. Window complete false
+  assert.equal(res.window.sessions_used, 4);
+  assert.equal(res.window.required_sessions, 5);
+  assert.equal(res.window.complete, false);
+
+  // 2. Instrument complete false, partial return calculated
+  const kospi = res.instruments.indices.KOSPI;
+  assert.equal(kospi.observations, 4);
+  assert.equal(kospi.complete, false);
+  assert.equal(kospi.baseline_value, 100);
+  assert.equal(kospi.end_value, 104);
+
+  // 3. Flow complete false, partial sum calculated
+  const foreignKospi = res.flows.markets.KOSPI.외국인;
+  assert.equal(foreignKospi.observations, 4);
+  assert.equal(foreignKospi.complete, false);
+  assert.equal(foreignKospi.net_buy, 400);
+
+  // 4. Breadth complete false
+  const breadthKospi = res.breadth.KOSPI;
+  assert.equal(breadthKospi.observations, 4);
+  assert.equal(breadthKospi.complete, false);
+
+  // 5. KRX groups coverage_complete false & individual sector/theme return_pct null
+  assert.equal(res.krx_groups.coverage_complete, false);
+  assert.equal(res.krx_groups.sessions_with_data, 4);
+  const chem = res.krx_groups.sectors.find(s => s.index_code === 'KGS04P');
+  assert.equal(chem.observations, 4);
+  assert.equal(chem.complete, false);
+  assert.equal(chem.return_pct, null, 'KRX sector return_pct must be null when window is incomplete (4/5)');
+});
+
+test('Boundary handling: missing instrument in first or last snapshot returns null return_pct', () => {
+  // First snapshot missing KOSPI
+  const snapshotsMissingFirst = [
+    { meta: { market_date: '2026-08-25', schema_version: '1.1.0' }, indices: {} },
+    { meta: { market_date: '2026-08-26', schema_version: '1.1.0' }, indices: { KOSPI: { close: 102, previous_close: 101, source_date: '2026-08-26' } } },
+    { meta: { market_date: '2026-08-27', schema_version: '1.1.0' }, indices: { KOSPI: { close: 103, previous_close: 102, source_date: '2026-08-27' } } },
+    { meta: { market_date: '2026-08-28', schema_version: '1.1.0' }, indices: { KOSPI: { close: 104, previous_close: 103, source_date: '2026-08-28' } } },
+    { meta: { market_date: '2026-08-29', schema_version: '1.1.0' }, indices: { KOSPI: { close: 105, previous_close: 104, source_date: '2026-08-29' } } }
+  ];
+
+  const res1 = computeMarketRange(snapshotsMissingFirst, '1w', 5);
+  const kospi1 = res1.instruments.indices.KOSPI;
+  assert.equal(kospi1.baseline_value, null);
+  assert.equal(kospi1.end_value, 105);
+  assert.equal(kospi1.change, null);
+  assert.equal(kospi1.return_pct, null);
+  assert.equal(kospi1.observations, 4);
+  assert.equal(kospi1.complete, false);
+
+  // Last snapshot missing KOSPI
+  const snapshotsMissingLast = [
+    { meta: { market_date: '2026-08-25', schema_version: '1.1.0' }, indices: { KOSPI: { close: 101, previous_close: 100, source_date: '2026-08-25' } } },
+    { meta: { market_date: '2026-08-26', schema_version: '1.1.0' }, indices: { KOSPI: { close: 102, previous_close: 101, source_date: '2026-08-26' } } },
+    { meta: { market_date: '2026-08-27', schema_version: '1.1.0' }, indices: { KOSPI: { close: 103, previous_close: 102, source_date: '2026-08-27' } } },
+    { meta: { market_date: '2026-08-28', schema_version: '1.1.0' }, indices: { KOSPI: { close: 104, previous_close: 103, source_date: '2026-08-28' } } },
+    { meta: { market_date: '2026-08-29', schema_version: '1.1.0' }, indices: {} }
+  ];
+
+  const res2 = computeMarketRange(snapshotsMissingLast, '1w', 5);
+  const kospi2 = res2.instruments.indices.KOSPI;
+  assert.equal(kospi2.baseline_value, 100);
+  assert.equal(kospi2.end_value, null);
+  assert.equal(kospi2.change, null);
+  assert.equal(kospi2.return_pct, null);
+  assert.equal(kospi2.observations, 4);
+  assert.equal(kospi2.complete, false);
+});
+
+test('Explicit rejection of data_state=unavailable and strict final_close non-fallback', () => {
+  // 1. data_state === 'unavailable' with stale finite numbers must be rejected
+  const unavailableSnapshots = [
+    {
+      meta: { market_date: '2026-08-25', schema_version: '1.1.0' },
+      rates_fx_volatility: {
+        VIX: { close: 15.0, current: 15.0, previous_close: 14.5, data_state: 'unavailable', source_date: '2026-08-25' }
+      }
+    },
+    {
+      meta: { market_date: '2026-08-26', schema_version: '1.1.0' },
+      rates_fx_volatility: {
+        VIX: { close: 16.0, current: 16.0, previous_close: 15.0, data_state: 'final_close', source_date: '2026-08-26' }
+      }
+    }
+  ];
+
+  const res1 = computeMarketRange(unavailableSnapshots, '1w', 2);
+  const vix = res1.instruments.rates_fx_volatility.VIX;
+  assert.equal(vix.baseline_value, null, 'Unavailable item must not serve as baseline');
+  assert.equal(vix.end_value, 16.0);
+  assert.equal(vix.return_pct, null);
+  assert.equal(vix.observations, 1);
+
+  // 2. data_state === 'final_close' where close is null must NOT fall back to current
+  const finalCloseNoCloseSnapshots = [
+    {
+      meta: { market_date: '2026-08-25', schema_version: '1.1.0' },
+      commodities_crypto: {
+        WTI: { close: null, current: 82.5, previous_close: 80.0, data_state: 'final_close', source_date: '2026-08-25' }
+      }
+    },
+    {
+      meta: { market_date: '2026-08-26', schema_version: '1.1.0' },
+      commodities_crypto: {
+        WTI: { close: null, current: 83.0, previous_close: 82.5, data_state: 'final_close', source_date: '2026-08-26' }
+      }
+    }
+  ];
+
+  const res2 = computeMarketRange(finalCloseNoCloseSnapshots, '1w', 2);
+  const wti = res2.instruments.commodities_crypto.WTI;
+  assert.equal(wti.baseline_value, null);
+  assert.equal(wti.end_value, null);
+  assert.equal(wti.observations, 0);
+  assert.equal(wti.complete, false);
+});
+
+test('Breadth missing ratio/count exclusion: partial field session is excluded without being treated as 0', () => {
+  const breadthSeries = [
+    { rise_ratio: 0.60, fall_ratio: 0.35, rise_count: 600, fall_count: 350 }, // valid
+    { rise_ratio: 0.50, fall_ratio: 0.40, rise_count: 500, fall_count: 400 }, // valid
+    { rise_ratio: null, fall_ratio: 0.50, rise_count: 400, fall_count: 500 }, // missing rise_ratio -> excluded!
+    { rise_ratio: 0.70, fall_ratio: 0.25, rise_count: 700, fall_count: 250 }, // valid
+    { rise_ratio: 0.40, fall_ratio: 0.50, rise_count: 400, fall_count: 500 }  // valid
+  ];
+
+  const snapshots = breadthSeries.map((b, i) => ({
+    meta: { market_date: `2026-08-2${i + 1}`, schema_version: '1.1.0' },
+    market_breadth: {
+      KOSPI: b
+    }
+  }));
+
+  const res = computeMarketRange(snapshots, '1w', 5);
+  const breadth = res.breadth.KOSPI;
+
+  // 4 valid sessions: (0.60 + 0.50 + 0.70 + 0.40) / 4 = 0.55
+  // If the 3rd session were treated as 0: (0.60 + 0.50 + 0 + 0.70 + 0.40) / 5 = 0.44
+  assert.equal(breadth.avg_rise_ratio, 0.55);
+  assert.equal(breadth.observations, 4);
+  assert.equal(breadth.complete, false);
 });

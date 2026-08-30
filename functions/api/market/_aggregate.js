@@ -16,17 +16,24 @@ function isFiniteNumber(val) {
 
 /**
  * Period value rule:
+ * - data_state === 'unavailable' -> null (unconditionally)
  * - KOSPI, KOSDAQ, USDKRW, JPYKRW: use close (fixed 15:30 close)
- * - Other instruments: if data_state === 'intraday' and current is finite -> current; else close
- * - If unavailable / non-finite -> null
+ * - data_state === 'intraday': use finite current, else null
+ * - data_state === 'final_close': use finite close, else null (never fallback to current)
+ * - other states: finite close, then finite current, else null
  */
 export function getPeriodValue(key, item) {
   if (!item || typeof item !== 'object') return null;
+  if (item.data_state === 'unavailable') return null;
+
   if (key === 'KOSPI' || key === 'KOSDAQ' || key === 'USDKRW' || key === 'JPYKRW') {
     return isFiniteNumber(item.close) ? item.close : null;
   }
-  if (item.data_state === 'intraday' && isFiniteNumber(item.current)) {
-    return item.current;
+  if (item.data_state === 'intraday') {
+    return isFiniteNumber(item.current) ? item.current : null;
+  }
+  if (item.data_state === 'final_close') {
+    return isFiniteNumber(item.close) ? item.close : null;
   }
   if (isFiniteNumber(item.close)) {
     return item.close;
@@ -39,12 +46,15 @@ export function getPeriodValue(key, item) {
 
 /**
  * Baseline value rule for multi-session returns:
+ * - data_state === 'unavailable' -> null
  * - First session previous_close if finite
  * - Else if close & change are finite: close - change
  * - Else: null
  */
 export function getBaselineValue(key, item) {
   if (!item || typeof item !== 'object') return null;
+  if (item.data_state === 'unavailable') return null;
+
   if (isFiniteNumber(item.previous_close)) {
     return item.previous_close;
   }
@@ -54,8 +64,7 @@ export function getBaselineValue(key, item) {
   return null;
 }
 
-function aggregateInstrumentCategory(categoryKey, snapshots, sessionsUsed) {
-  // Collect all unique instrument keys in this category across all snapshots
+function aggregateInstrumentCategory(categoryKey, snapshots, sessionsUsed, requiredSessions) {
   const instrumentKeys = new Set();
   for (const s of snapshots) {
     const group = s?.[categoryKey];
@@ -68,14 +77,15 @@ function aggregateInstrumentCategory(categoryKey, snapshots, sessionsUsed) {
 
   const result = {};
 
+  const firstSnapshot = snapshots.length > 0 ? snapshots[0] : null;
+  const lastSnapshot = snapshots.length > 0 ? snapshots[snapshots.length - 1] : null;
+  const startMarketDate = firstSnapshot?.meta?.market_date || null;
+  const endMarketDate = lastSnapshot?.meta?.market_date || null;
+
   for (const key of instrumentKeys) {
     let observations = 0;
     let periodHigh = null;
     let periodLow = null;
-    let firstObserved = null;
-    let lastObserved = null;
-    let firstSnapshotDate = null;
-    let lastSnapshotDate = null;
 
     for (const snapshot of snapshots) {
       const item = snapshot?.[categoryKey]?.[key];
@@ -84,43 +94,23 @@ function aggregateInstrumentCategory(categoryKey, snapshots, sessionsUsed) {
       const pVal = getPeriodValue(key, item);
       if (pVal !== null) {
         observations++;
-        if (!firstObserved) {
-          firstObserved = item;
-          firstSnapshotDate = snapshot.meta?.market_date || item.source_date || null;
+      }
+
+      if (item.data_state !== 'unavailable') {
+        if (isFiniteNumber(item.high)) {
+          periodHigh = periodHigh === null ? item.high : Math.max(periodHigh, item.high);
         }
-        lastObserved = item;
-        lastSnapshotDate = snapshot.meta?.market_date || item.source_date || null;
-      }
-
-      if (isFiniteNumber(item.high)) {
-        periodHigh = periodHigh === null ? item.high : Math.max(periodHigh, item.high);
-      }
-      if (isFiniteNumber(item.low)) {
-        periodLow = periodLow === null ? item.low : Math.min(periodLow, item.low);
+        if (isFiniteNumber(item.low)) {
+          periodLow = periodLow === null ? item.low : Math.min(periodLow, item.low);
+        }
       }
     }
 
-    if (observations === 0 || !firstObserved || !lastObserved) {
-      result[key] = {
-        baseline_value: null,
-        end_value: null,
-        change: null,
-        return_pct: null,
-        period_high: periodHigh,
-        period_low: periodLow,
-        observations: 0,
-        complete: false,
-        start_market_date: null,
-        end_market_date: null,
-        start_source_date: null,
-        end_source_date: null
-      };
-      if (key === 'US10Y') result[key].change_bp = null;
-      continue;
-    }
+    const firstItem = firstSnapshot?.[categoryKey]?.[key] || null;
+    const lastItem = lastSnapshot?.[categoryKey]?.[key] || null;
 
-    const baselineValue = getBaselineValue(key, firstObserved);
-    const endValue = getPeriodValue(key, lastObserved);
+    const baselineValue = (firstItem && getPeriodValue(key, firstItem) !== null) ? getBaselineValue(key, firstItem) : null;
+    const endValue = lastItem ? getPeriodValue(key, lastItem) : null;
 
     let change = null;
     let returnPct = null;
@@ -140,11 +130,11 @@ function aggregateInstrumentCategory(categoryKey, snapshots, sessionsUsed) {
       period_high: periodHigh,
       period_low: periodLow,
       observations,
-      complete: observations === sessionsUsed,
-      start_market_date: firstSnapshotDate,
-      end_market_date: lastSnapshotDate,
-      start_source_date: firstObserved.source_date || null,
-      end_source_date: lastObserved.source_date || null
+      complete: observations === requiredSessions,
+      start_market_date: startMarketDate,
+      end_market_date: endMarketDate,
+      start_source_date: firstItem?.source_date || null,
+      end_source_date: lastItem?.source_date || null
     };
 
     if (key === 'US10Y') {
@@ -157,7 +147,7 @@ function aggregateInstrumentCategory(categoryKey, snapshots, sessionsUsed) {
   return result;
 }
 
-function aggregateFlows(snapshots, sessionsUsed) {
+function aggregateFlows(snapshots, sessionsUsed, requiredSessions) {
   const markets = {};
 
   for (const market of FLOW_MARKETS) {
@@ -177,7 +167,7 @@ function aggregateFlows(snapshots, sessionsUsed) {
       markets[market][investor] = {
         net_buy: observations > 0 ? sumNetBuy : null,
         observations,
-        complete: observations === sessionsUsed
+        complete: observations === requiredSessions
       };
     }
   }
@@ -189,7 +179,7 @@ function aggregateFlows(snapshots, sessionsUsed) {
   };
 }
 
-function aggregateBreadth(snapshots, sessionsUsed) {
+function aggregateBreadth(snapshots, sessionsUsed, requiredSessions) {
   const result = {};
 
   for (const market of BREADTH_MARKETS) {
@@ -204,12 +194,18 @@ function aggregateBreadth(snapshots, sessionsUsed) {
 
     for (const s of snapshots) {
       const b = s?.market_breadth?.[market];
-      if (b && isFiniteNumber(b.rise_count) && isFiniteNumber(b.fall_count)) {
+      if (
+        b &&
+        isFiniteNumber(b.rise_count) &&
+        isFiniteNumber(b.fall_count) &&
+        isFiniteNumber(b.rise_ratio) &&
+        isFiniteNumber(b.fall_ratio)
+      ) {
         observations++;
         sumRiseCount += b.rise_count;
         sumFallCount += b.fall_count;
-        if (isFiniteNumber(b.rise_ratio)) sumRiseRatio += b.rise_ratio;
-        if (isFiniteNumber(b.fall_ratio)) sumFallRatio += b.fall_ratio;
+        sumRiseRatio += b.rise_ratio;
+        sumFallRatio += b.fall_ratio;
 
         if (b.rise_count > b.fall_count) advancerDominant++;
         else if (b.fall_count > b.rise_count) declinerDominant++;
@@ -226,25 +222,29 @@ function aggregateBreadth(snapshots, sessionsUsed) {
       decliner_dominant_sessions: declinerDominant,
       neutral_sessions: neutralSessions,
       observations,
-      complete: observations === sessionsUsed
+      complete: observations === requiredSessions
     };
   }
 
   return result;
 }
 
-function aggregateKrxGroups(snapshots, sessionsUsed) {
+function aggregateKrxGroups(snapshots, sessionsUsed, requiredSessions) {
   let sessionsWithData = 0;
   for (const s of snapshots) {
-    if (s?.krx_groups && typeof s.krx_groups === 'object' && (Array.isArray(s.krx_groups.sectors) || Array.isArray(s.krx_groups.themes))) {
+    if (
+      s?.krx_groups &&
+      typeof s.krx_groups === 'object' &&
+      Array.isArray(s.krx_groups.sectors) &&
+      Array.isArray(s.krx_groups.themes)
+    ) {
       sessionsWithData++;
     }
   }
 
-  const coverageComplete = sessionsWithData === sessionsUsed && sessionsUsed > 0;
+  const coverageComplete = sessionsUsed === requiredSessions && sessionsWithData === requiredSessions;
 
   function processGroupArray(kind) {
-    // Map of index_code -> array of items per snapshot
     const codeMap = new Map();
 
     snapshots.forEach((s, snapIndex) => {
@@ -272,41 +272,36 @@ function aggregateKrxGroups(snapshots, sessionsUsed) {
 
     for (const [code, record] of codeMap.entries()) {
       let observations = 0;
-      let firstItem = null;
-      let lastItem = null;
 
       for (let i = 0; i < record.itemsBySession.length; i++) {
         const item = record.itemsBySession[i];
         if (item && isFiniteNumber(item.close)) {
           observations++;
-          if (!firstItem) firstItem = item;
-          lastItem = item;
         }
       }
 
-      const isComplete = observations === sessionsUsed;
+      const isComplete = observations === requiredSessions;
+      const firstItem = record.itemsBySession[0];
+      const lastItem = record.itemsBySession[record.itemsBySession.length - 1];
+
       let baselineValue = null;
       let endValue = null;
       let returnPct = null;
 
-      if (isComplete && firstItem && lastItem) {
+      if (firstItem && isFiniteNumber(firstItem.close)) {
         if (isFiniteNumber(firstItem.previous_close)) {
           baselineValue = firstItem.previous_close;
-        } else if (isFiniteNumber(firstItem.close) && isFiniteNumber(firstItem.change)) {
+        } else if (isFiniteNumber(firstItem.change)) {
           baselineValue = firstItem.close - firstItem.change;
         }
-        endValue = lastItem.close;
+      }
 
-        if (baselineValue !== null && baselineValue !== 0 && endValue !== null) {
-          returnPct = ((endValue / baselineValue) - 1) * 100;
-        }
-      } else if (firstItem && lastItem) {
-        if (isFiniteNumber(firstItem.previous_close)) {
-          baselineValue = firstItem.previous_close;
-        } else if (isFiniteNumber(firstItem.close) && isFiniteNumber(firstItem.change)) {
-          baselineValue = firstItem.close - firstItem.change;
-        }
+      if (lastItem && isFiniteNumber(lastItem.close)) {
         endValue = lastItem.close;
+      }
+
+      if (isComplete && baselineValue !== null && baselineValue !== 0 && endValue !== null) {
+        returnPct = ((endValue / baselineValue) - 1) * 100;
       }
 
       const entry = {
@@ -370,12 +365,12 @@ export function computeMarketRange(snapshots, period, requiredSessions) {
 
   const instruments = {};
   for (const groupKey of INSTRUMENT_GROUPS) {
-    instruments[groupKey] = aggregateInstrumentCategory(groupKey, safeSnapshots, sessionsUsed);
+    instruments[groupKey] = aggregateInstrumentCategory(groupKey, safeSnapshots, sessionsUsed, requiredSessions);
   }
 
-  const flows = aggregateFlows(safeSnapshots, sessionsUsed);
-  const breadth = aggregateBreadth(safeSnapshots, sessionsUsed);
-  const krxGroups = aggregateKrxGroups(safeSnapshots, sessionsUsed);
+  const flows = aggregateFlows(safeSnapshots, sessionsUsed, requiredSessions);
+  const breadth = aggregateBreadth(safeSnapshots, sessionsUsed, requiredSessions);
+  const krxGroups = aggregateKrxGroups(safeSnapshots, sessionsUsed, requiredSessions);
 
   return {
     aggregation_version: AGGREGATION_VERSION,
