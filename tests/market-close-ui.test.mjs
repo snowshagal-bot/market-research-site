@@ -745,3 +745,101 @@ test('renderRangeView with complete coverage renders strongest and weakest secto
   assert.match(html, /2차전지/);
   assert.doesNotMatch(html, /불완전업종/, 'Incomplete sector must not be included in ranking');
 });
+
+test('toggle-calendar click dynamically switches active state from 1W to HISTORY and back on close', async () => {
+  const script = await read('assets/market-close.js');
+
+  class ClassList {
+    constructor() { this.classes = new Set(); }
+    toggle(cls, force) {
+      if (force === undefined) {
+        if (this.classes.has(cls)) this.classes.delete(cls);
+        else this.classes.add(cls);
+      } else if (force) {
+        this.classes.add(cls);
+      } else {
+        this.classes.delete(cls);
+      }
+    }
+    contains(cls) { return this.classes.has(cls); }
+  }
+
+  const modeButtons = [
+    { dataset: { marketAction: 'today' }, classList: new ClassList(), setAttribute() {} },
+    { dataset: { marketAction: 'view-1w' }, classList: new ClassList(), setAttribute() {} },
+    { dataset: { marketAction: 'view-1m' }, classList: new ClassList(), setAttribute() {} },
+    { dataset: { marketAction: 'toggle-calendar' }, classList: new ClassList(), setAttribute() {} }
+  ];
+
+  let rootClickListener = null;
+  const drawerEl = { hidden: true, innerHTML: '' };
+  const toggleBtn = { classList: new ClassList(), setAttribute() {} };
+  const rootElement = {
+    id: 'market-close-root',
+    innerHTML: '',
+    addEventListener(event, handler) {
+      if (event === 'click') rootClickListener = handler;
+    }
+  };
+
+  const document = {
+    documentElement: { dataset: { siteLang: 'ko' } },
+    body: { dataset: {} },
+    readyState: 'complete',
+    getElementById(id) {
+      if (id === 'market-close-root') return rootElement;
+      if (id === 'market-calendar-drawer') return drawerEl;
+      return null;
+    },
+    querySelector(sel) {
+      if (sel === '.market-calendar-toggle') return toggleBtn;
+      return null;
+    },
+    querySelectorAll(sel) {
+      if (sel === '.market-history-modes .market-mode-btn') return modeButtons;
+      return [];
+    },
+    addEventListener() {}
+  };
+
+  const window = {};
+  const context = vm.createContext({
+    window,
+    document,
+    location: { pathname: '/market/', search: '?view=1w', hostname: 'localhost' },
+    fetch: async () => ({ ok: true, json: async () => ({ dates: ['2026-08-28'] }) }),
+    Intl, Date, Set, URLSearchParams, console
+  });
+  vm.runInContext(script, context);
+  const runtime = window.MARKET_CLOSE;
+
+  // Initialize in 1W mode
+  runtime.state.mode = '1w';
+  runtime.state.calendarOpen = false;
+  runtime.renderRangeView({ aggregation_version: '1.0.0', period: '1w', window: { sessions_used: 4, required_sessions: 5 }, instruments: { indices: {}, rates_fx_volatility: {}, commodities_crypto: {} }, flows: { markets: {} }, breadth: {}, krx_groups: { coverage_complete: false } }, '1w', rootElement);
+  modeButtons[1].classList.toggle('active', true);
+
+  // 1. Simulate clicking toggle-calendar
+  const clickToggleEvent = {
+    target: {
+      closest(sel) {
+        if (sel === '[data-market-action]') return { dataset: { marketAction: 'toggle-calendar' } };
+        return null;
+      }
+    }
+  };
+
+  await rootClickListener(clickToggleEvent);
+
+  // Check state & classes after open
+  assert.equal(runtime.state.calendarOpen, true, 'calendar must be open');
+  assert.equal(modeButtons[1].classList.contains('active'), false, '1W must be inactive when calendar is open');
+  assert.equal(modeButtons[3].classList.contains('active'), true, 'HISTORY must be active when calendar is open');
+
+  // 2. Click toggle-calendar again to close
+  await rootClickListener(clickToggleEvent);
+
+  assert.equal(runtime.state.calendarOpen, false, 'calendar must be closed');
+  assert.equal(modeButtons[1].classList.contains('active'), true, '1W must be restored to active when calendar is closed');
+  assert.equal(modeButtons[3].classList.contains('active'), false, 'HISTORY must be inactive when calendar is closed in 1W mode');
+});

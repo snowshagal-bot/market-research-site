@@ -757,7 +757,10 @@
       if (modes[0]) modes[0].classList.toggle('active', state.mode === 'today' && !state.calendarOpen);
       if (modes[1]) modes[1].classList.toggle('active', state.mode === '1w' && !state.calendarOpen);
       if (modes[2]) modes[2].classList.toggle('active', state.mode === '1m' && !state.calendarOpen);
-      if (modes[3]) modes[3].classList.toggle('active', (state.mode === 'history' || state.calendarOpen) && state.mode !== '1w' && state.mode !== '1m');
+      if (modes[3]) {
+        modes[3].classList.toggle('active', state.mode === 'history' || state.calendarOpen);
+        modes[3].setAttribute('aria-expanded', String(state.calendarOpen));
+      }
       const toggleBtn = document.querySelector('.market-calendar-toggle');
       if (toggleBtn) {
         toggleBtn.classList.toggle('active', state.calendarOpen);
