@@ -19,9 +19,10 @@ test('all admin pages link to the Market Close uploader', async () => {
   assert.match(pages[2], /href="\.\.\/market\/">Market Close<\/a>/);
 });
 
-test('admin client gates final v1.0.1 payloads and keeps both secrets out of static code', async () => {
+test('admin client gates supported final payloads and keeps both secrets out of static code', async () => {
   const script = await read('assets/admin-market.js');
-  assert.match(script, /schema_version !== '1\.0\.1'/);
+  assert.match(script, /SUPPORTED_VERSIONS/);
+  assert.match(script, /'1\.0\.1', '1\.1\.0'/);
   assert.match(script, /status !== 'final'/);
   assert.match(script, /validation\?\.passed !== true/);
   assert.match(script, /'x-admin-key'/);

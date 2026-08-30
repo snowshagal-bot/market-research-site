@@ -22,6 +22,7 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
    - Preview `COMMENTS_DB` uses the isolated `market-research-comments-preview` database; Production continues to use `market-research-comments`, and no Production data was copied.
    - The Preview schema is initialized and contains one explicit `1900-01-01` / `preview-smoke-test` Market Close fixture solely for read smoke validation.
    - Preview Market/comments GET and the complete shared Preview smoke are verified at HTTP 200 and 20/20 PASS.
+   - The Market Close publish API now permits authenticated branch-Preview writes to that isolated D1 for contract E2E; no Production row is copied or written during Preview validation.
 
 ## Near-term Priorities
 

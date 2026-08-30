@@ -29,7 +29,9 @@ Locale structure:
 `/market/` and `/en/market/` are the Market Close pages. They read the published close from
 `GET /api/market/latest`, which serves the newest row of the D1-backed `market_close` table.
 The record is uploaded through `/admin/market/` against the JSON Schema in
-`contracts/market_close/`, and Preview is blocked from writing.
+`contracts/market_close/`. Authenticated Market Close writes are allowed on branch Preview
+hosts only because their `COMMENTS_DB` is isolated; the bare Pages hostname and unrelated
+Preview hosts remain blocked, and all non-Market mutation APIs keep their existing policy.
 
 ## Deployment verification
 

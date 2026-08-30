@@ -2,6 +2,7 @@
   'use strict';
   const MAX_BYTES = 512 * 1024;
   const REQUIRED = ['meta', 'indices', 'rates_fx_volatility', 'commodities_crypto', 'krx_investor_trading', 'recent_5d_flows', 'market_breadth', 'program_basis', 'market_internals', 'short_selling', 'market_cap_top10', 'validation'];
+  const SUPPORTED_VERSIONS = ['1.0.1', '1.1.0'];
   const fileInput = document.getElementById('market-json-file');
   const drop = document.getElementById('market-json-drop');
   const fileName = document.getElementById('market-file-name');
@@ -35,7 +36,8 @@
     const errors = [];
     if (!data || typeof data !== 'object' || Array.isArray(data)) return ['최상위 값이 JSON object여야 합니다.'];
     REQUIRED.forEach(key => { if (!Object.hasOwn(data, key)) errors.push(`${key} 필드가 없습니다.`); });
-    if (data.meta?.schema_version !== '1.0.1') errors.push('schema_version은 1.0.1이어야 합니다.');
+    if (!SUPPORTED_VERSIONS.includes(data.meta?.schema_version)) errors.push(`schema_version은 ${SUPPORTED_VERSIONS.join(' 또는 ')}이어야 합니다.`);
+    if (data.meta?.schema_version === '1.1.0' && !data.krx_groups) errors.push('v1.1.0에는 krx_groups 필드가 필요합니다.');
     if (data.meta?.status !== 'final') errors.push('status가 final인 파일만 게시할 수 있습니다.');
     if (data.validation?.passed !== true) errors.push('validation.passed가 true여야 합니다.');
     if (!Array.isArray(data.validation?.errors) || data.validation.errors.length) errors.push('validation.errors가 빈 배열이어야 합니다.');

@@ -15,11 +15,11 @@
 <body>
 <header class="site-header"><div class="site-wrap"><div class="header-row"><a class="brand" href="../../"><i></i>SNOWSHAGAL</a><div class="header-actions"><button class="icon-btn" type="button" data-theme-toggle aria-label="다크 모드로 전환">◐</button></div></div></div></header>
 <main class="market-admin"><div class="site-wrap">
-  <div class="market-admin-head"><div><a class="toplink" href="../../">← 홈페이지</a><h1>Market Close 게시</h1><p>로컬 대시보드가 생성한 v1.0.1 JSON을 검증하고 D1에 저장합니다.</p></div><div class="market-admin-note">final 데이터만 게시 가능</div></div>
+  <div class="market-admin-head"><div><a class="toplink" href="../../">← 홈페이지</a><h1>Market Close 게시</h1><p>로컬 대시보드가 생성한 v1.0.1/v1.1.0 JSON을 검증하고 D1에 저장합니다.</p></div><div class="market-admin-note">final 데이터만 게시 가능</div></div>
   <nav class="admin-nav" aria-label="관리자 메뉴"><a href="../">새 리포트 등록</a><a href="../manage/">게시물 관리</a><a href="../analytics/">방문 통계</a><a href="./" aria-current="page">Market Close</a></nav>
 
   <div class="market-admin-grid">
-    <section class="admin-market-card"><h2>1. JSON 파일</h2><label class="market-json-drop" id="market-json-drop" role="button" tabindex="0"><input id="market-json-file" type="file" accept=".json,application/json"><span aria-hidden="true">✦</span><strong>market_close JSON 선택</strong><small>계약 v1.0.1 · 최대 512KB</small></label><p class="market-file-name" id="market-file-name">선택된 파일 없음</p></section>
+    <section class="admin-market-card"><h2>1. JSON 파일</h2><label class="market-json-drop" id="market-json-drop" role="button" tabindex="0"><input id="market-json-file" type="file" accept=".json,application/json"><span aria-hidden="true">✦</span><strong>market_close JSON 선택</strong><small>계약 v1.0.1/v1.1.0 · 최대 512KB</small></label><p class="market-file-name" id="market-file-name">선택된 파일 없음</p></section>
     <section class="admin-market-card"><h2>2. 계약 상태</h2><dl class="market-contract-meta"><div><dt>Market date</dt><dd id="market-meta-date">—</dd></div><div><dt>Schema</dt><dd id="market-meta-version">—</dd></div><div><dt>Status</dt><dd id="market-meta-status">—</dd></div><div><dt>Validation</dt><dd id="market-meta-validation">—</dd></div></dl><div class="market-validation" id="market-validation" aria-live="polite">파일을 선택하면 게시 가능 여부를 확인합니다.</div></section>
     <section class="admin-market-card market-takeaway-card"><h2>3. 오늘의 한 줄 · 수동 Override</h2><p class="market-takeaway-note">일반적으로 같은 날짜의 Daily 리포트에서 자동 연동됩니다. 여기 입력한 문구가 있으면 자동 문구보다 우선합니다. 긴급 수정이나 Daily 미발행 시에만 사용하세요. 같은 <b id="market-takeaway-date">market date</b>로 함께 저장되며, 저장된 문구가 있으면 불러옵니다. 손대지 않은 언어는 그대로 유지되고, 직접 지우고 게시하면 그 언어만 삭제되어 자동 연동으로 돌아갑니다. 각 400자 이하.</p><label for="market-takeaway-ko">한국어</label><textarea id="market-takeaway-ko" rows="2" maxlength="400" placeholder="예) 낙차를 되감았지만, 시장의 무게중심은 아직 돌아오지 않았다."></textarea><label for="market-takeaway-en">English</label><textarea id="market-takeaway-en" rows="2" maxlength="400" placeholder="The market retraced the selloff, but its center of gravity has yet to return."></textarea><p class="market-takeaway-count" id="market-takeaway-count" aria-live="polite"></p><p class="market-takeaway-note" id="market-takeaway-loaded" aria-live="polite" hidden></p></section>
     <section class="admin-market-card market-publish-card"><h2>4. D1 게시</h2><label for="market-admin-key">관리자 키</label><input id="market-admin-key" type="password" autocomplete="current-password" placeholder="Cloudflare ADMIN_KEY"><button class="market-publish-button" id="market-publish-button" type="button" disabled>D1에 게시</button><p class="market-publish-status" id="market-publish-status" aria-live="polite"></p></section>
@@ -31,6 +31,6 @@
 <script src="/assets/locale.js?v=c9e75896a6"></script>
 <script src="/assets/site.js?v=b21afb2c92"></script>
 <script src="/assets/market-close.js?v=ebe7d5dacc"></script>
-<script src="/assets/admin-market.js?v=95e3d14d5b"></script>
+<script src="/assets/admin-market.js?v=9780cf5976"></script>
 </body>
 </html>
