@@ -600,12 +600,92 @@ test('renderRangeView formats complete vs incomplete windows, instruments, rates
 
     // Breadth
     assert.match(html, /60\.3%/);
+    assert.match(html, /35\.2%/);
     assert.match(html, lang === 'ko' ? /3일/ : /3 sessions/);
 
     // Groups incomplete empty state
     assert.match(html, /market-group-empty/);
     assert.match(html, lang === 'ko' ? /업종 · 테마 기간 데이터 축적 중/ : /Sector & theme history is building/);
   }
+});
+
+test('renderRangeFlows suppresses numeric sum when observations are less than sessions_used', async () => {
+  const script = await read('assets/market-close.js');
+  const window = {};
+  const context = vm.createContext({
+    window,
+    document: { documentElement: { dataset: { siteLang: 'ko' } }, body: { dataset: {} }, readyState: 'loading', addEventListener() {}, getElementById() { return null; } },
+    location: { search: '?view=1w', pathname: '/market/' },
+    Intl, Date, Set, URLSearchParams, console
+  });
+  vm.runInContext(script, context);
+  const runtime = window.MARKET_CLOSE;
+
+  const payload = {
+    aggregation_version: '1.0.0',
+    period: '1w',
+    window: { start_date: '2026-08-25', end_date: '2026-08-28', dates: ['2026-08-25', '2026-08-26', '2026-08-27', '2026-08-28'], sessions_used: 4, required_sessions: 5, complete: false },
+    instruments: { indices: {}, rates_fx_volatility: {}, commodities_crypto: {} },
+    flows: {
+      unit: 'KRW billion',
+      sessions_used: 4,
+      markets: {
+        KOSPI: {
+          외국인: { net_buy: -5551, observations: 4, complete: false },
+          기관: { net_buy: 1200, observations: 3, complete: false },
+          개인: { net_buy: 4351, observations: 4, complete: false }
+        }
+      }
+    },
+    breadth: {},
+    krx_groups: { sessions_with_data: 0, sessions_used: 4, coverage_complete: false, sectors: [], themes: [] }
+  };
+
+  const target = { innerHTML: '', addEventListener() {} };
+  runtime.renderRangeView(payload, '1w', target);
+  const html = target.innerHTML;
+
+  assert.match(html, /−5\.55조원/, 'foreign with 4/4 observations in 4-session window is rendered');
+  assert.match(html, /<td>--<\/td>/, 'institution with 3/4 observations in 4-session window is hidden as --');
+});
+
+test('history strip active states and aria-current reflect calendar open and history mode', async () => {
+  const script = await read('assets/market-close.js');
+  const window = {};
+  const context = vm.createContext({
+    window,
+    document: { documentElement: { dataset: { siteLang: 'ko' } }, body: { dataset: {} }, readyState: 'loading', addEventListener() {}, getElementById() { return null; } },
+    location: { search: '?view=1w', pathname: '/market/' },
+    Intl, Date, Set, URLSearchParams, console
+  });
+  vm.runInContext(script, context);
+  const runtime = window.MARKET_CLOSE;
+
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+
+  // 1. In 1W mode, calendar closed
+  runtime.state.mode = '1w';
+  runtime.state.calendarOpen = false;
+  const target1 = { innerHTML: '', addEventListener() {} };
+  runtime.renderRangeView({ aggregation_version: '1.0.0', period: '1w', window: { sessions_used: 4, required_sessions: 5 }, instruments: { indices: {}, rates_fx_volatility: {}, commodities_crypto: {} }, flows: { markets: {} }, breadth: {}, krx_groups: { coverage_complete: false } }, '1w', target1);
+  assert.match(target1.innerHTML, /class="market-mode-btn active" type="button" data-market-action="view-1w" aria-current="page">1W/);
+  assert.doesNotMatch(target1.innerHTML, /class="market-mode-btn active" type="button" data-market-action="toggle-calendar"/);
+
+  // 2. In 1W mode, calendar OPEN -> 1W inactive, HISTORY active
+  runtime.state.mode = '1w';
+  runtime.state.calendarOpen = true;
+  const target2 = { innerHTML: '', addEventListener() {} };
+  runtime.renderRangeView({ aggregation_version: '1.0.0', period: '1w', window: { sessions_used: 4, required_sessions: 5 }, instruments: { indices: {}, rates_fx_volatility: {}, commodities_crypto: {} }, flows: { markets: {} }, breadth: {}, krx_groups: { coverage_complete: false } }, '1w', target2);
+  assert.doesNotMatch(target2.innerHTML, /class="market-mode-btn active" type="button" data-market-action="view-1w"/);
+  assert.match(target2.innerHTML, /class="market-mode-btn active" type="button" data-market-action="toggle-calendar" aria-expanded="true"/);
+
+  // 3. In HISTORY mode (date selected) -> HISTORY has aria-current="page"
+  runtime.state.mode = 'history';
+  runtime.state.currentDate = '2026-08-27';
+  runtime.state.calendarOpen = false;
+  const target3 = { innerHTML: '', addEventListener() {} };
+  runtime.render(data, target3);
+  assert.match(target3.innerHTML, /class="market-mode-btn active" type="button" data-market-action="toggle-calendar" aria-expanded="false" aria-current="page"/);
 });
 
 test('renderRangeView with complete coverage renders strongest and weakest sector/theme rankings', async () => {

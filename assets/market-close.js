@@ -256,9 +256,9 @@
     const prevDate = canGoPrev ? state.dates[currentIndex + 1] : '';
 
     const isTodayActive = state.mode === 'today' && !state.calendarOpen;
-    const is1wActive = state.mode === '1w';
-    const is1mActive = state.mode === '1m';
-    const isHistoryActive = (state.mode === 'history' || state.calendarOpen) && !is1wActive && !is1mActive;
+    const is1wActive = state.mode === '1w' && !state.calendarOpen;
+    const is1mActive = state.mode === '1m' && !state.calendarOpen;
+    const isHistoryActive = state.mode === 'history' || state.calendarOpen;
 
     let rightNavHtml = '';
     if (state.mode === '1w' || state.mode === '1m') {
@@ -286,7 +286,7 @@
           <span class="market-mode-divider" aria-hidden="true"></span>
           <button class="market-mode-btn ${is1mActive ? 'active' : ''}" type="button" data-market-action="view-1m" ${is1mActive ? 'aria-current="page"' : ''}>1M</button>
           <span class="market-mode-divider" aria-hidden="true"></span>
-          <button class="market-mode-btn ${isHistoryActive ? 'active' : ''}" type="button" data-market-action="toggle-calendar" aria-expanded="${state.calendarOpen}">${copy.historyMode}</button>
+          <button class="market-mode-btn ${isHistoryActive ? 'active' : ''}" type="button" data-market-action="toggle-calendar" aria-expanded="${state.calendarOpen}" ${state.mode === 'history' ? 'aria-current="page"' : ''}>${copy.historyMode}</button>
         </div>
         <div class="market-history-nav">
           ${rightNavHtml}
@@ -552,12 +552,15 @@
   function renderRangeFlows(flows) {
     const markets = ['KOSPI', 'KOSDAQ', 'KOSPI200선물'];
     const headings = [copy.market, copy.foreign, copy.institution, copy.individual];
+    const sessionsUsed = flows?.sessions_used;
     const rows = markets.map(mKey => {
       const mName = mKey === 'KOSPI200선물' ? (ko ? '선물' : 'KOSPI 200 Futures') : mKey;
       const mData = flows?.markets?.[mKey] || {};
       const cells = ['외국인', '기관', '개인'].map(invKey => {
         const invData = mData[invKey];
-        if (!invData || !valid(invData.net_buy)) return '--';
+        if (!invData || !valid(invData.net_buy) || (valid(sessionsUsed) && invData.observations < sessionsUsed)) {
+          return '--';
+        }
         return `<span class="${signClass(invData.net_buy)}">${flow(invData.net_buy)}</span>`;
       });
       return [mName, ...cells];
@@ -593,6 +596,7 @@
         <h3>${marketKey}</h3>
         <div class="range-breadth-stats">
           <div class="market-metric"><span>${copy.avgRiseRatio}</span><strong class="up">${advPct}</strong></div>
+          <div class="market-metric"><span>${copy.avgFallRatio}</span><strong class="down">${decPct}</strong></div>
           <div class="market-metric"><span>${copy.advancerDominant}</span><strong>${advSessions}</strong></div>
           <div class="market-metric"><span>${copy.declinerDominant}</span><strong>${decSessions}</strong></div>
           <div class="market-metric"><span>${copy.neutralDominant}</span><strong>${neutralSessions}</strong></div>
