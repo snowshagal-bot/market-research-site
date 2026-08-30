@@ -204,7 +204,6 @@ async function runSchemaMigration(db) {
     )`),
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_disclosure_date_priority ON ${FILINGS_TABLE} (rcept_dt DESC, rule_score DESC)`),
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_disclosure_ai_queue ON ${FILINGS_TABLE} (ai_eligible, ai_status, rcept_dt DESC, rule_score DESC)`),
-    db.prepare(`CREATE INDEX IF NOT EXISTS idx_disclosure_published ON ${FILINGS_TABLE} (publish_status, rcept_dt DESC, rule_score DESC)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS ${WATCHLIST_TABLE} (
       stock_code TEXT PRIMARY KEY,
       corp_code TEXT NOT NULL DEFAULT '',
@@ -245,6 +244,11 @@ async function runSchemaMigration(db) {
     if (!existingCols.has('published_at')) {
       await db.prepare(`ALTER TABLE ${FILINGS_TABLE} ADD COLUMN published_at TEXT NOT NULL DEFAULT ''`).run();
     }
+  } catch (_) {}
+
+  // Index on publish_status after column is guaranteed to exist
+  try {
+    await db.prepare(`CREATE INDEX IF NOT EXISTS idx_disclosure_published ON ${FILINGS_TABLE} (publish_status, rcept_dt DESC, rule_score DESC)`).run();
   } catch (_) {}
 
   // Seed default watchlist if empty
