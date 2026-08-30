@@ -63,20 +63,21 @@ test('OpenDART adapter: list request contains only provider-specific query param
 });
 
 test('LLM adapter: Gemini Interactions output text is extracted and JSON normalized', () => {
-  const text = llmTest.interactionOutputText({ steps: [{ type: 'model_output', content: [{ type: 'text', text: '{"headline":"핵심","summary":"요약","impact":"mixed","urgency":"high","confidence":87,"watch_points":["금액 확인"],"limitation":"원문 확인"}' }] }] });
+  const text = llmTest.interactionOutputText({ steps: [{ type: 'model_output', content: [{ type: 'text', text: '{"summary":"공급계약 체결 요약","what_it_means":"시장 영향 해설","impact":"mixed","importance":"high","watch_points":["대금 지급 조건 확인"],"limitation":"DART 원문 확인 필요"}' }] }] });
   const parsed = llmTest.safeJson(text);
   const normalized = llmTest.normalizedAnalysis(parsed);
-  assert.equal(normalized.headline, '핵심');
-  assert.equal(normalized.urgency, 'high');
-  assert.equal(normalized.confidence, 87);
+  assert.equal(normalized.summary, '공급계약 체결 요약');
+  assert.equal(normalized.what_it_means, '시장 영향 해설');
+  assert.equal(normalized.importance, 'high');
+  assert.equal(normalized.impact, 'mixed');
 });
 
 test('LLM adapter: prompt explicitly forbids inventing unavailable figures', () => {
   const prompt = llmTest.analysisPrompt({
     corpName: '회사', stockCode: '000000', corpCls: 'Y', reportName: '공급계약체결', filerName: '회사', receiptDate: '20260830', remarks: '', ruleScore: 7, ruleReasons: ['대형 계약·투자']
   });
-  assert.match(prompt, /절대 추정하지 마라/);
-  assert.match(prompt, /공시 원문이 아니다/);
+  assert.match(prompt, /지어내지 말 것/);
+  assert.match(prompt, /공시 메타데이터/);
 });
 
 test('Disclosure latest filters: priority floors and limits are bounded', () => {

@@ -28,9 +28,21 @@ export async function onRequestGet({ request, env }) {
     const url = new URL(request.url);
     const limit = clampLimit(url.searchParams.get('limit'));
     const floor = priorityFloor(url.searchParams.get('priority'));
+    const statusFilter = String(url.searchParams.get('status') || 'all').trim().toLowerCase();
     const query = String(url.searchParams.get('q') || '').trim().slice(0, 80);
     const params = [floor];
     let where = 'WHERE rule_score >= ?';
+
+    if (statusFilter === 'market' || statusFilter === 'published') {
+      where += " AND publish_status IN ('auto', 'manual')";
+    } else if (statusFilter === 'watchlist') {
+      where += ' AND is_watchlist = 1';
+    } else if (statusFilter === 'normal' || statusFilter === 'other') {
+      where += ' AND is_watchlist = 0';
+    } else if (statusFilter === 'ai_error' || statusFilter === 'error') {
+      where += " AND ai_status = 'error'";
+    }
+
     if (query) {
       where += ' AND (corp_name LIKE ? OR stock_code LIKE ? OR report_nm LIKE ?)';
       const like = `%${query.replace(/[%_]/g, '')}%`;
@@ -41,9 +53,12 @@ export async function onRequestGet({ request, env }) {
       db.prepare(`SELECT * FROM ${FILINGS_TABLE} ${where}
         ORDER BY rcept_dt DESC, rule_score DESC, rcept_no DESC LIMIT ?`).bind(...params).all(),
       db.prepare(`SELECT COUNT(*) AS stored,
+        SUM(CASE WHEN publish_status IN ('auto', 'manual') THEN 1 ELSE 0 END) AS published,
+        SUM(CASE WHEN is_watchlist = 1 THEN 1 ELSE 0 END) AS watchlist_filings,
         SUM(CASE WHEN ai_eligible = 1 THEN 1 ELSE 0 END) AS eligible,
         SUM(CASE WHEN ai_status = 'done' THEN 1 ELSE 0 END) AS analyzed,
-        SUM(CASE WHEN ai_eligible = 1 AND ai_status IN ('available', 'pending') THEN 1 ELSE 0 END) AS available
+        SUM(CASE WHEN ai_eligible = 1 AND ai_status IN ('available', 'pending') THEN 1 ELSE 0 END) AS available,
+        SUM(CASE WHEN ai_status = 'error' THEN 1 ELSE 0 END) AS ai_errors
         FROM ${FILINGS_TABLE}`).first()
     ]);
 
@@ -56,9 +71,12 @@ export async function onRequestGet({ request, env }) {
       filings: (result?.results || []).map(publicFiling),
       stats: {
         stored: Number(totals?.stored || 0),
+        published: Number(totals?.published || 0),
+        watchlistFilings: Number(totals?.watchlist_filings || 0),
         eligible: Number(totals?.eligible || 0),
         analyzed: Number(totals?.analyzed || 0),
-        available: Number(totals?.available || 0)
+        available: Number(totals?.available || 0),
+        aiErrors: Number(totals?.ai_errors || 0)
       },
       usageDate,
       usage,

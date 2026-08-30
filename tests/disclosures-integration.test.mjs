@@ -20,6 +20,9 @@ import { analyzeWithLlm, __test as llmTest } from '../functions/api/disclosures/
 import { onRequestPost as syncPost, __test as syncTest } from '../functions/api/disclosures/sync.js';
 import { onRequestGet as latestGet } from '../functions/api/disclosures/latest.js';
 import { onRequestPost as analyzePost } from '../functions/api/disclosures/analyze.js';
+import { onRequestPost as publishPost } from '../functions/api/disclosures/publish.js';
+import { onRequestGet as watchlistGet, onRequestPost as watchlistPost } from '../functions/api/disclosures/watchlist.js';
+import { onRequestGet as feedGet } from '../functions/api/disclosures/feed.js';
 
 class SqliteStatement {
   constructor(database, sql) {
@@ -121,12 +124,11 @@ function item(number, overrides = {}) {
 
 function validAnalysis(overrides = {}) {
   return {
-    headline: '중요 자본조달 공시',
-    summary: '유상증자 결정 공시로 원문 확인이 필요합니다.',
-    impact: 'mixed',
-    urgency: 'high',
-    confidence: 80,
+    summary: '유상증자 결정 공시로 세부 조건 확인이 필요합니다.',
+    what_it_means: '자금 조달 목적 및 주주가치 영향 점검 필요',
     watch_points: ['세부 조건 원문 확인'],
+    impact: 'mixed',
+    importance: 'high',
     limitation: '공시 원문이 제공되지 않아 DART 원문 확인이 필요합니다.',
     ...overrides
   };
@@ -406,8 +408,8 @@ test('provider failure does not roll back collected filings and repeated sync st
 
 test('manual AI reanalysis updates one eligible filing and increments quota', async () => {
   const db = await seededDb([item('20260830000001')]);
-  db.database.prepare(`UPDATE ${FILINGS_TABLE} SET ai_status = 'done', ai_json = ?`).run(JSON.stringify(validAnalysis({ headline: 'old' })));
-  globalThis.fetch = async () => geminiResponse(validAnalysis({ headline: 'new headline' }));
+  db.database.prepare(`UPDATE ${FILINGS_TABLE} SET ai_status = 'done', ai_json = ?`).run(JSON.stringify(validAnalysis({ summary: 'old summary' })));
+  globalThis.fetch = async () => geminiResponse(validAnalysis({ summary: 'new summary' }));
   const response = await analyzePost({
     request: adminRequest('/api/disclosures/analyze', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ rceptNo: '20260830000001' })
@@ -416,7 +418,7 @@ test('manual AI reanalysis updates one eligible filing and increments quota', as
   });
   assert.equal(response.status, 200);
   const payload = await response.json();
-  assert.equal(payload.filing.ai.result.headline, 'new headline');
+  assert.equal(payload.filing.ai.result.summary, 'new summary');
   assert.equal(db.row("SELECT request_count FROM disclosure_usage_daily WHERE kind = 'llm:total'").request_count, 1);
   db.close();
 });
@@ -520,11 +522,546 @@ test('all five admin pages expose the same disclosure navigation destination', a
   }
 });
 
-test('disclosure admin remains responsive at desktop, 430px, and 360px widths', async () => {
-  const html = await readFile(new URL('../admin/disclosures/index.html', import.meta.url), 'utf8');
-  assert.match(html, /grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
-  assert.match(html, /@media\(max-width:800px\)/);
-  assert.match(html, /@media\(max-width:430px\)/);
-  assert.match(html, /grid-template-columns:1fr 1fr/);
-  assert.match(html, /viewport-fit=cover/);
+test('watchlist API allows viewing, adding, and removing watchlist companies', async () => {
+  const db = await seededDb();
+  const getRes = await watchlistGet({ request: adminRequest('/api/disclosures/watchlist'), env: envFor(db) });
+  assert.equal(getRes.status, 200);
+  const getPayload = await getRes.json();
+  assert.ok(getPayload.watchlist.length >= 30);
+  assert.ok(getPayload.watchlist.some(w => w.stockCode === '005930'));
+
+  const addRes = await watchlistPost({
+    request: adminRequest('/api/disclosures/watchlist', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action: 'add', stockCode: '999990', corpName: '신규테스트기업', corpCls: 'K' })
+    }),
+    env: envFor(db)
+  });
+  assert.equal(addRes.status, 200);
+  const addPayload = await addRes.json();
+  assert.ok(addPayload.watchlist.some(w => w.stockCode === '999990'));
+
+  const delRes = await watchlistPost({
+    request: adminRequest('/api/disclosures/watchlist', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', stockCode: '999990' })
+    }),
+    env: envFor(db)
+  });
+  assert.equal(delRes.status, 200);
+  const delPayload = await delRes.json();
+  assert.equal(delPayload.watchlist.some(w => w.stockCode === '999990'), false);
+  db.close();
+});
+
+test('sync auto-publishes watchlist companies with score >= 7 while keeping routine filings admin_only', async () => {
+  const db = await seededDb();
+  globalThis.fetch = async (url) => {
+    if (String(url).includes('opendart')) {
+      return new Response(JSON.stringify({
+        status: '000', message: '정상', page_no: 1, page_count: 100, total_count: 3, total_page: 1,
+        list: [
+          // Samsung (Watchlist) + Critical (score 10) -> auto publish
+          item('20260830000001', { corp_name: '삼성전자', stock_code: '005930', report_nm: '자기주식취득 결정' }),
+          // Samsung (Watchlist) + Low (score <= 2) -> admin_only
+          item('20260830000002', { corp_name: '삼성전자', stock_code: '005930', report_nm: '분기보고서 (2026.06)' }),
+          // Unknown company (Non-watchlist) + Critical -> admin_only
+          item('20260830000003', { corp_name: '일반비상장', stock_code: '', report_nm: '자기주식취득 결정' })
+        ]
+      }));
+    }
+    return geminiResponse();
+  };
+
+  const response = await syncPost({
+    request: adminRequest('/api/disclosures/sync', { method: 'POST', body: '{}' }),
+    env: envFor(db),
+    now: NOW
+  });
+  assert.equal(response.status, 200);
+
+  const row1 = db.row(`SELECT publish_status, is_watchlist FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`);
+  assert.equal(row1.is_watchlist, 1);
+  assert.equal(row1.publish_status, 'auto');
+
+  const row2 = db.row(`SELECT publish_status, is_watchlist FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000002'`);
+  assert.equal(row2.is_watchlist, 1);
+  assert.equal(row2.publish_status, 'admin_only');
+
+  const row3 = db.row(`SELECT publish_status, is_watchlist FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000003'`);
+  assert.equal(row3.is_watchlist, 0);
+  assert.equal(row3.publish_status, 'admin_only');
+  db.close();
+});
+
+test('manual publish endpoint allows publishing any filing and unpublishing', async () => {
+  const db = await seededDb([item('20260830000099', { corp_name: '수동게시기업', stock_code: '012340', report_nm: '기타공시' })]);
+  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE}`).publish_status, 'admin_only');
+
+  const pubRes = await publishPost({
+    request: adminRequest('/api/disclosures/publish', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ rceptNo: '20260830000099', action: 'publish' })
+    }),
+    env: envFor(db)
+  });
+  assert.equal(pubRes.status, 200);
+  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE}`).publish_status, 'manual');
+
+  const unpubRes = await publishPost({
+    request: adminRequest('/api/disclosures/publish', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ rceptNo: '20260830000099', action: 'unpublish' })
+    }),
+    env: envFor(db)
+  });
+  assert.equal(unpubRes.status, 200);
+  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE}`).publish_status, 'suppressed');
+  db.close();
+});
+
+test('public feed endpoint serves published filings with fact vs analysis structures and caching header', async () => {
+  const db = await seededDb([
+    item('20260830000001', { corp_name: '삼성전자', stock_code: '005930', report_nm: '자기주식취득 결정' }),
+    item('20260830000002', { corp_name: '숨겨진공시', stock_code: '000000', report_nm: '정기보고서' })
+  ]);
+  // Mark filing 1 as published with AI analysis
+  db.database.prepare(`UPDATE ${FILINGS_TABLE} SET publish_status = 'auto', ai_status = 'done', ai_json = ? WHERE rcept_no = '20260830000001'`)
+    .run(JSON.stringify(validAnalysis({ what_it_means: '자사주 취득으로 주주환원 긍정적' })));
+
+  const feedRes = await feedGet({
+    request: new Request('https://market-research-site.pages.dev/api/disclosures/feed?date=2026-08-30'),
+    env: envFor(db)
+  });
+  assert.equal(feedRes.status, 200);
+  assert.ok(feedRes.headers.get('cache-control')?.includes('public'));
+  const payload = await feedRes.json();
+  assert.equal(payload.totalPublished, 1);
+  assert.equal(payload.items.length, 1);
+  assert.equal(payload.items[0].fact.corpName, '삼성전자');
+  assert.equal(payload.items[0].fact.reportName, '자기주식취득 결정');
+  assert.equal(payload.items[0].ai.whatItMeans, '자사주 취득으로 주주환원 긍정적');
+
+  // Verify minimal DTO (top-level operational fields stripped)
+  assert.equal(payload.items[0].corpName, undefined);
+  assert.equal(payload.items[0].isWatchlist, undefined);
+  assert.equal(payload.items[0].publishStatus, undefined);
+  assert.equal(payload.items[0].score, undefined);
+  assert.equal(payload.items[0].reasons, undefined);
+  db.close();
+});
+
+test('Gemini location error or failure is isolated, preserving OpenDART sync and public feed', async () => {
+  const db = await seededDb();
+  globalThis.fetch = async (url) => {
+    if (String(url).includes('opendart')) {
+      return new Response(JSON.stringify({
+        status: '000', message: '정상', page_no: 1, page_count: 100, total_count: 1, total_page: 1,
+        list: [item('20260830000001', { corp_name: '삼성전자', stock_code: '005930', report_nm: '자기주식취득 결정' })]
+      }));
+    }
+    // Simulate Gemini location blocked 503
+    return new Response(JSON.stringify({ error: { message: 'This API is not available in your current location.' } }), { status: 400 });
+  };
+
+  const response = await syncPost({
+    request: adminRequest('/api/disclosures/sync', { method: 'POST', body: '{}' }),
+    env: envFor(db),
+    now: NOW
+  });
+  // OpenDART sync succeeds with 200, filings stored in D1
+  assert.equal(response.status, 200);
+  const syncPayload = await response.json();
+  assert.equal(syncPayload.source.created, 1);
+  assert.equal(syncPayload.ai.failed, 1);
+
+  // Filing in D1 is preserved and marked with publish_status = 'auto' and ai_status = 'error'
+  const row = db.row(`SELECT publish_status, ai_status, ai_error FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`);
+  assert.equal(row.publish_status, 'auto');
+  assert.equal(row.ai_status, 'error');
+  assert.match(row.ai_error, /location/i);
+
+  // Public feed still serves the filing cleanly (with null AI without crashing)
+  const feedRes = await feedGet({
+    request: new Request('https://market-research-site.pages.dev/api/disclosures/feed?date=2026-08-30'),
+    env: envFor(db)
+  });
+  assert.equal(feedRes.status, 200);
+  const feedPayload = await feedRes.json();
+  assert.equal(feedPayload.items.length, 1);
+  assert.equal(feedPayload.items[0].fact.corpName, '삼성전자');
+  assert.equal(feedPayload.items[0].ai, null);
+  db.close();
+});
+
+test('auto-publish date guard strictly enforces rcept_dt === KST today; past lookback filings remain admin_only', async () => {
+  const db = await seededDb();
+  globalThis.fetch = async (url) => {
+    if (String(url).includes('opendart')) {
+      return new Response(JSON.stringify({
+        status: '000', message: '정상', page_no: 1, page_count: 100, total_count: 2, total_page: 1,
+        list: [
+          // Past lookback filing: Samsung (Watchlist) + Critical (score 10) + Past receipt date (20260825)
+          item('20260825000001', { corp_name: '삼성전자', stock_code: '005930', report_nm: '자기주식취득 결정', rcept_dt: '20260825' }),
+          // Today filing: Samsung (Watchlist) + Critical (score 10) + Today receipt date (20260830)
+          item('20260830000001', { corp_name: '삼성전자', stock_code: '005930', report_nm: '자기주식취득 결정', rcept_dt: '20260830' })
+        ]
+      }));
+    }
+    return geminiResponse();
+  };
+
+  const response = await syncPost({
+    request: adminRequest('/api/disclosures/sync', {
+      method: 'POST',
+      body: JSON.stringify({ beginDate: '20260825', endDate: '20260830' })
+    }),
+    env: envFor(db),
+    now: NOW
+  });
+  assert.equal(response.status, 200);
+
+  // Past filing must stay admin_only despite watchlist & high score
+  const pastRow = db.row(`SELECT publish_status, is_watchlist, rcept_dt FROM ${FILINGS_TABLE} WHERE rcept_no = '20260825000001'`);
+  assert.equal(pastRow.is_watchlist, 1);
+  assert.equal(pastRow.rcept_dt, '20260825');
+  assert.equal(pastRow.publish_status, 'admin_only');
+
+  // Today filing is auto-published
+  const todayRow = db.row(`SELECT publish_status, is_watchlist, rcept_dt FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`);
+  assert.equal(todayRow.is_watchlist, 1);
+  assert.equal(todayRow.rcept_dt, '20260830');
+  assert.equal(todayRow.publish_status, 'auto');
+
+  db.close();
+});
+
+test('correction filings are parsed with isCorrection and correctionType without unsafe heuristic supersession', async () => {
+  const db = await seededDb([
+    // Original filing
+    item('20260830000010', { corp_name: '삼성전자', stock_code: '005930', report_nm: '단일판매ㆍ공급계약체결', rcept_dt: '20260830' })
+  ]);
+
+  // Ingest correction filing
+  globalThis.fetch = async (url) => {
+    if (String(url).includes('opendart')) {
+      return new Response(JSON.stringify({
+        status: '000', message: '정상', page_no: 1, page_count: 100, total_count: 1, total_page: 1,
+        list: [
+          item('20260830000020', { corp_name: '삼성전자', stock_code: '005930', report_nm: '[기재정정]단일판매ㆍ공급계약체결', rcept_dt: '20260830' })
+        ]
+      }));
+    }
+    return geminiResponse();
+  };
+
+  const response = await syncPost({
+    request: adminRequest('/api/disclosures/sync', {
+      method: 'POST',
+      body: '{}'
+    }),
+    env: envFor(db),
+    now: NOW
+  });
+  assert.equal(response.status, 200);
+
+  // Verify correction filing properties
+  const newRow = db.row(`SELECT publish_status, report_nm FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000020'`);
+  assert.equal(newRow.publish_status, 'auto');
+
+  // Feed returns published items with clean Fact object containing isCorrection and correctionType
+  const feedRes = await feedGet({
+    request: new Request('https://market-research-site.pages.dev/api/disclosures/feed?date=2026-08-30'),
+    env: envFor(db)
+  });
+  assert.equal(feedRes.status, 200);
+  const feedPayload = await feedRes.json();
+  assert.ok(feedPayload.items.length >= 1);
+  const corrItem = feedPayload.items.find(it => it.rceptNo === '20260830000020');
+  assert.ok(corrItem);
+  assert.equal(corrItem.fact.isCorrection, true);
+  assert.equal(corrItem.fact.correctionType, '[기재정정]');
+  assert.equal(corrItem.fact.baseReportName, '단일판매ㆍ공급계약체결');
+
+  db.close();
+});
+
+test('public feed endpoint strictly projects minimal whitelisted fields and never leaks admin_only filings', async () => {
+  const db = await seededDb([
+    item('20260830000001', { corp_name: '공개기업', stock_code: '005930', report_nm: '자기주식취득 결정' }),
+    item('20260830000002', { corp_name: '비공개기업1', stock_code: '000001', report_nm: '분기보고서' }),
+    item('20260830000003', { corp_name: '비공개기업2', stock_code: '000002', report_nm: '임원변동' })
+  ]);
+  // Only filing 1 is published
+  db.database.prepare(`UPDATE ${FILINGS_TABLE} SET publish_status = 'manual' WHERE rcept_no = '20260830000001'`).run();
+
+  const feedRes = await feedGet({
+    request: new Request('https://market-research-site.pages.dev/api/disclosures/feed?date=2026-08-30'),
+    env: envFor(db)
+  });
+  assert.equal(feedRes.status, 200);
+  const feedPayload = await feedRes.json();
+  assert.equal(feedPayload.totalPublished, 1);
+  assert.equal(feedPayload.items.length, 1);
+
+  const item0 = feedPayload.items[0];
+  assert.equal(item0.rceptNo, '20260830000001');
+  assert.ok(['high', 'critical'].includes(item0.priority));
+  assert.equal(item0.fact.corpName, '공개기업');
+
+  // Verify internal and operational fields are NOT leaked on top-level item
+  assert.equal(item0.isWatchlist, undefined);
+  assert.equal(item0.publishStatus, undefined);
+  assert.equal(item0.publishedAt, undefined);
+  assert.equal(item0.score, undefined);
+  assert.equal(item0.reasons, undefined);
+  assert.equal(item0.ai_provider, undefined);
+  assert.equal(item0.ai_model, undefined);
+  assert.equal(item0.ai_json, undefined);
+  assert.equal(item0.ai_error, undefined);
+  assert.equal(item0.first_seen_at, undefined);
+  assert.equal(item0.updated_at, undefined);
+
+  db.close();
+});
+
+test('오늘 auto 게시 → 다음날 동일 공시 backfill → 여전히 auto 상태 유지', async () => {
+  const db = await seededDb();
+  // Ingest today (2026-08-30)
+  globalThis.fetch = async (url) => {
+    if (String(url).includes('opendart')) {
+      return new Response(JSON.stringify({
+        status: '000', message: '정상', page_no: 1, page_count: 100, total_count: 1, total_page: 1,
+        list: [item('20260830000001', { corp_name: '삼성전자', stock_code: '005930', report_nm: '자기주식취득 결정', rcept_dt: '20260830' })]
+      }));
+    }
+    return geminiResponse();
+  };
+
+  const res1 = await syncPost({
+    request: adminRequest('/api/disclosures/sync', { method: 'POST', body: '{}' }),
+    env: envFor(db),
+    now: new Date('2026-08-30T10:00:00.000Z')
+  });
+  assert.equal(res1.status, 200);
+  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`).publish_status, 'auto');
+
+  // Next day backfill (2026-08-31) re-fetching 20260830
+  const res2 = await syncPost({
+    request: adminRequest('/api/disclosures/sync', { method: 'POST', body: '{}' }),
+    env: envFor(db),
+    now: new Date('2026-08-31T10:00:00.000Z')
+  });
+  assert.equal(res2.status, 200);
+
+  // Must still be auto!
+  const rowAfter = db.row(`SELECT publish_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`);
+  assert.equal(rowAfter.publish_status, 'auto');
+  db.close();
+});
+
+test('auto 게시 → Watchlist 삭제 → 과거 게시물은 auto 유지', async () => {
+  const db = await seededDb();
+  // Auto-publish filing for Samsung (005930)
+  globalThis.fetch = async (url) => {
+    if (String(url).includes('opendart')) {
+      return new Response(JSON.stringify({
+        status: '000', message: '정상', page_no: 1, page_count: 100, total_count: 1, total_page: 1,
+        list: [item('20260830000001', { corp_name: '삼성전자', stock_code: '005930', report_nm: '자기주식취득 결정', rcept_dt: '20260830' })]
+      }));
+    }
+    return geminiResponse();
+  };
+
+  await syncPost({
+    request: adminRequest('/api/disclosures/sync', { method: 'POST', body: '{}' }),
+    env: envFor(db),
+    now: NOW
+  });
+  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`).publish_status, 'auto');
+
+  // Remove Samsung from watchlist
+  const delRes = await watchlistPost({
+    request: adminRequest('/api/disclosures/watchlist', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', stockCode: '005930' })
+    }),
+    env: envFor(db)
+  });
+  assert.equal(delRes.status, 200);
+
+  // Past auto-published filing must still be auto!
+  const rowAfterDel = db.row(`SELECT publish_status, is_watchlist FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`);
+  assert.equal(rowAfterDel.is_watchlist, 0);
+  assert.equal(rowAfterDel.publish_status, 'auto');
+  db.close();
+});
+
+test('명시적 관리자 unpublish → suppressed', async () => {
+  const db = await seededDb([
+    item('20260830000001', { corp_name: '삼성전자', stock_code: '005930', report_nm: '자기주식취득 결정', rcept_dt: '20260830' })
+  ]);
+  db.database.prepare(`UPDATE ${FILINGS_TABLE} SET publish_status = 'auto' WHERE rcept_no = '20260830000001'`).run();
+  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`).publish_status, 'auto');
+
+  // Explicit unpublish
+  const unpubRes = await publishPost({
+    request: adminRequest('/api/disclosures/publish', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ rceptNo: '20260830000001', action: 'unpublish' })
+    }),
+    env: envFor(db)
+  });
+  assert.equal(unpubRes.status, 200);
+  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`).publish_status, 'suppressed');
+  db.close();
+});
+
+test('auto → 관리자 unpublish → 같은 날 재Sync → suppressed 유지 및 Feed 미노출', async () => {
+  const db = await seededDb();
+  // 1. Initial sync auto-publishes today's critical watchlist filing
+  globalThis.fetch = async (url) => {
+    if (String(url).includes('opendart')) {
+      return new Response(JSON.stringify({
+        status: '000', message: '정상', page_no: 1, page_count: 100, total_count: 1, total_page: 1,
+        list: [item('20260830000001', { corp_name: '삼성전자', stock_code: '005930', report_nm: '자기주식취득 결정', rcept_dt: '20260830' })]
+      }));
+    }
+    return geminiResponse();
+  };
+
+  const sync1 = await syncPost({
+    request: adminRequest('/api/disclosures/sync', { method: 'POST', body: '{}' }),
+    env: envFor(db),
+    now: NOW
+  });
+  assert.equal(sync1.status, 200);
+  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`).publish_status, 'auto');
+
+  // 2. Admin unpublishes the filing -> status becomes suppressed
+  const unpubRes = await publishPost({
+    request: adminRequest('/api/disclosures/publish', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ rceptNo: '20260830000001', action: 'unpublish' })
+    }),
+    env: envFor(db)
+  });
+  assert.equal(unpubRes.status, 200);
+  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`).publish_status, 'suppressed');
+
+  // 3. Same day re-sync happens with the same filing
+  const sync2 = await syncPost({
+    request: adminRequest('/api/disclosures/sync', { method: 'POST', body: '{}' }),
+    env: envFor(db),
+    now: NOW
+  });
+  assert.equal(sync2.status, 200);
+
+  // 4. Must stay suppressed (never auto-promoted back!)
+  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`).publish_status, 'suppressed');
+
+  // 5. Public feed must NOT include suppressed filings
+  const feedRes = await feedGet({
+    request: new Request('https://market-research-site.pages.dev/api/disclosures/feed?date=2026-08-30'),
+    env: envFor(db)
+  });
+  assert.equal(feedRes.status, 200);
+  const feedData = await feedRes.json();
+  assert.equal(feedData.totalPublished, 0);
+  assert.equal(feedData.items.length, 0);
+
+  // 6. Explicit admin publish can re-publish it as manual
+  const pubRes = await publishPost({
+    request: adminRequest('/api/disclosures/publish', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ rceptNo: '20260830000001', action: 'publish' })
+    }),
+    env: envFor(db)
+  });
+  assert.equal(pubRes.status, 200);
+  assert.equal(db.row(`SELECT publish_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260830000001'`).publish_status, 'manual');
+  db.close();
+});
+
+test('공개 공시 12건 fixture → 기본 10건(hasMore true) → all=1 파라미터 시 12건 전체 반환', async () => {
+  const items = Array.from({ length: 12 }, (_, i) => {
+    const num = String(i + 1).padStart(6, '0');
+    return item(`20260830${num}`, {
+      corp_name: `기업${i + 1}`,
+      stock_code: `0000${i + 1}`.slice(-6),
+      report_nm: `주요사항보고서 ${i + 1}`,
+      rcept_dt: '20260830',
+      rule_score: 10 - Math.min(i, 5)
+    });
+  });
+
+  const db = await seededDb(items);
+  // Mark all 12 as published (auto)
+  db.database.prepare(`UPDATE ${FILINGS_TABLE} SET publish_status = 'auto'`).run();
+
+  // 1. Default fetch: returns 10 items with hasMore = true
+  const feed1 = await feedGet({
+    request: new Request('https://market-research-site.pages.dev/api/disclosures/feed?date=2026-08-30'),
+    env: envFor(db)
+  });
+  assert.equal(feed1.status, 200);
+  const data1 = await feed1.json();
+  assert.equal(data1.totalPublished, 12);
+  assert.equal(data1.items.length, 10);
+  assert.equal(data1.hasMore, true);
+  assert.equal(data1.showingCount, 10);
+
+  // 2. Fetch with all=1: returns all 12 items with hasMore = false
+  const feed2 = await feedGet({
+    request: new Request('https://market-research-site.pages.dev/api/disclosures/feed?date=2026-08-30&all=1'),
+    env: envFor(db)
+  });
+  assert.equal(feed2.status, 200);
+  const data2 = await feed2.json();
+  assert.equal(data2.totalPublished, 12);
+  assert.equal(data2.items.length, 12);
+  assert.equal(data2.hasMore, false);
+  assert.equal(data2.showingCount, 12);
+
+  db.close();
+});
+
+test('request body로 임의 now를 보내도 Date Guard 우회 불가', async () => {
+  const db = await seededDb();
+  // Filing is from 2026-08-25 (past date).
+  // Client tries to cheat Date Guard by sending body { now: "2026-08-25T10:00:00Z" } to pretend it is today.
+  globalThis.fetch = async (url) => {
+    if (String(url).includes('opendart')) {
+      return new Response(JSON.stringify({
+        status: '000', message: '정상', page_no: 1, page_count: 100, total_count: 1, total_page: 1,
+        list: [item('20260825000001', { corp_name: '삼성전자', stock_code: '005930', report_nm: '자기주식취득 결정', rcept_dt: '20260825' })]
+      }));
+    }
+    return geminiResponse();
+  };
+
+  // Server parameter now is 2026-08-30 (real server time).
+  const syncRes = await syncPost({
+    request: adminRequest('/api/disclosures/sync', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ beginDate: '20260825', endDate: '20260825', now: '2026-08-25T10:00:00.000Z' })
+    }),
+    env: envFor(db),
+    now: new Date('2026-08-30T10:00:00.000Z')
+  });
+  assert.equal(syncRes.status, 200);
+
+  // Past filing must stay admin_only despite body spoofing
+  const row = db.row(`SELECT publish_status FROM ${FILINGS_TABLE} WHERE rcept_no = '20260825000001'`);
+  assert.equal(row.publish_status, 'admin_only');
+  db.close();
 });

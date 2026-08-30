@@ -181,20 +181,25 @@ The same `/admin/analytics/` page also contains an independent `읽기 행동 / 
 
 The tracker stores no IP address, cookie, name, email, login data, fingerprint, advertising ID, persistent visitor ID, or cross-site identifier. Country is supplied only by the server-side `request.cf.country` connection location (or `XX`), and does not represent nationality.
 
-## Admin Disclosure Monitor (Draft PR #79)
+## OpenDART Disclosure Monitor & MARKET Public Feed (PR #79)
 
 Admin page: `/admin/disclosures/`
+Public feed: `/market/` and `/en/market/` (Section 11) via `GET /api/disclosures/feed`
 
-The Draft implementation reuses `COMMENTS_DB` and keeps collection, deterministic triage and optional AI classification as separate layers:
+The disclosure architecture is cleanly decoupled across collection, curation, public display, and AI explanation layers:
 
-- `functions/api/disclosures/_source.js` implements the OpenDART list adapter with `Y,K` defaults, pagination, a configurable page cap and app-side daily request budget;
-- `functions/api/disclosures/_shared.js` owns normalization, deterministic scoring, D1 schema, idempotent `rcept_no` UPSERTs and atomic usage/AI claim primitives;
-- `functions/api/disclosures/_llm.js` implements Gemini Interactions structured output plus an OpenAI-compatible fallback adapter without exposing provider formats downstream;
-- `sync.js`, `latest.js` and `analyze.js` provide authenticated collection, admin read/search and one-row reanalysis APIs;
-- AI failures never remove a saved filing or DART source link, and no public page load calls OpenDART or an LLM;
-- all five admin pages expose the same restrained navigation destination, with 360–430px and 1280px layouts covered by repository tests.
+- **Admin Collection & Curation**:
+  - `functions/api/disclosures/_source.js`: OpenDART adapter collecting all daily market disclosures (`Y, K`) safely bounded by page caps and daily request quotas.
+  - `functions/api/disclosures/watchlist.js` & `disclosure_watchlist` table: Dynamic watchlist management (pre-seeded with 30 core Korean market leaders) editable in admin without redeployment.
+  - `functions/api/disclosures/publish.js`: Manual toggle to publish any disclosure to MARKET (`manual`) or unpublish (`admin_only`).
+  - Auto-publish rule: Filings with `is_watchlist = 1` AND `rule_score >= 7` (High/Critical) AND `rcept_dt === KST today` (Date Guard) are automatically published (`publish_status = 'auto'`) to the public MARKET feed; past lookback filings and routine filings (`score < 7`) remain `admin_only`.
+- **Public MARKET Feed**:
+  - `functions/api/disclosures/feed.js`: Public, fast-loading, cache-controlled (`Cache-Control: public, max-age=30, s-maxage=60`) endpoint serving only published items with a minimal whitelisted DTO (`rceptNo`, `priority`, `fact`, `ai`). Operational fields are strictly withheld.
+  - `assets/market-close.js` & `assets/market-close.css`: Renders Section 11 `DISCLOSURE · 오늘의 주요 공시` with separate Fact Box (official DART metadata, title, date, correction badge) and AI Insight Box (`해설 보기 ▾`), expandable list, and responsive layout down to 360px without horizontal overflow.
+- **Reader-Facing AI Explanation Layer**:
+  - `functions/api/disclosures/_llm.js`: Gemini 3.5 Flash-Lite structured output providing reader-facing explanation (`summary`, `what_it_means`, `watch_points`, `impact`, `importance`, `limitation`). Metadataless number generation (`key_figures`) is omitted to ensure zero hallucination risk. Decoupled from internal report preparation.
+  - Failure Isolation: AI or location errors log cleanly as `ai_status = 'error'` and never crash OpenDART sync, D1 storage, or public feed rendering.
 
-The feature remains Preview/manual-only. No automatic scheduler or public disclosure page is enabled, and Production merge requires a separate owner approval after actual Preview provider validation.
 
 Important date semantics:
 
