@@ -29,7 +29,20 @@
     sessionCount: n => `${n}일`,
     avgCounts: (r, f) => `평균 상승 ${r}개 · 하락 ${f}개`,
     weekdays: ['월', '화', '수', '목', '금', '토', '일'],
-    monthFormat: (y, m) => `${y}년 ${m}월`
+    monthFormat: (y, m) => `${y}년 ${m}월`,
+    disclosureTitle: 'DISCLOSURE · 오늘의 주요 공시',
+    disclosureSubtitle: '선별된 주요 기업 공시 및 핵심 해설',
+    viewAllDisclosures: n => `오늘의 주요 공시 전체 보기 (${n}건) →`,
+    viewLessDisclosures: '접기 ▴',
+    noDisclosures: '오늘 시장에 선별된 주요 공시가 없습니다.',
+    factHeading: '핵심 사실',
+    whatItMeans: '무엇을 의미하나',
+    watchPoints: '확인할 것',
+    aiExplanation: 'AI 시장 해설',
+    aiAssistNote: '이해 보조용 해석',
+    dartOriginal: 'DART 원문 ↗',
+    expandExplanation: '해설 보기 ▾',
+    collapseExplanation: '해설 닫기 ▴'
   } : {
     title: 'MARKET CLOSE', subtitle: 'How did the Korean market close today?', closeBasis: 'Korea close as of 15:30 KST', overseas: '* Overseas markets use each market’s latest trading session.',
     todayMode: 'TODAY', historyMode: 'HISTORY', prevDay: 'Previous session', nextDay: 'Next session',
@@ -60,7 +73,20 @@
     monthFormat: (y, m) => {
       const names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
       return `${names[m - 1]} ${y}`;
-    }
+    },
+    disclosureTitle: 'DISCLOSURE · Today’s Key Filings',
+    disclosureSubtitle: 'Selected key corporate filings and takeaways',
+    viewAllDisclosures: n => `View all key filings (${n}) →`,
+    viewLessDisclosures: 'Collapse ▴',
+    noDisclosures: 'No key disclosures selected for this session.',
+    factHeading: 'Key Facts',
+    whatItMeans: 'What It Means',
+    watchPoints: 'Watch Points',
+    aiExplanation: 'AI Market Insight',
+    aiAssistNote: 'Reader assistance',
+    dartOriginal: 'DART Original ↗',
+    expandExplanation: 'Details ▾',
+    collapseExplanation: 'Collapse ▴'
   };
 
   const names = {
@@ -473,10 +499,149 @@
           ${section(10, copy.sections[9], dataTable([copy.rank, copy.stock, copy.price, copy.change, copy.marketCap], marketCapRows, 'market-cap-table'))}
           <aside class="market-note"><span class="note-quote" aria-hidden="true">“</span><h2>${copy.noteTitle}</h2><p>${copy.noteBody}</p>${reportCtaHtml}</aside>
         </div>
+        <section id="market-disclosures-section" class="market-section market-disclosures-section" aria-label="${copy.disclosureTitle}">
+          <div class="market-disclosure-header">
+            <h2><span>11</span> ${copy.disclosureTitle}</h2>
+            <span id="market-disclosure-count" class="disclosure-header-badge"></span>
+          </div>
+          <p class="market-disclosure-sub">${copy.disclosureSubtitle}</p>
+          <div id="market-disclosures-mount" class="market-disclosures-mount" role="region" aria-live="polite">
+            <div class="disclosure-loading-state"><p>${ko ? '주요 공시를 불러오는 중입니다...' : 'Loading key disclosures...'}</p></div>
+          </div>
+        </section>
         <div class="market-data-note"><p>${copy.source}: ${html(Array.from(sourceSet).map(item => item.split(' · ')[0]).filter((item, index, all) => all.indexOf(item) === index).join(', '))}</p><p>${copy.generated}: ${html(data.meta?.generated_at || '--')} · ${html(data.meta?.schema_version || '')}</p></div>
       </div>`;
     target.innerHTML = output;
     bindEvents(target);
+    if (typeof target?.querySelector === 'function') {
+      loadAndRenderDisclosures(marketDate, target.querySelector('#market-disclosures-mount'));
+    }
+  }
+
+  const disclosureCache = new Map();
+  let disclosuresExpanded = false;
+
+  async function loadAndRenderDisclosures(date, mountContainer) {
+    if (!mountContainer) return;
+    try {
+      let data = disclosureCache.get(date);
+      if (!data) {
+        const url = date ? `/api/disclosures/feed?date=${encodeURIComponent(date)}` : '/api/disclosures/feed';
+        const res = await fetch(url);
+        if (res.ok) {
+          data = await res.json();
+          disclosureCache.set(date, data);
+        }
+      }
+      renderDisclosuresMount(mountContainer, data, disclosuresExpanded);
+    } catch (_) {
+      mountContainer.innerHTML = `<div class="disclosure-empty-state"><p>${copy.noDisclosures}</p></div>`;
+    }
+  }
+
+  function renderDisclosuresMount(container, feed, isExpanded) {
+    if (!container) return;
+    const items = feed?.items || [];
+    const countBadge = document.getElementById('market-disclosure-count');
+    if (countBadge) countBadge.textContent = `${feed?.totalPublished || items.length}`;
+
+    if (!items.length) {
+      container.innerHTML = `<div class="disclosure-empty-state"><p>${copy.noDisclosures}</p></div>`;
+      return;
+    }
+
+    const displayItems = (!isExpanded && items.length > 5) ? items.slice(0, 5) : items;
+
+    const cardsHtml = displayItems.map(item => {
+      const hasAi = Boolean(item.ai && item.ai.status === 'done');
+      const fact = item.fact || item;
+      const rceptNo = html(item.rceptNo || fact.rceptNo || '');
+      const corpName = html(fact.corpName || '');
+      const stockCode = html(fact.stockCode || '');
+      const reportName = html(fact.reportName || '');
+      const isCorrection = Boolean(fact.isCorrection);
+      const correctionType = html(fact.correctionType || (ko ? '[기재정정]' : '[Correction]'));
+      const sourceUrl = html(fact.sourceUrl || '');
+      const formattedTime = html(fact.formattedDate || fact.receiptDate || '');
+      const priorityClass = html(item.priority || 'low');
+      const priorityUpper = html((item.priority || 'low').toUpperCase());
+
+      return `
+        <article class="disclosure-card priority-${priorityClass}" data-rcept-no="${rceptNo}">
+          <div class="disclosure-card-main">
+            <div class="disclosure-card-top">
+              <div class="disclosure-corp-group">
+                <strong class="disclosure-corp-name">${corpName}</strong>
+                ${stockCode ? `<span class="disclosure-stock-code">${stockCode}</span>` : ''}
+                ${isCorrection ? `<span class="disclosure-correction-tag">${correctionType}</span>` : ''}
+                <span class="disclosure-priority-tag tag-${priorityClass}">${priorityUpper}</span>
+              </div>
+              <time class="disclosure-time">${formattedTime}</time>
+            </div>
+            <h3 class="disclosure-report-title">${reportName}</h3>
+            <div class="disclosure-card-actions">
+              <a class="disclosure-dart-btn" href="${sourceUrl}" target="_blank" rel="noopener noreferrer" aria-label="DART 전자공시 원문 열기">
+                ${copy.dartOriginal}
+              </a>
+              ${hasAi ? `
+                <button type="button" class="disclosure-toggle-ai-btn" data-toggle-rcept="${rceptNo}" aria-expanded="false">
+                  <span>${copy.expandExplanation}</span>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+          ${hasAi ? `
+            <div class="disclosure-ai-panel" id="ai-panel-${rceptNo}" hidden>
+              <div class="disclosure-fact-box">
+                <h4 class="fact-box-title">${copy.factHeading}</h4>
+                <p class="fact-official-title">${reportName}</p>
+                <div class="fact-meta-row">
+                  <span>${corpName}${stockCode ? ` (${stockCode})` : ''}</span>
+                  <span>${formattedTime}</span>
+                </div>
+              </div>
+              <div class="disclosure-insight-box">
+                <div class="insight-box-header">
+                  <h4 class="insight-title">${copy.aiExplanation}</h4>
+                  <span class="insight-disclaimer-pill">${copy.aiAssistNote}</span>
+                  ${item.ai.impact ? `<span class="impact-badge impact-${html(item.ai.impact)}">${html(item.ai.impact.toUpperCase())}</span>` : ''}
+                </div>
+                <div class="insight-content">
+                  ${item.ai.summary ? `
+                    <div class="insight-summary-block">
+                      <p class="insight-summary-text">${html(item.ai.summary)}</p>
+                    </div>
+                  ` : ''}
+                  <div class="insight-row">
+                    <strong>${copy.whatItMeans}:</strong>
+                    <p>${html(item.ai.whatItMeans || '')}</p>
+                  </div>
+                  ${item.ai.watchPoints && item.ai.watchPoints.length ? `
+                    <div class="insight-row">
+                      <strong>${copy.watchPoints}:</strong>
+                      <ul class="watchpoints-list">
+                        ${item.ai.watchPoints.map(wp => `<li>${html(wp)}</li>`).join('')}
+                      </ul>
+                    </div>
+                  ` : ''}
+                </div>
+                <p class="insight-limitation">${html(item.ai.limitation || '')}</p>
+              </div>
+            </div>
+          ` : ''}
+        </article>
+      `;
+    }).join('');
+
+    const toggleAllHtml = items.length > 5 ? `
+      <div class="disclosure-expand-all-wrap">
+        <button type="button" class="disclosure-expand-all-btn">
+          ${isExpanded ? copy.viewLessDisclosures : copy.viewAllDisclosures(feed.totalPublished || items.length)}
+        </button>
+      </div>
+    ` : '';
+
+    container.innerHTML = `<div class="disclosure-feed-list">${cardsHtml}</div>${toggleAllHtml}`;
   }
 
   /* ==========================================================================
@@ -732,6 +897,32 @@
   }
 
   async function onContainerClick(event) {
+    const toggleAiBtn = event.target.closest('.disclosure-toggle-ai-btn');
+    if (toggleAiBtn) {
+      const rceptNo = toggleAiBtn.dataset.toggleRcept;
+      const panel = document.getElementById(`ai-panel-${rceptNo}`);
+      if (panel) {
+        const isExpanded = toggleAiBtn.getAttribute('aria-expanded') === 'true';
+        toggleAiBtn.setAttribute('aria-expanded', !isExpanded);
+        panel.hidden = isExpanded;
+        const labelSpan = toggleAiBtn.querySelector('span');
+        if (labelSpan) labelSpan.textContent = isExpanded ? copy.expandExplanation : copy.collapseExplanation;
+      }
+      return;
+    }
+
+    const expandAllBtn = event.target.closest('.disclosure-expand-all-btn');
+    if (expandAllBtn) {
+      disclosuresExpanded = !disclosuresExpanded;
+      const mount = document.getElementById('market-disclosures-mount');
+      const marketDate = state.currentPayload?.meta?.market_date || state.currentDate;
+      const feedData = disclosureCache.get(marketDate);
+      if (mount && feedData) {
+        renderDisclosuresMount(mount, feedData, disclosuresExpanded);
+      }
+      return;
+    }
+
     const button = event.target.closest('[data-market-action]');
     if (!button) return;
 

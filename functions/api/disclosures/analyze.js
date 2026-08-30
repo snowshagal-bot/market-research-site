@@ -27,6 +27,8 @@ function filingForAnalysis(row) {
     remarks: row.rm,
     ruleScore: Number(row.rule_score || 0),
     rulePriority: row.rule_priority,
+    publishStatus: row.publish_status,
+    isWatchlist: Boolean(row.is_watchlist),
     ruleReasons: Array.isArray(reasons) ? reasons : []
   };
 }
@@ -61,6 +63,13 @@ export async function onRequestPost({ request, env }) {
       const updated = await db.prepare(`SELECT * FROM ${FILINGS_TABLE} WHERE rcept_no = ? LIMIT 1`).bind(rceptNo).first();
       return json({ ok: true, filing: publicFiling(updated) });
     } catch (error) {
+      console.error(JSON.stringify({
+        event: 'disclosure_analyze_failed',
+        rceptNo,
+        code: error?.code || 'ANALYZE_FAILED',
+        message: error?.message || 'unknown',
+        upstreamStatus: error?.upstreamStatus || 0
+      }));
       const available = error?.code === 'LLM_NOT_CONFIGURED' || error?.code === 'LLM_BUDGET_EXHAUSTED';
       await releaseAnalysisClaim(db, rceptNo, available ? 'available' : 'error', available ? '' : error?.message || 'AI 분석 실패');
       throw error;

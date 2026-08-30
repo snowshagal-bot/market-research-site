@@ -7,6 +7,7 @@ import {
   compactDate,
   disclosureConfig,
   ensureDisclosureSchema,
+  getWatchlistStockCodes,
   json,
   kstDate,
   publicFiling,
@@ -34,6 +35,8 @@ function filingForAnalysis(row) {
     remarks: row.rm,
     ruleScore: Number(row.rule_score || 0),
     rulePriority: row.rule_priority,
+    publishStatus: row.publish_status,
+    isWatchlist: Boolean(row.is_watchlist),
     ruleReasons: (() => { try { return JSON.parse(row.rule_reasons_json || '[]'); } catch (_) { return []; } })()
   };
 }
@@ -46,14 +49,15 @@ async function analyzeQueue(db, env, config, now) {
   const autoScoreFloor = Number(config.llmAutoScoreFloor ?? 10);
   const staleBefore = new Date(now.getTime() - ANALYSIS_CLAIM_TIMEOUT_MS).toISOString();
 
+  // Prioritize published items (auto or manual) or today's critical filings
   const rows = await db.prepare(`SELECT * FROM ${FILINGS_TABLE}
     WHERE rcept_dt = ?
       AND ai_eligible = 1
-      AND rule_score >= ?
+      AND (publish_status IN ('auto', 'manual') OR rule_score >= ?)
       AND (
         ai_status IN ('available', 'pending', 'error') OR (ai_status = 'processing' AND updated_at < ?)
       )
-    ORDER BY rule_score DESC, rcept_no DESC
+    ORDER BY (CASE WHEN publish_status IN ('auto', 'manual') THEN 1 ELSE 0 END) DESC, rule_score DESC, rcept_no DESC
     LIMIT ?`).bind(todayReceiptDate, autoScoreFloor, staleBefore, Math.max(limit, limit * 3)).all();
 
   let completed = 0;
@@ -80,12 +84,19 @@ async function analyzeQueue(db, env, config, now) {
         .bind(output.provider, output.model, JSON.stringify(output.result), new Date().toISOString(), new Date().toISOString(), claimed.rcept_no).run();
       completed += 1;
     } catch (error) {
+      console.error(JSON.stringify({
+        event: 'disclosure_analyze_failed',
+        rceptNo: claimed.rcept_no,
+        code: error?.code || 'ANALYZE_FAILED',
+        message: error?.message || 'unknown',
+        upstreamStatus: error?.upstreamStatus || 0
+      }));
       if (error?.code === 'LLM_NOT_CONFIGURED' || error?.code === 'LLM_BUDGET_EXHAUSTED' || error?.code === 'LLM_AUTO_BUDGET_EXHAUSTED') {
         stopReason = error.code;
         await releaseAnalysisClaim(db, claimed.rcept_no, 'available', '', now);
         break;
       }
-      await releaseAnalysisClaim(db, claimed.rcept_no, 'error', error?.message || 'AI 분석 실패');
+      await releaseAnalysisClaim(db, claimed.rcept_no, 'error', error?.message || 'AI 분석 실패', now);
       failed += 1;
     }
   }
@@ -96,22 +107,19 @@ export async function onRequestPost({ request, env }) {
   const authSource = authorizeSync(request, env);
   if (!authSource) return json({ ok: false, error: 'UNAUTHORIZED', message: '공시 동기화 인증에 실패했습니다.' }, 401);
 
-  const declaredSize = Number(request.headers.get('content-length') || 0);
-  if (declaredSize > MAX_BODY_BYTES) return json({ ok: false, error: 'PAYLOAD_TOO_LARGE' }, 413);
   let input = {};
-  if (declaredSize !== 0) {
-    let raw = '';
-    try { raw = await request.text(); } catch (_) { return json({ ok: false, error: 'INVALID_BODY' }, 400); }
+  let raw = '';
+  try { raw = await request.text(); } catch (_) { return json({ ok: false, error: 'INVALID_BODY' }, 400); }
+  if (raw.trim()) {
     if (new TextEncoder().encode(raw).byteLength > MAX_BODY_BYTES) return json({ ok: false, error: 'PAYLOAD_TOO_LARGE' }, 413);
-    if (raw.trim()) {
-      try { input = JSON.parse(raw); } catch (_) { return json({ ok: false, error: 'INVALID_JSON' }, 400); }
-    }
+    try { input = JSON.parse(raw); } catch (_) { return json({ ok: false, error: 'INVALID_JSON' }, 400); }
   }
 
-  const now = new Date();
+  const now = input.now ? new Date(input.now) : new Date();
   const config = disclosureConfig(env);
   try {
     const db = await ensureDisclosureSchema(env);
+    const watchlistCodes = await getWatchlistStockCodes(db);
     const source = await fetchDisclosureSource({
       env,
       db,
@@ -122,7 +130,7 @@ export async function onRequestPost({ request, env }) {
 
     let created = 0;
     for (const filing of source.filings) {
-      if (await upsertFiling(db, filing)) created += 1;
+      if (await upsertFiling(db, filing, { watchlistCodes, now })) created += 1;
     }
 
     const ai = await analyzeQueue(db, env, config, now);
@@ -134,7 +142,7 @@ export async function onRequestPost({ request, env }) {
     await setState(db, 'last_sync_truncated', source.truncated ? '1' : '0');
 
     const usage = await usageSnapshot(db, kstDate(now));
-    const top = await db.prepare(`SELECT * FROM ${FILINGS_TABLE} ORDER BY rcept_dt DESC, rule_score DESC, rcept_no DESC LIMIT 20`).all();
+    const top = await db.prepare(`SELECT * FROM ${FILINGS_TABLE} ORDER BY rcept_dt DESC, rule_score DESC, rcept_no DESC LIMIT 50`).all();
     return json({
       ok: true,
       syncedAt,
@@ -153,7 +161,12 @@ export async function onRequestPost({ request, env }) {
       latest: (top?.results || []).map(publicFiling)
     });
   } catch (error) {
-    console.error(JSON.stringify({ event: 'disclosure_sync_failed', code: error?.code || 'SYNC_FAILED', message: error?.message || 'unknown' }));
+    console.error(JSON.stringify({
+      event: 'disclosure_sync_failed',
+      code: error?.code || 'SYNC_FAILED',
+      message: error?.message || 'unknown',
+      upstreamStatus: error?.upstreamStatus || 0
+    }));
     if (error instanceof DisclosureError) return json({ ok: false, error: error.code, message: error.message }, error.status);
     return json({ ok: false, error: 'SYNC_FAILED', message: '공시 동기화에 실패했습니다.' }, 500);
   }
