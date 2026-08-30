@@ -96,7 +96,7 @@ export async function onRequest(context) {
           .filter((p) => postLanguage(p) === landing.lang && p?.type === landing.type && normalizeSitePath(p?.href));
         body = replaceElementContentsById(body, 'category-featured-cards', categoryFeaturedCards(posts, landing.type, landing.lang));
         body = replaceElementContentsById(body, 'category-report-list', categoryArchiveLinks(posts, landing.type, landing.lang));
-        if (categoryPosts.length <= 3) {
+        if (categoryPosts.length <= 2) {
           body = body.replace(/(<section\b[^>]*\bid=["']category-archive-section["'][^>]*)/i, '$1 hidden');
         }
         if (categoryPosts.length === 0) {
@@ -137,7 +137,7 @@ export async function onRequest(context) {
         })
         .on('link[rel="alternate"][hreflang]', { element(element) { element.remove(); } })
         .on('head', { element(element) { if (landingAlternates) element.append(landingAlternates, { html: true }); } });
-      if (categoryPosts.length <= 3) {
+      if (categoryPosts.length <= 2) {
         rewriter = rewriter.on('#category-archive-section', {
           element(element) { element.setAttribute('hidden', ''); }
         });

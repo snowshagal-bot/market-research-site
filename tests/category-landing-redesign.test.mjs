@@ -14,12 +14,12 @@ import { onRequest as middlewareRequest } from '../functions/_middleware.js';
 
 const read = (rel) => readFile(new URL('../' + rel, import.meta.url), 'utf8');
 
-test('1 & 2. Daily KO & EN category pages render top 3 featured cards via SSR and client scripts', async () => {
+test('1 & 2. Daily KO & EN category pages render top 2 featured cards via SSR and client scripts', async () => {
   const posts = JSON.parse(await read('data/posts.json'));
   for (const lang of ['ko', 'en']) {
     const featuredHtml = categoryFeaturedCards(posts, 'daily', lang);
-    const cardMatches = [...featuredHtml.matchAll(/class="latest-card latest-card-daily"/g)];
-    assert.equal(cardMatches.length, 3, `${lang} daily featured cards count must be 3`);
+    const cardMatches = [...featuredHtml.matchAll(/class="category-featured-card category-featured-card-daily"/g)];
+    assert.equal(cardMatches.length, 2, `${lang} daily featured cards count must be 2`);
 
     const landingHtml = await read(lang === 'en' ? 'en/daily/index.html' : 'daily/index.html');
     assert.match(landingHtml, /id="category-featured-section"/);
@@ -28,19 +28,19 @@ test('1 & 2. Daily KO & EN category pages render top 3 featured cards via SSR an
   }
 });
 
-test('3. Weekly category page renders top 3 featured cards and 4th+ posts in archive', async () => {
+test('3. Weekly category page renders top 2 featured cards and 3rd+ posts in archive', async () => {
   const posts = JSON.parse(await read('data/posts.json'));
   const koWeeklyPosts = posts.filter(p => postLanguage(p) === 'ko' && p.type === 'weekly');
-  assert.ok(koWeeklyPosts.length > 3, 'KO weekly has more than 3 posts');
+  assert.ok(koWeeklyPosts.length > 2, 'KO weekly has more than 2 posts');
 
   const featured = categoryFeaturedCards(posts, 'weekly', 'ko');
   const archive = categoryArchiveLinks(posts, 'weekly', 'ko');
 
-  const featuredMatches = [...featured.matchAll(/class="latest-card latest-card-weekly"/g)];
-  assert.equal(featuredMatches.length, 3);
+  const featuredMatches = [...featured.matchAll(/class="category-featured-card category-featured-card-weekly"/g)];
+  assert.equal(featuredMatches.length, 2);
 
   const archiveMatches = [...archive.matchAll(/class="report-item"/g)];
-  assert.equal(archiveMatches.length, koWeeklyPosts.length - 3);
+  assert.equal(archiveMatches.length, koWeeklyPosts.length - 2);
 });
 
 test('4. Research category has zero duplicate posts between Featured and Archive', async () => {
@@ -58,15 +58,14 @@ test('4. Research category has zero duplicate posts between Featured and Archive
   }
 });
 
-test('5. Category with <= 3 posts hides archive section without empty boxes', async () => {
+test('5. Category with <= 2 posts hides archive section without empty boxes', async () => {
   const testPosts = [
     { id: 'b1', type: 'basics', lang: 'en', reportDate: '2026-08-13', title: 'B1', href: 'reports/en/b1.html' },
-    { id: 'b2', type: 'basics', lang: 'en', reportDate: '2026-08-11', title: 'B2', href: 'reports/en/b2.html' },
-    { id: 'b3', type: 'basics', lang: 'en', reportDate: '2026-08-10', title: 'B3', href: 'reports/en/b3.html' }
+    { id: 'b2', type: 'basics', lang: 'en', reportDate: '2026-08-11', title: 'B2', href: 'reports/en/b2.html' }
   ];
 
   const archive = categoryArchiveLinks(testPosts, 'basics', 'en');
-  assert.equal(archive, '', 'Archive links for <=3 posts must be empty string');
+  assert.equal(archive, '', 'Archive links for <=2 posts must be empty string');
 
   // Test middleware SSR hiding
   const assets = { fetch: async () => Response.json(testPosts) };
@@ -92,7 +91,7 @@ test('6. Posts without cover images fall back safely without 404 or broken image
     }
   ];
   const featured = categoryFeaturedCards(posts, 'daily', 'ko');
-  assert.match(featured, /class="latest-card-art"/);
+  assert.match(featured, /class="category-featured-art"/);
   assert.doesNotMatch(featured, /<img/);
 });
 
@@ -186,22 +185,18 @@ test('15. Category landing hero eyebrow is editorial uppercase without ARCHIVE',
 test('16. SSR Featured cards include tags matching tag registry', async () => {
   const posts = JSON.parse(await read('data/posts.json'));
   const dailyKo = categoryFeaturedCards(posts, 'daily', 'ko');
-  assert.match(dailyKo, /<div class="latest-card-tags">/);
+  assert.match(dailyKo, /<div class="category-featured-tags">/);
   const researchEn = categoryFeaturedCards(posts, 'research', 'en');
-  assert.match(researchEn, /<div class="latest-card-tags">/);
+  assert.match(researchEn, /<div class="category-featured-tags">/);
 });
 
-test('17. Desktop Featured 3 cards grid styling is preserved', async () => {
-  const css = await read('assets/home-v2.css');
-  assert.match(css, /\.latest-cards\s*\{[^}]*grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\);/);
-});
-
-test('18. Mobile CSS contains horizontal swipe carousel and scroll-snap rules', async () => {
+test('17. Desktop Featured 2 cards grid styling in category-landing.css', async () => {
   const catCss = await read('assets/category-landing.css');
-  assert.match(catCss, /\.category-page\s+\.latest-cards\s*\{[^}]*display:\s*flex;/);
-  assert.match(catCss, /\.category-page\s+\.latest-cards\s*\{[^}]*overflow-x:\s*auto;/);
-  assert.match(catCss, /\.category-page\s+\.latest-cards\s*\{[^}]*scroll-snap-type:\s*x mandatory;/);
-  assert.match(catCss, /\.category-page\s+\.latest-card\s*\{[^}]*flex:\s*0 0 85%;/);
-  assert.match(catCss, /\.category-page\s+\.latest-card\s*\{[^}]*scroll-snap-align:\s*start;/);
-  assert.match(catCss, /\.category-page\s+\.latest-card-copy\s*\{[^}]*min-width:\s*0;/);
+  assert.match(catCss, /\.category-featured-grid\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);/);
+});
+
+test('18. Mobile CSS contains vertical stacked layout for category featured cards', async () => {
+  const catCss = await read('assets/category-landing.css');
+  assert.match(catCss, /\.category-featured-grid\s*\{[^}]*grid-template-columns:\s*1fr;/);
+  assert.match(catCss, /\.category-featured-card:not\(:last-child\)\s*\{[^}]*border-bottom:\s*1px solid var\(--line\);/);
 });

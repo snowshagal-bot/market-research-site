@@ -344,29 +344,33 @@ export function categoryFeaturedCards(posts, type, lang) {
       const byDate = String(right?.reportDate || right?.date || '').localeCompare(String(left?.reportDate || left?.date || ''));
       return byDate || String(right?.registeredAt || '').localeCompare(String(left?.registeredAt || ''));
     })
-    .slice(0, 3)
+    .slice(0, 2)
     .map((post) => {
       const summary = String(post?.summary || post?.description || post?.subtitle || '')
         .replace(/\s+/g, ' ')
         .trim();
       const cover = normalizeSitePath(post?.coverImage);
       const visual = cover
-        ? `<span class="latest-card-cover"><img src="/${escapeHtml(cover)}" alt="" loading="lazy"></span>`
-        : '<span class="latest-card-art" aria-hidden="true"></span>';
+        ? `<span class="category-featured-cover"><img src="/${escapeHtml(cover)}" alt="" loading="lazy"></span>`
+        : '<span class="category-featured-art" aria-hidden="true"></span>';
       const mins = typeof post?.readingMinutes === 'number' && post.readingMinutes > 0 ? post.readingMinutes : 0;
       const readingSuffix = mins > 0 ? (lang === 'en' ? ` · ${mins} min read` : ` · 약 ${mins}분`) : '';
       const metaLabel = categoryMetaLabels[post.type] || post.type.toUpperCase();
-      const summaryCopy = summary ? `<p class="latest-card-summary">${escapeHtml(summary)}</p>` : '';
+      const summaryCopy = summary ? `<p class="category-featured-summary">${escapeHtml(summary)}</p>` : '';
       const tags = Array.isArray(post?.tags) ? post.tags.map((tag) => tagLabel(tag, lang)).filter(Boolean).join(' · ') : '';
-      const tagsMarkup = tags ? `<div class="latest-card-tags">${escapeHtml(tags)}</div>` : '';
+      const tagsMarkup = tags ? `<div class="category-featured-tags">${escapeHtml(tags)}</div>` : '';
       const readLabel = lang === 'en' ? 'Read report' : '리포트 보기';
       const date = post?.reportDate || post?.date || '';
 
-      return `<a class="latest-card latest-card-${escapeHtml(post.type)}" href="${escapeHtml(cleanReportHref(post.href))}">`
-        + `<span class="latest-card-meta"><b>${escapeHtml(metaLabel)}${escapeHtml(readingSuffix)}</b><time datetime="${escapeHtml(date)}">${escapeHtml(date)}</time></span>`
-        + `<strong class="latest-card-title">${escapeHtml(post.title || '')}</strong>`
-        + `<span class="latest-card-body">${visual}<span class="latest-card-copy">${summaryCopy}${tagsMarkup}`
-        + `<span class="latest-card-read">${escapeHtml(readLabel)} <i aria-hidden="true">→</i></span></span></span></a>`;
+      return `<a class="category-featured-card category-featured-card-${escapeHtml(post.type)}" href="${escapeHtml(cleanReportHref(post.href))}">`
+        + `<span class="category-featured-cover-wrap">${visual}</span>`
+        + `<span class="category-featured-content">`
+        + `<span class="category-featured-meta"><b>${escapeHtml(metaLabel)}${escapeHtml(readingSuffix)}</b><time datetime="${escapeHtml(date)}">${escapeHtml(date)}</time></span>`
+        + `<strong class="category-featured-title">${escapeHtml(post.title || '')}</strong>`
+        + summaryCopy
+        + tagsMarkup
+        + `<span class="category-featured-action"><span class="category-featured-read">${escapeHtml(readLabel)} <i aria-hidden="true">→</i></span></span>`
+        + `</span></a>`;
     }).join('');
 }
 
@@ -377,7 +381,7 @@ export function categoryArchiveLinks(posts, type, lang) {
       const byDate = String(right?.reportDate || right?.date || '').localeCompare(String(left?.reportDate || left?.date || ''));
       return byDate || String(right?.registeredAt || '').localeCompare(String(left?.registeredAt || ''));
     })
-    .slice(3)
+    .slice(2)
     .map((post) => reportRowMarkup(post, lang, false))
     .join('');
 }

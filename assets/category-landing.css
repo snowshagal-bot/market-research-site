@@ -141,11 +141,181 @@
   word-break: keep-all;
 }
 
-.latest-card-daily .latest-card-meta b { color: var(--navy); }
-.latest-card-weekly .latest-card-meta b { color: var(--green); }
-.latest-card-research .latest-card-meta b { color: var(--brown); }
-.latest-card-basics .latest-card-meta b { color: var(--accent); }
-.latest-card-note .latest-card-meta b { color: var(--muted); }
+/* ============================================================
+   Category Landing - Featured 2-Column Spread
+   ============================================================ */
+.category-featured-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(24px, 3.5vw, 44px);
+}
+
+.category-featured-card {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  background: transparent;
+  padding: 0;
+  transition: opacity .15s ease;
+}
+
+.category-featured-card:hover {
+  text-decoration: none;
+}
+
+.category-featured-card:hover .category-featured-title {
+  color: var(--navy);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.category-featured-card:hover .category-featured-read i {
+  transform: translateX(4px);
+}
+
+.category-featured-cover-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--panel-2) 65%, var(--bg));
+  border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+}
+
+.category-featured-cover {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.category-featured-cover img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  transition: transform .3s ease;
+}
+
+.category-featured-card:hover .category-featured-cover img {
+  transform: scale(1.015);
+}
+
+.category-featured-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 60% 40%, rgba(94, 129, 160, .12), transparent 60%);
+  position: relative;
+}
+
+.category-featured-art::after {
+  content: "";
+  display: block;
+  width: 48px;
+  height: 48px;
+  background: url(/assets/brand/snowshagal-owl.webp) no-repeat center / contain;
+  opacity: .25;
+}
+
+.category-featured-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding-top: 18px;
+}
+
+.category-featured-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.category-featured-meta b {
+  font-weight: 800;
+}
+
+.category-featured-card-daily .category-featured-meta b { color: var(--navy); }
+.category-featured-card-weekly .category-featured-meta b { color: var(--green); }
+.category-featured-card-research .category-featured-meta b { color: var(--brown); }
+.category-featured-card-basics .category-featured-meta b { color: var(--accent); }
+.category-featured-card-note .category-featured-meta b { color: var(--muted); }
+
+.category-featured-meta time {
+  font-variant-numeric: tabular-nums;
+  opacity: .85;
+}
+
+.category-featured-title {
+  margin: 12px 0 0;
+  font-family: Georgia, 'Noto Serif KR', serif;
+  font-size: clamp(20px, 2vw, 25px);
+  font-weight: 600;
+  line-height: 1.32;
+  letter-spacing: -.03em;
+  color: var(--ink);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.category-featured-summary {
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.category-featured-tags {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted);
+  opacity: .85;
+  letter-spacing: -.01em;
+}
+
+.category-featured-action {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.category-featured-read {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--ink);
+}
+
+.category-featured-read i {
+  display: inline-block;
+  font-style: normal;
+  transition: transform .2s ease;
+}
 
 .category-page .empty {
   padding: 48px 0;
@@ -165,77 +335,29 @@
     gap: 8px;
   }
 
-  /* Task 1: Mobile Horizontal Swipe Carousel */
-  .category-page .latest-cards {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    gap: 12px;
-    padding-bottom: 8px;
-    margin: 0;
-    scrollbar-width: none;
+  .category-featured-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
   }
 
-  .category-page .latest-cards::-webkit-scrollbar {
-    display: none;
+  .category-featured-card:not(:last-child) {
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--line);
   }
 
-  .category-page .latest-card {
-    flex: 0 0 85%;
-    max-width: 85%;
-    min-width: 260px;
-    scroll-snap-align: start;
-    box-sizing: border-box;
-    padding: 16px;
-    border-radius: 14px;
-    min-height: 0;
+  .category-featured-cover-wrap {
+    aspect-ratio: 16 / 9;
   }
 
-  .category-page .latest-card-title {
-    min-height: 0;
-    margin-top: 10px;
-    font-size: 17px;
-    line-height: 1.38;
-    word-break: keep-all;
-    overflow-wrap: break-word;
+  .category-featured-title {
+    font-size: 19px;
+    line-height: 1.35;
   }
 
-  /* Task 2: Mobile Card Internal Layout (Option A - compact cover + robust text column) */
-  .category-page .latest-card-body {
-    display: grid;
-    grid-template-columns: 84px minmax(0, 1fr);
-    align-items: center;
-    gap: 12px;
-    margin-top: 11px;
-  }
-
-  .category-page .latest-card-copy {
-    min-width: 0;
-    overflow: hidden;
-  }
-
-  .category-page .latest-card-summary {
-    font-size: 11.5px;
+  .category-featured-summary {
+    font-size: 13px;
     line-height: 1.55;
-    word-break: keep-all;
-    overflow-wrap: break-word;
-    -webkit-line-clamp: 3;
-  }
-
-  .category-page .latest-card-tags {
-    margin-top: 6px;
-    font-size: 11px;
-    line-height: 1.4;
-    word-break: keep-all;
-    overflow-wrap: break-word;
-    white-space: normal;
-  }
-
-  .category-page .latest-card-read {
-    margin-top: 9px;
-    font-size: 10.5px;
-    white-space: nowrap;
+    -webkit-line-clamp: 2;
   }
 
   .category-page .report-item {
