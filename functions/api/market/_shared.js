@@ -22,6 +22,45 @@ export function json(body, status = 200, cacheControl = 'no-store', extraHeaders
   });
 }
 
+export function isValidMarketDate(dateStr) {
+  if (typeof dateStr !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+  const [yearStr, monthStr, dayStr] = dateStr.split('-');
+  const year = Number(yearStr);
+  const month = Number(monthStr);
+  const day = Number(dayStr);
+  if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) return false;
+  const dateObj = new Date(Date.UTC(year, month - 1, day));
+  return dateObj.getUTCFullYear() === year && (dateObj.getUTCMonth() + 1) === month && dateObj.getUTCDate() === day;
+}
+
+export function fingerprint(text) {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(36);
+}
+
+export function formatMarketResponse(row, request) {
+  const stamp = `${row.generated_at}|${row.published_at || ''}|${row.takeaway_ko || ''}|${row.takeaway_en || ''}`;
+  const etag = `W/"market-${row.market_date}-${fingerprint(stamp)}"`;
+  if (request.headers.get('if-none-match') === etag) {
+    return new Response(null, {
+      status: 304,
+      headers: { etag, 'cache-control': 'public, max-age=30, s-maxage=120, stale-while-revalidate=300' }
+    });
+  }
+  let payload;
+  try { payload = JSON.parse(row.payload_json); }
+  catch (error) {
+    console.error('stored market close payload is invalid', error);
+    return json({ error: 'INVALID_STORED_DATA', message: '저장된 Market Close 데이터를 읽을 수 없습니다.' }, 500);
+  }
+  payload.takeaway = { ko: String(row.takeaway_ko || ''), en: String(row.takeaway_en || '') };
+  return json(payload, 200, 'public, max-age=30, s-maxage=120, stale-while-revalidate=300', { etag });
+}
+
 export function isProductionRequest(request) {
   try { return new URL(request.url).hostname === 'snowshagal.com'; }
   catch (_) { return false; }

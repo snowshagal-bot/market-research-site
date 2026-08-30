@@ -161,10 +161,92 @@ test('Market layout explicitly supports dark mode, compact mobile widths, and re
   assert.ok(mobileHero.size <= 150_000);
 });
 
-test('locale switch preserves Market routes', async () => {
-  const locale = await read('assets/locale.js');
-  assert.match(locale, /\/en\\\/market/);
-  assert.match(locale, /'\/en\/market\/' : '\/market\/'/);
+test('locale switch preserves Market routes and date query parameters', async () => {
+  const localeScript = await read('assets/locale.js');
+  const window = {};
+  const context = vm.createContext({ window, Intl, Date, Set, URLSearchParams });
+  vm.runInContext(localeScript, context);
+  const localeApi = window.MARKET_LOCALE;
+
+  assert.equal(localeApi.pageLanguagePath('/market/', 'en', ''), '/en/market/');
+  assert.equal(localeApi.pageLanguagePath('/en/market/', 'ko', ''), '/market/');
+  assert.equal(localeApi.pageLanguagePath('/market/', 'en', '?date=2026-08-27'), '/en/market/?date=2026-08-27');
+  assert.equal(localeApi.pageLanguagePath('/en/market/', 'ko', '?date=2026-08-27'), '/market/?date=2026-08-27');
+});
+
+test('Market History UI renders navigation strip, previous/next trading days, and calendar drawer', async () => {
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+  const runtime = await marketRuntime('ko');
+  runtime.state.dates = ['2026-08-28', '2026-08-27', '2026-08-26'];
+  runtime.state.latestDate = '2026-08-28';
+  runtime.state.earliestDate = '2026-08-26';
+
+  const target = { innerHTML: '', addEventListener() {} };
+  runtime.render(data, target);
+
+  assert.match(target.innerHTML, /class="market-history-strip"/);
+  assert.match(target.innerHTML, /data-market-action="today"/);
+  assert.match(target.innerHTML, /data-market-action="toggle-calendar"/);
+  assert.match(target.innerHTML, /class="market-calendar-drawer"/);
+  assert.match(target.innerHTML, /class="market-calendar-panel"/);
+  assert.match(target.innerHTML, /class="market-cal-weekday"/);
+  assert.match(target.innerHTML, /data-target-date="2026-08-27"/);
+});
+
+test('findExactDaily strictly matches post.reportDate and locale with zero fallback to latest daily', async () => {
+  const script = await read('assets/market-close.js');
+  const mockPosts = [
+    { type: 'daily', reportDate: '2026-08-28', lang: 'ko', href: 'reports/daily-0828.html', title: '8/28 Daily KO' },
+    { type: 'daily', reportDate: '2026-08-28', lang: 'en', href: 'reports/en/daily-0828.html', title: '8/28 Daily EN' },
+    { type: 'daily', reportDate: '2026-08-26', lang: 'ko', href: 'reports/daily-0826.html', title: '8/26 Daily KO' }
+  ];
+
+  const window = { RESEARCH_POSTS: mockPosts };
+  const document = {
+    documentElement: { dataset: { siteLang: 'ko' } },
+    body: { dataset: {} },
+    readyState: 'loading',
+    addEventListener() {},
+    getElementById() { return null; }
+  };
+  const context = vm.createContext({ window, document, location: { hostname: 'localhost' }, Intl, Date, Set, console });
+  vm.runInContext(script, context);
+  const runtime = window.MARKET_CLOSE;
+
+  // 1. Exact match on 2026-08-28
+  const daily0828 = runtime.findExactDaily('2026-08-28');
+  assert.ok(daily0828);
+  assert.equal(daily0828.reportDate, '2026-08-28');
+  assert.equal(daily0828.lang, 'ko');
+
+  // 2. Exact match on 2026-08-26
+  const daily0826 = runtime.findExactDaily('2026-08-26');
+  assert.ok(daily0826);
+  assert.equal(daily0826.reportDate, '2026-08-26');
+
+  // 3. No match on 2026-08-27 -> MUST be null, NEVER fallback to 0828
+  const daily0827 = runtime.findExactDaily('2026-08-27');
+  assert.equal(daily0827, null, 'Must NOT fallback to latest daily when date is missing');
+
+  // 4. Render CTA behavior on historical date with vs without Daily
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+  runtime.state.latestDate = '2026-08-28';
+
+  // Render on 2026-08-26 (historical date with matching daily)
+  const d26 = JSON.parse(JSON.stringify(data));
+  d26.meta.market_date = '2026-08-26';
+  const targetWithDaily = { innerHTML: '', addEventListener() {} };
+  runtime.render(d26, targetWithDaily);
+  assert.match(targetWithDaily.innerHTML, /이날의 데일리 리포트 보기/);
+  assert.match(targetWithDaily.innerHTML, /reports\/daily-0826\.html/);
+
+  // Render on 2026-08-27 (historical date without matching daily)
+  const d27 = JSON.parse(JSON.stringify(data));
+  d27.meta.market_date = '2026-08-27';
+  const targetWithoutDaily = { innerHTML: '', addEventListener() {} };
+  runtime.render(d27, targetWithoutDaily);
+  assert.match(targetWithoutDaily.innerHTML, /이날 발행된 데일리 리포트가 없습니다\./);
+  assert.doesNotMatch(targetWithoutDaily.innerHTML, /reports\/daily-0828\.html/);
 });
 
 test('public pages keep mobile navigation elements outside header-row', async () => {

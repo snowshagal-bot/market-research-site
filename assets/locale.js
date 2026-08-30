@@ -142,7 +142,10 @@
       return targetLanguage === 'en' ? '/en/about/' : '/about/';
     }
     if (/^\/en\/market\/?$/i.test(path) || /^\/market\/?$/i.test(path)) {
-      return targetLanguage === 'en' ? '/en/market/' : '/market/';
+      const searchParams = new URLSearchParams(String(search || '').replace(/^\?/, ''));
+      const date = searchParams.get('date');
+      const base = targetLanguage === 'en' ? '/en/market/' : '/market/';
+      return date ? `${base}?date=${encodeURIComponent(date)}` : base;
     }
     const categoryMatch = path.match(/^\/(?:en\/)?(daily|weekly|research|basics|notes)\/?$/i);
     if (categoryMatch) {
