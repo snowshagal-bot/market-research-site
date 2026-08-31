@@ -7,6 +7,7 @@
 - [`PROJECT_STATE.md`](./PROJECT_STATE.md) — 현재 구현 상태, 주요 파일, 데이터 흐름
 - [`UI_RULES.md`](./UI_RULES.md) — 디자인, 반응형, 모바일/데스크탑 검수 원칙
 - [`DEPLOYMENT.md`](./DEPLOYMENT.md) — GitHub, Cloudflare Pages, D1, Secret/Binding 구성
+- [`PRODUCTION_RUNTIME_ENV.md`](./PRODUCTION_RUNTIME_ENV.md) — Production 환경변수·Secret 표준 인벤토리 및 안전 수칙
 - [`ROADMAP.md`](./ROADMAP.md) — 현재 작업 지점과 다음 우선순위
 - [`DAILY_REPORT_METADATA.md`](./DAILY_REPORT_METADATA.md) — Daily HTML이 반드시 담아야 하는 head 메타데이터
 - [`DISCLOSURES.md`](./DISCLOSURES.md) — OpenDART 공시 모니터, 무료 API 예산, LLM/데이터 공급자 교체 방식

@@ -286,6 +286,25 @@ After changing a Secret, Binding, Function behavior, or Pages build setting:
 4. test both mobile and desktop if the change affects visible UI;
 5. update `docs/ROADMAP.md` if a manual step is still pending.
 
+## Production Cloudflare Configuration Safety
+
+운영 중 환경변수 및 Secret 작업 시 다음 14개 규칙을 엄격히 준수한다:
+
+1. **Production env/secret 전체 object replace 금지**: Cloudflare Pages의 환경변수/Secret 설정 시 기존 객체를 통째로 덮어쓰거나 bulk rewrite하지 않는다.
+2. **단일 키 변경**: 환경변수 작업은 반드시 필요한 키 하나씩 수정 또는 추가한다.
+3. **변경 전 이름 확인**: 작업 전 `docs/PRODUCTION_RUNTIME_ENV.md`의 목록과 대조하여 변수명의 대소문자 및 철자를 확인한다.
+4. **Secret 원문 노출 금지**: Secret 원문은 export, log, git, 채팅, 스크린샷, 임시 파일에 일체 남기지 않는다.
+5. **Secret 변경 후 새 Production deployment**: Secret을 변경한 후에는 반드시 새 Production deployment를 생성하여 Functions 런타임 바인딩을 갱신한다.
+6. **배포 후 runtime-status 확인**: 새 배포 완료 후 `GET https://admin.snowshagal.com/api/admin/runtime-status`를 호출하여 런타임 상태를 확인한다.
+7. **Publisher 관련 변경**: `githubTokenConfigured=true`, `githubRepoRead=true`, `githubHttpStatus=200`을 확인한다.
+8. **Market 관련 변경**: `marketPublishKeyConfigured=true`를 확인한다.
+9. **Cover 관련 변경**: `browserRenderingConfigured=true`를 확인한다.
+10. **Disclosure 관련 변경**: `GET /api/disclosures/latest?limit=1`에서 `sourceConfigured=true`, `llmConfigured=true`를 확인한다.
+11. **Analytics 관련 변경**: `GET /api/analytics?range=1` 성공(HTTP 200)을 확인한다.
+12. **Optional Secret 판정**: `disclosureSyncKeyConfigured=false`는 정상이며 장애로 판정하지 않는다.
+13. **작업 분리**: Cloudflare configuration mutation과 application code migration을 동일 작업에서 섞지 않는다.
+14. **작업 종료 전 보고**: Production secret/config를 변경하는 작업은 변경 전/후 inventory를 보고한 뒤 종료한다.
+
 ## Deployment smoke layers
 
 Repository verification and deployed-site smoke are intentionally separate:
