@@ -346,8 +346,13 @@
     const meta = doc.querySelector('meta[name="report-title"]')?.content?.trim();
     if (meta) return meta;
     const candidates = [
-      doc.querySelector('h1')?.textContent,
+      doc.querySelector('.cv-h1')?.textContent,
+      doc.querySelector('.cv-title')?.textContent,
       doc.querySelector('.cover-title')?.textContent,
+      doc.querySelector('.cover-frame .cover-copy h1, .cover-frame .cover-copy h2, .cover-frame h1, .cover-frame h2')?.textContent,
+      doc.querySelector('.mag-cover h1, .mag-cover .cv-h1, .mag-cover .cv-title')?.textContent,
+      doc.querySelector('.cover-screen h1, .cover-page h1, .report-cover h1, .cover h1, .opener h1')?.textContent,
+      doc.querySelector('h1')?.textContent,
       doc.querySelector('.title')?.textContent,
       doc.title
     ].map(v => cleanTitle(v || '')).filter(Boolean);
