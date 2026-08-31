@@ -843,3 +843,96 @@ test('toggle-calendar click dynamically switches active state from 1W to HISTORY
   assert.equal(modeButtons[1].classList.contains('active'), true, '1W must be restored to active when calendar is closed');
   assert.equal(modeButtons[3].classList.contains('active'), false, 'HISTORY must be inactive when calendar is closed in 1W mode');
 });
+
+test('Market hero renders the update timestamp notice across TODAY, 1W, 1M, and HISTORY in KO and EN', async () => {
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+  const [koRuntime, enRuntime, css] = await Promise.all([
+    marketRuntime('ko'),
+    marketRuntime('en'),
+    read('assets/market-close.css')
+  ]);
+
+  // 1. KO TODAY
+  const koTodayTarget = { innerHTML: '', addEventListener() {} };
+  koRuntime.render(data, koTodayTarget);
+  assert.match(
+    koTodayTarget.innerHTML,
+    /<p class="market-date">2026\.08\.28 · 15:30 KST 마감 기준<\/p>\s*<p class="market-update">데이터 업데이트 · 매 거래일 16:05 KST<\/p>\s*<p class="market-overseas">\* 해외 시장은 각 시장의 최신 거래일 기준<\/p>/
+  );
+
+  // 2. EN TODAY
+  const enTodayTarget = { innerHTML: '', addEventListener() {} };
+  enRuntime.render(data, enTodayTarget);
+  assert.match(
+    enTodayTarget.innerHTML,
+    /<p class="market-date">Aug 28, 2026 · Korea close as of 15:30 KST<\/p>\s*<p class="market-update">Data updates · Every trading day at 16:05 KST<\/p>\s*<p class="market-overseas">\* Overseas markets use each market’s latest trading session\.<\/p>/
+  );
+
+  // 3. KO & EN HISTORY
+  koRuntime.state.mode = 'history';
+  koRuntime.state.latestDate = '2026-08-28';
+  koRuntime.state.currentDate = '2026-08-27';
+  const koHistoryTarget = { innerHTML: '', addEventListener() {} };
+  koRuntime.render(data, koHistoryTarget);
+  assert.match(koHistoryTarget.innerHTML, /<p class="market-update">데이터 업데이트 · 매 거래일 16:05 KST<\/p>/);
+
+  enRuntime.state.mode = 'history';
+  enRuntime.state.latestDate = '2026-08-28';
+  enRuntime.state.currentDate = '2026-08-27';
+  const enHistoryTarget = { innerHTML: '', addEventListener() {} };
+  enRuntime.render(data, enHistoryTarget);
+  assert.match(enHistoryTarget.innerHTML, /<p class="market-update">Data updates · Every trading day at 16:05 KST<\/p>/);
+
+  // 4. KO & EN 1W
+  const rangePayload1w = {
+    aggregation_version: '1.0.0',
+    period: '1w',
+    window: { start_date: '2026-08-25', end_date: '2026-08-28', sessions_used: 4, required_sessions: 5, complete: false },
+    instruments: { indices: {}, rates_fx_volatility: {}, commodities_crypto: {} },
+    flows: { markets: {} },
+    breadth: {},
+    krx_groups: { coverage_complete: false }
+  };
+  const ko1wTarget = { innerHTML: '', addEventListener() {} };
+  koRuntime.renderRangeView(rangePayload1w, '1w', ko1wTarget);
+  assert.match(
+    ko1wTarget.innerHTML,
+    /<p class="market-date">현재 누적 · 4 \/ 5 거래일<\/p>\s*<p class="market-update">데이터 업데이트 · 매 거래일 16:05 KST<\/p>/
+  );
+
+  const en1wTarget = { innerHTML: '', addEventListener() {} };
+  enRuntime.renderRangeView(rangePayload1w, '1w', en1wTarget);
+  assert.match(
+    en1wTarget.innerHTML,
+    /<p class="market-date">Partial · 4 \/ 5 sessions<\/p>\s*<p class="market-update">Data updates · Every trading day at 16:05 KST<\/p>/
+  );
+
+  // 5. KO & EN 1M
+  const rangePayload1m = {
+    aggregation_version: '1.0.0',
+    period: '1m',
+    window: { start_date: '2026-08-01', end_date: '2026-08-28', sessions_used: 20, required_sessions: 20, complete: true },
+    instruments: { indices: {}, rates_fx_volatility: {}, commodities_crypto: {} },
+    flows: { markets: {} },
+    breadth: {},
+    krx_groups: { coverage_complete: false }
+  };
+  const ko1mTarget = { innerHTML: '', addEventListener() {} };
+  koRuntime.renderRangeView(rangePayload1m, '1m', ko1mTarget);
+  assert.match(
+    ko1mTarget.innerHTML,
+    /<p class="market-date">20거래일 기준<\/p>\s*<p class="market-update">데이터 업데이트 · 매 거래일 16:05 KST<\/p>/
+  );
+
+  const en1mTarget = { innerHTML: '', addEventListener() {} };
+  enRuntime.renderRangeView(rangePayload1m, '1m', en1mTarget);
+  assert.match(
+    en1mTarget.innerHTML,
+    /<p class="market-date">20-session window<\/p>\s*<p class="market-update">Data updates · Every trading day at 16:05 KST<\/p>/
+  );
+
+  // 6. CSS invariants
+  assert.match(css, /\.market-date,\s*\.market-update,\s*\.market-overseas/);
+  assert.match(css, /\.market-update\{margin-top:2px;font-size:11px;line-height:1\.4\}/);
+  assert.match(css, /@media\(max-width:760px\)[\s\S]*?\.market-update\{font-size:11px;line-height:1\.4\}/);
+});

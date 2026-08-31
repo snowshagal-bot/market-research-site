@@ -3,7 +3,7 @@
 
   const ko = document.documentElement.dataset.siteLang !== 'en';
   const copy = ko ? {
-    title: 'MARKET CLOSE', subtitle: '오늘 시장은 어떻게 마감했나', closeBasis: '15:30 KST 마감 기준', overseas: '* 해외 시장은 각 시장의 최신 거래일 기준',
+    title: 'MARKET CLOSE', subtitle: '오늘 시장은 어떻게 마감했나', closeBasis: '15:30 KST 마감 기준', updateNotice: '데이터 업데이트 · 매 거래일 16:05 KST', overseas: '* 해외 시장은 각 시장의 최신 거래일 기준',
     todayMode: 'TODAY', historyMode: 'HISTORY', prevDay: '이전 거래일', nextDay: '다음 거래일',
     calendarToggle: '달력으로 날짜 선택', selectDate: '날짜 선택', closeCalendar: '달력 닫기',
     sections: ['주요 지수', '금리 · 환율 · 변동성', '원자재 · 가상자산', '시장 폭', 'KRX 투자자 매매동향 (당일)', '최근 5거래일 누적 수급', '프로그램 & 베이시스', '시장 내부 지표', '공매도 현황', '시가총액 상위 10종목'],
@@ -44,7 +44,7 @@
     expandExplanation: '해설 보기 ▾',
     collapseExplanation: '해설 닫기 ▴'
   } : {
-    title: 'MARKET CLOSE', subtitle: 'How did the Korean market close today?', closeBasis: 'Korea close as of 15:30 KST', overseas: '* Overseas markets use each market’s latest trading session.',
+    title: 'MARKET CLOSE', subtitle: 'How did the Korean market close today?', closeBasis: 'Korea close as of 15:30 KST', updateNotice: 'Data updates · Every trading day at 16:05 KST', overseas: '* Overseas markets use each market’s latest trading session.',
     todayMode: 'TODAY', historyMode: 'HISTORY', prevDay: 'Previous session', nextDay: 'Next session',
     calendarToggle: 'Select date from calendar', selectDate: 'Select date', closeCalendar: 'Close calendar',
     sections: ['Major Indices', 'Rates · FX · Volatility', 'Commodities · Crypto', 'Market Breadth', 'KRX Investor Flows (Daily)', 'Cumulative Flows: Last 5 Sessions', 'Program Trading & Basis', 'Market Internals', 'Short Selling', 'Top 10 by Market Cap'],
@@ -474,6 +474,7 @@
       <section class="market-hero" aria-labelledby="market-close-heading"><div class="market-wrap market-hero-inner"><div class="market-hero-copy">
         <p class="market-eyebrow">SNOWSHAGAL</p><h1 id="market-close-heading">${copy.title}</h1><p class="market-subtitle">${copy.subtitle}</p>
         <p class="market-date">${dateText(data.meta?.market_date)} · ${copy.closeBasis}</p>
+        <p class="market-update">${copy.updateNotice}</p>
         <p class="market-overseas">${copy.overseas}</p>
       </div><div class="market-mountain" aria-hidden="true"></div></div></section>
       <div class="market-wrap">
@@ -858,6 +859,7 @@
       <section class="market-hero" aria-labelledby="market-range-heading"><div class="market-wrap market-hero-inner"><div class="market-hero-copy">
         <p class="market-eyebrow">SNOWSHAGAL</p><h1 id="market-range-heading">${html(pTitle)}</h1><p class="market-subtitle">${dateRangeStr}</p>
         <p class="market-date">${html(statusNote)}</p>
+        <p class="market-update">${copy.updateNotice}</p>
       </div><div class="market-mountain" aria-hidden="true"></div></div></section>
       <div class="market-wrap">
         ${renderHistoryStrip()}
@@ -1079,6 +1081,7 @@
       <section class="market-hero" aria-labelledby="market-close-heading"><div class="market-wrap market-hero-inner"><div class="market-hero-copy">
         <p class="market-eyebrow">SNOWSHAGAL</p><h1 id="market-close-heading">${copy.title}</h1><p class="market-subtitle">${copy.subtitle}</p>
         <p class="market-date">${dateText(dateStr)} · ${copy.closeBasis}</p>
+        <p class="market-update">${copy.updateNotice}</p>
       </div><div class="market-mountain" aria-hidden="true"></div></div></section>
       <div class="market-wrap">
         ${renderHistoryStrip()}
