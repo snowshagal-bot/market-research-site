@@ -1,6 +1,6 @@
 (() => {
   const $ = (id) => document.getElementById(id);
-  const TYPE_LABELS = { daily: '데일리', weekly: '위클리', research: '비정기', basics: '시장 공부', note: '끄적끄적' };
+  const TYPE_LABELS = { daily: '데일리', weekly: '위클리', research: '비정기', basics: '시장 입문', note: '투자 노트' };
   const DEPLOY_POLL_INTERVAL_MS = 2500;
   const DEPLOY_POLL_MAX_ATTEMPTS = 36;
   const html = document.documentElement;

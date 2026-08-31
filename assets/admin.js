@@ -104,8 +104,8 @@
     daily: '데일리',
     weekly: '위클리',
     research: '비정기',
-    basics: '시장 공부',
-    note: '끄적끄적'
+    basics: '시장 입문',
+    note: '투자 노트'
   };
 
   function escapeHtml(value) {
@@ -259,8 +259,8 @@
       daily: '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.',
       weekly: '지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.',
       research: '특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.',
-      basics: '경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.',
-      note: '시장과 투자에 관한 생각을 자유롭게 정리한 글.'
+      basics: '경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 입문.',
+      note: '시장과 투자에 관한 생각을 자유롭게 정리한 투자 노트.'
     },
     en: {
       daily: 'A daily report on market trends, investor flows, sectors, and macro drivers.',
@@ -296,18 +296,18 @@
     if (allowedTypes.includes(declaredType)) return declaredType;
 
     const strongSignals = `${name} ${doc.title || ''}`;
-    if (/시장\s*공부|경제\s*공부|주식\s*공부|market\s*basics|investing\s*basics|explainer/i.test(strongSignals)) return 'basics';
+    if (/시장\s*입문|시장\s*공부|경제\s*공부|주식\s*공부|market\s*basics|investing\s*basics|explainer/i.test(strongSignals)) return 'basics';
     if (/위클리|weekly/i.test(strongSignals)) return 'weekly';
     if (/주식리포트|데일리|daily(?:\s+market)?|kospi\s+daily/i.test(strongSignals)) return 'daily';
     if (/비정기|소버린|technology\s*&\s*policy|research\s+(?:report|brief|analysis)/i.test(strongSignals) || /^research(?:[-_\s]*(?:report|brief|analysis))?\.html?$/i.test(name)) return 'research';
-    if (/끄적|essay|(?:^|[\s_.-])notes?(?=$|[\s_.-])/i.test(strongSignals)) return 'note';
+    if (/투자\s*노트|investment\s*notes?|끄적|essay|(?:^|[\s_.-])notes?(?=$|[\s_.-])/i.test(strongSignals)) return 'note';
 
     const bodySignals = text.slice(0, 4000);
-    if (/시장\s*공부|경제\s*공부|주식\s*공부|market\s*basics|investing\s*basics|explainer/i.test(bodySignals)) return 'basics';
+    if (/시장\s*입문|시장\s*공부|경제\s*공부|주식\s*공부|market\s*basics|investing\s*basics|explainer/i.test(bodySignals)) return 'basics';
     if (/위클리|weekly/i.test(bodySignals)) return 'weekly';
     if (/주식리포트|데일리|daily\s+market|kospi\s+daily/i.test(bodySignals)) return 'daily';
     if (/비정기|소버린|technology\s*&\s*policy|research\s+(?:report|brief|analysis)/i.test(bodySignals)) return 'research';
-    if (/끄적|essay|(?:^|[\s_.-])notes?(?=$|[\s_.-])/i.test(bodySignals)) return 'note';
+    if (/투자\s*노트|investment\s*notes?|끄적|essay|(?:^|[\s_.-])notes?(?=$|[\s_.-])/i.test(bodySignals)) return 'note';
     return '';
   }
 

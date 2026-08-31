@@ -167,11 +167,11 @@ test('18-20. Structured Data: Report BreadcrumbList hierarchy (KO & EN & Notes)'
 
   const noteDataKO = reportBreadcrumbStructuredData(koNote);
   assert.equal(noteDataKO.itemListElement[1].item, 'https://snowshagal.com/notes/');
-  assert.equal(noteDataKO.itemListElement[1].name, '끄적끄적');
+  assert.equal(noteDataKO.itemListElement[1].name, '투자 노트');
 
   const noteDataEN = reportBreadcrumbStructuredData(enNote);
   assert.equal(noteDataEN.itemListElement[1].item, 'https://snowshagal.com/en/notes/');
-  assert.equal(noteDataEN.itemListElement[1].name, 'Notes');
+  assert.equal(noteDataEN.itemListElement[1].name, 'Investment Note');
 });
 
 test('21. Structured Data: Category landings have BreadcrumbList ONLY (no Article, no Organization)', () => {

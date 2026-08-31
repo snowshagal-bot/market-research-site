@@ -85,12 +85,12 @@ test('official Snowshagal owl branding replaces decorative sparkles without chan
 
 test('desktop and mobile navigation use the approved category order across pages', async () => {
   const pages = [
-    ['index.html', ['홈', '마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
-    ['en/index.html', ['Home', 'Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']],
-    ['market/index.html', ['홈', '마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
-    ['en/market/index.html', ['Home', 'Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']],
-    ['about/index.html', ['홈', '마켓', '데일리', '위클리', '리서치', '시장 공부', '끄적끄적']],
-    ['en/about/index.html', ['Home', 'Market', 'Daily', 'Weekly', 'Research', 'Market Basics', 'Notes']]
+    ['index.html', ['홈', '마켓', '데일리', '위클리', '리서치', '투자 노트', '시장 입문']],
+    ['en/index.html', ['Home', 'Market', 'Daily', 'Weekly', 'Research', 'Investment Note', 'Market Basics']],
+    ['market/index.html', ['홈', '마켓', '데일리', '위클리', '리서치', '투자 노트', '시장 입문']],
+    ['en/market/index.html', ['Home', 'Market', 'Daily', 'Weekly', 'Research', 'Investment Note', 'Market Basics']],
+    ['about/index.html', ['홈', '마켓', '데일리', '위클리', '리서치', '투자 노트', '시장 입문']],
+    ['en/about/index.html', ['Home', 'Market', 'Daily', 'Weekly', 'Research', 'Investment Note', 'Market Basics']]
   ];
 
   for (const [path, expectedLabels] of pages) {
@@ -132,9 +132,9 @@ test('basics is added without replacing notes across public and admin controls',
   ]);
   for (const source of [html, admin, shell]) {
     assert.match(source, /basics/);
-    assert.match(source, /시장 공부/);
+    assert.match(source, /시장 입문/);
     assert.match(source, /note/);
-    assert.match(source, /끄적끄적/);
+    assert.match(source, /투자 노트/);
   }
   assert.ok(adminScript.includes('market\\s*basics'));
   assert.ok(adminScript.includes('investing\\s*basics'));
@@ -147,7 +147,7 @@ test('brand hero is fixed while latest cards remain post-driven and responsive',
     read('assets/home-v2.css'),
     read('assets/ui-polish.css')
   ]);
-  assert.match(script, /const coreTypes = \['daily', 'weekly', 'research', 'basics'\]/);
+  assert.match(script, /const coreTypes = \['daily', 'weekly', 'research', 'note', 'basics'\]/);
   assert.match(script, /\['daily','weekly','research'\]\.map\(type=>latestFor\(type\)\)\.filter\(Boolean\)/);
   assert.match(script, /const visual=post\.coverImage/);
   assert.match(script, /latest-card-cover/);

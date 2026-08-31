@@ -12,8 +12,8 @@
     return;
   }
   const categories = messages.categories;
-  const coreTypes = ['daily', 'weekly', 'research', 'basics'];
-  const validTypes = ['all', ...coreTypes, 'note'];
+  const coreTypes = ['daily', 'weekly', 'research', 'note', 'basics'];
+  const validTypes = ['all', ...coreTypes];
   const allPosts = (window.RESEARCH_POSTS || []).slice();
   const localizedPosts = localeApi?.localePosts(allPosts, locale) || allPosts.filter(post => (post.lang === 'en' ? 'en' : 'ko') === locale);
   const posts = localeApi?.sortPosts(localizedPosts) || localizedPosts.sort((a,b)=>{
@@ -26,14 +26,7 @@
   const themeBtn = document.querySelector('[data-theme-toggle]');
   const languageLinks = Array.from(document.querySelectorAll('[data-language-choice]'));
   const navLinks = Array.from(document.querySelectorAll('[data-nav-category]'));
-  // 끄적끄적 is a real category with nothing in it yet. Rather than leading
-  // readers to an empty result, its entry points appear once a note exists.
-  const hasNotes = posts.some(post => post.type === 'note');
-  const listedTypes = hasNotes ? [...coreTypes, 'note'] : [...coreTypes];
-  if (!hasNotes) {
-    document.querySelectorAll('[data-nav-category="note"], [data-filter="note"]')
-      .forEach(element => { element.hidden = true; });
-  }
+  const listedTypes = [...coreTypes];
 
   function esc(value){
     return String(value ?? '').replace(/[&<>"']/g,character=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[character]));

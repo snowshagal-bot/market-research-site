@@ -93,7 +93,7 @@ test('all ten category landing shells and their generator retain direct navigati
   assert.doesNotMatch(generator, /\?category=/);
 });
 
-test('Report Shell uses locale category paths while preserving Notes gating and active state', async () => {
+test('Report Shell uses locale category paths while preserving active state', async () => {
   const shell = await read('assets/report-shell.js');
   assert.match(shell, /function categoryPath\(type\)/);
   assert.match(shell, /const prefix = locale === 'en' \? '\/en' : ''/);
@@ -101,7 +101,6 @@ test('Report Shell uses locale category paths while preserving Notes gating and 
   for (const type of ['daily', 'weekly', 'research', 'basics', 'note']) {
     assert.match(shell, new RegExp(`href="\\$\\{categoryPath\\('${type}'\\)\\}"`));
   }
-  assert.match(shell, /hasNotes \|\| active === 'note'/);
   assert.match(shell, /active === 'daily' \? 'active' : ''/);
   assert.match(shell, /active === 'note' \? 'aria-current="true"' : ''/);
   assert.doesNotMatch(shell, /href="\$\{homePath\}\?category=/);
