@@ -153,7 +153,7 @@ function atomicGithubMock({
   };
 }
 
-function publishRequest({ type = 'daily', cover = null, shareCard = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, takeaway, tags = null } = {}, url = 'https://snowshagal.com/api/publish') {
+function publishRequest({ type = 'daily', cover = null, shareCard = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, takeaway, tags = null } = {}, url = 'https://admin.snowshagal.com/api/publish') {
   const form = new FormData();
   form.append('file', new File(['<!doctype html><html><body>report content with some words</body></html>'], 'report.html', { type: 'text/html' }));
   form.append('type', type);

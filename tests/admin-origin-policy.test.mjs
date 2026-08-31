@@ -18,7 +18,11 @@ import {
 import { onRequest as middleware } from '../functions/_middleware.js';
 import { onRequestPost as publishPost } from '../functions/api/publish.js';
 import { onRequestPost as managePost } from '../functions/api/manage.js';
-import { onRequestDelete as deleteComment } from '../functions/api/comments.js';
+import {
+  onRequestGet as getComments,
+  onRequestPost as postComment,
+  onRequestDelete as deleteComment
+} from '../functions/api/comments.js';
 import { onRequestPost as disclosureSyncPost } from '../functions/api/disclosures/sync.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -54,21 +58,36 @@ test('hostname classification distinguishes canonical, redirect, admin, branch P
   assert.equal(classifyHost('https://attacker.pages.dev/'), HOST_CLASS.UNKNOWN);
 });
 
-test('Phase 1A keeps apex admin compatible while the same policy exposes the future enforcement result', () => {
-  assert.equal(ADMIN_APEX_COMPATIBILITY, true);
-  assert.deepEqual(apexAdminRouteDecision(request(`${PUBLIC_ORIGIN}/admin/manage/`)), { action: 'pass' });
+test('Phase 1A enforcement redirects apex admin GET/HEAD and blocks mutations', () => {
+  assert.equal(ADMIN_APEX_COMPATIBILITY, false);
   assert.deepEqual(
-    apexAdminRouteDecision(request(`${PUBLIC_ORIGIN}/admin/manage/?from=test`), { compatibilityMode: false }),
+    apexAdminRouteDecision(request(`${PUBLIC_ORIGIN}/admin/manage/`)),
+    { action: 'redirect', status: 307, location: `${ADMIN_ORIGIN}/admin/manage/` }
+  );
+  assert.deepEqual(
+    apexAdminRouteDecision(request(`${PUBLIC_ORIGIN}/admin/manage/?from=test`)),
     { action: 'redirect', status: 307, location: `${ADMIN_ORIGIN}/admin/manage/?from=test` }
   );
   assert.deepEqual(
-    apexAdminRouteDecision(request(`${PUBLIC_ORIGIN}/api/manage`, { method: 'POST' }), { compatibilityMode: false }),
+    apexAdminRouteDecision(request(`${PUBLIC_ORIGIN}/admin/manage/`, { method: 'HEAD' })),
+    { action: 'redirect', status: 307, location: `${ADMIN_ORIGIN}/admin/manage/` }
+  );
+  assert.deepEqual(
+    apexAdminRouteDecision(request(`${PUBLIC_ORIGIN}/api/manage`, { method: 'POST' })),
     { action: 'deny', status: 403 }
+  );
+  assert.deepEqual(
+    apexAdminRouteDecision(request(`${PUBLIC_ORIGIN}/admin/manage/`, { method: 'POST' })),
+    { action: 'deny', status: 403 }
+  );
+  assert.deepEqual(
+    apexAdminRouteDecision(request(`${PUBLIC_ORIGIN}/admin/manage/`), { compatibilityMode: true }),
+    { action: 'pass' }
   );
   // HYBRID endpoints make the final decision after authentication so their
   // machine credentials are not accidentally moved to the administrator host.
   assert.deepEqual(
-    apexAdminRouteDecision(request(`${PUBLIC_ORIGIN}/api/market/publish`, { method: 'POST' }), { compatibilityMode: false }),
+    apexAdminRouteDecision(request(`${PUBLIC_ORIGIN}/api/market/publish`, { method: 'POST' })),
     { action: 'pass' }
   );
 });
@@ -99,10 +118,18 @@ test('middleware denies report and public active HTML on admin host before stati
   }
 });
 
-test('middleware allows Compatibility admin UI and adds admin-only no-store and CSP headers', async () => {
+test('middleware redirects apex admin UI to admin host and adds admin-only no-store and CSP headers on admin host', async () => {
   const apex = htmlContext(`${PUBLIC_ORIGIN}/admin/`);
-  assert.equal((await middleware(apex.context)).status, 200);
-  assert.equal(apex.calls(), 1);
+  const apexRes = await middleware(apex.context);
+  assert.equal(apexRes.status, 307);
+  assert.equal(apexRes.headers.get('location'), `${ADMIN_ORIGIN}/admin/`);
+  assert.equal(apex.calls(), 0);
+
+  const apexWithQuery = htmlContext(`${PUBLIC_ORIGIN}/admin/manage/?tab=drafts`);
+  const apexWithQueryRes = await middleware(apexWithQuery.context);
+  assert.equal(apexWithQueryRes.status, 307);
+  assert.equal(apexWithQueryRes.headers.get('location'), `${ADMIN_ORIGIN}/admin/manage/?tab=drafts`);
+  assert.equal(apexWithQuery.calls(), 0);
 
   const admin = htmlContext(`${ADMIN_ORIGIN}/admin/manage/`);
   const response = await middleware(admin.context);
@@ -135,7 +162,7 @@ test('human-admin mutations require the exact host-derived Origin', () => {
   })).error, 'BAD_ORIGIN');
 });
 
-test('publish and manage accept admin origin without weakening apex Compatibility Mode', async () => {
+test('publish and manage accept admin origin and block apex human-admin mutations in enforcement mode', async () => {
   const env = { ADMIN_KEY: 'admin-secret', GITHUB_TOKEN: 'github-secret' };
   const call = (handler, origin, suppliedOrigin = origin) => handler({
     request: request(`${origin}${handler === publishPost ? '/api/publish' : '/api/manage'}`, {
@@ -151,8 +178,8 @@ test('publish and manage accept admin origin without weakening apex Compatibilit
   assert.equal((await response.json()).error, 'NO_FILE');
 
   response = await call(publishPost, PUBLIC_ORIGIN);
-  assert.equal(response.status, 400);
-  assert.equal((await response.json()).error, 'NO_FILE');
+  assert.equal(response.status, 403);
+  assert.equal((await response.json()).error, 'PREVIEW_READ_ONLY');
 
   response = await call(managePost, ADMIN_ORIGIN, PUBLIC_ORIGIN);
   assert.equal(response.status, 403);
@@ -180,7 +207,7 @@ test('machine disclosure credential remains independent of human Origin validati
   assert.equal((await response.json()).error, 'DB_NOT_CONFIGURED');
 });
 
-test('comments admin delete uses the shared admin host and exact-Origin policy', async () => {
+test('comments admin delete uses the shared admin host and exact-Origin policy while guest comments work on apex', async () => {
   const columns = [
     'id', 'report_key', 'nickname', 'body', 'password_salt',
     'password_hash', 'ip_hash', 'created_at', 'deleted_at'
@@ -195,6 +222,7 @@ test('comments admin delete uses the shared admin host and exact-Origin policy',
         },
         async first() {
           if (sql.includes('SELECT id, password_salt')) return { id: 'comment-1', passwordSalt: '', passwordHash: '' };
+          if (sql.includes('SELECT COUNT(*) AS count')) return { count: 0 };
           return null;
         },
         async run() { return { success: true }; }
@@ -204,7 +232,7 @@ test('comments admin delete uses the shared admin host and exact-Origin policy',
   };
   const body = JSON.stringify({ id: 'comment-1', report: '/reports/example' });
   const call = (origin) => deleteComment({
-    request: request(`${ADMIN_ORIGIN}/api/comments`, {
+    request: request(`${origin || ADMIN_ORIGIN}/api/comments`, {
       method: 'DELETE',
       headers: { 'content-type': 'application/json', 'x-admin-key': 'admin-secret', ...(origin ? { origin } : {}) },
       body
@@ -212,9 +240,27 @@ test('comments admin delete uses the shared admin host and exact-Origin policy',
     env: { ADMIN_KEY: 'admin-secret', COMMENTS_DB: db }
   });
 
+  // Admin deletion requires admin host and matching admin origin:
   assert.equal((await call('')).status, 403);
   assert.equal((await call(PUBLIC_ORIGIN)).status, 403);
   assert.equal((await call(ADMIN_ORIGIN)).status, 200);
+
+  // Guest comment reads and writes work normally on public apex:
+  const getRes = await getComments({
+    request: request(`${PUBLIC_ORIGIN}/api/comments?report=%2Freports%2Fexample`),
+    env: { COMMENTS_DB: db }
+  });
+  assert.equal(getRes.status, 200);
+
+  const postRes = await postComment({
+    request: request(`${PUBLIC_ORIGIN}/api/comments`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: PUBLIC_ORIGIN },
+      body: JSON.stringify({ report: '/reports/example', nickname: 'reader', body: 'good report', password: 'guestpassword123' })
+    }),
+    env: { COMMENTS_DB: db }
+  });
+  assert.equal(postRes.status, 201);
 });
 
 test('administrator static dependencies resolve on admin host and public exits are absolute apex URLs', async () => {

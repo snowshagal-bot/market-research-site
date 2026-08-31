@@ -49,7 +49,7 @@ function githubMock(existingPosts, { searchIndex = null } = {}) {
   return calls;
 }
 
-function manageRequest(fields = {}, key = ADMIN_KEY, url = 'https://snowshagal.com/api/manage') {
+function manageRequest(fields = {}, key = ADMIN_KEY, url = 'https://admin.snowshagal.com/api/manage') {
   const form = new FormData();
   for (const [name, value] of Object.entries(fields)) {
     if (value instanceof File) form.append(name, value, value.name);
