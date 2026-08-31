@@ -181,7 +181,7 @@ test('stats API authenticates, handles empty and populated D1, and leaves commen
   }]]) {
     const db = new MockDb(rows);
     sharedTest.resetSchemaCache();
-    const request = new Request('https://preview.example/api/engagement-stats?days=7', { headers: { 'x-admin-key': ADMIN_KEY } });
+    const request = new Request('https://admin.snowshagal.com/api/engagement-stats?days=7', { headers: { 'x-admin-key': ADMIN_KEY } });
     const response = await getStats({ request, env: { ADMIN_KEY, COMMENTS_DB: db, ASSETS: { fetch: async () => Response.json([{ href: 'reports/sample.html', title: '샘플 리포트' }]) } } });
     const data = await response.json();
     assert.equal(response.status, 200);
@@ -190,6 +190,6 @@ test('stats API authenticates, handles empty and populated D1, and leaves commen
     assert.equal(data.overall.sessions, rows.length);
     if (rows.length) assert.equal(data.pages[0].title, '샘플 리포트');
   }
-  const unauthorized = await getStats({ request: new Request('https://preview.example/api/engagement-stats?days=7'), env: { ADMIN_KEY, COMMENTS_DB: new MockDb() } });
+  const unauthorized = await getStats({ request: new Request('https://admin.snowshagal.com/api/engagement-stats?days=7'), env: { ADMIN_KEY, COMMENTS_DB: new MockDb() } });
   assert.equal(unauthorized.status, 401);
 });

@@ -170,7 +170,7 @@
   }
 
   function isPreviewHost(hostname) {
-    return Boolean(hostname) && hostname !== 'snowshagal.com';
+    return Boolean(hostname) && hostname !== 'snowshagal.com' && hostname !== 'admin.snowshagal.com';
   }
 
   function formatBytes(bytes) {
@@ -327,7 +327,7 @@
     $('manage-summary').value = next.summary || '';
     if (takeawayInput) takeawayInput.value = (next.type === 'daily' && next.takeaway) ? next.takeaway : '';
     updateTakeawayVisibility(next.type || '');
-    $('current-report-link').href = `../../${next.href}`;
+    $('current-report-link').href = `https://snowshagal.com/${String(next.href || '').replace(/^\/+/, '')}`;
     setSelectedManageTags(next.tags || []);
     document.querySelector('input[name="cover-action"][value="keep"]').checked = true;
     deleteConfirmation.hidden = true;
@@ -464,7 +464,7 @@
     resultText.textContent = '홈페이지 반영을 확인하고 있습니다.';
     resultDetail.textContent = `GitHub commit ${operation.commit.slice(0, 7)}`;
     resultHome.textContent = '홈페이지로 이동';
-    resultHome.href = '/';
+    resultHome.href = 'https://snowshagal.com/';
     resultContinue.textContent = '관리 계속하기';
   }
 
@@ -488,7 +488,7 @@
     resultTitle.textContent = operation.action === 'delete' ? '삭제가 홈페이지에 반영되었습니다.' : '홈페이지 반영이 완료되었습니다.';
     resultText.textContent = '잠시 후 홈페이지로 이동합니다.';
     resultHome.textContent = '홈페이지로 이동';
-    redirectTimer = setTimeout(() => { location.href = '/'; }, 1500);
+    redirectTimer = setTimeout(() => { location.href = 'https://snowshagal.com/'; }, 1500);
   }
 
   function delayDeployment(operation) {

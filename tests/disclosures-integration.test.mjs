@@ -146,9 +146,10 @@ function geminiResponse(analysis = validAnalysis(), status = 200) {
 }
 
 function adminRequest(path, options = {}) {
-  return new Request(`https://preview.market-research-site.pages.dev${path}`, {
+  const origin = 'https://preview.market-research-site.pages.dev';
+  return new Request(`${origin}${path}`, {
     ...options,
-    headers: { 'x-admin-key': ADMIN_KEY, ...(options.headers || {}) }
+    headers: { 'x-admin-key': ADMIN_KEY, origin, ...(options.headers || {}) }
   });
 }
 
@@ -469,9 +470,9 @@ test('latest API supports search and priority filtering while returning true sto
 
 test('unauthorized disclosure APIs fail before D1 or provider access', async () => {
   const requests = [
-    syncPost({ request: new Request('https://preview.example/api/disclosures/sync', { method: 'POST', body: '{}' }), env: {} }),
-    latestGet({ request: new Request('https://preview.example/api/disclosures/latest'), env: {} }),
-    analyzePost({ request: new Request('https://preview.example/api/disclosures/analyze', { method: 'POST', body: '{}' }), env: {} })
+    syncPost({ request: new Request('https://preview.market-research-site.pages.dev/api/disclosures/sync', { method: 'POST', body: '{}' }), env: {} }),
+    latestGet({ request: new Request('https://preview.market-research-site.pages.dev/api/disclosures/latest'), env: {} }),
+    analyzePost({ request: new Request('https://preview.market-research-site.pages.dev/api/disclosures/analyze', { method: 'POST', body: '{}' }), env: {} })
   ];
   const responses = await Promise.all(requests);
   assert.deepEqual(responses.map(response => response.status), [401, 401, 401]);

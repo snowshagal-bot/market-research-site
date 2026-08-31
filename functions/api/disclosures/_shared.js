@@ -1,3 +1,5 @@
+import { isHumanAdminHost, validateHumanAdminMutation } from '../../_host-policy.js';
+
 export const FILINGS_TABLE = 'disclosure_filings';
 export const WATCHLIST_TABLE = 'disclosure_watchlist';
 export const USAGE_TABLE = 'disclosure_usage_daily';
@@ -85,6 +87,14 @@ export function authorizeSync(request, env) {
   const supplied = request.headers.get('x-disclosure-sync-key') || '';
   if (env?.DISCLOSURE_SYNC_KEY && constantTimeEqual(supplied, env.DISCLOSURE_SYNC_KEY)) return 'disclosure-sync-key';
   return '';
+}
+
+export function humanAdminHostAllowed(request) {
+  return isHumanAdminHost(request);
+}
+
+export function humanAdminMutationPolicy(request) {
+  return validateHumanAdminMutation(request);
 }
 
 function boundedInteger(value, fallback, minimum, maximum) {

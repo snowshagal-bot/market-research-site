@@ -1,11 +1,8 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-
-const source = await readFile(new URL('../functions/api/comments.js', import.meta.url), 'utf8');
-const moduleUrl = `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
+const moduleUrl = new URL('../functions/api/comments.js', import.meta.url).href;
 
 async function loadHandler(scenario) {
-  return (await import(`${moduleUrl}#${scenario}`)).onRequestGet;
+  return (await import(`${moduleUrl}?scenario=${scenario}`)).onRequestGet;
 }
 
 const currentColumns = [

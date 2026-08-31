@@ -106,7 +106,7 @@ function installCloudflareMock({ empty = false } = {}) {
 }
 
 function request(key = ENV.ADMIN_KEY, range = 7) {
-  return new Request(`https://preview.example/api/analytics?range=${range}`, {
+  return new Request(`https://admin-preview.market-research-site.pages.dev/api/analytics?range=${range}`, {
     headers: key === null ? {} : { 'x-admin-key': key }
   });
 }

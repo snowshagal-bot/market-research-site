@@ -1,3 +1,5 @@
+import { isAdminHost, validateHumanAdminMutation } from '../_host-policy.js';
+
 const MAX_NICKNAME = 20;
 const MAX_BODY = 1000;
 const MAX_PASSWORD = 64;
@@ -176,6 +178,7 @@ async function ensureSchema(db) {
 
 export async function onRequestGet(context) {
   const { request, env } = context;
+  if (isAdminHost(request)) return reply({ error: 'NOT_FOUND' }, 404);
   const missing = await ensureDbReady(env);
   if (missing) return missing;
 
@@ -201,6 +204,7 @@ export async function onRequestGet(context) {
 
 export async function onRequestPost(context) {
   const { request, env } = context;
+  if (isAdminHost(request)) return reply({ error: 'NOT_FOUND' }, 404);
   const missing = await ensureDbReady(env);
   if (missing) return missing;
   if (!sameOrigin(request)) return reply({ error: 'BAD_ORIGIN', message: '허용되지 않은 요청입니다.' }, 403);
@@ -260,9 +264,18 @@ export async function onRequestPost(context) {
 
 export async function onRequestDelete(context) {
   const { request, env } = context;
+  const suppliedAdminKey = request.headers.get('x-admin-key') || '';
+  if (isAdminHost(request) && !suppliedAdminKey) return reply({ error: 'NOT_FOUND' }, 404);
+  if (suppliedAdminKey) {
+    const originPolicy = validateHumanAdminMutation(request);
+    if (!originPolicy.ok) {
+      return reply({ error: originPolicy.error, message: '허용되지 않은 관리자 Origin입니다.' }, 403);
+    }
+  } else if (!sameOrigin(request)) {
+    return reply({ error: 'BAD_ORIGIN', message: '허용되지 않은 요청입니다.' }, 403);
+  }
   const missing = await ensureDbReady(env);
   if (missing) return missing;
-  if (!sameOrigin(request)) return reply({ error: 'BAD_ORIGIN', message: '허용되지 않은 요청입니다.' }, 403);
 
   let data;
   try { data = await request.json(); }

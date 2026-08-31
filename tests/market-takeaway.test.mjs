@@ -65,7 +65,11 @@ function publish(db, body) {
   return publishRequest({
     request: new Request('https://snowshagal.com/api/market/publish', {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-admin-key': 'secret' },
+      headers: {
+        'content-type': 'application/json',
+        'x-admin-key': 'secret',
+        origin: 'https://snowshagal.com'
+      },
       body: JSON.stringify(body)
     }),
     env: env(db)

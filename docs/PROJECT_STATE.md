@@ -16,6 +16,21 @@ Updated: 2026-08-30
 - Comments storage: Cloudflare D1 database `market-research-comments`
 - No framework and no user membership system at present
 
+## Admin origin isolation (Phase 1A Compatibility)
+
+The current Pages project is prepared to serve the existing administrator UI and
+human-admin API on `https://admin.snowshagal.com` without adding a second project, D1
+database, secret, login, session, or cookie. `functions/_host-policy.js` is the shared
+hostname/origin source of truth. The administrator hostname admits only an explicit UI,
+asset, data, and API allowlist; report and general public active HTML fail closed before
+static fallback. Human-admin mutations require their exact request-host Origin, while
+machine credentials keep their existing endpoint behavior.
+
+Phase 1A remains in Compatibility Mode: apex `/admin/*` and apex `ADMIN_KEY` operations are
+still available until the custom domain is manually connected and smoked. Production DNS,
+Pages custom domains, D1 bindings, and secrets have not been changed. See
+`docs/ADMIN_ORIGIN_ISOLATION.md` for the complete matrix and cutover procedure.
+
 ## Public information architecture
 
 Locale structure:
@@ -163,7 +178,7 @@ The management page extends the existing static admin and GitHub-backed publishi
 - keeps the editor unchanged after a successful mutation, shows a centered completion overlay, and polls the Production `data/posts.json` plus any updated cover until Cloudflare reflects the commit;
 - redirects to the homepage after confirmed deployment, while allowing the administrator to cancel the redirect and reload the latest management list.
 
-Cloudflare Preview hosts disable actual update/delete actions in the client, and `/api/manage` independently rejects every mutation whose request hostname is not exactly `snowshagal.com`. Preview validation must use list, form, sandboxed local HTML/cover preview, and mocked API tests only.
+Cloudflare Preview hosts disable actual update/delete actions in the client. In Phase 1A Compatibility Mode, `/api/manage` accepts authenticated mutations on `admin.snowshagal.com` and the legacy `snowshagal.com` path only when the explicit `Origin` exactly matches that approved host. Preview validation must use list, form, sandboxed local HTML/cover preview, and mocked API tests only.
 
 ## Admin Web Analytics
 

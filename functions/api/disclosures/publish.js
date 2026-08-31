@@ -2,6 +2,8 @@ import {
   DisclosureError,
   authorizeAdmin,
   ensureDisclosureSchema,
+  humanAdminHostAllowed,
+  humanAdminMutationPolicy,
   json,
   setFilingPublishStatus
 } from './_shared.js';
@@ -9,9 +11,12 @@ import {
 const MAX_BODY_BYTES = 1024;
 
 export async function onRequestPost({ request, env }) {
+  if (!humanAdminHostAllowed(request)) return json({ ok: false, error: 'ADMIN_HOST_BLOCKED' }, 403);
   if (!authorizeAdmin(request, env)) {
     return json({ ok: false, error: 'UNAUTHORIZED', message: '관리자 인증이 필요합니다.' }, 401);
   }
+  const originPolicy = humanAdminMutationPolicy(request);
+  if (!originPolicy.ok) return json({ ok: false, error: originPolicy.error, message: '허용되지 않은 관리자 Origin입니다.' }, 403);
 
   const declaredSize = Number(request.headers.get('content-length') || 0);
   if (declaredSize > MAX_BODY_BYTES) return json({ ok: false, error: 'PAYLOAD_TOO_LARGE' }, 413);

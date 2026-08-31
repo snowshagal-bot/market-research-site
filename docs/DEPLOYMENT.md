@@ -34,6 +34,20 @@ Current application model:
 - Git pushes trigger automatic deployments
 - the project does not depend on a frontend framework build
 
+### Prepared administrator custom domain
+
+Phase 1A prepares `admin.snowshagal.com` on this same `market-research-site` Pages project.
+It does not create or require a second Pages project. The hostname has not been attached to
+Production by the code change. Until the owner performs the documented cutover and approves
+a separate enforcement commit, `snowshagal.com/admin/*` remains available in Compatibility
+Mode.
+
+The same project means Production/Preview bindings and secrets remain project-environment
+bindings rather than hostname-scoped resources. Browser origin isolation is enforced by
+the shared hostname policy and exact Origin checks; it is not D1/secret isolation. No D1,
+binding, secret, or build setting changes are part of Phase 1A. The manual custom-domain,
+SSL smoke, rollback, and enforcement sequence is in `ADMIN_ORIGIN_ISOLATION.md`.
+
 A previous working setup used a no-op build command (`exit 0`) for the static repository. If build settings are changed later, confirm the deployed root still serves `index.html`, `assets/`, `data/`, `reports/`, and Pages Functions correctly.
 
 ## Cloudflare Secrets
@@ -182,13 +196,13 @@ The publisher writes the report HTML, optional cover image, and both post data f
 
 Publishing accepts only `lang=ko|en`. Korean reports retain the existing `reports/` layout, while English reports are stored below `reports/en/`. Optional translation relationships are stored as `translationGroup` metadata in both synchronized post data files. Legacy records without `lang` remain Korean and are not bulk-rewritten.
 
-Both `/api/publish` and `/api/manage` reject mutation requests unless the request hostname is exactly `snowshagal.com`; Preview, the former Pages Production hostname, and local validation must never perform a real publish, update, or delete.
+During Phase 1A Compatibility Mode, `/api/publish` and `/api/manage` accept authenticated administrator mutations on `admin.snowshagal.com` and the legacy `snowshagal.com` path. Both require an explicit `Origin` header that exactly matches the request host's approved origin. Preview, the former Pages Production hostname, and local validation must never perform a real publish, update, or delete.
 
 `/api/manage` uses the same secrets and repository permissions. It reads `data/posts.json` from the exact current `main` commit, creates one commit containing all requested metadata/report/cover changes, rechecks the branch ref, and updates it with `force: false`. If `main` moves during the operation, the API returns HTTP 409 and the administrator must refresh before retrying. Delete operations are limited to canonical paths under `reports/` and `covers/`.
 
 After a successful update or delete, `/admin/manage/` polls the Production `/data/posts.json` with cache busting for up to about 90 seconds. Updates must match the API-returned post metadata and any new cover must return HTTP 200 before the UI reports deployment complete. Deletes complete only after the post ID disappears. A delayed deployment check remains a successful GitHub save and is presented as a non-error state.
 
-Cloudflare Preview validation must not perform real `/api/manage` mutations. Both the management client and `/api/manage` enforce read-only behavior outside the exact production hostname `snowshagal.com`; Preview, the former Pages Production hostname, localhost, IP hosts, and other hostnames receive HTTP 403 `PREVIEW_READ_ONLY` before GitHub access. Use local file previews and mocked API tests there.
+Cloudflare Preview validation must not perform real `/api/manage` mutations. The management client treats branch Preview, the former Pages Production hostname, localhost, IP hosts, and unknown hosts as read-only. The API additionally restricts human-admin mutations to the approved Production hosts and exact matching origins. Use local file previews and mocked API tests on Preview.
 
 ## Search indexing
 

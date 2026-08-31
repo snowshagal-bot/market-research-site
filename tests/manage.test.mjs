@@ -84,7 +84,7 @@ function manageRequest(fields = {}, key = ADMIN_KEY, url = 'https://snowshagal.c
     if (value instanceof File) form.append(name, value, value.name);
     else if (value !== null && value !== undefined) form.append(name, String(value));
   }
-  return new Request(url, { method: 'POST', headers: { 'x-admin-key': key }, body: form });
+  return new Request(url, { method: 'POST', headers: { 'x-admin-key': key, origin: new URL(url).origin }, body: form });
 }
 
 async function run(fields = {}, env = { GITHUB_TOKEN: 'token', ADMIN_KEY }, url) {

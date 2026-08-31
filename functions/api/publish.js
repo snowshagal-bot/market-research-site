@@ -1,10 +1,10 @@
 import { searchIndexArtifacts } from './_search-index.js';
 import { SOCIAL_REPORT_CARD_DIR } from '../_seo.js';
+import { isHumanAdminHost, validateHumanAdminMutation } from '../_host-policy.js';
 
 const OWNER = 'snowshagal-bot';
 const REPO = 'market-research-site';
 const BRANCH = 'main';
-const PRODUCTION_HOSTNAME = 'snowshagal.com';
 const API_VERSION = '2026-03-10';
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const MAX_COVER_BYTES = 4 * 1024 * 1024;
@@ -544,7 +544,7 @@ function hasMatchingUniqueIds(posts, searchIndex) {
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  if (new URL(request.url).hostname !== PRODUCTION_HOSTNAME) {
+  if (!isHumanAdminHost(request, { allowPreview: false })) {
     return reply({ error: 'PREVIEW_READ_ONLY', message: 'Preview와 로컬 환경에서는 게시할 수 없습니다.' }, 403);
   }
 
@@ -558,6 +558,10 @@ export async function onRequestPost(context) {
   const suppliedKey = request.headers.get('x-admin-key') || '';
   if (!(await secretsMatch(suppliedKey, env.ADMIN_KEY))) {
     return reply({ error: 'UNAUTHORIZED', message: '관리자 키가 올바르지 않습니다.' }, 401);
+  }
+  const originPolicy = validateHumanAdminMutation(request, { allowPreview: false });
+  if (!originPolicy.ok) {
+    return reply({ error: originPolicy.error, message: '허용되지 않은 관리자 Origin입니다.' }, 403);
   }
 
   let form;

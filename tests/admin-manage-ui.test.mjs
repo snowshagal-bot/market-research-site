@@ -142,7 +142,7 @@ test('manage page includes navigation, list controls, immutable metadata, edit f
   assert.match(html, /id="delete-title-confirm"/);
   assert.match(html, /id="confirm-delete"[^>]*disabled/);
   assert.match(html, /id="manage-result-overlay"[^>]*role="dialog"[^>]*aria-modal="true"/);
-  assert.match(html, /id="manage-result-home"[^>]*href="\/"/);
+  assert.match(html, /id="manage-result-home"[^>]*href="https:\/\/snowshagal\.com\/"/);
   assert.match(html, /id="manage-result-continue"/);
   assert.match(html, /admin-manage\.css\?v=[a-f0-9]{10}/);
   assert.match(html, /admin-manage\.js\?v=[a-f0-9]{10}/);
@@ -169,6 +169,7 @@ test('client list sorting, search, category and language filters, file validatio
   assert.equal(helpers.isPreviewHost('abc.market-research-site.pages.dev'), true);
   assert.equal(helpers.isPreviewHost('market-research-site.pages.dev'), true);
   assert.equal(helpers.isPreviewHost('snowshagal.com'), false);
+  assert.equal(helpers.isPreviewHost('admin.snowshagal.com'), false);
 });
 
 test('manage client keeps immutable values server-owned and preserves current href for HTML replacement', async () => {
@@ -289,7 +290,7 @@ test('deployment polling matches the updated post, verifies the cover, and redir
   assert.equal(coverCall.options.cache, 'no-store');
   assert.equal([...timers.values()].some((timer) => timer.delay === 1500), true);
   [...timers.values()].find((timer) => timer.delay === 1500).callback();
-  assert.equal(location.href, '/');
+  assert.equal(location.href, 'https://snowshagal.com/');
 });
 
 test('continue management cancels redirect, reloads production posts, and reselects the updated post', async () => {
