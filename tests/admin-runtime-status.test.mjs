@@ -190,7 +190,7 @@ test('runtime-status NEVER returns secret values, prefixes, hashes, or sensitive
       GEMINI_API_KEY: sensitiveGemini,
       OPENDART_API_KEY: sensitiveOpenDart,
       CLOUDFLARE_ANALYTICS_API_TOKEN: sensitiveAnalytics,
-      CLOUDFLARE_ACCOUNT_ID: 'd080131229ccd3a98eb5babb532cc35a',
+      CLOUDFLARE_ACCOUNT_ID: 'test-account-id',
       CLOUDFLARE_WEB_ANALYTICS_SITE_TAG: 'tag-12345'
     };
     const res = await onRequestGet({ request, env });

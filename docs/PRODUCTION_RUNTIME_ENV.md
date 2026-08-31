@@ -1,6 +1,6 @@
 # Production Runtime Environment & Secret Inventory
 
-이 문서는 Cloudflare Pages Production 환경에서 사용되는 환경변수와 Secret의 표준 명세다.
+이 문서는 Cloudflare Pages Production 환경에서 사용되는 환경변수, Secret, D1 Database Binding의 표준 명세다.
 보안 원칙에 따라 **실제 비밀값은 이 문서와 Git 저장소에 절대 기록하지 않는다.**
 
 ---
@@ -10,8 +10,8 @@
 | Variable Name | Purpose | Required / Optional | Consumer | Validation Method | Rotation Dependency |
 |---|---|---|---|---|---|
 | `GITHUB_TOKEN` | GitHub 저장소 리포트 파일 및 메타데이터 Commit/Push | **Required** | `/api/publish`, `/api/manage`, `/api/admin/runtime-status` | `GET /api/admin/runtime-status` (`githubTokenConfigured=true`, `githubRepoRead=true`, `githubHttpStatus=200`) | Standalone (Cloudflare Secret 갱신 후 Pages 재배포) |
-| `AUTH_PEPPER` | Admin 계정 비밀번호 해싱용 서버 사이드 Pepper | **Required** | `/api/auth/login`, `/api/auth/session` | `POST /api/auth/login` (정상 로그인 인증) | Critical (변경 시 기존 비밀번호 전체 재설정 필요) |
-| `ADMIN_KEY` | 레거시 호환 및 비-human 인증용 키 | **Optional** (Legacy) | `functions/_auth.js` | `functions/_auth.js` | Standalone |
+| `AUTH_PEPPER` | Login rate limiting 및 audit log용 IP 해싱 server-side pepper (Password PBKDF2 salt는 credential별로 별도 저장되므로 비밀번호 자체와 무관) | **Required** | `functions/_auth.js`, `functions/api/comments.js` | `functions/_auth.js` (IP 해시 생성 및 로그인 rate limiting) | Low impact (변경 시에도 기존 사용자 비밀번호 재설정 불필요. 단, 기존 IP hash continuity 및 rate-limit 버킷만 초기화됨) |
+| `ADMIN_KEY` | 레거시 보존 환경변수 (Active Authentication Consumer: **NONE**. Human 인증용으로 복구하지 않음) | **Optional** (Legacy retained) | `functions/api/comments.js` (fallback IP hash salt 용도 외 활성 인증 소비자 없음) | Inactive (인증 미사용) | Standalone |
 | `MARKET_PUBLISH_KEY` | Market Close 데이터 자동 게시 머신 인증 키 | **Required** | `/api/market/publish`, `/api/admin/runtime-status` | `GET /api/admin/runtime-status` (`marketPublishKeyConfigured=true`) | **Coordinated** (Cloudflare Secret과 Market Close Publisher 클라이언트 설정을 동시에 갱신해야 함. 서버 단독 변경 금지) |
 | `GEMINI_API_KEY` | 공시 분석용 Google Gemini LLM API 키 | **Required** (Disclosure feature) | `/api/disclosures/analyze`, `/api/disclosures/latest`, `/api/admin/runtime-status` | `GET /api/disclosures/latest` (`config.llmConfigured=true`), `GET /api/admin/runtime-status` (`geminiApiKeyConfigured=true`) | Standalone |
 | `OPENDART_API_KEY` | 전자공시시스템(DART) 오픈API 연동 키 | **Required** (Disclosure feature) | `/api/disclosures/sync`, `/api/disclosures/latest`, `/api/admin/runtime-status` | `GET /api/disclosures/latest` (`config.sourceConfigured=true`), `GET /api/admin/runtime-status` (`openDartApiKeyConfigured=true`) | Standalone |
@@ -27,8 +27,8 @@
 
 | Binding Name | Purpose | Required / Optional | Consumer |
 |---|---|---|---|
-| `AUTH_DB` | 관리자 계정, 세션, rate limit, 감사 로그 저장소 | **Required** | `functions/_auth.js`, `/api/auth/*` |
-| `COMMENTS_DB` | 공개 게스트 댓글 및 참여 데이터 저장소 | **Required** | `/api/comments` |
+| `AUTH_DB` | 관리자 계정(`users`, `password_credentials`), 세션(`sessions`), Rate limit(`auth_rate_limits`), 감사 로그(`audit_events`) 저장소 | **Required** | `functions/_auth.js`, `/api/auth/*` |
+| `COMMENTS_DB` | 다중 기능 운영 데이터 저장소:<br>1. 게스트 댓글, 평가, 페이지 조회 세션 (`/api/comments`, `/api/engagement`, `/api/engagement-stats`)<br>2. Market Close 일별 스냅샷 및 아카이브 (`/api/market/*`)<br>3. 공시 데이터, 관심종목, 토큰 사용량, 동기화 상태 (`/api/disclosures/*`) | **Required** | `/api/comments`, `/api/engagement`, `/api/engagement-stats`, `/api/market/*`, `/api/disclosures/*` |
 
 ---
 
@@ -37,7 +37,7 @@
 1. **전체 Object Replace 금지**: Cloudflare Pages의 환경변수/Secret 설정 시 기존 객체를 통째로 덮어쓰거나 bulk rewrite하지 않는다.
 2. **단일 키 변경**: 환경변수 작업은 반드시 필요한 키 하나씩 수정 또는 추가한다.
 3. **변경 전 이름 확인**: 작업 전 본 문서의 목록과 대조하여 변수명의 대소문자 및 철자를 확인한다.
-4. **비밀값 노출 금지**: Secret 원문은 채팅, 터미널 출력(stdout), 로그, Git 커밋, 스크린샷, 임시 파일에 일체 남기지 않는다.
+4. **Secret 원문 노출 금지**: Secret 원문은 채팅, 터미널 출력(stdout), 로그, Git 커밋, 스크린샷, 임시 파일에 일체 남기지 않는다.
 5. **Secret 설정 후 재배포**: Cloudflare Pages Secret을 변경한 후에는 반드시 새 Production deployment를 생성하여 Functions 런타임에 바인딩이 반영되도록 한다.
 6. **배포 후 Runtime Status 확인**: 배포 완료 즉시 `GET /api/admin/runtime-status`를 통해 각 기능별 바인딩 상태를 검증한다.
 7. **Publisher 검증**: `githubTokenConfigured=true`, `githubRepoRead=true`, `githubHttpStatus=200`을 확인한다.

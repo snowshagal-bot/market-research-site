@@ -185,9 +185,6 @@ test('notes category is activated and promoted to core categories', async () => 
   assert.match(locale, /basics: \{ label: 'Market Basics'/);
   assert.match(site, /const coreTypes = \['daily', 'weekly', 'research', 'note', 'basics'\];/);
   assert.match(site, /const validTypes = \['all', \.\.\.coreTypes\];/);
-
-  const posts = JSON.parse(await read('data/posts.json'));
-  assert.equal(posts.filter(post => post.type === 'note').length, 0, 'fixture assumes there are still no notes');
 });
 
 test('no note posts state exposes Investment Note in KO and EN navs and in report shell without data-notes gating', async () => {
@@ -217,8 +214,11 @@ test('no note posts state exposes Investment Note in KO and EN navs and in repor
   assert.doesNotMatch(middleware, /data-notes=/);
 });
 
-test('fixture verification: notes count is 0 and nav remains fully populated', async () => {
+test('posts metadata integrity: valid core post types present and nav fully populated', async () => {
   const posts = JSON.parse(await read('data/posts.json'));
-  assert.equal(posts.filter(post => post.type === 'note').length, 0);
   assert.ok(posts.length > 0);
+  const allowedTypes = new Set(['daily', 'weekly', 'research', 'note', 'basics']);
+  for (const post of posts) {
+    assert.ok(allowedTypes.has(post.type), `Unknown post type: ${post.type}`);
+  }
 });
