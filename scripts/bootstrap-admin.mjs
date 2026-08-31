@@ -99,13 +99,14 @@ export async function bootstrapAdmin(db, { email, password }) {
   const result = await createAdminUserSql({ email, password });
   const now = new Date().toISOString();
 
-  await db.prepare(
-    `INSERT INTO users (id, email, email_normalized, role, status, created_at, updated_at) VALUES (?, ?, ?, 'admin', 'active', ?, ?)`
-  ).bind(result.userId, result.email, result.email, now, now).run();
-
-  await db.prepare(
-    `INSERT INTO password_credentials (user_id, password_hash, password_changed_at) VALUES (?, ?, ?)`
-  ).bind(result.userId, result.passwordHash, now).run();
+  await db.batch([
+    db.prepare(
+      `INSERT INTO users (id, email, email_normalized, role, status, created_at, updated_at) VALUES (?, ?, ?, 'admin', 'active', ?, ?)`
+    ).bind(result.userId, result.email, result.email, now, now),
+    db.prepare(
+      `INSERT INTO password_credentials (user_id, password_hash, password_changed_at) VALUES (?, ?, ?)`
+    ).bind(result.userId, result.passwordHash, now)
+  ]);
 
   return { userId: result.userId, email: result.email, role: 'admin' };
 }

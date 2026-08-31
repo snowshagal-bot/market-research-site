@@ -34,19 +34,14 @@ Current application model:
 - Git pushes trigger automatic deployments
 - the project does not depend on a frontend framework build
 
-### Prepared administrator custom domain
+### Administrator custom domain (`admin.snowshagal.com`)
 
-Phase 1A prepares `admin.snowshagal.com` on this same `market-research-site` Pages project.
-It does not create or require a second Pages project. The hostname has not been attached to
-Production by the code change. Until the owner performs the documented cutover and approves
-a separate enforcement commit, `snowshagal.com/admin/*` remains available in Compatibility
-Mode.
+Phase 1A Origin Isolation and Enforcement are complete on the `market-research-site` Pages project.
+`admin.snowshagal.com` is the enforced canonical origin for the administrator interface.
+Apex `snowshagal.com/admin/*` redirects to `admin.snowshagal.com/admin/*`, and human-admin mutations on apex return HTTP 403.
 
-The same project means Production/Preview bindings and secrets remain project-environment
-bindings rather than hostname-scoped resources. Browser origin isolation is enforced by
-the shared hostname policy and exact Origin checks; it is not D1/secret isolation. No D1,
-binding, secret, or build setting changes are part of Phase 1A. The manual custom-domain,
-SSL smoke, rollback, and enforcement sequence is in `ADMIN_ORIGIN_ISOLATION.md`.
+Browser origin isolation is enforced by the shared hostname policy and exact Origin checks.
+All human administration requires server sessions on `admin.snowshagal.com`.
 
 A previous working setup used a no-op build command (`exit 0`) for the static repository. If build settings are changed later, confirm the deployed root still serves `index.html`, `assets/`, `data/`, `reports/`, and Pages Functions correctly.
 
@@ -60,7 +55,7 @@ Fine-grained GitHub PAT used only by the authenticated publishing and post-manag
 
 ### `ADMIN_KEY`
 
-Private admin password used by `/admin/`, `/admin/manage/`, and `/admin/analytics/`. The browser sends it to the corresponding Pages Function in `X-Admin-Key` after the user enters it. The admin UI stores the entered value only in browser `sessionStorage` for the session.
+Legacy project secret preserved in Cloudflare settings for backward compatibility and salt fallback. Human administrator authentication is handled exclusively by server sessions (`AUTH_DB`), role verification, exact Origin, and CSRF tokens on `admin.snowshagal.com`. `ADMIN_KEY` is not used as a human authentication credential.
 
 ### `CLOUDFLARE_ACCOUNT_ID`
 
@@ -110,9 +105,9 @@ The Gemini adapter was checked against the official API on 2026-08-30 and uses t
 
 ## Web Analytics dependencies
 
-`/admin/analytics/` requires `ADMIN_KEY`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_ANALYTICS_API_TOKEN`, and `CLOUDFLARE_WEB_ANALYTICS_SITE_TAG` in each Cloudflare Pages environment where live analytics should be queried. Configure Preview and Production separately.
+The `/admin/analytics/` interface is accessed via administrator session on `admin.snowshagal.com`. Server-side `/api/analytics` requires `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_ANALYTICS_API_TOKEN`, and `CLOUDFLARE_WEB_ANALYTICS_SITE_TAG` in each Cloudflare Pages environment where live analytics should be queried. Configure Preview and Production separately.
 
-`/api/analytics` first uses GraphQL introspection to verify the current account's `rumPageloadEventsAdaptiveGroups` dataset and available dimensions, metrics, filters, and ordering fields. Every aggregate is filtered by both the configured site tag and the exact Production host `snowshagal.com`, and uses the schema-supported `requestPath_notlike: "/admin/%"` filter so Preview traffic and all `/admin/*` operator activity are excluded before aggregation. The primary trend and rankings also use Cloudflare's `excludeBots: "Yes"` filter and are labeled Bots excluded. These figures are closer to actual-user traffic, but do not mean that every automated request has been removed. One additional trend alias uses the same date/site/host/admin-path conditions without the bot filter to provide All traffic comparison totals. If a required production, admin-path, or bot filter is unavailable, the endpoint fails closed with `ANALYTICS_SCHEMA_UNSUPPORTED` rather than returning polluted statistics. The response contains only aggregated visits, page views, dates, paths, referers, countries, devices, browsers, and operating systems. It is returned with `private, no-store`; the API token, account ID, and site tag are never returned.
+`/api/analytics` first uses GraphQL introspection to verify the current account's `rumPageloadEventsAdaptiveGroups` dataset and available dimensions, metrics, filters, and ordering fields. Every aggregate is filtered by both the configured site tag and the exact Production host `snowshagal.com`, and uses the schema-supported `requestPath_notlike: "/admin/%"` filter so Preview traffic and all `/admin/*` operator activity are excluded before aggregation. The primary trend and rankings also use Cloudflare的 `excludeBots: "Yes"` filter and are labeled Bots excluded. These figures are closer to actual-user traffic, but do not mean that every automated request has been removed. One additional trend alias uses the same date/site/host/admin-path conditions without the bot filter to provide All traffic comparison totals. If a required production, admin-path, or bot filter is unavailable, the endpoint fails closed with `ANALYTICS_SCHEMA_UNSUPPORTED` rather than returning polluted statistics. The response contains only aggregated visits, page views, dates, paths, referers, countries, devices, browsers, and operating systems. It is returned with `private, no-store`; the API token, account ID, and site tag are never returned.
 
 No rows is a normal successful response and renders an empty state. Missing configuration, unsupported schema, timeout, authentication failure, and Cloudflare query failure are separate error states and must not be converted to zero totals. Preview validation can use mocked GraphQL responses before Preview secrets are configured; the endpoint never writes Analytics data.
 
@@ -150,8 +145,8 @@ The Preview database was initialized from `db/schema.sql` and contains `comments
 `market_close_snapshots`, and `engagement_sessions`.
 
 `POST /api/market/publish` is the sole mutation exception permitted on a branch Preview
-hostname matching `*.market-research-site.pages.dev`. It still requires `MARKET_PUBLISH_KEY`
-or `ADMIN_KEY` and writes only through the Preview `COMMENTS_DB` binding. The bare
+hostname matching `*.market-research-site.pages.dev`. It requires `MARKET_PUBLISH_KEY`
+(or an authenticated administrator session) and writes only through the Preview `COMMENTS_DB` binding. The bare
 `market-research-site.pages.dev` hostname, other Pages projects, localhost, and all existing
 report/manage/engagement mutations retain their fail-closed rules. Preview E2E tests must
 verify the binding is the isolated Preview database before posting a real dated fixture.
@@ -181,14 +176,14 @@ The shared middleware injects `/assets/engagement.js` only into successful publi
 
 Each row represents one temporary page-load UUID and contains only path, connection-location country code, page language, server timestamps, foreground active milliseconds, and maximum scroll percentage. Country comes only from `request.cf.country` (fallback `XX`). The system does not store IP addresses, cookies, names, emails, login data, fingerprints, advertising IDs, persistent visitor IDs, or cross-site identifiers. Country is network location, not nationality.
 
-`GET /api/engagement-stats?days=1|7|28` uses the existing `ADMIN_KEY`, reads the same D1 binding, and returns `private, no-store` aggregates to `/admin/analytics/`. No new secret or manual database action is needed when the Production `COMMENTS_DB` and `ADMIN_KEY` bindings already exist.
+`GET /api/engagement-stats?days=1|7|28` requires an authenticated administrator session (`requireAdmin`), reads the same D1 binding, and returns `private, no-store` aggregates to `/admin/analytics/`.
 
 ## Report publishing dependencies
 
 For `/admin/` publishing to work, production needs:
 
 - `GITHUB_TOKEN` secret
-- `ADMIN_KEY` secret
+- `AUTH_DB` binding and active administrator session
 - GitHub token still valid and scoped to this repository with Contents read/write permission
 - Cloudflare Pages Git integration operational
 
@@ -196,19 +191,13 @@ The publisher writes the report HTML, optional cover image, and both post data f
 
 Publishing accepts only `lang=ko|en`. Korean reports retain the existing `reports/` layout, while English reports are stored below `reports/en/`. Optional translation relationships are stored as `translationGroup` metadata in both synchronized post data files. Legacy records without `lang` remain Korean and are not bulk-rewritten.
 
-During Phase 1A Compatibility Mode, `/api/publish` and `/api/manage` accept authenticated administrator mutations on `admin.snowshagal.com` and the legacy `snowshagal.com` path. Both require an explicit `Origin` header that exactly matches the request host's approved origin. Preview, the former Pages Production hostname, and local validation must never perform a real publish, update, or delete.
+All publishing and management operations require an authenticated admin session, matching exact `Origin` (`https://admin.snowshagal.com`), and valid CSRF token. Preview, the former Pages Production hostname, and local validation must never perform a real publish, update, or delete.
 
 `/api/manage` uses the same secrets and repository permissions. It reads `data/posts.json` from the exact current `main` commit, creates one commit containing all requested metadata/report/cover changes, rechecks the branch ref, and updates it with `force: false`. If `main` moves during the operation, the API returns HTTP 409 and the administrator must refresh before retrying. Delete operations are limited to canonical paths under `reports/` and `covers/`.
 
 After a successful update or delete, `/admin/manage/` polls the Production `/data/posts.json` with cache busting for up to about 90 seconds. Updates must match the API-returned post metadata and any new cover must return HTTP 200 before the UI reports deployment complete. Deletes complete only after the post ID disappears. A delayed deployment check remains a successful GitHub save and is presented as a non-error state.
 
 Cloudflare Preview validation must not perform real `/api/manage` mutations. The management client treats branch Preview, the former Pages Production hostname, localhost, IP hosts, and unknown hosts as read-only. The API additionally restricts human-admin mutations to the approved Production hosts and exact matching origins. Use local file previews and mocked API tests on Preview.
-
-## Search indexing
-
-The apex custom domain is the only SEO canonical origin. Static locale pages declare their own canonical and real KO/EN alternates. Report responses receive canonical, metadata, and any real `translationGroup` alternates from the shared Pages middleware, without modifying uploaded report HTML. Canonical report URLs omit the stored `.html` suffix because Cloudflare Pages redirects those file URLs to its extensionless Clean URLs. `/sitemap.xml` is generated from `data/posts.json`; repository tests ensure every listed report path exists. `/robots.txt` permits public pages, excludes `/admin/` and `/api/`, and advertises the apex sitemap. The shared middleware also sends `X-Robots-Tag: noindex, nofollow` outside `snowshagal.com`, keeping branch Preview responses available for QA without making them index candidates.
-
-The middleware also server-renders current report anchors into the homepage Latest/Archive containers and the ten KO/EN category landing routes. This makes discovery independent of client JavaScript while keeping `data/posts.json` as the server-side source and `data/posts.js` as the existing interactive client source. A locale category with no posts remains routable but is `noindex, follow`, excluded from sitemap and crawlable category navigation, and omitted from category `hreflang`; publishing its first post reverses that state automatically. Category canonicals use trailing slashes; report canonicals continue to use extensionless Clean URLs. If shared category metadata or chrome changes, run `node scripts/build-category-pages.mjs` and commit the regenerated landing files together.
 
 Search Console should use a Domain property for `snowshagal.com`, verified with its Google-provided DNS TXT record. After verification, submit `sitemap.xml` and inspect the apex homepage. Do not commit a verification token or add it to application secrets.
 
@@ -228,8 +217,11 @@ Guest comment deletion uses the user's deletion password; administrator comment 
 
 Phase 1B-A replaces browser-side `ADMIN_KEY` entry with opaque server sessions and CSRF tokens on the isolated admin origin `admin.snowshagal.com`.
 
-### Prepared Cloudflare Resources
-- D1 Database: `market-research-auth`
+### Planned / To be provisioned Cloudflare Resources
+- D1 Databases:
+  - Production: `market-research-auth`
+  - Preview: `market-research-auth-preview`
+  - **Important**: Production and Preview `AUTH_DB` must point to completely separate D1 databases; never share the same database between environments.
 - Binding Name: `AUTH_DB`
 - Secret: `AUTH_PEPPER` (recommended 32-byte secret for server-side IP hashing)
 
@@ -248,13 +240,17 @@ npx wrangler d1 execute market-research-auth --file=migrations/auth/0001_auth_fo
 ### Operator Bootstrap Workflow
 Admin users are created via the local operator CLI with hidden password prompts (no plain passwords or hashes printed to stdout or logs):
 ```bash
-# Run interactive CLI (prompts for email and hidden password, writes SQL to .bootstrap-admin.sql with 0600 permissions)
+# 1. Run interactive CLI (prompts for email and hidden password, writes SQL to .bootstrap-admin.sql with 0600 permissions)
 node scripts/bootstrap-admin.mjs
 
-# Execute generated SQL to bootstrap admin in D1
+# 2. Execute generated SQL to bootstrap admin in D1
 npx wrangler d1 execute market-research-auth-preview --file=.bootstrap-admin.sql
 
-# Remove bootstrap SQL file after execution
+# 3. Postflight verification: ensure exactly 1 admin user and 1 matching credential row exist
+npx wrangler d1 execute market-research-auth-preview --command="SELECT id, email, role, status FROM users WHERE role = 'admin';"
+npx wrangler d1 execute market-research-auth-preview --command="SELECT user_id, password_changed_at FROM password_credentials;"
+
+# 4. Remove bootstrap SQL file after verification
 rm .bootstrap-admin.sql
 ```
 
@@ -264,7 +260,7 @@ If an operator needs to roll back the auth configuration:
    ```sql
    UPDATE sessions SET revoked_at = datetime('now') WHERE revoked_at IS NULL;
    ```
-2. **Reset / Remove Admin user**:
+2. **Reset / Remove Admin user (if bootstrap or postflight verification fails)**:
    ```sql
    DELETE FROM users WHERE email_normalized = 'admin@snowshagal.com';
    ```

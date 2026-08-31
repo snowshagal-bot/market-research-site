@@ -304,6 +304,20 @@ test('Operator bootstrap CLI rejects duplicate admin', async () => {
   );
 });
 
+test('Operator bootstrap atomicity: credential failure leaves no orphan user row', async () => {
+  const db = await createMockAuthDb();
+  db.exec(`CREATE TRIGGER fail_credentials BEFORE INSERT ON password_credentials BEGIN SELECT RAISE(FAIL, 'simulated credential failure'); END;`);
+
+  await assert.rejects(
+    async () => bootstrapAdmin(db, { email: 'fail-admin@snowshagal.com', password: 'AdminPassword123!' }),
+    /simulated credential failure/
+  );
+
+  // Verify that because of atomic batch rollback, no user was left behind in users table
+  const userCount = await db.prepare('SELECT COUNT(*) AS count FROM users').first('count');
+  assert.equal(userCount, 0, 'Users table must have 0 rows after rollback');
+});
+
 test('AUTH_DB bound but schema missing fails closed with 503 AUTH_SCHEMA_NOT_READY', async () => {
   const emptyDb = await createMockAuthDb(true); // skipSchema = true
   const env = { AUTH_DB: emptyDb, ADMIN_ORIGIN: 'https://admin.snowshagal.com' };

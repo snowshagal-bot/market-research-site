@@ -2,16 +2,14 @@ import {
   validateAuthSchema,
   normalizeEmail,
   verifyPassword,
-  generateToken,
+  createSession,
   sha256Hex,
-  createSessionCookie,
   getIpHash,
   checkLoginRateLimits,
   recordLoginFailure,
   clearLoginRateLimits,
   recordAuditEvent,
   DUMMY_PBKDF2_HASH,
-  SESSION_TTL_MS,
   MAX_LOGIN_BODY_BYTES,
   MAX_EMAIL_LENGTH,
   MAX_PASSWORD_LENGTH
@@ -155,26 +153,14 @@ export async function onRequestPost(context) {
   // 7. Success -> Clear rate limits, create session
   await clearLoginRateLimits(env.AUTH_DB, ipHash, emailHash);
 
-  const rawToken = generateToken(32);
-  const csrfToken = generateToken(32);
-  const tokenHash = await sha256Hex(rawToken);
-  const sessionId = crypto.randomUUID();
-  const now = new Date();
-  const expiresAt = new Date(now.getTime() + SESSION_TTL_MS).toISOString();
-
-  await env.AUTH_DB.prepare(`
-    INSERT INTO sessions (id, user_id, token_hash, csrf_token, created_at, expires_at)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `).bind(sessionId, row.id, tokenHash, csrfToken, now.toISOString(), expiresAt).run();
+  const session = await createSession(env.AUTH_DB, { userId: row.id, role: row.role });
 
   await recordAuditEvent(env.AUTH_DB, {
     eventType: 'login_success',
     userId: row.id,
     ipHash,
-    metadata: { sessionId }
+    metadata: { sessionId: session.id }
   });
-
-  const cookieHeader = createSessionCookie(rawToken);
 
   return reply(
     {
@@ -184,9 +170,9 @@ export async function onRequestPost(context) {
         email: row.email,
         role: row.role
       },
-      csrfToken
+      csrfToken: session.csrfToken
     },
     200,
-    { 'set-cookie': cookieHeader }
+    { 'set-cookie': session.cookie }
   );
 }
