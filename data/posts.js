@@ -1,5 +1,24 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-31-daily-1mkemh5",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-08-31",
+    "reportDate": "2026-08-31",
+    "registeredDate": "2026-08-31",
+    "registeredAt": "2026-08-31T10:20:26.939Z",
+    "legacyImport": false,
+    "title": "하나가 끌어올린 자리",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "tags": [],
+    "readingMinutes": 3,
+    "href": "reports/8월 31일 주식리포트.html",
+    "coverImage": "covers/2026-08-31-daily-1mkemh5.png",
+    "shareCardImage": "covers/share/2026-08-31-daily-1mkemh5.jpg"
+  },
+  {
     "id": "2026-08-29-weekly-4xkdij",
     "type": "weekly",
     "typeLabel": "Weekly",
