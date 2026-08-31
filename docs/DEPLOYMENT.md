@@ -223,7 +223,7 @@ Phase 1B-A replaces browser-side `ADMIN_KEY` entry with opaque server sessions a
   - Preview: `market-research-auth-preview`
   - **Important**: Production and Preview `AUTH_DB` must point to completely separate D1 databases; never share the same database between environments.
 - Binding Name: `AUTH_DB`
-- Secret: `AUTH_PEPPER` (recommended 32-byte secret for server-side IP hashing)
+- Secret: `AUTH_PEPPER` (required secret of at least 32 cryptographically random bytes for server-side IP hashing)
 
 ### Schema Migration
 Schema creation is separate from runtime request paths. Runtime functions validate schema readiness and fail closed with `503 AUTH_SCHEMA_NOT_READY` if tables are missing.

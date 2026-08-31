@@ -3,6 +3,8 @@
 .env.*
 !.env.example
 .dev.vars
+.bootstrap-admin.sql
+.bootstrap-admin*.sql
 
 # Tool and dependency caches
 .wrangler/

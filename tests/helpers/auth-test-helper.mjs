@@ -136,6 +136,7 @@ export async function createMockAuthEnv(extra = {}) {
   const session = await createAdminSession(authDb);
   return {
     AUTH_DB: authDb,
+    AUTH_PEPPER: 'test-auth-pepper-secret-minimum-32-bytes',
     ADMIN_ORIGIN: 'https://admin.snowshagal.com',
     ADMIN_KEY: 'test-admin-key',
     GITHUB_TOKEN: 'test-token',

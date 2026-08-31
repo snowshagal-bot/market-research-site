@@ -46,7 +46,10 @@ export async function onRequestPost(context) {
       `UPDATE sessions SET revoked_at = ? WHERE id = ?`
     ).bind(nowIso, session.session.id).run();
 
-    const ipHash = await getIpHash(request, env.AUTH_PEPPER || '');
+    let ipHash = null;
+    if (env?.AUTH_PEPPER) {
+      ipHash = await getIpHash(request, env.AUTH_PEPPER);
+    }
     await recordAuditEvent(env.AUTH_DB, {
       eventType: 'logout',
       userId: session.user.id,

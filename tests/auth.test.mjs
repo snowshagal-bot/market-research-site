@@ -37,6 +37,8 @@ import { onRequestPost as onGenerateCover } from '../functions/api/generate-cove
 import { onRequestPost as onMarketPublish } from '../functions/api/market/publish.js';
 import { onRequestPost as onDisclosureSync } from '../functions/api/disclosures/sync.js';
 
+const TEST_AUTH_PEPPER = 'test-auth-pepper-secret-minimum-32-bytes';
+
 test('Password hashing and verification with PBKDF2-SHA256 (600,000 iterations)', async () => {
   const password = 'SuperSecureAdminPassword123!';
   const hash = await hashPassword(password);
@@ -167,7 +169,7 @@ test('Auth API login / session / logout flow', async () => {
   const password = 'CorrectPassword1234!';
   await bootstrapAdmin(db, { email, password });
 
-  const env = { AUTH_DB: db, ADMIN_ORIGIN: 'https://admin.snowshagal.com' };
+  const env = { AUTH_DB: db, AUTH_PEPPER: TEST_AUTH_PEPPER, ADMIN_ORIGIN: 'https://admin.snowshagal.com' };
 
   // 1. Bad password -> 401
   const badLoginReq = new Request('https://admin.snowshagal.com/api/auth/login', {
@@ -345,7 +347,7 @@ test('AUTH_DB bound but schema missing fails closed with 503 AUTH_SCHEMA_NOT_REA
 
 test('Login response equivalence for unknown user, disabled user, member role, and wrong password', async () => {
   const db = await createMockAuthDb();
-  const env = { AUTH_DB: db, ADMIN_ORIGIN: 'https://admin.snowshagal.com' };
+  const env = { AUTH_DB: db, AUTH_PEPPER: TEST_AUTH_PEPPER, ADMIN_ORIGIN: 'https://admin.snowshagal.com' };
 
   // 1. Setup active admin, disabled admin, and active member
   const adminPassword = 'AdminPassword123!';
@@ -441,7 +443,7 @@ test('Malformed password hash and abnormal iterations are safely rejected withou
 
 test('Oversized login inputs are rejected cleanly', async () => {
   const db = await createMockAuthDb();
-  const env = { AUTH_DB: db, ADMIN_ORIGIN: 'https://admin.snowshagal.com' };
+  const env = { AUTH_DB: db, AUTH_PEPPER: TEST_AUTH_PEPPER, ADMIN_ORIGIN: 'https://admin.snowshagal.com' };
 
   // 1. Body > 4096 bytes
   const largeBody = JSON.stringify({ email: 'admin@snowshagal.com', password: 'A'.repeat(5000) });
@@ -475,7 +477,7 @@ test('Oversized login inputs are rejected cleanly', async () => {
 
 test('IP-only rate limit bucket triggers across different emails from the same IP', async () => {
   const db = await createMockAuthDb();
-  const env = { AUTH_DB: db, ADMIN_ORIGIN: 'https://admin.snowshagal.com' };
+  const env = { AUTH_DB: db, AUTH_PEPPER: TEST_AUTH_PEPPER, ADMIN_ORIGIN: 'https://admin.snowshagal.com' };
   const ip = '198.51.100.42';
 
   // 20 failed attempts with unique emails from same IP
@@ -670,4 +672,42 @@ test('Bootstrap admin helper does not expose plain password or SQL injection', a
   // Escaped in SQL
   assert.match(result.sql, /admin''--@snowshagal\.com/);
   assert.doesNotMatch(result.sql, /SafePassword1234!/);
+});
+
+test('Missing AUTH_PEPPER on login fails closed with 503 AUTH_PEPPER_NOT_CONFIGURED', async () => {
+  const db = await createMockAuthDb();
+  const env = { AUTH_DB: db, ADMIN_ORIGIN: 'https://admin.snowshagal.com' };
+  const loginReq = new Request('https://admin.snowshagal.com/api/auth/login', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'origin': 'https://admin.snowshagal.com' },
+    body: JSON.stringify({ email: 'admin@snowshagal.com', password: 'ValidPassword123!' })
+  });
+  const loginRes = await onLogin({ request: loginReq, env });
+  assert.equal(loginRes.status, 503);
+  const loginJson = await loginRes.json();
+  assert.equal(loginJson.error, 'AUTH_PEPPER_NOT_CONFIGURED');
+});
+
+test('Missing AUTH_PEPPER on logout still revokes session and clears cookie', async () => {
+  const db = await createMockAuthDb();
+  const session = await createAdminSession(db);
+  const env = { AUTH_DB: db, ADMIN_ORIGIN: 'https://admin.snowshagal.com' };
+
+  const logoutReq = new Request('https://admin.snowshagal.com/api/auth/logout', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      origin: 'https://admin.snowshagal.com',
+      cookie: session.cookieHeader,
+      'x-csrf-token': session.csrfToken
+    }
+  });
+  const logoutRes = await onLogout({ request: logoutReq, env });
+  assert.equal(logoutRes.status, 200);
+  const cookieHeader = logoutRes.headers.get('set-cookie');
+  assert.match(cookieHeader, /Max-Age=0/);
+
+  // Session should be revoked in DB
+  const revokedSession = await db.prepare('SELECT revoked_at FROM sessions WHERE id = ?').bind(session.sessionId).first();
+  assert.ok(revokedSession.revoked_at, 'Session must be marked revoked');
 });

@@ -46,7 +46,12 @@ export async function onRequestPost(context) {
     return reply({ error: schemaCheck.error, message: schemaCheck.message }, 503);
   }
 
-  // 3. Body size and JSON parsing
+  // 3. Pepper configuration check
+  if (!env?.AUTH_PEPPER || String(env.AUTH_PEPPER).trim().length === 0) {
+    return reply({ error: 'AUTH_PEPPER_NOT_CONFIGURED', message: '인증 Pepper 설정이 필요합니다.' }, 503);
+  }
+
+  // 4. Body size and JSON parsing
   const contentLength = Number(request.headers.get('content-length') || 0);
   if (contentLength > MAX_LOGIN_BODY_BYTES) {
     return reply({ error: 'PAYLOAD_TOO_LARGE', message: '요청 크기가 허용 범위를 초과했습니다.' }, 413);
