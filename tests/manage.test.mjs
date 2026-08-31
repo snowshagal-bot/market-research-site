@@ -68,7 +68,7 @@ function githubMock(existingPosts = [basePost], { conflict = false, searchIndex 
   return calls;
 }
 
-function manageRequest(fields = {}, key = ADMIN_KEY, url = 'https://snowshagal.com/api/manage') {
+function manageRequest(fields = {}, key = ADMIN_KEY, url = 'https://admin.snowshagal.com/api/manage') {
   const form = new FormData();
   for (const [name, value] of Object.entries({
     action: 'update',

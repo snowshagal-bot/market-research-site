@@ -63,12 +63,12 @@ function env(db) {
 
 function publish(db, body) {
   return publishRequest({
-    request: new Request('https://snowshagal.com/api/market/publish', {
+    request: new Request('https://admin.snowshagal.com/api/market/publish', {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
         'x-admin-key': 'secret',
-        origin: 'https://snowshagal.com'
+        origin: 'https://admin.snowshagal.com'
       },
       body: JSON.stringify(body)
     }),

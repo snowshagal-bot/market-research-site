@@ -70,7 +70,7 @@ const environment = db => ({
   MARKET_PUBLISH_KEY: 'market-secret',
   ASSETS: { fetch: async request => new URL(request.url).pathname.endsWith('/market_close.schema.json') ? Response.json(schema) : new Response('Not found', { status: 404 }) }
 });
-const publishRequest = (payload, headers = {}, host = 'snowshagal.com') => {
+const publishRequest = (payload, headers = {}, host = headers['x-admin-key'] ? 'admin.snowshagal.com' : 'snowshagal.com') => {
   const origin = `https://${host}`;
   return new Request(`${origin}/api/market/publish`, {
     method: 'POST',

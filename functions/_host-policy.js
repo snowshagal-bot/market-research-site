@@ -14,9 +14,7 @@ export const HOST_CLASS = Object.freeze({
 });
 
 // Phase 1A intentionally keeps the existing apex administrator available.
-// The cutover PR changes this single policy value only after the custom domain
-// has been connected and its read-only smoke has passed.
-export const ADMIN_APEX_COMPATIBILITY = true;
+export const ADMIN_APEX_COMPATIBILITY = false;
 
 const ADMIN_STATIC_PATHS = new Set([
   '/assets/site.css',
