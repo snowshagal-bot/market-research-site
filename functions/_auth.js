@@ -129,6 +129,10 @@ export async function sha256Hex(input) {
 
 export async function hashPassword(password, saltBytes = null, iterations = PBKDF2_ITERATIONS) {
   const salt = saltBytes || crypto.getRandomValues(new Uint8Array(16));
+  const saltArrayBuffer = salt instanceof Uint8Array
+    ? salt.buffer.slice(salt.byteOffset, salt.byteOffset + salt.byteLength)
+    : salt;
+
   const keyMaterial = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(password),
@@ -139,7 +143,7 @@ export async function hashPassword(password, saltBytes = null, iterations = PBKD
   const derivedBits = await crypto.subtle.deriveBits(
     {
       name: 'PBKDF2',
-      salt,
+      salt: saltArrayBuffer,
       iterations,
       hash: 'SHA-256'
     },
@@ -147,7 +151,7 @@ export async function hashPassword(password, saltBytes = null, iterations = PBKD
     256
   );
   const hashBytes = new Uint8Array(derivedBits);
-  const saltB64 = bytesToBase64Url(salt);
+  const saltB64 = bytesToBase64Url(salt instanceof Uint8Array ? salt : new Uint8Array(salt));
   const hashB64 = bytesToBase64Url(hashBytes);
   return `${PBKDF2_PREFIX}$${iterations}$${saltB64}$${hashB64}`;
 }
@@ -183,7 +187,8 @@ export async function verifyPassword(password, storedHash) {
     const actualHashed = await hashPassword(password, salt, iterations);
     const actualParts = actualHashed.split('$');
     return constantTimeEqual(actualParts[3], expectedHash);
-  } catch (_) {
+  } catch (err) {
+    console.error('verifyPassword error:', err);
     return false;
   }
 }
