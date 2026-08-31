@@ -241,19 +241,19 @@ test('empty category SEO gating follows locale posts and restores itself when th
   const koNote = fixturePost('note', 'ko');
   const enNote = fixturePost('note', 'en');
 
-  // KO/EN both empty: routes remain, but both are noindex and absent from sitemap/nav/hreflang.
+  // KO/EN both empty: routes remain, but both are noindex and absent from sitemap/hreflang. Nav remains visible.
   const emptyLocations = sitemapLocations(core);
   for (const path of ['/notes/', '/en/notes/']) {
     assert.ok(!emptyLocations.includes(`${PRODUCTION_ORIGIN}${path}`));
     const response = await renderCategory(path, core);
     assert.equal(response.headers.get('x-robots-tag'), 'noindex, follow');
     const html = await response.text();
-    assert.doesNotMatch(html, /data-nav-category="note"/);
+    assert.match(html, /data-nav-category="note"/);
     assert.doesNotMatch(html, /hreflang=/);
   }
   for (const lang of ['ko', 'en']) {
     const home = await renderHome(lang, core);
-    assert.doesNotMatch(await home.text(), /data-nav-category="note"/);
+    assert.match(await home.text(), /data-nav-category="note"/);
   }
 
   // KO only: only KO is indexable/discoverable; neither page invents a locale counterpart.
@@ -268,7 +268,7 @@ test('empty category SEO gating follows locale posts and restores itself when th
   assert.doesNotMatch(await koOnlyPage.text(), /hreflang=/);
   assert.doesNotMatch(await enEmptyPage.text(), /hreflang=/);
   assert.match(await (await renderHome('ko', koreanOnly)).text(), /data-nav-category="note"/);
-  assert.doesNotMatch(await (await renderHome('en', koreanOnly)).text(), /data-nav-category="note"/);
+  assert.match(await (await renderHome('en', koreanOnly)).text(), /data-nav-category="note"/);
 
   // Both locales populated: both URLs and reciprocal alternates return automatically.
   const bilingual = [...koreanOnly, enNote];

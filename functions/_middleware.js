@@ -58,13 +58,6 @@ function replaceElementContentsById(body, id, markup) {
   return body.replace(pattern, `$1${markup}$2`);
 }
 
-function removeCategoryNavLinks(body, types) {
-  return types.reduce((html, type) => {
-    const escaped = type.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const pattern = new RegExp(`<a\\b(?=[^>]*\\bdata-nav-category=["']${escaped}["'])[^>]*>[\\s\\S]*?<\\/a>`, 'gi');
-    return html.replace(pattern, '');
-  }, body);
-}
 
 function replaceCategoryAlternates(body, markup) {
   const withoutAlternates = body.replace(/<link\b(?=[^>]*\brel=["']alternate["'])(?=[^>]*\bhreflang=["'][^"']+["'])[^>]*>/gi, '');
@@ -148,10 +141,6 @@ export async function onRequest(context) {
       try { posts = await loadPosts(context.request, context.env); } catch (_) {}
     }
 
-    const pageLang = homeLang || landing?.lang || '';
-    const unavailableCategories = posts && pageLang
-      ? Object.keys(CATEGORY_SLUGS).filter((type) => !categoryHasPosts(posts, type, pageLang))
-      : [];
     const landingAlternates = posts && landing ? categoryAlternateTags(posts, landing.type) : '';
     if (isProduction && posts && landing && !categoryHasPosts(posts, landing.type, landing.lang)) {
       const headers = new Headers(response.headers);
@@ -183,7 +172,6 @@ export async function onRequest(context) {
         }
         body = replaceCategoryAlternates(body, landingAlternates);
       }
-      if (posts && pageLang) body = removeCategoryNavLinks(body, unavailableCategories);
       if (engagement) body = body.replace(/<\/body>/i, `${engagement}</body>`);
       const headers = new Headers(response.headers);
       headers.delete('content-length');
@@ -226,11 +214,6 @@ export async function onRequest(context) {
           element(element) { element.setAttribute('hidden', ''); }
         });
       }
-    }
-    for (const type of unavailableCategories) {
-      rewriter = rewriter.on(`[data-nav-category="${type}"]`, {
-        element(element) { element.remove(); }
-      });
     }
     if (engagement) {
       rewriter = rewriter.on('body', { element(element) { element.append(engagement, { html: true }); } });
