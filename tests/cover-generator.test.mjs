@@ -18,9 +18,61 @@ function node(text = '', { visual = false, children = 1 } = {}) {
 async function generatorApi() {
   const source = await read('assets/cover-generator.js');
   const window = {};
-  vm.runInNewContext(source, { window, document: {}, Blob, File: class TestFile extends Blob {
-    constructor(parts, name, options) { super(parts, options); this.name = name; }
-  } });
+  class TestDOMParser {
+    parseFromString(html) {
+      return {
+        body: node(html),
+        querySelector(selector) {
+          if (selector.startsWith('meta[')) {
+            const match = html.match(/<meta\b[^>]*name\s*=\s*["']report-cover-selector["'][^>]*content\s*=\s*["']([^"']+)["']/i);
+            return match ? { content: match[1] } : null;
+          }
+          if (selector === '.cvwrap > .cv' || selector === '.cvwrap .cv' || selector === '.cv') {
+            if (/class=["'][^"']*\bcv\b[^"']*["']/.test(html)) {
+              const el = node('cv content', { visual: true, children: 3 });
+              el.matches = s => s === '.cv';
+              return el;
+            }
+          }
+          if (selector === '.cover-frame' && /class=["'][^"']*\bcover-frame\b[^"']*["']/.test(html)) {
+            return node('frame', { visual: true });
+          }
+          if (selector === '.cover-screen' && /class=["'][^"']*\bcover-screen\b[^"']*["']/.test(html)) {
+            const frame = /class=["'][^"']*\bcover-frame\b[^"']*["']/.test(html) ? node('frame', { visual: true }) : null;
+            const screen = node('screen', { visual: true });
+            screen.matches = s => s === '.cover-screen';
+            screen.querySelector = s => s === '.cover-frame' ? frame : null;
+            return screen;
+          }
+          if (selector === '.report-cover' && /class=["'][^"']*\breport-cover\b[^"']*["']/.test(html)) {
+            return node('report cover', { visual: true });
+          }
+          if (selector === '.opener' && /class=["'][^"']*\bopener\b[^"']*["']/.test(html)) {
+            return node('opener', { visual: true });
+          }
+          if (selector === '.mag-cover' && /class=["'][^"']*\bmag-cover\b[^"']*["']/.test(html)) {
+            return node('mag cover', { visual: true });
+          }
+          if (selector === '.cover' && /class=["'][^"']*\bcover\b[^"']*["']/.test(html)) {
+            return node('cover', { visual: true });
+          }
+          return null;
+        },
+        querySelectorAll() {
+          return [];
+        }
+      };
+    }
+  }
+  vm.runInNewContext(source, {
+    window,
+    document: {},
+    Blob,
+    DOMParser: TestDOMParser,
+    File: class TestFile extends Blob {
+      constructor(parts, name, options) { super(parts, options); this.name = name; }
+    }
+  });
   return window.MARKET_COVER_GENERATOR;
 }
 
@@ -242,15 +294,71 @@ test('HTML targets use the same-origin server capture endpoint and preserve the 
   assert.match(source, /try \{ return await serverCapture\(html, selector, token\); \}[\s\S]*createTemplateCover\(template\)/);
 });
 
-test('configuration and authentication errors are never hidden by a template fallback', async () => {
+test('configuration and authentication errors are never hidden while missing target uses template fallback', async () => {
   const api = await generatorApi();
-  for (const code of ['UNAUTHORIZED', 'BROWSER_RENDERING_NOT_CONFIGURED', 'HTML_TOO_LARGE', 'COVER_TARGET_NOT_FOUND']) {
+  for (const code of ['UNAUTHORIZED', 'BROWSER_RENDERING_NOT_CONFIGURED', 'HTML_TOO_LARGE']) {
     assert.equal(api.canUseTemplateFallback({ code }), false, code);
   }
-  for (const code of ['BROWSER_RENDERING_FAILED', 'BROWSER_RENDERING_TIMEOUT', 'INVALID_RENDER_RESPONSE', 'INVALID_RENDER_SIZE']) {
+  for (const code of ['COVER_TARGET_NOT_FOUND', 'COVER_SELECTOR_INVALID', 'BROWSER_RENDERING_FAILED', 'BROWSER_RENDERING_TIMEOUT', 'INVALID_RENDER_RESPONSE', 'INVALID_RENDER_SIZE']) {
     assert.equal(api.canUseTemplateFallback({ code }), true, code);
   }
   assert.equal(api.canUseTemplateFallback(new TypeError('network failure')), true);
+});
+
+test('Investment Note HTML with no formal cover section falls back cleanly to template cover (900x1350)', async () => {
+  const api = await generatorApi();
+  const noteHtml = `<!doctype html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <title>INVESTMENT NOTE · NO.01 · 미국 자금시장 점검</title>
+  </head>
+  <body>
+    <main class="page">
+      <header class="mast">
+        <span class="eyebrow">INVESTMENT NOTE · NO.01</span>
+        <h1>미국 자금시장 점검</h1>
+        <p class="lead">SOFR와 역레포 잔액 변화를 통해 보는 단기 유동성 환경</p>
+      </header>
+      <section class="hero">
+        <p>단기 자금 시장의 주요 지표를 점검합니다.</p>
+      </section>
+    </main>
+  </body>
+  </html>`;
+
+  const selector = api.preferredSelector(noteHtml);
+  assert.equal(selector, '', 'Generic main/page elements must not be treated as server capture selectors');
+
+  const templateInput = {
+    category: '투자 노트',
+    date: '2026-09-15',
+    title: '미국 자금시장 점검',
+    description: 'SOFR와 역레포 잔액 변화를 통해 보는 단기 유동성 환경'
+  };
+
+  const template = api.templateData(templateInput);
+  assert.equal(template.category, '투자 노트');
+  assert.equal(template.title, '미국 자금시장 점검');
+  assert.equal(template.summary, 'SOFR와 역레포 잔액 변화를 통해 보는 단기 유동성 환경');
+  assert.equal(api.OUTPUT_WIDTH, 900);
+  assert.equal(api.OUTPUT_HEIGHT, 1350);
+});
+
+test('Daily, Weekly, and Research formal covers retain browser capture selectors', async () => {
+  const api = await generatorApi();
+
+  // Daily report with .cv
+  const dailyHtml = `<html><body><div class="cvwrap"><div class="cv"><img src="chart.png"><h1>Daily Cover</h1></div></div></body></html>`;
+  assert.equal(api.preferredSelector(dailyHtml), '.cv');
+
+  // Weekly report with .cover-frame / .mag-cover
+  const weeklyHtml = `<html><body><div class="cover-screen"><div class="cover-frame"><img src="cover.png"></div></div></body></html>`;
+  assert.equal(api.preferredSelector(weeklyHtml), '.cover-frame');
+
+  // Research report with .report-cover
+  const researchHtml = `<html><body><div class="report-cover"><img src="research.png"><h1>Deep Research</h1></div></body></html>`;
+  assert.equal(api.preferredSelector(researchHtml), '.report-cover');
 });
 
 test('the broken foreignObject rasterization path is no longer used', async () => {

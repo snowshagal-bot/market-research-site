@@ -524,9 +524,9 @@ test('invalid administrator authentication keeps a clear publish failure visible
   assert.equal(elements['publish-overlay'].classList.contains('error'), true);
   assert.equal(elements['publish-overlay'].getAttribute('role'), 'alertdialog');
   assert.equal(elements['publish-overlay'].getAttribute('aria-live'), 'assertive');
-  assert.equal(elements['publish-state-title'].textContent, '게시되지 않았습니다.');
-  assert.match(elements['publish-state-text'].textContent, /관리자 인증이 필요하거나|관리자 키/);
-  assert.equal(elements['publish-error-actions'].hidden, false);
+  assert.match(elements['publish-state-text'].textContent, /관리자 인증이 필요하거나/);
+  assert.match(elements['publish-state-detail'].textContent, /관리자 로그인 세션이 만료되었거나 권한이 없습니다/);
+  assert.equal(elements['publish-error-close'].textContent, '로그인 확인');
   assert.match(elements['parse-status'].textContent, /게시되지 않음/);
 
   elements['publish-error-close'].emit('click');

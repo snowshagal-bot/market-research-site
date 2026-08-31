@@ -7,16 +7,14 @@
     '.cvwrap > .cv',
     '.cvwrap .cv',
     '.cv',
-    '.mag-cover',
-    '.cover',
-    '.cover-page',
     '.cover-frame',
+    '.cover-page',
+    '.mag-cover',
     '.cover-screen',
-    '.page.cover',
     '.report-cover',
-    '.opener',
-    '.page:first-of-type',
-    'main'
+    '.cover',
+    '.page.cover',
+    '.opener'
   ];
   const SAFE_SELECTOR_TOKEN = /^[A-Za-z_][A-Za-z0-9_-]*$/;
   const COVER_CLASS_TOKEN = /(?:^|[-_])cover(?:$|[-_])/i;
@@ -79,18 +77,12 @@
         if (usableCandidate(target)) return normalizeCaptureTarget(target, declared, 'meta');
       } catch (_) {}
     }
-    for (const selector of HEURISTIC_SELECTORS.slice(0, -2)) {
+    for (const selector of HEURISTIC_SELECTORS) {
       const target = doc.querySelector(selector);
       if (usableCandidate(target)) return normalizeCaptureTarget(target, selector, 'heuristic');
     }
     const standaloneCover = findStandaloneImageCover(doc);
     if (standaloneCover) return standaloneCover;
-    for (const selector of HEURISTIC_SELECTORS.slice(-2)) {
-      const target = doc.querySelector(selector);
-      if (usableCandidate(target)) return normalizeCaptureTarget(target, selector, 'heuristic');
-    }
-    const body = doc.body;
-    if (usableCandidate(body, false)) return { target: body, selector: 'body', source: 'heuristic' };
     return { target: null, selector: '', source: 'template' };
   }
 
@@ -283,6 +275,8 @@
   function canUseTemplateFallback(error) {
     const code = String(error?.code || '');
     return !code || [
+      'COVER_TARGET_NOT_FOUND',
+      'COVER_SELECTOR_INVALID',
       'BROWSER_RENDERING_FAILED',
       'BROWSER_RENDERING_TIMEOUT',
       'INVALID_RENDER_RESPONSE',

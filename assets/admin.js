@@ -642,11 +642,11 @@
     overlayTitle.textContent = '게시되지 않았습니다.';
     overlayText.textContent = message;
     overlayDetail.textContent = authentication
-      ? 'Production에 설정한 관리자 키를 다시 입력한 후 게시해 주세요.'
+      ? '관리자 로그인 세션이 만료되었거나 권한이 없습니다. 다시 로그인한 후 시도해 주세요.'
       : '입력한 리포트와 게시 정보는 유지했습니다. 안내를 확인한 후 다시 시도해 주세요.';
     overlayLinks.hidden = true;
     if (overlayErrorActions) overlayErrorActions.hidden = false;
-    if (overlayErrorClose) overlayErrorClose.textContent = authentication ? '관리자 키 다시 입력' : '확인';
+    if (overlayErrorClose) overlayErrorClose.textContent = authentication ? '로그인 확인' : '확인';
   }
 
   function sleep(ms) {
