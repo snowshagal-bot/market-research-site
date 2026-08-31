@@ -1,6 +1,8 @@
 export const SCHEMA_VERSION = '1.1.0';
 export const SUPPORTED_SCHEMA_VERSIONS = Object.freeze(['1.0.1', '1.1.0']);
 export const MAX_PAYLOAD_BYTES = 512 * 1024;
+import { isAdminHost, isPreviewHost, isPublicHost, validateHumanAdminMutation } from '../../_host-policy.js';
+
 export const TABLE_NAME = 'market_close_snapshots';
 export const SCHEMA_PATH = '/contracts/market_close/market_close.schema.json';
 // The editorial one-liner is written by hand while the market payload is
@@ -62,19 +64,14 @@ export function formatMarketResponse(row, request) {
 }
 
 export function isProductionRequest(request) {
-  try { return new URL(request.url).hostname === 'snowshagal.com'; }
-  catch (_) { return false; }
+  return isPublicHost(request);
 }
 
 export function isMarketWriteRequest(request) {
-  try {
-    const hostname = new URL(request.url).hostname;
-    if (hostname === 'snowshagal.com') return true;
-    // A branch Preview uses its isolated Preview D1 binding. The bare Pages
-    // production hostname remains blocked, and authentication is still
-    // mandatory before any write is attempted.
-    return /^[a-z0-9-]+\.market-research-site\.pages\.dev$/i.test(hostname);
-  } catch (_) { return false; }
+  // A branch Preview uses its isolated Preview D1 binding. The bare Pages
+  // production hostname remains blocked, and authentication is still
+  // mandatory before any write is attempted.
+  return isPublicHost(request) || isAdminHost(request) || isPreviewHost(request);
 }
 
 function constantTimeEqual(left, right) {
@@ -92,6 +89,10 @@ export function authorizePublish(request, env) {
   if (env.MARKET_PUBLISH_KEY && constantTimeEqual(marketKey, env.MARKET_PUBLISH_KEY)) return 'market-publish-key';
   if (env.ADMIN_KEY && constantTimeEqual(adminKey, env.ADMIN_KEY)) return 'admin-key';
   return '';
+}
+
+export function humanAdminPublishPolicy(request) {
+  return validateHumanAdminMutation(request);
 }
 
 // D1 reports an existing column as "duplicate column name: <column>".

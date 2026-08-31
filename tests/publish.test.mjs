@@ -174,7 +174,7 @@ function publishRequest({ type = 'daily', cover = null, shareCard = null, lang =
   if (shareCard) form.append('shareCard', shareCard, shareCard.name);
   return new Request(url, {
     method: 'POST',
-    headers: { 'x-admin-key': ADMIN_KEY },
+    headers: { 'x-admin-key': ADMIN_KEY, origin: new URL(url).origin },
     body: form
   });
 }

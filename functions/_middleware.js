@@ -1,6 +1,5 @@
 import {
   FAVICON_TAGS,
-  PRODUCTION_ORIGIN,
   CATEGORY_SLUGS,
   categoryAlternateTags,
   categoryHasPosts,
@@ -16,6 +15,40 @@ import {
   normalizeSitePath,
   reportSeoTags
 } from './_seo.js';
+import {
+  ADMIN_CSP,
+  HOST_CLASS,
+  adminHostRouteDecision,
+  apexAdminRouteDecision,
+  classifyHost,
+  isAdminHost,
+  isAdminUiPath
+} from './_host-policy.js';
+
+function policyResponse(status, error) {
+  return new Response(JSON.stringify({ ok: false, error }), {
+    status,
+    headers: {
+      'content-type': 'application/json; charset=utf-8',
+      'cache-control': 'private, no-store, max-age=0',
+      'x-content-type-options': 'nosniff',
+      'x-robots-tag': 'noindex, nofollow'
+    }
+  });
+}
+
+function withAdminHeaders(response, { html = false } = {}) {
+  const headers = new Headers(response.headers);
+  headers.set('cache-control', 'private, no-store, max-age=0');
+  headers.set('x-content-type-options', 'nosniff');
+  headers.set('x-robots-tag', 'noindex, nofollow');
+  if (html) headers.set('content-security-policy', ADMIN_CSP);
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers
+  });
+}
 
 function replaceElementContentsById(body, id, markup) {
   const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -38,10 +71,28 @@ function replaceCategoryAlternates(body, markup) {
 
 export async function onRequest(context) {
   const url = new URL(context.request.url);
-  const isProduction = url.hostname === new URL(PRODUCTION_ORIGIN).hostname;
+  const hostClass = classifyHost(url);
+  const isProduction = hostClass === HOST_CLASS.PUBLIC_PRODUCTION;
+  const adminDecision = adminHostRouteDecision(context.request);
+  if (adminDecision.action === 'deny') return policyResponse(adminDecision.status, 'ADMIN_HOST_PATH_BLOCKED');
+  const apexDecision = apexAdminRouteDecision(context.request);
+  if (apexDecision.action === 'deny') return policyResponse(apexDecision.status, 'APEX_ADMIN_BLOCKED');
+  if (apexDecision.action === 'redirect') {
+    return new Response(null, {
+      status: apexDecision.status,
+      headers: { location: apexDecision.location, 'cache-control': 'private, no-store, max-age=0' }
+    });
+  }
   let response = await context.next();
 
-  if (!isProduction) {
+  if (isAdminHost(url)) {
+    const contentType = response.headers.get('content-type') || '';
+    response = withAdminHeaders(response, {
+      html: isAdminUiPath(url.pathname) && contentType.includes('text/html')
+    });
+  }
+
+  if (!isProduction && !isAdminHost(url)) {
     const headers = new Headers(response.headers);
     headers.set('x-robots-tag', 'noindex, nofollow');
     response = new Response(response.body, {

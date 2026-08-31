@@ -66,7 +66,7 @@
   let reportSelectionVersion = 0;
   let coverPreviewUrl = '';
   let publishing = false;
-  const PRODUCTION_HOSTNAME = 'snowshagal.com';
+  const PUBLIC_ORIGIN = 'https://snowshagal.com';
   const localeApi = window.MARKET_LOCALE;
 
   const defaultCoverInfo = 'JPG, PNG, WebP · 최대 4MB · 원본 리포트 HTML과 별도로 저장됩니다.';
@@ -251,7 +251,7 @@
   }
 
   function isPreviewHost(hostname) {
-    return Boolean(hostname) && hostname !== PRODUCTION_HOSTNAME;
+    return Boolean(hostname) && hostname !== 'snowshagal.com' && hostname !== 'admin.snowshagal.com';
   }
 
   const defaultDescriptions = {
@@ -645,11 +645,12 @@
   }
 
   async function waitForDeployment(postId, reportUrl, postType, registered, language) {
-    const categoryUrl = language === 'en'
-      ? `../en/?category=${encodeURIComponent(postType)}`
-      : `../?category=${encodeURIComponent(postType)}`;
+    const categoryPath = language === 'en'
+      ? `/en/?category=${encodeURIComponent(postType)}`
+      : `/?category=${encodeURIComponent(postType)}`;
+    const categoryUrl = `${PUBLIC_ORIGIN}${categoryPath}`;
     homeLink.href = categoryUrl;
-    reportLink.href = reportUrl || '#';
+    reportLink.href = reportUrl ? new URL(reportUrl, PUBLIC_ORIGIN).href : '#';
     overlayTitle.textContent = '홈페이지 반영 중';
     overlayText.textContent = 'GitHub 게시가 끝났습니다. Cloudflare가 새 버전을 배포하고 있습니다.';
     overlayDetail.textContent = `홈페이지 등록일 ${registered} · 새 배포 확인 중`;

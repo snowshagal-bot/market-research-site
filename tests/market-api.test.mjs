@@ -70,11 +70,14 @@ const environment = db => ({
   MARKET_PUBLISH_KEY: 'market-secret',
   ASSETS: { fetch: async request => new URL(request.url).pathname.endsWith('/market_close.schema.json') ? Response.json(schema) : new Response('Not found', { status: 404 }) }
 });
-const publishRequest = (payload, headers = {}, host = 'snowshagal.com') => new Request(`https://${host}/api/market/publish`, {
-  method: 'POST',
-  headers: { 'content-type': 'application/json', ...headers },
-  body: typeof payload === 'string' ? payload : JSON.stringify(payload)
-});
+const publishRequest = (payload, headers = {}, host = 'snowshagal.com') => {
+  const origin = `https://${host}`;
+  return new Request(`${origin}/api/market/publish`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...(headers['x-admin-key'] ? { origin } : {}), ...headers },
+    body: typeof payload === 'string' ? payload : JSON.stringify(payload)
+  });
+};
 
 test('authoritative example passes the schema-backed final validator', () => {
   assert.deepEqual(validateMarketPayload(fixture, schema), { passed: true, errors: [] });

@@ -10,10 +10,12 @@ const ENV = {
 };
 
 function request(body, key = ENV.ADMIN_KEY) {
-  return new Request('https://preview.example/api/generate-cover', {
+  const origin = 'https://admin-preview.market-research-site.pages.dev';
+  return new Request(`${origin}/api/generate-cover`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
+      origin,
       ...(key === null ? {} : { 'x-admin-key': key })
     },
     body: JSON.stringify(body)

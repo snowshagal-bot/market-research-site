@@ -459,7 +459,9 @@
 
     if (exactDaily) {
       const ctaLabel = isHistory ? copy.historyReport : copy.latestReport;
-      const cleanHref = exactDaily.href ? exactDaily.href : '#';
+      const cleanHref = exactDaily.href
+        ? `https://snowshagal.com/${String(exactDaily.href).replace(/^\/+/, '')}`
+        : '#';
       reportCtaHtml = `
         <a class="market-report-cta" href="${html(cleanHref)}">
           <span>${html(ctaLabel)}</span>

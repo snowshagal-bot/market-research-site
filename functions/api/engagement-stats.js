@@ -1,4 +1,5 @@
 import { loadPosts } from '../_seo.js';
+import { isHumanAdminHost } from '../_host-policy.js';
 import {
   aggregateRows,
   ensureEngagementSchema,
@@ -27,6 +28,7 @@ function titleLookup(posts) {
 }
 
 export async function onRequestGet({ request, env }) {
+  if (!isHumanAdminHost(request)) return json({ ok: false, error: 'ADMIN_HOST_BLOCKED' }, 403);
   if (!env?.ADMIN_KEY) return json({ ok: false, error: 'SERVER_NOT_CONFIGURED' }, 503);
   if (!await secretsMatch(request.headers.get('x-admin-key'), env.ADMIN_KEY)) return json({ ok: false, error: 'UNAUTHORIZED' }, 401);
   if (!env?.COMMENTS_DB) return json({ ok: false, error: 'ENGAGEMENT_NOT_CONFIGURED' }, 503);

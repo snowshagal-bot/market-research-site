@@ -10,6 +10,14 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+0. **Admin origin isolation Phase 1A cutover (manual approval pending)**:
+   - Compatibility code prepares `admin.snowshagal.com` on the existing Pages project while
+     retaining apex `/admin/*` and `ADMIN_KEY` operation.
+   - Do not attach the Production custom domain from a Preview PR. After approved merge,
+     follow `docs/ADMIN_ORIGIN_ISOLATION.md`, run the read-only admin-host smoke, and request
+     explicit approval for the separate apex enforcement commit.
+   - No login/session/cookie/AUTH_DB work belongs to Phase 1A.
+
 1. **Google Search Console Domain property confirmation & Sitemap monitoring**:
    - Verify `snowshagal.com` DNS Domain-property in Google Search Console.
    - Confirm `/sitemap.xml` coverage, indexing status, and crawl rates for KO/EN homepages, category landings, and published reports.

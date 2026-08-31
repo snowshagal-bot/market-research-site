@@ -1,3 +1,5 @@
+import { isHumanAdminHost } from '../_host-policy.js';
+
 const GRAPHQL_ENDPOINT = 'https://api.cloudflare.com/client/v4/graphql';
 const DATASET = 'rumPageloadEventsAdaptiveGroups';
 const PRODUCTION_HOSTNAME = 'snowshagal.com';
@@ -417,6 +419,9 @@ function normalizeAnalytics(data, schema, days, dates) {
 }
 
 export async function onRequestGet({ request, env }) {
+  if (!isHumanAdminHost(request)) {
+    return json({ ok: false, error: 'ADMIN_HOST_BLOCKED', message: '허용되지 않은 관리자 host입니다.' }, 403);
+  }
   if (!env.ADMIN_KEY) {
     return json({ ok: false, error: 'SERVER_NOT_CONFIGURED', message: '관리자 인증 설정이 필요합니다.' }, 503);
   }

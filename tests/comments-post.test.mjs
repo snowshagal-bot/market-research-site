@@ -1,9 +1,7 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { DatabaseSync } from 'node:sqlite';
 
-const source = await readFile(new URL('../functions/api/comments.js', import.meta.url), 'utf8');
-const moduleUrl = `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
+const moduleUrl = new URL('../functions/api/comments.js', import.meta.url).href;
 const cloudflareMaxPbkdf2Iterations = 100000;
 const originalCryptoDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'crypto');
 const nativeCrypto = globalThis.crypto;
@@ -35,7 +33,7 @@ Object.defineProperty(globalThis, 'crypto', {
 });
 
 async function loadHandlers(scenario) {
-  return import(`${moduleUrl}#${scenario}`);
+  return import(`${moduleUrl}?scenario=${scenario}`);
 }
 
 class SqliteStatement {
