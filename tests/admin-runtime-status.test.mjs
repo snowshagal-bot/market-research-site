@@ -94,6 +94,7 @@ test('configured GITHUB_TOKEN with GitHub 200 response sets githubTokenConfigure
     const env = {
       AUTH_DB: db,
       GITHUB_TOKEN: 'ghp_secret_token_value_12345',
+      CLOUDFLARE_ACCOUNT_ID: 'acc-id-123',
       CLOUDFLARE_BROWSER_RENDERING_TOKEN: 'br-token',
       DISCLOSURE_SYNC_KEY: 'disc-key',
       MARKET_PUBLISH_KEY: 'mkt-key'
@@ -112,6 +113,37 @@ test('configured GITHUB_TOKEN with GitHub 200 response sets githubTokenConfigure
     assert.equal(authHeader, 'Bearer ghp_secret_token_value_12345');
   } finally {
     globalThis.fetch = originalFetch;
+  }
+});
+
+test('browserRenderingConfigured requires both CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_BROWSER_RENDERING_TOKEN', async () => {
+  const db = await createMockAuthDb();
+  const session = await createAdminSession(db);
+  const request = createAdminRequest('https://admin.snowshagal.com/api/admin/runtime-status', {
+    cookie: session.cookieHeader
+  });
+
+  const matrix = [
+    { accountId: '', token: '', expected: false },
+    { accountId: 'acc-123', token: '', expected: false },
+    { accountId: '', token: 'br-tok', expected: false },
+    { accountId: 'acc-123', token: 'br-tok', expected: true }
+  ];
+
+  for (const { accountId, token, expected } of matrix) {
+    const env = {
+      AUTH_DB: db,
+      CLOUDFLARE_ACCOUNT_ID: accountId,
+      CLOUDFLARE_BROWSER_RENDERING_TOKEN: token
+    };
+    const res = await onRequestGet({ request, env });
+    assert.equal(res.status, 200);
+    const data = await res.json();
+    assert.equal(
+      data.runtime.browserRenderingConfigured,
+      expected,
+      `Expected browserRenderingConfigured=${expected} when accountId="${accountId}" and token="${token}"`
+    );
   }
 });
 

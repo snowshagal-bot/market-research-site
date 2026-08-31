@@ -46,7 +46,12 @@ export async function onRequestGet(context) {
     }
   }
 
-  const browserRenderingConfigured = Boolean(env?.CLOUDFLARE_BROWSER_RENDERING_TOKEN || env?.CLOUDFLARE_ACCOUNT_ID);
+  const browserRenderingConfigured = Boolean(
+    env?.CLOUDFLARE_ACCOUNT_ID &&
+    String(env.CLOUDFLARE_ACCOUNT_ID).trim().length > 0 &&
+    env?.CLOUDFLARE_BROWSER_RENDERING_TOKEN &&
+    String(env.CLOUDFLARE_BROWSER_RENDERING_TOKEN).trim().length > 0
+  );
   const disclosureSyncKeyConfigured = Boolean(env?.DISCLOSURE_SYNC_KEY && String(env.DISCLOSURE_SYNC_KEY).trim().length > 0);
   const marketPublishKeyConfigured = Boolean(env?.MARKET_PUBLISH_KEY && String(env.MARKET_PUBLISH_KEY).trim().length > 0);
 
