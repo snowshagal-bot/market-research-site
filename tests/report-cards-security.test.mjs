@@ -190,11 +190,35 @@ test('notes category is activated and promoted to core categories', async () => 
   assert.equal(posts.filter(post => post.type === 'note').length, 0, 'fixture assumes there are still no notes');
 });
 
-test('the middleware flags notes only for the report language', async () => {
-  const middleware = await read('functions/_middleware.js');
-  // lang is derived from the report path, so a Korean-only note leaves an
-  // English report's fixed nav without the link, matching /en/.
-  assert.ok(middleware.includes("i.test(url.pathname) ? 'en' : 'ko'"),
-    'lang must come from the report path');
-  assert.match(middleware, /candidate\?\.type === 'note' && \(candidate\?\.lang === 'en' \? 'en' : 'ko'\) === lang/);
+test('no note posts state exposes Investment Note in KO and EN navs and in report shell without data-notes gating', async () => {
+  const [koHome, enHome, shell, middleware] = await Promise.all([
+    read('index.html'),
+    read('en/index.html'),
+    read('assets/report-shell.js'),
+    read('functions/_middleware.js')
+  ]);
+
+  // KO desktop & mobile nav has 투자 노트
+  assert.match(koHome, /<nav class="main-nav"[\s\S]*?data-nav-category="research"[\s\S]*?data-nav-category="note"[^>]*>투자 노트<\/a>[\s\S]*?data-nav-category="basics"[^>]*>시장 입문<\/a>/);
+  assert.match(koHome, /<nav class="mobile-quick-nav"[\s\S]*?data-nav-category="research"[\s\S]*?data-nav-category="note"[^>]*>투자 노트<\/a>[\s\S]*?data-nav-category="basics"[^>]*>시장 입문<\/a>/);
+
+  // EN desktop & mobile nav has Investment Note
+  assert.match(enHome, /<nav class="main-nav"[\s\S]*?data-nav-category="research"[\s\S]*?data-nav-category="note"[^>]*>Investment Note<\/a>[\s\S]*?data-nav-category="basics"[^>]*>Market Basics<\/a>/);
+  assert.match(enHome, /<nav class="mobile-quick-nav"[\s\S]*?data-nav-category="research"[\s\S]*?data-nav-category="note"[^>]*>Investment Note<\/a>[\s\S]*?data-nav-category="basics"[^>]*>Market Basics<\/a>/);
+
+  // Report shell nav order: research -> note -> basics
+  assert.ok(shell.indexOf("categoryPath('research')") < shell.indexOf("categoryPath('note')"));
+  assert.ok(shell.indexOf("categoryPath('note')") < shell.indexOf("categoryPath('basics')"));
+
+  // Dead gating removal check: no hasNotes or data-notes attribute in report-shell or middleware
+  assert.doesNotMatch(shell, /hasNotes/);
+  assert.doesNotMatch(shell, /dataset\.notes/);
+  assert.doesNotMatch(middleware, /hasNotes/);
+  assert.doesNotMatch(middleware, /data-notes=/);
+});
+
+test('fixture verification: notes count is 0 and nav remains fully populated', async () => {
+  const posts = JSON.parse(await read('data/posts.json'));
+  assert.equal(posts.filter(post => post.type === 'note').length, 0);
+  assert.ok(posts.length > 0);
 });

@@ -1,8 +1,6 @@
 (() => {
   const scriptEl = document.currentScript;
   const active = scriptEl?.dataset.category || '';
-  // Mirrors the homepage: the 끄적끄적 entry point appears once a note exists.
-  const hasNotes = scriptEl?.dataset.notes === '1';
   const locale = scriptEl?.dataset.lang === 'en' || /^\/reports\/en\//i.test(location.pathname) ? 'en' : 'ko';
   const targetLocale = locale === 'en' ? 'ko' : 'en';
   const localeApi = window.MARKET_LOCALE;
