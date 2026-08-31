@@ -54,6 +54,16 @@ export async function onRequestGet(context) {
   );
   const disclosureSyncKeyConfigured = Boolean(env?.DISCLOSURE_SYNC_KEY && String(env.DISCLOSURE_SYNC_KEY).trim().length > 0);
   const marketPublishKeyConfigured = Boolean(env?.MARKET_PUBLISH_KEY && String(env.MARKET_PUBLISH_KEY).trim().length > 0);
+  const geminiApiKeyConfigured = Boolean(env?.GEMINI_API_KEY && String(env.GEMINI_API_KEY).trim().length > 0);
+  const openDartApiKeyConfigured = Boolean(env?.OPENDART_API_KEY && String(env.OPENDART_API_KEY).trim().length > 0);
+  const analyticsConfigured = Boolean(
+    env?.CLOUDFLARE_ACCOUNT_ID &&
+    String(env.CLOUDFLARE_ACCOUNT_ID).trim().length > 0 &&
+    env?.CLOUDFLARE_ANALYTICS_API_TOKEN &&
+    String(env.CLOUDFLARE_ANALYTICS_API_TOKEN).trim().length > 0 &&
+    env?.CLOUDFLARE_WEB_ANALYTICS_SITE_TAG &&
+    String(env.CLOUDFLARE_WEB_ANALYTICS_SITE_TAG).trim().length > 0
+  );
 
   return reply({
     ok: true,
@@ -63,7 +73,11 @@ export async function onRequestGet(context) {
       githubHttpStatus,
       browserRenderingConfigured,
       disclosureSyncKeyConfigured,
-      marketPublishKeyConfigured
+      disclosureSyncKeyRequired: false,
+      marketPublishKeyConfigured,
+      geminiApiKeyConfigured,
+      openDartApiKeyConfigured,
+      analyticsConfigured
     }
   }, 200);
 }

@@ -178,16 +178,105 @@ test('runtime-status NEVER returns secret values, prefixes, hashes, or sensitive
     cookie: session.cookieHeader
   });
   const sensitiveToken = 'ghp_SUPER_SECRET_TOKEN_DO_NOT_LEAK_99999999';
+  const sensitiveGemini = 'AIzaSy_SUPER_SECRET_GEMINI_KEY_123456';
+  const sensitiveOpenDart = 'opendart_SUPER_SECRET_KEY_7890';
+  const sensitiveAnalytics = 'cf_SUPER_SECRET_ANALYTICS_TOKEN_ABC';
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () => new Response(JSON.stringify({ secret_github_internal: 'hidden' }), { status: 200 });
   try {
-    const env = { AUTH_DB: db, GITHUB_TOKEN: sensitiveToken };
+    const env = {
+      AUTH_DB: db,
+      GITHUB_TOKEN: sensitiveToken,
+      GEMINI_API_KEY: sensitiveGemini,
+      OPENDART_API_KEY: sensitiveOpenDart,
+      CLOUDFLARE_ANALYTICS_API_TOKEN: sensitiveAnalytics,
+      CLOUDFLARE_ACCOUNT_ID: 'd080131229ccd3a98eb5babb532cc35a',
+      CLOUDFLARE_WEB_ANALYTICS_SITE_TAG: 'tag-12345'
+    };
     const res = await onRequestGet({ request, env });
     const text = await res.text();
     assert.doesNotMatch(text, /SUPER_SECRET/);
     assert.doesNotMatch(text, /ghp_/);
+    assert.doesNotMatch(text, /AIzaSy/);
+    assert.doesNotMatch(text, /opendart_/);
     assert.doesNotMatch(text, /secret_github_internal/);
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+test('geminiApiKeyConfigured and openDartApiKeyConfigured accurately report presence', async () => {
+  const db = await createMockAuthDb();
+  const session = await createAdminSession(db);
+  const request = createAdminRequest('https://admin.snowshagal.com/api/admin/runtime-status', {
+    cookie: session.cookieHeader
+  });
+
+  const envBothMissing = { AUTH_DB: db };
+  const res1 = await onRequestGet({ request, env: envBothMissing });
+  const data1 = await res1.json();
+  assert.equal(data1.runtime.geminiApiKeyConfigured, false);
+  assert.equal(data1.runtime.openDartApiKeyConfigured, false);
+
+  const envBothPresent = {
+    AUTH_DB: db,
+    GEMINI_API_KEY: 'test-gemini-key',
+    OPENDART_API_KEY: 'test-opendart-key'
+  };
+  const res2 = await onRequestGet({ request, env: envBothPresent });
+  const data2 = await res2.json();
+  assert.equal(data2.runtime.geminiApiKeyConfigured, true);
+  assert.equal(data2.runtime.openDartApiKeyConfigured, true);
+});
+
+test('analyticsConfigured requires all three: CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_ANALYTICS_API_TOKEN, and CLOUDFLARE_WEB_ANALYTICS_SITE_TAG', async () => {
+  const db = await createMockAuthDb();
+  const session = await createAdminSession(db);
+  const request = createAdminRequest('https://admin.snowshagal.com/api/admin/runtime-status', {
+    cookie: session.cookieHeader
+  });
+
+  const matrix = [
+    { acc: '', tok: '', tag: '', expected: false },
+    { acc: 'acc-1', tok: 'tok-1', tag: '', expected: false },
+    { acc: 'acc-1', tok: '', tag: 'tag-1', expected: false },
+    { acc: '', tok: 'tok-1', tag: 'tag-1', expected: false },
+    { acc: 'acc-1', tok: 'tok-1', tag: 'tag-1', expected: true }
+  ];
+
+  for (const { acc, tok, tag, expected } of matrix) {
+    const env = {
+      AUTH_DB: db,
+      CLOUDFLARE_ACCOUNT_ID: acc,
+      CLOUDFLARE_ANALYTICS_API_TOKEN: tok,
+      CLOUDFLARE_WEB_ANALYTICS_SITE_TAG: tag
+    };
+    const res = await onRequestGet({ request, env });
+    assert.equal(res.status, 200);
+    const data = await res.json();
+    assert.equal(
+      data.runtime.analyticsConfigured,
+      expected,
+      `Expected analyticsConfigured=${expected} when acc="${acc}", tok="${tok}", tag="${tag}"`
+    );
+  }
+});
+
+test('disclosureSyncKeyConfigured=false is treated as optional and keeps ok=true with disclosureSyncKeyRequired=false', async () => {
+  const db = await createMockAuthDb();
+  const session = await createAdminSession(db);
+  const request = createAdminRequest('https://admin.snowshagal.com/api/admin/runtime-status', {
+    cookie: session.cookieHeader
+  });
+
+  const env = {
+    AUTH_DB: db,
+    DISCLOSURE_SYNC_KEY: ''
+  };
+  const res = await onRequestGet({ request, env });
+  assert.equal(res.status, 200);
+  const data = await res.json();
+  assert.equal(data.ok, true);
+  assert.equal(data.runtime.disclosureSyncKeyConfigured, false);
+  assert.equal(data.runtime.disclosureSyncKeyRequired, false);
 });
