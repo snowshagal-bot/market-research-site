@@ -6,17 +6,17 @@ export const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 export const RATE_LIMIT_MAX_ATTEMPTS = 5; // IP + Email limit
 export const RATE_LIMIT_IP_MAX_ATTEMPTS = 20; // IP-only limit
 export const RATE_LIMIT_BLOCK_MS = 15 * 60 * 1000; // 15 minutes
-export const PBKDF2_ITERATIONS = 600000;
-export const MIN_PBKDF2_ITERATIONS = 100000;
-export const MAX_PBKDF2_ITERATIONS = 1000000;
+export const PBKDF2_ITERATIONS = 100000;
+export const MIN_PBKDF2_ITERATIONS = 50000;
+export const MAX_PBKDF2_ITERATIONS = 100000;
 export const PBKDF2_PREFIX = 'pbkdf2-sha256';
 export const MIN_PASSWORD_LENGTH = 12;
 export const MAX_PASSWORD_LENGTH = 128;
 export const MAX_LOGIN_BODY_BYTES = 4096;
 export const MAX_EMAIL_LENGTH = 254;
 
-// Precomputed valid PBKDF2 hash (600,000 iterations) for dummy timing-equal verification
-export const DUMMY_PBKDF2_HASH = 'pbkdf2-sha256$600000$1vX_Djy6tUzkgQCCS_JxGw$yeRgqwSvcMgUALML7ijA18LzTfJPghcztmaScIk1SOI';
+// Precomputed valid PBKDF2 hash (100,000 iterations) for dummy timing-equal verification
+export const DUMMY_PBKDF2_HASH = 'pbkdf2-sha256$100000$acm3xQOE5bfnOxQOjAg5yw$ltRPlb_tTf1QrFV7f92dnrx7LZE1SpxYpwdUilZmmmc';
 
 export const REQUIRED_AUTH_TABLES = Object.freeze([
   'users',

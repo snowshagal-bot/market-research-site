@@ -39,13 +39,13 @@ import { onRequestPost as onDisclosureSync } from '../functions/api/disclosures/
 
 const TEST_AUTH_PEPPER = 'test-auth-pepper-secret-minimum-32-bytes';
 
-test('Password hashing and verification with PBKDF2-SHA256 (600,000 iterations)', async () => {
+test('Password hashing and verification with PBKDF2-SHA256 (100,000 iterations)', async () => {
   const password = 'SuperSecureAdminPassword123!';
   const hash = await hashPassword(password);
 
-  assert.match(hash, /^pbkdf2-sha256\$600000\$[A-Za-z0-9_-]+\$[A-Za-z0-9_-]+$/);
+  assert.match(hash, /^pbkdf2-sha256\$100000\$[A-Za-z0-9_-]+\$[A-Za-z0-9_-]+$/);
   const parts = hash.split('$');
-  assert.equal(parts[1], '600000');
+  assert.equal(parts[1], '100000');
   assert.ok(parts[2].length >= 22, 'Salt base64url should be at least 16 bytes');
 
   const valid = await verifyPassword(password, hash);
@@ -423,11 +423,11 @@ test('Login response equivalence for unknown user, disabled user, member role, a
 });
 
 test('Malformed password hash and abnormal iterations are safely rejected without crashing', async () => {
-  // Abnormal iteration counts (< 100,000 or > 1,000,000)
-  const lowIterHash = 'pbkdf2-sha256$50000$c2FsdHNhbHQ$aGFzaGhhc2g';
+  // Abnormal iteration counts (< 50,000 or > 100,000)
+  const lowIterHash = 'pbkdf2-sha256$20000$c2FsdHNhbHQ$aGFzaGhhc2g';
   assert.equal(await verifyPassword('password123', lowIterHash), false);
 
-  const highIterHash = 'pbkdf2-sha256$5000000$c2FsdHNhbHQ$aGFzaGhhc2g';
+  const highIterHash = 'pbkdf2-sha256$500000$c2FsdHNhbHQ$aGFzaGhhc2g';
   assert.equal(await verifyPassword('password123', highIterHash), false);
 
   const nanIterHash = 'pbkdf2-sha256$NaN$c2FsdHNhbHQ$aGFzaGhhc2g';
@@ -435,8 +435,8 @@ test('Malformed password hash and abnormal iterations are safely rejected withou
 
   // Malformed string structure
   assert.equal(await verifyPassword('password123', 'not-a-hash'), false);
-  assert.equal(await verifyPassword('password123', 'pbkdf2-sha256$600000$short'), false);
-  assert.equal(await verifyPassword('password123', 'pbkdf2-sha256$600000$???invalid_base64???$hash'), false);
+  assert.equal(await verifyPassword('password123', 'pbkdf2-sha256$100000$short'), false);
+  assert.equal(await verifyPassword('password123', 'pbkdf2-sha256$100000$???invalid_base64???$hash'), false);
   assert.equal(await verifyPassword('password123', null), false);
   assert.equal(await verifyPassword('password123', undefined), false);
 });
