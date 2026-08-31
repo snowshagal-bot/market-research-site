@@ -178,19 +178,14 @@ export async function verifyPassword(password, storedHash) {
     return false;
   }
 
-  try {
-    const salt = base64UrlToBytes(parts[2]);
-    if (!salt || salt.length < 8) return false;
-    const expectedHash = parts[3];
-    if (!expectedHash) return false;
+  const salt = base64UrlToBytes(parts[2]);
+  if (!salt || salt.length < 8) return false;
+  const expectedHash = parts[3];
+  if (!expectedHash) return false;
 
-    const actualHashed = await hashPassword(password, salt, iterations);
-    const actualParts = actualHashed.split('$');
-    return constantTimeEqual(actualParts[3], expectedHash);
-  } catch (err) {
-    console.error('verifyPassword error:', err);
-    return false;
-  }
+  const actualHashed = await hashPassword(password, salt, iterations);
+  const actualParts = actualHashed.split('$');
+  return constantTimeEqual(actualParts[3], expectedHash);
 }
 
 export function generateToken(length = 32) {

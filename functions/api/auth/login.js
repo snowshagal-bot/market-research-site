@@ -127,23 +127,30 @@ export async function onRequestPost(context) {
   const isEligibleAdmin = Boolean(row && row.password_hash && row.status === 'active' && row.role === 'admin');
 
   let valid = false;
-  if (isEligibleAdmin) {
-    valid = await verifyPassword(rawPassword, row.password_hash);
-  } else {
-    // Execute dummy PBKDF2 (or hash of non-admin account) to ensure constant execution timing
-    const hashToVerify = row?.password_hash || DUMMY_PBKDF2_HASH;
-    await verifyPassword(rawPassword, hashToVerify);
+  let verifyError = null;
+  try {
+    if (isEligibleAdmin) {
+      valid = await verifyPassword(rawPassword, row.password_hash);
+    } else {
+      // Execute dummy PBKDF2 (or hash of non-admin account) to ensure constant execution timing
+      const hashToVerify = row?.password_hash || DUMMY_PBKDF2_HASH;
+      await verifyPassword(rawPassword, hashToVerify);
+    }
+  } catch (err) {
+    verifyError = err?.message || String(err);
   }
 
   if (!valid || !isEligibleAdmin) {
     await recordLoginFailure(env.AUTH_DB, ipHash, emailHash);
-    const reason = !row
-      ? 'user_not_found'
-      : row.status !== 'active'
-        ? 'disabled'
-        : row.role !== 'admin'
-          ? 'non_admin_role'
-          : 'wrong_password';
+    const reason = verifyError
+      ? `verify_error: ${verifyError}`
+      : !row
+        ? 'user_not_found'
+        : row.status !== 'active'
+          ? 'disabled'
+          : row.role !== 'admin'
+            ? 'non_admin_role'
+            : 'wrong_password';
 
     await recordAuditEvent(env.AUTH_DB, {
       eventType: 'login_failure',
