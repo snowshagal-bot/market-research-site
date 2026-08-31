@@ -1,5 +1,25 @@
 [
   {
+    "id": "2026-08-31-daily-19944ff",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-08-31",
+    "reportDate": "2026-08-31",
+    "registeredDate": "2026-08-31",
+    "registeredAt": "2026-08-31T11:09:31.201Z",
+    "legacyImport": false,
+    "title": "One Buyer Did the Lifting",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-08-31_KOSPI_Daily_Report_EN_Cover.html",
+    "translationGroup": "2026-08-31-daily-1mkemh5",
+    "coverImage": "covers/2026-08-31-daily-19944ff.webp",
+    "shareCardImage": "covers/share/2026-08-31-daily-19944ff.jpg"
+  },
+  {
     "id": "2026-08-31-daily-1mkemh5",
     "type": "daily",
     "typeLabel": "주식 리포트",
