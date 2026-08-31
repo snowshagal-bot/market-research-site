@@ -199,7 +199,7 @@ test('admin exposes five always-visible accessible category radio chips', async 
   const html = await read('admin/index.html');
   assert.match(html, /class="category-options" role="radiogroup"/);
   assert.equal((html.match(/name="post-category" value="(?:daily|weekly|research|basics|note)"/g) || []).length, 5);
-  for (const label of ['데일리', '위클리', '비정기', '시장 공부', '끄적끄적']) assert.match(html, new RegExp(`<span>${label}</span>`));
+  for (const label of ['데일리', '위클리', '비정기', '시장 입문', '투자 노트']) assert.match(html, new RegExp(`<span>${label}</span>`));
   assert.doesNotMatch(html, /<select id="post-type"/);
   assert.match(html, /\.category-chip input:focus-visible\+span/);
 });
@@ -211,8 +211,11 @@ test('category auto-detection covers Korean and English inputs and leaves unknow
     ['generic.html', '<title>Market Research</title>', ''],
     ['generic.html', '<title>Generic report</title><body>This research reviews market flows.</body>', ''],
     ['비정기.html', '<title>Special report</title>', 'research'],
+    ['시장 입문.html', '<title>Market Basics</title>', 'basics'],
     ['시장 공부.html', '<title>Market Basics</title>', 'basics'],
     ['notes.html', '<title>Notes</title>', 'note'],
+    ['INVESTMENT NOTE NO.01.html', '<title>Investment Note</title>', 'note'],
+    ['투자 노트.html', '<title>미국 자금시장 점검</title>', 'note'],
     ['데일리.html', '<meta name="report-type" content="weekly"><title>Daily</title>', 'weekly'],
     ['generic.html', '<meta name="report-type" content="research"><title>Market Research</title>', 'research'],
     ['generic.html', '<meta name="report-type" content="invalid"><title>Market Research</title>', '']

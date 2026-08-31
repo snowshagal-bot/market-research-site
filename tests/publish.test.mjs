@@ -425,7 +425,7 @@ test('publishing Market Basics with a cover stores a binary blob and coverImage 
     const postsEntry = treeCall.body.tree.find(entry => entry.path === 'data/posts.json');
     const post = JSON.parse(postsEntry.content)[0];
     assert.equal(post.type, 'basics');
-    assert.equal(post.typeLabel, '시장 공부');
+    assert.equal(post.typeLabel, '시장 입문');
     assert.equal(post.coverImage, data.coverImage);
   } finally {
     globalThis.fetch = originalFetch;

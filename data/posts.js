@@ -493,7 +493,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-08-20-basics-1jqzwpd",
     "type": "basics",
-    "typeLabel": "시장 공부",
+    "typeLabel": "시장 입문",
     "lang": "ko",
     "date": "2026-08-20",
     "reportDate": "2026-08-20",
@@ -502,7 +502,7 @@ window.RESEARCH_POSTS = [
     "legacyImport": false,
     "title": "급락은 어떻게더 큰 급락을 만드는가",
     "subtitle": "",
-    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
+    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 입문.",
     "tags": [
       "flows",
       "futures"
@@ -777,7 +777,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-08-15-basics-1cd8c9w",
     "type": "basics",
-    "typeLabel": "시장 공부",
+    "typeLabel": "시장 입문",
     "lang": "ko",
     "date": "2026-08-15",
     "reportDate": "2026-08-15",
@@ -786,7 +786,7 @@ window.RESEARCH_POSTS = [
     "legacyImport": false,
     "title": "좋은 회사가 왜 좋은 주식은 아닌가",
     "subtitle": "",
-    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
+    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 입문.",
     "href": "reports/시장을읽는말들_4편_좋은회사가왜좋은주식은아닌가.html",
     "coverImage": "covers/2026-08-15-basics-1cd8c9w.webp",
     "tags": [],
@@ -867,7 +867,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-08-13-basics-1qofo4f",
     "type": "basics",
-    "typeLabel": "시장 공부",
+    "typeLabel": "시장 입문",
     "lang": "ko",
     "date": "2026-08-13",
     "reportDate": "2026-08-13",
@@ -876,7 +876,7 @@ window.RESEARCH_POSTS = [
     "legacyImport": false,
     "title": "미국의 숫자는 어떻게 한국에 도착하는가",
     "subtitle": "",
-    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
+    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 입문.",
     "href": "reports/시장을읽는말들_3편_미국의숫자는어떻게한국에도착하는가.html",
     "coverImage": "covers/2026-08-13-basics-1qofo4f.webp",
     "tags": [
@@ -937,7 +937,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-08-10-basics-1rhknmt",
     "type": "basics",
-    "typeLabel": "시장 공부",
+    "typeLabel": "시장 입문",
     "lang": "ko",
     "date": "2026-08-12",
     "reportDate": "2026-08-12",
@@ -946,7 +946,7 @@ window.RESEARCH_POSTS = [
     "legacyImport": false,
     "title": "현물과 선물이 엇갈릴 때",
     "subtitle": "",
-    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
+    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 입문.",
     "href": "reports/시장을읽는말들_2편_현물과선물이엇갈릴때.html",
     "coverImage": "covers/2026-08-10-basics-1rhknmt.webp",
     "updatedAt": "2026-08-25T11:09:25.060Z",
@@ -1054,7 +1054,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-08-11-basics-1e0xeuz",
     "type": "basics",
-    "typeLabel": "시장 공부",
+    "typeLabel": "시장 입문",
     "date": "2026-08-11",
     "reportDate": "2026-08-11",
     "registeredDate": "2026-08-12",
@@ -1062,7 +1062,7 @@ window.RESEARCH_POSTS = [
     "legacyImport": false,
     "title": "주가는 누가 움직이는가",
     "subtitle": "",
-    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.",
+    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 입문.",
     "href": "reports/시장을읽는말들_1편_주가는누가움직이는가.html",
     "tags": [
       "flows"

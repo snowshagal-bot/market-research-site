@@ -34,7 +34,7 @@
 
   const LABELS = {
     daily: 'DAILY', weekly: 'WEEKLY', research: 'RESEARCH',
-    basics: 'MARKET BASICS', note: 'NOTES'
+    basics: 'MARKET BASICS', note: 'INVESTMENT NOTE'
   };
 
   function categoryLabel(category) {

@@ -21,15 +21,6 @@ html[data-theme="light"] {
   opacity: 1;
 }
 
-.nav-secondary {
-  opacity: .72;
-}
-
-.nav-secondary:hover,
-.nav-secondary.active {
-  opacity: 1;
-}
-
 body.static-page {
   display: flex;
   min-height: 100vh;
@@ -40,10 +31,48 @@ body.static-page {
   flex: 1;
 }
 
-@media (max-width: 960px) and (min-width: 761px) {
+@media (max-width: 1180px) and (min-width: 961px) {
   .main-nav {
-    gap: 10px;
-    margin-left: 16px;
+    gap: 12px;
+    margin-left: 14px;
+  }
+}
+
+@media (max-width: 960px) and (min-width: 761px) {
+  .site-wrap {
+    width: min(calc(100% - 20px), var(--max));
+  }
+  .header-row {
+    gap: 6px;
+  }
+  .snowshagal-brand {
+    gap: 5px;
+  }
+  .brand-copy strong {
+    font-size: 13.5px;
+  }
+  .brand-copy small {
+    display: none;
+  }
+  .brand-owl {
+    width: 20px;
+    height: auto;
+  }
+  .main-nav {
+    gap: 6px;
+    margin-left: 6px;
+    font-size: 11.5px;
+  }
+  .header-actions {
+    gap: 3px;
+  }
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+  }
+  .language-pill {
+    padding: 0 10px;
+    min-height: 34px;
   }
 }
 

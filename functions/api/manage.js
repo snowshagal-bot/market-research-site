@@ -15,15 +15,15 @@ const TYPE_LABELS = {
   daily: "주식 리포트",
   weekly: "위클리 리포트",
   research: "비정기 리서치",
-  basics: "시장 공부",
-  note: "끄적끄적",
+  basics: "시장 입문",
+  note: "투자 노트",
 };
 const EN_TYPE_LABELS = {
   daily: "Daily",
   weekly: "Weekly",
   research: "Research",
   basics: "Market Basics",
-  note: "Notes",
+  note: "Investment Note",
 };
 
 function postLanguage(post) {

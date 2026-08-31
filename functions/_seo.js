@@ -59,30 +59,30 @@ export const CATEGORY_LANDINGS = Object.freeze({
   },
   basics: {
     ko: {
-      title: '경제·주식시장 기초 설명 | Snowshagal 시장 공부',
+      title: '경제·주식시장 기초 설명 | Snowshagal 시장 입문',
       description: '경제와 주식시장이 낯선 투자자를 위해 시장의 기본 개념과 투자에 필요한 배경을 쉽게 설명합니다.',
-      heading: '경제·주식시장 기초 설명',
-      lead: '경제와 투자의 기본 개념을 부담 없이 이해할 수 있도록 차분히 설명합니다.'
+      heading: '시장 입문',
+      lead: '시장을 처음 읽는 독자를 위해 경제·주식시장의 기본 개념과 투자에 필요한 배경을 차근차근 설명합니다.'
     },
     en: {
-      title: 'Market Basics & Investing Explainers | Snowshagal',
-      description: 'Clear explanations of economic, market, and investing fundamentals for readers building their foundation.',
-      heading: 'Market Basics & Investing Explainers',
-      lead: 'Clear, approachable explanations of economic, market, and investing fundamentals.'
+      title: 'Market Basics | Snowshagal',
+      description: 'Clear introductions to economic, market, and investing fundamentals for readers learning how markets work.',
+      heading: 'Market Basics',
+      lead: 'A clear introduction to the concepts and background needed to start reading markets with confidence.'
     }
   },
   note: {
     ko: {
-      title: '시장과 투자에 관한 기록 | Snowshagal 끄적끄적',
-      description: '시장과 투자에 관해 지나치기 쉬운 생각과 관찰을 짧게 기록한 Snowshagal 노트 아카이브입니다.',
-      heading: '시장과 투자에 관한 기록',
-      lead: '시장과 투자에 관해 지나치기 쉬운 생각과 관찰을 짧게 기록합니다.'
+      title: '시장·투자 아이디어와 관찰 | Snowshagal 투자 노트',
+      description: '데일리·위클리·리서치로 다루기엔 가볍지만 놓치기 아까운 시장 변수, 투자 아이디어와 주요 이벤트의 체크포인트를 기록합니다.',
+      heading: '투자 노트',
+      lead: '데일리·위클리·리서치에 담기 애매하지만 놓치기 아까운 시장 변수와 투자 아이디어를 기록합니다.'
     },
     en: {
-      title: 'Market & Investing Notes | Snowshagal',
-      description: 'Short Snowshagal notes capturing observations and ideas about markets and investing.',
-      heading: 'Market & Investing Notes',
-      lead: 'Short observations and ideas about markets and investing.'
+      title: 'Investment Note | Snowshagal',
+      description: 'Timely observations, market variables, and investment ideas that sit between daily coverage and full-length research.',
+      heading: 'Investment Note',
+      lead: 'Timely observations, market variables, and investment ideas that sit between daily coverage and full-length research.'
     }
   }
 });
@@ -336,7 +336,7 @@ export function categoryFeaturedCards(posts, type, lang) {
     weekly: 'WEEKLY',
     research: 'RESEARCH',
     basics: 'MARKET BASICS',
-    note: 'NOTES'
+    note: 'INVESTMENT NOTE'
   };
   return (Array.isArray(posts) ? posts : [])
     .filter((post) => postLanguage(post) === lang && post?.type === type && normalizeSitePath(post?.href))
@@ -448,8 +448,8 @@ export const CATEGORY_BREADCRUMB_NAMES = Object.freeze({
   daily: { ko: '데일리', en: 'Daily' },
   weekly: { ko: '위클리', en: 'Weekly' },
   research: { ko: '리서치', en: 'Research' },
-  basics: { ko: '시장 공부', en: 'Market Basics' },
-  note: { ko: '끄적끄적', en: 'Notes' }
+  basics: { ko: '시장 입문', en: 'Market Basics' },
+  note: { ko: '투자 노트', en: 'Investment Note' }
 });
 
 export function serializeJsonLd(data) {

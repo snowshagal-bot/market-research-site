@@ -243,11 +243,11 @@ export async function onRequest(context) {
 
   let active = '';
   const lang = /^\/reports\/en\//i.test(url.pathname) ? 'en' : 'ko';
-  if (/시장\s*공부|경제\s*공부|주식\s*공부|market[\s_-]*basics|investing[\s_-]*basics|explainer/i.test(decodedPath)) active = 'basics';
+  if (/시장\s*입문|시장\s*공부|경제\s*공부|주식\s*공부|market[\s_-]*basics|investing[\s_-]*basics|explainer/i.test(decodedPath)) active = 'basics';
   else if (/주식리포트|데일리|daily/i.test(decodedPath)) active = 'daily';
   else if (/위클리|weekly/i.test(decodedPath)) active = 'weekly';
   else if (/비정기|소버린|research/i.test(decodedPath)) active = 'research';
-  else if (/끄적|note/i.test(decodedPath)) active = 'note';
+  else if (/투자\s*노트|끄적|note/i.test(decodedPath)) active = 'note';
 
   let hasNotes = false;
   let seo = '';
@@ -264,7 +264,7 @@ export async function onRequest(context) {
 
   // Built after the post data is read so the shell knows whether 끄적끄적 has
   // anything in it, and the fixed report nav matches the homepage.
-  const shell = `<script src="/assets/locale.js?v=3b5552cdd4"></script><script src="/assets/report-shell.js?v=5d566fd0c8" data-category="${active}" data-lang="${lang}" data-notes="${hasNotes ? '1' : '0'}"></script>${engagement}`;
+  const shell = `<script src="/assets/locale.js?v=bb6eec37ab"></script><script src="/assets/report-shell.js?v=a6785f2184" data-category="${active}" data-lang="${lang}" data-notes="${hasNotes ? '1' : '0'}"></script>${engagement}`;
 
   return new HTMLRewriter()
     .on('title', { element(element) { if (seo) element.remove(); } })

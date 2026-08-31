@@ -167,117 +167,27 @@ test('_headers sets frame and permissions policy without pinning HSTS', async ()
 
 /* ---------------- notes category ---------------- */
 
-test('the notes entry points appear only once a note exists', async () => {
-  const [site, shell, middleware] = await Promise.all([
-    read('assets/site.js'), read('assets/report-shell.js'), read('functions/_middleware.js')
+test('notes category is a core category and visible across navigation', async () => {
+  const [site, shell] = await Promise.all([
+    read('assets/site.js'), read('assets/report-shell.js')
   ]);
 
-  // Scoped to the reader's language: an English-only note must not surface the
-  // Korean entry point, or the other way round.
-  assert.match(site, /const hasNotes = posts\.some\(post => post\.type === 'note'\);/);
-  assert.doesNotMatch(site, /hasNotes = allPosts/);
-  assert.match(site, /const listedTypes = hasNotes \? \[\.\.\.coreTypes, 'note'\] : \[\.\.\.coreTypes\];/);
-  // Both navs and the archive filter hide together.
-  assert.match(site, /\[data-nav-category="note"\], \[data-filter="note"\]/);
-  // The archive index is built from the same list, so its counts match.
-  assert.match(site, /archiveIndex\.innerHTML=listedTypes\.map/);
-
-  // The report shell learns the same fact from the middleware, so the fixed nav
-  // on a report never offers a link the homepage has hidden.
-  assert.match(middleware, /candidate\?\.type === 'note' && \(candidate\?\.lang === 'en' \? 'en' : 'ko'\) === lang/);
-  assert.match(middleware, /data-notes="\$\{hasNotes \? '1' : '0'\}"/);
-  assert.match(shell, /const hasNotes = scriptEl\?\.dataset\.notes === '1';/);
-  assert.match(shell, /\$\{hasNotes \|\| active === 'note' \?/);
+  assert.match(site, /const coreTypes = \['daily', 'weekly', 'research', 'note', 'basics'\];/);
+  assert.match(site, /const validTypes = \['all', \.\.\.coreTypes\];/);
+  assert.match(shell, /href="\$\{categoryPath\('note'\)\}">\$\{copy\.note\}<\/a>/);
 });
 
-test('nothing about the notes category itself is removed', async () => {
+test('notes category is activated and promoted to core categories', async () => {
   const [locale, site] = await Promise.all([read('assets/locale.js'), read('assets/site.js')]);
-  // Hidden, not deleted: publishing the first note brings every entry point back.
-  assert.match(locale, /note: \{ label: '끄적끄적'/);
-  assert.match(locale, /note: \{ label: 'Notes'/);
-  assert.match(site, /const validTypes = \['all', \.\.\.coreTypes, 'note'\];/);
+  assert.match(locale, /note: \{ label: '투자 노트'/);
+  assert.match(locale, /note: \{ label: 'Investment Note'/);
+  assert.match(locale, /basics: \{ label: '시장 입문'/);
+  assert.match(locale, /basics: \{ label: 'Market Basics'/);
+  assert.match(site, /const coreTypes = \['daily', 'weekly', 'research', 'note', 'basics'\];/);
+  assert.match(site, /const validTypes = \['all', \.\.\.coreTypes\];/);
 
   const posts = JSON.parse(await read('data/posts.json'));
   assert.equal(posts.filter(post => post.type === 'note').length, 0, 'fixture assumes there are still no notes');
-});
-
-/* ---------------- notes gating is per locale ---------------- */
-
-/** Run assets/site.js against a stub homepage and report what the notes entry points did. */
-async function notesVisibility(posts, lang) {
-  const [localeSource, siteSource] = await Promise.all([read('assets/locale.js'), read('assets/site.js')]);
-  const { default: vm } = await import('node:vm');
-
-  const stub = (name) => ({
-    name, hidden: false, textContent: '', innerHTML: '', href: '', value: '', dataset: {},
-    style: { setProperty() {} }, classList: { add() {}, remove() {}, toggle() {}, contains: () => false },
-    addEventListener() {}, removeEventListener() {}, setAttribute() {}, removeAttribute() {},
-    getAttribute: () => null, appendChild() {}, append() {}, remove() {}, focus() {},
-    querySelector: () => null, querySelectorAll: () => [], getBoundingClientRect: () => ({})
-  });
-
-  const noteNodes = [stub('nav-note'), stub('mobile-note'), stub('filter-note')];
-  const archiveIndex = stub('archive-index');
-  const byId = new Map([['archive-index', archiveIndex], ['report-list', stub('report-list')]]);
-
-  const document = {
-    documentElement: Object.assign(stub('html'), { lang, dataset: { siteLang: lang } }),
-    body: stub('body'), title: '', readyState: 'complete',
-    addEventListener() {}, createElement: () => stub('created'),
-    getElementById: id => byId.get(id) || null,
-    querySelector: () => null,
-    querySelectorAll: selector => (selector.includes('note') ? noteNodes : [])
-  };
-
-  const context = vm.createContext({
-    window: { RESEARCH_POSTS: posts, addEventListener() {} },
-    document,
-    location: { pathname: lang === 'en' ? '/en/' : '/', search: '', href: 'https://snowshagal.com/' },
-    localStorage: { getItem: () => null, setItem() {} },
-    matchMedia: () => ({ matches: false, addEventListener() {} }),
-    fetch: () => Promise.resolve({ ok: false, json: () => Promise.resolve({}) }),
-    setTimeout, clearTimeout, Intl, URL, URLSearchParams, console
-  });
-  vm.runInContext(localeSource, context);
-  vm.runInContext(siteSource, context);
-
-  return {
-    hiddenNodes: noteNodes.filter(node => node.hidden).length,
-    totalNodes: noteNodes.length,
-  };
-}
-
-const KO_NOTE = { id: 'ko-note', type: 'note', lang: 'ko', title: '끄적', href: 'reports/n.html', reportDate: '2026-08-20', tags: [] };
-const EN_NOTE = { id: 'en-note', type: 'note', lang: 'en', title: 'Note', href: 'reports/en/n.html', reportDate: '2026-08-20', tags: [] };
-const KO_DAILY = { id: 'ko-d', type: 'daily', lang: 'ko', title: '데일리', href: 'reports/d.html', reportDate: '2026-08-26', tags: [] };
-const EN_DAILY = { id: 'en-d', type: 'daily', lang: 'en', title: 'Daily', href: 'reports/en/d.html', reportDate: '2026-08-26', tags: [] };
-
-test('a Korean note surfaces the entry points on the Korean homepage only', async () => {
-  const posts = [KO_NOTE, KO_DAILY, EN_DAILY];
-
-  const ko = await notesVisibility(posts, 'ko');
-  assert.equal(ko.hiddenNodes, 0, 'Korean entry points must stay visible');
-
-  const en = await notesVisibility(posts, 'en');
-  assert.equal(en.hiddenNodes, en.totalNodes, 'English entry points must be hidden');
-});
-
-test('an English note surfaces the entry points on the English homepage only', async () => {
-  const posts = [EN_NOTE, KO_DAILY, EN_DAILY];
-
-  const en = await notesVisibility(posts, 'en');
-  assert.equal(en.hiddenNodes, 0);
-
-  const ko = await notesVisibility(posts, 'ko');
-  assert.equal(ko.hiddenNodes, ko.totalNodes);
-});
-
-test('with no notes at all both locales hide the entry points', async () => {
-  const posts = [KO_DAILY, EN_DAILY];
-  for (const lang of ['ko', 'en']) {
-    const result = await notesVisibility(posts, lang);
-    assert.equal(result.hiddenNodes, result.totalNodes, lang);
-  }
 });
 
 test('the middleware flags notes only for the report language', async () => {
