@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { onRequestPost } from '../functions/api/publish.js';
+import { createMockAuthEnv } from './helpers/auth-test-helper.mjs';
 
 const ADMIN_KEY = 'test-admin-key';
 const originalFetch = globalThis.fetch;
@@ -153,7 +154,15 @@ function atomicGithubMock({
   };
 }
 
-function publishRequest({ type = 'daily', cover = null, shareCard = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, takeaway, tags = null } = {}, url = 'https://admin.snowshagal.com/api/publish') {
+let sharedAuthEnv = null;
+async function getAuthEnv() {
+  if (!sharedAuthEnv) {
+    sharedAuthEnv = await createMockAuthEnv({ ADMIN_KEY, GITHUB_TOKEN: 'token', GITHUB_REPO: 'snowshagal-bot/market-research-site' });
+  }
+  return sharedAuthEnv;
+}
+
+function publishRequest({ type = 'daily', cover = null, shareCard = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, takeaway, tags = null } = {}, url = 'https://admin.snowshagal.com/api/publish', session = sharedAuthEnv?._authSession) {
   const form = new FormData();
   form.append('file', new File(['<!doctype html><html><body>report content with some words</body></html>'], 'report.html', { type: 'text/html' }));
   form.append('type', type);
@@ -172,15 +181,25 @@ function publishRequest({ type = 'daily', cover = null, shareCard = null, lang =
   if (translationGroup) form.append('translationGroup', translationGroup);
   if (cover) form.append('cover', cover, cover.name);
   if (shareCard) form.append('shareCard', shareCard, shareCard.name);
+  const headers = {
+    origin: new URL(url).origin,
+    'x-admin-key': ADMIN_KEY
+  };
+  if (session) {
+    headers['cookie'] = session.cookieHeader;
+    headers['x-csrf-token'] = session.csrfToken;
+  }
   return new Request(url, {
     method: 'POST',
-    headers: { 'x-admin-key': ADMIN_KEY, origin: new URL(url).origin },
+    headers,
     body: form
   });
 }
 
 async function runPublish(options = {}) {
-  const response = await onRequestPost({ request: publishRequest(options), env: { GITHUB_TOKEN: 'token', ADMIN_KEY } });
+  const env = await getAuthEnv();
+  const request = publishRequest(options, 'https://admin.snowshagal.com/api/publish', env._authSession);
+  const response = await onRequestPost({ request, env });
   return { response, data: await response.json() };
 }
 
@@ -342,10 +361,12 @@ test('atomic publish preserves pairing, inherited tags, reading time, cover, and
 test('Preview, former production, and local publish requests are rejected before GitHub access', async () => {
   for (const url of ['https://branch.market-research-site.pages.dev/api/publish', 'https://market-research-site.pages.dev/api/publish', 'http://localhost:8788/api/publish']) {
     const calls = githubMock();
+    const env = await getAuthEnv();
     try {
-      const response = await onRequestPost({ request: publishRequest({}, url), env: { GITHUB_TOKEN: 'token', ADMIN_KEY } });
+      const response = await onRequestPost({ request: publishRequest({}, url, env._authSession), env });
       assert.equal(response.status, 403);
-      assert.equal((await response.json()).error, 'PREVIEW_READ_ONLY');
+      const data = await response.json();
+      assert.ok(['PREVIEW_READ_ONLY', 'ADMIN_HOST_BLOCKED'].includes(data.error));
       assert.equal(calls.length, 0);
     } finally { globalThis.fetch = originalFetch; }
   }

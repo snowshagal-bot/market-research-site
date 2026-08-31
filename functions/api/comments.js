@@ -1,4 +1,5 @@
 import { isAdminHost, validateHumanAdminMutation } from '../_host-policy.js';
+import { requireAdminMutation } from '../_auth.js';
 
 const MAX_NICKNAME = 20;
 const MAX_BODY = 1000;
@@ -297,11 +298,18 @@ export async function onRequestDelete(context) {
     if (!row) return reply({ error: 'NOT_FOUND', message: '댓글을 찾을 수 없습니다.' }, 404);
 
     let authorized = false;
-    const adminKey = request.headers.get('x-admin-key') || '';
-    if (env.ADMIN_KEY && adminKey && constantTimeEqual(adminKey, env.ADMIN_KEY)) {
-      authorized = true;
-    } else if (password) {
+    if (password) {
       authorized = await verifyPassword(password, row.passwordSalt, row.passwordHash);
+    } else {
+      const auth = await requireAdminMutation(request, env);
+      if (auth.ok) {
+        authorized = true;
+      } else {
+        const adminKey = request.headers.get('x-admin-key') || '';
+        if (env.ADMIN_KEY && constantTimeEqual(adminKey, env.ADMIN_KEY)) {
+          authorized = true;
+        }
+      }
     }
 
     if (!authorized) return reply({ error: 'BAD_PASSWORD', message: '삭제 비밀번호가 올바르지 않습니다.' }, 401);

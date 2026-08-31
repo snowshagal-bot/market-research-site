@@ -38,7 +38,7 @@
   const coverPreviewCaption = $('cover-preview-caption');
   const coverPreviewNote = $('cover-preview-note');
   const coverPreviewModes = [...document.querySelectorAll('[data-cover-preview-mode]')];
-  const adminKey = $('admin-key');
+  let csrfToken = '';
   const publishBtn = $('publish-btn');
   const themeBtn = document.querySelector('[data-theme-toggle]');
   const overlay = $('publish-overlay');
@@ -279,7 +279,16 @@
     return Object.values(defaultDescriptions).some(descriptions => Object.values(descriptions).includes(value));
   }
 
-  try { adminKey.value = sessionStorage.getItem('mrs-admin-key') || ''; } catch (_) {}
+  async function loadAuth() {
+    try {
+      const res = await fetch('/api/auth/session');
+      const data = await res.json().catch(() => ({}));
+      if (data?.ok && data.authenticated) {
+        csrfToken = data.csrfToken || '';
+      }
+    } catch (_) {}
+  }
+  loadAuth();
 
   function detectType(name, doc, text) {
     const allowedTypes = ['daily', 'weekly', 'research', 'basics', 'note'];
@@ -562,13 +571,13 @@
   }
 
   function updatePublishState() {
-    const ready = selectedFile && type.value && /^\d{4}-\d{2}-\d{2}$/.test(date.value) && title.value.trim() && filename.value.trim() && adminKey.value.trim();
+    const ready = selectedFile && type.value && /^\d{4}-\d{2}-\d{2}$/.test(date.value) && title.value.trim() && filename.value.trim();
     publishBtn.disabled = publishing || generatingCover || coverDecodePending || !ready;
-    if (generateCoverBtn) generateCoverBtn.disabled = generatingCover || coverDecodePending || !selectedFile || !selectedHtmlText || !selectedHtmlDocument || !adminKey.value.trim();
+    if (generateCoverBtn) generateCoverBtn.disabled = generatingCover || coverDecodePending || !selectedFile || !selectedHtmlText || !selectedHtmlDocument;
   }
 
   async function generateCover() {
-    if (generatingCover || !selectedHtmlText || !selectedHtmlDocument || !adminKey.value.trim() || !window.MARKET_COVER_GENERATOR) return;
+    if (generatingCover || !selectedHtmlText || !selectedHtmlDocument || !window.MARKET_COVER_GENERATOR) return;
     const generationVersion = ++coverGenerationVersion;
     const generationReportVersion = reportSelectionVersion;
     generatingCover = true;
@@ -578,7 +587,7 @@
     try {
       const result = await window.MARKET_COVER_GENERATOR.generate({
         html: selectedHtmlText,
-        adminKey: adminKey.value.trim(),
+        adminKey: csrfToken,
         template: {
           category: labels[type.value] || '리포트',
           date: date.value,
@@ -776,7 +785,6 @@
     updatePublishState();
     publishBtn.textContent = '게시 중…';
     status.classList.remove('error');
-    adminKey.removeAttribute('aria-invalid');
     status.textContent = 'HTML과 게시 목록을 GitHub에 반영하는 중…';
     showOverlay('게시 처리 중', '리포트 HTML과 홈페이지 목록을 GitHub에 저장하고 있습니다.', '창을 닫지 않아도 됩니다.');
 
@@ -809,18 +817,18 @@
     }
 
     try {
-      const key = adminKey.value.trim();
-      try { sessionStorage.setItem('mrs-admin-key', key); } catch (_) {}
+      const headers = {};
+      if (csrfToken) headers['x-csrf-token'] = csrfToken;
       const res = await fetch('/api/publish', {
         method: 'POST',
-        headers: { 'X-Admin-Key': key },
+        headers,
         body: form
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const authentication = res.status === 401 || data.error === 'UNAUTHORIZED';
+        const authentication = res.status === 401 || res.status === 403 || data.error === 'UNAUTHORIZED';
         const message = authentication
-          ? '관리자 키가 올바르지 않아 게시하지 못했습니다.'
+          ? '관리자 인증이 필요하거나 권한이 없습니다.'
           : (data.message || data.error || `게시 실패 (${res.status})`);
         const error = new Error(message);
         error.authentication = authentication;
@@ -838,7 +846,6 @@
       showPublishError(message, { authentication: Boolean(err.authentication) });
       status.textContent = err.authentication ? `게시되지 않음 · ${message}` : message;
       status.classList.add('error');
-      if (err.authentication) adminKey.setAttribute('aria-invalid', 'true');
       publishBtn.textContent = '게시';
       publishing = false;
       updatePublishState();
@@ -876,7 +883,7 @@
   coverPreviewModes.forEach(button => {
     button.addEventListener('click', () => setCoverPreviewMode(button.dataset.coverPreviewMode));
   });
-  [date,title,subtitle,description,postSummary,adminKey].forEach(el => el?.addEventListener('input', updatePublishState));
+  [date,title,subtitle,description,postSummary].forEach(el => el?.addEventListener('input', updatePublishState));
   categoryOptions.forEach((option, index) => {
     option.addEventListener('change', () => {
       if (option.checked) setCategory(option.value, 'manual');
@@ -901,17 +908,9 @@
     });
   });
   translationSource?.addEventListener('change', syncPairedReportDate);
-  adminKey?.addEventListener('input', () => {
-    if (adminKey.getAttribute('aria-invalid') !== 'true') return;
-    adminKey.removeAttribute('aria-invalid');
-    status.classList.remove('error');
-    status.textContent = '관리자 키를 수정했습니다. 다시 게시해 주세요.';
-  });
-  adminKey?.addEventListener('change', () => { try { sessionStorage.setItem('mrs-admin-key', adminKey.value.trim()); } catch (_) {} });
   overlayErrorClose?.addEventListener('click', () => {
-    const authentication = adminKey.getAttribute('aria-invalid') === 'true';
     overlay?.classList.remove('on', 'error');
-    (authentication ? adminKey : publishBtn)?.focus();
+    publishBtn?.focus();
   });
   publishBtn?.addEventListener('click', publish);
 

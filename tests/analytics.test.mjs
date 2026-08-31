@@ -3,6 +3,20 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
 import { __test, onRequestGet } from '../functions/api/analytics.js';
+import { createMockAuthEnv } from './helpers/auth-test-helper.mjs';
+
+let sharedAuthEnv = null;
+async function getAuthEnv() {
+  if (!sharedAuthEnv) {
+    sharedAuthEnv = await createMockAuthEnv({
+      ADMIN_KEY: 'test-admin-key',
+      CLOUDFLARE_ACCOUNT_ID: 'account-tag',
+      CLOUDFLARE_ANALYTICS_API_TOKEN: 'analytics-token-secret',
+      CLOUDFLARE_WEB_ANALYTICS_SITE_TAG: 'site-tag-secret'
+    });
+  }
+  return sharedAuthEnv;
+}
 
 const ENV = {
   ADMIN_KEY: 'test-admin-key',
@@ -105,9 +119,14 @@ function installCloudflareMock({ empty = false } = {}) {
   return calls;
 }
 
-function request(key = ENV.ADMIN_KEY, range = 7) {
-  return new Request(`https://admin-preview.market-research-site.pages.dev/api/analytics?range=${range}`, {
-    headers: key === null ? {} : { 'x-admin-key': key }
+function request(key = ENV.ADMIN_KEY, range = 7, session = sharedAuthEnv?._authSession) {
+  const headers = {};
+  if (key !== null) headers['x-admin-key'] = key;
+  if (session && key === ENV.ADMIN_KEY) {
+    headers['cookie'] = session.cookieHeader;
+  }
+  return new Request(`https://admin.snowshagal.com/api/analytics?range=${range}`, {
+    headers
   });
 }
 
@@ -115,9 +134,10 @@ test('missing and incorrect admin keys are rejected before Cloudflare access', {
   const originalFetch = globalThis.fetch;
   let calls = 0;
   globalThis.fetch = async () => { calls += 1; return new Response(); };
+  const authEnv = await getAuthEnv();
   try {
     for (const key of [null, 'wrong-key']) {
-      const response = await onRequestGet({ request: request(key), env: ENV });
+      const response = await onRequestGet({ request: request(key, 7, null), env: authEnv });
       assert.equal(response.status, 401);
       assert.equal((await response.json()).error, 'UNAUTHORIZED');
     }
@@ -129,8 +149,9 @@ test('authenticated requests introspect the live schema before querying the RUM 
   const originalFetch = globalThis.fetch;
   __test.resetSchemaCache();
   const calls = installCloudflareMock();
+  const env = await getAuthEnv();
   try {
-    const response = await onRequestGet({ request: request(), env: ENV });
+    const response = await onRequestGet({ request: request(), env });
     const data = await response.json();
     assert.equal(response.status, 200);
     assert.equal(data.source.dataset, 'rumPageloadEventsAdaptiveGroups');
@@ -162,8 +183,9 @@ test('production host and admin path exclusions protect human and all-traffic ag
   const originalFetch = globalThis.fetch;
   __test.resetSchemaCache();
   const calls = installCloudflareMock();
+  const env = await getAuthEnv();
   try {
-    const response = await onRequestGet({ request: request(), env: ENV });
+    const response = await onRequestGet({ request: request(), env });
     assert.equal(response.status, 200);
     const query = calls.at(-1).query;
     assert.equal((query.match(/requestHost_in: \["snowshagal\.com"\]/g) || []).length, 8);
@@ -193,8 +215,9 @@ test('unsupported host, admin-prefix, or bot filters fail closed before analytic
     dataQueries += 1;
     return Response.json({ data: analyticsRows() });
   };
+  const env = await getAuthEnv();
   try {
-    const response = await onRequestGet({ request: request(), env: ENV });
+    const response = await onRequestGet({ request: request(), env });
     const data = await response.json();
     assert.equal(response.status, 424);
     assert.equal(data.error, 'ANALYTICS_SCHEMA_UNSUPPORTED');
@@ -216,8 +239,9 @@ test('zero rows are a successful empty state rather than an API failure', { conc
   const originalFetch = globalThis.fetch;
   __test.resetSchemaCache();
   installCloudflareMock({ empty: true });
+  const env = await getAuthEnv();
   try {
-    const response = await onRequestGet({ request: request(), env: ENV });
+    const response = await onRequestGet({ request: request(), env });
     const data = await response.json();
     assert.equal(response.status, 200);
     assert.equal(data.empty, true);
@@ -234,8 +258,9 @@ test('Cloudflare GraphQL errors are distinct from zero data and sanitized', { co
   __test.resetSchemaCache();
   globalThis.fetch = async () => Response.json({ errors: [{ message: 'internal account detail' }] });
   console.error = (message) => errorLogs.push(message);
+  const env = await getAuthEnv();
   try {
-    const response = await onRequestGet({ request: request(), env: ENV });
+    const response = await onRequestGet({ request: request(), env });
     const data = await response.json();
     assert.equal(response.status, 424);
     assert.equal(data.ok, false);
@@ -251,10 +276,11 @@ test('Cloudflare GraphQL errors are distinct from zero data and sanitized', { co
 });
 
 test('missing server secrets are reported only after successful admin authentication', async () => {
+  const authEnv = await getAuthEnv();
   const missingAdmin = await onRequestGet({ request: request(), env: {} });
   assert.equal(missingAdmin.status, 503);
-  assert.equal((await missingAdmin.json()).error, 'SERVER_NOT_CONFIGURED');
-  const missingAnalytics = await onRequestGet({ request: request(), env: { ADMIN_KEY: ENV.ADMIN_KEY } });
+  assert.equal((await missingAdmin.json()).error, 'AUTH_NOT_CONFIGURED');
+  const missingAnalytics = await onRequestGet({ request: request(ENV.ADMIN_KEY, 7, authEnv._authSession), env: { ...authEnv, CLOUDFLARE_ANALYTICS_API_TOKEN: undefined } });
   assert.equal(missingAnalytics.status, 503);
   assert.equal((await missingAnalytics.json()).error, 'ANALYTICS_NOT_CONFIGURED');
 });
@@ -355,10 +381,9 @@ test('analytics page keeps secrets server-side and renders Bots excluded versus 
       querySelector: () => theme,
       createElement: () => element()
     },
-    window: {}
+    window: { __TEST_ENV__: true }
   };
   vm.runInNewContext(client, context);
-  elements['analytics-admin-key'].value = 'test-admin-key';
   await context.window.__adminAnalyticsTest.loadAnalytics(7);
   assert.equal(elements['analytics-dashboard'].hidden, false);
   assert.equal(elements['analytics-empty'].hidden, true);

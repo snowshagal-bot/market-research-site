@@ -24,6 +24,7 @@ import {
   isAdminHost,
   isAdminUiPath
 } from './_host-policy.js';
+import { getSession, validateSafeNextUrl } from './_auth.js';
 
 function policyResponse(status, error) {
   return new Response(JSON.stringify({ ok: false, error }), {
@@ -83,6 +84,32 @@ export async function onRequest(context) {
       headers: { location: apexDecision.location, 'cache-control': 'private, no-store, max-age=0' }
     });
   }
+
+  if (isAdminHost(url) && isAdminUiPath(url.pathname)) {
+    const isLoginPath = url.pathname === '/admin/login' || url.pathname === '/admin/login/';
+    const session = await getSession(context.request, context.env);
+    const isAdmin = Boolean(session?.authenticated && session?.user?.role === 'admin');
+
+    if (isLoginPath) {
+      if (isAdmin) {
+        const nextTarget = validateSafeNextUrl(url.searchParams.get('next'));
+        return new Response(null, {
+          status: 302,
+          headers: { location: nextTarget, 'cache-control': 'private, no-store, max-age=0' }
+        });
+      }
+    } else {
+      if (!isAdmin) {
+        const nextParam = url.pathname + url.search;
+        const loginUrl = `/admin/login/?next=${encodeURIComponent(nextParam)}`;
+        return new Response(null, {
+          status: 302,
+          headers: { location: loginUrl, 'cache-control': 'private, no-store, max-age=0' }
+        });
+      }
+    }
+  }
+
   let response = await context.next();
 
   if (isAdminHost(url)) {

@@ -1,6 +1,7 @@
 import { searchIndexArtifacts } from "./_search-index.js";
 import { SOCIAL_REPORT_CARD_DIR } from "../_seo.js";
 import { isHumanAdminHost, validateHumanAdminMutation } from "../_host-policy.js";
+import { requireAdminMutation } from "../_auth.js";
 
 const OWNER = "snowshagal-bot";
 const REPO = "market-research-site";
@@ -621,19 +622,17 @@ function validateEditableFields(form) {
 
 export async function onRequestPost(context) {
   const { request, env } = context;
+
+  const auth = await requireAdminMutation(request, env);
+  if (!auth.ok) {
+    return reply({ ok: false, error: auth.error, message: auth.message }, auth.status);
+  }
+
   if (!isHumanAdminHost(request, { allowPreview: false })) {
     return reply({ ok: false, error: "PREVIEW_READ_ONLY", message: "Preview와 로컬 환경에서는 게시물을 변경할 수 없습니다." }, 403);
   }
-  if (!env.ADMIN_KEY || !env.GITHUB_TOKEN) {
+  if (!env.GITHUB_TOKEN) {
     return reply({ ok: false, error: "SERVER_NOT_CONFIGURED", message: "관리자 환경 변수가 설정되지 않았습니다." }, 503);
-  }
-
-  if (!secretsMatch(request.headers.get("X-Admin-Key") || "", env.ADMIN_KEY)) {
-    return reply({ ok: false, error: "UNAUTHORIZED", message: "관리자 키가 올바르지 않습니다." }, 401);
-  }
-  const originPolicy = validateHumanAdminMutation(request, { allowPreview: false });
-  if (!originPolicy.ok) {
-    return reply({ ok: false, error: originPolicy.error, message: "허용되지 않은 관리자 Origin입니다." }, 403);
   }
 
   let form;

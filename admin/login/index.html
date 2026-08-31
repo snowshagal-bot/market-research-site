@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e6">
+<meta name="robots" content="noindex,nofollow">
+<title>관리자 로그인 · Snowshagal Admin</title>
+<link rel="stylesheet" href="/assets/site.css?v=1efc69cb5c">
+<link rel="stylesheet" href="/assets/ui-polish.css?v=26a4fe9976">
+<style>
+.login-page{min-height:80vh;display:flex;align-items:center;justify-content:center;padding:40px 16px}
+.login-card{width:100%;max-width:380px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:32px 28px}
+.login-head{margin-bottom:24px}
+.login-head .brand-tag{display:inline-block;font-size:10px;font-weight:900;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.login-head h1{margin:0;font-size:24px;letter-spacing:-.03em;line-height:1.2}
+.login-head p{margin:6px 0 0;color:var(--text-2);font-size:12.5px;line-height:1.4}
+.login-form{display:grid;gap:16px}
+.login-field{display:grid;gap:6px}
+.login-field label{font-size:11px;font-weight:850;color:var(--text-2)}
+.login-field input{width:100%;min-height:42px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);padding:9px 12px;font:inherit;font-size:13px;box-sizing:border-box}
+.login-field input:focus{outline:none;border-color:var(--text)}
+.login-btn{width:100%;min-height:44px;border:1px solid var(--text);border-radius:10px;background:var(--text);color:var(--bg);font:inherit;font-size:13px;font-weight:850;cursor:pointer;transition:opacity .15s ease}
+.login-btn:disabled{opacity:.4;cursor:not-allowed}
+.login-status{min-height:20px;margin-top:14px;font-size:12px;line-height:1.4;text-align:center;color:var(--brown)}
+.login-status.info{color:var(--text-2)}
+.login-footer{margin-top:20px;padding-top:16px;border-top:1px dashed var(--line);text-align:center}
+.login-footer a{color:var(--text-2);font-size:11px;font-weight:800;text-decoration:none}
+.login-footer a:hover{text-decoration:underline}
+</style>
+<script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
+</head>
+<body>
+<header class="site-header"><div class="site-wrap"><div class="header-row"><a class="brand" href="https://snowshagal.com/"><i></i>SNOWSHAGAL</a><div class="header-actions"><button class="icon-btn" type="button" data-theme-toggle aria-label="다크 모드로 전환">◐</button></div></div></div></header>
+
+<main class="login-page">
+  <div class="login-card">
+    <div class="login-head">
+      <span class="brand-tag">SNOWSHAGAL ADMIN</span>
+      <h1>관리자 로그인</h1>
+      <p>시장 리서치 관리자 계정으로 로그인합니다.</p>
+    </div>
+
+    <form class="login-form" id="login-form">
+      <div class="login-field">
+        <label for="email">이메일</label>
+        <input id="email" type="email" autocomplete="username" placeholder="admin@snowshagal.com" required>
+      </div>
+
+      <div class="login-field">
+        <label for="password">비밀번호</label>
+        <input id="password" type="password" autocomplete="current-password" placeholder="비밀번호" required>
+      </div>
+
+      <button class="login-btn" id="submit-btn" type="submit">로그인</button>
+      <div class="login-status" id="status" role="alert" aria-live="polite"></div>
+    </form>
+
+    <div class="login-footer">
+      <a href="https://snowshagal.com/">← 홈페이지로 돌아가기</a>
+    </div>
+  </div>
+</main>
+
+<script>
+(() => {
+  const form = document.getElementById('login-form');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const submitBtn = document.getElementById('submit-btn');
+  const status = document.getElementById('status');
+
+  // Parse and sanitize safe next parameter
+  function getSafeNext() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const next = (params.get('next') || '').trim();
+      if (!next.startsWith('/admin') || next.startsWith('//') || next.startsWith('/\\') || next.split('?')[0].includes(':')) {
+        return '/admin/';
+      }
+      if (next === '/admin/login' || next === '/admin/login/') return '/admin/';
+      return next;
+    } catch (_) {
+      return '/admin/';
+    }
+  }
+
+  // Theme toggle
+  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const isDark = document.documentElement.dataset.theme === 'dark';
+      const next = isDark ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      try { localStorage.setItem('site-theme', next); } catch (_) {}
+    });
+  });
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    if (!email || !password) return;
+
+    submitBtn.disabled = true;
+    status.className = 'login-status info';
+    status.textContent = '로그인 중입니다…';
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok && data.ok) {
+        status.className = 'login-status info';
+        status.textContent = '로그인 성공. 이동 중입니다…';
+        const target = getSafeNext();
+        window.location.href = target;
+        return;
+      }
+
+      status.className = 'login-status';
+      if (response.status === 503) {
+        status.textContent = data.message || '인증 데이터베이스가 아직 설정되지 않았습니다.';
+      } else if (response.status === 429) {
+        status.textContent = data.message || '로그인 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.';
+      } else {
+        status.textContent = data.message || '이메일 또는 비밀번호가 올바르지 않습니다.';
+      }
+    } catch (err) {
+      status.className = 'login-status';
+      status.textContent = '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>

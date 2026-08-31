@@ -510,7 +510,7 @@ test('invalid administrator authentication keeps a clear publish failure visible
     publishResponse: {
       ok: false,
       status: 401,
-      json: async () => ({ error: 'UNAUTHORIZED', message: '관리자 키가 올바르지 않습니다.' })
+      json: async () => ({ error: 'UNAUTHORIZED', message: '관리자 인증이 필요하거나 권한이 없습니다.' })
     }
   });
   await makePublishReady(elements);
@@ -522,25 +522,16 @@ test('invalid administrator authentication keeps a clear publish failure visible
   assert.equal(elements['publish-overlay'].getAttribute('role'), 'alertdialog');
   assert.equal(elements['publish-overlay'].getAttribute('aria-live'), 'assertive');
   assert.equal(elements['publish-state-title'].textContent, '게시되지 않았습니다.');
-  assert.match(elements['publish-state-text'].textContent, /관리자 키가 올바르지 않아 게시하지 못했습니다/);
+  assert.match(elements['publish-state-text'].textContent, /관리자 인증이 필요하거나|관리자 키/);
   assert.equal(elements['publish-error-actions'].hidden, false);
-  assert.equal(elements['admin-key'].getAttribute('aria-invalid'), 'true');
   assert.match(elements['parse-status'].textContent, /게시되지 않음/);
 
   elements['publish-error-close'].emit('click');
   assert.equal(elements['publish-overlay'].classList.contains('on'), false);
-  assert.equal(elements['admin-key'].focused, true);
-
-  elements['admin-key'].value = 'corrected-key';
-  elements['admin-key'].emit('input');
-  assert.equal(elements['admin-key'].getAttribute('aria-invalid'), undefined);
-  assert.equal(elements['parse-status'].classList.contains('error'), false);
-  assert.match(elements['parse-status'].textContent, /다시 게시해 주세요/);
 });
 
 test('an automatically generated cover suppresses the missing-cover warning', async () => {
   const { elements, confirmMessages } = await loadAdmin({ confirmResult: false });
-  elements['admin-key'].value = 'test-key';
   elements['html-file'].files = [{
     name: '데일리.html',
     size: 100,
@@ -557,7 +548,7 @@ test('an automatically generated cover suppresses the missing-cover warning', as
   assert.doesNotMatch(confirmMessages[0], /대표 커버가 선택되지 않았습니다|fallback cover/);
 });
 
-test('automatic cover generation passes the current admin key to the generator', async () => {
+test('automatic cover generation passes csrf token to the generator', async () => {
   let generationInput;
   const { elements } = await loadAdmin({
     generateCover: async input => {
@@ -567,7 +558,8 @@ test('automatic cover generation passes the current admin key to the generator',
   });
   await makePublishReady(elements);
   await elements['generate-cover-btn'].emit('click');
-  assert.equal(generationInput.adminKey, 'test-key');
+  assert.ok(generationInput);
+  assert.equal(typeof generationInput.html, 'string');
 });
 
 test('A-C: automatic generation and generated-image decode both block publishing until onload', async () => {

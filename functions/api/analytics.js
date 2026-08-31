@@ -1,4 +1,5 @@
 import { isHumanAdminHost } from '../_host-policy.js';
+import { requireAdmin } from '../_auth.js';
 
 const GRAPHQL_ENDPOINT = 'https://api.cloudflare.com/client/v4/graphql';
 const DATASET = 'rumPageloadEventsAdaptiveGroups';
@@ -422,12 +423,9 @@ export async function onRequestGet({ request, env }) {
   if (!isHumanAdminHost(request)) {
     return json({ ok: false, error: 'ADMIN_HOST_BLOCKED', message: '허용되지 않은 관리자 host입니다.' }, 403);
   }
-  if (!env.ADMIN_KEY) {
-    return json({ ok: false, error: 'SERVER_NOT_CONFIGURED', message: '관리자 인증 설정이 필요합니다.' }, 503);
-  }
-  const suppliedKey = request.headers.get('x-admin-key') || '';
-  if (!(await secretsMatch(suppliedKey, env.ADMIN_KEY))) {
-    return json({ ok: false, error: 'UNAUTHORIZED', message: '관리자 키가 올바르지 않습니다.' }, 401);
+  const auth = await requireAdmin(request, env);
+  if (!auth.ok) {
+    return json({ ok: false, error: auth.error, message: auth.message }, auth.status);
   }
   if (!env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_ANALYTICS_API_TOKEN || !env.CLOUDFLARE_WEB_ANALYTICS_SITE_TAG) {
     return json({ ok: false, error: 'ANALYTICS_NOT_CONFIGURED', message: 'Cloudflare Analytics 환경 변수 설정이 필요합니다.' }, 503);

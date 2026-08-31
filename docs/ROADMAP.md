@@ -1,22 +1,22 @@
 # Roadmap
 
-Updated: 2026-08-30
+Updated: 2026-08-31
 
 This roadmap records implementation order, completed capabilities, and operational priorities, not a promise to build every future idea. Keep the current site small and stable until real traffic, indexing, and operational needs justify added complexity.
 
 ## Current Stage & Next Action
 
-The core site architecture, bilingual structure, SEO/clean URLs, category discovery, analytics, and publishing pipeline are fully implemented and running in Production. The project is currently in the **Search indexing + traffic observation + operational stabilization** stage.
+The core site architecture, bilingual structure, SEO/clean URLs, category discovery, analytics, and publishing pipeline are fully implemented and running in Production. Admin Origin Isolation (Phase 1A) is enforced on `admin.snowshagal.com`.
 
 ### Next action
 
-0. **Admin origin isolation Phase 1A cutover (manual approval pending)**:
-   - Compatibility code prepares `admin.snowshagal.com` on the existing Pages project while
-     retaining apex `/admin/*` and `ADMIN_KEY` operation.
-   - Do not attach the Production custom domain from a Preview PR. After approved merge,
-     follow `docs/ADMIN_ORIGIN_ISOLATION.md`, run the read-only admin-host smoke, and request
-     explicit approval for the separate apex enforcement commit.
-   - No login/session/cookie/AUTH_DB work belongs to Phase 1A.
+0. **Phase 1B-A Account Foundation & Admin Login (Draft PR & Preview validation)**:
+   - Shared account model (`users`, `password_credentials`, `sessions`, `auth_rate_limits`, `audit_events`).
+   - PBKDF2-HMAC-SHA256 password hashing, opaque server session cookie (`__Host-snowshagal-admin-session`), CSRF tokens (`x-csrf-token`), rate limiting, route guard redirects to `/admin/login/?next=...`.
+   - Migration `migrations/auth/0001_auth_foundation.sql` and operator CLI `scripts/bootstrap-admin.mjs`.
+   - Human `ADMIN_KEY` removed from browser UI / sessionStorage.
+   - Cloudflare D1 `AUTH_DB` fail-closed (503 `AUTH_NOT_CONFIGURED` when unbound).
+   - Validation in Preview without touching Production D1 or secrets.
 
 1. **Google Search Console Domain property confirmation & Sitemap monitoring**:
    - Verify `snowshagal.com` DNS Domain-property in Google Search Console.

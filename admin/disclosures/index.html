@@ -22,14 +22,13 @@
   <div class="disc-head"><div><a class="toplink" href="../">← 관리자</a><h1>공시 모니터</h1><p>OpenDART 당일 전체 공시를 수집·검색하고, MARKET 공개 피드 및 독자용 AI 해설을 선별 관리합니다.</p></div><div class="disc-note">Watchlist 기업 + High/Critical 자동 MARKET 게시 · 수동 게시 제어 가능</div></div>
   <nav class="admin-nav" aria-label="관리자 메뉴"><a href="../">새 리포트 등록</a><a href="../manage/">게시물 관리</a><a href="../analytics/">방문 통계</a><a href="../market/">Market Close</a><a href="./" aria-current="page">공시 모니터</a></nav>
   <section class="card disc-auth">
-    <div class="field"><label for="admin-key">관리자 키</label><input id="admin-key" type="password" autocomplete="current-password" placeholder="Cloudflare ADMIN_KEY"></div>
     <div class="actions">
-      <button id="load" class="btn" type="button">공시 조회</button>
-      <button id="sync" class="btn primary" type="button">OpenDART 동기화</button>
+      <button id="load" class="btn primary" type="button">공시 조회</button>
+      <button id="sync" class="btn" type="button">OpenDART 동기화</button>
       <button id="toggle-watchlist-btn" class="btn secondary" type="button">관심기업 관리 (30)</button>
     </div>
   </section>
-  <div id="status" class="status" aria-live="polite">관리자 키를 입력하면 조회할 수 있습니다.</div>
+  <div id="status" class="status" aria-live="polite">공시 조회 버튼을 누르면 최신 데이터를 불러옵니다.</div>
 
   <section id="watchlist-section" class="watchlist-panel" hidden>
     <div class="wl-header">
@@ -72,15 +71,14 @@
 <script>
 (() => {
   const $ = id => document.getElementById(id);
-  const key = $('admin-key'); const load = $('load'); const sync = $('sync'); const status = $('status'); const dashboard = $('dashboard'); const feed = $('feed');
+  const load = $('load'); const sync = $('sync'); const status = $('status'); const dashboard = $('dashboard'); const feed = $('feed');
   let current = [];
   let currentFilter = 'all';
   let watchlist = [];
-  try { key.value = sessionStorage.getItem('mrs-admin-key') || ''; } catch (_) {}
+  let csrfToken = '';
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmtDate = raw => /^\d{8}$/.test(raw || '') ? `${raw.slice(0,4)}.${raw.slice(4,6)}.${raw.slice(6,8)}` : raw || '—';
   function setStatus(message, error=false){ status.textContent=message; status.classList.toggle('error',error); }
-  function auth(){ const value=key.value.trim(); try{sessionStorage.setItem('mrs-admin-key',value)}catch(_){} return value; }
   function usageCount(usage,prefix){ return Object.entries(usage||{}).filter(([k])=>k.startsWith(prefix)).reduce((n,[,v])=>n+Number(v.requests||0),0); }
 
   function render(data){
@@ -185,10 +183,16 @@
     feed.querySelectorAll('[data-publish]').forEach(btn => btn.addEventListener('click', () => togglePublish(btn.dataset.publish, btn.dataset.action, btn)));
   }
 
-  async function request(url,options={}){ const res=await fetch(url,{...options,headers:{...(options.headers||{}),'X-Admin-Key':auth()}}); const data=await res.json().catch(()=>({})); if(!res.ok) throw new Error(data.message||data.error||`HTTP ${res.status}`); return data; }
+  async function request(url,options={}){
+    const headers = { ...(options.headers || {}) };
+    if (csrfToken) headers['x-csrf-token'] = csrfToken;
+    const res = await fetch(url, { ...options, headers });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || data.error || `HTTP ${res.status}`);
+    return data;
+  }
 
   async function loadData(){
-    if(!auth()){setStatus('관리자 키를 입력해 주세요.',true);return;}
     load.disabled=sync.disabled=true; setStatus('저장된 공시를 불러오는 중…');
     try{
       const data=await request('/api/disclosures/latest?limit=200');
@@ -198,7 +202,6 @@
   }
 
   async function syncData(){
-    if(!auth()){setStatus('관리자 키를 입력해 주세요.',true);return;}
     load.disabled=sync.disabled=true; setStatus('OpenDART 동기화 중… Watchlist 및 High 공시를 MARKET 피드에 선별합니다.');
     try{
       const data=await request('/api/disclosures/sync',{method:'POST',headers:{'content-type':'application/json'},body:'{}'});
@@ -238,7 +241,6 @@
   }
 
   async function loadWatchlist() {
-    if (!auth()) return;
     try {
       const data = await request('/api/disclosures/watchlist');
       watchlist = data.watchlist || [];
@@ -315,9 +317,19 @@
   sync.addEventListener('click', syncData);
   $('search').addEventListener('input', renderFeed);
   $('priority').addEventListener('change', renderFeed);
-  key.addEventListener('change', () => { auth(); loadWatchlist(); });
   $('theme-toggle').addEventListener('click',()=>{const html=document.documentElement;const next=html.dataset.theme==='dark'?'light':'dark';html.dataset.theme=next;try{localStorage.setItem('site-theme',next)}catch(_){}});
-  if(key.value) { loadData(); loadWatchlist(); }
+
+  (async () => {
+    try {
+      const res = await fetch('/api/auth/session');
+      const data = await res.json().catch(() => ({}));
+      if (data?.ok && data.authenticated) {
+        csrfToken = data.csrfToken || '';
+      }
+    } catch (_) {}
+    loadData();
+    loadWatchlist();
+  })();
 })();
 </script>
 </body>

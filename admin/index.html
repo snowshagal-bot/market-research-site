@@ -46,7 +46,7 @@
       <div class="field full"><label for="post-summary">홈페이지 요약 <span>(선택)</span></label><textarea id="post-summary" maxlength="500" placeholder="리포트 내용을 2~3문장으로 요약해 주세요"></textarea><small>리포트 HTML의 report-summary 또는 커버 한 줄 문구를 자동 인식합니다. 게시 전에 수정할 수 있습니다.</small><p class="takeaway-status" id="takeaway-status" aria-live="polite" hidden></p></div>
       <fieldset class="field full tag-field"><legend id="tags-label">주제 태그 <span>(선택 · 최대 3개)</span> <span id="tags-count" class="tags-count">0/3</span></legend><div class="tag-options" id="tag-options" role="group" aria-labelledby="tags-label"></div><small id="tags-status" class="tags-status">글의 핵심 주제를 0~3개 선택하세요. 번역 짝 연결 시 기존 태그가 자동 반영됩니다.</small></fieldset>
     </div>
-    <div class="actions"><div><div class="auth"><label for="admin-key">관리자 키</label><input id="admin-key" type="password" autocomplete="current-password" placeholder="Cloudflare에 설정한 관리자 키"></div><div class="status" id="parse-status">파일을 선택하면 자동 분석합니다.</div></div><button class="btn primary" id="publish-btn" type="button" disabled>게시</button></div></section>
+    <div class="actions"><div><div class="status" id="parse-status">파일을 선택하면 자동 분석합니다.</div></div><button class="btn primary" id="publish-btn" type="button" disabled>게시</button></div></section>
     <section class="card preview-card" aria-labelledby="cover-preview-title"><div class="cover-preview-head"><h2 id="cover-preview-title">3. 홈페이지 커버 미리보기</h2><div class="cover-preview-modes" role="group" aria-label="홈페이지 커버 미리보기 화면 크기"><button class="cover-preview-mode" type="button" data-cover-preview-mode="1280" aria-pressed="true">PC 1280</button><button class="cover-preview-mode" type="button" data-cover-preview-mode="430" aria-pressed="false">모바일 430</button><button class="cover-preview-mode" type="button" data-cover-preview-mode="360" aria-pressed="false">모바일 360</button></div></div><div class="cover-preview-canvas" id="cover-preview-canvas" data-cover-mode="1280"><div class="cover-preview-empty" id="cover-preview-empty">대표 커버를 선택하면 홈페이지에서 보이는 영역을 확인할 수 있습니다.</div><img id="cover-preview-image" alt="선택한 홈페이지 대표 커버 미리보기" hidden></div><p class="cover-preview-caption" id="cover-preview-caption">홈페이지 커버 표시 영역 · PC 1280</p><dl class="cover-preview-meta" id="cover-preview-meta" aria-live="polite" hidden><div><dt>파일명</dt><dd id="cover-preview-name"></dd></div><div><dt>이미지 크기</dt><dd id="cover-preview-dimensions"></dd></div><div><dt>파일 크기</dt><dd id="cover-preview-size"></dd></div></dl><p class="cover-preview-note" id="cover-preview-note" aria-live="polite">커버 미선택 · 게시 후 홈페이지에서는 fallback cover 사용</p></section>
     <section class="card preview-card"><h2>4. 원본 HTML 미리보기</h2><div class="preview-wrap" id="preview-wrap"><div class="preview-empty">파일을 넣으면 이곳에 원본 리포트가 표시됩니다.</div></div></section>
   </div>
@@ -57,8 +57,8 @@
 <script src="/data/tags.js?v=636e50700f"></script>
 <script src="/data/posts.js"></script>
 <script src="/assets/locale.js?v=3b5552cdd4"></script>
-<script src="/assets/cover-generator.js?v=2bf741516e"></script>
+<script src="/assets/cover-generator.js?v=d54ad19534"></script>
 <script src="/assets/share-card.js?v=3f0995dbae"></script>
-<script src="/assets/admin.js?v=303bad7080"></script>
+<script src="/assets/admin.js?v=37978106a8"></script>
 </body>
 </html>

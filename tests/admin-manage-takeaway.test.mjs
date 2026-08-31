@@ -3,11 +3,20 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
 import { onRequestPost } from '../functions/api/manage.js';
+import { createMockAuthEnv } from './helpers/auth-test-helper.mjs';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 const ADMIN_KEY = 'test-admin-key';
 const originalFetch = globalThis.fetch;
+
+let sharedAuthEnv = null;
+async function getAuthEnv() {
+  if (!sharedAuthEnv) {
+    sharedAuthEnv = await createMockAuthEnv({ ADMIN_KEY, GITHUB_TOKEN: 'token', GITHUB_REPO: 'snowshagal-bot/market-research-site' });
+  }
+  return sharedAuthEnv;
+}
 
 function base64(text) {
   const bytes = new TextEncoder().encode(text);
@@ -49,15 +58,20 @@ function githubMock(existingPosts, { searchIndex = null } = {}) {
   return calls;
 }
 
-function manageRequest(fields = {}, key = ADMIN_KEY, url = 'https://admin.snowshagal.com/api/manage') {
+function manageRequest(fields = {}, key = ADMIN_KEY, url = 'https://admin.snowshagal.com/api/manage', session = sharedAuthEnv?._authSession) {
   const form = new FormData();
   for (const [name, value] of Object.entries(fields)) {
     if (value instanceof File) form.append(name, value, value.name);
     else if (value !== null && value !== undefined) form.append(name, String(value));
   }
+  const headers = { 'x-admin-key': key, origin: new URL(url).origin };
+  if (session && key === ADMIN_KEY) {
+    headers['cookie'] = session.cookieHeader;
+    headers['x-csrf-token'] = session.csrfToken;
+  }
   return new Request(url, {
     method: 'POST',
-    headers: { 'x-admin-key': key, origin: new URL(url).origin },
+    headers,
     body: form
   });
 }
@@ -172,6 +186,7 @@ test('Case 2: Daily takeaway update via API modifies posts.json properly', async
   };
 
   const calls = githubMock([initialPost]);
+  const env = await getAuthEnv();
   const req = manageRequest({
     action: 'update',
     id: initialPost.id,
@@ -179,9 +194,9 @@ test('Case 2: Daily takeaway update via API modifies posts.json properly', async
     reportDate: '2026-08-27',
     title: '기존 리포트',
     takeaway: '새로운 문구'
-  });
+  }, ADMIN_KEY, 'https://admin.snowshagal.com/api/manage', env._authSession);
 
-  const res = await onRequestPost({ request: req, env: { GITHUB_TOKEN: 'token', ADMIN_KEY } });
+  const res = await onRequestPost({ request: req, env });
   const data = await res.json();
   assert.equal(res.status, 200);
   assert.equal(data.ok, true);
@@ -206,6 +221,7 @@ test('Case 3: Editing other fields (title, summary, tags) preserves existing tak
   };
 
   const calls = githubMock([initialPost]);
+  const env = await getAuthEnv();
   const req = manageRequest({
     action: 'update',
     id: initialPost.id,
@@ -213,9 +229,9 @@ test('Case 3: Editing other fields (title, summary, tags) preserves existing tak
     reportDate: '2026-08-27',
     title: '새로운 제목',
     summary: '새 요약'
-  });
+  }, ADMIN_KEY, 'https://admin.snowshagal.com/api/manage', env._authSession);
 
-  const res = await onRequestPost({ request: req, env: { GITHUB_TOKEN: 'token', ADMIN_KEY } });
+  const res = await onRequestPost({ request: req, env });
   const data = await res.json();
   assert.equal(res.status, 200);
   assert.equal(data.ok, true);
@@ -241,6 +257,7 @@ test('Case 4: Deleting takeaway by submitting empty string removes takeaway prop
   };
 
   const calls = githubMock([initialPost]);
+  const env = await getAuthEnv();
   const req = manageRequest({
     action: 'update',
     id: initialPost.id,
@@ -248,9 +265,9 @@ test('Case 4: Deleting takeaway by submitting empty string removes takeaway prop
     reportDate: '2026-08-27',
     title: '리포트',
     takeaway: '   '
-  });
+  }, ADMIN_KEY, 'https://admin.snowshagal.com/api/manage', env._authSession);
 
-  const res = await onRequestPost({ request: req, env: { GITHUB_TOKEN: 'token', ADMIN_KEY } });
+  const res = await onRequestPost({ request: req, env });
   const data = await res.json();
   assert.equal(res.status, 200);
   assert.equal(data.ok, true);
@@ -275,6 +292,7 @@ test('Case 5: Changing category from Daily to Weekly strips takeaway property', 
   };
 
   const calls = githubMock([initialPost]);
+  const env = await getAuthEnv();
   const req = manageRequest({
     action: 'update',
     id: initialPost.id,
@@ -282,9 +300,9 @@ test('Case 5: Changing category from Daily to Weekly strips takeaway property', 
     reportDate: '2026-08-27',
     title: '위클리로 변경할 리포트',
     takeaway: '기존 데일리 문구'
-  });
+  }, ADMIN_KEY, 'https://admin.snowshagal.com/api/manage', env._authSession);
 
-  const res = await onRequestPost({ request: req, env: { GITHUB_TOKEN: 'token', ADMIN_KEY } });
+  const res = await onRequestPost({ request: req, env });
   const data = await res.json();
   assert.equal(res.status, 200);
 
@@ -308,6 +326,7 @@ test('Case 6: Changing category from Weekly to Daily allows creating takeaway', 
   };
 
   const calls = githubMock([initialPost]);
+  const env = await getAuthEnv();
   const req = manageRequest({
     action: 'update',
     id: initialPost.id,
@@ -315,9 +334,9 @@ test('Case 6: Changing category from Weekly to Daily allows creating takeaway', 
     reportDate: '2026-08-27',
     title: '데일리로 변경할 리포트',
     takeaway: '새로운 데일리 한 줄'
-  });
+  }, ADMIN_KEY, 'https://admin.snowshagal.com/api/manage', env._authSession);
 
-  const res = await onRequestPost({ request: req, env: { GITHUB_TOKEN: 'token', ADMIN_KEY } });
+  const res = await onRequestPost({ request: req, env });
   const data = await res.json();
   assert.equal(res.status, 200);
 
@@ -342,6 +361,7 @@ test('Case 7: 400 char limit enforcement on both client form and server API', as
   };
 
   const calls = githubMock([initialPost]);
+  const env = await getAuthEnv();
   const req = manageRequest({
     action: 'update',
     id: initialPost.id,
@@ -349,9 +369,9 @@ test('Case 7: 400 char limit enforcement on both client form and server API', as
     reportDate: '2026-08-27',
     title: '리포트',
     takeaway: longTakeaway
-  });
+  }, ADMIN_KEY, 'https://admin.snowshagal.com/api/manage', env._authSession);
 
-  const res = await onRequestPost({ request: req, env: { GITHUB_TOKEN: 'token', ADMIN_KEY } });
+  const res = await onRequestPost({ request: req, env });
   assert.equal(res.status, 200);
 
   const tree = calls.find(c => c.path.endsWith('/git/trees'))?.body.tree;

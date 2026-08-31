@@ -18,11 +18,11 @@
   <nav class="admin-nav" aria-label="관리자 메뉴"><a href="../">새 리포트 등록</a><a href="../manage/">게시물 관리</a><a href="./" aria-current="page">방문 통계</a><a href="../market/">Market Close</a><a href="../disclosures/">공시 모니터</a></nav>
 
   <section class="card analytics-auth" aria-labelledby="analytics-auth-title">
-    <div><h2 id="analytics-auth-title">관리자 인증</h2><p>기존 관리자 키로 통계 데이터 조회를 시작합니다.</p></div>
-    <div class="auth-controls"><label for="analytics-admin-key">관리자 키</label><div><input id="analytics-admin-key" type="password" autocomplete="current-password" placeholder="Cloudflare에 설정한 관리자 키"><button class="btn primary" id="analytics-load" type="button">통계 조회</button></div></div>
+    <div><h2 id="analytics-auth-title">방문 통계 조회</h2><p>Cloudflare Web Analytics 방문·유입 데이터를 불러옵니다.</p></div>
+    <div class="auth-controls"><button class="btn primary" id="analytics-load" type="button">통계 불러오기</button></div>
   </section>
 
-  <div class="analytics-status" id="analytics-status" role="status" aria-live="polite">관리자 키를 입력하면 통계를 불러옵니다.</div>
+  <div class="analytics-status" id="analytics-status" role="status" aria-live="polite">통계 불러오기 버튼을 누르면 데이터를 조회합니다.</div>
 
   <section id="analytics-dashboard" hidden>
     <div class="range-tabs" id="analytics-ranges" role="group" aria-label="조회 기간">
@@ -81,6 +81,6 @@
     </section>
   </section>
 </div></main>
-<script src="/assets/admin-analytics.js?v=61748fb62f"></script>
+<script src="/assets/admin-analytics.js?v=6592cb2dc8"></script>
 </body>
 </html>

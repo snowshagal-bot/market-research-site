@@ -14,7 +14,7 @@
   const editorEmpty = $('editor-empty');
   const form = $('editor-form');
   const status = $('manage-status');
-  const adminKey = $('manage-admin-key');
+  let csrfToken = '';
   const htmlInput = $('replacement-html');
   const htmlStatus = $('html-status');
   const htmlPreview = $('html-preview');
@@ -437,11 +437,10 @@
   }
 
   async function mutate(body) {
-    const key = adminKey.value.trim();
-    if (!key) throw new Error('관리자 키를 입력해 주세요.');
     if (isPreviewHost(location.hostname)) throw new Error('Preview에서는 실제 저장·삭제를 실행할 수 없습니다.');
-    try { sessionStorage.setItem('mrs-admin-key', key); } catch (_) {}
-    const response = await fetch('/api/manage', { method: 'POST', headers: { 'X-Admin-Key': key }, body });
+    const headers = {};
+    if (csrfToken) headers['x-csrf-token'] = csrfToken;
+    const response = await fetch('/api/manage', { method: 'POST', headers, body });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.message || data.error || `처리 실패 (${response.status})`);
     return data;
@@ -621,7 +620,16 @@
     }
   }
 
-  try { adminKey.value = sessionStorage.getItem('mrs-admin-key') || ''; } catch (_) {}
+  async function loadAuth() {
+    try {
+      const res = await fetch('/api/auth/session');
+      const data = await res.json().catch(() => ({}));
+      if (data?.ok && data.authenticated) {
+        csrfToken = data.csrfToken || '';
+      }
+    } catch (_) {}
+  }
+  loadAuth();
   applyTheme(savedTheme());
   themeMedia.addEventListener?.('change', () => { if (savedTheme() === 'system') applyTheme('system'); });
   themeButton?.addEventListener('click', () => {

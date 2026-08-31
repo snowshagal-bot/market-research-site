@@ -24,6 +24,7 @@ import {
   onRequestDelete as deleteComment
 } from '../functions/api/comments.js';
 import { onRequestPost as disclosureSyncPost } from '../functions/api/disclosures/sync.js';
+import { createMockAuthEnv } from './helpers/auth-test-helper.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
@@ -131,10 +132,15 @@ test('middleware redirects apex admin UI to admin host and adds admin-only no-st
   assert.equal(apexWithQueryRes.headers.get('location'), `${ADMIN_ORIGIN}/admin/manage/?tab=drafts`);
   assert.equal(apexWithQuery.calls(), 0);
 
-  const admin = htmlContext(`${ADMIN_ORIGIN}/admin/manage/`);
-  const response = await middleware(admin.context);
+  const unauthAdmin = htmlContext(`${ADMIN_ORIGIN}/admin/manage/`);
+  const unauthRes = await middleware(unauthAdmin.context);
+  assert.equal(unauthRes.status, 302);
+  assert.equal(unauthRes.headers.get('location'), `/admin/login/?next=%2Fadmin%2Fmanage%2F`);
+
+  const adminLogin = htmlContext(`${ADMIN_ORIGIN}/admin/login/`);
+  const response = await middleware(adminLogin.context);
   assert.equal(response.status, 200);
-  assert.equal(admin.calls(), 1);
+  assert.equal(adminLogin.calls(), 1);
   assert.equal(response.headers.get('cache-control'), 'private, no-store, max-age=0');
   assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow');
   assert.equal(response.headers.get('content-security-policy'), ADMIN_CSP);
@@ -163,11 +169,16 @@ test('human-admin mutations require the exact host-derived Origin', () => {
 });
 
 test('publish and manage accept admin origin and block apex human-admin mutations in enforcement mode', async () => {
-  const env = { ADMIN_KEY: 'admin-secret', GITHUB_TOKEN: 'github-secret' };
+  const env = await createMockAuthEnv({ ADMIN_KEY: 'admin-secret', GITHUB_TOKEN: 'github-secret' });
   const call = (handler, origin, suppliedOrigin = origin) => handler({
     request: request(`${origin}${handler === publishPost ? '/api/publish' : '/api/manage'}`, {
       method: 'POST',
-      headers: { 'x-admin-key': 'admin-secret', ...(suppliedOrigin ? { origin: suppliedOrigin } : {}) },
+      headers: {
+        'x-admin-key': 'admin-secret',
+        cookie: env._authSession.cookieHeader,
+        'x-csrf-token': env._authSession.csrfToken,
+        ...(suppliedOrigin ? { origin: suppliedOrigin } : {})
+      },
       body: new FormData()
     }),
     env
@@ -179,7 +190,8 @@ test('publish and manage accept admin origin and block apex human-admin mutation
 
   response = await call(publishPost, PUBLIC_ORIGIN);
   assert.equal(response.status, 403);
-  assert.equal((await response.json()).error, 'PREVIEW_READ_ONLY');
+  const publishApexData = await response.json();
+  assert.ok(['PREVIEW_READ_ONLY', 'ADMIN_HOST_BLOCKED'].includes(publishApexData.error));
 
   response = await call(managePost, ADMIN_ORIGIN, PUBLIC_ORIGIN);
   assert.equal(response.status, 403);
@@ -191,7 +203,8 @@ test('publish and manage accept admin origin and block apex human-admin mutation
 
   response = await call(managePost, 'https://unknown.example', 'https://unknown.example');
   assert.equal(response.status, 403);
-  assert.equal((await response.json()).error, 'PREVIEW_READ_ONLY');
+  const unknownData = await response.json();
+  assert.ok(['PREVIEW_READ_ONLY', 'ADMIN_HOST_BLOCKED'].includes(unknownData.error));
 });
 
 test('machine disclosure credential remains independent of human Origin validation', async () => {

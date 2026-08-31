@@ -254,13 +254,12 @@
     }
   }
 
-  async function serverCapture(html, selector, adminKey) {
+  async function serverCapture(html, selector, csrfToken) {
+    const headers = { 'content-type': 'application/json' };
+    if (csrfToken) headers['x-csrf-token'] = String(csrfToken || '');
     const response = await fetch('/api/generate-cover', {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-admin-key': String(adminKey || '')
-      },
+      headers,
       body: JSON.stringify({ html: String(html || ''), preferredSelector: selector })
     });
     if (!response.ok) {
@@ -291,10 +290,11 @@
     ].includes(code);
   }
 
-  async function generate({ html, template, adminKey }) {
+  async function generate({ html, template, csrfToken, adminKey }) {
     const selector = preferredSelector(html);
+    const token = csrfToken || adminKey;
     if (selector) {
-      try { return await serverCapture(html, selector, adminKey); }
+      try { return await serverCapture(html, selector, token); }
       catch (error) {
         if (!canUseTemplateFallback(error)) throw error;
         const fallback = await createTemplateCover(template);
