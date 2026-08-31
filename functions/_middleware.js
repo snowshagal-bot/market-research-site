@@ -22,6 +22,7 @@ import {
   apexAdminRouteDecision,
   classifyHost,
   isAdminHost,
+  isHumanAdminHost,
   isAdminUiPath
 } from './_host-policy.js';
 import { getSession, validateSafeNextUrl } from './_auth.js';
@@ -85,7 +86,7 @@ export async function onRequest(context) {
     });
   }
 
-  if (isAdminHost(url) && isAdminUiPath(url.pathname)) {
+  if (isHumanAdminHost(url) && isAdminUiPath(url.pathname)) {
     const isLoginPath = url.pathname === '/admin/login' || url.pathname === '/admin/login/';
     const session = await getSession(context.request, context.env);
     const isAdmin = Boolean(session?.authenticated && session?.user?.role === 'admin');
