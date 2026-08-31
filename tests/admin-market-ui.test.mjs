@@ -19,6 +19,23 @@ test('all admin pages link to the Market Close uploader', async () => {
   assert.match(pages[2], /href="\.\.\/market\/">Market Close<\/a>/);
 });
 
+test('all admin pages expose the announcement manager', async () => {
+  const pages = await Promise.all([
+    'admin/index.html',
+    'admin/manage/index.html',
+    'admin/analytics/index.html',
+    'admin/market/index.html',
+    'admin/disclosures/index.html',
+    'admin/market/announcements/index.html'
+  ].map(read));
+  assert.match(pages[0], /href="\.\/market\/announcements\/">공지 관리<\/a>/);
+  assert.match(pages[1], /href="\.\.\/market\/announcements\/">공지 관리<\/a>/);
+  assert.match(pages[2], /href="\.\.\/market\/announcements\/">공지 관리<\/a>/);
+  assert.match(pages[3], /href="\.\/announcements\/">공지 관리<\/a>/);
+  assert.match(pages[4], /href="\.\.\/market\/announcements\/">공지 관리<\/a>/);
+  assert.match(pages[5], /href="\.\/" aria-current="page">공지 관리<\/a>/);
+});
+
 test('admin client gates supported final payloads and keeps both secrets out of static code', async () => {
   const script = await read('assets/admin-market.js');
   assert.match(script, /SUPPORTED_VERSIONS/);

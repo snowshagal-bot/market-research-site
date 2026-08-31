@@ -520,12 +520,13 @@ test('secret values never appear in admin source or authenticated API responses'
   db.close();
 });
 
-test('all five admin pages expose the same disclosure navigation destination', async () => {
+test('all six admin pages expose the same disclosure navigation destination', async () => {
   const pages = [
     ['../admin/index.html', 'href="./disclosures/"'],
     ['../admin/manage/index.html', 'href="../disclosures/"'],
     ['../admin/analytics/index.html', 'href="../disclosures/"'],
     ['../admin/market/index.html', 'href="../disclosures/"'],
+    ['../admin/market/announcements/index.html', 'href="../../disclosures/"'],
     ['../admin/disclosures/index.html', 'href="./" aria-current="page">공시 모니터']
   ];
   for (const [path, expected] of pages) {

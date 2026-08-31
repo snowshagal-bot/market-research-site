@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko" data-site-lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e6">
+<meta name="robots" content="noindex,nofollow">
+<title>공지 관리 · Snowshagal Admin</title>
+<link rel="stylesheet" href="/assets/site.css?v=1efc69cb5c">
+<link rel="stylesheet" href="/assets/ui-polish.css?v=c877f37bf7">
+<link rel="stylesheet" href="/assets/admin-announcements.css?v=8b20bc53eb">
+<script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
+</head>
+<body>
+<header class="site-header"><div class="site-wrap"><div class="header-row"><a class="brand" href="https://snowshagal.com/"><i></i>SNOWSHAGAL</a><div class="header-actions"><button class="icon-btn" type="button" data-theme-toggle aria-label="다크 모드로 전환">◐</button></div></div></div></header>
+<main class="announcement-admin"><div class="site-wrap">
+  <div class="announcement-head"><div><a class="toplink" href="../../">← 관리자</a><h1>공지 관리</h1><p>MARKET 공개 화면에 표시할 운영 공지를 작성하고 노출 기간을 관리합니다.</p></div><div class="announcement-note">입력 시각 · Asia/Seoul (KST)<br>DB 저장 · UTC</div></div>
+  <nav class="admin-nav" aria-label="관리자 메뉴"><a href="../../">새 리포트 등록</a><a href="../../manage/">게시물 관리</a><a href="../../analytics/">방문 통계</a><a href="../">Market Close</a><a href="./" aria-current="page">공지 관리</a><a href="../../disclosures/">공시 모니터</a></nav>
+
+  <section class="announcement-editor" aria-labelledby="announcement-editor-heading">
+    <div class="section-heading"><div><span>EDITOR</span><h2 id="announcement-editor-heading">새 공지 작성</h2></div><button id="announcement-cancel-edit" class="quiet-button" type="button" hidden>수정 취소</button></div>
+    <form id="announcement-form" novalidate>
+      <div class="form-grid">
+        <label class="field"><span>유형</span><select id="announcement-type" required><option value="major">주요</option><option value="general">일반</option></select></label>
+        <label class="field"><span>대상</span><select id="announcement-audience" required><option value="all">전체</option><option value="group">특정 그룹</option></select></label>
+        <label class="field field-wide" id="announcement-target-wrap" hidden><span>대상 그룹</span><input id="announcement-target-group" type="text" maxlength="100" placeholder="향후 회원 그룹 식별자"></label>
+        <label class="field field-wide"><span>제목</span><input id="announcement-title" type="text" maxlength="200" required placeholder="공지 제목"></label>
+        <label class="field field-wide"><span>본문</span><textarea id="announcement-content" rows="7" maxlength="20000" required placeholder="공개 화면에는 일반 텍스트로 안전하게 표시됩니다."></textarea><small id="announcement-content-count">0 / 20,000</small></label>
+        <label class="field"><span>노출 시작 (KST)</span><input id="announcement-start" type="datetime-local" required></label>
+        <label class="field"><span>노출 종료 (KST, 선택)</span><input id="announcement-end" type="datetime-local"></label>
+      </div>
+      <p id="announcement-form-status" class="form-status" aria-live="polite"></p>
+      <div class="form-actions"><button class="quiet-button" type="submit" value="draft">임시 저장</button><button class="primary-button" type="submit" value="published">게시</button></div>
+    </form>
+  </section>
+
+  <section class="announcement-list-section" aria-labelledby="announcement-list-heading">
+    <div class="section-heading"><div><span>ANNOUNCEMENTS</span><h2 id="announcement-list-heading">공지 목록</h2></div><span id="announcement-total" class="list-total">0건</span></div>
+    <div class="announcement-toolbar"><label><span class="sr-only">제목 검색</span><input id="announcement-search" type="search" placeholder="제목 검색"></label><div id="announcement-filters" class="announcement-filters" aria-label="공지 필터"><button type="button" data-filter="all" aria-pressed="true">전체</button><button type="button" data-filter="major" aria-pressed="false">주요</button><button type="button" data-filter="general" aria-pressed="false">일반</button><button type="button" data-filter="draft" aria-pressed="false">Draft</button><button type="button" data-filter="scheduled" aria-pressed="false">Scheduled</button><button type="button" data-filter="published" aria-pressed="false">Published</button><button type="button" data-filter="expired" aria-pressed="false">Expired</button></div></div>
+    <div class="announcement-table-wrap"><table class="announcement-table"><thead><tr><th scope="col">유형</th><th scope="col">제목</th><th scope="col">대상</th><th scope="col">상태</th><th scope="col">노출 시작</th><th scope="col">노출 종료</th><th scope="col">작성 / 수정</th><th scope="col">작업</th></tr></thead><tbody id="announcement-list"><tr><td colspan="8" class="empty-row">공지 목록을 불러오는 중입니다.</td></tr></tbody></table></div>
+  </section>
+</div></main>
+<script src="/assets/site.js?v=9f42a34e4d"></script>
+<script src="/assets/admin-announcements.js?v=5d884dc92c"></script>
+</body>
+</html>
