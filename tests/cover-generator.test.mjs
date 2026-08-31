@@ -43,6 +43,23 @@ test('report-cover-selector metadata wins over heuristic candidates', async () =
   assert.equal(result.source, 'meta');
 });
 
+test('new Daily .cvwrap and .cv elements are selected and normalized to .cv', async () => {
+  const api = await generatorApi();
+  const cvElement = node('외국인 순매도 전환', { visual: true, children: 3 });
+  cvElement.matches = sel => sel === '.cv';
+  const doc = {
+    body: node('리포트 본문', { children: 8 }),
+    querySelector(selector) {
+      if (selector === '.cvwrap > .cv' || selector === '.cvwrap .cv' || selector === '.cv') return cvElement;
+      return null;
+    }
+  };
+  const result = api.findCaptureTarget(doc);
+  assert.equal(result.target, cvElement);
+  assert.equal(result.selector, '.cv');
+  assert.equal(result.source, 'heuristic');
+});
+
 test('heuristic cover candidates are used when selector metadata is absent', async () => {
   const api = await generatorApi();
   const coverPage = node('첫 페이지 커버');

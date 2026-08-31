@@ -4,6 +4,9 @@
   const CAPTURE_PADDING = 32;
   const DEFAULT_CAPTURE_BACKGROUND = '#ece7dc';
   const HEURISTIC_SELECTORS = [
+    '.cvwrap > .cv',
+    '.cvwrap .cv',
+    '.cv',
     '.mag-cover',
     '.cover',
     '.cover-page',
@@ -35,6 +38,13 @@
     if (target?.matches?.('.cover-screen')) {
       const frame = target.querySelector('.cover-frame');
       if (usableCandidate(frame)) return { target: frame, selector: '.cover-frame', source };
+    }
+    if (target?.matches?.('.cvwrap')) {
+      const cv = target.querySelector('.cv');
+      if (usableCandidate(cv)) return { target: cv, selector: '.cv', source };
+    }
+    if (target?.matches?.('.cv')) {
+      return { target, selector: '.cv', source };
     }
     return { target, selector, source };
   }

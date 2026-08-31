@@ -25,7 +25,12 @@ test('selector priority prefers metadata, then completed cover structures before
   assert.equal(__test.selectCaptureSelector('<section class="cover-screen"><div class="cover-frame"><img class="cover-art"><div class="cover-copy">title</div></div><span class="cover-hint">hint</span></section>'), '.cover-frame');
   assert.equal(__test.selectCaptureSelector('<div class="cover-page">x</div><section class="cover-screen">y</section>'), '.cover-page');
   assert.equal(__test.selectCaptureSelector('<section class="mag-cover plate"><img class="cv-img" width="900" height="1350"><h1 class="cv-h1">반도체 다음의 자리</h1></section><div class="cover">unrelated</div>'), '.mag-cover');
-  assert.deepEqual(__test.SELECTOR_PRIORITY, ['.cover-frame', '.cover-page', '.mag-cover', '.cover-screen', '.report-cover', '.cover', '.opener']);
+  assert.deepEqual(__test.SELECTOR_PRIORITY, ['.cover-frame', '.cover-page', '.mag-cover', '.cover-screen', '.report-cover', '.cover', '.opener', '.cv']);
+});
+
+test('new Daily reports using .cvwrap and .cv select .cv as capture target', () => {
+  const html = '<div class="cvwrap"><div class="cv"><img src="data:image/webp;base64,AA=="><div class="cv-copy"><div class="cv-h1">외국인 순매도 전환</div></div></div></div>';
+  assert.equal(__test.selectCaptureSelector(html), '.cv');
 });
 
 test('Korean and English opener covers are accepted as Browser Rendering targets', () => {
@@ -136,6 +141,38 @@ test('magazine capture plan derives the complete cover ratio from cv-img without
   assert.ok(__test.magazineCoverCapturePlan('<section class="plate mag-cover"><img class="cv-img" width="480" height="720"></section>', '.mag-cover'));
   assert.equal(__test.magazineCoverCapturePlan(html, '.cv-img'), null);
   assert.equal(__test.magazineCoverCapturePlan('<section class="mag-cover">generic</section>', '.mag-cover'), null);
+});
+
+test('new daily capture plan generates full-bleed 2:3 clip and fixed styling', () => {
+  const html = '<div class="cvwrap"><div class="cv"><img src="data:image/webp;base64,AA=="><div class="cv-copy"><div class="cv-h1">외국인 순매도 전환</div></div></div></div>';
+  const plan = __test.newDailyCoverCapturePlan(html, '.cv');
+  assert.ok(plan);
+  assert.deepEqual(plan.screenshotOptions.clip, { x: 0, y: 0, width: 480, height: 720, scale: 1 });
+  assert.match(plan.addStyleTag[0].content, /\.cv\{position:fixed!important;inset:0 auto auto 0!important/);
+  assert.match(plan.addStyleTag[0].content, /\.cvwrap\{width:480px!important/);
+  assert.equal(__test.newDailyCoverCapturePlan('<div class="unrelated">test</div>', '.cv'), null);
+});
+
+test('new Daily .cv structure executes full-bleed Browser Rendering screenshot without body bleed', { concurrency: false }, async () => {
+  const originalFetch = globalThis.fetch;
+  let payload;
+  globalThis.fetch = async (_url, options) => {
+    payload = JSON.parse(options.body);
+    return new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'content-type': 'image/png' } });
+  };
+  try {
+    const html = '<style>.cv{aspect-ratio:2/3}</style><div class="cvwrap"><div class="cv"><img src="data:image/webp;base64,AA=="><div class="cv-copy"><div class="cv-h1">외국인 순매도 전환, 코스피 숨고르기 장세</div></div></div></div><div class="page"><h1>본문 내용</h1></div>';
+    const response = await onRequestPost({ request: request({ html }), env: ENV });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('x-cover-selector'), '.cv');
+    assert.equal('selector' in payload, false);
+    assert.equal(payload.html, html);
+    assert.deepEqual(payload.screenshotOptions.clip, { x: 0, y: 0, width: 480, height: 720, scale: 1 });
+    assert.match(payload.addStyleTag[0].content, /\.cv\{position:fixed!important/);
+    assert.match(payload.html, /class="cv-h1"/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
 
 test('non-weekly .cover candidates retain the general selector screenshot path', () => {

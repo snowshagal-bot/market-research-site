@@ -4,7 +4,7 @@ const RENDER_TIMEOUT_MS = 25000;
 const DEFAULT_RATE_LIMIT_RETRY_MS = 10000;
 const MAX_RATE_LIMIT_RETRY_MS = 15000;
 const RENDER_VIEWPORT = { width: 480, height: 900 };
-const SELECTOR_PRIORITY = ['.cover-frame', '.cover-page', '.mag-cover', '.cover-screen', '.report-cover', '.cover', '.opener'];
+const SELECTOR_PRIORITY = ['.cover-frame', '.cover-page', '.mag-cover', '.cover-screen', '.report-cover', '.cover', '.opener', '.cv'];
 const SAFE_SELECTOR_TOKEN = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 const COVER_CLASS_TOKEN = /(?:^|[-_])cover(?:$|[-_])/i;
 
@@ -163,6 +163,30 @@ function weeklyCoverCapturePlan(html, selector) {
   };
 }
 
+function newDailyCoverCapturePlan(html, selector) {
+  if (selector !== '.cv') return null;
+  const hasDailyCv = (
+    /<div\b[^>]*class\s*=\s*["'][^"']*\bcvwrap\b[^"']*["'][^>]*>/i.test(html) ||
+    /<div\b[^>]*class\s*=\s*["'][^"']*\bcv\b[^"']*["'][^>]*>/i.test(html)
+  ) && (
+    /\.cv\s*\{[^}]*aspect-ratio\s*:\s*2\s*\/\s*3\b/i.test(html) ||
+    /\bclass\s*=\s*["'][^"']*\bcv-copy\b[^"']*["']/i.test(html) ||
+    /\bclass\s*=\s*["'][^"']*\bcv-h1\b[^"']*["']/i.test(html)
+  );
+  if (!hasDailyCv) return null;
+  const captureHeight = RENDER_VIEWPORT.width * 3 / 2;
+  return {
+    addStyleTag: [{
+      content: `html,body{margin:0!important;padding:0!important;width:${RENDER_VIEWPORT.width}px!important;min-width:0!important;overflow:hidden!important}.cvwrap{width:${RENDER_VIEWPORT.width}px!important;max-width:none!important;margin:0!important;padding:0!important}.cv{position:fixed!important;inset:0 auto auto 0!important;width:${RENDER_VIEWPORT.width}px!important;max-width:none!important;height:${captureHeight}px!important;margin:0!important;padding:0!important;box-shadow:none!important;border-radius:0!important;z-index:2147483647!important}`
+    }],
+    screenshotOptions: {
+      type: 'png',
+      captureBeyondViewport: true,
+      clip: { x: 0, y: 0, width: RENDER_VIEWPORT.width, height: captureHeight, scale: 1 }
+    }
+  };
+}
+
 function magazineCoverCapturePlan(html, selector) {
   if (selector !== '.mag-cover') return null;
   const hasCompletedCover = [...html.matchAll(/<(?:section|div)\b[^>]*>/gi)]
@@ -255,6 +279,7 @@ export async function onRequestPost({ request, env }) {
       'content-type': 'application/json'
     };
     const framePlan = coverFrameCapturePlan(html, selector)
+      || newDailyCoverCapturePlan(html, selector)
       || magazineCoverCapturePlan(html, selector)
       || weeklyCoverCapturePlan(html, selector);
     const upstream = await fetchRenderingWithRetry(
@@ -311,6 +336,7 @@ export const __test = {
   RENDER_VIEWPORT,
   SELECTOR_PRIORITY,
   coverFrameCapturePlan,
+  newDailyCoverCapturePlan,
   magazineCoverCapturePlan,
   weeklyCoverCapturePlan,
   fetchRendering,
