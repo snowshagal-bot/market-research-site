@@ -216,8 +216,8 @@ function harness() {
     get('post-date').value = date;
     get('post-title').value = title;
     get('post-filename').value = filename;
-    get('admin-key').value = 'key';
-    await get('admin-key').fire('input');
+    await get('post-title').fire('input');
+    await get('post-date').fire('input');
   }
 
   return { get, analyze, ready, submissions };

@@ -85,6 +85,11 @@ class SqliteD1 {
   }
 }
 
+import { createMockAuthDb, createAdminSession } from './helpers/auth-test-helper.mjs';
+
+const sharedAuthDb = await createMockAuthDb();
+const sharedSession = await createAdminSession(sharedAuthDb);
+
 const ADMIN_KEY = 'integration-admin-secret';
 const OPENDART_KEY = 'integration-opendart-secret';
 const GEMINI_KEY = 'integration-gemini-secret';
@@ -97,7 +102,9 @@ test.afterEach(() => {
 
 function envFor(db, extra = {}) {
   return {
+    AUTH_DB: sharedAuthDb,
     COMMENTS_DB: db,
+    DISCLOSURE_SYNC_KEY: 'integration-sync-key',
     ADMIN_KEY,
     OPENDART_API_KEY: OPENDART_KEY,
     GEMINI_API_KEY: GEMINI_KEY,
@@ -146,10 +153,14 @@ function geminiResponse(analysis = validAnalysis(), status = 200) {
 }
 
 function adminRequest(path, options = {}) {
-  const origin = 'https://preview.market-research-site.pages.dev';
+  const origin = 'https://admin.snowshagal.com';
   return new Request(`${origin}${path}`, {
     ...options,
-    headers: { 'x-admin-key': ADMIN_KEY, origin, ...(options.headers || {}) }
+    headers: {
+      ...sharedSession.headers,
+      'x-disclosure-sync-key': 'integration-sync-key',
+      ...(options.headers || {})
+    }
   });
 }
 

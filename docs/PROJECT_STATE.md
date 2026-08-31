@@ -13,23 +13,16 @@ Updated: 2026-08-30
 - Production URL: `https://snowshagal.com`
 - Frontend: static HTML/CSS/vanilla JavaScript
 - Server-side features: Cloudflare Pages Functions
-- Comments storage: Cloudflare D1 database `market-research-comments`
-- No framework and no user membership system at present
+- Comments & Market Close storage: Cloudflare D1 database `market-research-comments` (`COMMENTS_DB`)
+- Account & Auth storage: Cloudflare D1 database `market-research-auth` (`AUTH_DB`, Phase 1B-A prepared)
+- Framework: Vanilla JS / HTML / CSS / Cloudflare Pages Functions
 
-## Admin origin isolation (Phase 1A Compatibility)
+## Admin origin isolation & Account Foundation (Phase 1A Enforced, Phase 1B-A in progress)
 
-The current Pages project is prepared to serve the existing administrator UI and
-human-admin API on `https://admin.snowshagal.com` without adding a second project, D1
-database, secret, login, session, or cookie. `functions/_host-policy.js` is the shared
-hostname/origin source of truth. The administrator hostname admits only an explicit UI,
-asset, data, and API allowlist; report and general public active HTML fail closed before
-static fallback. Human-admin mutations require their exact request-host Origin, while
-machine credentials keep their existing endpoint behavior.
+The administrator surface is enforced on `https://admin.snowshagal.com`. Apex `snowshagal.com/admin/*`
+routes return HTTP 307 redirects to `admin.snowshagal.com/admin/*`, and human-admin mutation requests on apex are blocked (403 `ADMIN_HOST_BLOCKED`).
 
-Phase 1A remains in Compatibility Mode: apex `/admin/*` and apex `ADMIN_KEY` operations are
-still available until the custom domain is manually connected and smoked. Production DNS,
-Pages custom domains, D1 bindings, and secrets have not been changed. See
-`docs/ADMIN_ORIGIN_ISOLATION.md` for the complete matrix and cutover procedure.
+Phase 1B-A introduces the account foundation (`users`, `password_credentials`, `sessions`, `auth_rate_limits`, `audit_events`), PBKDF2-HMAC-SHA256 authentication, `__Host-snowshagal-admin-session` HttpOnly cookie sessions, CSRF token verification, rate limiting, and `/admin/login/` UI. Human admin operations no longer require or expose `ADMIN_KEY` in the browser. Unbound `AUTH_DB` safely fails closed with 503 `AUTH_NOT_CONFIGURED`.
 
 ## Public information architecture
 

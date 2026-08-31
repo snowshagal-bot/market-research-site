@@ -2,6 +2,19 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { __test, onRequestPost } from '../functions/api/generate-cover.js';
+import { createMockAuthEnv } from './helpers/auth-test-helper.mjs';
+
+let sharedAuthEnv = null;
+async function getAuthEnv() {
+  if (!sharedAuthEnv) {
+    sharedAuthEnv = await createMockAuthEnv({
+      ADMIN_KEY: 'test-admin-key',
+      CLOUDFLARE_ACCOUNT_ID: 'account-id',
+      CLOUDFLARE_BROWSER_RENDERING_TOKEN: 'server-secret-token'
+    });
+  }
+  return sharedAuthEnv;
+}
 
 const ENV = {
   ADMIN_KEY: 'test-admin-key',
@@ -9,15 +22,19 @@ const ENV = {
   CLOUDFLARE_BROWSER_RENDERING_TOKEN: 'server-secret-token'
 };
 
-function request(body, key = ENV.ADMIN_KEY) {
-  const origin = 'https://admin-preview.market-research-site.pages.dev';
+function request(body, key = ENV.ADMIN_KEY, origin = 'https://admin.snowshagal.com', session = sharedAuthEnv?._authSession) {
+  const headers = {
+    'content-type': 'application/json',
+    origin
+  };
+  if (key !== null) headers['x-admin-key'] = key;
+  if (session && key === ENV.ADMIN_KEY) {
+    headers['cookie'] = session.cookieHeader;
+    headers['x-csrf-token'] = session.csrfToken;
+  }
   return new Request(`${origin}/api/generate-cover`, {
     method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      origin,
-      ...(key === null ? {} : { 'x-admin-key': key })
-    },
+    headers,
     body: JSON.stringify(body)
   });
 }
@@ -55,9 +72,10 @@ test('standalone image cover is sent to Browser Rendering as its complete sectio
     payload = JSON.parse(options.body);
     return new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'content-type': 'image/png' } });
   };
+  const env = await getAuthEnv();
   try {
     const html = '<body><section class="final-cover-0824" aria-label="SnowShagal DAILY 커버"><img src="data:image/webp;base64,AA=="><a class="site-hit">site</a></section><main>report</main></body>';
-    const response = await onRequestPost({ request: request({ html, preferredSelector: 'body' }), env: ENV });
+    const response = await onRequestPost({ request: request({ html, preferredSelector: 'body' }), env });
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('x-cover-selector'), '.final-cover-0824');
     assert.equal(payload.selector, '.final-cover-0824');
@@ -74,9 +92,10 @@ test('opener capture sends the complete overlaid cover to Browser Rendering', { 
     payload = JSON.parse(options.body);
     return new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'content-type': 'image/png' } });
   };
+  const env = await getAuthEnv();
   try {
     const html = '<section class="opener" aria-label="Cover"><img src="data:image/webp;base64,AA=="><div class="bot"><h1>Two Illusions</h1></div></section>';
-    const response = await onRequestPost({ request: request({ html, preferredSelector: '.opener' }), env: ENV });
+    const response = await onRequestPost({ request: request({ html, preferredSelector: '.opener' }), env });
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('x-cover-selector'), '.opener');
     assert.equal(payload.selector, '.opener');
@@ -99,9 +118,10 @@ test('completed weekly section.cover uses one full-bleed Browser Rendering clip'
     payload = JSON.parse(options.body);
     return new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'content-type': 'image/png' } });
   };
+  const env = await getAuthEnv();
   try {
     const html = '<style>.cvwrap{position:relative;aspect-ratio:2/3}</style><div class="app"><section class="cover cv" id="s0"><div class="cvwrap"><img class="cvart" width="900" height="1350"></div></section></div>';
-    const response = await onRequestPost({ request: request({ html, preferredSelector: '.cover' }), env: ENV });
+    const response = await onRequestPost({ request: request({ html, preferredSelector: '.cover' }), env });
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('x-cover-selector'), '.cover');
     assert.equal('selector' in payload, false);
@@ -120,9 +140,10 @@ test('completed mag-cover captures the image and overlay copy as one full-bleed 
     payload = JSON.parse(options.body);
     return new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'content-type': 'image/png' } });
   };
+  const env = await getAuthEnv();
   try {
     const html = '<section class="mag-cover plate" id="s0"><img class="cv-img" width="900" height="1350" src="data:image/webp;base64,AA=="><span class="cv-date">2026.08.10</span><h1 class="cv-h1">반도체 다음의 자리</h1><div class="cv-bottom">weekly details</div></section>';
-    const response = await onRequestPost({ request: request({ html }), env: ENV });
+    const response = await onRequestPost({ request: request({ html }), env });
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('x-cover-selector'), '.mag-cover');
     assert.equal('selector' in payload, false);
@@ -162,9 +183,10 @@ test('new Daily .cv structure executes full-bleed Browser Rendering screenshot w
     payload = JSON.parse(options.body);
     return new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'content-type': 'image/png' } });
   };
+  const env = await getAuthEnv();
   try {
     const html = '<style>.cv{aspect-ratio:2/3}</style><div class="cvwrap"><div class="cv"><img src="data:image/webp;base64,AA=="><div class="cv-copy"><div class="cv-h1">외국인 순매도 전환, 코스피 숨고르기 장세</div></div></div></div><div class="page"><h1>본문 내용</h1></div>';
-    const response = await onRequestPost({ request: request({ html }), env: ENV });
+    const response = await onRequestPost({ request: request({ html }), env });
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('x-cover-selector'), '.cv');
     assert.equal('selector' in payload, false);
@@ -190,9 +212,10 @@ test('raw HTML and selected cover-frame are sent to Cloudflare Browser Rendering
     calls.push(call);
     return new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'content-type': 'image/png' } });
   };
+  const env = await getAuthEnv();
   try {
     const html = '<section class="cover-screen"><div class="cover-frame"><img class="cover-art" width="900" height="1350"><div class="cover-copy">title</div></div><span class="cover-hint">hint</span></section>';
-    const response = await onRequestPost({ request: request({ html, preferredSelector: '.cover-screen' }), env: ENV });
+    const response = await onRequestPost({ request: request({ html, preferredSelector: '.cover-screen' }), env });
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('content-type'), 'image/png');
     assert.equal(response.headers.get('x-cover-selector'), '.cover-frame');
@@ -236,10 +259,11 @@ test('Cloudflare Quick Action rate limits are retried once before falling back',
     }
     return new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'content-type': 'image/png' } });
   };
+  const env = await getAuthEnv();
   try {
     const response = await onRequestPost({
       request: request({ html: '<div class="cover-frame"><img class="cover-art" width="900" height="1350">cover</div>' }),
-      env: ENV
+      env
     });
     assert.equal(response.status, 200);
     assert.equal(calls.length, 2);
@@ -260,11 +284,12 @@ test('missing and incorrect admin authentication are rejected before Browser Ren
   const originalFetch = globalThis.fetch;
   let calls = 0;
   globalThis.fetch = async () => { calls += 1; return new Response(); };
+  const authEnv = await getAuthEnv();
   try {
     for (const [key, label] of [[null, 'missing'], ['wrong-key', 'incorrect']]) {
       const response = await onRequestPost({
-        request: request({ html: '<div class="cover-frame">cover</div>' }, key),
-        env: ENV
+        request: request({ html: '<div class="cover-frame">cover</div>' }, key, 'https://admin.snowshagal.com', null),
+        env: authEnv
       });
       assert.equal(response.status, 401, label);
       assert.equal((await response.json()).error, 'UNAUTHORIZED', label);
@@ -278,8 +303,9 @@ test('missing and incorrect admin authentication are rejected before Browser Ren
 test('Cloudflare errors are sanitized and secrets remain server-only', { concurrency: false }, async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () => new Response('sensitive upstream details', { status: 403 });
+  const env = await getAuthEnv();
   try {
-    const response = await onRequestPost({ request: request({ html: '<div class="cover-frame">cover</div>' }), env: ENV });
+    const response = await onRequestPost({ request: request({ html: '<div class="cover-frame">cover</div>' }), env });
     assert.equal(response.status, 502);
     const data = await response.json();
     assert.equal(data.error, 'BROWSER_RENDERING_FAILED');
@@ -299,10 +325,11 @@ test('Cloudflare errors are sanitized and secrets remain server-only', { concurr
 });
 
 test('missing configuration and oversized HTML fail before Browser Rendering', async () => {
-  const missing = await onRequestPost({ request: request({ html: '<div class="cover-frame">cover</div>' }), env: {} });
+  const authEnv = await getAuthEnv();
+  const missing = await onRequestPost({ request: request({ html: '<div class="cover-frame">cover</div>' }, null, 'https://admin.snowshagal.com', null), env: {} });
   assert.equal(missing.status, 503);
 
   const oversized = 'x'.repeat(__test.MAX_HTML_BYTES + 1);
-  const response = await onRequestPost({ request: request({ html: oversized }), env: ENV });
+  const response = await onRequestPost({ request: request({ html: oversized }), env: authEnv });
   assert.equal(response.status, 413);
 });

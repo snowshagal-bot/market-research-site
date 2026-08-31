@@ -24,7 +24,7 @@ function priorityFloor(value) {
 
 export async function onRequestGet({ request, env }) {
   if (!humanAdminHostAllowed(request)) return json({ ok: false, error: 'ADMIN_HOST_BLOCKED' }, 403);
-  if (!authorizeAdmin(request, env)) return json({ ok: false, error: 'UNAUTHORIZED', message: '관리자 인증이 필요합니다.' }, 401);
+  if (!(await authorizeAdmin(request, env))) return json({ ok: false, error: 'UNAUTHORIZED', message: '관리자 인증이 필요합니다.' }, 401);
   try {
     const db = await ensureDisclosureSchema(env);
     const url = new URL(request.url);

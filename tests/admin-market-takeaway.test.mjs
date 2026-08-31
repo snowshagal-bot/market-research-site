@@ -62,6 +62,9 @@ function harness({ latest = async () => failed() } = {}) {
   const lookups = [];
 
   const fetchStub = async (url, init) => {
+    if (url === '/api/auth/session') {
+      return okJson({ ok: true, authenticated: true, csrfToken: 'test-csrf-token' });
+    }
     if (url === '/api/market/latest') {
       lookups.push(url);
       return latest();

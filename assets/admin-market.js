@@ -11,7 +11,7 @@
   const status = document.getElementById('market-meta-status');
   const validationMeta = document.getElementById('market-meta-validation');
   const validationBox = document.getElementById('market-validation');
-  const keyInput = document.getElementById('market-admin-key');
+  let csrfToken = '';
   const publishButton = document.getElementById('market-publish-button');
   const publishStatus = document.getElementById('market-publish-status');
   const preview = document.getElementById('market-preview-root');
@@ -19,9 +19,18 @@
   let payload = null;
   let valid = false;
 
-  try { keyInput.value = sessionStorage.getItem('market-admin-key') || ''; } catch (_) {}
+  async function loadAuth() {
+    try {
+      const res = await fetch('/api/auth/session');
+      const data = await res.json().catch(() => ({}));
+      if (data?.ok && data.authenticated) {
+        csrfToken = data.csrfToken || '';
+      }
+    } catch (_) {}
+  }
+  loadAuth();
 
-  const updateButton = () => { publishButton.disabled = !valid || !keyInput.value.trim(); };
+  const updateButton = () => { publishButton.disabled = !valid; };
   const reset = message => {
     raw = ''; payload = null; valid = false;
     date.textContent = version.textContent = status.textContent = validationMeta.textContent = '—';
@@ -74,7 +83,6 @@
   ['dragenter', 'dragover'].forEach(type => drop.addEventListener(type, event => { event.preventDefault(); drop.classList.add('drag'); }));
   ['dragleave', 'drop'].forEach(type => drop.addEventListener(type, event => { event.preventDefault(); drop.classList.remove('drag'); }));
   drop.addEventListener('drop', event => selectFile(event.dataTransfer?.files?.[0]));
-  keyInput.addEventListener('input', () => { try { sessionStorage.setItem('market-admin-key', keyInput.value); } catch (_) {} updateButton(); });
 
   // The one-liner is written by hand and travels with the machine-generated
   // payload, so both reach D1 under the same market_date.
@@ -169,8 +177,10 @@
         if (!sameDate || !touched.has(lang)) continue;
         takeaway[lang] = field?.value.trim() || '';
       }
+      const headers = { 'content-type': 'application/json' };
+      if (csrfToken) headers['x-csrf-token'] = csrfToken;
       const envelope = JSON.stringify({ market: payload, takeaway });
-      const response = await fetch('/api/market/publish', { method: 'POST', headers: { 'content-type': 'application/json', 'x-admin-key': keyInput.value.trim() }, body: envelope });
+      const response = await fetch('/api/market/publish', { method: 'POST', headers, body: envelope });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error([result.message, ...(result.details || []).slice(0, 3)].filter(Boolean).join(' · ') || `게시 실패 (${response.status})`);
       publishStatus.className = 'market-publish-status success';

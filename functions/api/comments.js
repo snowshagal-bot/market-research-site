@@ -1,4 +1,5 @@
-import { isAdminHost, validateHumanAdminMutation } from '../_host-policy.js';
+import { isAdminHost } from '../_host-policy.js';
+import { requireAdminMutation } from '../_auth.js';
 
 const MAX_NICKNAME = 20;
 const MAX_BODY = 1000;
@@ -229,7 +230,7 @@ export async function onRequestPost(context) {
   const createdAt = now.toISOString();
   const cutoff = new Date(now.getTime() - RATE_LIMIT_WINDOW_MS).toISOString();
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-  const ipHash = await digestText(`${ip}|${env.ADMIN_KEY || 'comment-rate-v1'}`);
+  const ipHash = await digestText(`${ip}|${env.COMMENTS_PEPPER || env.AUTH_PEPPER || env.ADMIN_KEY || 'comment-rate-v1'}`);
 
   try {
     const rate = await env.COMMENTS_DB.prepare(`
@@ -264,16 +265,6 @@ export async function onRequestPost(context) {
 
 export async function onRequestDelete(context) {
   const { request, env } = context;
-  const suppliedAdminKey = request.headers.get('x-admin-key') || '';
-  if (isAdminHost(request) && !suppliedAdminKey) return reply({ error: 'NOT_FOUND' }, 404);
-  if (suppliedAdminKey) {
-    const originPolicy = validateHumanAdminMutation(request);
-    if (!originPolicy.ok) {
-      return reply({ error: originPolicy.error, message: '허용되지 않은 관리자 Origin입니다.' }, 403);
-    }
-  } else if (!sameOrigin(request)) {
-    return reply({ error: 'BAD_ORIGIN', message: '허용되지 않은 요청입니다.' }, 403);
-  }
   const missing = await ensureDbReady(env);
   if (missing) return missing;
 
@@ -281,9 +272,9 @@ export async function onRequestDelete(context) {
   try { data = await request.json(); }
   catch (_) { return reply({ error: 'BAD_JSON', message: '삭제 요청을 읽을 수 없습니다.' }, 400); }
 
-  const id = String(data.id || '').trim();
-  const reportKey = normalizeReportKey(data.report);
-  const password = String(data.password || '');
+  const id = String(data?.id || '').trim();
+  const reportKey = normalizeReportKey(data?.report);
+  const password = cleanText(data?.password || '');
   if (!id || !reportKey) return reply({ error: 'BAD_REQUEST', message: '댓글 정보를 확인하세요.' }, 400);
 
   try {
@@ -296,15 +287,18 @@ export async function onRequestDelete(context) {
 
     if (!row) return reply({ error: 'NOT_FOUND', message: '댓글을 찾을 수 없습니다.' }, 404);
 
-    let authorized = false;
-    const adminKey = request.headers.get('x-admin-key') || '';
-    if (env.ADMIN_KEY && adminKey && constantTimeEqual(adminKey, env.ADMIN_KEY)) {
-      authorized = true;
-    } else if (password) {
-      authorized = await verifyPassword(password, row.passwordSalt, row.passwordHash);
+    if (password) {
+      // Guest deletion via comment password
+      if (!sameOrigin(request)) return reply({ error: 'BAD_ORIGIN', message: '허용되지 않은 요청입니다.' }, 403);
+      const authorized = await verifyPassword(password, row.passwordSalt, row.passwordHash);
+      if (!authorized) return reply({ error: 'BAD_PASSWORD', message: '삭제 비밀번호가 올바르지 않습니다.' }, 401);
+    } else {
+      // Admin deletion via admin session + CSRF + origin guard
+      const auth = await requireAdminMutation(request, env);
+      if (!auth.ok) {
+        return reply({ error: auth.error, message: auth.message || '관리자 권한이 필요합니다.' }, auth.status || 401);
+      }
     }
-
-    if (!authorized) return reply({ error: 'BAD_PASSWORD', message: '삭제 비밀번호가 올바르지 않습니다.' }, 401);
 
     await env.COMMENTS_DB.prepare(`UPDATE comments SET deleted_at = ? WHERE id = ?`)
       .bind(new Date().toISOString(), id).run();

@@ -5,9 +5,18 @@ import vm from 'node:vm';
 import { onRequestPost } from '../functions/api/engagement.js';
 import { onRequestGet as getStats } from '../functions/api/engagement-stats.js';
 import { __test as sharedTest, aggregateRows, rangeDates } from '../functions/api/_engagement.js';
+import { createMockAuthEnv } from './helpers/auth-test-helper.mjs';
 
 const ADMIN_KEY = 'engagement-test-key';
 const UUID = '123e4567-e89b-42d3-a456-426614174000';
+
+let sharedAuthEnv = null;
+async function getAuthEnv() {
+  if (!sharedAuthEnv) {
+    sharedAuthEnv = await createMockAuthEnv({ ADMIN_KEY });
+  }
+  return sharedAuthEnv;
+}
 
 class MockStatement {
   constructor(db, sql) { this.db = db; this.sql = sql.trim(); this.values = []; }
@@ -175,14 +184,20 @@ test('stats API authenticates, handles empty and populated D1, and leaves commen
   assert.match(schema, /CREATE TABLE IF NOT EXISTS engagement_sessions/);
   assert.doesNotMatch(schema, /DROP TABLE|DELETE FROM comments/i);
 
+  const authEnv = await getAuthEnv();
   for (const rows of [[], [{
     session_id: UUID, path: '/reports/sample', country: 'KR', lang: 'ko',
     started_at: new Date().toISOString(), updated_at: new Date().toISOString(), active_ms: 42000, max_scroll: 95
   }]]) {
     const db = new MockDb(rows);
     sharedTest.resetSchemaCache();
-    const request = new Request('https://admin.snowshagal.com/api/engagement-stats?days=7', { headers: { 'x-admin-key': ADMIN_KEY } });
-    const response = await getStats({ request, env: { ADMIN_KEY, COMMENTS_DB: db, ASSETS: { fetch: async () => Response.json([{ href: 'reports/sample.html', title: '샘플 리포트' }]) } } });
+    const request = new Request('https://admin.snowshagal.com/api/engagement-stats?days=7', {
+      headers: {
+        'x-admin-key': ADMIN_KEY,
+        cookie: authEnv._authSession.cookieHeader
+      }
+    });
+    const response = await getStats({ request, env: { ...authEnv, COMMENTS_DB: db, ASSETS: { fetch: async () => Response.json([{ href: 'reports/sample.html', title: '샘플 리포트' }]) } } });
     const data = await response.json();
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('cache-control'), 'private, no-store, max-age=0');
@@ -190,6 +205,6 @@ test('stats API authenticates, handles empty and populated D1, and leaves commen
     assert.equal(data.overall.sessions, rows.length);
     if (rows.length) assert.equal(data.pages[0].title, '샘플 리포트');
   }
-  const unauthorized = await getStats({ request: new Request('https://admin.snowshagal.com/api/engagement-stats?days=7'), env: { ADMIN_KEY, COMMENTS_DB: new MockDb() } });
+  const unauthorized = await getStats({ request: new Request('https://admin.snowshagal.com/api/engagement-stats?days=7'), env: { ...authEnv, COMMENTS_DB: new MockDb() } });
   assert.equal(unauthorized.status, 401);
 });

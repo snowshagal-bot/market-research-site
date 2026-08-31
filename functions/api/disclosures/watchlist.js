@@ -15,7 +15,7 @@ const MAX_BODY_BYTES = 2048;
 
 export async function onRequestGet({ request, env }) {
   if (!humanAdminHostAllowed(request)) return json({ ok: false, error: 'ADMIN_HOST_BLOCKED' }, 403);
-  if (!authorizeAdmin(request, env)) {
+  if (!(await authorizeAdmin(request, env))) {
     return json({ ok: false, error: 'UNAUTHORIZED', message: '관리자 인증이 필요합니다.' }, 401);
   }
 
@@ -32,10 +32,10 @@ export async function onRequestGet({ request, env }) {
 
 export async function onRequestPost({ request, env }) {
   if (!humanAdminHostAllowed(request)) return json({ ok: false, error: 'ADMIN_HOST_BLOCKED' }, 403);
-  if (!authorizeAdmin(request, env)) {
+  if (!(await authorizeAdmin(request, env))) {
     return json({ ok: false, error: 'UNAUTHORIZED', message: '관리자 인증이 필요합니다.' }, 401);
   }
-  const originPolicy = humanAdminMutationPolicy(request);
+  const originPolicy = await humanAdminMutationPolicy(request, env);
   if (!originPolicy.ok) return json({ ok: false, error: originPolicy.error, message: '허용되지 않은 관리자 Origin입니다.' }, 403);
 
   const declaredSize = Number(request.headers.get('content-length') || 0);

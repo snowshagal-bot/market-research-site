@@ -8,7 +8,6 @@ import {
   disclosureConfig,
   ensureDisclosureSchema,
   getWatchlistStockCodes,
-  humanAdminMutationPolicy,
   json,
   kstDate,
   publicFiling,
@@ -105,12 +104,8 @@ async function analyzeQueue(db, env, config, now) {
 }
 
 export async function onRequestPost({ request, env, now = new Date() }) {
-  const authSource = authorizeSync(request, env);
+  const authSource = await authorizeSync(request, env);
   if (!authSource) return json({ ok: false, error: 'UNAUTHORIZED', message: '공시 동기화 인증에 실패했습니다.' }, 401);
-  if (authSource === 'admin-key') {
-    const originPolicy = humanAdminMutationPolicy(request);
-    if (!originPolicy.ok) return json({ ok: false, error: originPolicy.error, message: '허용되지 않은 관리자 Origin입니다.' }, 403);
-  }
 
   let input = {};
   let raw = '';

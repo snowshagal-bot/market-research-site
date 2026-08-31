@@ -2,6 +2,7 @@ export const SCHEMA_VERSION = '1.1.0';
 export const SUPPORTED_SCHEMA_VERSIONS = Object.freeze(['1.0.1', '1.1.0']);
 export const MAX_PAYLOAD_BYTES = 512 * 1024;
 import { isAdminHost, isPreviewHost, isPublicHost, validateHumanAdminMutation } from '../../_host-policy.js';
+import { requireAdminMutation } from '../../_auth.js';
 
 export const TABLE_NAME = 'market_close_snapshots';
 export const SCHEMA_PATH = '/contracts/market_close/market_close.schema.json';
@@ -83,11 +84,13 @@ function constantTimeEqual(left, right) {
   return difference === 0;
 }
 
-export function authorizePublish(request, env) {
+export async function authorizePublish(request, env) {
   const marketKey = request.headers.get('x-market-publish-key') || '';
-  const adminKey = request.headers.get('x-admin-key') || '';
   if (env.MARKET_PUBLISH_KEY && constantTimeEqual(marketKey, env.MARKET_PUBLISH_KEY)) return 'market-publish-key';
-  if (env.ADMIN_KEY && constantTimeEqual(adminKey, env.ADMIN_KEY)) return 'admin-key';
+
+  const sessionAuth = await requireAdminMutation(request, env);
+  if (sessionAuth.ok) return 'admin-session';
+
   return '';
 }
 

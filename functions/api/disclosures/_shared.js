@@ -1,4 +1,5 @@
 import { isHumanAdminHost, validateHumanAdminMutation } from '../../_host-policy.js';
+import { requireAdmin, requireAdminMutation } from '../../_auth.js';
 
 export const FILINGS_TABLE = 'disclosure_filings';
 export const WATCHLIST_TABLE = 'disclosure_watchlist';
@@ -77,15 +78,16 @@ export function constantTimeEqual(left, right) {
   return difference === 0;
 }
 
-export function authorizeAdmin(request, env) {
-  const supplied = request.headers.get('x-admin-key') || '';
-  return Boolean(env?.ADMIN_KEY && constantTimeEqual(supplied, env.ADMIN_KEY));
+export async function authorizeAdmin(request, env) {
+  const sessionAuth = await requireAdmin(request, env);
+  return Boolean(sessionAuth.ok);
 }
 
-export function authorizeSync(request, env) {
-  if (authorizeAdmin(request, env)) return 'admin-key';
+export async function authorizeSync(request, env) {
   const supplied = request.headers.get('x-disclosure-sync-key') || '';
   if (env?.DISCLOSURE_SYNC_KEY && constantTimeEqual(supplied, env.DISCLOSURE_SYNC_KEY)) return 'disclosure-sync-key';
+  const sessionAuth = await requireAdminMutation(request, env);
+  if (sessionAuth.ok) return 'admin-session';
   return '';
 }
 
@@ -93,8 +95,8 @@ export function humanAdminHostAllowed(request) {
   return isHumanAdminHost(request);
 }
 
-export function humanAdminMutationPolicy(request) {
-  return validateHumanAdminMutation(request);
+export async function humanAdminMutationPolicy(request, env) {
+  return requireAdminMutation(request, env);
 }
 
 function boundedInteger(value, fallback, minimum, maximum) {

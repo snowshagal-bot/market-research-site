@@ -1,6 +1,5 @@
 (() => {
   const $ = (id) => document.getElementById(id);
-  const keyInput = $('analytics-admin-key');
   const loadButton = $('analytics-load');
   const dashboard = $('analytics-dashboard');
   const status = $('analytics-status');
@@ -206,12 +205,6 @@
   }
 
   async function loadAnalytics(range = selectedRange) {
-    const key = keyInput.value.trim();
-    if (!key) {
-      setStatus('관리자 키를 입력해 주세요.', true);
-      keyInput.focus();
-      return;
-    }
     if (loading) return;
     loading = true;
     selectedRange = Number(range);
@@ -223,8 +216,7 @@
       $('engagement-status').classList.toggle('error', false);
     }
     try {
-      sessionStorage.setItem('mrs-admin-key', key);
-      const options = { headers: { 'X-Admin-Key': key }, cache: 'no-store' };
+      const options = { cache: 'no-store' };
       const [webResult, engagementResult] = await Promise.allSettled([
         fetch(`/api/analytics?range=${selectedRange}`, options).then((response) => responseData(response, '방문 통계')),
         fetch(`/api/engagement-stats?days=${selectedRange}`, options).then((response) => responseData(response, '읽기 행동 통계'))
@@ -258,8 +250,6 @@
   }
 
   loadButton.addEventListener('click', () => loadAnalytics(selectedRange));
-  keyInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') loadAnalytics(selectedRange); });
-  keyInput.addEventListener('change', () => { try { sessionStorage.setItem('mrs-admin-key', keyInput.value.trim()); } catch (_) {} });
   rangeButtons.forEach((button) => button.addEventListener('click', () => loadAnalytics(Number(button.dataset.range))));
 
   const themeButton = document.querySelector('[data-theme-toggle]');
@@ -269,6 +259,6 @@
     try { localStorage.setItem('site-theme', dark ? 'light' : 'dark'); } catch (_) {}
   });
 
-  try { keyInput.value = sessionStorage.getItem('mrs-admin-key') || ''; } catch (_) {}
   window.__adminAnalyticsTest = { formatNumber, formatDuration, formatPercent, displayCountry, renderTrend, render, renderEngagement, loadAnalytics };
+  if (!window.__TEST_ENV__) loadAnalytics(7);
 })();

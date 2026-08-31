@@ -51,6 +51,9 @@ const ADMIN_API_PATHS = new Set([
   '/api/generate-cover',
   '/api/engagement-stats',
   '/api/comments',
+  '/api/auth/login',
+  '/api/auth/logout',
+  '/api/auth/session',
   '/api/disclosures/latest',
   '/api/disclosures/analyze',
   '/api/disclosures/publish',
@@ -68,6 +71,8 @@ const HUMAN_ADMIN_MUTATION_PATHS = new Set([
   '/api/publish',
   '/api/manage',
   '/api/generate-cover',
+  '/api/auth/login',
+  '/api/auth/logout',
   '/api/disclosures/analyze',
   '/api/disclosures/publish',
   '/api/disclosures/watchlist'

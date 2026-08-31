@@ -6,7 +6,7 @@ const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 test('Market admin exposes file selection, contract status, preview, auth, and publish controls', async () => {
   const html = await read('admin/market/index.html');
-  for (const id of ['market-json-file', 'market-meta-date', 'market-meta-version', 'market-meta-status', 'market-meta-validation', 'market-admin-key', 'market-publish-button', 'market-preview-root']) assert.match(html, new RegExp(`id="${id}"`));
+  for (const id of ['market-json-file', 'market-meta-date', 'market-meta-version', 'market-meta-status', 'market-meta-validation', 'market-publish-button', 'market-preview-root']) assert.match(html, new RegExp(`id="${id}"`));
   assert.match(html, /accept="\.json,application\/json"/);
   assert.match(html, /meta name="robots" content="noindex,nofollow"/);
   assert.match(html, /src="(?:(?:\.\.\/)+|\/)assets\/admin-market\.js/);
@@ -25,6 +25,6 @@ test('admin client gates supported final payloads and keeps both secrets out of 
   assert.match(script, /'1\.0\.1', '1\.1\.0'/);
   assert.match(script, /status !== 'final'/);
   assert.match(script, /validation\?\.passed !== true/);
-  assert.match(script, /'x-admin-key'/);
+  assert.match(script, /x-csrf-token/);
   assert.doesNotMatch(script, /market-secret|admin-secret|MARKET_PUBLISH_KEY|ADMIN_KEY\s*=/);
 });

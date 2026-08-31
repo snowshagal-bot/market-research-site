@@ -1,4 +1,5 @@
 import { isHumanAdminHost, validateHumanAdminMutation } from '../_host-policy.js';
+import { requireAdminMutation } from '../_auth.js';
 
 const MAX_HTML_BYTES = 5 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -250,17 +251,12 @@ export async function onRequestPost({ request, env }) {
   if (!isHumanAdminHost(request)) {
     return json({ error: 'ADMIN_HOST_BLOCKED', message: '허용되지 않은 관리자 host입니다.' }, 403);
   }
-  if (!env.ADMIN_KEY || !env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_BROWSER_RENDERING_TOKEN) {
+  const auth = await requireAdminMutation(request, env);
+  if (!auth.ok) {
+    return json({ error: auth.error, message: auth.message }, auth.status);
+  }
+  if (!env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_BROWSER_RENDERING_TOKEN) {
     return json({ error: 'BROWSER_RENDERING_NOT_CONFIGURED', message: '커버 생성 서비스 설정이 필요합니다.' }, 503);
-  }
-
-  const suppliedKey = request.headers.get('x-admin-key') || '';
-  if (!(await secretsMatch(suppliedKey, env.ADMIN_KEY))) {
-    return json({ error: 'UNAUTHORIZED', message: '관리자 키가 올바르지 않습니다.' }, 401);
-  }
-  const originPolicy = validateHumanAdminMutation(request);
-  if (!originPolicy.ok) {
-    return json({ error: originPolicy.error, message: '허용되지 않은 관리자 Origin입니다.' }, 403);
   }
 
   const contentLength = Number(request.headers.get('content-length') || 0);

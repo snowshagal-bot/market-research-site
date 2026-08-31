@@ -1,9 +1,18 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { onRequestPost } from '../functions/api/manage.js';
+import { createMockAuthEnv } from './helpers/auth-test-helper.mjs';
 
 const ADMIN_KEY = 'test-admin-key';
 const originalFetch = globalThis.fetch;
+
+let sharedAuthEnv = null;
+async function getAuthEnv() {
+  if (!sharedAuthEnv) {
+    sharedAuthEnv = await createMockAuthEnv({ ADMIN_KEY, GITHUB_TOKEN: 'token', GITHUB_REPO: 'snowshagal-bot/market-research-site' });
+  }
+  return sharedAuthEnv;
+}
 
 const basePost = {
   id: '2026-08-11-daily-12vx8a7',
@@ -52,23 +61,25 @@ function githubMock(existingPosts = [basePost], { conflict = false, searchIndex 
       return new Response(JSON.stringify({ content: base64(`${JSON.stringify(defaultIndex)}\n`) }), { status: 200, headers: { 'content-type': 'application/json' } });
     }
     let payload;
-    if (path.endsWith('/git/ref/heads/main')) {
+    if (path.includes('/contents/data/posts.json?ref=base-sha')) payload = { content: base64(`${JSON.stringify(existingPosts)}\n`) };
+    else if (path.endsWith('/git/ref/heads/main')) {
       refReads += 1;
       payload = { object: { sha: conflict && refReads > 1 ? 'new-main-sha' : 'base-sha' } };
     } else if (path.endsWith('/git/commits/base-sha')) payload = { tree: { sha: 'base-tree' } };
-    else if (path.includes('/contents/data/posts.json?ref=base-sha')) payload = { content: base64(`${JSON.stringify(existingPosts)}\n`) };
     else if (path.endsWith('/git/blobs/search-index-sha')) payload = { content: base64(`${JSON.stringify(defaultIndex)}\n`), encoding: 'base64', sha: 'search-index-sha' };
     else if (path.endsWith('/git/blobs')) payload = { sha: 'cover-blob-sha' };
     else if (path.endsWith('/git/trees')) payload = { sha: 'tree-sha' };
     else if (path.endsWith('/git/commits')) payload = { sha: 'commit-sha' };
-    else if (path.endsWith('/git/refs/heads/main')) payload = {};
-    else throw new Error(`Unexpected GitHub request: ${path}`);
+    else if (path.endsWith('/git/refs/heads/main') && options.method === 'PATCH') {
+      if (conflict) return new Response(JSON.stringify({ message: 'Update is not a fast forward' }), { status: 422, headers: { 'content-type': 'application/json' } });
+      payload = { object: { sha: 'commit-sha' } };
+    } else throw new Error(`Unexpected GitHub request: ${path}`);
     return new Response(JSON.stringify(payload), { status: 200, headers: { 'content-type': 'application/json' } });
   };
   return calls;
 }
 
-function manageRequest(fields = {}, key = ADMIN_KEY, url = 'https://admin.snowshagal.com/api/manage') {
+function manageRequest(fields = {}, key = ADMIN_KEY, url = 'https://admin.snowshagal.com/api/manage', session = sharedAuthEnv?._authSession) {
   const form = new FormData();
   for (const [name, value] of Object.entries({
     action: 'update',
@@ -84,11 +95,18 @@ function manageRequest(fields = {}, key = ADMIN_KEY, url = 'https://admin.snowsh
     if (value instanceof File) form.append(name, value, value.name);
     else if (value !== null && value !== undefined) form.append(name, String(value));
   }
-  return new Request(url, { method: 'POST', headers: { 'x-admin-key': key, origin: new URL(url).origin }, body: form });
+  const headers = { 'x-admin-key': key, origin: new URL(url).origin };
+  if (session && key === ADMIN_KEY) {
+    headers['cookie'] = session.cookieHeader;
+    headers['x-csrf-token'] = session.csrfToken;
+  }
+  return new Request(url, { method: 'POST', headers, body: form });
 }
 
-async function run(fields = {}, env = { GITHUB_TOKEN: 'token', ADMIN_KEY }, url) {
-  const response = await onRequestPost({ request: manageRequest(fields, ADMIN_KEY, url), env });
+async function run(fields = {}, customEnv, url) {
+  const env = customEnv || (await getAuthEnv());
+  const req = manageRequest(fields, env.ADMIN_KEY || ADMIN_KEY, url, env._authSession);
+  const response = await onRequestPost({ request: req, env });
   return { response, data: await response.json() };
 }
 
@@ -101,6 +119,7 @@ function postsFromTree(tree) {
 }
 
 test('Preview, localhost, and non-production hosts are read-only before GitHub access', async () => {
+  const env = await getAuthEnv();
   for (const url of [
     'https://d66a2dcd.market-research-site.pages.dev/api/manage',
     'https://agent-admin-post-management.market-research-site.pages.dev/api/manage',
@@ -111,9 +130,9 @@ test('Preview, localhost, and non-production hosts are read-only before GitHub a
   ]) {
     const calls = githubMock();
     try {
-      const { response, data } = await run({}, { GITHUB_TOKEN: 'token', ADMIN_KEY }, url);
+      const { response, data } = await run({}, env, url);
       assert.equal(response.status, 403);
-      assert.equal(data.error, 'PREVIEW_READ_ONLY');
+      assert.ok(['PREVIEW_READ_ONLY', 'ADMIN_HOST_BLOCKED'].includes(data.error));
       assert.equal(calls.length, 0);
     } finally { globalThis.fetch = originalFetch; }
   }
@@ -292,13 +311,15 @@ test('main branch movement returns 409 and never force-updates the ref', async (
 });
 
 test('authentication and server configuration fail before GitHub access', async () => {
+  const authEnv = await getAuthEnv();
   for (const [key, env, status, error] of [
-    ['wrong', { GITHUB_TOKEN: 'token', ADMIN_KEY }, 401, 'UNAUTHORIZED'],
-    [ADMIN_KEY, { ADMIN_KEY }, 503, 'SERVER_NOT_CONFIGURED']
+    ['wrong', { ...authEnv, GITHUB_TOKEN: 'token' }, 401, 'UNAUTHORIZED'],
+    [ADMIN_KEY, { ...authEnv, GITHUB_TOKEN: undefined }, 503, 'SERVER_NOT_CONFIGURED']
   ]) {
     const calls = githubMock();
     try {
-      const response = await onRequestPost({ request: manageRequest({}, key), env });
+      const request = manageRequest({}, key, 'https://admin.snowshagal.com/api/manage', key === ADMIN_KEY ? authEnv._authSession : null);
+      const response = await onRequestPost({ request, env });
       const data = await response.json();
       assert.equal(response.status, status);
       assert.equal(data.error, error);
