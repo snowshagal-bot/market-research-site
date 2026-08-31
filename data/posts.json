@@ -1,5 +1,28 @@
 [
   {
+    "id": "2026-09-01-note-u23dp3",
+    "type": "note",
+    "typeLabel": "투자 노트",
+    "lang": "ko",
+    "date": "2026-09-01",
+    "reportDate": "2026-09-01",
+    "registeredDate": "2026-09-01",
+    "registeredAt": "2026-08-31T19:33:43.733Z",
+    "legacyImport": false,
+    "title": "9월 15일,미국 자금시장 점검",
+    "subtitle": "",
+    "description": "시장과 투자에 관한 생각을 자유롭게 정리한 투자 노트.",
+    "tags": [
+      "rates",
+      "treasuries",
+      "fed"
+    ],
+    "readingMinutes": 7,
+    "href": "reports/20260901_Investment_Note_US_Money_Market.html",
+    "coverImage": "covers/2026-09-01-note-u23dp3.webp",
+    "shareCardImage": "covers/share/2026-09-01-note-u23dp3.jpg"
+  },
+  {
     "id": "2026-08-31-daily-19944ff",
     "type": "daily",
     "typeLabel": "Daily",
