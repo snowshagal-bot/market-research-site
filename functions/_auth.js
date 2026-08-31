@@ -3,73 +3,73 @@ import { isHumanAdminHost, validateHumanAdminMutation, ADMIN_ORIGIN } from './_h
 export const SESSION_COOKIE_NAME = '__Host-snowshagal-admin-session';
 export const SESSION_TTL_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
 export const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-export const RATE_LIMIT_MAX_ATTEMPTS = 5;
+export const RATE_LIMIT_MAX_ATTEMPTS = 5; // IP + Email limit
+export const RATE_LIMIT_IP_MAX_ATTEMPTS = 20; // IP-only limit
 export const RATE_LIMIT_BLOCK_MS = 15 * 60 * 1000; // 15 minutes
 export const PBKDF2_ITERATIONS = 600000;
+export const MIN_PBKDF2_ITERATIONS = 100000;
+export const MAX_PBKDF2_ITERATIONS = 1000000;
 export const PBKDF2_PREFIX = 'pbkdf2-sha256';
 export const MIN_PASSWORD_LENGTH = 12;
 export const MAX_PASSWORD_LENGTH = 128;
+export const MAX_LOGIN_BODY_BYTES = 4096;
+export const MAX_EMAIL_LENGTH = 254;
 
-const TABLE_SQL = [
-  `CREATE TABLE IF NOT EXISTS users (
-    id TEXT PRIMARY KEY,
-    email TEXT NOT NULL,
-    email_normalized TEXT NOT NULL UNIQUE,
-    role TEXT NOT NULL CHECK(role IN ('member', 'admin')),
-    status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'disabled')),
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
-  )`,
-  `CREATE INDEX IF NOT EXISTS idx_users_email_normalized ON users(email_normalized)`,
-  `CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)`,
-  `CREATE TABLE IF NOT EXISTS password_credentials (
-    user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-    password_hash TEXT NOT NULL,
-    password_changed_at TEXT NOT NULL
-  )`,
-  `CREATE TABLE IF NOT EXISTS sessions (
-    id TEXT PRIMARY KEY,
-    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    token_hash TEXT NOT NULL UNIQUE,
-    csrf_token TEXT NOT NULL,
-    created_at TEXT NOT NULL,
-    expires_at TEXT NOT NULL,
-    revoked_at TEXT
-  )`,
-  `CREATE INDEX IF NOT EXISTS idx_sessions_token_hash ON sessions(token_hash)`,
-  `CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)`,
-  `CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)`,
-  `CREATE TABLE IF NOT EXISTS auth_rate_limits (
-    id TEXT PRIMARY KEY,
-    key TEXT NOT NULL UNIQUE,
-    attempts INTEGER NOT NULL DEFAULT 1,
-    first_attempt_at TEXT NOT NULL,
-    last_attempt_at TEXT NOT NULL,
-    blocked_until TEXT
-  )`,
-  `CREATE INDEX IF NOT EXISTS idx_auth_rate_limits_key ON auth_rate_limits(key)`,
-  `CREATE TABLE IF NOT EXISTS audit_events (
-    id TEXT PRIMARY KEY,
-    event_type TEXT NOT NULL,
-    user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
-    ip_hash TEXT,
-    metadata TEXT,
-    created_at TEXT NOT NULL
-  )`,
-  `CREATE INDEX IF NOT EXISTS idx_audit_events_user_created ON audit_events(user_id, created_at)`,
-  `CREATE INDEX IF NOT EXISTS idx_audit_events_type_created ON audit_events(event_type, created_at)`
-];
+// Precomputed valid PBKDF2 hash (600,000 iterations) for dummy timing-equal verification
+export const DUMMY_PBKDF2_HASH = 'pbkdf2-sha256$600000$1vX_Djy6tUzkgQCCS_JxGw$yeRgqwSvcMgUALML7ijA18LzTfJPghcztmaScIk1SOI';
 
-const schemaInitSet = new WeakSet();
+export const REQUIRED_AUTH_TABLES = Object.freeze([
+  'users',
+  'password_credentials',
+  'sessions',
+  'auth_rate_limits',
+  'audit_events'
+]);
 
-export async function ensureAuthSchema(db) {
-  if (!db) return false;
-  if (schemaInitSet.has(db)) return true;
-  for (const statement of TABLE_SQL) {
-    await db.prepare(statement).run();
+const verifiedDbSet = new WeakSet();
+
+/**
+ * Runtime schema readiness validation.
+ * Verifies that all required tables exist in D1 without executing DDL on the request path.
+ */
+export async function validateAuthSchema(db) {
+  if (!db || typeof db.prepare !== 'function') {
+    return { ready: false, error: 'AUTH_NOT_CONFIGURED', message: '인증 데이터베이스가 연결되지 않았습니다.' };
   }
-  schemaInitSet.add(db);
-  return true;
+  if (verifiedDbSet.has(db)) {
+    return { ready: true };
+  }
+
+  try {
+    const rows = await db.prepare(
+      `SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('users', 'password_credentials', 'sessions', 'auth_rate_limits', 'audit_events')`
+    ).all();
+
+    const existingTables = new Set((rows?.results || []).map(r => r.name));
+    const allPresent = REQUIRED_AUTH_TABLES.every(t => existingTables.has(t));
+
+    if (!allPresent) {
+      return {
+        ready: false,
+        error: 'AUTH_SCHEMA_NOT_READY',
+        message: '인증 데이터베이스 스키마가 초기화되지 않았습니다.'
+      };
+    }
+
+    verifiedDbSet.add(db);
+    return { ready: true };
+  } catch (err) {
+    return {
+      ready: false,
+      error: 'AUTH_SCHEMA_NOT_READY',
+      message: err?.message || '인증 데이터베이스 스키마를 확인할 수 없습니다.'
+    };
+  }
+}
+
+// For test environments only: compatibility alias
+export async function ensureAuthSchema(db) {
+  return validateAuthSchema(db);
 }
 
 export function normalizeEmail(raw) {
@@ -108,9 +108,13 @@ export function bytesToBase64Url(bytes) {
 }
 
 export function base64UrlToBytes(str) {
-  let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
-  while (base64.length % 4) base64 += '=';
-  return base64ToBytes(base64);
+  try {
+    let base64 = String(str || '').replace(/-/g, '+').replace(/_/g, '/');
+    while (base64.length % 4) base64 += '=';
+    return base64ToBytes(base64);
+  } catch (_) {
+    return new Uint8Array(0);
+  }
 }
 
 export function bytesToHex(bytes) {
@@ -164,14 +168,24 @@ export async function verifyPassword(password, storedHash) {
   if (!storedHash || typeof storedHash !== 'string') return false;
   const parts = storedHash.split('$');
   if (parts.length !== 4 || parts[0] !== PBKDF2_PREFIX) return false;
-  const iterations = parseInt(parts[1], 10);
-  if (Number.isNaN(iterations) || iterations <= 0) return false;
-  const salt = base64UrlToBytes(parts[2]);
-  const expectedHash = parts[3];
 
-  const actualHashed = await hashPassword(password, salt, iterations);
-  const actualParts = actualHashed.split('$');
-  return constantTimeEqual(actualParts[3], expectedHash);
+  const iterations = parseInt(parts[1], 10);
+  if (Number.isNaN(iterations) || iterations < MIN_PBKDF2_ITERATIONS || iterations > MAX_PBKDF2_ITERATIONS) {
+    return false;
+  }
+
+  try {
+    const salt = base64UrlToBytes(parts[2]);
+    if (!salt || salt.length < 8) return false;
+    const expectedHash = parts[3];
+    if (!expectedHash) return false;
+
+    const actualHashed = await hashPassword(password, salt, iterations);
+    const actualParts = actualHashed.split('$');
+    return constantTimeEqual(actualParts[3], expectedHash);
+  } catch (_) {
+    return false;
+  }
 }
 
 export function generateToken(length = 32) {
@@ -193,7 +207,9 @@ export const safeNextUrl = validateSafeNextUrl;
 export const hashToken = sha256Hex;
 
 export async function createSession(db, { userId, role = 'admin' }) {
-  await ensureAuthSchema(db);
+  const schemaCheck = await validateAuthSchema(db);
+  if (!schemaCheck.ready) throw new Error(schemaCheck.message);
+
   const sessionId = crypto.randomUUID();
   const rawTokenBytes = crypto.getRandomValues(new Uint8Array(32));
   const rawToken = bytesToHex(rawTokenBytes);
@@ -222,20 +238,6 @@ export async function revokeSession(db, rawToken) {
   const tokenHash = await sha256Hex(rawToken);
   const nowIso = new Date().toISOString();
   await db.prepare(`UPDATE sessions SET revoked_at = ? WHERE token_hash = ?`).bind(nowIso, tokenHash).run();
-}
-
-export async function recordLoginFailure(db, ip, email) {
-  const ipHash = await sha256Hex(ip || '127.0.0.1');
-  const normEmail = normalizeEmail(email);
-  const rateLimitKey = `login:${ipHash}:${normEmail}`;
-  return recordRateLimitAttempt(db, rateLimitKey, false);
-}
-
-export async function clearRateLimit(db, ip, email) {
-  const ipHash = await sha256Hex(ip || '127.0.0.1');
-  const normEmail = normalizeEmail(email);
-  const rateLimitKey = `login:${ipHash}:${normEmail}`;
-  return recordRateLimitAttempt(db, rateLimitKey, true);
 }
 
 export function parseCookies(request) {
@@ -272,22 +274,18 @@ export async function getIpHash(request, pepper = '') {
   return sha256Hex(`${ip}|${pepper}`);
 }
 
-export async function checkRateLimit(db, ipOrKey, maybeEmail = null) {
-  let key = ipOrKey;
-  if (maybeEmail !== null) {
-    const ipHash = await sha256Hex(ipOrKey || '127.0.0.1');
-    const normEmail = normalizeEmail(maybeEmail);
-    key = `login:${ipHash}:${normEmail}`;
-  }
+/**
+ * Checks a single rate limit bucket.
+ */
+export async function checkRateLimit(db, key, maxAttempts = RATE_LIMIT_MAX_ATTEMPTS) {
   const now = new Date();
-  const nowIso = now.toISOString();
 
   const record = await db.prepare(
     `SELECT id, attempts, first_attempt_at, last_attempt_at, blocked_until FROM auth_rate_limits WHERE key = ? LIMIT 1`
   ).bind(key).first();
 
   if (!record) {
-    return { allowed: true, remaining: RATE_LIMIT_MAX_ATTEMPTS };
+    return { allowed: true, remaining: maxAttempts };
   }
 
   if (record.blocked_until && new Date(record.blocked_until) > now) {
@@ -298,14 +296,37 @@ export async function checkRateLimit(db, ipOrKey, maybeEmail = null) {
   if (new Date(record.first_attempt_at) < windowStart) {
     // Window expired, reset
     await db.prepare(`DELETE FROM auth_rate_limits WHERE key = ?`).bind(key).run();
-    return { allowed: true, remaining: RATE_LIMIT_MAX_ATTEMPTS };
+    return { allowed: true, remaining: maxAttempts };
   }
 
-  const remaining = Math.max(0, RATE_LIMIT_MAX_ATTEMPTS - record.attempts);
-  return { allowed: record.attempts < RATE_LIMIT_MAX_ATTEMPTS, remaining };
+  const remaining = Math.max(0, maxAttempts - record.attempts);
+  return { allowed: record.attempts < maxAttempts, remaining };
 }
 
-export async function recordRateLimitAttempt(db, key, success = false) {
+/**
+ * Checks both IP-only (20 attempts) and IP+Email (5 attempts) rate limit buckets.
+ */
+export async function checkLoginRateLimits(db, ipHash, emailHash) {
+  const ipKey = `login:ip:${ipHash}`;
+  const ipEmailKey = `login:ip_email:${ipHash}:${emailHash}`;
+
+  const ipCheck = await checkRateLimit(db, ipKey, RATE_LIMIT_IP_MAX_ATTEMPTS);
+  if (!ipCheck.allowed) {
+    return { allowed: false, bucket: 'ip', remaining: 0, blockedUntil: ipCheck.blockedUntil };
+  }
+
+  const emailCheck = await checkRateLimit(db, ipEmailKey, RATE_LIMIT_MAX_ATTEMPTS);
+  if (!emailCheck.allowed) {
+    return { allowed: false, bucket: 'ip_email', remaining: 0, blockedUntil: emailCheck.blockedUntil };
+  }
+
+  return { allowed: true, remaining: Math.min(ipCheck.remaining, emailCheck.remaining) };
+}
+
+/**
+ * Records a single attempt in a rate limit bucket.
+ */
+export async function recordRateLimitAttempt(db, key, success = false, maxAttempts = RATE_LIMIT_MAX_ATTEMPTS) {
   const now = new Date();
   const nowIso = now.toISOString();
 
@@ -336,13 +357,43 @@ export async function recordRateLimitAttempt(db, key, success = false) {
 
   const newAttempts = record.attempts + 1;
   let blockedUntil = null;
-  if (newAttempts >= RATE_LIMIT_MAX_ATTEMPTS) {
+  if (newAttempts >= maxAttempts) {
     blockedUntil = new Date(now.getTime() + RATE_LIMIT_BLOCK_MS).toISOString();
   }
 
   await db.prepare(
     `UPDATE auth_rate_limits SET attempts = ?, last_attempt_at = ?, blocked_until = ? WHERE key = ?`
   ).bind(newAttempts, nowIso, blockedUntil, key).run();
+}
+
+/**
+ * Records failed login across both IP-only and IP+Email buckets.
+ */
+export async function recordLoginFailure(db, ipHash, emailHash) {
+  const ipKey = `login:ip:${ipHash}`;
+  const ipEmailKey = `login:ip_email:${ipHash}:${emailHash}`;
+  await Promise.all([
+    recordRateLimitAttempt(db, ipKey, false, RATE_LIMIT_IP_MAX_ATTEMPTS),
+    recordRateLimitAttempt(db, ipEmailKey, false, RATE_LIMIT_MAX_ATTEMPTS)
+  ]);
+}
+
+/**
+ * Clears rate limits on successful login.
+ */
+export async function clearLoginRateLimits(db, ipHash, emailHash) {
+  const ipKey = `login:ip:${ipHash}`;
+  const ipEmailKey = `login:ip_email:${ipHash}:${emailHash}`;
+  await Promise.all([
+    recordRateLimitAttempt(db, ipKey, true),
+    recordRateLimitAttempt(db, ipEmailKey, true)
+  ]);
+}
+
+export async function clearRateLimit(db, ip, email) {
+  const ipHash = await sha256Hex(ip || '127.0.0.1');
+  const emailHash = await sha256Hex(normalizeEmail(email));
+  return clearLoginRateLimits(db, ipHash, emailHash);
 }
 
 export async function recordAuditEvent(db, { eventType, userId = null, ipHash = null, metadata = {} }) {
@@ -389,7 +440,9 @@ export async function getSession(requestOrDb, envOrRequest) {
   const token = getSessionToken(request);
   if (!token) return null;
 
-  await ensureAuthSchema(db);
+  const schemaCheck = await validateAuthSchema(db);
+  if (!schemaCheck.ready) return null;
+
   const tokenHash = await sha256Hex(token);
   const nowIso = new Date().toISOString();
 
@@ -433,6 +486,10 @@ export async function requireAdmin(request, env) {
   if (!env?.AUTH_DB) {
     return { ok: false, status: 503, error: 'AUTH_NOT_CONFIGURED', message: '인증 데이터베이스가 설정되지 않았습니다.' };
   }
+  const schemaCheck = await validateAuthSchema(env.AUTH_DB);
+  if (!schemaCheck.ready) {
+    return { ok: false, status: 503, error: schemaCheck.error, message: schemaCheck.message };
+  }
   const session = await getSession(request, env);
   if (!session || !session.authenticated) {
     return { ok: false, status: 401, error: 'UNAUTHORIZED', message: '로그인이 필요합니다.' };
@@ -466,5 +523,5 @@ export async function requireAdminMutation(request, env) {
 export const __test = {
   bytesToBase64,
   base64ToBytes,
-  TABLE_SQL
+  verifiedDbSet
 };

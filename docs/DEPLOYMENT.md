@@ -222,7 +222,54 @@ For comments to work, production needs:
 - a deployment made after the binding was saved
 - Pages Functions enabled and `/api/comments` reachable
 
-`ADMIN_KEY` is also used as part of the server-side IP-hash salt and can authorize administrative comment deletion when supplied by a trusted admin client. Guest deletion uses the user's deletion password.
+Guest comment deletion uses the user's deletion password; administrator comment deletion uses session authentication (`requireAdminMutation`).
+
+## Account & Auth Foundation (`AUTH_DB`)
+
+Phase 1B-A replaces browser-side `ADMIN_KEY` entry with opaque server sessions and CSRF tokens on the isolated admin origin `admin.snowshagal.com`.
+
+### Prepared Cloudflare Resources
+- D1 Database: `market-research-auth`
+- Binding Name: `AUTH_DB`
+- Secret: `AUTH_PEPPER` (recommended 32-byte secret for server-side IP hashing)
+
+### Schema Migration
+Schema creation is separate from runtime request paths. Runtime functions validate schema readiness and fail closed with `503 AUTH_SCHEMA_NOT_READY` if tables are missing.
+
+To initialize or migrate the database:
+```bash
+# Preview DB migration
+npx wrangler d1 execute market-research-auth-preview --file=migrations/auth/0001_auth_foundation.sql
+
+# Production DB migration
+npx wrangler d1 execute market-research-auth --file=migrations/auth/0001_auth_foundation.sql
+```
+
+### Operator Bootstrap Workflow
+Admin users are created via the local operator CLI with hidden password prompts (no plain passwords or hashes printed to stdout or logs):
+```bash
+# Run interactive CLI (prompts for email and hidden password, writes SQL to .bootstrap-admin.sql with 0600 permissions)
+node scripts/bootstrap-admin.mjs
+
+# Execute generated SQL to bootstrap admin in D1
+npx wrangler d1 execute market-research-auth-preview --file=.bootstrap-admin.sql
+
+# Remove bootstrap SQL file after execution
+rm .bootstrap-admin.sql
+```
+
+### Rollback Procedures
+If an operator needs to roll back the auth configuration:
+1. **Revoke all active sessions**:
+   ```sql
+   UPDATE sessions SET revoked_at = datetime('now') WHERE revoked_at IS NULL;
+   ```
+2. **Reset / Remove Admin user**:
+   ```sql
+   DELETE FROM users WHERE email_normalized = 'admin@snowshagal.com';
+   ```
+3. **Database teardown (if unbinding)**:
+   Unbind `AUTH_DB` in Cloudflare Pages Settings → Functions → D1 database bindings. When `AUTH_DB` is unbound, all human admin endpoints fail closed with `503 AUTH_NOT_CONFIGURED` while machine endpoints (`MARKET_PUBLISH_KEY`, `DISCLOSURE_SYNC_KEY`) and public features continue operating seamlessly.
 
 ## Security rules
 

@@ -80,15 +80,14 @@ export function constantTimeEqual(left, right) {
 
 export async function authorizeAdmin(request, env) {
   const sessionAuth = await requireAdmin(request, env);
-  if (sessionAuth.ok) return true;
-  const supplied = request.headers.get('x-admin-key') || '';
-  return Boolean(env?.ADMIN_KEY && constantTimeEqual(supplied, env.ADMIN_KEY));
+  return Boolean(sessionAuth.ok);
 }
 
 export async function authorizeSync(request, env) {
-  if (await authorizeAdmin(request, env)) return 'admin-key';
   const supplied = request.headers.get('x-disclosure-sync-key') || '';
   if (env?.DISCLOSURE_SYNC_KEY && constantTimeEqual(supplied, env.DISCLOSURE_SYNC_KEY)) return 'disclosure-sync-key';
+  const sessionAuth = await requireAdminMutation(request, env);
+  if (sessionAuth.ok) return 'admin-session';
   return '';
 }
 
@@ -97,13 +96,7 @@ export function humanAdminHostAllowed(request) {
 }
 
 export async function humanAdminMutationPolicy(request, env) {
-  const sessionAuth = await requireAdminMutation(request, env);
-  if (sessionAuth.ok) return { ok: true };
-  const originPolicy = validateHumanAdminMutation(request);
-  if (!originPolicy.ok) return originPolicy;
-  const supplied = request.headers.get('x-admin-key') || '';
-  if (env?.ADMIN_KEY && constantTimeEqual(supplied, env.ADMIN_KEY)) return { ok: true };
-  return sessionAuth;
+  return requireAdminMutation(request, env);
 }
 
 function boundedInteger(value, fallback, minimum, maximum) {

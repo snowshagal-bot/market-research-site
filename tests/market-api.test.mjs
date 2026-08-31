@@ -64,17 +64,23 @@ class MockDb {
   prepare(sql) { return new MockStatement(this, sql); }
 }
 
+import { createMockAuthDb, createAdminSession } from './helpers/auth-test-helper.mjs';
+
+const sharedAuthDb = await createMockAuthDb();
+const sharedSession = await createAdminSession(sharedAuthDb);
+
 const environment = db => ({
+  AUTH_DB: sharedAuthDb,
   COMMENTS_DB: db,
   ADMIN_KEY: 'admin-secret',
   MARKET_PUBLISH_KEY: 'market-secret',
   ASSETS: { fetch: async request => new URL(request.url).pathname.endsWith('/market_close.schema.json') ? Response.json(schema) : new Response('Not found', { status: 404 }) }
 });
-const publishRequest = (payload, headers = {}, host = headers['x-admin-key'] ? 'admin.snowshagal.com' : 'snowshagal.com') => {
+const publishRequest = (payload, headers = {}, host = 'snowshagal.com') => {
   const origin = `https://${host}`;
   return new Request(`${origin}/api/market/publish`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json', ...(headers['x-admin-key'] ? { origin } : {}), ...headers },
+    headers: { 'content-type': 'application/json', ...headers },
     body: typeof payload === 'string' ? payload : JSON.stringify(payload)
   });
 };
@@ -147,7 +153,7 @@ test('publish accepts automated and admin auth, upserts same dates, and never ro
   assert.equal(result.is_latest, true);
 
   const repeated = clone(fixture); repeated.indices.KOSPI.close = 6697;
-  response = await onRequestPost({ request: publishRequest(repeated, { 'x-admin-key': 'admin-secret' }), env: environment(db) });
+  response = await onRequestPost({ request: publishRequest(repeated, sharedSession.headers, 'admin.snowshagal.com'), env: environment(db) });
   assert.equal(response.status, 200);
   result = await response.json();
   assert.equal(result.action, 'updated');

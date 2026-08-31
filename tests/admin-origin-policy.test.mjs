@@ -243,14 +243,19 @@ test('comments admin delete uses the shared admin host and exact-Origin policy w
     },
     async batch() { return []; }
   };
+  const mockAuthEnv = await createMockAuthEnv({ COMMENTS_DB: db });
   const body = JSON.stringify({ id: 'comment-1', report: '/reports/example' });
   const call = (origin) => deleteComment({
     request: request(`${origin || ADMIN_ORIGIN}/api/comments`, {
       method: 'DELETE',
-      headers: { 'content-type': 'application/json', 'x-admin-key': 'admin-secret', ...(origin ? { origin } : {}) },
+      headers: {
+        'content-type': 'application/json',
+        ...mockAuthEnv._authSession.headers,
+        ...(origin !== undefined ? { origin } : {})
+      },
       body
     }),
-    env: { ADMIN_KEY: 'admin-secret', COMMENTS_DB: db }
+    env: mockAuthEnv
   });
 
   // Admin deletion requires admin host and matching admin origin:

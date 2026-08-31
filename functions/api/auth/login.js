@@ -1,15 +1,20 @@
 import {
-  ensureAuthSchema,
+  validateAuthSchema,
   normalizeEmail,
   verifyPassword,
   generateToken,
   sha256Hex,
   createSessionCookie,
   getIpHash,
-  checkRateLimit,
-  recordRateLimitAttempt,
+  checkLoginRateLimits,
+  recordLoginFailure,
+  clearLoginRateLimits,
   recordAuditEvent,
-  SESSION_TTL_MS
+  DUMMY_PBKDF2_HASH,
+  SESSION_TTL_MS,
+  MAX_LOGIN_BODY_BYTES,
+  MAX_EMAIL_LENGTH,
+  MAX_PASSWORD_LENGTH
 } from '../../_auth.js';
 import { validateHumanAdminMutation } from '../../_host-policy.js';
 
@@ -38,11 +43,31 @@ export async function onRequestPost(context) {
     return reply({ error: 'AUTH_NOT_CONFIGURED', message: '인증 데이터베이스가 설정되지 않았습니다.' }, 503);
   }
 
-  await ensureAuthSchema(env.AUTH_DB);
+  const schemaCheck = await validateAuthSchema(env.AUTH_DB);
+  if (!schemaCheck.ready) {
+    return reply({ error: schemaCheck.error, message: schemaCheck.message }, 503);
+  }
+
+  // 3. Body size and JSON parsing
+  const contentLength = Number(request.headers.get('content-length') || 0);
+  if (contentLength > MAX_LOGIN_BODY_BYTES) {
+    return reply({ error: 'PAYLOAD_TOO_LARGE', message: '요청 크기가 허용 범위를 초과했습니다.' }, 413);
+  }
+
+  let rawText;
+  try {
+    rawText = await request.text();
+  } catch (_) {
+    return reply({ error: 'INVALID_BODY', message: '요청 본문을 읽을 수 없습니다.' }, 400);
+  }
+
+  if (new TextEncoder().encode(rawText).byteLength > MAX_LOGIN_BODY_BYTES) {
+    return reply({ error: 'PAYLOAD_TOO_LARGE', message: '요청 크기가 허용 범위를 초과했습니다.' }, 413);
+  }
 
   let body;
   try {
-    body = await request.json();
+    body = JSON.parse(rawText);
   } catch (_) {
     return reply({ error: 'BAD_JSON', message: '요청 데이터를 읽을 수 없습니다.' }, 400);
   }
@@ -51,20 +76,16 @@ export async function onRequestPost(context) {
   const rawPassword = String(body?.password || '');
   const email = normalizeEmail(rawEmail);
 
-  if (!email || !rawPassword) {
-    return reply({ error: 'INVALID_CREDENTIALS', message: '이메일 또는 비밀번호가 올바르지 않습니다.' }, 401);
-  }
-
   const ipHash = await getIpHash(request, env.AUTH_PEPPER || '');
-  const rateLimitKey = `login:${ipHash}:${email}`;
+  const emailHash = await sha256Hex(email || 'empty');
 
-  // 3. Rate limit check
-  const rateCheck = await checkRateLimit(env.AUTH_DB, rateLimitKey);
+  // 4. Rate limit check (dual bucket: IP-only and IP+Email)
+  const rateCheck = await checkLoginRateLimits(env.AUTH_DB, ipHash, emailHash);
   if (!rateCheck.allowed) {
     await recordAuditEvent(env.AUTH_DB, {
       eventType: 'login_rate_limited',
       ipHash,
-      metadata: { email }
+      metadata: { bucket: rateCheck.bucket }
     });
     return reply({
       error: 'RATE_LIMIT',
@@ -72,7 +93,20 @@ export async function onRequestPost(context) {
     }, 429);
   }
 
-  // 4. Query user & credential
+  // 5. Input bounds and format validation
+  if (!email || !rawPassword || email.length > MAX_EMAIL_LENGTH || rawPassword.length > MAX_PASSWORD_LENGTH) {
+    // Run dummy PBKDF2 hash check for timing mitigation
+    await verifyPassword(rawPassword || 'dummy-password', DUMMY_PBKDF2_HASH);
+    await recordLoginFailure(env.AUTH_DB, ipHash, emailHash);
+    await recordAuditEvent(env.AUTH_DB, {
+      eventType: 'login_failure',
+      ipHash,
+      metadata: { reason: 'invalid_format' }
+    });
+    return reply({ error: 'INVALID_CREDENTIALS', message: '이메일 또는 비밀번호가 올바르지 않습니다.' }, 401);
+  }
+
+  // 6. Query user & credential
   const row = await env.AUTH_DB.prepare(`
     SELECT
       u.id AS id,
@@ -87,35 +121,39 @@ export async function onRequestPost(context) {
     LIMIT 1
   `).bind(email).first();
 
+  const isEligibleAdmin = Boolean(row && row.password_hash && row.status === 'active' && row.role === 'admin');
+
   let valid = false;
-  if (row && row.password_hash && row.status === 'active') {
+  if (isEligibleAdmin) {
     valid = await verifyPassword(rawPassword, row.password_hash);
+  } else {
+    // Execute dummy PBKDF2 (or hash of non-admin account) to ensure constant execution timing
+    const hashToVerify = row?.password_hash || DUMMY_PBKDF2_HASH;
+    await verifyPassword(rawPassword, hashToVerify);
   }
 
-  if (!valid || !row) {
-    await recordRateLimitAttempt(env.AUTH_DB, rateLimitKey, false);
+  if (!valid || !isEligibleAdmin) {
+    await recordLoginFailure(env.AUTH_DB, ipHash, emailHash);
+    const reason = !row
+      ? 'user_not_found'
+      : row.status !== 'active'
+        ? 'disabled'
+        : row.role !== 'admin'
+          ? 'non_admin_role'
+          : 'wrong_password';
+
     await recordAuditEvent(env.AUTH_DB, {
       eventType: 'login_failure',
       userId: row?.id || null,
       ipHash,
-      metadata: { email, reason: !row ? 'user_not_found' : row.status !== 'active' ? 'disabled' : 'wrong_password' }
+      metadata: { reason }
     });
+    // Response equivalence: always return 401 INVALID_CREDENTIALS with same message
     return reply({ error: 'INVALID_CREDENTIALS', message: '이메일 또는 비밀번호가 올바르지 않습니다.' }, 401);
   }
 
-  if (row.role !== 'admin') {
-    await recordRateLimitAttempt(env.AUTH_DB, rateLimitKey, false);
-    await recordAuditEvent(env.AUTH_DB, {
-      eventType: 'login_forbidden_role',
-      userId: row.id,
-      ipHash,
-      metadata: { email, role: row.role }
-    });
-    return reply({ error: 'FORBIDDEN', message: '관리자 권한이 없는 계정입니다.' }, 403);
-  }
-
-  // 5. Success -> Clear rate limit, create session
-  await recordRateLimitAttempt(env.AUTH_DB, rateLimitKey, true);
+  // 7. Success -> Clear rate limits, create session
+  await clearLoginRateLimits(env.AUTH_DB, ipHash, emailHash);
 
   const rawToken = generateToken(32);
   const csrfToken = generateToken(32);
@@ -133,7 +171,7 @@ export async function onRequestPost(context) {
     eventType: 'login_success',
     userId: row.id,
     ipHash,
-    metadata: { email, sessionId }
+    metadata: { sessionId }
   });
 
   const cookieHeader = createSessionCookie(rawToken);

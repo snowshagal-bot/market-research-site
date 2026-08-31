@@ -1,4 +1,4 @@
-import { getSession } from '../../_auth.js';
+import { getSession, validateAuthSchema } from '../../_auth.js';
 
 function reply(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -15,6 +15,11 @@ export async function onRequestGet(context) {
 
   if (!env?.AUTH_DB) {
     return reply({ error: 'AUTH_NOT_CONFIGURED', message: '인증 데이터베이스가 설정되지 않았습니다.' }, 503);
+  }
+
+  const schemaCheck = await validateAuthSchema(env.AUTH_DB);
+  if (!schemaCheck.ready) {
+    return reply({ error: schemaCheck.error, message: schemaCheck.message }, 503);
   }
 
   const session = await getSession(request, env);

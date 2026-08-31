@@ -71,9 +71,17 @@ export class MockD1 {
   }
 }
 
-export async function createMockAuthDb() {
+import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
+
+const migrationPath = fileURLToPath(new URL('../../migrations/auth/0001_auth_foundation.sql', import.meta.url));
+const MIGRATION_SQL = readFileSync(migrationPath, 'utf8');
+
+export async function createMockAuthDb(skipSchema = false) {
   const db = new MockD1();
-  await ensureAuthSchema(db);
+  if (!skipSchema) {
+    db.exec(MIGRATION_SQL);
+  }
   return db;
 }
 

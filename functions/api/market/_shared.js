@@ -91,8 +91,6 @@ export async function authorizePublish(request, env) {
   const sessionAuth = await requireAdminMutation(request, env);
   if (sessionAuth.ok) return 'admin-session';
 
-  const adminKey = request.headers.get('x-admin-key') || '';
-  if (env.ADMIN_KEY && constantTimeEqual(adminKey, env.ADMIN_KEY)) return 'admin-key';
   return '';
 }
 

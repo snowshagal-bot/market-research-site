@@ -5,10 +5,6 @@ export async function onRequestPost(context) {
   if (!isMarketWriteRequest(request)) return json({ error: 'WRITE_HOST_BLOCKED', message: 'Market Close 게시는 Production 또는 격리된 branch Preview에서만 허용됩니다.' }, 403);
   const authSource = await authorizePublish(request, env);
   if (!authSource) return json({ error: 'UNAUTHORIZED', message: '인증에 실패했습니다.' }, 401);
-  if (authSource === 'admin-key') {
-    const originPolicy = humanAdminPublishPolicy(request);
-    if (!originPolicy.ok) return json({ error: originPolicy.error, message: '허용되지 않은 관리자 Origin입니다.' }, 403);
-  }
 
   const declaredSize = Number(request.headers.get('content-length') || 0);
   if (declaredSize > MAX_PAYLOAD_BYTES) return json({ error: 'PAYLOAD_TOO_LARGE', message: 'JSON 파일이 허용 크기를 초과했습니다.' }, 413);

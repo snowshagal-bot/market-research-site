@@ -53,9 +53,16 @@ function fakeDb({ alterError = null } = {}) {
   };
 }
 
+import { createMockAuthDb, createAdminSession } from './helpers/auth-test-helper.mjs';
+
+const sharedAuthDb = await createMockAuthDb();
+const sharedSession = await createAdminSession(sharedAuthDb);
+
 function env(db) {
   return {
+    AUTH_DB: sharedAuthDb,
     COMMENTS_DB: db,
+    MARKET_PUBLISH_KEY: 'secret-market-key',
     ADMIN_KEY: 'secret',
     ASSETS: { fetch: async () => new Response(SCHEMA, { headers: { 'content-type': 'application/json' } }) }
   };
@@ -67,8 +74,7 @@ function publish(db, body) {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        'x-admin-key': 'secret',
-        origin: 'https://admin.snowshagal.com'
+        ...sharedSession.headers
       },
       body: JSON.stringify(body)
     }),
