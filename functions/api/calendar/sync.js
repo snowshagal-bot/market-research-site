@@ -46,7 +46,7 @@ export async function onRequestPost({ request, env, now = new Date() }) {
     return json({ ok: false, error: 'DB_UNAVAILABLE', message: '캘린더 데이터베이스를 사용할 수 없습니다.' }, 503);
   }
 
-  const outcome = await runCalendarSync(db, { fetchImpl: fetch, now });
+  const outcome = await runCalendarSync(db, { env, fetchImpl: fetch, now });
 
   // A failed source is a real failure and the workflow should see it, but the
   // sources that did answer have already been written and are not rolled back.

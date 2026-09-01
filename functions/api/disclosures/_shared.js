@@ -554,6 +554,12 @@ export async function addWatchlistCompany(db, {
   const nowStr = now.toISOString();
   const wantsDisclosure = Boolean(disclosureEnabled);
   const wantsCalendar = Boolean(calendarEnabled);
+  // A company followed for neither reason is not followed at all, and a row
+  // that says otherwise would sit in the list doing nothing. Removing it is
+  // the operation for that.
+  if (!wantsDisclosure && !wantsCalendar) {
+    throw new DisclosureError('NO_PURPOSE', '공시 중요기업 또는 캘린더 추적 중 하나는 선택해야 합니다.', 400);
+  }
   await db.prepare(`INSERT INTO ${WATCHLIST_TABLE} (stock_code, corp_code, corp_name, corp_name_en, corp_cls, active,
       disclosure_enabled, calendar_enabled, sort_order, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)
@@ -634,6 +640,11 @@ export async function setWatchlistFlags(db, stockCode, { disclosureEnabled, cale
 
   const nextDisclosure = disclosureEnabled === undefined ? Boolean(current.disclosure_enabled) : Boolean(disclosureEnabled);
   const nextCalendar = calendarEnabled === undefined ? Boolean(current.calendar_enabled) : Boolean(calendarEnabled);
+  // The same rule as adding: turning off the last remaining purpose is a
+  // removal, and has to be asked for as one.
+  if (!nextDisclosure && !nextCalendar) {
+    throw new DisclosureError('NO_PURPOSE', '공시 중요기업 또는 캘린더 추적 중 하나는 선택해야 합니다.', 400);
+  }
   const nowStr = now.toISOString();
   await db.prepare(`UPDATE ${WATCHLIST_TABLE} SET disclosure_enabled = ?, calendar_enabled = ?, updated_at = ?
     WHERE stock_code = ?`).bind(nextDisclosure ? 1 : 0, nextCalendar ? 1 : 0, nowStr, safeStock).run();

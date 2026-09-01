@@ -284,3 +284,56 @@ test('an unknown company cannot have its flags set', async () => {
   assert.equal(response.status, 404);
   db.close();
 });
+
+/* ------------------------------- a company has to be followed for something */
+
+test('adding a company for neither purpose is refused by the server', async () => {
+  const db = await seededDb();
+  const response = await post(db, {
+    action: 'add', stockCode: '064350', corpName: '현대로템',
+    disclosureEnabled: false, calendarEnabled: false
+  });
+
+  assert.equal(response.status, 400);
+  const payload = await response.json();
+  assert.equal(payload.error, 'NO_PURPOSE');
+  assert.match(payload.message, /하나는 선택해야 합니다/);
+  // And nothing was written on the way to the refusal.
+  assert.equal(db.row(`SELECT stock_code FROM ${WATCHLIST_TABLE} WHERE stock_code = '064350'`), null);
+  db.close();
+});
+
+test('turning off the last remaining purpose is refused too', async () => {
+  const db = await seededDb();
+  await post(db, { action: 'add', stockCode: '064350', corpName: '현대로템', disclosureEnabled: false, calendarEnabled: true });
+
+  const response = await post(db, { action: 'flags', stockCode: '064350', calendarEnabled: false });
+  assert.equal(response.status, 400);
+  assert.equal((await response.json()).error, 'NO_PURPOSE');
+
+  // The company is untouched: still calendar-tracked, still not a disclosure one.
+  assert.equal((await getCalendarStockCodes(db)).has('064350'), true);
+  assert.equal((await getWatchlistStockCodes(db)).has('064350'), false);
+  db.close();
+});
+
+test('turning off one purpose while the other stands is still allowed', async () => {
+  const db = await seededDb();
+  await post(db, { action: 'add', stockCode: '064350', corpName: '현대로템', disclosureEnabled: true, calendarEnabled: true });
+
+  const response = await post(db, { action: 'flags', stockCode: '064350', calendarEnabled: false });
+  assert.equal(response.status, 200);
+  assert.equal((await getCalendarStockCodes(db)).has('064350'), false);
+  assert.equal((await getWatchlistStockCodes(db)).has('064350'), true);
+  db.close();
+});
+
+test('the seeded companies cannot be emptied of both purposes either', async () => {
+  const db = await seededDb();
+  const response = await post(db, { action: 'flags', stockCode: '005930', disclosureEnabled: false, calendarEnabled: false });
+  assert.equal(response.status, 400);
+  const samsung = (await getWatchlist(db)).find(company => company.stockCode === '005930');
+  assert.equal(samsung.disclosureEnabled, true);
+  assert.equal(samsung.calendarEnabled, true);
+  db.close();
+});

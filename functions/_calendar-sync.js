@@ -25,6 +25,7 @@ import {
   parseFomcSchedule
 } from './_calendar-sources.js';
 import { cancelMissingEvents, recordSourceRun, upsertEvent } from './_calendar-events.js';
+import { syncCorporateEvents } from './api/disclosures/_calendar-corporate.js';
 
 /** How far ahead the calendar keeps events. Two years covers every source. */
 export const SYNC_YEARS_AHEAD = 1;
@@ -235,7 +236,7 @@ export function syncYears(now = new Date()) {
   return Array.from({ length: SYNC_YEARS_AHEAD + 1 }, (_, offset) => current + offset);
 }
 
-export async function runCalendarSync(db, { fetchImpl = fetch, now = new Date() } = {}) {
+export async function runCalendarSync(db, { env = {}, fetchImpl = fetch, now = new Date() } = {}) {
   const years = syncYears(now);
   const currentYear = years[0];
   const results = [];
@@ -245,6 +246,15 @@ export async function runCalendarSync(db, { fetchImpl = fetch, now = new Date() 
   results.push(await syncBea(db, { years, fetchImpl, now }));
   for (const year of years) results.push(await syncBok(db, { year, currentYear, fetchImpl, now }));
   results.push(...await syncExpiries(db, { years, now }));
+
+  // Company dates come last: they read filings the disclosure sync has already
+  // stored, and they are the only part that spends the OpenDART budget.
+  try {
+    results.push(await syncCorporateEvents(db, { env, fetchImpl, now }));
+  } catch (error) {
+    await recordSourceRun(db, { sourceName: 'opendart-corporate', status: 'error', error: String(error?.message || error) }, now);
+    results.push({ sourceName: 'opendart-corporate', status: 'error', error: String(error?.message || error) });
+  }
 
   const failed = results.filter(result => result.status === 'error');
   return {
