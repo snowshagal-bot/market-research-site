@@ -160,9 +160,21 @@ test('a busy day shows a couple of events and counts the rest', async () => {
   assert.match(grid, /\+2건 더/, 'four events, two shown, two counted');
 });
 
-test('a cancelled event is kept out of the grid', async () => {
+test('a cancelled event is kept out of the grid and out of the count', async () => {
   const { grid } = await render({ payload: payloadFor([{ ...expiry, status: 'cancelled' }]) });
   assert.doesNotMatch(grid, /cal-event-chip/);
+
+  // Three live events and one withdrawn: the counter must say one more,
+  // not two, or the cell would promise something the detail card lacks.
+  const mixed = [
+    { ...expiry, id: 'rule:a', title: { ko: '하나', en: 'One' } },
+    { ...expiry, id: 'rule:b', title: { ko: '둘', en: 'Two' } },
+    { ...expiry, id: 'rule:c', title: { ko: '셋', en: 'Three' } },
+    { ...expiry, id: 'rule:d', title: { ko: '취소된 것', en: 'Withdrawn' }, status: 'cancelled' }
+  ];
+  const busy = await render({ payload: payloadFor(mixed) });
+  assert.match(busy.grid, /\+1건 더/);
+  assert.doesNotMatch(busy.grid, /취소된 것/, 'a withdrawn event is not one of the chips');
 });
 
 /* ------------------------------------------------------------ the failure */
@@ -224,4 +236,58 @@ test('every category has a name in both locales', async () => {
   // Two tables, one per locale.
   assert.equal((SCRIPT.match(/eventCategories: \{/g) || []).length, 2);
   assert.equal((SCRIPT.match(/eventsUnavailable:/g) || []).length, 2);
+});
+
+/* --------------------------------------------- how a time is shown to a reader */
+
+test('times are labelled the way a market is spoken of, not by IANA path', async () => {
+  const { grid, get } = await render({ payload: payloadFor([fomc]) });
+  assert.doesNotMatch(grid, /America\/New_York/, 'the zone identifier is not reader-facing');
+
+  // Open the day the decision lands on in Seoul.
+  await get('calendar-grid-mount').fire('click', { target: { closest: () => ({ dataset: { date: '2026-09-17' } }) } });
+  const detail = get('calendar-day-detail-mount').innerHTML;
+  assert.match(detail, /03:00 KST/);
+  assert.match(detail, /현지 14:00 ET/, 'the source clock keeps its own market label');
+  assert.doesNotMatch(detail, /America\/New_York/);
+  assert.doesNotMatch(detail, /UTC[+-]/, 'a fixed offset is never substituted for the zone');
+});
+
+test('the English detail says the same without the Korean word for local', async () => {
+  const { get } = await render({ lang: 'en', payload: payloadFor([fomc]) });
+  await get('calendar-grid-mount').fire('click', { target: { closest: () => ({ dataset: { date: '2026-09-17' } }) } });
+  const detail = get('calendar-day-detail-mount').innerHTML;
+  assert.match(detail, /03:00 KST/);
+  assert.match(detail, /14:00 ET/);
+  assert.doesNotMatch(detail, /America\/New_York/);
+});
+
+test('a Korean event shows one clock, because there is only one', async () => {
+  const { get } = await render({ payload: payloadFor([briefing]) });
+  await get('calendar-grid-mount').fire('click', { target: { closest: () => ({ dataset: { date: '2026-09-10' } }) } });
+  const detail = get('calendar-day-detail-mount').innerHTML;
+  assert.match(detail, /14:00 KST/);
+  assert.doesNotMatch(detail, /현지/, 'the source and the reader share a zone');
+});
+
+test('an event with no time says so rather than inventing one', async () => {
+  const { get } = await render({ payload: payloadFor([expiry]) });
+  await get('calendar-grid-mount').fire('click', { target: { closest: () => ({ dataset: { date: '2026-09-10' } }) } });
+  assert.match(get('calendar-day-detail-mount').innerHTML, /시간 미정/);
+});
+
+test('a withdrawn event is shown in the detail, marked as withdrawn', async () => {
+  const { get } = await render({ payload: payloadFor([{ ...expiry, status: 'cancelled' }]) });
+  await get('calendar-grid-mount').fire('click', { target: { closest: () => ({ dataset: { date: '2026-09-10' } }) } });
+  const detail = get('calendar-day-detail-mount').innerHTML;
+  assert.match(detail, /취소됨/);
+  assert.match(detail, /is-cancelled/);
+});
+
+test('the source timezone still travels in the API payload', async () => {
+  // Only the display is simplified; storage and the API keep the IANA zone,
+  // which is what the conversion is computed from.
+  assert.equal(fomc.source.timezone, 'America/New_York');
+  assert.match(SCRIPT, /ZONE_LABELS/);
+  assert.doesNotMatch(SCRIPT, /UTC-[45]/, 'no fixed offset stands in for the zone');
 });

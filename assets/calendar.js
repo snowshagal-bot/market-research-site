@@ -33,6 +33,7 @@
     eventsNone: '등록된 시장 이벤트가 없습니다.',
     eventMore: (n) => `+${n}건 더`,
     eventAllDay: '시간 미정',
+    eventLocalTime: (value) => `현지 ${value}`,
     eventCancelled: '취소됨',
     eventChanged: '일정 변경',
     eventCategories: {
@@ -80,6 +81,7 @@
     eventsNone: 'No market events scheduled.',
     eventMore: (n) => `+${n} more`,
     eventAllDay: 'Time TBC',
+    eventLocalTime: (value) => value,
     eventCancelled: 'Cancelled',
     eventChanged: 'Rescheduled',
     eventCategories: {
@@ -239,8 +241,36 @@
       .filter(event => !wanted || event.market === wanted);
   }
 
+  // Readers get the short name a market actually goes by. The IANA zone stays
+  // in storage and in the API and is what the conversion is computed from —
+  // this is a label, not a substitute offset, and ET covers both EST and EDT
+  // for exactly that reason.
+  const ZONE_LABELS = {
+    'Asia/Seoul': 'KST',
+    'America/New_York': 'ET',
+    'America/Chicago': 'CT',
+    'Europe/London': 'UK'
+  };
+
+  function zoneLabel(timeZone) {
+    if (ZONE_LABELS[timeZone]) return ZONE_LABELS[timeZone];
+    // An unmapped zone keeps its city rather than showing a raw IANA path.
+    const city = String(timeZone || '').split('/').pop() || '';
+    return city.replace(/_/g, ' ');
+  }
+
   function eventTimeLabel(event) {
-    return event.display?.time || copy.eventAllDay;
+    const shown = event.display?.time;
+    if (!shown) return copy.eventAllDay;
+    return `${shown} ${zoneLabel(event.display?.timezone)}`;
+  }
+
+  // The source's own clock, named the way its market names it.
+  function eventSourceTimeLabel(event) {
+    const time = event.source?.time;
+    if (!time) return '';
+    if (event.source?.timezone === event.display?.timezone) return '';
+    return copy.eventLocalTime(`${time} ${zoneLabel(event.source.timezone)}`);
   }
 
   function eventTitle(event) {
@@ -462,8 +492,9 @@
         : (event.status === 'changed' ? `<span class="cal-event-status changed">${escapeHtml(copy.eventChanged)}</span>` : '');
       // The source time is shown beside the Korean one whenever the two
       // differ, so a reader can see where the hour came from.
-      const sourceNote = event.display?.time && event.source?.timezone !== event.display?.timezone
-        ? `<span class="cal-event-source-time">${escapeHtml(event.source.time)} ${escapeHtml(event.source.timezone)}</span>`
+      const localTime = eventSourceTimeLabel(event);
+      const sourceNote = localTime
+        ? `<span class="cal-event-source-time">${escapeHtml(localTime)}</span>`
         : '';
       return `
         <div class="detail-item-row cal-event-row ${event.status === 'cancelled' ? 'is-cancelled' : ''}">
