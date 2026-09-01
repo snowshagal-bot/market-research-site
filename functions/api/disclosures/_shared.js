@@ -568,8 +568,8 @@ export async function setFilingPublishStatus(db, rceptNo, publishStatus, now = n
   return publicFiling(row);
 }
 
-export async function upsertFiling(db, filing, { watchlistCodes = null, now = new Date() } = {}) {
-  if (!/^\d{14}$/.test(filing.rceptNo)) return false;
+export function buildInsertStatement(db, filing, { watchlistCodes = null, now = new Date() } = {}) {
+  if (!/^\d{14}$/.test(filing.rceptNo)) return null;
   const todayReceiptDate = compactDate(kstDate(now));
   const isToday = filing.receiptDate === todayReceiptDate;
   const initialAiStatus = filing.aiEligible ? 'available' : 'skipped';
@@ -578,7 +578,7 @@ export async function upsertFiling(db, filing, { watchlistCodes = null, now = ne
   const initialPublishStatus = autoPublish ? 'auto' : 'admin_only';
   const initialPublishedAt = autoPublish ? filing.firstSeenAt : '';
 
-  const inserted = await db.prepare(`INSERT INTO ${FILINGS_TABLE} (
+  return db.prepare(`INSERT INTO ${FILINGS_TABLE} (
       rcept_no, corp_cls, corp_name, corp_code, stock_code, report_nm, flr_nm, rcept_dt, rm, source_url,
       rule_score, rule_priority, rule_reasons_json, ai_eligible, ai_status, publish_status, is_watchlist,
       published_at, superseded_by, first_seen_at, updated_at
@@ -590,58 +590,105 @@ export async function upsertFiling(db, filing, { watchlistCodes = null, now = ne
       filing.filerName, filing.receiptDate, filing.remarks, filing.sourceUrl, filing.ruleScore, filing.rulePriority,
       JSON.stringify(filing.ruleReasons), filing.aiEligible ? 1 : 0, initialAiStatus, initialPublishStatus, isWatchlist,
       initialPublishedAt, filing.firstSeenAt, filing.updatedAt
-    ).all();
+    );
+}
 
-  const isNewInsert = Boolean(inserted?.results?.length);
+export function buildUpdateStatement(db, filing, { watchlistCodes = null, now = new Date() } = {}) {
+  if (!/^\d{14}$/.test(filing.rceptNo)) return null;
+  const todayReceiptDate = compactDate(kstDate(now));
+  const isToday = filing.receiptDate === todayReceiptDate;
+  const isWatchlist = watchlistCodes ? (watchlistCodes.has(filing.stockCode) ? 1 : 0) : 0;
 
-  if (!isNewInsert) {
-    await db.prepare(`UPDATE ${FILINGS_TABLE} SET
-        corp_cls = ?,
-        corp_name = ?,
-        corp_code = ?,
-        stock_code = ?,
-        report_nm = ?,
-        flr_nm = ?,
-        rcept_dt = ?,
-        rm = ?,
-        source_url = ?,
-        rule_score = ?,
-        rule_priority = ?,
-        rule_reasons_json = ?,
-        ai_eligible = ?,
-        is_watchlist = ?,
-        publish_status = CASE
-          WHEN ${FILINGS_TABLE}.publish_status = 'manual' THEN 'manual'
-          WHEN ${FILINGS_TABLE}.publish_status = 'suppressed' THEN 'suppressed'
-          WHEN ${FILINGS_TABLE}.publish_status = 'auto' THEN 'auto'
-          WHEN ${FILINGS_TABLE}.publish_status = 'admin_only' AND ? = 1 AND ? >= 7 AND ? = 1 THEN 'auto'
-          ELSE ${FILINGS_TABLE}.publish_status
-        END,
-        published_at = CASE
-          WHEN (${FILINGS_TABLE}.published_at != '' AND ${FILINGS_TABLE}.published_at IS NOT NULL) THEN ${FILINGS_TABLE}.published_at
-          WHEN ${FILINGS_TABLE}.publish_status = 'admin_only' AND ? = 1 AND ? >= 7 AND ? = 1 THEN ?
-          ELSE ${FILINGS_TABLE}.published_at
-        END,
-        ai_status = CASE
-          WHEN ? = 0 THEN 'skipped'
-          WHEN ${FILINGS_TABLE}.ai_status IN ('done', 'processing') THEN ${FILINGS_TABLE}.ai_status
-          WHEN ${FILINGS_TABLE}.ai_status = 'error' THEN 'error'
-          ELSE 'available'
-        END,
-        updated_at = ?
-      WHERE rcept_no = ?`)
-      .bind(
-        filing.corpCls, filing.corpName, filing.corpCode, filing.stockCode, filing.reportName,
-        filing.filerName, filing.receiptDate, filing.remarks, filing.sourceUrl, filing.ruleScore,
-        filing.rulePriority, JSON.stringify(filing.ruleReasons), filing.aiEligible ? 1 : 0,
-        isWatchlist,
-        isWatchlist, filing.ruleScore, isToday ? 1 : 0,
-        isWatchlist, filing.ruleScore, isToday ? 1 : 0, filing.updatedAt,
-        filing.aiEligible ? 1 : 0, filing.updatedAt, filing.rceptNo
-      ).run();
+  return db.prepare(`UPDATE ${FILINGS_TABLE} SET
+      corp_cls = ?,
+      corp_name = ?,
+      corp_code = ?,
+      stock_code = ?,
+      report_nm = ?,
+      flr_nm = ?,
+      rcept_dt = ?,
+      rm = ?,
+      source_url = ?,
+      rule_score = ?,
+      rule_priority = ?,
+      rule_reasons_json = ?,
+      ai_eligible = ?,
+      is_watchlist = ?,
+      publish_status = CASE
+        WHEN ${FILINGS_TABLE}.publish_status = 'manual' THEN 'manual'
+        WHEN ${FILINGS_TABLE}.publish_status = 'suppressed' THEN 'suppressed'
+        WHEN ${FILINGS_TABLE}.publish_status = 'auto' THEN 'auto'
+        WHEN ${FILINGS_TABLE}.publish_status = 'admin_only' AND ? = 1 AND ? >= 7 AND ? = 1 THEN 'auto'
+        ELSE ${FILINGS_TABLE}.publish_status
+      END,
+      published_at = CASE
+        WHEN (${FILINGS_TABLE}.published_at != '' AND ${FILINGS_TABLE}.published_at IS NOT NULL) THEN ${FILINGS_TABLE}.published_at
+        WHEN ${FILINGS_TABLE}.publish_status = 'admin_only' AND ? = 1 AND ? >= 7 AND ? = 1 THEN ?
+        ELSE ${FILINGS_TABLE}.published_at
+      END,
+      ai_status = CASE
+        WHEN ? = 0 THEN 'skipped'
+        WHEN ${FILINGS_TABLE}.ai_status IN ('done', 'processing') THEN ${FILINGS_TABLE}.ai_status
+        WHEN ${FILINGS_TABLE}.ai_status = 'error' THEN 'error'
+        ELSE 'available'
+      END,
+      updated_at = ?
+    WHERE rcept_no = ?`)
+    .bind(
+      filing.corpCls, filing.corpName, filing.corpCode, filing.stockCode, filing.reportName,
+      filing.filerName, filing.receiptDate, filing.remarks, filing.sourceUrl, filing.ruleScore,
+      filing.rulePriority, JSON.stringify(filing.ruleReasons), filing.aiEligible ? 1 : 0,
+      isWatchlist,
+      isWatchlist, filing.ruleScore, isToday ? 1 : 0,
+      isWatchlist, filing.ruleScore, isToday ? 1 : 0, filing.updatedAt,
+      filing.aiEligible ? 1 : 0, filing.updatedAt, filing.rceptNo
+    );
+}
+
+export async function upsertFiling(db, filing, options = {}) {
+  const insertStmt = buildInsertStatement(db, filing, options);
+  if (!insertStmt) return false;
+  const inserted = await insertStmt.all();
+  const isNew = Boolean(inserted?.results?.length);
+  if (!isNew) {
+    const updateStmt = buildUpdateStatement(db, filing, options);
+    if (updateStmt) await updateStmt.run();
   }
+  return isNew;
+}
 
-  return isNewInsert;
+export async function upsertFilingsBatch(db, filings, options = {}) {
+  let created = 0;
+  const BATCH_SIZE = 50;
+  for (let i = 0; i < filings.length; i += BATCH_SIZE) {
+    const chunk = filings.slice(i, i + BATCH_SIZE);
+    const insertStmts = [];
+    const validChunk = [];
+    for (const filing of chunk) {
+      const stmt = buildInsertStatement(db, filing, options);
+      if (stmt) {
+        insertStmts.push(stmt);
+        validChunk.push(filing);
+      }
+    }
+    if (insertStmts.length === 0) continue;
+    const insertResults = await db.batch(insertStmts);
+    const updateStmts = [];
+    for (let j = 0; j < insertResults.length; j++) {
+      const res = insertResults[j];
+      const isNew = Boolean(res?.results?.length || (res?.meta?.changes && res.meta.changes > 0));
+      if (isNew) {
+        created += 1;
+      } else {
+        const updateStmt = buildUpdateStatement(db, validChunk[j], options);
+        if (updateStmt) updateStmts.push(updateStmt);
+      }
+    }
+    if (updateStmts.length > 0) {
+      await db.batch(updateStmts);
+    }
+  }
+  return created;
 }
 
 export async function claimFilingForAnalysis(db, rceptNo, { allowDone = false, now = new Date() } = {}) {

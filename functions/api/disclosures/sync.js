@@ -15,6 +15,7 @@ import {
   reserveRequest,
   setState,
   upsertFiling,
+  upsertFilingsBatch,
   usageSnapshot
 } from './_shared.js';
 import { fetchDisclosureSource } from './_source.js';
@@ -128,11 +129,7 @@ export async function onRequestPost({ request, env, now = new Date() }) {
       now
     });
 
-    let created = 0;
-    for (const filing of source.filings) {
-      if (await upsertFiling(db, filing, { watchlistCodes, now })) created += 1;
-    }
-
+    const created = await upsertFilingsBatch(db, source.filings, { watchlistCodes, now });
     const ai = await analyzeQueue(db, env, config, now);
     const syncedAt = new Date().toISOString();
     await setState(db, 'last_sync_at', syncedAt);
