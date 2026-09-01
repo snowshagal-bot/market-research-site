@@ -209,7 +209,7 @@ const bare = {
   href: 'reports/basics.html', reportDate: '2026-08-15'
 };
 
-test('a report with a cover sends a landscape card to Open Graph and the cover to X', async () => {
+test('a report with a cover sends the same landscape card everywhere', async () => {
   const withCard = { ...covered, shareCardImage: `covers/share/${covered.id}.jpg` };
   const tags = reportSeoTags([withCard], withCard);
   const coverUrl = `${PRODUCTION_ORIGIN}/covers/2026-08-26-daily.webp`;
@@ -226,10 +226,13 @@ test('a report with a cover sends a landscape card to Open Graph and the cover t
   assert.doesNotMatch(tags, /property="og:image" content="[^"]*\/covers\/[^\/"]*\.webp"/);
   assert.doesNotMatch(tags, /property="og:image" content="[^"]*market-close-share/);
 
-  // X shows a summary thumbnail rather than a cropped band, so it keeps the cover.
-  assert.match(tags, new RegExp(`<meta name="twitter:image" content="${coverUrl}">`));
-  assert.match(tags, /<meta name="twitter:card" content="summary">/);
-  assert.doesNotMatch(tags, /summary_large_image/);
+  // X gets that same card at full width. The card carries the portrait cover
+  // whole, so the large frame crops nothing the small one was protecting — and
+  // the portrait file itself still never leaves as a social image.
+  assert.match(tags, new RegExp(`<meta name="twitter:image" content="${PRODUCTION_ORIGIN}/covers/share/${covered.id}\.jpg">`));
+  assert.match(tags, /<meta name="twitter:card" content="summary_large_image">/);
+  assert.doesNotMatch(tags, new RegExp(`<meta name="twitter:image" content="${coverUrl}">`));
+  assert.doesNotMatch(tags, /name="twitter:image" content="[^"]*\/covers\/[^\/"]*\.webp"/);
 
   assert.match(tags, /<meta property="og:image:width" content="1200">/);
   assert.match(tags, /<meta property="og:image:height" content="630">/);
@@ -268,15 +271,11 @@ test('every report advertises a 1200x630 og:image whatever its cover state', asy
     assert.match(tags, /<meta property="og:image:width" content="1200">/, post.id);
     assert.match(tags, /<meta property="og:image:height" content="630">/, post.id);
 
+    // One image serves every unfurler, and it is always the landscape one.
     const twitterImage = tags.match(/name="twitter:image" content="([^"]*)"/)[1];
     const card = tags.match(/name="twitter:card" content="([^"]*)"/)[1];
-    if (post.coverImage) {
-      assert.equal(twitterImage, `${PRODUCTION_ORIGIN}/${post.coverImage}`, post.id);
-      assert.equal(card, 'summary', post.id);
-    } else {
-      assert.equal(twitterImage, `${PRODUCTION_ORIGIN}${SOCIAL_FALLBACK_IMAGE}`, post.id);
-      assert.equal(card, 'summary_large_image', post.id);
-    }
+    assert.equal(twitterImage, expected, post.id);
+    assert.equal(card, 'summary_large_image', post.id);
   }
 });
 

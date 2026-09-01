@@ -57,8 +57,11 @@ test('SEO output falls back to the brand card whenever no card is recorded', () 
   assert.equal(ogOf({ ...base, shareCardImage: 'covers/share/r-1.jpg' }),
     `${PRODUCTION_ORIGIN}/covers/share/r-1.jpg`);
 
-  // The cover still reaches X in every case.
-  assert.match(reportSeoTags([base], base), /<meta name="twitter:card" content="summary">/);
+  // Whatever the card state resolved to, X is told the same thing and is sent
+  // the same landscape image, never the portrait cover behind it.
+  const tags = reportSeoTags([base], base);
+  assert.match(tags, /<meta name="twitter:card" content="summary_large_image">/);
+  assert.match(tags, new RegExp(`<meta name="twitter:image" content="${brand}">`));
 });
 
 test('every recorded card exists on disk at 1200x630, and none is recorded without one', async () => {
@@ -80,22 +83,21 @@ test('every recorded card exists on disk at 1200x630, and none is recorded witho
   }
 });
 
-test('Open Graph gets the card and X keeps the cover', async () => {
+test('every unfurler gets the composed card, and never the raw cover', async () => {
   const posts = JSON.parse(await read('data/posts.json'));
   for (const post of posts) {
     const tags = reportSeoTags(posts, post);
     const ogImage = tags.match(/property="og:image" content="([^"]*)"/)[1];
     const twitterImage = tags.match(/name="twitter:image" content="([^"]*)"/)[1];
 
-    if (post.shareCardImage) {
-      assert.equal(ogImage, `${PRODUCTION_ORIGIN}/${SOCIAL_REPORT_CARD_DIR}/${post.id}.jpg`, post.id);
-      // The portrait cover is still what X shows, where it is not cropped.
-      assert.equal(twitterImage, `${PRODUCTION_ORIGIN}/${post.coverImage}`, post.id);
-      assert.match(tags, /<meta name="twitter:card" content="summary">/, post.id);
-    } else {
-      assert.equal(ogImage, `${PRODUCTION_ORIGIN}${SOCIAL_FALLBACK_IMAGE}`, post.id);
-      assert.match(tags, /<meta name="twitter:card" content="summary_large_image">/, post.id);
-    }
+    const expected = post.shareCardImage
+      ? `${PRODUCTION_ORIGIN}/${SOCIAL_REPORT_CARD_DIR}/${post.id}.jpg`
+      : `${PRODUCTION_ORIGIN}${SOCIAL_FALLBACK_IMAGE}`;
+    assert.equal(ogImage, expected, post.id);
+    // The card already holds the portrait cover whole, so one landscape image
+    // serves every reader and the portrait file is never handed out itself.
+    assert.equal(twitterImage, expected, post.id);
+    assert.match(tags, /<meta name="twitter:card" content="summary_large_image">/, post.id);
     assert.match(tags, /<meta property="og:image:width" content="1200">/, post.id);
   }
 });

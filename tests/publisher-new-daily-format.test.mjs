@@ -5,19 +5,40 @@ import { __test as coverApi } from '../functions/api/generate-cover.js';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
+// A stand-in element that keeps the browser's own rules about whitespace: a
+// tag contributes none of its own to textContent, so only a <br> can hold two
+// lines apart, and only on a copy. A looser stub that turned every tag into a
+// space would pass code that runs a cover's two title rows together.
+function stubElement(innerHtml) {
+  return {
+    innerHtml,
+    get textContent() {
+      return this.innerHtml.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    },
+    cloneNode() { return stubElement(this.innerHtml); },
+    querySelectorAll(selector) {
+      if (selector !== 'br') return [];
+      const found = this.innerHtml.match(/<br\b[^>]*>/gi) || [];
+      return found.map(() => ({
+        replaceWith: (text) => { this.innerHtml = this.innerHtml.replace(/<br\b[^>]*>/i, text); }
+      }));
+    }
+  };
+}
+
 function parseHtmlDoc(html) {
   const metaTitle = html.match(/<meta\b[^>]*name\s*=\s*["']report-title["'][^>]*content\s*=\s*["']([^"']+)["']/i)?.[1]
     || html.match(/<meta\b[^>]*content\s*=\s*["']([^"']+)["'][^>]*name\s*=\s*["']report-title["']/i)?.[1];
 
-  const extractText = (selector) => {
+  const extractInner = (selector) => {
     if (selector.startsWith('.')) {
       const cls = selector.slice(1);
       const match = html.match(new RegExp(`<([a-z0-9]+)\\b[^>]*class\\s*=\\s*["'][^"']*\\b${cls}\\b[^"']*["'][^>]*>([\\s\\S]*?)<\\/\\1>`, 'i'));
-      if (match) return match[2].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      if (match) return match[2];
     }
     if (selector === 'h1') {
       const match = html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
-      if (match) return match[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      if (match) return match[1];
     }
     return null;
   };
@@ -31,19 +52,26 @@ function parseHtmlDoc(html) {
       if (sel === 'meta[name="report-title"]') {
         return metaTitle ? { content: metaTitle } : null;
       }
-      const text = extractText(sel);
-      return text !== null ? { textContent: text } : null;
+      const inner = extractInner(sel);
+      return inner !== null ? stubElement(inner) : null;
     }
   };
 }
 
 async function loadAdminDetectTitle() {
   const adminSource = await read('assets/admin.js');
-  const match = adminSource.match(/function detectTitle\(name, doc\) \{([\s\S]*?)\n  \}/);
-  const cleanTitleMatch = adminSource.match(/function cleanTitle\(s\) \{([\s\S]*?)\n  \}/);
-  const cleanTitleFn = new Function(`return function cleanTitle(s) { ${cleanTitleMatch[1]} }`)();
-  const fn = new Function('cleanTitle', `return function detectTitle(name, doc) { ${match[1]} }`);
-  return fn(cleanTitleFn);
+  const body = (name, signature) => {
+    const found = adminSource.match(new RegExp(`function ${name}\\(${signature}\\) \\{([\\s\\S]*?)\\n  \\}`));
+    assert.ok(found, `admin.js no longer defines ${name}`);
+    return found[1];
+  };
+  const cleanTitleFn = new Function(`return function cleanTitle(s) { ${body('cleanTitle', 's')} }`)();
+  const brokenLineTextFn = new Function(
+    `return function brokenLineText(element) { ${body('brokenLineText', 'element')} }`
+  )();
+  const fn = new Function('cleanTitle', 'brokenLineText',
+    `return function detectTitle(name, doc) { ${body('detectTitle', 'name, doc')} }`);
+  return fn(cleanTitleFn, brokenLineTextFn);
 }
 
 test('Title Detection - Case A: .cv-h1 is chosen over generic body h1', async () => {

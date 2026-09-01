@@ -351,20 +351,33 @@
     return s.replace(/\s*[|·｜]\s*(market research|daily market report|weekly).*$/i,'').replace(/_커버통합|\.html?$/gi,'').replace(/_/g,' ').trim();
   }
 
+  // Covers set a title across two rows with <br>. Reading textContent straight
+  // off the element closes that gap and runs "시장" into "가라앉은", so the
+  // breaks become spaces on a copy first and the document is left alone. Other
+  // tags contribute nothing of their own, exactly as textContent has it.
+  function brokenLineText(element) {
+    if (!element) return '';
+    const clone = element.cloneNode ? element.cloneNode(true) : null;
+    if (!clone || typeof clone.querySelectorAll !== 'function') return element.textContent || '';
+    clone.querySelectorAll('br').forEach(br => { br.replaceWith(' '); });
+    return clone.textContent || '';
+  }
+
   function detectTitle(name, doc) {
     const meta = doc.querySelector('meta[name="report-title"]')?.content?.trim();
     if (meta) return meta;
     const candidates = [
-      doc.querySelector('.cv-h1')?.textContent,
-      doc.querySelector('.cv-title')?.textContent,
-      doc.querySelector('.cover-title')?.textContent,
-      doc.querySelector('.cover-frame .cover-copy h1, .cover-frame .cover-copy h2, .cover-frame h1, .cover-frame h2')?.textContent,
-      doc.querySelector('.mag-cover h1, .mag-cover .cv-h1, .mag-cover .cv-title')?.textContent,
-      doc.querySelector('.cover-screen h1, .cover-page h1, .report-cover h1, .cover h1, .opener h1')?.textContent,
-      doc.querySelector('h1')?.textContent,
-      doc.querySelector('.title')?.textContent,
-      doc.title
-    ].map(v => cleanTitle(v || '')).filter(Boolean);
+      doc.querySelector('.cv-h1'),
+      doc.querySelector('.cv-title'),
+      doc.querySelector('.cover-title'),
+      doc.querySelector('.cover-frame .cover-copy h1, .cover-frame .cover-copy h2, .cover-frame h1, .cover-frame h2'),
+      doc.querySelector('.mag-cover h1, .mag-cover .cv-h1, .mag-cover .cv-title'),
+      doc.querySelector('.cover-screen h1, .cover-page h1, .report-cover h1, .cover h1, .opener h1'),
+      doc.querySelector('h1'),
+      doc.querySelector('.title')
+    ].map(node => cleanTitle(brokenLineText(node)))
+      .concat(cleanTitle(doc.title || ''))
+      .filter(Boolean);
     if (candidates.length) return candidates[0].replace(/\s+/g,' ');
     return cleanTitle(name);
   }
@@ -373,7 +386,7 @@
     const meta = doc.querySelector('meta[name="report-subtitle"]')?.content?.trim();
     if (meta) return meta;
     const node = doc.querySelector('.subtitle,.cover-subtitle,[class*="subtitle"]');
-    return node ? node.textContent.replace(/\s+/g,' ').trim().slice(0,120) : '';
+    return node ? brokenLineText(node).replace(/\s+/g,' ').trim().slice(0,120) : '';
   }
 
   function detectSummary(doc) {
@@ -400,17 +413,10 @@
       .slice(0, MAX_TAKEAWAY_LENGTH);
   }
 
-  // A cover can set its line across two rows with <br>. Reading textContent
-  // straight off the element would run "it," into "but", so the breaks become
-  // spaces on a copy first and the document itself is left alone.
+  // A cover can set its line across two rows with <br>, the same way it sets a
+  // title, so the line is read the same way and then held to its own length.
   function elementTakeaway(element) {
-    if (!element) return '';
-    const clone = element.cloneNode ? element.cloneNode(true) : null;
-    if (clone && typeof clone.querySelectorAll === 'function') {
-      clone.querySelectorAll('br').forEach(br => { br.replaceWith(' '); });
-      return normalizeTakeaway(clone.textContent);
-    }
-    return normalizeTakeaway(element.textContent);
+    return normalizeTakeaway(brokenLineText(element));
   }
 
   function detectTakeaway(doc) {

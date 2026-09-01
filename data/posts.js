@@ -9,7 +9,7 @@ window.RESEARCH_POSTS = [
     "registeredDate": "2026-09-02",
     "registeredAt": "2026-09-01T15:29:52.609Z",
     "legacyImport": false,
-    "title": "WGBI,Three Tranches Left",
+    "title": "WGBI, Three Tranches Left",
     "subtitle": "",
     "description": "Notes and observations on markets and investing.",
     "tags": [
@@ -31,7 +31,7 @@ window.RESEARCH_POSTS = [
     "registeredDate": "2026-09-02",
     "registeredAt": "2026-09-01T15:28:35.359Z",
     "legacyImport": false,
-    "title": "WGBI,남은 세 번",
+    "title": "WGBI, 남은 세 번",
     "subtitle": "",
     "description": "시장과 투자에 관한 생각을 자유롭게 정리한 투자 노트.",
     "tags": [
@@ -52,7 +52,7 @@ window.RESEARCH_POSTS = [
     "registeredDate": "2026-09-01",
     "registeredAt": "2026-09-01T10:26:53.459Z",
     "legacyImport": false,
-    "title": "An Index Held Up,Every KOSDAQ Top 10 Constituent Fell",
+    "title": "An Index Held Up, Every KOSDAQ Top 10 Constituent Fell",
     "subtitle": "",
     "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
     "tags": [
@@ -74,7 +74,7 @@ window.RESEARCH_POSTS = [
     "registeredDate": "2026-09-01",
     "registeredAt": "2026-09-01T10:07:27.803Z",
     "legacyImport": false,
-    "title": "붙잡힌 시장가라앉은 지수",
+    "title": "붙잡힌 시장 가라앉은 지수",
     "subtitle": "",
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
     "tags": [
@@ -95,7 +95,7 @@ window.RESEARCH_POSTS = [
     "registeredDate": "2026-09-01",
     "registeredAt": "2026-08-31T19:35:33.720Z",
     "legacyImport": false,
-    "title": "September 15:A Check on U.S. Money Markets",
+    "title": "September 15: A Check on U.S. Money Markets",
     "subtitle": "",
     "description": "Notes and observations on markets and investing.",
     "tags": [
@@ -119,7 +119,7 @@ window.RESEARCH_POSTS = [
     "registeredDate": "2026-09-01",
     "registeredAt": "2026-08-31T19:33:43.733Z",
     "legacyImport": false,
-    "title": "9월 15일,미국 자금시장 점검",
+    "title": "9월 15일, 미국 자금시장 점검",
     "subtitle": "",
     "description": "시장과 투자에 관한 생각을 자유롭게 정리한 투자 노트.",
     "tags": [
@@ -181,7 +181,7 @@ window.RESEARCH_POSTS = [
     "registeredDate": "2026-08-29",
     "registeredAt": "2026-08-29T09:30:15.250Z",
     "legacyImport": false,
-    "title": "While One PillarTook a Breather",
+    "title": "While One Pillar Took a Breather",
     "subtitle": "",
     "description": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
     "tags": [
@@ -205,7 +205,7 @@ window.RESEARCH_POSTS = [
     "registeredDate": "2026-08-29",
     "registeredAt": "2026-08-29T09:24:15.928Z",
     "legacyImport": false,
-    "title": "한 축이쉬는 동안",
+    "title": "한 축이 쉬는 동안",
     "subtitle": "",
     "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
     "tags": [
@@ -229,7 +229,7 @@ window.RESEARCH_POSTS = [
     "registeredDate": "2026-08-29",
     "registeredAt": "2026-08-28T20:00:01.843Z",
     "legacyImport": false,
-    "title": "Behind the CoinAre Treasuries",
+    "title": "Behind the Coin Are Treasuries",
     "subtitle": "",
     "description": "Independent research on specific industries, companies, policies, and market structure.",
     "tags": [
@@ -253,7 +253,7 @@ window.RESEARCH_POSTS = [
     "registeredDate": "2026-08-29",
     "registeredAt": "2026-08-28T19:57:57.475Z",
     "legacyImport": false,
-    "title": "코인의 뒷면에는국채가 있다",
+    "title": "코인의 뒷면에는 국채가 있다",
     "subtitle": "",
     "description": "특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.",
     "tags": [
