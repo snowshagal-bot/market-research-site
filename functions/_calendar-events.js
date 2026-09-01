@@ -13,6 +13,8 @@
  * deleted, because a date that was announced and withdrawn is itself news.
  */
 
+import { DISPLAY_TIMEZONE, withDisplayTime } from './_calendar-time.js';
+
 export const EVENTS_TABLE = 'market_calendar_events';
 
 export const EVENT_CATEGORIES = Object.freeze([
@@ -330,3 +332,63 @@ export function publicEvent(row) {
 }
 
 export const __test = { text, runSchema };
+
+/**
+ * The events a Seoul reader should see in one month.
+ *
+ * Which month an event belongs to is decided by its Korean display date, not
+ * by the date its source published. A Federal Reserve decision at 14:00 on
+ * 31 January is 04:00 on 1 February in Seoul, and February is where a reader
+ * looks for it — so the rows are read with a couple of days of slack on either
+ * side, converted, and only then filtered to the month that was asked for.
+ *
+ * Events with no time keep their own date: an expiry or a record date is a day
+ * in its own market rather than an instant, and shifting it would be inventing
+ * a fact rather than translating one.
+ */
+export async function getEventsForDisplayMonth(db, year, month, displayTimeZone = DISPLAY_TIMEZONE) {
+  const y = Number(year);
+  const m = Number(month);
+  if (!Number.isInteger(y) || !Number.isInteger(m) || m < 1 || m > 12) {
+    throw new CalendarEventError('BAD_MONTH', 'year and month must be integers, month 1-12');
+  }
+
+  // Two days covers any zone this calendar carries, in either direction.
+  const BUFFER_DAYS = 2;
+  const firstOfMonth = Date.UTC(y, m - 1, 1);
+  const lastOfMonth = Date.UTC(y, m, 0);
+  const from = new Date(firstOfMonth - BUFFER_DAYS * 86400000).toISOString().slice(0, 10);
+  const to = new Date(lastOfMonth + BUFFER_DAYS * 86400000).toISOString().slice(0, 10);
+
+  const result = await db.prepare(`SELECT event_id, event_date, event_time, timezone, market, category, importance,
+      title_ko, title_en, source_name, source_url, company_stock_code, company_name, status
+    FROM ${EVENTS_TABLE}
+    WHERE event_date >= ? AND event_date <= ?`).bind(from, to).all();
+
+  const prefix = `${y}-${String(m).padStart(2, '0')}-`;
+  return (result?.results || [])
+    .map(row => withDisplayTime(publicEvent(row), displayTimeZone))
+    .filter(event => event.display.date.startsWith(prefix))
+    .sort(byDisplayOrder);
+}
+
+/**
+ * Reading order for a day: everything that has no hour first, because it
+ * belongs to the whole day, then by the hour shown. Ties fall back to
+ * importance, then to fixed fields so the order never wobbles between calls.
+ */
+const IMPORTANCE_RANK = { high: 0, normal: 1, low: 2 };
+
+export function byDisplayOrder(a, b) {
+  if (a.display.date !== b.display.date) return a.display.date < b.display.date ? -1 : 1;
+
+  const aAllDay = a.display.time === null;
+  const bAllDay = b.display.time === null;
+  if (aAllDay !== bAllDay) return aAllDay ? -1 : 1;
+  if (!aAllDay && a.display.time !== b.display.time) return a.display.time < b.display.time ? -1 : 1;
+
+  const rank = (IMPORTANCE_RANK[a.importance] ?? 1) - (IMPORTANCE_RANK[b.importance] ?? 1);
+  if (rank !== 0) return rank;
+  if (a.category !== b.category) return a.category < b.category ? -1 : 1;
+  return a.id < b.id ? -1 : (a.id > b.id ? 1 : 0);
+}
