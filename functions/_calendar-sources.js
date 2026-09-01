@@ -179,7 +179,9 @@ export function parseBlsSchedule(html, { series } = {}) {
       titleKo: spec.titleKo,
       titleEn: spec.titleEn,
       sourceType: 'official',
-      sourceName: 'bls',
+      // One name per series: the sweep that cancels withdrawn releases is
+      // scoped by source name, and CPI must never reach the employment report.
+      sourceName: `bls-${spec.slug}`,
       sourceUrl: spec.url,
       sourceEventId: `${spec.slug}:${date}`,
       meta: { referenceMonth: cells[0] || '' }
@@ -287,7 +289,8 @@ export function parseBokSchedule(html, { year } = {}) {
       titleKo: '한국은행 금통위 통화정책방향 결정',
       titleEn: 'Bank of Korea Monetary Policy Decision',
       sourceType: 'official',
-      sourceName: 'bank-of-korea',
+      // One name per year, because each year is its own page and its own sweep.
+      sourceName: `bank-of-korea-${requestedYear}`,
       sourceUrl: bokUrl(requestedYear),
       sourceEventId: `bok:${date}`,
       meta: {}

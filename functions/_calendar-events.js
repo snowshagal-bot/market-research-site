@@ -98,6 +98,7 @@ async function runSchema(db) {
       last_attempt_at TEXT NOT NULL DEFAULT '',
       last_error TEXT NOT NULL DEFAULT '',
       event_count INTEGER NOT NULL DEFAULT 0,
+      last_status TEXT NOT NULL DEFAULT 'ok',
       updated_at TEXT NOT NULL
     )`)
   ]);
@@ -235,25 +236,38 @@ export async function cancelMissingEvents(db, { sourceName, fromDate, toDate, se
   return { cancelled: missing.length, eventIds: missing };
 }
 
-/** Records that a source answered, or why it did not. */
-export async function recordSourceRun(db, { sourceName, sourceUrl = '', ok, error = '', eventCount = 0 }, now = new Date()) {
+/**
+ * Records that a source answered, or why it did not.
+ *
+ * `pending` is its own outcome, distinct from both. A year the Bank of Korea
+ * has not announced yet returns nothing, and that is the truth rather than a
+ * failure; the same silence from a year that should be published is a failure
+ * and has to look like one.
+ */
+export const SOURCE_RUN_STATUSES = Object.freeze(['ok', 'pending', 'error']);
+
+export async function recordSourceRun(db, { sourceName, sourceUrl = '', ok, status, error = '', eventCount = 0 }, now = new Date()) {
+  const runStatus = SOURCE_RUN_STATUSES.includes(status) ? status : (ok ? 'ok' : 'error');
+  const succeeded = runStatus !== 'error';
   const nowStr = now.toISOString();
   await db.prepare(`INSERT INTO market_calendar_sources (
-      source_name, source_url, last_success_at, last_attempt_at, last_error, event_count, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      source_name, source_url, last_success_at, last_attempt_at, last_error, event_count, last_status, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(source_name) DO UPDATE SET
       source_url = CASE WHEN excluded.source_url != '' THEN excluded.source_url ELSE market_calendar_sources.source_url END,
       last_success_at = CASE WHEN excluded.last_success_at != '' THEN excluded.last_success_at ELSE market_calendar_sources.last_success_at END,
       last_attempt_at = excluded.last_attempt_at,
       last_error = excluded.last_error,
       event_count = CASE WHEN excluded.last_error = '' THEN excluded.event_count ELSE market_calendar_sources.event_count END,
+      last_status = excluded.last_status,
       updated_at = excluded.updated_at`)
-    .bind(sourceName, String(sourceUrl || ''), ok ? nowStr : '', nowStr, ok ? '' : String(error || 'unknown').slice(0, 300),
-      Number(eventCount) || 0, nowStr).run();
+    .bind(sourceName, String(sourceUrl || ''), succeeded ? nowStr : '', nowStr,
+      succeeded ? '' : String(error || 'unknown').slice(0, 300),
+      Number(eventCount) || 0, runStatus, nowStr).run();
 }
 
 export async function getSourceRuns(db) {
-  const result = await db.prepare(`SELECT source_name, source_url, last_success_at, last_attempt_at, last_error, event_count
+  const result = await db.prepare(`SELECT source_name, source_url, last_success_at, last_attempt_at, last_error, event_count, last_status
     FROM market_calendar_sources ORDER BY source_name ASC`).all();
   return (result?.results || []).map(row => ({
     sourceName: row.source_name,
@@ -261,7 +275,8 @@ export async function getSourceRuns(db) {
     lastSuccessAt: row.last_success_at || null,
     lastAttemptAt: row.last_attempt_at || null,
     lastError: row.last_error || '',
-    eventCount: Number(row.event_count || 0)
+    eventCount: Number(row.event_count || 0),
+    status: row.last_status || 'ok'
   }));
 }
 

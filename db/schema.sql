@@ -204,5 +204,8 @@ CREATE TABLE IF NOT EXISTS market_calendar_sources (
   last_attempt_at TEXT NOT NULL DEFAULT '',
   last_error TEXT NOT NULL DEFAULT '',
   event_count INTEGER NOT NULL DEFAULT 0,
+  -- ok | pending | error. 'pending' is a year the source has not published yet,
+  -- which is an answer rather than a failure.
+  last_status TEXT NOT NULL DEFAULT 'ok',
   updated_at TEXT NOT NULL
 );
