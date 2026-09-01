@@ -887,3 +887,91 @@ test('Breadth missing ratio/count exclusion: partial field session is excluded w
   assert.equal(breadth.observations, 4);
   assert.equal(breadth.complete, false);
 });
+
+test('Machine publisher early publish guard enforces session timing boundaries while permitting backfill and admin sessions', async () => {
+  const db = new MockDb();
+  const env = environment(db);
+
+  const payloadNormal = clone(fixture);
+  payloadNormal.meta.market_date = '2026-09-01';
+  alignGroupDate(payloadNormal, '2026-09-01');
+
+  // 1. Normal trading day: 16:04 KST (07:04 UTC) -> REJECT
+  const normalPreTime = new Date('2026-09-01T07:04:00Z');
+  const resPre = await onRequestPost({
+    request: publishRequest(payloadNormal, { 'x-market-publish-key': 'market-secret' }),
+    env,
+    now: normalPreTime
+  });
+  assert.equal(resPre.status, 422);
+  const dataPre = await resPre.json();
+  assert.equal(dataPre.error, 'MARKET_PUBLISH_TOO_EARLY');
+
+  // 2. Normal trading day: 16:05 KST (07:05 UTC) -> ALLOW
+  const normalPostTime = new Date('2026-09-01T07:05:00Z');
+  const resPost = await onRequestPost({
+    request: publishRequest(payloadNormal, { 'x-market-publish-key': 'market-secret' }),
+    env,
+    now: normalPostTime
+  });
+  assert.equal(resPost.status, 201);
+  const dataPost = await resPost.json();
+  assert.equal(dataPost.ok, true);
+
+  // 3. CSAT special session day (2026-11-19, 16:30 close, 17:05 publish eligible):
+  const payloadCsat = clone(fixture);
+  payloadCsat.meta.market_date = '2026-11-19';
+  alignGroupDate(payloadCsat, '2026-11-19');
+
+  // 3a. CSAT day: 17:04 KST (08:04 UTC) -> REJECT
+  const csatPreTime = new Date('2026-11-19T08:04:00Z');
+  const resCsatPre = await onRequestPost({
+    request: publishRequest(payloadCsat, { 'x-market-publish-key': 'market-secret' }),
+    env,
+    now: csatPreTime
+  });
+  assert.equal(resCsatPre.status, 422);
+  const dataCsatPre = await resCsatPre.json();
+  assert.equal(dataCsatPre.error, 'MARKET_PUBLISH_TOO_EARLY');
+
+  // 3b. CSAT day: 17:05 KST (08:05 UTC) -> ALLOW
+  const csatPostTime = new Date('2026-11-19T08:05:00Z');
+  const resCsatPost = await onRequestPost({
+    request: publishRequest(payloadCsat, { 'x-market-publish-key': 'market-secret' }),
+    env,
+    now: csatPostTime
+  });
+  assert.equal(resCsatPost.status, 201);
+  const dataCsatPost = await resCsatPost.json();
+  assert.equal(dataCsatPost.ok, true);
+
+  // 4. Past trading date historical backfill by machine publisher:
+  // On 2026-09-01 at 10:00 KST, publishing 2026-08-31 -> ALLOW
+  const payloadBackfill = clone(fixture);
+  payloadBackfill.meta.market_date = '2026-08-31';
+  alignGroupDate(payloadBackfill, '2026-08-31');
+  const morningTime = new Date('2026-09-01T01:00:00Z'); // 10:00 KST
+  const resBackfill = await onRequestPost({
+    request: publishRequest(payloadBackfill, { 'x-market-publish-key': 'market-secret' }),
+    env,
+    now: morningTime
+  });
+  assert.equal(resBackfill.status, 201);
+  const dataBackfill = await resBackfill.json();
+  assert.equal(dataBackfill.ok, true);
+
+  // 5. Human admin session publishing current date before 16:05 (e.g. 10:00 KST):
+  // Admin manual publish bypasses early machine guard -> ALLOW
+  const payloadAdmin = clone(fixture);
+  payloadAdmin.meta.market_date = '2026-09-02';
+  alignGroupDate(payloadAdmin, '2026-09-02');
+  const adminMorningTime = new Date('2026-09-02T01:00:00Z'); // 10:00 KST
+  const resAdmin = await onRequestPost({
+    request: publishRequest(payloadAdmin, sharedSession.headers, 'admin.snowshagal.com'),
+    env,
+    now: adminMorningTime
+  });
+  assert.equal(resAdmin.status, 201);
+  const dataAdmin = await resAdmin.json();
+  assert.equal(dataAdmin.ok, true);
+});
