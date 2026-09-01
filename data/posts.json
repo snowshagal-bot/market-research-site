@@ -1,5 +1,27 @@
 [
   {
+    "id": "2026-09-01-daily-1uv21dp",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-01",
+    "reportDate": "2026-09-01",
+    "registeredDate": "2026-09-01",
+    "registeredAt": "2026-09-01T10:26:53.459Z",
+    "legacyImport": false,
+    "title": "An Index Held Up,Every KOSDAQ Top 10 Constituent Fell",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "flows"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-01_KOSPI_Daily_Report_EN.html",
+    "translationGroup": "2026-09-01-daily-1oq37xo",
+    "coverImage": "covers/2026-09-01-daily-1uv21dp.webp",
+    "shareCardImage": "covers/share/2026-09-01-daily-1uv21dp.jpg"
+  },
+  {
     "id": "2026-09-01-daily-1oq37xo",
     "type": "daily",
     "typeLabel": "주식 리포트",
