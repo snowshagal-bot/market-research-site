@@ -230,6 +230,16 @@ Preview and Production must retain different D1 database IDs. Preview CRUD fixtu
 
 Public `GET /api/announcements` returns only `publish_state = published`, `audience = all` rows whose UTC exposure window contains the current server time. Admin create/update/delete require an authenticated administrator session, exact Preview or Production admin Origin, and the session CSRF token. No new Secret or environment variable is required.
 
+### Automated OpenDART Daily Sync (`DISCLOSURE_SYNC_KEY`)
+
+- **Workflow**: `.github/workflows/disclosure-daily-sync.yml`
+- **Schedule**: Weekdays at 16:05 KST (`5 7 * * 1-5` UTC)
+- **Engine**: `scripts/sync-disclosures.mjs`
+- **Secret**: `DISCLOSURE_SYNC_KEY` (must be identically configured in GitHub Actions Repository Secrets and Cloudflare Pages Production secrets)
+- **Authentication**: `POST https://snowshagal.com/api/disclosures/sync` with header `x-disclosure-sync-key: <key>`
+- **Idempotency**: Existing `upsertFiling()` ensures safe repeated runs (e.g. manual admin sync at 15:55 followed by automated sync at 16:05).
+- **Failure Alerting**: Failed runs open or update the GitHub Issue `[Alert] OpenDART daily sync failure` (`<!-- snowshagal-disclosure-sync-alert -->` marker) and auto-close upon subsequent successful recovery.
+
 ## Report publishing dependencies
 
 For `/admin/` publishing to work, production needs:
