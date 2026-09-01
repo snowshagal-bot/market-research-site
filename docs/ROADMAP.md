@@ -40,6 +40,10 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
    - Compare Production `market_date` with the expected latest KRX session after the close grace period instead of treating HTTP 200 as sufficient.
    - Run a read-only weekday freshness alert that opens one operator Issue on stale/network/server/validation failures and closes it after recovery.
    - Keep Publisher process exit propagation in the separate private `snowshagal-market-publisher` repository; do not mix Windows executable changes into this Pages repository.
+7. **OpenDART automated daily sync (`.github/workflows/disclosure-daily-sync.yml`)**:
+   - Triggered weekdays at 16:05 KST (`5 7 * * 1-5` UTC) using `DISCLOSURE_SYNC_KEY` machine authentication.
+   - Idempotent execution preserves manual Admin sync at 15:55 without duplicating D1 records.
+   - Dedicated GitHub Issue alert `[Alert] OpenDART daily sync failure` opens on failure and auto-closes on recovery.
 
 
 ## Near-term Priorities

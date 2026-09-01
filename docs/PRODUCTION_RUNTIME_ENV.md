@@ -18,8 +18,7 @@
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare 계정 식별자 (Browser Rendering & GraphQL Analytics) | **Required** | `/api/generate-cover`, `/api/analytics`, `/api/admin/runtime-status` | `GET /api/admin/runtime-status` (`browserRenderingConfigured=true`, `analyticsConfigured=true`) | Standalone |
 | `CLOUDFLARE_BROWSER_RENDERING_TOKEN` | Cloudflare Workers Browser Rendering REST API 인증 토큰 | **Required** (Browser cover capture) | `/api/generate-cover`, `/api/admin/runtime-status` | `GET /api/admin/runtime-status` (`browserRenderingConfigured=true`), HTML 커버 자동 캡처 | Standalone |
 | `CLOUDFLARE_ANALYTICS_API_TOKEN` | Cloudflare GraphQL Analytics API 조회 토큰 | **Required** (Analytics) | `/api/analytics`, `/api/admin/runtime-status` | `GET /api/analytics?range=1` (HTTP 200), `GET /api/admin/runtime-status` (`analyticsConfigured=true`) | Standalone |
-| `CLOUDFLARE_WEB_ANALYTICS_SITE_TAG` | Cloudflare Web Analytics 사이트 식별 태그 | **Required** (Analytics) | `/api/analytics`, `/api/admin/runtime-status` | `GET /api/analytics?range=1` (HTTP 200), `GET /api/admin/runtime-status` (`analyticsConfigured=true`) | Standalone |
-| `DISCLOSURE_SYNC_KEY` | 외부 스케줄러(cron) 머신 연동용 공시 동기화 키 | **Optional** (미사용) | `/api/disclosures/sync`, `/api/admin/runtime-status` | `GET /api/admin/runtime-status` (`disclosureSyncKeyConfigured=false`는 정상) | Standalone (외부 스케줄러 도입 시 생성) |
+| `DISCLOSURE_SYNC_KEY` | GitHub Actions 스케줄러(`.github/workflows/disclosure-daily-sync.yml`) 머신 연동용 공시 동기화 키 | **Required (for Automated Sync)** | `/api/disclosures/sync`, `/api/admin/runtime-status`, `scripts/sync-disclosures.mjs` | `GET /api/admin/runtime-status` (`disclosureSyncKeyConfigured=true`) | **Coordinated** (Cloudflare Pages Secret과 GitHub Actions Repository Secret `DISCLOSURE_SYNC_KEY`를 동일한 값으로 동시 설정해야 함) |
 
 ---
 
