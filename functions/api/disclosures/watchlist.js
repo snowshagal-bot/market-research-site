@@ -8,6 +8,7 @@ import {
   humanAdminMutationPolicy,
   json,
   removeWatchlistCompany,
+  setWatchlistFlags,
   toggleWatchlistActive
 } from './_shared.js';
 
@@ -60,8 +61,13 @@ export async function onRequestPost({ request, env }) {
         stockCode: input.stockCode,
         corpCode: input.corpCode,
         corpName: input.corpName,
+        corpNameEn: input.corpNameEn,
         corpCls: input.corpCls,
-        sortOrder: input.sortOrder
+        sortOrder: input.sortOrder,
+        // Both default to on, which is what the seeded companies are. A
+        // calendar-only company is added by sending disclosureEnabled: false.
+        disclosureEnabled: input.disclosureEnabled === undefined ? true : Boolean(input.disclosureEnabled),
+        calendarEnabled: input.calendarEnabled === undefined ? true : Boolean(input.calendarEnabled)
       });
       const watchlist = await getWatchlist(db);
       return json({ ok: true, action: 'add', result, watchlist });
@@ -79,7 +85,16 @@ export async function onRequestPost({ request, env }) {
       return json({ ok: true, action: 'toggle', result, watchlist });
     }
 
-    return json({ ok: false, error: 'INVALID_ACTION', message: '지원하지 않는 action입니다. (add, delete, toggle)' }, 400);
+    if (action === 'flags') {
+      const result = await setWatchlistFlags(db, input.stockCode, {
+        disclosureEnabled: input.disclosureEnabled,
+        calendarEnabled: input.calendarEnabled
+      });
+      const watchlist = await getWatchlist(db);
+      return json({ ok: true, action: 'flags', result, watchlist });
+    }
+
+    return json({ ok: false, error: 'INVALID_ACTION', message: '지원하지 않는 action입니다. (add, delete, toggle, flags)' }, 400);
   } catch (error) {
     if (error instanceof DisclosureError) return json({ ok: false, error: error.code, message: error.message }, error.status);
     console.error('watchlist operation failed', error);

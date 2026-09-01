@@ -471,3 +471,171 @@ html[data-theme="dark"] {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Market events on the monthly grid.
+
+   The grid already carries closure and special-session tags. Events sit under
+   them in the same cell, and the density is held down deliberately: at most
+   two lines and a count, because a day cell that turns into a dashboard stops
+   being readable at a glance. The full list lives in the day detail card.
+
+   No new colour family. Events borrow the existing KRX and NYSE hues at a
+   lighter weight, so the palette stays the ivory and navy the rest of the site
+   uses and a busy month does not look like a legend.
+--------------------------------------------------------------------------- */
+
+.cal-event-chip {
+  font-size: 9.5px;
+  font-weight: 650;
+  padding: 1px 5px;
+  border-radius: 4px;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-left: 2px solid transparent;
+  background: color-mix(in srgb, var(--panel-2) 70%, transparent);
+  color: var(--text-2);
+}
+
+.cal-event-chip.kr {
+  border-left-color: var(--cal-krx-color);
+}
+
+.cal-event-chip.us {
+  border-left-color: var(--cal-nyse-color);
+}
+
+.cal-event-more {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--muted);
+  padding-left: 2px;
+  line-height: 1.3;
+}
+
+/* A failure to load events says so once, quietly, and leaves the exchange
+   calendar above it exactly as it was. */
+.calendar-events-notice {
+  margin: 10px 0 0;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--panel-2) 45%, transparent);
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------- the day detail card */
+
+.cal-event-section {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.cal-event-heading {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.cal-event-row.is-cancelled .cal-event-body strong {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.cal-event-body {
+  min-width: 0;
+}
+
+.cal-event-body strong {
+  display: inline;
+  font-size: 13px;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.cal-event-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin: 3px 0 0;
+  font-size: 11.5px;
+  color: var(--text-2);
+}
+
+.cal-event-time {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-event-category {
+  color: var(--muted);
+}
+
+/* The source's own clock, shown beside the Korean one so the conversion is
+   visible rather than something the reader has to take on trust. */
+.cal-event-source-time {
+  color: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-event-status {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  vertical-align: middle;
+}
+
+.cal-event-status.cancelled {
+  background: var(--cal-joint-bg);
+  color: var(--cal-joint-color);
+}
+
+.cal-event-status.changed {
+  background: var(--cal-special-bg);
+  color: var(--cal-special-color);
+}
+
+.cal-event-empty {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------------ narrow screens */
+
+@media (max-width: 480px) {
+  .cal-event-chip {
+    font-size: 8.5px;
+    padding: 1px 3px;
+  }
+  .cal-event-more {
+    font-size: 8.5px;
+  }
+}
+
+@media (max-width: 430px) {
+  .cal-event-chip {
+    font-size: 8px;
+    padding: 0 3px;
+  }
+  .cal-event-more {
+    font-size: 8px;
+  }
+  .cal-event-meta {
+    gap: 3px 8px;
+    font-size: 11px;
+  }
+}

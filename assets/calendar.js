@@ -28,6 +28,22 @@
     errorDesc: '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
     retryBtn: '다시 시도',
     deferredNotice: '해당 연도 일정은 공식 확정 후 순차 업데이트됩니다.',
+    eventsHeading: '시장 이벤트',
+    eventsUnavailable: '시장 이벤트 일정을 일시적으로 불러오지 못했습니다.',
+    eventsNone: '등록된 시장 이벤트가 없습니다.',
+    eventMore: (n) => `+${n}건 더`,
+    eventAllDay: '시간 미정',
+    eventLocalTime: (value) => `현지 ${value}`,
+    eventCancelled: '취소됨',
+    eventChanged: '일정 변경',
+    eventCategories: {
+      monetary_policy: '통화정책',
+      inflation: '물가',
+      employment: '고용',
+      earnings: '실적',
+      corporate_event: '기업 일정',
+      derivatives_expiry: '파생 만기'
+    },
     krxPendingBanner: 'KRX(한국) 2027년 거래 일정은 한국거래소 공식 발표 후 순차 반영 예정입니다. (미국 NYSE 2027 일정 정상 제공)',
     krxPendingOnlyBanner: 'KRX(한국) 2027년 연간 거래 일정은 한국거래소의 공식 공시 발표 후 업데이트됩니다.',
     krxPendingStatus: 'KRX 2027 공식 일정 확정 대기'
@@ -60,6 +76,22 @@
     errorDesc: 'A temporary error occurred. Please try again in a moment.',
     retryBtn: 'Try again',
     deferredNotice: 'Schedules for this year will be updated once officially confirmed.',
+    eventsHeading: 'Market Events',
+    eventsUnavailable: 'Market events are temporarily unavailable.',
+    eventsNone: 'No market events scheduled.',
+    eventMore: (n) => `+${n} more`,
+    eventAllDay: 'Time TBC',
+    eventLocalTime: (value) => value,
+    eventCancelled: 'Cancelled',
+    eventChanged: 'Rescheduled',
+    eventCategories: {
+      monetary_policy: 'Monetary Policy',
+      inflation: 'Inflation',
+      employment: 'Employment',
+      earnings: 'Earnings',
+      corporate_event: 'Corporate',
+      derivatives_expiry: 'Derivatives Expiry'
+    },
     krxPendingBanner: 'KRX 2027 official schedule is pending publication by KRX. (NYSE 2027 schedule is officially confirmed & provided)',
     krxPendingOnlyBanner: 'KRX 2027 full annual schedule will be updated once officially released by Korea Exchange.',
     krxPendingStatus: 'KRX 2027 schedule pending official release'
@@ -196,6 +228,89 @@
     }
   }
 
+  // The market filter reads the exchanges; events carry a country. One is a
+  // trading venue and the other is where the news comes from, and the filter
+  // is meant to mean "show me Korea" either way.
+  const FILTER_MARKETS = { ALL: null, KRX: 'KR', NYSE: 'US' };
+
+  function eventsForDate(dateStr) {
+    const wanted = FILTER_MARKETS[state.filter];
+    return (state.calendarData?.events || [])
+      // The day a reader sees, not the day the source published.
+      .filter(event => event.display?.date === dateStr)
+      .filter(event => !wanted || event.market === wanted);
+  }
+
+  // Readers get the short name a market actually goes by. The IANA zone stays
+  // in storage and in the API and is what the conversion is computed from —
+  // this is a label, not a substitute offset, and ET covers both EST and EDT
+  // for exactly that reason.
+  const ZONE_LABELS = {
+    'Asia/Seoul': 'KST',
+    'America/New_York': 'ET',
+    'America/Chicago': 'CT',
+    'Europe/London': 'UK'
+  };
+
+  function zoneLabel(timeZone) {
+    if (ZONE_LABELS[timeZone]) return ZONE_LABELS[timeZone];
+    // An unmapped zone keeps its city rather than showing a raw IANA path.
+    const city = String(timeZone || '').split('/').pop() || '';
+    return city.replace(/_/g, ' ');
+  }
+
+  function eventTimeLabel(event) {
+    const shown = event.display?.time;
+    if (!shown) return copy.eventAllDay;
+    return `${shown} ${zoneLabel(event.display?.timezone)}`;
+  }
+
+  // The source's own clock, named the way its market names it.
+  function eventSourceTimeLabel(event) {
+    const time = event.source?.time;
+    if (!time) return '';
+    if (event.source?.timezone === event.display?.timezone) return '';
+    return copy.eventLocalTime(`${time} ${zoneLabel(event.source.timezone)}`);
+  }
+
+  function eventTitle(event) {
+    // An event is named in the reader's language when it has a name there;
+    // a Korean filing with no registered English name keeps its own words
+    // rather than being machine-translated.
+    const preferred = ko ? event.title?.ko : event.title?.en;
+    return preferred || event.title?.ko || event.title?.en || '';
+  }
+
+  function eventCompany(event) {
+    if (!event.company) return '';
+    // English readers get the company's registered English name when there
+    // is one, and its Korean name as it stands when there is not. A name is
+    // never machine-translated for the sake of filling the gap.
+    if (!ko && event.company.nameEn) return event.company.nameEn;
+    return event.company.name || event.company.stockCode || '';
+  }
+
+  // Two chips at most, so a busy day stays a day rather than a dashboard.
+  const MAX_CELL_EVENTS = 2;
+
+  function cellEventsHtml(dateStr) {
+    const events = eventsForDate(dateStr).filter(event => event.status !== 'cancelled');
+    if (!events.length) return '';
+    const shown = events.slice(0, MAX_CELL_EVENTS).map(event => {
+      const company = eventCompany(event);
+      const label = company || eventTitle(event);
+      return `<span class="cal-event-chip ${event.market === 'KR' ? 'kr' : 'us'}" title="${escapeHtml(eventTitle(event))}">${escapeHtml(label)}</span>`;
+    }).join('');
+    const rest = events.length - MAX_CELL_EVENTS;
+    return shown + (rest > 0 ? `<span class="cal-event-more">${escapeHtml(copy.eventMore(rest))}</span>` : '');
+  }
+
+  function eventsUnavailableHtml() {
+    if (state.calendarData?.eventsStatus !== 'unavailable') return '';
+    // Non-destructive: the exchange calendar above it is unaffected.
+    return `<p class="calendar-events-notice" role="status">${escapeHtml(copy.eventsUnavailable)}</p>`;
+  }
+
   function renderCalendarGrid(data) {
     const gridMount = document.getElementById('calendar-grid-mount');
     if (!gridMount) return;
@@ -278,6 +393,7 @@
           </div>
           <div class="day-events">
             ${tagsHtml}
+            ${cellEventsHtml(day.date)}
           </div>
         </div>
       `;
@@ -300,6 +416,7 @@
           ${cellsHtml}
         </div>
       </div>
+      ${eventsUnavailableHtml()}
       <div id="calendar-day-detail-mount"></div>
     `;
 
@@ -369,6 +486,40 @@
       }
     }
 
+    const dayEvents = eventsForDate(dateStr);
+    const eventsHtml = dayEvents.map(event => {
+      const company = eventCompany(event);
+      const marketLabel = event.market === 'KR' ? 'KR' : 'US';
+      const category = copy.eventCategories[event.category] || event.category;
+      const statusTag = event.status === 'cancelled'
+        ? `<span class="cal-event-status cancelled">${escapeHtml(copy.eventCancelled)}</span>`
+        : (event.status === 'changed' ? `<span class="cal-event-status changed">${escapeHtml(copy.eventChanged)}</span>` : '');
+      // The source time is shown beside the Korean one whenever the two
+      // differ, so a reader can see where the hour came from.
+      const localTime = eventSourceTimeLabel(event);
+      const sourceNote = localTime
+        ? `<span class="cal-event-source-time">${escapeHtml(localTime)}</span>`
+        : '';
+      return `
+        <div class="detail-item-row cal-event-row ${event.status === 'cancelled' ? 'is-cancelled' : ''}">
+          <span class="detail-market-badge ${event.market === 'KR' ? 'krx' : 'nyse'}">${marketLabel}</span>
+          <div class="cal-event-body">
+            <strong>${escapeHtml(company ? `${company} · ${eventTitle(event)}` : eventTitle(event))}</strong>
+            ${statusTag}
+            <p class="cal-event-meta">
+              <span class="cal-event-time">${escapeHtml(eventTimeLabel(event))}</span>
+              <span class="cal-event-category">${escapeHtml(category)}</span>
+              ${sourceNote}
+            </p>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const eventsSection = state.calendarData?.eventsStatus === 'unavailable'
+      ? `<p class="calendar-events-notice" role="status">${escapeHtml(copy.eventsUnavailable)}</p>`
+      : (eventsHtml || `<p class="cal-event-empty">${escapeHtml(copy.eventsNone)}</p>`);
+
     mount.innerHTML = `
       <div class="calendar-detail-card">
         <div class="detail-card-head">
@@ -377,6 +528,10 @@
         </div>
         <div class="detail-items-list">
           ${itemsHtml}
+        </div>
+        <div class="cal-event-section">
+          <h4 class="cal-event-heading">${escapeHtml(copy.eventsHeading)}</h4>
+          ${eventsSection}
         </div>
       </div>
     `;

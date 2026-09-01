@@ -90,16 +90,24 @@ CREATE INDEX IF NOT EXISTS idx_disclosure_published
 CREATE INDEX IF NOT EXISTS idx_disclosure_superseded
   ON disclosure_filings (superseded_by, publish_status);
 
+-- A company is followed for two independent reasons: disclosure priority and
+-- calendar tracking. Existing rows were migrated with both enabled.
 CREATE TABLE IF NOT EXISTS disclosure_watchlist (
   stock_code TEXT PRIMARY KEY,
   corp_code TEXT NOT NULL DEFAULT '',
   corp_name TEXT NOT NULL,
+  corp_name_en TEXT NOT NULL DEFAULT '',
   corp_cls TEXT NOT NULL DEFAULT 'Y',
   active INTEGER NOT NULL DEFAULT 1,
+  disclosure_enabled INTEGER NOT NULL DEFAULT 1,
+  calendar_enabled INTEGER NOT NULL DEFAULT 0,
   sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS idx_disclosure_watchlist_calendar
+  ON disclosure_watchlist (calendar_enabled, active, sort_order);
 
 CREATE INDEX IF NOT EXISTS idx_disclosure_watchlist_active
   ON disclosure_watchlist (active, sort_order, corp_name);
@@ -148,3 +156,59 @@ CREATE INDEX IF NOT EXISTS idx_admin_announcements_public
 
 CREATE INDEX IF NOT EXISTS idx_admin_announcements_updated
   ON admin_announcements (updated_at DESC);
+
+-- Market events shown on /calendar/. Exchange closures stay in
+-- functions/_trading-calendar.js; what lives here arrives from outside and
+-- therefore needs identity, a status, and a last-verified time.
+-- event_time is nullable: several official schedules publish a date and no
+-- clock time, and a guessed time would read as a fact.
+CREATE TABLE IF NOT EXISTS market_calendar_events (
+  event_id TEXT PRIMARY KEY,
+  event_date TEXT NOT NULL,
+  event_time TEXT,
+  timezone TEXT NOT NULL,
+  market TEXT NOT NULL,
+  category TEXT NOT NULL,
+  importance TEXT NOT NULL DEFAULT 'normal',
+  title_ko TEXT NOT NULL DEFAULT '',
+  title_en TEXT NOT NULL DEFAULT '',
+  source_type TEXT NOT NULL,
+  source_name TEXT NOT NULL,
+  source_url TEXT NOT NULL DEFAULT '',
+  source_event_id TEXT NOT NULL,
+  company_stock_code TEXT NOT NULL DEFAULT '',
+  company_name TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'scheduled',
+  -- Source-specific detail kept beside the event: the first day of a
+  -- two-day FOMC meeting, for instance. Never the event date itself.
+  meta_json TEXT NOT NULL DEFAULT '{}',
+  first_seen_at TEXT NOT NULL,
+  last_verified_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_calendar_events_month
+  ON market_calendar_events (event_date, market, category);
+
+CREATE INDEX IF NOT EXISTS idx_calendar_events_source
+  ON market_calendar_events (source_type, source_name, event_date);
+
+CREATE INDEX IF NOT EXISTS idx_calendar_events_company
+  ON market_calendar_events (company_stock_code, event_date);
+
+-- When each official source last answered, so a stale feed is visible.
+CREATE TABLE IF NOT EXISTS market_calendar_sources (
+  source_name TEXT PRIMARY KEY,
+  source_url TEXT NOT NULL DEFAULT '',
+  last_success_at TEXT NOT NULL DEFAULT '',
+  last_attempt_at TEXT NOT NULL DEFAULT '',
+  last_error TEXT NOT NULL DEFAULT '',
+  event_count INTEGER NOT NULL DEFAULT 0,
+  -- ok | pending | error. 'pending' is a year the source has not published yet,
+  -- which is an answer rather than a failure.
+  last_status TEXT NOT NULL DEFAULT 'ok',
+  -- What a successful run could not confirm, such as a release time the source
+  -- did not publish. Not an error: the events still landed.
+  last_note TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL
+);
