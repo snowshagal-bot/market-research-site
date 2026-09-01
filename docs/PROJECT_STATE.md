@@ -17,12 +17,24 @@ Updated: 2026-08-30
 - Account & Auth storage: Cloudflare D1 database `market-research-auth` (`AUTH_DB`, Phase 1B-A prepared)
 - Framework: Vanilla JS / HTML / CSS / Cloudflare Pages Functions
 
-## Admin origin isolation & Account Foundation (Phase 1A Enforced, Phase 1B-A in progress)
+## Admin origin isolation & Account Foundation (Phase 1 complete)
 
 The administrator surface is enforced on `https://admin.snowshagal.com`. Apex `snowshagal.com/admin/*`
 routes return HTTP 307 redirects to `admin.snowshagal.com/admin/*`, and human-admin mutation requests on apex are blocked (403 `ADMIN_HOST_BLOCKED`).
 
-Phase 1B-A introduces the account foundation (`users`, `password_credentials`, `sessions`, `auth_rate_limits`, `audit_events`), PBKDF2-HMAC-SHA256 authentication, `__Host-snowshagal-admin-session` HttpOnly cookie sessions, CSRF token verification, rate limiting, and `/admin/login/` UI. Human admin operations no longer require or expose `ADMIN_KEY` in the browser. Unbound `AUTH_DB` safely fails closed with 503 `AUTH_NOT_CONFIGURED`.
+Phase 1B-A introduced the account foundation (`users`, `password_credentials`, `sessions`, `auth_rate_limits`, `audit_events`), PBKDF2-HMAC-SHA256 authentication, `__Host-snowshagal-admin-session` HttpOnly cookie sessions, CSRF token verification, rate limiting, and `/admin/login/` UI. Human admin operations no longer require or expose `ADMIN_KEY` in the browser. Unbound `AUTH_DB` safely fails closed with 503 `AUTH_NOT_CONFIGURED`.
+
+## Admin announcements (Phase 2 Draft)
+
+Admin page: `/admin/market/announcements/`
+Admin API: `/api/admin/announcements`
+Public API: `/api/announcements`
+
+Operational notices are stored in the dedicated `admin_announcements` table on `COMMENTS_DB`; they are not OpenDART filings and do not alter `disclosure_filings`, its collection pipeline, or the existing MARKET disclosure DTO. The admin API reuses the Phase 1 session, admin role, exact-Origin, and CSRF guards for create/update/delete. Actor IDs and timestamps live on the row, while create/update/delete actions also append to the existing `AUTH_DB.audit_events` table.
+
+The canonical stored state is `publish_state = draft|published` plus UTC `exposure_start_at` and nullable `exposure_end_at`. `Scheduled`, `Published`, and `Expired` are derived at read time rather than persisted. Admin datetime inputs are explicitly KST wall time and are converted to UTC before submission. Until a member/group system exists, group-targeted rows remain admin-visible but the public API exposes only `audience = all` rows that are inside their active exposure window.
+
+The Korean MARKET page adds a compact operational-notice section before the existing numbered OpenDART disclosure section. The Phase 1 Section 11 markup, `/api/disclosures/feed` request, detail expansion, DART links, and AI explanation contract remain intact.
 
 ## Public information architecture
 
@@ -343,6 +355,9 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `scripts/check-market-freshness.mjs` / `.github/workflows/market-freshness-alert.yml` — read-only scheduled MARKET health alert
 - `contracts/market_close/` — Market Close JSON Schema, example payload and data contract
 - `admin/market/index.html` / `assets/admin-market.js` — Market Close upload UI
+- `admin/market/announcements/index.html` / `assets/admin-announcements.js` / `assets/admin-announcements.css` — session-authenticated operational notice CRUD UI
+- `functions/api/admin/announcements.js` / `functions/api/announcements.js` / `functions/_announcements.js` — admin CRUD, public active-window projection, validation and status calculation
+- `migrations/comments/0001_admin_announcements.sql` — idempotent `COMMENTS_DB` announcement migration
 - `data/market-summary.js` — fallback data and editorial one-liner for the homepage TODAY strip
 - `data/tags.json` / `data/tags.js` — canonical topic tag registry
 - `scripts/build-search-index.mjs` — builds the search index and syncs reading time

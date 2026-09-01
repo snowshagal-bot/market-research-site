@@ -10,13 +10,12 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
-0. **Phase 1B-A Account Foundation & Admin Login (Draft PR & Preview validation)**:
-   - Shared account model (`users`, `password_credentials`, `sessions`, `auth_rate_limits`, `audit_events`).
-   - PBKDF2-HMAC-SHA256 password hashing, opaque server session cookie (`__Host-snowshagal-admin-session`), CSRF tokens (`x-csrf-token`), rate limiting, route guard redirects to `/admin/login/?next=...`.
-   - Migration `migrations/auth/0001_auth_foundation.sql` and operator CLI `scripts/bootstrap-admin.mjs`.
-   - Human `ADMIN_KEY` removed from browser UI / sessionStorage.
-   - Cloudflare D1 `AUTH_DB` fail-closed (503 `AUTH_NOT_CONFIGURED` when unbound).
-   - Validation in Preview without touching Production D1 or secrets.
+0. **Admin Phase 2 announcements (Draft implementation)**:
+   - Session-authenticated CRUD at `/admin/market/announcements/` for major/general, all/future-group audience, Draft/Published state, and KST-authored UTC exposure windows.
+   - Dedicated `admin_announcements` entity on the existing environment-isolated `COMMENTS_DB`; OpenDART filings remain unchanged.
+   - Public `/api/announcements` exposes only active all-audience notices and feeds a compact Korean MARKET notice section before the existing Section 11 disclosure UI.
+   - Apply `migrations/comments/0001_admin_announcements.sql` to the isolated Preview DB, run synthetic create/update/publish/delete acceptance, and remove the fixture.
+   - Complete mobile/dark-mode Preview checks and keep Production merge pending owner review.
 
 1. **Google Search Console Domain property confirmation & Sitemap monitoring**:
    - Verify `snowshagal.com` DNS Domain-property in Google Search Console.

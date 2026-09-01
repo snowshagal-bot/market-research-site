@@ -92,6 +92,14 @@ The homepage opens with the Snowshagal brand rather than a rotating post or a ge
 - generated covers must immediately reuse the PC 1280, mobile 430, and mobile 360 crop previews and the same publish payload as manual JPG/PNG/WebP covers;
 - automatic generation remains optional, failures must not block publishing, and manual cover upload must remain available.
 
+## Admin announcements
+
+- `/admin/market/announcements/` follows the existing dense, border-led Admin language rather than introducing a separate dashboard design;
+- title/content are plain text fields and public rendering must escape them before preserving line breaks;
+- datetime-local values are labeled KST and converted to UTC explicitly instead of inheriting the operator browser timezone;
+- the list must keep type, audience, derived status, exposure window, timestamps, edit, and delete visible on desktop, then reflow to labeled rows on mobile without page-level horizontal overflow;
+- Draft/Scheduled/Published/Expired are operational states, not decorative badges; use restrained emphasis and avoid status-chip proliferation.
+
 ## Report isolation
 
 Uploaded reports are standalone documents and can contain global CSS rules. Do not assume their CSS is well-scoped.

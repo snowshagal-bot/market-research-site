@@ -210,6 +210,26 @@ Each row represents one temporary page-load UUID and contains only path, connect
 
 `GET /api/engagement-stats?days=1|7|28` requires an authenticated administrator session (`requireAdmin`), reads the same D1 binding, and returns `private, no-store` aggregates to `/admin/analytics/`.
 
+### Admin announcements on the existing D1 binding
+
+Admin Phase 2 reuses `COMMENTS_DB`; do not create a third database or change the binding name. Operational notices use the isolated `admin_announcements` table and never reuse or mutate the OpenDART `disclosure_filings` entity.
+
+Apply the checked-in idempotent migration to Preview before Preview CRUD validation:
+
+```bash
+npx wrangler d1 execute market-research-comments-preview --remote --file=migrations/comments/0001_admin_announcements.sql
+```
+
+Before a later Production merge, apply the same checked-in migration to the Production database through the migration file, not an ad-hoc dashboard SQL edit:
+
+```bash
+npx wrangler d1 execute market-research-comments --remote --file=migrations/comments/0001_admin_announcements.sql
+```
+
+Preview and Production must retain different D1 database IDs. Preview CRUD fixtures must be clearly synthetic and deleted before acceptance completes. The application fails closed with `503 ANNOUNCEMENT_SCHEMA_NOT_READY` when the table is missing; request handlers do not run DDL implicitly.
+
+Public `GET /api/announcements` returns only `publish_state = published`, `audience = all` rows whose UTC exposure window contains the current server time. Admin create/update/delete require an authenticated administrator session, exact Preview or Production admin Origin, and the session CSRF token. No new Secret or environment variable is required.
+
 ## Report publishing dependencies
 
 For `/admin/` publishing to work, production needs:
