@@ -43,6 +43,7 @@ export async function onRequestGet({ request, now = new Date() }) {
       year: queryYear,
       month: queryMonth,
       serverDate: currentKst.date,
+      marketSupport: { krx: false, nyse: false },
       message: calendarData.message || `${queryYear} calendar deferred — official schedule incomplete`,
       days: [],
       upcoming: []
@@ -57,6 +58,8 @@ export async function onRequestGet({ request, now = new Date() }) {
     year: queryYear,
     month: queryMonth,
     serverDate: currentKst.date,
+    marketSupport: calendarData.marketSupport,
+    krxPendingMessage: calendarData.krxPendingMessage || null,
     days: calendarData.days,
     upcoming
   });

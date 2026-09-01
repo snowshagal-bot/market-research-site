@@ -40,10 +40,54 @@ test('Calendar pages expose canonical SEO, alternates, and 9-item navigation', a
   }
 });
 
-test('Calendar client script targets /api/calendar endpoint with filters', async () => {
+test('Calendar client script has no hardcoded initial month and dynamically computes current KST month', async () => {
   const js = await read('assets/calendar.js');
+  // Ensure hardcoded default year: 2026, month: 9 is completely absent
+  assert.doesNotMatch(js, /year:\s*2026,\s*month:\s*9/);
+  assert.match(js, /getDefaultKstYearMonth/);
+  assert.match(js, /timeZone:\s*['"]Asia\/Seoul['"]/);
   assert.match(js, /\/api\/calendar\?year=/);
   assert.match(js, /filter === 'ALL'/);
   assert.match(js, /filter === 'KRX'/);
   assert.match(js, /filter === 'NYSE'/);
+});
+
+test('Calendar initialization logic correctly handles dates across 2026-10, 2026-12, and explicit query params', () => {
+  // Simulate the client getDefaultKstYearMonth helper with custom dates
+  function testKstHelper(dateObj) {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Seoul',
+      year: 'numeric',
+      month: 'numeric'
+    }).formatToParts(dateObj);
+    const y = Number(parts.find(p => p.type === 'year')?.value);
+    const m = Number(parts.find(p => p.type === 'month')?.value);
+    return { year: y, month: m };
+  }
+
+  // 1. Access in 2026-10 defaults to 2026-10
+  const octDate = new Date('2026-10-15T03:00:00Z'); // 12:00 KST Oct 15
+  assert.deepEqual(testKstHelper(octDate), { year: 2026, month: 10 });
+
+  // 2. Access in 2026-12 defaults to 2026-12
+  const decDate = new Date('2026-12-05T03:00:00Z'); // 12:00 KST Dec 5
+  assert.deepEqual(testKstHelper(decDate), { year: 2026, month: 12 });
+
+  // 3. Query parsing logic maintains explicit ?year=2026&month=9 even when accessing in December
+  function parseTestUrl(queryString, nowKst) {
+    const params = new URLSearchParams(queryString);
+    const hasYear = params.has('year');
+    const hasMonth = params.has('month');
+    const y = Number(params.get('year'));
+    const m = Number(params.get('month'));
+    const def = testKstHelper(nowKst);
+    return {
+      year: (hasYear && Number.isInteger(y)) ? y : def.year,
+      month: (hasMonth && Number.isInteger(m)) ? m : def.month
+    };
+  }
+
+  assert.deepEqual(parseTestUrl('?year=2026&month=9', decDate), { year: 2026, month: 9 });
+  assert.deepEqual(parseTestUrl('', decDate), { year: 2026, month: 12 });
+  assert.deepEqual(parseTestUrl('', octDate), { year: 2026, month: 10 });
 });

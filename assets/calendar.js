@@ -27,7 +27,10 @@
     errorTitle: '캘린더를 불러오지 못했습니다.',
     errorDesc: '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
     retryBtn: '다시 시도',
-    deferredNotice: '2027년 및 이후 일정은 공식 확정 후 순차 업데이트됩니다.'
+    deferredNotice: '해당 연도 일정은 공식 확정 후 순차 업데이트됩니다.',
+    krxPendingBanner: 'KRX(한국) 2027년 거래 일정은 한국거래소 공식 발표 후 순차 반영 예정입니다. (미국 NYSE 2027 일정 정상 제공)',
+    krxPendingOnlyBanner: 'KRX(한국) 2027년 연간 거래 일정은 한국거래소의 공식 공시 발표 후 업데이트됩니다.',
+    krxPendingStatus: 'KRX 2027 공식 일정 확정 대기'
   } : {
     title: 'MARKET CALENDAR',
     subtitle: 'KRX · NYSE Trading Schedule',
@@ -56,12 +59,34 @@
     errorTitle: 'Could not load market calendar.',
     errorDesc: 'A temporary error occurred. Please try again in a moment.',
     retryBtn: 'Try again',
-    deferredNotice: 'Schedules for 2027 and beyond will be updated once officially confirmed.'
+    deferredNotice: 'Schedules for this year will be updated once officially confirmed.',
+    krxPendingBanner: 'KRX 2027 official schedule is pending publication by KRX. (NYSE 2027 schedule is officially confirmed & provided)',
+    krxPendingOnlyBanner: 'KRX 2027 full annual schedule will be updated once officially released by Korea Exchange.',
+    krxPendingStatus: 'KRX 2027 schedule pending official release'
   };
 
+  function getDefaultKstYearMonth() {
+    const now = new Date();
+    try {
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Seoul',
+        year: 'numeric',
+        month: 'numeric'
+      }).formatToParts(now);
+      const y = Number(parts.find(p => p.type === 'year')?.value);
+      const m = Number(parts.find(p => p.type === 'month')?.value);
+      if (Number.isInteger(y) && Number.isInteger(m) && m >= 1 && m <= 12) {
+        return { year: y, month: m };
+      }
+    } catch (_) {}
+    return { year: now.getUTCFullYear(), month: now.getUTCMonth() + 1 };
+  }
+
+  const initialKst = getDefaultKstYearMonth();
+
   const state = {
-    year: 2026,
-    month: 9,
+    year: initialKst.year,
+    month: initialKst.month,
     filter: 'ALL', // 'ALL' | 'KRX' | 'NYSE'
     selectedDate: null,
     serverDate: null,
@@ -83,16 +108,26 @@
 
   function parseUrlState() {
     const params = new URLSearchParams(window.location.search);
+    const hasYear = params.has('year');
+    const hasMonth = params.has('month');
     const y = Number(params.get('year'));
     const m = Number(params.get('month'));
     const market = params.get('market');
 
-    if (Number.isInteger(y) && y >= 2026 && y <= 2027) {
+    if (hasYear && Number.isInteger(y) && y >= 2020 && y <= 2030) {
       state.year = y;
+    } else if (!hasYear) {
+      const def = getDefaultKstYearMonth();
+      state.year = def.year;
     }
-    if (Number.isInteger(m) && m >= 1 && m <= 12) {
+
+    if (hasMonth && Number.isInteger(m) && m >= 1 && m <= 12) {
       state.month = m;
+    } else if (!hasMonth) {
+      const def = getDefaultKstYearMonth();
+      state.month = def.month;
     }
+
     if (['ALL', 'KRX', 'NYSE'].includes(market?.toUpperCase())) {
       state.filter = market.toUpperCase();
     }
@@ -175,6 +210,20 @@
       return;
     }
 
+    const krxSupported = Boolean(data.marketSupport?.krx);
+    const nyseSupported = Boolean(data.marketSupport?.nyse);
+
+    // If viewing purely KRX for a year where KRX is pending
+    if (state.filter === 'KRX' && !krxSupported) {
+      gridMount.innerHTML = `
+        <div class="calendar-detail-card" style="text-align:center;padding:40px 20px;">
+          <h3>${copy.krxPendingStatus}</h3>
+          <p style="color:var(--muted);">${copy.krxPendingOnlyBanner}</p>
+        </div>
+      `;
+      return;
+    }
+
     const days = data.days || [];
     if (!days.length) return;
 
@@ -199,22 +248,22 @@
         if (day.isJointClosure && state.filter === 'ALL') {
           tagsHtml += `<span class="cal-tag joint">${ko ? '동시 휴장' : 'Joint Holiday'}</span>`;
         } else {
-          if (day.krx.holiday && (state.filter === 'ALL' || state.filter === 'KRX')) {
+          if (day.krx?.holiday && (state.filter === 'ALL' || state.filter === 'KRX')) {
             const label = day.krx.name ? (ko ? day.krx.name.ko : day.krx.name.en) : (ko ? 'KRX 휴장' : 'KRX Holiday');
             tagsHtml += `<span class="cal-tag krx" title="${escapeHtml(label)}">KRX ${escapeHtml(label)}</span>`;
           }
-          if (day.nyse.holiday && (state.filter === 'ALL' || state.filter === 'NYSE')) {
+          if (day.nyse?.holiday && (state.filter === 'ALL' || state.filter === 'NYSE')) {
             const label = day.nyse.name ? (ko ? day.nyse.name.ko : day.nyse.name.en) : (ko ? 'NYSE 휴장' : 'NYSE Holiday');
             tagsHtml += `<span class="cal-tag nyse" title="${escapeHtml(label)}">NYSE ${escapeHtml(label)}</span>`;
           }
         }
 
-        if (day.krx.specialSession && (state.filter === 'ALL' || state.filter === 'KRX')) {
+        if (day.krx?.specialSession && (state.filter === 'ALL' || state.filter === 'KRX')) {
           const spec = day.krx.specialSession;
           const label = ko ? spec.nameKo : spec.nameEn;
           tagsHtml += `<span class="cal-tag special" title="${escapeHtml(label)}">KRX ${escapeHtml(spec.session)}</span>`;
         }
-        if (day.nyse.specialSession && (state.filter === 'ALL' || state.filter === 'NYSE')) {
+        if (day.nyse?.specialSession && (state.filter === 'ALL' || state.filter === 'NYSE')) {
           const spec = day.nyse.specialSession;
           const label = ko ? spec.nameKo : spec.nameEn;
           tagsHtml += `<span class="cal-tag special" title="${escapeHtml(label)}">NYSE ${escapeHtml(spec.session)}</span>`;
@@ -234,7 +283,15 @@
       `;
     }
 
+    const pendingNoticeBanner = (!krxSupported && state.filter === 'ALL') ? `
+      <div style="background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:8px;">
+        <span style="font-size:14px;">ℹ️</span>
+        <span>${copy.krxPendingBanner}</span>
+      </div>
+    ` : '';
+
     gridMount.innerHTML = `
+      ${pendingNoticeBanner}
       <div class="calendar-card">
         <div class="calendar-weekdays-row">
           ${weekdaysHtml}
@@ -271,8 +328,8 @@
     if (day.isWeekend) {
       itemsHtml += `<div class="detail-item-row"><span class="detail-market-badge krx">CLOSED</span><span>${copy.weekendNotice}</span></div>`;
     } else if (day.isJointClosure) {
-      const krxName = day.krx.name ? (ko ? day.krx.name.ko : day.krx.name.en) : '';
-      const nyseName = day.nyse.name ? (ko ? day.nyse.name.ko : day.nyse.name.en) : '';
+      const krxName = day.krx?.name ? (ko ? day.krx.name.ko : day.krx.name.en) : '';
+      const nyseName = day.nyse?.name ? (ko ? day.nyse.name.ko : day.nyse.name.en) : '';
       itemsHtml += `
         <div class="detail-item-row">
           <span class="detail-market-badge joint">JOINT CLOSURE</span>
@@ -284,7 +341,9 @@
       `;
     } else {
       // KRX
-      if (day.krx.holiday) {
+      if (!day.krx?.supported) {
+        itemsHtml += `<div class="detail-item-row"><span class="detail-market-badge" style="background:var(--panel-2);color:var(--muted);">KRX</span><span style="color:var(--muted);">${copy.krxPendingStatus}</span></div>`;
+      } else if (day.krx.holiday) {
         const name = day.krx.name ? (ko ? day.krx.name.ko : day.krx.name.en) : (ko ? '휴장일' : 'Holiday');
         itemsHtml += `<div class="detail-item-row"><span class="detail-market-badge krx">KRX HOLIDAY</span><strong>${escapeHtml(name)}</strong></div>`;
       } else if (day.krx.specialSession) {
@@ -296,7 +355,9 @@
       }
 
       // NYSE
-      if (day.nyse.holiday) {
+      if (!day.nyse?.supported) {
+        itemsHtml += `<div class="detail-item-row"><span class="detail-market-badge" style="background:var(--panel-2);color:var(--muted);">NYSE</span><span style="color:var(--muted);">NYSE pending</span></div>`;
+      } else if (day.nyse.holiday) {
         const name = day.nyse.name ? (ko ? day.nyse.name.ko : day.nyse.name.en) : (ko ? '휴장일' : 'Holiday');
         itemsHtml += `<div class="detail-item-row"><span class="detail-market-badge nyse">NYSE HOLIDAY</span><strong>${escapeHtml(name)}</strong></div>`;
       } else if (day.nyse.specialSession) {
@@ -338,10 +399,24 @@
 
     const filtered = events.filter(event => {
       if (state.filter === 'ALL') return true;
-      if (state.filter === 'KRX') return event.krx.holiday || event.krx.specialSession;
-      if (state.filter === 'NYSE') return event.nyse.holiday || event.nyse.specialSession;
+      if (state.filter === 'KRX') return event.krx?.supported && (event.krx.holiday || event.krx.specialSession);
+      if (state.filter === 'NYSE') return event.nyse?.supported && (event.nyse.holiday || event.nyse.specialSession);
       return true;
     });
+
+    if (!filtered.length) {
+      if (state.filter === 'KRX' && state.year >= 2027) {
+        upcomingMount.innerHTML = `
+          <section class="calendar-upcoming-section">
+            <h2>${copy.upcomingHeading}</h2>
+            <p style="font-size:12px;color:var(--muted);">${copy.krxPendingOnlyBanner}</p>
+          </section>
+        `;
+      } else {
+        upcomingMount.innerHTML = '';
+      }
+      return;
+    }
 
     const cardsHtml = filtered.map(ev => {
       const [y, m, d] = ev.date.split('-').map(Number);
@@ -354,20 +429,20 @@
       if (ev.isJointClosure) {
         eventRows += `<div class="detail-item-row"><span class="detail-market-badge joint">JOINT</span><strong>${copy.jointClosureDesc}</strong></div>`;
       } else {
-        if (ev.krx.holiday && (state.filter === 'ALL' || state.filter === 'KRX')) {
+        if (ev.krx?.supported && ev.krx.holiday && (state.filter === 'ALL' || state.filter === 'KRX')) {
           const name = ev.krx.name ? (ko ? ev.krx.name.ko : ev.krx.name.en) : (ko ? 'KRX 휴장' : 'KRX Holiday');
           eventRows += `<div class="detail-item-row"><span class="detail-market-badge krx">KRX</span><strong>${escapeHtml(name)}</strong></div>`;
         }
-        if (ev.krx.specialSession && (state.filter === 'ALL' || state.filter === 'KRX')) {
+        if (ev.krx?.supported && ev.krx.specialSession && (state.filter === 'ALL' || state.filter === 'KRX')) {
           const spec = ev.krx.specialSession;
           const name = ko ? spec.nameKo : spec.nameEn;
           eventRows += `<div class="detail-item-row"><span class="detail-market-badge special">KRX</span><span>${escapeHtml(name)} (${escapeHtml(spec.session)})</span></div>`;
         }
-        if (ev.nyse.holiday && (state.filter === 'ALL' || state.filter === 'NYSE')) {
+        if (ev.nyse?.supported && ev.nyse.holiday && (state.filter === 'ALL' || state.filter === 'NYSE')) {
           const name = ev.nyse.name ? (ko ? ev.nyse.name.ko : ev.nyse.name.en) : (ko ? 'NYSE 휴장' : 'NYSE Holiday');
           eventRows += `<div class="detail-item-row"><span class="detail-market-badge nyse">NYSE</span><strong>${escapeHtml(name)}</strong></div>`;
         }
-        if (ev.nyse.specialSession && (state.filter === 'ALL' || state.filter === 'NYSE')) {
+        if (ev.nyse?.supported && ev.nyse.specialSession && (state.filter === 'ALL' || state.filter === 'NYSE')) {
           const spec = ev.nyse.specialSession;
           const name = ko ? spec.nameKo : spec.nameEn;
           eventRows += `<div class="detail-item-row"><span class="detail-market-badge special">NYSE</span><span>${escapeHtml(name)} (${escapeHtml(spec.session)})</span></div>`;
@@ -423,8 +498,9 @@
         state.year = y;
         state.month = m;
       } else {
-        state.year = 2026;
-        state.month = 9;
+        const def = getDefaultKstYearMonth();
+        state.year = def.year;
+        state.month = def.month;
       }
       state.selectedDate = null;
       updateUrlState();
