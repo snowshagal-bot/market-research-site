@@ -111,7 +111,7 @@ test('authenticated admin can create, list, update, publish, and delete with aud
   });
   assert.equal(removed.status, 200);
   assert.equal((await ctx.commentsDb.prepare('SELECT count(*) AS count FROM admin_announcements').first()).count, 0);
-  const audit = await ctx.authDb.prepare("SELECT event_type FROM audit_events WHERE event_type LIKE 'announcement.%' ORDER BY created_at").all();
+  const audit = await ctx.authDb.prepare("SELECT event_type FROM audit_events WHERE event_type LIKE 'announcement.%' ORDER BY rowid").all();
   assert.deepEqual(audit.results.map(row => row.event_type), ['announcement.created', 'announcement.updated', 'announcement.deleted']);
   ctx.authDb.close();
   ctx.commentsDb.close();
@@ -187,6 +187,7 @@ test('admin and public surfaces preserve the existing MARKET disclosure UI contr
   assert.match(market, /id="market-disclosures-section"/);
   assert.match(market, /html\(item\.content \|\| ''\)\.replace/);
   assert.match(css, /@media\(max-width:620px\)/);
+  assert.match(client, /return item\.status !== 'expired';/);
   assert.equal(isAdminHostnameAllowedPath('/api/admin/announcements'), true);
   assert.equal(isAdminHostnameAllowedPath('/assets/admin-announcements.js'), true);
 });

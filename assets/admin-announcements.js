@@ -161,7 +161,7 @@
       if (query && !item.title.toLocaleLowerCase('ko-KR').includes(query)) return false;
       if (activeFilter === 'major' || activeFilter === 'general') return item.noticeType === activeFilter;
       if (['draft', 'scheduled', 'published', 'expired'].includes(activeFilter)) return item.status === activeFilter;
-      return true;
+      return item.status !== 'expired';
     });
     total.textContent = `${visible.length.toLocaleString('ko-KR')}건`;
     list.replaceChildren();
