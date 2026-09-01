@@ -238,7 +238,7 @@ export async function onRequest(context) {
     if (post) seo = reportSeoTags(posts, post);
   } catch (_) {}
 
-  const shell = `<script src="/assets/locale.js?v=bb6eec37ab"></script><script src="/assets/report-shell.js?v=54fcddaf15" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
+  const shell = `<script src="/assets/locale.js?v=bb6eec37ab"></script><script src="/assets/report-shell.js?v=f494a9954b" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
 
   return new HTMLRewriter()
     .on('title', { element(element) { if (seo) element.remove(); } })

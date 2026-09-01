@@ -319,7 +319,11 @@ test('the sitemap keeps global locale pages when no category has posts', () => {
     `${PRODUCTION_ORIGIN}/about/`,
     `${PRODUCTION_ORIGIN}/en/about/`,
     `${PRODUCTION_ORIGIN}/market/`,
-    `${PRODUCTION_ORIGIN}/en/market/`
+    `${PRODUCTION_ORIGIN}/en/market/`,
+    `${PRODUCTION_ORIGIN}/disclosures/`,
+    `${PRODUCTION_ORIGIN}/en/disclosures/`,
+    `${PRODUCTION_ORIGIN}/calendar/`,
+    `${PRODUCTION_ORIGIN}/en/calendar/`
   ]);
   assert.equal(new Set(locations).size, locations.length, 'duplicate sitemap URL');
 

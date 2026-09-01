@@ -167,7 +167,7 @@ test('admin API rejects unauthenticated, wrong-origin, non-admin, and unmigrated
   missingCtx.authDb.close(); missingCtx.commentsDb.close();
 });
 
-test('admin and public surfaces preserve the existing MARKET disclosure UI contract', async () => {
+test('admin and public surfaces preserve the existing MARKET announcement UI contract', async () => {
   const [page, client, market, css] = await Promise.all([
     readFile(new URL('../admin/market/announcements/index.html', import.meta.url), 'utf8'),
     readFile(new URL('../assets/admin-announcements.js', import.meta.url), 'utf8'),
@@ -184,8 +184,7 @@ test('admin and public surfaces preserve the existing MARKET disclosure UI contr
   assert.match(client, /new Date\(`\$\{value\}:00\+09:00`\)/);
   assert.doesNotMatch(client, /\.innerHTML\s*=/);
   assert.match(market, /\/api\/announcements/);
-  assert.match(market, /\/api\/disclosures\/feed/);
-  assert.match(market, /id="market-disclosures-section"/);
+  assert.match(market, /id="market-announcements-mount"/);
   assert.match(market, /html\(item\.content \|\| ''\)\.replace/);
   assert.match(css, /@media\(max-width:620px\)/);
   assert.match(client, /return item\.status !== 'expired';/);

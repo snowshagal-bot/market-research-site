@@ -1,30 +1,16 @@
-const CALENDAR_HOLIDAYS = Object.freeze({
-  KRX: Object.freeze({
-    // KRX closes on Korean public holidays, Labor Day and its year-end
-    // closing day. Keep this explicit list in sync with the annual KRX/KASI
-    // calendar before the first trading day of a new year.
-    2026: Object.freeze([
-      '2026-01-01',
-      '2026-02-16', '2026-02-17', '2026-02-18',
-      '2026-03-02',
-      '2026-05-01', '2026-05-05', '2026-05-25',
-      '2026-06-03',
-      '2026-08-17',
-      '2026-09-24', '2026-09-25',
-      '2026-10-05', '2026-10-09',
-      '2026-12-25', '2026-12-31'
-    ])
-  }),
-  NYSE: Object.freeze({
-    // NYSE 2026 full-day market holidays. Early-close sessions are trading
-    // days and therefore are intentionally absent.
-    2026: Object.freeze([
-      '2026-01-01', '2026-01-19', '2026-02-16', '2026-04-03',
-      '2026-05-25', '2026-06-19', '2026-07-03', '2026-09-07',
-      '2026-11-26', '2026-12-25'
-    ])
-  })
-});
+import {
+  CALENDAR_HOLIDAYS,
+  expectedLatestKrxTradingDate,
+  isTradingDate,
+  parseDate,
+  previousTradingDate
+} from '../../_trading-calendar.js';
+
+export {
+  expectedLatestKrxTradingDate,
+  isTradingDate,
+  previousTradingDate
+};
 
 const SAME_DAY_RULES = Object.freeze([
   ['indices', ['KOSPI', 'KOSDAQ']],
@@ -36,66 +22,6 @@ const PREVIOUS_US_SESSION_RULES = Object.freeze([
   ['indices', ['NASDAQ', 'DOW', 'SP500']],
   ['rates_fx_volatility', ['SOX', 'VIX', 'US10Y']]
 ]);
-
-function parseDate(dateString) {
-  if (typeof dateString !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return null;
-  const date = new Date(`${dateString}T00:00:00Z`);
-  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === dateString ? date : null;
-}
-
-function shiftDate(dateString, days) {
-  const date = parseDate(dateString);
-  if (!date) throw new Error(`Invalid market date: ${dateString}`);
-  date.setUTCDate(date.getUTCDate() + days);
-  return date.toISOString().slice(0, 10);
-}
-
-function calendarHolidays(market, year) {
-  const dates = CALENDAR_HOLIDAYS[market]?.[year];
-  if (!dates) throw new Error(`${market} trading calendar is not configured for ${year}`);
-  return new Set(dates);
-}
-
-export function isTradingDate(dateString, market) {
-  const date = parseDate(dateString);
-  if (!date) throw new Error(`Invalid market date: ${dateString}`);
-  const day = date.getUTCDay();
-  if (day === 0 || day === 6) return false;
-  return !calendarHolidays(market, date.getUTCFullYear()).has(dateString);
-}
-
-export function previousTradingDate(dateString, market) {
-  let candidate = shiftDate(dateString, -1);
-  for (let attempts = 0; attempts < 370; attempts += 1) {
-    if (isTradingDate(candidate, market)) return candidate;
-    candidate = shiftDate(candidate, -1);
-  }
-  throw new Error(`Unable to resolve previous ${market} trading date from ${dateString}`);
-}
-
-function kstParts(now) {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Seoul',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23'
-  }).formatToParts(now);
-  const value = Object.fromEntries(parts.map(part => [part.type, part.value]));
-  return {
-    date: `${value.year}-${value.month}-${value.day}`,
-    minutes: Number(value.hour) * 60 + Number(value.minute)
-  };
-}
-
-export function expectedLatestKrxTradingDate(now = new Date(), closeGraceMinutes = 16 * 60 + 30) {
-  if (!(now instanceof Date) || !Number.isFinite(now.getTime())) throw new Error('Freshness check requires a valid current time.');
-  const current = kstParts(now);
-  if (isTradingDate(current.date, 'KRX') && current.minutes >= closeGraceMinutes) return current.date;
-  return previousTradingDate(current.date, 'KRX');
-}
 
 function validateInstrument(payload, section, code, expectedDate, errors) {
   const item = payload?.[section]?.[code];

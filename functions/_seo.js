@@ -680,6 +680,16 @@ export function sitemapXml(posts) {
     { lang: 'en', href: `${PRODUCTION_ORIGIN}/en/market/` },
     { lang: 'x-default', href: `${PRODUCTION_ORIGIN}/market/` }
   ];
+  const disclosuresAlternates = [
+    { lang: 'ko', href: `${PRODUCTION_ORIGIN}/disclosures/` },
+    { lang: 'en', href: `${PRODUCTION_ORIGIN}/en/disclosures/` },
+    { lang: 'x-default', href: `${PRODUCTION_ORIGIN}/disclosures/` }
+  ];
+  const calendarAlternates = [
+    { lang: 'ko', href: `${PRODUCTION_ORIGIN}/calendar/` },
+    { lang: 'en', href: `${PRODUCTION_ORIGIN}/en/calendar/` },
+    { lang: 'x-default', href: `${PRODUCTION_ORIGIN}/calendar/` }
+  ];
   const urlEntry = (loc, lastmod, alternates = []) => {
     const alternateTags = alternates.map((entry) => (
       `<xhtml:link rel="alternate" hreflang="${entry.lang}" href="${escapeHtml(entry.href)}"/>`
@@ -706,6 +716,10 @@ export function sitemapXml(posts) {
     urlEntry(`${PRODUCTION_ORIGIN}/en/about/`, '', aboutAlternates),
     urlEntry(`${PRODUCTION_ORIGIN}/market/`, '', marketAlternates),
     urlEntry(`${PRODUCTION_ORIGIN}/en/market/`, '', marketAlternates),
+    urlEntry(`${PRODUCTION_ORIGIN}/disclosures/`, '', disclosuresAlternates),
+    urlEntry(`${PRODUCTION_ORIGIN}/en/disclosures/`, '', disclosuresAlternates),
+    urlEntry(`${PRODUCTION_ORIGIN}/calendar/`, '', calendarAlternates),
+    urlEntry(`${PRODUCTION_ORIGIN}/en/calendar/`, '', calendarAlternates),
     ...categoryEntries,
     ...validPosts.map((post) => urlEntry(
       reportSiteUrl(post.href),

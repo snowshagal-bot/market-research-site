@@ -21,7 +21,12 @@ const EN_CATEGORY_LINKS = {
   note: '/en/notes/'
 };
 
-function assertDirectCategoryLinks(nav, links) {
+function assertDirectCategoryLinks(nav, links, lang = 'ko') {
+  const isEn = lang === 'en';
+  const prefix = isEn ? '/en' : '';
+  assert.match(nav, new RegExp(`href="${prefix}\\/market\\/"`));
+  assert.match(nav, new RegExp(`href="${prefix}\\/disclosures\\/"`));
+  assert.match(nav, new RegExp(`href="${prefix}\\/calendar\\/"`));
   for (const [type, href] of Object.entries(links)) {
     assert.match(nav, new RegExp(`data-nav-category="${type}"[^>]*href="${href.replaceAll('/', '\\/')}"`));
   }
@@ -34,20 +39,20 @@ test('KO and EN homepage desktop and mobile navigation use category landings', a
   const enNavs = navBlocks(en);
   assert.equal(koNavs.length, 2);
   assert.equal(enNavs.length, 2);
-  koNavs.forEach(nav => assertDirectCategoryLinks(nav, KO_CATEGORY_LINKS));
-  enNavs.forEach(nav => assertDirectCategoryLinks(nav, EN_CATEGORY_LINKS));
+  koNavs.forEach(nav => assertDirectCategoryLinks(nav, KO_CATEGORY_LINKS, 'ko'));
+  enNavs.forEach(nav => assertDirectCategoryLinks(nav, EN_CATEGORY_LINKS, 'en'));
 });
 
 test('KO About desktop and mobile navigation use category landings', async () => {
   const navs = navBlocks(await read('about/index.html'));
   assert.equal(navs.length, 2);
-  navs.forEach(nav => assertDirectCategoryLinks(nav, KO_CATEGORY_LINKS));
+  navs.forEach(nav => assertDirectCategoryLinks(nav, KO_CATEGORY_LINKS, 'ko'));
 });
 
 test('EN About desktop and mobile navigation use category landings', async () => {
   const navs = navBlocks(await read('en/about/index.html'));
   assert.equal(navs.length, 2);
-  navs.forEach(nav => assertDirectCategoryLinks(nav, EN_CATEGORY_LINKS));
+  navs.forEach(nav => assertDirectCategoryLinks(nav, EN_CATEGORY_LINKS, 'en'));
 });
 
 test('KO Market desktop and mobile navigation use category landings and keep Market active', async () => {
@@ -55,7 +60,7 @@ test('KO Market desktop and mobile navigation use category landings and keep Mar
   const navs = navBlocks(html);
   assert.equal(navs.length, 2);
   navs.forEach(nav => {
-    assertDirectCategoryLinks(nav, KO_CATEGORY_LINKS);
+    assertDirectCategoryLinks(nav, KO_CATEGORY_LINKS, 'ko');
     assert.match(nav, /class="active" href="\/market\/" aria-current="page">마켓<\/a>/);
   });
 });
@@ -65,28 +70,28 @@ test('EN Market desktop and mobile navigation use category landings and keep Mar
   const navs = navBlocks(html);
   assert.equal(navs.length, 2);
   navs.forEach(nav => {
-    assertDirectCategoryLinks(nav, EN_CATEGORY_LINKS);
+    assertDirectCategoryLinks(nav, EN_CATEGORY_LINKS, 'en');
     assert.match(nav, /class="active" href="\/en\/market\/" aria-current="page">Market<\/a>/);
   });
 });
 
 test('all ten category landing shells and their generator retain direct navigation URLs', async () => {
   const pages = [
-    ['daily/index.html', KO_CATEGORY_LINKS],
-    ['weekly/index.html', KO_CATEGORY_LINKS],
-    ['research/index.html', KO_CATEGORY_LINKS],
-    ['basics/index.html', KO_CATEGORY_LINKS],
-    ['notes/index.html', KO_CATEGORY_LINKS],
-    ['en/daily/index.html', EN_CATEGORY_LINKS],
-    ['en/weekly/index.html', EN_CATEGORY_LINKS],
-    ['en/research/index.html', EN_CATEGORY_LINKS],
-    ['en/basics/index.html', EN_CATEGORY_LINKS],
-    ['en/notes/index.html', EN_CATEGORY_LINKS]
+    ['daily/index.html', KO_CATEGORY_LINKS, 'ko'],
+    ['weekly/index.html', KO_CATEGORY_LINKS, 'ko'],
+    ['research/index.html', KO_CATEGORY_LINKS, 'ko'],
+    ['basics/index.html', KO_CATEGORY_LINKS, 'ko'],
+    ['notes/index.html', KO_CATEGORY_LINKS, 'ko'],
+    ['en/daily/index.html', EN_CATEGORY_LINKS, 'en'],
+    ['en/weekly/index.html', EN_CATEGORY_LINKS, 'en'],
+    ['en/research/index.html', EN_CATEGORY_LINKS, 'en'],
+    ['en/basics/index.html', EN_CATEGORY_LINKS, 'en'],
+    ['en/notes/index.html', EN_CATEGORY_LINKS, 'en']
   ];
-  for (const [path, links] of pages) {
+  for (const [path, links, lang] of pages) {
     const navs = navBlocks(await read(path));
     assert.equal(navs.length, 2, path);
-    navs.forEach(nav => assertDirectCategoryLinks(nav, links));
+    navs.forEach(nav => assertDirectCategoryLinks(nav, links, lang));
   }
   const generator = await read('scripts/build-category-pages.mjs');
   assert.match(generator, /categoryLandingPath\(type, lang\)/);
@@ -98,6 +103,10 @@ test('Report Shell uses locale category paths while preserving active state', as
   assert.match(shell, /function categoryPath\(type\)/);
   assert.match(shell, /const prefix = locale === 'en' \? '\/en' : ''/);
   assert.match(shell, /const slug = type === 'note' \? 'notes' : type/);
+  assert.match(shell, /const disclosuresPath = locale === 'en' \? '\/en\/disclosures\/' : '\/disclosures\/'/);
+  assert.match(shell, /const calendarPath = locale === 'en' \? '\/en\/calendar\/' : '\/calendar\/'/);
+  assert.match(shell, /href="\$\{disclosuresPath\}"/);
+  assert.match(shell, /href="\$\{calendarPath\}"/);
   for (const type of ['daily', 'weekly', 'research', 'basics', 'note']) {
     assert.match(shell, new RegExp(`href="\\$\\{categoryPath\\('${type}'\\)\\}"`));
   }
