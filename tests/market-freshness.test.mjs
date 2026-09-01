@@ -146,3 +146,16 @@ test('scheduled health checker distinguishes current, stale, server, network and
     error => error instanceof MarketFreshnessError && error.kind === 'timeout'
   );
 });
+
+test('market-freshness-alert.yml workflow defines exact 17:00 and 18:30 KST cron schedules', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const workflow = await readFile(new URL('../.github/workflows/market-freshness-alert.yml', import.meta.url), 'utf8');
+
+  // Both cron schedules must be present
+  assert.match(workflow, /- cron:\s*["']0 8 \* \* 1-5["']/);
+  assert.match(workflow, /- cron:\s*["']30 9 \* \* 1-5["']/);
+
+  // Comments must clearly indicate 17:00 KST regular check and 18:30 KST post-recovery check
+  assert.match(workflow, /17:00 KST/);
+  assert.match(workflow, /18:30 KST/);
+});
