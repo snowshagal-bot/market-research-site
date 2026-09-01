@@ -1,0 +1,81 @@
+name: Market Calendar Daily Sync
+
+# Official release schedules are published months ahead and change rarely, so
+# once a day is enough. It runs after the Korean market close so a day's
+# corporate filings are already stored when the calendar reads them.
+on:
+  schedule:
+    # 16:40 KST on weekdays (07:40 UTC), after the OpenDART sync at 16:05.
+    - cron: "40 7 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: market-calendar-sync
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Trigger market calendar sync
+        id: sync
+        continue-on-error: true
+        env:
+          # The same key as the disclosure sync: one operator secret, and the
+          # calendar's own sources need no authentication of their own.
+          DISCLOSURE_SYNC_KEY: ${{ secrets.DISCLOSURE_SYNC_KEY }}
+        run: node scripts/sync-calendar.mjs
+
+      - name: Open or update the operator alert
+        if: steps.sync.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '[Alert] Market calendar sync failure';
+            const marker = '<!-- snowshagal-calendar-sync-alert -->';
+            const body = `${marker}\nThe daily market calendar sync failed.\n\nRun: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\nThe per-source lines in the run log say which source stopped answering. A source that fails leaves its stored events untouched, so the calendar keeps showing what it already had — this is worth fixing, not urgent.`;
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+            const existing = issues.find(issue => issue.title === title && !issue.pull_request);
+            if (existing) {
+              await github.rest.issues.update({ owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, body });
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, body: `Calendar sync failed again: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}` });
+            } else {
+              await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title, body });
+            }
+
+      - name: Close a recovered operator alert
+        if: steps.sync.outcome == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = '[Alert] Market calendar sync failure';
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+            const existing = issues.find(issue => issue.title === title && !issue.pull_request);
+            if (existing) {
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, body: `Recovered: market calendar sync passed in ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}` });
+              await github.rest.issues.update({ owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, state: 'closed', state_reason: 'completed' });
+            }
+
+      - name: Fail the workflow after alerting
+        if: steps.sync.outcome == 'failure'
+        run: exit 1
