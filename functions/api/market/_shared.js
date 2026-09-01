@@ -3,6 +3,7 @@ export const SUPPORTED_SCHEMA_VERSIONS = Object.freeze(['1.0.1', '1.1.0']);
 export const MAX_PAYLOAD_BYTES = 512 * 1024;
 import { isAdminHost, isPreviewHost, isPublicHost, validateHumanAdminMutation } from '../../_host-policy.js';
 import { requireAdminMutation } from '../../_auth.js';
+import { validateSourceFreshness } from './_freshness.js';
 
 export const TABLE_NAME = 'market_close_snapshots';
 export const SCHEMA_PATH = '/contracts/market_close/market_close.schema.json';
@@ -281,5 +282,7 @@ export function validateMarketPayload(payload, schema) {
       });
     }
   }
+  const freshness = validateSourceFreshness(payload);
+  errors.push(...freshness.errors);
   return { passed: errors.length === 0, errors: Array.from(new Set(errors)).slice(0, 100) };
 }

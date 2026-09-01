@@ -164,6 +164,38 @@ fixture if the read smoke requires one, redeploy, and rerun
 `node scripts/smoke-site.mjs --origin <preview-url> --mode preview`. A 503 from either
 D1-backed GET endpoint is a failure, not an accepted empty state.
 
+### MARKET freshness and operator alert
+
+`POST /api/market/publish` validates source dates after the JSON Schema check and before any
+D1 write. KOSPI/KOSDAQ, FX, commodities and crypto use the snapshot's KRX date; US equity
+indices, SOX, VIX and US10Y use the previous completed NYSE session. This intentionally
+rejects the observed `2026-08-31` snapshot with `2026-08-27` US data, while accepting
+different dates caused by weekends or an exchange holiday.
+
+The exchange calendars are explicit and fail closed outside their configured coverage.
+`functions/api/market/_freshness.js` currently covers KRX and NYSE 2026 holidays. Review the
+official KRX/KASI and NYSE calendars and extend this file before the first trading day of a
+new calendar year. KRX closes on Korean public holidays, Labor Day and its year-end closing
+day; NYSE early-close sessions remain trading days.
+
+Calendar references:
+
+- KRX holiday rules: `https://global.krx.co.kr/contents/GLB/06/0602/0602010201/GLB0602010201T1.jsp`
+- KASI 2026 official almanac: `https://astro.kasi.re.kr/life/post/almanac?year=2026`
+- NYSE holiday calendar: `https://www.nyse.com/trade/hours-calendars`
+
+Production deployment smoke now requires `/api/market/latest` to match the expected latest
+KRX trading day after a 16:30 KST grace period, in addition to HTTP/schema and per-market
+source freshness. Preview smoke does not compare its deliberately synthetic `1900-01-01`
+fixture with today's market date.
+
+`.github/workflows/market-freshness-alert.yml` runs at 17:00 KST on weekdays and calls the
+read-only `scripts/check-market-freshness.mjs`. A stale date, stale source, HTTP/server,
+network, timeout or response-validation failure fails the workflow and opens or updates one
+operator Issue. A later successful run comments on and closes that Issue. The workflow uses
+only GitHub Actions and the public Production API; it has no market credential and performs
+no D1 write.
+
 `functions/api/comments.js` reads the database through `env.COMMENTS_DB`.
 
 The API inspects and prepares the comments schema on first use, so a manual schema paste is not required for initial setup. If it finds an incompatible pre-release `comments` table, it preserves that table as `comments_legacy_v1` and then creates the current table and indexes. `db/schema.sql` remains the schema reference.

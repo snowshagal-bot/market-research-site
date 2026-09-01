@@ -56,6 +56,12 @@ check-run from Cloudflare's GitHub App to report success. Only then does it run 
 Production smoke. A missing or timed-out check fails closed, so an older Production cannot
 be inspected and reported as the new commit. There is no automatic rollback.
 
+Market verification additionally checks explicit 2026 KRX/NYSE calendars, the expected
+latest KRX trading date after 16:30 KST, and per-market source dates. The read-only
+`market-freshness-alert.yml` schedule runs at 17:00 KST on weekdays and maintains one GitHub
+Issue while Production MARKET remains stale or otherwise unverifiable. Calendar coverage
+must be extended before a new trading year; an unknown year fails closed.
+
 Preview Functions must use the same `COMMENTS_DB` binding name as Production while pointing
 to a different Preview-only D1 database. This parity is complete: Preview uses
 `market-research-comments-preview`, Production uses `market-research-comments`, and no
@@ -333,6 +339,8 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `market/index.html` / `en/market/index.html` — Market Close pages
 - `assets/market-close.js` / `assets/market-close.css` — Market Close rendering
 - `functions/api/market/latest.js` / `publish.js` / `_shared.js` — D1-backed Market Close read, authenticated publish, shared validation
+- `functions/api/market/_freshness.js` — KRX/NYSE calendars, source-date and Production freshness rules
+- `scripts/check-market-freshness.mjs` / `.github/workflows/market-freshness-alert.yml` — read-only scheduled MARKET health alert
 - `contracts/market_close/` — Market Close JSON Schema, example payload and data contract
 - `admin/market/index.html` / `assets/admin-market.js` — Market Close upload UI
 - `data/market-summary.js` — fallback data and editorial one-liner for the homepage TODAY strip

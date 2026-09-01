@@ -36,6 +36,11 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
    - **Selective MARKET Feed**: Auto-publishes Watchlist companies with High/Critical priority (Rule Score >= 7) and `rcept_dt === KST today` (Date Guard) to public `/market/` Section 11 (`/api/disclosures/feed`); past filings remain `admin_only`.
    - **Minimal Public DTO & Clean Separation**: Public feed serves minimal `{ rceptNo, priority, fact, ai }` DTO without internal columns. Fact Box displays official DART metadata and correction badge; AI Insight Box displays Gemini 3.5 structured insight (`summary`, `what_it_means`, `watch_points`, `impact`, `importance`, `limitation`) without invented `key_figures`.
    - **Error Isolation**: AI and location errors are fully isolated, ensuring OpenDART collection, D1 storage, and public feed display succeed independently.
+6. **MARKET publish reliability (Draft PR)**:
+   - Fail closed when a final payload carries stale KRX, US, FX, commodity, or crypto source dates.
+   - Compare Production `market_date` with the expected latest KRX session after the close grace period instead of treating HTTP 200 as sufficient.
+   - Run a read-only weekday freshness alert that opens one operator Issue on stale/network/server/validation failures and closes it after recovery.
+   - Keep Publisher process exit propagation in the separate private `snowshagal-market-publisher` repository; do not mix Windows executable changes into this Pages repository.
 
 
 ## Near-term Priorities
