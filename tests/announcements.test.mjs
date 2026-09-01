@@ -177,6 +177,7 @@ test('admin and public surfaces preserve the existing MARKET disclosure UI contr
   for (const id of ['announcement-type', 'announcement-title', 'announcement-content', 'announcement-audience', 'announcement-target-group', 'announcement-start', 'announcement-end']) {
     assert.match(page, new RegExp(`id="${id}"`));
   }
+  assert.match(page, /<script src="\/data\/posts\.js"><\/script>\s*<script src="\/assets\/locale\.js\?v=[a-f0-9]+"><\/script>\s*<script src="\/assets\/site\.js\?v=[a-f0-9]+"><\/script>/);
   for (const filter of ['major', 'general', 'draft', 'scheduled', 'published', 'expired']) {
     assert.match(page, new RegExp(`data-filter="${filter}"`));
   }
