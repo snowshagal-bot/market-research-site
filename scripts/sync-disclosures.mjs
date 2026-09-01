@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const DEFAULT_ORIGIN = 'https://snowshagal.com';
-const DEFAULT_TIMEOUT_MS = 30_000;
+const DEFAULT_TIMEOUT_MS = 120_000;
 
 export class DisclosureSyncError extends Error {
   constructor(kind, message) {
