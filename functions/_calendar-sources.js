@@ -363,3 +363,74 @@ export function parseFomcDecisionTime(html) {
   if (/a\.m\./i.test(match[4]) && hour === 12) hour = 0;
   return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
 }
+
+/**
+ * The Fed's monthly calendar page, which does carry the decision time.
+ *
+ * The schedule at fomccalendars.htm lists dates only. Each month has its own
+ * static page where the same meeting appears with an hour beside it, and where
+ * the press conference is a separate row half an hour later:
+ *
+ *   2:30 p.m. | FOMC Press Conference                          | 16
+ *   2:00 p.m. | FOMC Meeting | Two-day meeting, September 15-16 | 16
+ *
+ * Only the row titled exactly "FOMC Meeting" is read. The press conference is
+ * a different event and is deliberately not one this calendar carries.
+ *
+ * Returns a map of ISO date to HH:MM, empty when the month's page does not say.
+ */
+export function parseFomcMonthlyTimes(html, { year, month } = {}) {
+  const times = new Map();
+  const y = Number(year);
+  const m = Number(month);
+  if (!Number.isInteger(y) || !Number.isInteger(m)) return times;
+
+  const source = String(html);
+  const sectionAt = source.search(/FOMC Meetings\s*</i);
+  if (sectionAt < 0) return times;
+  // The section ends where the next titled block begins.
+  const nextTitle = source.slice(sectionAt + 1).search(/cal-nojs__rowTitle/i);
+  const section = nextTitle > 0 ? source.slice(sectionAt, sectionAt + 1 + nextTitle) : source.slice(sectionAt);
+
+  for (const row of section.matchAll(/<div class="panel-body">([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/gi)) {
+    // The row capture stops at the first run of three closing tags, which can
+    // fall inside the last cell, so a cell may run to the end of the row.
+    const cells = [...row[1].matchAll(/<div class="[^"]*col-xs-[^"]*"[^>]*>([\s\S]*?)(?:<\/div>|$)/gi)]
+      .map(cell => cell[1]);
+    if (cells.length < 3) continue;
+
+    // The first paragraph of the description cell is the row's own title, and
+    // it is what separates the meeting from the conference.
+    const title = cellText(/<p[^>]*>([\s\S]*?)<\/p>/i.exec(cells[1])?.[1] || '');
+    if (title !== 'FOMC Meeting') continue;
+
+    const time = parseMeridiemClock(cellText(cells[0]));
+    const day = Number((cellText(cells[cells.length - 1]).match(/\b(\d{1,2})\b/) || [])[1]);
+    if (!time || !day) continue;
+    const date = realDate(y, m, day);
+    if (date) times.set(date, time);
+  }
+  return times;
+}
+
+/** "2:00 p.m." → "14:00". Null for anything that is not a clock. */
+export function parseMeridiemClock(value) {
+  const match = /\b(\d{1,2}):(\d{2})\s*(a\.m\.|p\.m\.|AM|PM)/i.exec(collapse(value));
+  if (!match) return null;
+  let hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (hour < 1 || hour > 12 || minute > 59) return null;
+  const isPm = /p/i.test(match[3]);
+  if (isPm && hour < 12) hour += 12;
+  if (!isPm && hour === 12) hour = 0;
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+
+const MONTH_SLUGS = Object.freeze([
+  'january', 'february', 'march', 'april', 'may', 'june',
+  'july', 'august', 'september', 'october', 'november', 'december'
+]);
+
+/** The Fed publishes one static page per month; next year's may not exist yet. */
+export const fomcMonthlyUrl = (year, month) =>
+  `https://www.federalreserve.gov/newsevents/${year}-${MONTH_SLUGS[Number(month) - 1]}.htm`;

@@ -135,3 +135,38 @@ test('the meeting calendar as published carries no time, and that is not a failu
   // calendar; it simply has no hour, which the sync records as unconfirmed.
   assert.equal(parseFomcDecisionTime(page), null);
 });
+
+/* ------------------------------- the monthly page, which does carry the hour */
+
+test('the monthly page names the meeting hour, and not the conference', async () => {
+  const { parseFomcMonthlyTimes, parseMeridiemClock } = await import('../functions/_calendar-sources.js');
+  const page = await readFile(new URL('./fixtures/calendar/fed-2026-september.html', import.meta.url), 'utf8');
+
+  const times = parseFomcMonthlyTimes(page, { year: 2026, month: 9 });
+  assert.deepEqual([...times], [['2026-09-16', '14:00']]);
+
+  // The page carries both rows; only the one titled "FOMC Meeting" is read.
+  assert.match(page, /FOMC Press Conference/);
+  assert.match(page, /2:30 p\.m\./);
+  assert.equal([...times.values()].includes('14:30'), false,
+    'the press conference is a different event and this v1 does not carry it');
+  assert.equal(parseMeridiemClock('2:30 p.m.'), '14:30', 'the clock itself parses; the row is what is rejected');
+});
+
+test('a month with no meeting, or a page that is not published, yields nothing', async () => {
+  const { parseFomcMonthlyTimes } = await import('../functions/_calendar-sources.js');
+  assert.deepEqual([...parseFomcMonthlyTimes('<html><body>Not found</body></html>', { year: 2027, month: 1 })], []);
+  assert.deepEqual([...parseFomcMonthlyTimes('', { year: 2026, month: 9 })], []);
+  // A day the month's page does not list is simply absent.
+  const page = await readFile(new URL('./fixtures/calendar/fed-2026-september.html', import.meta.url), 'utf8');
+  assert.equal(parseFomcMonthlyTimes(page, { year: 2026, month: 9 }).get('2026-09-15'), undefined);
+});
+
+test('the confirmed hour is stored in the Fed’s zone and shown in Seoul', async () => {
+  const { parseFomcMonthlyTimes } = await import('../functions/_calendar-sources.js');
+  const page = await readFile(new URL('./fixtures/calendar/fed-2026-september.html', import.meta.url), 'utf8');
+  const time = parseFomcMonthlyTimes(page, { year: 2026, month: 9 }).get('2026-09-16');
+
+  const shown = toDisplayTime({ date: '2026-09-16', time, timezone: 'America/New_York' });
+  assert.deepEqual([shown.date, shown.time], ['2026-09-17', '03:00']);
+});

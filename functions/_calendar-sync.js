@@ -20,7 +20,8 @@ import {
   parseBeaSchedule,
   parseBlsSchedule,
   parseBokSchedule,
-  parseFomcDecisionTime,
+  fomcMonthlyUrl,
+  parseFomcMonthlyTimes,
   parseFomcSchedule
 } from './_calendar-sources.js';
 import { cancelMissingEvents, recordSourceRun, upsertEvent } from './_calendar-events.js';
@@ -76,22 +77,67 @@ export async function syncFomc(db, { years, fetchImpl, now }) {
     const events = [];
     for (const year of years) events.push(...parseFomcSchedule(html, { year }));
 
-    // The meeting list carries dates only. When the Fed states the release
-    // time on the same page, it is used; when it does not, the meeting keeps
-    // its date with no time rather than being dropped, and the run says so.
-    const decisionTime = parseFomcDecisionTime(html);
-    if (decisionTime) for (const event of events) event.eventTime = decisionTime;
+    // The schedule page lists dates only. Each month has its own static page
+    // where the same meeting appears with its hour, so the time is confirmed
+    // there — one page per month that actually holds a meeting.
+    const confirmed = await enrichFomcTimes(events, fetchImpl);
+    const unconfirmed = events.filter(event => !event.eventTime).length;
 
     const result = await commitSource(db, {
       sourceName: 'federal-reserve',
       sourceUrl: FOMC_URL,
       events,
       window: { from: `${years[0]}-01-01`, to: `${years[years.length - 1]}-12-31` },
-      note: decisionTime ? '' : 'decision time unconfirmed'
+      note: unconfirmed ? `decision time unconfirmed for ${unconfirmed} of ${events.length} meetings` : ''
     }, now);
-    return { ...result, enrichment: decisionTime ? 'confirmed' : 'unconfirmed', decisionTime: decisionTime || null };
+    return {
+      ...result,
+      enrichment: unconfirmed === 0 ? 'confirmed' : (confirmed ? 'partial' : 'unconfirmed'),
+      timesConfirmed: confirmed,
+      timesUnconfirmed: unconfirmed
+    };
   } catch (error) {
     return failSource(db, { sourceName: 'federal-reserve', sourceUrl: FOMC_URL, error }, now);
+  }
+}
+
+/**
+ * Fills in each meeting's hour from the Fed's monthly page for that month.
+ *
+ * A month whose page is not published yet answers 404, and a month that does
+ * not name the hour answers with nothing. Neither is a failure: the meeting
+ * keeps its date and stays on the calendar without a time. Only a row titled
+ * exactly "FOMC Meeting" is read, so the press conference half an hour later
+ * is never mistaken for the decision.
+ */
+async function enrichFomcTimes(events, fetchImpl) {
+  const months = new Map();
+  let confirmed = 0;
+
+  for (const event of events) {
+    const [year, month] = event.eventDate.split('-').map(Number);
+    const key = `${year}-${month}`;
+    if (!months.has(key)) {
+      months.set(key, await readMonthlyTimes(year, month, fetchImpl));
+    }
+    const time = months.get(key).get(event.eventDate);
+    if (!time) continue;
+    event.eventTime = time;
+    // The stored value stays in the Fed's own zone; the calendar converts it.
+    event.timezone = 'America/New_York';
+    event.meta = { ...(event.meta || {}), decisionTimeSource: fomcMonthlyUrl(year, month) };
+    confirmed += 1;
+  }
+  return confirmed;
+}
+
+async function readMonthlyTimes(year, month, fetchImpl) {
+  try {
+    const html = await fetchText(fomcMonthlyUrl(year, month), fetchImpl);
+    return parseFomcMonthlyTimes(html, { year, month });
+  } catch (_) {
+    // Next year's pages do not exist yet. That is expected, not broken.
+    return new Map();
   }
 }
 

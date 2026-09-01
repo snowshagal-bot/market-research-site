@@ -37,12 +37,13 @@ class SqliteD1 {
 const fixture = name => readFile(new URL(`./fixtures/calendar/${name}`, import.meta.url), 'utf8');
 
 const PAGES = {
-  'federalreserve.gov': await fixture('fomc-calendars.html'),
+  'monetarypolicy/fomccalendars.htm': await fixture('fomc-calendars.html'),
   'cpi.htm': await fixture('bls-cpi.html'),
   'empsit.htm': await fixture('bls-empsit.html'),
   'bea.gov': await fixture('bea-schedule.html'),
   'pYear=2026': await fixture('bok-2026.html'),
-  'pYear=2027': await fixture('bok-2027.html')
+  'pYear=2027': await fixture('bok-2027.html'),
+  'newsevents/2026-september.htm': await fixture('fed-2026-september.html')
 };
 
 const NOW = new Date('2026-09-02T00:00:00.000Z');
@@ -57,7 +58,11 @@ function pageFetch(overrides = {}) {
         return handler;
       }
     }
-    const key = Object.keys(PAGES).find(candidate => String(url).includes(candidate));
+    // Longest match first: the monthly pages live under the same host as the
+    // meeting schedule, so a bare host key must not swallow them.
+    const key = Object.keys(PAGES)
+      .sort((a, b) => b.length - a.length)
+      .find(candidate => String(url).includes(candidate));
     if (!key) return { ok: false, status: 404, text: async () => '' };
     return { ok: true, status: 200, text: async () => PAGES[key] };
   };
@@ -151,7 +156,7 @@ test('a source that fails leaves its stored events alone', async () => {
   const before = db.rows(`SELECT event_id, status FROM ${EVENTS_TABLE} WHERE source_name = 'federal-reserve' ORDER BY event_id`);
   assert.ok(before.length >= 8);
 
-  const failing = pageFetch({ 'federalreserve.gov': { ok: false, status: 503, text: async () => '' } });
+  const failing = pageFetch({ 'monetarypolicy/fomccalendars.htm': { ok: false, status: 503, text: async () => '' } });
   const result = await syncFomc(db, { years: [2026, 2027], fetchImpl: failing, now: NOW });
 
   assert.equal(result.status, 'error');
@@ -167,7 +172,7 @@ test('a page that changed shape fails rather than emptying the calendar', async 
   const before = db.rows(`SELECT count(*) AS n FROM ${EVENTS_TABLE} WHERE source_name = 'federal-reserve'`)[0].n;
 
   const replaced = { ok: true, status: 200, text: async () => '<html><body><p>We are making improvements.</p></body></html>' };
-  const result = await syncFomc(db, { years: [2026], fetchImpl: pageFetch({ 'federalreserve.gov': replaced }), now: NOW });
+  const result = await syncFomc(db, { years: [2026], fetchImpl: pageFetch({ 'monetarypolicy/fomccalendars.htm': replaced }), now: NOW });
 
   assert.equal(result.status, 'error');
   assert.equal(db.rows(`SELECT count(*) AS n FROM ${EVENTS_TABLE} WHERE source_name = 'federal-reserve'`)[0].n, before);
@@ -199,14 +204,14 @@ test('a source that drops a date cancels only its own, only in its window', asyn
   // The Fed page comes back with September missing. The month and its day
   // range sit in separate elements, so the range is removed from the 2026
   // block specifically.
-  const page = PAGES['federalreserve.gov'];
+  const page = PAGES['monetarypolicy/fomccalendars.htm'];
   const blockAt = page.indexOf('2026 FOMC Meetings');
   const rangeAt = page.indexOf('>15-16*<', blockAt);
   assert.ok(rangeAt > blockAt, 'the fixture should carry the September 2026 range');
   const withoutSeptember = `${page.slice(0, rangeAt)}>15<${page.slice(rangeAt + '>15-16*<'.length)}`;
   const result = await syncFomc(db, {
     years: [2026, 2027], now: NOW,
-    fetchImpl: pageFetch({ 'federalreserve.gov': { ok: true, status: 200, text: async () => withoutSeptember } })
+    fetchImpl: pageFetch({ 'monetarypolicy/fomccalendars.htm': { ok: true, status: 200, text: async () => withoutSeptember } })
   });
 
   assert.equal(result.status, 'ok');
@@ -248,4 +253,48 @@ test('every source identifies itself with the page it read', async () => {
     assert.ok(run.lastAttemptAt, `${run.sourceName} must record when it was tried`);
   }
   db.close();
+});
+
+/* -------------------------------------------- the FOMC hour, month by month */
+
+test('a meeting whose month page names the hour is stored with it', async () => {
+  const db = await freshDb();
+  const outcome = await runCalendarSync(db, { fetchImpl: pageFetch(), now: NOW });
+
+  const september = db.row(`SELECT event_time, timezone, meta_json FROM ${EVENTS_TABLE} WHERE event_id = 'official:fomc:2026-09-16'`);
+  assert.equal(september.event_time, '14:00', 'the hour comes from the month page');
+  assert.equal(september.timezone, 'America/New_York', 'and is stored in the Fed’s own zone');
+  assert.match(JSON.parse(september.meta_json).decisionTimeSource, /2026-september\.htm$/);
+
+  const fed = runOf(outcome.results, 'federal-reserve');
+  assert.equal(fed.timesConfirmed, 1, 'only September has a page in the fixtures');
+  assert.equal(fed.enrichment, 'partial');
+});
+
+test('a meeting whose month page is missing keeps its date with no hour', async () => {
+  const db = await freshDb();
+  await runCalendarSync(db, { fetchImpl: pageFetch(), now: NOW });
+
+  // No fixture stands in for 2026-december.htm or any 2027 page, so those
+  // fetches 404 the way an unpublished month does.
+  const december = db.row(`SELECT event_date, event_time, status FROM ${EVENTS_TABLE} WHERE event_id = 'official:fomc:2026-12-09'`);
+  assert.equal(december.event_date, '2026-12-09', 'the meeting is still on the calendar');
+  assert.equal(december.event_time, null);
+  assert.equal(december.status, 'scheduled');
+});
+
+test('the run says how many hours it could not confirm', async () => {
+  const db = await freshDb();
+  await runCalendarSync(db, { fetchImpl: pageFetch(), now: NOW });
+  const fed = (await getSourceRuns(db)).find(run => run.sourceName === 'federal-reserve');
+
+  assert.equal(fed.status, 'ok', 'an unconfirmed hour is not a failed source');
+  assert.match(fed.note, /decision time unconfirmed for 15 of 16 meetings/);
+});
+
+test('the press conference is never picked up as the decision', async () => {
+  const db = await freshDb();
+  await runCalendarSync(db, { fetchImpl: pageFetch(), now: NOW });
+  const times = db.rows(`SELECT event_time FROM ${EVENTS_TABLE} WHERE source_name = 'federal-reserve' AND event_time IS NOT NULL`);
+  assert.deepEqual([...new Set(times.map(row => row.event_time))], ['14:00']);
 });

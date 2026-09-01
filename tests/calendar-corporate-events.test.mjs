@@ -214,3 +214,43 @@ test('every rule names its own labels and both locale titles', () => {
   assert.deepEqual(CALENDAR_FILING_RULES.map(rule => rule.key),
     ['ir', 'earnings', 'shareholder_meeting', 'dividend_record']);
 });
+
+/* ------------------------- one filing, at most one event (a v1 invariant) */
+
+test('a filing produces at most one calendar event', () => {
+  // The identity is dart:<rceptNo> and nothing else, so one filing can only
+  // ever own one row. A filing that announces two separate dates would need
+  // dart:<rceptNo>:<kind> before it could carry both — and that is a change
+  // to make deliberately, not something to discover from a duplicate.
+  const filings = [
+    filing({ report_nm: '기업설명회(IR)개최(안내공시)' }),
+    filing({ rcept_no: '20260901000002', report_nm: '주주총회소집결의' }),
+    filing({ rcept_no: '20260901000003', report_nm: '현금ㆍ현물배당결정' })
+  ];
+  const candidates = selectCalendarCandidates(filings, CALENDAR_CODES);
+  assert.equal(candidates.length, 3);
+
+  // A document that names several dates at once still yields one event.
+  const crowded = '개최일시 2026년 10월 15일 주주총회일 2026년 10월 30일 배당기준일 2026년 12월 31일';
+  const events = candidates
+    .map(candidate => buildCorporateEvent(candidate, crowded, { now: NOW }))
+    .filter(result => result.ok)
+    .map(result => result.event);
+
+  assert.equal(events.length, 3, 'three filings, three events');
+  const ids = events.map(event => event.sourceEventId);
+  assert.deepEqual(ids, ['dart:20260901000001', 'dart:20260901000002', 'dart:20260901000003']);
+  assert.equal(new Set(ids).size, ids.length, 'one identity per filing');
+  // And each identity is exactly the receipt number, with nothing appended.
+  for (const id of ids) assert.match(id, /^dart:\d{14}$/);
+});
+
+test('one candidate yields one event and never a second for another date', () => {
+  const [candidate] = selectCalendarCandidates([filing()], CALENDAR_CODES);
+  const first = buildCorporateEvent(candidate, '개최일시 2026년 10월 15일', { now: NOW });
+  const second = buildCorporateEvent(candidate, '개최일시 2026년 10월 15일 개최일시 2026년 11월 20일', { now: NOW });
+
+  assert.equal(first.event.sourceEventId, second.event.sourceEventId);
+  // The first labelled date wins; a second one does not become another event.
+  assert.equal(second.event.eventDate, '2026-10-15');
+});
