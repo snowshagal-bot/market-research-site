@@ -126,13 +126,16 @@ test('an expiry is stored as a date with no invented time', () => {
   assert.equal(krx.eventTime, null, 'the exchange publishes a date, not a clock time');
   assert.equal(krx.sourceType, 'rule');
   assert.equal(krx.sourceEventId, 'krx-monthly:2026-09');
-  assert.equal(krx.titleKo, 'KRX 지수옵션 만기');
-  assert.equal(krx.titleEn, 'KRX index option expiry');
+  // Named for the monthly series: these are not the weekly or daily expiries.
+  assert.equal(krx.titleKo, 'KOSPI200 월물 옵션 만기');
+  assert.equal(krx.titleEn, 'KOSPI 200 Monthly Options Expiration');
 
   assert.equal(us.market, 'US');
   assert.equal(us.eventDate, '2026-09-18');
   assert.equal(us.eventTime, null);
   assert.equal(us.sourceEventId, 'us-monthly:2026-09');
+  assert.equal(us.titleKo, '미국 표준 월물 옵션 만기');
+  assert.equal(us.titleEn, 'US Standard Monthly Options Expiration');
 });
 
 test('the source identity is per month, so re-running a month cannot duplicate it', () => {

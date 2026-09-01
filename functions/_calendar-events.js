@@ -76,6 +76,9 @@ async function runSchema(db) {
       company_stock_code TEXT NOT NULL DEFAULT '',
       company_name TEXT NOT NULL DEFAULT '',
       status TEXT NOT NULL DEFAULT 'scheduled',
+      -- Source-specific detail that is worth keeping but is not the event
+      -- itself: the first day of a two-day FOMC meeting, for instance.
+      meta_json TEXT NOT NULL DEFAULT '{}',
       first_seen_at TEXT NOT NULL,
       last_verified_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
@@ -157,7 +160,8 @@ export function normalizeEvent(input = {}) {
     sourceEventId,
     companyStockCode: text(input.companyStockCode, 20),
     companyName: text(input.companyName, 80),
-    status
+    status,
+    meta: input.meta && typeof input.meta === 'object' ? input.meta : {}
   };
 }
 
@@ -177,11 +181,12 @@ export async function upsertEvent(db, input, now = new Date()) {
     await db.prepare(`INSERT INTO ${EVENTS_TABLE} (
         event_id, event_date, event_time, timezone, market, category, importance,
         title_ko, title_en, source_type, source_name, source_url, source_event_id,
-        company_stock_code, company_name, status, first_seen_at, last_verified_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+        company_stock_code, company_name, status, meta_json, first_seen_at, last_verified_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
       .bind(event.eventId, event.eventDate, event.eventTime, event.timezone, event.market, event.category,
         event.importance, event.titleKo, event.titleEn, event.sourceType, event.sourceName, event.sourceUrl,
-        event.sourceEventId, event.companyStockCode, event.companyName, event.status, nowStr, nowStr, nowStr).run();
+        event.sourceEventId, event.companyStockCode, event.companyName, event.status,
+        JSON.stringify(event.meta), nowStr, nowStr, nowStr).run();
     return { eventId: event.eventId, action: 'created' };
   }
 
@@ -193,12 +198,12 @@ export async function upsertEvent(db, input, now = new Date()) {
   await db.prepare(`UPDATE ${EVENTS_TABLE} SET
       event_date = ?, event_time = ?, timezone = ?, market = ?, category = ?, importance = ?,
       title_ko = ?, title_en = ?, source_name = ?, source_url = ?,
-      company_stock_code = ?, company_name = ?, status = ?,
+      company_stock_code = ?, company_name = ?, status = ?, meta_json = ?,
       last_verified_at = ?, updated_at = ?
     WHERE event_id = ?`)
     .bind(event.eventDate, event.eventTime, event.timezone, event.market, event.category, event.importance,
       event.titleKo, event.titleEn, event.sourceName, event.sourceUrl,
-      event.companyStockCode, event.companyName, status, nowStr, nowStr, event.eventId).run();
+      event.companyStockCode, event.companyName, status, JSON.stringify(event.meta), nowStr, nowStr, event.eventId).run();
 
   return { eventId: event.eventId, action: moved || wasCancelled ? 'changed' : 'verified' };
 }

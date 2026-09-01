@@ -179,6 +179,9 @@ CREATE TABLE IF NOT EXISTS market_calendar_events (
   company_stock_code TEXT NOT NULL DEFAULT '',
   company_name TEXT NOT NULL DEFAULT '',
   status TEXT NOT NULL DEFAULT 'scheduled',
+  -- Source-specific detail kept beside the event: the first day of a
+  -- two-day FOMC meeting, for instance. Never the event date itself.
+  meta_json TEXT NOT NULL DEFAULT '{}',
   first_seen_at TEXT NOT NULL,
   last_verified_at TEXT NOT NULL,
   updated_at TEXT NOT NULL

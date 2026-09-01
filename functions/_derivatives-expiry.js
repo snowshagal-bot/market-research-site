@@ -4,12 +4,16 @@
  * These two are the only market dates this repo derives itself, because both
  * exchanges publish them as rules rather than as schedules:
  *
- *   KRX  — KOSPI 200 options settle on the second Thursday of the contract
- *          month. When that Thursday is a closure the last trading day moves
- *          back to the trading day before it.
+ *   KRX  — KOSPI 200 monthly options settle on the second Thursday of the
+ *          contract month. When that Thursday is a closure the last trading
+ *          day moves back to the trading day before it.
  *   US   — standard monthly equity and index options expire on the third
  *          Friday. When that Friday is an exchange holiday, expiry moves back
  *          to the preceding business day.
+ *
+ * Both events are named for the monthly series specifically. Weekly, daily and
+ * other contract expiries follow different schedules and are not covered here,
+ * so the titles must not read as though they were.
  *
  * The holiday half is the part worth writing down: "second Thursday" and
  * "third Friday" alone are wrong in exactly the months a reader would most
@@ -89,8 +93,8 @@ export function monthlyExpiryEvents(year, month) {
       market: 'KR',
       category: 'derivatives_expiry',
       importance: 'normal',
-      titleKo: 'KRX 지수옵션 만기',
-      titleEn: 'KRX index option expiry',
+      titleKo: 'KOSPI200 월물 옵션 만기',
+      titleEn: 'KOSPI 200 Monthly Options Expiration',
       sourceType: 'rule',
       sourceName: 'krx-expiry-rule',
       sourceUrl: 'https://global.krx.co.kr/contents/GLB/05/0503/0503010301/GLB0503010301.jsp',
@@ -107,8 +111,8 @@ export function monthlyExpiryEvents(year, month) {
       market: 'US',
       category: 'derivatives_expiry',
       importance: 'normal',
-      titleKo: '미국 월물 옵션 만기',
-      titleEn: 'US monthly option expiry',
+      titleKo: '미국 표준 월물 옵션 만기',
+      titleEn: 'US Standard Monthly Options Expiration',
       sourceType: 'rule',
       sourceName: 'us-expiry-rule',
       sourceUrl: 'https://www.theocc.com/',
