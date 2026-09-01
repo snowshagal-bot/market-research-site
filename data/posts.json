@@ -1,5 +1,26 @@
 [
   {
+    "id": "2026-09-01-daily-1oq37xo",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-09-01",
+    "reportDate": "2026-09-01",
+    "registeredDate": "2026-09-01",
+    "registeredAt": "2026-09-01T10:07:27.803Z",
+    "legacyImport": false,
+    "title": "붙잡힌 시장가라앉은 지수",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "tags": [
+      "flows"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/9월 1일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-09-01-daily-1oq37xo.webp",
+    "shareCardImage": "covers/share/2026-09-01-daily-1oq37xo.jpg"
+  },
+  {
     "id": "2026-09-01-note-1k5d647",
     "type": "note",
     "typeLabel": "Investment Note",
