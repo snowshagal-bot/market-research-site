@@ -82,6 +82,7 @@ test('an unsupported year still answers, and still carries its events', async ()
   assert.equal(payload.supported, false);
   assert.deepEqual(payload.days, []);
   assert.ok(Array.isArray(payload.events), 'events do not depend on a holiday table');
+  assert.equal(payload.eventsStatus, 'ok');
   db.close();
 });
 
@@ -144,12 +145,27 @@ test('no operational detail travels to the public API', async () => {
   db.close();
 });
 
+test('a quiet month and an unreachable one are told apart', async () => {
+  const db = await seededDb();
+  // Nothing is scheduled in May, and the page knows that for a fact.
+  const quiet = await (await call('?year=2026&month=5', { COMMENTS_DB: db })).json();
+  assert.deepEqual(quiet.events, []);
+  assert.equal(quiet.eventsStatus, 'ok');
+
+  // Without a database the page cannot know either way, and says so.
+  const missing = await (await call('?year=2026&month=5', {})).json();
+  assert.deepEqual(missing.events, []);
+  assert.equal(missing.eventsStatus, 'unavailable');
+  db.close();
+});
+
 test('the calendar still renders when the database is not there', async () => {
   // The exchange schedule is checked in; a D1 outage costs the events only.
   const payload = await (await call('?year=2026&month=9', {})).json();
   assert.equal(payload.ok, true);
   assert.equal(payload.days.length, 30);
   assert.deepEqual(payload.events, []);
+  assert.equal(payload.eventsStatus, 'unavailable');
   assert.equal(payload.eventsTimezone, 'Asia/Seoul');
 });
 
@@ -158,10 +174,22 @@ test('a database that throws costs the events and nothing else', async () => {
     prepare() { throw new Error('D1 unavailable'); },
     async batch() { throw new Error('D1 unavailable'); }
   };
-  const payload = await (await call('?year=2026&month=9', { COMMENTS_DB: broken })).json();
+  const response = await call('?year=2026&month=9', { COMMENTS_DB: broken });
+  const payload = await response.json();
   assert.equal(payload.ok, true);
   assert.equal(payload.days.length, 30);
   assert.deepEqual(payload.events, []);
+  assert.equal(payload.eventsStatus, 'unavailable');
+  // The reason stays on the server: no exception text reaches the reader.
+  assert.equal(JSON.stringify(payload).includes('D1 unavailable'), false);
+});
+
+test('a month that answers carries the ok status', async () => {
+  const db = await seededDb();
+  const payload = await (await call('?year=2026&month=9', { COMMENTS_DB: db })).json();
+  assert.equal(payload.eventsStatus, 'ok');
+  assert.ok(payload.events.length > 0);
+  db.close();
 });
 
 test('the response stays cacheable', async () => {

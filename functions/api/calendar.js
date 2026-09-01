@@ -19,12 +19,13 @@ function json(data, status = 200, headers = {}) {
 }
 
 /**
- * Market events for the month, or an empty list when the database is not
- * reachable. The exchange calendar is checked in and needs no database, so a
- * D1 outage must cost the reader the events and not the whole page.
+ * Market events for the month, and whether they could be read at all.
  *
- * Operational detail — which source last failed, what a parser could not
- * confirm — belongs to the admin surface and never travels here.
+ * The exchange calendar is checked in and needs no database, so a D1 outage
+ * costs the reader the events and not the whole page. It also has to be
+ * distinguishable from a quiet month: an empty list with 'ok' means nothing
+ * is scheduled, and an empty list with 'unavailable' means the page could not
+ * find out. The reason itself stays here — no error text, no source metadata.
  */
 async function monthEvents(env, year, month) {
   if (!env?.COMMENTS_DB) return { events: [], available: false };
@@ -58,6 +59,7 @@ export async function onRequestGet({ request, env, now = new Date() }) {
   const calendarData = getMonthlyTradingCalendar(queryYear, queryMonth);
 
   if (!calendarData.supported) {
+    const deferred = await monthEvents(env, queryYear, queryMonth);
     return json({
       ok: true,
       supported: false,
@@ -71,12 +73,13 @@ export async function onRequestGet({ request, env, now = new Date() }) {
       // Events are stored per date and do not depend on a market's holiday
       // table, so a year without one can still carry them.
       eventsTimezone: DISPLAY_TIMEZONE,
-      events: (await monthEvents(env, queryYear, queryMonth)).events
+      eventsStatus: deferred.available ? 'ok' : 'unavailable',
+      events: deferred.events
     });
   }
 
   const upcoming = getUpcomingTradingEvents(currentKst.date, 12);
-  const { events } = await monthEvents(env, queryYear, queryMonth);
+  const { events, available } = await monthEvents(env, queryYear, queryMonth);
 
   return json({
     ok: true,
@@ -92,6 +95,7 @@ export async function onRequestGet({ request, env, now = new Date() }) {
     // always the month their source published them in. Each carries both
     // its source values and the converted ones.
     eventsTimezone: DISPLAY_TIMEZONE,
+    eventsStatus: available ? 'ok' : 'unavailable',
     events
   });
 }
