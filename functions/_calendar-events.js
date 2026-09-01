@@ -313,7 +313,7 @@ export async function getEventsForMonth(db, year, month) {
 }
 
 /** Nothing internal travels to the public API: no source errors, no timestamps. */
-export function publicEvent(row) {
+export function publicEvent(row, company = null) {
   return {
     id: row.event_id,
     date: row.event_date,
@@ -323,8 +323,14 @@ export function publicEvent(row) {
     category: row.category,
     importance: row.importance,
     title: { ko: row.title_ko || '', en: row.title_en || '' },
+    // The registered English name when the administrator entered one, and the
+    // Korean name as it stands when they did not. Nothing is translated here.
     company: row.company_stock_code
-      ? { stockCode: row.company_stock_code, name: row.company_name }
+      ? {
+        stockCode: row.company_stock_code,
+        name: company?.name || row.company_name,
+        nameEn: company?.nameEn || ''
+      }
       : null,
     source: { name: row.source_name, url: row.source_url || '' },
     status: row.status
@@ -366,10 +372,38 @@ export async function getEventsForDisplayMonth(db, year, month, displayTimeZone 
     WHERE event_date >= ? AND event_date <= ?`).bind(from, to).all();
 
   const prefix = `${y}-${String(m).padStart(2, '0')}-`;
+
+  // A company's dates are shown only while it is actually being followed for
+  // the calendar. Turning tracking off hides its events at once without
+  // deleting them, so turning it back on shows the same ones again rather than
+  // spending requests re-reading filings that have not changed.
+  const followed = await calendarCompanyIndex(db);
+
   return (result?.results || [])
-    .map(row => withDisplayTime(publicEvent(row), displayTimeZone))
+    .filter(row => !row.company_stock_code || followed.has(row.company_stock_code))
+    .map(row => withDisplayTime(publicEvent(row, followed.get(row.company_stock_code)), displayTimeZone))
     .filter(event => event.display.date.startsWith(prefix))
     .sort(byDisplayOrder);
+}
+
+/**
+ * The companies the calendar currently follows, and the names each locale
+ * should use for them. Empty when the disclosure tables are not there, which
+ * simply means no company events are shown.
+ */
+async function calendarCompanyIndex(db) {
+  const index = new Map();
+  try {
+    const result = await db.prepare(`SELECT stock_code, corp_name, corp_name_en FROM disclosure_watchlist
+      WHERE active = 1 AND calendar_enabled = 1`).all();
+    for (const row of result?.results || []) {
+      index.set(row.stock_code, { name: row.corp_name, nameEn: String(row.corp_name_en || '') });
+    }
+  } catch (_) {
+    // No watchlist table means no followed companies, and therefore no
+    // company events — never a page full of them from a stale table.
+  }
+  return index;
 }
 
 /**

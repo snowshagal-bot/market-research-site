@@ -342,6 +342,34 @@ export async function reserveRequest(db, usageDate, kind, limit) {
   return { allowed: false, count: Number(current?.request_count || 0), limit: safeLimit };
 }
 
+/**
+ * Reserves several requests at once, all or nothing.
+ *
+ * Reserving one at a time and stopping halfway would leave the earlier ones
+ * counted against the day for work that never happened. A caller that needs
+ * two requests to be useful asks for two.
+ */
+export async function reserveRequests(db, usageDate, kind, limit, amount = 1) {
+  const safeLimit = Math.max(0, Number(limit) || 0);
+  const safeAmount = Math.max(1, Number(amount) || 1);
+  const now = new Date().toISOString();
+  const result = await db.prepare(`INSERT INTO ${USAGE_TABLE} (usage_date, kind, request_count, input_tokens, output_tokens, updated_at)
+    SELECT ?, ?, ?, 0, 0, ?
+    WHERE ? >= ?
+    ON CONFLICT(usage_date, kind) DO UPDATE SET
+      request_count = ${USAGE_TABLE}.request_count + ?,
+      updated_at = excluded.updated_at
+    WHERE ${USAGE_TABLE}.request_count + ? <= ?
+    RETURNING request_count`)
+    .bind(usageDate, kind, safeAmount, now, safeLimit, safeAmount, safeAmount, safeAmount, safeLimit).all();
+
+  const reserved = result?.results?.[0];
+  if (reserved) return { allowed: true, reserved: safeAmount, count: Number(reserved.request_count || 0), limit: safeLimit };
+  const current = await db.prepare(`SELECT request_count FROM ${USAGE_TABLE} WHERE usage_date = ? AND kind = ? LIMIT 1`)
+    .bind(usageDate, kind).first();
+  return { allowed: false, reserved: 0, count: Number(current?.request_count || 0), limit: safeLimit };
+}
+
 export async function recordRequest(db, usageDate, kind) {
   const now = new Date().toISOString();
   await db.prepare(`INSERT INTO ${USAGE_TABLE} (usage_date, kind, request_count, input_tokens, output_tokens, updated_at)

@@ -267,7 +267,9 @@ test('a company event carries the company it belongs to', async () => {
     companyStockCode: '005930', companyName: '삼성전자'
   }), DAY_ONE);
   const [event] = await getEventsForMonth(db, 2026, 9);
-  assert.deepEqual(event.company, { stockCode: '005930', name: '삼성전자' });
+  // The English name is filled in from the watchlist by the public month query;
+  // the stored row alone carries the name the filing was made under.
+  assert.deepEqual(event.company, { stockCode: '005930', name: '삼성전자', nameEn: '' });
   db.close();
 });
 

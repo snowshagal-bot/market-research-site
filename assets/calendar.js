@@ -283,6 +283,10 @@
 
   function eventCompany(event) {
     if (!event.company) return '';
+    // English readers get the company's registered English name when there
+    // is one, and its Korean name as it stands when there is not. A name is
+    // never machine-translated for the sake of filling the gap.
+    if (!ko && event.company.nameEn) return event.company.nameEn;
     return event.company.name || event.company.stockCode || '';
   }
 

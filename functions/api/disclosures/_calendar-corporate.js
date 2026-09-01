@@ -26,21 +26,28 @@ import {
   disclosureConfig,
   ensureDisclosureSchema,
   getCalendarStockCodes,
-  reserveRequest
+  reserveRequests
 } from './_shared.js';
 import { buildCorporateEvent, selectCalendarCandidates } from './_calendar-extract.js';
 import { REQUESTS_PER_DOCUMENT, fetchFilingDocument } from './_calendar-document.js';
-import { EVENTS_TABLE, upsertEvent } from '../../_calendar-events.js';
+import { EVENTS_TABLE, recordSourceRun, upsertEvent } from '../../_calendar-events.js';
 
 /**
  * How many filings may be opened in one pass.
  *
- * Two requests each, so twenty filings is at most forty requests against a
- * daily budget in the thousands. The tracked companies file a handful of these
- * a day between them; the ceiling exists for the day something goes wrong, not
- * for the normal one.
+ * The binding constraint is not the daily OpenDART budget — that is in the
+ * thousands — but Cloudflare's cap on outbound requests within a single
+ * invocation, which is 50 on the free plan. The official sources spend 22 of
+ * those (one schedule page, sixteen monthly Fed pages, two BLS, one BEA, two
+ * Bank of Korea), so eight documents at two requests each brings the pass to
+ * 38 and leaves a dozen spare for redirects and retries.
+ *
+ * The tracked companies file a handful of these a day between them, so the
+ * ceiling is for the unusual day rather than the normal one. Anything over it
+ * is picked up by the next run: a filing that has not been read is still
+ * pending tomorrow.
  */
-export const MAX_DOCUMENTS_PER_RUN = 20;
+export const MAX_DOCUMENTS_PER_RUN = 8;
 
 /** How far back to look for filings that have not been read yet. */
 const LOOKBACK_DAYS = 7;
@@ -151,45 +158,46 @@ export async function syncCorporateEvents(db, { env = {}, fetchImpl = fetch, now
     status: 'ok',
     companies: calendarCodes.size,
     candidates: candidates.length,
+    // Kept apart on purpose: a filing that could not be fetched is a fault
+    // somewhere, while one whose document carries no date is simply not a
+    // calendar entry. Folding them together hides the first behind the second.
+    attempted: 0,
     opened: 0,
+    documentErrors: 0,
+    unreadable: 0,
     events: 0,
     superseded: 0,
-    skipped: 0,
     budgetExhausted: false,
     requests: 0
   };
+  let lastError = '';
 
   for (const candidate of candidates.slice(0, Math.max(0, limit))) {
-    // Both requests are reserved before either is made, so a document is never
-    // half-fetched on the last of the budget.
-    let reserved = 0;
-    for (let i = 0; i < REQUESTS_PER_DOCUMENT; i += 1) {
-      const budget = await reserveRequest(db, usageDate, 'source:opendart', config.dartDailyBudget);
-      if (!budget.allowed) break;
-      reserved += 1;
-    }
-    if (reserved < REQUESTS_PER_DOCUMENT) {
+    // Both requests are reserved in one statement, so a refusal leaves the
+    // counter untouched rather than charging for a document never opened.
+    const budget = await reserveRequests(db, usageDate, 'source:opendart', config.dartDailyBudget, REQUESTS_PER_DOCUMENT);
+    if (!budget.allowed) {
       outcome.budgetExhausted = true;
-      outcome.requests += reserved;
       break;
     }
-    outcome.requests += reserved;
+    outcome.requests += budget.reserved;
+    outcome.attempted += 1;
 
     let document;
     try {
       document = await fetchFilingDocument(candidate.rceptNo, { fetchImpl });
       outcome.opened += 1;
     } catch (error) {
-      // A filing that could not be opened is left for tomorrow: unlike an
-      // unreadable one, this may well be temporary.
-      outcome.skipped += 1;
+      // Left for tomorrow: unlike an unreadable document, this may be passing.
+      outcome.documentErrors += 1;
+      lastError = String(error?.message || error);
       continue;
     }
 
     const built = buildCorporateEvent(candidate, document, { now });
     if (!built.ok) {
       await rememberSkip(db, candidate, built.reason, now);
-      outcome.skipped += 1;
+      outcome.unreadable += 1;
       continue;
     }
 
@@ -200,6 +208,33 @@ export async function syncCorporateEvents(db, { env = {}, fetchImpl = fetch, now
     outcome.events += 1;
   }
 
+  // Nothing opening at all, when something was tried, means the route to DART
+  // is broken rather than that today had no dates in it. That has to reach the
+  // alert; a few failures among many are a note, not a page.
+  const allFailed = outcome.attempted > 0 && outcome.opened === 0;
+  const mostFailed = outcome.attempted >= 3 && outcome.documentErrors > outcome.attempted / 2;
+  if (allFailed || mostFailed) {
+    outcome.status = 'error';
+    outcome.error = `${outcome.documentErrors} of ${outcome.attempted} filing documents could not be fetched: ${lastError}`;
+    await recordSourceRun(db, {
+      sourceName: outcome.sourceName, sourceUrl: 'https://dart.fss.or.kr/',
+      status: 'error', error: outcome.error
+    }, now);
+    return outcome;
+  }
+
+  const note = [
+    outcome.documentErrors ? `${outcome.documentErrors} document(s) unreachable` : '',
+    outcome.unreadable ? `${outcome.unreadable} filing(s) carried no readable date` : '',
+    outcome.budgetExhausted ? 'stopped on the daily budget' : ''
+  ].filter(Boolean).join('; ');
+
+  // Recorded on every good run, so a previous failure is cleared once the
+  // source works again rather than lingering as the last thing anybody saw.
+  await recordSourceRun(db, {
+    sourceName: outcome.sourceName, sourceUrl: 'https://dart.fss.or.kr/',
+    status: 'ok', eventCount: outcome.events, note
+  }, now);
   return outcome;
 }
 

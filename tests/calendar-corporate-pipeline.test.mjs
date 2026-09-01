@@ -20,7 +20,7 @@ import {
   parseViewerArgs,
   viewerUrl
 } from '../functions/api/disclosures/_calendar-document.js';
-import { EVENTS_TABLE, ensureCalendarEventSchema, getEventsForDisplayMonth } from '../functions/_calendar-events.js';
+import { EVENTS_TABLE, ensureCalendarEventSchema, getEventsForDisplayMonth, getSourceRuns } from '../functions/_calendar-events.js';
 
 class SqliteStatement {
   constructor(database, sql) { this.database = database; this.sql = sql; this.values = []; }
@@ -171,7 +171,7 @@ test('a real IR filing becomes a calendar event a reader can see', async () => {
   const [event] = await getEventsForDisplayMonth(db, 2026, 4);
   assert.equal(event.id, `opendart:dart:${REAL_RECEIPT_NO}`);
   assert.deepEqual(event.display, { date: '2026-04-01', time: '13:00', timezone: 'Asia/Seoul', shifted: false });
-  assert.deepEqual(event.company, { stockCode: '001440', name: '대한전선' });
+  assert.deepEqual(event.company, { stockCode: '001440', name: '대한전선', nameEn: '' });
   db.close();
 });
 
@@ -227,7 +227,8 @@ test('a filing with no readable date is remembered rather than retried forever',
   const undated = dartFetch({ body: new TextEncoder().encode('<html><body>일시는 추후 공시 예정입니다.</body></html>') });
   const first = await syncCorporateEvents(db, { fetchImpl: undated, now: NOW });
   assert.equal(first.events, 0);
-  assert.equal(first.skipped, 1);
+  assert.equal(first.unreadable, 1, 'a document with no date is unreadable, not a fetch failure');
+  assert.equal(first.documentErrors, 0);
   assert.equal(db.row(`SELECT reason FROM market_calendar_skipped WHERE rcept_no = '20260330800111'`).reason, 'NO_LABELLED_DATE');
 
   const again = dartFetch();
@@ -270,13 +271,13 @@ test('an exhausted budget stops the pass instead of half-reading a filing', asyn
 test('the per-run ceiling bounds the worst day', async () => {
   const db = await seedDb();
   await addWatchlistCompany(db, { stockCode: '001440', corpName: '대한전선', disclosureEnabled: false, calendarEnabled: true }, NOW);
-  for (let i = 0; i < 25; i += 1) {
+  for (let i = 0; i < 12; i += 1) {
     await storeFiling(db, { rcept_no: `202603308001${String(i).padStart(2, '0')}` });
   }
 
   const fetchImpl = dartFetch();
   const outcome = await syncCorporateEvents(db, { fetchImpl, now: NOW });
-  assert.equal(outcome.candidates, 25);
+  assert.equal(outcome.candidates, 12);
   assert.equal(outcome.opened, MAX_DOCUMENTS_PER_RUN);
   assert.equal(fetchImpl.calls.length, MAX_DOCUMENTS_PER_RUN * 2);
   db.close();
@@ -341,4 +342,116 @@ test('the corporate step is part of the calendar sync, not a separate thing', as
   assert.match(source, /results\.push\(await syncCorporateEvents\(db, \{ env, fetchImpl, now \}\)\)/);
   // A failure there is reported like any other source, not swallowed.
   assert.match(source, /sourceName: 'opendart-corporate', status: 'error'/);
+});
+
+/* ------------------------------------------- when the source itself is broken */
+
+test('a source that cannot open anything is an error, not a quiet zero', async () => {
+  const db = await seedDb();
+  await addWatchlistCompany(db, { stockCode: '001440', corpName: '대한전선', disclosureEnabled: false, calendarEnabled: true }, NOW);
+  for (let i = 0; i < 4; i += 1) await storeFiling(db, { rcept_no: `2026033080077${i}` });
+
+  const outcome = await syncCorporateEvents(db, { fetchImpl: dartFetch({ shellStatus: 503 }), now: NOW });
+
+  assert.equal(outcome.status, 'error', 'DART being unreachable must reach the alert');
+  assert.equal(outcome.attempted, 4);
+  assert.equal(outcome.opened, 0);
+  assert.equal(outcome.documentErrors, 4);
+  assert.match(outcome.error, /could not be fetched/);
+
+  const run = (await getSourceRuns(db)).find(entry => entry.sourceName === 'opendart-corporate');
+  assert.equal(run.status, 'error');
+  assert.match(run.lastError, /HTTP 503/);
+  db.close();
+});
+
+test('a few failures among many are a note rather than a page', async () => {
+  const db = await seedDb();
+  await addWatchlistCompany(db, { stockCode: '001440', corpName: '대한전선', disclosureEnabled: false, calendarEnabled: true }, NOW);
+  for (let i = 0; i < 4; i += 1) await storeFiling(db, { rcept_no: `2026033080066${i}` });
+
+  // One filing refuses; the rest open.
+  let seen = 0;
+  const flaky = dartFetch();
+  const wrapped = async (url) => {
+    if (String(url).includes('dsaf001/main.do') && seen++ === 0) {
+      return { ok: false, status: 500, headers: { get: () => 'text/html' }, arrayBuffer: async () => new ArrayBuffer(0) };
+    }
+    return flaky(url);
+  };
+
+  const outcome = await syncCorporateEvents(db, { fetchImpl: wrapped, now: NOW });
+  assert.equal(outcome.status, 'ok');
+  assert.equal(outcome.documentErrors, 1);
+  assert.ok(outcome.opened >= 3);
+
+  const run = (await getSourceRuns(db)).find(entry => entry.sourceName === 'opendart-corporate');
+  assert.equal(run.status, 'ok');
+  assert.match(run.note, /1 document\(s\) unreachable/, 'it is written down rather than vanishing');
+  assert.equal(run.lastError, '');
+  db.close();
+});
+
+test('a source that failed yesterday is clean again after a good run', async () => {
+  const db = await seedDb();
+  await addWatchlistCompany(db, { stockCode: '001440', corpName: '대한전선', disclosureEnabled: false, calendarEnabled: true }, NOW);
+  await storeFiling(db, { rcept_no: '20260330800801' });
+
+  // Yesterday: DART unreachable.
+  const yesterday = new Date('2026-03-29T09:00:00.000Z');
+  await storeFiling(db, { rcept_no: '20260329800802', rcept_dt: '20260329' });
+  const failed = await syncCorporateEvents(db, { fetchImpl: dartFetch({ shellStatus: 503 }), now: yesterday });
+  assert.equal(failed.status, 'error');
+  const broken = (await getSourceRuns(db)).find(entry => entry.sourceName === 'opendart-corporate');
+  assert.equal(broken.status, 'error');
+  assert.ok(broken.lastError);
+  assert.equal(broken.lastSuccessAt, null, 'it has never worked yet');
+
+  // Today: it works.
+  const recovered = await syncCorporateEvents(db, { fetchImpl: dartFetch(), now: NOW });
+  assert.equal(recovered.status, 'ok');
+
+  const run = (await getSourceRuns(db)).find(entry => entry.sourceName === 'opendart-corporate');
+  assert.equal(run.status, 'ok');
+  assert.equal(run.lastError, '', 'the old failure is cleared');
+  assert.equal(run.lastSuccessAt, NOW.toISOString());
+  assert.equal(run.lastAttemptAt, NOW.toISOString());
+  assert.equal(run.eventCount, recovered.events);
+  db.close();
+});
+
+test('a good run records itself even when it had nothing to do', async () => {
+  const db = await seedDb();
+  const outcome = await syncCorporateEvents(db, { fetchImpl: dartFetch(), now: NOW });
+  assert.equal(outcome.status, 'ok');
+  assert.equal(outcome.attempted, 0);
+
+  const run = (await getSourceRuns(db)).find(entry => entry.sourceName === 'opendart-corporate');
+  assert.equal(run.status, 'ok');
+  assert.equal(run.lastSuccessAt, NOW.toISOString());
+  db.close();
+});
+
+/* ------------------------------------------------------- the budget, exactly */
+
+test('a budget with room for one request refuses a two-request document', async () => {
+  const db = await seedDb();
+  await addWatchlistCompany(db, { stockCode: '001440', corpName: '대한전선', disclosureEnabled: false, calendarEnabled: true }, NOW);
+  await storeFiling(db);
+
+  // Spend all but one of the day's allowance, then try to open a document.
+  const { reserveRequests } = await import('../functions/api/disclosures/_shared.js');
+  await reserveRequests(db, '2026-03-30', 'source:opendart', 50, 49);
+  const before = db.row(`SELECT request_count FROM disclosure_usage_daily WHERE kind = 'source:opendart'`).request_count;
+  assert.equal(before, 49);
+
+  const fetchImpl = dartFetch();
+  const outcome = await syncCorporateEvents(db, { fetchImpl, now: NOW, env: { DISCLOSURE_DART_DAILY_BUDGET: '50' } });
+
+  assert.equal(outcome.budgetExhausted, true);
+  assert.equal(outcome.attempted, 0, 'one request of room is not enough for a two-request document');
+  assert.equal(fetchImpl.calls.length, 0);
+  // And the refusal did not spend the last one.
+  assert.equal(db.row(`SELECT request_count FROM disclosure_usage_daily WHERE kind = 'source:opendart'`).request_count, 49);
+  db.close();
 });
