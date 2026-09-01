@@ -1,5 +1,48 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-02-note-1ojta7j",
+    "type": "note",
+    "typeLabel": "Investment Note",
+    "lang": "en",
+    "date": "2026-09-02",
+    "reportDate": "2026-09-02",
+    "registeredDate": "2026-09-02",
+    "registeredAt": "2026-09-01T15:29:52.609Z",
+    "legacyImport": false,
+    "title": "WGBI,Three Tranches Left",
+    "subtitle": "",
+    "description": "Notes and observations on markets and investing.",
+    "tags": [
+      "rates"
+    ],
+    "readingMinutes": 9,
+    "href": "reports/en/20260902_Investment_Note_Korea_WGBI_EN.html",
+    "translationGroup": "2026-09-02-note-xgdd5t",
+    "coverImage": "covers/2026-09-02-note-1ojta7j.webp",
+    "shareCardImage": "covers/share/2026-09-02-note-1ojta7j.jpg"
+  },
+  {
+    "id": "2026-09-02-note-xgdd5t",
+    "type": "note",
+    "typeLabel": "투자 노트",
+    "lang": "ko",
+    "date": "2026-09-02",
+    "reportDate": "2026-09-02",
+    "registeredDate": "2026-09-02",
+    "registeredAt": "2026-09-01T15:28:35.359Z",
+    "legacyImport": false,
+    "title": "WGBI,남은 세 번",
+    "subtitle": "",
+    "description": "시장과 투자에 관한 생각을 자유롭게 정리한 투자 노트.",
+    "tags": [
+      "rates"
+    ],
+    "readingMinutes": 8,
+    "href": "reports/20260902_Investment_Note_Korea_WGBI.html",
+    "coverImage": "covers/2026-09-02-note-xgdd5t.webp",
+    "shareCardImage": "covers/share/2026-09-02-note-xgdd5t.jpg"
+  },
+  {
     "id": "2026-09-01-daily-1uv21dp",
     "type": "daily",
     "typeLabel": "Daily",
