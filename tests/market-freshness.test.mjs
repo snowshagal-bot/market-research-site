@@ -48,6 +48,23 @@ test('KRX freshness uses today only after the close grace period', () => {
   );
 });
 
+test('KRX special session (CSAT day 2026-11-19) applies 1-hour grace after delayed 16:30 close', () => {
+  // Before 17:30 KST on CSAT day, freshness expects previous trading date
+  assert.equal(
+    expectedLatestKrxTradingDate(new Date('2026-11-19T07:05:00Z')), // 16:05 KST (during session)
+    '2026-11-18'
+  );
+  assert.equal(
+    expectedLatestKrxTradingDate(new Date('2026-11-19T08:29:00Z')), // 17:29 KST
+    '2026-11-18'
+  );
+  // At 17:30 KST (1h grace after 16:30 close), freshness expects today (2026-11-19)
+  assert.equal(
+    expectedLatestKrxTradingDate(new Date('2026-11-19T08:30:00Z')), // 17:30 KST
+    '2026-11-19'
+  );
+});
+
 test('KRX public holiday does not create a false stale alert', () => {
   assert.equal(isTradingDate('2026-05-25', 'KRX'), false);
   assert.equal(
@@ -128,4 +145,17 @@ test('scheduled health checker distinguishes current, stale, server, network and
     checkProductionMarketFreshness({ now, fetchImpl: async () => { throw timeout; } }),
     error => error instanceof MarketFreshnessError && error.kind === 'timeout'
   );
+});
+
+test('market-freshness-alert.yml workflow defines exact 17:00 and 18:30 KST cron schedules', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const workflow = await readFile(new URL('../.github/workflows/market-freshness-alert.yml', import.meta.url), 'utf8');
+
+  // Both cron schedules must be present
+  assert.match(workflow, /- cron:\s*["']0 8 \* \* 1-5["']/);
+  assert.match(workflow, /- cron:\s*["']30 9 \* \* 1-5["']/);
+
+  // Comments must clearly indicate 17:00 KST regular check and 18:30 KST post-recovery check
+  assert.match(workflow, /17:00 KST/);
+  assert.match(workflow, /18:30 KST/);
 });

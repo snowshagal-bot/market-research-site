@@ -2,8 +2,10 @@ name: Production MARKET Freshness Alert
 
 on:
   schedule:
-    # 17:00 KST on weekdays, after the 16:30 KST freshness grace period.
+    # 17:00 KST (08:00 UTC) on weekdays: verifies regular trading days after the 16:30 KST grace cutoff.
     - cron: "0 8 * * 1-5"
+    # 18:30 KST (09:30 UTC) on weekdays: verifies special trading days (e.g. CSAT) after Publisher 18:00~18:20 KST recovery slot.
+    - cron: "30 9 * * 1-5"
   workflow_dispatch:
 
 permissions:

@@ -1,4 +1,5 @@
 import { MAX_PAYLOAD_BYTES, MAX_TAKEAWAY_LENGTH, TABLE_NAME, MarketDbError, authorizePublish, ensureMarketTable, humanAdminPublishPolicy, isMarketWriteRequest, json, loadMarketSchema, validateMarketPayload } from './_shared.js';
+import { getKrxSessionTimes, kstParts } from '../../_trading-calendar.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -46,6 +47,30 @@ export async function onRequestPost(context) {
   }
   const validation = validateMarketPayload(payload, schema);
   if (!validation.passed) return json({ error: 'VALIDATION_FAILED', message: 'Market Close 데이터 계약 검증에 실패했습니다.', details: validation.errors }, 422);
+
+  // Machine publisher early publish guard:
+  // Reject automated requests for today's market date before the canonical session close and aggregation grace.
+  if (authSource === 'market-publish-key') {
+    const now = context.now || new Date();
+    const currentKst = kstParts(now);
+    const marketDate = payload?.meta?.market_date;
+    if (marketDate === currentKst.date) {
+      const session = getKrxSessionTimes(currentKst.date);
+      if (currentKst.minutes < session.publishEligibleMinutes) {
+        const hh = String(Math.floor(session.publishEligibleMinutes / 60)).padStart(2, '0');
+        const mm = String(session.publishEligibleMinutes % 60).padStart(2, '0');
+        return json({
+          error: 'MARKET_PUBLISH_TOO_EARLY',
+          message: `KRX 정규 거래 세션 종료 전 또는 발행 유예 시간 전에는 자동 게시할 수 없습니다. (발행 가능 시각: ${hh}:${mm} KST)`,
+          details: {
+            market_date: marketDate,
+            current_kst_time: `${String(Math.floor(currentKst.minutes / 60)).padStart(2, '0')}:${String(currentKst.minutes % 60).padStart(2, '0')}`,
+            publish_eligible_kst_time: `${hh}:${mm}`
+          }
+        }, 422);
+      }
+    }
+  }
 
   try {
     const db = await ensureMarketTable(env);

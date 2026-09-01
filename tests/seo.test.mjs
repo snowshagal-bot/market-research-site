@@ -129,6 +129,10 @@ test('repository post metadata references existing public report files without f
     `${PRODUCTION_ORIGIN}/en/about/`,
     `${PRODUCTION_ORIGIN}/market/`,
     `${PRODUCTION_ORIGIN}/en/market/`,
+    `${PRODUCTION_ORIGIN}/disclosures/`,
+    `${PRODUCTION_ORIGIN}/en/disclosures/`,
+    `${PRODUCTION_ORIGIN}/calendar/`,
+    `${PRODUCTION_ORIGIN}/en/calendar/`,
     ...Object.keys(CATEGORY_SLUGS).flatMap((type) => ['ko', 'en']
       .filter((lang) => posts.some((post) => post.type === type && (post.lang === 'en' ? 'en' : 'ko') === lang))
       .map((lang) => `${PRODUCTION_ORIGIN}${categoryLandingPath(type, lang)}`)),

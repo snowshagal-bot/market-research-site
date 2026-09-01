@@ -31,13 +31,15 @@ const CATEGORY_EYEBROWS = {
 
 function nav(lang) {
   const labels = lang === 'en'
-    ? { home: 'Home', market: 'Market', daily: 'Daily', weekly: 'Weekly', research: 'Research', note: 'Investment Note', basics: 'Market Basics' }
-    : { home: '홈', market: '마켓', daily: '데일리', weekly: '위클리', research: '리서치', note: '투자 노트', basics: '시장 입문' };
+    ? { home: 'Home', market: 'Market', disclosures: 'Disclosure', calendar: 'Calendar', daily: 'Daily', weekly: 'Weekly', research: 'Research', note: 'Investment Note', basics: 'Market Basics' }
+    : { home: '홈', market: '마켓', disclosures: '공시', calendar: '캘린더', daily: '데일리', weekly: '위클리', research: '리서치', note: '투자 노트', basics: '시장 입문' };
   const localePrefix = lang === 'en' ? '/en' : '';
   const homePath = lang === 'en' ? '/en/' : '/';
   const navTypes = ['daily', 'weekly', 'research', 'note', 'basics'];
   return `<a data-nav-category="all" href="${homePath}">${labels.home}</a>
         <a href="${localePrefix}/market/">${labels.market}</a>
+        <a href="${localePrefix}/disclosures/">${labels.disclosures}</a>
+        <a href="${localePrefix}/calendar/">${labels.calendar}</a>
         ${navTypes.map((type) => `<a data-nav-category="${type}" href="${categoryLandingPath(type, lang)}">${labels[type]}</a>`).join('\n        ')}`;
 }
 

@@ -16,12 +16,16 @@ export const TRACKED_ASSETS = [
   'assets/home-v2.css',
   'assets/category-landing.css',
   'assets/market-close.css',
+  'assets/disclosures.css',
+  'assets/calendar.css',
 
   // Core site scripts
   'assets/site.js',
   'assets/category-landing.js',
   'assets/locale.js',
   'assets/market-close.js',
+  'assets/disclosures.js',
+  'assets/calendar.js',
   'assets/report-shell.js',
   'assets/engagement.js',
 
@@ -69,6 +73,10 @@ export const STAMP_TARGETS = [
   'en/about/index.html',
   'market/index.html',
   'en/market/index.html',
+  'disclosures/index.html',
+  'en/disclosures/index.html',
+  'calendar/index.html',
+  'en/calendar/index.html',
   'admin/index.html',
   'admin/manage/index.html',
   'admin/market/index.html',
