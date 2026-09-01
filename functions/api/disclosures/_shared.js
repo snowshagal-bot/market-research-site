@@ -221,8 +221,11 @@ async function runSchemaMigration(db) {
       stock_code TEXT PRIMARY KEY,
       corp_code TEXT NOT NULL DEFAULT '',
       corp_name TEXT NOT NULL,
+      corp_name_en TEXT NOT NULL DEFAULT '',
       corp_cls TEXT NOT NULL DEFAULT 'Y',
       active INTEGER NOT NULL DEFAULT 1,
+      disclosure_enabled INTEGER NOT NULL DEFAULT 1,
+      calendar_enabled INTEGER NOT NULL DEFAULT 0,
       sort_order INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
@@ -262,6 +265,26 @@ async function runSchemaMigration(db) {
     }
   } catch (_) {}
 
+  // A company can be followed for two different reasons, and until now one
+  // switch meant both. Existing rows keep disclosure exactly as it was and
+  // join the calendar, which is what the thirty seeded companies are for.
+  try {
+    const watchlistInfo = await db.prepare(`PRAGMA table_info(${WATCHLIST_TABLE})`).all();
+    const watchlistCols = new Set((watchlistInfo?.results || []).map(r => r.name));
+    if (!watchlistCols.has('disclosure_enabled')) {
+      await db.prepare(`ALTER TABLE ${WATCHLIST_TABLE} ADD COLUMN disclosure_enabled INTEGER NOT NULL DEFAULT 1`).run();
+    }
+    if (!watchlistCols.has('calendar_enabled')) {
+      // The default is 0 for anything added later; the rows that predate the
+      // split are turned on explicitly below.
+      await db.prepare(`ALTER TABLE ${WATCHLIST_TABLE} ADD COLUMN calendar_enabled INTEGER NOT NULL DEFAULT 0`).run();
+      await db.prepare(`UPDATE ${WATCHLIST_TABLE} SET calendar_enabled = 1`).run();
+    }
+    if (!watchlistCols.has('corp_name_en')) {
+      await db.prepare(`ALTER TABLE ${WATCHLIST_TABLE} ADD COLUMN corp_name_en TEXT NOT NULL DEFAULT ''`).run();
+    }
+  } catch (_) {}
+
   // Index on publish_status and superseded_by after columns are guaranteed to exist
   try {
     await db.prepare(`CREATE INDEX IF NOT EXISTS idx_disclosure_published ON ${FILINGS_TABLE} (publish_status, rcept_dt DESC, rule_score DESC)`).run();
@@ -274,8 +297,8 @@ async function runSchemaMigration(db) {
     if (Number(countRow?.count || 0) === 0) {
       const now = new Date().toISOString();
       const seedStatements = DEFAULT_WATCHLIST.map(item =>
-        db.prepare(`INSERT OR IGNORE INTO ${WATCHLIST_TABLE} (stock_code, corp_code, corp_name, corp_cls, active, sort_order, created_at, updated_at)
-          VALUES (?, ?, ?, ?, 1, ?, ?, ?)`).bind(item.stockCode, item.corpCode, item.corpName, item.corpCls, item.sortOrder, now, now)
+        db.prepare(`INSERT OR IGNORE INTO ${WATCHLIST_TABLE} (stock_code, corp_code, corp_name, corp_cls, active, disclosure_enabled, calendar_enabled, sort_order, created_at, updated_at)
+          VALUES (?, ?, ?, ?, 1, 1, 1, ?, ?, ?)`).bind(item.stockCode, item.corpCode, item.corpName, item.corpCls, item.sortOrder, now, now)
       );
       if (seedStatements.length) await db.batch(seedStatements);
     }
@@ -472,53 +495,104 @@ export function normalizeFiling(item = {}, now = new Date()) {
 }
 
 export async function getWatchlist(db) {
-  const result = await db.prepare(`SELECT stock_code, corp_code, corp_name, corp_cls, active, sort_order, created_at, updated_at
+  const result = await db.prepare(`SELECT stock_code, corp_code, corp_name, corp_name_en, corp_cls, active,
+      disclosure_enabled, calendar_enabled, sort_order, created_at, updated_at
     FROM ${WATCHLIST_TABLE}
     ORDER BY sort_order ASC, corp_name ASC`).all();
   return (result?.results || []).map(row => ({
     stockCode: row.stock_code,
     corpCode: row.corp_code,
     corpName: row.corp_name,
+    corpNameEn: String(row.corp_name_en || ''),
     corpCls: row.corp_cls,
     active: Boolean(row.active),
+    disclosureEnabled: Boolean(row.disclosure_enabled),
+    calendarEnabled: Boolean(row.calendar_enabled),
     sortOrder: Number(row.sort_order || 0),
     createdAt: row.created_at,
     updatedAt: row.updated_at
   }));
 }
 
+// Which companies the disclosure engine treats as important. Following a
+// company for its calendar alone must not reach this set, or adding it would
+// quietly start auto-publishing its filings.
 export async function getWatchlistStockCodes(db) {
-  const result = await db.prepare(`SELECT stock_code FROM ${WATCHLIST_TABLE} WHERE active = 1`).all();
+  const result = await db.prepare(`SELECT stock_code FROM ${WATCHLIST_TABLE}
+    WHERE active = 1 AND disclosure_enabled = 1`).all();
   return new Set((result?.results || []).map(r => r.stock_code));
 }
 
-export async function addWatchlistCompany(db, { stockCode, corpCode = '', corpName, corpCls = 'Y', sortOrder = 0 }, now = new Date()) {
+// Which companies the calendar extracts future events for. Separate switch,
+// separate meaning: this one grants no disclosure priority at all.
+export async function getCalendarStockCodes(db) {
+  const result = await db.prepare(`SELECT stock_code FROM ${WATCHLIST_TABLE}
+    WHERE active = 1 AND calendar_enabled = 1`).all();
+  return new Set((result?.results || []).map(r => r.stock_code));
+}
+
+// The companies the calendar follows, with the names each locale should show.
+export async function getCalendarCompanies(db) {
+  const result = await db.prepare(`SELECT stock_code, corp_code, corp_name, corp_name_en FROM ${WATCHLIST_TABLE}
+    WHERE active = 1 AND calendar_enabled = 1
+    ORDER BY sort_order ASC, corp_name ASC`).all();
+  return (result?.results || []).map(row => ({
+    stockCode: row.stock_code,
+    corpCode: String(row.corp_code || ''),
+    corpName: row.corp_name,
+    corpNameEn: String(row.corp_name_en || '')
+  }));
+}
+
+export async function addWatchlistCompany(db, {
+  stockCode, corpCode = '', corpName, corpNameEn = '', corpCls = 'Y', sortOrder = 0,
+  disclosureEnabled = true, calendarEnabled = true
+}, now = new Date()) {
   const safeStock = String(stockCode || '').trim();
   const safeName = String(corpName || '').trim();
   if (!safeStock || !safeName) throw new DisclosureError('INVALID_INPUT', '종목코드와 회사명은 필수입니다.', 400);
   const nowStr = now.toISOString();
-  const todayReceiptDate = compactDate(kstDate(now));
-  await db.prepare(`INSERT INTO ${WATCHLIST_TABLE} (stock_code, corp_code, corp_name, corp_cls, active, sort_order, created_at, updated_at)
-    VALUES (?, ?, ?, ?, 1, ?, ?, ?)
+  const wantsDisclosure = Boolean(disclosureEnabled);
+  const wantsCalendar = Boolean(calendarEnabled);
+  await db.prepare(`INSERT INTO ${WATCHLIST_TABLE} (stock_code, corp_code, corp_name, corp_name_en, corp_cls, active,
+      disclosure_enabled, calendar_enabled, sort_order, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)
     ON CONFLICT(stock_code) DO UPDATE SET
       corp_name = excluded.corp_name,
+      corp_name_en = excluded.corp_name_en,
       corp_code = CASE WHEN excluded.corp_code != '' THEN excluded.corp_code ELSE ${WATCHLIST_TABLE}.corp_code END,
       corp_cls = excluded.corp_cls,
       active = 1,
+      disclosure_enabled = excluded.disclosure_enabled,
+      calendar_enabled = excluded.calendar_enabled,
       updated_at = excluded.updated_at`)
-    .bind(safeStock, String(corpCode || '').trim(), safeName, String(corpCls || 'Y').trim().toUpperCase(), Number(sortOrder) || 0, nowStr, nowStr).run();
+    .bind(safeStock, String(corpCode || '').trim(), safeName, String(corpNameEn || '').trim(),
+      String(corpCls || 'Y').trim().toUpperCase(), wantsDisclosure ? 1 : 0, wantsCalendar ? 1 : 0,
+      Number(sortOrder) || 0, nowStr, nowStr).run();
 
-  // Update existing filings for this stock code to is_watchlist = 1
-  await db.prepare(`UPDATE ${FILINGS_TABLE} SET is_watchlist = 1, updated_at = ? WHERE stock_code = ?`).bind(nowStr, safeStock).run();
+  await applyDisclosureMembership(db, safeStock, wantsDisclosure, now);
+
+  return { stockCode: safeStock, corpName: safeName, active: true, disclosureEnabled: wantsDisclosure, calendarEnabled: wantsCalendar };
+}
+
+/**
+ * Everything that follows from a company being a disclosure-priority company:
+ * the flag on its filings, and the same-day auto-publish that flag grants.
+ * Calendar tracking deliberately does not come through here.
+ */
+async function applyDisclosureMembership(db, stockCode, enabled, now = new Date()) {
+  const nowStr = now.toISOString();
+  const todayReceiptDate = compactDate(kstDate(now));
+  await db.prepare(`UPDATE ${FILINGS_TABLE} SET is_watchlist = ?, updated_at = ? WHERE stock_code = ?`)
+    .bind(enabled ? 1 : 0, nowStr, stockCode).run();
+  if (!enabled) return;
   // Auto-publish eligible high score filings for TODAY ONLY
   await db.prepare(`UPDATE ${FILINGS_TABLE} SET
       publish_status = 'auto',
       published_at = CASE WHEN published_at = '' OR published_at IS NULL THEN ? ELSE published_at END,
       updated_at = ?
     WHERE stock_code = ? AND rule_score >= 7 AND rcept_dt = ? AND publish_status = 'admin_only'`)
-    .bind(nowStr, nowStr, safeStock, todayReceiptDate).run();
-
-  return { stockCode: safeStock, corpName: safeName, active: true };
+    .bind(nowStr, nowStr, stockCode, todayReceiptDate).run();
 }
 
 export async function removeWatchlistCompany(db, stockCode, now = new Date()) {
@@ -535,21 +609,37 @@ export async function toggleWatchlistActive(db, stockCode, active, now = new Dat
   const safeStock = String(stockCode || '').trim();
   const isActive = Boolean(active);
   const nowStr = now.toISOString();
-  const todayReceiptDate = compactDate(kstDate(now));
   await db.prepare(`UPDATE ${WATCHLIST_TABLE} SET active = ?, updated_at = ? WHERE stock_code = ?`)
     .bind(isActive ? 1 : 0, nowStr, safeStock).run();
-  await db.prepare(`UPDATE ${FILINGS_TABLE} SET is_watchlist = ?, updated_at = ? WHERE stock_code = ?`)
-    .bind(isActive ? 1 : 0, nowStr, safeStock).run();
-  if (isActive) {
-    // Auto-publish eligible high score filings for TODAY ONLY
-    await db.prepare(`UPDATE ${FILINGS_TABLE} SET
-        publish_status = 'auto',
-        published_at = CASE WHEN published_at = '' OR published_at IS NULL THEN ? ELSE published_at END,
-        updated_at = ?
-      WHERE stock_code = ? AND rule_score >= 7 AND rcept_dt = ? AND publish_status = 'admin_only'`)
-      .bind(nowStr, nowStr, safeStock, todayReceiptDate).run();
-  }
-  return { stockCode: safeStock, active: isActive };
+  // Reactivating restores only what this company is actually enabled for.
+  const row = await db.prepare(`SELECT disclosure_enabled FROM ${WATCHLIST_TABLE} WHERE stock_code = ?`)
+    .bind(safeStock).first();
+  const disclosureEnabled = Boolean(row?.disclosure_enabled);
+  await applyDisclosureMembership(db, safeStock, isActive && disclosureEnabled, now);
+  return { stockCode: safeStock, active: isActive, disclosureEnabled };
+}
+
+/**
+ * Flips one purpose without touching the other. Turning disclosure on grants
+ * the same-day auto-publish that membership has always granted; turning it off
+ * withdraws the flag but leaves anything already published alone, the way
+ * removing a company does.
+ */
+export async function setWatchlistFlags(db, stockCode, { disclosureEnabled, calendarEnabled }, now = new Date()) {
+  const safeStock = String(stockCode || '').trim();
+  if (!safeStock) throw new DisclosureError('INVALID_INPUT', '종목코드가 필요합니다.', 400);
+  const current = await db.prepare(`SELECT active, disclosure_enabled, calendar_enabled FROM ${WATCHLIST_TABLE}
+    WHERE stock_code = ?`).bind(safeStock).first();
+  if (!current) throw new DisclosureError('NOT_FOUND', '등록되지 않은 종목코드입니다.', 404);
+
+  const nextDisclosure = disclosureEnabled === undefined ? Boolean(current.disclosure_enabled) : Boolean(disclosureEnabled);
+  const nextCalendar = calendarEnabled === undefined ? Boolean(current.calendar_enabled) : Boolean(calendarEnabled);
+  const nowStr = now.toISOString();
+  await db.prepare(`UPDATE ${WATCHLIST_TABLE} SET disclosure_enabled = ?, calendar_enabled = ?, updated_at = ?
+    WHERE stock_code = ?`).bind(nextDisclosure ? 1 : 0, nextCalendar ? 1 : 0, nowStr, safeStock).run();
+
+  await applyDisclosureMembership(db, safeStock, Boolean(current.active) && nextDisclosure, now);
+  return { stockCode: safeStock, disclosureEnabled: nextDisclosure, calendarEnabled: nextCalendar };
 }
 
 export async function setFilingPublishStatus(db, rceptNo, publishStatus, now = new Date()) {

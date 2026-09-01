@@ -90,16 +90,24 @@ CREATE INDEX IF NOT EXISTS idx_disclosure_published
 CREATE INDEX IF NOT EXISTS idx_disclosure_superseded
   ON disclosure_filings (superseded_by, publish_status);
 
+-- A company is followed for two independent reasons: disclosure priority and
+-- calendar tracking. Existing rows were migrated with both enabled.
 CREATE TABLE IF NOT EXISTS disclosure_watchlist (
   stock_code TEXT PRIMARY KEY,
   corp_code TEXT NOT NULL DEFAULT '',
   corp_name TEXT NOT NULL,
+  corp_name_en TEXT NOT NULL DEFAULT '',
   corp_cls TEXT NOT NULL DEFAULT 'Y',
   active INTEGER NOT NULL DEFAULT 1,
+  disclosure_enabled INTEGER NOT NULL DEFAULT 1,
+  calendar_enabled INTEGER NOT NULL DEFAULT 0,
   sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS idx_disclosure_watchlist_calendar
+  ON disclosure_watchlist (calendar_enabled, active, sort_order);
 
 CREATE INDEX IF NOT EXISTS idx_disclosure_watchlist_active
   ON disclosure_watchlist (active, sort_order, corp_name);
