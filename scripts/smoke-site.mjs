@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Buffer } from 'node:buffer';
 import { fileURLToPath } from 'node:url';
+import { validateProductionFreshness, validateSourceFreshness } from '../functions/api/market/_freshness.js';
 
 const PRODUCTION_ORIGIN = 'https://snowshagal.com';
 const CATEGORY_SLUG = {
@@ -148,7 +149,7 @@ function validateModeOrigin(origin, mode) {
   }
 }
 
-export async function runSmoke({ origin, mode, posts, fetchImpl = fetch, logger = console, enforceOrigin = true }) {
+export async function runSmoke({ origin, mode, posts, fetchImpl = fetch, logger = console, enforceOrigin = true, now = new Date() }) {
   if (!['production', 'preview'].includes(mode)) throw new Error('Mode must be production or preview.');
   if (!Array.isArray(posts) || posts.length === 0) throw new Error('Smoke requires current data/posts.json records.');
 
@@ -270,6 +271,14 @@ export async function runSmoke({ origin, mode, posts, fetchImpl = fetch, logger 
     try { payload = await response.json(); }
     catch (error) { throw new Error(`/api/market/latest: invalid JSON (${error.message})`); }
     validateMarketPayload(payload);
+    if (mode === 'production') {
+      const sourceFreshness = validateSourceFreshness(payload);
+      if (!sourceFreshness.passed) {
+        throw new Error(`market API: source freshness failed (${sourceFreshness.errors.join(' | ')})`);
+      }
+      const productionFreshness = validateProductionFreshness(payload, now);
+      if (!productionFreshness.passed) throw new Error(`market API: ${productionFreshness.message}`);
+    }
   });
 
   await check('comments read API', async () => {

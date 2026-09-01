@@ -6,6 +6,7 @@ import { onRequestGet as onRequestGetDate } from '../functions/api/market/date.j
 import { onRequestGet as onRequestGetDates } from '../functions/api/market/dates.js';
 import { onRequestGet as onRequestGetRange } from '../functions/api/market/range.js';
 import { computeMarketRange } from '../functions/api/market/_aggregate.js';
+import { previousTradingDate } from '../functions/api/market/_freshness.js';
 import { onRequestPost } from '../functions/api/market/publish.js';
 import { MAX_PAYLOAD_BYTES, isValidMarketDate, validateMarketPayload } from '../functions/api/market/_shared.js';
 
@@ -19,6 +20,12 @@ const alignGroupDate = (payload, marketDate) => {
   for (const rows of Object.values(payload.krx_groups || {})) {
     for (const row of rows) row.source_date = marketDate;
   }
+  const usDate = previousTradingDate(marketDate, 'NYSE');
+  for (const code of ['KOSPI', 'KOSDAQ']) payload.indices[code].source_date = marketDate;
+  for (const code of ['NASDAQ', 'DOW', 'SP500']) payload.indices[code].source_date = usDate;
+  for (const code of ['SOX', 'VIX', 'US10Y']) payload.rates_fx_volatility[code].source_date = usDate;
+  for (const code of ['USDKRW', 'JPYKRW', 'DXY']) payload.rates_fx_volatility[code].source_date = marketDate;
+  for (const code of ['WTI', 'GOLD', 'BITCOIN']) payload.commodities_crypto[code].source_date = marketDate;
 };
 
 class MockStatement {
@@ -93,6 +100,18 @@ test('legacy v1.0.1 payload remains publishable without krx_groups', () => {
   assert.deepEqual(validateMarketPayload(legacyFixture, schema), { passed: true, errors: [] });
 });
 
+test('publish validator rejects the observed stale US source-date regression', () => {
+  const stale = clone(fixture);
+  stale.meta.market_date = '2026-08-31';
+  alignGroupDate(stale, stale.meta.market_date);
+  for (const code of ['NASDAQ', 'DOW', 'SP500']) stale.indices[code].source_date = '2026-08-27';
+  for (const code of ['SOX', 'VIX', 'US10Y']) stale.rates_fx_volatility[code].source_date = '2026-08-27';
+  const result = validateMarketPayload(stale, schema);
+  assert.equal(result.passed, false);
+  assert.match(result.errors.join('\n'), /NASDAQ.*expected 2026-08-28.*2026-08-27/);
+  assert.match(result.errors.join('\n'), /US10Y.*expected 2026-08-28.*2026-08-27/);
+});
+
 test('legacy v1.0.1 payload can be stored and read back without krx_groups', async () => {
   const db = new MockDb();
   const published = await onRequestPost({
@@ -141,6 +160,25 @@ test('publish fails closed on Preview, missing auth, invalid JSON, and oversized
   assert.equal(response.status, 400);
   response = await onRequestPost({ request: publishRequest('{}', { 'x-market-publish-key': 'market-secret', 'content-length': String(MAX_PAYLOAD_BYTES + 1) }), env: environment(db) });
   assert.equal(response.status, 413);
+  assert.equal(db.rows.size, 0);
+});
+
+test('publish API rejects stale per-market source dates before any D1 write', async () => {
+  const db = new MockDb();
+  const stale = clone(fixture);
+  stale.meta.market_date = '2026-08-31';
+  alignGroupDate(stale, stale.meta.market_date);
+  for (const code of ['NASDAQ', 'DOW', 'SP500']) stale.indices[code].source_date = '2026-08-27';
+  for (const code of ['SOX', 'VIX', 'US10Y']) stale.rates_fx_volatility[code].source_date = '2026-08-27';
+
+  const response = await onRequestPost({
+    request: publishRequest(stale, { 'x-market-publish-key': 'market-secret' }),
+    env: environment(db)
+  });
+  const body = await response.json();
+  assert.equal(response.status, 422);
+  assert.equal(body.error, 'VALIDATION_FAILED');
+  assert.match(body.details.join('\n'), /NASDAQ.*expected 2026-08-28.*2026-08-27/);
   assert.equal(db.rows.size, 0);
 });
 
@@ -397,8 +435,8 @@ test('GET /api/market/range calculates window completeness for 1w (5 sessions) a
 
   // Add 5th date -> 1w complete: true
   const snap5 = clone(fixture);
-  snap5.meta.market_date = '2026-08-29';
-  alignGroupDate(snap5, '2026-08-29');
+  snap5.meta.market_date = '2026-08-31';
+  alignGroupDate(snap5, '2026-08-31');
   await onRequestPost({ request: publishRequest(snap5, { 'x-market-publish-key': 'market-secret' }), env });
 
   res = await onRequestGetRange({ request: new Request('https://snowshagal.com/api/market/range?period=1w'), env });
@@ -408,7 +446,7 @@ test('GET /api/market/range calculates window completeness for 1w (5 sessions) a
   assert.equal(data.window.required_sessions, 5);
   assert.equal(data.window.complete, true);
   assert.equal(data.window.start_date, '2026-08-25');
-  assert.equal(data.window.end_date, '2026-08-29');
+  assert.equal(data.window.end_date, '2026-08-31');
 
   // Query historical end=2026-08-27 -> 3 sessions (25, 26, 27)
   res = await onRequestGetRange({ request: new Request('https://snowshagal.com/api/market/range?period=1w&end=2026-08-27'), env });

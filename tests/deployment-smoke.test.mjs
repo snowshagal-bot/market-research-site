@@ -30,16 +30,41 @@ const categoryRoutes = new Set([
   '/en/daily/', '/en/weekly/', '/en/research/', '/en/basics/', '/en/notes/'
 ]);
 
+const SMOKE_NOW = new Date('2026-09-01T08:00:00Z');
+
 const marketPayload = {
   meta: {
-    market_date: '2026-08-29',
-    generated_at: '2026-08-29T01:00:00Z',
+    market_date: '2026-09-01',
+    generated_at: '2026-09-01T08:00:00Z',
     schema_version: '1.0.1',
     status: 'final'
   },
-  indices: { KOSPI: { close: 1 } },
+  indices: {
+    KOSPI: { close: 1, source_date: '2026-09-01', data_state: 'final_close' },
+    KOSDAQ: { close: 1, source_date: '2026-09-01', data_state: 'final_close' },
+    NASDAQ: { close: 1, source_date: '2026-08-31', data_state: 'final_close' },
+    DOW: { close: 1, source_date: '2026-08-31', data_state: 'final_close' },
+    SP500: { close: 1, source_date: '2026-08-31', data_state: 'final_close' }
+  },
+  rates_fx_volatility: {
+    SOX: { close: 1, source_date: '2026-08-31', data_state: 'final_close' },
+    VIX: { close: 1, source_date: '2026-08-31', data_state: 'final_close' },
+    US10Y: { close: 1, source_date: '2026-08-31', data_state: 'final_close' },
+    USDKRW: { close: 1, source_date: '2026-09-01', data_state: 'final_close' },
+    JPYKRW: { close: 1, source_date: '2026-09-01', data_state: 'final_close' },
+    DXY: { close: 1, source_date: '2026-09-01', data_state: 'intraday' }
+  },
+  commodities_crypto: {
+    WTI: { close: 1, source_date: '2026-09-01', data_state: 'intraday' },
+    GOLD: { close: 1, source_date: '2026-09-01', data_state: 'intraday' },
+    BITCOIN: { close: 1, source_date: '2026-09-01', data_state: 'intraday' }
+  },
   validation: { passed: true, errors: [] }
 };
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
 
 function html(canonical) {
   return `<!doctype html><html><head><link rel="canonical" href="${canonical}"></head><body>ok</body></html>`;
@@ -102,7 +127,7 @@ async function withServer(options, fn) {
         response.end(JSON.stringify({ error: 'DB_NOT_CONFIGURED' }));
       } else {
         response.writeHead(200, { 'content-type': 'application/json' });
-        response.end(options.invalidJson ? '{broken' : JSON.stringify(marketPayload));
+        response.end(options.invalidJson ? '{broken' : JSON.stringify(options.marketPayload || marketPayload));
       }
       return;
     }
@@ -135,7 +160,7 @@ const quiet = { log() {}, error() {} };
 async function expectFailure(options, expectedName, expectedMessage) {
   await withServer(options, async origin => {
     await assert.rejects(
-      runSmoke({ origin, mode: options.noindex ? 'preview' : 'production', posts, logger: quiet, enforceOrigin: false }),
+      runSmoke({ origin, mode: options.noindex ? 'preview' : 'production', posts, logger: quiet, enforceOrigin: false, now: SMOKE_NOW }),
       error => {
         assert.ok(error instanceof SmokeFailure);
         const failed = error.result.checks.find(item => item.name === expectedName);
@@ -149,7 +174,7 @@ async function expectFailure(options, expectedName, expectedMessage) {
 
 test('deployment smoke accepts valid 200 pages, 308 redirects, 404, sitemap, and API JSON', async () => {
   await withServer({}, async origin => {
-    const result = await runSmoke({ origin, mode: 'production', posts, logger: quiet, enforceOrigin: false });
+    const result = await runSmoke({ origin, mode: 'production', posts, logger: quiet, enforceOrigin: false, now: SMOKE_NOW });
     assert.equal(result.failed, 0);
     assert.equal(result.passed, result.total);
     assert.equal(result.total, 20);
@@ -158,7 +183,7 @@ test('deployment smoke accepts valid 200 pages, 308 redirects, 404, sitemap, and
 
 test('Preview mode requires and accepts the existing noindex policy', async () => {
   await withServer({ noindex: true }, async origin => {
-    const result = await runSmoke({ origin, mode: 'preview', posts, logger: quiet });
+    const result = await runSmoke({ origin, mode: 'preview', posts, logger: quiet, now: SMOKE_NOW });
     assert.equal(result.failed, 0);
   });
 });
@@ -200,6 +225,24 @@ test('deployment smoke rejects invalid API JSON', async () => {
 
 test('deployment smoke rejects Preview API 503 instead of treating a missing binding as PASS', async () => {
   await expectFailure({ noindex: true, market503: true }, 'market API', /expected HTTP 200, received 503/);
+});
+
+test('deployment smoke rejects a stale Production market_date despite HTTP 200', async () => {
+  const stale = clone(marketPayload);
+  stale.meta.market_date = '2026-08-31';
+  stale.meta.generated_at = '2026-08-31T08:00:00Z';
+  for (const code of ['KOSPI', 'KOSDAQ']) stale.indices[code].source_date = '2026-08-31';
+  for (const code of ['NASDAQ', 'DOW', 'SP500']) stale.indices[code].source_date = '2026-08-28';
+  for (const code of ['SOX', 'VIX', 'US10Y']) stale.rates_fx_volatility[code].source_date = '2026-08-28';
+  for (const code of ['USDKRW', 'JPYKRW', 'DXY']) stale.rates_fx_volatility[code].source_date = '2026-08-31';
+  for (const code of ['WTI', 'GOLD', 'BITCOIN']) stale.commodities_crypto[code].source_date = '2026-08-31';
+  await expectFailure({ marketPayload: stale }, 'market API', /Production market_date is stale: expected 2026-09-01, received 2026-08-31/);
+});
+
+test('deployment smoke rejects stale per-market source dates despite a current snapshot', async () => {
+  const staleSource = clone(marketPayload);
+  staleSource.indices.NASDAQ.source_date = '2026-08-27';
+  await expectFailure({ marketPayload: staleSource }, 'market API', /source freshness failed.*NASDAQ.*expected 2026-08-31.*2026-08-27/);
 });
 
 test('deployment smoke rejects comments GET 503 instead of treating a missing binding as PASS', async () => {
