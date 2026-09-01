@@ -308,7 +308,7 @@
     "lang": "en",
     "category": "daily",
     "typeLabel": "Daily",
-    "title": "The NightOpens First",
+    "title": "The Night Opens First",
     "subtitle": "",
     "date": "2026-08-26",
     "registeredAt": "2026-08-26T14:03:00.177Z",
@@ -328,7 +328,7 @@
     "lang": "ko",
     "category": "daily",
     "typeLabel": "주식 리포트",
-    "title": "먼저열리는 밤",
+    "title": "먼저 열리는 밤",
     "subtitle": "",
     "date": "2026-08-26",
     "registeredAt": "2026-08-26T13:58:29.784Z",
@@ -472,7 +472,7 @@
     "subtitle": "",
     "date": "2026-08-21",
     "registeredAt": "2026-08-24T18:25:49.152Z",
-    "summary": "193 stocks up.683 stocks down.",
+    "summary": "193 stocks up. 683 stocks down.",
     "tags": [
       "semiconductors",
       "flows"
@@ -506,7 +506,7 @@
     "lang": "en",
     "category": "basics",
     "typeLabel": "Market Basics",
-    "title": "How a SelloffFeeds on Itself",
+    "title": "How a Selloff Feeds on Itself",
     "subtitle": "",
     "date": "2026-08-20",
     "registeredAt": "2026-08-28T20:03:42.497Z",
@@ -525,7 +525,7 @@
     "lang": "ko",
     "category": "basics",
     "typeLabel": "시장 입문",
-    "title": "급락은 어떻게더 큰 급락을 만드는가",
+    "title": "급락은 어떻게 더 큰 급락을 만드는가",
     "subtitle": "",
     "date": "2026-08-20",
     "registeredAt": "2026-08-28T20:02:13.999Z",
@@ -548,7 +548,7 @@
     "subtitle": "",
     "date": "2026-08-20",
     "registeredAt": "2026-08-24T17:10:54.138Z",
-    "summary": "Prior-session high 6,614.39.Today's open 6,680.34.",
+    "summary": "Prior-session high 6,614.39. Today's open 6,680.34.",
     "tags": [
       "flows",
       "semiconductors",
@@ -588,7 +588,7 @@
     "subtitle": "",
     "date": "2026-08-19",
     "registeredAt": "2026-08-24T18:19:10.656Z",
-    "summary": "As the 30-year yield hit a high,the biggest prior winners were sold first",
+    "summary": "As the 30-year yield hit a high, the biggest prior winners were sold first",
     "tags": [
       "treasuries",
       "rates",
@@ -628,7 +628,7 @@
     "subtitle": "",
     "date": "2026-08-18",
     "registeredAt": "2026-08-24T18:17:14.398Z",
-    "summary": "The memory catalyststayed with SK Hynix,while institutional and non-arbitrage sellingcut breadth to 22%.",
+    "summary": "The memory catalyst stayed with SK Hynix, while institutional and non-arbitrage selling cut breadth to 22%.",
     "tags": [
       "semiconductors",
       "flows"
@@ -726,7 +726,7 @@
     "subtitle": "",
     "date": "2026-08-16",
     "registeredAt": "2026-08-23T17:19:08.100Z",
-    "summary": "GPU는 채권이 될 수 있을까?\r\n칩 위에 붙은 이자를 알아보자.",
+    "summary": "GPU는 채권이 될 수 있을까? 칩 위에 붙은 이자를 알아보자.",
     "tags": [
       "ai",
       "cloud-datacenter",
@@ -742,7 +742,7 @@
     "lang": "en",
     "category": "basics",
     "typeLabel": "Market Basics",
-    "title": "A Good CompanyIsn’t Always a Good Stock",
+    "title": "A Good Company Isn’t Always a Good Stock",
     "subtitle": "",
     "date": "2026-08-15",
     "registeredAt": "2026-08-28T16:30:43.438Z",
@@ -858,7 +858,7 @@
     "subtitle": "",
     "date": "2026-08-13",
     "registeredAt": "2026-08-24T18:03:24.015Z",
-    "summary": "The Index Rose Like the Tide533 Left in the Mudflats",
+    "summary": "The Index Rose Like the Tide 533 Left in the Mudflats",
     "tags": [
       "semiconductors",
       "flows"
@@ -915,7 +915,7 @@
     "subtitle": "",
     "date": "2026-08-12",
     "registeredAt": "2026-08-24T16:18:52.772Z",
-    "summary": "Two Semiconductor Giants,Waiting to Revisit Their Highs",
+    "summary": "Two Semiconductor Giants, Waiting to Revisit Their Highs",
     "tags": [
       "semiconductors",
       "flows"
@@ -973,7 +973,7 @@
     "subtitle": "",
     "date": "2026-08-11",
     "registeredAt": "2026-08-24T16:17:30.596Z",
-    "summary": "One ship on the ripples.The waters ahead are still dark.",
+    "summary": "One ship on the ripples. The waters ahead are still dark.",
     "tags": [
       "flows"
     ],
@@ -1047,7 +1047,7 @@
     "subtitle": "",
     "date": "2026-08-10",
     "registeredAt": "2026-08-24T15:01:44.842Z",
-    "summary": "With Samsung Electronics and SK Hynixtaking a breather,KOSDAQ and small- and mid-cap stocksbroadened the market first.",
+    "summary": "With Samsung Electronics and SK Hynix taking a breather, KOSDAQ and small- and mid-cap stocks broadened the market first.",
     "tags": [
       "semiconductors",
       "autos",
@@ -1166,7 +1166,7 @@
     "subtitle": "",
     "date": "2026-08-07",
     "registeredAt": "2026-08-24T14:08:52.539Z",
-    "summary": "The two market leaders diverged,and the index held its ground in between.",
+    "summary": "The two market leaders diverged, and the index held its ground in between.",
     "tags": [
       "semiconductors",
       "energy",
@@ -1246,7 +1246,7 @@
     "subtitle": "",
     "date": "2026-08-05",
     "registeredAt": "2026-08-24T11:42:40.621Z",
-    "summary": "As oil prices and interest rates cool.Returning hands.",
+    "summary": "As oil prices and interest rates cool. Returning hands.",
     "tags": [
       "energy",
       "rates",
@@ -1286,7 +1286,7 @@
     "subtitle": "",
     "date": "2026-08-04",
     "registeredAt": "2026-08-24T11:42:15.423Z",
-    "summary": "Large-cap semiconductors stalled,while the rest of the market drove the index recovery.",
+    "summary": "Large-cap semiconductors stalled, while the rest of the market drove the index recovery.",
     "tags": [
       "semiconductors",
       "flows"

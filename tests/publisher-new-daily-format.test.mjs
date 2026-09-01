@@ -6,21 +6,40 @@ import { __test as coverApi } from '../functions/api/generate-cover.js';
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 // A stand-in element that keeps the browser's own rules about whitespace: a
-// tag contributes none of its own to textContent, so only a <br> can hold two
-// lines apart, and only on a copy. A looser stub that turned every tag into a
-// space would pass code that runs a cover's two title rows together.
-function stubElement(innerHtml) {
+// tag contributes none of its own to textContent, so nothing but a <br> or a
+// child the detector is told is a row can hold two lines apart, and only on a
+// copy. A looser stub that turned every tag into a space would pass code that
+// runs a cover's two title rows together.
+function stubElement(innerHtml, className = '') {
+  const text = html => html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
   return {
     innerHtml,
-    get textContent() {
-      return this.innerHtml.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    className,
+    get textContent() { return text(this.innerHtml); },
+    matches(selector) {
+      return selector.startsWith('.') && className.split(/\s+/).includes(selector.slice(1));
     },
-    cloneNode() { return stubElement(this.innerHtml); },
+    get children() {
+      const owner = this;
+      const found = [];
+      const child = /<([a-z0-9]+)\b[^>]*>([\s\S]*?)<\/\1>/gi;
+      let match;
+      while ((match = child.exec(this.innerHtml))) {
+        const [raw, tag, inner] = match;
+        found.push({
+          tagName: tag.toUpperCase(),
+          get textContent() { return text(inner); },
+          replaceWith(replacement) { owner.innerHtml = owner.innerHtml.replace(raw, replacement); }
+        });
+      }
+      return found;
+    },
+    cloneNode() { return stubElement(this.innerHtml, className); },
     querySelectorAll(selector) {
       if (selector !== 'br') return [];
       const found = this.innerHtml.match(/<br\b[^>]*>/gi) || [];
       return found.map(() => ({
-        replaceWith: (text) => { this.innerHtml = this.innerHtml.replace(/<br\b[^>]*>/i, text); }
+        replaceWith: (replacement) => { this.innerHtml = this.innerHtml.replace(/<br\b[^>]*>/i, replacement); }
       }));
     }
   };
@@ -33,12 +52,14 @@ function parseHtmlDoc(html) {
   const extractInner = (selector) => {
     if (selector.startsWith('.')) {
       const cls = selector.slice(1);
-      const match = html.match(new RegExp(`<([a-z0-9]+)\\b[^>]*class\\s*=\\s*["'][^"']*\\b${cls}\\b[^"']*["'][^>]*>([\\s\\S]*?)<\\/\\1>`, 'i'));
-      if (match) return match[2];
+      const match = html.match(new RegExp(`<([a-z0-9]+)\\b[^>]*class\\s*=\\s*["']([^"']*\\b${cls}\\b[^"']*)["'][^>]*>([\\s\\S]*?)<\\/\\1>`, 'i'));
+      if (match) return { inner: match[3], className: match[2] };
     }
     if (selector === 'h1') {
-      const match = html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
-      if (match) return match[1];
+      const match = html.match(/<h1\b[^>]*class\s*=\s*["']([^"']*)["'][^>]*>([\s\S]*?)<\/h1>/i);
+      if (match) return { inner: match[2], className: match[1] };
+      const plain = html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
+      if (plain) return { inner: plain[1], className: '' };
     }
     return null;
   };
@@ -52,26 +73,37 @@ function parseHtmlDoc(html) {
       if (sel === 'meta[name="report-title"]') {
         return metaTitle ? { content: metaTitle } : null;
       }
-      const inner = extractInner(sel);
-      return inner !== null ? stubElement(inner) : null;
+      const found = extractInner(sel);
+      return found !== null ? stubElement(found.inner, found.className) : null;
     }
   };
 }
 
-async function loadAdminDetectTitle() {
+// The real functions out of assets/admin.js, including the list of cover
+// families whose children stand for a row, so a change to that list is a
+// change to what these tests exercise.
+async function loadAdminTitleReader() {
   const adminSource = await read('assets/admin.js');
   const body = (name, signature) => {
     const found = adminSource.match(new RegExp(`function ${name}\\(${signature}\\) \\{([\\s\\S]*?)\\n  \\}`));
     assert.ok(found, `admin.js no longer defines ${name}`);
     return found[1];
   };
-  const cleanTitleFn = new Function(`return function cleanTitle(s) { ${body('cleanTitle', 's')} }`)();
-  const brokenLineTextFn = new Function(
-    `return function brokenLineText(element) { ${body('brokenLineText', 'element')} }`
-  )();
-  const fn = new Function('cleanTitle', 'brokenLineText',
-    `return function detectTitle(name, doc) { ${body('detectTitle', 'name, doc')} }`);
-  return fn(cleanTitleFn, brokenLineTextFn);
+  const rows = adminSource.match(/const COVER_ROWS = (\[[\s\S]*?\]);/);
+  assert.ok(rows, 'admin.js no longer declares COVER_ROWS');
+
+  const built = new Function(`
+    const COVER_ROWS = ${rows[1]};
+    function cleanTitle(s) { ${body('cleanTitle', 's')} }
+    function brokenLineText(element) { ${body('brokenLineText', 'element')} }
+    function detectTitle(name, doc) { ${body('detectTitle', 'name, doc')} }
+    return { detectTitle, brokenLineText, COVER_ROWS };
+  `)();
+  return built;
+}
+
+async function loadAdminDetectTitle() {
+  return (await loadAdminTitleReader()).detectTitle;
 }
 
 test('Title Detection - Case A: .cv-h1 is chosen over generic body h1', async () => {
@@ -240,4 +272,58 @@ test('Cover Detection Regression - prior formats and no-cover document', () => {
   // No-cover document
   const noCoverHtml = '<div class="article"><h1>No Cover</h1><p>Body</p></div>';
   assert.equal(coverApi.selectCaptureSelector(noCoverHtml), '');
+});
+
+/* ----------------------------------- rows a stylesheet makes, not a <br> --- */
+
+test('a cover that stacks its title with block children reads as two rows', async () => {
+  const { detectTitle } = await loadAdminTitleReader();
+
+  // .cvtitle span is display:block in every Market Basics report.
+  const basics = detectTitle('x.html', parseHtmlDoc(
+    `<html><body><h1 class="cvtitle">How a Selloff<span>Feeds on Itself</span></h1></body></html>`
+  ));
+  assert.equal(basics, 'How a Selloff Feeds on Itself');
+
+  // .cover-title i is display:block with font-style:normal, so the italic is
+  // a row rather than emphasis.
+  const daily = detectTitle('x.html', parseHtmlDoc(
+    `<html><body><h1 class="cover-title"><i>The Night</i><i>Opens First</i></h1></body></html>`
+  ));
+  assert.equal(daily, 'The Night Opens First');
+
+  const korean = detectTitle('x.html', parseHtmlDoc(
+    `<html><body><h1 class="cover-title"><i>먼저</i><i>열리는 밤</i></h1></body></html>`
+  ));
+  assert.equal(korean, '먼저 열리는 밤');
+});
+
+test('an inline span inside a cover title is left where it reads', async () => {
+  const { detectTitle } = await loadAdminTitleReader();
+
+  // .han is a gloss, not a row: no display rule turns it into one. Treating
+  // every span as a row would put a space in front of it and change the title.
+  const glossed = detectTitle('x.html', parseHtmlDoc(
+    `<html><body><h1 class="cover-title">고도<span class="han">(高度)</span>를<br/>기다리며</h1></body></html>`
+  ));
+  assert.equal(glossed, '고도(高度)를 기다리며');
+  assert.doesNotMatch(glossed, /고도 \(/, 'the gloss stays attached to the word it glosses');
+
+  // A span in a family that is not on the list is inline too.
+  const other = detectTitle('x.html', parseHtmlDoc(
+    `<html><body><h1 class="cv-h1">Same inputs,<em>different answers</em></h1></body></html>`
+  ));
+  assert.equal(other, 'Same inputs,different answers');
+});
+
+test('only the tag its own family uses is read as a row', async () => {
+  const { brokenLineText, COVER_ROWS } = await loadAdminTitleReader();
+  assert.deepEqual(COVER_ROWS.find(([parent]) => parent === '.cvtitle'), ['.cvtitle', 'span']);
+
+  const readOf = html => brokenLineText(parseHtmlDoc(html).querySelector('.cvtitle'))
+    .replace(/\s+/g, ' ').trim();
+
+  // An <i> inside .cvtitle is not that family's row element, so it stays inline.
+  assert.equal(readOf('<h1 class="cvtitle">one<i>two</i></h1>'), 'onetwo');
+  assert.equal(readOf('<h1 class="cvtitle">one<span>two</span></h1>'), 'one two');
 });

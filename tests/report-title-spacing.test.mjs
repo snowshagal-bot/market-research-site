@@ -7,35 +7,67 @@ import { reportDescription } from '../functions/_seo.js';
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 /**
- * The two readings of a cover's title.
- *
- * `glued` is what a browser's textContent gives back: tags contribute nothing,
- * so a title set across two rows arrives with its rows run together. `spaced`
- * is the same reading with each <br> restored to the space it stood for.
- *
- * Where a cover breaks its rows some other way — an inline element the
- * stylesheet turns into a block — the two readings agree here, and the editor's
- * own wording in the form is what settles it. Those titles are left alone.
+ * The cover families whose children stand for a row rather than for emphasis.
+ * Each pair is display:block in the stylesheet of every report that uses it,
+ * and the list is kept in step with COVER_ROWS in assets/admin.js.
  */
-function readTitle(html) {
-  const opened = /<h1\b[^>]*>([\s\S]*?)<\/h1>/i.exec(html);
-  if (!opened) return null;
-  const inner = opened[1];
-  const strip = text => text
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;|&#160;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/[​-‍﻿⁠]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+const COVER_ROWS = [
+  ['cover-title', 'i'],
+  ['cover-oneline', 'i'],
+  ['cover-idx', 'i'],
+  ['cv-one', 'i'],
+  ['cvtitle', 'span']
+];
+
+const collapse = text => text
+  .replace(/&nbsp;|&#160;/g, ' ')
+  .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+  .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'")
+  .replace(/[​-‍﻿⁠]/g, '')
+  .replace(/\s+/g, ' ')
+  .trim();
+
+/**
+ * The two readings of one element's markup.
+ *
+ * `glued` is what a browser's textContent gives back: no tag contributes a
+ * space of its own, so a value set on two rows arrives with the rows run
+ * together. `spaced` is the same reading with each row restored — a <br>, and
+ * a child of a family listed above.
+ *
+ * Anywhere else the two agree, and the value the editor typed into the form is
+ * what settles it.
+ */
+function readings(openTag, inner) {
+  const family = /class="([^"]*)"/.exec(openTag)?.[1] || '';
+  const rowTag = COVER_ROWS.find(([parent]) => family.split(/\s+/).includes(parent))?.[1];
+  let spaced = inner.replace(/<br\b[^>]*>/gi, ' ');
+  if (rowTag) {
+    spaced = spaced.replace(new RegExp(`<${rowTag}\\b[^>]*>([\\s\\S]*?)</${rowTag}>`, 'gi'), ' $1 ');
+  }
   return {
-    glued: strip(inner),
-    spaced: strip(inner.replace(/<br\b[^>]*>/gi, ' ')),
-    hasBreak: /<br\b[^>]*>/i.test(inner)
+    glued: collapse(inner.replace(/<[^>]+>/g, '')),
+    spaced: collapse(spaced.replace(/<[^>]+>/g, ''))
   };
 }
 
-test('no published title is its own cover read with the line breaks swallowed', async () => {
+// The closing tag has to be the one that opened, or a wrapper full of <i>
+// rows ends at the first </i> and the reading is only its first row.
+function firstElement(html, pattern) {
+  const found = pattern.exec(html);
+  if (!found) return null;
+  const [, tag, inner] = found;
+  assert.ok(tag && inner !== undefined, 'the pattern must capture a tag and its contents');
+  return readings(found[0].slice(0, found[0].indexOf('>') + 1), inner);
+}
+
+const titleOf = html => firstElement(html, /<(h1)\b[^>]*>([\s\S]*?)<\/\1>/i);
+const summaryOf = html => firstElement(
+  html,
+  /<([a-z0-9]+)\b[^>]*class="[^"]*\bcover-(?:oneline|summary|description)\b[^"]*"[^>]*>([\s\S]*?)<\/\1>/i
+);
+
+test('no published title is its own cover read with the rows run together', async () => {
   const posts = JSON.parse(await read('data/posts.json'));
   const glued = [];
 
@@ -43,28 +75,52 @@ test('no published title is its own cover read with the line breaks swallowed', 
     if (!post.href) continue;
     let html;
     try { html = await read(post.href); } catch { continue; }
-    const reading = readTitle(html);
-    // A report whose title the editor set explicitly answers to that, not to
-    // its cover markup.
-    if (!reading || !reading.hasBreak) continue;
     if (/<meta\s+name=["']report-title["']/i.test(html)) continue;
-    if (reading.glued === reading.spaced) continue;
 
+    const reading = titleOf(html);
+    if (!reading || reading.glued === reading.spaced) continue;
     if (post.title === reading.glued) {
       glued.push(`${post.id}: ${JSON.stringify(post.title)} should read ${JSON.stringify(reading.spaced)}`);
     }
   }
 
-  assert.deepEqual(glued, [], `titles missing the space a <br> stood for:\n  ${glued.join('\n  ')}`);
+  assert.deepEqual(glued, [], `titles missing a space the layout shows:\n  ${glued.join('\n  ')}`);
+});
+
+test('no stored summary is its own cover read with the rows run together', async () => {
+  const posts = JSON.parse(await read('data/posts.json'));
+  const glued = [];
+
+  for (const post of posts) {
+    if (!post.href || !post.summary) continue;
+    let html;
+    try { html = await read(post.href); } catch { continue; }
+
+    const reading = summaryOf(html);
+    if (!reading || reading.glued === reading.spaced) continue;
+    if (collapse(post.summary) === reading.glued) {
+      glued.push(`${post.id}: ${JSON.stringify(post.summary.slice(0, 60))} should read ${JSON.stringify(reading.spaced.slice(0, 60))}`);
+    }
+  }
+
+  assert.deepEqual(glued, [], `summaries missing a space the layout shows:\n  ${glued.join('\n  ')}`);
+});
+
+test('a stored summary reaches a search result on one line', async () => {
+  const posts = JSON.parse(await read('data/posts.json'));
+  const ragged = posts
+    .filter(post => post.summary && post.summary !== collapse(post.summary))
+    .map(post => `${post.id}: ${JSON.stringify(post.summary.slice(0, 50))}`);
+  assert.deepEqual(ragged, [], `summaries carrying raw line breaks:\n  ${ragged.join('\n  ')}`);
 });
 
 test('the repaired titles are the ones the covers actually set', async () => {
   const posts = JSON.parse(await read('data/posts.json'));
   const byId = new Map(posts.map(post => [post.id, post.title]));
 
-  // Each of these ran two cover rows together until the reading was fixed.
-  // They are named outright so a regeneration that reintroduces the glue is
-  // caught here rather than noticed months later in a search result.
+  // Ten ran their rows together across a <br>, five across a child the
+  // stylesheet turns into a block. They are named outright so a regeneration
+  // that reintroduces the glue is caught here rather than in a search result.
   const repaired = {
     '2026-09-02-note-1ojta7j': 'WGBI, Three Tranches Left',
     '2026-09-02-note-xgdd5t': 'WGBI, 남은 세 번',
@@ -75,7 +131,12 @@ test('the repaired titles are the ones the covers actually set', async () => {
     '2026-08-29-weekly-4xkdij': 'While One Pillar Took a Breather',
     '2026-08-04-weekly-q9jryh': '한 축이 쉬는 동안',
     '2026-08-29-research-15pk9zq': 'Behind the Coin Are Treasuries',
-    '2026-08-29-research-178u9g5': '코인의 뒷면에는 국채가 있다'
+    '2026-08-29-research-178u9g5': '코인의 뒷면에는 국채가 있다',
+    '2026-08-26-daily-15udspv': 'The Night Opens First',
+    '2026-08-26-daily-1ufok0a': '먼저 열리는 밤',
+    '2026-08-20-basics-1txn8bp': 'How a Selloff Feeds on Itself',
+    '2026-08-20-basics-1jqzwpd': '급락은 어떻게 더 큰 급락을 만드는가',
+    '2026-08-15-basics-ntseyw': 'A Good Company Isn’t Always a Good Stock'
   };
 
   for (const [id, title] of Object.entries(repaired)) {
@@ -83,10 +144,30 @@ test('the repaired titles are the ones the covers actually set', async () => {
   }
 });
 
+test('the repaired summaries keep their own words and gain only spaces', async () => {
+  const posts = JSON.parse(await read('data/posts.json'));
+  const byId = new Map(posts.map(post => [post.id, post.summary]));
+
+  // Nothing here is rewritten: each pair differs by whitespace alone.
+  const repaired = {
+    '2026-08-21-daily-16tx7f1': '193 stocks up. 683 stocks down.',
+    '2026-08-19-daily-otvpwu': 'As the 30-year yield hit a high, the biggest prior winners were sold first',
+    '2026-08-18-daily-tfmejq': 'The memory catalyst stayed with SK Hynix, while institutional and non-arbitrage selling cut breadth to 22%.',
+    '2026-08-13-daily-1nnspvd': 'The Index Rose Like the Tide 533 Left in the Mudflats',
+    '2026-08-11-daily-yxlmio': 'One ship on the ripples. The waters ahead are still dark.',
+    '2026-08-24-daily-og5aig': 'As oil prices and interest rates cool. Returning hands.',
+    '2026-08-16-research-141u5l9': 'GPU는 채권이 될 수 있을까? 칩 위에 붙은 이자를 알아보자.'
+  };
+
+  for (const [id, summary] of Object.entries(repaired)) {
+    assert.equal(byId.get(id), summary, id);
+  }
+});
+
 test('a title the editor spaced by hand is never rewritten from the markup', async () => {
-  // 고도<span class="han">(高度)</span>를<br/>기다리며 — the parenthetical is a
-  // block in the stylesheet, so the browser reads no space before it and the
-  // editor supplied one. Restoring only <br> would take that space away again.
+  // 고도<span class="han">(高度)</span>를<br/>기다리며 — the gloss is inline, so
+  // the browser reads no space before it and the editor supplied one. Reading
+  // every span as a row would take that space back out.
   const posts = JSON.parse(await read('data/posts.json'));
   const post = posts.find(entry => entry.id === '2026-08-12-daily-15kwiwr');
   assert.ok(post, 'the 高度 report is still published');

@@ -351,15 +351,42 @@
     return s.replace(/\s*[|·｜]\s*(market research|daily market report|weekly).*$/i,'').replace(/_커버통합|\.html?$/gi,'').replace(/_/g,' ').trim();
   }
 
-  // Covers set a title across two rows with <br>. Reading textContent straight
-  // off the element closes that gap and runs "시장" into "가라앉은", so the
-  // breaks become spaces on a copy first and the document is left alone. Other
-  // tags contribute nothing of their own, exactly as textContent has it.
+  // Two things put a cover's second row on its own line, and neither leaves
+  // anything behind in textContent: a <br>, and a child the cover's own
+  // stylesheet turns into a block. Read straight off the element, a title set
+  // on two rows arrives with the rows run together — "붙잡힌 시장가라앉은 지수".
+  //
+  // Only the pairs below are read as rows. Each is display:block in the
+  // stylesheet of every report that uses it: `.cover-title i` and `.cv-one i`
+  // are display:block with font-style:normal, so the italic is a row and not
+  // emphasis, and `.cvtitle span` is display:block. This is deliberately a
+  // list and not a rule about elements — the gloss in "고도 (高度)를 기다리며"
+  // is a span inside .cover-title, and it is inline, so it stays as it reads.
+  const COVER_ROWS = [
+    ['.cover-title', 'i'],
+    ['.cover-oneline', 'i'],
+    ['.cover-idx', 'i'],
+    ['.cv-one', 'i'],
+    ['.cvtitle', 'span']
+  ];
+
   function brokenLineText(element) {
     if (!element) return '';
     const clone = element.cloneNode ? element.cloneNode(true) : null;
     if (!clone || typeof clone.querySelectorAll !== 'function') return element.textContent || '';
     clone.querySelectorAll('br').forEach(br => { br.replaceWith(' '); });
+    if (typeof clone.matches === 'function') {
+      const pair = COVER_ROWS.find(([parent]) => clone.matches(parent));
+      // Direct children only, and only the one tag this cover family uses for
+      // its rows. Anything else inside the title is left exactly as it is.
+      if (pair) {
+        Array.from(clone.children || []).forEach(child => {
+          if (String(child.tagName || '').toLowerCase() === pair[1]) {
+            child.replaceWith(` ${child.textContent} `);
+          }
+        });
+      }
+    }
     return clone.textContent || '';
   }
 
@@ -390,10 +417,14 @@
   }
 
   function detectSummary(doc) {
-    const declared = (doc.querySelector('meta[name="report-summary"]')?.content || '').trim();
+    // A declared summary can still be written across lines in the attribute,
+    // and it travels into a search result on one, so it is collapsed too.
+    const declared = (doc.querySelector('meta[name="report-summary"]')?.content || '').replace(/\s+/g, ' ').trim();
     if (declared) return declared.slice(0, 500);
     for (const selector of ['.cover-oneline', '.opener .stand', '.cover-summary', '.cover-description', '[data-report-summary]']) {
-      const text = (doc.querySelector(selector)?.textContent || '').replace(/\s+/g, ' ').trim();
+      // Covers set these across rows exactly as they set a title, so the rows
+      // are read apart rather than run together.
+      const text = brokenLineText(doc.querySelector(selector)).replace(/\s+/g, ' ').trim();
       if (text) return text.slice(0, 500);
     }
     return '';
