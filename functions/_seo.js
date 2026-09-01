@@ -267,7 +267,11 @@ export function reportDescription(post) {
   const lang = postLanguage(post);
   const title = normalize(post?.title);
   const date = reportDateLabel(post, lang);
-  const supplied = normalize(post?.description || post?.subtitle);
+  // The sentence the report itself chose as its point. It says something no
+  // other report says, which is what a search result needs and what the
+  // category boilerplate below can never be.
+  const takeaway = normalize(post?.takeaway);
+  const supplied = takeaway || normalize(post?.description || post?.subtitle);
   const category = CATEGORY_LANDINGS[post?.type]?.[lang]?.heading || (lang === 'en' ? 'market report' : '시장 리포트');
   let context = category;
   if (post?.type === 'daily') context = lang === 'en' ? 'Korean market daily report' : '한국 주식시장 데일리';
@@ -627,15 +631,16 @@ export function reportSeoTags(posts, post) {
   const lang = postLanguage(post);
   const title = reportSeoTitle(post);
   const description = reportDescription(post);
-  const cover = post.coverImage ? absoluteSiteUrl(post.coverImage) : '';
   // og:image is always a 1200x630 landscape card, so nothing that crops to
   // 1.91:1 can behead the artwork.
   const card = reportCardPath(post);
   const ogImage = absoluteSiteUrl(card || SOCIAL_FALLBACK_IMAGE);
-  // X keeps the report's own cover: the summary card shows a small thumbnail
-  // rather than a cropped band, so the portrait artwork survives intact.
-  const twitterImage = cover || absoluteSiteUrl(SOCIAL_FALLBACK_IMAGE);
-  const twitterCard = cover ? 'summary' : 'summary_large_image';
+  // X gets the same landscape card, at the full width a large card is given.
+  // The card already carries the portrait cover whole, beside the wordmark and
+  // the date, so nothing is cropped by asking for the bigger frame — the
+  // small summary thumbnail only made the same artwork harder to read.
+  const twitterImage = ogImage;
+  const twitterCard = 'summary_large_image';
   const counterpart = findTranslationCounterpart(posts, post);
   const alternates = reportAlternates(posts, post)
     .map((entry) => `<link rel="alternate" hreflang="${entry.lang}" href="${escapeHtml(entry.href)}">`)
