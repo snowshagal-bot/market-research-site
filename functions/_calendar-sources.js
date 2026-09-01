@@ -332,3 +332,34 @@ export const SOURCE_USER_AGENT =
   'Mozilla/5.0 (compatible; SnowshagalCalendarBot/1.0; +https://snowshagal.com)';
 
 export const __test = { tableRows, cellText, monthNumber, beaScheduleYear, realDate };
+
+/* ------------------------------------------------- FOMC time enrichment */
+
+/**
+ * The hour the policy decision is released, read from the Fed's own page.
+ *
+ * The meeting calendar lists dates only. The Committee's statement has gone
+ * out at 2:00 p.m. Eastern for years, and the Fed states that on its own
+ * pages — but only in prose, and not on every revision of them. So the time
+ * is read when it is written and left absent when it is not: a convention
+ * everybody knows is still not something this calendar will assert on the
+ * Fed's behalf.
+ *
+ * Returns null rather than throwing. A missing time costs the reader an hour
+ * of precision; a missing meeting costs them the meeting.
+ */
+export function parseFomcDecisionTime(html) {
+  const text = collapse(stripTags(String(html)));
+  // The time has to be tied to the statement or the decision, not to a
+  // conference, a speech, or an unrelated release on the same page.
+  const pattern = /(statement|policy decision|decision)[^.]{0,80}?\b(\d{1,2}):(\d{2})\s*(a\.m\.|p\.m\.)/i;
+  const match = pattern.exec(text);
+  if (!match) return null;
+
+  let hour = Number(match[2]);
+  const minute = Number(match[3]);
+  if (!Number.isInteger(hour) || hour < 1 || hour > 12 || minute > 59) return null;
+  if (/p\.m\./i.test(match[4]) && hour < 12) hour += 12;
+  if (/a\.m\./i.test(match[4]) && hour === 12) hour = 0;
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}

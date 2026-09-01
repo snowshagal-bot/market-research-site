@@ -99,6 +99,9 @@ async function runSchema(db) {
       last_error TEXT NOT NULL DEFAULT '',
       event_count INTEGER NOT NULL DEFAULT 0,
       last_status TEXT NOT NULL DEFAULT 'ok',
+      -- What a successful run could not confirm, such as a release time the
+      -- source did not publish. Not an error: the events still landed.
+      last_note TEXT NOT NULL DEFAULT '',
       updated_at TEXT NOT NULL
     )`)
   ]);
@@ -246,13 +249,13 @@ export async function cancelMissingEvents(db, { sourceName, fromDate, toDate, se
  */
 export const SOURCE_RUN_STATUSES = Object.freeze(['ok', 'pending', 'error']);
 
-export async function recordSourceRun(db, { sourceName, sourceUrl = '', ok, status, error = '', eventCount = 0 }, now = new Date()) {
+export async function recordSourceRun(db, { sourceName, sourceUrl = '', ok, status, error = '', eventCount = 0, note = '' }, now = new Date()) {
   const runStatus = SOURCE_RUN_STATUSES.includes(status) ? status : (ok ? 'ok' : 'error');
   const succeeded = runStatus !== 'error';
   const nowStr = now.toISOString();
   await db.prepare(`INSERT INTO market_calendar_sources (
-      source_name, source_url, last_success_at, last_attempt_at, last_error, event_count, last_status, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      source_name, source_url, last_success_at, last_attempt_at, last_error, event_count, last_status, last_note, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(source_name) DO UPDATE SET
       source_url = CASE WHEN excluded.source_url != '' THEN excluded.source_url ELSE market_calendar_sources.source_url END,
       last_success_at = CASE WHEN excluded.last_success_at != '' THEN excluded.last_success_at ELSE market_calendar_sources.last_success_at END,
@@ -260,14 +263,15 @@ export async function recordSourceRun(db, { sourceName, sourceUrl = '', ok, stat
       last_error = excluded.last_error,
       event_count = CASE WHEN excluded.last_error = '' THEN excluded.event_count ELSE market_calendar_sources.event_count END,
       last_status = excluded.last_status,
+      last_note = excluded.last_note,
       updated_at = excluded.updated_at`)
     .bind(sourceName, String(sourceUrl || ''), succeeded ? nowStr : '', nowStr,
       succeeded ? '' : String(error || 'unknown').slice(0, 300),
-      Number(eventCount) || 0, runStatus, nowStr).run();
+      Number(eventCount) || 0, runStatus, String(note || '').slice(0, 200), nowStr).run();
 }
 
 export async function getSourceRuns(db) {
-  const result = await db.prepare(`SELECT source_name, source_url, last_success_at, last_attempt_at, last_error, event_count, last_status
+  const result = await db.prepare(`SELECT source_name, source_url, last_success_at, last_attempt_at, last_error, event_count, last_status, last_note
     FROM market_calendar_sources ORDER BY source_name ASC`).all();
   return (result?.results || []).map(row => ({
     sourceName: row.source_name,
@@ -276,7 +280,8 @@ export async function getSourceRuns(db) {
     lastAttemptAt: row.last_attempt_at || null,
     lastError: row.last_error || '',
     eventCount: Number(row.event_count || 0),
-    status: row.last_status || 'ok'
+    status: row.last_status || 'ok',
+    note: row.last_note || ''
   }));
 }
 

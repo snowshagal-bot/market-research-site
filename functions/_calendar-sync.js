@@ -20,6 +20,7 @@ import {
   parseBeaSchedule,
   parseBlsSchedule,
   parseBokSchedule,
+  parseFomcDecisionTime,
   parseFomcSchedule
 } from './_calendar-sources.js';
 import { cancelMissingEvents, recordSourceRun, upsertEvent } from './_calendar-events.js';
@@ -42,7 +43,7 @@ async function fetchText(url, fetchImpl) {
  * it, so a source that answers for one year cannot withdraw another year's
  * events.
  */
-async function commitSource(db, { sourceName, sourceUrl, events, window: span }, now) {
+async function commitSource(db, { sourceName, sourceUrl, events, window: span, note = '' }, now) {
   const seen = new Set();
   let created = 0;
   let changed = 0;
@@ -56,7 +57,7 @@ async function commitSource(db, { sourceName, sourceUrl, events, window: span },
     ? await cancelMissingEvents(db, { sourceName, fromDate: span.from, toDate: span.to, seenEventIds: seen }, now)
     : { cancelled: 0 };
 
-  await recordSourceRun(db, { sourceName, sourceUrl, status: 'ok', eventCount: events.length }, now);
+  await recordSourceRun(db, { sourceName, sourceUrl, status: 'ok', eventCount: events.length, note }, now);
   return { sourceName, status: 'ok', events: events.length, created, changed, cancelled };
 }
 
@@ -74,12 +75,21 @@ export async function syncFomc(db, { years, fetchImpl, now }) {
     const html = await fetchText(FOMC_URL, fetchImpl);
     const events = [];
     for (const year of years) events.push(...parseFomcSchedule(html, { year }));
-    return await commitSource(db, {
+
+    // The meeting list carries dates only. When the Fed states the release
+    // time on the same page, it is used; when it does not, the meeting keeps
+    // its date with no time rather than being dropped, and the run says so.
+    const decisionTime = parseFomcDecisionTime(html);
+    if (decisionTime) for (const event of events) event.eventTime = decisionTime;
+
+    const result = await commitSource(db, {
       sourceName: 'federal-reserve',
       sourceUrl: FOMC_URL,
       events,
-      window: { from: `${years[0]}-01-01`, to: `${years[years.length - 1]}-12-31` }
+      window: { from: `${years[0]}-01-01`, to: `${years[years.length - 1]}-12-31` },
+      note: decisionTime ? '' : 'decision time unconfirmed'
     }, now);
+    return { ...result, enrichment: decisionTime ? 'confirmed' : 'unconfirmed', decisionTime: decisionTime || null };
   } catch (error) {
     return failSource(db, { sourceName: 'federal-reserve', sourceUrl: FOMC_URL, error }, now);
   }
