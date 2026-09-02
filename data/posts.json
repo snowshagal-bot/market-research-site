@@ -1,5 +1,28 @@
 [
   {
+    "id": "2026-09-02-daily-1cf4sz2",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-02",
+    "reportDate": "2026-09-02",
+    "registeredDate": "2026-09-03",
+    "registeredAt": "2026-09-02T19:19:49.228Z",
+    "legacyImport": false,
+    "title": "Heavier Than the Support",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "flows"
+    ],
+    "readingMinutes": 4,
+    "href": "reports/en/9월 2일 주식리포트_커버통합_en.html",
+    "translationGroup": "2026-09-02-daily-1xpzuhv",
+    "coverImage": "covers/2026-09-02-daily-1cf4sz2.webp",
+    "shareCardImage": "covers/share/2026-09-02-daily-1cf4sz2.jpg",
+    "coverThumbnail": "covers/2026-09-02-daily-1cf4sz2-450.webp"
+  },
+  {
     "id": "2026-09-02-daily-1xpzuhv",
     "type": "daily",
     "typeLabel": "주식 리포트",
