@@ -1,5 +1,27 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-02-daily-1xpzuhv",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-09-02",
+    "reportDate": "2026-09-02",
+    "registeredDate": "2026-09-03",
+    "registeredAt": "2026-09-02T19:18:02.398Z",
+    "legacyImport": false,
+    "title": "받침보다 무거운 날",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "tags": [
+      "flows"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/9월 2일 주식리포트_커버통합.html",
+    "coverImage": "covers/2026-09-02-daily-1xpzuhv.webp",
+    "shareCardImage": "covers/share/2026-09-02-daily-1xpzuhv.jpg",
+    "coverThumbnail": "covers/2026-09-02-daily-1xpzuhv-450.webp"
+  },
+  {
     "id": "2026-09-02-note-1ojta7j",
     "type": "note",
     "typeLabel": "Investment Note",
