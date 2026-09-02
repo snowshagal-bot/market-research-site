@@ -138,11 +138,12 @@ test('the thumbnail name is derived the same way by the writers', () => {
 
 /* ------------------------------------------- what is left exactly as it was */
 
-test('category landings, share cards and social images do not use the thumbnail', async () => {
+test('category landings offer the thumbnail from the record; share cards and social images never do', async () => {
   const posts = JSON.parse(await text('data/posts.json'));
   const category = categoryFeaturedCards(posts, 'research', 'ko');
-  assert.doesNotMatch(category, /-450\.webp/);
-  assert.doesNotMatch(category, /srcset=/);
+  // Same field, same two files, its own layout-measured sizes.
+  assert.match(category, /srcset="\/covers\/[^"]+-450\.webp 450w, \/covers\/[^"]+ 900w"/);
+  assert.doesNotMatch(category, /sizes="\(max-width: 760px\) 30vw, 112px"/, 'not the homepage card sizes');
   for (const post of posts.filter(entry => entry.coverImage)) {
     assert.doesNotMatch(reportSeoTags(posts, post), /-450\.webp/, `${post.id}: a social image is never the thumbnail`);
   }
