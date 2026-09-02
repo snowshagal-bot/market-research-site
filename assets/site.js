@@ -41,13 +41,17 @@
   const COVER_ORIGINAL_WIDTH = 900;
   const LATEST_CARD_COVER_SIZES = '(max-width: 760px) 30vw, 112px';
   const HERO_FEATURED_COVER_SIZES = '(max-width: 760px) 140px, 220px';
-  function coverThumbnailPath(cover){
-    const match = String(cover || '').match(/^(.*)\.(webp|png|jpe?g)$/i);
-    return match ? `${match[1]}-${COVER_THUMBNAIL_WIDTH}.webp` : '';
+  // Only a thumbnail the post's metadata records is offered: the field is
+  // written when the file was committed and dropped when it was not, and a
+  // browser shows a broken image for a missing srcset candidate rather than
+  // falling back to src.
+  function coverThumbnailOf(post){
+    const thumbnail = String(post && post.coverThumbnail || '');
+    return /-450\.webp$/i.test(thumbnail) ? rootPath(thumbnail) : '';
   }
-  function coverThumbnailMarkup(cover, sizes){
-    const original = rootPath(cover);
-    const thumbnail = coverThumbnailPath(original);
+  function coverImageMarkup(post, sizes){
+    const original = rootPath(post.coverImage);
+    const thumbnail = coverThumbnailOf(post);
     if (!thumbnail) return `<img src="${esc(original)}" alt="" loading="lazy">`;
     return `<img src="${esc(original)}"`
       + ` srcset="${esc(thumbnail)} ${COVER_THUMBNAIL_WIDTH}w, ${esc(original)} ${COVER_ORIGINAL_WIDTH}w"`
@@ -576,7 +580,7 @@
       const summary=String(post.summary||post.description||post.subtitle||'').trim();
       const readLabel=locale==='en'?'Read report':'리포트 보기';
       const visual=post.coverImage
-        ? `<span class="latest-card-cover">${coverThumbnailMarkup(post.coverImage, LATEST_CARD_COVER_SIZES)}</span>`
+        ? `<span class="latest-card-cover">${coverImageMarkup(post, LATEST_CARD_COVER_SIZES)}</span>`
         : '<span class="latest-card-art" aria-hidden="true"></span>';
       const summaryCopy=summary?`<p class="latest-card-summary">${esc(summary)}</p>`:'';
       const readingTimeStr = formatReadingTime(post.readingMinutes, locale);
@@ -1175,7 +1179,7 @@
         // really is; without `sizes` a browser assumes the full viewport and
         // takes the 900px file every time.
         const cover = latestResearch.coverImage ? rootPath(latestResearch.coverImage) : '';
-        const thumbnail = cover ? coverThumbnailPath(cover) : '';
+        const thumbnail = cover ? coverThumbnailOf(latestResearch) : '';
         // An empty srcset is the same as none, so the fallback artwork is
         // simply a plain src again.
         imgEl.srcset = cover && thumbnail ? `${thumbnail} 450w, ${cover} 900w` : '';

@@ -133,20 +133,34 @@ export const LATEST_CARD_COVER_SIZES = '(max-width: 760px) 30vw, 112px';
 export const HERO_FEATURED_COVER_SIZES = '(max-width: 760px) 140px, 220px';
 
 /**
- * An <img> that offers the thumbnail and the original and lets the browser
- * choose by the space it actually has. The original is the `src`, so a cover
- * published before its thumbnail exists still shows; the intrinsic size keeps
- * the box at the cover's own 2:3 while the bytes are on their way.
+ * The thumbnail a post actually has, or nothing.
+ *
+ * Only `coverThumbnail` in the post's metadata counts: it is written when the
+ * file was committed and removed when it was not, so the cards never name a
+ * file that was merely expected. A browser does not fall back to `src` when a
+ * srcset candidate is missing — it shows a broken image — so guessing here
+ * would turn one failed thumbnail into a broken card.
  */
-export function coverThumbnailMarkup(cover, sizes, extra = '') {
-  const original = normalizeSitePath(cover);
-  const thumbnail = coverThumbnailPath(original);
-  if (!thumbnail) return `<img src="/${escapeHtml(original)}" alt="" loading="lazy"${extra}>`;
+export function coverThumbnailOf(post) {
+  const thumbnail = normalizeSitePath(post?.coverThumbnail);
+  return /-450\.webp$/i.test(thumbnail) ? thumbnail : '';
+}
+
+/**
+ * An <img> for a post's cover. With a thumbnail it offers both files and lets
+ * the browser choose by the space it actually has; without one it is the
+ * plain original, exactly as the cards were before thumbnails existed.
+ */
+export function coverImageMarkup(post, sizes) {
+  const original = normalizeSitePath(post?.coverImage);
+  const thumbnail = coverThumbnailOf(post);
+  if (!original) return '';
+  if (!thumbnail) return `<img src="/${escapeHtml(original)}" alt="" loading="lazy">`;
   return `<img src="/${escapeHtml(original)}"`
     + ` srcset="/${escapeHtml(thumbnail)} ${COVER_THUMBNAIL_WIDTH}w, /${escapeHtml(original)} ${COVER_ORIGINAL_WIDTH}w"`
     + ` sizes="${escapeHtml(sizes)}"`
     + ` width="${COVER_ORIGINAL_WIDTH}" height="${COVER_ORIGINAL_WIDTH * 3 / 2}"`
-    + ` alt="" loading="lazy"${extra}>`;
+    + ` alt="" loading="lazy">`;
 }
 
 // Uploaded report HTML declares no icon, so the shared shell supplies one.
@@ -471,7 +485,7 @@ export function homepageLatestLinks(posts, lang) {
         .trim();
       const cover = normalizeSitePath(post?.coverImage);
       const visual = cover
-        ? `<span class="latest-card-cover">${coverThumbnailMarkup(cover, LATEST_CARD_COVER_SIZES)}</span>`
+        ? `<span class="latest-card-cover">${coverImageMarkup(post, LATEST_CARD_COVER_SIZES)}</span>`
         : '<span class="latest-card-art" aria-hidden="true"></span>';
       const mins = typeof post?.readingMinutes === 'number' && post.readingMinutes > 0 ? post.readingMinutes : 0;
       const readingSuffix = mins > 0 ? (lang === 'en' ? ` · ${mins} min read` : ` · 약 ${mins}분`) : '';

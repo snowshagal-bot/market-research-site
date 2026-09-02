@@ -236,16 +236,22 @@ test('replacing a cover writes the homepage thumbnail beside it, and never delet
     const tree = treeFrom(calls);
     assert.equal(tree.find((entry) => entry.path === `covers/${basePost.id}-450.webp`)?.sha, 'cover-blob-sha');
     assert.equal(tree.filter((entry) => entry.path === `covers/${basePost.id}-450.webp` && entry.sha === null).length, 0);
+    assert.equal(postsFromTree(tree)[0].coverThumbnail, `covers/${basePost.id}-450.webp`, 'the record says the file is there');
   } finally { globalThis.fetch = originalFetch; }
 
-  // Without one, and with no thumbnail visible in the repository, nothing is
-  // deleted: a delete of a path that is not there would fail the whole save.
-  calls = githubMock([post]);
+  // Without one — the browser could not compose it — the record says so, so
+  // the cards use the new original; and with no thumbnail visible in the
+  // repository nothing is deleted, since deleting a path that is not there
+  // would fail the whole save. A stale record from the previous cover goes.
+  calls = githubMock([{ ...post, coverThumbnail: `covers/${basePost.id}-450.webp` }]);
   try {
     const { response } = await run({ coverAction: 'replace', cover: new File(['new'], 'new.webp', { type: 'image/webp' }) });
     assert.equal(response.status, 200);
     const tree = treeFrom(calls);
-    assert.equal(tree.filter((entry) => /-450\.webp$/.test(entry.path)).length, 0);
+    assert.equal(tree.filter((entry) => /-450\.webp$/.test(entry.path)).length, 0, 'no thumbnail path, written or deleted');
+    const updated = postsFromTree(tree)[0];
+    assert.equal(updated.coverImage, `covers/${basePost.id}.webp`);
+    assert.equal(Object.hasOwn(updated, 'coverThumbnail'), false, 'the stale record does not survive the new cover');
   } finally { globalThis.fetch = originalFetch; }
 
   // A thumbnail that is not WebP is not a thumbnail.
@@ -253,7 +259,19 @@ test('replacing a cover writes the homepage thumbnail beside it, and never delet
   try {
     const { response } = await run({ coverAction: 'replace', cover: new File(['new'], 'new.webp', { type: 'image/webp' }), coverThumbnail: new File(['x'], 'cover-450.png', { type: 'image/png' }) });
     assert.equal(response.status, 200);
-    assert.equal(treeFrom(calls).filter((entry) => /-450\.webp$/.test(entry.path)).length, 0);
+    const tree = treeFrom(calls);
+    assert.equal(tree.filter((entry) => /-450\.webp$/.test(entry.path)).length, 0);
+    assert.equal(Object.hasOwn(postsFromTree(tree)[0], 'coverThumbnail'), false);
+  } finally { globalThis.fetch = originalFetch; }
+
+  // Removing the cover removes the record with it.
+  calls = githubMock([{ ...post, coverThumbnail: `covers/${basePost.id}-450.webp` }]);
+  try {
+    const { response } = await run({ coverAction: 'remove' });
+    assert.equal(response.status, 200);
+    const updated = postsFromTree(treeFrom(calls))[0];
+    assert.equal(Object.hasOwn(updated, 'coverImage'), false);
+    assert.equal(Object.hasOwn(updated, 'coverThumbnail'), false);
   } finally { globalThis.fetch = originalFetch; }
 });
 

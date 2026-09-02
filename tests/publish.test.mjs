@@ -350,10 +350,10 @@ test('atomic publish preserves pairing, inherited tags, reading time, cover, and
     assert.match(published.shareCardImage, /^covers\/share\/.+\.jpg$/);
     assert.ok(tree.some(entry => entry.path === published.coverImage));
     assert.ok(tree.some(entry => entry.path === published.shareCardImage));
-    // The homepage thumbnail lands beside the cover, named after it, and is
-    // not recorded in the metadata: the cards derive its name from the cover.
-    assert.ok(tree.some(entry => entry.path === published.coverImage.replace(/\.webp$/, '-450.webp')));
-    assert.equal(Object.hasOwn(published, 'coverThumbnail'), false);
+    // The homepage thumbnail lands beside the cover and is recorded, so the
+    // cards offer exactly the file this commit holds.
+    assert.equal(published.coverThumbnail, published.coverImage.replace(/\.webp$/, '-450.webp'));
+    assert.ok(tree.some(entry => entry.path === published.coverThumbnail));
     assert.ok(tree.some(entry => entry.path === 'reports/en/daily-report.html'));
     const fromJs = JSON.parse(tree.find(entry => entry.path === 'data/posts.js').content.replace(/^window\.RESEARCH_POSTS = /, '').replace(/;\s*$/, ''));
     assert.deepEqual(fromJs, posts);
@@ -434,6 +434,10 @@ test('publishing Market Basics with a cover stores a binary blob and coverImage 
     assert.equal(post.type, 'basics');
     assert.equal(post.typeLabel, '시장 입문');
     assert.equal(post.coverImage, data.coverImage);
+    // No thumbnail was sent, so none is recorded and none is named: the
+    // homepage card for this post shows the original, not a broken -450 file.
+    assert.equal(Object.hasOwn(post, 'coverThumbnail'), false);
+    assert.equal(treeCall.body.tree.filter(entry => /-450\.webp$/.test(entry.path)).length, 0);
   } finally {
     globalThis.fetch = originalFetch;
   }

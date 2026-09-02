@@ -132,27 +132,63 @@ async function withChrome(fn) {
   }
 }
 
+/**
+ * Records in `posts.json` which thumbnails are actually on disk, as
+ * `coverThumbnail`, and drops the field where the file is not. The homepage
+ * renders from this field alone, never from an assumption that the file
+ * exists, so the metadata and the files are made to agree here. Returns how
+ * many posts changed; the derived `posts.js` and search index are rebuilt
+ * when any did.
+ */
+export async function recordThumbnails(root = ROOT, log = console.log) {
+  const postsPath = path.join(root, 'data', 'posts.json');
+  const raw = readFileSync(postsPath, 'utf8');
+  const posts = JSON.parse(raw);
+  let changed = 0;
+  for (const post of posts) {
+    const cover = String(post.coverImage || '').replace(/^\/+/, '');
+    const thumbnail = cover ? thumbnailPathFor(cover) : '';
+    const present = thumbnail && existsSync(path.join(root, thumbnail));
+    if (present && post.coverThumbnail !== thumbnail) { post.coverThumbnail = thumbnail; changed += 1; }
+    if (!present && post.coverThumbnail !== undefined) { delete post.coverThumbnail; changed += 1; }
+  }
+  if (changed) {
+    const newline = raw.includes('\r\n') ? '\r\n' : '\n';
+    writeFileSync(postsPath, JSON.stringify(posts, null, 2).replace(/\n/g, newline) + newline);
+    const { buildSearchIndex } = await import('./build-search-index.mjs');
+    buildSearchIndex(root);
+    log(`${changed} post(s) had their coverThumbnail metadata updated; posts.js and the search index were rebuilt`);
+  }
+  return changed;
+}
+
 export async function buildThumbnails({ root = ROOT, force = false, check = false, log = console.log } = {}) {
   const covers = listCovers(root);
   const todo = covers.filter(({ cover, thumbnail }) => existsSync(path.join(root, cover)) && (force || stale(root, cover, thumbnail)));
-  const summary = { covers: covers.length, written: 0, skipped: covers.length - todo.length, missing: todo.map(t => t.thumbnail) };
-  if (check || !todo.length) {
-    log(`${covers.length} covers, ${todo.length} thumbnail(s) ${check ? 'would be' : 'to be'} written`);
+  const summary = { covers: covers.length, written: 0, skipped: covers.length - todo.length, missing: todo.map(t => t.thumbnail), recorded: 0 };
+  if (check) {
+    const posts = JSON.parse(readFileSync(path.join(root, 'data', 'posts.json'), 'utf8'));
+    const unrecorded = covers.filter(({ cover, thumbnail }) => existsSync(path.join(root, thumbnail))
+      && !posts.some(post => String(post.coverImage || '').replace(/^\/+/, '') === cover && post.coverThumbnail === thumbnail)).length;
+    log(`${covers.length} covers, ${todo.length} thumbnail(s) would be written, ${unrecorded} present but not recorded in posts.json`);
     return summary;
   }
-  await withChrome(async (encode) => {
-    for (const { cover, thumbnail } of todo) {
-      const bytes = readFileSync(path.join(root, cover));
-      const mime = /\.png$/i.test(cover) ? 'image/png' : /\.jpe?g$/i.test(cover) ? 'image/jpeg' : 'image/webp';
-      const out = await encode(`data:${mime};base64,${bytes.toString('base64')}`);
-      const webp = Buffer.from(out.dataUrl.split(',')[1], 'base64');
-      writeFileSync(path.join(root, thumbnail), webp);
-      summary.written += 1;
-      log(`  ${thumbnail}  ${out.sourceWidth}x${out.sourceHeight} -> ${out.width}x${out.height}  ${Math.round(bytes.length / 1024)}KB -> ${Math.round(webp.length / 1024)}KB`);
-    }
-  });
-  summary.missing = [];
-  log(`${summary.written} thumbnail(s) written, ${summary.skipped} already current`);
+  if (todo.length) {
+    await withChrome(async (encode) => {
+      for (const { cover, thumbnail } of todo) {
+        const bytes = readFileSync(path.join(root, cover));
+        const mime = /\.png$/i.test(cover) ? 'image/png' : /\.jpe?g$/i.test(cover) ? 'image/jpeg' : 'image/webp';
+        const out = await encode(`data:${mime};base64,${bytes.toString('base64')}`);
+        const webp = Buffer.from(out.dataUrl.split(',')[1], 'base64');
+        writeFileSync(path.join(root, thumbnail), webp);
+        summary.written += 1;
+        log(`  ${thumbnail}  ${out.sourceWidth}x${out.sourceHeight} -> ${out.width}x${out.height}  ${Math.round(bytes.length / 1024)}KB -> ${Math.round(webp.length / 1024)}KB`);
+      }
+    });
+    summary.missing = [];
+  }
+  summary.recorded = await recordThumbnails(root, log);
+  log(`${summary.written} thumbnail(s) written, ${summary.skipped} already current, ${summary.recorded} metadata change(s)`);
   return summary;
 }
 

@@ -829,6 +829,7 @@ export async function onRequestPost(context) {
         if (existing.shareCardImage) entries.push(deletedEntry(existing.shareCardImage));
         delete updated.coverImage;
         delete updated.shareCardImage;
+        delete updated.coverThumbnail;
       } else if (coverAction === "replace") {
         if (!/^[A-Za-z0-9._-]+$/.test(existing.id)) {
           return reply({ ok: false, error: "UNSAFE_POST_ID", message: "안전하지 않은 게시물 ID에는 커버를 저장할 수 없습니다." }, 400);
@@ -879,8 +880,15 @@ export async function onRequestPost(context) {
             body: JSON.stringify({ content: encodeBase64(await thumbnailFile.arrayBuffer()), encoding: "base64" }),
           });
           entries.push({ path: nextThumbnailPath, mode: "100644", type: "blob", sha: thumbnailBlob.sha });
-        } else if (await repoFileExists(env.GITHUB_TOKEN, nextThumbnailPath, baseSha)) {
-          entries.push(deletedEntry(nextThumbnailPath));
+          updated.coverThumbnail = nextThumbnailPath;
+        } else {
+          // No thumbnail for the new cover: the metadata says so, so the cards
+          // use the original, and any old thumbnail beside the previous cover
+          // is removed rather than left depicting artwork that is gone.
+          delete updated.coverThumbnail;
+          if (await repoFileExists(env.GITHUB_TOKEN, nextThumbnailPath, baseSha)) {
+            entries.push(deletedEntry(nextThumbnailPath));
+          }
         }
       }
 

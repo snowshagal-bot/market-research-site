@@ -19,7 +19,8 @@
     "href": "reports/en/20260902_Investment_Note_Korea_WGBI_EN.html",
     "translationGroup": "2026-09-02-note-xgdd5t",
     "coverImage": "covers/2026-09-02-note-1ojta7j.webp",
-    "shareCardImage": "covers/share/2026-09-02-note-1ojta7j.jpg"
+    "shareCardImage": "covers/share/2026-09-02-note-1ojta7j.jpg",
+    "coverThumbnail": "covers/2026-09-02-note-1ojta7j-450.webp"
   },
   {
     "id": "2026-09-02-note-xgdd5t",
@@ -40,7 +41,8 @@
     "readingMinutes": 8,
     "href": "reports/20260902_Investment_Note_Korea_WGBI.html",
     "coverImage": "covers/2026-09-02-note-xgdd5t.webp",
-    "shareCardImage": "covers/share/2026-09-02-note-xgdd5t.jpg"
+    "shareCardImage": "covers/share/2026-09-02-note-xgdd5t.jpg",
+    "coverThumbnail": "covers/2026-09-02-note-xgdd5t-450.webp"
   },
   {
     "id": "2026-09-01-daily-1uv21dp",
@@ -62,7 +64,8 @@
     "href": "reports/en/2026-09-01_KOSPI_Daily_Report_EN.html",
     "translationGroup": "2026-09-01-daily-1oq37xo",
     "coverImage": "covers/2026-09-01-daily-1uv21dp.webp",
-    "shareCardImage": "covers/share/2026-09-01-daily-1uv21dp.jpg"
+    "shareCardImage": "covers/share/2026-09-01-daily-1uv21dp.jpg",
+    "coverThumbnail": "covers/2026-09-01-daily-1uv21dp-450.webp"
   },
   {
     "id": "2026-09-01-daily-1oq37xo",
@@ -83,7 +86,8 @@
     "readingMinutes": 3,
     "href": "reports/9월 1일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-09-01-daily-1oq37xo.webp",
-    "shareCardImage": "covers/share/2026-09-01-daily-1oq37xo.jpg"
+    "shareCardImage": "covers/share/2026-09-01-daily-1oq37xo.jpg",
+    "coverThumbnail": "covers/2026-09-01-daily-1oq37xo-450.webp"
   },
   {
     "id": "2026-09-01-note-1k5d647",
@@ -107,7 +111,8 @@
     "href": "reports/en/20260901_Investment_Note_US_Money_Market_EN.html",
     "translationGroup": "2026-09-01-note-u23dp3",
     "coverImage": "covers/2026-09-01-note-1k5d647.webp",
-    "shareCardImage": "covers/share/2026-09-01-note-1k5d647.jpg"
+    "shareCardImage": "covers/share/2026-09-01-note-1k5d647.jpg",
+    "coverThumbnail": "covers/2026-09-01-note-1k5d647-450.webp"
   },
   {
     "id": "2026-09-01-note-u23dp3",
@@ -130,7 +135,8 @@
     "readingMinutes": 7,
     "href": "reports/20260901_Investment_Note_US_Money_Market.html",
     "coverImage": "covers/2026-09-01-note-u23dp3.webp",
-    "shareCardImage": "covers/share/2026-09-01-note-u23dp3.jpg"
+    "shareCardImage": "covers/share/2026-09-01-note-u23dp3.jpg",
+    "coverThumbnail": "covers/2026-09-01-note-u23dp3-450.webp"
   },
   {
     "id": "2026-08-31-daily-19944ff",
@@ -150,7 +156,8 @@
     "href": "reports/en/2026-08-31_KOSPI_Daily_Report_EN_Cover.html",
     "translationGroup": "2026-08-31-daily-1mkemh5",
     "coverImage": "covers/2026-08-31-daily-19944ff.webp",
-    "shareCardImage": "covers/share/2026-08-31-daily-19944ff.jpg"
+    "shareCardImage": "covers/share/2026-08-31-daily-19944ff.jpg",
+    "coverThumbnail": "covers/2026-08-31-daily-19944ff-450.webp"
   },
   {
     "id": "2026-08-31-daily-1mkemh5",
@@ -169,7 +176,8 @@
     "readingMinutes": 3,
     "href": "reports/8월 31일 주식리포트.html",
     "coverImage": "covers/2026-08-31-daily-1mkemh5.png",
-    "shareCardImage": "covers/share/2026-08-31-daily-1mkemh5.jpg"
+    "shareCardImage": "covers/share/2026-08-31-daily-1mkemh5.jpg",
+    "coverThumbnail": "covers/2026-08-31-daily-1mkemh5-450.webp"
   },
   {
     "id": "2026-08-29-weekly-4xkdij",
@@ -193,7 +201,8 @@
     "href": "reports/en/2026-08-29_Korea_Weekly_Report_EN.html",
     "translationGroup": "2026-08-04-weekly-q9jryh",
     "coverImage": "covers/2026-08-29-weekly-4xkdij.webp",
-    "shareCardImage": "covers/share/2026-08-29-weekly-4xkdij.jpg"
+    "shareCardImage": "covers/share/2026-08-29-weekly-4xkdij.jpg",
+    "coverThumbnail": "covers/2026-08-29-weekly-4xkdij-450.webp"
   },
   {
     "id": "2026-08-04-weekly-q9jryh",
@@ -217,7 +226,8 @@
     "href": "reports/위클리_2026.08.4주차 위클리.html",
     "coverImage": "covers/2026-08-04-weekly-q9jryh.webp",
     "shareCardImage": "covers/share/2026-08-04-weekly-q9jryh.jpg",
-    "updatedAt": "2026-08-29T09:27:13.061Z"
+    "updatedAt": "2026-08-29T09:27:13.061Z",
+    "coverThumbnail": "covers/2026-08-04-weekly-q9jryh-450.webp"
   },
   {
     "id": "2026-08-29-research-15pk9zq",
@@ -241,7 +251,8 @@
     "href": "reports/en/2026-08-29_Stablecoins_Treasuries_Research_EN.html",
     "translationGroup": "2026-08-29-research-178u9g5",
     "coverImage": "covers/2026-08-29-research-15pk9zq.webp",
-    "shareCardImage": "covers/share/2026-08-29-research-15pk9zq.jpg"
+    "shareCardImage": "covers/share/2026-08-29-research-15pk9zq.jpg",
+    "coverThumbnail": "covers/2026-08-29-research-15pk9zq-450.webp"
   },
   {
     "id": "2026-08-29-research-178u9g5",
@@ -264,7 +275,8 @@
     "readingMinutes": 13,
     "href": "reports/리서치_NO.05_코인의뒷면에는국채가있다_2026.08.29.html",
     "coverImage": "covers/2026-08-29-research-178u9g5.webp",
-    "shareCardImage": "covers/share/2026-08-29-research-178u9g5.jpg"
+    "shareCardImage": "covers/share/2026-08-29-research-178u9g5.jpg",
+    "coverThumbnail": "covers/2026-08-29-research-178u9g5-450.webp"
   },
   {
     "id": "2026-08-28-daily-o8t6vj",
@@ -289,7 +301,8 @@
     "href": "reports/en/2026-08-28_KOSPI_Daily_Report_EN.html",
     "translationGroup": "2026-08-28-daily-1a6ign1",
     "coverImage": "covers/2026-08-28-daily-o8t6vj.webp",
-    "shareCardImage": "covers/share/2026-08-28-daily-o8t6vj.jpg"
+    "shareCardImage": "covers/share/2026-08-28-daily-o8t6vj.jpg",
+    "coverThumbnail": "covers/2026-08-28-daily-o8t6vj-450.webp"
   },
   {
     "id": "2026-08-28-daily-1a6ign1",
@@ -313,7 +326,8 @@
     "readingMinutes": 3,
     "href": "reports/8월 28일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-08-28-daily-1a6ign1.webp",
-    "shareCardImage": "covers/share/2026-08-28-daily-1a6ign1.jpg"
+    "shareCardImage": "covers/share/2026-08-28-daily-1a6ign1.jpg",
+    "coverThumbnail": "covers/2026-08-28-daily-1a6ign1-450.webp"
   },
   {
     "id": "2026-08-27-daily-xslavx",
@@ -338,7 +352,8 @@
     "href": "reports/en/2026-08-27_KOSPI_Daily_Report_EN_polished.html",
     "translationGroup": "2026-08-27-daily-cpna7g",
     "coverImage": "covers/2026-08-27-daily-xslavx.webp",
-    "shareCardImage": "covers/share/2026-08-27-daily-xslavx.jpg"
+    "shareCardImage": "covers/share/2026-08-27-daily-xslavx.jpg",
+    "coverThumbnail": "covers/2026-08-27-daily-xslavx-450.webp"
   },
   {
     "id": "2026-08-27-daily-cpna7g",
@@ -362,7 +377,8 @@
     "readingMinutes": 3,
     "href": "reports/8월 27일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-08-27-daily-cpna7g.webp",
-    "shareCardImage": "covers/share/2026-08-27-daily-cpna7g.jpg"
+    "shareCardImage": "covers/share/2026-08-27-daily-cpna7g.jpg",
+    "coverThumbnail": "covers/2026-08-27-daily-cpna7g-450.webp"
   },
   {
     "id": "2026-08-26-daily-15udspv",
@@ -386,7 +402,8 @@
     "href": "reports/en/2026-08-26_KOSPI_Daily_Report_EN.html",
     "translationGroup": "2026-08-26-daily-1ufok0a",
     "coverImage": "covers/2026-08-26-daily-15udspv.webp",
-    "shareCardImage": "covers/share/2026-08-26-daily-15udspv.jpg"
+    "shareCardImage": "covers/share/2026-08-26-daily-15udspv.jpg",
+    "coverThumbnail": "covers/2026-08-26-daily-15udspv-450.webp"
   },
   {
     "id": "2026-08-26-daily-1ufok0a",
@@ -409,7 +426,8 @@
     "readingMinutes": 8,
     "href": "reports/8월 26일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-08-26-daily-1ufok0a.webp",
-    "shareCardImage": "covers/share/2026-08-26-daily-1ufok0a.jpg"
+    "shareCardImage": "covers/share/2026-08-26-daily-1ufok0a.jpg",
+    "coverThumbnail": "covers/2026-08-26-daily-1ufok0a-450.webp"
   },
   {
     "id": "2026-08-25-daily-bmu64e",
@@ -433,7 +451,8 @@
       "rates"
     ],
     "readingMinutes": 9,
-    "shareCardImage": "covers/share/2026-08-25-daily-bmu64e.jpg"
+    "shareCardImage": "covers/share/2026-08-25-daily-bmu64e.jpg",
+    "coverThumbnail": "covers/2026-08-25-daily-bmu64e-450.webp"
   },
   {
     "id": "2026-08-25-daily-13engmv",
@@ -456,7 +475,8 @@
       "rates"
     ],
     "readingMinutes": 6,
-    "shareCardImage": "covers/share/2026-08-25-daily-13engmv.jpg"
+    "shareCardImage": "covers/share/2026-08-25-daily-13engmv.jpg",
+    "coverThumbnail": "covers/2026-08-25-daily-13engmv-450.webp"
   },
   {
     "id": "2026-08-24-daily-ya1ru9",
@@ -480,7 +500,8 @@
       "semiconductors"
     ],
     "readingMinutes": 7,
-    "shareCardImage": "covers/share/2026-08-24-daily-ya1ru9.jpg"
+    "shareCardImage": "covers/share/2026-08-24-daily-ya1ru9.jpg",
+    "coverThumbnail": "covers/2026-08-24-daily-ya1ru9-450.webp"
   },
   {
     "id": "2026-08-24-daily-97jc8s",
@@ -503,7 +524,8 @@
       "semiconductors"
     ],
     "readingMinutes": 4,
-    "shareCardImage": "covers/share/2026-08-24-daily-97jc8s.jpg"
+    "shareCardImage": "covers/share/2026-08-24-daily-97jc8s.jpg",
+    "coverThumbnail": "covers/2026-08-24-daily-97jc8s-450.webp"
   },
   {
     "id": "2026-08-23-research-16pvcxp",
@@ -527,7 +549,8 @@
       "policy"
     ],
     "readingMinutes": 11,
-    "shareCardImage": "covers/share/2026-08-23-research-16pvcxp.jpg"
+    "shareCardImage": "covers/share/2026-08-23-research-16pvcxp.jpg",
+    "coverThumbnail": "covers/2026-08-23-research-16pvcxp-450.webp"
   },
   {
     "id": "2026-08-23-research-1xleg6o",
@@ -550,7 +573,8 @@
       "policy"
     ],
     "readingMinutes": 7,
-    "shareCardImage": "covers/share/2026-08-23-research-1xleg6o.jpg"
+    "shareCardImage": "covers/share/2026-08-23-research-1xleg6o.jpg",
+    "coverThumbnail": "covers/2026-08-23-research-1xleg6o-450.webp"
   },
   {
     "id": "2026-08-21-daily-16tx7f1",
@@ -574,7 +598,8 @@
       "flows"
     ],
     "readingMinutes": 6,
-    "shareCardImage": "covers/share/2026-08-21-daily-16tx7f1.jpg"
+    "shareCardImage": "covers/share/2026-08-21-daily-16tx7f1.jpg",
+    "coverThumbnail": "covers/2026-08-21-daily-16tx7f1-450.webp"
   },
   {
     "id": "2026-08-21-daily-1i56f22",
@@ -598,7 +623,8 @@
       "flows"
     ],
     "readingMinutes": 4,
-    "shareCardImage": "covers/share/2026-08-21-daily-1i56f22.jpg"
+    "shareCardImage": "covers/share/2026-08-21-daily-1i56f22.jpg",
+    "coverThumbnail": "covers/2026-08-21-daily-1i56f22-450.webp"
   },
   {
     "id": "2026-08-20-basics-1txn8bp",
@@ -621,7 +647,8 @@
     "href": "reports/en/Market_Language_Ep5_How_a_Selloff_Feeds_on_Itself.html",
     "translationGroup": "2026-08-20-basics-1jqzwpd",
     "coverImage": "covers/2026-08-20-basics-1txn8bp.webp",
-    "shareCardImage": "covers/share/2026-08-20-basics-1txn8bp.jpg"
+    "shareCardImage": "covers/share/2026-08-20-basics-1txn8bp.jpg",
+    "coverThumbnail": "covers/2026-08-20-basics-1txn8bp-450.webp"
   },
   {
     "id": "2026-08-20-basics-1jqzwpd",
@@ -643,7 +670,8 @@
     "readingMinutes": 6,
     "href": "reports/시장을읽는말들_5편_급락은어떻게더큰급락을만드는가.html",
     "coverImage": "covers/2026-08-20-basics-1jqzwpd.webp",
-    "shareCardImage": "covers/share/2026-08-20-basics-1jqzwpd.jpg"
+    "shareCardImage": "covers/share/2026-08-20-basics-1jqzwpd.jpg",
+    "coverThumbnail": "covers/2026-08-20-basics-1jqzwpd-450.webp"
   },
   {
     "id": "2026-08-20-daily-1ctu7fr",
@@ -667,7 +695,8 @@
       "rates"
     ],
     "readingMinutes": 6,
-    "shareCardImage": "covers/share/2026-08-20-daily-1ctu7fr.jpg"
+    "shareCardImage": "covers/share/2026-08-20-daily-1ctu7fr.jpg",
+    "coverThumbnail": "covers/2026-08-20-daily-1ctu7fr-450.webp"
   },
   {
     "id": "2026-08-20-daily-c6eow2",
@@ -692,7 +721,8 @@
       "treasuries"
     ],
     "readingMinutes": 4,
-    "shareCardImage": "covers/share/2026-08-20-daily-c6eow2.jpg"
+    "shareCardImage": "covers/share/2026-08-20-daily-c6eow2.jpg",
+    "coverThumbnail": "covers/2026-08-20-daily-c6eow2-450.webp"
   },
   {
     "id": "2026-08-19-daily-otvpwu",
@@ -717,7 +747,8 @@
       "semiconductors"
     ],
     "readingMinutes": 5,
-    "shareCardImage": "covers/share/2026-08-19-daily-otvpwu.jpg"
+    "shareCardImage": "covers/share/2026-08-19-daily-otvpwu.jpg",
+    "coverThumbnail": "covers/2026-08-19-daily-otvpwu-450.webp"
   },
   {
     "id": "2026-08-19-daily-kuhjks",
@@ -742,7 +773,8 @@
       "semiconductors"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-08-19-daily-kuhjks.jpg"
+    "shareCardImage": "covers/share/2026-08-19-daily-kuhjks.jpg",
+    "coverThumbnail": "covers/2026-08-19-daily-kuhjks-450.webp"
   },
   {
     "id": "2026-08-18-daily-tfmejq",
@@ -766,7 +798,8 @@
       "flows"
     ],
     "readingMinutes": 5,
-    "shareCardImage": "covers/share/2026-08-18-daily-tfmejq.jpg"
+    "shareCardImage": "covers/share/2026-08-18-daily-tfmejq.jpg",
+    "coverThumbnail": "covers/2026-08-18-daily-tfmejq-450.webp"
   },
   {
     "id": "2026-08-18-weekly-11u1873",
@@ -790,7 +823,8 @@
       "geopolitics"
     ],
     "readingMinutes": 17,
-    "shareCardImage": "covers/share/2026-08-18-weekly-11u1873.jpg"
+    "shareCardImage": "covers/share/2026-08-18-weekly-11u1873.jpg",
+    "coverThumbnail": "covers/2026-08-18-weekly-11u1873-450.webp"
   },
   {
     "id": "2026-08-18-weekly-n6uraz",
@@ -813,7 +847,8 @@
       "geopolitics"
     ],
     "readingMinutes": 11,
-    "shareCardImage": "covers/share/2026-08-18-weekly-n6uraz.jpg"
+    "shareCardImage": "covers/share/2026-08-18-weekly-n6uraz.jpg",
+    "coverThumbnail": "covers/2026-08-18-weekly-n6uraz-450.webp"
   },
   {
     "id": "2026-08-18-daily-1burfko",
@@ -837,7 +872,8 @@
       "flows"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-08-18-daily-1burfko.jpg"
+    "shareCardImage": "covers/share/2026-08-18-daily-1burfko.jpg",
+    "coverThumbnail": "covers/2026-08-18-daily-1burfko-450.webp"
   },
   {
     "id": "2026-08-16-research-1b9x09d",
@@ -861,7 +897,8 @@
       "semiconductors"
     ],
     "readingMinutes": 4,
-    "shareCardImage": "covers/share/2026-08-16-research-1b9x09d.jpg"
+    "shareCardImage": "covers/share/2026-08-16-research-1b9x09d.jpg",
+    "coverThumbnail": "covers/2026-08-16-research-1b9x09d-450.webp"
   },
   {
     "id": "2026-08-16-research-141u5l9",
@@ -885,7 +922,8 @@
       "semiconductors"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-08-16-research-141u5l9.jpg"
+    "shareCardImage": "covers/share/2026-08-16-research-141u5l9.jpg",
+    "coverThumbnail": "covers/2026-08-16-research-141u5l9-450.webp"
   },
   {
     "id": "2026-08-15-basics-ntseyw",
@@ -905,7 +943,8 @@
     "href": "reports/en/Market_Language_Ep4_Why_a_Good_Company_Isnt_Always_a_Good_Stock.html",
     "translationGroup": "2026-08-15-basics-1cd8c9w",
     "coverImage": "covers/2026-08-15-basics-ntseyw.webp",
-    "shareCardImage": "covers/share/2026-08-15-basics-ntseyw.jpg"
+    "shareCardImage": "covers/share/2026-08-15-basics-ntseyw.jpg",
+    "coverThumbnail": "covers/2026-08-15-basics-ntseyw-450.webp"
   },
   {
     "id": "2026-08-15-basics-1cd8c9w",
@@ -924,7 +963,8 @@
     "coverImage": "covers/2026-08-15-basics-1cd8c9w.webp",
     "tags": [],
     "readingMinutes": 6,
-    "shareCardImage": "covers/share/2026-08-15-basics-1cd8c9w.jpg"
+    "shareCardImage": "covers/share/2026-08-15-basics-1cd8c9w.jpg",
+    "coverThumbnail": "covers/2026-08-15-basics-1cd8c9w-450.webp"
   },
   {
     "id": "2026-08-14-daily-1yyf33y",
@@ -949,7 +989,8 @@
       "semiconductors"
     ],
     "readingMinutes": 4,
-    "shareCardImage": "covers/share/2026-08-14-daily-1yyf33y.jpg"
+    "shareCardImage": "covers/share/2026-08-14-daily-1yyf33y.jpg",
+    "coverThumbnail": "covers/2026-08-14-daily-1yyf33y-450.webp"
   },
   {
     "id": "2026-08-14-daily-dqoisk",
@@ -972,7 +1013,8 @@
       "semiconductors"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-08-14-daily-dqoisk.jpg"
+    "shareCardImage": "covers/share/2026-08-14-daily-dqoisk.jpg",
+    "coverThumbnail": "covers/2026-08-14-daily-dqoisk-450.webp"
   },
   {
     "id": "2026-08-13-basics-1cmfur2",
@@ -995,7 +1037,8 @@
       "rates"
     ],
     "readingMinutes": 8,
-    "shareCardImage": "covers/share/2026-08-13-basics-1cmfur2.jpg"
+    "shareCardImage": "covers/share/2026-08-13-basics-1cmfur2.jpg",
+    "coverThumbnail": "covers/2026-08-13-basics-1cmfur2-450.webp"
   },
   {
     "id": "2026-08-13-basics-1qofo4f",
@@ -1018,7 +1061,8 @@
       "fed"
     ],
     "readingMinutes": 6,
-    "shareCardImage": "covers/share/2026-08-13-basics-1qofo4f.jpg"
+    "shareCardImage": "covers/share/2026-08-13-basics-1qofo4f.jpg",
+    "coverThumbnail": "covers/2026-08-13-basics-1qofo4f-450.webp"
   },
   {
     "id": "2026-08-13-daily-1nnspvd",
@@ -1042,7 +1086,8 @@
       "flows"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-08-13-daily-1nnspvd.jpg"
+    "shareCardImage": "covers/share/2026-08-13-daily-1nnspvd.jpg",
+    "coverThumbnail": "covers/2026-08-13-daily-1nnspvd-450.webp"
   },
   {
     "id": "2026-08-13-daily-1tgqr3y",
@@ -1065,7 +1110,8 @@
       "flows"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-08-13-daily-1tgqr3y.jpg"
+    "shareCardImage": "covers/share/2026-08-13-daily-1tgqr3y.jpg",
+    "coverThumbnail": "covers/2026-08-13-daily-1tgqr3y-450.webp"
   },
   {
     "id": "2026-08-10-basics-1rhknmt",
@@ -1088,7 +1134,8 @@
       "flows"
     ],
     "readingMinutes": 4,
-    "shareCardImage": "covers/share/2026-08-10-basics-1rhknmt.jpg"
+    "shareCardImage": "covers/share/2026-08-10-basics-1rhknmt.jpg",
+    "coverThumbnail": "covers/2026-08-10-basics-1rhknmt-450.webp"
   },
   {
     "id": "2026-08-12-daily-rk55d0",
@@ -1112,7 +1159,8 @@
       "flows"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-08-12-daily-rk55d0.jpg"
+    "shareCardImage": "covers/share/2026-08-12-daily-rk55d0.jpg",
+    "coverThumbnail": "covers/2026-08-12-daily-rk55d0-450.webp"
   },
   {
     "id": "2026-08-12-daily-15kwiwr",
@@ -1136,7 +1184,8 @@
       "flows"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-08-12-daily-15kwiwr.jpg"
+    "shareCardImage": "covers/share/2026-08-12-daily-15kwiwr.jpg",
+    "coverThumbnail": "covers/2026-08-12-daily-15kwiwr-450.webp"
   },
   {
     "id": "2026-08-11-basics-1bmtot3",
@@ -1159,7 +1208,8 @@
       "rates"
     ],
     "readingMinutes": 6,
-    "shareCardImage": "covers/share/2026-08-11-basics-1bmtot3.jpg"
+    "shareCardImage": "covers/share/2026-08-11-basics-1bmtot3.jpg",
+    "coverThumbnail": "covers/2026-08-11-basics-1bmtot3-450.webp"
   },
   {
     "id": "2026-08-11-daily-yxlmio",
@@ -1182,7 +1232,8 @@
       "flows"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-08-11-daily-yxlmio.jpg"
+    "shareCardImage": "covers/share/2026-08-11-daily-yxlmio.jpg",
+    "coverThumbnail": "covers/2026-08-11-daily-yxlmio-450.webp"
   },
   {
     "id": "2026-08-11-basics-1e0xeuz",
@@ -1221,7 +1272,8 @@
       "flows"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-08-11-daily-12vx8a7.jpg"
+    "shareCardImage": "covers/share/2026-08-11-daily-12vx8a7.jpg",
+    "coverThumbnail": "covers/2026-08-11-daily-12vx8a7-450.webp"
   },
   {
     "id": "2026-08-10-basics-f7gadj",
@@ -1244,7 +1296,8 @@
       "rates"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-08-10-basics-f7gadj.jpg"
+    "shareCardImage": "covers/share/2026-08-10-basics-f7gadj.jpg",
+    "coverThumbnail": "covers/2026-08-10-basics-f7gadj-450.webp"
   },
   {
     "id": "2026-08-10-daily-1bb8z4p",
@@ -1269,7 +1322,8 @@
       "energy"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-08-10-daily-1bb8z4p.jpg"
+    "shareCardImage": "covers/share/2026-08-10-daily-1bb8z4p.jpg",
+    "coverThumbnail": "covers/2026-08-10-daily-1bb8z4p-450.webp"
   },
   {
     "id": "2026-08-10-weekly-hez6ok",
@@ -1293,7 +1347,8 @@
       "energy"
     ],
     "readingMinutes": 16,
-    "shareCardImage": "covers/share/2026-08-10-weekly-hez6ok.jpg"
+    "shareCardImage": "covers/share/2026-08-10-weekly-hez6ok.jpg",
+    "coverThumbnail": "covers/2026-08-10-weekly-hez6ok-450.webp"
   },
   {
     "id": "2026-08-10-weekly-1rva1f6",
@@ -1316,7 +1371,8 @@
       "energy"
     ],
     "readingMinutes": 11,
-    "shareCardImage": "covers/share/2026-08-10-weekly-1rva1f6.jpg"
+    "shareCardImage": "covers/share/2026-08-10-weekly-1rva1f6.jpg",
+    "coverThumbnail": "covers/2026-08-10-weekly-1rva1f6-450.webp"
   },
   {
     "id": "2026-08-10-daily-1evguss",
@@ -1337,7 +1393,8 @@
       "flows"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-08-10-daily-1evguss.jpg"
+    "shareCardImage": "covers/share/2026-08-10-daily-1evguss.jpg",
+    "coverThumbnail": "covers/2026-08-10-daily-1evguss-450.webp"
   },
   {
     "id": "2026-08-09-research-12sm7v2",
@@ -1361,7 +1418,8 @@
       "geopolitics"
     ],
     "readingMinutes": 9,
-    "shareCardImage": "covers/share/2026-08-09-research-12sm7v2.jpg"
+    "shareCardImage": "covers/share/2026-08-09-research-12sm7v2.jpg",
+    "coverThumbnail": "covers/2026-08-09-research-12sm7v2-450.webp"
   },
   {
     "id": "2026-08-09-sovereign-ai",
@@ -1384,7 +1442,8 @@
       "geopolitics"
     ],
     "readingMinutes": 6,
-    "shareCardImage": "covers/share/2026-08-09-sovereign-ai.jpg"
+    "shareCardImage": "covers/share/2026-08-09-sovereign-ai.jpg",
+    "coverThumbnail": "covers/2026-08-09-sovereign-ai-450.webp"
   },
   {
     "id": "2026-08-07-daily-cjwe8f",
@@ -1409,7 +1468,8 @@
       "flows"
     ],
     "readingMinutes": 6,
-    "shareCardImage": "covers/share/2026-08-07-daily-cjwe8f.jpg"
+    "shareCardImage": "covers/share/2026-08-07-daily-cjwe8f.jpg",
+    "coverThumbnail": "covers/2026-08-07-daily-cjwe8f-450.webp"
   },
   {
     "id": "2026-08-07-daily",
@@ -1455,7 +1515,8 @@
       "futures"
     ],
     "readingMinutes": 6,
-    "shareCardImage": "covers/share/2026-08-06-daily-1d9zin0.jpg"
+    "shareCardImage": "covers/share/2026-08-06-daily-1d9zin0.jpg",
+    "coverThumbnail": "covers/2026-08-06-daily-1d9zin0-450.webp"
   },
   {
     "id": "2026-08-06-daily-94w8bi",
@@ -1480,7 +1541,8 @@
       "futures"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-08-06-daily-94w8bi.jpg"
+    "shareCardImage": "covers/share/2026-08-06-daily-94w8bi.jpg",
+    "coverThumbnail": "covers/2026-08-06-daily-94w8bi-450.webp"
   },
   {
     "id": "2026-08-24-daily-og5aig",
@@ -1505,7 +1567,8 @@
       "flows"
     ],
     "readingMinutes": 6,
-    "shareCardImage": "covers/share/2026-08-24-daily-og5aig.jpg"
+    "shareCardImage": "covers/share/2026-08-24-daily-og5aig.jpg",
+    "coverThumbnail": "covers/2026-08-24-daily-og5aig-450.webp"
   },
   {
     "id": "2026-08-05-daily-oq9vps",
@@ -1528,7 +1591,8 @@
       "flows"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-08-05-daily-oq9vps.jpg"
+    "shareCardImage": "covers/share/2026-08-05-daily-oq9vps.jpg",
+    "coverThumbnail": "covers/2026-08-05-daily-oq9vps-450.webp"
   },
   {
     "id": "2026-08-24-daily-1nyohtr",
@@ -1552,7 +1616,8 @@
       "flows"
     ],
     "readingMinutes": 6,
-    "shareCardImage": "covers/share/2026-08-24-daily-1nyohtr.jpg"
+    "shareCardImage": "covers/share/2026-08-24-daily-1nyohtr.jpg",
+    "coverThumbnail": "covers/2026-08-24-daily-1nyohtr-450.webp"
   },
   {
     "id": "2026-08-04-daily-wfcoi4",
@@ -1575,7 +1640,8 @@
       "flows"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-08-04-daily-wfcoi4.jpg"
+    "shareCardImage": "covers/share/2026-08-04-daily-wfcoi4.jpg",
+    "coverThumbnail": "covers/2026-08-04-daily-wfcoi4-450.webp"
   },
   {
     "id": "2026-08-03-weekly-yqni0t",
@@ -1599,7 +1665,8 @@
       "flows"
     ],
     "readingMinutes": 16,
-    "shareCardImage": "covers/share/2026-08-03-weekly-yqni0t.jpg"
+    "shareCardImage": "covers/share/2026-08-03-weekly-yqni0t.jpg",
+    "coverThumbnail": "covers/2026-08-03-weekly-yqni0t-450.webp"
   },
   {
     "id": "2026-08-03-daily-ely1wy",
@@ -1623,7 +1690,8 @@
       "rates"
     ],
     "readingMinutes": 4,
-    "shareCardImage": "covers/share/2026-08-03-daily-ely1wy.jpg"
+    "shareCardImage": "covers/share/2026-08-03-daily-ely1wy.jpg",
+    "coverThumbnail": "covers/2026-08-03-daily-ely1wy-450.webp"
   },
   {
     "id": "2026-08-03-daily-181n1pj",
@@ -1666,7 +1734,8 @@
       "flows"
     ],
     "readingMinutes": 12,
-    "shareCardImage": "covers/share/2026-08-week1-weekly.jpg"
+    "shareCardImage": "covers/share/2026-08-week1-weekly.jpg",
+    "coverThumbnail": "covers/2026-08-week1-weekly-450.webp"
   },
   {
     "id": "2026-07-31-daily-lr4ely",
@@ -1690,7 +1759,8 @@
       "futures"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-07-31-daily-lr4ely.jpg"
+    "shareCardImage": "covers/share/2026-07-31-daily-lr4ely.jpg",
+    "coverThumbnail": "covers/2026-07-31-daily-lr4ely-450.webp"
   },
   {
     "id": "2026-07-30-daily-10k99v5",
@@ -1713,7 +1783,8 @@
       "flows"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-07-30-daily-10k99v5.jpg"
+    "shareCardImage": "covers/share/2026-07-30-daily-10k99v5.jpg",
+    "coverThumbnail": "covers/2026-07-30-daily-10k99v5-450.webp"
   },
   {
     "id": "2026-07-29-research-4eg0o9",
@@ -1737,7 +1808,8 @@
       "futures"
     ],
     "readingMinutes": 6,
-    "shareCardImage": "covers/share/2026-07-29-research-4eg0o9.jpg"
+    "shareCardImage": "covers/share/2026-07-29-research-4eg0o9.jpg",
+    "coverThumbnail": "covers/2026-07-29-research-4eg0o9-450.webp"
   },
   {
     "id": "2026-07-29-daily-mo0iu1",
@@ -1760,7 +1832,8 @@
       "flows"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-07-29-daily-mo0iu1.jpg"
+    "shareCardImage": "covers/share/2026-07-29-daily-mo0iu1.jpg",
+    "coverThumbnail": "covers/2026-07-29-daily-mo0iu1-450.webp"
   },
   {
     "id": "2026-07-29-research-m2ef0m",
@@ -1804,7 +1877,8 @@
       "flows"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-07-28-daily-g24k4s.jpg"
+    "shareCardImage": "covers/share/2026-07-28-daily-g24k4s.jpg",
+    "coverThumbnail": "covers/2026-07-28-daily-g24k4s-450.webp"
   },
   {
     "id": "2026-07-27-daily-1og5hu",
@@ -1828,7 +1902,8 @@
       "ai"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-07-27-daily-1og5hu.jpg"
+    "shareCardImage": "covers/share/2026-07-27-daily-1og5hu.jpg",
+    "coverThumbnail": "covers/2026-07-27-daily-1og5hu-450.webp"
   },
   {
     "id": "2026-08-12-weekly-1macab6",
@@ -1852,7 +1927,8 @@
       "ai"
     ],
     "readingMinutes": 14,
-    "shareCardImage": "covers/share/2026-08-12-weekly-1macab6.jpg"
+    "shareCardImage": "covers/share/2026-08-12-weekly-1macab6.jpg",
+    "coverThumbnail": "covers/2026-08-12-weekly-1macab6-450.webp"
   },
   {
     "id": "2026-07-20-weekly-1u5gndk",
@@ -1876,7 +1952,8 @@
       "cloud-datacenter"
     ],
     "readingMinutes": 7,
-    "shareCardImage": "covers/share/2026-07-20-weekly-1u5gndk.jpg"
+    "shareCardImage": "covers/share/2026-07-20-weekly-1u5gndk.jpg",
+    "coverThumbnail": "covers/2026-07-20-weekly-1u5gndk-450.webp"
   },
   {
     "id": "2026-07-13-weekly-um5mnf",
@@ -1899,7 +1976,8 @@
       "energy"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-07-13-weekly-um5mnf.jpg"
+    "shareCardImage": "covers/share/2026-07-13-weekly-um5mnf.jpg",
+    "coverThumbnail": "covers/2026-07-13-weekly-um5mnf-450.webp"
   },
   {
     "id": "2026-07-06-weekly-a0ek97",
@@ -1921,6 +1999,7 @@
       "flows"
     ],
     "readingMinutes": 3,
-    "shareCardImage": "covers/share/2026-07-06-weekly-a0ek97.jpg"
+    "shareCardImage": "covers/share/2026-07-06-weekly-a0ek97.jpg",
+    "coverThumbnail": "covers/2026-07-06-weekly-a0ek97-450.webp"
   }
 ]

@@ -702,7 +702,10 @@ export async function onRequestPost(context) {
       href,
       ...(translationGroup ? { translationGroup } : {}),
       ...(coverPath ? { coverImage: coverPath } : {}),
-      ...(shareCardPath ? { shareCardImage: shareCardPath } : {})
+      ...(shareCardPath ? { shareCardImage: shareCardPath } : {}),
+      // Recorded only when the file is in this same commit, so the homepage
+      // cards never name a thumbnail that was merely expected.
+      ...(coverThumbnailPath ? { coverThumbnail: coverThumbnailPath } : {})
     };
 
     const originalPostsLength = posts.length;
