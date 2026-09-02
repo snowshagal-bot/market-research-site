@@ -573,6 +573,10 @@ export async function onRequestPost(context) {
   // Composed in the browser from the same cover. Optional: without it the
   // report simply falls back to the brand card.
   const shareCard = form.get('shareCard');
+  // The 450px thumbnail the homepage cards draw from, made in the browser
+  // from the same cover. Optional in the same way: without it the cards show
+  // the original, which is only heavier, not missing.
+  const coverThumbnail = form.get('coverThumbnail');
   const type = String(form.get('type') || '').trim();
   const lang = String(form.get('lang') || '').trim();
   const translationGroup = String(form.get('translationGroup') || '').trim();
@@ -668,6 +672,14 @@ export async function onRequestPost(context) {
       && Number(shareCard.size || 0) > 0 && Number(shareCard.size || 0) <= MAX_COVER_BYTES
     );
     const shareCardPath = hasShareCard ? `${SOCIAL_REPORT_CARD_DIR}/${id}.jpg` : null;
+    // The thumbnail is only ever WebP and only ever beside a cover; its name
+    // is derived from the cover's, which is how the cards find it.
+    const hasCoverThumbnail = Boolean(
+      coverPath && coverThumbnail && typeof coverThumbnail.arrayBuffer === 'function'
+      && Number(coverThumbnail.size || 0) > 0 && Number(coverThumbnail.size || 0) <= MAX_COVER_BYTES
+      && String(coverThumbnail.type || '').toLowerCase() === 'image/webp'
+    );
+    const coverThumbnailPath = hasCoverThumbnail ? coverPath.replace(/\.[a-z0-9]+$/i, '-450.webp') : null;
     const post = {
       id,
       type,
@@ -784,6 +796,17 @@ export async function onRequestPost(context) {
       shareCardEntry = { path: shareCardPath, mode: '100644', type: 'blob', sha: cardBlob.sha };
     }
 
+    let coverThumbnailEntry = null;
+    if (coverThumbnailPath) {
+      const thumbnailBytes = new Uint8Array(await coverThumbnail.arrayBuffer());
+      const thumbnailBlob = await gh(token, '/git/blobs', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ content: encodeBase64(thumbnailBytes), encoding: 'base64' })
+      });
+      coverThumbnailEntry = { path: coverThumbnailPath, mode: '100644', type: 'blob', sha: thumbnailBlob.sha };
+    }
+
     let coverEntry = null;
     if (coverPath) {
       const coverBytes = new Uint8Array(await cover.arrayBuffer());
@@ -804,6 +827,7 @@ export async function onRequestPost(context) {
           { path: reportPath, mode: '100644', type: 'blob', content: html },
           ...(coverEntry ? [coverEntry] : []),
           ...(shareCardEntry ? [shareCardEntry] : []),
+          ...(coverThumbnailEntry ? [coverThumbnailEntry] : []),
           { path: 'data/posts.json', mode: '100644', type: 'blob', content: postsJson },
           { path: 'data/posts.js', mode: '100644', type: 'blob', content: postsJs },
           ...searchIndexBlobs

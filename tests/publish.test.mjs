@@ -162,7 +162,7 @@ async function getAuthEnv() {
   return sharedAuthEnv;
 }
 
-function publishRequest({ type = 'daily', cover = null, shareCard = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, takeaway, tags = null } = {}, url = 'https://admin.snowshagal.com/api/publish', session = sharedAuthEnv?._authSession) {
+function publishRequest({ type = 'daily', cover = null, shareCard = null, coverThumbnail = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, takeaway, tags = null } = {}, url = 'https://admin.snowshagal.com/api/publish', session = sharedAuthEnv?._authSession) {
   const form = new FormData();
   form.append('file', new File(['<!doctype html><html><body>report content with some words</body></html>'], 'report.html', { type: 'text/html' }));
   form.append('type', type);
@@ -181,6 +181,7 @@ function publishRequest({ type = 'daily', cover = null, shareCard = null, lang =
   if (translationGroup) form.append('translationGroup', translationGroup);
   if (cover) form.append('cover', cover, cover.name);
   if (shareCard) form.append('shareCard', shareCard, shareCard.name);
+  if (coverThumbnail) form.append('coverThumbnail', coverThumbnail, coverThumbnail.name);
   const headers = {
     origin: new URL(url).origin,
     'x-admin-key': ADMIN_KEY
@@ -328,13 +329,15 @@ test('atomic publish preserves pairing, inherited tags, reading time, cover, and
   const github = atomicGithubMock({ existingPosts: [pairedPost] });
   const cover = new File([new Uint8Array([1, 2, 3])], 'cover.webp', { type: 'image/webp' });
   const shareCard = new File([new Uint8Array([4, 5, 6])], 'share.jpg', { type: 'image/jpeg' });
+  const coverThumbnail = new File([new Uint8Array([7, 8, 9])], 'cover-450.webp', { type: 'image/webp' });
   try {
     const { response, data } = await runPublish({
       type: 'daily',
       lang: 'en',
       translationGroup: 'daily-pair',
       cover,
-      shareCard
+      shareCard,
+      coverThumbnail
     });
     assert.equal(response.status, 200);
     const tree = github.branchTree().tree;
@@ -347,6 +350,10 @@ test('atomic publish preserves pairing, inherited tags, reading time, cover, and
     assert.match(published.shareCardImage, /^covers\/share\/.+\.jpg$/);
     assert.ok(tree.some(entry => entry.path === published.coverImage));
     assert.ok(tree.some(entry => entry.path === published.shareCardImage));
+    // The homepage thumbnail lands beside the cover, named after it, and is
+    // not recorded in the metadata: the cards derive its name from the cover.
+    assert.ok(tree.some(entry => entry.path === published.coverImage.replace(/\.webp$/, '-450.webp')));
+    assert.equal(Object.hasOwn(published, 'coverThumbnail'), false);
     assert.ok(tree.some(entry => entry.path === 'reports/en/daily-report.html'));
     const fromJs = JSON.parse(tree.find(entry => entry.path === 'data/posts.js').content.replace(/^window\.RESEARCH_POSTS = /, '').replace(/;\s*$/, ''));
     assert.deepEqual(fromJs, posts);

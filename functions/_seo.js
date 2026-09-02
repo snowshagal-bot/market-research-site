@@ -105,6 +105,50 @@ export function reportCardPath(post) {
   return declared === `${SOCIAL_REPORT_CARD_DIR}/${post.id}.jpg` ? declared : '';
 }
 
+/**
+ * The 450px thumbnail that sits beside every cover: `covers/x.webp` →
+ * `covers/x-450.webp`. Always WebP, whatever the original was.
+ *
+ * The homepage draws a cover at 112px on a desktop and never wider than 140px
+ * on a phone, so even a 3× screen needs 420 source pixels at most. Sending
+ * the 900×1350 original there is four times the pixels any of those cards
+ * can show. The original stays where it is for the report page, the share
+ * card and anyone who wants the full artwork.
+ */
+export const COVER_THUMBNAIL_WIDTH = 450;
+export const COVER_ORIGINAL_WIDTH = 900;
+
+export function coverThumbnailPath(cover) {
+  const normalized = normalizeSitePath(cover);
+  const match = normalized.match(/^(.*)\.(webp|png|jpe?g)$/i);
+  return match ? `${match[1]}-${COVER_THUMBNAIL_WIDTH}.webp` : '';
+}
+
+/**
+ * Where each cover surface draws its image, as the `sizes` the browser needs
+ * in order to pick the smaller file. Each is the layout's own measure, not a
+ * shared guess: a `100vw` here would send the 900px original to a 112px card.
+ */
+export const LATEST_CARD_COVER_SIZES = '(max-width: 760px) 30vw, 112px';
+export const HERO_FEATURED_COVER_SIZES = '(max-width: 760px) 140px, 220px';
+
+/**
+ * An <img> that offers the thumbnail and the original and lets the browser
+ * choose by the space it actually has. The original is the `src`, so a cover
+ * published before its thumbnail exists still shows; the intrinsic size keeps
+ * the box at the cover's own 2:3 while the bytes are on their way.
+ */
+export function coverThumbnailMarkup(cover, sizes, extra = '') {
+  const original = normalizeSitePath(cover);
+  const thumbnail = coverThumbnailPath(original);
+  if (!thumbnail) return `<img src="/${escapeHtml(original)}" alt="" loading="lazy"${extra}>`;
+  return `<img src="/${escapeHtml(original)}"`
+    + ` srcset="/${escapeHtml(thumbnail)} ${COVER_THUMBNAIL_WIDTH}w, /${escapeHtml(original)} ${COVER_ORIGINAL_WIDTH}w"`
+    + ` sizes="${escapeHtml(sizes)}"`
+    + ` width="${COVER_ORIGINAL_WIDTH}" height="${COVER_ORIGINAL_WIDTH * 3 / 2}"`
+    + ` alt="" loading="lazy"${extra}>`;
+}
+
 // Uploaded report HTML declares no icon, so the shared shell supplies one.
 export const FAVICON_TAGS = '<link rel="icon" href="/favicon.ico" sizes="any">'
   + '<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">'
@@ -427,7 +471,7 @@ export function homepageLatestLinks(posts, lang) {
         .trim();
       const cover = normalizeSitePath(post?.coverImage);
       const visual = cover
-        ? `<span class="latest-card-cover"><img src="/${escapeHtml(cover)}" alt="" loading="lazy"></span>`
+        ? `<span class="latest-card-cover">${coverThumbnailMarkup(cover, LATEST_CARD_COVER_SIZES)}</span>`
         : '<span class="latest-card-art" aria-hidden="true"></span>';
       const mins = typeof post?.readingMinutes === 'number' && post.readingMinutes > 0 ? post.readingMinutes : 0;
       const readingSuffix = mins > 0 ? (lang === 'en' ? ` · ${mins} min read` : ` · 약 ${mins}분`) : '';

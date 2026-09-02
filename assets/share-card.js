@@ -127,5 +127,39 @@
     }
   }
 
-  root.SHARE_CARD = { renderShareCard, categoryLabel, formatDate, WIDTH, HEIGHT };
+  const THUMBNAIL_WIDTH = 450;
+  // The same encoder and quality the cover itself is made with, see
+  // cover-generator.js: Chrome's canvas, WebP at 0.9.
+  const THUMBNAIL_QUALITY = 0.9;
+
+  /**
+   * The 450px copy of a cover the homepage cards draw from. Same artwork,
+   * same proportions, nothing cropped and nothing sharpened — only fewer
+   * pixels than a 112px card can ever show.
+   * @param {Blob|File|string} cover the report cover, as an upload or a URL
+   * @returns {Promise<Blob>} a WebP THUMBNAIL_WIDTH pixels wide
+   */
+  async function renderCoverThumbnail(cover) {
+    const coverUrl = typeof cover === 'string' ? cover : URL.createObjectURL(cover);
+    try {
+      const image = await loadImage(coverUrl);
+      const height = Math.max(1, Math.round(image.height * THUMBNAIL_WIDTH / image.width));
+      const canvas = document.createElement('canvas');
+      canvas.width = THUMBNAIL_WIDTH;
+      canvas.height = height;
+      const context = canvas.getContext('2d');
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = 'high';
+      context.drawImage(image, 0, 0, THUMBNAIL_WIDTH, height);
+      return await new Promise((resolve, reject) => {
+        canvas.toBlob(blob => (blob && blob.type === 'image/webp'
+          ? resolve(blob)
+          : reject(new Error('thumbnail encode failed'))), 'image/webp', THUMBNAIL_QUALITY);
+      });
+    } finally {
+      if (typeof cover !== 'string') URL.revokeObjectURL(coverUrl);
+    }
+  }
+
+  root.SHARE_CARD = { renderShareCard, renderCoverThumbnail, categoryLabel, formatDate, WIDTH, HEIGHT, THUMBNAIL_WIDTH };
 })(typeof window !== 'undefined' ? window : globalThis);
