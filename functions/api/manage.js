@@ -120,6 +120,21 @@ async function readRepoText(token, path, ref) {
   return decodeBase64Utf8(blob.content);
 }
 
+/**
+ * Whether a file is in the repository at this ref. Deleting a path that is
+ * not in the base tree fails the whole commit, so anything derived — like a
+ * cover's thumbnail, which older posts may lack — is only deleted once it is
+ * known to be there. A lookup that fails for any reason counts as absent.
+ */
+async function repoFileExists(token, path, ref) {
+  try {
+    const file = await gh(token, `/contents/${encodeRepoPath(path)}?ref=${encodeURIComponent(ref)}`);
+    return Boolean(file?.sha);
+  } catch {
+    return false;
+  }
+}
+
 function isFile(value) {
   return value && typeof value === "object" && typeof value.arrayBuffer === "function";
 }
@@ -803,12 +818,18 @@ export async function onRequestPost(context) {
       }
 
       if (coverAction === "remove") {
-        if (existing.coverImage) entries.push(deletedEntry(existing.coverImage));
+        if (existing.coverImage) {
+          entries.push(deletedEntry(existing.coverImage));
+          // The thumbnail beside it goes the same way, when there is one.
+          const thumbnail = existing.coverImage.replace(/\.[a-z0-9]+$/i, "-450.webp");
+          if (await repoFileExists(env.GITHUB_TOKEN, thumbnail, baseSha)) entries.push(deletedEntry(thumbnail));
+        }
         // Nothing to compose a card from any more, so the report falls back to
         // the brand card and the stale card is removed rather than orphaned.
         if (existing.shareCardImage) entries.push(deletedEntry(existing.shareCardImage));
         delete updated.coverImage;
         delete updated.shareCardImage;
+        delete updated.coverThumbnail;
       } else if (coverAction === "replace") {
         if (!/^[A-Za-z0-9._-]+$/.test(existing.id)) {
           return reply({ ok: false, error: "UNSAFE_POST_ID", message: "안전하지 않은 게시물 ID에는 커버를 저장할 수 없습니다." }, 400);
@@ -839,6 +860,35 @@ export async function onRequestPost(context) {
         } else {
           if (existing.shareCardImage) entries.push(deletedEntry(existing.shareCardImage));
           delete updated.shareCardImage;
+        }
+
+        // The homepage thumbnail is derived from the cover's name, so a new
+        // cover needs a new one beside it. When the browser could not make
+        // it, any old thumbnail is removed rather than left showing the
+        // artwork the cover no longer has; the cards then use the original.
+        const thumbnailFile = form.get("coverThumbnail");
+        const nextThumbnailPath = nextCoverPath.replace(/\.[a-z0-9]+$/i, "-450.webp");
+        const usableThumbnail = thumbnailFile && typeof thumbnailFile.arrayBuffer === "function"
+          && Number(thumbnailFile.size || 0) > 0 && Number(thumbnailFile.size || 0) <= MAX_COVER_BYTES
+          && String(thumbnailFile.type || "").toLowerCase() === "image/webp";
+        if (usableThumbnail) {
+          // Same name whatever the cover's extension, so this overwrites any
+          // thumbnail the previous cover had.
+          const thumbnailBlob = await gh(env.GITHUB_TOKEN, "/git/blobs", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ content: encodeBase64(await thumbnailFile.arrayBuffer()), encoding: "base64" }),
+          });
+          entries.push({ path: nextThumbnailPath, mode: "100644", type: "blob", sha: thumbnailBlob.sha });
+          updated.coverThumbnail = nextThumbnailPath;
+        } else {
+          // No thumbnail for the new cover: the metadata says so, so the cards
+          // use the original, and any old thumbnail beside the previous cover
+          // is removed rather than left depicting artwork that is gone.
+          delete updated.coverThumbnail;
+          if (await repoFileExists(env.GITHUB_TOKEN, nextThumbnailPath, baseSha)) {
+            entries.push(deletedEntry(nextThumbnailPath));
+          }
         }
       }
 

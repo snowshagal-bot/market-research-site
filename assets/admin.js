@@ -851,6 +851,15 @@
       } catch (error) {
         console.warn('share card generation failed; falling back to the brand card', error);
       }
+      // The 450px thumbnail the homepage cards draw from, made here from the
+      // same cover so a new report never goes out without one. If it cannot
+      // be made the cards fall back to the original, which still displays.
+      try {
+        const thumbnail = await window.SHARE_CARD.renderCoverThumbnail(selectedCover);
+        form.append('coverThumbnail', thumbnail, 'cover-450.webp');
+      } catch (error) {
+        console.warn('cover thumbnail generation failed; the homepage will use the original cover', error);
+      }
     }
 
     try {

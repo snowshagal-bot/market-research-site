@@ -121,6 +121,7 @@ The homepage also provides:
 - a fixed Korean hero headline and supporting copy, with a matching English-language hero on `/en/`
 - post-driven latest DAILY, WEEKLY, and RESEARCH cards using the current localized `posts` data
 - optional post cover images through `coverImage`, with a restrained CSS fallback when no cover exists
+- a 450px WebP thumbnail beside every cover (`covers/<id>-450.webp`), recorded in `posts.json` as `coverThumbnail` only when the file was actually committed. The homepage latest cards and the hero featured cover render from that field alone: with it they offer `srcset="…-450.webp 450w, <original> 900w"` with layout-measured `sizes` (`(max-width: 760px) 30vw, 112px` for cards, `(max-width: 760px) 140px, 220px` for the hero), so a 112px card downloads the small file and only a 3× desktop hero takes the original; without it they are the plain original `<img>`, never a guessed `-450` path (a missing srcset candidate is a broken image, not a fallback to `src`). The report page, share cards and social images never reference a thumbnail, and category landings still use the original in their own box. `node scripts/build-cover-thumbnails.mjs` regenerates missing or stale thumbnails with the same Chrome-canvas WebP 0.9 encoding the covers use and brings the `coverThumbnail` records into line with the files on disk, rebuilding `posts.js` and the search index when they change.
 - the existing report archive, URL category filtering, and report-date sorting
 - a paged archive: 20 rows render at a time behind a `더 보기` / `Show more` control that
   names how many remain. Changing category, year, month or tag, resetting the filters, or
@@ -163,6 +164,7 @@ Admin page: `/admin/`
 7. `/api/publish` authenticates with `ADMIN_KEY` and uses `GITHUB_TOKEN` server-side. It accepts only `ko` or `en`; Korean reports keep `reports/`, while English reports are written under `reports/en/`.
 8. An optional JPG/PNG/WebP cover image can be uploaded separately from the report HTML.
 9. A single Git commit updates the report HTML, optional `covers/` asset, `data/posts.json`, and `data/posts.js`.
+10. When a cover is uploaded, the admin browser also composes its 450px WebP thumbnail (`SHARE_CARD.renderCoverThumbnail`, beside the 1200×630 share card) and sends it as `coverThumbnail`; `/api/publish` commits it as `covers/<id>-450.webp`. `/api/manage` does the same on cover replacement and removes the thumbnail on cover removal, deleting only a thumbnail it has confirmed exists in the repository. A thumbnail that could not be composed is not fatal: the homepage cards then use the original cover.
 10. Cloudflare Pages automatically deploys the new Git commit.
 11. Admin UI polls `data/posts.json` until the new post appears, then shows completion and redirects to the relevant locale/category.
 

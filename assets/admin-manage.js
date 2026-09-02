@@ -432,6 +432,13 @@
       } catch (error) {
         console.warn('share card generation failed; the previous card is kept', error);
       }
+      // And the 450px thumbnail the homepage cards use, from the same cover.
+      try {
+        const thumbnail = await window.SHARE_CARD.renderCoverThumbnail(selectedCover);
+        body.append('coverThumbnail', thumbnail, 'cover-450.webp');
+      } catch (error) {
+        console.warn('cover thumbnail generation failed; the homepage will use the original cover', error);
+      }
     }
     return body;
   }

@@ -33,6 +33,32 @@
   }
   function reportDate(post){ return post.reportDate || post.date || ''; }
   function rootPath(path){ return `/${String(path || '').replace(/^\/+/, '')}`; }
+
+  // The 450px thumbnail beside every cover, and the widths the homepage
+  // actually draws a cover at. Kept in step with functions/_seo.js, which
+  // renders the same cards on the server; the browser re-renders them here.
+  const COVER_THUMBNAIL_WIDTH = 450;
+  const COVER_ORIGINAL_WIDTH = 900;
+  const LATEST_CARD_COVER_SIZES = '(max-width: 760px) 30vw, 112px';
+  const HERO_FEATURED_COVER_SIZES = '(max-width: 760px) 140px, 220px';
+  // Only a thumbnail the post's metadata records is offered: the field is
+  // written when the file was committed and dropped when it was not, and a
+  // browser shows a broken image for a missing srcset candidate rather than
+  // falling back to src.
+  function coverThumbnailOf(post){
+    const thumbnail = String(post && post.coverThumbnail || '');
+    return /-450\.webp$/i.test(thumbnail) ? rootPath(thumbnail) : '';
+  }
+  function coverImageMarkup(post, sizes){
+    const original = rootPath(post.coverImage);
+    const thumbnail = coverThumbnailOf(post);
+    if (!thumbnail) return `<img src="${esc(original)}" alt="" loading="lazy">`;
+    return `<img src="${esc(original)}"`
+      + ` srcset="${esc(thumbnail)} ${COVER_THUMBNAIL_WIDTH}w, ${esc(original)} ${COVER_ORIGINAL_WIDTH}w"`
+      + ` sizes="${esc(sizes)}"`
+      + ` width="${COVER_ORIGINAL_WIDTH}" height="${COVER_ORIGINAL_WIDTH * 3 / 2}"`
+      + ` alt="" loading="lazy">`;
+  }
   function cleanReportUrl(href){
     const str = String(href || '').trim();
     const match = str.match(/^([^?#]*)([?#].*)?$/);
@@ -554,7 +580,7 @@
       const summary=String(post.summary||post.description||post.subtitle||'').trim();
       const readLabel=locale==='en'?'Read report':'리포트 보기';
       const visual=post.coverImage
-        ? `<span class="latest-card-cover"><img src="${esc(rootPath(post.coverImage))}" alt="" loading="lazy"></span>`
+        ? `<span class="latest-card-cover">${coverImageMarkup(post, LATEST_CARD_COVER_SIZES)}</span>`
         : '<span class="latest-card-art" aria-hidden="true"></span>';
       const summaryCopy=summary?`<p class="latest-card-summary">${esc(summary)}</p>`:'';
       const readingTimeStr = formatReadingTime(post.readingMinutes, locale);
@@ -1148,7 +1174,17 @@
       if (actionBtn) actionBtn.href = href;
       if (imgLink) imgLink.href = href;
       if (imgEl) {
-        imgEl.src = latestResearch.coverImage ? rootPath(latestResearch.coverImage) : '/assets/social/snowshagal-home.jpg';
+        // The hero shows the cover at 220px on a desktop and 140px on a phone,
+        // so it is offered the thumbnail and the original and told how wide it
+        // really is; without `sizes` a browser assumes the full viewport and
+        // takes the 900px file every time.
+        const cover = latestResearch.coverImage ? rootPath(latestResearch.coverImage) : '';
+        const thumbnail = cover ? coverThumbnailOf(latestResearch) : '';
+        // An empty srcset is the same as none, so the fallback artwork is
+        // simply a plain src again.
+        imgEl.srcset = cover && thumbnail ? `${thumbnail} 450w, ${cover} 900w` : '';
+        imgEl.sizes = cover && thumbnail ? HERO_FEATURED_COVER_SIZES : '';
+        imgEl.src = cover || '/assets/social/snowshagal-home.jpg';
         imgEl.alt = latestResearch.title || '';
       }
     } else {
