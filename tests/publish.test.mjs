@@ -162,9 +162,9 @@ async function getAuthEnv() {
   return sharedAuthEnv;
 }
 
-function publishRequest({ type = 'daily', cover = null, shareCard = null, coverThumbnail = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, takeaway, tags = null } = {}, url = 'https://admin.snowshagal.com/api/publish', session = sharedAuthEnv?._authSession) {
+function publishRequest({ type = 'daily', cover = null, shareCard = null, coverThumbnail = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, takeaway, tags = null, html = null } = {}, url = 'https://admin.snowshagal.com/api/publish', session = sharedAuthEnv?._authSession) {
   const form = new FormData();
-  form.append('file', new File(['<!doctype html><html><body>report content with some words</body></html>'], 'report.html', { type: 'text/html' }));
+  form.append('file', new File([html || '<!doctype html><html><body>report content with some words</body></html>'], 'report.html', { type: 'text/html' }));
   form.append('type', type);
   form.append('reportDate', reportDate);
   form.append('title', type === 'basics' ? '시장을 읽는 기본' : '테스트 리포트');
@@ -871,3 +871,53 @@ test('publish English report creates reports/en/...html in posts.json and /repor
   }
 });
 
+
+/* ------------------------------- a late cover rule never reaches the repository */
+
+const COVER_MARKUP = '<section class="dcv"><img class="dcv-img" src="x.webp"><div class="dcv-copy">t</div></section>';
+const COVER_SIZING = '<style id="daily-cover">body.cover-edition .dcv{position:relative;width:100%}</style>';
+const reportHtml = (head, ...body) =>
+  `<!doctype html><html><head><style>.page{color:#000}</style>${head}</head>`
+  + `<body class="cover-edition">${body.join('')} report content with some words</body></html>`;
+
+test('a report whose cover is sized after the cover is refused before GitHub is touched', async () => {
+  const calls = githubMock();
+  try {
+    const { response, data } = await runPublish({ html: reportHtml('', COVER_MARKUP, COVER_SIZING) });
+    assert.equal(response.status, 400);
+    assert.equal(data.error, 'LATE_COVER_STYLE');
+    assert.match(data.message, /표지 크기를 정하는 CSS\(\.dcv\)/);
+    assert.equal(data.detail.container, 'dcv');
+    assert.ok(data.detail.ruleAt > data.detail.elementAt);
+    // Nothing was read from or written to the repository.
+    assert.deepEqual(calls, [], 'the refusal happens before any GitHub request');
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('the same report with its cover rule in the head publishes normally', async () => {
+  const calls = githubMock();
+  try {
+    const { response } = await runPublish({ html: reportHtml(COVER_SIZING, COVER_MARKUP) });
+    assert.equal(response.status, 200);
+    assert.ok(calls.some(call => call.path.endsWith('/git/trees')), 'the commit went ahead');
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('a body <style> that does not size a cover is left alone', async () => {
+  const calls = githubMock();
+  try {
+    // What most published reports look like: body typography late in the file.
+    const { response } = await runPublish({
+      html: reportHtml(COVER_SIZING, COVER_MARKUP, '<style id="daily-fix">.page .bul{display:block}</style>')
+    });
+    assert.equal(response.status, 200);
+    assert.ok(calls.some(call => call.path.endsWith('/git/trees')));
+  } finally { globalThis.fetch = originalFetch; }
+
+  const plain = githubMock();
+  try {
+    const { response } = await runPublish({ html: reportHtml('', '<div class="page">t</div>', '<style>.page{margin:0}</style>') });
+    assert.equal(response.status, 200);
+    assert.ok(plain.some(call => call.path.endsWith('/git/trees')));
+  } finally { globalThis.fetch = originalFetch; }
+});

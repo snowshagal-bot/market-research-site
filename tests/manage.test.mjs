@@ -223,6 +223,34 @@ test('optional HTML replacement keeps href and validates standalone HTML before 
   } finally { globalThis.fetch = originalFetch; }
 });
 
+test('replacement HTML whose cover is sized after the cover is refused before GitHub is touched', async () => {
+  const cover = '<section class="dcv"><img class="dcv-img" src="x.webp"><div class="dcv-copy">t</div></section>';
+  const sizing = '<style id="daily-cover">body.cover-edition .dcv{position:relative;width:100%}</style>';
+  const report = (head, ...body) =>
+    `<!doctype html><html><head><style>.page{color:#000}</style>${head}</head>`
+    + `<body class="cover-edition">${body.join('')} replacement content</body></html>`;
+
+  let calls = githubMock([basePost]);
+  try {
+    const { response, data } = await run({ file: new File([report('', cover, sizing)], 'r.html', { type: 'text/html' }) });
+    assert.equal(response.status, 400);
+    assert.equal(data.error, 'LATE_COVER_STYLE');
+    assert.match(data.message, /표지 크기를 정하는 CSS\(\.dcv\)/);
+    assert.deepEqual(calls, [], 'nothing reached the repository');
+  } finally { globalThis.fetch = originalFetch; }
+
+  // The same file with the rule in the head, and an unrelated body <style>,
+  // saves normally.
+  calls = githubMock([basePost]);
+  try {
+    const { response } = await run({
+      file: new File([report(sizing, cover, '<style id="daily-fix">.page .bul{display:block}</style>')], 'r.html', { type: 'text/html' })
+    });
+    assert.equal(response.status, 200);
+    assert.ok(treeFrom(calls).some(entry => entry.path === basePost.href), 'the report was written');
+  } finally { globalThis.fetch = originalFetch; }
+});
+
 test('replacing a cover writes the homepage thumbnail beside it, and never deletes one it cannot see', async () => {
   const post = { ...basePost, coverImage: `covers/${basePost.id}.webp` };
   const thumbnail = new File(['thumb'], 'cover-450.webp', { type: 'image/webp' });
