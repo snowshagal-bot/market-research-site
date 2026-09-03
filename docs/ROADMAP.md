@@ -60,7 +60,7 @@ Focus on operational observation and incremental refinement rather than new prod
 
 ### 3. Publishing Workflow Refinement (Friction-Driven Only)
 
-- Homepage cover thumbnails (`covers/<id>-450.webp`) are generated at publish time by the admin browser and backfilled for existing posts by `scripts/build-cover-thumbnails.mjs`. Follow-ups, only if measured worthwhile: give category landings' featured cards (a 16:10 `object-fit: contain` box, up to ~235px of cover on a desktop) their own `srcset`/`sizes`; the five legacy PNG covers (1.4–2.6MB each) are still served in full on report pages and category landings.
+- Cover thumbnails (`covers/<id>-450.webp`) are generated at publish time by the admin browser and backfilled for existing posts by `scripts/build-cover-thumbnails.mjs`. The homepage cards and the category landings' featured cards both choose between the thumbnail and the original from `coverThumbnail` with layout-measured `sizes`. Still open, only if measured worthwhile: the five legacy PNG covers (1.4–2.6MB each) are served in full wherever the original is chosen; category landings' LCP is the first featured cover and it is `loading="lazy"`.
 Refine `/admin/` and `/admin/manage/` only when recurring operational pain points are observed:
 - Clearer duplicate-file / existing-slug warnings at publish time;
 - Potential manual slug or filename customization if needed for future reports;

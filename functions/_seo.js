@@ -131,6 +131,14 @@ export function coverThumbnailPath(cover) {
  */
 export const LATEST_CARD_COVER_SIZES = '(max-width: 760px) 30vw, 112px';
 export const HERO_FEATURED_COVER_SIZES = '(max-width: 760px) 140px, 220px';
+// A category landing's featured card holds the cover in a 16:10 box (16:9 up
+// to 680px) with object-fit: contain, so the picture is painted narrower than
+// the box: at 2:3 it fills the box's height and takes 5/12 of its width (3/8
+// of it in the 16:9 box). These are the painted widths measured on the live
+// pages — 123px at 360, 134 at 390, 149 at 430, 146 at 768, 195 at 1024, and
+// 235 once the grid reaches its 1180px cap — not the box widths, which would
+// over-ask by more than double. One column below 680px; two above.
+export const CATEGORY_FEATURED_COVER_SIZES = '(max-width: 680px) calc(37.5vw - 10px), (max-width: 1220px) calc(20.8vw - 12px), 235px';
 
 /**
  * The thumbnail a post actually has, or nothing.
@@ -413,7 +421,7 @@ export function categoryFeaturedCards(posts, type, lang) {
         .trim();
       const cover = normalizeSitePath(post?.coverImage);
       const visual = cover
-        ? `<span class="category-featured-cover"><img src="/${escapeHtml(cover)}" alt="" loading="lazy"></span>`
+        ? `<span class="category-featured-cover">${coverImageMarkup(post, CATEGORY_FEATURED_COVER_SIZES)}</span>`
         : '<span class="category-featured-art" aria-hidden="true"></span>';
       const mins = typeof post?.readingMinutes === 'number' && post.readingMinutes > 0 ? post.readingMinutes : 0;
       const readingSuffix = mins > 0 ? (lang === 'en' ? ` · ${mins} min read` : ` · 약 ${mins}분`) : '';
