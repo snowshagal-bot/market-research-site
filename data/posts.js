@@ -1,5 +1,29 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-03-daily-14kg6ag",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-03",
+    "reportDate": "2026-09-03",
+    "registeredDate": "2026-09-03",
+    "registeredAt": "2026-09-03T14:44:14.725Z",
+    "legacyImport": false,
+    "title": "An Afternoon Wiped Away",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "flows",
+      "geopolitics"
+    ],
+    "readingMinutes": 5,
+    "href": "reports/en/2026-09-03_KOSPI_Daily_Report_EN_publish_fixed.html",
+    "translationGroup": "2026-09-03-daily-earj10",
+    "coverImage": "covers/2026-09-03-daily-14kg6ag.webp",
+    "shareCardImage": "covers/share/2026-09-03-daily-14kg6ag.jpg",
+    "coverThumbnail": "covers/2026-09-03-daily-14kg6ag-450.webp"
+  },
+  {
     "id": "2026-09-03-daily-earj10",
     "type": "daily",
     "typeLabel": "주식 리포트",
