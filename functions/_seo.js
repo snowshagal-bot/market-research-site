@@ -158,17 +158,22 @@ export function coverThumbnailOf(post) {
  * An <img> for a post's cover. With a thumbnail it offers both files and lets
  * the browser choose by the space it actually has; without one it is the
  * plain original, exactly as the cards were before thumbnails existed.
+ *
+ * Covers load lazily unless the caller says otherwise: `{ loading: 'eager' }`
+ * is for the one cover that is a page's largest first paint, which a lazy
+ * image only requests after every stylesheet has arrived and laid out.
  */
-export function coverImageMarkup(post, sizes) {
+export function coverImageMarkup(post, sizes, { loading } = {}) {
   const original = normalizeSitePath(post?.coverImage);
   const thumbnail = coverThumbnailOf(post);
+  const loadingAttr = loading === 'eager' ? 'eager' : 'lazy';
   if (!original) return '';
-  if (!thumbnail) return `<img src="/${escapeHtml(original)}" alt="" loading="lazy">`;
+  if (!thumbnail) return `<img src="/${escapeHtml(original)}" alt="" loading="${loadingAttr}">`;
   return `<img src="/${escapeHtml(original)}"`
     + ` srcset="/${escapeHtml(thumbnail)} ${COVER_THUMBNAIL_WIDTH}w, /${escapeHtml(original)} ${COVER_ORIGINAL_WIDTH}w"`
     + ` sizes="${escapeHtml(sizes)}"`
     + ` width="${COVER_ORIGINAL_WIDTH}" height="${COVER_ORIGINAL_WIDTH * 3 / 2}"`
-    + ` alt="" loading="lazy">`;
+    + ` alt="" loading="${loadingAttr}">`;
 }
 
 // Uploaded report HTML declares no icon, so the shared shell supplies one.
@@ -415,13 +420,18 @@ export function categoryFeaturedCards(posts, type, lang) {
       return byDate || String(right?.registeredAt || '').localeCompare(String(left?.registeredAt || ''));
     })
     .slice(0, 2)
-    .map((post) => {
+    .map((post, index) => {
       const summary = String(post?.summary || post?.description || post?.subtitle || '')
         .replace(/\s+/g, ' ')
         .trim();
       const cover = normalizeSitePath(post?.coverImage);
+      // The first card's cover is the landing's largest contentful paint on
+      // every measured page. Lazy, the browser only asks for it once all seven
+      // stylesheets have arrived and laid out — about 700ms after the HTML on
+      // a phone, 260ms on a desktop — so that one is eager; the second card
+      // stays lazy. assets/category-landing.js re-renders with the same rule.
       const visual = cover
-        ? `<span class="category-featured-cover">${coverImageMarkup(post, CATEGORY_FEATURED_COVER_SIZES)}</span>`
+        ? `<span class="category-featured-cover">${coverImageMarkup(post, CATEGORY_FEATURED_COVER_SIZES, { loading: index === 0 ? 'eager' : 'lazy' })}</span>`
         : '<span class="category-featured-art" aria-hidden="true"></span>';
       const mins = typeof post?.readingMinutes === 'number' && post.readingMinutes > 0 ? post.readingMinutes : 0;
       const readingSuffix = mins > 0 ? (lang === 'en' ? ` · ${mins} min read` : ` · 약 ${mins}분`) : '';

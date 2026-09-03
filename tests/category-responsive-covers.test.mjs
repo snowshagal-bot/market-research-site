@@ -31,7 +31,7 @@ test('a featured card whose post records a thumbnail offers 450w and 900w', () =
     assert.match(img, new RegExp(`srcset="/${post.coverThumbnail} 450w, /${post.coverImage} 900w"`));
     assert.match(img, /sizes="\(max-width: 680px\) calc\(37\.5vw - 10px\), \(max-width: 1220px\) calc\(20\.8vw - 12px\), 235px"/);
     assert.match(img, /width="900" height="1350"/);
-    assert.match(img, /loading="lazy"/);
+    assert.match(img, /loading="eager"/, 'the first featured cover is the page\'s LCP and is requested at once');
   }
 });
 
@@ -46,7 +46,7 @@ test('a featured card whose post records no thumbnail is the plain original, nam
     { ...en, coverThumbnail: undefined }
   ]) {
     const [img] = imgOf(categoryFeaturedCards([post], 'research', post.lang));
-    assert.equal(img, `<img src="/${post.coverImage}" alt="" loading="lazy">`, JSON.stringify(post.coverThumbnail));
+    assert.equal(img, `<img src="/${post.coverImage}" alt="" loading="eager">`, JSON.stringify(post.coverThumbnail));
     assert.doesNotMatch(img, /srcset|sizes|-450/);
   }
   // A real thumbnail on disk that the record does not mention is not offered.
@@ -59,14 +59,14 @@ test('a featured card whose post records no thumbnail is the plain original, nam
 test('the category landing script decides from the same field, with the same sizes, and never derives a name', async () => {
   const script = await read('assets/category-landing.js');
   assert.match(script, /function coverThumbnailOf\(post\) \{\s*const thumbnail = String\(post && post\.coverThumbnail \|\| ''\);/);
-  assert.match(script, /coverImageMarkup\(post, CATEGORY_FEATURED_COVER_SIZES\)/);
+  assert.match(script, /coverImageMarkup\(post, CATEGORY_FEATURED_COVER_SIZES, \{ loading: index === 0 \? 'eager' : 'lazy' \}\)/);
   assert.match(script, new RegExp(`const CATEGORY_FEATURED_COVER_SIZES = '${CATEGORY_FEATURED_COVER_SIZES.replace(/[().]/g, '\\$&')}';`));
-  assert.match(script, /if \(!thumbnail\) return `<img src="\$\{esc\(original\)\}" alt="" loading="lazy">`;/);
+  assert.match(script, /if \(!thumbnail\) return `<img src="\$\{esc\(original\)\}" alt="" loading="\$\{loading\}">`;/);
   assert.doesNotMatch(script, /coverThumbnailPath\(|-450\.webp`|replace\([^)]*-450/, 'no thumbnail name is ever built from the cover name');
   // The server renderer likewise.
   const seo = await read('functions/_seo.js');
   const featured = seo.slice(seo.indexOf('export function categoryFeaturedCards'), seo.indexOf('export function categoryArchiveLinks'));
-  assert.match(featured, /coverImageMarkup\(post, CATEGORY_FEATURED_COVER_SIZES\)/);
+  assert.match(featured, /coverImageMarkup\(post, CATEGORY_FEATURED_COVER_SIZES, \{ loading: index === 0 \? 'eager' : 'lazy' \}\)/);
   assert.doesNotMatch(featured, /coverThumbnailPath\(/);
 });
 
