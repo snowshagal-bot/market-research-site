@@ -81,30 +81,35 @@
   // CATEGORY_FEATURED_COVER_SIZES in functions/_seo.js, which renders the same
   // cards on the server. Only a thumbnail the post's metadata records is
   // offered — a missing srcset candidate is a broken image, not a fallback.
+  // The first card's cover is the page's largest contentful paint, and a lazy
+  // image is only requested after every stylesheet has arrived and laid out;
+  // so the first is eager and the second stays lazy — the same rule the
+  // server applies, so this re-render never turns an eager cover lazy.
   const CATEGORY_FEATURED_COVER_SIZES = '(max-width: 680px) calc(37.5vw - 10px), (max-width: 1220px) calc(20.8vw - 12px), 235px';
   function coverThumbnailOf(post) {
     const thumbnail = String(post && post.coverThumbnail || '');
     return /-450\.webp$/i.test(thumbnail) ? rootPath(thumbnail) : '';
   }
-  function coverImageMarkup(post, sizes) {
+  function coverImageMarkup(post, sizes, options) {
     const original = rootPath(post.coverImage);
     const thumbnail = coverThumbnailOf(post);
-    if (!thumbnail) return `<img src="${esc(original)}" alt="" loading="lazy">`;
+    const loading = options && options.loading === 'eager' ? 'eager' : 'lazy';
+    if (!thumbnail) return `<img src="${esc(original)}" alt="" loading="${loading}">`;
     return `<img src="${esc(original)}"`
       + ` srcset="${esc(thumbnail)} 450w, ${esc(original)} 900w"`
       + ` sizes="${esc(sizes)}"`
       + ` width="900" height="1350"`
-      + ` alt="" loading="lazy">`;
+      + ` alt="" loading="${loading}">`;
   }
 
   // Render Featured Cards (1-2 cards)
   if (featuredHost) {
     if (featuredSection) featuredSection.hidden = false;
-    featuredHost.innerHTML = featuredPosts.map((post) => {
+    featuredHost.innerHTML = featuredPosts.map((post, index) => {
       const summary = String(post.summary || post.description || post.subtitle || '').trim();
       const readLabel = lang === 'en' ? 'Read report' : '리포트 보기';
       const visual = post.coverImage
-        ? `<span class="category-featured-cover">${coverImageMarkup(post, CATEGORY_FEATURED_COVER_SIZES)}</span>`
+        ? `<span class="category-featured-cover">${coverImageMarkup(post, CATEGORY_FEATURED_COVER_SIZES, { loading: index === 0 ? 'eager' : 'lazy' })}</span>`
         : '<span class="category-featured-art" aria-hidden="true"></span>';
       const summaryCopy = summary ? `<p class="category-featured-summary">${esc(summary)}</p>` : '';
       const readingTimeStr = formatReadingTime(post.readingMinutes, lang);
