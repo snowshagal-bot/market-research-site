@@ -216,6 +216,59 @@ details.inline-more[open]>summary:after{content:"−"}
   h1{font-size:30px}
 }
 </style>
+<style id="daily-cover">
+  /* 커버 · 2026.09.02 · 플레이트 실측 배치 (조판사양 md가 정본) */
+  body.cover-edition{background:var(--paper)}
+  body.cover-edition .dcv{position:relative;width:100%;max-width:620px;margin:0 auto;
+    background:var(--paper);line-height:1}
+  body.cover-edition .dcv-img{display:block;width:100%;height:auto}
+  body.cover-edition .dcv-copy{position:absolute;inset:0}
+  body.cover-edition .dcv-copy *{margin:0;padding:0}
+  /* 브랜드·날짜 · 우상단 2줄 · 구름 위라 크림 */
+  body.cover-edition .dcv-brand{position:absolute;right:6.5%;top:3.4%;text-align:right;
+    font-family:'Helvetica Neue',Arial,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+    font-size:min(2.42vw,11.6px);font-weight:700;letter-spacing:.1em;color:#E4DCCA;white-space:nowrap}
+  body.cover-edition .dcv-date{position:absolute;right:6.5%;top:6.4%;text-align:right;
+    font-family:'Helvetica Neue',Arial,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+    font-size:min(2.55vw,12.2px);font-weight:700;letter-spacing:.14em;color:#E4DCCA;white-space:nowrap}
+  /* 룰·제목 · 좌측 · y61% */
+  body.cover-edition .dcv-main{position:absolute;left:6.5%;top:61%;
+    width:min(60vw,300px);text-align:left}
+  body.cover-edition .dcv-rule{width:min(11vw,54px);height:1.6px;background:#46584D;opacity:.85;
+    margin:0 0 min(2.6vw,13px)}
+  body.cover-edition .dcv-h1{font-family:'Noto Serif KR','Noto Serif CJK KR',serif;
+    font-size:min(7.08vw,34px);font-weight:800;line-height:1.24;letter-spacing:-.035em;
+    color:#2A2721}
+  /* 오늘의 한 줄 · 좌측 · y82% */
+  body.cover-edition .dcv-one{position:absolute;left:6.5%;top:82%;
+    width:min(55vw,270px);text-align:left}
+  body.cover-edition .dcv-ol-lab{font-family:'Helvetica Neue',Arial,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+    font-size:min(2.19vw,10.5px);font-weight:800;letter-spacing:.16em;color:#1F2922;
+    white-space:nowrap;margin-bottom:.78em}
+  body.cover-edition .dcv-ol{font-family:'Noto Serif KR','Noto Serif CJK KR',serif;
+    font-size:max(11.5px,min(2.9vw,14px));line-height:1.5;color:#2A2721;font-weight:600}
+  body.cover-edition .dcv-ol i{display:block;font-style:normal;white-space:nowrap}
+  /* 주소 · 우하단 · 하단이 밝아 잉크 · 스크림 없음 */
+  body.cover-edition .dcv-site{position:absolute;right:6.5%;bottom:3.6%;
+    display:flex;align-items:center;gap:9px;
+    font-family:'Helvetica Neue',Arial,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+    font-size:min(2.35vw,11.2px);font-weight:700;letter-spacing:.06em;
+    color:#403B34;text-decoration:none;white-space:nowrap}
+  body.cover-edition .dcv-site:before{content:"";display:block;width:min(7vw,34px);height:1.4px;
+    background:#403B34;opacity:.72}
+  @media (min-width:700px){
+    body.cover-edition .dcv-brand{font-size:15.0px}
+    body.cover-edition .dcv-date{font-size:15.8px}
+    body.cover-edition .dcv-site{font-size:14.5px}
+    body.cover-edition .dcv-site:before{width:44px}
+    body.cover-edition .dcv-rule{width:70px;margin-bottom:17px}
+    body.cover-edition .dcv-h1{font-size:43.9px}
+    body.cover-edition .dcv-main{width:390px}
+    body.cover-edition .dcv-ol-lab{font-size:13.6px}
+    body.cover-edition .dcv-ol{font-size:18.1px}
+    body.cover-edition .dcv-one{width:350px}
+  }
+</style>
 </head>
 <body class="cover-edition">
 <!--
@@ -590,59 +643,6 @@ details.inline-more[open]>summary:after{content:"−"}
   .page .backissue a{color:var(--muted);text-decoration:none;
     border-bottom:1px solid rgba(126,119,108,.42)}
   .page .backissue a:hover{color:var(--navy);border-bottom-color:var(--navy)}
-</style>
-<style id="daily-cover">
-  /* 커버 · 2026.09.02 · 플레이트 실측 배치 (조판사양 md가 정본) */
-  body.cover-edition{background:var(--paper)}
-  body.cover-edition .dcv{position:relative;width:100%;max-width:620px;margin:0 auto;
-    background:var(--paper);line-height:1}
-  body.cover-edition .dcv-img{display:block;width:100%;height:auto}
-  body.cover-edition .dcv-copy{position:absolute;inset:0}
-  body.cover-edition .dcv-copy *{margin:0;padding:0}
-  /* 브랜드·날짜 · 우상단 2줄 · 구름 위라 크림 */
-  body.cover-edition .dcv-brand{position:absolute;right:6.5%;top:3.4%;text-align:right;
-    font-family:'Helvetica Neue',Arial,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
-    font-size:min(2.42vw,11.6px);font-weight:700;letter-spacing:.1em;color:#E4DCCA;white-space:nowrap}
-  body.cover-edition .dcv-date{position:absolute;right:6.5%;top:6.4%;text-align:right;
-    font-family:'Helvetica Neue',Arial,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
-    font-size:min(2.55vw,12.2px);font-weight:700;letter-spacing:.14em;color:#E4DCCA;white-space:nowrap}
-  /* 룰·제목 · 좌측 · y61% */
-  body.cover-edition .dcv-main{position:absolute;left:6.5%;top:61%;
-    width:min(60vw,300px);text-align:left}
-  body.cover-edition .dcv-rule{width:min(11vw,54px);height:1.6px;background:#46584D;opacity:.85;
-    margin:0 0 min(2.6vw,13px)}
-  body.cover-edition .dcv-h1{font-family:'Noto Serif KR','Noto Serif CJK KR',serif;
-    font-size:min(7.08vw,34px);font-weight:800;line-height:1.24;letter-spacing:-.035em;
-    color:#2A2721}
-  /* 오늘의 한 줄 · 좌측 · y82% */
-  body.cover-edition .dcv-one{position:absolute;left:6.5%;top:82%;
-    width:min(55vw,270px);text-align:left}
-  body.cover-edition .dcv-ol-lab{font-family:'Helvetica Neue',Arial,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
-    font-size:min(2.19vw,10.5px);font-weight:800;letter-spacing:.16em;color:#1F2922;
-    white-space:nowrap;margin-bottom:.78em}
-  body.cover-edition .dcv-ol{font-family:'Noto Serif KR','Noto Serif CJK KR',serif;
-    font-size:max(11.5px,min(2.9vw,14px));line-height:1.5;color:#2A2721;font-weight:600}
-  body.cover-edition .dcv-ol i{display:block;font-style:normal;white-space:nowrap}
-  /* 주소 · 우하단 · 하단이 밝아 잉크 · 스크림 없음 */
-  body.cover-edition .dcv-site{position:absolute;right:6.5%;bottom:3.6%;
-    display:flex;align-items:center;gap:9px;
-    font-family:'Helvetica Neue',Arial,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
-    font-size:min(2.35vw,11.2px);font-weight:700;letter-spacing:.06em;
-    color:#403B34;text-decoration:none;white-space:nowrap}
-  body.cover-edition .dcv-site:before{content:"";display:block;width:min(7vw,34px);height:1.4px;
-    background:#403B34;opacity:.72}
-  @media (min-width:700px){
-    body.cover-edition .dcv-brand{font-size:15.0px}
-    body.cover-edition .dcv-date{font-size:15.8px}
-    body.cover-edition .dcv-site{font-size:14.5px}
-    body.cover-edition .dcv-site:before{width:44px}
-    body.cover-edition .dcv-rule{width:70px;margin-bottom:17px}
-    body.cover-edition .dcv-h1{font-size:43.9px}
-    body.cover-edition .dcv-main{width:390px}
-    body.cover-edition .dcv-ol-lab{font-size:13.6px}
-    body.cover-edition .dcv-ol{font-size:18.1px}
-    body.cover-edition .dcv-one{width:350px}
-  }
 </style>
 <!-- SNOWSHAGAL_DIRECT_HTML_TRACKER_START -->
 <script>

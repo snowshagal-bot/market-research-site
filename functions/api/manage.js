@@ -1,4 +1,5 @@
 import { searchIndexArtifacts } from "./_search-index.js";
+import { findLateCoverStyle, lateCoverStyleMessage } from "../_cover-style.js";
 import { SOCIAL_REPORT_CARD_DIR } from "../_seo.js";
 import { isHumanAdminHost, validateHumanAdminMutation } from "../_host-policy.js";
 import { requireAdminMutation } from "../_auth.js";
@@ -679,6 +680,12 @@ export async function onRequestPost(context) {
       replacementHtml = await file.text();
       if (!isStandaloneHtml(replacementHtml)) {
         return reply({ ok: false, error: "INVALID_HTML", message: "독립 실행형 HTML 파일인지 확인해 주세요." }, 400);
+      }
+      // Replacing a report writes the same kind of file to the same place, so
+      // it is held to the same rule as publishing one.
+      const lateCoverStyle = findLateCoverStyle(replacementHtml);
+      if (lateCoverStyle) {
+        return reply({ ok: false, error: "LATE_COVER_STYLE", message: lateCoverStyleMessage(lateCoverStyle), detail: lateCoverStyle }, 400);
       }
     }
 

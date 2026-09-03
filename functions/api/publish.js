@@ -1,4 +1,5 @@
 import { searchIndexArtifacts } from './_search-index.js';
+import { findLateCoverStyle, lateCoverStyleMessage } from '../_cover-style.js';
 import { SOCIAL_REPORT_CARD_DIR } from '../_seo.js';
 import { isHumanAdminHost, validateHumanAdminMutation } from '../_host-policy.js';
 import { requireAdminMutation } from '../_auth.js';
@@ -610,6 +611,14 @@ export async function onRequestPost(context) {
   const html = await file.text();
   if (!/<(?:!doctype\s+html|html\b)/i.test(html.slice(0, 10000))) {
     return reply({ error: 'NOT_HTML', message: '독립 실행형 HTML 파일인지 확인하세요.' }, 400);
+  }
+  // Checked here, before anything reaches GitHub. The repository gate catches
+  // this too, but by then the report is already on Production and the shift is
+  // already being served; refusing the upload is the only place it can be
+  // stopped in time.
+  const lateCoverStyle = findLateCoverStyle(html);
+  if (lateCoverStyle) {
+    return reply({ error: 'LATE_COVER_STYLE', message: lateCoverStyleMessage(lateCoverStyle), detail: lateCoverStyle }, 400);
   }
 
   const rawInputTags = form.getAll('tags').length > 1 ? form.getAll('tags') : form.get('tags');
