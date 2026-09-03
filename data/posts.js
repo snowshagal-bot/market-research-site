@@ -1,5 +1,28 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-03-daily-earj10",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-09-03",
+    "reportDate": "2026-09-03",
+    "registeredDate": "2026-09-03",
+    "registeredAt": "2026-09-03T14:37:08.168Z",
+    "legacyImport": false,
+    "title": "한 번 지워진 오후",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "tags": [
+      "flows",
+      "geopolitics"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/9월 3일 주식리포트_통합.html",
+    "coverImage": "covers/2026-09-03-daily-earj10.webp",
+    "shareCardImage": "covers/share/2026-09-03-daily-earj10.jpg",
+    "coverThumbnail": "covers/2026-09-03-daily-earj10-450.webp"
+  },
+  {
     "id": "2026-09-02-daily-1cf4sz2",
     "type": "daily",
     "typeLabel": "Daily",
