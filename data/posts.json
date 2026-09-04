@@ -1,5 +1,30 @@
 [
   {
+    "id": "2026-09-04-daily-1y780gf",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-04",
+    "reportDate": "2026-09-04",
+    "registeredDate": "2026-09-05",
+    "registeredAt": "2026-09-04T16:46:00.159Z",
+    "legacyImport": false,
+    "title": "One Sentence Split the Market",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "semiconductors",
+      "rates",
+      "fed"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-04_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-09-04-daily-vj1d82",
+    "coverImage": "covers/2026-09-04-daily-1y780gf.webp",
+    "shareCardImage": "covers/share/2026-09-04-daily-1y780gf.jpg",
+    "coverThumbnail": "covers/2026-09-04-daily-1y780gf-450.webp"
+  },
+  {
     "id": "2026-09-04-daily-vj1d82",
     "type": "daily",
     "typeLabel": "주식 리포트",
