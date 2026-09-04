@@ -35,7 +35,7 @@ function createElement(id = '') {
   };
 }
 
-async function loadAdmin({ confirmResult = false, generateCover, publishResponse } = {}) {
+async function loadAdmin({ confirmResult = false, generateCover, publishResponse, pendingReportFile = null } = {}) {
   const source = await read('assets/admin.js');
   const ids = [
     'html-file', 'drop-zone', 'file-info', 'parse-status', 'preview-wrap', 'post-type',
@@ -79,6 +79,18 @@ async function loadAdmin({ confirmResult = false, generateCover, publishResponse
     entries = [];
     append(...args) { this.entries.push(args); }
   }
+  const windowState = {
+    MARKET_COVER_GENERATOR: {
+      generate: generateCover || (async () => ({ file: validCover('generated-cover.webp'), method: 'template', selector: '' }))
+    },
+    RESEARCH_POSTS: [
+      { id: 'ko-source', title: '한국어 원문', reportDate: '2026-08-10', href: 'reports/source.html' },
+      { id: 'en-source', lang: 'en', title: 'English source', reportDate: '2026-08-10', href: 'reports/en/source.html' }
+    ],
+    __SNOWSHAGAL_ADMIN_READY__: false,
+    __SNOWSHAGAL_PENDING_REPORT_FILE__: pendingReportFile,
+    addEventListener(type, handler) { windowListeners.set(type, handler); }
+  };
   const context = {
     console,
     confirm: message => { confirmMessages.push(message); return confirmResult; },
@@ -133,19 +145,10 @@ async function loadAdmin({ confirmResult = false, generateCover, publishResponse
           : selector === 'input[name="post-language-choice"]' ? languageOptions : [],
       createElement: tag => createElement(tag)
     },
-    window: {
-      MARKET_COVER_GENERATOR: {
-        generate: generateCover || (async () => ({ file: validCover('generated-cover.webp'), method: 'template', selector: '' }))
-      },
-      RESEARCH_POSTS: [
-        { id: 'ko-source', title: '한국어 원문', reportDate: '2026-08-10', href: 'reports/source.html' },
-        { id: 'en-source', lang: 'en', title: 'English source', reportDate: '2026-08-10', href: 'reports/en/source.html' }
-      ],
-      addEventListener(type, handler) { windowListeners.set(type, handler); }
-    }
+    window: windowState
   };
   vm.runInNewContext(source, context);
-  return { elements, modeButtons, categoryOptions, languageOptions, createdUrls, revokedUrls, windowListeners, submissions, confirmMessages };
+  return { elements, modeButtons, categoryOptions, languageOptions, createdUrls, revokedUrls, windowListeners, submissions, confirmMessages, windowState };
 }
 
 const validCover = (name = 'cover.webp') => ({ name, type: 'image/webp', size: 320 * 1024 });
@@ -193,6 +196,47 @@ test('admin markup contains the cover preview modes before the original HTML pre
   assert.match(adminScript, /iframe\.srcdoc = text/);
   assert.match(html, /admin\.js\?v=[a-f0-9]{10}/);
   assert.doesNotMatch(adminScript, /allow-same-origin/);
+});
+
+test('admin readiness consumes one early pending report and clears it exactly once', async () => {
+  let reads = 0;
+  const pending = {
+    name: 'early-데일리.html',
+    size: 100,
+    async text() {
+      reads += 1;
+      return '<!doctype html><html><head><meta name="report-date" content="2026-08-10"><title>Early daily</title></head><body></body></html>';
+    }
+  };
+  const { elements, windowState } = await loadAdmin({ pendingReportFile: pending });
+  await Promise.resolve();
+  await Promise.resolve();
+
+  assert.equal(windowState.__SNOWSHAGAL_ADMIN_READY__, true);
+  assert.equal(windowState.__SNOWSHAGAL_PENDING_REPORT_FILE__, null);
+  assert.equal(reads, 1);
+  assert.match(elements['file-info'].innerHTML, /early-데일리\.html/);
+});
+
+test('normal drop after readiness keeps the existing one-parse path and never uses pending state', async () => {
+  const { elements, windowState } = await loadAdmin();
+  let reads = 0;
+  const file = {
+    name: 'ready-데일리.html',
+    size: 100,
+    async text() {
+      reads += 1;
+      return '<!doctype html><html><head><meta name="report-date" content="2026-08-10"><title>Ready daily</title></head><body></body></html>';
+    }
+  };
+
+  await elements['drop-zone'].emit('drop', { dataTransfer: { files: [file] } });
+  await Promise.resolve();
+  await Promise.resolve();
+
+  assert.equal(reads, 1);
+  assert.equal(windowState.__SNOWSHAGAL_PENDING_REPORT_FILE__, null);
+  assert.match(elements['file-info'].innerHTML, /ready-데일리\.html/);
 });
 
 test('admin exposes five always-visible accessible category radio chips', async () => {
