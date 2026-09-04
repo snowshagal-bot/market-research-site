@@ -1,5 +1,29 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-04-daily-vj1d82",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-09-04",
+    "reportDate": "2026-09-04",
+    "registeredDate": "2026-09-05",
+    "registeredAt": "2026-09-04T16:37:41.741Z",
+    "legacyImport": false,
+    "title": "시장을 가른 한 문장",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "tags": [
+      "semiconductors",
+      "rates",
+      "fed"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/9월 4일 주식리포트_통합.html",
+    "coverImage": "covers/2026-09-04-daily-vj1d82.webp",
+    "shareCardImage": "covers/share/2026-09-04-daily-vj1d82.jpg",
+    "coverThumbnail": "covers/2026-09-04-daily-vj1d82-450.webp"
+  },
+  {
     "id": "2026-09-03-daily-14kg6ag",
     "type": "daily",
     "typeLabel": "Daily",
