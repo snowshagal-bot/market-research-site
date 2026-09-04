@@ -1,5 +1,6 @@
 import { searchIndexArtifacts } from "./_search-index.js";
 import { findLateCoverStyle, lateCoverStyleMessage } from "../_cover-style.js";
+import { bodyAssetsApply, bodyAssetsSummary, isBodyAssetPath, planBodyAssets } from "../_body-assets.js";
 import { SOCIAL_REPORT_CARD_DIR } from "../_seo.js";
 import { isHumanAdminHost, validateHumanAdminMutation } from "../_host-policy.js";
 import { requireAdminMutation } from "../_auth.js";
@@ -761,6 +762,12 @@ export async function onRequestPost(context) {
     if (existing.coverImage && !isManagedPath(existing.coverImage, "covers")) {
       return reply({ ok: false, error: "UNSAFE_COVER_PATH", message: "안전하지 않은 커버 경로는 변경할 수 없습니다." }, 400);
     }
+    // The body pictures this post owns: only its own hashed files under its
+    // own directory are ever deleted on its behalf.
+    const existingBodyAssets = Array.isArray(existing.bodyAssets) ? existing.bodyAssets : [];
+    if (existingBodyAssets.some((path) => !isBodyAssetPath(path, existing.id))) {
+      return reply({ ok: false, error: "UNSAFE_BODY_ASSET_PATH", message: "안전하지 않은 본문 이미지 경로는 변경할 수 없습니다." }, 400);
+    }
     if (action === "delete" && String(form.get("confirmTitle") || "") !== existing.title) {
       return reply({ ok: false, error: "DELETE_CONFIRMATION_MISMATCH", message: "삭제 확인 제목이 현재 게시물 제목과 일치하지 않습니다." }, 400);
     }
@@ -768,6 +775,7 @@ export async function onRequestPost(context) {
     const entries = [];
     let commitMessage;
     let resultPost = null;
+    let resultBodyAssets = null;
 
     if (action === "delete") {
       posts.splice(postIndex, 1);
@@ -785,6 +793,8 @@ export async function onRequestPost(context) {
       if (existing.coverImage) entries.push(deletedEntry(existing.coverImage));
       // Only a card that was recorded exists to delete.
       if (existing.shareCardImage) entries.push(deletedEntry(existing.shareCardImage));
+      // And the body pictures recorded for it, in the same commit.
+      for (const path of existingBodyAssets) entries.push(deletedEntry(path));
       entries.push(...metadataEntries(sortPosts(posts), searchIndex));
       commitMessage = `Delete ${existing.title}`;
     } else {
@@ -819,9 +829,38 @@ export async function onRequestPost(context) {
         updated.tags = editFields.tags;
       }
 
+      let committedHtml = replacementHtml;
+      let bodyAssetSummary = null;
       if (replacementHtml !== null) {
-        entries.push({ path: existing.href, mode: "100644", type: "blob", content: replacementHtml });
-        updated.readingMinutes = calculateReadingMinutes(replacementHtml, postLanguage(existing), existing.type);
+        // A replacement is held to the publish rule: Research body pictures
+        // become files, committed in this same tree as the HTML that names
+        // them. Every blob is created before the tree, so a failure leaves
+        // the old report, the old files and the old metadata all in place.
+        let nextBodyAssets = [];
+        if (bodyAssetsApply(updated.type)) {
+          const plan = await planBodyAssets(replacementHtml, existing.id);
+          bodyAssetSummary = bodyAssetsSummary(plan);
+          console.log("body assets", existing.id, JSON.stringify(bodyAssetSummary));
+          committedHtml = plan.html;
+          nextBodyAssets = plan.bodyAssets;
+          for (const asset of plan.assets) {
+            const assetBlob = await gh(env.GITHUB_TOKEN, "/git/blobs", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ content: encodeBase64(asset.bytes), encoding: "base64" }),
+            });
+            entries.push({ path: asset.path, mode: "100644", type: "blob", sha: assetBlob.sha });
+          }
+        }
+        entries.push({ path: existing.href, mode: "100644", type: "blob", content: committedHtml });
+        updated.readingMinutes = calculateReadingMinutes(committedHtml, postLanguage(existing), existing.type);
+        // Files the previous HTML used and the new one does not go with it;
+        // a file both use keeps its content-addressed path and is untouched.
+        for (const path of existingBodyAssets) {
+          if (!nextBodyAssets.includes(path)) entries.push(deletedEntry(path));
+        }
+        if (nextBodyAssets.length) updated.bodyAssets = nextBodyAssets;
+        else delete updated.bodyAssets;
       }
 
       if (coverAction === "remove") {
@@ -912,7 +951,7 @@ export async function onRequestPost(context) {
         tags: Array.isArray(updated.tags) ? updated.tags : [],
         readingMinutes: typeof updated.readingMinutes === 'number' ? updated.readingMinutes : 1,
         coverImage: updated.coverImage ? `/${updated.coverImage.replace(/^\/+/, '')}` : '',
-        ...(replacementHtml !== null ? { bodyText: extractSearchText(replacementHtml) } : {})
+        ...(replacementHtml !== null ? { bodyText: extractSearchText(committedHtml) } : {})
       };
 
       if (!hasMatchingUniqueIds(posts, searchIndex)) {
@@ -926,6 +965,7 @@ export async function onRequestPost(context) {
       entries.push(...metadataEntries(sortPosts(posts), searchIndex));
       commitMessage = `Update ${updated.title}`;
       resultPost = updated;
+      resultBodyAssets = bodyAssetSummary;
     }
 
     const commit = await createCommit(env.GITHUB_TOKEN, baseSha, parentCommit.tree.sha, entries, commitMessage);
@@ -933,7 +973,7 @@ export async function onRequestPost(context) {
       return reply({ ok: false, error: "REPOSITORY_CHANGED", message: "저장소가 변경되었습니다. 새로고침 후 다시 시도하세요." }, 409);
     }
 
-    return reply({ ok: true, action, post: resultPost, commit: commit.sha, apiVersion: API_VERSION });
+    return reply({ ok: true, action, post: resultPost, commit: commit.sha, apiVersion: API_VERSION, ...(resultBodyAssets ? { bodyAssets: resultBodyAssets } : {}) });
   } catch (error) {
     console.error("post management failed", { status: error?.status, message: error?.message });
     if (error?.status === 409 || error?.status === 422) {

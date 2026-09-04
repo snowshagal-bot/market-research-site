@@ -1,5 +1,6 @@
 import { searchIndexArtifacts } from './_search-index.js';
 import { findLateCoverStyle, lateCoverStyleMessage } from '../_cover-style.js';
+import { bodyAssetsApply, bodyAssetsSummary, planBodyAssets } from '../_body-assets.js';
 import { SOCIAL_REPORT_CARD_DIR } from '../_seo.js';
 import { isHumanAdminHost, validateHumanAdminMutation } from '../_host-policy.js';
 import { requireAdminMutation } from '../_auth.js';
@@ -689,6 +690,18 @@ export async function onRequestPost(context) {
       && String(coverThumbnail.type || '').toLowerCase() === 'image/webp'
     );
     const coverThumbnailPath = hasCoverThumbnail ? coverPath.replace(/\.[a-z0-9]+$/i, '-450.webp') : null;
+    // Research only, by the canonical type validated above: the body pictures
+    // leave the HTML and become files beside it. The plan is made here, before
+    // anything reaches GitHub; the files are committed below, and the HTML that
+    // names them goes into the same tree, so no commit can hold one without the
+    // other. A plan that passes through leaves the upload exactly as it came.
+    let reportHtml = html;
+    let bodyAssetPlan = null;
+    if (bodyAssetsApply(type)) {
+      bodyAssetPlan = await planBodyAssets(html, id);
+      reportHtml = bodyAssetPlan.html;
+      console.log('body assets', id, JSON.stringify(bodyAssetsSummary(bodyAssetPlan)));
+    }
     const post = {
       id,
       type,
@@ -714,7 +727,10 @@ export async function onRequestPost(context) {
       ...(shareCardPath ? { shareCardImage: shareCardPath } : {}),
       // Recorded only when the file is in this same commit, so the homepage
       // cards never name a thumbnail that was merely expected.
-      ...(coverThumbnailPath ? { coverThumbnail: coverThumbnailPath } : {})
+      ...(coverThumbnailPath ? { coverThumbnail: coverThumbnailPath } : {}),
+      // Likewise only the files this commit carries, in the order the HTML
+      // shows them, each once.
+      ...(bodyAssetPlan && bodyAssetPlan.bodyAssets.length ? { bodyAssets: bodyAssetPlan.bodyAssets } : {})
     };
 
     const originalPostsLength = posts.length;
@@ -830,16 +846,30 @@ export async function onRequestPost(context) {
       coverEntry = { path: coverPath, mode: '100644', type: 'blob', sha: coverBlob.sha };
     }
 
+    // Every body picture becomes a blob before the tree is built: a failure
+    // here throws, and the report that would have referenced the file is
+    // never committed without it.
+    const bodyAssetEntries = [];
+    for (const asset of bodyAssetPlan?.assets || []) {
+      const assetBlob = await gh(token, '/git/blobs', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ content: encodeBase64(asset.bytes), encoding: 'base64' })
+      });
+      bodyAssetEntries.push({ path: asset.path, mode: '100644', type: 'blob', sha: assetBlob.sha });
+    }
+
     const tree = await gh(token, '/git/trees', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         base_tree: baseTree,
         tree: [
-          { path: reportPath, mode: '100644', type: 'blob', content: html },
+          { path: reportPath, mode: '100644', type: 'blob', content: reportHtml },
           ...(coverEntry ? [coverEntry] : []),
           ...(shareCardEntry ? [shareCardEntry] : []),
           ...(coverThumbnailEntry ? [coverThumbnailEntry] : []),
+          ...bodyAssetEntries,
           { path: 'data/posts.json', mode: '100644', type: 'blob', content: postsJson },
           { path: 'data/posts.js', mode: '100644', type: 'blob', content: postsJs },
           ...searchIndexBlobs
@@ -874,7 +904,9 @@ export async function onRequestPost(context) {
       coverImage: coverPath,
       lang,
       translationGroup: translationGroup || null,
-      commitSha: commit.sha
+      commitSha: commit.sha,
+      // What happened to the body pictures, so a pass-through is never silent.
+      ...(bodyAssetPlan ? { bodyAssets: bodyAssetsSummary(bodyAssetPlan) } : {})
     });
   } catch (err) {
     console.error('publish failed', err);
