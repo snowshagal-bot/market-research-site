@@ -26,8 +26,19 @@
     if (status) status.textContent = '관리자 기능을 불러오는 중입니다. 선택한 파일은 잠시 보관합니다.';
   };
 
+  const preserveEarlyFileSelection = event => {
+    if (window.__SNOWSHAGAL_ADMIN_READY__ === true || event.target?.id !== 'html-file') return;
+    const file = event.target.files?.[0];
+    if (!file) return;
+    event.stopPropagation();
+    window.__SNOWSHAGAL_PENDING_REPORT_FILE__ = file;
+    const status = document.getElementById('parse-status');
+    if (status) status.textContent = '관리자 기능을 불러오는 중입니다. 선택한 파일은 잠시 보관합니다.';
+  };
+
   document.addEventListener('dragover', guardDropNavigation, true);
   document.addEventListener('drop', guardDropNavigation, true);
+  document.addEventListener('change', preserveEarlyFileSelection, true);
 })();
 </script>
 <link rel="stylesheet" href="/assets/site.css?v=1efc69cb5c">
