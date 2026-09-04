@@ -295,20 +295,23 @@ html[data-theme="dark"] .search-highlight {
 }
 
 /* Editorial Footer & About additions */
-.footer-primary {
+.footer-primary,
+.site-footer-primary {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 36px;
+  gap: 48px;
   padding-bottom: 28px;
   border-bottom: 1px solid color-mix(in srgb, var(--line) 65%, transparent);
 }
 
-.footer-brand-col {
-  max-width: 440px;
+.footer-brand-col,
+.site-footer-brand-col {
+  max-width: 380px;
 }
 
-.footer-brand {
+.footer-brand,
+.site-footer-brand {
   display: inline-flex;
   align-items: center;
   gap: 9px;
@@ -318,26 +321,80 @@ html[data-theme="dark"] .search-highlight {
   letter-spacing: .14em;
   color: var(--text);
   line-height: 1;
+  text-decoration: none;
 }
 
-.footer-brand-owl {
+.footer-brand:hover,
+.site-footer-brand:hover {
+  color: var(--text);
+}
+
+.footer-brand-owl,
+.site-footer-brand-owl {
   display: block;
   width: 22px;
   height: auto;
   flex: 0 0 auto;
 }
 
-html[data-theme="dark"] .footer-brand-owl {
+html[data-theme="dark"] .footer-brand-owl,
+html[data-theme="dark"] .site-footer-brand-owl {
   filter: drop-shadow(0 1px 4px rgba(151, 183, 225, .18));
 }
 
-.footer-tagline {
-  margin: 9px 0 0;
+.footer-tagline,
+.site-footer-tagline {
+  margin: 10px 0 0;
   font-size: 13px;
   line-height: 1.5;
   color: var(--text-2);
   letter-spacing: -.01em;
   word-break: keep-all;
+}
+
+.site-footer-nav-groups {
+  display: flex;
+  gap: 44px 56px;
+  flex-wrap: wrap;
+}
+
+.site-footer-group {
+  min-width: 110px;
+}
+
+.site-footer-heading {
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.site-footer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.site-footer-nav a {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-2);
+  text-decoration: none;
+  line-height: 1.4;
+  white-space: nowrap;
+  transition: color .15s ease;
+}
+
+.site-footer-nav a:hover {
+  color: var(--text);
+}
+
+.site-footer-nav a:focus-visible,
+.site-footer-brand:focus-visible {
+  outline: 2px solid var(--navy, #1e2a38);
+  outline-offset: 2px;
 }
 
 .footer-nav-col {
@@ -379,7 +436,8 @@ html[data-theme="dark"] .footer-brand-owl {
   text-decoration: underline;
 }
 
-.footer-meta {
+.footer-meta,
+.site-footer-meta {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -387,7 +445,8 @@ html[data-theme="dark"] .footer-brand-owl {
   padding-top: 20px;
 }
 
-.footer-disclaimer {
+.footer-disclaimer,
+.site-footer-disclaimer {
   margin: 0;
   font-size: 11px;
   line-height: 1.65;
@@ -396,7 +455,8 @@ html[data-theme="dark"] .footer-brand-owl {
   word-break: keep-all;
 }
 
-.footer-copy {
+.footer-copy,
+.site-footer-copy {
   margin: 0;
   font-size: 11px;
   color: var(--muted);
@@ -554,24 +614,35 @@ html[data-theme="dark"] .footer-brand-owl {
     display: none !important;
   }
 
-  .footer {
+  .footer,
+  .site-footer {
     padding: 30px 0 calc(24px + env(safe-area-inset-bottom, 0px));
   }
 
-  .footer-primary {
+  .footer-primary,
+  .site-footer-primary {
     flex-direction: column;
     align-items: flex-start;
-    gap: 18px;
-    padding-bottom: 18px;
+    gap: 24px;
+    padding-bottom: 22px;
   }
 
-  .footer-brand {
+  .footer-brand,
+  .site-footer-brand {
     font-size: 14.5px;
     gap: 8px;
   }
 
-  .footer-brand-owl {
+  .footer-brand-owl,
+  .site-footer-brand-owl {
     width: 20px;
+  }
+
+  .site-footer-nav-groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 20px;
+    width: 100%;
   }
 
   .footer-nav-col {
@@ -584,18 +655,21 @@ html[data-theme="dark"] .footer-brand-owl {
     gap: 10px 16px;
   }
 
-  .footer-meta {
+  .footer-meta,
+  .site-footer-meta {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
     padding-top: 14px;
   }
 
-  .footer-copy {
+  .footer-copy,
+  .site-footer-copy {
     order: 2;
   }
 
-  .footer-disclaimer {
+  .footer-disclaimer,
+  .site-footer-disclaimer {
     order: 1;
   }
 

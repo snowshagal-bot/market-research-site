@@ -5,6 +5,7 @@ import {
   getAssetVersionMap,
   stampAssetVersionsInContent
 } from './asset-versions.mjs';
+import { syncStaticFooters } from './sync-static-footers.mjs';
 
 const root = process.cwd();
 const versionMap = getAssetVersionMap(root);
@@ -24,6 +25,8 @@ const STATIC_TARGETS = STAMP_TARGETS.filter((t) =>
   !t.endsWith('basics/index.html') &&
   !t.endsWith('notes/index.html')
 );
+
+syncStaticFooters(root);
 
 for (const relPath of STATIC_TARGETS) {
   const fullPath = path.join(root, relPath);

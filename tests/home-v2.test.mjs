@@ -12,7 +12,7 @@ test('homepage presents the Snowshagal brand hero before latest reports and arch
     html.indexOf('class="today-strip"'),
     html.indexOf('class="site-introduction"'),
     html.indexOf('class="section archive-section"'),
-    html.indexOf('class="footer"')
+    html.search(/class="footer\b/)
   ];
   assert.deepEqual(order, [...order].sort((a, b) => a - b));
   assert.match(html, /<strong>SNOWSHAGAL<\/strong><small>MARKET RESEARCH<\/small>/);

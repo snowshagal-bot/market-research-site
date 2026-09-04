@@ -11,7 +11,7 @@ test('homepage desktop and mobile navigation use the About slot for Market', asy
   assert.match(desktopNav, /href="\/market\/">마켓<\/a>/);
   assert.match(quickNav, /href="\/market\/">마켓<\/a>/);
   assert.match(html, /<footer[\s\S]*href="\/about\/">소개<\/a>/);
-  assert.match(html, /<footer[\s\S]*href="\/about\/#contact">문의<\/a>/);
+  assert.match(html, /<footer[\s\S]*href="mailto:contact@snowshagal\.com">문의<\/a>/);
 });
 
 test('shared report shell links to Market', async () => {
@@ -24,9 +24,9 @@ test('About page contains editorial introduction, contact, and simplified footer
   const html = await read('about/index.html');
   assert.match(html, /<title>소개 \| Snowshagal Market Research<\/title>/);
   assert.doesNotMatch(html, /name="robots"/);
-  assert.equal((html.match(/href="\/market\/">마켓<\/a>/g) || []).length, 2);
+  assert.equal((html.match(/href="\/market\/">마켓<\/a>/g) || []).length, 3);
   assert.match(html, /<footer[\s\S]*href="\/about\/">소개<\/a>/);
-  assert.match(html, /<footer[\s\S]*href="\/about\/#contact">문의<\/a>/);
+  assert.match(html, /<footer[\s\S]*href="mailto:contact@snowshagal\.com">문의<\/a>/);
   assert.match(html, /<footer[\s\S]*contact@snowshagal\.com/);
   assert.match(html, /<section class="about-section" aria-labelledby="section-about-heading">[\s\S]*?<h2[^>]*>소개<\/h2>/);
   assert.match(html, /<section id="contact" class="about-section" aria-labelledby="section-contact-heading">[\s\S]*?<h2[^>]*>문의<\/h2>/);
@@ -44,9 +44,9 @@ test('English About page contains matching editorial About and Contact sections'
   assert.match(html, /<html lang="en" data-site-lang="en">/);
   assert.match(html, /<title>About \| Snowshagal Market Research<\/title>/);
   assert.doesNotMatch(html, /name="robots"/);
-  assert.equal((html.match(/href="\/en\/market\/">Market<\/a>/g) || []).length, 2);
+  assert.equal((html.match(/href="\/en\/market\/">Market<\/a>/g) || []).length, 3);
   assert.match(html, /<footer[\s\S]*href="\/en\/about\/">About<\/a>/);
-  assert.match(html, /<footer[\s\S]*href="\/en\/about\/#contact">Contact<\/a>/);
+  assert.match(html, /<footer[\s\S]*href="mailto:contact@snowshagal\.com">Contact<\/a>/);
   assert.match(html, /<footer[\s\S]*contact@snowshagal\.com/);
   assert.match(html, /<section class="about-section" aria-labelledby="section-about-heading">[\s\S]*?<h2[^>]*>About<\/h2>/);
   assert.match(html, /<section id="contact" class="about-section" aria-labelledby="section-contact-heading">[\s\S]*?<h2[^>]*>Contact<\/h2>/);
