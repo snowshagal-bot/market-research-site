@@ -6,6 +6,30 @@
 <meta name="theme-color" content="#f5f0e6">
 <title>Report Admin · Market Research</title>
 <meta name="robots" content="noindex,nofollow">
+<script id="admin-early-drop-guard">
+(() => {
+  window.__SNOWSHAGAL_ADMIN_READY__ = false;
+  window.__SNOWSHAGAL_PENDING_REPORT_FILE__ = null;
+
+  const isDropZoneTarget = target => target && typeof target.closest === 'function' && target.closest('#drop-zone');
+  const guardDropNavigation = event => {
+    if (!isDropZoneTarget(event.target)) return;
+    event.preventDefault();
+    if (window.__SNOWSHAGAL_ADMIN_READY__ === true) return;
+
+    event.stopPropagation();
+    if (event.type !== 'drop') return;
+
+    const file = event.dataTransfer?.files?.[0];
+    if (file) window.__SNOWSHAGAL_PENDING_REPORT_FILE__ = file;
+    const status = document.getElementById('parse-status');
+    if (status) status.textContent = '관리자 기능을 불러오는 중입니다. 선택한 파일은 잠시 보관합니다.';
+  };
+
+  document.addEventListener('dragover', guardDropNavigation, true);
+  document.addEventListener('drop', guardDropNavigation, true);
+})();
+</script>
 <link rel="stylesheet" href="/assets/site.css?v=1efc69cb5c">
 <link rel="stylesheet" href="/assets/ui-polish.css?v=c877f37bf7">
 <style>
@@ -59,6 +83,6 @@
 <script src="/assets/locale.js?v=bb6eec37ab"></script>
 <script src="/assets/cover-generator.js?v=11a145312a"></script>
 <script src="/assets/share-card.js?v=685158069d"></script>
-<script src="/assets/admin.js?v=9b17ea0231"></script>
+<script src="/assets/admin.js?v=49ecf78ea2"></script>
 </body>
 </html>

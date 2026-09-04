@@ -972,4 +972,9 @@
   setLanguage(postLanguage?.value || 'ko');
   if (isPreviewHost(location.hostname)) status.textContent = 'Preview와 로컬 환경에서는 실제 게시가 비활성화됩니다.';
   updatePublishState();
+
+  const pendingReportFile = window.__SNOWSHAGAL_PENDING_REPORT_FILE__ || null;
+  window.__SNOWSHAGAL_PENDING_REPORT_FILE__ = null;
+  window.__SNOWSHAGAL_ADMIN_READY__ = true;
+  if (pendingReportFile) void parseFile(pendingReportFile);
 })();
