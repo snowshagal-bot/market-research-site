@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>The Language of Markets · Episode 6 · How Does 1 Coin Become $1?</title>
+<style>
+:root{
+  --surface-page:#ECEAE5;
+  --surface-band:#E3E0D9;
+  --surface-inner:#F1EFEA;
+  --surface-detail:#E8E5DF;
+  --surface-muted:#DAD6CE;
+  --ink:#2E2E2C;
+  --ink2:#43423E;
+  --body:#53514C;
+  --sub:#706D66;
+  --muted:#8B867E;
+  --line:#CEC9BF;
+  --line2:#DCD7CE;
+  --green:#46584D;
+  --green-dark:#2F3C34;
+  --green-soft:#DCE3DD;
+  --green-line:#AAB6AC;
+  --green-pale:#A8C6B4;
+  
+  --dk:#46584D;
+  --dk-dark:#2F3C34;
+  --dk-soft:#DDE4DE;
+  --dk-line:#A8B6AB;
+  --sc:#A9714B;
+  --sc-dark:#7A4E30;
+  --sc-soft:#F0E2D5;
+  --sc-line:#D0AE90;
+  --up:#C74754;
+  --down:#4F78A8;
+  --warn:#7A5444;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:58px;overflow-x:hidden}
+html,body{max-width:100%}
+body{
+  margin:0;background:var(--surface-page);color:var(--ink);
+  font-family:"Pretendard Variable","Pretendard","SUIT","Noto Sans KR","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  line-height:1.58;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;
+  word-break:keep-all;line-break:strict;overflow-wrap:break-word;
+}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(38px + env(safe-area-inset-bottom,0px));width:100%;position:relative}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.up{color:var(--up)}.down{color:var(--down)}
+a{color:inherit;text-decoration:none}
+p,li,.p,.cap{text-wrap:pretty}
+
+
+.topbar{position:sticky;top:0;z-index:50;margin:0 -16px;
+  background:rgba(236,234,229,.92);-webkit-backdrop-filter:saturate(150%) blur(12px);backdrop-filter:saturate(150%) blur(12px);
+  border-bottom:1px solid rgba(90,84,74,.13)}
+.tbin{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0)) 18px 9px}
+.tbin .brand{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.tbin .brand i{font-style:normal;color:var(--green)}
+.tbin .ep{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.prog{height:2px;background:rgba(90,84,74,.10)}
+.prog i{display:block;height:100%;width:0;background:var(--green);transition:width .1s linear}
+
+
+.cover{margin:0 -16px;padding:18px 22px 15px;
+  background:linear-gradient(160deg,#37453C 0%,#2B372F 55%,#232C26 100%);color:#EFEDE7}
+.cvkick{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.06em;
+  color:#BFD2C6;border:1px solid rgba(168,198,180,.34);border-radius:999px;padding:5px 12px}
+.cvkick b{color:#EFEDE7;font-weight:800}
+.cvtitle{margin:12px 0 0;font-size:30px;line-height:1.24;font-weight:800;letter-spacing:-.05em;color:#F4F2ED}
+.cvtitle span{display:block;color:var(--green-pale)}
+.cvsub{margin:12px 0 0;font-size:14px;line-height:1.58;font-weight:600;color:#C6D2CA}
+.cvmotif{margin:12px 0 0}
+.cvmotif svg{display:block;width:100%;height:auto}
+.cvidx{display:flex;gap:6px;margin:12px 0 0;flex-wrap:wrap}
+.cvidx a{font-size:11.5px;font-weight:800;color:#D3DED7;background:rgba(255,255,255,.07);
+  border:1px solid rgba(168,198,180,.22);border-radius:999px;padding:6px 12px}
+.cvidx a b{color:var(--green-pale);font-weight:800;margin-right:5px}
+
+
+.ch{margin:17px 0 10px}
+.chtop{display:flex;align-items:center;gap:9px;margin-bottom:7px;flex-wrap:wrap}
+.chn{font-size:12px;font-weight:800;color:#EFEDE7;background:var(--ink);border-radius:4px;padding:3px 8px;letter-spacing:.04em}
+.chk{font-size:11.5px;font-weight:800;letter-spacing:.11em;color:var(--sub)}
+.cht{margin:0;font-size:24px;line-height:1.3;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.chrule{display:flex;height:3px;margin-top:12px;gap:2px}
+.chrule i{display:block;height:100%;flex:1}
+.chrule .r1{background:var(--dk)}
+.chrule .r2{background:var(--dk-line)}
+.chrule .r3{background:var(--sc-line)}
+.chrule .r4{background:var(--sc)}
+
+
+.sig{display:flex;gap:5px;margin:9px 0 0;flex-wrap:wrap}
+.sig b{font-size:11.5px;font-weight:800;letter-spacing:-.01em;padding:4px 9px;border-radius:999px;
+  background:var(--surface-detail);color:var(--muted);border:1px solid var(--line2)}
+.sig b.on1{background:var(--dk-soft);color:var(--dk-dark);border-color:var(--dk-line)}
+.sig b.on3{background:var(--sc-soft);color:var(--sc-dark);border-color:var(--sc-line)}
+
+
+.qbig{margin:14px 0 0;font-size:22px;line-height:1.44;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.ans{margin:11px -16px 0;padding:15px 22px;background:var(--green);color:#EFEDE7;position:relative;overflow:hidden}
+.ans:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green-pale)}
+.ans .ak{font-size:11px;font-weight:800;letter-spacing:.14em;color:#A8BCAE;margin-bottom:8px}
+.ans .av{font-size:20px;line-height:1.44;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.ans .aw{margin:11px 0 0;padding-top:11px;border-top:1px solid rgba(168,198,180,.24);font-size:13px;line-height:1.6;font-weight:600;color:#CBD8CF}
+
+
+.p{margin:10px 0 0;font-size:14px;line-height:1.70;color:var(--body);font-weight:500}
+.p b{color:var(--ink);font-weight:800}
+.p.lead{font-size:15px;color:var(--ink2);font-weight:600}
+.hd{margin:15px 0 0;font-size:16.5px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.44}
+.cap{margin:6px 0 0;font-size:11.5px;line-height:1.55;color:var(--muted);font-weight:600}
+.cap b{color:var(--sub);font-weight:800}
+
+
+.tags{display:grid;gap:9px;margin:13px 0 0}
+.tag{border-radius:12px;border:1px solid var(--line);padding:14px 15px;position:relative;overflow:hidden}
+.tag.d{background:var(--dk-soft);border-color:var(--dk-line)}
+.tag.s{background:var(--sc-soft);border-color:var(--sc-line)}
+.tag .tk{font-size:11.5px;font-weight:800;letter-spacing:.06em}
+.tag.d .tk{color:var(--dk-dark)}
+.tag.s .tk{color:var(--sc-dark)}
+.tag .tv{margin:7px 0 0;font-size:26px;font-weight:800;letter-spacing:-.04em;color:var(--ink);font-variant-numeric:tabular-nums}
+.tag .tn{margin:4px 0 0;font-size:12px;font-weight:700;color:var(--body);line-height:1.5}
+.tagx{text-align:center;font-size:13px;font-weight:800;color:var(--sub);padding:2px 0}
+
+
+.six{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden;margin:13px 0 0}
+.six .si{background:var(--surface-inner);padding:9px 13px;display:grid;grid-template-columns:52px 1fr;gap:11px;align-items:start}
+.six .sk{font-size:12px;font-weight:800;color:var(--dk-dark);letter-spacing:-.01em;padding-top:1px}
+.six .sv{font-size:13px;font-weight:700;color:var(--body);line-height:1.55}
+.six .sv b{color:var(--ink);font-weight:800}
+
+
+.bld{margin:14px 0 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface-inner)}
+.flr{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:13px 14px;align-items:start;border-bottom:1px solid var(--line2)}
+.flr:last-child{border-bottom:0}
+.flr .fn{font-size:11.5px;font-weight:800;color:#EFEDE7;background:var(--muted);border-radius:5px;padding:5px 0;text-align:center;letter-spacing:-.01em}
+.flr.f3 .fn{background:var(--sc)}
+.flr.f2 .fn{background:#8E7A63}
+.flr.f1 .fn{background:var(--dk-dark)}
+.flr .ft{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.03em}
+.flr .fw{margin-top:3px;font-size:12.5px;font-weight:700;color:var(--body);line-height:1.55}
+.flr .fw i{font-style:normal;font-weight:800;color:var(--sub)}
+.flr .badge{display:inline-block;margin-top:6px;font-size:11px;font-weight:800;border-radius:999px;padding:3px 9px}
+.flr.f3 .badge{background:var(--sc-soft);color:var(--sc-dark);border:1px solid var(--sc-line)}
+.flr.f2 .badge{background:var(--surface-detail);color:var(--warn);border:1px solid var(--line)}
+.flr.f1 .badge{background:var(--dk-soft);color:var(--dk-dark);border:1px solid var(--dk-line)}
+.flr.hit{background:#F6EEE8}
+.flr .hitmark{display:inline-block;margin-top:6px;font-size:11px;font-weight:800;color:#EFEDE7;background:var(--warn);border-radius:4px;padding:3px 8px}
+
+
+.gate{margin:13px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.gate .gh{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--line)}
+.gate .gh>div{background:var(--surface-detail);padding:9px 10px;font-size:11.5px;font-weight:800;color:var(--sub)}
+.gate .gh>div:nth-child(2){color:var(--dk-dark)}
+.gate .gh>div:nth-child(3){color:var(--dk-dark)}
+.gate .gr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--line2)}
+.gate .gr>div{background:var(--surface-inner);padding:9px 10px;font-size:12.5px;font-weight:700;color:var(--body);line-height:1.5}
+.gate .gr>div:first-child{font-weight:800;color:var(--ink2)}
+.gate .gr b{color:var(--ink);font-weight:800}
+.gate .gr em{font-style:normal;font-weight:800;color:var(--warn)}
+
+
+.steps{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden;margin:13px 0 0}
+.steps .st{background:var(--surface-inner);padding:10px 13px;display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start}
+.steps .sn{font-size:13.5px;font-weight:800;color:var(--sc);line-height:1.45}
+.steps .sx{font-size:13.5px;font-weight:700;color:var(--ink2);line-height:1.52}
+.steps .sx b{color:var(--ink);font-weight:800}
+.quote{margin:12px 0 0;padding:13px 15px;background:var(--surface-detail);border-left:4px solid var(--dk);border-radius:0 12px 12px 0}
+.quote p{margin:0;font-size:13px;line-height:1.66;font-weight:700;color:var(--ink2)}
+.quote .qs{margin:8px 0 0;font-size:11.5px;font-weight:800;color:var(--muted)}
+
+
+.jars{display:grid;gap:10px;margin:14px 0 0}
+.jar{border:1px solid var(--line);border-radius:12px;background:var(--surface-inner);padding:13px 14px}
+.jar .jh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:9px}
+.jar .jh b{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.03em}
+.jar .jh i{font-style:normal;font-size:11px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{display:flex;height:20px;border-radius:5px;overflow:hidden;background:var(--surface-muted)}
+.bar i{display:block;height:100%}
+.leg{display:grid;grid-template-columns:1fr auto;gap:3px 10px;margin:9px 0 0;font-variant-numeric:tabular-nums}
+.leg span{font-size:12.5px;font-weight:700;color:var(--body);display:flex;align-items:center;gap:7px}
+.leg span em{font-style:normal;width:9px;height:9px;border-radius:2px;flex:0 0 auto}
+.leg strong{font-size:12.5px;font-weight:800;color:var(--ink);text-align:right}
+
+
+.tbl{margin:13px 0 0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.tbl .th{display:grid;gap:1px;background:var(--line)}
+.tbl .th>div{background:var(--surface-detail);padding:8px 10px;font-size:11.5px;font-weight:800;color:var(--sub)}
+.tbl .tr{display:grid;gap:1px;background:var(--line2)}
+.tbl .tr>div{background:var(--surface-inner);padding:9px 10px;font-size:12.5px;font-weight:700;color:var(--body);font-variant-numeric:tabular-nums}
+.tbl .tr>div:first-child{font-weight:800;color:var(--ink2)}
+.c4{grid-template-columns:1.1fr 1fr 1fr 1fr}
+
+
+.stop{margin:13px -16px 0;padding:15px 22px;background:var(--ink);color:#EFEDE7;position:relative}
+.stop:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--sc)}
+.stop .sk{font-size:11px;font-weight:800;letter-spacing:.14em;color:#A7A29A;margin-bottom:8px}
+.stop .sv{font-size:16px;line-height:1.56;font-weight:800;letter-spacing:-.03em;color:#F4F2ED}
+.stop .sn{margin:11px 0 0;padding-top:11px;border-top:1px solid rgba(230,225,215,.2);font-size:13px;line-height:1.62;font-weight:600;color:#C4BFB6}
+.stop .sn b{color:#F4F2ED;font-weight:800}
+
+
+.mini{margin:13px 0 0;background:var(--surface-detail);border-left:4px solid var(--sc);border-radius:0 12px 12px 0;padding:13px 15px}
+.mini b.mh{display:block;font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.mini .mg{display:grid;grid-template-columns:1fr auto;gap:4px 10px;margin:8px 0 0;font-variant-numeric:tabular-nums}
+.mini .mg span{font-size:12.5px;font-weight:700;color:var(--body)}
+.mini .mg em{font-style:normal;font-size:12.5px;font-weight:800;color:var(--ink);text-align:right}
+.mini .mp{margin:9px 0 0;font-size:13px;line-height:1.62;font-weight:700;color:var(--ink2)}
+
+
+.limit{margin:15px 0 0;display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden}
+.limit .li{background:var(--surface-inner);padding:12px 15px}
+.limit .lk{font-size:11.5px;font-weight:800;letter-spacing:.05em;margin-bottom:8px}
+.limit .can .lk{color:var(--dk-dark)}
+.limit .cant .lk{color:var(--warn)}
+.limit ul{margin:0;padding-left:16px;display:grid;gap:5px}
+.limit li{font-size:12.5px;line-height:1.55;font-weight:700;color:var(--body)}
+.limit .cant li{color:var(--ink2)}
+
+
+.pull{margin:15px -16px 0;padding:20px;background:var(--surface-band);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)}
+.pull p{margin:0;font-size:19px;line-height:1.52;font-weight:800;letter-spacing:-.045em;color:var(--ink)}
+.pull p b{color:var(--dk-dark)}
+
+
+.next{margin:15px -16px 0;padding:18px 22px;background:linear-gradient(150deg,#4A4038 0%,#2F2A25 100%);color:#EDE9E4;position:relative;overflow:hidden}
+.next:before{content:"";position:absolute;right:-40px;bottom:-52px;width:150px;height:150px;border-radius:50%;border:1px solid rgba(200,186,172,.18)}
+.next .nh{position:relative;font-size:11px;font-weight:800;letter-spacing:.12em;color:#B3A697;margin-bottom:10px}
+.next p{position:relative;margin:0;font-size:16px;line-height:1.56;font-weight:800;letter-spacing:-.03em;color:#F0ECE7}
+.next p b{color:#FFFFFF}
+.next .nt{position:relative;margin-top:13px;padding-top:12px;border-top:1px solid rgba(200,186,172,.22);font-size:12.5px;font-weight:800;color:#C4B8A9}
+.next .nt b{color:#F0ECE7;font-weight:800}
+
+
+.foldwrap{margin:12px 0 0}
+details.fold{border:1px solid var(--line);border-radius:12px;background:var(--surface-detail);margin:0 0 8px;overflow:hidden}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:11px 15px;font-size:13px;font-weight:800;color:var(--ink)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary:after{content:"+";font-size:18px;font-weight:800;color:var(--green);line-height:.9}
+details.fold[open]>summary:after{content:"−"}
+details.fold .fb{padding:0 15px 14px}
+.fb p{margin:0 0 8px;font-size:12.5px;line-height:1.65;color:var(--body);font-weight:600}
+.fb p:last-child{margin-bottom:0}
+.fb p b{color:var(--ink);font-weight:800}
+.gloss{display:grid;grid-template-columns:112px 1fr;gap:9px 11px;margin:2px 0 0;font-size:13px}
+.gloss dt{font-weight:850;color:#4B4740}
+.gloss dd{margin:0;color:var(--body);line-height:1.55}
+.fb .miss{margin:10px 0 0;padding:11px 12px;background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;
+  font-size:12px;line-height:1.6;font-weight:700;color:var(--ink2)}
+.csv{display:grid;grid-template-columns:1fr auto;gap:4px 9px;margin:9px 0 2px;font-variant-numeric:tabular-nums;align-items:baseline}
+.csv .h{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.03em}
+.csv .k{font-size:12.5px;font-weight:700;color:var(--body)}
+.csv .v{font-size:12.5px;font-weight:800;color:var(--ink);text-align:right}
+.src{display:grid;gap:6px;margin:2px 0 0}
+.src div{font-size:12px;line-height:1.55;font-weight:600;color:var(--body)}
+.src div b{color:var(--ink2);font-weight:800}
+.disc{font-size:11.5px;color:var(--muted);text-align:center;line-height:1.55;padding:12px 8px 0;font-weight:500}
+.foot{text-align:center;font-size:11.5px;color:var(--sub);padding:10px 0 4px;font-weight:800;letter-spacing:-.01em}
+
+
+.term{border-bottom:1.5px dashed #8B867E;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;font-weight:850;color:var(--ink);
+  display:inline-block;padding:3px 4px;margin:-3px -4px;line-height:1.3;
+  touch-action:manipulation;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.term .tip{position:fixed;left:12px;top:0;min-width:160px;max-width:min(248px,calc(100vw - 28px));
+  background:#33322F;color:#F2F0EB;font-size:12px;font-weight:600;line-height:1.52;padding:9px 11px;border-radius:9px;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);z-index:60;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease;white-space:normal;text-align:left}
+.term .tip:after{content:"";position:absolute;top:100%;left:var(--ax,50%);transform:translateX(-50%);border:6px solid transparent;border-top-color:#33322F}
+.term .tip.below:after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#33322F}
+.term.open .tip{opacity:1;visibility:visible;pointer-events:auto}
+
+@media(max-width:360px){
+  .cvtitle{font-size:26px}
+  .qbig{font-size:19px}
+  .ans .av{font-size:18px}
+  .pull p{font-size:17px}
+  .cht{font-size:21px}
+  .tag .tv{font-size:23px}
+  .six .si{grid-template-columns:46px 1fr;gap:9px}
+  .flr{grid-template-columns:40px 1fr;gap:9px}
+  .gloss{grid-template-columns:96px 1fr}
+  .gate .gh>div,.gate .gr>div{padding:8px 7px;font-size:11.5px}
+}
+
+
+@media(min-width:768px){
+  .app{max-width:860px;padding-left:30px;padding-right:30px}
+  .topbar{margin:0 -30px}
+  .cover{margin:0 -30px;padding:44px 40px 34px}
+  .cvtitle{font-size:44px}
+  .cvsub{font-size:15px}
+  .ch{margin-top:46px}
+  .cht{font-size:29px}
+  .qbig{font-size:26px}
+  .ans{margin-left:-30px;margin-right:-30px;padding:26px 40px}
+  .ans .av{font-size:24px}
+  .stop{margin-left:-30px;margin-right:-30px;padding:26px 40px}
+  .stop .sv{font-size:19px}
+  .pull{margin-left:-30px;margin-right:-30px;padding:32px 40px}
+  .pull p{font-size:25px}
+  .next{margin-left:-30px;margin-right:-30px;padding:28px 40px}
+  .tags{grid-template-columns:1fr auto 1fr;align-items:center;gap:12px}
+  .tagx{padding:0 4px}
+  .jars{grid-template-columns:1fr 1fr}
+  .limit{grid-template-columns:1fr 1fr}
+  .p{font-size:14.5px}
+  .p.lead{font-size:16px}
+}
+@media(min-width:860px){h1 br.w,h2 br.w,.cht br.w{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<span id="top"></span>
+<div class="topbar">
+<div class="tbin">
+<span class="brand"><i>The Language of Markets</i> · Episode 6</span>
+<span class="ep">06</span>
+</div>
+<div class="prog"><i id="pg"></i></div>
+</div>
+<div class="cover">
+<span class="cvkick">ECONOMICS &amp; MARKETS GLOSSARY <b>06</b></span>
+<h1 class="cvtitle">How Does 1 Coin<span>Become $1?</span></h1>
+<p class="cvsub">A quick tour from coins to exchanges—<br/>then into the structure that keeps the price pinned to $1.</p>
+<div class="cvmotif">
+<svg aria-label="Cover graphic showing that $1 at the issuer desk is not the same as $0.88 on an exchange screen" role="img" viewbox="0 0 340 84">
+<rect fill="none" height="44" rx="8" stroke="rgba(210,220,213,.5)" stroke-width="1.6" width="104" x="12" y="16"></rect>
+<text fill="#A8C6B4" font-size="19" font-weight="800" text-anchor="middle" x="64" y="45">$1.0000</text>
+<text fill="#BFD2C6" font-size="11.5" font-weight="800" text-anchor="middle" x="64" y="74">Issuer desk</text>
+<text fill="#EFEDE7" font-size="25" font-weight="800" text-anchor="middle" x="170" y="47">≠</text>
+<rect fill="none" height="44" rx="8" stroke="rgba(224,196,168,.62)" stroke-width="1.6" width="104" x="224" y="16"></rect>
+<text fill="#E0C4A8" font-size="19" font-weight="800" text-anchor="middle" x="276" y="45">$0.88</text>
+<text fill="#DFC7AE" font-size="11.5" font-weight="800" text-anchor="middle" x="276" y="74">Exchange screen</text>
+</svg>
+</div>
+<div class="cvidx">
+<a href="#p1"><b>01</b> What a Coin Is</a>
+<a href="#p2"><b>02</b> The Day $1 on the Screen Wobbled</a>
+<a href="#p3"><b>03</b> That Door Is Open to 819</a>
+<a href="#p4"><b>04</b> Two Places Where It Breaks</a>
+</div>
+</div>
+<div class="ch" id="p1">
+<div class="chtop"><span class="chn">01</span><span class="chk">What a Coin Is</span></div>
+<h2 class="cht">An Asset With Nothing <br class="w"/>Underpinning Its Price</h2>
+<div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+<p class="p lead">Before talking about stablecoins, we need to start one step earlier. Stablecoins were born inside the crypto market, and they were created because of the way that market works.</p>
+<h3 class="hd">What Is a Coin?</h3>
+<p class="p">A bank-account balance is a number recorded in a ledger run by the bank. With a coin, that ledger is not held by one company; <b>everyone participating shares a copy</b>. The shared ledger records who sent how much to whom, and changing that record requires moving a majority of the network. There is no central administrator, but transactions are correspondingly hard to reverse.</p>
+<p class="p">Bitcoin was the first. Its design paper was released in October 2008, and the first record was created on January 3, 2009. Since then, coins built for many different purposes have continued to appear.</p>
+<div class="tbl">
+<div class="th" style="grid-template-columns:96px 1fr"><div>Name · Launch</div><div>What It Was Built to Do</div></div>
+<div class="tr" style="grid-template-columns:96px 1fr"><div>Bitcoin · BTC<br/><i style="font-style:normal;font-weight:700;color:var(--muted)">2009.01</i></div><div>Transfers value without a central issuer. Maximum supply: <b>21 million</b></div></div>
+<div class="tr" style="grid-template-columns:96px 1fr"><div>Ether · ETH<br/><i style="font-style:normal;font-weight:700;color:var(--muted)">2015.07</i></div><div>Runs conditional programs on top of the ledger. Ethereum is the network; Ether is the coin.</div></div>
+<div class="tr" style="grid-template-columns:96px 1fr"><div>XRP<br/><i style="font-style:normal;font-weight:700;color:var(--muted)">2012.06</i></div><div>Designed for faster cross-border transfers. A total of 100 billion XRP were created at inception.</div></div>
+<div class="tr" style="grid-template-columns:96px 1fr"><div>Other<br/><i style="font-style:normal;font-weight:700;color:var(--muted)">Ongoing</i></div><div>Coins other than Bitcoin are collectively called <b>altcoins</b>. It is a market term, not a legal classification.</div></div>
+</div>
+<p class="cap">Ripple is the name of the company behind XRP. In Korea, the company and token names were long used interchangeably; in February 2025, Upbit changed the listed asset name from “Ripple” to “XRP.”</p>
+<h3 class="hd">What Supports the Price?</h3>
+<p class="p">This is the starting point for this episode. A stock has a company behind it, and a bond has an obligation to repay. <b>A coin has no such claim behind it.</b> Its price is made by buyers and sellers.</p>
+<p class="p">That is why prices can move so sharply. In a March 2026 report, the Bank for International Settlements wrote that Bitcoin had <b>fallen about 50% from its 2025 peak</b>. The Bank of Korea cited the sharp drop that followed Bitcoin’s record high on October 10, 2025, when large-scale futures liquidations accelerated the move.</p>
+<div class="mini">
+<b class="mh">Crypto Market Size · End-June 2026</b>
+<div class="mg">
+<span>Total cryptoasset market capitalization</span><em class="num">About $2.3tn</em>
+<span>Bitcoin</span><em class="num">About $1.3tn</em>
+<span>Bitcoin share</span><em class="num">56%</em>
+</div>
+<p class="mp">Bitcoin alone accounts for more than half. Thousands of other assets split the rest, based on IMF data.</p>
+</div>
+<h3 class="hd">Where Do People Trade Them?</h3>
+<p class="p">Coins are bought on exchanges. But the way in differs between Korea and overseas markets.</p>
+<div class="tbl">
+<div class="th" style="grid-template-columns:88px 1fr"><div>Where</div><div>How You Fund It</div></div>
+<div class="tr" style="grid-template-columns:88px 1fr"><div>Korean exchanges</div><div><b>You can buy directly with Korean won.</b> The exchange must be linked to a real-name verified bank account. As of August 2026, five exchanges qualify.</div></div>
+<div class="tr" style="grid-template-columns:88px 1fr"><div>Overseas exchanges</div><div><b>There is no KRW deposit channel.</b> You generally need to buy crypto in Korea and transfer it in.</div></div>
+</div>
+<p class="p">In August 2021, Binance removed all Korean-won trading pairs and KRW payment options, saying it was acting proactively to comply with Korean regulation. Since then, direct KRW access to major overseas exchanges has effectively been closed.</p>
+<p class="p">So what do overseas exchanges use as the unit of account? If volatile coins are priced against other volatile coins, the benchmark itself moves. <b>A coin whose price does not move</b> is what the market needed here.</p>
+<h3 class="hd">Stablecoins at a Glance</h3>
+<div class="six">
+<div class="si"><span class="sk">Who</span><span class="sv">Private companies issue them. <b>Tether (USDT)</b> and <b>Circle (USDC)</b> together account for most of the market.</span></div>
+<div class="si"><span class="sk">When</span><span class="sv">First issued in 2014. Formal U.S. regulation began with the <b>GENIUS Act</b> in July 2025.</span></div>
+<div class="si"><span class="sk">Where</span><span class="sv">Issued in specific jurisdictions such as the U.S.; circulated on borderless ledgers.</span></div>
+<div class="si"><span class="sk">What</span><span class="sv">A digital asset designed to keep its value <b>pegged to $1</b> . This is what separates it from other coins whose prices move.</span></div>
+<div class="si"><span class="sk">How</span><span class="sv">Hold dollar-denominated reserve assets against the amount issued, and open <b>a desk that redeems at par</b>.</span></div>
+<div class="si"><span class="sk">Why</span><span class="sv">Because a market where prices swing sharply even within a day needs <b>a place where the value stays still</b>.</span></div>
+</div>
+<p class="p">That last point is the starting point. In a market where prices can move dramatically within a day, traders needed somewhere to park value temporarily. As of June 2025, <b>85%</b> of global cryptoasset trading was settled in stablecoins.</p>
+<div class="foldwrap">
+<details class="fold">
+<summary>Where Is the 21 Million Cap Written?</summary>
+<div class="fb">
+<p>Bitcoin’s design paper <b>does not contain the number 21 million.</b> It only says that once a predetermined number of coins have entered circulation, incentives transition to transaction fees.</p>
+<p>The cap comes from the issuance rules in the code. The block reward began at 50 BTC and halves every 210,000 blocks; the resulting series converges on 21 million. The most recent halving was on April 20, 2024, and the current block reward is 3.125 BTC.</p>
+<div class="miss">You will often read that “the white paper fixes Bitcoin’s supply at 21 million.” It is the code, not the white paper, that sets the cap. The distinction sounds small, but it changes what would actually have to be altered for the cap to change.</div>
+</div>
+</details>
+<details class="fold">
+<summary>Altcoins · Meme Coins · The XRP Lawsuit</summary>
+<div class="fb">
+<p>The term <b>altcoin</b> has no official definition. Neither international bodies nor regulators have formally defined the term. It is simply a market shorthand.</p>
+<p><b>Meme coins</b> are different. On February 27, 2025, the U.S. SEC’s Division of Corporation Finance issued a staff statement defining meme coins as coins that arise from internet memes or popular topics and attract online users, and said they are not securities. But the statement is not a rule and has no binding legal force.</p>
+<p><b>The XRP lawsuit</b> did not ask whether XRP itself was a security in the abstract. The July 2023 ruling distinguished between direct institutional sales, which were investment contracts, and sales through exchange order books, which were not, because buyers did not know who was on the other side. The key question was how the asset was sold and to whom. The appeal was withdrawn on August 7, 2025, ending the case.</p>
+</div>
+</details>
+</div>
+<div class="ch" id="p2">
+<div class="chtop"><span class="chn">02</span><span class="chk">The Day $1 on the Screen Wobbled</span></div>
+<h2 class="cht">The Same Coin Has <br class="w"/>Two Different Prices</h2>
+<div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+<div class="sig"><b class="on3">3F · Exchange Screen</b></div>
+</div>
+<p class="p lead"><span class="term">Stablecoin<span class="tip">A digital asset designed to keep its value tied to a reference asset such as the U.S. dollar. The issuer sets aside reserve assets to support that value.</span></span> is designed to stay pegged to $1. But on March 11, 2023, the exchange price of USDC, a major dollar stablecoin, fell as low as $0.88.</p>
+<div class="tags">
+<div class="tag d">
+<div class="tk">Issuer desk</div>
+<div class="tv num">$1.0000</div>
+<div class="tn">The issuer’s par exchange rate. It did not change that day.</div>
+</div>
+<div class="tagx">Same coin, same moment</div>
+<div class="tag s">
+<div class="tk">Exchange screen · 2023.03.11</div>
+<div class="tv num">$0.88</div>
+<div class="tn">The price formed where buyers and sellers met.</div>
+</div>
+</div>
+<p class="cap">Sources differ on the low: some report $0.86 and others $0.88. The Federal Reserve cites $0.86, while other Fed-system research and the Bank of Korea cite $0.88.</p>
+<h3 class="hd">What Happened That Day?</h3>
+<p class="p">Circle, the issuer of USDC, had placed $3.3 billion of its <span class="term">reserve assets<span class="tip">Assets the issuer sets aside against the coins it has issued. They can include cash, bank deposits, and government securities.</span></span> at Silicon Valley Bank. The bank was closed on March 10. The amount at risk was <b>8% of total reserves</b>, while incoming <span class="term">redemption<span class="tip">Returning coins to the issuer and receiving cash at par.</span></span> requests reached <b>$7.8 billion, equal to 18% of market capitalization</b>.</p>
+<div class="tbl">
+<div class="th" style="grid-template-columns:82px 1fr"><div>When</div><div>What Happened</div></div>
+<div class="tr" style="grid-template-columns:82px 1fr"><div>Mar. 10–11</div><div>Silicon Valley Bank was closed. Circle disclosed its deposit exposure on Friday night. The exchange price fell to <b>$0.88</b>. Issuance and redemption at the issuer desk were unavailable over the weekend.</div></div>
+<div class="tr" style="grid-template-columns:82px 1fr"><div>Sun., Mar. 12</div><div>The U.S. Treasury, Federal Reserve, and FDIC announced that depositors would have access to all of their funds. The price rebounded sharply.</div></div>
+<div class="tr" style="grid-template-columns:82px 1fr"><div>Mon., Mar. 13</div><div>Circle resumed processing redemptions. USDC then returned fully to $1.</div></div>
+</div>
+<div class="stop">
+<div class="sk">The Question From Page 2</div>
+<div class="sv">What restored the price—the government announcement on Sunday, or the issuer desk reopening on Monday?</div>
+<div class="sn">Both events happened outside the third floor. To answer the question, we need to understand why the exchange price can diverge from the issuer’s par price—and what pulls the two back together. <b>Page 3 opens up that structure.</b></div>
+</div>
+<div class="foldwrap">
+<details class="fold">
+<summary>Why Don’t Bank Deposits Trade Away From Par?</summary>
+<div class="fb">
+<p>KRW 1 million deposited at KB Kookmin Bank and KRW 1 million deposited at Shinhan Bank are always worth the same KRW 1 million. That is because both banks hold reserves at the central bank and settle with one another through the central-bank payment system. The Bank of Korea calls this <b>the singleness of money</b>.</p>
+<p>Stablecoins do not have that central settlement mechanism. Each issuer has a different reserve mix and a different credit profile. The Bank of Korea put it this way: <b>Even the two largest stablecoins, USDT and USDC, do not always exchange one-for-one.</b> In other words, before asking whether one coin equals one dollar, even the question of whether one “dollar coin” equals another is unsettled.</p>
+<p><b>Nor is this the first time money bearing the same face value has traded differently.</b> In the mid-19th century, the United States adopted free banking. Anyone who met a state’s requirements could establish a bank and issue banknotes.</p>
+<p>The result was disorder. The quality of the state bonds backing each bank differed, so notes carrying the same <b>$1</b> face value traded at different prices. Merchants checked which bank had issued a note before accepting it. Some $1 notes traded at $0.90, others at $0.80, and some Indiana free-bank notes fell as low as $0.20.</p>
+<p>State issuance does not guarantee the face value either. Under King Gojong of Joseon, the <b>Dangbaekjeon</b> was assigned a face value 100 times that of an ordinary coin, as its name implied, even though its copper content was barely higher. People quickly recognized the mismatch, and prices surged.</p>
+<div class="miss">A number printed on money does not make it worth that number. What stands behind the promise is what matters. That backing is what this episode is examining.</div>
+</div>
+</details>
+</div>
+<div class="ch" id="p3">
+<div class="chtop"><span class="chn">03</span><span class="chk">That Door Is Open to 819</span></div>
+<h2 class="cht">The Desk That Pays $1 <br class="w"/>Is Not Open to Us</h2>
+<div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+<div class="sig"><b class="on1">1F · Issuer Desk</b><b>2F · The Bridge</b></div>
+</div>
+<p class="p lead">Pay $1 and receive one coin; return one coin and receive $1. That is the basic promise. But access to that desk is restricted.</p>
+<div class="bld">
+<div class="flr f3"><span class="fn">3F</span><div><div class="ft">Exchange screen</div><div class="fw">This is the market price we see. Buyers and sellers meet here to set the price.</div><span class="badge">Anyone</span></div></div>
+<div class="flr f2"><span class="fn">2F</span><div><div class="ft">Participants Who Connect the Two Floors</div><div class="fw">They buy cheaply on the exchange and redeem at par at the issuer desk. The spread is their profit.</div><span class="badge">A small group with access to 1F</span></div></div>
+<div class="flr f1"><span class="fn">1F</span><div><div class="ft">Issuer desk</div><div class="fw">One dollar and one coin are exchanged at par. The posted rate here does not fluctuate.</div><span class="badge">Verified customers only</span></div></div>
+</div>
+<p class="cap">This three-floor building returns on Page 4, where we mark the floor that failed in each case.</p>
+<h3 class="hd">Conditions for Accessing 1F</h3>
+<div class="gate">
+<div class="gh"><div>Item</div><div>Tether · USDT</div><div>Circle · USDC</div></div>
+<div class="gr"><div>Direct redemption eligibility</div><div>Verified customers only</div><div>Institutional-account holders only</div></div>
+<div class="gr"><div>Verified customers</div><div><b>819</b><br/>2026.02.16</div><div>Not disclosed</div></div>
+<div class="gr"><div>Minimum purchase</div><div><b>$100,000</b></div><div>Not disclosed</div></div>
+<div class="gr"><div>Redemption fee</div><div>Greater of $1,000 or <b>0.1%</b></div><div>None<br/>Network/transfer fees separate</div></div>
+<div class="gr"><div>Retail access</div><div><em>Effectively blocked by the minimum size</em></div><div><em>Official documentation says retail users are ineligible</em></div></div>
+</div>
+<p class="cap">Tether figures are based on disclosure documents filed with El Salvador’s regulator. Circle’s institutional-account documentation explicitly states that the service is not offered to individuals.</p>
+<p class="p">The Bank of Korea makes the same point. Individuals and ordinary corporations cannot demand direct redemption from the issuer; they <b>must sell on an exchange to cash out</b>. The Bank of Korea calls this <b>market redemption</b>. In other words, the $1 price we see on the screen is not the issuer-desk price; it is a market price formed on the third floor.</p>
+<h3 class="hd">So Who Pulls the Exchange Price Back?</h3>
+<div class="steps">
+<div class="st"><span class="sn">①</span><span class="sx">The exchange price falls to <b>$0.99</b></span></div>
+<div class="st"><span class="sn">②</span><span class="sx">A participant with access to 1F buys on the exchange at <b>$0.99</b></span></div>
+<div class="st"><span class="sn">③</span><span class="sx">At the issuer desk, the participant redeems it for <b>$1.00</b></span></div>
+<div class="st"><span class="sn">④</span><span class="sx">The $0.01 spread becomes the participant’s profit, while the buying in Step ② <b>pushes the exchange price higher</b></span></div>
+</div>
+<div class="quote">
+<p>“A small set of participants are eligible to issue and redeem directly with the issuer at par. They operate between the primary market and the <span class="term">secondary market<span class="tip">A market where users trade with one another without going through the issuer. The exchange screen is the secondary market.</span></span> , using <span class="term">arbitrage<span class="tip">Trading the price difference between the same asset in two venues to earn a profit.</span></span> to keep the price near par.”</p>
+<div class="qs">BIS Working Papers No. 1270 · June 2026</div>
+</div>
+<p class="p">The IMF compares this structure to an ETF’s authorized participants. What holds the peg is not an issuer’s declaration, but <b>the incentive for people with access to that door to act</b>.</p>
+<h3 class="hd">Same “1:1 Backing,” Different Reserve Mixes</h3>
+<div class="jars">
+<div class="jar">
+<div class="jh"><b>Tether · USDT</b><i>2026.06.30 · Share of Total Assets</i></div>
+<div aria-label="Tether reserve-asset composition bar" class="bar" role="img">
+<i style="width:61.2%;background:#46584D"></i><i style="width:13.6%;background:#7B8F82"></i><i style="width:10.0%;background:#C9A227"></i><i style="width:7.2%;background:#A9714B"></i><i style="width:3.1%;background:#D0AE90"></i><i style="width:4.9%;background:#C6C1B6"></i>
+</div>
+<div class="leg">
+<span><em style="background:#46584D"></em>U.S. Treasuries</span><strong class="num">61.2%</strong>
+<span><em style="background:#7B8F82"></em><span class="term">Reverse repo<span class="tip">A short-term transaction in which cash is lent against Treasury collateral—in effect, a short-term loan secured by government bonds.</span></span></span><strong class="num">13.6%</strong>
+<span><em style="background:#C9A227"></em>Precious metals</span><strong class="num">10.0%</strong>
+<span><em style="background:#A9714B"></em>Secured loans</span><strong class="num">7.2%</strong>
+<span><em style="background:#D0AE90"></em>Bitcoin</span><strong class="num">3.1%</strong>
+<span><em style="background:#C6C1B6"></em>Other</span><strong class="num">4.9%</strong>
+</div>
+</div>
+<div class="jar">
+<div class="jh"><b>Circle · USDC</b><i>2026.06.30 · Share of Reserve Assets</i></div>
+<div aria-label="Circle reserve-asset composition bar" class="bar" role="img">
+<i style="width:71.6%;background:#7B8F82"></i><i style="width:11.6%;background:#46584D"></i><i style="width:15.5%;background:#AAB6AC"></i><i style="width:1.3%;background:#C6C1B6"></i>
+</div>
+<div class="leg">
+<span><em style="background:#7B8F82"></em>U.S. Treasury reverse repos</span><strong class="num">71.6%</strong>
+<span><em style="background:#46584D"></em>U.S. Treasuries</span><strong class="num">11.6%</strong>
+<span><em style="background:#AAB6AC"></em>Cash at regulated financial institutions</span><strong class="num">15.5%</strong>
+<span><em style="background:#C6C1B6"></em>Other</span><strong class="num">1.3%</strong>
+</div>
+</div>
+</div>
+<p class="p">Both issuers say they are backed “1:1,” but what fills the reserve pool is different. One includes gold, Bitcoin, and secured loans; the other is composed of Treasuries and cash.</p>
+<div class="foldwrap">
+<details class="fold">
+<summary>The Denominator Behind “100% Reserves”</summary>
+<div class="fb">
+<p>A Federal Reserve note published in April 2026 gives a useful comparison:</p>
+<div class="csv">
+<span class="h">Tether · Reserve assets per coin</span><span class="h" style="text-align:right">Multiple</span>
+<span class="k">Using total assets</span><span class="v num">About 1.04×</span>
+<span class="k">Using only Treasuries, Treasury-backed reverse repos, and bank deposits</span><span class="v num">About 0.74×</span>
+</div>
+<p>Same company, same point in time—yet the ratios differ this much because <b>what counts toward the “1”</b> is different. Total assets include gold, Bitcoin, and secured loans; the narrower high-quality-asset measure does not.</p>
+<div class="miss">When you read that reserves are held “1:1,” you also need to ask what is being counted toward that one. Change the denominator and 1.04× becomes 0.74×. If the comfort provided by “1:1” changes that much with the definition, then the reassurance is only as strong as the definition behind it.</div>
+</div>
+</details>
+</div>
+<div class="pull">
+<p>What Holds the Peg Is Not <b>the Promise</b> but<br/>the Incentive for Those With Access to the Door <b>to Act</b>.</p>
+</div>
+<div class="ch" id="p4">
+<div class="chtop"><span class="chn">04</span><span class="chk">Two Places Where It Breaks</span></div>
+<h2 class="cht">Either the Door Closes, <br class="w"/>or There Is Nothing Behind It</h2>
+<div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+<div class="sig"><b class="on1">The Full Structure</b><b class="on3">And Korea</b></div>
+</div>
+<p class="p lead">The two cases in which the peg broke failed in different places. Put them into the three-floor building from Page 3 and the fault becomes visible.</p>
+<h3 class="hd">Failure ① · The Assets Existed, but the Door Closed</h3>
+<p class="p">USDC had reserve assets in March 2023. But when the banking system closed for the weekend, <b>the first-floor issuer desk stopped operating</b>, so the second-floor arbitrageurs could not do their job. We can now answer the question from Page 2. The government announcement on Sunday drove a large rebound, and <b>when the issuer desk reopened on Monday, USDC returned fully to $1</b>. The Federal Reserve describes the sequence in that order. The announcement sparked the recovery; the reopened redemption channel completed it.</p>
+<h3 class="hd">Failure ② · The Door Could Open, but There Was Nothing Behind It</h3>
+<p class="p">TerraUSD in May 2022 held neither dollars nor Treasuries in reserve. When its price fell, it promised holders <b>$1 worth of another token from the same ecosystem, Luna</b>. That conversion promise stood in for reserve assets.</p>
+<div class="tbl">
+<div class="th c4"><div>Item</div><div>05.05</div><div>05.09</div><div>Later</div></div>
+<div class="tr c4"><div>Luna price</div><div>$87.33</div><div>$32.00</div><div>$0.0002</div></div>
+<div class="tr c4"><div>TerraUSD price</div><div>Not available</div><div>$0.800</div><div>$0.409<br/>05.12</div></div>
+<div class="tr c4"><div>Luna supply</div><div>352 million</div><div>Not available</div><div>6.5 trillion<br/>05.16</div></div>
+</div>
+<p class="p">The more TerraUSD was converted, the more Luna was minted; the lower Luna’s price fell, the less value each new token could provide. In one week, Luna’s supply exploded from the hundreds of millions into the trillions.</p>
+<div class="quote">
+<p>“The key reason for Terra’s collapse was that it promised to maintain a value of $1 without putting in place adequate and effective stabilization mechanisms to support that promise.”</p>
+<div class="qs">Financial Stability Board (FSB) · October 2022</div>
+</div>
+<p class="p">The U.S. Department of Justice put investor losses at <b>more than $40 billion</b>. Side by side, the contrast is clear: in one case the backing existed but the door closed; in the other, the door could open but there was nothing adequate behind it.</p>
+<h3 class="hd">In Korea, the Gateway Sits Inside the Banking System</h3>
+<p class="p">So far, this has been a dollar story. Korea places the gateway somewhere else. To buy crypto with Korean won on a domestic exchange, you need a <span class="term">real-name verified deposit/withdrawal account<span class="tip">An account structure that allows funds to move only between the exchange’s account and the customer’s account at the same bank. It is based on Article 7 of Korea’s Act on Reporting and Using Specified Financial Transaction Information.</span></span>. This requirement is based on Article 7(3)2 of the Act on Reporting and Using Specified Financial Transaction Information and took effect on <b>March 25, 2021</b>. The account allows money to move <b>only between the exchange’s account and the customer’s account at the same bank</b> . If an exchange cannot secure a partnership with a bank, it cannot open a <span class="term">KRW market<span class="tip">A market where crypto can be bought and sold directly for Korean won. A real-name verified deposit/withdrawal account is required.</span></span> at all. As of July 2026, five exchanges operated such markets.</p>
+<p class="cap">Upbit · K Bank · Bithumb · KB Kookmin Bank · Coinone · KakaoBank · Korbit · Shinhan Bank · Gopax · Jeonbuk Bank</p>
+<p class="p">The numbers reveal how different this structure is. The following figures are Bank of Korea data as of end-June 2025.</p>
+<div class="mini">
+<b class="mh">What Do People Use to Buy Crypto?</b>
+<div class="mg">
+<span>Korea · Stablecoin settlement share</span><em class="num">0.04%</em>
+<span>Korea · KRW settlement share</span><em class="num">99.7%</em>
+<span>Global · Stablecoin settlement share</span><em class="num">84.0%</em>
+</div>
+<p class="mp">Korean users generally do not need a dollar stablecoin as a bridge asset. They buy directly with won because the banking gateway is attached to the exchange.</p>
+</div>
+<p class="p">Holdings on Korean exchanges are also relatively small. At end-June 2025, they held KRW 557.1 billion of USDT and KRW 20.7 billion of USDC, roughly <b>0.1%</b> of global market capitalization. In Korea, these coins are used primarily as <b>a transfer rail between domestic and overseas exchanges</b>.</p>
+<p class="p">The Bank of Korea assessed that dollar stablecoins are unlikely to broadly displace demand for the won in Korea. Dollarization tends to emerge primarily in countries with high inflation, such as Argentina, Nigeria, and Türkiye.</p>
+<div class="foldwrap">
+<details class="fold">
+<summary>The Cross-Border Flow Is a Different Story</summary>
+<div class="fb">
+<p>Balances remaining on Korean exchanges are small, but outbound flows are not. According to data the Financial Supervisory Service submitted to the National Assembly, net outflows from Korea’s five exchanges in June 2026 were <b>KRW 560.3bn</b>, and cumulative net outflows from January 2025 through June 2026 were <b>KRW 14.9246tn</b>. That marked 18 consecutive months of net outflows.</p>
+<p>According to Bank of Korea data submitted to the National Assembly, stablecoin holdings on Korean exchanges at end-February 2026 were <b>KRW 607.1bn</b>.</p>
+<div class="miss">But all of these figures cover only <b>balances held in accounts at registered Korean exchanges</b>. Assets moved to personal wallets or overseas exchanges are not captured. No official statistic was found that measures total Korean holdings including assets outside domestic exchanges.</div>
+</div>
+</details>
+</div>
+<div class="limit">
+<div class="li can">
+<div class="lk">What We Can Say</div>
+<ul>
+<li>What and how much the issuer says it holds in reserves</li>
+<li>Who can access the issuer’s mint/redemption desk</li>
+<li>How far the exchange price has moved away from $1</li>
+</ul>
+</div>
+<div class="li cant">
+<div class="lk">What We Cannot Say</div>
+<ul>
+<li>Whether the coin is “safe” right now</li>
+<li>Whether it will depeg next time</li>
+<li>Whether disclosed reserve assets can be sold at full value under stress</li>
+</ul>
+</div>
+</div>
+<p class="p">The last point matters. A disclosure tells you <b>what the issuer holds</b>. It does not tell you what those assets will fetch in a rush.</p>
+<div class="ans">
+<div class="ak">Episode 6 in One Sentence</div>
+<div class="av">One coin equals $1 not because of a promise, but because of a structure. That structure has three floors, and the $1 we see is formed on the top floor.</div>
+<div class="aw">“Pegged to $1” describes the outcome, not the mechanism. The peg is held by the issuer desk, the small group with access to it, and their incentive to act. If any one of those three stops working, the exchange price is the first thing to move.</div>
+</div>
+<div class="foldwrap">
+<details class="fold">
+<summary>Glossary for This Episode</summary>
+<div class="fb">
+<dl class="gloss">
+<dt>Stablecoin</dt><dd>A digital asset designed to keep its market value tied to a reference asset such as the U.S. dollar.</dd>
+<dt>Reserve assets</dt><dd>Assets set aside by the issuer to back the coins it has issued.</dd>
+<dt>Depegging</dt><dd>A state in which the market price moves away from the target peg.</dd>
+<dt>Redemption</dt><dd>Returning coins to the issuer and receiving cash at par.</dd>
+<dt>Market redemption</dt><dd>Cashing out by selling on an exchange when direct redemption with the issuer is unavailable.</dd>
+<dt>Par value</dt><dd>The issuer’s stated exchange value: $1 per coin.</dd>
+<dt>Secondary market</dt><dd>A market where users trade with one another without going through the issuer. The exchange screen is the secondary market.</dd>
+<dt>Arbitrage</dt><dd>Trading the price difference between the same asset in two venues to earn a profit.</dd>
+<dt>Reverse repo</dt><dd>A short-term transaction in which cash is lent against Treasury collateral.</dd>
+<dt>Singleness of money</dt><dd>The principle that the same nominal amount of money is worth the same regardless of which bank issued or holds it.</dd>
+<dt>Real-name verified deposit/withdrawal account</dt><dd>An account arrangement that allows funds to move only between an exchange account and a customer account at the same bank.</dd>
+<dt>KRW market</dt><dd>A market where crypto can be bought and sold directly for Korean won. A real-name verified deposit/withdrawal account is required.</dd>
+</dl>
+</div>
+</details>
+<details class="fold">
+<summary>Numbers We Chose Not to Use</summary>
+<div class="fb">
+<p><b>Total market size.</b> A primary source for total market capitalization as of August 2026 was not found. The latest figure we could verify is about $320 billion at end-May 2026, from the BIS.</p>
+<p><b>Market share.</b> Neither issuer specified a common denominator. Circle cited 27% and Tether more than 60%, but the underlying denominators differ, so we use dollar amounts instead. At end-June 2026: Tether $183.6 billion; Circle $73.3 billion.</p>
+<p><b>USDC low.</b> Even Federal Reserve publications differ between $0.86 and $0.88. Rather than force a single figure, we present the range and identify the sources.</p>
+<p><b>The $450 billion “Terra loss” figure.</b> That figure refers to the decline in the broader cryptoasset market during May–June 2022, not losses from Terra alone. Because the figures are often conflated in reporting, this article uses only the U.S. Department of Justice figure of more than $40 billion in investor losses.</p>
+<div class="miss">We do not fill in numbers we cannot verify. Leaving a blank is more accurate than inserting an unsupported figure.</div>
+</div>
+</details>
+<details class="fold">
+<summary>Sources</summary>
+<div class="fb">
+<div class="src">
+<div><b>Tether reserves · Tokens outstanding</b> · Tether International Consolidated Reserves Report, as of 2026.06.30; reviewed by BDO; report dated 2026.07.31</div>
+<div><b>Tether issuer-desk terms · 819 verified customers</b> · Relevant Information Document, Tether International, filed with El Salvador’s CNAD, 2026.02.20</div>
+<div><b>Circle reserve assets · USDC in circulation</b> · Circle USDC Examination Report June 2026, reviewed by Deloitte; report dated 2026.07.29</div>
+<div><b>Circle · Retail users not eligible</b> · Circle Mint official documentation and USDC Terms, updated 2025.12.12</div>
+<div><b>Arbitrage mechanism</b> · BIS Working Papers No. 1270, “Stablecoins and safe asset prices,” 2026.06, p. 16</div>
+<div><b>ETF authorized-participant analogy</b> · IMF Departmental Paper, “Understanding Stablecoins,” 2025, p. 9</div>
+<div><b>Reserve-asset quality · 0.74× measure</b> · Federal Reserve FEDS Notes, “Stablecoins in 2025”, 2026.04.08</div>
+<div><b>Total market size</b> · BIS Annual Economic Report 2026, Chapter III</div>
+<div><b>USDC depegging timeline</b> · Federal Reserve FEDS Notes, 2025.12.17 · NY Fed Staff Report No 1073</div>
+<div><b>$3.3bn at SVB · $7.8bn of redemption requests</b> · Circle official statements, 2023.03 · Bank of Korea, “Money in the Digital Age: Balancing Innovation and Trust,” 2025.10.27</div>
+<div><b>Full depositor access guarantee</b> · Joint statement by the U.S. Treasury, Federal Reserve, and FDIC, 2023.03.12</div>
+<div><b>Terra assessment</b> · FSB, “Review of the FSB High-level Recommendations… GSC”, 2022.10.11</div>
+<div><b>Terra collapse figures</b> · NY Fed Staff Report No. 1073 · Investor-loss figure from a U.S. Department of Justice press release</div>
+<div><b>Singleness of money · Market redemption · Free banking · Dangbaekjeon</b> · Bank of Korea, “Money in the Digital Age: Balancing Innovation and Trust,” 2025.10.27</div>
+<div><b>Korean settlement shares · Holdings · KRW markets</b> · Same Bank of Korea report; status checked as of 2026.07.01</div>
+<div><b>Real-name verified deposit/withdrawal account</b> · Act on Reporting and Using Specified Financial Transaction Information, Article 7(3)2</div>
+<div><b>Korean net outflows · Holdings</b> · Data submitted to the National Assembly by the Financial Supervisory Service and the Bank of Korea</div>
+</div>
+</div>
+</details>
+</div>
+<div class="next">
+<div class="nh">Continue Reading</div>
+<p>Special Research No. 03 · <b>Behind the Coin Are Treasuries</b></p>
+<div class="nt">This episode built the mechanism that holds the peg in place. One question remains: <b>Why did the United States put a legal framework around these coins?</b> The answer was visible on the day the law was signed.</div>
+</div>
+<p class="disc">This article is educational material explaining economic and financial terminology and how to read market structures. It is not a recommendation to buy or sell any specific asset. Investment decisions and their outcomes remain the investor’s responsibility.<br/>Figures are based on issuer disclosures, reports by international organizations and central banks, and reporting that cites materials submitted to Korea’s National Assembly. Reference dates are stated in the text.</p>
+<p class="foot">The Language of Markets · 06</p>
+</div>
+<script>
+(function(){
+  if(window.__mwWords6) return; window.__mwWords6 = true;
+
+  var pg=document.getElementById('pg');
+  function updateProg(){
+    if(!pg) return;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var y=window.scrollY||window.pageYOffset||0;
+    pg.style.width=(h>0?Math.min(100,Math.max(0,y/h*100)):0)+'%';
+  }
+  window.addEventListener('scroll',updateProg,{passive:true});
+  window.addEventListener('resize',updateProg);
+  updateProg();
+
+  function resetTip(el){ var tp=el.querySelector('.tip'); if(tp){ tp.classList.remove('below'); tp.removeAttribute('style'); } }
+  function clampTip(t){
+    var tip=t.querySelector('.tip'); if(!tip) return;
+    var vw=window.innerWidth, pad=12;
+    var w=Math.min(248, vw-2*pad);
+    tip.style.position='fixed'; tip.style.bottom='auto'; tip.style.transform='none';
+    tip.style.width=w+'px'; tip.style.left='0px'; tip.style.top='0px';
+    var tr=t.getBoundingClientRect();
+    var th=tip.getBoundingClientRect().height;
+    var left=tr.left+tr.width/2-w/2;
+    if(left<pad) left=pad;
+    if(left+w>vw-pad) left=vw-pad-w;
+    var top=tr.top-th-9, below=false;
+    if(top<pad+50){ top=tr.bottom+9; below=true; }
+    var vh=window.innerHeight;
+    if(top+th>vh-pad){ top=vh-pad-th; }
+    if(top<pad){ top=pad; }
+    tip.style.left=Math.round(left)+'px';
+    tip.style.top=Math.round(top)+'px';
+    var tb=tip.getBoundingClientRect();
+    var dx=tb.left-left, dy=tb.top-top;
+    if(dx||dy){ tip.style.left=Math.round(left-dx)+'px'; tip.style.top=Math.round(top-dy)+'px'; }
+    tip.classList.toggle('below', below);
+    var ax=tr.left+tr.width/2-left;
+    ax=Math.max(12, Math.min(w-12, ax));
+    tip.style.setProperty('--ax', Math.round(ax)+'px');
+  }
+  function closeTerms(except){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++){ if(open[i]!==except){ open[i].classList.remove('open'); resetTip(open[i]); } }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.term'), function(t){
+    t.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var willOpen=!t.classList.contains('open');
+      closeTerms(t);
+      t.classList.toggle('open', willOpen);
+      if(willOpen) clampTip(t);
+    });
+  });
+  document.addEventListener('click', function(){ closeTerms(null); });
+  window.addEventListener('scroll', function(){ closeTerms(null); }, {passive:true});
+  window.addEventListener('resize', function(){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++) clampTip(open[i]);
+  });
+})();
+</script>
+</body>
+</html>

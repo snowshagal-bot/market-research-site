@@ -321,6 +321,29 @@
     "coverThumbnail": "covers/2026-08-31-daily-1mkemh5-450.webp"
   },
   {
+    "id": "2026-08-29-basics-hwhg8",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-08-29",
+    "reportDate": "2026-08-29",
+    "registeredDate": "2026-09-06",
+    "registeredAt": "2026-09-05T17:04:21.240Z",
+    "legacyImport": false,
+    "title": "How Does 1 Coin Become $1?",
+    "subtitle": "",
+    "description": "A clear guide to the essential concepts behind markets, economics, and investing.",
+    "tags": [
+      "stablecoins"
+    ],
+    "readingMinutes": 11,
+    "href": "reports/en/용어시리즈_6편_1코인은어떻게1달러가되는가_en.html",
+    "translationGroup": "2026-08-29-basics-1388bwu",
+    "coverImage": "covers/2026-08-29-basics-hwhg8.webp",
+    "shareCardImage": "covers/share/2026-08-29-basics-hwhg8.jpg",
+    "coverThumbnail": "covers/2026-08-29-basics-hwhg8-450.webp"
+  },
+  {
     "id": "2026-08-29-basics-1388bwu",
     "type": "basics",
     "typeLabel": "시장 입문",
