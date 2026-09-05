@@ -9,3 +9,6 @@ export async function onRequestGet({ request, env }) {
     return feedUnavailable();
   }
 }
+
+// Readers and validators probe with HEAD; answer it like GET (the runtime drops the body).
+export const onRequestHead = onRequestGet;

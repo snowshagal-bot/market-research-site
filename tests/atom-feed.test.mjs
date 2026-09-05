@@ -324,3 +324,15 @@ test('reports, sitemap and robots are untouched', async () => {
   assert.doesNotMatch(sitemapXml([post('a')]), /rss\.xml/);
   assert.doesNotMatch(await read('robots.txt'), /rss\.xml/);
 });
+
+test('HEAD on a feed route answers like GET, so readers that probe first do not see a 404', async () => {
+  const { onRequestHead: koHead } = await import('../functions/rss.xml.js');
+  const { onRequestHead: enHead } = await import('../functions/en/rss.xml.js');
+  const posts = [post('ko1'), post('en1', { lang: 'en', href: 'reports/en/en1.html' })];
+  for (const [handler, url] of [[koHead, 'https://snowshagal.com/rss.xml'], [enHead, 'https://snowshagal.com/en/rss.xml']]) {
+    const res = await handler({ request: new Request(url, { method: 'HEAD' }), env: envWith(posts) });
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get('content-type'), ATOM_CONTENT_TYPE);
+    assert.equal(res.headers.get('cache-control'), 'public, max-age=300');
+  }
+});
