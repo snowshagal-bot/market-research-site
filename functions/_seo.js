@@ -821,3 +821,5 @@ export async function loadPosts(request, env) {
   if (!Array.isArray(posts)) throw new Error('POSTS_INVALID');
   return posts;
 }
+
+export { siteFooter, footerCss } from './_footer.js';

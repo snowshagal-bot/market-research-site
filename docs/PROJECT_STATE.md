@@ -377,14 +377,16 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `functions/api/analytics.js` — authenticated, schema-discovered GraphQL Analytics aggregation endpoint
 - `assets/engagement.js` / `functions/api/engagement.js` / `functions/api/engagement-stats.js` — privacy-minimal Production-only reading-session tracker, D1 writer, and authenticated aggregate endpoint
 - `functions/api/_engagement.js` — shared Engagement schema, validation, date-range, and aggregation helpers
-- `functions/_middleware.js` — injects crawlable homepage/category report links, the shared report shell, favicon set and report SEO, and marks non-Production hosts noindex
-- `functions/_seo.js` — canonical URLs, category metadata, report title/description, crawlable discovery markup, hreflang, sitemap and social constants
+- `functions/_footer.js` — canonical single source of truth for global editorial footer markup (`siteFooter`) and scoped report CSS (`footerCss`)
+- `functions/_middleware.js` — injects crawlable homepage/category report links, the shared report shell, global editorial footer and CSS, favicon set and report SEO, and marks non-Production hosts noindex
+- `functions/_seo.js` — canonical URLs, category metadata, report title/description, crawlable discovery markup, hreflang, sitemap, social constants, and footer re-exports
 - `scripts/verify.mjs` — single official repository verification gate running all test suites, JS/MJS syntax validation, and integrity invariants
 - `.github/workflows/verify.yml` — lightweight GitHub Actions CI running `node scripts/verify.mjs` and `git diff --check` on pull requests and main pushes
 - `.github/workflows/deployment-smoke.yml` — waits for the exact main SHA's Cloudflare Pages success check before GET-only Production smoke
 - `scripts/smoke-site.mjs` — shared Production/Preview deployed-site smoke engine using current post data
 - `scripts/wait-for-cloudflare-deployment.mjs` — bounded GitHub check-run poller that prevents pre-deployment Production PASS
 - `scripts/build-category-pages.mjs` — regenerates the ten static KO/EN category landing shells from shared metadata
+- `scripts/sync-static-footers.mjs` — synchronizes canonical `siteFooter` markup across all static public HTML pages and rebuilds category pages
 - `favicon.ico` / `favicon-32x32.png` / `apple-touch-icon.png` / `site.webmanifest` — icon set
 - `assets/social/` — 1200x630 social cards
 - `assets/report-shell.js` — isolated navigation, share section and comments UI for report pages

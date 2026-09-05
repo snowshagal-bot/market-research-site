@@ -305,7 +305,7 @@ test('the share panel is isolated and cannot reflow the report or the comments',
   assert.match(body, /attachShadow\(\{ mode: 'open' \}\)/);
   assert.match(body, /host\.id = 'mrs-share-host'/);
   // Mounted as its own block element, so nothing upstream is re-laid out.
-  assert.match(body, /document\.body\.appendChild\(host\)/);
+  assert.match(body, /appendBeforeGlobalFooter\(host\)/);
   assert.doesNotMatch(body, /document\.body\.style|documentElement\.style/);
   // Accessibility basics.
   assert.match(body, /role="status" aria-live="polite"/);

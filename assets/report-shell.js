@@ -55,6 +55,13 @@
   function applyShellTheme() {
     const theme = resolvedTheme();
     shellHosts.forEach(host => { host.dataset.theme = theme; });
+    const footer = document.getElementById('site-footer');
+    if (footer) footer.dataset.theme = theme;
+  }
+
+  function appendBeforeGlobalFooter(node) {
+    const footer = document.getElementById('site-footer');
+    document.body.insertBefore(node, footer || null);
   }
 
   themeMedia.addEventListener?.('change', () => {
@@ -151,7 +158,7 @@
       clear: 'both', flex: '0 0 100%', margin: '0', padding: '0', border: '0', boxSizing: 'border-box'
     };
     for (const [key, value] of Object.entries(hostStyles)) host.style.setProperty(key, value, 'important');
-    document.body.appendChild(host);
+    appendBeforeGlobalFooter(host);
 
     const root = host.attachShadow({ mode: 'open' });
     root.innerHTML = `
@@ -595,7 +602,7 @@
       clear: 'both', flex: '0 0 100%', margin: '0', padding: '0', border: '0', boxSizing: 'border-box'
     };
     for (const [key, value] of Object.entries(hostStyles)) host.style.setProperty(key, value, 'important');
-    document.body.appendChild(host);
+    appendBeforeGlobalFooter(host);
 
     const root = host.attachShadow({ mode: 'open' });
     root.innerHTML = `
@@ -790,7 +797,7 @@
       clear: 'both', flex: '0 0 100%', margin: '0', padding: '0', border: '0', boxSizing: 'border-box'
     };
     for (const [key, value] of Object.entries(hostStyles)) host.style.setProperty(key, value, 'important');
-    document.body.appendChild(host);
+    appendBeforeGlobalFooter(host);
 
     const root = host.attachShadow({ mode: 'open' });
     const native = prefersNativeShare();

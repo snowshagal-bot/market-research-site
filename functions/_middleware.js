@@ -13,7 +13,9 @@ import {
   loadPosts,
   postLanguage,
   normalizeSitePath,
-  reportSeoTags
+  reportSeoTags,
+  siteFooter,
+  footerCss
 } from './_seo.js';
 import {
   ADMIN_CSP,
@@ -238,7 +240,33 @@ export async function onRequest(context) {
     if (post) seo = reportSeoTags(posts, post);
   } catch (_) {}
 
-  const shell = `<script src="/assets/locale.js?v=bb6eec37ab"></script><script src="/assets/report-shell.js?v=f494a9954b" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
+  const shell = `<script src="/assets/locale.js?v=bb6eec37ab"></script><script src="/assets/report-shell.js?v=cdb13e2848" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
+  const footerStyle = `<style id="site-footer-css">${footerCss()}</style>`;
+  const footerMarkup = siteFooter(lang);
+
+  if (typeof HTMLRewriter === 'undefined') {
+    let body = await response.text();
+    if (seo) {
+      body = body.replace(/<title>[\s\S]*?<\/title>/i, '');
+      body = body.replace(/<meta\s+name="description"[\s\S]*?>/gi, '');
+      body = body.replace(/<meta\s+property="og:[^"]*"[\s\S]*?>/gi, '');
+      body = body.replace(/<meta\s+name="twitter:[^"]*"[\s\S]*?>/gi, '');
+    }
+    body = body.replace(/<link\s+rel="canonical"[\s\S]*?>/gi, '');
+    body = body.replace(/<link\s+rel="alternate"\s+hreflang[\s\S]*?>/gi, '');
+    body = body.replace(/<link\s+rel~?="icon"[\s\S]*?>/gi, '');
+    body = body.replace(/<link\s+rel="apple-touch-icon"[\s\S]*?>/gi, '');
+    body = body.replace(/<link\s+rel="manifest"[\s\S]*?>/gi, '');
+    body = body.replace(/<\/head>/i, `${FAVICON_TAGS}${seo}${footerStyle}</head>`);
+    body = body.replace(/<\/body>/i, `${footerMarkup}${shell}</body>`);
+    const headers = new Headers(response.headers);
+    headers.delete('content-length');
+    return new Response(body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers
+    });
+  }
 
   return new HTMLRewriter()
     .on('title', { element(element) { if (seo) element.remove(); } })
@@ -251,10 +279,10 @@ export async function onRequest(context) {
     .on('link[rel~="icon"]', { element(element) { element.remove(); } })
     .on('link[rel="apple-touch-icon"]', { element(element) { element.remove(); } })
     .on('link[rel="manifest"]', { element(element) { element.remove(); } })
-    .on('head', { element(element) { element.append(`${FAVICON_TAGS}${seo}`, { html: true }); } })
+    .on('head', { element(element) { element.append(`${FAVICON_TAGS}${seo}${footerStyle}`, { html: true }); } })
     .on('body', {
       element(element) {
-        element.append(shell, { html: true });
+        element.append(`${footerMarkup}${shell}`, { html: true });
       }
     })
     .transform(response);
