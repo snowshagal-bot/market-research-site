@@ -8,9 +8,10 @@ import {
   categoryLandingPath,
   categoryStructuredData,
   escapeHtml,
-  structuredDataScript,
-  siteFooter
+  structuredDataScript
 } from '../functions/_seo.js';
+import { siteFooter } from '../functions/_footer.js';
+import { feedDiscoveryTag } from '../functions/_feed.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -77,6 +78,7 @@ function page(type, lang) {
 <title>${escapeHtml(text.title)}</title>
 <meta name="description" content="${escapeHtml(text.description)}">
 <link rel="canonical" href="${PRODUCTION_ORIGIN}${canonicalPath}">
+${feedDiscoveryTag(lang)}
 <meta property="og:type" content="website"><meta property="og:site_name" content="Snowshagal"><meta property="og:locale" content="${en ? 'en_US' : 'ko_KR'}"><meta property="og:title" content="${escapeHtml(text.title)}"><meta property="og:description" content="${escapeHtml(text.description)}"><meta property="og:url" content="${PRODUCTION_ORIGIN}${canonicalPath}"><meta property="og:image" content="${PRODUCTION_ORIGIN}/assets/social/snowshagal-home.jpg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${escapeHtml(text.title)}"><meta name="twitter:description" content="${escapeHtml(text.description)}"><meta name="twitter:image" content="${PRODUCTION_ORIGIN}/assets/social/snowshagal-home.jpg">
 ${structuredDataScript(categoryStructuredData(type, lang))}
 <link rel="stylesheet" href="/assets/site.css?v=db822a2ac5"><link rel="stylesheet" href="/assets/brand.css?v=890e1e5732"><link rel="stylesheet" href="/assets/language.css?v=0c4ca7f4fc"><link rel="stylesheet" href="/assets/category-state.css?v=4328e4b8c2"><link rel="stylesheet" href="/assets/ui-polish.css?v=c877f37bf7"><link rel="stylesheet" href="/assets/home-v2.css?v=5342d21ef9"><link rel="stylesheet" href="/assets/category-landing.css?v=6da877e833">
