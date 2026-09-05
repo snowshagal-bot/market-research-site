@@ -1,3 +1,5 @@
+import { feedPath } from './_feed.js';
+
 export function siteFooter(lang = 'ko') {
   const isEn = lang === 'en';
   const prefix = isEn ? '/en' : '';
@@ -7,10 +9,12 @@ export function siteFooter(lang = 'ko') {
   const reportsHeading = isEn ? 'Reports' : '리포트';
   const marketHeading = isEn ? 'Market' : '마켓';
   const siteHeading = isEn ? 'Site' : '사이트';
+  const followHeading = isEn ? 'Follow' : '팔로우';
 
   const reportsNavAria = isEn ? 'Footer Reports menu' : '푸터 리포트 메뉴';
   const marketNavAria = isEn ? 'Footer Market menu' : '푸터 마켓 메뉴';
   const siteNavAria = isEn ? 'Footer Site menu' : '푸터 사이트 메뉴';
+  const followNavAria = isEn ? 'Footer Follow menu' : '푸터 팔로우 메뉴';
 
   const labels = isEn
     ? {
@@ -73,6 +77,12 @@ export function siteFooter(lang = 'ko') {
             <a href="${prefix}/market/">${labels.market}</a>
             <a href="${prefix}/disclosures/">${labels.disclosures}</a>
             <a href="${prefix}/calendar/">${labels.calendar}</a>
+          </nav>
+        </div>
+        <div class="site-footer-group">
+          <p class="site-footer-heading" aria-hidden="true">${followHeading}</p>
+          <nav class="site-footer-nav" aria-label="${followNavAria}">
+            <a href="${feedPath(lang)}" type="application/atom+xml">RSS</a>
           </nav>
         </div>
         <div class="site-footer-group">

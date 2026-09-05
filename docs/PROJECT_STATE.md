@@ -1,6 +1,6 @@
 # Project state
 
-Updated: 2026-08-30
+Updated: 2026-09-06
 
 ## Purpose
 
@@ -52,6 +52,42 @@ The record is uploaded through `/admin/market/` against the JSON Schema in
 `contracts/market_close/`. Authenticated Market Close writes are allowed on branch Preview
 hosts only because their `COMMENTS_DB` is isolated; the bare Pages hostname and unrelated
 Preview hosts remain blocked, and all non-Market mutation APIs keep their existing policy.
+
+## Atom feeds (Phase 2, Draft PR)
+
+Two Atom 1.0 feeds carry the published reports, one per language, at the addresses readers
+expect: `/rss.xml` (Korean) and `/en/rss.xml` (English). Both are Pages Functions
+(`functions/rss.xml.js`, `functions/en/rss.xml.js`) over one module, `functions/_feed.js`,
+and follow the sitemap's shape: `loadPosts()` → XML → `cache-control: public, max-age=300`,
+with a fail-closed `503 text/plain` / `no-store` that exposes nothing when `posts.json`
+cannot be read. The content type is `application/atom+xml; charset=utf-8`; there is no
+RSS 2.0 variant, no per-category feed and no full-article body.
+
+- Items: `reports/*.html` posts split by `postLanguage(post)` (no `lang` → Korean), at most 50
+  per feed. `id` and `link` are the canonical `reportSiteUrl()` address without `.html`;
+  `category term` is the post type; `summary type="text"` is `reportDescription()` prefixed
+  with `기준일 YYYY-MM-DD ·` / `Report date YYYY-MM-DD ·` when the post has a report date.
+- Dates are the site's clock, not the market's: `published` is `registeredAt`, else
+  `registeredDate` read as `YYYY-MM-DDT00:00:00+09:00`; a post with neither is skipped rather
+  than dated from `reportDate`. `updated` is a valid `updatedAt`, otherwise `published`, and
+  never earlier than it. Entries sort by `published` DESC with a canonical-URL tie-break, so
+  the order is the same for every request; the feed's own `updated` is the newest entry's, and
+  an empty feed carries a fixed constant — request time never enters the document.
+- Text goes through `xmlText()`: the five XML characters are escaped and the characters XML 1.0
+  forbids (C0/C1 controls, U+FFFE/FFFF, lone surrogates) are removed. No CDATA, no raw HTML.
+- Discovery: every public page's `<head>` carries exactly one
+  `<link rel="alternate" type="application/atom+xml" title="Snowshagal (KO|EN)" href=…>` from the
+  single helper `feedDiscoveryTag(lang)` — stamped into the hand-written pages by
+  `scripts/sync-static-feed-links.mjs` (idempotent; runs at the end of
+  `scripts/sync-static-footers.mjs`), written by `scripts/build-category-pages.mjs` for the
+  category landings, and appended by `functions/_middleware.js` for reports, which also removes
+  any Atom link an uploaded report brought along. `hreflang` alternates are untouched. Admin
+  pages and API routes carry no feed link.
+- The global footer has a fourth group, 팔로우 / Follow, whose only link is the language's feed
+  (`<a href="/rss.xml" type="application/atom+xml">RSS</a>`). On ≤768px the groups form the 2-column
+  grid Reports/Market, Follow/Site. No email placeholder.
+- Excluded on purpose: email subscription, subscriber storage, newsletter providers, category
+  feeds, RSS 2.0, feed bodies with article HTML, and any change to `sitemap.xml` or `robots.txt`.
 
 ## Deployment verification
 
@@ -377,6 +413,10 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `functions/api/analytics.js` — authenticated, schema-discovered GraphQL Analytics aggregation endpoint
 - `assets/engagement.js` / `functions/api/engagement.js` / `functions/api/engagement-stats.js` — privacy-minimal Production-only reading-session tracker, D1 writer, and authenticated aggregate endpoint
 - `functions/api/_engagement.js` — shared Engagement schema, validation, date-range, and aggregation helpers
+- `functions/_feed.js` — Atom 1.0 feed document, dates, XML sanitizer, response and the one discovery `<link>` helper
+- `functions/rss.xml.js` / `functions/en/rss.xml.js` — the KO/EN feed routes
+- `scripts/static-public-pages.mjs` — the hand-written public page list shared by the footer and feed-link sync scripts
+- `scripts/sync-static-feed-links.mjs` — idempotent feed discovery `<link>` stamp for the hand-written public pages
 - `functions/_footer.js` — canonical single source of truth for global editorial footer markup (`siteFooter`) and scoped report CSS (`footerCss`)
 - `functions/_middleware.js` — injects crawlable homepage/category report links, the shared report shell, global editorial footer and CSS, favicon set and report SEO, and marks non-Production hosts noindex
 - `functions/_seo.js` — canonical URLs, category metadata, report title/description, crawlable discovery markup, hreflang, sitemap, social constants, and footer re-exports
@@ -386,7 +426,7 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `scripts/smoke-site.mjs` — shared Production/Preview deployed-site smoke engine using current post data
 - `scripts/wait-for-cloudflare-deployment.mjs` — bounded GitHub check-run poller that prevents pre-deployment Production PASS
 - `scripts/build-category-pages.mjs` — regenerates the ten static KO/EN category landing shells from shared metadata
-- `scripts/sync-static-footers.mjs` — synchronizes canonical `siteFooter` markup across all static public HTML pages and rebuilds category pages
+- `scripts/sync-static-footers.mjs` — synchronizes canonical `siteFooter` markup across all static public HTML pages, rebuilds category pages and re-stamps feed discovery links
 - `favicon.ico` / `favicon-32x32.png` / `apple-touch-icon.png` / `site.webmanifest` — icon set
 - `assets/social/` — 1200x630 social cards
 - `assets/report-shell.js` — isolated navigation, share section and comments UI for report pages
@@ -410,6 +450,8 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
   Instagram deep link and no Kakao SDK, app key or custom scheme.
 - Per-report social cards are not generated. Social Card v2 remains a candidate, not a plan.
 - Existing Korean report URLs are not renamed; only future reports could take ASCII slugs.
+- Feeds are Atom only. No email subscription, subscriber table or newsletter provider; the footer
+  FOLLOW group carries RSS and nothing else until a real audience asks for more.
 
 ## Known operational principle
 
