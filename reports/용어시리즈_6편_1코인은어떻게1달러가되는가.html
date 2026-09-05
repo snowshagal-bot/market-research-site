@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>시장을 읽는 말들 · 제6편 1코인은 어떻게 1달러가 되는가</title>
+<style>
+:root{
+  --surface-page:#ECEAE5;
+  --surface-band:#E3E0D9;
+  --surface-inner:#F1EFEA;
+  --surface-detail:#E8E5DF;
+  --surface-muted:#DAD6CE;
+  --ink:#2E2E2C;
+  --ink2:#43423E;
+  --body:#53514C;
+  --sub:#706D66;
+  --muted:#8B867E;
+  --line:#CEC9BF;
+  --line2:#DCD7CE;
+  --green:#46584D;
+  --green-dark:#2F3C34;
+  --green-soft:#DCE3DD;
+  --green-line:#AAB6AC;
+  --green-pale:#A8C6B4;
+  /* 이번 편 두 축 · 창구(딥그린)와 화면(클레이) */
+  --dk:#46584D;
+  --dk-dark:#2F3C34;
+  --dk-soft:#DDE4DE;
+  --dk-line:#A8B6AB;
+  --sc:#A9714B;
+  --sc-dark:#7A4E30;
+  --sc-soft:#F0E2D5;
+  --sc-line:#D0AE90;
+  --up:#C74754;
+  --down:#4F78A8;
+  --warn:#7A5444;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:58px;overflow-x:hidden}
+html,body{max-width:100%}
+body{
+  margin:0;background:var(--surface-page);color:var(--ink);
+  font-family:"Pretendard Variable","Pretendard","SUIT","Noto Sans KR","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  line-height:1.58;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;
+  word-break:keep-all;line-break:strict;overflow-wrap:break-word;
+}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(38px + env(safe-area-inset-bottom,0px));width:100%;position:relative}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.up{color:var(--up)}.down{color:var(--down)}
+a{color:inherit;text-decoration:none}
+p,li,.p,.cap{text-wrap:pretty}
+
+/* ── 상단바 ── */
+.topbar{position:sticky;top:0;z-index:50;margin:0 -16px;
+  background:rgba(236,234,229,.92);-webkit-backdrop-filter:saturate(150%) blur(12px);backdrop-filter:saturate(150%) blur(12px);
+  border-bottom:1px solid rgba(90,84,74,.13)}
+.tbin{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0)) 18px 9px}
+.tbin .brand{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.tbin .brand i{font-style:normal;color:var(--green)}
+.tbin .ep{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.prog{height:2px;background:rgba(90,84,74,.10)}
+.prog i{display:block;height:100%;width:0;background:var(--green);transition:width .1s linear}
+
+/* ── 표지 ── */
+.cover{margin:0 -16px;padding:18px 22px 15px;
+  background:linear-gradient(160deg,#37453C 0%,#2B372F 55%,#232C26 100%);color:#EFEDE7}
+.cvkick{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.06em;
+  color:#BFD2C6;border:1px solid rgba(168,198,180,.34);border-radius:999px;padding:5px 12px}
+.cvkick b{color:#EFEDE7;font-weight:800}
+.cvtitle{margin:12px 0 0;font-size:30px;line-height:1.24;font-weight:800;letter-spacing:-.05em;color:#F4F2ED}
+.cvtitle span{display:block;color:var(--green-pale)}
+.cvsub{margin:12px 0 0;font-size:14px;line-height:1.58;font-weight:600;color:#C6D2CA}
+.cvmotif{margin:12px 0 0}
+.cvmotif svg{display:block;width:100%;height:auto}
+.cvidx{display:flex;gap:6px;margin:12px 0 0;flex-wrap:wrap}
+.cvidx a{font-size:11.5px;font-weight:800;color:#D3DED7;background:rgba(255,255,255,.07);
+  border:1px solid rgba(168,198,180,.22);border-radius:999px;padding:6px 12px}
+.cvidx a b{color:var(--green-pale);font-weight:800;margin-right:5px}
+
+/* ── 챕터 오프너 ── */
+.ch{margin:17px 0 10px}
+.chtop{display:flex;align-items:center;gap:9px;margin-bottom:7px;flex-wrap:wrap}
+.chn{font-size:12px;font-weight:800;color:#EFEDE7;background:var(--ink);border-radius:4px;padding:3px 8px;letter-spacing:.04em}
+.chk{font-size:11.5px;font-weight:800;letter-spacing:.11em;color:var(--sub)}
+.cht{margin:0;font-size:24px;line-height:1.3;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.chrule{display:flex;height:3px;margin-top:12px;gap:2px}
+.chrule i{display:block;height:100%;flex:1}
+.chrule .r1{background:var(--dk)}
+.chrule .r2{background:var(--dk-line)}
+.chrule .r3{background:var(--sc-line)}
+.chrule .r4{background:var(--sc)}
+
+/* ── 층 표시등 ── */
+.sig{display:flex;gap:5px;margin:9px 0 0;flex-wrap:wrap}
+.sig b{font-size:11.5px;font-weight:800;letter-spacing:-.01em;padding:4px 9px;border-radius:999px;
+  background:var(--surface-detail);color:var(--muted);border:1px solid var(--line2)}
+.sig b.on1{background:var(--dk-soft);color:var(--dk-dark);border-color:var(--dk-line)}
+.sig b.on3{background:var(--sc-soft);color:var(--sc-dark);border-color:var(--sc-line)}
+
+/* ── 큰 질문 · 한 문장 답 ── */
+.qbig{margin:14px 0 0;font-size:22px;line-height:1.44;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.ans{margin:11px -16px 0;padding:15px 22px;background:var(--green);color:#EFEDE7;position:relative;overflow:hidden}
+.ans:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green-pale)}
+.ans .ak{font-size:11px;font-weight:800;letter-spacing:.14em;color:#A8BCAE;margin-bottom:8px}
+.ans .av{font-size:20px;line-height:1.44;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.ans .aw{margin:11px 0 0;padding-top:11px;border-top:1px solid rgba(168,198,180,.24);font-size:13px;line-height:1.6;font-weight:600;color:#CBD8CF}
+
+/* ── 본문 ── */
+.p{margin:10px 0 0;font-size:14px;line-height:1.70;color:var(--body);font-weight:500}
+.p b{color:var(--ink);font-weight:800}
+.p.lead{font-size:15px;color:var(--ink2);font-weight:600}
+.hd{margin:15px 0 0;font-size:16.5px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.44}
+.cap{margin:6px 0 0;font-size:11.5px;line-height:1.55;color:var(--muted);font-weight:600}
+.cap b{color:var(--sub);font-weight:800}
+
+/* ── 두 개의 가격표 ── */
+.tags{display:grid;gap:9px;margin:13px 0 0}
+.tag{border-radius:12px;border:1px solid var(--line);padding:14px 15px;position:relative;overflow:hidden}
+.tag.d{background:var(--dk-soft);border-color:var(--dk-line)}
+.tag.s{background:var(--sc-soft);border-color:var(--sc-line)}
+.tag .tk{font-size:11.5px;font-weight:800;letter-spacing:.06em}
+.tag.d .tk{color:var(--dk-dark)}
+.tag.s .tk{color:var(--sc-dark)}
+.tag .tv{margin:7px 0 0;font-size:26px;font-weight:800;letter-spacing:-.04em;color:var(--ink);font-variant-numeric:tabular-nums}
+.tag .tn{margin:4px 0 0;font-size:12px;font-weight:700;color:var(--body);line-height:1.5}
+.tagx{text-align:center;font-size:13px;font-weight:800;color:var(--sub);padding:2px 0}
+
+/* ── 육하원칙 한눈에 ── */
+.six{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden;margin:13px 0 0}
+.six .si{background:var(--surface-inner);padding:9px 13px;display:grid;grid-template-columns:52px 1fr;gap:11px;align-items:start}
+.six .sk{font-size:12px;font-weight:800;color:var(--dk-dark);letter-spacing:-.01em;padding-top:1px}
+.six .sv{font-size:13px;font-weight:700;color:var(--body);line-height:1.55}
+.six .sv b{color:var(--ink);font-weight:800}
+
+/* ── 3층 건물 ── */
+.bld{margin:14px 0 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface-inner)}
+.flr{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:13px 14px;align-items:start;border-bottom:1px solid var(--line2)}
+.flr:last-child{border-bottom:0}
+.flr .fn{font-size:11.5px;font-weight:800;color:#EFEDE7;background:var(--muted);border-radius:5px;padding:5px 0;text-align:center;letter-spacing:-.01em}
+.flr.f3 .fn{background:var(--sc)}
+.flr.f2 .fn{background:#8E7A63}
+.flr.f1 .fn{background:var(--dk-dark)}
+.flr .ft{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.03em}
+.flr .fw{margin-top:3px;font-size:12.5px;font-weight:700;color:var(--body);line-height:1.55}
+.flr .fw i{font-style:normal;font-weight:800;color:var(--sub)}
+.flr .badge{display:inline-block;margin-top:6px;font-size:11px;font-weight:800;border-radius:999px;padding:3px 9px}
+.flr.f3 .badge{background:var(--sc-soft);color:var(--sc-dark);border:1px solid var(--sc-line)}
+.flr.f2 .badge{background:var(--surface-detail);color:var(--warn);border:1px solid var(--line)}
+.flr.f1 .badge{background:var(--dk-soft);color:var(--dk-dark);border:1px solid var(--dk-line)}
+.flr.hit{background:#F6EEE8}
+.flr .hitmark{display:inline-block;margin-top:6px;font-size:11px;font-weight:800;color:#EFEDE7;background:var(--warn);border-radius:4px;padding:3px 8px}
+
+/* ── 창구 조건표 ── */
+.gate{margin:13px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.gate .gh{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--line)}
+.gate .gh>div{background:var(--surface-detail);padding:9px 10px;font-size:11.5px;font-weight:800;color:var(--sub)}
+.gate .gh>div:nth-child(2){color:var(--dk-dark)}
+.gate .gh>div:nth-child(3){color:var(--dk-dark)}
+.gate .gr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--line2)}
+.gate .gr>div{background:var(--surface-inner);padding:9px 10px;font-size:12.5px;font-weight:700;color:var(--body);line-height:1.5}
+.gate .gr>div:first-child{font-weight:800;color:var(--ink2)}
+.gate .gr b{color:var(--ink);font-weight:800}
+.gate .gr em{font-style:normal;font-weight:800;color:var(--warn)}
+
+/* ── 되돌리는 순서 ── */
+.steps{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden;margin:13px 0 0}
+.steps .st{background:var(--surface-inner);padding:10px 13px;display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start}
+.steps .sn{font-size:13.5px;font-weight:800;color:var(--sc);line-height:1.45}
+.steps .sx{font-size:13.5px;font-weight:700;color:var(--ink2);line-height:1.52}
+.steps .sx b{color:var(--ink);font-weight:800}
+.quote{margin:12px 0 0;padding:13px 15px;background:var(--surface-detail);border-left:4px solid var(--dk);border-radius:0 12px 12px 0}
+.quote p{margin:0;font-size:13px;line-height:1.66;font-weight:700;color:var(--ink2)}
+.quote .qs{margin:8px 0 0;font-size:11.5px;font-weight:800;color:var(--muted)}
+
+/* ── 준비자산 두 항아리 ── */
+.jars{display:grid;gap:10px;margin:14px 0 0}
+.jar{border:1px solid var(--line);border-radius:12px;background:var(--surface-inner);padding:13px 14px}
+.jar .jh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:9px}
+.jar .jh b{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.03em}
+.jar .jh i{font-style:normal;font-size:11px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{display:flex;height:20px;border-radius:5px;overflow:hidden;background:var(--surface-muted)}
+.bar i{display:block;height:100%}
+.leg{display:grid;grid-template-columns:1fr auto;gap:3px 10px;margin:9px 0 0;font-variant-numeric:tabular-nums}
+.leg span{font-size:12.5px;font-weight:700;color:var(--body);display:flex;align-items:center;gap:7px}
+.leg span em{font-style:normal;width:9px;height:9px;border-radius:2px;flex:0 0 auto}
+.leg strong{font-size:12.5px;font-weight:800;color:var(--ink);text-align:right}
+
+/* ── 표 ── */
+.tbl{margin:13px 0 0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.tbl .th{display:grid;gap:1px;background:var(--line)}
+.tbl .th>div{background:var(--surface-detail);padding:8px 10px;font-size:11.5px;font-weight:800;color:var(--sub)}
+.tbl .tr{display:grid;gap:1px;background:var(--line2)}
+.tbl .tr>div{background:var(--surface-inner);padding:9px 10px;font-size:12.5px;font-weight:700;color:var(--body);font-variant-numeric:tabular-nums}
+.tbl .tr>div:first-child{font-weight:800;color:var(--ink2)}
+.c4{grid-template-columns:1.1fr 1fr 1fr 1fr}
+
+/* ── 멈춤 박스 ── */
+.stop{margin:13px -16px 0;padding:15px 22px;background:var(--ink);color:#EFEDE7;position:relative}
+.stop:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--sc)}
+.stop .sk{font-size:11px;font-weight:800;letter-spacing:.14em;color:#A7A29A;margin-bottom:8px}
+.stop .sv{font-size:16px;line-height:1.56;font-weight:800;letter-spacing:-.03em;color:#F4F2ED}
+.stop .sn{margin:11px 0 0;padding-top:11px;border-top:1px solid rgba(230,225,215,.2);font-size:13px;line-height:1.62;font-weight:600;color:#C4BFB6}
+.stop .sn b{color:#F4F2ED;font-weight:800}
+
+/* ── 짧은 사례 ── */
+.mini{margin:13px 0 0;background:var(--surface-detail);border-left:4px solid var(--sc);border-radius:0 12px 12px 0;padding:13px 15px}
+.mini b.mh{display:block;font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.mini .mg{display:grid;grid-template-columns:1fr auto;gap:4px 10px;margin:8px 0 0;font-variant-numeric:tabular-nums}
+.mini .mg span{font-size:12.5px;font-weight:700;color:var(--body)}
+.mini .mg em{font-style:normal;font-size:12.5px;font-weight:800;color:var(--ink);text-align:right}
+.mini .mp{margin:9px 0 0;font-size:13px;line-height:1.62;font-weight:700;color:var(--ink2)}
+
+/* ── 여기까지만 ── */
+.limit{margin:15px 0 0;display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden}
+.limit .li{background:var(--surface-inner);padding:12px 15px}
+.limit .lk{font-size:11.5px;font-weight:800;letter-spacing:.05em;margin-bottom:8px}
+.limit .can .lk{color:var(--dk-dark)}
+.limit .cant .lk{color:var(--warn)}
+.limit ul{margin:0;padding-left:16px;display:grid;gap:5px}
+.limit li{font-size:12.5px;line-height:1.55;font-weight:700;color:var(--body)}
+.limit .cant li{color:var(--ink2)}
+
+/* ── 풀쿼트 ── */
+.pull{margin:15px -16px 0;padding:20px;background:var(--surface-band);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)}
+.pull p{margin:0;font-size:19px;line-height:1.52;font-weight:800;letter-spacing:-.045em;color:var(--ink)}
+.pull p b{color:var(--dk-dark)}
+
+/* ── 다음 편 ── */
+.next{margin:15px -16px 0;padding:18px 22px;background:linear-gradient(150deg,#4A4038 0%,#2F2A25 100%);color:#EDE9E4;position:relative;overflow:hidden}
+.next:before{content:"";position:absolute;right:-40px;bottom:-52px;width:150px;height:150px;border-radius:50%;border:1px solid rgba(200,186,172,.18)}
+.next .nh{position:relative;font-size:11px;font-weight:800;letter-spacing:.12em;color:#B3A697;margin-bottom:10px}
+.next p{position:relative;margin:0;font-size:16px;line-height:1.56;font-weight:800;letter-spacing:-.03em;color:#F0ECE7}
+.next p b{color:#FFFFFF}
+.next .nt{position:relative;margin-top:13px;padding-top:12px;border-top:1px solid rgba(200,186,172,.22);font-size:12.5px;font-weight:800;color:#C4B8A9}
+.next .nt b{color:#F0ECE7;font-weight:800}
+
+/* ── 접힘 ── */
+.foldwrap{margin:12px 0 0}
+details.fold{border:1px solid var(--line);border-radius:12px;background:var(--surface-detail);margin:0 0 8px;overflow:hidden}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:11px 15px;font-size:13px;font-weight:800;color:var(--ink)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary:after{content:"+";font-size:18px;font-weight:800;color:var(--green);line-height:.9}
+details.fold[open]>summary:after{content:"−"}
+details.fold .fb{padding:0 15px 14px}
+.fb p{margin:0 0 8px;font-size:12.5px;line-height:1.65;color:var(--body);font-weight:600}
+.fb p:last-child{margin-bottom:0}
+.fb p b{color:var(--ink);font-weight:800}
+.gloss{display:grid;grid-template-columns:112px 1fr;gap:9px 11px;margin:2px 0 0;font-size:13px}
+.gloss dt{font-weight:850;color:#4B4740}
+.gloss dd{margin:0;color:var(--body);line-height:1.55}
+.fb .miss{margin:10px 0 0;padding:11px 12px;background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;
+  font-size:12px;line-height:1.6;font-weight:700;color:var(--ink2)}
+.csv{display:grid;grid-template-columns:1fr auto;gap:4px 9px;margin:9px 0 2px;font-variant-numeric:tabular-nums;align-items:baseline}
+.csv .h{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.03em}
+.csv .k{font-size:12.5px;font-weight:700;color:var(--body)}
+.csv .v{font-size:12.5px;font-weight:800;color:var(--ink);text-align:right}
+.src{display:grid;gap:6px;margin:2px 0 0}
+.src div{font-size:12px;line-height:1.55;font-weight:600;color:var(--body)}
+.src div b{color:var(--ink2);font-weight:800}
+.disc{font-size:11.5px;color:var(--muted);text-align:center;line-height:1.55;padding:12px 8px 0;font-weight:500}
+.foot{text-align:center;font-size:11.5px;color:var(--sub);padding:10px 0 4px;font-weight:800;letter-spacing:-.01em}
+
+/* ── 툴팁 ── */
+.term{border-bottom:1.5px dashed #8B867E;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;font-weight:850;color:var(--ink);
+  display:inline-block;padding:3px 4px;margin:-3px -4px;line-height:1.3;
+  touch-action:manipulation;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.term .tip{position:fixed;left:12px;top:0;min-width:160px;max-width:min(248px,calc(100vw - 28px));
+  background:#33322F;color:#F2F0EB;font-size:12px;font-weight:600;line-height:1.52;padding:9px 11px;border-radius:9px;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);z-index:60;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease;white-space:normal;text-align:left}
+.term .tip:after{content:"";position:absolute;top:100%;left:var(--ax,50%);transform:translateX(-50%);border:6px solid transparent;border-top-color:#33322F}
+.term .tip.below:after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#33322F}
+.term.open .tip{opacity:1;visibility:visible;pointer-events:auto}
+
+@media(max-width:360px){
+  .cvtitle{font-size:26px}
+  .qbig{font-size:19px}
+  .ans .av{font-size:18px}
+  .pull p{font-size:17px}
+  .cht{font-size:21px}
+  .tag .tv{font-size:23px}
+  .six .si{grid-template-columns:46px 1fr;gap:9px}
+  .flr{grid-template-columns:40px 1fr;gap:9px}
+  .gloss{grid-template-columns:96px 1fr}
+  .gate .gh>div,.gate .gr>div{padding:8px 7px;font-size:11.5px}
+}
+
+/* ── 넓은 판 · 모바일과 같은 조판을 유지한다 ── */
+@media(min-width:768px){
+  .app{max-width:860px;padding-left:30px;padding-right:30px}
+  .topbar{margin:0 -30px}
+  .cover{margin:0 -30px;padding:44px 40px 34px}
+  .cvtitle{font-size:44px}
+  .cvsub{font-size:15px}
+  .ch{margin-top:46px}
+  .cht{font-size:29px}
+  .qbig{font-size:26px}
+  .ans{margin-left:-30px;margin-right:-30px;padding:26px 40px}
+  .ans .av{font-size:24px}
+  .stop{margin-left:-30px;margin-right:-30px;padding:26px 40px}
+  .stop .sv{font-size:19px}
+  .pull{margin-left:-30px;margin-right:-30px;padding:32px 40px}
+  .pull p{font-size:25px}
+  .next{margin-left:-30px;margin-right:-30px;padding:28px 40px}
+  .tags{grid-template-columns:1fr auto 1fr;align-items:center;gap:12px}
+  .tagx{padding:0 4px}
+  .jars{grid-template-columns:1fr 1fr}
+  .limit{grid-template-columns:1fr 1fr}
+  .p{font-size:14.5px}
+  .p.lead{font-size:16px}
+}
+@media(min-width:860px){h1 br.w,h2 br.w,.cht br.w{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<span id="top"></span>
+
+<div class="topbar">
+  <div class="tbin">
+    <span class="brand"><i>시장을 읽는 말들</i> · 제6편</span>
+    <span class="ep">06</span>
+  </div>
+  <div class="prog"><i id="pg"></i></div>
+</div>
+
+<!-- ══════ 표지 ══════ -->
+<div class="cover">
+  <span class="cvkick">경제·주식 용어 연재 <b>06</b></span>
+  <h1 class="cvtitle">1코인은 어떻게<span>1달러가 되는가</span></h1>
+  <p class="cvsub">코인부터 거래소까지 한 번 훑고,<br/>값이 1달러에 붙들리는 구조로 들어간다.</p>
+  <div class="cvmotif">
+    <svg viewBox="0 0 340 84" role="img" aria-label="왼쪽 발행사 창구의 1달러와 오른쪽 거래소 화면의 0.88달러가 같지 않음을 나타내는 표지 그림">
+      <rect x="12" y="16" width="104" height="44" rx="8" fill="none" stroke="rgba(210,220,213,.5)" stroke-width="1.6"/>
+      <text x="64" y="45" text-anchor="middle" font-size="19" font-weight="800" fill="#A8C6B4">$1.0000</text>
+      <text x="64" y="74" text-anchor="middle" font-size="11.5" font-weight="800" fill="#BFD2C6">발행사 창구</text>
+      <text x="170" y="47" text-anchor="middle" font-size="25" font-weight="800" fill="#EFEDE7">≠</text>
+      <rect x="224" y="16" width="104" height="44" rx="8" fill="none" stroke="rgba(224,196,168,.62)" stroke-width="1.6"/>
+      <text x="276" y="45" text-anchor="middle" font-size="19" font-weight="800" fill="#E0C4A8">$0.88</text>
+      <text x="276" y="74" text-anchor="middle" font-size="11.5" font-weight="800" fill="#DFC7AE">거래소 화면</text>
+    </svg>
+  </div>
+  <div class="cvidx">
+    <a href="#p1"><b>01</b>코인이라는 물건</a>
+    <a href="#p2"><b>02</b>화면 속 1달러가 흔들린 날</a>
+    <a href="#p3"><b>03</b>그 문은 819명에게</a>
+    <a href="#p4"><b>04</b>고장 나는 두 자리</a>
+  </div>
+</div>
+
+<!-- ══════ 1면 ══════ -->
+<div class="ch" id="p1">
+  <div class="chtop"><span class="chn">01</span><span class="chk">코인이라는 물건</span></div>
+  <h2 class="cht">값을 받치는 것이 <br class="w"/>없는 자산</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">스테이블코인 이야기를 하려면 그 앞을 먼저 봐야 한다. 스테이블코인은 코인 시장 안에서 생긴 물건이고, 그 시장의 성질 때문에 만들어졌다.</p>
+
+<h3 class="hd">코인은 무엇인가</h3>
+<p class="p">은행 계좌의 잔액은 은행이 관리하는 장부에 적힌 숫자다. 코인은 그 장부를 특정 회사가 아니라 <b>참여한 모두가 나눠 갖는다</b>. 누가 누구에게 얼마를 보냈는지가 공유 장부에 기록되고, 그 기록을 고치려면 참여자 다수를 움직여야 한다. 중앙에 관리자가 없는 대신 되돌리기도 어렵다.</p>
+<p class="p">처음 나온 것이 비트코인이다. 2008년 10월 설계 문서가 공개됐고 첫 기록은 2009년 1월 3일에 만들어졌다. 그 뒤로 서로 다른 목적을 가진 코인이 계속 나왔다.</p>
+
+<div class="tbl">
+  <div class="th" style="grid-template-columns:96px 1fr"><div>이름 · 나온 때</div><div>무엇을 하려고</div></div>
+  <div class="tr" style="grid-template-columns:96px 1fr"><div>비트코인 BTC<br/><i style="font-style:normal;font-weight:700;color:var(--muted)">2009.01</i></div><div>중앙 발행자 없이 값을 주고받는다. 발행 상한 <b>2,100만 개</b></div></div>
+  <div class="tr" style="grid-template-columns:96px 1fr"><div>이더 ETH<br/><i style="font-style:normal;font-weight:700;color:var(--muted)">2015.07</i></div><div>장부 위에 조건이 걸린 프로그램을 올린다. 네트워크 이름이 이더리움, 코인 이름이 이더다</div></div>
+  <div class="tr" style="grid-template-columns:96px 1fr"><div>엑스알피 XRP<br/><i style="font-style:normal;font-weight:700;color:var(--muted)">2012.06</i></div><div>나라 사이 송금을 빠르게 한다. 총 1,000억 개가 처음에 한꺼번에 만들어졌다</div></div>
+  <div class="tr" style="grid-template-columns:96px 1fr"><div>그 밖<br/><i style="font-style:normal;font-weight:700;color:var(--muted)">계속</i></div><div>비트코인이 아닌 코인을 묶어 <b>알트코인</b>이라 부른다. 시장에서 쓰는 말일 뿐 법적 분류는 아니다</div></div>
+</div>
+<p class="cap">리플은 XRP를 만든 회사 이름이다. 국내에서 오래 섞여 쓰였고, 업비트는 2025년 2월 종목명을 「리플」에서 「엑스알피」로 바꿨다.</p>
+
+<h3 class="hd">값은 무엇이 받치고 있나</h3>
+<p class="p">여기서 이 편의 출발점이 나온다. 주식 뒤에는 회사가 있고 채권 뒤에는 갚을 의무가 있다. <b>코인 뒤에는 그런 것이 없다.</b> 값을 만드는 것은 사려는 사람과 팔려는 사람뿐이다.</p>
+<p class="p">그래서 값이 크게 움직인다. 국제결제은행은 2026년 3월 보고서에서 비트코인이 <b>2025년 고점 대비 약 50% 내렸다</b>고 적었다. 한국은행은 2025년 10월 10일 사상 최고가를 새로 쓴 직후 선물시장의 대규모 청산으로 값이 급하게 빠진 일을 예로 들었다.</p>
+
+<div class="mini">
+  <b class="mh">코인 시장의 크기 · 2026년 6월 말</b>
+  <div class="mg">
+    <span>전체 가상자산 시가총액</span><em class="num">약 2조 3,000억달러</em>
+    <span>비트코인</span><em class="num">약 1조 3,000억달러</em>
+    <span>비트코인 비중</span><em class="num">56%</em>
+  </div>
+  <p class="mp">절반이 비트코인 하나다. 나머지를 수천 종이 나눠 갖는다. 국제통화기금 집계 기준이다.</p>
+</div>
+
+<h3 class="hd">어디서 사고파나</h3>
+<p class="p">코인은 거래소에서 산다. 그런데 한국과 해외는 문이 다르다.</p>
+
+<div class="tbl">
+  <div class="th" style="grid-template-columns:88px 1fr"><div>어디</div><div>들어가는 문</div></div>
+  <div class="tr" style="grid-template-columns:88px 1fr"><div>국내 거래소</div><div><b>원화로 바로 살 수 있다.</b> 은행 실명확인 계좌가 붙어 있어야 하고, 2026년 8월 기준 다섯 곳이다</div></div>
+  <div class="tr" style="grid-template-columns:88px 1fr"><div>해외 거래소</div><div><b>원화 입금 창구가 없다.</b> 국내에서 코인을 사서 옮겨야 들어갈 수 있다</div></div>
+</div>
+
+<p class="p">바이낸스는 2021년 8월 한국 원화 거래쌍과 결제수단을 모두 없앴다. 국내 규제를 앞서 지키겠다는 이유였다. 그 뒤로 해외 큰 거래소에 원화로 들어가는 길은 사실상 닫혀 있다.</p>
+<p class="p">그러면 해외 거래소 안에서는 무엇으로 값을 매길까. 하루에도 크게 움직이는 코인끼리 값을 매기면 기준 자체가 흔들린다. <b>값이 안 움직이는 코인</b>이 필요해진 자리가 여기다.</p>
+
+<h3 class="hd">스테이블코인, 한눈에</h3>
+<div class="six">
+  <div class="si"><span class="sk">누가</span><span class="sv">민간 회사가 만든다. <b>테더(USDT)</b>와 <b>서클(USDC)</b> 두 곳이 대부분을 차지한다</span></div>
+  <div class="si"><span class="sk">언제</span><span class="sv">2014년 첫 발행. 제도권에 들어온 것은 2025년 7월 미국 <b>지니어스법</b>부터다</span></div>
+  <div class="si"><span class="sk">어디서</span><span class="sv">발행은 미국 등 특정 나라에서, 유통은 국경이 없는 장부 위에서</span></div>
+  <div class="si"><span class="sk">무엇을</span><span class="sv">값을 <b>1달러에 붙들어 둔</b> 디지털 자산. 값이 움직이는 다른 코인과 여기서 갈린다</span></div>
+  <div class="si"><span class="sk">어떻게</span><span class="sv">발행액만큼 달러 자산을 쌓고, <b>액면가로 바꿔주는 창구</b>를 연다</span></div>
+  <div class="si"><span class="sk">왜</span><span class="sv">값이 하루에도 크게 움직이는 코인 시장 안에, <b>값이 안 움직이는 자리</b>가 필요해서</span></div>
+</div>
+<p class="p">마지막 칸이 출발점이다. 값이 하루에도 크게 움직이는 시장에서는 잠시 돈을 세워 둘 자리가 필요했다. 2025년 6월 기준 세계 가상자산 거래의 <b>85%</b>가 이 코인으로 결제된다.</p>
+
+<div class="foldwrap">
+  <details class="fold">
+    <summary>2,100만 개는 어디에 적혀 있나</summary>
+    <div class="fb">
+      <p>비트코인 설계 문서에는 <b>2,100만이라는 숫자가 없다.</b> 「정해진 수의 코인이 유통되고 나면 보상이 수수료로 넘어간다」고만 적혀 있다.</p>
+      <p>상한은 프로그램의 발행 규칙에서 나온다. 처음 한 번에 50개로 시작해 21만 번마다 절반으로 줄어드는데, 그 합이 2,100만에 수렴한다. 마지막으로 절반이 된 것은 2024년 4월 20일이고 지금은 한 번에 3.125개가 나온다.</p>
+      <div class="miss">「백서에 2,100만 개로 정해져 있다」는 문장을 자주 보게 된다. 정해 둔 것은 백서가 아니라 코드다. 작은 차이 같지만, 무엇을 고치면 상한이 바뀌는지가 달라진다.</div>
+    </div>
+  </details>
+  <details class="fold">
+    <summary>알트코인·밈코인·엑스알피 소송</summary>
+    <div class="fb">
+      <p><b>알트코인</b>은 공식 정의가 없다. 국제기구도 감독당국도 이 말을 규정한 문서를 두지 않았다. 시장에서 쓰는 묶음말이다.</p>
+      <p><b>밈코인</b>은 다르다. 미 증권거래위원회 기업금융국이 2025년 2월 27일 직원 성명을 내고, 인터넷 밈이나 화제에서 나와 온라인 이용자를 끌어모으는 코인을 밈코인으로 정의했다. 그리고 증권이 아니라고 봤다. 다만 이건 규칙이 아니라 직원 성명이라 법적 구속력은 없다.</p>
+      <p><b>엑스알피 소송</b>은 코인 자체가 증권인지를 묻지 않았다. 2023년 7월 판결은 기관에 직접 판 것은 투자계약이고, 거래소 호가창에서 판 것은 아니라고 갈랐다. 산 쪽이 상대가 누구인지 알 수 없었기 때문이다. 누구에게 어떻게 팔았는지가 기준이었다. 항소는 2025년 8월 7일 취하돼 사건이 끝났다.</p>
+    </div>
+  </details>
+</div>
+
+<!-- ══════ 2면 ══════ -->
+<div class="ch" id="p2">
+  <div class="chtop"><span class="chn">02</span><span class="chk">화면 속 1달러가 흔들린 날</span></div>
+  <h2 class="cht">같은 코인에 <br class="w"/>값이 두 개 붙어 있다</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+  <div class="sig"><b class="on3">3층 · 거래소 화면</b></div>
+</div>
+
+<p class="p lead"><span class="term">스테이블코인<span class="tip">값이 달러 같은 특정 가치에 붙들려 있도록 설계된 디지털 자산. 발행사가 그만큼의 자산을 따로 쌓아 값을 지킨다.</span></span>은 값이 1달러에 붙들려 있도록 설계된 코인이다. 그런데 2023년 3월 11일, 대표적인 달러 스테이블코인인 USDC의 화면 값이 0.88달러까지 내려갔다.</p>
+
+<div class="tags">
+  <div class="tag d">
+    <div class="tk">발행사 창구</div>
+    <div class="tv num">1.0000달러</div>
+    <div class="tn">발행사가 정한 교환 기준. 그날도 바뀌지 않았다.</div>
+  </div>
+  <div class="tagx">같은 코인, 같은 시각</div>
+  <div class="tag s">
+    <div class="tk">거래소 화면 · 2023.03.11</div>
+    <div class="tv num">0.88달러</div>
+    <div class="tn">사려는 쪽과 팔려는 쪽이 만나 정해진 값.</div>
+  </div>
+</div>
+<p class="cap">최저가는 자료마다 86센트와 88센트로 갈린다. 미 연준은 86센트로, 다른 연준 계열 보고서와 한국은행은 0.88달러로 적었다.</p>
+
+<h3 class="hd">그날 무슨 일이 있었나</h3>
+<p class="p">USDC를 발행하는 서클은 <span class="term">준비자산<span class="tip">발행한 코인만큼 발행사가 따로 쌓아 두는 자산. 현금, 예금, 국채 등으로 구성한다.</span></span> 가운데 33억달러를 실리콘밸리은행에 예치해 두고 있었다. 그 은행이 3월 10일 문을 닫았다. 잃을 뻔한 돈은 <b>전체 준비자산의 8%</b>였는데, 몰린 <span class="term">상환<span class="tip">코인을 발행사에 돌려주고 액면가만큼 돈을 받는 것.</span></span> 요구는 <b>시가총액의 18%인 78억달러</b>어치였다.</p>
+
+<div class="tbl">
+  <div class="th" style="grid-template-columns:82px 1fr"><div>시점</div><div>일어난 일</div></div>
+  <div class="tr" style="grid-template-columns:82px 1fr"><div>3월 10~11일</div><div>실리콘밸리은행 폐쇄. 서클이 금요일 밤에 예치 사실을 공시. 화면 값 <b>0.88달러</b>. 발행·상환 창구는 주말이라 멈춰 있었다</div></div>
+  <div class="tr" style="grid-template-columns:82px 1fr"><div>3월 12일 일</div><div>미 재무부·연준·FDIC가 예금 전액 접근 보장을 발표. 값이 크게 되돌아왔다</div></div>
+  <div class="tr" style="grid-template-columns:82px 1fr"><div>3월 13일 월</div><div>서클이 상환 처리를 재개. 그때 완전히 1달러로 돌아왔다</div></div>
+</div>
+
+<div class="stop">
+  <div class="sk">2면의 질문</div>
+  <div class="sv">값을 되돌린 것은 일요일의 정부 발표였을까, 월요일에 다시 열린 창구였을까?</div>
+  <div class="sn">둘 다 3층 밖에서 일어난 일이다. 화면 값이 왜 창구 값과 달라지는지, 그리고 무엇이 그 둘을 다시 붙이는지를 알면 답이 나온다. <b>3면에서 그 구조를 연다.</b></div>
+</div>
+
+<div class="foldwrap">
+  <details class="fold">
+    <summary>은행 예금은 왜 값이 흔들리지 않나</summary>
+    <div class="fb">
+      <p>KB국민은행 예금 100만원과 신한은행 예금 100만원은 언제나 같은 100만원이다. 두 은행이 중앙은행에 지급준비금을 쌓아 두고 중앙은행 결제시스템 안에서 서로 정산하기 때문이다. 한국은행은 이것을 <b>화폐의 단일성</b>이라고 부른다.</p>
+      <p>스테이블코인에는 그 중앙 정산이 없다. 발행사마다 준비자산 구성도 다르고 신용도 다르다. 한국은행은 이렇게 적었다. <b>양대 스테이블코인인 USDT와 USDC조차 항상 1대1로 교환되지는 않는다.</b> 1코인이 1달러인지를 묻기 전에, 1코인이 1코인인지부터 갈린다는 뜻이다.</p>
+      <p><b>같은 일이 처음도 아니다.</b> 19세기 중반 미국은 자유은행제를 도입했다. 주정부가 정한 요건만 채우면 누구나 은행을 세우고 은행권을 발행할 수 있었다.</p>
+      <p>결과는 혼란이었다. 은행마다 담보로 잡은 주정부 채권의 질이 달라, 같은 <b>1달러</b>라고 적힌 지폐의 값이 제각각이었다. 상인들은 어느 은행 지폐인지를 따져 받았다. 어떤 지폐는 90센트, 어떤 것은 80센트에 거래됐다. 인디애나주 자유은행권은 20센트까지 내려갔다.</p>
+      <p>국가가 찍어도 결과가 다르지 않다. 조선 고종 때 발행한 <b>당백전</b>은 이름대로 기존 동전의 100배 가치를 붙였지만 구리 함량은 거의 그대로였다. 사람들은 곧 알아차렸고, 물가가 치솟았다.</p>
+      <div class="miss">값이 적혀 있다고 그 값이 되는 것이 아니다. 무엇이 뒤를 받치고 있는지가 값을 만든다. 이 편이 보려는 것도 그 뒤편이다.</div>
+    </div>
+  </details>
+</div>
+
+<!-- ══════ 3면 ══════ -->
+<div class="ch" id="p3">
+  <div class="chtop"><span class="chn">03</span><span class="chk">그 문은 819명에게</span></div>
+  <h2 class="cht">1달러로 바꿔주는 창구는 <br class="w"/>우리 쪽에 없다</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+  <div class="sig"><b class="on1">1층 · 발행사 창구</b><b>2층 · 잇는 사람들</b></div>
+</div>
+
+<p class="p lead">1달러를 내면 1코인이 나오고, 1코인을 돌려주면 1달러가 나온다. 기본 약속이다. 그런데 그 창구에 들어갈 수 있는 사람이 정해져 있다.</p>
+
+<div class="bld">
+  <div class="flr f3"><span class="fn">3층</span><div><div class="ft">거래소 화면</div><div class="fw">우리가 보는 시세가 여기 있다. 사려는 쪽과 팔려는 쪽이 만나 값이 정해진다.</div><span class="badge">누구나</span></div></div>
+  <div class="flr f2"><span class="fn">2층</span><div><div class="ft">두 층을 잇는 사람들</div><div class="fw">화면에서 싸게 사서 창구에서 액면가로 바꾼다. 그 차액이 이들의 몫이다.</div><span class="badge">1층 문을 가진 소수</span></div></div>
+  <div class="flr f1"><span class="fn">1층</span><div><div class="ft">발행사 창구</div><div class="fw">1달러와 1코인을 액면가로 맞바꾼다. 여기 값은 흔들리지 않는다.</div><span class="badge">인증된 소수</span></div></div>
+</div>
+<p class="cap">이 건물은 4면에서 한 번 더 나온다. 그때는 고장 난 층에 표시가 붙는다.</p>
+
+<h3 class="hd">1층 문의 조건</h3>
+<div class="gate">
+  <div class="gh"><div>항목</div><div>테더 · USDT</div><div>서클 · USDC</div></div>
+  <div class="gr"><div>직접 상환 자격</div><div>인증 고객만</div><div>기관 전용 계정 보유자만</div></div>
+  <div class="gr"><div>인증 고객 수</div><div><b>819명</b><br/>2026.02.16</div><div>미공시</div></div>
+  <div class="gr"><div>최소 매입</div><div><b>10만달러</b></div><div>미공시</div></div>
+  <div class="gr"><div>상환 수수료</div><div>1,000달러와 0.1% 중 <b>큰 금액</b></div><div>없음<br/>전송료 별도</div></div>
+  <div class="gr"><div>개인 이용</div><div><em>최소 금액에 막힘</em></div><div><em>공식 문서에 불가 명시</em></div></div>
+</div>
+<p class="cap">테더는 엘살바도르 규제당국에 낸 공시문서 기준. 서클은 기관 전용 계정 안내문에 「개인에게는 제공하지 않는다」고 적어 두었다.</p>
+
+<p class="p">한국은행도 같은 사실을 적었다. 개인과 일반 법인은 발행사에 직접 상환을 청구할 수 없고 <b>거래소에 팔아서 각자 현금을 만드는 수밖에 없다</b>. 한국은행은 이 방식을 <b>시장상환</b>이라고 부른다. 우리가 화면에서 보는 1달러는 창구 값이 아니라 3층에서 만들어진 값이라는 뜻이다.</p>
+
+<h3 class="hd">그러면 화면 값은 누가 되돌리나</h3>
+<div class="steps">
+  <div class="st"><span class="sn">①</span><span class="sx">화면 값이 <b>0.99달러</b>로 내려간다</span></div>
+  <div class="st"><span class="sn">②</span><span class="sx">1층 문을 가진 참가자가 화면에서 <b>0.99달러에 산다</b></span></div>
+  <div class="st"><span class="sn">③</span><span class="sx">창구에 가서 <b>1.00달러로 바꾼다</b></span></div>
+  <div class="st"><span class="sn">④</span><span class="sx">0.01달러가 그의 몫이 되고, ②의 매수세가 <b>화면 값을 올린다</b></span></div>
+</div>
+<div class="quote">
+  <p>“발행사와 직접 액면가로 발행·상환할 수 있는 자격을 가진 소수의 참가자가 있다. 이들이 1차시장과 <span class="term">2차시장<span class="tip">발행사를 거치지 않고 이용자끼리 사고파는 시장. 거래소 화면이 여기다.</span></span> 사이에서 <span class="term">차익거래<span class="tip">같은 물건에 붙은 두 값의 차이를 사고팔아 이익을 남기는 거래.</span></span>를 하며 값을 붙들어 둔다.”</p>
+  <div class="qs">국제결제은행(BIS) 워킹페이퍼 1270호 · 2026년 6월</div>
+</div>
+<p class="p">국제통화기금은 이 구조를 ETF의 지정참가회사에 빗댔다. 값을 붙드는 것은 발행사의 선언이 아니라 <b>그 문을 가진 사람들이 움직일 이유</b>다.</p>
+
+<h3 class="hd">「1대1로 쌓는다」는 같은 말, 다른 항아리</h3>
+<div class="jars">
+  <div class="jar">
+    <div class="jh"><b>테더 · USDT</b><i>2026.06.30 · 총자산 대비</i></div>
+    <div class="bar" role="img" aria-label="테더 준비자산 구성 막대">
+      <i style="width:61.2%;background:#46584D"></i><i style="width:13.6%;background:#7B8F82"></i><i style="width:10.0%;background:#C9A227"></i><i style="width:7.2%;background:#A9714B"></i><i style="width:3.1%;background:#D0AE90"></i><i style="width:4.9%;background:#C6C1B6"></i>
+    </div>
+    <div class="leg">
+      <span><em style="background:#46584D"></em>미 국채</span><strong class="num">61.2%</strong>
+      <span><em style="background:#7B8F82"></em><span class="term">역레포<span class="tip">돈을 빌려주고 국채를 담보로 받아 두는 단기 거래. 사실상 국채를 깔고 앉은 단기 대출이다.</span></span></span><strong class="num">13.6%</strong>
+      <span><em style="background:#C9A227"></em>귀금속</span><strong class="num">10.0%</strong>
+      <span><em style="background:#A9714B"></em>담보부 대출</span><strong class="num">7.2%</strong>
+      <span><em style="background:#D0AE90"></em>비트코인</span><strong class="num">3.1%</strong>
+      <span><em style="background:#C6C1B6"></em>그 밖</span><strong class="num">4.9%</strong>
+    </div>
+  </div>
+  <div class="jar">
+    <div class="jh"><b>서클 · USDC</b><i>2026.06.30 · 준비자산 대비</i></div>
+    <div class="bar" role="img" aria-label="서클 준비자산 구성 막대">
+      <i style="width:71.6%;background:#7B8F82"></i><i style="width:11.6%;background:#46584D"></i><i style="width:15.5%;background:#AAB6AC"></i><i style="width:1.3%;background:#C6C1B6"></i>
+    </div>
+    <div class="leg">
+      <span><em style="background:#7B8F82"></em>미 국채 역레포</span><strong class="num">71.6%</strong>
+      <span><em style="background:#46584D"></em>미 국채</span><strong class="num">11.6%</strong>
+      <span><em style="background:#AAB6AC"></em>규제기관 예치 현금</span><strong class="num">15.5%</strong>
+      <span><em style="background:#C6C1B6"></em>그 밖</span><strong class="num">1.3%</strong>
+    </div>
+  </div>
+</div>
+<p class="p">두 곳 다 「1대1로 쌓았다」고 말하지만 채운 것이 다르다. 한쪽 항아리에는 금과 비트코인과 담보부 대출이 들어 있고, 다른 쪽에는 국채와 현금만 들어 있다.</p>
+
+<div class="foldwrap">
+  <details class="fold">
+    <summary>「100% 준비금」이라는 말의 분모</summary>
+    <div class="fb">
+      <p>미 연준 연구진이 2026년 4월에 낸 노트에 이런 대목이 있다.</p>
+      <div class="csv">
+        <span class="h">테더 · 코인 한 개당 준비자산</span><span class="h" style="text-align:right">배수</span>
+        <span class="k">총자산 기준</span><span class="v num">약 1.04배</span>
+        <span class="k">국채·국채담보 역레포·은행예금만 기준</span><span class="v num">약 0.74배</span>
+      </div>
+      <p>같은 회사, 같은 시점인데 숫자가 이렇게 갈린다. <b>무엇을 세어 1로 삼았는가</b>가 다르기 때문이다. 총자산에는 금과 비트코인과 담보부 대출이 들어가고, 고품질 자산에는 들어가지 않는다.</p>
+      <div class="miss">「1대1로 쌓았다」는 문장을 읽을 때는 무엇을 세어 1인지를 함께 봐야 한다. 분모가 바뀌면 1.04배는 0.74배가 된다. 그 정도 폭에서 갈리는 안심이라면, 그 안심은 애초에 그만큼만 단단하다.</div>
+    </div>
+  </details>
+</div>
+
+<div class="pull">
+  <p>값을 붙드는 것은 <b>약속</b>이 아니라<br/>그 문을 가진 사람들이 움직일 <b>이유</b>다.</p>
+</div>
+
+<!-- ══════ 4면 ══════ -->
+<div class="ch" id="p4">
+  <div class="chtop"><span class="chn">04</span><span class="chk">고장 나는 두 자리</span></div>
+  <h2 class="cht">문이 닫히거나, <br class="w"/>채울 것이 없거나</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+  <div class="sig"><b class="on1">구조 전체</b><b class="on3">그리고 한국</b></div>
+</div>
+
+<p class="p lead">값이 풀린 사례 두 건은 고장 난 자리가 서로 달랐다. 3면에서 세운 건물을 놓고 보면 그 자리가 보인다.</p>
+
+<h3 class="hd">고장 ① · 채울 것은 있는데 문이 닫혔다</h3>
+<p class="p">2023년 3월의 USDC는 준비자산이 있었다. 다만 은행이 주말에 문을 닫으면서 <b>1층 창구가 멈췄고</b>, 2층 사람들이 일을 할 수 없었다. 2면의 질문에 이제 답할 수 있다. 일요일의 정부 발표가 값을 크게 되돌렸고, <b>월요일에 창구가 다시 열리면서 완전히 1달러로 돌아왔다</b>. 미 연준이 이 순서로 적었다. 값을 마무리한 것은 발표가 아니라 다시 열린 문이었다.</p>
+
+<h3 class="hd">고장 ② · 문을 열어도 채울 것이 없었다</h3>
+<p class="p">2022년 5월의 테라USD는 달러도 국채도 쌓아두지 않았다. 값이 내려가면 <b>같은 회사가 만든 다른 코인(루나)</b>을 1달러어치 주는 방식으로 값을 붙들었다. 그 약속이 준비자산을 대신했다.</p>
+
+<div class="tbl">
+  <div class="th c4"><div>항목</div><div>05.05</div><div>05.09</div><div>그 뒤</div></div>
+  <div class="tr c4"><div>루나 값</div><div>87.33달러</div><div>32.00달러</div><div>0.0002달러</div></div>
+  <div class="tr c4"><div>테라USD 값</div><div>미확보</div><div>0.800달러</div><div>0.409달러<br/>05.12</div></div>
+  <div class="tr c4"><div>루나 발행량</div><div>3억 5,200만 개</div><div>미확보</div><div>6조 5,000억 개<br/>05.16</div></div>
+</div>
+<p class="p">바꿔줄수록 루나가 더 찍혔고, 루나 값이 내려갈수록 바꿔줄 힘이 줄었다. 일주일 만에 발행량이 3억 개대에서 6조 개대가 됐다.</p>
+
+<div class="quote">
+  <p>“테라가 무너진 주된 이유는 1달러를 유지하겠다고 약속해 놓고 그 약속을 뒷받침할 적절하고 실효성 있는 안정화 장치를 두지 않았기 때문이다.”</p>
+  <div class="qs">금융안정위원회(FSB) · 2022년 10월</div>
+</div>
+<p class="p">미 법무부는 투자자 손실을 <b>400억달러 이상</b>으로 적었다. 두 사례를 나란히 놓으면 이렇다. 하나는 채울 것이 있는데 문이 닫혔고, 다른 하나는 문을 열어도 채울 것이 없었다.</p>
+
+<h3 class="hd">한국은 창구가 은행 안에 있다</h3>
+<p class="p">여기까지는 달러 이야기였다. 한국은 창구가 다른 자리에 있다. 국내 거래소에서 원화로 코인을 사려면 <span class="term">실명확인 입출금계정<span class="tip">같은 은행 안에 있는 거래소 계좌와 고객 계좌 사이로만 돈이 오가게 한 계정. 특정금융정보법 제7조에 근거를 둔다.</span></span>이 있어야 한다. 특정금융정보법 제7조 제3항 제2호에 근거가 있고 <b>2021년 3월 25일</b>부터 시행됐다. 이 계정은 <b>같은 은행 안에 있는 거래소 계좌와 고객 계좌 사이에서만</b> 돈이 오간다. 은행 한 곳과 제휴를 맺지 못하면 <span class="term">원화마켓<span class="tip">원화로 코인을 직접 사고파는 시장. 실명확인 입출금계정이 있어야 열린다.</span></span> 자체가 열리지 않는다. 2026년 7월 기준 다섯 곳이다.</p>
+
+<p class="cap">업비트·케이뱅크 · 빗썸·KB국민은행 · 코인원·카카오뱅크 · 코빗·신한은행 · 고팍스·전북은행</p>
+
+<p class="p">이 구조는 숫자로 이렇게 드러난다. 한국은행 집계, 2025년 6월 말 기준이다.</p>
+
+<div class="mini">
+  <b class="mh">코인을 살 때 무엇으로 결제하나</b>
+  <div class="mg">
+    <span>국내 · 스테이블코인 결제 비중</span><em class="num">0.04%</em>
+    <span>국내 · 원화 결제 비중</span><em class="num">99.7%</em>
+    <span>세계 · 스테이블코인 결제 비중</span><em class="num">84.0%</em>
+  </div>
+  <p class="mp">한국 사람은 달러 코인을 다리로 쓰지 않는다. 원화로 곧장 산다. 은행 창구가 거래소에 붙어 있기 때문이다.</p>
+</div>
+
+<p class="p">국내 거래소 보유금액도 크지 않다. 2025년 6월 말 USDT 5,571억원, USDC 207억원으로 세계 시가총액의 <b>0.1% 수준</b>이다. 한국에서 이 코인은 주로 <b>국내와 해외 거래소 사이를 오가는 이동 수단</b>으로 쓰인다.</p>
+<p class="p">한국은행은 달러 코인이 국내 원화 수요를 널리 대신할 가능성은 낮다고 봤다. 통화가 달러로 바뀌는 현상은 아르헨티나·나이지리아·튀르키예처럼 물가가 크게 오르는 나라에서 주로 나타난다.</p>
+
+<div class="foldwrap">
+  <details class="fold">
+    <summary>국경을 넘어가는 쪽은 따로 있다</summary>
+    <div class="fb">
+      <p>국내에 머무는 잔액은 작지만, 밖으로 나가는 흐름은 작지 않다. 금융감독원이 국회에 낸 자료 기준으로 2026년 6월 국내 5개 거래소의 순유출은 <b>5,603억원</b>이고, 2025년 1월부터 2026년 6월까지 누적 순출고는 <b>14조 9,246억원</b>이다. 18개월 연속 순유출이다.</p>
+      <p>한국은행이 국회에 낸 자료 기준으로 2026년 2월 말 국내 스테이블코인 보유금액은 <b>6,071억원</b>이다.</p>
+      <div class="miss">다만 이 숫자들은 모두 <b>국내 신고 거래소 계정 안에 있는 잔액</b>이다. 개인지갑이나 해외 거래소로 옮긴 물량은 여기에 잡히지 않는다. 국내 거래소 밖 보유분까지 포함한 전체 규모를 집계한 공식 통계는 확인되지 않는다.</div>
+    </div>
+  </details>
+</div>
+
+<div class="limit">
+  <div class="li can">
+    <div class="lk">여기까지는 말할 수 있다</div>
+    <ul>
+      <li>발행사가 무엇을 얼마나 쌓아 뒀다고 공시했는지</li>
+      <li>그 창구에 누가 들어갈 수 있는지</li>
+      <li>화면 값이 1달러에서 얼마나 벗어났는지</li>
+    </ul>
+  </div>
+  <div class="li cant">
+    <div class="lk">여기부터는 말할 수 없다</div>
+    <ul>
+      <li>지금 그 코인이 안전한지</li>
+      <li>다음에 값이 풀릴지</li>
+      <li>공시된 자산이 급할 때 제값에 팔릴지</li>
+    </ul>
+  </div>
+</div>
+<p class="p">마지막 항목이 중요하다. 공시는 <b>무엇을 갖고 있는지</b>만 알려준다. 급할 때 그것이 얼마에 팔리는지는 알려주지 않는다.</p>
+
+<div class="ans">
+  <div class="ak">제6편의 한 문장</div>
+  <div class="av">1코인이 1달러인 것은 약속이 아니라 구조다. 그 구조는 세 층으로 되어 있고, 우리가 보는 1달러는 맨 위층이다.</div>
+  <div class="aw">「1달러에 고정」은 결과를 적은 말이지 원리를 적은 말이 아니다. 값을 붙드는 것은 창구와, 그 창구에 들어갈 수 있는 소수와, 그들이 움직일 이유다. 셋 중 하나가 멈추면 화면의 숫자부터 흔들린다.</div>
+</div>
+
+<div class="foldwrap">
+  <details class="fold">
+    <summary>이번 편에 나온 말 정리</summary>
+    <div class="fb">
+      <dl class="gloss">
+        <dt>스테이블코인</dt><dd>값이 달러 같은 특정 가치에 붙들려 있도록 설계된 디지털 자산.</dd>
+        <dt>준비자산</dt><dd>발행한 코인만큼 발행사가 따로 쌓아 두는 자산.</dd>
+        <dt>디페깅</dt><dd>붙들어 둔 값에서 실제 시세가 벗어난 상태.</dd>
+        <dt>상환</dt><dd>코인을 발행사에 돌려주고 액면가만큼 돈을 받는 것.</dd>
+        <dt>시장상환</dt><dd>발행사 창구를 쓰지 못하는 이용자가 거래소에 팔아 현금을 만드는 방식.</dd>
+        <dt>액면가</dt><dd>발행사가 정한 교환 기준값. 1코인에 1달러.</dd>
+        <dt>2차시장</dt><dd>발행사를 거치지 않고 이용자끼리 사고파는 시장. 거래소 화면이 여기다.</dd>
+        <dt>차익거래</dt><dd>같은 물건에 붙은 두 값의 차이를 사고팔아 이익을 남기는 거래.</dd>
+        <dt>역레포</dt><dd>돈을 빌려주고 국채를 담보로 받아 두는 단기 거래.</dd>
+        <dt>화폐의 단일성</dt><dd>어느 은행 예금이든 같은 금액이면 같은 값으로 통하는 성질.</dd>
+        <dt>실명확인 입출금계정</dt><dd>같은 은행 안의 거래소 계좌와 고객 계좌 사이로만 돈이 오가게 한 계정.</dd>
+        <dt>원화마켓</dt><dd>원화로 코인을 직접 사고파는 시장. 실명확인 입출금계정이 있어야 열린다.</dd>
+      </dl>
+    </div>
+  </details>
+  <details class="fold">
+    <summary>이 편에서 쓰지 않은 숫자</summary>
+    <div class="fb">
+      <p><b>전체 시장 규모.</b> 2026년 8월 시점의 총 시가총액은 1차 자료로 확인되지 않았다. 국제결제은행 기준 2026년 5월 말 약 3,200억달러가 확인된 마지막 값이다.</p>
+      <p><b>점유율.</b> 두 발행사 모두 분모를 밝히지 않았다. 서클은 27%, 테더는 60% 이상이라고 했는데 분모가 서로 다르다. 금액만 적었다. 2026년 6월 말 기준 테더 1,836억달러, 서클 733억달러다.</p>
+      <p><b>USDC 최저가.</b> 미 연준 문서 안에서도 86센트와 88센트로 갈린다. 하나로 적지 않고 범위와 출처를 함께 적었다.</p>
+      <p><b>테라 손실 4,500억달러.</b> 이 숫자는 2022년 5~6월 가상자산 시장 전체가 줄어든 금액이지 테라 한 건의 손실이 아니다. 섞어 쓴 보도가 많아 여기서는 미 법무부 기준 400억달러만 적었다.</p>
+      <div class="miss">확인되지 않은 숫자는 채우지 않는다. 빈칸으로 두는 편이 채워 넣은 숫자보다 정확하다.</div>
+    </div>
+  </details>
+  <details class="fold">
+    <summary>출처</summary>
+    <div class="fb">
+      <div class="src">
+        <div><b>테더 준비자산·발행잔액</b> · Tether International Consolidated Reserves Report, 2026.06.30 기준, BDO 검토, 보고서일 2026.07.31</div>
+        <div><b>테더 창구 조건·인증 고객 819명</b> · Relevant Information Document, Tether International, 엘살바도르 CNAD 제출, 2026.02.20</div>
+        <div><b>서클 준비자산·유통잔액</b> · Circle USDC Examination Report June 2026, Deloitte 검토, 보고서일 2026.07.29</div>
+        <div><b>서클 개인 이용 불가</b> · Circle Mint 공식 안내 및 USDC Terms, 2025.12.12 갱신</div>
+        <div><b>차익거래 구조</b> · BIS Working Papers No 1270 「Stablecoins and safe asset prices」, 2026.06, 16면</div>
+        <div><b>ETF 지정참가회사 비유</b> · IMF Departmental Paper 「Understanding Stablecoins」, 2025, 9면</div>
+        <div><b>준비자산 품질 0.74배</b> · Federal Reserve FEDS Notes 「Stablecoins in 2025」, 2026.04.08</div>
+        <div><b>전체 시장 규모</b> · BIS Annual Economic Report 2026, 제3장</div>
+        <div><b>USDC 디페깅 경과</b> · Federal Reserve FEDS Notes, 2025.12.17 · NY Fed Staff Report No 1073</div>
+        <div><b>SVB 예치 33억달러·상환 요구 78억달러</b> · 서클 공식 발표 2023.03 · 한국은행 「디지털 시대의 화폐, 혁신과 신뢰의 조화」 2025.10.27</div>
+        <div><b>예금 전액 접근 보장</b> · 미 재무부·연준·FDIC 공동성명, 2023.03.12</div>
+        <div><b>테라 판정</b> · FSB 「Review of the FSB High-level Recommendations… GSC」, 2022.10.11</div>
+        <div><b>테라 붕괴 수치</b> · NY Fed Staff Report No 1073 · 투자자 손실은 미 법무부 보도자료</div>
+        <div><b>화폐의 단일성·시장상환·자유은행제·당백전</b> · 한국은행 「디지털 시대의 화폐, 혁신과 신뢰의 조화」 2025.10.27</div>
+        <div><b>국내 결제 비중·보유금액·원화마켓</b> · 같은 보고서 및 2026.07.01 기준 확인</div>
+        <div><b>실명확인 입출금계정</b> · 특정 금융거래정보의 보고 및 이용 등에 관한 법률 제7조 제3항 제2호</div>
+        <div><b>국내 순유출·보유금액</b> · 금융감독원·한국은행이 국회에 낸 자료</div>
+      </div>
+    </div>
+  </details>
+</div>
+
+<div class="next">
+  <div class="nh">이어 읽기</div>
+  <p>비정기 리서치 No.03 · <b>코인의 뒷면에는 국채가 있다</b></p>
+  <div class="nt">이 편은 값이 붙들리는 구조를 세웠다. 그다음 질문은 하나 남는다. <b>미국은 왜 이 코인에 법을 씌웠을까.</b> 답은 서명 당일 공개돼 있었다.</div>
+</div>
+
+<p class="disc">이 글은 경제·금융 용어의 뜻과 읽는 방법을 설명하는 교양 자료입니다. 특정 자산의 매매를 권유하지 않으며, 투자 판단과 그 결과는 투자자 본인에게 있습니다.<br/>수치는 각 발행사 공시, 국제기구·중앙은행 보고서, 국회 제출자료 인용 보도 기준. 기준일은 본문에 함께 적었습니다.</p>
+<p class="foot">시장을 읽는 말들 · 06</p>
+
+</div>
+<script>
+(function(){
+  if(window.__mwWords6) return; window.__mwWords6 = true;
+
+  var pg=document.getElementById('pg');
+  function updateProg(){
+    if(!pg) return;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var y=window.scrollY||window.pageYOffset||0;
+    pg.style.width=(h>0?Math.min(100,Math.max(0,y/h*100)):0)+'%';
+  }
+  window.addEventListener('scroll',updateProg,{passive:true});
+  window.addEventListener('resize',updateProg);
+  updateProg();
+
+  function resetTip(el){ var tp=el.querySelector('.tip'); if(tp){ tp.classList.remove('below'); tp.removeAttribute('style'); } }
+  function clampTip(t){
+    var tip=t.querySelector('.tip'); if(!tip) return;
+    var vw=window.innerWidth, pad=12;
+    var w=Math.min(248, vw-2*pad);
+    tip.style.position='fixed'; tip.style.bottom='auto'; tip.style.transform='none';
+    tip.style.width=w+'px'; tip.style.left='0px'; tip.style.top='0px';
+    var tr=t.getBoundingClientRect();
+    var th=tip.getBoundingClientRect().height;
+    var left=tr.left+tr.width/2-w/2;
+    if(left<pad) left=pad;
+    if(left+w>vw-pad) left=vw-pad-w;
+    var top=tr.top-th-9, below=false;
+    if(top<pad+50){ top=tr.bottom+9; below=true; }
+    var vh=window.innerHeight;
+    if(top+th>vh-pad){ top=vh-pad-th; }
+    if(top<pad){ top=pad; }
+    tip.style.left=Math.round(left)+'px';
+    tip.style.top=Math.round(top)+'px';
+    var tb=tip.getBoundingClientRect();
+    var dx=tb.left-left, dy=tb.top-top;
+    if(dx||dy){ tip.style.left=Math.round(left-dx)+'px'; tip.style.top=Math.round(top-dy)+'px'; }
+    tip.classList.toggle('below', below);
+    var ax=tr.left+tr.width/2-left;
+    ax=Math.max(12, Math.min(w-12, ax));
+    tip.style.setProperty('--ax', Math.round(ax)+'px');
+  }
+  function closeTerms(except){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++){ if(open[i]!==except){ open[i].classList.remove('open'); resetTip(open[i]); } }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.term'), function(t){
+    t.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var willOpen=!t.classList.contains('open');
+      closeTerms(t);
+      t.classList.toggle('open', willOpen);
+      if(willOpen) clampTip(t);
+    });
+  });
+  document.addEventListener('click', function(){ closeTerms(null); });
+  window.addEventListener('scroll', function(){ closeTerms(null); }, {passive:true});
+  window.addEventListener('resize', function(){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++) clampTip(open[i]);
+  });
+})();
+</script>
+</body>
+</html>

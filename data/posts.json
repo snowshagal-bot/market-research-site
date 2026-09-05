@@ -321,6 +321,28 @@
     "coverThumbnail": "covers/2026-08-31-daily-1mkemh5-450.webp"
   },
   {
+    "id": "2026-08-29-basics-1388bwu",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-08-29",
+    "reportDate": "2026-08-29",
+    "registeredDate": "2026-09-06",
+    "registeredAt": "2026-09-05T16:50:53.736Z",
+    "legacyImport": false,
+    "title": "1코인은 어떻게 1달러가 되는가",
+    "subtitle": "",
+    "description": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 입문.",
+    "tags": [
+      "stablecoins"
+    ],
+    "readingMinutes": 8,
+    "href": "reports/용어시리즈_6편_1코인은어떻게1달러가되는가.html",
+    "coverImage": "covers/2026-08-29-basics-1388bwu.webp",
+    "shareCardImage": "covers/share/2026-08-29-basics-1388bwu.jpg",
+    "coverThumbnail": "covers/2026-08-29-basics-1388bwu-450.webp"
+  },
+  {
     "id": "2026-08-29-weekly-4xkdij",
     "type": "weekly",
     "typeLabel": "Weekly",
