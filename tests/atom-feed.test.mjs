@@ -336,3 +336,15 @@ test('HEAD on a feed route answers like GET, so readers that probe first do not 
     assert.equal(res.headers.get('cache-control'), 'public, max-age=300');
   }
 });
+
+test('with four groups, both footer stylesheets go to two columns between the phone grid and the width where four fit in one row', async () => {
+  const { footerCss } = await import('../functions/_footer.js');
+  assert.match(footerCss(), /@media\(min-width:769px\) and \(max-width:959px\)\{#site-footer \.site-footer-nav-groups\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  const siteCss = await read('assets/site.css');
+  assert.match(siteCss, /@media \(min-width: 761px\) and \(max-width: 959px\) \{\s*\.site-footer-nav-groups \{\s*display: grid;\s*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
+  const { computeAssetFileHash } = await import('../scripts/asset-versions.mjs');
+  const version = computeAssetFileHash(rootDir, 'assets/site.css');
+  for (const file of [...STATIC_FEED_PAGES.map(p => p.file).filter(f => f !== '404.html'), 'daily/index.html', 'en/daily/index.html', 'scripts/build-category-pages.mjs']) {
+    assert.ok((await read(file)).includes(`site.css?v=${version}`), `${file} references the current site.css`);
+  }
+});
