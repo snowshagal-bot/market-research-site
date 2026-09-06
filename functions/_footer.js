@@ -1,9 +1,8 @@
-import { feedPath } from './_feed.js';
-
 export function siteFooter(lang = 'ko') {
   const isEn = lang === 'en';
   const prefix = isEn ? '/en' : '';
   const homePath = isEn ? '/en/' : '/';
+  const feedHref = isEn ? '/en/rss.xml' : '/rss.xml';
 
   const tagline = isEn ? 'A clearer read on the market.' : '시장을 읽어주는 사이트.';
   const reportsHeading = isEn ? 'Reports' : '리포트';
@@ -82,7 +81,7 @@ export function siteFooter(lang = 'ko') {
         <div class="site-footer-group">
           <p class="site-footer-heading" aria-hidden="true">${followHeading}</p>
           <nav class="site-footer-nav" aria-label="${followNavAria}">
-            <a href="${feedPath(lang)}" type="application/atom+xml">RSS</a>
+            <a href="${feedHref}" type="application/atom+xml">RSS</a>
           </nav>
         </div>
         <div class="site-footer-group">
