@@ -1,5 +1,29 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-05-weekly-19wkhfg",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-09-05",
+    "reportDate": "2026-09-05",
+    "registeredDate": "2026-09-07",
+    "registeredAt": "2026-09-06T17:33:12.869Z",
+    "legacyImport": false,
+    "title": "받침보다 센 바람",
+    "subtitle": "",
+    "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "tags": [
+      "semiconductors",
+      "rates",
+      "policy"
+    ],
+    "readingMinutes": 11,
+    "href": "reports/위클리_2026년 9월 1주차 위클리.html",
+    "coverImage": "covers/2026-09-05-weekly-19wkhfg.webp",
+    "shareCardImage": "covers/share/2026-09-05-weekly-19wkhfg.jpg",
+    "coverThumbnail": "covers/2026-09-05-weekly-19wkhfg-450.webp"
+  },
+  {
     "id": "2026-09-04-daily-1y780gf",
     "type": "daily",
     "typeLabel": "Daily",
