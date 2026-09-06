@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated: 2026-08-31
+Updated: 2026-09-06
 
 This roadmap records implementation order, completed capabilities, and operational priorities, not a promise to build every future idea. Keep the current site small and stable until real traffic, indexing, and operational needs justify added complexity.
 
@@ -98,6 +98,10 @@ Refine `/admin/` and `/admin/manage/` only when recurring operational pain point
 ### Internal Discovery UX (2026-08)
 - **Previous / Next Navigation & Related Reading** (PR #59): Added isolated bottom navigation to all reports in `assets/report-shell.js`, providing chronologically adjacent report links and contextually relevant recommendations based on shared topic tags and category.
 
+### Atom Feeds & Global Footer (2026-09)
+- **Global Editorial Footer** (PR #104): one canonical `siteFooter` across every public surface, synced into the static pages and injected into reports by the middleware.
+- **Atom Feeds Phase 2** (Draft PR, Preview only): `/rss.xml` and `/en/rss.xml` Atom 1.0 feeds from `data/posts.json` through the site's own canonical URL, description and language helpers; registration-based `published`/`updated`; XML-safe text; one discovery `<link>` per public page from a single helper; footer FOLLOW → RSS. Email subscription deliberately excluded.
+
 ### SEO Foundation & Public Shells (2026-08)
 - **SEO Foundation** (PR #57): Server-rendered crawlable report anchors, 10 static KO/EN category landing shells, dynamic metadata generation (`<title>`, `<meta name="description">`), self-canonicals, reciprocal `hreflang` for translation pairs, dynamic `sitemap.xml`, and crawler-friendly `robots.txt`.
 - **Explicit 404 Handling**: Root `404.html` with `X-Robots-Tag: noindex` prevents Cloudflare Pages SPA fallback on missing routes.
@@ -134,6 +138,7 @@ Refine `/admin/` and `/admin/manage/` only when recurring operational pain point
 - Paid real-time market data feeds
 - Public view counters, ranking systems, or competitive popularity UI (internal analytics remain available in `/admin/analytics/`)
 - Automated Tistory cross-posting
+- Email subscription, subscriber storage or newsletter providers (Atom feeds only)
 - Unnecessary CMS or backend rewrite
 
 ## Architecture Guardrails

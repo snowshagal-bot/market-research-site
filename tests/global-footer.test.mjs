@@ -143,3 +143,8 @@ test('existing internal footers in uploaded reports remain preserved and reports
   const gitStatus = execSync('git status --porcelain reports/', { cwd: rootDir, encoding: 'utf8' }).trim();
   assert.equal(gitStatus, '', 'reports/ directory must have zero modifications on disk');
 });
+
+test('functions/_footer.js does not import _feed.js to prevent ESM circular dependencies', async () => {
+  const footerSource = await read('functions/_footer.js');
+  assert.doesNotMatch(footerSource, /_feed\.js/, '_footer.js must not depend on _feed.js');
+});

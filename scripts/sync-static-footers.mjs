@@ -7,19 +7,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
-export const STATIC_FOOTER_PAGES = [
-  { file: 'index.html', lang: 'ko' },
-  { file: 'en/index.html', lang: 'en' },
-  { file: 'about/index.html', lang: 'ko' },
-  { file: 'en/about/index.html', lang: 'en' },
-  { file: 'market/index.html', lang: 'ko' },
-  { file: 'en/market/index.html', lang: 'en' },
-  { file: 'disclosures/index.html', lang: 'ko' },
-  { file: 'en/disclosures/index.html', lang: 'en' },
-  { file: 'calendar/index.html', lang: 'ko' },
-  { file: 'en/calendar/index.html', lang: 'en' },
-  { file: '404.html', lang: 'ko' }
-];
+export { STATIC_PUBLIC_PAGES as STATIC_FOOTER_PAGES } from './static-public-pages.mjs';
+import { STATIC_PUBLIC_PAGES as STATIC_FOOTER_PAGES } from './static-public-pages.mjs';
 
 export function syncStaticFooters(root = rootDir) {
   let updatedCount = 0;
@@ -56,4 +45,9 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
     await import(`file:///${buildCatPages.replace(/\\/g, '/')}`);
     console.log('Rebuilt category landing pages.');
   }
+
+  // The same pages carry the feed discovery link; keep it in step too.
+  const feedLinks = await import('./sync-static-feed-links.mjs');
+  const feedCount = feedLinks.syncStaticFeedLinks();
+  console.log(`Finished syncing feed links (${feedCount} static files modified).`);
 }
