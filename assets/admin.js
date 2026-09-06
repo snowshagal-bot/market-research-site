@@ -22,6 +22,22 @@
   const tagOptionsContainer = $('tag-options');
   const tagsCount = $('tags-count');
   const tagsStatus = $('tags-status');
+  const selectedTagsContainer = $('selected-tags-container');
+  const selectedTagsList = $('selected-tags-list');
+  const tagSearchInput = $('tag-search-input');
+  const openCustomTagBtn = $('open-custom-tag-btn');
+  const customTagDialog = $('custom-tag-dialog');
+  const customTagClose = $('custom-tag-close');
+  const customTagCancel = $('custom-tag-cancel');
+  const customTagSubmit = $('custom-tag-submit');
+  const customTagBackdrop = $('custom-tag-backdrop');
+  const newTagKo = $('new-tag-ko');
+  const newTagEn = $('new-tag-en');
+  const newTagGroup = $('new-tag-group');
+  const newTagIdPreview = $('new-tag-id-preview');
+  const customTagError = $('custom-tag-error');
+  let selectedTagIds = new Set();
+  let pendingCustomTags = [];
   const filename = $('post-filename');
   const takeawayStatus = $('takeaway-status');
   const coverInput = $('cover-file');
@@ -134,69 +150,280 @@
   }
 
   const tagRegistry = window.TAG_REGISTRY || {
-    "flows": { "ko": "수급", "en": "Flows" },
-    "semiconductors": { "ko": "반도체", "en": "Semiconductors" },
-    "rates": { "ko": "금리", "en": "Rates" },
-    "fx": { "ko": "환율", "en": "FX" },
-    "treasuries": { "ko": "미국채", "en": "U.S. Treasuries" },
-    "fed": { "ko": "연준", "en": "Fed" },
-    "futures": { "ko": "선물·파생", "en": "Futures & Derivatives" },
-    "ai": { "ko": "AI", "en": "AI" },
-    "cloud-datacenter": { "ko": "클라우드·데이터센터", "en": "Cloud & Data Centers" },
-    "stablecoins": { "ko": "스테이블코인", "en": "Stablecoins" },
-    "crypto": { "ko": "가상자산", "en": "Crypto" },
-    "gold": { "ko": "금", "en": "Gold" },
-    "autos": { "ko": "자동차", "en": "Autos" },
-    "energy": { "ko": "에너지", "en": "Energy" },
-    "policy": { "ko": "정책", "en": "Policy" },
-    "geopolitics": { "ko": "지정학", "en": "Geopolitics" }
+    "kospi": { "ko": "KOSPI", "en": "KOSPI", "group": "market" },
+    "kosdaq": { "ko": "KOSDAQ", "en": "KOSDAQ", "group": "market" },
+    "flows": { "ko": "수급", "en": "Flows", "group": "market" },
+    "foreign-investors": { "ko": "외국인", "en": "Foreign Investors", "group": "market" },
+    "futures": { "ko": "선물·파생", "en": "Futures & Derivatives", "group": "market" },
+    "volatility": { "ko": "변동성", "en": "Volatility", "group": "market" },
+    "semiconductors": { "ko": "반도체", "en": "Semiconductors", "group": "sector" },
+    "batteries": { "ko": "2차전지", "en": "Batteries", "group": "sector" },
+    "autos": { "ko": "자동차", "en": "Autos", "group": "sector" },
+    "banks-financials": { "ko": "은행·금융", "en": "Banks & Financials", "group": "sector" },
+    "biotech-healthcare": { "ko": "바이오·헬스케어", "en": "Biotech & Healthcare", "group": "sector" },
+    "shipbuilding": { "ko": "조선", "en": "Shipbuilding", "group": "sector" },
+    "defense": { "ko": "방산", "en": "Defense", "group": "sector" },
+    "nuclear": { "ko": "원전", "en": "Nuclear Power", "group": "sector" },
+    "robotics": { "ko": "로봇", "en": "Robotics", "group": "sector" },
+    "internet-platforms": { "ko": "인터넷·플랫폼", "en": "Internet & Platforms", "group": "sector" },
+    "ai": { "ko": "AI", "en": "AI", "group": "sector" },
+    "cloud-datacenter": { "ko": "클라우드·데이터센터", "en": "Cloud & Data Centers", "group": "sector" },
+    "energy": { "ko": "에너지", "en": "Energy", "group": "sector" },
+    "rates": { "ko": "금리", "en": "Rates", "group": "macro" },
+    "fx": { "ko": "환율", "en": "FX", "group": "macro" },
+    "treasuries": { "ko": "미국채", "en": "U.S. Treasuries", "group": "macro" },
+    "fed": { "ko": "연준", "en": "Fed", "group": "macro" },
+    "liquidity": { "ko": "유동성", "en": "Liquidity", "group": "macro" },
+    "credit-bonds": { "ko": "신용·채권", "en": "Credit & Bonds", "group": "macro" },
+    "gold": { "ko": "금", "en": "Gold", "group": "macro" },
+    "commodities": { "ko": "원자재", "en": "Commodities", "group": "macro" },
+    "crypto": { "ko": "가상자산", "en": "Crypto", "group": "macro" },
+    "stablecoins": { "ko": "스테이블코인", "en": "Stablecoins", "group": "macro" },
+    "earnings": { "ko": "실적", "en": "Earnings", "group": "company-policy" },
+    "valuation": { "ko": "밸류에이션", "en": "Valuation", "group": "company-policy" },
+    "shareholder-returns": { "ko": "주주환원", "en": "Shareholder Returns", "group": "company-policy" },
+    "governance": { "ko": "기업지배구조", "en": "Corporate Governance", "group": "company-policy" },
+    "policy": { "ko": "정책", "en": "Policy", "group": "company-policy" },
+    "tariffs-trade": { "ko": "관세·무역", "en": "Tariffs & Trade", "group": "company-policy" },
+    "geopolitics": { "ko": "지정학", "en": "Geopolitics", "group": "company-policy" }
   };
+
+  const GROUP_ORDER = ['market', 'sector', 'macro', 'company-policy'];
+  const GROUP_TITLES = {
+    market: '시장',
+    sector: '업종',
+    macro: '매크로·자산',
+    'company-policy': '기업·정책'
+  };
+
+  function slugifyTag(label) {
+    return String(label || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
 
   function renderTagSelector() {
     if (!tagOptionsContainer) return;
-    tagOptionsContainer.innerHTML = Object.entries(tagRegistry).map(([id, info]) => `
-      <label class="tag-chip">
-        <input type="checkbox" name="post-tags" value="${escapeHtml(id)}">
-        <span>${escapeHtml(info.ko || id)}</span>
-      </label>
-    `).join('');
+    const query = (tagSearchInput?.value || '').trim().toLowerCase();
+
+    // Group items
+    const grouped = {
+      market: [],
+      sector: [],
+      macro: [],
+      'company-policy': []
+    };
+
+    for (const [id, info] of Object.entries(tagRegistry)) {
+      const g = info.group && grouped[info.group] ? info.group : 'market';
+      const ko = info.ko || id;
+      const en = info.en || id;
+      const matches = !query ||
+        id.toLowerCase().includes(query) ||
+        ko.toLowerCase().includes(query) ||
+        en.toLowerCase().includes(query);
+
+      if (matches) {
+        grouped[g].push({ id, ko, en, group: g });
+      }
+    }
+
+    const hasAny = GROUP_ORDER.some(g => grouped[g].length > 0);
+    if (!hasAny) {
+      tagOptionsContainer.innerHTML = `<div class="tag-empty-search" style="padding:14px 0;font-size:12px;color:var(--muted)">'${escapeHtml(query)}' 검색 결과가 없습니다.</div>`;
+      updateTagSelection();
+      return;
+    }
+
+    tagOptionsContainer.innerHTML = GROUP_ORDER.map(g => {
+      const items = grouped[g];
+      if (!items || items.length === 0) return '';
+      const chipsHtml = items.map(item => `
+        <label class="tag-chip" data-tag-id="${escapeHtml(item.id)}">
+          <input type="checkbox" name="post-tags" value="${escapeHtml(item.id)}" ${selectedTagIds.has(item.id) ? 'checked' : ''}>
+          <span>${escapeHtml(item.ko)}</span>
+        </label>
+      `).join('');
+
+      return `
+        <div class="tag-group-section" data-group="${g}">
+          <h4 class="tag-group-title">${GROUP_TITLES[g]}</h4>
+          <div class="tag-options">${chipsHtml}</div>
+        </div>
+      `;
+    }).join('');
 
     if (typeof tagOptionsContainer.querySelectorAll === 'function') {
       tagOptionsContainer.querySelectorAll('input[name="post-tags"]').forEach(cb => {
-        cb.addEventListener('change', () => updateTagSelection());
+        cb.addEventListener('change', () => {
+          if (cb.checked) {
+            if (selectedTagIds.size < 5) {
+              selectedTagIds.add(cb.value);
+            } else {
+              cb.checked = false;
+            }
+          } else {
+            selectedTagIds.delete(cb.value);
+          }
+          updateTagSelection();
+        });
+      });
+    }
+
+    updateTagSelection();
+  }
+
+  function getSelectedTags() {
+    return Array.from(selectedTagIds);
+  }
+
+  function setSelectedTags(tags = []) {
+    selectedTagIds = new Set((Array.isArray(tags) ? tags : []).map(t => String(t).trim().toLowerCase()).filter(Boolean));
+    if (tagOptionsContainer && typeof tagOptionsContainer.querySelectorAll === 'function') {
+      tagOptionsContainer.querySelectorAll('input[name="post-tags"]').forEach(cb => {
+        cb.checked = selectedTagIds.has(cb.value);
       });
     }
     updateTagSelection();
   }
 
-  function getSelectedTags() {
-    if (!tagOptionsContainer || typeof tagOptionsContainer.querySelectorAll !== 'function') return [];
-    return [...tagOptionsContainer.querySelectorAll('input[name="post-tags"]:checked')].map(cb => cb.value);
-  }
-
-  function setSelectedTags(tags = []) {
-    if (!tagOptionsContainer || typeof tagOptionsContainer.querySelectorAll !== 'function') return;
-    const tagSet = new Set(tags);
-    tagOptionsContainer.querySelectorAll('input[name="post-tags"]').forEach(cb => {
-      cb.checked = tagSet.has(cb.value);
-    });
-    updateTagSelection();
-  }
-
   function updateTagSelection() {
-    const selected = getSelectedTags();
-    const count = selected.length;
-    if (tagsCount) tagsCount.textContent = `${count}/3`;
+    const count = selectedTagIds.size;
+    if (tagsCount) tagsCount.textContent = `${count}/5`;
 
     if (tagOptionsContainer && typeof tagOptionsContainer.querySelectorAll === 'function') {
       tagOptionsContainer.querySelectorAll('input[name="post-tags"]').forEach(cb => {
+        cb.checked = selectedTagIds.has(cb.value);
         if (!cb.checked) {
-          cb.disabled = count >= 3;
+          cb.disabled = count >= 5;
         } else {
           cb.disabled = false;
         }
       });
     }
+
+    renderSelectedTagsBadges(Array.from(selectedTagIds));
+  }
+
+  function renderSelectedTagsBadges(selectedIds) {
+    if (!selectedTagsContainer || !selectedTagsList) return;
+    if (!selectedIds || selectedIds.length === 0) {
+      selectedTagsContainer.hidden = true;
+      selectedTagsList.innerHTML = '';
+      return;
+    }
+
+    selectedTagsContainer.hidden = false;
+    selectedTagsList.innerHTML = selectedIds.map(id => {
+      const info = tagRegistry[id];
+      const label = info?.ko || id;
+      return `
+        <span class="selected-tag-badge">
+          <span>${escapeHtml(label)}</span>
+          <button type="button" class="selected-tag-remove" data-remove-tag="${escapeHtml(id)}" aria-label="${escapeHtml(label)} 선택 해제">×</button>
+        </span>
+      `;
+    }).join('');
+
+    selectedTagsList.querySelectorAll('[data-remove-tag]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tagId = btn.getAttribute('data-remove-tag');
+        removeSelectedTag(tagId);
+      });
+    });
+  }
+
+  function removeSelectedTag(tagId) {
+    selectedTagIds.delete(tagId);
+    updateTagSelection();
+  }
+
+  function openCustomTagModal() {
+    if (!customTagDialog) return;
+    if (newTagKo) newTagKo.value = '';
+    if (newTagEn) newTagEn.value = '';
+    if (newTagGroup) newTagGroup.value = 'market';
+    if (newTagIdPreview) newTagIdPreview.textContent = '-';
+    if (customTagError) {
+      customTagError.hidden = true;
+      customTagError.textContent = '';
+    }
+    customTagDialog.hidden = false;
+    setTimeout(() => newTagKo?.focus(), 50);
+  }
+
+  function closeCustomTagModal() {
+    if (!customTagDialog) return;
+    customTagDialog.hidden = true;
+    openCustomTagBtn?.focus();
+  }
+
+  function updateNewTagSlugPreview() {
+    if (!newTagEn || !newTagIdPreview) return;
+    const slug = slugifyTag(newTagEn.value);
+    newTagIdPreview.textContent = slug || '-';
+  }
+
+  function submitCustomTag() {
+    if (!newTagKo || !newTagEn || !newTagGroup) return;
+    const ko = newTagKo.value.trim();
+    const en = newTagEn.value.trim();
+    const group = newTagGroup.value;
+    const slug = slugifyTag(en);
+
+    function showErr(msg) {
+      if (customTagError) {
+        customTagError.hidden = false;
+        customTagError.textContent = msg;
+      }
+    }
+
+    if (!ko) return showErr('한국어 태그 이름을 입력하세요.');
+    if (!en) return showErr('English 태그 이름을 입력하세요.');
+    if (ko.length > 40) return showErr('한국어 태그 이름은 최대 40자까지 가능합니다.');
+    if (en.length > 60) return showErr('English 태그 이름은 최대 60자까지 가능합니다.');
+    if (/<[^>]*>/i.test(ko) || /<[^>]*>/i.test(en)) return showErr('태그 이름에 HTML 태그는 사용할 수 없습니다.');
+    if (!slug) return showErr('English 이름에서 영문 슬러그를 생성할 수 없습니다.');
+    if (slug.length < 2 || slug.length > 48) return showErr(`태그 ID 길이는 2~48자여야 합니다 (현재 ${slug.length}자).`);
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return showErr('태그 ID는 영문 소문자, 숫자, 하이픈만 사용할 수 있습니다.');
+
+    // Duplicate checks
+    if (tagRegistry[slug]) {
+      return showErr(`이미 등록된 태그 ID입니다: '${slug}'`);
+    }
+    const normKo = ko.toLowerCase().replace(/\s+/g, ' ');
+    const normEn = en.toLowerCase().replace(/\s+/g, ' ');
+    for (const [existingId, item] of Object.entries(tagRegistry)) {
+      if (item.ko && item.ko.toLowerCase().replace(/\s+/g, ' ') === normKo) {
+        return showErr(`동일한 한국어 태그가 이미 존재합니다: '${item.ko}' (${existingId})`);
+      }
+      if (item.en && item.en.toLowerCase().replace(/\s+/g, ' ') === normEn) {
+        return showErr(`동일한 English 태그가 이미 존재합니다: '${item.en}' (${existingId})`);
+      }
+    }
+
+    if (pendingCustomTags.length >= 5) {
+      return showErr('한 번에 등록할 수 있는 새 태그는 최대 5개입니다.');
+    }
+
+    if (selectedTagIds.size >= 5) {
+      return showErr('이미 5개의 태그가 선택되어 있습니다. 기존 태그를 하나 해제한 후 추가하세요.');
+    }
+
+    // Register into local state
+    const newTagDef = { id: slug, ko, en, group };
+    tagRegistry[slug] = { ko, en, group };
+    pendingCustomTags.push(newTagDef);
+
+    // Re-render and select
+    if (tagSearchInput) tagSearchInput.value = '';
+    renderTagSelector();
+    selectedTagIds.add(slug);
+    updateTagSelection();
+
+    closeCustomTagModal();
   }
 
   function syncPairedReportDate() {
@@ -840,6 +1067,9 @@
     if (translationSource?.value) form.append('translationGroup', translationSource.value);
     const selectedTags = getSelectedTags();
     selectedTags.forEach(tagId => form.append('tags', tagId));
+    if (pendingCustomTags.length > 0) {
+      form.append('newTags', JSON.stringify(pendingCustomTags));
+    }
     if (selectedCover) {
       form.append('cover', selectedCover, selectedCover.name);
       // The 1200x630 social card is composed from the same cover, so an
@@ -886,6 +1116,7 @@
       status.textContent = `게시 완료 · 등록일 ${data.registeredDate}${takeawayNote}. Cloudflare 재배포 확인 중…`;
       publishBtn.textContent = '게시 완료';
       publishBtn.disabled = true;
+      pendingCustomTags = [];
       await waitForDeployment(data.id, data.reportUrl, postType, data.registeredDate || '등록 완료', language);
     } catch (err) {
       const message = err.message || '게시 중 오류가 발생했습니다.';
@@ -954,6 +1185,18 @@
     });
   });
   translationSource?.addEventListener('change', syncPairedReportDate);
+  tagSearchInput?.addEventListener('input', () => renderTagSelector());
+  openCustomTagBtn?.addEventListener('click', openCustomTagModal);
+  customTagClose?.addEventListener('click', closeCustomTagModal);
+  customTagCancel?.addEventListener('click', closeCustomTagModal);
+  customTagBackdrop?.addEventListener('click', closeCustomTagModal);
+  customTagSubmit?.addEventListener('click', submitCustomTag);
+  newTagEn?.addEventListener('input', updateNewTagSlugPreview);
+  document.addEventListener?.('keydown', event => {
+    if (event.key === 'Escape' && customTagDialog && !customTagDialog.hidden) {
+      closeCustomTagModal();
+    }
+  });
   overlayErrorClose?.addEventListener('click', () => {
     overlay?.classList.remove('on', 'error');
     publishBtn?.focus();

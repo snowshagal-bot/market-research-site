@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import fs from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
 import { onRequestPost } from '../functions/api/manage.js';
 import { createMockAuthEnv } from './helpers/auth-test-helper.mjs';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
+const tagsJsonFileContent = fs.readFileSync(new URL('../data/tags.json', import.meta.url), 'utf8');
 
 const ADMIN_KEY = 'test-admin-key';
 const originalFetch = globalThis.fetch;
@@ -66,6 +68,7 @@ function githubMock(existingPosts, { searchIndex = null } = {}) {
       payload = { object: { sha: 'base-sha' } };
     } else if (path.endsWith('/git/commits/base-sha')) payload = { tree: { sha: 'base-tree' } };
     else if (path.includes('/contents/data/posts.json?ref=')) payload = { content: base64(`${JSON.stringify(existingPosts)}\n`) };
+    else if (path.includes('/contents/data/tags.json?ref=')) payload = { content: base64(`${tagsJsonFileContent}\n`) };
     else if (path.endsWith('/git/blobs')) {
       const sha = `text-blob-${++textBlobs}`;
       if (body?.encoding === 'utf-8') blobContents.set(sha, body.content);
