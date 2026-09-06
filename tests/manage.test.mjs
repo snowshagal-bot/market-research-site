@@ -36,9 +36,25 @@ function base64(text) {
   return btoa(binary);
 }
 
+/**
+ * File contents reach a tree as blobs written first and named by hash, so the
+ * recorded tree call carries shas where it used to carry text. Git treats the
+ * two as the same thing; this mock does too, putting each blob's content back
+ * on the entry that names it so a test can still read what was committed.
+ */
+function restoreBlobContent(body, blobContents) {
+  if (!Array.isArray(body?.tree)) return;
+  for (const entry of body.tree) {
+    if (entry && typeof entry.sha === 'string' && blobContents.has(entry.sha)) {
+      entry.content = blobContents.get(entry.sha);
+    }
+  }
+}
 function githubMock(existingPosts = [basePost], { conflict = false, searchIndex = null, searchIndexFail = false, searchIndexViaBlob = false } = {}) {
   const calls = [];
   let refReads = 0;
+  const blobContents = new Map();
+  let textBlobs = 0;
   const defaultIndex = searchIndex !== null ? searchIndex : existingPosts.map(p => ({
     id: p.id,
     lang: p.lang || 'ko',
@@ -67,8 +83,16 @@ function githubMock(existingPosts = [basePost], { conflict = false, searchIndex 
       payload = { object: { sha: conflict && refReads > 1 ? 'new-main-sha' : 'base-sha' } };
     } else if (path.endsWith('/git/commits/base-sha')) payload = { tree: { sha: 'base-tree' } };
     else if (path.endsWith('/git/blobs/search-index-sha')) payload = { content: base64(`${JSON.stringify(defaultIndex)}\n`), encoding: 'base64', sha: 'search-index-sha' };
+    else if (path.endsWith('/git/blobs') && body?.encoding === 'utf-8') {
+      const sha = `text-blob-${++textBlobs}`;
+      blobContents.set(sha, body.content);
+      payload = { sha };
+    }
     else if (path.endsWith('/git/blobs')) payload = { sha: 'cover-blob-sha' };
-    else if (path.endsWith('/git/trees')) payload = { sha: 'tree-sha' };
+    else if (path.endsWith('/git/trees')) {
+      restoreBlobContent(body, blobContents);
+      payload = { sha: 'tree-sha' };
+    }
     else if (path.endsWith('/git/commits')) payload = { sha: 'commit-sha' };
     else if (path.endsWith('/git/refs/heads/main') && options.method === 'PATCH') {
       if (conflict) return new Response(JSON.stringify({ message: 'Update is not a fast forward' }), { status: 422, headers: { 'content-type': 'application/json' } });
@@ -579,4 +603,38 @@ test('manage normalizes duplicate tags on update and supports removing tags', as
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+test('managing a post writes each file as a blob and sends a tree of hashes', async () => {
+  const calls = githubMock();
+  const inner = globalThis.fetch;
+  let sentTree = null;
+  globalThis.fetch = async (input, options = {}) => {
+    const path = new URL(String(input)).pathname;
+    if (path.endsWith('/git/trees') && (options.method || 'GET') === 'POST') sentTree = String(options.body);
+    return inner(input, options);
+  };
+  try {
+    const { response } = await run();
+    assert.equal(response.status, 200);
+    const blobCalls = calls.filter((call) => call.path.endsWith('/git/blobs') && call.method === 'POST');
+    assert.deepEqual([...new Set(blobCalls.map((call) => call.body.encoding))], ['utf-8']);
+    const tree = JSON.parse(sentTree).tree;
+    for (const entry of tree) {
+      assert.equal(Object.hasOwn(entry, 'content'), false, `${entry.path} carries no inline content`);
+      assert.equal(typeof entry.sha, 'string', `${entry.path} is named by hash`);
+    }
+    // The request that used to carry the whole search index is now a list.
+    assert.ok(sentTree.length < 4096, `tree request is ${sentTree.length} bytes`);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('a delete still removes files, and a null sha is not mistaken for content', async () => {
+  const calls = githubMock();
+  try {
+    const { response } = await run({ action: 'delete', confirmTitle: basePost.title });
+    assert.equal(response.status, 200);
+    const removed = treeFrom(calls).filter((entry) => entry.sha === null).map((entry) => entry.path);
+    assert.ok(removed.includes(basePost.href), 'the report HTML is deleted');
+  } finally { globalThis.fetch = originalFetch; }
 });

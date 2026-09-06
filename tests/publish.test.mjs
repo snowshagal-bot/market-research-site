@@ -13,8 +13,25 @@ function base64(text) {
   return btoa(binary);
 }
 
+/**
+ * File contents reach a tree as blobs written first and named by hash, so the
+ * recorded tree call carries shas where it used to carry text. Git treats the
+ * two as the same thing; these mocks do too, putting each blob's content back
+ * on the entry that names it so a test can still read what was committed.
+ */
+function restoreBlobContent(body, blobContents) {
+  if (!Array.isArray(body?.tree)) return;
+  for (const entry of body.tree) {
+    if (entry && typeof entry.sha === 'string' && blobContents.has(entry.sha)) {
+      entry.content = blobContents.get(entry.sha);
+    }
+  }
+}
+
 function githubMock(existingPosts = [], { searchIndex = null, searchIndexFail = false, searchIndexViaBlob = false } = {}) {
   const calls = [];
+  const blobContents = new Map();
+  let textBlobs = 0;
   const defaultIndex = searchIndex !== null ? searchIndex : existingPosts.map(p => ({
     id: p.id,
     lang: p.lang || 'ko',
@@ -41,8 +58,16 @@ function githubMock(existingPosts = [], { searchIndex = null, searchIndexFail = 
     else if (path.endsWith('/git/ref/heads/main')) payload = { object: { sha: 'parent-sha' } };
     else if (path.endsWith('/git/commits/parent-sha')) payload = { tree: { sha: 'base-tree' } };
     else if (path.endsWith('/git/blobs/search-index-sha')) payload = { content: base64(`${JSON.stringify(defaultIndex)}\n`), encoding: 'base64', sha: 'search-index-sha' };
+    else if (path.endsWith('/git/blobs') && body?.encoding === 'utf-8') {
+      const sha = `text-blob-${++textBlobs}`;
+      blobContents.set(sha, body.content);
+      payload = { sha };
+    }
     else if (path.endsWith('/git/blobs')) payload = { sha: 'cover-blob-sha' };
-    else if (path.endsWith('/git/trees')) payload = { sha: 'tree-sha' };
+    else if (path.endsWith('/git/trees')) {
+      restoreBlobContent(body, blobContents);
+      payload = { sha: 'tree-sha' };
+    }
     else if (path.endsWith('/git/commits')) payload = { sha: 'commit-sha' };
     else if (path.endsWith('/git/refs/heads/main')) payload = {};
     else throw new Error(`Unexpected GitHub request: ${path}`);
@@ -74,6 +99,7 @@ function atomicGithubMock({
   let treeCounter = 0;
   let commitCounter = 0;
   let blobCounter = 0;
+  const blobContents = new Map();
   let initialRefReads = 0;
   let releaseInitialRefs;
   const initialRefGate = concurrentInitialRefs > 0
@@ -116,11 +142,14 @@ function atomicGithubMock({
     }
     if (method === 'POST' && path.endsWith('/git/blobs')) {
       blobCounter += 1;
-      return Response.json({ sha: `blob-${blobCounter}` });
+      const sha = `blob-${blobCounter}`;
+      if (body?.encoding === 'utf-8') blobContents.set(sha, body.content);
+      return Response.json({ sha });
     }
     if (method === 'POST' && path.endsWith('/git/trees')) {
       treeCounter += 1;
       const sha = `tree-${treeCounter}`;
+      restoreBlobContent(body, blobContents);
       trees.set(sha, body);
       return Response.json({ sha });
     }
@@ -424,7 +453,7 @@ test('publishing Market Basics with a cover stores a binary blob and coverImage 
     const { response, data } = await runPublish({ type: 'basics', cover });
     assert.equal(response.status, 200);
     assert.match(data.coverImage, /^covers\/2026-08-10-basics-[a-z0-9]+\.png$/);
-    const blobCall = calls.find(call => call.path.endsWith('/git/blobs'));
+    const blobCall = calls.find(call => call.path.endsWith('/git/blobs') && call.body?.encoding === 'base64');
     assert.deepEqual(blobCall.body, { content: 'AQIDBA==', encoding: 'base64' });
     const treeCall = calls.find(call => call.path.endsWith('/git/trees'));
     const coverEntry = treeCall.body.tree.find(entry => entry.path === data.coverImage);
@@ -919,5 +948,97 @@ test('a body <style> that does not size a cover is left alone', async () => {
     const { response } = await runPublish({ html: reportHtml('', '<div class="page">t</div>', '<style>.page{margin:0}</style>') });
     assert.equal(response.status, 200);
     assert.ok(plain.some(call => call.path.endsWith('/git/trees')));
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+/* ------------------------------------------------- how the commit is sent */
+
+// What actually went on the wire, before the mock puts blob content back on
+// the tree entries for the benefit of the tests that read it.
+function captureTreeRequest() {
+  const inner = globalThis.fetch;
+  const state = { body: null, treePosts: 0, refPatches: 0 };
+  globalThis.fetch = async (input, options = {}) => {
+    const path = new URL(String(input)).pathname;
+    const method = (options.method || 'GET').toUpperCase();
+    if (path.endsWith('/git/trees') && method === 'POST') {
+      state.treePosts += 1;
+      state.body = String(options.body);
+    }
+    if (path.endsWith('/git/refs/heads/main') && method === 'PATCH') state.refPatches += 1;
+    return inner(input, options);
+  };
+  return state;
+}
+
+test('every file is written as its own blob, and the tree carries hashes rather than content', async () => {
+  const calls = githubMock();
+  const sent = captureTreeRequest();
+  try {
+    const { response } = await runPublish({});
+    assert.equal(response.status, 200);
+
+    const blobCalls = calls.filter(call => call.path.endsWith('/git/blobs') && call.method === 'POST');
+    assert.deepEqual([...new Set(blobCalls.map(call => call.body.encoding))], ['utf-8']);
+    // The report, both posts files and all four search index artifacts.
+    assert.equal(blobCalls.length, 7);
+
+    const tree = JSON.parse(sent.body).tree;
+    for (const entry of tree) {
+      assert.equal(typeof entry.sha, 'string', `${entry.path} is named by hash`);
+      assert.equal(Object.hasOwn(entry, 'content'), false, `${entry.path} carries no inline content`);
+    }
+    // Every file still reaches the commit; only how it travels changed.
+    const paths = tree.map(entry => entry.path);
+    for (const path of ['data/posts.json', 'data/posts.js', 'data/search-index.json', 'data/search-index-meta.js', 'data/search-index-body-ko.js', 'data/search-index-body-en.js']) {
+      assert.ok(paths.includes(path), `${path} is in the tree`);
+    }
+    assert.equal(paths.filter(path => path.startsWith('reports/')).length, 1);
+    // The whole point: the request that used to carry megabytes is a list.
+    assert.ok(sent.body.length < 4096, `tree request is ${sent.body.length} bytes`);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('an edge that drops one content-addressed call is retried, and the publish still goes through', async () => {
+  githubMock();
+  const inner = globalThis.fetch;
+  const attempts = { tree: 0 };
+  globalThis.fetch = async (input, options = {}) => {
+    const path = new URL(String(input)).pathname;
+    if (path.endsWith('/git/trees') && (options.method || 'GET') === 'POST' && ++attempts.tree === 1) {
+      // What Cloudflare answers when it gives up on a request: its own words,
+      // not GitHub's, and not JSON.
+      return new Response('error code: 520', { status: 520, headers: { 'content-type': 'text/plain' } });
+    }
+    return inner(input, options);
+  };
+  try {
+    const { response, data } = await runPublish({});
+    assert.equal(response.status, 200, JSON.stringify(data));
+    assert.equal(attempts.tree, 2, 'sent again, once');
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('a branch update is never retried, and the failure names the call that failed', async () => {
+  githubMock();
+  const inner = globalThis.fetch;
+  const attempts = { patch: 0 };
+  globalThis.fetch = async (input, options = {}) => {
+    const path = new URL(String(input)).pathname;
+    if (path.endsWith('/git/refs/heads/main') && (options.method || 'GET') === 'PATCH') {
+      attempts.patch += 1;
+      return new Response('error code: 520', { status: 520, headers: { 'content-type': 'text/plain' } });
+    }
+    return inner(input, options);
+  };
+  try {
+    const { response, data } = await runPublish({});
+    assert.equal(response.status, 500);
+    assert.equal(data.error, 'PUBLISH_FAILED');
+    // Moving a reference twice is not the same as moving it once.
+    assert.equal(attempts.patch, 1);
+    // The old report said only "error code: 520"; this one says whose 520.
+    assert.match(data.message, /PATCH \/git\/refs\/heads\/main → 520/);
+    assert.match(data.message, /error code: 520/);
   } finally { globalThis.fetch = originalFetch; }
 });

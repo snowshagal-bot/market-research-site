@@ -123,24 +123,92 @@ function githubHeaders(token) {
   };
 }
 
+// A failure the upstream did not author: an edge between here and GitHub gave
+// up on the request. Nothing was decided, so the call can simply be made again.
+const TRANSIENT_STATUS = new Set([408, 429, 500, 502, 503, 504, 520, 521, 522, 523, 524]);
+const GH_ATTEMPTS = 3;
+
+/**
+ * Git objects are addressed by the hash of their content: creating the same
+ * blob, tree or commit twice yields the same object and no second effect, so
+ * these calls can be repeated safely. Moving a branch reference cannot, and
+ * never is.
+ */
+function isRepeatable(method, path) {
+  if (method === 'GET') return true;
+  return method === 'POST' && ['/git/blobs', '/git/trees', '/git/commits'].includes(path);
+}
+
 async function gh(token, path, options = {}) {
-  const response = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}${path}`, {
-    ...options,
-    headers: {
-      ...githubHeaders(token),
-      ...(options.headers || {})
+  const method = String(options.method || 'GET').toUpperCase();
+  const attempts = isRepeatable(method, path) ? GH_ATTEMPTS : 1;
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    if (attempt > 1) await new Promise(resolve => setTimeout(resolve, 500 * (attempt - 1)));
+
+    let response;
+    try {
+      response = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}${path}`, {
+        ...options,
+        headers: {
+          ...githubHeaders(token),
+          ...(options.headers || {})
+        }
+      });
+    } catch (cause) {
+      // The request never produced a response at all.
+      lastError = new Error(`GitHub ${method} ${path} 요청이 실패했습니다: ${cause?.message || cause}`);
+      lastError.status = 0;
+      continue;
     }
-  });
-  const text = await response.text();
-  let data = null;
-  try { data = text ? JSON.parse(text) : null; } catch (_) { data = { message: text }; }
-  if (!response.ok) {
-    const err = new Error(data?.message || `GitHub API ${response.status}`);
+
+    const text = await response.text();
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch (_) { data = { message: text }; }
+    if (response.ok) return data;
+
+    // An edge that rejects the request answers in its own words — "error code:
+    // 520" and nothing else — so the endpoint and status are recorded here.
+    // Without them the publisher reports a number no one can place.
+    const detail = data?.message ? `: ${String(data.message).replace(/\s+/g, ' ').trim().slice(0, 200)}` : '';
+    const err = new Error(`GitHub ${method} ${path} → ${response.status}${detail}`);
     err.status = response.status;
     err.details = data;
-    throw err;
+    lastError = err;
+    if (!TRANSIENT_STATUS.has(response.status)) throw err;
   }
-  return data;
+
+  throw lastError;
+}
+
+/**
+ * Turns tree entries that carry file content into blob references.
+ *
+ * A tree that inlines every file puts the whole search index, both body
+ * shards, the posts files and the report into a single request — several
+ * megabytes that grow with every report published, and a request that large is
+ * what an edge refuses without saying why. Written as blobs first, each file
+ * travels on its own and the tree itself is a short list of hashes. What lands
+ * in the commit is identical either way: a tree entry naming a blob's hash and
+ * one carrying that blob's content mean the same thing to Git.
+ */
+async function toBlobEntries(token, entries) {
+  const resolved = [];
+  for (const entry of entries) {
+    if (typeof entry?.content !== 'string') {
+      resolved.push(entry);
+      continue;
+    }
+    const blob = await gh(token, '/git/blobs', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ content: entry.content, encoding: 'utf-8' })
+    });
+    const { content, ...rest } = entry;
+    resolved.push({ ...rest, sha: blob.sha });
+  }
+  return resolved;
 }
 
 async function readRepoText(token, path, ref) {
@@ -830,21 +898,20 @@ export async function onRequestPost(context) {
       coverEntry = { path: coverPath, mode: '100644', type: 'blob', sha: coverBlob.sha };
     }
 
+    const treeEntries = await toBlobEntries(token, [
+      { path: reportPath, mode: '100644', type: 'blob', content: html },
+      ...(coverEntry ? [coverEntry] : []),
+      ...(shareCardEntry ? [shareCardEntry] : []),
+      ...(coverThumbnailEntry ? [coverThumbnailEntry] : []),
+      { path: 'data/posts.json', mode: '100644', type: 'blob', content: postsJson },
+      { path: 'data/posts.js', mode: '100644', type: 'blob', content: postsJs },
+      ...searchIndexBlobs
+    ]);
+
     const tree = await gh(token, '/git/trees', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        base_tree: baseTree,
-        tree: [
-          { path: reportPath, mode: '100644', type: 'blob', content: html },
-          ...(coverEntry ? [coverEntry] : []),
-          ...(shareCardEntry ? [shareCardEntry] : []),
-          ...(coverThumbnailEntry ? [coverThumbnailEntry] : []),
-          { path: 'data/posts.json', mode: '100644', type: 'blob', content: postsJson },
-          { path: 'data/posts.js', mode: '100644', type: 'blob', content: postsJs },
-          ...searchIndexBlobs
-        ]
-      })
+      body: JSON.stringify({ base_tree: baseTree, tree: treeEntries })
     });
 
     const commit = await gh(token, '/git/commits', {
