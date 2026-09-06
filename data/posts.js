@@ -1,5 +1,30 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-05-weekly-12vtfba",
+    "type": "weekly",
+    "typeLabel": "Weekly",
+    "lang": "en",
+    "date": "2026-09-05",
+    "reportDate": "2026-09-05",
+    "registeredDate": "2026-09-07",
+    "registeredAt": "2026-09-06T17:36:09.776Z",
+    "legacyImport": false,
+    "title": "Winds Stronger Than the Support",
+    "subtitle": "",
+    "description": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
+    "tags": [
+      "semiconductors",
+      "rates",
+      "policy"
+    ],
+    "readingMinutes": 16,
+    "href": "reports/en/2026-09-06_Korea_Weekly_Report_EN.html",
+    "translationGroup": "2026-09-05-weekly-19wkhfg",
+    "coverImage": "covers/2026-09-05-weekly-12vtfba.webp",
+    "shareCardImage": "covers/share/2026-09-05-weekly-12vtfba.jpg",
+    "coverThumbnail": "covers/2026-09-05-weekly-12vtfba-450.webp"
+  },
+  {
     "id": "2026-09-05-weekly-19wkhfg",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
