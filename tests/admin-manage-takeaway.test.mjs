@@ -25,8 +25,25 @@ function base64(text) {
   return btoa(binary);
 }
 
+/**
+ * File contents reach a tree as blobs written first and named by hash, so the
+ * recorded tree call carries shas where it used to carry text. Git treats the
+ * two as the same thing; this mock does too, putting each blob's content back
+ * on the entry that names it so a test can still read what was committed.
+ */
+function restoreBlobContent(body, blobContents) {
+  if (!Array.isArray(body?.tree)) return;
+  for (const entry of body.tree) {
+    if (entry && typeof entry.sha === 'string' && blobContents.has(entry.sha)) {
+      entry.content = blobContents.get(entry.sha);
+    }
+  }
+}
+
 function githubMock(existingPosts, { searchIndex = null } = {}) {
   const calls = [];
+  const blobContents = new Map();
+  let textBlobs = 0;
   const defaultIndex = searchIndex !== null ? searchIndex : existingPosts.map(p => ({
     id: p.id,
     lang: p.lang || 'ko',
@@ -49,7 +66,15 @@ function githubMock(existingPosts, { searchIndex = null } = {}) {
       payload = { object: { sha: 'base-sha' } };
     } else if (path.endsWith('/git/commits/base-sha')) payload = { tree: { sha: 'base-tree' } };
     else if (path.includes('/contents/data/posts.json?ref=')) payload = { content: base64(`${JSON.stringify(existingPosts)}\n`) };
-    else if (path.endsWith('/git/trees')) payload = { sha: 'tree-sha' };
+    else if (path.endsWith('/git/blobs')) {
+      const sha = `text-blob-${++textBlobs}`;
+      if (body?.encoding === 'utf-8') blobContents.set(sha, body.content);
+      payload = { sha };
+    }
+    else if (path.endsWith('/git/trees')) {
+      restoreBlobContent(body, blobContents);
+      payload = { sha: 'tree-sha' };
+    }
     else if (path.endsWith('/git/commits')) payload = { sha: 'commit-sha' };
     else if (path.endsWith('/git/refs/heads/main')) payload = {};
     else throw new Error(`Unexpected GitHub request: ${path}`);

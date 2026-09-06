@@ -1,6 +1,6 @@
 # Project state
 
-Updated: 2026-09-06
+Updated: 2026-09-07
 
 ## Purpose
 
@@ -205,6 +205,8 @@ Admin page: `/admin/`
 11. Admin UI polls `data/posts.json` until the new post appears, then shows completion and redirects to the relevant locale/category.
 
 The publisher and post manager read repository JSON through the Git blob API when a file is too large for the GitHub Contents API to return inline. This keeps the growing full-text search index publishable beyond the Contents API's 1MB inline-content limit.
+
+They write the same way. Every file in a publish or an edit — the report HTML, `data/posts.json`, `data/posts.js` and the four search index artifacts — is created as its own Git blob first, and the tree names it by hash. A tree that inlined the contents instead grew with the archive: by 2026-09 a single publish request carried over 6MB before the report itself, and an edge between Cloudflare and GitHub refused it with an opaque `error code: 520` that reached the admin with no indication of which call had failed. Requests that Git addresses by content hash — blobs, trees, commits — are retried on such a failure; a branch reference update is not, because moving it twice is not the same as moving it once. A GitHub error now records the endpoint and status alongside whatever the upstream said.
 
 The publishing UI now warns before the final confirmation when no optional homepage cover is selected. Publishing without a cover remains supported and uses the homepage fallback cover.
 Publish failures remain visible without clearing the selected report or metadata. An invalid administrator key is identified explicitly, marked on the key field, and can be corrected before retrying.
