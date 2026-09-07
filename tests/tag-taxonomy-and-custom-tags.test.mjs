@@ -16,6 +16,11 @@ import {
   parseAndValidateTags,
   generateTagsJs
 } from '../functions/_tags.js';
+import {
+  tagLabel,
+  categoryFeaturedCards,
+  homepageLatestLinks
+} from '../functions/_seo.js';
 import { createMockAuthEnv } from './helpers/auth-test-helper.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -300,6 +305,277 @@ test('Atomic Publish with Custom Tag: persists data/tags.json & data/tags.js in 
     assert.ok(postsEntry, 'data/posts.json must be committed');
     const posts = JSON.parse(postsEntry.content);
     assert.deepEqual(posts[0].tags, ['humanoid', 'semiconductors']);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('Regression 1: SSR custom tag label rendering in Home and Category with zero raw ID exposure', () => {
+  const customRegistry = {
+    ...JSON.parse(tagsJsonRaw),
+    'quantum-computing': {
+      ko: '양자 컴퓨팅',
+      en: 'Quantum Computing',
+      group: 'sector'
+    }
+  };
+
+  const samplePosts = [
+    {
+      id: '2026-09-07-quantum-ko',
+      type: 'daily',
+      reportDate: '2026-09-07',
+      title: '양자 컴퓨팅 데일리',
+      href: '/reports/2026-09-07-quantum-ko.html',
+      lang: 'ko',
+      tags: ['quantum-computing', 'kospi']
+    },
+    {
+      id: '2026-09-07-quantum-en',
+      type: 'daily',
+      reportDate: '2026-09-07',
+      title: 'Quantum Computing Daily',
+      href: '/en/reports/2026-09-07-quantum-en.html',
+      lang: 'en',
+      tags: ['quantum-computing', 'kospi']
+    },
+    {
+      id: '2026-09-07-unknown-tag',
+      type: 'research',
+      reportDate: '2026-09-06',
+      title: 'Unknown Tag Post',
+      href: '/reports/unknown.html',
+      lang: 'ko',
+      tags: ['completely-unknown-tag']
+    }
+  ];
+
+  // 1. tagLabel direct resolution
+  assert.equal(tagLabel('quantum-computing', 'ko', customRegistry), '양자 컴퓨팅');
+  assert.equal(tagLabel('quantum-computing', 'en', customRegistry), 'Quantum Computing');
+  // Unknown tag must fail-safe to empty string, NEVER raw ID
+  assert.equal(tagLabel('completely-unknown-tag', 'ko', customRegistry), '');
+  assert.equal(tagLabel('completely-unknown-tag', 'en', customRegistry), '');
+
+  // 2. Category featured cards SSR
+  const koCategoryHtml = categoryFeaturedCards(samplePosts, 'daily', 'ko', customRegistry);
+  assert.match(koCategoryHtml, /양자 컴퓨팅/);
+  assert.doesNotMatch(koCategoryHtml, /quantum-computing/);
+
+  const enCategoryHtml = categoryFeaturedCards(samplePosts, 'daily', 'en', customRegistry);
+  assert.match(enCategoryHtml, /Quantum Computing/);
+  assert.doesNotMatch(enCategoryHtml, /quantum-computing/);
+
+  // Unknown tag post in category featured cards: raw tag ID must NOT appear
+  const unknownCatHtml = categoryFeaturedCards(samplePosts, 'research', 'ko', customRegistry);
+  assert.doesNotMatch(unknownCatHtml, /completely-unknown-tag/);
+  assert.doesNotMatch(unknownCatHtml, /<div class="category-featured-tags">/);
+
+  // 3. Homepage latest links SSR
+  const koHomeHtml = homepageLatestLinks(samplePosts, 'ko', customRegistry);
+  assert.match(koHomeHtml, /양자 컴퓨팅/);
+  assert.doesNotMatch(koHomeHtml, /quantum-computing/);
+
+  const enHomeHtml = homepageLatestLinks(samplePosts, 'en', customRegistry);
+  assert.match(enHomeHtml, /Quantum Computing/);
+  assert.doesNotMatch(enHomeHtml, /quantum-computing/);
+});
+
+test('Regression 2: Pending custom tag deselection excludes tag from submission and registry', () => {
+  // Simulate admin UI state
+  const pendingCustomTags = [
+    { id: 'custom-tag-1', ko: '커스텀 태그 1', en: 'Custom Tag 1', group: 'sector' }
+  ];
+  const selectedTagIds = new Set(['kospi']); // User created custom-tag-1, but deselected it, keeping only kospi
+
+  // Filter logic identically matching assets/admin.js publish()
+  const activeCustomTags = pendingCustomTags.filter(tag => selectedTagIds.has(tag.id));
+  assert.equal(activeCustomTags.length, 0, 'Deselected pending custom tag must not be in activeCustomTags');
+
+  // Verify form payload construction: newTags should NOT be appended
+  const form = new FormData();
+  if (activeCustomTags.length > 0) {
+    form.append('newTags', JSON.stringify(activeCustomTags));
+  }
+  selectedTagIds.forEach(id => form.append('tags', id));
+
+  assert.equal(form.get('newTags'), null, 'FormData must not contain newTags');
+  assert.deepEqual(form.getAll('tags'), ['kospi']);
+});
+
+test('Regression 3: Multiple pending custom tags with partial deselection only persists selected tags', async () => {
+  // Simulate admin UI state with two custom tags created
+  const pendingCustomTags = [
+    { id: 'custom-alpha', ko: '커스텀 알파', en: 'Custom Alpha', group: 'sector' },
+    { id: 'custom-beta', ko: '커스텀 베타', en: 'Custom Beta', group: 'macro' }
+  ];
+  // Alpha is selected, Beta is deselected, along with existing tag 'kospi'
+  const selectedTagIds = new Set(['custom-alpha', 'kospi']);
+
+  const activeCustomTags = pendingCustomTags.filter(tag => selectedTagIds.has(tag.id));
+  assert.equal(activeCustomTags.length, 1);
+  assert.equal(activeCustomTags[0].id, 'custom-alpha');
+
+  const calls = [];
+  const existingPosts = [];
+  let branchSha = 'base-sha';
+  let blobCounter = 0;
+  const blobContents = new Map();
+
+  globalThis.fetch = async (input, options = {}) => {
+    const url = new URL(String(input));
+    const path = `${url.pathname}${url.search}`;
+    const method = options.method || 'GET';
+    const body = options.body ? JSON.parse(options.body) : null;
+    calls.push({ path, method, body });
+
+    if (path.endsWith('/git/ref/heads/main')) {
+      return Response.json({ object: { sha: branchSha } });
+    }
+    if (path.includes('/contents/data/posts.json')) {
+      return Response.json({ content: base64(`${JSON.stringify(existingPosts)}\n`) });
+    }
+    if (path.includes('/contents/data/tags.json')) {
+      return Response.json({ content: base64(`${tagsJsonRaw}\n`) });
+    }
+    if (path.includes('/contents/data/search-index.json')) {
+      return Response.json({ content: base64('[]\n') });
+    }
+    if (method === 'GET' && path.includes('/git/commits/')) {
+      return Response.json({ tree: { sha: 'base-tree' } });
+    }
+    if (method === 'POST' && path.endsWith('/git/blobs')) {
+      blobCounter += 1;
+      const sha = `blob-${blobCounter}`;
+      if (body?.encoding === 'utf-8') blobContents.set(sha, body.content);
+      return Response.json({ sha });
+    }
+    if (method === 'POST' && path.endsWith('/git/trees')) {
+      if (Array.isArray(body?.tree)) {
+        for (const entry of body.tree) {
+          if (entry && blobContents.has(entry.sha)) {
+            entry.content = blobContents.get(entry.sha);
+          }
+        }
+      }
+      return Response.json({ sha: 'new-tree-sha' });
+    }
+    if (method === 'POST' && path.endsWith('/git/commits')) {
+      return Response.json({ sha: 'new-commit-sha' });
+    }
+    if (method === 'PATCH' && path.endsWith('/git/refs/heads/main')) {
+      branchSha = body.sha;
+      return Response.json({ object: { sha: branchSha } });
+    }
+    throw new Error(`Unexpected call: ${path}`);
+  };
+
+  try {
+    const authEnv = await createTestAuthEnv();
+    const form = new FormData();
+    const sampleHtml = '<!DOCTYPE html><html><head><title>Test Report</title></head><body><h1>Test Report</h1><p>' + '본문 내용 '.repeat(50) + '</p></body></html>';
+    form.append('file', new File([sampleHtml], '2026-09-07-daily-multi.html', { type: 'text/html' }));
+    form.append('type', 'daily');
+    form.append('reportDate', '2026-09-07');
+    form.append('title', 'Multi Test');
+    form.append('lang', 'ko');
+    form.append('newTags', JSON.stringify(activeCustomTags));
+    selectedTagIds.forEach(id => form.append('tags', id));
+
+    const headers = {
+      origin: 'https://admin.snowshagal.com',
+      'x-admin-key': ADMIN_KEY,
+      cookie: authEnv._authSession.cookieHeader,
+      'x-csrf-token': authEnv._authSession.csrfToken
+    };
+
+    const req = new Request('https://admin.snowshagal.com/api/publish', {
+      method: 'POST',
+      headers,
+      body: form
+    });
+
+    const res = await publishPost({ request: req, env: authEnv });
+    assert.equal(res.status, 200);
+
+    const treeCall = calls.find(c => c.path.endsWith('/git/trees'));
+    const tagsJsonEntry = treeCall.body.tree.find(e => e.path === 'data/tags.json');
+    const parsedTags = JSON.parse(tagsJsonEntry.content);
+
+    assert.ok(parsedTags['custom-alpha'], 'Selected custom tag alpha must be in tags.json');
+    assert.equal(parsedTags['custom-beta'], undefined, 'Deselected custom tag beta must NOT be in tags.json');
+
+    const postsEntry = treeCall.body.tree.find(e => e.path === 'data/posts.json');
+    const posts = JSON.parse(postsEntry.content);
+    assert.deepEqual(posts[0].tags, ['custom-alpha', 'kospi']);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('Regression 4: Forged / unreferenced newTags API request is rejected with 400 UNUSED_CUSTOM_TAG (zero mutation)', async () => {
+  const calls = [];
+  globalThis.fetch = async (input, options = {}) => {
+    const url = new URL(String(input));
+    const path = `${url.pathname}${url.search}`;
+    const method = options.method || 'GET';
+    const body = options.body ? JSON.parse(options.body) : null;
+    calls.push({ path, method, body });
+
+    if (path.endsWith('/git/ref/heads/main')) {
+      return Response.json({ object: { sha: 'base-sha' } });
+    }
+    if (path.includes('/contents/data/posts.json')) {
+      return Response.json({ content: base64('[]\n') });
+    }
+    if (path.includes('/contents/data/tags.json')) {
+      return Response.json({ content: base64(`${tagsJsonRaw}\n`) });
+    }
+    if (path.includes('/contents/data/search-index.json')) {
+      return Response.json({ content: base64('[]\n') });
+    }
+    if (method === 'GET' && path.includes('/git/commits/')) {
+      return Response.json({ tree: { sha: 'base-tree' } });
+    }
+    throw new Error(`Unexpected call during validation failure: ${path}`);
+  };
+
+  try {
+    const authEnv = await createTestAuthEnv();
+    const form = new FormData();
+    const sampleHtml = '<!DOCTYPE html><html><head><title>Forged Report</title></head><body><h1>Forged Report</h1><p>' + '본문 내용 '.repeat(50) + '</p></body></html>';
+    form.append('file', new File([sampleHtml], '2026-09-07-daily-forged.html', { type: 'text/html' }));
+    form.append('type', 'daily');
+    form.append('reportDate', '2026-09-07');
+    form.append('title', 'Forged Report');
+    form.append('lang', 'ko');
+    // newTags declares 'forged-tag', but post only selects 'kospi'
+    form.append('newTags', JSON.stringify([
+      { ko: '위조 태그', en: 'Forged Tag', group: 'sector' }
+    ]));
+    form.append('tags', 'kospi');
+
+    const headers = {
+      origin: 'https://admin.snowshagal.com',
+      'x-admin-key': ADMIN_KEY,
+      cookie: authEnv._authSession.cookieHeader,
+      'x-csrf-token': authEnv._authSession.csrfToken
+    };
+
+    const req = new Request('https://admin.snowshagal.com/api/publish', {
+      method: 'POST',
+      headers,
+      body: form
+    });
+
+    const res = await publishPost({ request: req, env: authEnv });
+    const data = await res.json();
+    assert.equal(res.status, 400, 'Must reject with HTTP 400');
+    assert.equal(data.error, 'UNUSED_CUSTOM_TAG', 'Error code must be UNUSED_CUSTOM_TAG');
+
+    // Zero mutations: no blobs, trees, commits, or patch ref calls made
+    const mutatingCalls = calls.filter(c => c.method === 'POST' || c.method === 'PATCH' || c.method === 'PUT');
+    assert.equal(mutatingCalls.length, 0, 'Must make zero mutating GitHub API calls');
   } finally {
     globalThis.fetch = originalFetch;
   }

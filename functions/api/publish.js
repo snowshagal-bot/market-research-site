@@ -716,6 +716,7 @@ export async function onRequestPost(context) {
     if (!tagRegistry || typeof tagRegistry !== 'object') throw new Error('tags.json 형식이 올바르지 않습니다.');
 
     let hasNewTags = false;
+    const validatedNewTags = [];
     for (const def of newTagsInput) {
       const tagValidationResult = validateTagDefinition(def, tagRegistry);
       if (!tagValidationResult.valid) {
@@ -726,6 +727,7 @@ export async function onRequestPost(context) {
         en: tagValidationResult.tag.en,
         group: tagValidationResult.tag.group
       };
+      validatedNewTags.push(tagValidationResult.tag);
       hasNewTags = true;
     }
 
@@ -751,6 +753,19 @@ export async function onRequestPost(context) {
       return reply({ error: 'BAD_TAGS', message: tagValidation.error }, 400);
     }
     const tags = tagValidation.tags;
+
+    // Server-side defense: verify that every declared new tag is actually referenced in the post's final tags
+    if (validatedNewTags.length > 0) {
+      const finalTagSet = new Set(tags);
+      for (const newTag of validatedNewTags) {
+        if (!finalTagSet.has(newTag.id)) {
+          return reply({
+            error: 'UNUSED_CUSTOM_TAG',
+            message: `신규 등록 태그 '${newTag.id}'가 게시물의 최종 태그에 포함되지 않았습니다.`
+          }, 400);
+        }
+      }
+    }
     const readingMinutes = calculateReadingMinutes(html, lang, type);
 
     if (posts.some(p => p.href === href)) {

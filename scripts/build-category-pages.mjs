@@ -89,7 +89,7 @@ ${structuredDataScript(categoryStructuredData(type, lang))}
 <main><section class="category-landing-hero"><div class="site-wrap"><p class="category-landing-eyebrow">${eyebrow}</p><h1>${escapeHtml(text.heading)}</h1><p class="category-landing-lead">${escapeHtml(text.lead)}</p></div></section><section class="category-landing-featured-section" id="category-featured-section" aria-labelledby="category-featured-heading"><div class="site-wrap"><div class="category-landing-list-head"><h2 id="category-featured-heading">${escapeHtml(featuredHeading)}</h2></div><div id="category-featured-cards" class="category-featured-grid" data-category-featured-cards></div></div></section><section class="category-landing-list-section" id="category-archive-section" aria-labelledby="category-list-heading"><div class="site-wrap"><div class="category-landing-list-head"><h2 id="category-list-heading">${en ? 'Previous Reports' : '지난 리포트'}</h2><a class="category-landing-home" href="${home}">${en ? 'All reports' : '전체 리포트'} <span aria-hidden="true">→</span></a></div><div id="category-report-list" class="report-list" data-category-report-list data-category="${type}"></div></div></section></main>
 ${siteFooter(lang)}
 ${searchDialog(lang)}
-<script src="/data/tags.js?v=121f43e8ae"></script><script src="/data/posts.js"></script><script src="/assets/locale.js?v=bb6eec37ab"></script><script src="/assets/site.js?v=218cfb62a2"></script><script src="/assets/category-landing.js?v=c2ca21cfa8"></script>
+<script src="/data/tags.js?v=121f43e8ae"></script><script src="/data/posts.js"></script><script src="/assets/locale.js?v=bb6eec37ab"></script><script src="/assets/site.js?v=dc2fa549f8"></script><script src="/assets/category-landing.js?v=36b2a4df15"></script>
 </body></html>
 `;
 }

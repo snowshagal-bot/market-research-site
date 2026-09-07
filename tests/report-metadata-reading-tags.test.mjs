@@ -369,21 +369,12 @@ test('Canonical Registry: Exact single-source-of-truth across all backend and fr
   assert.match(publishJs, /_tags\.js/);
   assert.match(manageJs, /_tags\.js/);
 
-  // 4. Frontend fallback registries exact label equality
-  function extractFallback(src) {
-    const match = src.match(/(?:const|let|var)\s+tagRegistry\s*=\s*window\.TAG_REGISTRY\s*\|\|\s*(\{[\s\S]*?\n\s*\});/) ||
-                  src.match(/(?:const|let|var)\s+TAG_REGISTRY\s*=\s*window\.TAG_REGISTRY\s*\|\|\s*(\{[\s\S]*?\n\s*\});/);
-    assert.ok(match, 'Source must define fallback tag registry');
-    return Function(`return ${match[1]};`)();
-  }
-
-  const siteFallback = extractFallback(siteJs);
-  const adminFallback = extractFallback(adminJs);
-  const adminManageFallback = extractFallback(adminManageJs);
-
-  assert.deepEqual(siteFallback, tagsJson, 'assets/site.js fallback must exactly deepEqual data/tags.json');
-  assert.deepEqual(adminFallback, tagsJson, 'assets/admin.js fallback must exactly deepEqual data/tags.json');
-  assert.deepEqual(adminManageFallback, tagsJson, 'assets/admin-manage.js fallback must exactly deepEqual data/tags.json');
+  // 4. Duplicate hardcoded registry elimination check (SSOT principle)
+  assert.doesNotMatch(siteJs, /"semiconductors":\s*\{\s*"ko":\s*"반도체"/, 'assets/site.js must not contain hardcoded duplicate tag registry');
+  assert.doesNotMatch(adminJs, /"semiconductors":\s*\{\s*"ko":\s*"반도체"/, 'assets/admin.js must not contain hardcoded duplicate tag registry');
+  assert.doesNotMatch(adminManageJs, /"semiconductors":\s*\{\s*"ko":\s*"반도체"/, 'assets/admin-manage.js must not contain hardcoded duplicate tag registry');
+  const seoJs = fs.readFileSync(path.join(rootDir, 'functions', '_seo.js'), 'utf8');
+  assert.doesNotMatch(seoJs, /"semiconductors":\s*\{\s*ko:\s*['"]반도체['"]/, 'functions/_seo.js must not contain hardcoded duplicate tag registry');
 });
 
 test('Admin UI: Translation Pair Tag Inheritance resets tags on switch (no stale tags)', () => {
