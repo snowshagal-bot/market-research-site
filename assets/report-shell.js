@@ -448,7 +448,7 @@
   function normalizeReportPath(value) {
     let path = String(value || '').split(/[?#]/, 1)[0].replace(/^\/+/, '');
     try { path = decodeURIComponent(path); } catch (_) {}
-    return path.toLowerCase();
+    return path.replace(/\.html?$/i, '').toLowerCase();
   }
 
   function postLang(post) {
