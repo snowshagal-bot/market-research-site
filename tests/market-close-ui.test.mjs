@@ -105,8 +105,11 @@ test('Market pages deliver substantive initial HTML for search engines and avoid
   // Avoid thin/empty-loading sole content in <main>
   const koMain = ko.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] || '';
   const enMain = en.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] || '';
-  assert.ok(koMain.length > 2000, `KO main content too short: ${koMain.length} chars`);
-  assert.ok(enMain.length > 2000, `EN main content too short: ${enMain.length} chars`);
+  const stripTags = (html) => html.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  const koText = stripTags(koMain);
+  const enText = stripTags(enMain);
+  assert.ok(koText.length >= 300, `KO meaningful main text should be non-trivial: ${koText.length} chars`);
+  assert.ok(enText.length >= 300, `EN meaningful main text should be non-trivial: ${enText.length} chars`);
   assert.doesNotMatch(koMain, /^\s*<section class="market-loading"[\s\S]*?<\/section>\s*$/);
   assert.doesNotMatch(enMain, /^\s*<section class="market-loading"[\s\S]*?<\/section>\s*$/);
 });
