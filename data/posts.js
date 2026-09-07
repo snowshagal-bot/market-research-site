@@ -1,5 +1,31 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-07-daily-1362ni2",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-09-07",
+    "reportDate": "2026-09-07",
+    "registeredDate": "2026-09-08",
+    "registeredAt": "2026-09-07T18:58:29.540Z",
+    "legacyImport": false,
+    "title": "잔인하다는 9월에 드디어 봄이?",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors",
+      "volatility"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/9월 7일 주식리포트_통합.html",
+    "coverImage": "covers/2026-09-07-daily-1362ni2.webp",
+    "shareCardImage": "covers/share/2026-09-07-daily-1362ni2.jpg",
+    "coverThumbnail": "covers/2026-09-07-daily-1362ni2-450.webp"
+  },
+  {
     "id": "2026-09-05-weekly-12vtfba",
     "type": "weekly",
     "typeLabel": "Weekly",
