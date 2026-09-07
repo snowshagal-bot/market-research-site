@@ -55,8 +55,12 @@ test('KO and EN Market pages use only the public latest API at runtime', async (
 
 test('Market renderer distinguishes loading, empty, and retryable error states', async () => {
   const [ko, en, script] = await Promise.all([read('market/index.html'), read('en/market/index.html'), read('assets/market-close.js')]);
-  assert.match(ko, /class="market-loading" role="status"/);
-  assert.match(en, /class="market-loading" role="status"/);
+  assert.match(ko, /id="market-close-root"/);
+  assert.match(ko, /class="market-hero"/);
+  assert.match(ko, /id="market-dashboard-view"/);
+  assert.match(en, /id="market-close-root"/);
+  assert.match(en, /class="market-hero"/);
+  assert.match(en, /id="market-dashboard-view"/);
   assert.match(script, /response\.status === 404/);
   assert.match(script, /function renderEmpty/);
   assert.match(script, /class="market-retry"/);
@@ -65,6 +69,46 @@ test('Market renderer distinguishes loading, empty, and retryable error states',
   assert.match(script, /localhost\|127\\\.0\\\.0\\\.1/);
   assert.match(script, /market-preview-notice/);
   assert.doesNotMatch(script, /snowshagal\.com.*example\.json/);
+});
+
+test('Market pages deliver substantive initial HTML for search engines and avoid soft 404 thin-page states', async () => {
+  const [ko, en] = await Promise.all([read('market/index.html'), read('en/market/index.html')]);
+
+  // KO Substantive Content Checks
+  assert.match(ko, /<h1[^>]*>MARKET CLOSE<\/h1>/);
+  assert.match(ko, /오늘 한국 시장은 어떻게 마감했나/);
+  assert.match(ko, /코스피·코스닥 마감 지표와 투자자 수급/);
+  assert.match(ko, /15:30 KST 마감 기준/);
+  assert.match(ko, /<span>01<\/span>\s*주요 지수/);
+  assert.match(ko, /<span>02<\/span>\s*금리 · 환율 · 변동성/);
+  assert.match(ko, /<span>04<\/span>\s*Snowshagal Market Close 제공 데이터 안내/);
+  assert.match(ko, /<span>05<\/span>\s*시장 리서치 &amp; 심층 리포트 둘러보기/);
+  assert.match(ko, /href="\/daily\/"/);
+  assert.match(ko, /href="\/weekly\/"/);
+  assert.match(ko, /href="\/research\/"/);
+  assert.match(ko, /숫자 너머의 의미를 해석합니다\./);
+
+  // EN Substantive Content Checks
+  assert.match(en, /<h1[^>]*>MARKET CLOSE<\/h1>/);
+  assert.match(en, /How did the Korean market close today\?/);
+  assert.match(en, /Comprehensive South Korean market close across indices/);
+  assert.match(en, /15:30 KST official close/);
+  assert.match(en, /<span>01<\/span>\s*Major Indices/);
+  assert.match(en, /<span>02<\/span>\s*Rates · FX · Volatility/);
+  assert.match(en, /<span>04<\/span>\s*Snowshagal Market Close Coverage &amp; Methodology/);
+  assert.match(en, /<span>05<\/span>\s*Featured Research &amp; Daily Market Reports/);
+  assert.match(en, /href="\/en\/daily\/"/);
+  assert.match(en, /href="\/en\/weekly\/"/);
+  assert.match(en, /href="\/en\/research\/"/);
+  assert.match(en, /We interpret the meaning beyond the numbers\./);
+
+  // Avoid thin/empty-loading sole content in <main>
+  const koMain = ko.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] || '';
+  const enMain = en.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] || '';
+  assert.ok(koMain.length > 2000, `KO main content too short: ${koMain.length} chars`);
+  assert.ok(enMain.length > 2000, `EN main content too short: ${enMain.length} chars`);
+  assert.doesNotMatch(koMain, /^\s*<section class="market-loading"[\s\S]*?<\/section>\s*$/);
+  assert.doesNotMatch(enMain, /^\s*<section class="market-loading"[\s\S]*?<\/section>\s*$/);
 });
 
 test('Market renderer covers every contract section without inventing an intraday chart', async () => {

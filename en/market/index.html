@@ -67,7 +67,241 @@
   </div>
 </header>
 <main id="market-close-root">
-  <section class="market-loading" role="status"><img class="market-loading-mark" src="/assets/brand/snowshagal-owl.webp" alt="" width="232" height="256" aria-hidden="true"><p>Loading the latest market close.</p></section>
+  <section class="market-hero" aria-labelledby="market-close-heading">
+    <div class="market-wrap market-hero-inner">
+      <div class="market-hero-copy">
+        <p class="market-eyebrow">SNOWSHAGAL</p>
+        <h1 id="market-close-heading">MARKET CLOSE</h1>
+        <p class="market-subtitle">How did the Korean market close today?</p>
+        <p class="market-date">Comprehensive South Korean market close across indices, flows, FX, and breadth · 15:30 KST official close</p>
+        <p class="market-update">Data updates · Every trading day at 16:05 KST</p>
+        <p class="market-overseas">* Overseas markets use each market’s latest trading session.</p>
+      </div>
+      <div class="market-mountain" aria-hidden="true"></div>
+    </div>
+  </section>
+  <div class="market-wrap">
+    <div class="market-history-strip">
+      <div class="market-history-modes" role="tablist" aria-label="View mode">
+        <button class="market-mode-btn active" type="button" data-market-action="today" role="tab" aria-selected="true">TODAY</button>
+        <button class="market-mode-btn" type="button" data-market-action="view-1w" role="tab" aria-selected="false">1W</button>
+        <button class="market-mode-btn" type="button" data-market-action="view-1m" role="tab" aria-selected="false">1M</button>
+        <span class="market-mode-divider" aria-hidden="true"></span>
+        <button class="market-mode-btn" type="button" data-market-action="toggle-calendar" role="tab" aria-selected="false" aria-expanded="false">HISTORY</button>
+      </div>
+      <div class="market-history-nav">
+        <span class="market-current-date">Latest Trading Session</span>
+        <button class="market-calendar-toggle" type="button" data-market-action="toggle-calendar" aria-label="Select date from calendar" aria-expanded="false">📅</button>
+      </div>
+    </div>
+    <div id="market-calendar-drawer" class="market-calendar-drawer" hidden></div>
+  </div>
+  <div id="market-dashboard-view" class="market-wrap market-dashboard">
+    <section class="market-section" aria-labelledby="sec-title-1">
+      <h2 id="sec-title-1"><span>01</span> Major Indices</h2>
+      <div class="major-index-grid">
+        <article class="instrument-card major">
+          <div class="instrument-heading"><strong>KOSPI</strong><small>Korea Composite</small></div>
+          <span class="instrument-value">Benchmark</span>
+          <div class="instrument-close-label">15:30 close</div>
+          <div class="instrument-current"><span>The premier benchmark index of the Korea Exchange (KRX)</span></div>
+          <div class="market-ohlc">
+            <div><dt>Universe</dt><dd>All KOSPI listed equities</dd></div>
+            <div><dt>Weighting</dt><dd>Market cap weighted</dd></div>
+          </div>
+          <div class="instrument-state">KRX Source Data</div>
+        </article>
+        <article class="instrument-card major">
+          <div class="instrument-heading"><strong>KOSDAQ</strong><small>Growth &amp; Tech</small></div>
+          <span class="instrument-value">Growth Index</span>
+          <div class="instrument-close-label">15:30 close</div>
+          <div class="instrument-current"><span>Tech, bio-healthcare, and battery innovation focus</span></div>
+          <div class="market-ohlc">
+            <div><dt>Universe</dt><dd>All KOSDAQ listed equities</dd></div>
+            <div><dt>Weighting</dt><dd>Market cap weighted</dd></div>
+          </div>
+          <div class="instrument-state">KRX Source Data</div>
+        </article>
+        <article class="instrument-card major">
+          <div class="instrument-heading"><strong>NASDAQ</strong><small>NASDAQ Composite</small></div>
+          <span class="instrument-value">Global Tech</span>
+          <div class="instrument-close-label">U.S. session close</div>
+          <div class="instrument-current"><span>Global technology, mega-cap, and semiconductor barometer</span></div>
+          <div class="market-ohlc">
+            <div><dt>Exchange</dt><dd>NASDAQ</dd></div>
+            <div><dt>Key Correlate</dt><dd>PHLX Semiconductor (SOX)</dd></div>
+          </div>
+          <div class="instrument-state">Overseas Index</div>
+        </article>
+        <article class="instrument-card major">
+          <div class="instrument-heading"><strong>DOW</strong><small>Dow Jones</small></div>
+          <span class="instrument-value">Blue Chip</span>
+          <div class="instrument-close-label">U.S. session close</div>
+          <div class="instrument-current"><span>30 prominent industrial blue-chip leaders</span></div>
+          <div class="market-ohlc">
+            <div><dt>Exchange</dt><dd>NYSE</dd></div>
+            <div><dt>Weighting</dt><dd>Price-weighted</dd></div>
+          </div>
+          <div class="instrument-state">Overseas Index</div>
+        </article>
+        <article class="instrument-card major">
+          <div class="instrument-heading"><strong>S&amp;P 500</strong><small>Large Cap 500</small></div>
+          <span class="instrument-value">Market Benchmark</span>
+          <div class="instrument-close-label">U.S. session close</div>
+          <div class="instrument-current"><span>Covers approx. 80% of available U.S. market capitalization</span></div>
+          <div class="market-ohlc">
+            <div><dt>Provider</dt><dd>S&amp;P Dow Jones</dd></div>
+            <div><dt>Weighting</dt><dd>Float-adjusted market cap</dd></div>
+          </div>
+          <div class="instrument-state">Overseas Index</div>
+        </article>
+      </div>
+    </section>
+    <div class="market-pair">
+      <section class="market-section" aria-labelledby="sec-title-2">
+        <h2 id="sec-title-2"><span>02</span> Rates · FX · Volatility</h2>
+        <div class="mini-instrument-grid">
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>USDKRW</strong><small>USD / KRW</small></div>
+            <span class="instrument-value">Currency</span>
+            <div class="instrument-current"><span>Key FX rate closely correlated with foreign equity flows</span></div>
+          </article>
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>US10Y</strong><small>US 10Y Yield</small></div>
+            <span class="instrument-value">Benchmark Yield</span>
+            <div class="instrument-current"><span>Global risk-free rate anchoring asset valuation</span></div>
+          </article>
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>VIX</strong><small>Volatility Index</small></div>
+            <span class="instrument-value">Fear Gauge</span>
+            <div class="instrument-current"><span>30-day forward expected market volatility</span></div>
+          </article>
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>SOX</strong><small>PHLX Semiconductor</small></div>
+            <span class="instrument-value">Semiconductors</span>
+            <div class="instrument-current"><span>Leading indicator for Korean mega-cap tech</span></div>
+          </article>
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>DXY</strong><small>Dollar Index</small></div>
+            <span class="instrument-value">Dollar Strength</span>
+            <div class="instrument-current"><span>Value of USD relative to a basket of 6 major currencies</span></div>
+          </article>
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>JPYKRW</strong><small>100 JPY / KRW</small></div>
+            <span class="instrument-value">Yen Cross</span>
+            <div class="instrument-current"><span>Export competition &amp; yen carry trade barometer</span></div>
+          </article>
+        </div>
+      </section>
+      <section class="market-section" aria-labelledby="sec-title-3">
+        <h2 id="sec-title-3"><span>03</span> Commodities · Crypto</h2>
+        <div class="mini-instrument-grid commodity-grid">
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>WTI</strong><small>WTI Crude</small></div>
+            <span class="instrument-value">Energy</span>
+            <div class="instrument-current"><span>Headline commodity price gauge for industrial input costs</span></div>
+          </article>
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>GOLD</strong><small>Gold Spot</small></div>
+            <span class="instrument-value">Safe Haven</span>
+            <div class="instrument-current"><span>Real interest rate inverse hedge &amp; reserve asset</span></div>
+          </article>
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>BITCOIN</strong><small>Bitcoin</small></div>
+            <span class="instrument-value">Digital Asset</span>
+            <div class="instrument-current"><span>Global speculative liquidity &amp; risk appetite gauge</span></div>
+          </article>
+        </div>
+      </section>
+    </div>
+    <section class="market-section" aria-labelledby="sec-title-guide">
+      <h2 id="sec-title-guide"><span>04</span> Snowshagal Market Close Coverage &amp; Methodology</h2>
+      <div class="market-table-wrap">
+        <table class="market-table">
+          <thead>
+            <tr>
+              <th scope="col">Dimension</th>
+              <th scope="col">Components</th>
+              <th scope="col">Analytical Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Indices &amp; Breadth</th>
+              <td>KOSPI, KOSDAQ, Advancers, Decliners, Unchanged</td>
+              <td>Evaluates true underlying market breadth beyond headline index distortion</td>
+            </tr>
+            <tr>
+              <th scope="row">Investor Flows</th>
+              <td>Foreign, Institutional, and Retail Net Positions (1D &amp; 5D)</td>
+              <td>Tracks institutional and foreign accumulation across cash and futures</td>
+            </tr>
+            <tr>
+              <th scope="row">Program Trading &amp; Basis</th>
+              <td>Arbitrage, Non-arbitrage, KOSPI 200 Spot/Futures, Market Basis</td>
+              <td>Monitors systematic algorithmic execution and spot-futures basis spreads</td>
+            </tr>
+            <tr>
+              <th scope="row">Internals &amp; Short Selling</th>
+              <td>Turnover ratios, Top 1/Top 5 Concentration, Short selling value/ratio</td>
+              <td>Gauges liquidity velocity, capital concentration, and short-seller positioning</td>
+            </tr>
+            <tr>
+              <th scope="row">Top 10 Market Cap</th>
+              <td>Samsung Electronics, SK hynix, Hyundai Motor, LG Energy Solution, etc.</td>
+              <td>Inspects price performance and weightings of key heavyweight market movers</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <section class="market-section" aria-labelledby="sec-title-reports">
+      <h2 id="sec-title-reports"><span>05</span> Featured Research &amp; Daily Market Reports</h2>
+      <p style="margin: 0 0 12px; font-size: 12px; color: var(--text-2); line-height: 1.6;">
+        Beyond raw closing figures, Snowshagal publishes deep contextual analysis on underlying drivers, regulatory shifts, and capital flows.
+      </p>
+      <div class="mini-instrument-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+        <article class="instrument-card">
+          <div class="instrument-heading"><strong>Daily Reports</strong><small>DAILY</small></div>
+          <span class="instrument-value" style="font-size: 16px; margin: 8px 0 4px;"><a href="/en/daily/" style="color: inherit; text-decoration: underline;">Daily Session Reviews →</a></span>
+          <div class="instrument-current"><span>Daily recap of market drivers, foreign flows, and catalysts for the next session</span></div>
+        </article>
+        <article class="instrument-card">
+          <div class="instrument-heading"><strong>Weekly Reports</strong><small>WEEKLY</small></div>
+          <span class="instrument-value" style="font-size: 16px; margin: 8px 0 4px;"><a href="/en/weekly/" style="color: inherit; text-decoration: underline;">Weekly Market Outlook →</a></span>
+          <div class="instrument-current"><span>Comprehensive weekly trends, macro calendar events, and sector rotation</span></div>
+        </article>
+        <article class="instrument-card">
+          <div class="instrument-heading"><strong>In-Depth Research</strong><small>RESEARCH</small></div>
+          <span class="instrument-value" style="font-size: 16px; margin: 8px 0 4px;"><a href="/en/research/" style="color: inherit; text-decoration: underline;">Thematic Insights →</a></span>
+          <div class="instrument-current"><span>Structural deep-dives covering semiconductors, monetary policy, and corporate governance</span></div>
+        </article>
+      </div>
+    </section>
+    <div class="market-bottom-grid">
+      <div class="market-section">
+        <h2 style="font-size: 13px; margin: 0 0 8px;">About Market Close Data</h2>
+        <p style="font-size: 11px; color: var(--text-2); line-height: 1.6; margin: 0;">
+          This dashboard updates every trading day around 16:05 KST following the official 15:30 KST close.
+          Use the <strong>1W</strong> and <strong>1M</strong> tabs above to examine cumulative 5-session and 20-session performance,
+          or select <strong>HISTORY</strong> and the interactive calendar to look back at any prior trading session.
+        </p>
+      </div>
+      <aside class="market-note">
+        <span class="note-quote" aria-hidden="true">“</span>
+        <h2>We interpret the meaning beyond the numbers.</h2>
+        <p>See the market’s broad direction and internal Korean-market structure at a glance, then continue with deeper context in Snowshagal reports.</p>
+        <a class="market-report-cta" href="/en/daily/">
+          <span>Read Daily Reports</span>
+          <span aria-hidden="true">→</span>
+        </a>
+      </aside>
+    </div>
+    <div class="market-data-note">
+      <p>Data sources: KRX (Korea Exchange), Naver Finance, Yonhap Infomax, Yahoo Finance</p>
+      <p>Snowshagal Market Close · Updated every trading session</p>
+    </div>
+  </div>
 </main>
 <footer id="site-footer" class="footer site-footer">
   <div class="site-wrap">
