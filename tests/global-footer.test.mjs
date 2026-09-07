@@ -103,7 +103,7 @@ test('middleware injects footer CSS into head and siteFooter into body for repor
   });
   const koBody = await koRes.text();
   assert.match(koBody, /<style id="site-footer-css">[\s\S]*?<\/style><\/head>/);
-  assert.match(koBody, /<footer id="site-footer" class="footer site-footer">[\s\S]*?<\/footer><script src="\/assets\/locale\.js/);
+  assert.match(koBody, /<footer id="site-footer" class="footer site-footer">[\s\S]*?<\/footer>[\s\S]*?<script src="\/assets\/locale\.js/);
   assert.match(koBody, /시장을 읽어주는 사이트\./);
 
   // EN Report
@@ -114,7 +114,7 @@ test('middleware injects footer CSS into head and siteFooter into body for repor
   });
   const enBody = await enRes.text();
   assert.match(enBody, /<style id="site-footer-css">[\s\S]*?<\/style><\/head>/);
-  assert.match(enBody, /<footer id="site-footer" class="footer site-footer">[\s\S]*?<\/footer><script src="\/assets\/locale\.js/);
+  assert.match(enBody, /<footer id="site-footer" class="footer site-footer">[\s\S]*?<\/footer>[\s\S]*?<script src="\/assets\/locale\.js/);
   assert.match(enBody, /A clearer read on the market\./);
 });
 

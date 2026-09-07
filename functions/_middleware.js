@@ -16,7 +16,8 @@ import {
   normalizeSitePath,
   reportSeoTags,
   siteFooter,
-  footerCss
+  footerCss,
+  serializeTagRegistryBootstrap
 } from './_seo.js';
 import {
   ADMIN_CSP,
@@ -244,13 +245,24 @@ export async function onRequest(context) {
   else if (/비정기|소버린|research/i.test(decodedPath)) active = 'research';
   else if (/투자\s*노트|끄적|note/i.test(decodedPath)) active = 'note';
   let seo = '';
+  let tags = null;
   try {
-    const posts = await loadPosts(context.request, context.env);
-    const post = findPostByPath(posts, url.pathname);
-    if (post) seo = reportSeoTags(posts, post);
+    const [postsRes, tagsRes] = await Promise.allSettled([
+      loadPosts(context.request, context.env),
+      loadTags(context.request, context.env)
+    ]);
+    if (postsRes.status === 'fulfilled') {
+      const posts = postsRes.value;
+      const post = findPostByPath(posts, url.pathname);
+      if (post) seo = reportSeoTags(posts, post);
+    }
+    if (tagsRes.status === 'fulfilled' && tagsRes.value) {
+      tags = tagsRes.value;
+    }
   } catch (_) {}
 
-  const shell = `<script src="/assets/locale.js?v=bb6eec37ab"></script><script src="/assets/report-shell.js?v=85c7a888a2" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
+  const tagBootstrap = serializeTagRegistryBootstrap(tags);
+  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=bb6eec37ab"></script><script src="/assets/report-shell.js?v=e6a944eccc" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
   const footerStyle = `<style id="site-footer-css">${footerCss()}</style>`;
   const footerMarkup = siteFooter(lang);
   // One feed link per page, for the page's own language. Any Atom link the

@@ -815,4 +815,15 @@ export async function loadTags(request, env) {
   return tags;
 }
 
+export function serializeTagRegistryBootstrap(tags) {
+  if (!tags || typeof tags !== 'object' || Array.isArray(tags)) return '';
+  const safeJson = JSON.stringify(tags)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+  return `<script id="report-tag-registry">window.TAG_REGISTRY = ${safeJson};</script>`;
+}
+
 export { siteFooter, footerCss } from './_footer.js';

@@ -16,11 +16,14 @@ import {
   parseAndValidateTags,
   generateTagsJs
 } from '../functions/_tags.js';
+import vm from 'node:vm';
 import {
   tagLabel,
   categoryFeaturedCards,
-  homepageLatestLinks
+  homepageLatestLinks,
+  serializeTagRegistryBootstrap
 } from '../functions/_seo.js';
+import { onRequest as middleware } from '../functions/_middleware.js';
 import { createMockAuthEnv } from './helpers/auth-test-helper.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -579,4 +582,258 @@ test('Regression 4: Forged / unreferenced newTags API request is rejected with 4
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+test('Regression 5: serializeTagRegistryBootstrap safe serialization against script breakout and control characters', () => {
+  // Invalid inputs must return empty string
+  assert.equal(serializeTagRegistryBootstrap(null), '');
+  assert.equal(serializeTagRegistryBootstrap(undefined), '');
+  assert.equal(serializeTagRegistryBootstrap([]), '');
+  assert.equal(serializeTagRegistryBootstrap('string'), '');
+  assert.equal(serializeTagRegistryBootstrap(123), '');
+
+  // Empty object
+  const emptyHtml = serializeTagRegistryBootstrap({});
+  assert.equal(emptyHtml, '<script id="report-tag-registry">window.TAG_REGISTRY = {};</script>');
+
+  // Script breakout and control characters
+  const dangerousRegistry = {
+    xss: {
+      ko: '</script><script>alert("xss")</script>',
+      en: 'A & B > C < D \u2028 \u2029',
+      group: 'sector'
+    }
+  };
+
+  const serialized = serializeTagRegistryBootstrap(dangerousRegistry);
+  assert.ok(serialized.startsWith('<script id="report-tag-registry">window.TAG_REGISTRY = '));
+  assert.ok(serialized.endsWith(';</script>'));
+
+  // Inner payload must NOT contain unescaped < or > or &
+  const innerPayload = serialized
+    .replace(/^<script id="report-tag-registry">window\.TAG_REGISTRY = /, '')
+    .replace(/;<\/script>$/, '');
+  assert.doesNotMatch(innerPayload, /[<>]/, 'Inner JSON must contain no unescaped angle brackets');
+  assert.ok(innerPayload.includes('\\u003c/script\\u003e'), 'Closing script tag must be safely escaped');
+  assert.ok(innerPayload.includes('\\u0026'), 'Ampersand must be escaped');
+  assert.ok(innerPayload.includes('\\u2028'), 'Line separator must be escaped');
+  assert.ok(innerPayload.includes('\\u2029'), 'Paragraph separator must be escaped');
+
+  // Execution in JavaScript environment must restore exact original object
+  const restored = Function(`const window = {}; ${serialized.replace(/^<script[^>]*>|<\/script>$/g, '')}; return window.TAG_REGISTRY;`)();
+  assert.deepEqual(restored, dangerousRegistry);
+});
+
+test('Regression 6: Report middleware bootstraps TAG_REGISTRY with correct script ordering before locale.js and report-shell.js', async () => {
+  const samplePosts = [
+    {
+      id: 'test-report',
+      href: '/reports/2026-08-25-test.html',
+      title: '테스트 리포트',
+      type: 'daily',
+      lang: 'ko',
+      reportDate: '2026-08-25',
+      tags: ['semiconductors', 'rates', 'policy']
+    }
+  ];
+  const sampleTags = {
+    ...JSON.parse(tagsJsonRaw),
+    'quantum-computing': {
+      ko: '양자 컴퓨팅',
+      en: 'Quantum Computing',
+      group: 'sector'
+    }
+  };
+
+  const mockHtml = '<!DOCTYPE html><html><head><title>Test Report</title></head><body><h1>Content</h1></body></html>';
+
+  // 1. Success case: both posts and tags load
+  const context = {
+    request: new Request('https://snowshagal.com/reports/2026-08-25-test.html'),
+    env: {
+      ASSETS: {
+        fetch: async (req) => {
+          const url = new URL(req.url);
+          if (url.pathname === '/data/posts.json') {
+            return new Response(JSON.stringify(samplePosts));
+          }
+          if (url.pathname === '/data/tags.json') {
+            return new Response(JSON.stringify(sampleTags));
+          }
+          return new Response('Not found', { status: 404 });
+        }
+      }
+    },
+    next: async () => new Response(mockHtml, {
+      status: 200,
+      headers: { 'content-type': 'text/html; charset=utf-8' }
+    })
+  };
+
+  const res = await middleware(context);
+  assert.equal(res.status, 200);
+  const html = await res.text();
+
+  const tagRegistryIdx = html.indexOf('<script id="report-tag-registry">');
+  const localeIdx = html.indexOf('/assets/locale.js');
+  const reportShellIdx = html.indexOf('/assets/report-shell.js');
+
+  assert.ok(tagRegistryIdx !== -1, 'report-tag-registry must be present in report HTML');
+  assert.ok(localeIdx !== -1, 'locale.js must be present in report HTML');
+  assert.ok(reportShellIdx !== -1, 'report-shell.js must be present in report HTML');
+
+  assert.ok(tagRegistryIdx < localeIdx, 'TAG_REGISTRY bootstrap must execute before locale.js');
+  assert.ok(localeIdx < reportShellIdx, 'locale.js must execute before report-shell.js');
+
+  // Verify custom and core tags are present in bootstrap script
+  assert.match(html, /양자 컴퓨팅/);
+  assert.match(html, /Quantum Computing/);
+  assert.match(html, /반도체/);
+
+  // 2. Fail-safe case: tags.json fails to load (404/error)
+  const failContext = {
+    request: new Request('https://snowshagal.com/reports/2026-08-25-test.html'),
+    env: {
+      ASSETS: {
+        fetch: async (req) => {
+          const url = new URL(req.url);
+          if (url.pathname === '/data/posts.json') {
+            return new Response(JSON.stringify(samplePosts));
+          }
+          return new Response('Error', { status: 500 });
+        }
+      }
+    },
+    next: async () => new Response(mockHtml, {
+      status: 200,
+      headers: { 'content-type': 'text/html; charset=utf-8' }
+    })
+  };
+
+  const failRes = await middleware(failContext);
+  assert.equal(failRes.status, 200, 'Page must not return 500 when tags.json fails');
+  const failHtml = await failRes.text();
+  assert.ok(failHtml.includes('/assets/report-shell.js'), 'report-shell.js must still be injected on fail-safe');
+});
+
+test('Regression 7: Related Reading tag rendering in report-shell.js displays core and custom tags, drops unknown tags, and exposes zero raw IDs', async () => {
+  const shellCode = fs.readFileSync(path.join(rootDir, 'assets', 'report-shell.js'), 'utf8');
+
+  function makeMockElement(name, attrs = {}) {
+    const map = new Map(Object.entries(attrs));
+    return {
+      name,
+      hidden: false,
+      href: '',
+      value: '',
+      textContent: '',
+      innerHTML: '',
+      dataset: {},
+      classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } },
+      style: { setProperty() {} },
+      children: [],
+      getAttribute: key => (map.has(key) ? map.get(key) : null),
+      setAttribute: (key, val) => map.set(key, String(val)),
+      removeAttribute: key => map.delete(key),
+      addEventListener() {},
+      removeEventListener() {},
+      appendChild() {},
+      append() {},
+      prepend() {},
+      replaceChildren() {},
+      insertAdjacentHTML() {},
+      insertBefore() {},
+      remove() {},
+      attachShadow: () => makeMockElement('#shadow-root'),
+      querySelector: () => null,
+      querySelectorAll: () => [],
+      getElementById: () => null,
+      contains: () => false
+    };
+  }
+
+  const customRegistry = {
+    ...JSON.parse(tagsJsonRaw),
+    'quantum-computing': {
+      ko: '양자 컴퓨팅',
+      en: 'Quantum Computing',
+      group: 'sector'
+    }
+  };
+
+  const windowObj = {
+    TAG_REGISTRY: customRegistry,
+    MARKET_LOCALE: undefined,
+    addEventListener() {}
+  };
+
+  const documentObj = {
+    currentScript: { dataset: { category: 'daily', lang: 'ko' } },
+    documentElement: makeMockElement('html'),
+    body: Object.assign(makeMockElement('body'), { firstChild: null }),
+    title: '테스트 리포트',
+    readyState: 'complete',
+    addEventListener() {},
+    createElement: tag => makeMockElement(tag),
+    getElementById: (id) => (id === 'mrs-comments-host' ? makeMockElement('section') : null),
+    querySelector: () => null,
+    querySelectorAll: () => []
+  };
+
+  const sandbox = {
+    window: windowObj,
+    document: documentObj,
+    location: { pathname: '/reports/2026-08-25-test.html', href: 'https://snowshagal.com/reports/2026-08-25-test.html', search: '' },
+    localStorage: { getItem: () => null, setItem() {} },
+    matchMedia: () => ({ matches: false, addEventListener() {} }),
+    navigator: { share: undefined, clipboard: undefined },
+    fetch: () => Promise.resolve({ ok: false, status: 503, json: () => Promise.resolve([]) }),
+    setTimeout,
+    clearTimeout,
+    URL,
+    URLSearchParams,
+    console
+  };
+
+  vm.createContext(sandbox);
+  vm.runInContext(shellCode, sandbox);
+
+  assert.ok(sandbox.window.REPORT_DISCOVERY, 'REPORT_DISCOVERY must be exported on window');
+  const { formatTags, tagLabel: shellTagLabel } = sandbox.window.REPORT_DISCOVERY;
+  assert.equal(typeof formatTags, 'function');
+  assert.equal(typeof shellTagLabel, 'function');
+
+  // 1. Core tags formatting
+  const coreTags = ['semiconductors', 'rates', 'policy'];
+  const coreKo = formatTags(coreTags, 'ko');
+  assert.equal(coreKo, '반도체 · 금리 · 정책', 'KO Core tags must render exact Korean labels');
+
+  const coreEn = formatTags(coreTags, 'en');
+  assert.equal(coreEn, 'Semiconductors · Rates · Policy', 'EN Core tags must render exact English labels');
+
+  // 2. Custom tag formatting
+  const customTag = ['quantum-computing'];
+  const customKo = formatTags(customTag, 'ko');
+  assert.equal(customKo, '양자 컴퓨팅', 'KO custom tag must render localized label');
+
+  const customEn = formatTags(customTag, 'en');
+  assert.equal(customEn, 'Quantum Computing', 'EN custom tag must render localized label');
+
+  // 3. Raw canonical ID must NEVER be exposed
+  assert.doesNotMatch(customKo, /quantum-computing/, 'Raw canonical ID must not appear in KO label');
+  assert.doesNotMatch(customEn, /quantum-computing/, 'Raw canonical ID must not appear in EN label');
+
+  // 4. Unknown tag fail-safe: dropped cleanly with empty string, 0 errors
+  const unknownTag = ['unknown-internal-tag'];
+  const unknownKo = formatTags(unknownTag, 'ko');
+  assert.equal(unknownKo, '', 'Unknown tag must yield empty string');
+  assert.doesNotMatch(unknownKo, /unknown-internal-tag/, 'Unknown raw ID must not be visible');
+
+  // 5. Mixed tags (custom + unknown + core)
+  const mixedTags = ['quantum-computing', 'unknown-internal-tag', 'rates'];
+  const mixedKo = formatTags(mixedTags, 'ko');
+  assert.equal(mixedKo, '양자 컴퓨팅 · 금리', 'Unknown tag must be cleanly omitted from joined output');
+
+  const mixedEn = formatTags(mixedTags, 'en');
+  assert.equal(mixedEn, 'Quantum Computing · Rates', 'Unknown tag must be cleanly omitted from joined EN output');
 });

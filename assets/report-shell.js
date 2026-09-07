@@ -420,14 +420,16 @@
     return false;
   }
 
-  // Canonical Topic Tags: uses window.TAG_REGISTRY when provided by tags.js
-  const TAG_REGISTRY = (window.TAG_REGISTRY && typeof window.TAG_REGISTRY === 'object')
-    ? window.TAG_REGISTRY
-    : {};
+  // Canonical Topic Tags: uses window.TAG_REGISTRY when provided by server bootstrap or tags.js
+  function getTagRegistry() {
+    return (window.TAG_REGISTRY && typeof window.TAG_REGISTRY === 'object')
+      ? window.TAG_REGISTRY
+      : {};
+  }
 
   function tagLabel(tagKey, loc) {
     const l = loc || locale;
-    const entry = TAG_REGISTRY[tagKey];
+    const entry = getTagRegistry()[tagKey];
     return entry ? (entry[l] || entry.ko || '') : '';
   }
 
@@ -759,7 +761,7 @@
   }
 
   window.REPORT_SHELL = { canonicalShareUrl, shareTitle, shareText, shareLinks, prefersNativeShare };
-  window.REPORT_DISCOVERY = { findAdjacentReports, rankRelatedReports, normalizeReportPath };
+  window.REPORT_DISCOVERY = { findAdjacentReports, rankRelatedReports, normalizeReportPath, formatTags, tagLabel };
 
   const SHARE_ICONS = {
     copy: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
