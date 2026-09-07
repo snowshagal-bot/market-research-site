@@ -11,11 +11,13 @@ import {
   homepageLatestLinks,
   homepageReportLinks,
   loadPosts,
+  loadTags,
   postLanguage,
   normalizeSitePath,
   reportSeoTags,
   siteFooter,
-  footerCss
+  footerCss,
+  serializeTagRegistryBootstrap
 } from './_seo.js';
 import {
   ADMIN_CSP,
@@ -140,8 +142,16 @@ export async function onRequest(context) {
     const homeLang = url.pathname === '/' ? 'ko' : (/^\/en\/?$/.test(url.pathname) ? 'en' : '');
     const landing = categoryLandingFromPath(url.pathname);
     let posts = null;
+    let tags = null;
     if ((homeLang || landing) && context.env?.ASSETS?.fetch) {
-      try { posts = await loadPosts(context.request, context.env); } catch (_) {}
+      try {
+        [posts, tags] = await Promise.all([
+          loadPosts(context.request, context.env),
+          loadTags(context.request, context.env)
+        ]);
+      } catch (_) {
+        try { posts = await loadPosts(context.request, context.env); } catch (_) {}
+      }
     }
 
     const landingAlternates = posts && landing ? categoryAlternateTags(posts, landing.type) : '';
@@ -159,13 +169,13 @@ export async function onRequest(context) {
     if (typeof HTMLRewriter === 'undefined') {
       let body = await response.text();
       if (posts && homeLang) {
-        body = replaceElementContentsById(body, 'latest-category-cards', homepageLatestLinks(posts, homeLang));
+        body = replaceElementContentsById(body, 'latest-category-cards', homepageLatestLinks(posts, homeLang, tags));
         body = replaceElementContentsById(body, 'report-list', homepageReportLinks(posts, homeLang));
       }
       if (posts && landing) {
         const categoryPosts = (Array.isArray(posts) ? posts : [])
           .filter((p) => postLanguage(p) === landing.lang && p?.type === landing.type && normalizeSitePath(p?.href));
-        body = replaceElementContentsById(body, 'category-featured-cards', categoryFeaturedCards(posts, landing.type, landing.lang));
+        body = replaceElementContentsById(body, 'category-featured-cards', categoryFeaturedCards(posts, landing.type, landing.lang, tags));
         body = replaceElementContentsById(body, 'category-report-list', categoryArchiveLinks(posts, landing.type, landing.lang));
         if (categoryPosts.length <= 2) {
           body = body.replace(/(<section\b[^>]*\bid=["']category-archive-section["'][^>]*)/i, '$1 hidden');
@@ -187,7 +197,7 @@ export async function onRequest(context) {
 
     let rewriter = new HTMLRewriter();
     if (posts && homeLang) {
-      const latest = homepageLatestLinks(posts, homeLang);
+      const latest = homepageLatestLinks(posts, homeLang, tags);
       const archive = homepageReportLinks(posts, homeLang);
       rewriter = rewriter
         .on('#latest-category-cards', { element(element) { element.setInnerContent(latest, { html: true }); } })
@@ -196,7 +206,7 @@ export async function onRequest(context) {
     if (posts && landing) {
       const categoryPosts = (Array.isArray(posts) ? posts : [])
         .filter((p) => postLanguage(p) === landing.lang && p?.type === landing.type && normalizeSitePath(p?.href));
-      const featuredCards = categoryFeaturedCards(posts, landing.type, landing.lang);
+      const featuredCards = categoryFeaturedCards(posts, landing.type, landing.lang, tags);
       const archiveLinks = categoryArchiveLinks(posts, landing.type, landing.lang);
       rewriter = rewriter
         .on('#category-featured-cards', {
@@ -235,13 +245,24 @@ export async function onRequest(context) {
   else if (/비정기|소버린|research/i.test(decodedPath)) active = 'research';
   else if (/투자\s*노트|끄적|note/i.test(decodedPath)) active = 'note';
   let seo = '';
+  let tags = null;
   try {
-    const posts = await loadPosts(context.request, context.env);
-    const post = findPostByPath(posts, url.pathname);
-    if (post) seo = reportSeoTags(posts, post);
+    const [postsRes, tagsRes] = await Promise.allSettled([
+      loadPosts(context.request, context.env),
+      loadTags(context.request, context.env)
+    ]);
+    if (postsRes.status === 'fulfilled') {
+      const posts = postsRes.value;
+      const post = findPostByPath(posts, url.pathname);
+      if (post) seo = reportSeoTags(posts, post);
+    }
+    if (tagsRes.status === 'fulfilled' && tagsRes.value) {
+      tags = tagsRes.value;
+    }
   } catch (_) {}
 
-  const shell = `<script src="/assets/locale.js?v=bb6eec37ab"></script><script src="/assets/report-shell.js?v=cdb13e2848" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
+  const tagBootstrap = serializeTagRegistryBootstrap(tags);
+  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=bb6eec37ab"></script><script src="/assets/report-shell.js?v=43526f9b5f" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
   const footerStyle = `<style id="site-footer-css">${footerCss()}</style>`;
   const footerMarkup = siteFooter(lang);
   // One feed link per page, for the page's own language. Any Atom link the

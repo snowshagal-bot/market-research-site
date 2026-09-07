@@ -3,6 +3,10 @@ import { findLateCoverStyle, lateCoverStyleMessage } from "../_cover-style.js";
 import { SOCIAL_REPORT_CARD_DIR } from "../_seo.js";
 import { isHumanAdminHost, validateHumanAdminMutation } from "../_host-policy.js";
 import { requireAdminMutation } from "../_auth.js";
+import {
+  MAX_POST_TAGS,
+  parseAndValidateTags
+} from "../_tags.js";
 
 const OWNER = "snowshagal-bot";
 const REPO = "market-research-site";
@@ -375,11 +379,6 @@ function countUnits(text, isEn = false) {
   return text.replace(/\s+/g, '').length;
 }
 
-const CANONICAL_TAGS = new Set([
-  'flows', 'semiconductors', 'rates', 'fx', 'treasuries', 'fed',
-  'futures', 'ai', 'cloud-datacenter', 'stablecoins', 'crypto',
-  'gold', 'autos', 'energy', 'policy', 'geopolitics'
-]);
 
 function removeSourceGlossaryContainers(html) {
   if (!html) return '';
@@ -650,25 +649,6 @@ function calculateReadingMinutes(html, lang = 'ko', type = 'daily') {
   return calculateLegacyReadingMinutes(html, lang);
 }
 
-function parseAndValidateTags(inputTags) {
-  let rawTags = [];
-  if (Array.isArray(inputTags)) {
-    rawTags = inputTags;
-  } else if (typeof inputTags === 'string') {
-    rawTags = inputTags.split(/[,\s]+/).map(t => t.trim()).filter(Boolean);
-  }
-  const normalized = Array.from(new Set(rawTags.map(t => String(t).trim().toLowerCase()))).filter(Boolean);
-  if (normalized.length > 3) {
-    return { error: '태그는 최대 3개까지만 지정할 수 있습니다.' };
-  }
-  for (const t of normalized) {
-    if (!CANONICAL_TAGS.has(t)) {
-      return { error: `허용되지 않은 태그입니다: ${t}` };
-    }
-  }
-  return { tags: normalized };
-}
-
 function validateEditableFields(form) {
   const type = String(form.get("type") || "");
   const reportDate = String(form.get("reportDate") || "");
@@ -682,9 +662,14 @@ function validateEditableFields(form) {
   if (form.has("tags")) {
     tagsProvided = true;
     const rawInputTags = form.getAll('tags').length > 1 ? form.getAll('tags') : form.get('tags');
-    const tagRes = parseAndValidateTags(rawInputTags);
-    if (tagRes.error) return { error: tagRes.error, errorCode: "BAD_TAGS" };
-    tags = tagRes.tags;
+    let rawTags = [];
+    if (Array.isArray(rawInputTags)) rawTags = rawInputTags;
+    else if (typeof rawInputTags === 'string') rawTags = rawInputTags.split(/[,\s]+/).map(t => t.trim()).filter(Boolean);
+    const normalized = Array.from(new Set(rawTags.map(t => String(t).trim().toLowerCase()))).filter(Boolean);
+    if (normalized.length > MAX_POST_TAGS) {
+      return { error: `태그는 최대 ${MAX_POST_TAGS}개까지만 지정할 수 있습니다.`, errorCode: "BAD_TAGS" };
+    }
+    tags = normalized;
   }
 
   return {
@@ -773,12 +758,13 @@ export async function onRequestPost(context) {
   try {
     const ref = await currentRef(env.GITHUB_TOKEN);
     const baseSha = ref.object.sha;
-    let parentCommit, postsText, searchIndexText;
+    let parentCommit, postsText, searchIndexText, tagsText;
     try {
-      [parentCommit, postsText, searchIndexText] = await Promise.all([
+      [parentCommit, postsText, searchIndexText, tagsText] = await Promise.all([
         gh(env.GITHUB_TOKEN, `/git/commits/${baseSha}`),
         readRepoText(env.GITHUB_TOKEN, "data/posts.json", baseSha),
         readRepoText(env.GITHUB_TOKEN, "data/search-index.json", baseSha),
+        readRepoText(env.GITHUB_TOKEN, "data/tags.json", baseSha)
       ]);
     } catch (err) {
       return reply({
@@ -798,6 +784,25 @@ export async function onRequestPost(context) {
         error: "SEARCH_INDEX_READ_FAILED",
         message: `검색 인덱스 JSON 파싱에 실패했습니다: ${err.message}`
       }, 500);
+    }
+
+    let tagRegistry;
+    try {
+      tagRegistry = JSON.parse(tagsText);
+    } catch (err) {
+      return reply({
+        ok: false,
+        error: "TAGS_READ_FAILED",
+        message: `태그 레지스트리 JSON 파싱에 실패했습니다: ${err.message}`
+      }, 500);
+    }
+
+    if (action === "update" && editFields.tagsProvided) {
+      const tagRes = parseAndValidateTags(editFields.tags, [], tagRegistry, { max: MAX_POST_TAGS });
+      if (tagRes.error) {
+        return reply({ ok: false, error: "BAD_TAGS", message: tagRes.error }, 400);
+      }
+      editFields.tags = tagRes.tags;
     }
 
     if (!hasMatchingUniqueIds(posts, searchIndex)) {

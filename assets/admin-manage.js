@@ -46,24 +46,9 @@
   const takeawayField = $('manage-takeaway-field');
   const takeawayInput = $('manage-takeaway');
   const typeSelect = $('manage-type');
-  const tagRegistry = window.TAG_REGISTRY || {
-    "flows": { "ko": "수급", "en": "Flows" },
-    "semiconductors": { "ko": "반도체", "en": "Semiconductors" },
-    "rates": { "ko": "금리", "en": "Rates" },
-    "fx": { "ko": "환율", "en": "FX" },
-    "treasuries": { "ko": "미국채", "en": "U.S. Treasuries" },
-    "fed": { "ko": "연준", "en": "Fed" },
-    "futures": { "ko": "선물·파생", "en": "Futures & Derivatives" },
-    "ai": { "ko": "AI", "en": "AI" },
-    "cloud-datacenter": { "ko": "클라우드·데이터센터", "en": "Cloud & Data Centers" },
-    "stablecoins": { "ko": "스테이블코인", "en": "Stablecoins" },
-    "crypto": { "ko": "가상자산", "en": "Crypto" },
-    "gold": { "ko": "금", "en": "Gold" },
-    "autos": { "ko": "자동차", "en": "Autos" },
-    "energy": { "ko": "에너지", "en": "Energy" },
-    "policy": { "ko": "정책", "en": "Policy" },
-    "geopolitics": { "ko": "지정학", "en": "Geopolitics" }
-  };
+  const tagRegistry = (window.TAG_REGISTRY && typeof window.TAG_REGISTRY === 'object')
+    ? { ...window.TAG_REGISTRY }
+    : {};
 
   function escapeHtml(str) {
     return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -71,6 +56,11 @@
 
   function renderManageTagSelector() {
     if (!manageTagOptions) return;
+    if (Object.keys(tagRegistry).length === 0) {
+      manageTagOptions.innerHTML = '<p class="error-message">태그 목록을 불러오지 못했습니다.</p>';
+      updateManageTagSelection();
+      return;
+    }
     manageTagOptions.innerHTML = Object.entries(tagRegistry).map(([id, info]) => `
       <label class="tag-chip">
         <input type="checkbox" name="manage-tags" value="${escapeHtml(id)}">
@@ -103,12 +93,12 @@
   function updateManageTagSelection() {
     const selected = getSelectedManageTags();
     const count = selected.length;
-    if (manageTagsCount) manageTagsCount.textContent = `${count}/3`;
+    if (manageTagsCount) manageTagsCount.textContent = `${count}/5`;
 
     if (manageTagOptions && typeof manageTagOptions.querySelectorAll === 'function') {
       manageTagOptions.querySelectorAll('input[name="manage-tags"]').forEach(cb => {
         if (!cb.checked) {
-          cb.disabled = count >= 3;
+          cb.disabled = count >= 5;
         } else {
           cb.disabled = false;
         }

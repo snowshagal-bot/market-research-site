@@ -380,32 +380,14 @@ function reportRowMarkup(post, lang, isLatest = false) {
     + `<span class="report-arrow"><span class="report-read-label">${lang === 'en' ? 'Read' : '읽기'}</span><span aria-hidden="true">→</span></span></a>`;
 }
 
-export const TAG_REGISTRY = {
-  'flows': { ko: '수급', en: 'Flows' },
-  'semiconductors': { ko: '반도체', en: 'Semiconductors' },
-  'rates': { ko: '금리', en: 'Rates' },
-  'fx': { ko: '환율', en: 'FX' },
-  'treasuries': { ko: '미국채', en: 'U.S. Treasuries' },
-  'fed': { ko: '연준', en: 'Fed' },
-  'futures': { ko: '선물·파생', en: 'Futures & Derivatives' },
-  'ai': { ko: 'AI', en: 'AI' },
-  'cloud-datacenter': { ko: '클라우드·데이터센터', en: 'Cloud & Data Centers' },
-  'stablecoins': { ko: '스테이블코인', en: 'Stablecoins' },
-  'crypto': { ko: '가상자산', en: 'Crypto' },
-  'gold': { ko: '금', en: 'Gold' },
-  'autos': { ko: '자동차', en: 'Autos' },
-  'energy': { ko: '에너지', en: 'Energy' },
-  'policy': { ko: '정책', en: 'Policy' },
-  'geopolitics': { ko: '지정학', en: 'Geopolitics' }
-};
-
-export function tagLabel(key, lang) {
-  const entry = TAG_REGISTRY[key];
-  if (!entry) return key || '';
-  return entry[lang] || entry.ko || key || '';
+export function tagLabel(key, lang, tagRegistry = null) {
+  if (!key || typeof key !== 'string') return '';
+  const entry = tagRegistry?.[key];
+  if (!entry) return '';
+  return entry[lang] || entry.ko || '';
 }
 
-export function categoryFeaturedCards(posts, type, lang) {
+export function categoryFeaturedCards(posts, type, lang, tagRegistry = null) {
   const categoryMetaLabels = {
     daily: 'DAILY',
     weekly: 'WEEKLY',
@@ -437,7 +419,7 @@ export function categoryFeaturedCards(posts, type, lang) {
       const readingSuffix = mins > 0 ? (lang === 'en' ? ` · ${mins} min read` : ` · 약 ${mins}분`) : '';
       const metaLabel = categoryMetaLabels[post.type] || post.type.toUpperCase();
       const summaryCopy = summary ? `<p class="category-featured-summary">${escapeHtml(summary)}</p>` : '';
-      const tags = Array.isArray(post?.tags) ? post.tags.map((tag) => tagLabel(tag, lang)).filter(Boolean).join(' · ') : '';
+      const tags = Array.isArray(post?.tags) ? post.tags.map((tag) => tagLabel(tag, lang, tagRegistry)).filter(Boolean).join(' · ') : '';
       const tagsMarkup = tags ? `<div class="category-featured-tags">${escapeHtml(tags)}</div>` : '';
       const readLabel = lang === 'en' ? 'Read report' : '리포트 보기';
       const date = post?.reportDate || post?.date || '';
@@ -489,7 +471,7 @@ export function homepageReportLinks(posts, lang, limit = 20) {
     .join('');
 }
 
-export function homepageLatestLinks(posts, lang) {
+export function homepageLatestLinks(posts, lang, tagRegistry = null) {
   const localized = (Array.isArray(posts) ? posts : [])
     .filter((post) => postLanguage(post) === lang && normalizeSitePath(post?.href))
     .sort((left, right) => String(right?.reportDate || right?.date || '').localeCompare(String(left?.reportDate || left?.date || '')));
@@ -508,7 +490,7 @@ export function homepageLatestLinks(posts, lang) {
       const mins = typeof post?.readingMinutes === 'number' && post.readingMinutes > 0 ? post.readingMinutes : 0;
       const readingSuffix = mins > 0 ? (lang === 'en' ? ` · ${mins} min read` : ` · 약 ${mins}분`) : '';
       const summaryCopy = summary ? `<p class="latest-card-summary">${escapeHtml(summary)}</p>` : '';
-      const tags = Array.isArray(post?.tags) ? post.tags.map((tag) => tagLabel(tag, lang)).filter(Boolean).join(' · ') : '';
+      const tags = Array.isArray(post?.tags) ? post.tags.map((tag) => tagLabel(tag, lang, tagRegistry)).filter(Boolean).join(' · ') : '';
       const tagsMarkup = tags ? `<div class="latest-card-tags">${escapeHtml(tags)}</div>` : '';
       const readLabel = lang === 'en' ? 'Read report' : '리포트 보기';
       const date = post?.reportDate || post?.date || '';
@@ -820,6 +802,28 @@ export async function loadPosts(request, env) {
   const posts = await response.json();
   if (!Array.isArray(posts)) throw new Error('POSTS_INVALID');
   return posts;
+}
+
+export async function loadTags(request, env) {
+  const url = new URL('/data/tags.json', request.url);
+  const response = env?.ASSETS?.fetch
+    ? await env.ASSETS.fetch(new Request(url, { headers: { accept: 'application/json' } }))
+    : await fetch(url);
+  if (!response.ok) return null;
+  const tags = await response.json().catch(() => null);
+  if (!tags || typeof tags !== 'object' || Array.isArray(tags)) return null;
+  return tags;
+}
+
+export function serializeTagRegistryBootstrap(tags) {
+  if (!tags || typeof tags !== 'object' || Array.isArray(tags)) return '';
+  const safeJson = JSON.stringify(tags)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+  return `<script id="report-tag-registry">window.TAG_REGISTRY = ${safeJson};</script>`;
 }
 
 export { siteFooter, footerCss } from './_footer.js';

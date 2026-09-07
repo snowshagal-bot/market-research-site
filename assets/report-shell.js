@@ -420,30 +420,17 @@
     return false;
   }
 
-  // Canonical Topic Tags: uses window.TAG_REGISTRY when provided by tags.js, with fallback
-  const TAG_REGISTRY = window.TAG_REGISTRY || {
-    "flows": { "ko": "수급", "en": "Flows" },
-    "semiconductors": { "ko": "반도체", "en": "Semiconductors" },
-    "rates": { "ko": "금리", "en": "Rates" },
-    "fx": { "ko": "환율", "en": "FX" },
-    "treasuries": { "ko": "미국채", "en": "U.S. Treasuries" },
-    "fed": { "ko": "연준", "en": "Fed" },
-    "futures": { "ko": "선물·파생", "en": "Futures & Derivatives" },
-    "ai": { "ko": "AI", "en": "AI" },
-    "cloud-datacenter": { "ko": "클라우드·데이터센터", "en": "Cloud & Data Centers" },
-    "stablecoins": { "ko": "스테이블코인", "en": "Stablecoins" },
-    "crypto": { "ko": "가상자산", "en": "Crypto" },
-    "gold": { "ko": "금", "en": "Gold" },
-    "autos": { "ko": "자동차", "en": "Autos" },
-    "energy": { "ko": "에너지", "en": "Energy" },
-    "policy": { "ko": "정책", "en": "Policy" },
-    "geopolitics": { "ko": "지정학", "en": "Geopolitics" }
-  };
+  // Canonical Topic Tags: uses window.TAG_REGISTRY when provided by server bootstrap or tags.js
+  function getTagRegistry() {
+    return (window.TAG_REGISTRY && typeof window.TAG_REGISTRY === 'object')
+      ? window.TAG_REGISTRY
+      : {};
+  }
 
   function tagLabel(tagKey, loc) {
     const l = loc || locale;
-    const entry = TAG_REGISTRY[tagKey];
-    return entry ? (entry[l] || entry.ko || tagKey) : tagKey;
+    const entry = getTagRegistry()[tagKey];
+    return entry ? (entry[l] || entry.ko || '') : '';
   }
 
   function formatTags(tags, loc) {
@@ -461,7 +448,7 @@
   function normalizeReportPath(value) {
     let path = String(value || '').split(/[?#]/, 1)[0].replace(/^\/+/, '');
     try { path = decodeURIComponent(path); } catch (_) {}
-    return path.toLowerCase();
+    return path.replace(/\.html?$/i, '').toLowerCase();
   }
 
   function postLang(post) {
@@ -774,7 +761,7 @@
   }
 
   window.REPORT_SHELL = { canonicalShareUrl, shareTitle, shareText, shareLinks, prefersNativeShare };
-  window.REPORT_DISCOVERY = { findAdjacentReports, rankRelatedReports, normalizeReportPath };
+  window.REPORT_DISCOVERY = { findAdjacentReports, rankRelatedReports, normalizeReportPath, formatTags, tagLabel };
 
   const SHARE_ICONS = {
     copy: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',

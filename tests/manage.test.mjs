@@ -1,7 +1,15 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { onRequestPost } from '../functions/api/manage.js';
 import { createMockAuthEnv } from './helpers/auth-test-helper.mjs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const rootDir = path.resolve(__dirname, '..');
+const tagsJsonFileContent = fs.readFileSync(path.join(rootDir, 'data', 'tags.json'), 'utf8');
 
 const ADMIN_KEY = 'test-admin-key';
 const originalFetch = globalThis.fetch;
@@ -78,6 +86,7 @@ function githubMock(existingPosts = [basePost], { conflict = false, searchIndex 
     }
     let payload;
     if (path.includes('/contents/data/posts.json?ref=base-sha')) payload = { content: base64(`${JSON.stringify(existingPosts)}\n`) };
+    else if (path.includes('/contents/data/tags.json?ref=base-sha')) payload = { content: base64(`${tagsJsonFileContent}\n`) };
     else if (path.endsWith('/git/ref/heads/main')) {
       refReads += 1;
       payload = { object: { sha: conflict && refReads > 1 ? 'new-main-sha' : 'base-sha' } };
@@ -563,13 +572,13 @@ test('manage recalculates readingMinutes when replacement HTML is uploaded', asy
   }
 });
 
-test('manage rejects 4 unique tags with BAD_TAGS 400', async () => {
+test('manage rejects 6 unique tags with BAD_TAGS 400', async () => {
   const post = { ...basePost, tags: ['flows'] };
   const searchIndex = [{ id: post.id, lang: 'ko', category: 'daily', title: post.title, date: '2026-08-11', tags: ['flows'], readingMinutes: 2 }];
   const calls = githubMock([post], { searchIndex });
 
   try {
-    const { response, data } = await run({ id: post.id, tags: 'flows, rates, fx, fed' });
+    const { response, data } = await run({ id: post.id, tags: 'flows, rates, fx, fed, gold, semiconductors' });
     assert.equal(response.status, 400);
     assert.equal(data.error, 'BAD_TAGS');
     assert.equal(calls.length, 0);

@@ -1,7 +1,15 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { onRequestPost } from '../functions/api/publish.js';
 import { createMockAuthEnv } from './helpers/auth-test-helper.mjs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const rootDir = path.resolve(__dirname, '..');
+const tagsJsonFileContent = fs.readFileSync(path.join(rootDir, 'data', 'tags.json'), 'utf8');
 
 const ADMIN_KEY = 'test-admin-key';
 const originalFetch = globalThis.fetch;
@@ -55,6 +63,7 @@ function githubMock(existingPosts = [], { searchIndex = null, searchIndexFail = 
     }
     let payload;
     if (path.includes('/contents/data/posts.json')) payload = { content: base64(`${JSON.stringify(existingPosts)}\n`) };
+    else if (path.includes('/contents/data/tags.json')) payload = { content: base64(`${tagsJsonFileContent}\n`) };
     else if (path.endsWith('/git/ref/heads/main')) payload = { object: { sha: 'parent-sha' } };
     else if (path.endsWith('/git/commits/parent-sha')) payload = { tree: { sha: 'base-tree' } };
     else if (path.endsWith('/git/blobs/search-index-sha')) payload = { content: base64(`${JSON.stringify(defaultIndex)}\n`), encoding: 'base64', sha: 'search-index-sha' };
@@ -129,6 +138,10 @@ function atomicGithubMock({
       const ref = url.searchParams.get('ref');
       const posts = ref === advancedSha ? advancedPosts : existingPosts;
       return Response.json({ content: base64(`${JSON.stringify(posts)}\n`) });
+    }
+    if (path.includes('/contents/data/tags.json')) {
+      contentReads += 1;
+      return Response.json({ content: base64(`${tagsJsonFileContent}\n`) });
     }
     if (path.includes('/contents/data/search-index.json')) {
       contentReads += 1;
@@ -644,7 +657,8 @@ test('publish validates canonical tags and rejects unknown tags', async () => {
     const { response, data } = await runPublish({ tags: ['rates', 'invalid_random_tag'] });
     assert.equal(response.status, 400);
     assert.equal(data.error, 'BAD_TAGS');
-    assert.equal(calls.length, 0);
+    const writeCalls = calls.filter(c => c.method === 'POST' || c.method === 'PATCH');
+    assert.equal(writeCalls.length, 0, 'No mutation calls should be made on validation failure');
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -709,11 +723,11 @@ test('publish inherits canonical tags from translation counterpart when not spec
   }
 });
 
-test('publish rejects 4 unique tags with BAD_TAGS 400', async () => {
+test('publish rejects 6 unique tags with BAD_TAGS 400', async () => {
   const calls = githubMock([]);
   try {
     const { response, data } = await runPublish({
-      tags: ['flows', 'rates', 'fx', 'fed']
+      tags: ['flows', 'rates', 'fx', 'fed', 'gold', 'semiconductors']
     });
     assert.equal(response.status, 400);
     assert.equal(data.error, 'BAD_TAGS');

@@ -151,7 +151,96 @@ runStep(3, 'Checking repository invariants & git diff whitespace checks', () => 
     throw new Error('data/posts.json and data/posts.js are not synchronized');
   }
 
-  // B. Search index artifacts
+  // B. tags.json & tags.js sanity & synchronization
+  const tagsJsonPath = path.join(rootDir, 'data/tags.json');
+  const tagsJsPath = path.join(rootDir, 'data/tags.js');
+
+  if (!fs.existsSync(tagsJsonPath)) {
+    throw new Error('Missing data/tags.json');
+  }
+  if (!fs.existsSync(tagsJsPath)) {
+    throw new Error('Missing data/tags.js');
+  }
+
+  let tags;
+  try {
+    tags = JSON.parse(fs.readFileSync(tagsJsonPath, 'utf8'));
+  } catch (parseErr) {
+    throw new Error(`Failed to parse data/tags.json: ${parseErr.message}`);
+  }
+
+  if (!tags || typeof tags !== 'object' || Array.isArray(tags)) {
+    throw new Error('data/tags.json must be a non-empty object dictionary');
+  }
+
+  const tagEntries = Object.entries(tags);
+  if (tagEntries.length === 0) {
+    throw new Error('data/tags.json must contain at least one tag definition');
+  }
+
+  const tagsJsContent = fs.readFileSync(tagsJsPath, 'utf8');
+  if (!tagsJsContent.includes('window.TAG_REGISTRY =')) {
+    throw new Error('data/tags.js must export window.TAG_REGISTRY');
+  }
+
+  const tagsFromJs = JSON.parse(tagsJsContent.replace(/^window\.TAG_REGISTRY\s*=\s*/, '').replace(/;\s*$/, ''));
+  if (JSON.stringify(tags) !== JSON.stringify(tagsFromJs)) {
+    throw new Error('data/tags.json and data/tags.js are not synchronized');
+  }
+
+  const validGroups = new Set(['market', 'sector', 'macro', 'company-policy']);
+  const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  const koSeen = new Map();
+  const enSeen = new Map();
+
+  for (const [id, def] of tagEntries) {
+    if (!slugRegex.test(id) || id.length < 2 || id.length > 48) {
+      throw new Error(`Invalid tag slug '${id}' in data/tags.json: must be 2-48 lowercase alphanumeric/hyphen characters`);
+    }
+    if (!def || typeof def !== 'object') {
+      throw new Error(`Tag '${id}' definition must be an object`);
+    }
+    if (typeof def.ko !== 'string' || !def.ko.trim() || def.ko.length > 40) {
+      throw new Error(`Tag '${id}' must have a valid Korean label (1-40 chars)`);
+    }
+    if (typeof def.en !== 'string' || !def.en.trim() || def.en.length > 60) {
+      throw new Error(`Tag '${id}' must have a valid English label (1-60 chars)`);
+    }
+    if (!validGroups.has(def.group)) {
+      throw new Error(`Tag '${id}' has invalid group '${def.group}'. Valid groups: ${[...validGroups].join(', ')}`);
+    }
+
+    const normKo = def.ko.toLowerCase().replace(/\s+/g, ' ').trim();
+    const normEn = def.en.toLowerCase().replace(/\s+/g, ' ').trim();
+    if (koSeen.has(normKo)) {
+      throw new Error(`Duplicate Korean tag label '${def.ko}' found in '${id}' and '${koSeen.get(normKo)}'`);
+    }
+    if (enSeen.has(normEn)) {
+      throw new Error(`Duplicate English tag label '${def.en}' found in '${id}' and '${enSeen.get(normEn)}'`);
+    }
+    koSeen.set(normKo, id);
+    enSeen.set(normEn, id);
+  }
+
+  // Cross-reference with posts.json
+  for (const post of posts) {
+    const pTags = Array.isArray(post.tags) ? post.tags : [];
+    if (pTags.length > 5) {
+      throw new Error(`Post '${post.id}' exceeds maximum tag limit of 5 (has ${pTags.length})`);
+    }
+    const seenPostTags = new Set();
+    for (const t of pTags) {
+      if (!tags[t]) {
+        throw new Error(`Post '${post.id}' uses unregistered tag '${t}' not in data/tags.json`);
+      }
+      if (seenPostTags.has(t)) {
+        throw new Error(`Post '${post.id}' contains duplicate tag '${t}'`);
+      }
+      seenPostTags.add(t);
+    }
+  }
+
+  // C. Search index artifacts
   const searchIndexFiles = [
     'data/search-index.json',
     'data/search-index-meta.js',
@@ -278,6 +367,22 @@ runStep(3, 'Checking repository invariants & git diff whitespace checks', () => 
     const err = new Error('git diff --cached --check detected errors in staged changes');
     err.details = (stagedDiff.stdout || stagedDiff.stderr || '').trim();
     throw err;
+  }
+
+  // 5. Invariant: reports/** directory must not have modified HTML files
+  if (baseRef) {
+    const reportDiff = spawnSync('git', ['diff', '--name-only', baseRef, '--', 'reports/'], {
+      cwd: rootDir,
+      encoding: 'utf8'
+    });
+    if (reportDiff.status === 0 && reportDiff.stdout.trim().length > 0) {
+      const changed = reportDiff.stdout.trim().split(/\r?\n/).filter(Boolean);
+      if (changed.length > 0) {
+        const err = new Error(`reports/** source HTML files must not be modified (${changed.length} file(s) changed)`);
+        err.details = changed.join('\n');
+        throw err;
+      }
+    }
   }
 });
 

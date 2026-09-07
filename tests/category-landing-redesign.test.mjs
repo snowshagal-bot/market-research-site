@@ -184,9 +184,10 @@ test('15. Category landing hero eyebrow is editorial uppercase without ARCHIVE',
 
 test('16. SSR Featured cards include tags matching tag registry', async () => {
   const posts = JSON.parse(await read('data/posts.json'));
-  const dailyKo = categoryFeaturedCards(posts, 'daily', 'ko');
+  const tags = JSON.parse(await read('data/tags.json'));
+  const dailyKo = categoryFeaturedCards(posts, 'daily', 'ko', tags);
   assert.match(dailyKo, /<div class="category-featured-tags">/);
-  const researchEn = categoryFeaturedCards(posts, 'research', 'en');
+  const researchEn = categoryFeaturedCards(posts, 'research', 'en', tags);
   assert.match(researchEn, /<div class="category-featured-tags">/);
 });
 

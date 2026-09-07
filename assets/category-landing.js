@@ -44,7 +44,7 @@
 
   function tagLabel(key) {
     const entry = window.TAG_REGISTRY?.[key];
-    return entry ? (entry[lang] || entry.ko || key) : key;
+    return entry ? (entry[lang] || entry.ko || '') : '';
   }
 
   const categoryMetaLabels = {

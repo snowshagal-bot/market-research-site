@@ -3,6 +3,13 @@ import { findLateCoverStyle, lateCoverStyleMessage } from '../_cover-style.js';
 import { SOCIAL_REPORT_CARD_DIR } from '../_seo.js';
 import { isHumanAdminHost, validateHumanAdminMutation } from '../_host-policy.js';
 import { requireAdminMutation } from '../_auth.js';
+import {
+  MAX_POST_TAGS,
+  MAX_NEW_CUSTOM_TAGS_PER_PUBLISH,
+  validateTagDefinition,
+  parseAndValidateTags,
+  generateTagsJs
+} from '../_tags.js';
 
 const OWNER = 'snowshagal-bot';
 const REPO = 'market-research-site';
@@ -296,11 +303,6 @@ function countUnits(text, isEn = false) {
   return text.replace(/\s+/g, '').length;
 }
 
-const CANONICAL_TAGS = new Set([
-  'flows', 'semiconductors', 'rates', 'fx', 'treasuries', 'fed',
-  'futures', 'ai', 'cloud-datacenter', 'stablecoins', 'crypto',
-  'gold', 'autos', 'energy', 'policy', 'geopolitics'
-]);
 
 function removeSourceGlossaryContainers(html) {
   if (!html) return '';
@@ -571,27 +573,6 @@ function calculateReadingMinutes(html, lang = 'ko', type = 'daily') {
   return calculateLegacyReadingMinutes(html, lang);
 }
 
-function parseAndValidateTags(inputTags, counterpartTags = []) {
-  let rawTags = [];
-  if (Array.isArray(inputTags)) {
-    rawTags = inputTags;
-  } else if (typeof inputTags === 'string') {
-    rawTags = inputTags.split(/[,\s]+/).map(t => t.trim()).filter(Boolean);
-  }
-  if (!rawTags.length && Array.isArray(counterpartTags) && counterpartTags.length) {
-    rawTags = counterpartTags;
-  }
-  const normalized = Array.from(new Set(rawTags.map(t => String(t).trim().toLowerCase()))).filter(Boolean);
-  if (normalized.length > 3) {
-    return { error: '태그는 최대 3개까지만 지정할 수 있습니다.' };
-  }
-  for (const t of normalized) {
-    if (!CANONICAL_TAGS.has(t)) {
-      return { error: `허용되지 않은 태그입니다: ${t}` };
-    }
-  }
-  return { tags: normalized };
-}
 
 function hasMatchingUniqueIds(posts, searchIndex) {
   if (!Array.isArray(posts) || !Array.isArray(searchIndex)) return false;
@@ -689,10 +670,29 @@ export async function onRequestPost(context) {
     return reply({ error: 'LATE_COVER_STYLE', message: lateCoverStyleMessage(lateCoverStyle), detail: lateCoverStyle }, 400);
   }
 
+  let newTagsInput = [];
+  const rawNewTags = form.get('newTags') || form.get('new_tags');
+  if (rawNewTags) {
+    try {
+      newTagsInput = typeof rawNewTags === 'string' ? JSON.parse(rawNewTags) : rawNewTags;
+      if (!Array.isArray(newTagsInput)) {
+        return reply({ error: 'BAD_NEW_TAGS', message: '새 태그 목록은 배열 형식이어야 합니다.' }, 400);
+      }
+    } catch (err) {
+      return reply({ error: 'BAD_NEW_TAGS', message: '새 태그 JSON 형식이 올바르지 않습니다.' }, 400);
+    }
+  }
+  if (newTagsInput.length > MAX_NEW_CUSTOM_TAGS_PER_PUBLISH) {
+    return reply({ error: 'TOO_MANY_NEW_TAGS', message: `새 태그는 한 번에 최대 ${MAX_NEW_CUSTOM_TAGS_PER_PUBLISH}개까지만 등록할 수 있습니다.` }, 400);
+  }
+
   const rawInputTags = form.getAll('tags').length > 1 ? form.getAll('tags') : form.get('tags');
-  const initialTagValidation = parseAndValidateTags(rawInputTags);
-  if (initialTagValidation.error) {
-    return reply({ error: 'BAD_TAGS', message: initialTagValidation.error }, 400);
+  let rawParsedTags = [];
+  if (Array.isArray(rawInputTags)) rawParsedTags = rawInputTags;
+  else if (typeof rawInputTags === 'string') rawParsedTags = rawInputTags.split(/[,\s]+/).map(t => t.trim()).filter(Boolean);
+  const normalizedRawTags = Array.from(new Set(rawParsedTags.map(t => String(t).trim().toLowerCase()))).filter(Boolean);
+  if (normalizedRawTags.length > MAX_POST_TAGS) {
+    return reply({ error: 'BAD_TAGS', message: `태그는 최대 ${MAX_POST_TAGS}개까지만 지정할 수 있습니다.` }, 400);
   }
 
   const token = env.GITHUB_TOKEN;
@@ -705,12 +705,31 @@ export async function onRequestPost(context) {
   try {
     const ref = await currentRef(token);
     const baseSha = ref.object.sha;
-    const [parentCommit, postsText] = await Promise.all([
+    const [parentCommit, postsText, tagsText] = await Promise.all([
       gh(token, `/git/commits/${baseSha}`),
-      readRepoText(token, 'data/posts.json', baseSha)
+      readRepoText(token, 'data/posts.json', baseSha),
+      readRepoText(token, 'data/tags.json', baseSha)
     ]);
     let posts = JSON.parse(postsText);
     if (!Array.isArray(posts)) throw new Error('posts.json 형식이 올바르지 않습니다.');
+    let tagRegistry = JSON.parse(tagsText);
+    if (!tagRegistry || typeof tagRegistry !== 'object') throw new Error('tags.json 형식이 올바르지 않습니다.');
+
+    let hasNewTags = false;
+    const validatedNewTags = [];
+    for (const def of newTagsInput) {
+      const tagValidationResult = validateTagDefinition(def, tagRegistry);
+      if (!tagValidationResult.valid) {
+        return reply({ error: 'BAD_CUSTOM_TAG', message: tagValidationResult.error }, 400);
+      }
+      tagRegistry[tagValidationResult.tag.id] = {
+        ko: tagValidationResult.tag.ko,
+        en: tagValidationResult.tag.en,
+        group: tagValidationResult.tag.group
+      };
+      validatedNewTags.push(tagValidationResult.tag);
+      hasNewTags = true;
+    }
 
     let pairedPost = null;
     if (translationGroup) {
@@ -729,11 +748,24 @@ export async function onRequestPost(context) {
       }
     }
 
-    const tagValidation = parseAndValidateTags(rawInputTags, pairedPost?.tags);
+    const tagValidation = parseAndValidateTags(rawInputTags, pairedPost?.tags, tagRegistry, { max: MAX_POST_TAGS });
     if (tagValidation.error) {
       return reply({ error: 'BAD_TAGS', message: tagValidation.error }, 400);
     }
     const tags = tagValidation.tags;
+
+    // Server-side defense: verify that every declared new tag is actually referenced in the post's final tags
+    if (validatedNewTags.length > 0) {
+      const finalTagSet = new Set(tags);
+      for (const newTag of validatedNewTags) {
+        if (!finalTagSet.has(newTag.id)) {
+          return reply({
+            error: 'UNUSED_CUSTOM_TAG',
+            message: `신규 등록 태그 '${newTag.id}'가 게시물의 최종 태그에 포함되지 않았습니다.`
+          }, 400);
+        }
+      }
+    }
     const readingMinutes = calculateReadingMinutes(html, lang, type);
 
     if (posts.some(p => p.href === href)) {
@@ -898,6 +930,16 @@ export async function onRequestPost(context) {
       coverEntry = { path: coverPath, mode: '100644', type: 'blob', sha: coverBlob.sha };
     }
 
+    let tagsBlobs = [];
+    if (hasNewTags) {
+      const tagsJson = `${JSON.stringify(tagRegistry, null, 2)}\n`;
+      const tagsJs = generateTagsJs(tagRegistry);
+      tagsBlobs = [
+        { path: 'data/tags.json', mode: '100644', type: 'blob', content: tagsJson },
+        { path: 'data/tags.js', mode: '100644', type: 'blob', content: tagsJs }
+      ];
+    }
+
     const treeEntries = await toBlobEntries(token, [
       { path: reportPath, mode: '100644', type: 'blob', content: html },
       ...(coverEntry ? [coverEntry] : []),
@@ -905,7 +947,8 @@ export async function onRequestPost(context) {
       ...(coverThumbnailEntry ? [coverThumbnailEntry] : []),
       { path: 'data/posts.json', mode: '100644', type: 'blob', content: postsJson },
       { path: 'data/posts.js', mode: '100644', type: 'blob', content: postsJs },
-      ...searchIndexBlobs
+      ...searchIndexBlobs,
+      ...tagsBlobs
     ]);
 
     const tree = await gh(token, '/git/trees', {

@@ -282,11 +282,12 @@ test('Reading Time: hidden attributes, dialog, nav, header, footer are excluded'
 });
 
 test('Tags: Canonical Tag Registry validation and constraints', () => {
-  assert.equal(validTagKeys.size, 16, 'Exactly 16 canonical tags in registry');
+  assert.equal(validTagKeys.size, 36, 'Exactly 36 canonical tags in registry');
   for (const tag of validTagKeys) {
     const entry = tagsRegistry[tag];
     assert.ok(entry.ko, `Tag ${tag} must have Korean label`);
     assert.ok(entry.en, `Tag ${tag} must have English label`);
+    assert.ok(entry.group, `Tag ${tag} must have group`);
   }
 });
 
@@ -307,7 +308,7 @@ test('Backfilled Data Integrity: posts.json and search-index.json synchronizatio
     // Tags equality
     assert.deepEqual(post.tags, searchEntry.tags, `Tags must match for ${id}`);
     assert.ok(Array.isArray(post.tags), `post.tags must be array for ${id}`);
-    assert.ok(post.tags.length <= 3, `post.tags must not exceed 3 tags for ${id}`);
+    assert.ok(post.tags.length <= 5, `post.tags must not exceed 5 tags for ${id}`);
 
     // No duplicate tags
     assert.equal(new Set(post.tags).size, post.tags.length, `No duplicate tags allowed in ${id}`);
@@ -354,8 +355,8 @@ test('Canonical Registry: Exact single-source-of-truth across all backend and fr
   const adminManageJs = fs.readFileSync(path.join(rootDir, 'assets', 'admin-manage.js'), 'utf8');
 
   const jsonKeys = Object.keys(tagsJson);
-  assert.equal(jsonKeys.length, 16, 'Exactly 16 canonical tags in tags.json');
-  assert.equal(new Set(jsonKeys).size, 16, 'No duplicate keys in tags.json');
+  assert.equal(jsonKeys.length, 36, 'Exactly 36 canonical tags in tags.json');
+  assert.equal(new Set(jsonKeys).size, 36, 'No duplicate keys in tags.json');
 
   // 1. data/tags.js evaluation and exact deepEqual
   const context = { window: {} };
@@ -364,37 +365,16 @@ test('Canonical Registry: Exact single-source-of-truth across all backend and fr
   const parsedTagsJs = Function(`const window = {}; ${tagsJsContent}; return window.TAG_REGISTRY;`)();
   assert.deepEqual(parsedTagsJs, tagsJson, 'data/tags.js must deepEqual data/tags.json');
 
-  // 2. publish.js CANONICAL_TAGS exact Set equality
-  const publishMatch = publishJs.match(/const CANONICAL_TAGS = new Set\(\[\s*([\s\S]*?)\s*\]\);/);
-  assert.ok(publishMatch, 'publish.js must define CANONICAL_TAGS Set');
-  const publishTags = publishMatch[1].split(',').map(s => s.trim().replace(/['"]/g, '')).filter(Boolean);
-  assert.equal(publishTags.length, 16, 'publish.js CANONICAL_TAGS must have 16 items');
-  assert.equal(new Set(publishTags).size, 16, 'publish.js CANONICAL_TAGS must have no duplicates');
-  assert.deepEqual(new Set(publishTags), new Set(jsonKeys), 'publish.js CANONICAL_TAGS must exactly match data/tags.json');
+  // 2. publish.js and manage.js use functions/_tags.js for dynamic validation
+  assert.match(publishJs, /_tags\.js/);
+  assert.match(manageJs, /_tags\.js/);
 
-  // 3. manage.js CANONICAL_TAGS exact Set equality
-  const manageMatch = manageJs.match(/const CANONICAL_TAGS = new Set\(\[\s*([\s\S]*?)\s*\]\);/);
-  assert.ok(manageMatch, 'manage.js must define CANONICAL_TAGS Set');
-  const manageTags = manageMatch[1].split(',').map(s => s.trim().replace(/['"]/g, '')).filter(Boolean);
-  assert.equal(manageTags.length, 16, 'manage.js CANONICAL_TAGS must have 16 items');
-  assert.equal(new Set(manageTags).size, 16, 'manage.js CANONICAL_TAGS must have no duplicates');
-  assert.deepEqual(new Set(manageTags), new Set(jsonKeys), 'manage.js CANONICAL_TAGS must exactly match data/tags.json');
-
-  // 4. Frontend fallback registries exact label equality
-  function extractFallback(src) {
-    const match = src.match(/(?:const|let|var)\s+tagRegistry\s*=\s*window\.TAG_REGISTRY\s*\|\|\s*(\{[\s\S]*?\n\s*\});/) ||
-                  src.match(/(?:const|let|var)\s+TAG_REGISTRY\s*=\s*window\.TAG_REGISTRY\s*\|\|\s*(\{[\s\S]*?\n\s*\});/);
-    assert.ok(match, 'Source must define fallback tag registry');
-    return Function(`return ${match[1]};`)();
-  }
-
-  const siteFallback = extractFallback(siteJs);
-  const adminFallback = extractFallback(adminJs);
-  const adminManageFallback = extractFallback(adminManageJs);
-
-  assert.deepEqual(siteFallback, tagsJson, 'assets/site.js fallback must exactly deepEqual data/tags.json');
-  assert.deepEqual(adminFallback, tagsJson, 'assets/admin.js fallback must exactly deepEqual data/tags.json');
-  assert.deepEqual(adminManageFallback, tagsJson, 'assets/admin-manage.js fallback must exactly deepEqual data/tags.json');
+  // 4. Duplicate hardcoded registry elimination check (SSOT principle)
+  assert.doesNotMatch(siteJs, /"semiconductors":\s*\{\s*"ko":\s*"반도체"/, 'assets/site.js must not contain hardcoded duplicate tag registry');
+  assert.doesNotMatch(adminJs, /"semiconductors":\s*\{\s*"ko":\s*"반도체"/, 'assets/admin.js must not contain hardcoded duplicate tag registry');
+  assert.doesNotMatch(adminManageJs, /"semiconductors":\s*\{\s*"ko":\s*"반도체"/, 'assets/admin-manage.js must not contain hardcoded duplicate tag registry');
+  const seoJs = fs.readFileSync(path.join(rootDir, 'functions', '_seo.js'), 'utf8');
+  assert.doesNotMatch(seoJs, /"semiconductors":\s*\{\s*ko:\s*['"]반도체['"]/, 'functions/_seo.js must not contain hardcoded duplicate tag registry');
 });
 
 test('Admin UI: Translation Pair Tag Inheritance resets tags on switch (no stale tags)', () => {
