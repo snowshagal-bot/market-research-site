@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-07-daily-kjq154",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-07",
+    "reportDate": "2026-09-07",
+    "registeredDate": "2026-09-08",
+    "registeredAt": "2026-09-07T19:06:18.308Z",
+    "legacyImport": false,
+    "title": "Cruel September— Spring at Last?",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors",
+      "volatility"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-07_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-09-07-daily-1362ni2",
+    "coverImage": "covers/2026-09-07-daily-kjq154.webp",
+    "shareCardImage": "covers/share/2026-09-07-daily-kjq154.jpg",
+    "coverThumbnail": "covers/2026-09-07-daily-kjq154-450.webp"
+  },
+  {
     "id": "2026-09-07-daily-1362ni2",
     "type": "daily",
     "typeLabel": "주식 리포트",
