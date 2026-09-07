@@ -477,20 +477,17 @@ test('Admin UI Tag Selectors: Publish & Manage tag selector markup and scripts',
   assert.match(manageJs, /body\.append\('tags'/);
 });
 
-test('Semantic Backfill Quality: Varied tag distribution (0, 1, 2, 3 tags allowed)', () => {
+test('Semantic Backfill Quality: Varied tag distribution (0 to 5 tags allowed)', () => {
   const posts = JSON.parse(fs.readFileSync(path.join(rootDir, 'data', 'posts.json'), 'utf8'));
-  const counts = { 0: 0, 1: 0, 2: 0, 3: 0, '4+': 0 };
+  const counts = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, '6+': 0 };
 
   for (const post of posts) {
     const len = post.tags.length;
-    if (len === 0) counts[0]++;
-    else if (len === 1) counts[1]++;
-    else if (len === 2) counts[2]++;
-    else if (len === 3) counts[3]++;
-    else counts['4+']++;
+    if (len in counts) counts[len]++;
+    else counts['6+']++;
   }
 
-  assert.equal(counts['4+'], 0, 'No post can have more than 3 tags');
+  assert.equal(counts['6+'], 0, 'No post can have more than 5 tags');
   assert.ok(counts[0] > 0, '0-tag posts exist where no taxonomy fit exists');
   assert.ok(counts[1] > 0, '1-tag posts exist where 1 core topic fits');
   assert.ok(counts[2] > 0, '2-tag posts exist');
