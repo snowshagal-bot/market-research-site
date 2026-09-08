@@ -1,5 +1,31 @@
 [
   {
+    "id": "2026-09-08-daily-74ct5l",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-09-08",
+    "reportDate": "2026-09-08",
+    "registeredDate": "2026-09-09",
+    "registeredAt": "2026-09-08T17:23:47.757Z",
+    "legacyImport": false,
+    "title": "7천은 생각보다 두꺼웠다",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "volatility"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/9월 8일 주식리포트_통합.html",
+    "coverImage": "covers/2026-09-08-daily-74ct5l.webp",
+    "shareCardImage": "covers/share/2026-09-08-daily-74ct5l.jpg",
+    "coverThumbnail": "covers/2026-09-08-daily-74ct5l-450.webp"
+  },
+  {
     "id": "2026-09-07-daily-kjq154",
     "type": "daily",
     "typeLabel": "Daily",
