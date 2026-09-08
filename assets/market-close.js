@@ -19,6 +19,7 @@
     previewFixture: 'PREVIEW FIXTURE · 실제 게시 데이터가 아닙니다.', emptyTitle: '첫 마감 데이터를 준비하고 있습니다.', emptyBody: '데이터가 게시되면 이곳에서 최신 한국 시장 마감을 확인할 수 있습니다.',
     dateNotFoundTitle: '해당 날짜의 Market Close 데이터가 없습니다.', returnToLatest: '최신 시장으로 돌아가기',
     loadError: '마감 데이터를 불러오지 못했습니다.', retry: '다시 시도',
+    fallbackNotice: '실시간 시장 데이터를 일시적으로 불러올 수 없습니다. 기본 시장 개요를 표시합니다.',
     rangeLoadError: '기간 데이터를 불러오지 못했습니다.',
     recent5Days: '최근 5거래일', recent20Days: '최근 20거래일',
     sectorThemeBuilding: '업종 · 테마 기간 데이터 축적 중',
@@ -53,6 +54,7 @@
     previewFixture: 'PREVIEW FIXTURE · Not published market data.', emptyTitle: 'The first market close is being prepared.', emptyBody: 'The latest Korean market close will appear here once it is published.',
     dateNotFoundTitle: 'No market close data for this date.', returnToLatest: 'Return to latest market',
     loadError: 'Could not load the market close.', retry: 'Try again',
+    fallbackNotice: 'Live market data is temporarily unavailable. Showing the latest available market overview.',
     rangeLoadError: 'Could not load the period data.',
     recent5Days: 'Last 5 Sessions', recent20Days: 'Last 20 Sessions',
     sectorThemeBuilding: 'Sector & theme history is building',
@@ -938,7 +940,11 @@
         const response = await fetch(source, { headers: { Accept: 'application/json' } });
         if (!response.ok) {
           if (await renderPreviewFixture(rootEl)) return;
-          if (response.status === 404) return renderEmpty(rootEl);
+          if (response.status === 404) {
+            const hasStatic = Boolean(rootEl.querySelector('#market-dashboard-view') || rootEl.querySelector('.market-section'));
+            if (hasStatic) return renderFallbackNotice(rootEl);
+            return renderEmpty(rootEl);
+          }
           throw new Error(`HTTP ${response.status}`);
         }
         const data = await response.json();
@@ -947,8 +953,37 @@
       }
     } catch (error) {
       console.error('Failed to load market close data', error);
-      renderError(rootEl);
+      const hasStatic = Boolean(rootEl.querySelector('#market-dashboard-view') || rootEl.querySelector('.market-section'));
+      if (mode === 'today' && hasStatic) {
+        renderFallbackNotice(rootEl);
+      } else {
+        renderError(rootEl);
+      }
     }
+  }
+
+  function renderFallbackNotice(target = document.getElementById('market-close-root')) {
+    if (!target) return;
+    const dashboardView = target.querySelector('#market-dashboard-view');
+    if (dashboardView) {
+      dashboardView.classList.remove('is-loading');
+    }
+    let notice = target.querySelector('#market-fallback-notice');
+    if (!notice) {
+      const noticeHtml = `
+        <div class="market-wrap">
+          <aside id="market-fallback-notice" class="market-fallback-notice" role="status" aria-live="polite">
+            <p class="market-fallback-text">${copy.fallbackNotice}</p>
+            <button class="market-fallback-retry" type="button" data-market-action="retry">${copy.retry}</button>
+          </aside>
+        </div>`;
+      if (dashboardView) {
+        dashboardView.insertAdjacentHTML('beforebegin', noticeHtml);
+      } else {
+        target.insertAdjacentHTML('afterbegin', noticeHtml);
+      }
+    }
+    bindEvents(target);
   }
 
   function renderDateNotFound(dateStr, target = document.getElementById('market-close-root')) {
@@ -965,7 +1000,7 @@
       <div class="market-wrap">
         <section class="market-state market-not-found" role="alert">
           <img class="market-state-owl" src="/assets/brand/snowshagal-owl.webp" alt="" width="232" height="256" aria-hidden="true">
-          <h1>${copy.dateNotFoundTitle}</h1>
+          <h2>${copy.dateNotFoundTitle}</h2>
           <p>${dateText(dateStr)}</p>
           <button class="market-return-btn" type="button" data-market-action="today">${copy.returnToLatest}</button>
         </section>
@@ -986,7 +1021,7 @@
       <div class="market-wrap">
         <section class="market-state" role="alert">
           <img class="market-state-owl" src="/assets/brand/snowshagal-owl.webp" alt="" width="232" height="256" aria-hidden="true">
-          <h1>${copy.rangeLoadError}</h1>
+          <h2>${copy.rangeLoadError}</h2>
           <button class="market-retry" type="button" data-market-action="retry">${copy.retry}</button>
         </section>
       </div>`;
@@ -995,13 +1030,50 @@
 
   function renderError(target = document.getElementById('market-close-root')) {
     if (!target) return;
-    target.innerHTML = `<section class="market-state" role="alert"><img class="market-state-owl" src="/assets/brand/snowshagal-owl.webp" alt="" width="232" height="256" aria-hidden="true"><h1>${copy.loadError}</h1><button class="market-retry" type="button" data-market-action="retry">${copy.retry}</button></section>`;
+    const hasStatic = Boolean(target.querySelector('#market-dashboard-view') || target.querySelector('.market-section'));
+    if (hasStatic) {
+      renderFallbackNotice(target);
+      return;
+    }
+    target.innerHTML = `
+      <section class="market-hero" aria-labelledby="market-close-heading"><div class="market-wrap market-hero-inner"><div class="market-hero-copy">
+        <p class="market-eyebrow">SNOWSHAGAL</p><h1 id="market-close-heading">${copy.title}</h1><p class="market-subtitle">${copy.subtitle}</p>
+      </div><div class="market-mountain" aria-hidden="true"></div></div></section>
+      <div class="market-wrap">
+        ${renderHistoryStrip()}
+      </div>
+      <div class="market-wrap">
+        <section class="market-state" role="alert">
+          <img class="market-state-owl" src="/assets/brand/snowshagal-owl.webp" alt="" width="232" height="256" aria-hidden="true">
+          <h2>${copy.loadError}</h2>
+          <button class="market-retry" type="button" data-market-action="retry">${copy.retry}</button>
+        </section>
+      </div>`;
     bindEvents(target);
   }
 
   function renderEmpty(target = document.getElementById('market-close-root')) {
     if (!target) return;
-    target.innerHTML = `<section class="market-state"><img class="market-state-owl" src="/assets/brand/snowshagal-owl.webp" alt="" width="232" height="256" aria-hidden="true"><h1>${copy.emptyTitle}</h1><p>${copy.emptyBody}</p></section>`;
+    const hasStatic = Boolean(target.querySelector('#market-dashboard-view') || target.querySelector('.market-section'));
+    if (hasStatic) {
+      renderFallbackNotice(target);
+      return;
+    }
+    target.innerHTML = `
+      <section class="market-hero" aria-labelledby="market-close-heading"><div class="market-wrap market-hero-inner"><div class="market-hero-copy">
+        <p class="market-eyebrow">SNOWSHAGAL</p><h1 id="market-close-heading">${copy.title}</h1><p class="market-subtitle">${copy.subtitle}</p>
+      </div><div class="market-mountain" aria-hidden="true"></div></div></section>
+      <div class="market-wrap">
+        ${renderHistoryStrip()}
+      </div>
+      <div class="market-wrap">
+        <section class="market-state">
+          <img class="market-state-owl" src="/assets/brand/snowshagal-owl.webp" alt="" width="232" height="256" aria-hidden="true">
+          <h2>${copy.emptyTitle}</h2>
+          <p>${copy.emptyBody}</p>
+        </section>
+      </div>`;
+    bindEvents(target);
   }
 
   function isPreviewFixtureHost() {
@@ -1046,7 +1118,10 @@
   }
 
   async function init() {
-    if (!document.getElementById('market-close-root')) return;
+    const rootEl = document.getElementById('market-close-root');
+    if (!rootEl) return;
+
+    bindEvents(rootEl);
 
     if (!state.popstateBound && typeof window?.addEventListener === 'function') {
       window.removeEventListener?.('popstate', onPopState);
@@ -1063,6 +1138,7 @@
 
   root.MARKET_CLOSE = {
     render,
+    renderFallbackNotice,
     renderAnnouncementsMount,
     renderRangeView,
     format: { number, pct, ratioPct, won, flow },
