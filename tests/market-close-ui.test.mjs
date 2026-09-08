@@ -983,3 +983,167 @@ test('Market hero renders the update timestamp notice across TODAY, 1W, 1M, and 
   assert.match(css, /\.market-update\{margin-top:2px;font-size:11px;line-height:1\.4\}/);
   assert.match(css, /@media\(max-width:760px\)[\s\S]*?\.market-update\{font-size:11px;line-height:1\.4\}/);
 });
+
+test('Hydration failure fallback: /api/market/latest errors preserve static content, H1, links, and show non-blocking notice', async () => {
+  const [koHtml, enHtml, script, fixtureText] = await Promise.all([
+    read('market/index.html'),
+    read('en/market/index.html'),
+    read('assets/market-close.js'),
+    read('contracts/market_close/market_close.example.json')
+  ]);
+  const fixtureData = JSON.parse(fixtureText);
+
+  const stripTags = (html) => html.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
+  function createMockEnv(htmlContent, lang, fetchHandler) {
+    const mainMatch = htmlContent.match(/<main id="market-close-root">([\s\S]*?)<\/main>/i);
+    let mainInnerHtml = mainMatch ? mainMatch[1] : '';
+    const listeners = new Map();
+
+    const dashboardViewMock = {
+      id: 'market-dashboard-view',
+      classList: {
+        classes: new Set(['market-wrap', 'market-dashboard']),
+        add(cls) { this.classes.add(cls); },
+        remove(cls) { this.classes.delete(cls); },
+        contains(cls) { return this.classes.has(cls); }
+      },
+      insertAdjacentHTML(position, text) {
+        if (position === 'beforebegin') {
+          mainInnerHtml = mainInnerHtml.replace(/<div id="market-dashboard-view"/i, text + '\n<div id="market-dashboard-view"');
+        }
+      }
+    };
+
+    const rootEl = {
+      id: 'market-close-root',
+      get innerHTML() { return mainInnerHtml; },
+      set innerHTML(val) { mainInnerHtml = val; },
+      querySelector(sel) {
+        if (sel === '#market-dashboard-view') {
+          return mainInnerHtml.includes('id="market-dashboard-view"') ? dashboardViewMock : null;
+        }
+        if (sel === '.market-section') {
+          return mainInnerHtml.includes('class="market-section"') ? {} : null;
+        }
+        if (sel === '#market-fallback-notice') {
+          return mainInnerHtml.includes('id="market-fallback-notice"') ? {} : null;
+        }
+        if (sel === '#market-close-heading') {
+          return mainInnerHtml.includes('id="market-close-heading"') ? {} : null;
+        }
+        return null;
+      },
+      querySelectorAll() { return []; },
+      insertAdjacentHTML(position, text) {
+        if (position === 'afterbegin') mainInnerHtml = text + mainInnerHtml;
+        else if (position === 'beforebegin') mainInnerHtml = text + mainInnerHtml;
+        else if (position === 'beforeend') mainInnerHtml = mainInnerHtml + text;
+        else if (position === 'afterend') mainInnerHtml = mainInnerHtml + text;
+      },
+      addEventListener(type, fn) {
+        if (!listeners.has(type)) listeners.set(type, new Set());
+        listeners.get(type).add(fn);
+      },
+      removeEventListener(type, fn) {
+        if (listeners.has(type)) listeners.get(type).delete(fn);
+      }
+    };
+
+    const document = {
+      documentElement: { dataset: { siteLang: lang } },
+      body: { dataset: { marketSource: '/api/market/latest' } },
+      readyState: 'complete',
+      getElementById(id) {
+        if (id === 'market-close-root') return rootEl;
+        if (id === 'market-dashboard-view') return rootEl.querySelector('#market-dashboard-view');
+        return null;
+      },
+      querySelector(sel) { return rootEl.querySelector(sel); },
+      querySelectorAll() { return []; },
+      addEventListener() {}
+    };
+
+    const window = {
+      addEventListener() {},
+      removeEventListener() {}
+    };
+
+    const location = { pathname: lang === 'ko' ? '/market/' : '/en/market/', search: '', hostname: 'snowshagal.com' };
+    const context = vm.createContext({
+      window,
+      document,
+      location,
+      fetch: fetchHandler,
+      Intl,
+      Date,
+      Set,
+      URLSearchParams,
+      console: { ...console, error() {} }
+    });
+    vm.runInContext(script, context);
+    return { runtime: window.MARKET_CLOSE, rootEl };
+  }
+
+  // 1. Error scenarios to test
+  const failureScenarios = [
+    { name: 'Network Error (fetch rejects)', mock: () => Promise.reject(new Error('NetworkError: Failed to fetch')) },
+    { name: 'Request Timeout (fetch AbortError)', mock: () => Promise.reject(new Error('AbortError: The operation was aborted due to timeout')) },
+    { name: 'HTTP 500 Server Error', mock: () => Promise.resolve({ ok: false, status: 500, statusText: 'Internal Server Error' }) },
+    { name: 'HTTP 503 Service Unavailable', mock: () => Promise.resolve({ ok: false, status: 503, statusText: 'Service Unavailable' }) },
+    { name: 'HTTP 404 Not Found', mock: () => Promise.resolve({ ok: false, status: 404, statusText: 'Not Found' }) }
+  ];
+
+  for (const scenario of failureScenarios) {
+    for (const [lang, htmlContent] of [['ko', koHtml], ['en', enHtml]]) {
+      const { runtime, rootEl } = createMockEnv(htmlContent, lang, scenario.mock);
+
+      await runtime.loadAndRender('today');
+
+      const renderedHtml = rootEl.innerHTML;
+      const textOnly = stripTags(renderedHtml);
+
+      // Regression checks required by user:
+      // A. MARKET CLOSE H1 is strictly preserved
+      assert.match(renderedHtml, /<h1 id="market-close-heading">MARKET CLOSE<\/h1>/, `[${lang}|${scenario.name}] MARKET CLOSE H1 must be preserved`);
+      // B. "Could not load the market close" must NEVER be rendered as H1
+      assert.doesNotMatch(renderedHtml, /<h1[^>]*>[\s\S]*?Could not load[\s\S]*?<\/h1>/i, `[${lang}|${scenario.name}] Could not load must not be H1`);
+      assert.doesNotMatch(renderedHtml, /<h1[^>]*>[\s\S]*?불러오지 못했습니다[\s\S]*?<\/h1>/i, `[${lang}|${scenario.name}] 불러오지 못했습니다 must not be H1`);
+      // C. <main> is NOT an error-only state
+      assert.doesNotMatch(renderedHtml, /^\s*<section class="market-state"[\s\S]*?<\/section>\s*$/, `[${lang}|${scenario.name}] Main must not be error-only state`);
+      // D. Substantive content is maintained (sections 01, 02, 04, 05)
+      assert.match(renderedHtml, lang === 'ko' ? /주요 지수/ : /Major Indices/, `[${lang}|${scenario.name}] Major Indices section must remain`);
+      assert.match(renderedHtml, lang === 'ko' ? /금리 · 환율 · 변동성/ : /Rates · FX · Volatility/, `[${lang}|${scenario.name}] Rates/FX section must remain`);
+      // E. Discovery links /daily/, /weekly/, /research/ maintained
+      assert.match(renderedHtml, new RegExp(`href="${lang === 'ko' ? '' : '/en'}/daily/"`), `[${lang}|${scenario.name}] /daily/ link must remain`);
+      assert.match(renderedHtml, new RegExp(`href="${lang === 'ko' ? '' : '/en'}/weekly/"`), `[${lang}|${scenario.name}] /weekly/ link must remain`);
+      assert.match(renderedHtml, new RegExp(`href="${lang === 'ko' ? '' : '/en'}/research/"`), `[${lang}|${scenario.name}] /research/ link must remain`);
+      // F. Non-blocking notice is rendered
+      assert.match(renderedHtml, /id="market-fallback-notice"/, `[${lang}|${scenario.name}] Fallback notice must be present`);
+      assert.match(renderedHtml, /data-market-action="retry"/, `[${lang}|${scenario.name}] Retry button must be present`);
+      const expectedNoticeText = lang === 'ko'
+        ? '실시간 시장 데이터를 일시적으로 불러올 수 없습니다. 기본 시장 개요를 표시합니다.'
+        : 'Live market data is temporarily unavailable. Showing the latest available market overview.';
+      assert.match(renderedHtml, new RegExp(expectedNoticeText), `[${lang}|${scenario.name}] Expected notice text must be present`);
+      // G. Meaningful text remains >= 300
+      assert.ok(textOnly.length >= 300, `[${lang}|${scenario.name}] Substantive text length (${textOnly.length}) must be >= 300`);
+    }
+  }
+
+  // 2. Success scenario: hydrates interactive UI properly
+  for (const [lang, htmlContent] of [['ko', koHtml], ['en', enHtml]]) {
+    const { runtime, rootEl } = createMockEnv(htmlContent, lang, () => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(fixtureData)
+    }));
+
+    await runtime.loadAndRender('today');
+    const renderedHtml = rootEl.innerHTML;
+
+    assert.match(renderedHtml, /<h1 id="market-close-heading">MARKET CLOSE<\/h1>/);
+    assert.match(renderedHtml, /class="major-index-grid"/);
+    assert.match(renderedHtml, /class="instrument-card major"/);
+    // Fallback notice should NOT be present on success
+    assert.doesNotMatch(renderedHtml, /id="market-fallback-notice"/);
+  }
+});
