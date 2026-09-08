@@ -34,7 +34,7 @@
 <link rel="stylesheet" href="/assets/brand.css?v=890e1e5732">
 <link rel="stylesheet" href="/assets/language.css?v=0c4ca7f4fc">
 <link rel="stylesheet" href="/assets/home-v2.css?v=5342d21ef9">
-<link rel="stylesheet" href="/assets/market-close.css?v=0fb9a017b7">
+<link rel="stylesheet" href="/assets/market-close.css?v=43b0d3768c">
 <link rel="preload" as="image" href="/assets/market-close-mountain.webp" media="(min-width: 761px)">
 <link rel="preload" as="image" href="/assets/market-close-mountain-mobile.webp" media="(max-width: 760px)">
 <script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
@@ -67,7 +67,241 @@
   </div>
 </header>
 <main id="market-close-root">
-  <section class="market-loading" role="status"><img class="market-loading-mark" src="/assets/brand/snowshagal-owl.webp" alt="" width="232" height="256" aria-hidden="true"><p>마감 데이터를 불러오는 중입니다.</p></section>
+  <section class="market-hero" aria-labelledby="market-close-heading">
+    <div class="market-wrap market-hero-inner">
+      <div class="market-hero-copy">
+        <p class="market-eyebrow">SNOWSHAGAL</p>
+        <h1 id="market-close-heading">MARKET CLOSE</h1>
+        <p class="market-subtitle">오늘 한국 시장은 어떻게 마감했나</p>
+        <p class="market-date">코스피·코스닥 마감 지표와 투자자 수급, 금리·환율 요약 · 15:30 KST 마감 기준</p>
+        <p class="market-update">데이터 업데이트 · 매 거래일 16:05 KST</p>
+        <p class="market-overseas">* 해외 시장은 각 시장의 최신 거래일 기준</p>
+      </div>
+      <div class="market-mountain" aria-hidden="true"></div>
+    </div>
+  </section>
+  <div class="market-wrap">
+    <div class="market-history-strip">
+      <div class="market-history-modes" role="tablist" aria-label="조회 방식">
+        <button class="market-mode-btn active" type="button" data-market-action="today" role="tab" aria-selected="true">TODAY</button>
+        <button class="market-mode-btn" type="button" data-market-action="view-1w" role="tab" aria-selected="false">1W</button>
+        <button class="market-mode-btn" type="button" data-market-action="view-1m" role="tab" aria-selected="false">1M</button>
+        <span class="market-mode-divider" aria-hidden="true"></span>
+        <button class="market-mode-btn" type="button" data-market-action="toggle-calendar" role="tab" aria-selected="false" aria-expanded="false">HISTORY</button>
+      </div>
+      <div class="market-history-nav">
+        <span class="market-current-date">최신 거래일 마감</span>
+        <button class="market-calendar-toggle" type="button" data-market-action="toggle-calendar" aria-label="달력으로 날짜 선택" aria-expanded="false">📅</button>
+      </div>
+    </div>
+    <div id="market-calendar-drawer" class="market-calendar-drawer" hidden></div>
+  </div>
+  <div id="market-dashboard-view" class="market-wrap market-dashboard">
+    <section class="market-section" aria-labelledby="sec-title-1">
+      <h2 id="sec-title-1"><span>01</span> 주요 지수</h2>
+      <div class="major-index-grid">
+        <article class="instrument-card major">
+          <div class="instrument-heading"><strong>KOSPI</strong><small>코스피</small></div>
+          <span class="instrument-value">종합 지수</span>
+          <div class="instrument-close-label">15:30 확정</div>
+          <div class="instrument-current"><span>대한민국 유가증권시장 대표 벤치마크 지수</span></div>
+          <div class="market-ohlc">
+            <div><dt>포함 종목</dt><dd>유가증권시장 전 종목</dd></div>
+            <div><dt>산출 방식</dt><dd>시가총액 가중방식</dd></div>
+          </div>
+          <div class="instrument-state">KRX 원천 데이터</div>
+        </article>
+        <article class="instrument-card major">
+          <div class="instrument-heading"><strong>KOSDAQ</strong><small>코스닥</small></div>
+          <span class="instrument-value">성장·기술주</span>
+          <div class="instrument-close-label">15:30 확정</div>
+          <div class="instrument-current"><span>IT·바이오·2차전지 혁신성장 중심 시장</span></div>
+          <div class="market-ohlc">
+            <div><dt>포함 종목</dt><dd>코스닥 등록 전 종목</dd></div>
+            <div><dt>산출 방식</dt><dd>시가총액 가중방식</dd></div>
+          </div>
+          <div class="instrument-state">KRX 원천 데이터</div>
+        </article>
+        <article class="instrument-card major">
+          <div class="instrument-heading"><strong>NASDAQ</strong><small>나스닥 종합</small></div>
+          <span class="instrument-value">글로벌 기술주</span>
+          <div class="instrument-close-label">미국 마감 기준</div>
+          <div class="instrument-current"><span>글로벌 테크·빅테크 및 반도체 벤치마크</span></div>
+          <div class="market-ohlc">
+            <div><dt>거래소</dt><dd>미국 나스닥(NASDAQ)</dd></div>
+            <div><dt>연동 지표</dt><dd>필라델피아 반도체 지수</dd></div>
+          </div>
+          <div class="instrument-state">해외 지수</div>
+        </article>
+        <article class="instrument-card major">
+          <div class="instrument-heading"><strong>DOW</strong><small>다우 존스</small></div>
+          <span class="instrument-value">미국 우량주</span>
+          <div class="instrument-close-label">미국 마감 기준</div>
+          <div class="instrument-current"><span>미국 대표 산업 우량 30개 종목</span></div>
+          <div class="market-ohlc">
+            <div><dt>거래소</dt><dd>뉴욕증권거래소(NYSE)</dd></div>
+            <div><dt>산출 방식</dt><dd>주가 평균 방식</dd></div>
+          </div>
+          <div class="instrument-state">해외 지수</div>
+        </article>
+        <article class="instrument-card major">
+          <div class="instrument-heading"><strong>S&amp;P 500</strong><small>대형주 500</small></div>
+          <span class="instrument-value">시장 대표</span>
+          <div class="instrument-close-label">미국 마감 기준</div>
+          <div class="instrument-current"><span>미국 주식시장 시가총액 약 80% 포괄</span></div>
+          <div class="market-ohlc">
+            <div><dt>산출 기관</dt><dd>S&amp;P 다우존스</dd></div>
+            <div><dt>산출 방식</dt><dd>유동 시가총액 가중</dd></div>
+          </div>
+          <div class="instrument-state">해외 지수</div>
+        </article>
+      </div>
+    </section>
+    <div class="market-pair">
+      <section class="market-section" aria-labelledby="sec-title-2">
+        <h2 id="sec-title-2"><span>02</span> 금리 · 환율 · 변동성</h2>
+        <div class="mini-instrument-grid">
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>USDKRW</strong><small>원/달러 환율</small></div>
+            <span class="instrument-value">외환 시장</span>
+            <div class="instrument-current"><span>외국인 수급과 직결되는 핵심 환율 지표</span></div>
+          </article>
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>US10Y</strong><small>미국채 10년</small></div>
+            <span class="instrument-value">글로벌 금리</span>
+            <div class="instrument-current"><span>글로벌 자산 가격의 기준이 되는 무위험 금리</span></div>
+          </article>
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>VIX</strong><small>변동성 지수</small></div>
+            <span class="instrument-value">시장 공포 지수</span>
+            <div class="instrument-current"><span>S&amp;P 500 옵션 기반 변동성 기대치</span></div>
+          </article>
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>SOX</strong><small>필라델피아 반도체</small></div>
+            <span class="instrument-value">반도체 섹터</span>
+            <div class="instrument-current"><span>국내 반도체 대형주 흐름의 선행 지표</span></div>
+          </article>
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>DXY</strong><small>달러 인덱스</small></div>
+            <span class="instrument-value">달러 강세 지표</span>
+            <div class="instrument-current"><span>주요 6개국 통화 대비 미국 달러 가치</span></div>
+          </article>
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>JPYKRW</strong><small>100엔/원</small></div>
+            <span class="instrument-value">엔화 환율</span>
+            <div class="instrument-current"><span>수출 경합도 및 엔캐리 트레이드 변수</span></div>
+          </article>
+        </div>
+      </section>
+      <section class="market-section" aria-labelledby="sec-title-3">
+        <h2 id="sec-title-3"><span>03</span> 원자재 · 가상자산</h2>
+        <div class="mini-instrument-grid commodity-grid">
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>WTI</strong><small>서부텍사스산원유</small></div>
+            <span class="instrument-value">에너지 원자재</span>
+            <div class="instrument-current"><span>인플레이션 압력 및 제조업 원가 지표</span></div>
+          </article>
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>GOLD</strong><small>국제 금</small></div>
+            <span class="instrument-value">안전자산</span>
+            <div class="instrument-current"><span>지정학적 리스크 및 실질금리 역연동</span></div>
+          </article>
+          <article class="instrument-card">
+            <div class="instrument-heading"><strong>BITCOIN</strong><small>비트코인</small></div>
+            <span class="instrument-value">디지털 자산</span>
+            <div class="instrument-current"><span>글로벌 유동성 및 위험선호 측정 지표</span></div>
+          </article>
+        </div>
+      </section>
+    </div>
+    <section class="market-section" aria-labelledby="sec-title-guide">
+      <h2 id="sec-title-guide"><span>04</span> Snowshagal Market Close 제공 데이터 안내</h2>
+      <div class="market-table-wrap">
+        <table class="market-table">
+          <thead>
+            <tr>
+              <th scope="col">섹션</th>
+              <th scope="col">주요 항목</th>
+              <th scope="col">데이터 의미 및 활용</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">주요 지수 &amp; 시장 폭</th>
+              <td>KOSPI, KOSDAQ, 상승/하락 종목 수, 상승비율</td>
+              <td>지수의 착시를 넘어 체감 시장의 온도를 파악하는 시장 폭(Breadth) 분석</td>
+            </tr>
+            <tr>
+              <th scope="row">투자자별 수급 동향</th>
+              <td>외국인, 기관, 개인 당일 및 5거래일 누적 순매수</td>
+              <td>시장 방향성을 주도하는 메이저 주체(외국인·기관)의 포지션 누적 추적</td>
+            </tr>
+            <tr>
+              <th scope="row">프로그램 매매 &amp; 베이시스</th>
+              <td>차익거래, 비차익거래, KOSPI 200 선물, 베이시스</td>
+              <td>선물·현물 가격 괴리율(베이시스)과 알고리즘 비차익 매수·매도 강도 측정</td>
+            </tr>
+            <tr>
+              <th scope="row">시장 내부 지표 &amp; 공매도</th>
+              <td>시장별 거래대금, 수급 집중도 TOP5, 공매도 거래대금</td>
+              <td>거래대금 회전율, 상위 종목 수급 쏠림 현상, 숏(공매도) 비중 상위 모니터링</td>
+            </tr>
+            <tr>
+              <th scope="row">시가총액 상위 10종목</th>
+              <td>삼성전자, SK하이닉스, 현대차, LG엔솔 등 시총 상위</td>
+              <td>지수 기여도가 가장 큰 대형 핵심 주도주의 등락률 및 시가총액 변동</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <section class="market-section" aria-labelledby="sec-title-reports">
+      <h2 id="sec-title-reports"><span>05</span> 시장 리서치 &amp; 심층 리포트 둘러보기</h2>
+      <p style="margin: 0 0 12px; font-size: 12px; color: var(--text-2); line-height: 1.6;">
+        마감 데이터의 단순 수치를 넘어, 시장을 움직인 배경과 외국인·기관 수급의 맥락을 심층 해설하는 Snowshagal 정기 리포트입니다.
+      </p>
+      <div class="mini-instrument-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+        <article class="instrument-card">
+          <div class="instrument-heading"><strong>데일리 리포트</strong><small>DAILY</small></div>
+          <span class="instrument-value" style="font-size: 16px; margin: 8px 0 4px;"><a href="/daily/" style="color: inherit; text-decoration: underline;">오늘의 시장 복기 →</a></span>
+          <div class="instrument-current"><span>매 거래일 마감 직후 발행되는 시장 핵심 요약 및 수급 분석</span></div>
+        </article>
+        <article class="instrument-card">
+          <div class="instrument-heading"><strong>위클리 리포트</strong><small>WEEKLY</small></div>
+          <span class="instrument-value" style="font-size: 16px; margin: 8px 0 4px;"><a href="/weekly/" style="color: inherit; text-decoration: underline;">한 주간의 흐름 →</a></span>
+          <div class="instrument-current"><span>주간 시장 흐름 총괄과 다음 주 핵심 매크로·정책 일정 점검</span></div>
+        </article>
+        <article class="instrument-card">
+          <div class="instrument-heading"><strong>심층 리서치</strong><small>RESEARCH</small></div>
+          <span class="instrument-value" style="font-size: 16px; margin: 8px 0 4px;"><a href="/research/" style="color: inherit; text-decoration: underline;">주제별 인사이트 →</a></span>
+          <div class="instrument-current"><span>반도체, 금리, 환율, 밸류업 등 구조적 변화를 짚는 기획 리서치</span></div>
+        </article>
+      </div>
+    </section>
+    <div class="market-bottom-grid">
+      <div class="market-section">
+        <h2 style="font-size: 13px; margin: 0 0 8px;">마켓 클로즈 이용 안내</h2>
+        <p style="font-size: 11px; color: var(--text-2); line-height: 1.6; margin: 0;">
+          본 화면은 매 정규 거래일 15:30 KRX 정규장 마감 후, 16:05경 최신 시장 데이터 스냅샷으로 자동 갱신됩니다.
+          상단의 <strong>1W</strong>, <strong>1M</strong> 탭을 통해 최근 5거래일 및 20거래일 누적 성과를 조회하거나,
+          <strong>HISTORY</strong> 및 달력 메뉴를 통해 과거 거래일의 마감 데이터를 언제든지 되짚어볼 수 있습니다.
+        </p>
+      </div>
+      <aside class="market-note">
+        <span class="note-quote" aria-hidden="true">“</span>
+        <h2>숫자 너머의 의미를 해석합니다.</h2>
+        <p>시장 전체 흐름과 한국시장 내부 구조를 한눈에 정리하고, 더 깊은 해설은 Snowshagal 리포트에서 이어갑니다.</p>
+        <a class="market-report-cta" href="/daily/">
+          <span>최신 데일리 리포트 보기</span>
+          <span aria-hidden="true">→</span>
+        </a>
+      </aside>
+    </div>
+    <div class="market-data-note">
+      <p>데이터 출처: KRX 한국거래소, 네이버 금융, 연합인포맥스, 야후 파이낸스</p>
+      <p>Snowshagal Market Close · 매 거래일 마감 업데이트</p>
+    </div>
+  </div>
 </main>
 <footer id="site-footer" class="footer site-footer">
   <div class="site-wrap">

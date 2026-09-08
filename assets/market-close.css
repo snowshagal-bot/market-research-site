@@ -154,8 +154,19 @@ body.market-close-page:has(.market-loading)>.footer{visibility:hidden}
   .market-announcement summary{grid-template-columns:42px minmax(0,1fr) 14px;gap:8px}
   .market-announcement summary time{grid-column:2/3;grid-row:2;white-space:normal}
   .market-announcement summary::after{grid-column:3;grid-row:1/3}
-}
   .market-announcement-content{padding:0 22px 14px 50px}
 }
-@media(max-width:360px){.market-wrap{width:min(calc(100% - 18px),1240px)}.market-hero-copy{padding-left:0}.market-subtitle{font-size:18px}.market-hero h1{font-size:39px}.market-mode-btn{padding:2px 3px;font-size:9px}.market-range-badge{font-size:10px}.major-index-grid{grid-template-columns:1fr 1fr}.instrument-card.major{min-height:178px}.instrument-value{font-size:19px}.instrument-change span{display:block;margin-left:10px}.commodity-grid{grid-template-columns:1fr 1fr}.commodity-grid .instrument-card:last-child{grid-column:1/-1}.program-grid,.short-ranks{grid-template-columns:1fr}.basis-panel{border-left:0;border-top:1px solid var(--line);padding:9px 0 0}.market-cap-table th:nth-child(1),.market-cap-table td:nth-child(1),.market-cap-table th:nth-child(3),.market-cap-table td:nth-child(3){display:none}.range-item-name strong{font-size:11px}.range-item-values{flex-direction:column;align-items:flex-end;gap:2px}}
+@media(max-width:860px) and (min-width:761px){
+  .market-close-page .site-wrap{width:min(calc(100% - 16px),var(--max))}
+  .market-close-page .header-row{gap:6px}
+  .market-close-page .snowshagal-brand{gap:5px}
+  .market-close-page .brand-copy small{display:none}
+  .market-close-page .brand-copy strong{font-size:12.5px}
+  .market-close-page .main-nav{gap:4px;font-size:10.5px}
+  .market-close-page .main-nav a{padding-inline:2px}
+  .market-close-page .header-actions{gap:3px}
+  .market-close-page .icon-btn{width:30px;height:30px}
+  .market-close-page .language-pill{min-width:30px;height:30px;padding:0 6px;font-size:10px}
+}
+@media(max-width:360px){.market-wrap{width:min(calc(100% - 18px),1240px)}.market-hero-copy{padding-left:0}.market-subtitle{font-size:18px}.market-hero h1{font-size:39px}.market-mode-btn{padding:2px 3px;font-size:9px}.market-range-badge{font-size:10px}.market-history-strip{flex-wrap:wrap;row-gap:6px}.market-current-date{font-size:10px}.major-index-grid{grid-template-columns:1fr 1fr}.instrument-card.major{min-height:178px}.instrument-value{font-size:19px}.instrument-change span{display:block;margin-left:10px}.commodity-grid{grid-template-columns:1fr 1fr}.commodity-grid .instrument-card:last-child{grid-column:1/-1}.program-grid,.short-ranks{grid-template-columns:1fr}.basis-panel{border-left:0;border-top:1px solid var(--line);padding:9px 0 0}.market-cap-table th:nth-child(1),.market-cap-table td:nth-child(1),.market-cap-table th:nth-child(3),.market-cap-table td:nth-child(3){display:none}.range-item-name strong{font-size:11px}.range-item-values{flex-direction:column;align-items:flex-end;gap:2px}}
 @media(prefers-reduced-motion:reduce){.market-close-page *{scroll-behavior:auto!important;transition:none!important}}
