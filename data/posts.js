@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-08-daily-16lgq92",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-08",
+    "reportDate": "2026-09-08",
+    "registeredDate": "2026-09-09",
+    "registeredAt": "2026-09-08T17:27:51.781Z",
+    "legacyImport": false,
+    "title": "The 7,000 Line Was Tougher Than It Looked",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "volatility"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-08_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-09-08-daily-74ct5l",
+    "coverImage": "covers/2026-09-08-daily-16lgq92.webp",
+    "shareCardImage": "covers/share/2026-09-08-daily-16lgq92.jpg",
+    "coverThumbnail": "covers/2026-09-08-daily-16lgq92-450.webp"
+  },
+  {
     "id": "2026-09-08-daily-74ct5l",
     "type": "daily",
     "typeLabel": "주식 리포트",
