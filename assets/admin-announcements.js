@@ -78,12 +78,17 @@
     contentCount.textContent = `${fields.content.value.length.toLocaleString('ko-KR')} / 20,000`;
   }
 
+  function kstDaysLaterInput(days = 7) {
+    return toKstInput(new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString());
+  }
+
   function resetForm() {
     editingId = '';
     form.reset();
     fields.type.value = 'major';
     fields.audience.value = 'all';
     fields.start.value = kstNowInput();
+    fields.end.value = kstDaysLaterInput(7);
     editorHeading.textContent = '새 공지 작성';
     cancelEdit.hidden = true;
     syncAudience();

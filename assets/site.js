@@ -1113,19 +1113,45 @@
   }
 
   /* Hero Carousel -----------------------------------------------------------
-     Two-slide manual editorial carousel on the homepage:
+     Dynamic editorial carousel on the homepage:
      - Slide 01: Brand Hero (static SSR copy & entries)
-     - Slide 02: Latest Daily report (dynamically bound from locale posts)
+     - Slide 02: Notice (when active announcement exists, items[0] from /api/announcements)
+     - Slide 02/03: Latest Research (dynamically bound from locale posts)
+     Active notice order: BRAND (01/03) -> NOTICE (02/03) -> LATEST RESEARCH (03/03)
+     No active notice order: BRAND (01/02) -> LATEST RESEARCH (02/02)
      Manual controls only (no automatic timers). Supports click, keyboard, and touch swipe.
   -------------------------------------------------------------------------- */
+  function formatAnnouncementDate(isoString, isEn) {
+    if (!isoString) return '—';
+    const date = new Date(isoString);
+    if (!Number.isFinite(date.getTime())) return '—';
+    const kst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+    const y = kst.getUTCFullYear();
+    const d = String(kst.getUTCDate()).padStart(2, '0');
+    if (isEn) {
+      const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+      const m = months[kst.getUTCMonth()];
+      return `${m} ${d}, ${y}`;
+    }
+    const m = String(kst.getUTCMonth() + 1).padStart(2, '0');
+    return `${y}.${m}.${d}`;
+  }
+
   function initHeroCarousel() {
     const heroSection = document.querySelector('.brand-hero');
     const slide1 = document.getElementById('hero-slide-1');
+    const slideNotice = document.getElementById('hero-slide-notice');
     const slide2 = document.getElementById('hero-slide-2');
     const prevBtn = document.getElementById('hero-carousel-prev');
     const nextBtn = document.getElementById('hero-carousel-next');
     const counterCurrent = document.getElementById('carousel-current');
+    const counterTotal = heroSection?.querySelector('.carousel-total');
     if (!heroSection || !slide1 || !slide2) return null;
+
+    const isEn = locale === 'en';
+
+    // Track active slide elements
+    let activeSlides = [slide1];
 
     // Find the latest research for this locale
     const latestResearch = posts.find(p => p.type === 'research');
@@ -1161,58 +1187,74 @@
       if (actionBtn) actionBtn.href = href;
       if (imgLink) imgLink.href = href;
       if (imgEl) {
-        // The hero shows the cover at 220px on a desktop and 140px on a phone,
-        // so it is offered the thumbnail and the original and told how wide it
-        // really is; without `sizes` a browser assumes the full viewport and
-        // takes the 900px file every time.
         const cover = latestResearch.coverImage ? rootPath(latestResearch.coverImage) : '';
         const thumbnail = cover ? coverThumbnailOf(latestResearch) : '';
-        // An empty srcset is the same as none, so the fallback artwork is
-        // simply a plain src again.
         imgEl.srcset = cover && thumbnail ? `${thumbnail} 450w, ${cover} 900w` : '';
         imgEl.sizes = cover && thumbnail ? HERO_FEATURED_COVER_SIZES : '';
         imgEl.src = cover || '/assets/social/snowshagal-home.jpg';
         imgEl.alt = latestResearch.title || '';
       }
+      activeSlides.push(slide2);
     } else {
-      // If there are no research posts at all, hide slide 2 and controls
-      const controls = document.querySelector('.hero-carousel-controls');
+      const controls = heroSection.querySelector('.hero-carousel-controls') || document.querySelector('.hero-carousel-controls');
       if (controls) controls.hidden = true;
       slide2.hidden = true;
     }
 
     let activeIndex = 0;
 
-    function goTo(index) {
-      activeIndex = Math.max(0, Math.min(1, index));
-      if (activeIndex === 0) {
-        slide1.classList.add('active');
-        slide1.setAttribute('aria-hidden', 'false');
-        slide2.classList.remove('active');
-        slide2.setAttribute('aria-hidden', 'true');
-        if (prevBtn) { prevBtn.disabled = true; prevBtn.setAttribute('aria-disabled', 'true'); }
-        if (nextBtn) { nextBtn.disabled = false; nextBtn.setAttribute('aria-disabled', 'false'); }
-        if (counterCurrent) counterCurrent.textContent = '01';
-      } else {
-        slide1.classList.remove('active');
-        slide1.setAttribute('aria-hidden', 'true');
-        slide2.classList.add('active');
-        slide2.setAttribute('aria-hidden', 'false');
-        if (prevBtn) { prevBtn.disabled = false; prevBtn.setAttribute('aria-disabled', 'false'); }
-        if (nextBtn) { nextBtn.disabled = true; nextBtn.setAttribute('aria-disabled', 'true'); }
-        if (counterCurrent) counterCurrent.textContent = '02';
+    function updateCounterAndControls() {
+      const total = activeSlides.length;
+      if (counterTotal) {
+        counterTotal.textContent = String(total).padStart(2, '0');
+      }
+      const controls = heroSection.querySelector('.hero-carousel-controls') || document.querySelector('.hero-carousel-controls');
+      if (controls) {
+        controls.hidden = total <= 1;
+      }
+      if (counterCurrent) {
+        counterCurrent.textContent = String(activeIndex + 1).padStart(2, '0');
+      }
+      if (prevBtn) {
+        const canPrev = activeIndex > 0;
+        prevBtn.disabled = !canPrev;
+        prevBtn.setAttribute('aria-disabled', String(!canPrev));
+      }
+      if (nextBtn) {
+        const canNext = activeIndex < total - 1;
+        nextBtn.disabled = !canNext;
+        nextBtn.setAttribute('aria-disabled', String(!canNext));
       }
     }
 
-    prevBtn?.addEventListener('click', () => goTo(0));
-    nextBtn?.addEventListener('click', () => goTo(1));
+    function goTo(index) {
+      if (activeSlides.length <= 1) {
+        activeIndex = 0;
+        activeSlides.forEach((slide) => {
+          slide.classList.add('active');
+          slide.setAttribute('aria-hidden', 'false');
+        });
+        updateCounterAndControls();
+        return;
+      }
+      activeIndex = Math.max(0, Math.min(activeSlides.length - 1, index));
+      activeSlides.forEach((slide, idx) => {
+        const isActive = idx === activeIndex;
+        slide.classList.toggle('active', isActive);
+        slide.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+      });
+      updateCounterAndControls();
+    }
+
+    prevBtn?.addEventListener('click', () => goTo(activeIndex - 1));
+    nextBtn?.addEventListener('click', () => goTo(activeIndex + 1));
 
     // Keyboard navigation
     heroSection.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft') {
-        goTo(0);
+        goTo(activeIndex - 1);
       } else if (e.key === 'ArrowRight') {
-        goTo(1);
+        goTo(activeIndex + 1);
       }
     });
 
@@ -1230,14 +1272,127 @@
       const deltaX = touchEndX - touchStartX;
       const deltaY = touchEndY - touchStartY;
       if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 40) {
-        if (deltaX < 0) goTo(1); // Swipe left -> Next
-        else goTo(0); // Swipe right -> Prev
+        if (deltaX < 0) goTo(activeIndex + 1); // Swipe left -> Next
+        else goTo(activeIndex - 1); // Swipe right -> Prev
       }
     }, { passive: true });
 
+    // Initial state
     goTo(0);
 
-    const controller = { goTo, getActiveIndex: () => activeIndex, latestResearch };
+    // Dialog setup
+    const noticeDialog = document.getElementById('notice-dialog');
+    let triggerEl = null;
+
+    function openNoticeDialog() {
+      if (!noticeDialog) return;
+      triggerEl = document.activeElement;
+      if (typeof noticeDialog.showModal === 'function') {
+        noticeDialog.showModal();
+      } else {
+        noticeDialog.setAttribute('open', 'true');
+      }
+      const closeBtn = noticeDialog.querySelector('.notice-dialog-close');
+      closeBtn?.focus();
+    }
+
+    function closeNoticeDialog() {
+      if (!noticeDialog) return;
+      if (typeof noticeDialog.close === 'function') {
+        noticeDialog.close();
+      } else {
+        noticeDialog.removeAttribute('open');
+      }
+      if (triggerEl && typeof triggerEl.focus === 'function') {
+        triggerEl.focus();
+      }
+    }
+
+    if (noticeDialog) {
+      const actionBtn = document.getElementById('hero-notice-action-btn');
+      actionBtn?.addEventListener('click', openNoticeDialog);
+
+      noticeDialog.querySelectorAll('[data-notice-close]').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          closeNoticeDialog();
+        });
+      });
+
+      noticeDialog.addEventListener('click', (e) => {
+        const rect = noticeDialog.getBoundingClientRect();
+        const isInDialog = (rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
+          rect.left <= e.clientX && e.clientX <= rect.left + rect.width);
+        if (!isInDialog) {
+          closeNoticeDialog();
+        }
+      });
+
+      noticeDialog.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeNoticeDialog();
+        }
+      });
+    }
+
+    let activeNoticeItem = null;
+
+    // Asynchronous announcement binding (single request to /api/announcements)
+    const noticePromise = fetch('/api/announcements', { headers: { Accept: 'application/json' } })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        const items = Array.isArray(data?.items) ? data.items : [];
+        if (items.length > 0 && slideNotice) {
+          const notice = items[0];
+          activeNoticeItem = notice;
+
+          const dateFormatted = formatAnnouncementDate(notice.exposureStartAt || notice.createdAt, isEn);
+
+          // Hero slide binding (strictly textContent, no translation or language parsing)
+          const heroNoticeDate = document.getElementById('hero-notice-date');
+          const heroNoticeTitle = document.getElementById('hero-notice-title');
+          const heroNoticeSnippet = document.getElementById('hero-notice-snippet');
+
+          if (heroNoticeDate) heroNoticeDate.textContent = dateFormatted;
+          if (heroNoticeTitle) heroNoticeTitle.textContent = notice.title || '';
+          if (heroNoticeSnippet) heroNoticeSnippet.textContent = notice.content || '';
+
+          // Dialog binding (strictly textContent)
+          const dialogDate = document.getElementById('notice-dialog-date');
+          const dialogTitle = document.getElementById('notice-dialog-title');
+          const dialogContent = document.getElementById('notice-dialog-content');
+
+          if (dialogDate) dialogDate.textContent = dateFormatted;
+          if (dialogTitle) dialogTitle.textContent = notice.title || '';
+          if (dialogContent) dialogContent.textContent = notice.content || '';
+
+          // Unhide notice slide
+          slideNotice.hidden = false;
+
+          // Rebuild activeSlides: [BRAND, NOTICE, LATEST RESEARCH]
+          activeSlides = [slide1, slideNotice];
+          if (latestResearch && !slide2.hidden) {
+            activeSlides.push(slide2);
+          }
+
+          // Refresh current position & controls
+          goTo(activeIndex);
+        }
+        return activeNoticeItem;
+      })
+      .catch(() => null);
+
+    const controller = {
+      goTo,
+      getActiveIndex: () => activeIndex,
+      getSlides: () => activeSlides,
+      latestResearch,
+      getActiveNotice: () => activeNoticeItem,
+      noticeReady: noticePromise,
+      openNoticeDialog,
+      closeNoticeDialog
+    };
     window.__heroCarouselTest = controller;
     return controller;
   }

@@ -476,6 +476,267 @@ html[lang="en"] .hero-copy h1 {
   letter-spacing: .08em;
 }
 
+/* Slide Notice Layout */
+.hero-shell-notice {
+  align-items: center;
+}
+
+.notice-hero-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 28px 0 62px;
+}
+
+.notice-badge {
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--brown) 18%, transparent);
+  color: var(--brown);
+  font-weight: 850;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.notice-date {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.notice-title {
+  margin: 0 0 10px;
+  font-family: Georgia, "Noto Serif KR", "Nanum Myeongjo", serif;
+  font-size: clamp(26px, 2.4vw, 34px);
+  font-weight: 500;
+  letter-spacing: -.04em;
+  line-height: 1.25;
+  word-break: keep-all;
+  color: var(--text);
+}
+
+.notice-snippet {
+  max-width: 48ch;
+  margin: 0 0 16px;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: pre-line;
+}
+
+.notice-action {
+  display: flex;
+  align-items: center;
+}
+
+.notice-open-btn {
+  background: none;
+  border: none;
+  border-bottom: 1.5px solid var(--text);
+  padding: 0 0 3px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: color .18s ease, border-color .18s ease;
+}
+
+.notice-open-btn:hover {
+  color: var(--green);
+  border-color: var(--green);
+}
+
+.notice-art {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.notice-art-card {
+  position: relative;
+  width: 200px;
+  height: 220px;
+  border-radius: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 30px rgba(20, 35, 55, 0.07);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.notice-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--brown) 14%, transparent);
+  color: var(--brown);
+}
+
+.notice-card-label {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .14em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+/* Notice Dialog */
+.notice-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.notice-dialog[open] {
+  display: flex;
+}
+
+.notice-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 23, 34, 0.6);
+}
+
+.notice-dialog-content {
+  position: relative;
+  width: min(calc(100% - 32px), 640px);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 20px 45px rgba(20, 24, 21, 0.12);
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+  z-index: 1;
+  padding: 24px 28px 28px;
+  box-sizing: border-box;
+}
+
+.notice-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.notice-dialog-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notice-dialog-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .18s ease;
+}
+
+.notice-dialog-close:hover {
+  background: var(--line);
+}
+
+.notice-dialog-body {
+  overflow-y: auto;
+  max-height: calc(80vh - 100px);
+  padding-right: 4px;
+}
+
+.notice-dialog-title {
+  margin: 0 0 14px;
+  font-family: Georgia, "Noto Serif KR", "Nanum Myeongjo", serif;
+  font-size: clamp(20px, 2.2vw, 24px);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -.03em;
+  color: var(--text);
+  word-break: keep-all;
+}
+
+.notice-dialog-text {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--text-2);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  .hero-shell-notice {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .notice-art {
+    display: none;
+  }
+  .notice-hero-copy {
+    padding: 24px 0 36px;
+  }
+  .notice-title {
+    font-size: clamp(22px, 6vw, 28px);
+  }
+  .notice-dialog-content {
+    width: min(calc(100% - 24px), 640px);
+    padding: 20px 18px 24px;
+    max-height: 85vh;
+  }
+  .notice-dialog-title {
+    font-size: 19px;
+  }
+  .notice-dialog-text {
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+}
+
 /* Minimal Editorial Carousel Controls */
 .hero-carousel-controls {
   position: absolute;

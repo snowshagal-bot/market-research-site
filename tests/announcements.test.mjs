@@ -167,25 +167,38 @@ test('admin API rejects unauthenticated, wrong-origin, non-admin, and unmigrated
   missingCtx.authDb.close(); missingCtx.commentsDb.close();
 });
 
-test('admin and public surfaces preserve the existing MARKET announcement UI contract', async () => {
-  const [page, client, market, css] = await Promise.all([
+test('admin and public surfaces preserve the announcement contract across admin and home', async () => {
+  const [page, client, market, site, homeKo, homeEn, css] = await Promise.all([
     readFile(new URL('../admin/market/announcements/index.html', import.meta.url), 'utf8'),
     readFile(new URL('../assets/admin-announcements.js', import.meta.url), 'utf8'),
     readFile(new URL('../assets/market-close.js', import.meta.url), 'utf8'),
+    readFile(new URL('../assets/site.js', import.meta.url), 'utf8'),
+    readFile(new URL('../index.html', import.meta.url), 'utf8'),
+    readFile(new URL('../en/index.html', import.meta.url), 'utf8'),
     readFile(new URL('../assets/admin-announcements.css', import.meta.url), 'utf8')
   ]);
   for (const id of ['announcement-type', 'announcement-title', 'announcement-content', 'announcement-audience', 'announcement-target-group', 'announcement-start', 'announcement-end']) {
     assert.match(page, new RegExp(`id="${id}"`));
   }
+  assert.match(page, /홈 화면에 표시할 운영 공지를 작성하고 노출 기간을 관리합니다/);
+  assert.match(page, /한국어와 영어 홈에 동일한 내용이 표시되므로/);
   assert.match(page, /<script src="\/data\/posts\.js"><\/script>\s*<script src="\/assets\/locale\.js\?v=[a-f0-9]+"><\/script>\s*<script src="\/assets\/site\.js\?v=[a-f0-9]+"><\/script>/);
   for (const filter of ['major', 'general', 'draft', 'scheduled', 'published', 'expired']) {
     assert.match(page, new RegExp(`data-filter="${filter}"`));
   }
   assert.match(client, /new Date\(`\$\{value\}:00\+09:00`\)/);
+  assert.match(client, /kstDaysLaterInput\(7\)/);
   assert.doesNotMatch(client, /\.innerHTML\s*=/);
-  assert.match(market, /\/api\/announcements/);
-  assert.match(market, /id="market-announcements-mount"/);
-  assert.match(market, /html\(item\.content \|\| ''\)\.replace/);
+  // MARKET has completely removed announcements UI and /api/announcements calls
+  assert.doesNotMatch(market, /\/api\/announcements/);
+  assert.doesNotMatch(market, /id="market-announcements-mount"/);
+  // Homepage hero carousel and dialog bindings
+  assert.match(site, /\/api\/announcements/);
+  assert.match(site, /formatAnnouncementDate/);
+  assert.match(homeKo, /id="hero-slide-notice"/);
+  assert.match(homeKo, /id="notice-dialog"/);
+  assert.match(homeEn, /id="hero-slide-notice"/);
+  assert.match(homeEn, /id="notice-dialog"/);
   assert.match(css, /@media\(max-width:620px\)/);
   assert.match(client, /return item\.status !== 'expired';/);
   assert.equal(isAdminHostnameAllowedPath('/api/admin/announcements'), true);

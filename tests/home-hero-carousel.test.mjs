@@ -41,9 +41,13 @@ function element(id = '') {
     },
     setAttribute(name, value) { attributes.set(name, String(value)); },
     getAttribute(name) { return attributes.get(name); },
+    removeAttribute(name) { attributes.delete(name); },
+    hasAttribute(name) { return attributes.has(name); },
     getBoundingClientRect() { return { left: 0, right: 0, top: 0, bottom: 0, width: 0, height: 0 }; },
     closest() { return element(); },
     appendChild() {},
+    showModal() { attributes.set('open', 'true'); },
+    close() { attributes.delete('open'); },
     querySelector(sel) {
       if (sel === '#archive-more') return element('archive-more');
       if (sel === '.hero-carousel-controls') return element('hero-carousel-controls');
@@ -54,27 +58,58 @@ function element(id = '') {
   };
 }
 
-async function loadSiteScriptContext(initialPosts = [], currentLocale = 'ko') {
+async function loadSiteScriptContext(initialPosts = [], currentLocale = 'ko', announcementsResponse = null) {
   const source = await read('assets/site.js');
   const ids = [
-    'hero-slide-1', 'hero-slide-2', 'hero-carousel-prev', 'hero-carousel-next',
-    'carousel-current', 'hero-featured-date', 'hero-featured-reading',
+    'hero-slide-1', 'hero-slide-notice', 'hero-slide-2', 'hero-carousel-prev', 'hero-carousel-next',
+    'carousel-current', 'carousel-total', 'hero-featured-date', 'hero-featured-reading',
     'hero-featured-title-link', 'hero-featured-snippet', 'hero-featured-action-btn',
-    'hero-featured-img-link', 'hero-featured-img', 'today-strip-date',
+    'hero-featured-img-link', 'hero-featured-img', 'hero-notice-date', 'hero-notice-title',
+    'hero-notice-snippet', 'hero-notice-action-btn', 'notice-dialog', 'notice-dialog-title',
+    'notice-dialog-content', 'notice-dialog-date', 'notice-dialog-close', 'today-strip-date',
     'today-takeaway-label', 'today-takeaway-text', 'today-takeaway-link',
     'report-list', 'archive-more', 'filter-year', 'filter-month', 'filter-tag',
     'filter-reset', 'search-dialog', 'global-search-input', 'search-clear-btn',
-    'search-results-list', 'search-empty-state', 'search-quick-tags', 'search-tag-cloud'
+    'search-results-list', 'search-empty-state', 'search-quick-tags', 'search-tag-cloud',
+    'latest-category-cards'
   ];
   const elements = Object.fromEntries(ids.map((id) => [id, element(id)]));
   elements['hero-slide-1'].classList.add('active');
+  elements['hero-slide-notice'].hidden = true;
   const heroSection = element('brand-hero');
   const controlsEl = element('hero-carousel-controls');
+  const counterTotalEl = elements['carousel-total'];
+  const noticeCloseBtn = elements['notice-dialog-close'];
+
+  heroSection.querySelector = (sel) => {
+    if (sel === '.carousel-total') return counterTotalEl;
+    if (sel === '.hero-carousel-controls') return controlsEl;
+    return element();
+  };
+
+  const noticeDialogEl = elements['notice-dialog'];
+  noticeDialogEl.querySelector = (sel) => {
+    if (sel === '.notice-dialog-close') return noticeCloseBtn;
+    return element();
+  };
+  noticeDialogEl.querySelectorAll = (sel) => {
+    if (sel === '[data-notice-close]') return [noticeCloseBtn];
+    return [];
+  };
+
   const context = {
     console,
     URLSearchParams,
     Intl,
-    fetch: async () => ({ ok: true, json: async () => ({}) }),
+    fetch: async (url) => {
+      if (url === '/api/announcements') {
+        return {
+          ok: true,
+          json: async () => announcementsResponse || { items: [] }
+        };
+      }
+      return { ok: true, json: async () => ({}) };
+    },
     matchMedia: () => ({ matches: false, addEventListener: () => {} }),
     localStorage: { getItem: () => null, setItem: () => {} },
     sessionStorage: { getItem: () => null, setItem: () => {} },
@@ -85,6 +120,7 @@ async function loadSiteScriptContext(initialPosts = [], currentLocale = 'ko') {
       querySelector: (sel) => {
         if (sel === '.brand-hero') return heroSection;
         if (sel === '.hero-carousel-controls') return controlsEl;
+        if (sel === '.carousel-total') return counterTotalEl;
         if (sel === '.today-strip') return element('today-strip');
         if (sel === '.today-takeaway-row') return element('today-takeaway-row');
         if (sel === '#report-list') return elements['report-list'];
@@ -119,6 +155,11 @@ async function loadSiteScriptContext(initialPosts = [], currentLocale = 'ko') {
   };
   vm.createContext(context);
   vm.runInContext(source, context);
+
+  if (context.window?.__heroCarouselTest?.noticeReady) {
+    await context.window.__heroCarouselTest.noticeReady;
+  }
+
   return { context, elements, heroSection, controlsEl };
 }
 
@@ -305,4 +346,182 @@ test('PR #73 Hero Composition: Controls positioned on left under copy with 44px 
   assert.ok(homeCss.includes('right: clamp(-36px, -2vw, -12px);'));
   assert.ok(homeCss.includes('width: min(78vw, 920px);'));
   assert.ok(homeCss.includes('object-position: 60% 36%;'));
+});
+
+// -------------------------------------------------------------
+// BILINGUAL HERO ANNOUNCEMENT TESTS
+// -------------------------------------------------------------
+
+test('Slide 02 Notice: Active notice on KO produces 3 slides (BRAND -> NOTICE -> LATEST RESEARCH), counter 01/03, Korean date formatting', async () => {
+  const samplePosts = [
+    { id: '1', type: 'research', lang: 'ko', title: '한국 리서치 글', reportDate: '2026-09-08', href: 'reports/ko-res.html' }
+  ];
+  const noticePayload = {
+    items: [
+      {
+        id: 'notice-1',
+        title: '운영 점검 안내',
+        content: 'English notice line first.\n\n한국어 공지 본문입니다.',
+        exposureStartAt: '2026-09-09T03:00:00.000Z'
+      }
+    ]
+  };
+
+  const { context, elements } = await loadSiteScriptContext(samplePosts, 'ko', noticePayload);
+  const controller = context.window.__heroCarouselTest;
+
+  // Slide Notice unhidden, 3 total slides
+  assert.equal(elements['hero-slide-notice'].hidden, false);
+  assert.equal(elements['carousel-total'].textContent, '03');
+  assert.equal(elements['carousel-current'].textContent, '01');
+  assert.equal(controller.getActiveIndex(), 0);
+
+  // Formatted date (KO format: YYYY.MM.DD)
+  assert.equal(elements['hero-notice-date'].textContent, '2026.09.09');
+  assert.equal(elements['hero-notice-title'].textContent, '운영 점검 안내');
+  assert.equal(elements['hero-notice-snippet'].textContent, 'English notice line first.\n\n한국어 공지 본문입니다.');
+
+  // Slide navigation: 01 (Brand) -> 02 (Notice) -> 03 (Research)
+  elements['hero-carousel-next'].emit('click');
+  assert.equal(controller.getActiveIndex(), 1);
+  assert.equal(elements['carousel-current'].textContent, '02');
+  assert.equal(elements['hero-slide-notice'].classList.contains('active'), true);
+  assert.equal(elements['hero-slide-1'].classList.contains('active'), false);
+  assert.equal(elements['hero-slide-2'].classList.contains('active'), false);
+
+  elements['hero-carousel-next'].emit('click');
+  assert.equal(controller.getActiveIndex(), 2);
+  assert.equal(elements['carousel-current'].textContent, '03');
+  assert.equal(elements['hero-slide-2'].classList.contains('active'), true);
+  assert.equal(elements['hero-slide-notice'].classList.contains('active'), false);
+
+  elements['hero-carousel-prev'].emit('click');
+  assert.equal(controller.getActiveIndex(), 1);
+  assert.equal(elements['carousel-current'].textContent, '02');
+});
+
+test('Slide 02 Notice: Active notice on EN uses identical verbatim text and English date format (MMM DD, YYYY)', async () => {
+  const samplePosts = [
+    { id: '1', type: 'research', lang: 'en', title: 'US Semi Research', reportDate: '2026-09-08', href: 'reports/en-res.html' }
+  ];
+  const noticePayload = {
+    items: [
+      {
+        id: 'notice-1',
+        title: 'System Maintenance Notice / 점검 안내',
+        content: 'English notice details here.\n\n한국어 상세 내용입니다.',
+        exposureStartAt: '2026-09-09T03:00:00.000Z'
+      }
+    ]
+  };
+
+  const { context, elements } = await loadSiteScriptContext(samplePosts, 'en', noticePayload);
+  const controller = context.window.__heroCarouselTest;
+
+  assert.equal(elements['hero-slide-notice'].hidden, false);
+  assert.equal(elements['carousel-total'].textContent, '03');
+  assert.equal(controller.getActiveIndex(), 0);
+
+  // Formatted date (EN format: uppercase MMM DD, YYYY)
+  assert.equal(elements['hero-notice-date'].textContent, 'SEP 09, 2026');
+  // Verbatim text preserved without modification or locale alteration
+  assert.equal(elements['hero-notice-title'].textContent, 'System Maintenance Notice / 점검 안내');
+  assert.equal(elements['hero-notice-snippet'].textContent, 'English notice details here.\n\n한국어 상세 내용입니다.');
+  assert.equal(elements['notice-dialog-title'].textContent, 'System Maintenance Notice / 점검 안내');
+  assert.equal(elements['notice-dialog-content'].textContent, 'English notice details here.\n\n한국어 상세 내용입니다.');
+  assert.equal(elements['notice-dialog-date'].textContent, 'SEP 09, 2026');
+});
+
+test('Slide 02 Notice: Multiple active notices pick items[0] for both KO and EN', async () => {
+  const noticePayload = {
+    items: [
+      { id: 'n1', title: 'Top Priority Notice', content: 'Primary announcement' },
+      { id: 'n2', title: 'Older Notice', content: 'Secondary announcement' }
+    ]
+  };
+
+  const { elements: koEl } = await loadSiteScriptContext([], 'ko', noticePayload);
+  assert.equal(koEl['hero-notice-title'].textContent, 'Top Priority Notice');
+  assert.equal(koEl['notice-dialog-title'].textContent, 'Top Priority Notice');
+
+  const { elements: enEl } = await loadSiteScriptContext([], 'en', noticePayload);
+  assert.equal(enEl['hero-notice-title'].textContent, 'Top Priority Notice');
+  assert.equal(enEl['notice-dialog-title'].textContent, 'Top Priority Notice');
+});
+
+test('Slide 02 Notice: No active notice preserves 2 slides (BRAND -> LATEST RESEARCH), counter 01/02', async () => {
+  const samplePosts = [
+    { id: '1', type: 'research', lang: 'ko', title: '단독 리서치', reportDate: '2026-09-08', href: 'reports/res.html' }
+  ];
+  const { elements } = await loadSiteScriptContext(samplePosts, 'ko', { items: [] });
+
+  assert.equal(elements['hero-slide-notice'].hidden, true);
+  assert.equal(elements['carousel-total'].textContent, '02');
+  assert.equal(elements['carousel-current'].textContent, '01');
+
+  // Next moves directly to Slide 2 (Research)
+  elements['hero-carousel-next'].emit('click');
+  assert.equal(elements['carousel-current'].textContent, '02');
+  assert.equal(elements['hero-slide-2'].classList.contains('active'), true);
+  assert.equal(elements['hero-slide-notice'].classList.contains('active'), false);
+});
+
+test('Slide 02 Notice: Zero research posts with active notice preserves 2 slides (BRAND -> NOTICE), counter 01/02', async () => {
+  const noticePayload = {
+    items: [
+      { id: 'n1', title: 'Only Announcement', content: 'Content here' }
+    ]
+  };
+  const { context, elements } = await loadSiteScriptContext([], 'ko', noticePayload);
+  const controller = context.window.__heroCarouselTest;
+
+  assert.equal(elements['hero-slide-2'].hidden, true);
+  assert.equal(elements['hero-slide-notice'].hidden, false);
+  assert.equal(elements['carousel-total'].textContent, '02');
+  assert.equal(elements['carousel-current'].textContent, '01');
+
+  // Next moves to Slide Notice
+  elements['hero-carousel-next'].emit('click');
+  assert.equal(controller.getActiveIndex(), 1);
+  assert.equal(elements['carousel-current'].textContent, '02');
+  assert.equal(elements['hero-slide-notice'].classList.contains('active'), true);
+});
+
+test('Slide 02 Notice: Strict textContent binding neutralizes XSS payloads (<script>, <img>) in Hero and Dialog', async () => {
+  const rawMalicious = '<script>alert("xss")</script><img src=x onerror=alert(1)><b>bold</b>';
+  const noticePayload = {
+    items: [
+      { id: 'xss', title: rawMalicious, content: rawMalicious }
+    ]
+  };
+
+  const { elements } = await loadSiteScriptContext([], 'ko', noticePayload);
+
+  assert.equal(elements['hero-notice-title'].textContent, rawMalicious);
+  assert.equal(elements['hero-notice-snippet'].textContent, rawMalicious);
+  assert.equal(elements['notice-dialog-title'].textContent, rawMalicious);
+  assert.equal(elements['notice-dialog-content'].textContent, rawMalicious);
+
+  // InnerHTML of dialog must remain empty (no dangerous HTML parsing)
+  assert.equal(elements['notice-dialog'].innerHTML, '');
+});
+
+test('Slide 02 Notice: Dialog open and close interaction controls', async () => {
+  const noticePayload = {
+    items: [
+      { id: 'n1', title: 'Modal Notice', content: 'Dialog test' }
+    ]
+  };
+  const { context, elements } = await loadSiteScriptContext([], 'ko', noticePayload);
+  const controller = context.window.__heroCarouselTest;
+
+  assert.equal(elements['notice-dialog'].hasAttribute('open'), false);
+
+  // Open modal
+  controller.openNoticeDialog();
+  assert.equal(elements['notice-dialog'].hasAttribute('open'), true);
+
+  // Close modal
+  controller.closeNoticeDialog();
+  assert.equal(elements['notice-dialog'].hasAttribute('open'), false);
 });
