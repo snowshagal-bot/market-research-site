@@ -1,5 +1,31 @@
 [
   {
+    "id": "2026-09-09-daily-kwiiyd",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-09",
+    "reportDate": "2026-09-09",
+    "registeredDate": "2026-09-10",
+    "registeredAt": "2026-09-09T16:13:37.727Z",
+    "legacyImport": false,
+    "title": "7,000 Again, After 48 Days",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "nuclear"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-09_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-09-09-daily-1e567vx",
+    "coverImage": "covers/2026-09-09-daily-kwiiyd.webp",
+    "shareCardImage": "covers/share/2026-09-09-daily-kwiiyd.jpg",
+    "coverThumbnail": "covers/2026-09-09-daily-kwiiyd-450.webp"
+  },
+  {
     "id": "2026-09-09-daily-1e567vx",
     "type": "daily",
     "typeLabel": "주식 리포트",
