@@ -76,6 +76,35 @@ body.static-page {
   }
 }
 
+@media (max-width: 860px) and (min-width: 761px) {
+  .site-wrap {
+    width: min(calc(100% - 16px), var(--max));
+  }
+  .main-nav {
+    gap: 4px;
+    margin-left: 4px;
+    font-size: 10.5px;
+  }
+  .main-nav a {
+    padding-inline: 3px;
+  }
+  .header-actions,
+  .home-page .header-actions {
+    margin-left: auto;
+    gap: 3px;
+  }
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+  }
+  .language-pill {
+    min-width: 30px;
+    height: 30px;
+    padding: 0 6px;
+    font-size: 10px;
+  }
+}
+
 @media (min-width: 761px) {
   .mobile-nav.open {
     display: none;
