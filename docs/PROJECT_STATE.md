@@ -202,7 +202,7 @@ Admin page: `/admin/`
 9. A single Git commit updates the report HTML, optional `covers/` asset, `data/posts.json`, and `data/posts.js`.
 10. When a cover is uploaded, the admin browser also composes its 450px WebP thumbnail (`SHARE_CARD.renderCoverThumbnail`, beside the 1200×630 share card) and sends it as `coverThumbnail`; `/api/publish` commits it as `covers/<id>-450.webp`. `/api/manage` does the same on cover replacement and removes the thumbnail on cover removal, deleting only a thumbnail it has confirmed exists in the repository. A thumbnail that could not be composed is not fatal: the homepage cards then use the original cover.
 10. Cloudflare Pages automatically deploys the new Git commit.
-11. Admin UI polls `data/posts.json` until the new post appears, then shows completion and redirects to the relevant locale/category.
+11. Admin UI polls `data/posts.json` until the new post appears, then stays on `/admin/` with a completion overlay. `다음 리포트 등록` reloads the current Admin URL so the latest post and translation-pair candidates are loaded into a fully reset form; the report and locale/category confirmation links open in new tabs. A polling timeout remains a successful publish state with the same actions and never redirects automatically.
 
 The publisher and post manager read repository JSON through the Git blob API when a file is too large for the GitHub Contents API to return inline. This keeps the growing full-text search index publishable beyond the Contents API's 1MB inline-content limit.
 
