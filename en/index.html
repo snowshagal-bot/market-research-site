@@ -33,8 +33,8 @@
 <link rel="stylesheet" href="/assets/brand.css?v=890e1e5732">
 <link rel="stylesheet" href="/assets/language.css?v=0c4ca7f4fc">
 <link rel="stylesheet" href="/assets/category-state.css?v=4328e4b8c2">
-<link rel="stylesheet" href="/assets/ui-polish.css?v=c877f37bf7">
-<link rel="stylesheet" href="/assets/home-v2.css?v=5342d21ef9">
+<link rel="stylesheet" href="/assets/ui-polish.css?v=6ec39e1026">
+<link rel="stylesheet" href="/assets/home-v2.css?v=257aa81ec7">
 <link rel="preload" as="image" href="/assets/snowshagal-hero.webp" media="(min-width: 761px)">
 <link rel="preload" as="image" href="/assets/snowshagal-hero-mobile.webp" media="(max-width: 760px)">
 <script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
@@ -101,6 +101,34 @@
                 <source media="(max-width: 760px)" srcset="/assets/snowshagal-hero-mobile.webp">
                 <img src="/assets/snowshagal-hero.webp" alt="" width="1536" height="1024" fetchpriority="high">
               </picture>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-slide" id="hero-slide-notice" role="group" aria-roledescription="slide" aria-label="2 of 3: Announcement" aria-hidden="true" hidden>
+          <div class="hero-shell hero-shell-notice">
+            <div class="notice-hero-copy">
+              <div class="featured-eyebrow">
+                <span class="notice-badge">NOTICE</span>
+                <span class="featured-dot" aria-hidden="true">·</span>
+                <span class="notice-date" id="hero-notice-date">—</span>
+              </div>
+              <h2 class="notice-title" id="hero-notice-title">—</h2>
+              <p class="notice-snippet" id="hero-notice-snippet">—</p>
+              <div class="notice-action">
+                <button type="button" class="btn-editorial notice-open-btn" id="hero-notice-action-btn">
+                  <span>Read notice</span> <span aria-hidden="true">→</span>
+                </button>
+              </div>
+            </div>
+            <div class="notice-art" aria-hidden="true">
+              <div class="notice-editorial-frame">
+                <div class="notice-editorial-seal">
+                  <img src="/assets/brand/snowshagal-owl.webp" alt="" width="56" height="62" class="notice-owl-mark">
+                  <span class="notice-seal-rule"></span>
+                  <span class="notice-seal-text">SNOWSHAGAL EDITORIAL</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -306,6 +334,26 @@
   </div>
 </footer>
 
+<dialog id="notice-dialog" class="notice-dialog" aria-labelledby="notice-dialog-title">
+  <div class="notice-dialog-backdrop" data-notice-close></div>
+  <div class="notice-dialog-content">
+    <div class="notice-dialog-header">
+      <div class="notice-dialog-meta">
+        <span class="notice-badge">NOTICE</span>
+        <span class="featured-dot" aria-hidden="true">·</span>
+        <span class="notice-date" id="notice-dialog-date">—</span>
+      </div>
+      <button type="button" id="notice-dialog-close" class="notice-dialog-close" data-notice-close aria-label="Close">
+        <span>Close</span> <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="notice-dialog-body">
+      <h2 id="notice-dialog-title" class="notice-dialog-title">—</h2>
+      <div id="notice-dialog-content" class="notice-dialog-text"></div>
+    </div>
+  </div>
+</dialog>
+
 <dialog id="search-dialog" class="search-dialog" aria-label="Search">
   <div class="search-dialog-backdrop" data-search-close></div>
   <div class="search-dialog-content">
@@ -335,6 +383,6 @@
 <script src="/data/posts.js"></script>
 <script src="/data/market-summary.js"></script>
 <script src="/assets/locale.js?v=bb6eec37ab"></script>
-<script src="/assets/site.js?v=dc2fa549f8"></script>
+<script src="/assets/site.js?v=c0af2e1bed"></script>
 </body>
 </html>

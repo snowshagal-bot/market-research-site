@@ -30,13 +30,7 @@
     sessionCount: n => `${n}일`,
     avgCounts: (r, f) => `평균 상승 ${r}개 · 하락 ${f}개`,
     weekdays: ['월', '화', '수', '목', '금', '토', '일'],
-    monthFormat: (y, m) => `${y}년 ${m}월`,
-    announcementTitle: 'NOTICE · 운영 공지',
-    announcementSubtitle: 'Snowshagal MARKET 이용 및 운영 안내',
-    announcementMajor: '주요', announcementGeneral: '일반',
-    announcementPermanent: '종료일 없음', announcementKst: 'KST',
-    noAnnouncements: '현재 노출 중인 운영 공지가 없습니다.',
-    announcementLoadError: '운영 공지를 불러오지 못했습니다.'
+    monthFormat: (y, m) => `${y}년 ${m}월`
   } : {
     title: 'MARKET CLOSE', subtitle: 'How did the Korean market close today?', closeBasis: 'Korea close as of 15:30 KST', updateNotice: 'Data updates · Every trading day at 16:05 KST', overseas: '* Overseas markets use each market’s latest trading session.',
     todayMode: 'TODAY', historyMode: 'HISTORY', prevDay: 'Previous session', nextDay: 'Next session',
@@ -68,13 +62,7 @@
     monthFormat: (y, m) => {
       const names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
       return `${names[m - 1]} ${y}`;
-    },
-    announcementTitle: 'NOTICE · Service Announcements',
-    announcementSubtitle: 'Snowshagal MARKET service and operational updates',
-    announcementMajor: 'Major', announcementGeneral: 'General',
-    announcementPermanent: 'No end date', announcementKst: 'KST',
-    noAnnouncements: 'There are no active service announcements.',
-    announcementLoadError: 'Could not load service announcements.'
+    }
   };
 
   const names = {
@@ -490,75 +478,10 @@
           ${section(10, copy.sections[9], dataTable([copy.rank, copy.stock, copy.price, copy.change, copy.marketCap], marketCapRows, 'market-cap-table'))}
           <aside class="market-note"><span class="note-quote" aria-hidden="true">“</span><h2>${copy.noteTitle}</h2><p>${copy.noteBody}</p>${reportCtaHtml}</aside>
         </div>
-        ${ko ? `
-        <section id="market-announcements-section" class="market-section market-announcements-section" aria-label="${copy.announcementTitle}">
-          <div class="market-announcement-header">
-            <div><h2>${copy.announcementTitle}</h2><p>${copy.announcementSubtitle}</p></div>
-            <span id="market-announcement-count" class="market-announcement-count"></span>
-          </div>
-          <div id="market-announcements-mount" class="market-announcements-mount" role="region" aria-live="polite">
-            <p class="market-announcement-empty">운영 공지를 불러오는 중입니다...</p>
-          </div>
-        </section>
-        ` : ''}
         <div class="market-data-note"><p>${copy.source}: ${html(Array.from(sourceSet).map(item => item.split(' · ')[0]).filter((item, index, all) => all.indexOf(item) === index).join(', '))}</p><p>${copy.generated}: ${html(data.meta?.generated_at || '--')} · ${html(data.meta?.schema_version || '')}</p></div>
       </div>`;
     target.innerHTML = output;
     bindEvents(target);
-    if (ko && typeof target?.querySelector === 'function') {
-      loadAndRenderAnnouncements(target.querySelector('#market-announcements-mount'));
-    }
-  }
-
-  let announcementCache = null;
-
-  function announcementPeriod(item) {
-    const formatter = new Intl.DateTimeFormat(ko ? 'ko-KR' : 'en-US', {
-      timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', hour12: false
-    });
-    const start = formatter.format(new Date(item.exposureStartAt));
-    const end = item.exposureEndAt ? formatter.format(new Date(item.exposureEndAt)) : copy.announcementPermanent;
-    return `${start} – ${end} ${copy.announcementKst}`;
-  }
-
-  async function loadAndRenderAnnouncements(mountContainer) {
-    if (!mountContainer) return;
-    try {
-      if (!announcementCache) {
-        const response = await fetch('/api/announcements', { headers: { Accept: 'application/json' } });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        announcementCache = await response.json();
-      }
-      renderAnnouncementsMount(mountContainer, announcementCache);
-    } catch (_) {
-      mountContainer.innerHTML = `<p class="market-announcement-empty">${copy.announcementLoadError}</p>`;
-    }
-  }
-
-  function renderAnnouncementsMount(container, feed) {
-    if (!container) return;
-    const items = Array.isArray(feed?.items) ? feed.items : [];
-    const scope = typeof container.closest === 'function' ? container.closest('.market-announcements-section') : null;
-    const countBadge = scope?.querySelector?.('#market-announcement-count') || document.getElementById('market-announcement-count');
-    if (countBadge) countBadge.textContent = items.length ? `${items.length}` : '';
-    if (!items.length) {
-      container.innerHTML = `<p class="market-announcement-empty">${copy.noAnnouncements}</p>`;
-      return;
-    }
-    container.innerHTML = items.map(item => {
-      const type = item.noticeType === 'major' ? 'major' : 'general';
-      const typeLabel = type === 'major' ? copy.announcementMajor : copy.announcementGeneral;
-      const content = html(item.content || '').replace(/\r?\n/g, '<br>');
-      return `<details class="market-announcement market-announcement-${type}">
-        <summary>
-          <span class="market-announcement-type">${typeLabel}</span>
-          <strong>${html(item.title || '')}</strong>
-          <time>${html(announcementPeriod(item))}</time>
-        </summary>
-        <div class="market-announcement-content"><p>${content}</p></div>
-      </details>`;
-    }).join('');
   }
 
   /* ==========================================================================
@@ -1139,7 +1062,6 @@
   root.MARKET_CLOSE = {
     render,
     renderFallbackNotice,
-    renderAnnouncementsMount,
     renderRangeView,
     format: { number, pct, ratioPct, won, flow },
     displayValue,
