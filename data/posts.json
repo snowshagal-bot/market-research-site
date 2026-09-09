@@ -1,5 +1,30 @@
 [
   {
+    "id": "2026-09-09-daily-1e567vx",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-09-09",
+    "reportDate": "2026-09-09",
+    "registeredDate": "2026-09-10",
+    "registeredAt": "2026-09-09T16:11:50.888Z",
+    "legacyImport": false,
+    "title": "48일 만에, 다시 7천",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "nuclear"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/9월 9일 주식리포트_통합.html",
+    "coverImage": "covers/2026-09-09-daily-1e567vx.webp",
+    "shareCardImage": "covers/share/2026-09-09-daily-1e567vx.jpg",
+    "coverThumbnail": "covers/2026-09-09-daily-1e567vx-450.webp"
+  },
+  {
     "id": "2026-09-08-daily-16lgq92",
     "type": "daily",
     "typeLabel": "Daily",
