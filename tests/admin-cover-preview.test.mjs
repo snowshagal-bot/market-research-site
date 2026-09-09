@@ -35,7 +35,14 @@ function createElement(id = '') {
   };
 }
 
-async function loadAdmin({ confirmResult = false, generateCover, publishResponse, pendingReportFile = null } = {}) {
+async function loadAdmin({
+  confirmResult = false,
+  generateCover,
+  publishResponse,
+  deploymentResponses = [],
+  immediateTimers = false,
+  pendingReportFile = null
+} = {}) {
   const source = await read('assets/admin.js');
   const ids = [
     'html-file', 'drop-zone', 'file-info', 'parse-status', 'preview-wrap', 'post-type',
@@ -46,7 +53,7 @@ async function loadAdmin({ confirmResult = false, generateCover, publishResponse
     'cover-preview-caption', 'cover-preview-note', 'admin-key', 'publish-btn', 'publish-overlay',
     'publish-state-title', 'publish-state-text', 'publish-state-detail', 'publish-links',
     'publish-error-actions', 'publish-error-close',
-    'published-report-link', 'published-home-link', 'category-status'
+    'publish-next-report', 'published-report-link', 'published-home-link', 'category-status'
     , 'post-language', 'translation-source', 'translation-source-status', 'generate-cover-btn', 'cover-generator-status'
   ];
   const elements = Object.fromEntries(ids.map(id => [id, createElement(id)]));
@@ -75,6 +82,12 @@ async function loadAdmin({ confirmResult = false, generateCover, publishResponse
   const revokedUrls = [];
   const submissions = [];
   const confirmMessages = [];
+  const location = {
+    href: '',
+    hostname: 'snowshagal.com',
+    reloadCalls: 0,
+    reload() { this.reloadCalls += 1; }
+  };
   class TestFormData {
     entries = [];
     append(...args) { this.entries.push(args); }
@@ -99,11 +112,15 @@ async function loadAdmin({ confirmResult = false, generateCover, publishResponse
         submissions.push(options.body);
         return publishResponse || { ok: false, status: 500, json: async () => ({ message: 'test stop' }) };
       }
+      if (String(url).startsWith('/data/posts.json?deploycheck=')) {
+        const posts = deploymentResponses.length > 0 ? deploymentResponses.shift() : [];
+        return { ok: true, status: 200, json: async () => posts };
+      }
       return { ok: true, json: async () => [] };
     },
     FormData: TestFormData,
-    setTimeout() {},
-    location: { href: '', hostname: 'snowshagal.com' },
+    setTimeout(fn) { if (immediateTimers) fn(); return 0; },
+    location,
     localStorage: { getItem: () => null, setItem() {} },
     sessionStorage: { getItem: () => null, setItem() {} },
     matchMedia: () => ({ matches: false, addEventListener() {} }),
@@ -127,13 +144,13 @@ async function loadAdmin({ confirmResult = false, generateCover, publishResponse
         };
       }
     },
-    URL: {
-      createObjectURL(file) {
+    URL: class TestURL extends URL {
+      static createObjectURL(file) {
         const url = `blob:test-${createdUrls.length + 1}-${file.name}`;
         createdUrls.push(url);
         return url;
-      },
-      revokeObjectURL(url) { revokedUrls.push(url); }
+      }
+      static revokeObjectURL(url) { revokedUrls.push(url); }
     },
     document: {
       documentElement: { dataset: {} },
@@ -148,7 +165,7 @@ async function loadAdmin({ confirmResult = false, generateCover, publishResponse
     window: windowState
   };
   vm.runInNewContext(source, context);
-  return { elements, modeButtons, categoryOptions, languageOptions, createdUrls, revokedUrls, windowListeners, submissions, confirmMessages, windowState };
+  return { elements, modeButtons, categoryOptions, languageOptions, createdUrls, revokedUrls, windowListeners, submissions, confirmMessages, location, windowState };
 }
 
 const validCover = (name = 'cover.webp') => ({ name, type: 'image/webp', size: 320 * 1024 });
@@ -180,6 +197,17 @@ const reportFile = name => ({
   text: async () => `<!doctype html><html><head><meta name="report-date" content="2026-08-10"><title>${name}</title></head><body></body></html>`
 });
 
+const successfulPublishResponse = () => ({
+  ok: true,
+  status: 200,
+  json: async () => ({
+    id: 'new-report',
+    registeredDate: '2026-08-10',
+    reportUrl: '/reports/new-report',
+    state: 'success'
+  })
+});
+
 test('admin markup contains the cover preview modes before the original HTML preview', async () => {
   const [html, adminScript] = await Promise.all([read('admin/index.html'), read('assets/admin.js')]);
   assert.equal((html.match(/class="admin-grid"/g) || []).length, 1);
@@ -196,6 +224,58 @@ test('admin markup contains the cover preview modes before the original HTML pre
   assert.match(adminScript, /iframe\.srcdoc = text/);
   assert.match(html, /admin\.js\?v=[a-f0-9]{10}/);
   assert.doesNotMatch(adminScript, /allow-same-origin/);
+});
+
+test('publish success actions prioritize another Admin report and keep both confirmation links in new tabs', async () => {
+  const [html, adminScript] = await Promise.all([read('admin/index.html'), read('assets/admin.js')]);
+  assert.match(html, /<button class="primary" id="publish-next-report" type="button">다음 리포트 등록<\/button>[\s\S]*게시된 리포트 열기[\s\S]*홈페이지 확인/);
+  assert.match(html, /id="published-report-link"[^>]*target="_blank"[^>]*rel="noopener"/);
+  assert.match(html, /id="published-home-link"[^>]*target="_blank"[^>]*rel="noopener"/);
+  assert.match(html, /\.publish-links \.primary\{background:var\(--text\)/);
+  assert.doesNotMatch(adminScript, /location\.href\s*=\s*categoryUrl/);
+});
+
+test('confirmed deployment stays in Admin until the next-report action reloads the current page', async () => {
+  const { elements, location } = await loadAdmin({
+    confirmResult: true,
+    publishResponse: successfulPublishResponse(),
+    deploymentResponses: [[{ id: 'new-report' }]]
+  });
+  await makePublishReady(elements);
+  await elements['publish-btn'].emit('click');
+
+  assert.equal(elements['publish-overlay'].classList.contains('done'), true);
+  assert.equal(elements['publish-state-title'].textContent, '홈페이지 반영 완료');
+  assert.match(elements['publish-state-text'].textContent, /목록에 새 글이 등록됐습니다/);
+  assert.match(elements['publish-state-text'].textContent, /다음 리포트를 계속 등록하거나 게시된 화면을 확인할 수 있습니다/);
+  assert.equal(elements['publish-links'].hidden, false);
+  assert.equal(elements['published-report-link'].href, 'https://snowshagal.com/reports/new-report');
+  assert.equal(elements['published-home-link'].href, 'https://snowshagal.com/?category=daily');
+  assert.equal(location.href, '');
+
+  elements['publish-next-report'].emit('click');
+  assert.equal(location.reloadCalls, 1);
+  assert.equal(location.href, '');
+});
+
+test('deployment timeout remains a publish-success action state and can reload Admin', async () => {
+  const { elements, location } = await loadAdmin({
+    confirmResult: true,
+    publishResponse: successfulPublishResponse(),
+    immediateTimers: true
+  });
+  await makePublishReady(elements);
+  await elements['publish-btn'].emit('click');
+
+  assert.equal(elements['publish-overlay'].classList.contains('error'), false);
+  assert.equal(elements['publish-state-title'].textContent, '게시는 완료됐습니다');
+  assert.match(elements['publish-state-text'].textContent, /게시 자체는 완료됐습니다/);
+  assert.match(elements['publish-state-text'].textContent, /다음 리포트를 계속 등록하거나 게시된 화면을 확인할 수 있습니다/);
+  assert.equal(elements['publish-links'].hidden, false);
+  assert.equal(location.href, '');
+
+  elements['publish-next-report'].emit('click');
+  assert.equal(location.reloadCalls, 1);
 });
 
 test('admin readiness consumes one early pending report and clears it exactly once', async () => {
@@ -572,9 +652,35 @@ test('invalid administrator authentication keeps a clear publish failure visible
   assert.match(elements['publish-state-detail'].textContent, /관리자 로그인 세션이 만료되었거나 권한이 없습니다/);
   assert.equal(elements['publish-error-close'].textContent, '로그인 확인');
   assert.match(elements['parse-status'].textContent, /게시되지 않음/);
+  assert.equal(elements['publish-links'].hidden, true);
+  assert.equal(elements['publish-btn'].disabled, false);
+  assert.equal(elements['post-title'].value, 'Daily report');
 
   elements['publish-error-close'].emit('click');
   assert.equal(elements['publish-overlay'].classList.contains('on'), false);
+});
+
+test('non-auth publish failure preserves the form, retry action, and hides next-report actions', async () => {
+  const { elements, submissions, location } = await loadAdmin({
+    confirmResult: true,
+    publishResponse: {
+      ok: false,
+      status: 500,
+      json: async () => ({ message: 'GitHub 게시 요청이 실패했습니다.' })
+    }
+  });
+  await makePublishReady(elements);
+  await elements['publish-btn'].emit('click');
+
+  assert.equal(submissions.length, 1);
+  assert.equal(elements['publish-overlay'].classList.contains('error'), true);
+  assert.equal(elements['publish-error-actions'].hidden, false);
+  assert.equal(elements['publish-links'].hidden, true);
+  assert.equal(elements['publish-btn'].textContent, '게시');
+  assert.equal(elements['publish-btn'].disabled, false);
+  assert.equal(elements['post-title'].value, 'Daily report');
+  assert.equal(elements['html-file'].files[0].name, '데일리.html');
+  assert.equal(location.reloadCalls, 0);
 });
 
 test('an automatically generated cover suppresses the missing-cover warning', async () => {

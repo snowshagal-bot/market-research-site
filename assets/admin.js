@@ -64,6 +64,7 @@
   const overlayLinks = $('publish-links');
   const overlayErrorActions = $('publish-error-actions');
   const overlayErrorClose = $('publish-error-close');
+  const nextReportButton = $('publish-next-report');
   const reportLink = $('published-report-link');
   const homeLink = $('published-home-link');
   const html = document.documentElement;
@@ -906,10 +907,9 @@
           if (Array.isArray(posts) && posts.some(p => p.id === postId)) {
             overlay.classList.add('done');
             overlayTitle.textContent = '홈페이지 반영 완료';
-            overlayText.textContent = `${labels[postType] || '리포트'} 목록에 새 글이 등록됐습니다. 잠시 후 자동으로 이동합니다.`;
+            overlayText.textContent = `${labels[postType] || '리포트'} 목록에 새 글이 등록됐습니다. 다음 리포트를 계속 등록하거나 게시된 화면을 확인할 수 있습니다.`;
             overlayDetail.textContent = `홈페이지 등록일 ${registered}`;
             overlayLinks.hidden = false;
-            setTimeout(() => { location.href = categoryUrl; }, 1400);
             return;
           }
         }
@@ -922,7 +922,7 @@
     }
 
     overlayTitle.textContent = '게시는 완료됐습니다';
-    overlayText.textContent = 'Cloudflare 반영 확인이 예상보다 늦어지고 있습니다. 게시 자체는 완료됐으니 아래 버튼으로 이동해도 됩니다.';
+    overlayText.textContent = 'Cloudflare 반영 확인이 예상보다 늦어지고 있습니다. 게시 자체는 완료됐습니다. 다음 리포트를 계속 등록하거나 게시된 화면을 확인할 수 있습니다.';
     overlayDetail.textContent = `홈페이지 등록일 ${registered}`;
     overlayLinks.hidden = false;
   }
@@ -1172,6 +1172,7 @@
     overlay?.classList.remove('on', 'error');
     publishBtn?.focus();
   });
+  nextReportButton?.addEventListener('click', () => location.reload());
   publishBtn?.addEventListener('click', publish);
 
   themeBtn?.addEventListener('click', () => {
