@@ -1201,9 +1201,24 @@
       slide2.hidden = true;
     }
 
-    let activeIndex = 0;
+    function syncSlideAriaLabels() {
+      const total = activeSlides.length;
+      activeSlides.forEach((slide, idx) => {
+        const num = idx + 1;
+        let title = '';
+        if (slide === slide1) {
+          title = isEn ? 'Brand' : '브랜드';
+        } else if (slide === slideNotice) {
+          title = isEn ? 'Announcement' : '공지사항';
+        } else if (slide === slide2) {
+          title = isEn ? 'Latest Research' : '최신 리서치';
+        }
+        slide.setAttribute('aria-label', `${num} of ${total}: ${title}`);
+      });
+    }
 
     function updateCounterAndControls() {
+      syncSlideAriaLabels();
       const total = activeSlides.length;
       if (counterTotal) {
         counterTotal.textContent = String(total).padStart(2, '0');

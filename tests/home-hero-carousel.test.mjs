@@ -525,3 +525,87 @@ test('Slide 02 Notice: Dialog open and close interaction controls', async () => 
   controller.closeNoticeDialog();
   assert.equal(elements['notice-dialog'].hasAttribute('open'), false);
 });
+
+test('Carousel Slide ARIA labels synchronize dynamically across 1/2/3 slide states and locales', async () => {
+  const samplePosts = [
+    { id: '1', type: 'research', lang: 'ko', title: '리서치', reportDate: '2026-09-08', href: 'reports/res.html' }
+  ];
+  const samplePostsEn = [
+    { id: '1', type: 'research', lang: 'en', title: 'Research', reportDate: '2026-09-08', href: 'reports/res-en.html' }
+  ];
+  const noticePayload = {
+    items: [{ id: 'n1', title: '공지', content: '내용' }]
+  };
+
+  // 1. 3 slides: Active Notice + Research on KO
+  const { elements: ko3 } = await loadSiteScriptContext(samplePosts, 'ko', noticePayload);
+  assert.equal(ko3['hero-slide-1'].getAttribute('aria-label'), '1 of 3: 브랜드');
+  assert.equal(ko3['hero-slide-notice'].getAttribute('aria-label'), '2 of 3: 공지사항');
+  assert.equal(ko3['hero-slide-2'].getAttribute('aria-label'), '3 of 3: 최신 리서치');
+
+  // 2. 3 slides: Active Notice + Research on EN
+  const { elements: en3 } = await loadSiteScriptContext(samplePostsEn, 'en', noticePayload);
+  assert.equal(en3['hero-slide-1'].getAttribute('aria-label'), '1 of 3: Brand');
+  assert.equal(en3['hero-slide-notice'].getAttribute('aria-label'), '2 of 3: Announcement');
+  assert.equal(en3['hero-slide-2'].getAttribute('aria-label'), '3 of 3: Latest Research');
+
+  // 3. 2 slides: No Notice + Research on KO
+  const { elements: ko2 } = await loadSiteScriptContext(samplePosts, 'ko', { items: [] });
+  assert.equal(ko2['hero-slide-1'].getAttribute('aria-label'), '1 of 2: 브랜드');
+  assert.equal(ko2['hero-slide-2'].getAttribute('aria-label'), '2 of 2: 최신 리서치');
+
+  // 4. 2 slides: No Notice + Research on EN
+  const { elements: en2 } = await loadSiteScriptContext(samplePostsEn, 'en', { items: [] });
+  assert.equal(en2['hero-slide-1'].getAttribute('aria-label'), '1 of 2: Brand');
+  assert.equal(en2['hero-slide-2'].getAttribute('aria-label'), '2 of 2: Latest Research');
+
+  // 5. 2 slides: Active Notice + No Research on KO
+  const { elements: koNoticeOnly } = await loadSiteScriptContext([], 'ko', noticePayload);
+  assert.equal(koNoticeOnly['hero-slide-1'].getAttribute('aria-label'), '1 of 2: 브랜드');
+  assert.equal(koNoticeOnly['hero-slide-notice'].getAttribute('aria-label'), '2 of 2: 공지사항');
+
+  // 6. 2 slides: Active Notice + No Research on EN
+  const { elements: enNoticeOnly } = await loadSiteScriptContext([], 'en', noticePayload);
+  assert.equal(enNoticeOnly['hero-slide-1'].getAttribute('aria-label'), '1 of 2: Brand');
+  assert.equal(enNoticeOnly['hero-slide-notice'].getAttribute('aria-label'), '2 of 2: Announcement');
+});
+
+test('Notice Hero Editorial Tone: restrained typography, thin rules, no alert card or pill buttons', async () => {
+  const [homeCss, koHtml, enHtml] = await Promise.all([
+    read('assets/home-v2.css'),
+    read('index.html'),
+    read('en/index.html')
+  ]);
+
+  // Art card and alert decor removed
+  assert.equal(homeCss.includes('.notice-art-card'), false);
+  assert.equal(homeCss.includes('.notice-card-icon'), false);
+  assert.equal(homeCss.includes('.notice-card-label'), false);
+  assert.equal(koHtml.includes('notice-art-card'), false);
+  assert.equal(enHtml.includes('notice-art-card'), false);
+
+  // Subtle editorial frame with owl mark present
+  assert.ok(homeCss.includes('.notice-editorial-frame'));
+  assert.ok(homeCss.includes('.notice-owl-mark'));
+  assert.ok(homeCss.includes('.notice-seal-rule'));
+  assert.ok(homeCss.includes('.notice-seal-text'));
+  assert.ok(koHtml.includes('notice-editorial-frame'));
+  assert.ok(enHtml.includes('notice-editorial-frame'));
+  assert.ok(koHtml.includes('snowshagal-owl.webp'));
+  assert.ok(enHtml.includes('snowshagal-owl.webp'));
+
+  // Notice badge is an editorial label (no background chip, padding, or border-radius)
+  const noticeBadgeIdx = homeCss.indexOf('.notice-badge {');
+  assert.ok(noticeBadgeIdx !== -1);
+  const noticeBadgeBlock = homeCss.slice(noticeBadgeIdx, noticeBadgeIdx + 200);
+  assert.equal(noticeBadgeBlock.includes('padding'), false);
+  assert.equal(noticeBadgeBlock.includes('background'), false);
+  assert.equal(noticeBadgeBlock.includes('border-radius'), false);
+
+  // Dialog close button is not a pill (no border-radius: 999px, uses 6px)
+  const closeBtnIdx = homeCss.indexOf('.notice-dialog-close {');
+  assert.ok(closeBtnIdx !== -1);
+  const closeBtnBlock = homeCss.slice(closeBtnIdx, closeBtnIdx + 250);
+  assert.equal(closeBtnBlock.includes('999px'), false);
+  assert.ok(closeBtnBlock.includes('border-radius: 6px;'));
+});

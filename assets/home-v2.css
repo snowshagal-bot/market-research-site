@@ -492,13 +492,10 @@ html[lang="en"] .hero-copy h1 {
 }
 
 .notice-badge {
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--brown) 18%, transparent);
-  color: var(--brown);
+  color: var(--text-2);
   font-weight: 850;
   font-size: 11px;
-  letter-spacing: .12em;
+  letter-spacing: .14em;
   text-transform: uppercase;
 }
 
@@ -568,36 +565,42 @@ html[lang="en"] .hero-copy h1 {
   justify-content: flex-end;
 }
 
-.notice-art-card {
+/* Subtle Snowshagal editorial right-column vignette */
+.notice-editorial-frame {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 200px;
   height: 220px;
-  border-radius: 12px;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  box-shadow: 0 10px 30px rgba(20, 35, 55, 0.07);
+  border-left: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  padding-left: 36px;
+}
+
+.notice-editorial-seal {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 12px;
+  opacity: 0.8;
 }
 
-.notice-card-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--brown) 14%, transparent);
-  color: var(--brown);
+.notice-owl-mark {
+  width: 56px;
+  height: auto;
+  opacity: 0.85;
 }
 
-.notice-card-label {
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: .14em;
+.notice-seal-rule {
+  width: 28px;
+  height: 1px;
+  background: var(--line);
+}
+
+.notice-seal-text {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: .22em;
   color: var(--muted);
   text-transform: uppercase;
 }
@@ -665,22 +668,23 @@ html[lang="en"] .hero-copy h1 {
 .notice-dialog-close {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 32px;
-  padding: 4px 12px;
+  gap: 4px;
+  min-height: 28px;
+  padding: 4px 10px;
   border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--panel-2);
-  color: var(--text);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--muted);
   font: inherit;
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: background .18s ease;
+  transition: all .15s ease;
 }
 
 .notice-dialog-close:hover {
-  background: var(--line);
+  color: var(--text);
+  background: var(--panel-2);
 }
 
 .notice-dialog-body {
