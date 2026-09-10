@@ -1,5 +1,30 @@
 [
   {
+    "id": "2026-09-10-daily-m6v33p",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-10",
+    "reportDate": "2026-09-10",
+    "registeredDate": "2026-09-11",
+    "registeredAt": "2026-09-10T16:11:54.204Z",
+    "legacyImport": false,
+    "title": "An Afternoon That Survived Quadruple Witching",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "quadruple-witching-day"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-10_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-09-10-daily-193qqj4",
+    "coverImage": "covers/2026-09-10-daily-m6v33p.webp",
+    "shareCardImage": "covers/share/2026-09-10-daily-m6v33p.jpg",
+    "coverThumbnail": "covers/2026-09-10-daily-m6v33p-450.webp"
+  },
+  {
     "id": "2026-09-10-daily-193qqj4",
     "type": "daily",
     "typeLabel": "주식 리포트",
