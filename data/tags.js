@@ -178,5 +178,10 @@ window.TAG_REGISTRY = {
     "ko": "지정학",
     "en": "Geopolitics",
     "group": "company-policy"
+  },
+  "quadruple-witching-day": {
+    "ko": "네 마녀의",
+    "en": "Quadruple Witching Day",
+    "group": "market"
   }
 };
