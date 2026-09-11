@@ -1,5 +1,30 @@
 [
   {
+    "id": "2026-09-11-daily-1f4utmk",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-11",
+    "reportDate": "2026-09-11",
+    "registeredDate": "2026-09-12",
+    "registeredAt": "2026-09-11T17:09:56.107Z",
+    "legacyImport": false,
+    "title": "Halfway Back",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-11_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-09-11-daily-1sx754u",
+    "coverImage": "covers/2026-09-11-daily-1f4utmk.webp",
+    "shareCardImage": "covers/share/2026-09-11-daily-1f4utmk.jpg",
+    "coverThumbnail": "covers/2026-09-11-daily-1f4utmk-450.webp"
+  },
+  {
     "id": "2026-09-11-daily-1sx754u",
     "type": "daily",
     "typeLabel": "주식 리포트",
