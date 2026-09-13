@@ -400,6 +400,30 @@ window.RESEARCH_POSTS = [
     "coverThumbnail": "covers/2026-09-03-daily-earj10-450.webp"
   },
   {
+    "id": "2026-09-02-weekly-11ncmn3",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-09-02",
+    "reportDate": "2026-09-02",
+    "registeredDate": "2026-09-14",
+    "registeredAt": "2026-09-13T16:24:35.302Z",
+    "legacyImport": false,
+    "title": "한 주를 만든 하루",
+    "subtitle": "",
+    "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows"
+    ],
+    "readingMinutes": 13,
+    "href": "reports/위클리_2026년 9월 2주차 위클리.html",
+    "coverImage": "covers/2026-09-02-weekly-11ncmn3.webp",
+    "shareCardImage": "covers/share/2026-09-02-weekly-11ncmn3.jpg",
+    "coverThumbnail": "covers/2026-09-02-weekly-11ncmn3-450.webp"
+  },
+  {
     "id": "2026-09-02-daily-1cf4sz2",
     "type": "daily",
     "typeLabel": "Daily",
