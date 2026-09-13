@@ -1,5 +1,30 @@
 [
   {
+    "id": "2026-09-11-weekly-17fg5xx",
+    "type": "weekly",
+    "typeLabel": "Weekly",
+    "lang": "en",
+    "date": "2026-09-11",
+    "reportDate": "2026-09-11",
+    "registeredDate": "2026-09-14",
+    "registeredAt": "2026-09-13T16:51:00.189Z",
+    "legacyImport": false,
+    "title": "The Day That Made the Week",
+    "subtitle": "",
+    "description": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows"
+    ],
+    "readingMinutes": 18,
+    "href": "reports/en/2026-09-13_Korea_Weekly_Report_EN.html",
+    "translationGroup": "2026-09-11-daily-1sx754u",
+    "coverImage": "covers/2026-09-11-weekly-17fg5xx.webp",
+    "shareCardImage": "covers/share/2026-09-11-weekly-17fg5xx.jpg",
+    "coverThumbnail": "covers/2026-09-11-weekly-17fg5xx-450.webp"
+  },
+  {
     "id": "2026-09-11-daily-1f4utmk",
     "type": "daily",
     "typeLabel": "Daily",
