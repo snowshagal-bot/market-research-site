@@ -11,7 +11,7 @@ import {
   buildSearchIndex,
   READING_SPEED
 } from '../scripts/build-search-index.mjs';
-import { MAX_POST_TAGS } from '../functions/_tags.js';
+import { CANONICAL_TAG_COUNT, MAX_POST_TAGS, splitTagRegistry } from '../functions/_tags.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -283,7 +283,9 @@ test('Reading Time: hidden attributes, dialog, nav, header, footer are excluded'
 });
 
 test('Tags: Canonical Tag Registry validation and constraints', () => {
-  assert.equal(validTagKeys.size, 36, 'Exactly 36 canonical tags in registry');
+  const { canonical, custom } = splitTagRegistry(tagsRegistry);
+  assert.equal(Object.keys(canonical).length, CANONICAL_TAG_COUNT, 'Exactly 36 canonical tags in registry');
+  assert.equal(validTagKeys.size, Object.keys(canonical).length + Object.keys(custom).length, 'Registry is canonical plus custom tags');
   for (const tag of validTagKeys) {
     const entry = tagsRegistry[tag];
     assert.ok(entry.ko, `Tag ${tag} must have Korean label`);
@@ -356,8 +358,8 @@ test('Canonical Registry: Exact single-source-of-truth across all backend and fr
   const adminManageJs = fs.readFileSync(path.join(rootDir, 'assets', 'admin-manage.js'), 'utf8');
 
   const jsonKeys = Object.keys(tagsJson);
-  assert.equal(jsonKeys.length, 36, 'Exactly 36 canonical tags in tags.json');
-  assert.equal(new Set(jsonKeys).size, 36, 'No duplicate keys in tags.json');
+  assert.equal(Object.keys(splitTagRegistry(tagsJson).canonical).length, CANONICAL_TAG_COUNT, 'Exactly 36 canonical tags in tags.json');
+  assert.equal(new Set(jsonKeys).size, jsonKeys.length, 'No duplicate keys in tags.json');
 
   // 1. data/tags.js evaluation and exact deepEqual
   const context = { window: {} };

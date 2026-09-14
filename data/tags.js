@@ -180,13 +180,15 @@ window.TAG_REGISTRY = {
     "group": "company-policy"
   },
   "quadruple-witching-day": {
-    "ko": "네 마녀의",
+    "ko": "네 마녀의 날",
     "en": "Quadruple Witching Day",
-    "group": "market"
+    "group": "market",
+    "custom": true
   },
   "japan": {
     "ko": "일본",
-    "en": "japan",
-    "group": "market"
+    "en": "Japan",
+    "group": "market",
+    "custom": true
   }
 };

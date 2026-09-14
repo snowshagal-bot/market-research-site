@@ -14,7 +14,9 @@ import {
   sanitizeLabel,
   validateTagDefinition,
   parseAndValidateTags,
-  generateTagsJs
+  generateTagsJs,
+  CANONICAL_TAG_COUNT,
+  splitTagRegistry
 } from '../functions/_tags.js';
 import vm from 'node:vm';
 import {
@@ -49,10 +51,11 @@ function createTestAuthEnv() {
   });
 }
 
-test('Tag Taxonomy: 36 tags across 4 canonical groups (6 market, 13 sector, 10 macro, 7 company-policy)', () => {
+test('Tag Taxonomy: 36 canonical tags across 4 groups (6 market, 13 sector, 10 macro, 7 company-policy), custom tags beside them', () => {
   const tagsJson = JSON.parse(tagsJsonRaw);
-  const keys = Object.keys(tagsJson);
-  assert.equal(keys.length, 36, 'Exact 36 tags in registry');
+  const { canonical, custom } = splitTagRegistry(tagsJson);
+  assert.equal(Object.keys(canonical).length, CANONICAL_TAG_COUNT, 'Exactly 36 canonical tags in registry');
+  assert.equal(Object.keys(tagsJson).length, Object.keys(canonical).length + Object.keys(custom).length, 'Every tag is canonical or custom');
 
   const groupCounts = { market: 0, sector: 0, macro: 0, 'company-policy': 0 };
   for (const [id, def] of Object.entries(tagsJson)) {
@@ -60,8 +63,10 @@ test('Tag Taxonomy: 36 tags across 4 canonical groups (6 market, 13 sector, 10 m
     assert.match(id, TAG_SLUG_REGEX, `Valid slug regex for ${id}`);
     assert.ok(def.ko && def.ko.length > 0 && def.ko.length <= 40, `Valid KO for ${id}`);
     assert.ok(def.en && def.en.length > 0 && def.en.length <= 60, `Valid EN for ${id}`);
-    groupCounts[def.group]++;
   }
+  // The group distribution is a property of the canonical taxonomy; custom tags
+  // may land in any group.
+  for (const def of Object.values(canonical)) groupCounts[def.group]++;
 
   assert.equal(groupCounts.market, 6, 'Exactly 6 market tags');
   assert.equal(groupCounts.sector, 13, 'Exactly 13 sector tags');
@@ -302,6 +307,7 @@ test('Atomic Publish with Custom Tag: persists data/tags.json & data/tags.js in 
     assert.equal(parsedCommittedTags.humanoid.ko, '휴머노이드');
     assert.equal(parsedCommittedTags.humanoid.en, 'Humanoid');
     assert.equal(parsedCommittedTags.humanoid.group, 'sector');
+    assert.equal(parsedCommittedTags.humanoid.custom, true, 'A tag a publish adds is marked custom');
 
     // Verify posts.json includes the new tag
     const postsEntry = tree.find(e => e.path === 'data/posts.json');

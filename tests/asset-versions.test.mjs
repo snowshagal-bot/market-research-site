@@ -9,6 +9,8 @@ import {
   STAMP_TARGETS,
   computeAssetFileHash,
   computeContentHash,
+  findStaleAssetReferences,
+  findVersionedDynamicReferences,
   getAssetVersionMap,
   stampAssetVersionsInContent
 } from '../scripts/asset-versions.mjs';
@@ -74,18 +76,8 @@ test('Regression Guard: all STAMP_TARGETS have exact, fresh content hashes for a
     assert.ok(fs.existsSync(fullPath), `STAMP_TARGET file must exist on disk: ${file}`);
     const content = fs.readFileSync(fullPath, 'utf8');
 
-    for (const [assetPath, expectedHash] of Object.entries(versionMap)) {
-      const escaped = assetPath.replace(/[.*+?^$${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`(?:href|src)=["'](?:\\/|\\.\\.\\/)*${escaped}(?:\\?v=([^"']*))?["']`, 'g');
-      let match;
-      while ((match = regex.exec(content)) !== null) {
-        const actualVersion = match[1];
-        assert.equal(
-          actualVersion,
-          expectedHash,
-          `Stale asset query in ${file} for ${assetPath}: expected ?v=${expectedHash}, found ?v=${actualVersion || '(none)'}`
-        );
-      }
+    for (const { assetPath, expected, actual } of findStaleAssetReferences(content, versionMap)) {
+      assert.fail(`Stale asset query in ${file} for ${assetPath}: expected ?v=${expected}, found ?v=${actual || '(none)'}`);
     }
   }
 });
@@ -118,22 +110,15 @@ test('Regression Guard: No legacy manual date-based ?v=20... queries remain in S
   }
 });
 
-test('Dynamic Data Separation: data/posts.js and data/market-summary.js do NOT have ?v= query params in HTML', async () => {
+test('Dynamic Data Separation: DYNAMIC_DATA_ASSETS carry no query string in any STAMP_TARGET', async () => {
   const root = process.cwd();
   for (const file of STAMP_TARGETS) {
-    const fullPath = path.join(root, file);
-    const content = fs.readFileSync(fullPath, 'utf8');
-
-    for (const dataAsset of DYNAMIC_DATA_ASSETS) {
-      const escaped = dataAsset.replace(/[.*+?^$${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`(?:href|src)=["'](?:\\/|\\.\\.\\/)*${escaped}\?v=[^"']*["']`, 'g');
-      const match = content.match(regex);
-      assert.equal(
-        match,
-        null,
-        `Dynamic data asset ${dataAsset} in ${file} should not have a ?v= query: ${match}`
-      );
-    }
+    const content = fs.readFileSync(path.join(root, file), 'utf8');
+    assert.deepEqual(
+      findVersionedDynamicReferences(content),
+      [],
+      `Dynamic data assets in ${file} must not carry a ?v= or any other query string`
+    );
   }
 });
 
@@ -157,8 +142,7 @@ test('KO and EN Homepage parity: identical tracked assets use identical content 
     'assets/home-v2.css',
     'assets/site.js',
     'assets/brand.css',
-    'assets/language.css',
-    'data/tags.js'
+    'assets/language.css'
   ];
 
   for (const asset of assetsToCheck) {

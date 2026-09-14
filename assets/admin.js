@@ -337,10 +337,21 @@
     newTagIdPreview.textContent = slug || '-';
   }
 
-  function submitCustomTag() {
+  function submitCustomTag(event, compositionEnded = false) {
     if (!newTagKo || !newTagEn || !newTagGroup) return;
-    const ko = newTagKo.value.trim();
-    const en = newTagEn.value.trim();
+    // Whether a syllable a Korean keyboard is still composing is already in
+    // the field when the button is pressed depends on the platform. Taking
+    // focus off the field ends the composition first, and the label is read on
+    // the next turn, so what is stored is what was on screen.
+    const active = document.activeElement;
+    if (!compositionEnded && (active === newTagKo || active === newTagEn)) {
+      active.blur();
+      setTimeout(() => submitCustomTag(event, true), 0);
+      return;
+    }
+    // The normalization the server stores: NFC, one space between words.
+    const ko = newTagKo.value.normalize('NFC').replace(/\s+/g, ' ').trim();
+    const en = newTagEn.value.normalize('NFC').replace(/\s+/g, ' ').trim();
     const group = newTagGroup.value;
     const slug = slugifyTag(en);
 

@@ -25,6 +25,45 @@ export const MAX_EN_LABEL_LENGTH = 60;
 export const MAX_NEW_CUSTOM_TAGS_PER_PUBLISH = 5;
 
 /**
+ * The registry is the canonical taxonomy plus whatever custom tags publishing
+ * has added beside it. Every tag a publish adds is stored with `custom: true`,
+ * and that marker is the only thing that tells the two apart, so the canonical
+ * set never has to be written down a second time.
+ */
+export const CANONICAL_TAG_COUNT = 36;
+
+export function isCustomTag(definition) {
+  return definition?.custom === true;
+}
+
+/** The registry split into its canonical and custom entries, order kept. */
+export function splitTagRegistry(registry) {
+  const canonical = {};
+  const custom = {};
+  const entries = registry && typeof registry === 'object' && !Array.isArray(registry) ? Object.entries(registry) : [];
+  for (const [id, definition] of entries) {
+    (isCustomTag(definition) ? custom : canonical)[id] = definition;
+  }
+  return { canonical, custom };
+}
+
+/**
+ * What is wrong with a registry as a whole: the canonical taxonomy must be
+ * exactly CANONICAL_TAG_COUNT tags, and any number of custom tags may sit
+ * beside it.
+ */
+export function tagRegistryProblems(registry) {
+  const { canonical, custom } = splitTagRegistry(registry);
+  const canonicalCount = Object.keys(canonical).length;
+  const customCount = Object.keys(custom).length;
+  const problems = [];
+  if (canonicalCount !== CANONICAL_TAG_COUNT) {
+    problems.push(`canonical tags: expected ${CANONICAL_TAG_COUNT}, found ${canonicalCount}`);
+  }
+  return { canonicalCount, customCount, problems };
+}
+
+/**
  * Generate a safe URL/registry slug from an English label.
  * Lowercase, ASCII alphanumeric + '-', collapsed, trimmed.
  */
@@ -52,10 +91,53 @@ export function sanitizeLabel(label, maxLength) {
 }
 
 /**
+ * The form a label is stored in: Unicode NFC, so the same Korean word matches
+ * whether it arrived precomposed or as separate jamo; control characters read
+ * as spaces; every run of whitespace a single space; nothing at either end.
+ */
+export function normalizeLabelText(label) {
+  if (typeof label !== 'string') return '';
+  return label
+    .normalize('NFC')
+    .replace(/[\x00-\x1f\x7f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Names that arrive typed in lowercase and whose right spelling is not simply a
+// capitalised word. Consulted only when the input carries no capitals at all.
+const KNOWN_ENGLISH_LABELS = new Map(Object.entries({
+  ai: 'AI', esg: 'ESG', etf: 'ETF', etfs: 'ETFs', ev: 'EV', hbm: 'HBM', ipo: 'IPO',
+  cpi: 'CPI', gdp: 'GDP', pmi: 'PMI', ppi: 'PPI',
+  boj: 'BOJ', ecb: 'ECB', fed: 'Fed', fomc: 'FOMC', opec: 'OPEC', pboc: 'PBOC',
+  kosdaq: 'KOSDAQ', kospi: 'KOSPI', krx: 'KRX', msci: 'MSCI', nasdaq: 'Nasdaq', nxt: 'NXT', wgbi: 'WGBI',
+  cny: 'CNY', eur: 'EUR', jpy: 'JPY', krw: 'KRW', usd: 'USD',
+  ebay: 'eBay', iphone: 'iPhone', nvidia: 'NVIDIA', openai: 'OpenAI', 'sk hynix': 'SK hynix'
+}));
+
+/**
+ * An English label as stored. Casing someone chose is kept: a capital anywhere
+ * in the input means the label stands as typed (`SK hynix`, `iPhone`, `ETF`).
+ * Input with no capitals at all is corrected only where the answer is certain —
+ * a known name (`etf` → `ETF`), or a single plain lowercase word of five letters
+ * or more (`japan` → `Japan`). A shorter word may be an acronym and not every
+ * word of a phrase takes a capital, so those are left exactly as typed.
+ */
+export function normalizeEnglishLabel(label) {
+  const text = normalizeLabelText(label);
+  if (text !== text.toLowerCase()) return text;
+  const known = KNOWN_ENGLISH_LABELS.get(text);
+  if (known) return known;
+  if (/^[a-z]{5,}$/.test(text)) return text[0].toUpperCase() + text.slice(1);
+  return text;
+}
+
+/**
  * Normalize label for case-insensitive and whitespace-insensitive duplicate checking.
  */
 export function normalizeLabelKey(label) {
   return String(label || '')
+    .normalize('NFC')
     .trim()
     .toLowerCase()
     .replace(/\s+/g, ' ');
@@ -69,27 +151,27 @@ export function validateTagDefinition(def, existingRegistry = {}) {
     return { valid: false, error: '태그 정의 객체가 올바르지 않습니다.' };
   }
 
-  const rawKo = String(def.ko || '').trim();
-  const rawEn = String(def.en || '').trim();
+  // Normalized before anything is checked, so the length limits, the duplicate
+  // checks and the stored entry all see the same text.
+  const ko = normalizeLabelText(String(def.ko ?? ''));
+  const en = normalizeEnglishLabel(String(def.en ?? ''));
   const group = String(def.group || '').trim().toLowerCase();
 
-  if (!rawKo) return { valid: false, error: '한국어 태그 이름을 입력하세요.' };
-  if (!rawEn) return { valid: false, error: 'English 태그 이름을 입력하세요.' };
+  if (!ko) return { valid: false, error: '한국어 태그 이름을 입력하세요.' };
+  if (!en) return { valid: false, error: 'English 태그 이름을 입력하세요.' };
   if (!VALID_GROUPS.has(group)) {
     return { valid: false, error: `유효하지 않은 태그 분류입니다: ${group}` };
   }
 
-  if (rawKo.length > MAX_KO_LABEL_LENGTH) {
+  if (ko.length > MAX_KO_LABEL_LENGTH) {
     return { valid: false, error: `한국어 태그 이름은 최대 ${MAX_KO_LABEL_LENGTH}자까지 가능합니다.` };
   }
-  const ko = sanitizeLabel(rawKo);
-  if (!ko) return { valid: false, error: '한국어 태그 이름에 허용되지 않는 문자나 HTML이 포함되어 있습니다.' };
+  if (!sanitizeLabel(ko)) return { valid: false, error: '한국어 태그 이름에 허용되지 않는 문자나 HTML이 포함되어 있습니다.' };
 
-  if (rawEn.length > MAX_EN_LABEL_LENGTH) {
+  if (en.length > MAX_EN_LABEL_LENGTH) {
     return { valid: false, error: `English 태그 이름은 최대 ${MAX_EN_LABEL_LENGTH}자까지 가능합니다.` };
   }
-  const en = sanitizeLabel(rawEn);
-  if (!en) return { valid: false, error: 'English 태그 이름에 허용되지 않는 문자나 HTML이 포함되어 있습니다.' };
+  if (!sanitizeLabel(en)) return { valid: false, error: 'English 태그 이름에 허용되지 않는 문자나 HTML이 포함되어 있습니다.' };
 
   // Derive or validate canonical slug ID
   let id = def.id ? String(def.id).trim().toLowerCase() : slugifyLabel(en);
@@ -136,6 +218,11 @@ export function validateTagDefinition(def, existingRegistry = {}) {
       group
     }
   };
+}
+
+/** The registry entry a publish stores for a custom tag that passed validation. */
+export function customTagEntry(tag) {
+  return { ko: tag.ko, en: tag.en, group: tag.group, custom: true };
 }
 
 /**
