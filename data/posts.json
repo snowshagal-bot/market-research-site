@@ -1,5 +1,30 @@
 [
   {
+    "id": "2026-09-14-note-19m98iv",
+    "type": "note",
+    "typeLabel": "Investment Note",
+    "lang": "en",
+    "date": "2026-09-14",
+    "reportDate": "2026-09-14",
+    "registeredDate": "2026-09-15",
+    "registeredAt": "2026-09-14T15:15:54.904Z",
+    "legacyImport": false,
+    "title": "Three Tests in Four Days",
+    "subtitle": "",
+    "description": "Notes and observations on markets and investing.",
+    "tags": [
+      "treasuries",
+      "fed",
+      "japan"
+    ],
+    "readingMinutes": 11,
+    "href": "reports/en/20260914_Investment_Note_Three_Tests_Week_EN.html",
+    "translationGroup": "2026-09-14-note-1v56yop",
+    "coverImage": "covers/2026-09-14-note-19m98iv.webp",
+    "shareCardImage": "covers/share/2026-09-14-note-19m98iv.jpg",
+    "coverThumbnail": "covers/2026-09-14-note-19m98iv-450.webp"
+  },
+  {
     "id": "2026-09-14-daily-137y6zk",
     "type": "daily",
     "typeLabel": "Daily",
