@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-09-14-daily-137y6zk",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-14",
+    "reportDate": "2026-09-14",
+    "registeredDate": "2026-09-15",
+    "registeredAt": "2026-09-14T15:14:35.582Z",
+    "legacyImport": false,
+    "title": "A Monday Farther Than Friday",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "kosdaq",
+      "flows",
+      "kospi",
+      "volatility",
+      "geopolitics"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-14_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-09-14-daily-1fzfpc8",
+    "coverImage": "covers/2026-09-14-daily-137y6zk.webp",
+    "shareCardImage": "covers/share/2026-09-14-daily-137y6zk.jpg",
+    "coverThumbnail": "covers/2026-09-14-daily-137y6zk-450.webp"
+  },
+  {
     "id": "2026-09-14-note-1v56yop",
     "type": "note",
     "typeLabel": "투자 노트",
