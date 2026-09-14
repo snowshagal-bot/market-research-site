@@ -40,10 +40,7 @@ export const TRACKED_ASSETS = [
   'assets/admin-analytics.css',
   'assets/admin-analytics.js',
   'assets/cover-generator.js',
-  'assets/share-card.js',
-
-  // Static canonical registry (only changes on code deploy)
-  'data/tags.js'
+  'assets/share-card.js'
 ];
 
 /**
@@ -59,8 +56,47 @@ export const DYNAMIC_DATA_ASSETS = [
   'data/search-index-meta.js',
   'data/search-index-body-ko.js',
   'data/search-index-body-en.js',
-  'data/search-index.json'
+  'data/search-index.json',
+  // The tag registry: a publish that registers a custom tag rewrites it, so a
+  // content hash stamped at deploy time goes stale the moment one is added.
+  'data/tags.js'
 ];
+
+function assetPathPattern(relPath) {
+  return relPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Every reference in `content` to a TRACKED asset whose ?v= is not that asset's
+ * current content hash; a reference with no ?v= at all is stale too. This is
+ * the check the Verification Gate runs over every STAMP_TARGET.
+ */
+export function findStaleAssetReferences(content, versionMap) {
+  const stale = [];
+  for (const [assetPath, expected] of Object.entries(versionMap)) {
+    const regex = new RegExp(`(?:href|src)=["'](?:\\/|\\.\\.\\/)*${assetPathPattern(assetPath)}(?:\\?v=([^"']*))?["']`, 'g');
+    let match;
+    while ((match = regex.exec(content)) !== null) {
+      if (match[1] !== expected) stale.push({ assetPath, expected, actual: match[1] || null });
+    }
+  }
+  return stale;
+}
+
+/**
+ * Every reference in `content` to a DYNAMIC data asset that still carries a
+ * query string. A dynamic asset is rewritten by a publish rather than a deploy,
+ * so a pinned ?v= names a version that is already gone.
+ */
+export function findVersionedDynamicReferences(content) {
+  const found = [];
+  for (const assetPath of DYNAMIC_DATA_ASSETS) {
+    const regex = new RegExp(`(?:href|src)=["'](?:\\/|\\.\\.\\/)*${assetPathPattern(assetPath)}(\\?[^"']*)["']`, 'g');
+    let match;
+    while ((match = regex.exec(content)) !== null) found.push({ assetPath, query: match[1] });
+  }
+  return found;
+}
 
 /**
  * Single source of truth for all public HTML files and generator templates that

@@ -6,6 +6,7 @@ import { requireAdminMutation } from '../_auth.js';
 import {
   MAX_POST_TAGS,
   MAX_NEW_CUSTOM_TAGS_PER_PUBLISH,
+  customTagEntry,
   validateTagDefinition,
   parseAndValidateTags,
   generateTagsJs
@@ -722,11 +723,7 @@ export async function onRequestPost(context) {
       if (!tagValidationResult.valid) {
         return reply({ error: 'BAD_CUSTOM_TAG', message: tagValidationResult.error }, 400);
       }
-      tagRegistry[tagValidationResult.tag.id] = {
-        ko: tagValidationResult.tag.ko,
-        en: tagValidationResult.tag.en,
-        group: tagValidationResult.tag.group
-      };
+      tagRegistry[tagValidationResult.tag.id] = customTagEntry(tagValidationResult.tag);
       validatedNewTags.push(tagValidationResult.tag);
       hasNewTags = true;
     }
