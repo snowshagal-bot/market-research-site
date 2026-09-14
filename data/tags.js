@@ -183,5 +183,10 @@ window.TAG_REGISTRY = {
     "ko": "네 마녀의",
     "en": "Quadruple Witching Day",
     "group": "market"
+  },
+  "japan": {
+    "ko": "일본",
+    "en": "japan",
+    "group": "market"
   }
 };

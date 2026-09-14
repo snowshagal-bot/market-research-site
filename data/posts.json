@@ -1,5 +1,29 @@
 [
   {
+    "id": "2026-09-14-note-1v56yop",
+    "type": "note",
+    "typeLabel": "투자 노트",
+    "lang": "ko",
+    "date": "2026-09-14",
+    "reportDate": "2026-09-14",
+    "registeredDate": "2026-09-15",
+    "registeredAt": "2026-09-14T15:11:59.998Z",
+    "legacyImport": false,
+    "title": "나흘에 몰린 세 개의 시험",
+    "subtitle": "",
+    "description": "시장과 투자에 관한 생각을 자유롭게 정리한 투자 노트.",
+    "tags": [
+      "treasuries",
+      "fed",
+      "japan"
+    ],
+    "readingMinutes": 10,
+    "href": "reports/20260914_Investment_Note_Three_Tests_Week.html",
+    "coverImage": "covers/2026-09-14-note-1v56yop.webp",
+    "shareCardImage": "covers/share/2026-09-14-note-1v56yop.jpg",
+    "coverThumbnail": "covers/2026-09-14-note-1v56yop-450.webp"
+  },
+  {
     "id": "2026-09-14-daily-1fzfpc8",
     "type": "daily",
     "typeLabel": "주식 리포트",
