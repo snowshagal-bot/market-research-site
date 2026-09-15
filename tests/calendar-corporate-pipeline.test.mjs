@@ -339,9 +339,10 @@ test('a correction with no stated original leaves the first one alone', async ()
 test('the corporate step is part of the calendar sync, not a separate thing', async () => {
   const source = await readFile(new URL('../functions/_calendar-sync.js', import.meta.url), 'utf8');
   assert.match(source, /import \{ syncCorporateEvents \}/);
-  assert.match(source, /results\.push\(await syncCorporateEvents\(db, \{ env, fetchImpl, now \}\)\)/);
-  // A failure there is reported like any other source, not swallowed.
-  assert.match(source, /sourceName: 'opendart-corporate', status: 'error'/);
+  // A named step of the pass: a failure there is reported like any other
+  // source (with its name and stage), not swallowed.
+  assert.match(source, /await step\('opendart-corporate', \(\) => syncCorporateEvents\(db, \{ env, fetchImpl, now \}\)\)/);
+  assert.match(source, /results\.push\(await failSource\(db, \{ sourceName, error, stage: 'orchestration' \}, now\)\)/);
 });
 
 /* ------------------------------------------- when the source itself is broken */

@@ -9,7 +9,7 @@ import {
   getEventsForMonth,
   getSourceRuns
 } from '../functions/_calendar-events.js';
-import { runCalendarSync, syncBok, syncFomc, syncYears } from '../functions/_calendar-sync.js';
+import { FAILURE_STAGES, runCalendarSync, syncBok, syncFomc, syncYears } from '../functions/_calendar-sync.js';
 
 class SqliteStatement {
   constructor(database, sql) { this.database = database; this.sql = sql; this.values = []; }
@@ -192,6 +192,94 @@ test('one broken source does not stop the others', async () => {
   assert.equal(runOf(outcome.results, 'federal-reserve').status, 'ok');
   assert.equal(runOf(outcome.results, 'bls-cpi').status, 'ok');
   assert.equal(runOf(outcome.results, 'bank-of-korea-2026').status, 'ok');
+  db.close();
+});
+
+/* ------------------------------------------------- naming what failed */
+
+const emptyBok = { ok: true, status: 200, text: async () => '<html><body>통화정책방향 결정회의<table></table></body></html>' };
+const reshapedFomc = { ok: true, status: 200, text: async () => '<html><body><p>We are making improvements.</p></body></html>' };
+
+test('every failure names its source, the stage it stopped at, and the HTTP status', async () => {
+  const db = await freshDb();
+  const outcome = await runCalendarSync(db, {
+    fetchImpl: pageFetch({
+      'bea.gov': { ok: false, status: 500, text: async () => '' },
+      'monetarypolicy/fomccalendars.htm': reshapedFomc,
+      'pYear=2026': emptyBok
+    }),
+    now: NOW
+  });
+
+  assert.equal(outcome.ok, false);
+  const bySource = Object.fromEntries(outcome.failures.map(failure => [failure.source, failure]));
+  assert.deepEqual(Object.keys(bySource).sort(), ['bank-of-korea-2026', 'bea', 'federal-reserve']);
+  assert.deepEqual(outcome.failed.slice().sort(), Object.keys(bySource).sort());
+  assert.deepEqual({ stage: bySource.bea.stage, httpStatus: bySource.bea.httpStatus, attempt: bySource.bea.attempt }, { stage: 'fetch', httpStatus: 500, attempt: 1 });
+  assert.equal(bySource['federal-reserve'].stage, 'parse');
+  assert.equal(bySource['federal-reserve'].httpStatus, null);
+  assert.equal(bySource['bank-of-korea-2026'].stage, 'validate');
+  assert.ok(outcome.failures.every(failure => failure.source && failure.error), 'no failure is anonymous or blank');
+  db.close();
+});
+
+test('a network exception is a fetch failure of the source that threw it', async () => {
+  const db = await freshDb();
+  const outcome = await runCalendarSync(db, {
+    fetchImpl: pageFetch({ 'cpi.htm': () => { throw new TypeError('fetch failed'); } }),
+    now: NOW
+  });
+
+  assert.deepEqual(outcome.failures.map(failure => [failure.source, failure.stage]), [['bls-cpi', 'fetch']]);
+  assert.match(outcome.failures[0].error, /network failure: fetch failed/);
+  db.close();
+});
+
+test('when every fetched source fails, the calendar already stored is preserved', async () => {
+  const db = await freshDb();
+  await runCalendarSync(db, { fetchImpl: pageFetch(), now: NOW });
+  const before = db.rows(`SELECT event_id, event_date, event_time, status FROM ${EVENTS_TABLE} ORDER BY event_id`);
+  assert.ok(before.length > 20);
+
+  const down = { ok: false, status: 503, text: async () => '' };
+  const outcome = await runCalendarSync(db, {
+    fetchImpl: pageFetch(Object.fromEntries(Object.keys(PAGES).map(key => [key, down]))),
+    now: new Date('2026-09-03T00:00:00.000Z')
+  });
+
+  assert.equal(outcome.ok, false);
+  assert.deepEqual(
+    outcome.failures.map(failure => failure.source).sort(),
+    ['bank-of-korea-2026', 'bank-of-korea-2027', 'bea', 'bls-cpi', 'bls-nfp', 'federal-reserve']
+  );
+  assert.ok(outcome.failures.every(failure => failure.stage === 'fetch' && failure.httpStatus === 503));
+  const after = db.rows(`SELECT event_id, event_date, event_time, status FROM ${EVENTS_TABLE} ORDER BY event_id`);
+  assert.deepEqual(after, before, 'a failed sync must never overwrite or cancel what was stored');
+  db.close();
+});
+
+test('a store that breaks mid-pass names each source at publish and loses nothing', async () => {
+  const db = await freshDb();
+  await runCalendarSync(db, { fetchImpl: pageFetch(), now: NOW });
+  const before = db.rows(`SELECT event_id, event_date, status FROM ${EVENTS_TABLE} ORDER BY event_id`);
+
+  // The events table stops answering; the source-run table still works.
+  const broken = {
+    prepare(sql) {
+      if (sql.includes(EVENTS_TABLE)) throw new Error('D1_ERROR: database is locked');
+      return db.prepare(sql);
+    },
+    batch: statements => db.batch(statements)
+  };
+  const outcome = await runCalendarSync(broken, { fetchImpl: pageFetch(), now: new Date('2026-09-03T00:00:00.000Z') });
+
+  assert.equal(outcome.ok, false);
+  const stages = Object.fromEntries(outcome.failures.map(failure => [failure.source, failure.stage]));
+  for (const source of ['federal-reserve', 'bls-cpi', 'bls-nfp', 'bea', 'bank-of-korea-2026', 'krx-expiry-rule', 'us-expiry-rule']) {
+    assert.equal(stages[source], 'publish', `${source} is named at the publish stage`);
+  }
+  assert.ok(outcome.failures.every(failure => failure.source && FAILURE_STAGES.includes(failure.stage)));
+  assert.deepEqual(db.rows(`SELECT event_id, event_date, status FROM ${EVENTS_TABLE} ORDER BY event_id`), before);
   db.close();
 });
 
