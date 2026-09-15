@@ -84,6 +84,15 @@ Exporter는 원천 웹 페이지를 직접 파싱하지 않는다. UI와 TXT 저
 
 검증 실패 원인은 `validation.errors`에 기록한다. 전 거래일 KRX 값은 당일 값으로 승격되지 않는다.
 
+### 정규장 복원 불가 세부값 (schema 1.1.0 호환)
+
+정규장 확정 원천(15:31~15:39 KST 휴장 구간 스냅샷)을 놓친 날의 복구본은 애프터마켓이 섞인 현재값으로 채우지 않고 다음처럼 표기한다.
+
+- `krx_investor_trading.markets.*.investors.*.sell`/`buy`: `null` 허용. `net_buy`는 정규장 순매수 원천이 있을 때만 싣는다.
+- `short_selling.market_summary.*`와 `top5_*[]`의 `total_volume`, `total_value_won`, `short_volume_ratio`, `short_value_ratio`: `null` 허용. 공매도 수량·금액은 정규장 기준으로 확인된 경우에만 싣는다.
+- `short_selling.top5_by_ratio`: 정규장 거래대금이 없으면 비중 순위를 만들 수 없으므로 빈 배열 허용.
+- 해당 객체의 `data_state`에 확정된 항목과 `unavailable` 항목을 명시한다. 화면은 `null`을 `--` 또는 `정규장 기준 값 없음`으로 표시하고 0으로 표시하지 않는다.
+
 ## 최상위 구조
 
 | 필드 | 의미 |

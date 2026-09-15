@@ -11,7 +11,7 @@
     rise: '상승종목', fall: '하락종목', flat: '보합종목', upper: '상한가', lower: '하한가', riseRatio: '상승비율', fallRatio: '하락비율',
     foreign: '외국인', institution: '기관', individual: '개인', market: '시장', fiveDays: '5거래일', billion: '억원',
     arbitrage: '차익', nonArbitrage: '비차익', total: '전체', netBuy: '순매수', spot: 'KOSPI200 현물', future: '선물', basis: '베이시스',
-    turnover: '거래대금', previousTurnover: '전일 거래대금', average5: '5일 평균', ratio5: '5일 평균 대비', concentration: '수급 집중도 (상위 비중)', concentrationUnavailable: '정규장 기준 값 없음', foreignBuy: '외국인 매수', foreignSell: '외국인 매도', institutionBuy: '기관 매수', institutionSell: '기관 매도', top1: 'TOP1', top5: 'TOP5',
+    turnover: '거래대금', previousTurnover: '전일 거래대금', average5: '5일 평균', ratio5: '5일 평균 대비', concentration: '수급 집중도 (상위 비중)', concentrationUnavailable: '정규장 기준 값 없음', regularUnavailable: '정규장 기준 값 없음', foreignBuy: '외국인 매수', foreignSell: '외국인 매도', institutionBuy: '기관 매수', institutionSell: '기관 매도', top1: 'TOP1', top5: 'TOP5',
     shortSummary: '시장별 공매도', shortValue: '공매도 거래대금 TOP5', shortRatio: '공매도 비중 TOP5', valueRatio: '거래대금 비중', shortAmount: '공매도 거래대금',
     rank: '순위', stock: '종목명', price: '종가', change: '등락률', marketCap: '시가총액', source: '데이터 출처', generated: '생성',
     latestReport: '오늘의 리포트 보기', historyReport: '이날의 데일리 리포트 보기', noDailyReport: '이날 발행된 데일리 리포트가 없습니다.',
@@ -40,7 +40,7 @@
     rise: 'Advancers', fall: 'Decliners', flat: 'Unchanged', upper: 'Limit up', lower: 'Limit down', riseRatio: 'Advance ratio', fallRatio: 'Decline ratio',
     foreign: 'Foreign', institution: 'Institution', individual: 'Retail', market: 'Market', fiveDays: '5 sessions', billion: 'KRW 100m',
     arbitrage: 'Arbitrage', nonArbitrage: 'Non-arbitrage', total: 'Total', netBuy: 'Net buy', spot: 'KOSPI 200 spot', future: 'Futures', basis: 'Basis',
-    turnover: 'Turnover', previousTurnover: 'Previous', average5: '5-session avg.', ratio5: 'vs. 5-session avg.', concentration: 'Flow Concentration (Top Share)', concentrationUnavailable: 'No regular-session value', foreignBuy: 'Foreign buy', foreignSell: 'Foreign sell', institutionBuy: 'Institution buy', institutionSell: 'Institution sell', top1: 'TOP1', top5: 'TOP5',
+    turnover: 'Turnover', previousTurnover: 'Previous', average5: '5-session avg.', ratio5: 'vs. 5-session avg.', concentration: 'Flow Concentration (Top Share)', concentrationUnavailable: 'No regular-session value', regularUnavailable: 'No regular-session value', foreignBuy: 'Foreign buy', foreignSell: 'Foreign sell', institutionBuy: 'Institution buy', institutionSell: 'Institution sell', top1: 'TOP1', top5: 'TOP5',
     shortSummary: 'Market Short Selling', shortValue: 'Top 5 by Short Value', shortRatio: 'Top 5 by Short Ratio', valueRatio: 'Value ratio', shortAmount: 'Short value',
     rank: 'Rank', stock: 'Company', price: 'Close', change: 'Change', marketCap: 'Market cap', source: 'Sources', generated: 'Generated',
     latestReport: 'Read today’s report', historyReport: 'Read this day’s Daily report', noDailyReport: 'No Daily report was published for this date.',
@@ -419,7 +419,7 @@
       [copy.institutionSell, concentration['기관']?.sell]
     ].filter(entry => entry[1]);
 
-    const shortList = (items, isRatio = false) => `<ol class="rank-list">${(items || []).map((item, index) => `<li><span>${index + 1}. <b>${html(companyName(item))}</b><small>${html(item?.market || '')}</small></span><strong>${isRatio ? ratioPct(item?.short_value_ratio) : won(item?.short_value_won)}</strong></li>`).join('')}</ol>`;
+    const shortList = (items, isRatio = false) => !(items || []).length ? `<p class="unit-note">${copy.regularUnavailable}</p>` : `<ol class="rank-list">${(items || []).map((item, index) => `<li><span>${index + 1}. <b>${html(companyName(item))}</b><small>${html(item?.market || '')}</small></span><strong>${isRatio ? ratioPct(item?.short_value_ratio) : won(item?.short_value_won)}</strong></li>`).join('')}</ol>`;
 
     const marketCapRows = marketCap.map(item => [
       item?.rank ?? '--',
