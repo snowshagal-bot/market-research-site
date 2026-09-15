@@ -8,6 +8,10 @@
  * answered did not". A source that fails leaves its stored events untouched:
  * the sweep that marks missing events cancelled runs only after a fetch that
  * actually succeeded and covered the window it is sweeping.
+ *
+ * Every failure names its source, the stage it stopped at, and the HTTP status
+ * when there was one. An operator reading the alert should never have to guess
+ * which source broke.
  */
 
 import { monthlyExpiryEvents } from './_derivatives-expiry.js';
@@ -16,6 +20,7 @@ import {
   BLS_SERIES,
   FOMC_URL,
   SOURCE_USER_AGENT,
+  SourceParseError,
   bokUrl,
   parseBeaSchedule,
   parseBlsSchedule,
@@ -24,18 +29,56 @@ import {
   parseFomcMonthlyTimes,
   parseFomcSchedule
 } from './_calendar-sources.js';
-import { cancelMissingEvents, recordSourceRun, upsertEvent } from './_calendar-events.js';
+import { CalendarEventError, cancelMissingEvents, recordSourceRun, upsertEvent } from './_calendar-events.js';
 import { syncCorporateEvents } from './api/disclosures/_calendar-corporate.js';
 
 /** How far ahead the calendar keeps events. Two years covers every source. */
 export const SYNC_YEARS_AHEAD = 1;
 
+/** Where a source's pass stopped. `orchestration` is a fault outside any one step. */
+export const FAILURE_STAGES = Object.freeze(['fetch', 'parse', 'normalize', 'validate', 'publish', 'orchestration']);
+
+/** The source name used when a failure cannot be tied to a source. */
+export const INTERNAL_SOURCE = 'internal';
+
+export class SourceFetchError extends Error {
+  constructor(message, httpStatus = null) {
+    super(message);
+    this.name = 'SourceFetchError';
+    this.stage = 'fetch';
+    this.httpStatus = httpStatus;
+  }
+}
+
 async function fetchText(url, fetchImpl) {
-  const response = await fetchImpl(url, {
-    headers: { 'user-agent': SOURCE_USER_AGENT, accept: 'text/html,application/xhtml+xml' }
-  });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  return response.text();
+  let response;
+  try {
+    response = await fetchImpl(url, {
+      headers: { 'user-agent': SOURCE_USER_AGENT, accept: 'text/html,application/xhtml+xml' }
+    });
+  } catch (error) {
+    throw new SourceFetchError(`network failure: ${shortError(error)}`);
+  }
+  if (!response.ok) throw new SourceFetchError(`HTTP ${response.status}`, response.status);
+  try {
+    return await response.text();
+  } catch (error) {
+    throw new SourceFetchError(`body could not be read: ${shortError(error)}`, response.status);
+  }
+}
+
+function shortError(error) {
+  return String(error?.message || error || 'unknown error').replace(/\s+/g, ' ').trim().slice(0, 300) || 'unknown error';
+}
+
+const WINDOW_ERROR_CODES = new Set(['BAD_WINDOW', 'BAD_SEEN_SET', 'BAD_SOURCE']);
+
+/** The stage an error belongs to: its own if it carries one, else what it is, else where it was thrown. */
+export function failureStage(error, fallback = 'orchestration') {
+  if (FAILURE_STAGES.includes(error?.stage)) return error.stage;
+  if (error instanceof SourceParseError) return 'parse';
+  if (error instanceof CalendarEventError) return WINDOW_ERROR_CODES.has(error.code) ? 'validate' : 'normalize';
+  return FAILURE_STAGES.includes(fallback) ? fallback : 'orchestration';
 }
 
 /**
@@ -63,9 +106,26 @@ async function commitSource(db, { sourceName, sourceUrl, events, window: span, n
   return { sourceName, status: 'ok', events: events.length, created, changed, cancelled };
 }
 
-async function failSource(db, { sourceName, sourceUrl, error }, now) {
-  await recordSourceRun(db, { sourceName, sourceUrl, status: 'error', error: String(error?.message || error) }, now);
-  return { sourceName, status: 'error', error: String(error?.message || error) };
+/**
+ * The failure result for one source. Recording it can itself fail (the same
+ * database that just broke), and that must not turn a named failure into an
+ * anonymous crash.
+ */
+async function failSource(db, { sourceName, sourceUrl = '', error, stage }, now) {
+  const failure = {
+    sourceName: sourceName || INTERNAL_SOURCE,
+    status: 'error',
+    stage: failureStage(error, stage),
+    error: shortError(error),
+    httpStatus: Number.isInteger(error?.httpStatus) ? error.httpStatus : null,
+    attempt: 1
+  };
+  try {
+    await recordSourceRun(db, { sourceName: failure.sourceName, sourceUrl, status: 'error', error: failure.error }, now);
+  } catch (recordError) {
+    failure.recordError = shortError(recordError);
+  }
+  return failure;
 }
 
 const yearSpan = year => ({ from: `${year}-01-01`, to: `${year}-12-31` });
@@ -73,8 +133,10 @@ const yearSpan = year => ({ from: `${year}-01-01`, to: `${year}-12-31` });
 /* ------------------------------------------------------------- official */
 
 export async function syncFomc(db, { years, fetchImpl, now }) {
+  let stage = 'fetch';
   try {
     const html = await fetchText(FOMC_URL, fetchImpl);
+    stage = 'parse';
     const events = [];
     for (const year of years) events.push(...parseFomcSchedule(html, { year }));
 
@@ -84,6 +146,7 @@ export async function syncFomc(db, { years, fetchImpl, now }) {
     const confirmed = await enrichFomcTimes(events, fetchImpl);
     const unconfirmed = events.filter(event => !event.eventTime).length;
 
+    stage = 'publish';
     const result = await commitSource(db, {
       sourceName: 'federal-reserve',
       sourceUrl: FOMC_URL,
@@ -98,7 +161,7 @@ export async function syncFomc(db, { years, fetchImpl, now }) {
       timesUnconfirmed: unconfirmed
     };
   } catch (error) {
-    return failSource(db, { sourceName: 'federal-reserve', sourceUrl: FOMC_URL, error }, now);
+    return failSource(db, { sourceName: 'federal-reserve', sourceUrl: FOMC_URL, error, stage }, now);
   }
 }
 
@@ -145,32 +208,38 @@ async function readMonthlyTimes(year, month, fetchImpl) {
 export async function syncBls(db, { series, fetchImpl, now }) {
   const spec = BLS_SERIES[series];
   const sourceName = `bls-${spec.slug}`;
+  let stage = 'fetch';
   try {
     const html = await fetchText(spec.url, fetchImpl);
+    stage = 'parse';
     const events = parseBlsSchedule(html, { series });
     // The page lists a rolling window rather than a calendar year, so the
     // sweep is confined to the span the page itself covered.
     const dates = events.map(event => event.eventDate).sort();
+    stage = 'publish';
     return await commitSource(db, {
       sourceName, sourceUrl: spec.url, events,
       window: { from: dates[0], to: dates[dates.length - 1] }
     }, now);
   } catch (error) {
-    return failSource(db, { sourceName, sourceUrl: spec.url, error }, now);
+    return failSource(db, { sourceName, sourceUrl: spec.url, error, stage }, now);
   }
 }
 
 export async function syncBea(db, { years, fetchImpl, now }) {
+  let stage = 'fetch';
   try {
     const html = await fetchText(BEA_URL, fetchImpl);
+    stage = 'parse';
     const events = parseBeaSchedule(html);
     const dates = events.map(event => event.eventDate).sort();
+    stage = 'publish';
     return await commitSource(db, {
       sourceName: 'bea', sourceUrl: BEA_URL, events,
       window: { from: dates[0], to: dates[dates.length - 1] }
     }, now);
   } catch (error) {
-    return failSource(db, { sourceName: 'bea', sourceUrl: BEA_URL, error }, now);
+    return failSource(db, { sourceName: 'bea', sourceUrl: BEA_URL, error, stage }, now);
   }
 }
 
@@ -181,29 +250,34 @@ export async function syncBea(db, { years, fetchImpl, now }) {
  */
 export async function syncBok(db, { year, currentYear, fetchImpl, now }) {
   const url = bokUrl(year);
+  let stage = 'fetch';
   try {
     const html = await fetchText(url, fetchImpl);
+    stage = 'parse';
     const events = parseBokSchedule(html, { year });
 
     if (!events.length) {
       if (year > currentYear) {
+        stage = 'publish';
         await recordSourceRun(db, { sourceName: `bank-of-korea-${year}`, sourceUrl: url, status: 'pending', eventCount: 0 }, now);
         return { sourceName: `bank-of-korea-${year}`, status: 'pending', events: 0 };
       }
+      stage = 'validate';
       throw new Error(`no meetings listed for ${year}, which should be published`);
     }
 
+    stage = 'publish';
     return await commitSource(db, {
       sourceName: `bank-of-korea-${year}`, sourceUrl: url, events, window: yearSpan(year)
     }, now);
   } catch (error) {
-    return failSource(db, { sourceName: `bank-of-korea-${year}`, sourceUrl: url, error }, now);
+    return failSource(db, { sourceName: `bank-of-korea-${year}`, sourceUrl: url, error, stage }, now);
   }
 }
 
 /* ----------------------------------------------------------------- rules */
 
-/** Computed, so it cannot fail on the network — only on an unknown year. */
+/** Computed, so it cannot fail on the network — only on an unknown year or the store. */
 export async function syncExpiries(db, { years, now }) {
   const events = [];
   for (const year of years) {
@@ -217,12 +291,16 @@ export async function syncExpiries(db, { years, now }) {
 
   const results = [];
   for (const [sourceName, ruleEvents] of byRule) {
-    results.push(await commitSource(db, {
-      sourceName,
-      sourceUrl: ruleEvents[0].sourceUrl,
-      events: ruleEvents,
-      window: { from: `${years[0]}-01-01`, to: `${years[years.length - 1]}-12-31` }
-    }, now));
+    try {
+      results.push(await commitSource(db, {
+        sourceName,
+        sourceUrl: ruleEvents[0].sourceUrl,
+        events: ruleEvents,
+        window: { from: `${years[0]}-01-01`, to: `${years[years.length - 1]}-12-31` }
+      }, now));
+    } catch (error) {
+      results.push(await failSource(db, { sourceName, sourceUrl: ruleEvents[0].sourceUrl, error, stage: 'publish' }, now));
+    }
   }
   // A year whose holidays are not checked in produces nothing, and that is
   // deliberate rather than a failure: see _derivatives-expiry.js.
@@ -236,31 +314,61 @@ export function syncYears(now = new Date()) {
   return Array.from({ length: SYNC_YEARS_AHEAD + 1 }, (_, offset) => current + offset);
 }
 
+/** One failure per errored result, always with a source and a known stage. */
+export function failuresOf(results) {
+  return results
+    .filter(result => result?.status === 'error')
+    .map(result => ({
+      source: String(result.sourceName || INTERNAL_SOURCE),
+      stage: FAILURE_STAGES.includes(result.stage) ? result.stage : 'orchestration',
+      error: shortError(result.error),
+      httpStatus: Number.isInteger(result.httpStatus) ? result.httpStatus : null,
+      attempt: Number.isInteger(result.attempt) && result.attempt > 0 ? result.attempt : 1
+    }));
+}
+
+/** The outcome for a pass that could not run at all. It still names what failed. */
+export function orchestrationFailure(error) {
+  const failures = [{ source: INTERNAL_SOURCE, stage: 'orchestration', error: shortError(error), httpStatus: null, attempt: 1 }];
+  return { ok: false, years: [], results: [], failed: [INTERNAL_SOURCE], failures };
+}
+
 export async function runCalendarSync(db, { env = {}, fetchImpl = fetch, now = new Date() } = {}) {
   const years = syncYears(now);
   const currentYear = years[0];
   const results = [];
 
-  results.push(await syncFomc(db, { years, fetchImpl, now }));
-  for (const series of Object.keys(BLS_SERIES)) results.push(await syncBls(db, { series, fetchImpl, now }));
-  results.push(await syncBea(db, { years, fetchImpl, now }));
-  for (const year of years) results.push(await syncBok(db, { year, currentYear, fetchImpl, now }));
-  results.push(...await syncExpiries(db, { years, now }));
+  // Each step is caught on its own. An exception that escapes a source still
+  // names the step it came from instead of taking the whole pass down.
+  const step = async (sourceName, action) => {
+    try {
+      const value = await action();
+      results.push(...(Array.isArray(value) ? value : [value]));
+    } catch (error) {
+      results.push(await failSource(db, { sourceName, error, stage: 'orchestration' }, now));
+    }
+  };
+
+  await step('federal-reserve', () => syncFomc(db, { years, fetchImpl, now }));
+  for (const series of Object.keys(BLS_SERIES)) {
+    await step(`bls-${BLS_SERIES[series].slug}`, () => syncBls(db, { series, fetchImpl, now }));
+  }
+  await step('bea', () => syncBea(db, { years, fetchImpl, now }));
+  for (const year of years) {
+    await step(`bank-of-korea-${year}`, () => syncBok(db, { year, currentYear, fetchImpl, now }));
+  }
+  await step('derivatives-expiry', () => syncExpiries(db, { years, now }));
 
   // Company dates come last: they read filings the disclosure sync has already
   // stored, and they are the only part that spends the OpenDART budget.
-  try {
-    results.push(await syncCorporateEvents(db, { env, fetchImpl, now }));
-  } catch (error) {
-    await recordSourceRun(db, { sourceName: 'opendart-corporate', status: 'error', error: String(error?.message || error) }, now);
-    results.push({ sourceName: 'opendart-corporate', status: 'error', error: String(error?.message || error) });
-  }
+  await step('opendart-corporate', () => syncCorporateEvents(db, { env, fetchImpl, now }));
 
-  const failed = results.filter(result => result.status === 'error');
+  const failures = failuresOf(results);
   return {
-    ok: failed.length === 0,
+    ok: failures.length === 0,
     years,
     results,
-    failed: failed.map(result => result.sourceName)
+    failed: failures.map(failure => failure.source),
+    failures
   };
 }

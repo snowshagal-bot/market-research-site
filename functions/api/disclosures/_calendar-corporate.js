@@ -215,6 +215,7 @@ export async function syncCorporateEvents(db, { env = {}, fetchImpl = fetch, now
   const mostFailed = outcome.attempted >= 3 && outcome.documentErrors > outcome.attempted / 2;
   if (allFailed || mostFailed) {
     outcome.status = 'error';
+    outcome.stage = 'fetch';
     outcome.error = `${outcome.documentErrors} of ${outcome.attempted} filing documents could not be fetched: ${lastError}`;
     await recordSourceRun(db, {
       sourceName: outcome.sourceName, sourceUrl: 'https://dart.fss.or.kr/',

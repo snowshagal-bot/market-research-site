@@ -12,7 +12,7 @@
 
 import { authorizeSync, humanAdminHostAllowed } from '../disclosures/_shared.js';
 import { ensureCalendarEventSchema, getSourceRuns } from '../../_calendar-events.js';
-import { runCalendarSync } from '../../_calendar-sync.js';
+import { orchestrationFailure, runCalendarSync } from '../../_calendar-sync.js';
 
 const PRODUCTION_HOST = 'snowshagal.com';
 
@@ -46,7 +46,23 @@ export async function onRequestPost({ request, env, now = new Date() }) {
     return json({ ok: false, error: 'DB_UNAVAILABLE', message: '캘린더 데이터베이스를 사용할 수 없습니다.' }, 503);
   }
 
-  const outcome = await runCalendarSync(db, { env, fetchImpl: fetch, now });
+  let outcome;
+  try {
+    outcome = await runCalendarSync(db, { env, fetchImpl: fetch, now });
+  } catch (error) {
+    // Nothing escapes a source step, so this is the pass itself breaking. It is
+    // still answered in the same shape, naming `internal`, so the runner never
+    // has to report a failure without a source.
+    console.error('calendar sync: orchestration failed', error);
+    outcome = orchestrationFailure(error);
+  }
+
+  let sources = [];
+  try {
+    sources = await getSourceRuns(db);
+  } catch (error) {
+    console.error('calendar sync: source run status unavailable', error);
+  }
 
   // A failed source is a real failure and the workflow should see it, but the
   // sources that did answer have already been written and are not rolled back.
@@ -55,8 +71,9 @@ export async function onRequestPost({ request, env, now = new Date() }) {
     authSource,
     years: outcome.years,
     failed: outcome.failed,
+    failures: outcome.failures,
     results: outcome.results,
-    sources: await getSourceRuns(db)
+    sources
   }, outcome.ok ? 200 : 502);
 }
 

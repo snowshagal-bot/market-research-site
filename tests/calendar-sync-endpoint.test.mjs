@@ -5,7 +5,13 @@ import { DatabaseSync } from 'node:sqlite';
 
 import { onRequestGet as statusGet, onRequestPost as syncPost } from '../functions/api/calendar/sync.js';
 import { ensureCalendarEventSchema, recordSourceRun } from '../functions/_calendar-events.js';
-import { syncCalendar, CalendarSyncError } from '../scripts/sync-calendar.mjs';
+import {
+  CalendarSyncError,
+  collectFailures,
+  formatFailureReport,
+  runCli,
+  syncCalendar
+} from '../scripts/sync-calendar.mjs';
 
 class SqliteStatement {
   constructor(database, sql) { this.database = database; this.sql = sql; this.values = []; }
@@ -156,6 +162,122 @@ test('an authentication failure is named as one', async () => {
   );
 });
 
+/* ---------------------------------------------------- the failure report */
+
+const FAILED_AT = new Date('2026-09-14T14:25:15.000Z');
+const answer = (body, status) => async () => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+
+test('the runner names every failed source with its stage, HTTP status, attempt and time', async () => {
+  const result = await syncCalendar({
+    key: SYNC_KEY,
+    fetchImpl: answer({
+      ok: false, years: [2026, 2027], failed: ['bea', 'bank-of-korea-2026'],
+      failures: [
+        { source: 'bea', stage: 'fetch', error: 'HTTP 503', httpStatus: 503, attempt: 1 },
+        { source: 'bank-of-korea-2026', stage: 'parse', error: 'expected date field missing', httpStatus: null, attempt: 1 }
+      ],
+      results: [
+        { sourceName: 'bea', status: 'error', stage: 'fetch', error: 'HTTP 503', httpStatus: 503, attempt: 1 },
+        { sourceName: 'bank-of-korea-2026', status: 'error', stage: 'parse', error: 'expected date field missing', attempt: 1 }
+      ]
+    }, 502)
+  });
+
+  assert.equal(result.ok, false);
+  assert.equal(result.httpStatus, 502);
+  assert.deepEqual(result.failed, ['bea', 'bank-of-korea-2026']);
+  const report = formatFailureReport(result.failures, { now: FAILED_AT });
+  assert.match(report, /^Calendar sync failed\n\nFailed sources:\n- bea: fetch — HTTP 503\n- bank-of-korea-2026: parse — expected date field missing\n/);
+  assert.match(report, /source: bea\nstage: fetch\nerror: HTTP 503\nhttp_status: 503\nattempt: 1\ntimestamp: 2026-09-14T14:25:15\.000Z \(2026-09-14 23:25:15 KST\)/);
+  assert.match(report, /source: bank-of-korea-2026\nstage: parse\nerror: expected date field missing\nhttp_status: n\/a/);
+});
+
+test('an older answer without stages still names the failed source', () => {
+  const failures = collectFailures({
+    ok: false, failed: ['bea'],
+    results: [{ sourceName: 'federal-reserve', status: 'ok', events: 16 }, { sourceName: 'bea', status: 'error', error: 'HTTP 503' }]
+  }, { httpStatus: 502 });
+  assert.deepEqual(failures, [{ source: 'bea', stage: 'fetch', error: 'HTTP 503', httpStatus: 503, attempt: 1 }]);
+});
+
+test('#117: a failed answer that names no source is reported as internal, never as an empty list', async () => {
+  // The 2026-09-14 run received a JSON answer with ok !== true and neither
+  // `results` nor `failed`, and printed "sources failed:" with nothing after it.
+  for (const [body, status] of [[{ ok: false, error: 'UPSTREAM' }, 502], [{}, 200], [{ ok: false, failed: [], results: [] }, 502]]) {
+    const result = await syncCalendar({ key: SYNC_KEY, fetchImpl: answer(body, status) });
+    assert.equal(result.ok, false, JSON.stringify(body));
+    assert.equal(result.failures.length, 1);
+    assert.deepEqual(
+      { source: result.failures[0].source, stage: result.failures[0].stage, httpStatus: result.failures[0].httpStatus },
+      { source: 'internal', stage: 'orchestration', httpStatus: status }
+    );
+    assert.match(result.failures[0].error, new RegExp(`HTTP ${status}`));
+
+    const report = formatFailureReport(result.failures, { now: FAILED_AT });
+    assert.doesNotMatch(report, /sources failed:\s*$/m);
+    assert.match(report, /- internal: orchestration — HTTP \d{3}/);
+    assert.match(report, /source: internal\nstage: orchestration/);
+  }
+  const unnamed = collectFailures({ ok: false, error: 'UPSTREAM', message: 'bad gateway' }, { httpStatus: 502 });
+  assert.match(unnamed[0].error, /keys=\[ok,error,message\] error=UPSTREAM message=bad gateway/);
+});
+
+test('an empty failure list is itself reported as an internal failure', () => {
+  for (const failures of [[], undefined, null]) {
+    const report = formatFailureReport(failures, { now: FAILED_AT });
+    assert.match(report, /Failed sources:\n- internal: orchestration — sync reported a failure without naming any source/);
+    assert.match(report, /source: internal\nstage: orchestration/);
+  }
+});
+
+test('the command line passes quietly and writes a named report when anything fails', async () => {
+  const written = [];
+  const quiet = { log: () => {}, logError: () => {}, now: () => FAILED_AT, writeReport: async (path, text) => { written.push({ path, text }); } };
+
+  const pass = await runCli({
+    ...quiet, env: { CALENDAR_SYNC_REPORT: '/tmp/report.txt' },
+    syncImpl: async () => ({ ok: true, years: [2026], failures: [], results: [{ sourceName: 'bea', status: 'ok', events: 4 }] })
+  });
+  assert.equal(pass, 0);
+  assert.equal(written.length, 0);
+
+  const failed = await runCli({
+    ...quiet, env: { CALENDAR_SYNC_REPORT: '/tmp/report.txt' },
+    syncImpl: async () => ({
+      ok: false, httpStatus: 502, years: [2026],
+      failures: [{ source: 'federal-reserve', stage: 'parse', error: 'no meeting date ranges found', httpStatus: null, attempt: 1 }],
+      results: [{ sourceName: 'federal-reserve', status: 'error', stage: 'parse', error: 'no meeting date ranges found' }]
+    })
+  });
+  assert.equal(failed, 1);
+  assert.equal(written[0].path, '/tmp/report.txt');
+  assert.match(written[0].text, /- federal-reserve: parse — no meeting date ranges found/);
+
+  // Thrown before any source result exists: still named.
+  const thrown = await runCli({
+    ...quiet, env: { CALENDAR_SYNC_REPORT: '/tmp/report.txt' },
+    syncImpl: async () => { throw new CalendarSyncError('network', 'calendar sync network failure: getaddrinfo ENOTFOUND'); }
+  });
+  assert.equal(thrown, 1);
+  assert.match(written[1].text, /source: internal\nstage: orchestration\nerror: \[network\] calendar sync network failure: getaddrinfo ENOTFOUND\nhttp_status: n\/a/);
+});
+
+test('a pass that cannot run at all still answers with a named internal failure', async () => {
+  const db = await freshDb();
+  const response = await syncPost({
+    request: new Request('https://snowshagal.com/api/calendar/sync', { method: 'POST', headers: { 'x-disclosure-sync-key': SYNC_KEY } }),
+    env: { COMMENTS_DB: db, DISCLOSURE_SYNC_KEY: SYNC_KEY },
+    now: new Date('not a date')
+  });
+  assert.equal(response.status, 502);
+  const payload = await response.json();
+  assert.equal(payload.ok, false);
+  assert.deepEqual(payload.failed, ['internal']);
+  assert.equal(payload.failures[0].stage, 'orchestration');
+  assert.match(payload.failures[0].error, /Invalid time value/);
+  db.close();
+});
+
 /* --------------------------------------------------------------- the workflow */
 
 test('the workflow runs daily, after the disclosure sync, and alerts once', async () => {
@@ -175,6 +297,12 @@ test('the workflow runs daily, after the disclosure sync, and alerts once', asyn
   assert.match(workflow, /state: 'closed', state_reason: 'completed'/);
   // A failure is never swallowed.
   assert.match(workflow, /Fail the workflow after alerting[\s\S]*run: exit 1/);
+  // The alert quotes the named failure report instead of pointing at the log,
+  // and a missing report is itself named rather than left blank.
+  assert.equal((workflow.match(/CALENDAR_SYNC_REPORT: \$\{\{ runner\.temp \}\}\/calendar-sync-report\.txt/g) || []).length, 2);
+  assert.match(workflow, /readFileSync\(process\.env\.CALENDAR_SYNC_REPORT/);
+  assert.match(workflow, /source: internal', 'stage: orchestration'/);
+  assert.doesNotMatch(workflow, /The per-source lines in the run log say which source stopped answering/);
 });
 
 test('the disclosure sync workflow is untouched', async () => {
