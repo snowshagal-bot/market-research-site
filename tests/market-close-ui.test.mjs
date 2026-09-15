@@ -171,6 +171,26 @@ test('flow concentration without a regular-session value shows an explicit unava
   }
 });
 
+test('unavailable regular-session short-selling and investor subfields never render as zero', async () => {
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+  for (const market of ['KOSPI', 'KOSDAQ']) {
+    const summary = data.short_selling.market_summary[market];
+    Object.assign(summary, { total_volume: null, total_value_won: null, short_volume_ratio: null, short_value_ratio: null });
+    for (const investor of Object.values(data.krx_investor_trading.markets[market].investors)) Object.assign(investor, { sell: null, buy: null });
+  }
+  for (const row of data.short_selling.top5_by_value) Object.assign(row, { total_volume: null, total_value_won: null, short_volume_ratio: null, short_value_ratio: null });
+  data.short_selling.top5_by_ratio = [];
+  for (const [lang, note] of [['ko', /정규장 기준 값 없음/], ['en', /No regular-session value/]]) {
+    const runtime = await marketRuntime(lang);
+    const target = { innerHTML: '' };
+    runtime.render(data, target);
+    const shortSection = target.innerHTML.slice(target.innerHTML.indexOf('short-summary'), target.innerHTML.indexOf('market-bottom-grid'));
+    assert.match(shortSection, note);
+    assert.doesNotMatch(shortSection, /(^|[^\d.])0(\.0)?%/);
+    assert.match(shortSection, /--/);
+  }
+});
+
 test('English company resolver covers every fixture ticker and never leaks Korean company names', async () => {
   const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
   const en = await marketRuntime('en');

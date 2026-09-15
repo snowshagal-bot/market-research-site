@@ -105,6 +105,31 @@ test('final payload without a regular-session concentration value stays valid (k
   assert.equal(validateMarketPayload(missingKey, schema).passed, false);
 });
 
+test('regular-session recovery payload with unavailable subfields stays a valid 1.1.0 final', () => {
+  const recovery = clone(fixture);
+  for (const market of ['KOSPI', 'KOSDAQ']) {
+    for (const investor of Object.values(recovery.krx_investor_trading.markets[market].investors)) Object.assign(investor, { sell: null, buy: null });
+    Object.assign(recovery.short_selling.market_summary[market], { total_volume: null, total_value_won: null, short_volume_ratio: null, short_value_ratio: null });
+  }
+  for (const row of recovery.short_selling.top5_by_value) Object.assign(row, { total_volume: null, total_value_won: null, short_volume_ratio: null, short_value_ratio: null });
+  recovery.short_selling.top5_by_ratio = [];
+  recovery.market_internals.concentration = {};
+  assert.deepEqual(validateMarketPayload(recovery, schema), { passed: true, errors: [] });
+
+  const netMissing = clone(recovery);
+  netMissing.krx_investor_trading.markets.KOSPI.investors['외국인'].net_buy = null;
+  assert.match(validateMarketPayload(netMissing, schema).errors.join('\n'), /net_buy.*integer/);
+  const shortValueMissing = clone(recovery);
+  shortValueMissing.short_selling.market_summary.KOSPI.short_value_won = null;
+  assert.equal(validateMarketPayload(shortValueMissing, schema).passed, false);
+  const top5Short = clone(recovery);
+  top5Short.short_selling.top5_by_value.pop();
+  assert.match(validateMarketPayload(top5Short, schema).errors.join('\n'), /최소 5개/);
+  const top10Close = clone(recovery);
+  top10Close.market_cap_top10[0].close = null;
+  assert.equal(validateMarketPayload(top10Close, schema).passed, false);
+});
+
 test('legacy v1.0.1 payload remains publishable without krx_groups', () => {
   assert.deepEqual(validateMarketPayload(legacyFixture, schema), { passed: true, errors: [] });
 });

@@ -225,7 +225,7 @@
             "properties": {
               "market_summary": {"required": ["KOSPI", "KOSDAQ"]},
               "top5_by_value": {"minItems": 5, "maxItems": 5},
-              "top5_by_ratio": {"minItems": 5, "maxItems": 5}
+              "top5_by_ratio": {"maxItems": 5}
             }
           },
           "market_cap_top10": {"minItems": 10, "maxItems": 10},
@@ -302,8 +302,8 @@
       "additionalProperties": false,
       "required": ["sell", "buy", "net_buy"],
       "properties": {
-        "sell": {"type": "integer"},
-        "buy": {"type": "integer"},
+        "sell": {"$ref": "#/$defs/nullableInteger"},
+        "buy": {"$ref": "#/$defs/nullableInteger"},
         "net_buy": {"type": "integer"}
       }
     },
@@ -447,10 +447,10 @@
       "properties": {
         "short_volume": {"type": "integer"},
         "short_value_won": {"type": "integer"},
-        "total_volume": {"type": "integer"},
-        "total_value_won": {"type": "integer"},
-        "short_volume_ratio": {"type": "number"},
-        "short_value_ratio": {"type": "number"},
+        "total_volume": {"$ref": "#/$defs/nullableInteger"},
+        "total_value_won": {"$ref": "#/$defs/nullableInteger"},
+        "short_volume_ratio": {"$ref": "#/$defs/nullableNumber"},
+        "short_value_ratio": {"$ref": "#/$defs/nullableNumber"},
         "market_scope": {"type": "string"},
         "session_scope": {"type": "string"},
         "coverage_scope": {"type": "string"},
@@ -475,10 +475,10 @@
         "change_pct": {"$ref": "#/$defs/nullableNumber"},
         "short_volume": {"type": "integer"},
         "short_value_won": {"type": "integer"},
-        "total_volume": {"type": "integer"},
-        "total_value_won": {"type": "integer"},
-        "short_volume_ratio": {"type": "number"},
-        "short_value_ratio": {"type": "number"},
+        "total_volume": {"$ref": "#/$defs/nullableInteger"},
+        "total_value_won": {"$ref": "#/$defs/nullableInteger"},
+        "short_volume_ratio": {"$ref": "#/$defs/nullableNumber"},
+        "short_value_ratio": {"$ref": "#/$defs/nullableNumber"},
         "source_date": {"$ref": "#/$defs/date"},
         "as_of": {"$ref": "#/$defs/dateTime"},
         "data_state": {"type": "string"}
