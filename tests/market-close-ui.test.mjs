@@ -159,6 +159,18 @@ test('flow concentration renders TOP1 and TOP5 together', async () => {
   assert.match(target.innerHTML, /TOP1 31\.2% · TOP5 72\.5%/);
 });
 
+test('flow concentration without a regular-session value shows an explicit unavailable note', async () => {
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+  data.market_internals.concentration = {};
+  for (const [lang, note] of [['ko', /정규장 기준 값 없음/], ['en', /No regular-session value/]]) {
+    const runtime = await marketRuntime(lang);
+    const target = { innerHTML: '' };
+    runtime.render(data, target);
+    assert.match(target.innerHTML, note);
+    assert.doesNotMatch(target.innerHTML, /TOP1 --/);
+  }
+});
+
 test('English company resolver covers every fixture ticker and never leaks Korean company names', async () => {
   const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
   const en = await marketRuntime('en');

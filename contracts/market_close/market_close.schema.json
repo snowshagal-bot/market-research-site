@@ -218,14 +218,7 @@
           },
           "market_internals": {
             "properties": {
-              "turnover": {"required": ["KOSPI", "KOSDAQ"]},
-              "concentration": {
-                "required": ["외국인", "기관"],
-                "properties": {
-                  "외국인": {"required": ["buy", "sell"]},
-                  "기관": {"required": ["buy", "sell"]}
-                }
-              }
+              "turnover": {"required": ["KOSPI", "KOSDAQ"]}
             }
           },
           "short_selling": {
