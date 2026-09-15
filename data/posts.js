@@ -1,5 +1,30 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-15-daily-1e13zp5",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-09-15",
+    "reportDate": "2026-09-15",
+    "registeredDate": "2026-09-16",
+    "registeredAt": "2026-09-15T16:14:46.667Z",
+    "legacyImport": false,
+    "title": "바람은 다른 곳으로 갔다",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/9월 15일 주식리포트_통합.html",
+    "coverImage": "covers/2026-09-15-daily-1e13zp5.webp",
+    "shareCardImage": "covers/share/2026-09-15-daily-1e13zp5.jpg",
+    "coverThumbnail": "covers/2026-09-15-daily-1e13zp5-450.webp"
+  },
+  {
     "id": "2026-09-14-note-19m98iv",
     "type": "note",
     "typeLabel": "Investment Note",
