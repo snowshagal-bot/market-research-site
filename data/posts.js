@@ -1,5 +1,31 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-15-daily-nh9p6h",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-15",
+    "reportDate": "2026-09-15",
+    "registeredDate": "2026-09-16",
+    "registeredAt": "2026-09-15T16:17:26.663Z",
+    "legacyImport": false,
+    "title": "The Wind Moved Elsewhere",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-15_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-09-15-daily-1e13zp5",
+    "coverImage": "covers/2026-09-15-daily-nh9p6h.webp",
+    "shareCardImage": "covers/share/2026-09-15-daily-nh9p6h.jpg",
+    "coverThumbnail": "covers/2026-09-15-daily-nh9p6h-450.webp"
+  },
+  {
     "id": "2026-09-15-daily-1e13zp5",
     "type": "daily",
     "typeLabel": "주식 리포트",
