@@ -96,6 +96,15 @@ test('authoritative example passes the schema-backed final validator', () => {
   assert.deepEqual(validateMarketPayload(fixture, schema), { passed: true, errors: [] });
 });
 
+test('final payload without a regular-session concentration value stays valid (key kept as empty object)', () => {
+  const withoutConcentration = clone(fixture);
+  withoutConcentration.market_internals.concentration = {};
+  assert.deepEqual(validateMarketPayload(withoutConcentration, schema), { passed: true, errors: [] });
+  const missingKey = clone(fixture);
+  delete missingKey.market_internals.concentration;
+  assert.equal(validateMarketPayload(missingKey, schema).passed, false);
+});
+
 test('legacy v1.0.1 payload remains publishable without krx_groups', () => {
   assert.deepEqual(validateMarketPayload(legacyFixture, schema), { passed: true, errors: [] });
 });
