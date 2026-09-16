@@ -312,37 +312,236 @@ function reportDateLabel(post, lang) {
   }).format(new Date(Date.UTC(parts.year, parts.month - 1, parts.day)));
 }
 
-export function reportSeoTitle(post) {
-  const lang = postLanguage(post);
-  const title = String(post?.title || '').replace(/\s+/g, ' ').trim();
-  const date = reportDateLabel(post, lang);
+// ---------------------------------------------------------------------------
+// Report <title> / description
+//
+// A report's H1 is its editorial headline and stays untouched. The <title>
+// and description are written for search intent instead: what the market
+// did, on which date, then the brand. Every number comes from `facts`
+// (functions/_report-facts.js, the published Market Close row); when there is
+// no such row the wording below degrades to a dated fallback with no numbers,
+// never to a guess scraped out of the HTML.
+// ---------------------------------------------------------------------------
+const DESCRIPTION_MAX = 180;
+// KRW billion: 500 = 5,000억 is a flow worth leading the title with;
+// 100 = 1,000억 is still worth naming once KOSDAQ has nothing unusual.
+export const FLOW_STRONG_BILLION = 500;
+export const FLOW_NOTABLE_BILLION = 100;
+export const KOSDAQ_UNUSUAL_PCT = 1.5;
+const EN_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+const normalizeText = (value) => String(value || '').replace(/\s+/g, ' ').trim();
+
+function limitText(value, max = DESCRIPTION_MAX) {
+  const text = normalizeText(value);
+  if (text.length <= max) return text;
+  const clipped = text.slice(0, max - 1).replace(/[\s,;:·\-]+\S*$/, '').trim();
+  return `${clipped || text.slice(0, max - 1).trim()}…`;
+}
+
+export function formatIndexLevel(value) {
+  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+}
+
+export function formatSignedPct(value) {
+  const fixed = Math.abs(value).toFixed(2);
+  if (Number(fixed) === 0) return '0.00%';
+  return `${value > 0 ? '+' : '-'}${fixed}%`;
+}
+
+function trimZeros(text) {
+  return text.replace(/\.?0+$/, '');
+}
+
+// `value` is in KRW billion (10억원), the unit the Market Close contract uses.
+export function formatFlowAmount(value, lang) {
+  const abs = Math.abs(value);
+  if (lang === 'en') {
+    return abs >= 1000 ? `KRW ${trimZeros((abs / 1000).toFixed(2))}tn` : `KRW ${Math.round(abs).toLocaleString('en-US')}bn`;
+  }
+  return abs >= 1000 ? `${trimZeros((abs / 1000).toFixed(2))}조` : `${Math.round(abs * 10).toLocaleString('en-US')}억`;
+}
+
+function flowPhrase(investor, value, lang, style = 'title') {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value === 0) return '';
+  const amount = formatFlowAmount(value, lang);
+  const names = { foreign: { ko: '외국인', en: 'Foreign' }, institution: { ko: '기관', en: 'Institutions' }, individual: { ko: '개인', en: 'Retail' } };
+  const name = names[investor][lang === 'en' ? 'en' : 'ko'];
+  if (lang === 'en') {
+    if (style === 'title') return `${name} Net ${value > 0 ? 'Buy' : 'Sell'} ${amount}`;
+    const verb = value > 0 ? 'net bought' : 'net sold';
+    return investor === 'foreign' ? `Foreign investors ${verb} ${amount}` : `${name.toLowerCase()} ${verb} ${amount}`;
+  }
+  return `${name} ${amount} ${value > 0 ? '순매수' : '순매도'}`;
+}
+
+function shortDateLabel(reportDate, lang) {
+  const parts = isoDateParts(reportDate);
+  if (!parts) return '';
+  return lang === 'en' ? `${EN_MONTHS[parts.month - 1]} ${parts.day}` : `${parts.month}월 ${parts.day}일`;
+}
+
+function periodLabel(period, lang) {
+  const start = isoDateParts(period?.start);
+  const end = isoDateParts(period?.end);
+  if (!start || !end) return '';
+  if (lang === 'en') return `${EN_MONTHS[start.month - 1]} ${start.day}–${EN_MONTHS[end.month - 1]} ${end.day}`;
+  return `${start.month}월 ${start.day}일–${end.month}월 ${end.day}일`;
+}
+
+function weeklyPeriodOf(reportDate) {
+  const parts = isoDateParts(reportDate);
+  if (!parts) return null;
+  const date = new Date(Date.UTC(parts.year, parts.month - 1, parts.day));
+  const day = date.getUTCDay();
+  const monday = new Date(date.getTime() - (day === 0 ? 6 : day - 1) * 86400000);
+  const friday = new Date(monday.getTime() + 4 * 86400000);
+  return { start: monday.toISOString().slice(0, 10), end: friday.toISOString().slice(0, 10) };
+}
+
+export function postTagLabels(post, lang, tagRegistry = null, max = 3) {
+  return (Array.isArray(post?.tags) ? post.tags : [])
+    .map((tag) => tagLabel(tag, lang, tagRegistry))
+    .filter(Boolean)
+    .filter((label, index, all) => all.indexOf(label) === index)
+    .slice(0, max);
+}
+
+// The one fact that follows the KOSPI close in a Daily title, in order of
+// how much it says about the day: a large foreign flow, an unusual KOSDAQ
+// move, a smaller but still notable flow, then simply the KOSDAQ close.
+export function dailySecondaryFact(facts, lang) {
+  const foreign = facts?.foreignNet;
+  const kosdaq = facts?.kosdaq;
+  const kosdaqText = kosdaq ? `${lang === 'en' ? 'KOSDAQ' : '코스닥'} ${formatIndexLevel(kosdaq.close)} (${formatSignedPct(kosdaq.pct)})` : '';
+  if (typeof foreign === 'number' && Math.abs(foreign) >= FLOW_STRONG_BILLION) return flowPhrase('foreign', foreign, lang);
+  if (kosdaq && Math.abs(kosdaq.pct) >= KOSDAQ_UNUSUAL_PCT) return kosdaqText;
+  if (typeof foreign === 'number' && Math.abs(foreign) >= FLOW_NOTABLE_BILLION) return flowPhrase('foreign', foreign, lang);
+  if (kosdaq) return kosdaqText;
+  return `${lang === 'en' ? 'KOSPI' : '코스피'} ${formatSignedPct(facts.kospi.pct)}`;
+}
+
+function dailyFactsFor(post, facts) {
+  if (!facts || facts.kind !== 'daily' || !facts.kospi) return null;
+  const reportDate = String(post?.reportDate || post?.date || '').slice(0, 10);
+  return facts.marketDate === reportDate ? facts : null;
+}
+
+function weeklyFactsFor(post, facts) {
+  if (!facts || facts.kind !== 'weekly' || !facts.period || typeof facts.pct !== 'number' || !Number.isFinite(facts.pct)) return null;
+  return facts;
+}
+
+function legacyContext(post, lang) {
   const type = CATEGORY_LANDINGS[post?.type]?.[lang]?.heading || (lang === 'en' ? 'Market Report' : '시장 리포트');
-  let context = type;
-  if (post?.type === 'daily') context = lang === 'en' ? 'Korean Market Daily Report' : '한국 주식시장 데일리';
-  if (post?.type === 'weekly') context = lang === 'en' ? 'Korean Market Weekly Outlook' : '주간 시장 전망';
+  if (post?.type === 'daily') return lang === 'en' ? 'Korean Market Daily Report' : '한국 주식시장 데일리';
+  if (post?.type === 'weekly') return lang === 'en' ? 'Korean Market Weekly Outlook' : '주간 시장 전망';
+  return type;
+}
+
+export function reportSeoTitle(post, options = {}) {
+  const lang = postLanguage(post);
+  const title = normalizeText(post?.title);
+  const date = reportDateLabel(post, lang);
+  const reportDate = String(post?.reportDate || post?.date || '').slice(0, 10);
+
+  if (post?.type === 'daily') {
+    const facts = dailyFactsFor(post, options.facts);
+    const day = shortDateLabel(reportDate, lang);
+    if (facts && day) {
+      const secondary = dailySecondaryFact(facts, lang);
+      return lang === 'en'
+        ? `KOSPI ${formatIndexLevel(facts.kospi.close)} Close · ${secondary} | ${day} | Snowshagal`
+        : `코스피 ${formatIndexLevel(facts.kospi.close)} 마감 · ${secondary} | ${day} 증시 | Snowshagal`;
+    }
+    // No published close for this date: say what the page is, with no number.
+    if (day) {
+      return lang === 'en'
+        ? `${day} Korea Market Close · ${title} | Snowshagal`
+        : `${day} 증시 마감 · ${title} | Snowshagal`;
+    }
+  }
+
+  if (post?.type === 'weekly') {
+    const facts = weeklyFactsFor(post, options.facts);
+    const period = periodLabel(facts?.period || weeklyPeriodOf(reportDate), lang);
+    const themes = postTagLabels(post, lang, options.tagRegistry);
+    if (facts && period) {
+      const catalyst = themes.length ? themes.join(lang === 'en' ? ', ' : '·') : title;
+      return lang === 'en'
+        ? `KOSPI Week ${formatSignedPct(facts.pct)} · ${catalyst} | ${period} | Snowshagal`
+        : `코스피 주간 ${formatSignedPct(facts.pct)} · ${catalyst} | ${period} | Snowshagal`;
+    }
+    if (period) {
+      return lang === 'en'
+        ? `${period} Korea Market Weekly · ${title} | Snowshagal`
+        : `${period} 주간 시장 전망 · ${title} | Snowshagal`;
+    }
+  }
+
+  if (post?.type === 'research') {
+    const themes = postTagLabels(post, lang, options.tagRegistry);
+    if (title && themes.length) {
+      return lang === 'en'
+        ? `${title} | ${themes.join(', ')} Research | Snowshagal`
+        : `${title} | ${themes.join('·')} 리서치 | Snowshagal`;
+    }
+  }
+
+  const context = legacyContext(post, lang);
   const datedContext = date ? (lang === 'en' ? `${context} — ${date}` : `${date} ${context}`) : context;
   return [datedContext, title, 'Snowshagal'].filter(Boolean).join(' | ');
 }
 
-export function reportDescription(post) {
-  const normalize = (value) => String(value || '').replace(/\s+/g, ' ').trim();
-  const limit = (value, max = 180) => {
-    const text = normalize(value);
-    if (text.length <= max) return text;
-    const clipped = text.slice(0, max - 1).replace(/[\s,;:·\-]+\S*$/, '').trim();
-    return `${clipped || text.slice(0, max - 1).trim()}…`;
-  };
-  const summary = normalize(post?.summary);
-  if (summary) return limit(summary);
+// The sentence that says what the day meant: the Market Close row's own
+// takeaway first, then the one published with the post, then its summary.
+function dailyTakeaway(post, facts, lang) {
+  return normalizeText(facts?.takeaway?.[lang]) || normalizeText(post?.takeaway) || normalizeText(post?.summary);
+}
 
+export function reportDescription(post, options = {}) {
   const lang = postLanguage(post);
-  const title = normalize(post?.title);
+  const title = normalizeText(post?.title);
   const date = reportDateLabel(post, lang);
+
+  if (post?.type === 'daily') {
+    const facts = dailyFactsFor(post, options.facts);
+    if (facts && date) {
+      const kospi = `${formatIndexLevel(facts.kospi.close)} (${formatSignedPct(facts.kospi.pct)})`;
+      const kosdaq = facts.kosdaq ? `${formatIndexLevel(facts.kosdaq.close)} (${formatSignedPct(facts.kosdaq.pct)})` : '';
+      const flows = [flowPhrase('foreign', facts.foreignNet, lang, 'sentence'), flowPhrase('institution', facts.institutionNet, lang, 'sentence')]
+        .filter(Boolean);
+      const takeaway = dailyTakeaway(post, facts, lang).replace(/[.。]+$/, '');
+      const parts = lang === 'en'
+        ? [`${date}: KOSPI closed at ${kospi}${kosdaq ? `, KOSDAQ ${kosdaq}` : ''}.`, flows.length ? `${flows.join('; ')}.` : '', takeaway ? `${takeaway}.` : '']
+        : [`${date} 코스피 ${kospi}${kosdaq ? `, 코스닥 ${kosdaq}` : ''} 마감.`, flows.length ? `${flows.join(' · ')}.` : '', takeaway ? `${takeaway}.` : ''];
+      return limitText(parts.filter(Boolean).join(' '));
+    }
+  }
+
+  if (post?.type === 'weekly') {
+    const facts = weeklyFactsFor(post, options.facts);
+    const period = periodLabel(facts?.period, lang);
+    if (facts && period) {
+      const themes = postTagLabels(post, lang, options.tagRegistry);
+      const year = isoDateParts(facts.period.end)?.year;
+      const move = `${formatIndexLevel(facts.previousClose)} → ${formatIndexLevel(facts.close)}`;
+      const line = (normalizeText(post?.takeaway) || normalizeText(post?.summary)).replace(/[.。]+$/, '');
+      const parts = lang === 'en'
+        ? [`${period}, ${year}: KOSPI ${formatSignedPct(facts.pct)} for the week (${move}).`, themes.length ? `Key variables ahead: ${themes.join(', ')}.` : '', line ? `${line}.` : '']
+        : [`${year}년 ${period} 코스피 주간 ${formatSignedPct(facts.pct)} (${move}).`, themes.length ? `다음 주 변수: ${themes.join('·')}.` : '', line ? `${line}.` : ''];
+      return limitText(parts.filter(Boolean).join(' '));
+    }
+  }
+
+  const summary = normalizeText(post?.summary);
+  if (summary) return limitText(summary);
+
   // The sentence the report itself chose as its point. It says something no
   // other report says, which is what a search result needs and what the
   // category boilerplate below can never be.
-  const takeaway = normalize(post?.takeaway);
-  const supplied = takeaway || normalize(post?.description || post?.subtitle);
+  const takeaway = normalizeText(post?.takeaway);
+  const supplied = takeaway || normalizeText(post?.description || post?.subtitle);
   const category = CATEGORY_LANDINGS[post?.type]?.[lang]?.heading || (lang === 'en' ? 'market report' : '시장 리포트');
   let context = category;
   if (post?.type === 'daily') context = lang === 'en' ? 'Korean market daily report' : '한국 주식시장 데일리';
@@ -352,13 +551,13 @@ export function reportDescription(post) {
       ? `A Snowshagal ${category.toLowerCase()} covering the market context and key variables.`
       : `시장 흐름과 핵심 변수를 정리한 Snowshagal의 ${category} 콘텐츠입니다.`);
     const cleanDetail = detail.replace(/[.!?。]+$/, '');
-    return limit(lang === 'en'
+    return limitText(lang === 'en'
       ? `${context} — ${date}: ${title}. ${cleanDetail}.`
       : `${date} ${context} — ${title}. ${cleanDetail}.`);
   }
 
-  if (supplied) return limit(supplied);
-  return limit(lang === 'en'
+  if (supplied) return limitText(supplied);
+  return limitText(lang === 'en'
     ? `${title || 'This report'} — a Snowshagal ${category.toLowerCase()}.`
     : `${title || '이 글'} — Snowshagal의 ${category} 콘텐츠입니다.`);
 }
@@ -602,11 +801,13 @@ export function reportArticleImage(post) {
   return '';
 }
 
-export function reportArticleStructuredData(post) {
+export function reportArticleStructuredData(post, options = {}) {
   const canonical = reportSiteUrl(post.href);
   const lang = postLanguage(post);
+  // headline is the editorial H1, exactly as the page shows it; only the
+  // description follows the search-intent wording of the meta tag.
   const title = String(post?.title || '').replace(/\s+/g, ' ').trim();
-  const description = reportDescription(post);
+  const description = reportDescription(post, options);
   const datePublished = String(post?.reportDate || post?.date || '').slice(0, 10);
   const section = CATEGORY_LANDINGS[post?.type]?.[lang]?.heading || post?.typeLabel || '';
   const image = reportArticleImage(post);
@@ -672,23 +873,23 @@ export function reportBreadcrumbStructuredData(post) {
   };
 }
 
-export function reportStructuredData(post) {
+export function reportStructuredData(post, options = {}) {
   const lang = postLanguage(post);
   return {
     '@context': 'https://schema.org',
     '@graph': [
       organizationStructuredData(lang),
-      reportArticleStructuredData(post),
+      reportArticleStructuredData(post, options),
       reportBreadcrumbStructuredData(post)
     ]
   };
 }
 
-export function reportSeoTags(posts, post) {
+export function reportSeoTags(posts, post, options = {}) {
   const canonical = reportSiteUrl(post.href);
   const lang = postLanguage(post);
-  const title = reportSeoTitle(post);
-  const description = reportDescription(post);
+  const title = reportSeoTitle(post, options);
+  const description = reportDescription(post, options);
   // og:image is always a 1200x630 landscape card, so nothing that crops to
   // 1.91:1 can behead the artwork.
   const card = reportCardPath(post);
@@ -707,7 +908,7 @@ export function reportSeoTags(posts, post) {
   const localeAlternate = counterpart
     ? `<meta property="og:locale:alternate" content="${postLanguage(counterpart) === 'en' ? 'en_US' : 'ko_KR'}">`
     : '';
-  const jsonLd = structuredDataScript(reportStructuredData(post));
+  const jsonLd = structuredDataScript(reportStructuredData(post, options));
 
   return `<title>${escapeHtml(title)}</title><link rel="canonical" href="${escapeHtml(canonical)}">${alternates}${descriptionTags}`
     + `<meta property="og:type" content="article">`
