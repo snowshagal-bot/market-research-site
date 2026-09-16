@@ -1,5 +1,31 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-16-daily-5msodg",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-16",
+    "reportDate": "2026-09-16",
+    "registeredDate": "2026-09-17",
+    "registeredAt": "2026-09-16T17:01:52.616Z",
+    "legacyImport": false,
+    "title": "Waiting for the Fed,A Narrow Rebound",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-16_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-09-16-daily-3yztzq",
+    "coverImage": "covers/2026-09-16-daily-5msodg.webp",
+    "shareCardImage": "covers/share/2026-09-16-daily-5msodg.jpg",
+    "coverThumbnail": "covers/2026-09-16-daily-5msodg-450.webp"
+  },
+  {
     "id": "2026-09-16-daily-3yztzq",
     "type": "daily",
     "typeLabel": "주식 리포트",
