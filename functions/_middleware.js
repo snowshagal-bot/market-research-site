@@ -30,6 +30,7 @@ import {
   isAdminUiPath
 } from './_host-policy.js';
 import { feedDiscoveryTag } from './_feed.js';
+import { loadReportFacts } from './_report-facts.js';
 import { getSession, validateSafeNextUrl } from './_auth.js';
 
 function policyResponse(status, error) {
@@ -251,13 +252,19 @@ export async function onRequest(context) {
       loadPosts(context.request, context.env),
       loadTags(context.request, context.env)
     ]);
+    if (tagsRes.status === 'fulfilled' && tagsRes.value) {
+      tags = tagsRes.value;
+    }
     if (postsRes.status === 'fulfilled') {
       const posts = postsRes.value;
       const post = findPostByPath(posts, url.pathname);
-      if (post) seo = reportSeoTags(posts, post);
-    }
-    if (tagsRes.status === 'fulfilled' && tagsRes.value) {
-      tags = tagsRes.value;
+      if (post) {
+        // The published Market Close for the report's date supplies the
+        // numbers the <title> and description quote; without one they fall
+        // back to dated wording with no numbers.
+        const facts = await loadReportFacts(context.env, post);
+        seo = reportSeoTags(posts, post, { facts, tagRegistry: tags });
+      }
     }
   } catch (_) {}
 

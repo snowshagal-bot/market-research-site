@@ -60,8 +60,8 @@ test('public locale shells use snowshagal.com canonicals and only real homepage 
 
 test('Market Close locale pages expose canonical SEO and matching alternates', async () => {
   const [ko, en] = await Promise.all([read('market/index.html'), read('en/market/index.html')]);
-  assert.match(ko, /<title>Market Close \| 오늘의 한국 시장 마감 \| Snowshagal<\/title>/);
-  assert.match(en, /<title>Market Close \| Today’s Korean Market Close \| Snowshagal<\/title>/);
+  assert.match(ko, /<title>코스피·코스닥 마감, 원달러 환율 \| 한국 시장 데이터 \| Snowshagal<\/title>/);
+  assert.match(en, /<title>KOSPI &amp; KOSDAQ Close, USD\/KRW \| Korea Market Data \| Snowshagal<\/title>/);
   assert.match(ko, /rel="canonical" href="https:\/\/snowshagal\.com\/market\/"/);
   assert.match(en, /rel="canonical" href="https:\/\/snowshagal\.com\/en\/market\/"/);
   for (const page of [ko, en]) {
