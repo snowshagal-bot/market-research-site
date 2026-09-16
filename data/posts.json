@@ -1,5 +1,56 @@
 [
   {
+    "id": "2026-09-16-daily-5msodg",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-16",
+    "reportDate": "2026-09-16",
+    "registeredDate": "2026-09-17",
+    "registeredAt": "2026-09-16T17:01:52.616Z",
+    "legacyImport": false,
+    "title": "Waiting for the Fed,A Narrow Rebound",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-16_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-09-16-daily-3yztzq",
+    "coverImage": "covers/2026-09-16-daily-5msodg.webp",
+    "shareCardImage": "covers/share/2026-09-16-daily-5msodg.jpg",
+    "coverThumbnail": "covers/2026-09-16-daily-5msodg-450.webp"
+  },
+  {
+    "id": "2026-09-16-daily-3yztzq",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-09-16",
+    "reportDate": "2026-09-16",
+    "registeredDate": "2026-09-17",
+    "registeredAt": "2026-09-16T16:49:22.189Z",
+    "legacyImport": false,
+    "title": "연준을 기다린, 넓지 않은 반등",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/9월 16일 주식리포트_통합.html",
+    "coverImage": "covers/2026-09-16-daily-3yztzq.webp",
+    "shareCardImage": "covers/share/2026-09-16-daily-3yztzq.jpg",
+    "coverThumbnail": "covers/2026-09-16-daily-3yztzq-450.webp"
+  },
+  {
     "id": "2026-09-15-daily-nh9p6h",
     "type": "daily",
     "typeLabel": "Daily",
