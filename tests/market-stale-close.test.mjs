@@ -129,6 +129,12 @@ test('availability is stale only when the latest close is older than the expecte
   assert.equal(gapAcrossHoliday.badge, '마지막 검증 완료 · 9월 22일');
   assert.equal(gapAcrossHoliday.notice, '9월 28일 Market Close 데이터셋은 검증 미완료로 제공하지 않습니다.');
 
+  // Single-digit days: the English badge matches the strip's SEP 09 label.
+  const singleDigit = api.marketCloseAvailability('2026-09-09', '2026-10-02', 'en');
+  assert.equal(singleDigit.badge, 'LAST VERIFIED CLOSE · SEP 09');
+  assert.equal(singleDigit.notice, 'The Oct 2 Market Close dataset is unavailable pending validation.');
+  assert.equal(api.marketCloseAvailability('2026-09-09', '2026-10-02', 'ko').badge, '마지막 검증 완료 · 9월 9일');
+
   // Without a usable expectation nothing is judged stale.
   assert.equal(api.marketCloseAvailability('2026-09-15', '', 'ko').stale, false);
   assert.equal(api.marketCloseAvailability('2026-09-15', 'soon', 'en').stale, false);

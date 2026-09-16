@@ -80,7 +80,11 @@
       const [, month, day] = value.split('-').map(Number);
       return text.date(month, day);
     };
-    const lastVerifiedDate = language === 'en' ? label(latest).toUpperCase() : label(latest);
+    // The English badge follows the TODAY strip's own label (SEP 09); the
+    // sentence keeps the plain form (Sep 9).
+    const lastVerifiedDate = language === 'en'
+      ? latest.slice(5).replace(/^(\d{2})-(\d{2})$/, (_, month, day) => `${SHORT_MONTHS[Number(month) - 1].toUpperCase()} ${day}`)
+      : label(latest);
     return {
       stale: true,
       latestDate: latest,
