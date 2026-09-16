@@ -46,13 +46,17 @@ export function fingerprint(text) {
   return hash.toString(36);
 }
 
-export function formatMarketResponse(row, request) {
+// Set by /api/market/latest only: the KRX session that may already be
+// published (functions/_trading-calendar.js, publishEligible boundary).
+export const EXPECTED_MARKET_DATE_HEADER = 'x-market-expected-date';
+
+export function formatMarketResponse(row, request, extraHeaders = {}) {
   const stamp = `${row.generated_at}|${row.published_at || ''}|${row.takeaway_ko || ''}|${row.takeaway_en || ''}`;
   const etag = `W/"market-${row.market_date}-${fingerprint(stamp)}"`;
   if (request.headers.get('if-none-match') === etag) {
     return new Response(null, {
       status: 304,
-      headers: { etag, 'cache-control': 'public, max-age=30, s-maxage=120, stale-while-revalidate=300' }
+      headers: { etag, 'cache-control': 'public, max-age=30, s-maxage=120, stale-while-revalidate=300', ...extraHeaders }
     });
   }
   let payload;
@@ -62,7 +66,7 @@ export function formatMarketResponse(row, request) {
     return json({ error: 'INVALID_STORED_DATA', message: '저장된 Market Close 데이터를 읽을 수 없습니다.' }, 500);
   }
   payload.takeaway = { ko: String(row.takeaway_ko || ''), en: String(row.takeaway_en || '') };
-  return json(payload, 200, 'public, max-age=30, s-maxage=120, stale-while-revalidate=300', { etag });
+  return json(payload, 200, 'public, max-age=30, s-maxage=120, stale-while-revalidate=300', { etag, ...extraHeaders });
 }
 
 export function isProductionRequest(request) {

@@ -10,7 +10,7 @@ const ELEMENT_IDS = [
   'calendar-container', 'filter-month', 'filter-reset-btn', 'filter-tag', 'filter-year',
   'global-search-input', 'latest-category-cards', 'report-list', 'search-clear-btn', 'search-dialog',
   'search-empty-state', 'search-quick-tags', 'search-results-list', 'search-tag-cloud',
-  'today-market-grid', 'today-strip-date', 'today-takeaway-label', 'today-takeaway-link',
+  'today-market-grid', 'today-strip-date', 'today-strip-notice', 'today-strip-tag', 'today-takeaway-label', 'today-takeaway-link',
   'today-takeaway-text'
 ];
 
@@ -154,6 +154,8 @@ async function bootHomepage({ lang = 'ko', respond, summary = STATIC_SUMMARY, po
   // Seed the neutral initial state. tests/home-v2.test.mjs asserts the shipped
   // HTML matches exactly this.
   const marketPath = lang === 'en' ? '/en/market/' : '/market/';
+  elements.get('today-strip-tag').textContent = 'TODAY';
+  elements.get('today-strip-notice').hidden = true;
   elements.get('today-strip-date').textContent = DASH;
   elements.get('today-market-grid').innerHTML = Array.from({ length: 5 }, () => (
     `<div class="today-item" role="listitem"><span class="today-label">X</span><span class="today-value">${DASH}</span><span class="today-change pending">${DASH}</span></div>`
@@ -202,6 +204,8 @@ async function bootHomepage({ lang = 'ko', respond, summary = STATIC_SUMMARY, po
   vm.runInContext(siteScript, context);
 
   const nodes = {
+    tag: elements.get('today-strip-tag'),
+    notice: elements.get('today-strip-notice'),
     date: elements.get('today-strip-date'),
     grid: elements.get('today-market-grid'),
     label: elements.get('today-takeaway-label'),
@@ -219,9 +223,10 @@ async function bootHomepage({ lang = 'ko', respond, summary = STATIC_SUMMARY, po
 }
 
 /** Boot and wait for the request to settle; returns the final strip nodes. */
-async function runHomepage({ fetchResult = null, ...rest } = {}) {
+async function runHomepage({ fetchResult = null, expectedDate = '', ...rest } = {}) {
+  const headers = new Headers(expectedDate ? { 'x-market-expected-date': expectedDate } : {});
   const respond = () => (fetchResult
-    ? Promise.resolve({ ok: true, json: () => Promise.resolve(fetchResult) })
+    ? Promise.resolve({ ok: true, headers, json: () => Promise.resolve(fetchResult) })
     : Promise.resolve({ ok: false, status: 503, json: () => Promise.reject(new Error('no body')) }));
   const boot = await bootHomepage({ ...rest, respond });
   await boot.flush();
@@ -294,9 +299,47 @@ test('C. a weekend market date is current data, not stale data', async () => {
   assert.equal(strip.row.hidden, false);
   assert.equal(strip.link.href, '/reports/2026-08-28-ko');
 
-  // Freshness is decided by the API's market_date alone, never by the calendar.
+  // The weekend expectation is Friday, so the tag stays TODAY.
+  const weekend = await runHomepage({ fetchResult: marketPayload('2026-08-28'), expectedDate: '2026-08-28' });
+  assert.equal(weekend.tag.textContent, 'TODAY');
+  assert.equal(weekend.notice.hidden, true);
+
+  // Freshness comes from the server's expectation, never from this browser's clock.
   const siteJs = await read('assets/site.js');
   assert.doesNotMatch(siteJs, /Asia\/Seoul/);
+});
+
+test('C2. a close older than the expected session reads LAST VERIFIED CLOSE with a dated notice', async () => {
+  const current = await runHomepage({ fetchResult: marketPayload('2026-09-17', { ko: KO_LINE, en: EN_LINE }), expectedDate: '2026-09-17' });
+  assert.equal(current.tag.textContent, 'TODAY');
+  assert.equal(current.date.textContent, 'SEP 17');
+  assert.equal(current.notice.hidden, true);
+  assert.equal(current.notice.textContent, '');
+
+  const ko = await runHomepage({ fetchResult: marketPayload('2026-09-15', { ko: KO_LINE, en: EN_LINE }), expectedDate: '2026-09-16' });
+  assert.equal(`${ko.tag.textContent} · ${ko.date.textContent}`, '마지막 검증 완료 · 9월 15일');
+  assert.equal(ko.notice.hidden, false);
+  assert.equal(ko.notice.textContent, '9월 16일 Market Close 데이터셋은 검증 미완료로 제공하지 않습니다.');
+  // The numbers and the line still belong to the session on screen.
+  assert.match(ko.grid.innerHTML, /6,808\.21/);
+  assert.equal(ko.text.textContent, KO_LINE);
+
+  const en = await runHomepage({ lang: 'en', fetchResult: marketPayload('2026-09-15', { ko: KO_LINE, en: EN_LINE }), expectedDate: '2026-09-18' });
+  assert.equal(`${en.tag.textContent} · ${en.date.textContent}`, 'LAST VERIFIED CLOSE · SEP 15');
+  assert.equal(en.notice.hidden, false);
+  assert.equal(en.notice.textContent, 'The Sep 18 Market Close dataset is unavailable pending validation.');
+});
+
+test('C3. without an expectation, or on the static fallback, the strip keeps TODAY', async () => {
+  const noHeader = await runHomepage({ fetchResult: marketPayload('2026-09-15') });
+  assert.equal(noHeader.tag.textContent, 'TODAY');
+  assert.equal(noHeader.date.textContent, 'SEP 15');
+  assert.equal(noHeader.notice.hidden, true);
+
+  const fallback = await runHomepage({ fetchResult: null, expectedDate: '2026-09-16' });
+  assert.equal(fallback.tag.textContent, 'TODAY');
+  assert.equal(fallback.date.textContent, 'AUG 25');
+  assert.equal(fallback.notice.hidden, true);
 });
 
 test('D. a market date with no matching daily report links Market Close, not another day', async () => {

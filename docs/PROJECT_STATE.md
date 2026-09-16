@@ -148,8 +148,17 @@ is painted exactly once, after the request settles, so a past session is never s
 the request is in flight. A payload that does not resolve all five items is rejected whole
 rather than topped up, and the one-liner links strictly by `reportDate === displayed
 marketDate`: with no matching daily report it falls back to Market Close instead of opening
-another day's report. Freshness is whatever `market_date` the API returns, never the
-calendar, so a weekend or holiday keeps showing the last trading session as current.
+another day's report. Freshness is never judged by the browser's clock or a client-side
+calendar: `/api/market/latest` adds an `x-market-expected-date` response header (body
+unchanged) from `expectedPublishedKrxTradingDate` in `functions/_trading-calendar.js`, i.e.
+today once its `publishEligibleMinutes` (16:05 KST, CSAT 17:05) has passed, otherwise the
+previous trading date. When `market_date` equals it, HOME shows `TODAY · <date>` and MARKET
+its normal hero. When `market_date` is older, HOME shows `마지막 검증 완료 · 9월 15일` /
+`LAST VERIFIED CLOSE · SEP 15` with a notice naming the expected session (`9월 16일 Market
+Close 데이터셋은 검증 미완료로 제공하지 않습니다.` / `The Sep 16 Market Close dataset is
+unavailable pending validation.`), and the MARKET TODAY hero shows the same badge and notice
+(`assets/locale.js` `marketCloseAvailability`). Weekends, holidays and the hours before
+16:05 expect the previous session, so they stay on TODAY; without the header nothing changes.
 
 The homepage also provides:
 

@@ -206,8 +206,21 @@
     currentPayload: null,
     rangeData: null,
     rangeWindow: null,
+    // The session /api/market/latest says should already be published
+    // (x-market-expected-date, from functions/_trading-calendar.js).
+    expectedDate: null,
     popstateBound: false
   };
+  const EXPECTED_MARKET_DATE_HEADER = 'x-market-expected-date';
+
+  // TODAY view only: when the latest close is older than the expected session,
+  // name the last verified close and the session that is not provided.
+  function availabilityNotice(marketDate, isHistory) {
+    if (isHistory || state.mode !== 'today') return '';
+    const availability = root.MARKET_LOCALE?.marketCloseAvailability?.(marketDate, state.expectedDate, ko ? 'ko' : 'en');
+    if (!availability?.stale) return '';
+    return `<div class="market-availability" role="status"><p class="market-availability-badge">${html(availability.badge)}</p><p class="market-availability-note">${html(availability.notice)}</p></div>`;
+  }
 
   function parseUrlState() {
     const searchParams = new URLSearchParams(location.search);
@@ -452,6 +465,7 @@
       <section class="market-hero" aria-labelledby="market-close-heading"><div class="market-wrap market-hero-inner"><div class="market-hero-copy">
         <p class="market-eyebrow">SNOWSHAGAL</p><h1 id="market-close-heading">${copy.title}</h1><p class="market-subtitle">${copy.subtitle}</p>
         <p class="market-date">${dateText(data.meta?.market_date)} · ${copy.closeBasis}</p>
+        ${availabilityNotice(marketDate, isHistory)}
         <p class="market-update">${copy.updateNotice}</p>
         <p class="market-overseas">${copy.overseas}</p>
       </div><div class="market-mountain" aria-hidden="true"></div></div></section>
@@ -872,6 +886,7 @@
         }
         const data = await response.json();
         state.currentDate = data.meta?.market_date || null;
+        state.expectedDate = response.headers?.get?.(EXPECTED_MARKET_DATE_HEADER) || null;
         render(data, rootEl);
       }
     } catch (error) {

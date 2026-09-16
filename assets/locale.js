@@ -48,6 +48,50 @@
     }
   };
 
+  const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+  const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const MARKET_AVAILABILITY_COPY = {
+    ko: {
+      lastVerified: '마지막 검증 완료',
+      date: (month, day) => `${month}월 ${day}일`,
+      unavailable: date => `${date} Market Close 데이터셋은 검증 미완료로 제공하지 않습니다.`
+    },
+    en: {
+      lastVerified: 'LAST VERIFIED CLOSE',
+      date: (month, day) => `${SHORT_MONTHS[month - 1]} ${day}`,
+      unavailable: date => `The ${date} Market Close dataset is unavailable pending validation.`
+    }
+  };
+
+  /**
+   * Whether the published Market Close is behind the session the site should
+   * already carry. `expectedDate` comes from /api/market/latest's
+   * x-market-expected-date header, which the server derives from
+   * functions/_trading-calendar.js (trading days and the publish cutoff). The
+   * browser keeps no calendar of its own: without a valid expectation, or when
+   * the latest date is not older than it, the page stays on TODAY.
+   */
+  function marketCloseAvailability(latestDate, expectedDate, language) {
+    const latest = String(latestDate || '');
+    const expected = String(expectedDate || '');
+    if (!ISO_DATE.test(latest) || !ISO_DATE.test(expected) || latest >= expected) return { stale: false };
+    const text = MARKET_AVAILABILITY_COPY[language === 'en' ? 'en' : 'ko'];
+    const label = value => {
+      const [, month, day] = value.split('-').map(Number);
+      return text.date(month, day);
+    };
+    const lastVerifiedDate = language === 'en' ? label(latest).toUpperCase() : label(latest);
+    return {
+      stale: true,
+      latestDate: latest,
+      expectedDate: expected,
+      tag: text.lastVerified,
+      dateLabel: lastVerifiedDate,
+      badge: `${text.lastVerified} · ${lastVerifiedDate}`,
+      notice: text.unavailable(label(expected))
+    };
+  }
+
   function postLanguage(post) {
     return post?.lang === 'en' ? 'en' : 'ko';
   }
@@ -180,6 +224,7 @@
     findCounterpart,
     homepagePath,
     pageLanguagePath,
-    preferredHomepageRedirect
+    preferredHomepageRedirect,
+    marketCloseAvailability
   };
 })(typeof window !== 'undefined' ? window : globalThis);

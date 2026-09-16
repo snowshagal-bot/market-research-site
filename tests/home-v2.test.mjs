@@ -301,7 +301,7 @@ test('homepage presents TODAY market summary strip between brand hero and latest
     assert.match(page, /<section class="today-strip" aria-labelledby="today-strip-heading">/);
     assert.match(page, /class="today-strip-head"/);
     assert.match(page, /class="today-strip-eyebrow"/);
-    assert.match(page, /class="today-strip-tag">TODAY<\/span>/);
+    assert.match(page, /class="today-strip-tag" id="today-strip-tag">TODAY<\/span>/);
     assert.match(page, /class="today-strip-market-link"/);
     assert.match(page, /class="today-strip-scroll-wrap"/);
     assert.match(page, /id="today-market-grid"/);
