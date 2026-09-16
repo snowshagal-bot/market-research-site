@@ -6,6 +6,7 @@
 // present, not final, or not from the regular session is simply absent, so
 // the SEO layer falls back to wording without that number.
 import { TABLE_NAME, ensureMarketTable } from './api/market/_shared.js';
+import { isTradingDate, previousTradingDate } from './_trading-calendar.js';
 
 export const FLOW_UNIT = 'KRW billion';
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -79,34 +80,54 @@ export function weeklyPeriod(reportDate) {
 }
 
 /**
- * Weekly facts from Market Close rows sorted by date: the last final KOSPI
- * close inside the period against the last final close before it.
+ * The two KRX sessions a week's move is measured between: the last trading
+ * day before the period and the last trading day inside it. Null when the
+ * calendar cannot say (an unconfigured year) or the period has no session.
+ */
+export function weeklySessionBounds(period) {
+  try {
+    const previous = previousTradingDate(period.start, 'KRX');
+    const last = isTradingDate(period.end, 'KRX') ? period.end : previousTradingDate(period.end, 'KRX');
+    if (last < period.start) return null;
+    return { previous, last };
+  } catch (_) {
+    return null;
+  }
+}
+
+/**
+ * Weekly facts from Market Close rows: the final KOSPI close on the period's
+ * last KRX session against the final close on the session just before the
+ * period. Both of those exact sessions must be published. A missing session
+ * is never bridged by a nearer row, because that would quote a move over a
+ * different span than the title's period.
  */
 export function extractWeeklyFacts(rows, period) {
   if (!period || !Array.isArray(rows)) return null;
-  let previous = null;
-  let last = null;
+  const bounds = weeklySessionBounds(period);
+  if (!bounds) return null;
+  const closes = new Map();
   for (const row of rows) {
     const date = String(row?.market_date || '');
-    if (!ISO_DATE.test(date)) continue;
+    if (date !== bounds.previous && date !== bounds.last) continue;
     let payload;
     try { payload = typeof row.payload_json === 'string' ? JSON.parse(row.payload_json) : row.payload_json; }
     catch (_) { continue; }
-    if (payload?.meta?.status !== 'final') continue;
+    if (payload?.meta?.status !== 'final' || payload.meta.market_date !== date) continue;
     const kospi = finalIndex(payload, 'KOSPI');
-    if (!kospi) continue;
-    if (date < period.start) previous = { date, close: kospi.close };
-    else if (date <= period.end) last = { date, close: kospi.close };
+    if (kospi) closes.set(date, kospi.close);
   }
-  if (!previous || !last || previous.close <= 0) return null;
+  const previousClose = closes.get(bounds.previous);
+  const close = closes.get(bounds.last);
+  if (!finite(previousClose) || !finite(close) || previousClose <= 0) return null;
   return {
     kind: 'weekly',
     period,
-    previousClose: previous.close,
-    previousDate: previous.date,
-    close: last.close,
-    closeDate: last.date,
-    pct: (last.close / previous.close - 1) * 100
+    previousClose,
+    previousDate: bounds.previous,
+    close,
+    closeDate: bounds.last,
+    pct: (close / previousClose - 1) * 100
   };
 }
 

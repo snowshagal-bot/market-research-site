@@ -128,7 +128,10 @@ writes Daily titles as `코스피 {close} 마감 · {secondary fact} | {M월 D�
 topic-first (`{title} | {tag labels} 리서치 | Snowshagal`). Descriptions carry the KOSPI and
 KOSDAQ close with change, foreign/institution net flows, then the row takeaway, post takeaway
 or summary. The secondary fact prefers a foreign net flow of at least 5,000억, then a KOSDAQ
-move of at least 1.5%, then a flow of at least 1,000억, then the KOSDAQ close. A date without
+move of at least 1.5%, then a flow of at least 1,000억, then the KOSDAQ close. The Weekly move
+is measured only between the exact KRX sessions from `functions/_trading-calendar.js` (the
+session before the Mon–Fri period and the period's last session); if either row is missing or
+the year has no calendar, the title carries no number. A date without
 a published close falls back to dated wording with no numbers; nothing is scraped from the
 report HTML. `/market/` keeps a data-page title (`코스피·코스닥 마감, 원달러 환율 | 한국 시장
 데이터`) so it does not compete with dated Daily pages. og:title, twitter:title, canonical,

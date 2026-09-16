@@ -130,6 +130,28 @@ test('Weekly title states the week move, tag themes and the Monday–Friday peri
   assert.equal(extractWeeklyFacts(rows.slice(2), weeklyPeriod('2026-09-05')), null, 'no prior close means no week move');
   assert.equal(extractWeeklyFacts([rows[0], { market_date: '2026-09-04', payload_json: JSON.stringify(snapshot('2026-09-04', { status: 'partial' })) }], weeklyPeriod('2026-09-05')), null);
 
+  // Both ends must be the exact KRX sessions; a nearer published row never
+  // stands in for a missing one (the Preview D1 once held 08-28 and 09-09
+  // only, which would have printed a false +3.87% for Sep 7–11).
+  const row = (date, close) => ({ market_date: date, payload_json: JSON.stringify(snapshot(date, { kospi: [close, 0] })) });
+  const sep7to11 = weeklyPeriod('2026-09-11');
+  assert.equal(extractWeeklyFacts([row('2026-08-28', 6788.88), row('2026-09-09', 7051.64)], sep7to11), null, 'gap on both ends');
+  assert.equal(extractWeeklyFacts([row('2026-09-04', 6687.21), row('2026-09-10', 7033.92)], sep7to11), null, 'last session missing');
+  assert.equal(extractWeeklyFacts([row('2026-09-03', 6700), row('2026-09-11', 6909.91)], sep7to11), null, 'previous session missing');
+  const exact = extractWeeklyFacts([row('2026-09-04', 6687.21), row('2026-09-09', 7051.64), row('2026-09-11', 6909.91)], sep7to11);
+  assert.equal(exact.previousDate, '2026-09-04');
+  assert.equal(exact.closeDate, '2026-09-11');
+  assert.ok(Math.abs(exact.pct - 3.3302) < 0.001);
+  // A row whose payload names another date is not that session's close.
+  const mislabeled = { market_date: '2026-09-11', payload_json: JSON.stringify(snapshot('2026-09-10', { kospi: [7033.92, 0] })) };
+  assert.equal(extractWeeklyFacts([row('2026-09-04', 6687.21), mislabeled], sep7to11), null);
+  // Chuseok (09-24, 09-25 closed): the week ends on Wednesday 09-23.
+  const chuseok = extractWeeklyFacts([row('2026-09-18', 7000), row('2026-09-23', 7070)], weeklyPeriod('2026-09-25'));
+  assert.equal(chuseok.closeDate, '2026-09-23');
+  assert.ok(Math.abs(chuseok.pct - 1) < 1e-9);
+  // No KRX calendar for 2027 yet: no number rather than a guessed session.
+  assert.equal(extractWeeklyFacts([row('2026-12-24', 7000), row('2026-12-30', 7100)], weeklyPeriod('2027-01-01')), null);
+
   const koWeekly = { type: 'weekly', lang: 'ko', reportDate: '2026-09-05', title: '받침보다 센 바람', href: 'reports/위클리_2026년 9월 1주차 위클리.html', tags: ['semiconductors', 'rates', 'policy'] };
   const enWeekly = { ...koWeekly, lang: 'en', title: 'Winds Stronger Than the Support', href: 'reports/en/2026-09-06_Korea_Weekly_Report_EN.html' };
   assert.equal(reportSeoTitle(koWeekly, { facts: weekly, tagRegistry }), '코스피 주간 -1.50% · 반도체·금리·정책 | 8월 31일–9월 4일 | Snowshagal');
