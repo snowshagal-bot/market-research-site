@@ -110,6 +110,15 @@ latest KRX trading date after 16:30 KST, and per-market source dates. The read-o
 Issue while Production MARKET remains stale or otherwise unverifiable. Calendar coverage
 must be extended before a new trading year; an unknown year fails closed.
 
+Market `meta.generated_at` is a collector refresh stamp and may carry the collector PC's
+offset (for example `+07:00`) with microseconds. Stored values, the API, and the schema are
+untouched; the public UI formats it only through `MARKET_LOCALE.formatDataUpdated` in
+`assets/locale.js`, which pins the display to `Asia/Seoul` (`데이터 갱신 · 9월 15일 21:52 KST`
+/ `Data updated · Sep 15, 21:52 KST`, year shown only when it differs from the current KST
+year) and returns `null` for missing or malformed input so the page prints `--`. It is a
+"data updated" line, distinct from `market_date` and from the `15:30 KST` regular-session
+basis notice; it never decides the Market date or stale state.
+
 Preview Functions must use the same `COMMENTS_DB` binding name as Production while pointing
 to a different Preview-only D1 database. This parity is complete: Preview uses
 `market-research-comments-preview`, Production uses `market-research-comments`, and no
