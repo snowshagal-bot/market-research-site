@@ -302,9 +302,18 @@ function dataAttributes(tag) {
 async function runScript(script, { lang, search, elements, fetchImpl, NowDate = Date }) {
   const byId = new Map(elements.map(el => [el.id, el]));
   const filterButtons = ['ALL', 'KRX', 'NYSE'].map(filter => ({ dataset: { filter }, classList: { toggle() {} }, addEventListener() {} }));
+  const pushed = [];
   const window = {
     location: { search, href: `https://snowshagal.com/x${search}` },
-    history: { pushState() {}, replaceState() {} },
+    history: {
+      // A navigation the script makes moves the fake location with it.
+      pushState(_, __, next) {
+        pushed.push(next);
+        window.location.href = next;
+        window.location.search = new URL(next).search;
+      },
+      replaceState() {}
+    },
     addEventListener() {}
   };
   const document = {
@@ -320,8 +329,10 @@ async function runScript(script, { lang, search, elements, fetchImpl, NowDate = 
   });
   vm.runInContext(await read(script), context);
   for (let i = 0; i < 20; i += 1) await new Promise(resolve => setTimeout(resolve, 0));
-  return { byId, errors };
+  return { byId, errors, pushed };
 }
+
+const settle = async () => { for (let i = 0; i < 20; i += 1) await new Promise(resolve => setTimeout(resolve, 0)); };
 
 const apiFetch = (handler, env = { COMMENTS_DB: db }) => async (url) => handler({ request: new Request(`https://snowshagal.com${url}`), env });
 
@@ -408,4 +419,81 @@ test('the calendar script re-renders exactly what the server sent, stays on its 
     });
     assert.equal(failingGrid.innerHTML, serverGrid, `${lang}${search}: kept on failure`);
   }
+});
+
+test('Previous, Next and Today work from the latest disclosures page, and ?date= entries keep their own semantics', async () => {
+  async function open(pathWithSearch) {
+    const [path, query = ''] = pathWithSearch.split('?');
+    const search = query ? `?${query}` : '';
+    const { html } = await page(`${path}${search}`);
+    const requested = [];
+    const els = {
+      mount: element('disclosures-mount', innerById(html, 'disclosures-mount'), dataAttributes(openTag(html, 'disclosures-mount'))),
+      date: element('disclosures-current-date'),
+      count: element('disclosures-count-badge'),
+      next: element('disclosures-next-btn'),
+      prev: element('disclosures-prev-btn'),
+      today: element('disclosures-today-btn')
+    };
+    const run = await runScript('assets/disclosures.js', {
+      lang: 'ko', search,
+      elements: Object.values(els),
+      fetchImpl: async (url) => { requested.push(url); return feedGet({ request: new Request(`https://snowshagal.com${url}`), env: { COMMENTS_DB: db } }); }
+    });
+    const click = async (el) => { await el.listeners.click(); await settle(); };
+    return { els, requested, pushed: run.pushed, click, ssrDate: innerById(html, 'disclosures-current-date') };
+  }
+  const cards = (el) => count(el.innerHTML, '<article class="disclosure-card');
+
+  // Latest entry: the latest date is on screen and Next is disabled.
+  const latest = await open('/disclosures/');
+  assert.equal(latest.requested[0], '/api/disclosures/feed');
+  assert.equal(latest.els.date.textContent, '2026년 9월 16일 (수)');
+  assert.equal(latest.els.date.textContent, latest.ssrDate, 'same label as the server');
+  assert.equal(latest.els.next.disabled, true, 'Next disabled at the latest date');
+
+  // Previous really moves one day back.
+  await latest.click(latest.els.prev);
+  assert.equal(latest.requested.at(-1), '/api/disclosures/feed?date=2026-09-15');
+  assert.equal(latest.pushed.at(-1), 'https://snowshagal.com/x?date=2026-09-15');
+  assert.equal(latest.els.date.textContent, '2026년 9월 15일 (화)');
+  assert.equal(cards(latest.els.mount), 2);
+  assert.equal(latest.els.next.disabled, false, 'Next enabled below the latest date');
+
+  // Next returns to the latest date and stops there.
+  await latest.click(latest.els.next);
+  assert.equal(latest.requested.at(-1), '/api/disclosures/feed?date=2026-09-16');
+  assert.equal(latest.els.date.textContent, '2026년 9월 16일 (수)');
+  assert.equal(latest.els.next.disabled, true);
+  const before = latest.requested.length;
+  await latest.click(latest.els.next);
+  assert.equal(latest.requested.length, before, 'no request past the latest date');
+
+  // A past ?date= entry keeps its day and does not claim to be the latest.
+  const past = await open('/disclosures/?date=2026-09-15');
+  assert.equal(past.requested[0], '/api/disclosures/feed?date=2026-09-15');
+  assert.equal(past.els.date.textContent, '2026년 9월 15일 (화)');
+  assert.equal(cards(past.els.mount), 2);
+  assert.equal(past.els.next.disabled, false, 'todayDate is not taken from a ?date= load');
+  // "오늘" from a past date goes back to the query-less latest page.
+  await past.click(past.els.today);
+  assert.equal(past.pushed.at(-1), 'https://snowshagal.com/x');
+  assert.equal(past.requested.at(-1), '/api/disclosures/feed');
+  assert.equal(past.els.date.textContent, '2026년 9월 16일 (수)');
+  assert.equal(past.els.next.disabled, true);
+
+  // ?all=1 still shows every filing and carries all=1 through date moves.
+  const all = await open('/disclosures/?all=1');
+  assert.equal(all.requested[0], '/api/disclosures/feed?all=1');
+  assert.equal(cards(all.els.mount), 7);
+  assert.equal(all.els.next.disabled, true);
+  await all.click(all.els.prev);
+  assert.equal(all.requested.at(-1), '/api/disclosures/feed?date=2026-09-15&all=1');
+  const allUrl = new URL(all.pushed.at(-1));
+  assert.equal(allUrl.searchParams.get('date'), '2026-09-15');
+  assert.equal(allUrl.searchParams.get('all'), '1');
+  assert.equal(cards(all.els.mount), 2, 'the earlier day has two filings, all shown');
+
+  // The script no longer depends on a field the feed never sends.
+  assert.doesNotMatch(await read('assets/disclosures.js'), /marketDate/);
 });

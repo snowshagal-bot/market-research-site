@@ -163,18 +163,24 @@
       `;
     }
 
+    // What this load asked for, before the answer can change state: null is
+    // the latest-date request (no ?date=), anything else is a specific day.
+    const requestedDate = state.selectedDate;
+
     try {
-      const data = await fetchFeed(state.selectedDate, state.isExpanded);
+      const data = await fetchFeed(requestedDate, state.isExpanded);
       state.feedData = data;
-      state.selectedDate = data.marketDate || state.selectedDate;
-      if (!state.todayDate && data.marketDate) {
-        state.todayDate = data.marketDate;
+      // The feed names its date `date`. A latest request learns both the day
+      // on screen and the newest day from it, so Previous/Next have a date to
+      // move from and Next stops at the latest. A request for a specific day
+      // keeps that day and leaves todayDate as it was.
+      if (requestedDate === null && data.date) {
+        state.selectedDate = data.date;
+        state.todayDate = data.date;
       }
 
       if (dateDisplay) {
-        // The feed names its date `date`; without ?date= this is the date
-        // the server chose, which the label showed as blank before.
-        dateDisplay.textContent = formatDateDisplay(state.selectedDate || data.date);
+        dateDisplay.textContent = formatDateDisplay(state.selectedDate);
       }
       if (countBadge) {
         const total = data.totalPublished || (data.items ? data.items.length : 0);
