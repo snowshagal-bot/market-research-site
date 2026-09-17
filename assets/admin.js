@@ -437,17 +437,26 @@
     updatePublishState();
   }
 
+  // A translation pair is the same report in the other language, so the list
+  // offers only posts of the other language AND the same category. A Daily
+  // and a Weekly dated the same day are different reports; pairing them once
+  // broke hreflang for four pages (#126), and the server now rejects it too.
   function populateTranslationSources() {
     if (!translationSource || !postLanguage) return;
     const targetLanguage = postLanguage.value === 'en' ? 'ko' : 'en';
-    const items = (window.RESEARCH_POSTS || []).filter(post => normalizedLanguage(post) === targetLanguage);
+    const category = type?.value || '';
+    const items = (window.RESEARCH_POSTS || []).filter(post => (
+      normalizedLanguage(post) === targetLanguage && (!category || post?.type === category)
+    ));
+    const previous = translationSource.value;
     translationSource.innerHTML = `<option value="">연결하지 않음</option>${items.map(post => `<option value="${escapeHtml(translationKey(post))}">${escapeHtml(post.title || post.id)} · ${escapeHtml(post.reportDate || post.date || '')}</option>`).join('')}`;
-    translationSource.value = '';
+    translationSource.value = items.some(post => translationKey(post) === previous) ? previous : '';
     if (translationSourceStatus) {
       const targetLabel = targetLanguage === 'en' ? 'English' : '한국어';
+      const categoryLabel = category ? `${labels[category] || category} ` : '';
       translationSourceStatus.textContent = items.length
-        ? `${targetLabel} 게시물 ${items.length}개 중 번역 짝을 선택할 수 있습니다.`
-        : `연결할 기존 ${targetLabel} 게시물이 없습니다. 연결 없이 게시할 수 있습니다.`;
+        ? `${targetLabel} ${categoryLabel}게시물 ${items.length}개 중 번역 짝을 선택할 수 있습니다.`
+        : `연결할 기존 ${targetLabel} ${categoryLabel}게시물이 없습니다. 연결 없이 게시할 수 있습니다.`;
     }
   }
 
@@ -720,6 +729,7 @@
     type.value = value;
     categoryOptions.forEach(option => { option.checked = option.value === value; });
     updateCategoryDescription(value);
+    populateTranslationSources();
     if (categoryStatus) {
       if (source === 'auto' && value) categoryStatus.textContent = `자동 인식: ${labels[value]} · 필요하면 직접 변경하세요.`;
       else if (source === 'manual' && value) categoryStatus.textContent = `직접 선택: ${labels[value]}`;

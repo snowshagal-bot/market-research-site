@@ -211,6 +211,88 @@
     return pageLanguagePath(pathname, 'en', search);
   }
 
+  // ---------------------------------------------------------------------------
+  // User-facing timestamps (Market `generated_at` and similar collector stamps)
+  //
+  // Stored values keep whatever offset the collector PC wrote, e.g.
+  // `2026-09-15T19:52:01.276638+07:00`. Every reader must see the same wall
+  // clock regardless of their browser timezone, so the display is pinned to
+  // Asia/Seoul and the raw ISO string never reaches the page. Invalid or
+  // missing input yields null so callers can print `--` or hide the line.
+  // ---------------------------------------------------------------------------
+  const DISPLAY_TIMEZONE = 'Asia/Seoul';
+  const EN_SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const ISO_TIMESTAMP = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?\s*(Z|z|[+-]\d{2}:?\d{2})?$/;
+
+  // Parses an ISO-8601 timestamp without touching the host timezone. Fractional
+  // seconds of any length are accepted (Python writes six digits); a value with
+  // no offset is read as UTC rather than as browser-local time.
+  function parseTimestamp(value) {
+    if (value instanceof Date) return Number.isFinite(value.getTime()) ? value : null;
+    if (typeof value !== 'string') return null;
+    const text = value.trim();
+    if (!text) return null;
+    const match = ISO_TIMESTAMP.exec(text);
+    if (!match) {
+      const fallback = new Date(text);
+      return Number.isFinite(fallback.getTime()) && /(Z|[+-]\d{2}:?\d{2})$/i.test(text) ? fallback : null;
+    }
+    const [, year, month, day, hour, minute, second = '0', fraction = '', offset = 'Z'] = match;
+    // Date.UTC would silently roll `2026-13-45T99:99` into a real date; reject it.
+    const inRange = (text, min, max) => { const n = Number(text); return Number.isInteger(n) && n >= min && n <= max; };
+    if (!inRange(month, 1, 12) || !inRange(day, 1, 31) || !inRange(hour, 0, 23) || !inRange(minute, 0, 59) || !inRange(second, 0, 60)) return null;
+    const millis = Number((fraction + '000').slice(0, 3));
+    let utc = Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second), millis);
+    if (offset.toUpperCase() !== 'Z') {
+      const sign = offset[0] === '-' ? -1 : 1;
+      const digits = offset.slice(1).replace(':', '');
+      utc -= sign * (Number(digits.slice(0, 2)) * 60 + Number(digits.slice(2, 4))) * 60000;
+    }
+    const date = new Date(utc);
+    if (!Number.isFinite(date.getTime())) return null;
+    // Reject impossible calendar days such as Feb 30 instead of rolling over.
+    const probe = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+    return probe.getUTCMonth() === Number(month) - 1 && probe.getUTCDate() === Number(day) ? date : null;
+  }
+
+  function seoulParts(date) {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: DISPLAY_TIMEZONE,
+      year: 'numeric', month: 'numeric', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+    }).formatToParts(date);
+    const pick = type => Number(parts.find(part => part.type === type)?.value);
+    return { year: pick('year'), month: pick('month'), day: pick('day'), hour: pick('hour') % 24, minute: pick('minute') };
+  }
+
+  // `9월 15일 21:52 KST` / `Sep 15, 21:52 KST`; the year is added only when it
+  // differs from the current year in Seoul (`2025년 12월 30일 16:06 KST` /
+  // `Dec 30, 2025, 16:06 KST`). `options.now` exists so tests stay deterministic.
+  function formatKstTimestamp(value, language = 'ko', options = {}) {
+    const date = parseTimestamp(value);
+    if (!date) return null;
+    const stamp = seoulParts(date);
+    const reference = parseTimestamp(options.now) || new Date();
+    const showYear = options.alwaysYear === true || stamp.year !== seoulParts(reference).year;
+    const hhmm = `${String(stamp.hour).padStart(2, '0')}:${String(stamp.minute).padStart(2, '0')}`;
+    if ((language || 'ko') === 'en') {
+      const monthDay = `${EN_SHORT_MONTHS[stamp.month - 1]} ${stamp.day}`;
+      return showYear ? `${monthDay}, ${stamp.year}, ${hhmm} KST` : `${monthDay}, ${hhmm} KST`;
+    }
+    const monthDay = `${stamp.month}월 ${stamp.day}일`;
+    return showYear ? `${stamp.year}년 ${monthDay} ${hhmm} KST` : `${monthDay} ${hhmm} KST`;
+  }
+
+  // The label that goes with a collector stamp. It says when the dataset was
+  // refreshed, never what the prices are "as of": that basis stays with the
+  // separate `15:30 KST` close notice.
+  const dataUpdatedLabel = { ko: '데이터 갱신', en: 'Data updated' };
+  function formatDataUpdated(value, language = 'ko', options = {}) {
+    const stamp = formatKstTimestamp(value, language, options);
+    if (!stamp) return null;
+    return `${dataUpdatedLabel[language === 'en' ? 'en' : 'ko']} · ${stamp}`;
+  }
+
   root.MARKET_LOCALE = {
     validLanguages,
     copy,
@@ -229,6 +311,11 @@
     homepagePath,
     pageLanguagePath,
     preferredHomepageRedirect,
+    DISPLAY_TIMEZONE,
+    parseTimestamp,
+    formatKstTimestamp,
+    formatDataUpdated,
+    dataUpdatedLabel,
     marketCloseAvailability
   };
 })(typeof window !== 'undefined' ? window : globalThis);

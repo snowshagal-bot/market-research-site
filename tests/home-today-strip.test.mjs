@@ -342,6 +342,22 @@ test('C3. without an expectation, or on the static fallback, the strip keeps TOD
   assert.equal(fallback.notice.hidden, true);
 });
 
+test('C4. a newly published close returns the strip to TODAY on the next load with no manual step', async () => {
+  // 16:05 on 09-16 with 09-15 still the latest: LAST VERIFIED CLOSE.
+  const stale = await runHomepage({ fetchResult: marketPayload('2026-09-15', { ko: KO_LINE, en: EN_LINE }), expectedDate: '2026-09-16' });
+  assert.equal(`${stale.tag.textContent} · ${stale.date.textContent}`, '마지막 검증 완료 · 9월 15일');
+  assert.equal(stale.notice.hidden, false);
+
+  // The 09-16 close is published; the same page code on the next load reads TODAY again.
+  for (const lang of ['ko', 'en']) {
+    const fresh = await runHomepage({ lang, fetchResult: marketPayload('2026-09-16', { ko: KO_LINE, en: EN_LINE }), expectedDate: '2026-09-16' });
+    assert.equal(fresh.tag.textContent, 'TODAY');
+    assert.equal(fresh.date.textContent, 'SEP 16');
+    assert.equal(fresh.notice.hidden, true);
+    assert.equal(fresh.notice.textContent, '');
+  }
+});
+
 test('D. a market date with no matching daily report links Market Close, not another day', async () => {
   const strip = await runHomepage({ fetchResult: marketPayload('2026-08-27') });
 

@@ -110,6 +110,33 @@ latest KRX trading date after 16:30 KST, and per-market source dates. The read-o
 Issue while Production MARKET remains stale or otherwise unverifiable. Calendar coverage
 must be extended before a new trading year; an unknown year fails closed.
 
+Market `meta.generated_at` is a collector refresh stamp and may carry the collector PC's
+offset (for example `+07:00`) with microseconds. Stored values, the API, and the schema are
+untouched; the public UI formats it only through `MARKET_LOCALE.formatDataUpdated` in
+`assets/locale.js`, which pins the display to `Asia/Seoul` (`데이터 갱신 · 9월 15일 21:52 KST`
+/ `Data updated · Sep 15, 21:52 KST`, year shown only when it differs from the current KST
+year) and returns `null` for missing or malformed input so the page prints `--`. It is a
+"data updated" line, distinct from `market_date` and from the `15:30 KST` regular-session
+basis notice; it never decides the Market date or stale state.
+
+Report `<title>` and meta description are generated for search intent while the H1 keeps
+the editorial headline. `functions/_report-facts.js` reads the published Market Close row for
+the report's date (D1 `market_close_snapshots`, final snapshots only) and `functions/_seo.js`
+writes Daily titles as `코스피 {close} 마감 · {secondary fact} | {M월 D일} 증시 | Snowshagal`
+(`KOSPI {close} Close · {fact} | {Mon D} | Snowshagal`), Weekly titles as
+`코스피 주간 {pct} · {tag labels} | {Mon–Fri period} | Snowshagal`, and Research titles
+topic-first (`{title} | {tag labels} 리서치 | Snowshagal`). Descriptions carry the KOSPI and
+KOSDAQ close with change, foreign/institution net flows, then the row takeaway, post takeaway
+or summary. The secondary fact prefers a foreign net flow of at least 5,000억, then a KOSDAQ
+move of at least 1.5%, then a flow of at least 1,000억, then the KOSDAQ close. The Weekly move
+is measured only between the exact KRX sessions from `functions/_trading-calendar.js` (the
+session before the Mon–Fri period and the period's last session); if either row is missing or
+the year has no calendar, the title carries no number. A date without
+a published close falls back to dated wording with no numbers; nothing is scraped from the
+report HTML. `/market/` keeps a data-page title (`코스피·코스닥 마감, 원달러 환율 | 한국 시장
+데이터`) so it does not compete with dated Daily pages. og:title, twitter:title, canonical,
+hreflang and the JSON-LD headline are unchanged; the JSON-LD description matches the meta tag.
+
 Preview Functions must use the same `COMMENTS_DB` binding name as Production while pointing
 to a different Preview-only D1 database. This parity is complete: Preview uses
 `market-research-comments-preview`, Production uses `market-research-comments`, and no

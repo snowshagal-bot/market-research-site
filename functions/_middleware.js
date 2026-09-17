@@ -30,6 +30,7 @@ import {
   isAdminUiPath
 } from './_host-policy.js';
 import { feedDiscoveryTag } from './_feed.js';
+import { loadReportFacts } from './_report-facts.js';
 import { getSession, validateSafeNextUrl } from './_auth.js';
 
 function policyResponse(status, error) {
@@ -251,18 +252,24 @@ export async function onRequest(context) {
       loadPosts(context.request, context.env),
       loadTags(context.request, context.env)
     ]);
+    if (tagsRes.status === 'fulfilled' && tagsRes.value) {
+      tags = tagsRes.value;
+    }
     if (postsRes.status === 'fulfilled') {
       const posts = postsRes.value;
       const post = findPostByPath(posts, url.pathname);
-      if (post) seo = reportSeoTags(posts, post);
-    }
-    if (tagsRes.status === 'fulfilled' && tagsRes.value) {
-      tags = tagsRes.value;
+      if (post) {
+        // The published Market Close for the report's date supplies the
+        // numbers the <title> and description quote; without one they fall
+        // back to dated wording with no numbers.
+        const facts = await loadReportFacts(context.env, post);
+        seo = reportSeoTags(posts, post, { facts, tagRegistry: tags });
+      }
     }
   } catch (_) {}
 
   const tagBootstrap = serializeTagRegistryBootstrap(tags);
-  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=9902203c1a"></script><script src="/assets/report-shell.js?v=43526f9b5f" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
+  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=0fd9c0b1e3"></script><script src="/assets/report-shell.js?v=43526f9b5f" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
   const footerStyle = `<style id="site-footer-css">${footerCss()}</style>`;
   const footerMarkup = siteFooter(lang);
   // One feed link per page, for the page's own language. Any Atom link the

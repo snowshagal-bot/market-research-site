@@ -140,12 +140,103 @@ test('availability is stale only when the latest close is older than the expecte
   assert.equal(api.marketCloseAvailability('2026-09-15', 'soon', 'en').stale, false);
 });
 
+// The source of one named function, braces balanced, so a rule can be applied
+// to the stale judgement without banning what the rest of the file needs (the
+// #124 KST formatter in locale.js legitimately names Asia/Seoul and builds Dates).
+function functionSource(source, name) {
+  const start = source.indexOf(`function ${name}(`);
+  assert.ok(start >= 0, `${name} exists`);
+  let depth = 0;
+  for (let index = source.indexOf('{', start); index < source.length; index += 1) {
+    if (source[index] === '{') depth += 1;
+    if (source[index] === '}') {
+      depth -= 1;
+      if (depth === 0) return source.slice(start, index + 1);
+    }
+  }
+  throw new Error(`unbalanced ${name}`);
+}
+
 test('the browser keeps no calendar or clock of its own for this judgement', async () => {
   const [locale, site, market] = await Promise.all([read('assets/locale.js'), read('assets/site.js'), read('assets/market-close.js')]);
-  for (const source of [locale, site, market]) {
-    assert.doesNotMatch(source, /Asia\/Seoul|publishEligible|isTradingDate|previousTradingDate|2026-09-16/);
+  const judgement = [
+    functionSource(locale, 'marketCloseAvailability'),
+    functionSource(site, 'todayStripSession'),
+    functionSource(site, 'paintTodayStrip'),
+    functionSource(site, 'fetchPublishedMarketClose'),
+    functionSource(market, 'availabilityNotice')
+  ];
+  for (const source of judgement) {
+    // No calendar, no clock, no hard-coded session in the browser: the expected
+    // date only ever arrives from the server's trading calendar.
+    assert.doesNotMatch(source, /Asia\/Seoul|publishEligible|isTradingDate|previousTradingDate|new Date\(|Date\.now|getHours|getDay|\b20\d{2}-\d{2}-\d{2}\b/);
+    // generated_at is the collector's refresh stamp (#124), never the market date.
+    assert.doesNotMatch(source, /generated_?at|generatedAt/i);
   }
-  assert.doesNotMatch(locale, /new Date\(/);
+  // The KST timestamp line (#124) and the availability notice are separate outputs.
+  assert.match(market, /generatedAtText\(data\.meta\?\.generated_at\)/);
+  assert.match(market, /availabilityNotice\(marketDate, isHistory\)/);
+});
+
+/* 9. Recovery needs no manual step: the next response with the expected session
+   returns the page to TODAY, through the real API handler and the real page code. */
+
+async function marketPage(lang, respond) {
+  const [localeScript, marketScript] = await Promise.all([read('assets/locale.js'), read('assets/market-close.js')]);
+  const target = { innerHTML: '', addEventListener() {}, querySelector() { return null; }, querySelectorAll() { return []; } };
+  const window = {};
+  const context = vm.createContext({
+    window,
+    document: {
+      documentElement: { dataset: { siteLang: lang } },
+      body: { dataset: { marketSource: '/api/market/latest' } },
+      readyState: 'loading',
+      addEventListener() {},
+      getElementById: id => (id === 'market-close-root' ? target : null),
+      querySelector() { return null; },
+      querySelectorAll() { return []; }
+    },
+    location: { hostname: 'snowshagal.com', search: '', pathname: lang === 'en' ? '/en/market/' : '/market/' },
+    history: { replaceState() {}, pushState() {} },
+    fetch: url => respond(String(url)),
+    URLSearchParams, Headers, Intl, Date, Set, Map, console
+  });
+  vm.runInContext(localeScript, context);
+  vm.runInContext(marketScript, context);
+  return { runtime: window.MARKET_CLOSE, target };
+}
+
+test('9. a newly published close returns MARKET KO/EN to TODAY on the next load with no manual step', async () => {
+  const rows = [storedRow('2026-09-15')];
+  const env = { COMMENTS_DB: new MockDb(rows) };
+  let now = kst('2026-09-16T16:05');
+  // Market data is only ever read through the real /api/market/latest handler.
+  const respond = url => {
+    assert.equal(url, '/api/market/latest');
+    return latestRequest({ request: new Request(`https://snowshagal.com${url}`), env, now });
+  };
+
+  for (const [lang, stalePattern, staleNote] of [
+    ['ko', /마지막 검증 완료 · 9월 15일/, /9월 16일 Market Close 데이터셋은 검증 미완료로 제공하지 않습니다\./],
+    ['en', /LAST VERIFIED CLOSE · SEP 15/, /The Sep 16 Market Close dataset is unavailable pending validation\./]
+  ]) {
+    rows.splice(0, rows.length, storedRow('2026-09-15'));
+    now = kst('2026-09-16T16:05');
+    const { runtime, target } = await marketPage(lang, respond);
+
+    await runtime.loadAndRender('today');
+    assert.match(target.innerHTML, /class="market-availability"/, `${lang} stale at 16:05 with 09-15`);
+    assert.match(target.innerHTML, stalePattern);
+    assert.match(target.innerHTML, staleNote);
+
+    // The collector publishes 09-16; nothing else changes.
+    rows.push(storedRow('2026-09-16'));
+    now = kst('2026-09-16T16:20');
+    await runtime.loadAndRender('today');
+    assert.doesNotMatch(target.innerHTML, /market-availability/, `${lang} back to TODAY`);
+    assert.equal(runtime.state.expectedDate, '2026-09-16');
+    assert.equal(runtime.state.currentDate, '2026-09-16');
+  }
 });
 
 test('homepage markup ships the tag and a hidden notice node in KO and EN', async () => {
