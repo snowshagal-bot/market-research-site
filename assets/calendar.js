@@ -114,17 +114,37 @@
     return { year: now.getUTCFullYear(), month: now.getUTCMonth() + 1 };
   }
 
-  const initialKst = getDefaultKstYearMonth();
+  // The server renders the month into #calendar-grid-mount using the Seoul
+  // clock in functions/_trading-calendar.js and records which month it chose.
+  // Without ?year=/&month=, that month is the page's month, so the script never
+  // jumps to a different one computed from this browser's clock; the in-browser
+  // KST computation remains the fallback for a page served without it.
+  function serverRenderedMonth() {
+    const mount = document.getElementById('calendar-grid-mount');
+    const year = Number(mount?.dataset?.ssrYear);
+    const month = Number(mount?.dataset?.ssrMonth);
+    return Number.isInteger(year) && Number.isInteger(month) && month >= 1 && month <= 12 ? { year, month } : null;
+  }
+
+  function defaultYearMonth() {
+    return serverRenderedMonth() || getDefaultKstYearMonth();
+  }
+
+  const initialKst = defaultYearMonth();
 
   const state = {
     year: initialKst.year,
     month: initialKst.month,
     filter: 'ALL', // 'ALL' | 'KRX' | 'NYSE'
     selectedDate: null,
-    serverDate: null,
+    serverDate: document.getElementById('calendar-grid-mount')?.dataset?.ssrServerDate || null,
     calendarData: null,
     loading: false
   };
+
+  // The first load keeps the server-rendered month on screen if its one fetch
+  // fails; later loads (month moves, retry) behave as before.
+  let hydrateFromServer = true;
 
   const cache = new Map();
 
@@ -149,14 +169,14 @@
     if (hasYear && Number.isInteger(y) && y >= 2020 && y <= 2030) {
       state.year = y;
     } else if (!hasYear) {
-      const def = getDefaultKstYearMonth();
+      const def = defaultYearMonth();
       state.year = def.year;
     }
 
     if (hasMonth && Number.isInteger(m) && m >= 1 && m <= 12) {
       state.month = m;
     } else if (!hasMonth) {
-      const def = getDefaultKstYearMonth();
+      const def = defaultYearMonth();
       state.month = def.month;
     }
 
@@ -198,6 +218,11 @@
     const monthLabel = document.getElementById('calendar-month-label');
     const upcomingMount = document.getElementById('calendar-upcoming-mount');
 
+    const serverRendered = hydrateFromServer && Boolean(gridMount)
+      && gridMount.dataset.ssrYear === String(state.year)
+      && gridMount.dataset.ssrMonth === String(state.month);
+    hydrateFromServer = false;
+
     state.loading = true;
     if (monthLabel) {
       monthLabel.textContent = copy.monthFormat(state.year, state.month);
@@ -213,6 +238,8 @@
       renderCalendarGrid(data);
       renderUpcomingEvents(data.upcoming || []);
     } catch (err) {
+      // A transient failure must not replace the server-rendered month.
+      if (serverRendered) return;
       if (gridMount) {
         gridMount.innerHTML = `
           <div class="calendar-detail-card" style="text-align:center;padding:40px 20px;">
@@ -653,7 +680,7 @@
         state.year = y;
         state.month = m;
       } else {
-        const def = getDefaultKstYearMonth();
+        const def = defaultYearMonth();
         state.year = def.year;
         state.month = def.month;
       }

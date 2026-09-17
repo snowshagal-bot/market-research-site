@@ -137,6 +137,21 @@ report HTML. `/market/` keeps a data-page title (`코스피·코스닥 마감, �
 데이터`) so it does not compete with dated Daily pages. og:title, twitter:title, canonical,
 hreflang and the JSON-LD headline are unchanged; the JSON-LD description matches the meta tag.
 
+`/disclosures/`, `/en/disclosures/`, `/calendar/` and `/en/calendar/` render their core content
+into the HTTP response. `functions/api/disclosures/_feed-data.js` (`loadDisclosureFeed`) and
+`functions/_calendar-data.js` (`loadCalendarMonth`) hold the data selection that
+`/api/disclosures/feed` and `/api/calendar` return, and `functions/_initial-html.js` renders the
+same markup `assets/disclosures.js` and `assets/calendar.js` render, called from
+`functions/_middleware.js` for identical HTML to every visitor. Disclosures follow the feed rules
+(latest published, non-superseded date; `?date=`, `?all=1`; five cards, empty state). The calendar
+uses the Seoul month from `functions/_trading-calendar.js` unless `?year=` (2020–2030), `?month=`
+and `?market=` say otherwise; an event-store failure keeps the exchange calendar with the
+unavailable notice. The page scripts keep the server-rendered content on their first load and on a
+failed first fetch (`data-ssr-key`, `data-ssr-year`/`data-ssr-month`), and the calendar script takes
+its default month from the server. Any SSR failure, or data slower than 1.5 s, serves the static
+shell unchanged. HTML cache headers are the static `public, max-age=0, must-revalidate`.
+`tests/fixtures/initial-html-api-golden.json` pins the API bodies captured before the refactor.
+
 Preview Functions must use the same `COMMENTS_DB` binding name as Production while pointing
 to a different Preview-only D1 database. This parity is complete: Preview uses
 `market-research-comments-preview`, Production uses `market-research-comments`, and no

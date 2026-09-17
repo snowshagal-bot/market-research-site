@@ -62,6 +62,15 @@
 
   const cache = new Map();
 
+  // The server renders the feed into #disclosures-mount and marks it with the
+  // URL state it rendered (data-ssr-key). The first load keeps that content on
+  // screen instead of swapping in a loading box, and keeps it if that one
+  // fetch fails; later loads (date moves, "view all") behave as before.
+  let hydrateFromServer = true;
+  function hydrationKey() {
+    return `${state.selectedDate || ''}|${state.isExpanded ? 1 : 0}`;
+  }
+
   function escapeHtml(str) {
     if (str == null) return '';
     return String(str)
@@ -142,8 +151,11 @@
     const countBadge = document.getElementById('disclosures-count-badge');
     const nextBtn = document.getElementById('disclosures-next-btn');
 
+    const serverRendered = hydrateFromServer && Boolean(mount) && mount.dataset.ssrKey === hydrationKey();
+    hydrateFromServer = false;
+
     state.loading = true;
-    if (mount) {
+    if (mount && !serverRendered) {
       mount.innerHTML = `
         <div class="disclosures-state-box">
           <p>${copy.loadingTitle}</p>
@@ -151,12 +163,20 @@
       `;
     }
 
+    // What this load asked for, before the answer can change state: null is
+    // the latest-date request (no ?date=), anything else is a specific day.
+    const requestedDate = state.selectedDate;
+
     try {
-      const data = await fetchFeed(state.selectedDate, state.isExpanded);
+      const data = await fetchFeed(requestedDate, state.isExpanded);
       state.feedData = data;
-      state.selectedDate = data.marketDate || state.selectedDate;
-      if (!state.todayDate && data.marketDate) {
-        state.todayDate = data.marketDate;
+      // The feed names its date `date`. A latest request learns both the day
+      // on screen and the newest day from it, so Previous/Next have a date to
+      // move from and Next stops at the latest. A request for a specific day
+      // keeps that day and leaves todayDate as it was.
+      if (requestedDate === null && data.date) {
+        state.selectedDate = data.date;
+        state.todayDate = data.date;
       }
 
       if (dateDisplay) {
@@ -172,6 +192,8 @@
 
       renderFeed(data);
     } catch (err) {
+      // A transient failure must not replace valid server-rendered filings.
+      if (serverRendered) return;
       if (mount) {
         mount.innerHTML = `
           <div class="disclosures-state-box">
