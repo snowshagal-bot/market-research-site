@@ -31,6 +31,7 @@ import {
 } from './_host-policy.js';
 import { feedDiscoveryTag } from './_feed.js';
 import { loadReportFacts } from './_report-facts.js';
+import { applyInitialHtmlToRewriter, applyInitialHtmlToString, buildInitialHtml } from './_initial-html.js';
 import { getSession, validateSafeNextUrl } from './_auth.js';
 
 function policyResponse(status, error) {
@@ -155,6 +156,12 @@ export async function onRequest(context) {
       }
     }
 
+    // /disclosures/ and /calendar/ (KO/EN): the filings and trading days the
+    // page scripts render, rendered into the HTTP response itself. Null when
+    // the page is not one of those, or on any failure or timeout, in which case
+    // the static shell is served untouched and the scripts fill it as before.
+    const initial = await buildInitialHtml(url, context.env);
+
     const landingAlternates = posts && landing ? categoryAlternateTags(posts, landing.type) : '';
     if (isProduction && posts && landing && !categoryHasPosts(posts, landing.type, landing.lang)) {
       const headers = new Headers(response.headers);
@@ -166,7 +173,7 @@ export async function onRequest(context) {
       });
     }
 
-    if (!engagement && !posts) return response;
+    if (!engagement && !posts && !initial) return response;
     if (typeof HTMLRewriter === 'undefined') {
       let body = await response.text();
       if (posts && homeLang) {
@@ -185,6 +192,9 @@ export async function onRequest(context) {
           body = body.replace(/(<section\b[^>]*\bid=["']category-featured-section["'][^>]*)/i, '$1 hidden');
         }
         body = replaceCategoryAlternates(body, landingAlternates);
+      }
+      if (initial) {
+        try { body = applyInitialHtmlToString(body, initial); } catch (error) { console.error('initial html apply failed', error); }
       }
       if (engagement) body = body.replace(/<\/body>/i, `${engagement}</body>`);
       const headers = new Headers(response.headers);
@@ -229,6 +239,7 @@ export async function onRequest(context) {
         });
       }
     }
+    if (initial) rewriter = applyInitialHtmlToRewriter(rewriter, initial);
     if (engagement) {
       rewriter = rewriter.on('body', { element(element) { element.append(engagement, { html: true }); } });
     }
