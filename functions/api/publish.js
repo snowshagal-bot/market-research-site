@@ -739,6 +739,12 @@ export async function onRequestPost(context) {
       if (!pairedPost) {
         return reply({ error: 'BAD_TRANSLATION_GROUP', message: '선택한 번역 짝을 찾을 수 없습니다. 목록을 새로고침한 뒤 다시 선택하세요.' }, 400);
       }
+      // A Daily pairs with a Daily and a Weekly with a Weekly. Two posts of
+      // different types dated the same day are different reports, and pairing
+      // them breaks hreflang for both the wrong pair and the real one.
+      if (String(pairedPost.type || '') !== type) {
+        return reply({ error: 'PAIR_TYPE_MISMATCH', message: `번역 짝은 같은 카테고리여야 합니다. 선택한 짝은 ${TYPE_LABELS[pairedPost.type] || pairedPost.type || '다른 카테고리'}입니다.` }, 400);
+      }
       const pairedDate = String(pairedPost.reportDate || pairedPost.date || '');
       if (pairedDate !== reportDate) {
         return reply({ error: 'PAIR_DATE_MISMATCH', message: `리포트 기준일은 번역 짝과 같은 ${pairedDate || '날짜'}이어야 합니다.` }, 400);
