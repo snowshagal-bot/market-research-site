@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-09-17-daily-1cs8i2o",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-17",
+    "reportDate": "2026-09-17",
+    "registeredDate": "2026-09-18",
+    "registeredAt": "2026-09-17T15:59:51.072Z",
+    "legacyImport": false,
+    "title": "Same Level,Different Market",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "fed"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-17_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-09-17-daily-1k4zui3",
+    "coverImage": "covers/2026-09-17-daily-1cs8i2o.webp",
+    "shareCardImage": "covers/share/2026-09-17-daily-1cs8i2o.jpg",
+    "coverThumbnail": "covers/2026-09-17-daily-1cs8i2o-450.webp"
+  },
+  {
     "id": "2026-09-17-daily-1k4zui3",
     "type": "daily",
     "typeLabel": "주식 리포트",
