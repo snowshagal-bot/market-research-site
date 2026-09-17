@@ -229,14 +229,26 @@ export function getKrxSessionTimes(dateString) {
   };
 }
 
-export function expectedLatestKrxTradingDate(now = new Date()) {
+function latestKrxTradingDateAfter(now, boundary) {
   if (!(now instanceof Date) || !Number.isFinite(now.getTime())) throw new Error('Freshness check requires a valid current time.');
   const current = kstParts(now);
   if (isTradingDate(current.date, 'KRX')) {
     const sessionTimes = getKrxSessionTimes(current.date);
-    if (current.minutes >= sessionTimes.freshnessGraceMinutes) return current.date;
+    if (current.minutes >= sessionTimes[boundary]) return current.date;
   }
   return previousTradingDate(current.date, 'KRX');
+}
+
+export function expectedLatestKrxTradingDate(now = new Date()) {
+  return latestKrxTradingDateAfter(now, 'freshnessGraceMinutes');
+}
+
+/**
+ * The newest KRX session whose Market Close may already be published: today
+ * from its publishEligible time, otherwise the previous trading date.
+ */
+export function expectedPublishedKrxTradingDate(now = new Date()) {
+  return latestKrxTradingDateAfter(now, 'publishEligibleMinutes');
 }
 
 export function getMonthlyTradingCalendar(year, month) {

@@ -921,10 +921,14 @@
      locale. Neither a different date nor a different language can supply it,
      and with the API down the static record answers alone.
 
-     Freshness is whatever `market_date` the API returns. The calendar date is
-     never consulted: on a weekend or holiday the last trading session is the
-     current data, not stale data.
+     Freshness is decided by the server, never by this browser's clock. The API
+     sends the session that should already be published (x-market-expected-date,
+     from functions/_trading-calendar.js). Only a `market_date` older than that
+     turns TODAY into LAST VERIFIED CLOSE with a notice naming the missing
+     session; weekends, holidays and the hours before the publish cutoff expect the
+     previous trading session, so they stay on TODAY.
   -------------------------------------------------------------------------- */
+  const EXPECTED_MARKET_DATE_HEADER = 'x-market-expected-date';
   const MARKET_LATEST_ENDPOINT = '/api/market/latest';
   const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
   const TODAY_STRIP_ITEMS = [
@@ -1013,7 +1017,7 @@
     return String(post?.takeaway || '').replace(/\s+/g, ' ').trim();
   }
 
-  function todayStripSession(payload){
+  function todayStripSession(payload, expectedDate){
     const summary = window.TODAY_MARKET_SUMMARY;
     const publishedDate = isoDate(payload?.meta?.market_date);
     if (publishedDate) {
@@ -1024,7 +1028,8 @@
         // only when someone chose to override. Otherwise the same session's
         // daily supplies the line by itself, which is the everyday path.
         const override = localeTakeaway(payload?.takeaway);
-        return { marketDate: publishedDate, items, takeaway: override || postTakeaway(daily), daily, live: true };
+        const availability = localeApi?.marketCloseAvailability?.(publishedDate, expectedDate, locale) || { stale: false };
+        return { marketDate: publishedDate, items, takeaway: override || postTakeaway(daily), daily, live: true, availability };
       }
     }
     // Emergency fallback only, and then the whole static record is used: its
@@ -1040,18 +1045,27 @@
       // in would be the mixing this fallback exists to avoid.
       takeaway: localeTakeaway(summary?.takeaway),
       daily: dailyForDate(staticDate),
-      live: false
+      live: false,
+      availability: { stale: false }
     };
   }
 
   function paintTodayStrip(session){
     if (!session) return;
+    const tagEl = document.getElementById('today-strip-tag');
     const dateEl = document.getElementById('today-strip-date');
+    const noticeEl = document.getElementById('today-strip-notice');
     const gridEl = document.getElementById('today-market-grid');
-    const dateLabel = stripDateLabel(session.marketDate)
-      || window.TODAY_MARKET_SUMMARY?.dateDisplay?.[locale]
-      || '';
+    const availability = session.availability || { stale: false };
+    const dateLabel = availability.stale
+      ? availability.dateLabel
+      : stripDateLabel(session.marketDate) || window.TODAY_MARKET_SUMMARY?.dateDisplay?.[locale] || '';
+    if (tagEl) tagEl.textContent = availability.stale ? availability.tag : 'TODAY';
     if (dateEl && dateLabel) dateEl.textContent = dateLabel;
+    if (noticeEl) {
+      noticeEl.textContent = availability.stale ? availability.notice : '';
+      noticeEl.hidden = !availability.stale;
+    }
     if (gridEl) {
       gridEl.innerHTML = session.items.map(item => (
         `<div class="today-item" role="listitem"><span class="today-label">${esc(item.label)}</span><span class="today-value">${esc(item.value)}</span><span class="today-change ${item.direction}">${esc(item.change)}</span></div>`
@@ -1095,7 +1109,9 @@
   function fetchPublishedMarketClose(){
     if (typeof fetch !== 'function') return Promise.resolve(null);
     return fetch(MARKET_LATEST_ENDPOINT, { headers: { Accept: 'application/json' } })
-      .then(response => (response.ok ? response.json() : null))
+      .then(response => (response.ok
+        ? response.json().then(payload => ({ payload, expectedDate: response.headers?.get?.(EXPECTED_MARKET_DATE_HEADER) || '' }))
+        : null))
       .catch(() => null);
   }
 
@@ -1105,8 +1121,8 @@
   // the opposite of market-summary.js being a failure-only fallback.
   function renderTodayMarket(){
     if (!document.querySelector('.today-strip')) return;
-    return fetchPublishedMarketClose().then(payload => {
-      const session = todayStripSession(payload);
+    return fetchPublishedMarketClose().then(result => {
+      const session = todayStripSession(result?.payload, result?.expectedDate);
       paintTodayStrip(session);
       return session;
     });

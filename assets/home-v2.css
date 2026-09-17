@@ -892,6 +892,17 @@ html[data-theme="dark"] .hero-art img {
   color: var(--text-2);
 }
 
+/* Shown only when the published close is older than the session the calendar
+   expects; the eyebrow then reads LAST VERIFIED CLOSE. */
+.today-strip-notice {
+  margin: -6px 0 12px;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.5;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
 .today-strip-market-link {
   display: inline-flex;
   align-items: center;
