@@ -518,10 +518,12 @@ test('English reports are stored under reports/en with language and translation 
   } finally { globalThis.fetch = originalFetch; }
 });
 
-test('translation pairing rejects a missing counterpart or a mismatched report date', async () => {
+test('translation pairing rejects a missing counterpart, a mismatched report date, or a different report type', async () => {
   for (const [existingPosts, options, expectedError] of [
     [[], { lang: 'en', translationGroup: 'missing-source' }, 'BAD_TRANSLATION_GROUP'],
-    [[{ id: 'ko-source', reportDate: '2026-08-04' }], { lang: 'en', translationGroup: 'ko-source', reportDate: '2026-08-24' }, 'PAIR_DATE_MISMATCH']
+    [[{ id: 'ko-source', type: 'daily', reportDate: '2026-08-04' }], { lang: 'en', type: 'daily', translationGroup: 'ko-source', reportDate: '2026-08-24' }, 'PAIR_DATE_MISMATCH'],
+    // A Daily and a Weekly dated the same day are different reports (#126).
+    [[{ id: 'ko-daily', type: 'daily', reportDate: '2026-09-11' }], { lang: 'en', type: 'weekly', translationGroup: 'ko-daily', reportDate: '2026-09-11' }, 'PAIR_TYPE_MISMATCH']
   ]) {
     const calls = githubMock(existingPosts);
     try {

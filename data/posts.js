@@ -9,7 +9,7 @@ window.RESEARCH_POSTS = [
     "registeredDate": "2026-09-17",
     "registeredAt": "2026-09-16T17:01:52.616Z",
     "legacyImport": false,
-    "title": "Waiting for the Fed,A Narrow Rebound",
+    "title": "Waiting for the Fed, A Narrow Rebound",
     "subtitle": "",
     "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
     "tags": [
@@ -223,7 +223,7 @@ window.RESEARCH_POSTS = [
     ],
     "readingMinutes": 18,
     "href": "reports/en/2026-09-13_Korea_Weekly_Report_EN.html",
-    "translationGroup": "2026-09-11-daily-1sx754u",
+    "translationGroup": "2026-09-02-weekly-11ncmn3",
     "coverImage": "covers/2026-09-11-weekly-17fg5xx.webp",
     "shareCardImage": "covers/share/2026-09-11-weekly-17fg5xx.jpg",
     "coverThumbnail": "covers/2026-09-11-weekly-17fg5xx-450.webp"
@@ -2057,12 +2057,11 @@ window.RESEARCH_POSTS = [
     "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
     "summary": "With Samsung Electronics and SK Hynix taking a breather, KOSDAQ and small- and mid-cap stocks broadened the market first.",
     "href": "reports/en/2026-08-10_KOSPI_Daily_Report_EN_Benchmark.html",
-    "translationGroup": "2026-08-10-weekly-1rva1f6",
+    "translationGroup": "2026-08-10-daily-1evguss",
     "coverImage": "covers/2026-08-10-daily-1bb8z4p.webp",
     "tags": [
       "semiconductors",
-      "autos",
-      "energy"
+      "flows"
     ],
     "readingMinutes": 3,
     "shareCardImage": "covers/share/2026-08-10-daily-1bb8z4p.jpg",

@@ -97,8 +97,9 @@ async function loadAdmin({
       generate: generateCover || (async () => ({ file: validCover('generated-cover.webp'), method: 'template', selector: '' }))
     },
     RESEARCH_POSTS: [
-      { id: 'ko-source', title: '한국어 원문', reportDate: '2026-08-10', href: 'reports/source.html' },
-      { id: 'en-source', lang: 'en', title: 'English source', reportDate: '2026-08-10', href: 'reports/en/source.html' }
+      { id: 'ko-source', type: 'weekly', title: '한국어 원문', reportDate: '2026-08-10', href: 'reports/source.html' },
+      { id: 'ko-daily-source', type: 'daily', title: '한국어 데일리 원문', reportDate: '2026-08-10', href: 'reports/daily-source.html' },
+      { id: 'en-source', type: 'weekly', lang: 'en', title: 'English source', reportDate: '2026-08-10', href: 'reports/en/source.html' }
     ],
     __SNOWSHAGAL_ADMIN_READY__: false,
     __SNOWSHAGAL_PENDING_REPORT_FILE__: pendingReportFile,
@@ -465,6 +466,9 @@ test('language defaults to Korean and English selection submits an optional tran
   await elements['html-file'].emit('change');
   assert.equal(elements['post-date'].value, '2026-08-10');
   assert.match(elements['translation-source-status'].textContent, /2026-08-10.*자동 적용/);
+  // A Weekly upload may pair only with a Weekly: the Daily source is not offered (#126).
+  assert.match(elements['translation-source'].innerHTML, /value="ko-source"/);
+  assert.doesNotMatch(elements['translation-source'].innerHTML, /ko-daily-source/);
   await elements['publish-btn'].emit('click');
 
   assert.equal(submissions.length, 1);
@@ -477,7 +481,7 @@ test('translation pairing blocks a manually changed date that differs from its c
   const english = languageOptions.find(option => option.value === 'en');
   english.checked = true;
   english.emit('change');
-  elements['translation-source'].value = 'ko-source';
+  elements['translation-source'].value = 'ko-daily-source';
   elements['translation-source'].emit('change');
   elements['admin-key'].value = 'test-key';
   elements['html-file'].files = [{
