@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-18-daily-1h55pyv",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-18",
+    "reportDate": "2026-09-18",
+    "registeredDate": "2026-09-19",
+    "registeredAt": "2026-09-18T16:47:33.285Z",
+    "legacyImport": false,
+    "title": "The Rally Was Over Before the Open",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-18_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-09-18-daily-5sp6wn",
+    "coverImage": "covers/2026-09-18-daily-1h55pyv.webp",
+    "shareCardImage": "covers/share/2026-09-18-daily-1h55pyv.jpg",
+    "coverThumbnail": "covers/2026-09-18-daily-1h55pyv-450.webp"
+  },
+  {
     "id": "2026-09-18-daily-5sp6wn",
     "type": "daily",
     "typeLabel": "주식 리포트",
