@@ -1055,6 +1055,7 @@
     const tagEl = document.getElementById('today-strip-tag');
     const dateEl = document.getElementById('today-strip-date');
     const noticeEl = document.getElementById('today-strip-notice');
+    const transparencyEl = document.getElementById('today-strip-transparency');
     const gridEl = document.getElementById('today-market-grid');
     const availability = session.availability || { stale: false };
     const dateLabel = availability.stale
@@ -1065,6 +1066,21 @@
     if (noticeEl) {
       noticeEl.textContent = availability.stale ? availability.notice : '';
       noticeEl.hidden = !availability.stale;
+    }
+    if (transparencyEl) {
+      const tNotice = availability.transparencyNotice;
+      if (tNotice) {
+        transparencyEl.innerHTML = (
+          `<div class="market-transparency-card">` +
+            `<h3 class="market-transparency-title">${esc(tNotice.title)}</h3>` +
+            `<div class="market-transparency-body">${tNotice.body.map(line => `<p>${esc(line)}</p>`).join('')}</div>` +
+          `</div>`
+        );
+        transparencyEl.hidden = false;
+      } else {
+        transparencyEl.innerHTML = '';
+        transparencyEl.hidden = true;
+      }
     }
     if (gridEl) {
       gridEl.innerHTML = session.items.map(item => (

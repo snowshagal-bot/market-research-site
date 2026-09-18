@@ -10,7 +10,7 @@ const ELEMENT_IDS = [
   'calendar-container', 'filter-month', 'filter-reset-btn', 'filter-tag', 'filter-year',
   'global-search-input', 'latest-category-cards', 'report-list', 'search-clear-btn', 'search-dialog',
   'search-empty-state', 'search-quick-tags', 'search-results-list', 'search-tag-cloud',
-  'today-market-grid', 'today-strip-date', 'today-strip-notice', 'today-strip-tag', 'today-takeaway-label', 'today-takeaway-link',
+  'today-market-grid', 'today-strip-date', 'today-strip-notice', 'today-strip-tag', 'today-strip-transparency', 'today-takeaway-label', 'today-takeaway-link',
   'today-takeaway-text'
 ];
 
@@ -206,6 +206,7 @@ async function bootHomepage({ lang = 'ko', respond, summary = STATIC_SUMMARY, po
   const nodes = {
     tag: elements.get('today-strip-tag'),
     notice: elements.get('today-strip-notice'),
+    transparency: elements.get('today-strip-transparency'),
     date: elements.get('today-strip-date'),
     grid: elements.get('today-market-grid'),
     label: elements.get('today-takeaway-label'),
@@ -729,4 +730,50 @@ test('R. a hidden row keeps no text from the session before it', async () => {
   });
   assert.equal(strip.row.hidden, true);
   assert.equal(strip.text.textContent, '', 'the sentence must go when the row does');
+});
+
+test('S. temporary transparency notice appears on 2026-09-18 when stale (KO and EN)', async () => {
+  const koStrip = await runHomepage({
+    lang: 'ko',
+    posts: LINKED_POSTS,
+    fetchResult: marketPayload('2026-09-17'),
+    expectedDate: '2026-09-18'
+  });
+  assert.equal(koStrip.transparency.hidden, false);
+  assert.match(koStrip.transparency.innerHTML, /9월 18일 Market Close 안내/);
+  assert.match(koStrip.transparency.innerHTML, /데이터 제공원 변경으로 인해 9월 18일 정규장 마감 데이터의 검증을 완료하지 못했습니다\./);
+  assert.match(koStrip.transparency.innerHTML, /검증되지 않은 값을 임의로 보완하지 않기 위해 해당 일자의 Market Close는 제공하지 않습니다\./);
+  assert.match(koStrip.transparency.innerHTML, /새로운 검증 절차를 적용 중이며 다음 거래일부터 정상 제공을 목표로 하고 있습니다\./);
+
+  const enStrip = await runHomepage({
+    lang: 'en',
+    posts: LINKED_POSTS,
+    fetchResult: marketPayload('2026-09-17'),
+    expectedDate: '2026-09-18'
+  });
+  assert.equal(enStrip.transparency.hidden, false);
+  assert.match(enStrip.transparency.innerHTML, /Market Close Notice — Sep 18/);
+  assert.match(enStrip.transparency.innerHTML, /Due to a change in one of our market data sources, we could not complete verification of the Sep 18 regular-session close\./);
+  assert.match(enStrip.transparency.innerHTML, /We do not publish unverified or reconstructed figures, so Market Close data for this date will remain unavailable\./);
+  assert.match(enStrip.transparency.innerHTML, /A revised verification process is being deployed for the next trading session\./);
+});
+
+test('T. temporary transparency notice is hidden when expected date is not 2026-09-18', async () => {
+  const strip = await runHomepage({
+    posts: LINKED_POSTS,
+    fetchResult: marketPayload('2026-09-17'),
+    expectedDate: '2026-09-21'
+  });
+  assert.equal(strip.transparency.hidden, true);
+  assert.equal(strip.transparency.innerHTML, '');
+});
+
+test('U. temporary transparency notice is hidden when 2026-09-18 is fresh (not stale)', async () => {
+  const strip = await runHomepage({
+    posts: LINKED_POSTS,
+    fetchResult: marketPayload('2026-09-18'),
+    expectedDate: '2026-09-18'
+  });
+  assert.equal(strip.transparency.hidden, true);
+  assert.equal(strip.transparency.innerHTML, '');
 });

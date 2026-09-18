@@ -125,9 +125,25 @@ test('availability is stale only when the latest close is older than the expecte
   assert.equal(gap.expectedDate, '2026-09-18');
   assert.equal(gap.badge, 'LAST VERIFIED CLOSE · SEP 15');
   assert.equal(gap.notice, 'The Sep 18 Market Close dataset is unavailable pending validation.');
+  assert.ok(gap.transparencyNotice);
+  assert.equal(gap.transparencyNotice.title, 'Market Close Notice — Sep 18');
+  assert.equal(gap.transparencyNotice.body.length, 3);
+
+  const koSep18 = at('2026-09-18T16:10', '2026-09-17', 'ko');
+  assert.ok(koSep18.transparencyNotice);
+  assert.equal(koSep18.transparencyNotice.title, '9월 18일 Market Close 안내');
+  assert.equal(koSep18.transparencyNotice.body.length, 3);
+  assert.equal(koSep18.transparencyNotice.body[0], '데이터 제공원 변경으로 인해 9월 18일 정규장 마감 데이터의 검증을 완료하지 못했습니다.');
+  assert.equal(koSep18.transparencyNotice.body[1], '검증되지 않은 값을 임의로 보완하지 않기 위해 해당 일자의 Market Close는 제공하지 않습니다.');
+  assert.equal(koSep18.transparencyNotice.body[2], '새로운 검증 절차를 적용 중이며 다음 거래일부터 정상 제공을 목표로 하고 있습니다.');
+
+  const koSep21 = at('2026-09-21T16:10', '2026-09-17', 'ko');
+  assert.equal(koSep21.transparencyNotice, null);
+
   const gapAcrossHoliday = at('2026-09-28T16:05', '2026-09-22', 'ko');
   assert.equal(gapAcrossHoliday.badge, '마지막 검증 완료 · 9월 22일');
   assert.equal(gapAcrossHoliday.notice, '9월 28일 Market Close 데이터셋은 검증 미완료로 제공하지 않습니다.');
+  assert.equal(gapAcrossHoliday.transparencyNotice, null);
 
   // Single-digit days: the English badge matches the strip's SEP 09 label.
   const singleDigit = api.marketCloseAvailability('2026-09-09', '2026-10-02', 'en');
@@ -243,6 +259,7 @@ test('homepage markup ships the tag and a hidden notice node in KO and EN', asyn
   for (const page of await Promise.all([read('index.html'), read('en/index.html')])) {
     assert.match(page, /<span class="today-strip-tag" id="today-strip-tag">TODAY<\/span>/);
     assert.match(page, /<p class="today-strip-notice" id="today-strip-notice" role="status" hidden><\/p>/);
+    assert.match(page, /<div class="today-strip-transparency" id="today-strip-transparency" role="region"/);
   }
 });
 
@@ -285,7 +302,14 @@ test('MARKET KO/EN show the availability notice only on a stale TODAY view', asy
 
   const koHtml = renderMarket(ko, { latest: '2026-09-15', expected: '2026-09-16' });
   assert.match(koHtml, /<p class="market-date">2026\.09\.15 · 15:30 KST 마감 기준<\/p>\s*<div class="market-availability" role="status"><p class="market-availability-badge">마지막 검증 완료 · 9월 15일<\/p><p class="market-availability-note">9월 16일 Market Close 데이터셋은 검증 미완료로 제공하지 않습니다\.<\/p><\/div>/);
+  assert.doesNotMatch(koHtml, /market-transparency-card/);
 
   const enHtml = renderMarket(en, { latest: '2026-09-15', expected: '2026-09-18' });
   assert.match(enHtml, /<p class="market-availability-badge">LAST VERIFIED CLOSE · SEP 15<\/p><p class="market-availability-note">The Sep 18 Market Close dataset is unavailable pending validation\.<\/p>/);
+  assert.match(enHtml, /<div class="market-transparency-card"><h2 class="market-transparency-title">Market Close Notice — Sep 18<\/h2>/);
+  assert.match(enHtml, /Due to a change in one of our market data sources, we could not complete verification of the Sep 18 regular-session close\./);
+
+  const koSep18Html = renderMarket(ko, { latest: '2026-09-17', expected: '2026-09-18' });
+  assert.match(koSep18Html, /<div class="market-transparency-card"><h2 class="market-transparency-title">9월 18일 Market Close 안내<\/h2>/);
+  assert.match(koSep18Html, /데이터 제공원 변경으로 인해 9월 18일 정규장 마감 데이터의 검증을 완료하지 못했습니다\./);
 });

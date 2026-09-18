@@ -63,6 +63,27 @@
     }
   };
 
+  const MARKET_TRANSPARENCY_NOTICES = {
+    '2026-09-18': {
+      ko: {
+        title: '9월 18일 Market Close 안내',
+        body: [
+          '데이터 제공원 변경으로 인해 9월 18일 정규장 마감 데이터의 검증을 완료하지 못했습니다.',
+          '검증되지 않은 값을 임의로 보완하지 않기 위해 해당 일자의 Market Close는 제공하지 않습니다.',
+          '새로운 검증 절차를 적용 중이며 다음 거래일부터 정상 제공을 목표로 하고 있습니다.'
+        ]
+      },
+      en: {
+        title: 'Market Close Notice — Sep 18',
+        body: [
+          'Due to a change in one of our market data sources, we could not complete verification of the Sep 18 regular-session close.',
+          'We do not publish unverified or reconstructed figures, so Market Close data for this date will remain unavailable.',
+          'A revised verification process is being deployed for the next trading session.'
+        ]
+      }
+    }
+  };
+
   /**
    * Whether the published Market Close is behind the session the site should
    * already carry. `expectedDate` comes from /api/market/latest's
@@ -75,7 +96,8 @@
     const latest = String(latestDate || '');
     const expected = String(expectedDate || '');
     if (!ISO_DATE.test(latest) || !ISO_DATE.test(expected) || latest >= expected) return { stale: false };
-    const text = MARKET_AVAILABILITY_COPY[language === 'en' ? 'en' : 'ko'];
+    const lang = language === 'en' ? 'en' : 'ko';
+    const text = MARKET_AVAILABILITY_COPY[lang];
     const label = value => {
       const [, month, day] = value.split('-').map(Number);
       return text.date(month, day);
@@ -85,6 +107,7 @@
     const lastVerifiedDate = language === 'en'
       ? latest.slice(5).replace(/^(\d{2})-(\d{2})$/, (_, month, day) => `${SHORT_MONTHS[Number(month) - 1].toUpperCase()} ${day}`)
       : label(latest);
+    const transparencyNotice = MARKET_TRANSPARENCY_NOTICES[expected]?.[lang] || null;
     return {
       stale: true,
       latestDate: latest,
@@ -92,7 +115,8 @@
       tag: text.lastVerified,
       dateLabel: lastVerifiedDate,
       badge: `${text.lastVerified} · ${lastVerifiedDate}`,
-      notice: text.unavailable(label(expected))
+      notice: text.unavailable(label(expected)),
+      transparencyNotice
     };
   }
 
