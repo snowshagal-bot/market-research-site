@@ -1,5 +1,31 @@
 [
   {
+    "id": "2026-09-18-daily-5sp6wn",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-09-18",
+    "reportDate": "2026-09-18",
+    "registeredDate": "2026-09-19",
+    "registeredAt": "2026-09-18T16:45:01.543Z",
+    "legacyImport": false,
+    "title": "열리기 전에 끝난 상승",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/9월 18일 주식리포트_통합.html",
+    "coverImage": "covers/2026-09-18-daily-5sp6wn.webp",
+    "shareCardImage": "covers/share/2026-09-18-daily-5sp6wn.jpg",
+    "coverThumbnail": "covers/2026-09-18-daily-5sp6wn-450.webp"
+  },
+  {
     "id": "2026-09-17-daily-1cs8i2o",
     "type": "daily",
     "typeLabel": "Daily",
