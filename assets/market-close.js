@@ -227,7 +227,14 @@
     if (isHistory || state.mode !== 'today') return '';
     const availability = root.MARKET_LOCALE?.marketCloseAvailability?.(marketDate, state.expectedDate, ko ? 'ko' : 'en');
     if (!availability?.stale) return '';
-    return `<div class="market-availability" role="status"><p class="market-availability-badge">${html(availability.badge)}</p><p class="market-availability-note">${html(availability.notice)}</p></div>`;
+    const tNotice = availability.transparencyNotice;
+    const transparencyHtml = tNotice ? (
+      `<div class="market-transparency-card">` +
+        `<h2 class="market-transparency-title">${html(tNotice.title)}</h2>` +
+        `<div class="market-transparency-body">${tNotice.body.map(line => `<p>${html(line)}</p>`).join('')}</div>` +
+      `</div>`
+    ) : '';
+    return `<div class="market-availability" role="status"><p class="market-availability-badge">${html(availability.badge)}</p><p class="market-availability-note">${html(availability.notice)}</p>${transparencyHtml}</div>`;
   }
 
   function parseUrlState() {

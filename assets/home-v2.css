@@ -903,6 +903,39 @@ html[data-theme="dark"] .hero-art img {
   overflow-wrap: break-word;
 }
 
+.today-strip-transparency {
+  margin: -4px 0 14px;
+}
+
+.today-strip-transparency .market-transparency-card {
+  padding: 10px 12px;
+  max-width: 64ch;
+  border-left: 2px solid var(--navy);
+  background: color-mix(in srgb, var(--panel) 78%, transparent);
+  border-radius: 4px;
+}
+
+.today-strip-transparency .market-transparency-title {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 750;
+  color: var(--text);
+  letter-spacing: -.01em;
+}
+
+.today-strip-transparency .market-transparency-body p {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--text-2);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.today-strip-transparency .market-transparency-body p + p {
+  margin-top: 4px;
+}
+
 .today-strip-market-link {
   display: inline-flex;
   align-items: center;
