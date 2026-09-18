@@ -160,10 +160,14 @@
   let lastActiveTrigger = null;
 
   /* Search index ------------------------------------------------------------
-     Two tiers. The metadata file is ~34KB and answers title, tag and summary
-     queries immediately; report bodies are ~1.2MB per locale and load in the
-     background, so a body-only match appears a moment later instead of holding
-     the whole dialog hostage. A Korean reader never downloads English bodies.
+     Two tiers. The metadata file (~45KB) answers title, tag and summary
+     queries immediately. Report bodies (~1.7–1.9MB per locale) are fetched only
+     once someone actually types or picks a query: opening the dialog to browse
+     the tags, or closing it again, costs no body download. The first non-empty
+     query shows metadata results at once and starts the body download for this
+     page's locale only; when it lands the search re-runs with whatever is in the
+     box at that moment, so body-only matches join the list. A Korean reader
+     never downloads English bodies, and the shard is fetched once per page.
   -------------------------------------------------------------------------- */
   const SEARCH_META_SRC = '/data/search-index-meta.js';
   const SEARCH_BODY_SRC = `/data/search-index-body-${locale}.js`;
@@ -227,14 +231,33 @@
     return (window.SEARCH_INDEX_BODY && window.SEARCH_INDEX_BODY[entry.id]) || '';
   }
 
+  function searchDialogIsOpen(){
+    return Boolean(searchDialog && (searchDialog.open || searchDialog.hasAttribute?.('open')));
+  }
+
+  // Bodies are requested by the first non-empty query, never by opening the
+  // dialog. When they arrive the search re-runs with the input's value at that
+  // moment — never the query that started the download — and only while the
+  // dialog is still open.
+  function ensureSearchBodies(queryStr){
+    if (!String(queryStr || '').trim()) return;
+    loadSearchBodies(() => {
+      if (!searchDialogIsOpen()) return;
+      performSearch(globalSearchInput?.value || '');
+    });
+  }
+
+  function runSearch(queryStr){
+    performSearch(queryStr);
+    ensureSearchBodies(queryStr);
+  }
+
   function openSearchDialog(trigger){
     if (!searchDialog) return;
     lastActiveTrigger = trigger || null;
     loadSearchMeta(() => {
       renderSearchTagCloud();
-      performSearch(globalSearchInput?.value || '');
-      // Re-run once report bodies land so body-only matches join the list.
-      loadSearchBodies(() => performSearch(globalSearchInput?.value || ''));
+      runSearch(globalSearchInput?.value || '');
     });
     if (typeof searchDialog.showModal === 'function') {
       searchDialog.showModal();
@@ -325,7 +348,7 @@
         if (globalSearchInput) {
           globalSearchInput.value = tag;
           if (searchClearBtn) searchClearBtn.hidden = false;
-          performSearch(tag);
+          runSearch(tag);
           globalSearchInput.focus();
         }
       });
@@ -434,7 +457,7 @@
   }
 
   globalSearchInput?.addEventListener('input', (e) => {
-    performSearch(e.target.value);
+    runSearch(e.target.value);
   });
 
   searchClearBtn?.addEventListener('click', () => {

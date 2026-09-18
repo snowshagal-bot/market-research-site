@@ -222,16 +222,21 @@ The homepage also provides:
 
 A global dialog on every public shell. Every report body is indexed in full, deliberately:
 a keyword deep inside a long report must stay findable, so `bodyText` is never truncated.
-That makes the combined index roughly 2.4MB, so it is published in tiers by
+That makes the combined index roughly 3.7MB, so it is published in tiers by
 `functions/api/_search-index.js`:
 
-- `data/search-index-meta.js` (~34KB) — every field except `bodyText`. Loaded when the
-  dialog opens and enough to answer title, tag and summary queries immediately.
-- `data/search-index-body-ko.js` / `-en.js` — report bodies, one shard per locale, loaded in
-  the background. The query re-runs when a shard lands so body-only matches join then. A
-  reader never downloads the other locale's bodies.
-- `data/search-index.json` — the canonical full artifact. Read by the publisher and the post
-  manager, never shipped to the browser.
+- `data/search-index-meta.js` (~45KB, ~10KB gzip) — only the fields the search dialog reads
+  (`SEARCH_META_FIELDS`: id, lang, category, title, subtitle, date, summary, tags,
+  readingMinutes, url). Loaded when the dialog opens and enough to answer title, tag and
+  summary queries immediately.
+- `data/search-index-body-ko.js` / `-en.js` (~1.9MB / ~1.7MB) — report bodies, one shard per
+  locale. Requested by the first non-empty query, never by opening the dialog, and once per
+  page. When a shard lands the search re-runs with the input's value at that moment, and only
+  while the dialog is open, so body-only matches join then. A reader never downloads the
+  other locale's bodies.
+- `data/search-index.json` — the canonical full artifact, including `typeLabel`,
+  `registeredAt`, `coverImage` and every `bodyText`. Read back from Git by the publisher and
+  the post manager as the input they rebuild the index from, never shipped to the browser.
 
 `scripts/build-search-index.mjs`, `functions/api/publish.js` and `functions/api/manage.js`
 all emit that set through the shared serializer, so the three writers cannot drift apart.
