@@ -1,5 +1,29 @@
 [
   {
+    "id": "2026-09-19-research-1ygji7x",
+    "type": "research",
+    "typeLabel": "Research",
+    "lang": "en",
+    "date": "2026-09-19",
+    "reportDate": "2026-09-19",
+    "registeredDate": "2026-09-20",
+    "registeredAt": "2026-09-19T15:11:32.554Z",
+    "legacyImport": false,
+    "title": "Are Humanoids Really Working?",
+    "subtitle": "",
+    "description": "Independent research on specific industries, companies, policies, and market structure.",
+    "tags": [
+      "robotics",
+      "valuation"
+    ],
+    "readingMinutes": 18,
+    "href": "reports/en/20260919_Snowshagal_Special_Research_No06_Humanoids_EN.html",
+    "translationGroup": "2026-09-19-research-1cevl08",
+    "coverImage": "covers/2026-09-19-research-1ygji7x.webp",
+    "shareCardImage": "covers/share/2026-09-19-research-1ygji7x.jpg",
+    "coverThumbnail": "covers/2026-09-19-research-1ygji7x-450.webp"
+  },
+  {
     "id": "2026-09-19-research-1cevl08",
     "type": "research",
     "typeLabel": "비정기 리서치",
