@@ -1,5 +1,31 @@
 [
   {
+    "id": "2026-09-20-weekly-39cj3a",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-09-20",
+    "reportDate": "2026-09-20",
+    "registeredDate": "2026-09-21",
+    "registeredAt": "2026-09-20T15:12:24.498Z",
+    "legacyImport": false,
+    "title": "돌아온 지수, 남은 기울기",
+    "subtitle": "",
+    "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "rates"
+    ],
+    "readingMinutes": 10,
+    "href": "reports/위클리_2026년 9월 3주차 위클리.html",
+    "coverImage": "covers/2026-09-20-weekly-39cj3a.webp",
+    "shareCardImage": "covers/share/2026-09-20-weekly-39cj3a.jpg",
+    "coverThumbnail": "covers/2026-09-20-weekly-39cj3a-450.webp"
+  },
+  {
     "id": "2026-09-19-research-1ygji7x",
     "type": "research",
     "typeLabel": "Research",
