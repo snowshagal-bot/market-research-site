@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-09-20-weekly-8g7huy",
+    "type": "weekly",
+    "typeLabel": "Weekly",
+    "lang": "en",
+    "date": "2026-09-20",
+    "reportDate": "2026-09-20",
+    "registeredDate": "2026-09-21",
+    "registeredAt": "2026-09-20T15:14:01.526Z",
+    "legacyImport": false,
+    "title": "The Index Is Back, the Tilt Remains",
+    "subtitle": "",
+    "description": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "rates"
+    ],
+    "readingMinutes": 16,
+    "href": "reports/en/2026-09-20_Korea_Weekly_Report_EN.html",
+    "translationGroup": "2026-09-20-weekly-39cj3a",
+    "coverImage": "covers/2026-09-20-weekly-8g7huy.webp",
+    "shareCardImage": "covers/share/2026-09-20-weekly-8g7huy.jpg",
+    "coverThumbnail": "covers/2026-09-20-weekly-8g7huy-450.webp"
+  },
+  {
     "id": "2026-09-20-weekly-39cj3a",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
