@@ -26,31 +26,6 @@ window.RESEARCH_POSTS = [
     "coverThumbnail": "covers/2026-09-21-daily-cl1tze-450.webp"
   },
   {
-    "id": "2026-09-21-daily-1sx91i7",
-    "type": "daily",
-    "typeLabel": "주식 리포트",
-    "lang": "ko",
-    "date": "2026-09-21",
-    "reportDate": "2026-09-21",
-    "registeredDate": "2026-09-21",
-    "registeredAt": "2026-09-21T12:08:55.625Z",
-    "legacyImport": false,
-    "title": "A Narrow 7,000",
-    "subtitle": "",
-    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
-    "tags": [
-      "kospi",
-      "kosdaq",
-      "flows",
-      "foreign-investors"
-    ],
-    "readingMinutes": 6,
-    "href": "reports/2026-09-21_KOSPI_Daily_Report_EN_publish.html",
-    "coverImage": "covers/2026-09-21-daily-1sx91i7.webp",
-    "shareCardImage": "covers/share/2026-09-21-daily-1sx91i7.jpg",
-    "coverThumbnail": "covers/2026-09-21-daily-1sx91i7-450.webp"
-  },
-  {
     "id": "2026-09-21-daily-1vvye0i",
     "type": "daily",
     "typeLabel": "주식 리포트",
