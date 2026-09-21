@@ -1,5 +1,31 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-21-daily-cl1tze",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-21",
+    "reportDate": "2026-09-21",
+    "registeredDate": "2026-09-21",
+    "registeredAt": "2026-09-21T12:12:41.128Z",
+    "legacyImport": false,
+    "title": "A Narrow 7,000",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-21_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-09-21-daily-1vvye0i",
+    "coverImage": "covers/2026-09-21-daily-cl1tze.webp",
+    "shareCardImage": "covers/share/2026-09-21-daily-cl1tze.jpg",
+    "coverThumbnail": "covers/2026-09-21-daily-cl1tze-450.webp"
+  },
+  {
     "id": "2026-09-21-daily-1sx91i7",
     "type": "daily",
     "typeLabel": "주식 리포트",
