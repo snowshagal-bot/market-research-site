@@ -1,5 +1,25 @@
 [
   {
+    "id": "2026-09-21-daily-1vvye0i",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-09-21",
+    "reportDate": "2026-09-21",
+    "registeredDate": "2026-09-21",
+    "registeredAt": "2026-09-21T12:06:37.113Z",
+    "legacyImport": false,
+    "title": "넓지 않은 7천",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "tags": [],
+    "readingMinutes": 3,
+    "href": "reports/9월 21일 주식리포트_통합.html",
+    "coverImage": "covers/2026-09-21-daily-1vvye0i.webp",
+    "shareCardImage": "covers/share/2026-09-21-daily-1vvye0i.jpg",
+    "coverThumbnail": "covers/2026-09-21-daily-1vvye0i-450.webp"
+  },
+  {
     "id": "2026-09-20-weekly-8g7huy",
     "type": "weekly",
     "typeLabel": "Weekly",
