@@ -30,7 +30,12 @@
     "date": "2026-09-21",
     "registeredAt": "2026-09-21T12:06:37.113Z",
     "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
-    "tags": [],
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors"
+    ],
     "readingMinutes": 3,
     "url": "/reports/9월 21일 주식리포트_통합",
     "coverImage": "/covers/2026-09-21-daily-1vvye0i.webp",

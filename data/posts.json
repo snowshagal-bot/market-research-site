@@ -38,12 +38,18 @@
     "title": "넓지 않은 7천",
     "subtitle": "",
     "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
-    "tags": [],
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors"
+    ],
     "readingMinutes": 3,
     "href": "reports/9월 21일 주식리포트_통합.html",
     "coverImage": "covers/2026-09-21-daily-1vvye0i.webp",
     "shareCardImage": "covers/share/2026-09-21-daily-1vvye0i.jpg",
-    "coverThumbnail": "covers/2026-09-21-daily-1vvye0i-450.webp"
+    "coverThumbnail": "covers/2026-09-21-daily-1vvye0i-450.webp",
+    "updatedAt": "2026-09-21T17:46:54.502Z"
   },
   {
     "id": "2026-09-20-weekly-8g7huy",
