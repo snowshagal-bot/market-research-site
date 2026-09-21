@@ -84,6 +84,35 @@
     }
   };
 
+  // A published session whose stored values keep a known limitation. The note is
+  // shown only while that exact date is on screen; the payload itself is never
+  // rewritten, and no other date carries it.
+  const MARKET_INTEGRITY_NOTICES = {
+    '2026-09-14': {
+      ko: {
+        title: '데이터 안내',
+        body: [
+          '2026년 9월 14일 Market Close는 당시 수집 방식의 한계로 일부 항목에 정규장 이후 거래가 포함되어 있습니다.',
+          '정규장 기준 원천 스냅샷이 보존되지 않아 해당 값은 소급 수정하지 않았습니다.'
+        ]
+      },
+      en: {
+        title: 'Data Note',
+        body: [
+          'Some fields in the Sep 14, 2026 Market Close include post-close trading because of the collection method used at the time.',
+          'The original regular-session snapshots were not retained, so these historical values have not been retrospectively altered.'
+        ]
+      }
+    }
+  };
+
+  /** The note for exactly this market date, or null for every other date. */
+  function marketIntegrityNotice(marketDate, language) {
+    const date = String(marketDate || '');
+    if (!ISO_DATE.test(date)) return null;
+    return MARKET_INTEGRITY_NOTICES[date]?.[language === 'en' ? 'en' : 'ko'] || null;
+  }
+
   /**
    * Whether the published Market Close is behind the session the site should
    * already carry. `expectedDate` comes from /api/market/latest's
@@ -340,6 +369,7 @@
     formatKstTimestamp,
     formatDataUpdated,
     dataUpdatedLabel,
-    marketCloseAvailability
+    marketCloseAvailability,
+    marketIntegrityNotice
   };
 })(typeof window !== 'undefined' ? window : globalThis);

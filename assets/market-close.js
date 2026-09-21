@@ -223,6 +223,13 @@
 
   // TODAY view only: when the latest close is older than the expected session,
   // name the last verified close and the session that is not provided.
+  // 그 날짜를 열었을 때만 보이는 과거 데이터 한계 안내. payload는 그대로 둔다.
+  function integrityNotice(marketDate) {
+    const notice = root.MARKET_LOCALE?.marketIntegrityNotice?.(marketDate, ko ? 'ko' : 'en');
+    if (!notice) return '';
+    return `<div class="market-integrity" role="note"><h2 class="market-transparency-title">${html(notice.title)}</h2><div class="market-transparency-body">${notice.body.map(line => `<p>${html(line)}</p>`).join('')}</div></div>`;
+  }
+
   function availabilityNotice(marketDate, isHistory) {
     if (isHistory || state.mode !== 'today') return '';
     const availability = root.MARKET_LOCALE?.marketCloseAvailability?.(marketDate, state.expectedDate, ko ? 'ko' : 'en');
@@ -481,6 +488,7 @@
         <p class="market-eyebrow">SNOWSHAGAL</p><h1 id="market-close-heading">${copy.title}</h1><p class="market-subtitle">${copy.subtitle}</p>
         <p class="market-date">${dateText(data.meta?.market_date)} · ${copy.closeBasis}</p>
         ${availabilityNotice(marketDate, isHistory)}
+        ${integrityNotice(marketDate)}
         <p class="market-update">${copy.updateNotice}</p>
         <p class="market-overseas">${copy.overseas}</p>
       </div><div class="market-mountain" aria-hidden="true"></div></div></section>
