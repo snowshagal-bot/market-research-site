@@ -1,5 +1,31 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-22-daily-18k3zff",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-22",
+    "reportDate": "2026-09-22",
+    "registeredDate": "2026-09-23",
+    "registeredAt": "2026-09-22T17:43:56.047Z",
+    "legacyImport": false,
+    "title": "The Night Lifted It, the Day Gave It Back",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-22_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-09-22-daily-15c22e8",
+    "coverImage": "covers/2026-09-22-daily-18k3zff.webp",
+    "shareCardImage": "covers/share/2026-09-22-daily-18k3zff.jpg",
+    "coverThumbnail": "covers/2026-09-22-daily-18k3zff-450.webp"
+  },
+  {
     "id": "2026-09-22-daily-15c22e8",
     "type": "daily",
     "typeLabel": "주식 리포트",
