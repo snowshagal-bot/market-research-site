@@ -63,7 +63,31 @@
     }
   };
 
+  // Keyed by the session the site expects. An entry may pin the exact
+  // last-verified session it applies to (`latest`) and, when the outage is a
+  // settled fact rather than pending validation, replace the generic
+  // "unavailable pending validation" sentence with its own card
+  // (`replacesNotice`). Once the next session is published the expectation
+  // moves on and the card disappears on its own.
   const MARKET_TRANSPARENCY_NOTICES = {
+    '2026-09-22': {
+      latest: '2026-09-21',
+      replacesNotice: true,
+      ko: {
+        title: '9월 22일 Market Close 안내',
+        body: [
+          '정규장 데이터 수집 구간 중 시스템 중단으로 9월 22일 Market Close는 발행하지 않았습니다.',
+          '확인되지 않은 값을 소급해 채우지 않으며, 마지막 검증 완료 데이터인 9월 21일 종가를 표시합니다.'
+        ]
+      },
+      en: {
+        title: 'Market Close Notice — Sep 22',
+        body: [
+          'The Sep 22 Market Close was not published because the regular-session collection window was interrupted.',
+          'Unverified values are not reconstructed retrospectively; Sep 21 remains the last verified close.'
+        ]
+      }
+    },
     '2026-09-18': {
       ko: {
         title: '9월 18일 Market Close 안내',
@@ -136,7 +160,9 @@
     const lastVerifiedDate = language === 'en'
       ? latest.slice(5).replace(/^(\d{2})-(\d{2})$/, (_, month, day) => `${SHORT_MONTHS[Number(month) - 1].toUpperCase()} ${day}`)
       : label(latest);
-    const transparencyNotice = MARKET_TRANSPARENCY_NOTICES[expected]?.[lang] || null;
+    const entry = MARKET_TRANSPARENCY_NOTICES[expected];
+    const applies = !!entry && (!entry.latest || entry.latest === latest);
+    const transparencyNotice = applies ? entry[lang] || null : null;
     return {
       stale: true,
       latestDate: latest,
@@ -144,7 +170,7 @@
       tag: text.lastVerified,
       dateLabel: lastVerifiedDate,
       badge: `${text.lastVerified} · ${lastVerifiedDate}`,
-      notice: text.unavailable(label(expected)),
+      notice: transparencyNotice && entry.replacesNotice ? '' : text.unavailable(label(expected)),
       transparencyNotice
     };
   }

@@ -241,7 +241,8 @@
         `<div class="market-transparency-body">${tNotice.body.map(line => `<p>${html(line)}</p>`).join('')}</div>` +
       `</div>`
     ) : '';
-    return `<div class="market-availability" role="status"><p class="market-availability-badge">${html(availability.badge)}</p><p class="market-availability-note">${html(availability.notice)}</p>${transparencyHtml}</div>`;
+    const noteHtml = availability.notice ? `<p class="market-availability-note">${html(availability.notice)}</p>` : '';
+    return `<div class="market-availability" role="status"><p class="market-availability-badge">${html(availability.badge)}</p>${noteHtml}${transparencyHtml}</div>`;
   }
 
   function parseUrlState() {

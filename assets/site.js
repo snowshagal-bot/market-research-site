@@ -1065,7 +1065,7 @@
     if (dateEl && dateLabel) dateEl.textContent = dateLabel;
     if (noticeEl) {
       noticeEl.textContent = availability.stale ? availability.notice : '';
-      noticeEl.hidden = !availability.stale;
+      noticeEl.hidden = !availability.stale || !availability.notice;
     }
     if (transparencyEl) {
       const tNotice = availability.transparencyNotice;
