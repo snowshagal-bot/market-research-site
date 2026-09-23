@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-23-daily-1nzub7c",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-23",
+    "reportDate": "2026-09-23",
+    "registeredDate": "2026-09-24",
+    "registeredAt": "2026-09-23T17:36:02.598Z",
+    "legacyImport": false,
+    "title": "One Last Session Before the Break",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors",
+      "defense"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-23_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-09-23-daily-1v7pq3e",
+    "coverImage": "covers/2026-09-23-daily-1nzub7c.webp",
+    "shareCardImage": "covers/share/2026-09-23-daily-1nzub7c.jpg",
+    "coverThumbnail": "covers/2026-09-23-daily-1nzub7c-450.webp"
+  },
+  {
     "id": "2026-09-23-daily-1v7pq3e",
     "type": "daily",
     "typeLabel": "주식 리포트",
