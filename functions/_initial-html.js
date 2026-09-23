@@ -560,16 +560,19 @@ function attributeText(value) {
  * tags of the same name so a mount that already holds nested markup is
  * replaced whole. Used where HTMLRewriter is not available (tests).
  */
-function replaceById(body, { id, html, text, attrs }) {
+function replaceById(body, { id, html, text, attrs, removeAttrs }) {
   const open = new RegExp(`<([a-zA-Z][\\w-]*)\\b([^>]*\\bid=["']${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["'][^>]*)>`);
   const match = open.exec(body);
   if (!match) return body;
   const tag = match[1].toLowerCase();
   let attributes = match[2];
   for (const [name, value] of Object.entries(attrs || {})) {
-    const existing = new RegExp(`\\s${name}(?:=["'][^"']*["'])?`);
+    const existing = new RegExp(`\\s${name}(?:=["'][^"']*["'])?(?![\\w-])`);
     attributes = attributes.replace(existing, '');
     attributes += value === '' ? ` ${name}` : ` ${name}="${attributeText(value)}"`;
+  }
+  for (const name of removeAttrs || []) {
+    attributes = attributes.replace(new RegExp(`\\s${name}(?:=["'][^"']*["'])?(?![\\w-])`), '');
   }
   const openTag = `<${match[1]}${attributes}>`;
   const start = match.index;
@@ -614,6 +617,7 @@ export function applyInitialHtmlToRewriter(rewriter, initial) {
     out = out.on(`#${edit.id}`, {
       element(element) {
         for (const [name, value] of Object.entries(edit.attrs || {})) element.setAttribute(name, value);
+        for (const name of edit.removeAttrs || []) element.removeAttribute(name);
         if (edit.html !== undefined) element.setInnerContent(edit.html, { html: true });
         else if (edit.text !== undefined) element.setInnerContent(edit.text);
       }

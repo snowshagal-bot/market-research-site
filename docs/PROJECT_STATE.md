@@ -150,6 +150,20 @@ unavailable notice. The page scripts keep the server-rendered content on their f
 failed first fetch (`data-ssr-key`, `data-ssr-year`/`data-ssr-month`), and the calendar script takes
 its default month from the server. Any SSR failure, or data slower than 1.5 s, serves the static
 shell unchanged. HTML cache headers are the static `public, max-age=0, must-revalidate`.
+
+The two homepages (`/`, `/en/`) also render their hero and TODAY strip into the HTTP response
+(`functions/_home-initial.js`, called from the middleware after the existing card/archive SSR):
+the Latest Research slide (the locale's newest `research` post, sorted by `assets/locale.js`),
+the active notice (items[0] of the `/api/announcements` handler, carousel total 3 with it and 2
+without) and the TODAY strip (the `/api/market/latest` handler's payload and
+`x-market-expected-date`, stale/transparency copy from `locale.js` `marketCloseAvailability`,
+takeaway D1 → same-date same-locale Daily → hidden). Market and notice are read in parallel within
+1.5 s and fail independently; a failed or slow source is left to `assets/site.js`, which fetches it
+as before (static `data/market-summary.js` stays the failure-only fallback). What the server
+rendered is passed in `<script id="home-initial-data" type="application/json">` (only the strip
+fields and the notice title/content/dates), and `site.js` paints from it without requesting either
+API again. `tests/home-initial-ssr.test.mjs` runs `site.js` on the same data and requires the same
+visible output before and after JavaScript.
 `tests/fixtures/initial-html-api-golden.json` pins the API bodies captured before the refactor.
 
 Preview Functions must use the same `COMMENTS_DB` binding name as Production while pointing

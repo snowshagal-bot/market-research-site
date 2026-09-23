@@ -32,6 +32,7 @@ import {
 import { feedDiscoveryTag } from './_feed.js';
 import { loadReportFacts } from './_report-facts.js';
 import { applyInitialHtmlToRewriter, applyInitialHtmlToString, buildInitialHtml } from './_initial-html.js';
+import { buildHomeInitial } from './_home-initial.js';
 import { getSession, validateSafeNextUrl } from './_auth.js';
 
 function policyResponse(status, error) {
@@ -184,6 +185,11 @@ export async function onRequest(context) {
     // the page is not one of those, or on any failure or timeout, in which case
     // the static shell is served untouched and the scripts fill it as before.
     const initial = await buildInitialHtml(url, context.env);
+    // / and /en/: Latest Research, the active notice and the TODAY strip, from
+    // the same handlers the page script calls, plus a bootstrap so the script
+    // does not request them again. Null on any failure: the shell is served as
+    // before and the script fetches everything itself.
+    const home = homeLang ? await buildHomeInitial(url, context.env, posts) : null;
 
     const landingAlternates = posts && landing ? categoryAlternateTags(posts, landing.type) : '';
     if (isProduction && posts && landing && !categoryHasPosts(posts, landing.type, landing.lang)) {
@@ -196,7 +202,7 @@ export async function onRequest(context) {
       });
     }
 
-    if (!engagement && !posts && !initial) return response;
+    if (!engagement && !posts && !initial && !home) return response;
     if (typeof HTMLRewriter === 'undefined') {
       let body = await response.text();
       if (posts && homeLang) {
@@ -218,6 +224,12 @@ export async function onRequest(context) {
       }
       if (initial) {
         try { body = applyInitialHtmlToString(body, initial); } catch (error) { console.error('initial html apply failed', error); }
+      }
+      if (home) {
+        try {
+          body = applyInitialHtmlToString(body, home);
+          if (home.head) body = body.replace(/<\/head>/i, `${home.head}</head>`);
+        } catch (error) { console.error('home initial html apply failed', error); }
       }
       if (engagement) body = body.replace(/<\/body>/i, `${engagement}</body>`);
       const headers = new Headers(response.headers);
@@ -263,6 +275,10 @@ export async function onRequest(context) {
       }
     }
     if (initial) rewriter = applyInitialHtmlToRewriter(rewriter, initial);
+    if (home) {
+      rewriter = applyInitialHtmlToRewriter(rewriter, home);
+      if (home.head) rewriter = rewriter.on('head', { element(element) { element.append(home.head, { html: true }); } });
+    }
     if (engagement) {
       rewriter = rewriter.on('body', { element(element) { element.append(engagement, { html: true }); } });
     }
