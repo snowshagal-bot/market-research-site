@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://snowshagal.com/schemas/market_close-1.1.0.schema.json",
+  "$id": "https://snowshagal.com/schemas/market_close-1.2.0.schema.json",
   "title": "Snowshagal Market Close EOD Snapshot",
   "description": "글로벌 시장/KRX 대시보드에서 생성하는 공개용 일일 마감 데이터 계약. 계약 변경 시 meta.schema_version과 이 스키마의 $id/const를 함께 갱신해야 한다.",
   "type": "object",
@@ -21,7 +21,7 @@
         "generated_at": {"$ref": "#/$defs/dateTime"},
         "timezone": {"const": "Asia/Bangkok"},
         "status": {"enum": ["final", "incomplete"]},
-        "schema_version": {"enum": ["1.0.1", "1.1.0"]}
+        "schema_version": {"enum": ["1.0.1", "1.1.0", "1.2.0"]}
       }
     },
     "indices": {
@@ -169,6 +169,7 @@
     "krx_groups": {
       "anyOf": [{"$ref": "#/$defs/krxGroups"}, {"type": "null"}]
     },
+    "section_status": {"$ref": "#/$defs/sectionStatus"},
     "validation": {
       "type": "object",
       "additionalProperties": false,
@@ -191,49 +192,102 @@
         "required": ["meta"]
       },
       "then": {
-        "properties": {
-          "indices": {
-            "properties": {
-              "KOSPI": {"$ref": "#/$defs/instrument"},
-              "KOSDAQ": {"$ref": "#/$defs/instrument"}
+        "$comment": "1.2.0 final은 HARD(INDEX·TOP10·TURNOVER·INVESTOR·PROGRAM·SHORT·FUTURES와 시장 폭)만 필수다. SOFT(최근 5거래일·KRX 업종/테마·글로벌 지표)는 section_status로 판정한다. 그 밖의 버전은 기존 final 규칙을 그대로 쓴다.",
+        "if": {
+          "properties": {
+            "meta": {
+              "properties": {"schema_version": {"const": "1.2.0"}},
+              "required": ["schema_version"]
             }
           },
-          "krx_investor_trading": {
-            "properties": {
-              "markets": {"required": ["KOSPI", "KOSDAQ", "KOSPI200선물"]}
+          "required": ["meta"]
+        },
+        "then": {
+          "properties": {
+            "indices": {
+              "properties": {
+                "KOSPI": {"$ref": "#/$defs/instrument"},
+                "KOSDAQ": {"$ref": "#/$defs/instrument"}
+              }
+            },
+            "krx_investor_trading": {
+              "properties": {
+                "markets": {"required": ["KOSPI", "KOSDAQ", "KOSPI200선물"]}
+              }
+            },
+            "market_breadth": {"required": ["KOSPI", "KOSDAQ"]},
+            "program_basis": {
+              "properties": {
+                "basis": {"$ref": "#/$defs/basis"},
+                "program_trading": {"required": ["차익", "비차익", "전체"]}
+              }
+            },
+            "market_internals": {
+              "properties": {
+                "turnover": {"required": ["KOSPI", "KOSDAQ"]}
+              }
+            },
+            "short_selling": {
+              "properties": {
+                "market_summary": {"required": ["KOSPI", "KOSDAQ"]},
+                "top5_by_value": {"minItems": 5, "maxItems": 5},
+                "top5_by_ratio": {"maxItems": 5}
+              }
+            },
+            "market_cap_top10": {"minItems": 10, "maxItems": 10},
+            "validation": {
+              "properties": {
+                "passed": {"const": true},
+                "errors": {"maxItems": 0}
+              }
             }
-          },
-          "recent_5d_flows": {
-            "properties": {
-              "used_trading_days": {"const": 5},
-              "markets": {"required": ["KOSPI", "KOSDAQ", "KOSPI200선물"]}
-            }
-          },
-          "market_breadth": {"required": ["KOSPI", "KOSDAQ"]},
-          "program_basis": {
-            "properties": {
-              "basis": {"$ref": "#/$defs/basis"},
-              "program_trading": {"required": ["차익", "비차익", "전체"]}
-            }
-          },
-          "market_internals": {
-            "properties": {
-              "turnover": {"required": ["KOSPI", "KOSDAQ"]}
-            }
-          },
-          "short_selling": {
-            "properties": {
-              "market_summary": {"required": ["KOSPI", "KOSDAQ"]},
-              "top5_by_value": {"minItems": 5, "maxItems": 5},
-              "top5_by_ratio": {"maxItems": 5}
-            }
-          },
-          "market_cap_top10": {"minItems": 10, "maxItems": 10},
-          "krx_groups": {"$ref": "#/$defs/krxGroups"},
-          "validation": {
-            "properties": {
-              "passed": {"const": true},
-              "errors": {"maxItems": 0}
+          }
+        },
+        "else": {
+          "properties": {
+            "indices": {
+              "properties": {
+                "KOSPI": {"$ref": "#/$defs/instrument"},
+                "KOSDAQ": {"$ref": "#/$defs/instrument"}
+              }
+            },
+            "krx_investor_trading": {
+              "properties": {
+                "markets": {"required": ["KOSPI", "KOSDAQ", "KOSPI200선물"]}
+              }
+            },
+            "recent_5d_flows": {
+              "properties": {
+                "used_trading_days": {"const": 5},
+                "markets": {"required": ["KOSPI", "KOSDAQ", "KOSPI200선물"]}
+              }
+            },
+            "market_breadth": {"required": ["KOSPI", "KOSDAQ"]},
+            "program_basis": {
+              "properties": {
+                "basis": {"$ref": "#/$defs/basis"},
+                "program_trading": {"required": ["차익", "비차익", "전체"]}
+              }
+            },
+            "market_internals": {
+              "properties": {
+                "turnover": {"required": ["KOSPI", "KOSDAQ"]}
+              }
+            },
+            "short_selling": {
+              "properties": {
+                "market_summary": {"required": ["KOSPI", "KOSDAQ"]},
+                "top5_by_value": {"minItems": 5, "maxItems": 5},
+                "top5_by_ratio": {"maxItems": 5}
+              }
+            },
+            "market_cap_top10": {"minItems": 10, "maxItems": 10},
+            "krx_groups": {"$ref": "#/$defs/krxGroups"},
+            "validation": {
+              "properties": {
+                "passed": {"const": true},
+                "errors": {"maxItems": 0}
+              }
             }
           }
         }
@@ -250,6 +304,18 @@
         "required": ["meta"]
       },
       "then": {"required": ["krx_groups"]}
+    },
+    {
+      "if": {
+        "properties": {
+          "meta": {
+            "properties": {"schema_version": {"const": "1.2.0"}},
+            "required": ["schema_version"]
+          }
+        },
+        "required": ["meta"]
+      },
+      "then": {"required": ["krx_groups", "section_status"]}
     }
   ],
   "$defs": {
@@ -540,6 +606,60 @@
         "source_date": {"$ref": "#/$defs/date"},
         "retrieved_at": {"$ref": "#/$defs/dateTime"},
         "source": {"const": "KRX"}
+      }
+    },
+    "sectionState": {"enum": ["complete", "partial", "unavailable"]},
+    "sectionReason": {
+      "enum": [
+        "missing_session", "source_validation_failed", "source_unavailable",
+        "stale_source_date", "replay_without_stored_source", null
+      ]
+    },
+    "sectionStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["five_day_flows", "krx_groups", "global_indicators"],
+      "properties": {
+        "five_day_flows": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "reason", "expected_sessions", "available_sessions", "missing_sessions"],
+          "properties": {
+            "status": {"$ref": "#/$defs/sectionState"},
+            "reason": {"$ref": "#/$defs/sectionReason"},
+            "expected_sessions": {"const": 5},
+            "available_sessions": {"type": "integer", "minimum": 0, "maximum": 5},
+            "missing_sessions": {"type": "array", "maxItems": 5, "items": {"$ref": "#/$defs/date"}}
+          }
+        },
+        "krx_groups": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "reason"],
+          "properties": {
+            "status": {"enum": ["complete", "unavailable"]},
+            "reason": {"$ref": "#/$defs/sectionReason"}
+          }
+        },
+        "global_indicators": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "reason", "unavailable"],
+          "properties": {
+            "status": {"$ref": "#/$defs/sectionState"},
+            "reason": {"$ref": "#/$defs/sectionReason"},
+            "unavailable": {
+              "type": "array",
+              "maxItems": 12,
+              "items": {
+                "enum": [
+                  "NASDAQ", "DOW", "SP500", "SOX", "VIX", "US10Y",
+                  "USDKRW", "JPYKRW", "DXY", "WTI", "GOLD", "BITCOIN"
+                ]
+              }
+            }
+          }
+        }
       }
     },
     "krxGroups": {

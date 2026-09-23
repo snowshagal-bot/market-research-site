@@ -4,9 +4,9 @@
 
 이 계약은 개인용 글로벌 시장/KRX 대시보드가 Snowshagal 홈페이지의 **Market Close / EOD Snapshot**에 전달할 공개 JSON 형식을 고정한다. 실시간 시세 API가 아니며, 한국시장 거래일의 검증된 마감본만 `latest.json`으로 승격한다.
 
-- 현재 버전: `1.1.0`
+- 현재 버전: `1.2.0` (수신 측은 `1.0.1`·`1.1.0`·`1.2.0`을 모두 읽는다. 기존 payload는 마이그레이션하거나 다시 쓰지 않는다.)
 - 정식 스키마: `market_close.schema.json`
-- 실제 형식 예제: `market_close.example.json`
+- 실제 형식 예제: `market_close.example.json`(1.1.0), `market_close.example.v1.2.0.json`(1.2.0 · 5거래일 partial·업종/테마 unavailable)
 - 운영 출력: `data/market_close/YYYY-MM-DD.json`, `data/market_close/latest.json`
 - 제외 데이터: LME 구리, LME 알루미늄
 - 금지 데이터: API key, token, credential, password, cookie 등 인증정보
@@ -83,6 +83,41 @@ Exporter는 원천 웹 페이지를 직접 파싱하지 않는다. UI와 TXT 저
 - KRX 업종 최소 40개와 공식 테마 최소 35개가 존재하고, 지수 코드가 각 배열 안에서 유일하며 기준일이 `market_date`와 일치
 
 검증 실패 원인은 `validation.errors`에 기록한다. 전 거래일 KRX 값은 당일 값으로 승격되지 않는다.
+
+위 조건은 `1.0.1`·`1.1.0` final의 규칙이며 그대로 유지한다. `1.2.0`은 아래 HARD/SOFT 규칙을 따른다.
+
+### 1.2.0 HARD / SOFT 섹션
+
+**HARD** — 하나라도 확정 불가면 `status=final`이 될 수 없고 게시하지 않는다.
+
+| 섹션 | payload 위치 |
+|---|---|
+| INDEX | `indices.KOSPI`, `indices.KOSDAQ` |
+| TOP10 | `market_cap_top10` (10개) |
+| TURNOVER | `market_internals.turnover.KOSPI`/`KOSDAQ` |
+| INVESTOR | `krx_investor_trading.markets.KOSPI`/`KOSDAQ` |
+| PROGRAM | `program_basis.program_trading` 차익·비차익·전체 |
+| SHORT | `short_selling.market_summary`, `top5_by_value` 5개 |
+| FUTURES | `krx_investor_trading.markets.KOSPI200선물`, `program_basis.basis` |
+
+시장 폭(`market_breadth`)은 HARD/SOFT 분류가 결정되기 전까지 기존처럼 final 필수다.
+
+**SOFT** — 실패해도 Market Close 전체는 `final`일 수 있다. 대신 `section_status`에 상태를 밝히고, 빈 섹션은 stale 값으로 채우지 않는다.
+
+```json
+"section_status": {
+  "five_day_flows": {"status": "partial", "reason": "missing_session", "expected_sessions": 5, "available_sessions": 4, "missing_sessions": ["2026-09-22"]},
+  "krx_groups": {"status": "unavailable", "reason": "source_validation_failed"},
+  "global_indicators": {"status": "complete", "reason": null, "unavailable": []}
+}
+```
+
+- 상태 어휘는 `complete`·`partial`·`unavailable`뿐이다(KRX 업종·테마는 `complete`·`unavailable`). `complete`이면 `reason=null`, 그 밖에는 사유가 필수다.
+- 사유 어휘: `missing_session`, `source_validation_failed`, `source_unavailable`, `stale_source_date`, `replay_without_stored_source`.
+- **최근 5거래일**: 5거래일이 모두 있을 때만 `recent_5d_flows`에 누적 숫자를 싣는다. `partial`(확보 1~4일, 확보+누락=5)이나 `unavailable`(0일)이면 `markets={}`, `used_trading_days=0`이다. 4일 합계는 5거래일 누적이 아니므로 그 자리에 넣지 않는다. 화면은 "데이터 불완전 · 4/5 거래일 확보 · 9월 22일 데이터 없음"처럼 확보 상태만 표시한다.
+- **KRX 업종·테마**: KRX 응답이 자체 검증에 실패하거나 없으면 `krx_groups=null`, `status=unavailable`. 다른 날짜 값을 대신 쓰지 않는다.
+- **글로벌·24시간 지표**(NASDAQ·DOW·S&P 500·SOX·VIX·US10Y·USD/KRW·JPY/KRW·DXY·WTI·GOLD·BITCOIN): 실패하거나 기준일이 맞지 않는 지표는 `global_indicators.unavailable`에 적고, 해당 객체는 값·`source_date`가 모두 `null`인 `data_state=unavailable`로 싣는다. 목록에 없는 지표는 기존 기준일 규칙을 그대로 통과해야 한다. KOSPI·KOSDAQ은 SOFT가 아니다.
+- `section_status`는 1.2.0에만 있다. 1.0.1·1.1.0 payload에 이 필드가 있으면 기존처럼 계약에 없는 필드로 거부한다.
 
 ### 정규장 복원 불가 세부값 (schema 1.1.0 호환)
 

@@ -23,6 +23,24 @@ const PREVIOUS_US_SESSION_RULES = Object.freeze([
   ['rates_fx_volatility', ['SOX', 'VIX', 'US10Y']]
 ]);
 
+// Global / 24h indicators: a SOFT section in schema 1.2.0. KOSPI and KOSDAQ
+// are HARD and are never exempt from the freshness rules.
+export const GLOBAL_INDICATOR_SECTIONS = Object.freeze([
+  ['indices', ['NASDAQ', 'DOW', 'SP500']],
+  ['rates_fx_volatility', ['SOX', 'VIX', 'US10Y', 'USDKRW', 'JPYKRW', 'DXY']],
+  ['commodities_crypto', ['WTI', 'GOLD', 'BITCOIN']]
+]);
+
+// 1.2.0 only: indicators the payload itself declares unavailable. Their empty
+// shape is checked by validateSectionStatus; freshness does not apply to a
+// value that is deliberately absent.
+function declaredUnavailable(payload) {
+  if (payload?.meta?.schema_version !== '1.2.0') return new Set();
+  const listed = payload?.section_status?.global_indicators?.unavailable;
+  const globalCodes = new Set(GLOBAL_INDICATOR_SECTIONS.flatMap(([, codes]) => codes));
+  return new Set(Array.isArray(listed) ? listed.filter(code => globalCodes.has(code)) : []);
+}
+
 function validateInstrument(payload, section, code, expectedDate, errors) {
   const item = payload?.[section]?.[code];
   const path = `$.${section}.${code}`;
@@ -43,11 +61,12 @@ export function validateSourceFreshness(payload) {
     if (!parseDate(marketDate)) throw new Error(`Invalid market date: ${String(marketDate || '(missing)')}`);
     if (!isTradingDate(marketDate, 'KRX')) errors.push(`$.meta.market_date: ${marketDate} is not a KRX trading date.`);
     const previousUsSession = previousTradingDate(marketDate, 'NYSE');
+    const exempt = declaredUnavailable(payload);
     for (const [section, codes] of SAME_DAY_RULES) {
-      for (const code of codes) validateInstrument(payload, section, code, marketDate, errors);
+      for (const code of codes) if (!exempt.has(code)) validateInstrument(payload, section, code, marketDate, errors);
     }
     for (const [section, codes] of PREVIOUS_US_SESSION_RULES) {
-      for (const code of codes) validateInstrument(payload, section, code, previousUsSession, errors);
+      for (const code of codes) if (!exempt.has(code)) validateInstrument(payload, section, code, previousUsSession, errors);
     }
   } catch (error) {
     errors.push(`$.meta.market_date: ${error instanceof Error ? error.message : String(error)}.`);
