@@ -74,13 +74,14 @@ function replaceCategoryAlternates(body, markup) {
 const LEGACY_REPORT_HTML = /^\/reports\/.+\.html$/i;
 
 // /reports/<path>.html → 301 /reports/<path>(?query). Pages answers an existing
-// report's .html with its own 308 and a missing one with 404; only the former is
-// upgraded, so missing reports keep their direct 404. url.pathname is already
-// percent-encoded, so Hangul paths are not encoded twice.
+// report's .html with its own 308 and a missing one with 404; only that 308 (or a
+// file served directly with 200) is upgraded, so missing reports keep their direct
+// 404 and any other redirect keeps its own status and Location. url.pathname is
+// already percent-encoded, so Hangul paths are not encoded twice.
 export function legacyReportHtmlRedirect(request, url, response) {
   if (request.method !== 'GET' && request.method !== 'HEAD') return null;
   if (!LEGACY_REPORT_HTML.test(url.pathname)) return null;
-  if (!(response.ok || (response.status >= 300 && response.status < 400))) return null;
+  if (!(response.ok || response.status === 308)) return null;
   return new Response(null, {
     status: 301,
     headers: {

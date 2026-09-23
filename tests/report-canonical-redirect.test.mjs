@@ -105,6 +105,23 @@ test('5. a missing report answers 404 directly for both spellings', async () => 
   }
 });
 
+test('an upstream 301/302/307 migration redirect keeps its own status and Location', async () => {
+  const legacy = encodedPath(KO_POST.href);
+  const custom = `${PRODUCTION_ORIGIN}/reports/migrated-report?from=legacy`;
+  for (const origin of [PRODUCTION_ORIGIN, 'https://fix-seo.market-research-site.pages.dev']) {
+    for (const status of [301, 302, 307]) {
+      const request = new Request(new URL(`${legacy}?a=1`, origin), { redirect: 'manual' });
+      const response = await middleware({
+        request,
+        env: { ASSETS: { fetch: pagesAsset } },
+        next: async () => new Response(null, { status, headers: { location: custom } })
+      });
+      assert.equal(response.status, status, `${origin} upstream ${status}`);
+      assert.equal(response.headers.get('location'), custom, `${origin} upstream ${status}`);
+    }
+  }
+});
+
 test('6-7. root verification files are never redirected by the report rule and have a 200 rewrite', async () => {
   const redirects = await read('_redirects');
   for (const file of [NAVER, YANDEX]) {
