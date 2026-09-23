@@ -276,7 +276,7 @@ function isEmptyObject(value) {
 /*
  * 1.2.0 section availability. HARD sections are enforced by the schema's final
  * rules; SOFT sections (last-5-session flows, KRX sectors/themes, global/24h
- * indicators) may be partial or unavailable, but an empty section must really
+ * indicators, market breadth) may be partial or unavailable, but an empty section must really
  * be empty: a partial 5-session window never carries a 4-session sum, missing
  * groups are null, and an unavailable indicator carries no value. Earlier
  * versions are validated against the schema without section_status (see
@@ -325,6 +325,22 @@ export function validateSectionStatus(payload) {
   } else if (groups.status === 'unavailable') {
     if (payload.krx_groups !== null) errors.push('$.krx_groups: unavailable이면 null이어야 합니다(다른 날짜 값 대체 금지).');
     if (groups.reason === null) errors.push('$.section_status.krx_groups.reason: unavailable에는 사유가 필요합니다.');
+  }
+
+  // Market breadth (SOFT): complete means both markets for this very session;
+  // unavailable means no breadth numbers at all — never another date's counts.
+  const breadthStatus = status.market_breadth || {};
+  const breadth = payload.market_breadth;
+  if (breadthStatus.status === 'complete') {
+    if (breadthStatus.reason !== null) errors.push('$.section_status.market_breadth.reason: complete에는 사유가 없어야 합니다.');
+    for (const market of ['KOSPI', 'KOSDAQ']) {
+      const item = breadth?.[market];
+      if (!item) errors.push(`$.market_breadth.${market}: section_status가 complete이면 필수입니다.`);
+      else if (item.source_date !== payload?.meta?.market_date) errors.push(`$.market_breadth.${market}.source_date: market_date와 일치해야 합니다(다른 날짜 대체 금지).`);
+    }
+  } else if (breadthStatus.status === 'unavailable') {
+    if (breadthStatus.reason === null) errors.push('$.section_status.market_breadth.reason: unavailable에는 사유가 필요합니다.');
+    if (!isEmptyObject(breadth)) errors.push('$.market_breadth: unavailable이면 값을 싣지 않습니다(stale 값 금지).');
   }
 
   const global = status.global_indicators || {};

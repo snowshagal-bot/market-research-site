@@ -12,7 +12,7 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 0. **Market Close contract 1.2.0 (Draft PR, website first)**:
    - Publish API/validator accepts `1.0.1`, `1.1.0`, and `1.2.0`; `1.0.1`/`1.1.0` payloads get exactly the pre-1.2.0 result (differential check over every stored payload plus mutations). Existing D1 rows are not migrated.
-   - `1.2.0`: HARD sections (INDEX, TOP10, TURNOVER, INVESTOR, PROGRAM, SHORT, FUTURES; market breadth still required pending classification) gate `final`; SOFT sections (last-5-session flows, KRX sectors/themes, global/24h indicators) are declared in `section_status` and carried empty, never stale.
+   - `1.2.0`: HARD sections (INDEX, TOP10, TURNOVER, INVESTOR, PROGRAM, SHORT, FUTURES) gate `final`; SOFT sections (last-5-session flows, KRX sectors/themes, global/24h indicators, market breadth) are declared in `section_status` and carried empty, never stale.
    - MARKET shows an incomplete 5-session window as availability (KO/EN) instead of a partial sum; HOME keeps the live session when a 1.2.0 payload declares USD/KRW, US 10Y, or GOLD unavailable (`--`).
    - Remaining manual steps, in order: Preview QA of this PR → Production merge → install the matching core (never before this site contract is live) → offline 09-23 reconstruction from the frozen evidence → website validator dry-run → owner decision on the 09-23 POST.
 

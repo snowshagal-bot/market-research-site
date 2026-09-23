@@ -26,6 +26,8 @@
     sectorThemeBuildingDesc: (used, total) => `현재 ${used} / ${total} 거래일 · KRX 공식 업종·테마는 v1.1.0 스냅샷부터 누적됩니다.`,
     fiveDayIncomplete: (used, total) => `데이터 불완전 · ${used}/${total} 거래일 확보`,
     fiveDayMissing: days => `${days} 데이터 없음`,
+    breadthUnavailable: '이날 시장 폭 데이터 없음',
+    breadthUnavailableDesc: '등락 종목 수를 확인하지 못해 표시하지 않습니다.',
     strongest: '상승 상위', weakest: '하락 상위',
     avgRiseRatio: '평균 상승비율', avgFallRatio: '평균 하락비율',
     advancerDominant: '상승 우세', declinerDominant: '하락 우세', neutralDominant: '중립',
@@ -57,6 +59,8 @@
     sectorThemeBuildingDesc: (used, total) => `Currently ${used} / ${total} sessions available`,
     fiveDayIncomplete: (used, total) => `Incomplete data · ${used}/${total} sessions available`,
     fiveDayMissing: days => `No data for ${days}`,
+    breadthUnavailable: 'Market breadth unavailable for this session',
+    breadthUnavailableDesc: 'Advance/decline counts could not be confirmed, so none are shown.',
     strongest: 'STRONGEST', weakest: 'WEAKEST',
     avgRiseRatio: 'Avg. advance ratio', avgFallRatio: 'Avg. decline ratio',
     advancerDominant: 'Advancer dominant', declinerDominant: 'Decliner dominant', neutralDominant: 'Neutral',
@@ -455,6 +459,12 @@
         (fiveDayStatus.missing_sessions || []).length ? `<p class="group-empty-desc">${html(copy.fiveDayMissing(fiveDayStatus.missing_sessions.map(monthDay).join(', ')))}</p>` : ''}</div>`
       : null;
 
+    // Contract 1.2.0 SOFT: unavailable breadth shows its state, never old counts.
+    const breadthUnavailable = data.meta?.schema_version === '1.2.0' && data.section_status?.market_breadth?.status === 'unavailable';
+    const breadthBody = breadthUnavailable
+      ? `<div class="market-group-empty market-breadth-status" role="note"><p class="group-empty-title">${html(copy.breadthUnavailable)}</p><p class="group-empty-desc">${html(copy.breadthUnavailableDesc)}</p></div>`
+      : `<div class="breadth-grid">${['KOSPI', 'KOSDAQ'].map(key => breadthCard(key, breadth[key])).join('')}</div>`;
+
     const fiveRows = ['KOSPI', 'KOSDAQ', 'KOSPI200선물'].map(marketKey => {
       const marketName = marketKey === 'KOSPI200선물' ? (ko ? '선물' : 'KOSPI 200 Futures') : marketKey;
       const inv = recentFlows.markets?.[marketKey] || {};
@@ -521,7 +531,7 @@
           ${section(2, copy.sections[1], `<div class="mini-instrument-grid">${['SOX', 'VIX', 'US10Y', 'USDKRW', 'JPYKRW', 'DXY'].map(key => instrumentCard(key, rates[key])).join('')}</div>`)}
           ${section(3, copy.sections[2], `<div class="mini-instrument-grid commodity-grid">${['WTI', 'GOLD', 'BITCOIN'].map(key => instrumentCard(key, commodities[key])).join('')}</div>`)}
         </div>
-        ${section(4, copy.sections[3], `<div class="breadth-grid">${['KOSPI', 'KOSDAQ'].map(key => breadthCard(key, breadth[key])).join('')}</div>`)}
+        ${section(4, copy.sections[3], breadthBody)}
         <div class="market-pair market-pair-tables">
           ${section(5, copy.sections[4], dataTable([copy.market, copy.foreign, copy.institution, copy.individual], investorRows))}
           ${section(6, copy.sections[5], fiveDayBody || `${dataTable([copy.market, copy.foreign, copy.institution, copy.individual], fiveRows)}<p class="unit-note">${dateText(data.recent_5d_flows?.start_date)} – ${dateText(data.recent_5d_flows?.end_date)}</p>`)}

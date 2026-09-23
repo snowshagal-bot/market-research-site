@@ -192,7 +192,7 @@
         "required": ["meta"]
       },
       "then": {
-        "$comment": "1.2.0 final은 HARD(INDEX·TOP10·TURNOVER·INVESTOR·PROGRAM·SHORT·FUTURES와 시장 폭)만 필수다. SOFT(최근 5거래일·KRX 업종/테마·글로벌 지표)는 section_status로 판정한다. 그 밖의 버전은 기존 final 규칙을 그대로 쓴다.",
+        "$comment": "1.2.0 final은 HARD(INDEX·TOP10·TURNOVER·INVESTOR·PROGRAM·SHORT·FUTURES)만 필수다. SOFT(최근 5거래일·KRX 업종/테마·글로벌 지표·시장 폭)는 section_status로 판정한다. 그 밖의 버전은 기존 final 규칙을 그대로 쓴다.",
         "if": {
           "properties": {
             "meta": {
@@ -215,7 +215,6 @@
                 "markets": {"required": ["KOSPI", "KOSDAQ", "KOSPI200선물"]}
               }
             },
-            "market_breadth": {"required": ["KOSPI", "KOSDAQ"]},
             "program_basis": {
               "properties": {
                 "basis": {"$ref": "#/$defs/basis"},
@@ -618,7 +617,7 @@
     "sectionStatus": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["five_day_flows", "krx_groups", "global_indicators"],
+      "required": ["five_day_flows", "krx_groups", "global_indicators", "market_breadth"],
       "properties": {
         "five_day_flows": {
           "type": "object",
@@ -633,6 +632,15 @@
           }
         },
         "krx_groups": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "reason"],
+          "properties": {
+            "status": {"enum": ["complete", "unavailable"]},
+            "reason": {"$ref": "#/$defs/sectionReason"}
+          }
+        },
+        "market_breadth": {
           "type": "object",
           "additionalProperties": false,
           "required": ["status", "reason"],

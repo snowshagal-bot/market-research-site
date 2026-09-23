@@ -100,23 +100,24 @@ Exporter는 원천 웹 페이지를 직접 파싱하지 않는다. UI와 TXT 저
 | SHORT | `short_selling.market_summary`, `top5_by_value` 5개 |
 | FUTURES | `krx_investor_trading.markets.KOSPI200선물`, `program_basis.basis` |
 
-시장 폭(`market_breadth`)은 HARD/SOFT 분류가 결정되기 전까지 기존처럼 final 필수다.
 
-**SOFT** — 실패해도 Market Close 전체는 `final`일 수 있다. 대신 `section_status`에 상태를 밝히고, 빈 섹션은 stale 값으로 채우지 않는다.
+**SOFT** — 최근 5거래일 수급, KRX 업종·테마, 글로벌·24시간 지표, 시장 폭. 실패해도 Market Close 전체는 `final`일 수 있다. 대신 `section_status`에 상태를 밝히고, 빈 섹션은 stale 값으로 채우지 않는다.
 
 ```json
 "section_status": {
   "five_day_flows": {"status": "partial", "reason": "missing_session", "expected_sessions": 5, "available_sessions": 4, "missing_sessions": ["2026-09-22"]},
   "krx_groups": {"status": "unavailable", "reason": "source_validation_failed"},
-  "global_indicators": {"status": "complete", "reason": null, "unavailable": []}
+  "global_indicators": {"status": "complete", "reason": null, "unavailable": []},
+  "market_breadth": {"status": "complete", "reason": null}
 }
 ```
 
-- 상태 어휘는 `complete`·`partial`·`unavailable`뿐이다(KRX 업종·테마는 `complete`·`unavailable`). `complete`이면 `reason=null`, 그 밖에는 사유가 필수다.
+- 상태 어휘는 `complete`·`partial`·`unavailable`뿐이다(KRX 업종·테마와 시장 폭은 `complete`·`unavailable`). `complete`이면 `reason=null`, 그 밖에는 사유가 필수다.
 - 사유 어휘: `missing_session`, `source_validation_failed`, `source_unavailable`, `stale_source_date`, `replay_without_stored_source`.
 - **최근 5거래일**: 5거래일이 모두 있을 때만 `recent_5d_flows`에 누적 숫자를 싣는다. `partial`(확보 1~4일, 확보+누락=5)이나 `unavailable`(0일)이면 `markets={}`, `used_trading_days=0`이다. 4일 합계는 5거래일 누적이 아니므로 그 자리에 넣지 않는다. 화면은 "데이터 불완전 · 4/5 거래일 확보 · 9월 22일 데이터 없음"처럼 확보 상태만 표시한다.
 - **KRX 업종·테마**: KRX 응답이 자체 검증에 실패하거나 없으면 `krx_groups=null`, `status=unavailable`. 다른 날짜 값을 대신 쓰지 않는다.
 - **글로벌·24시간 지표**(NASDAQ·DOW·S&P 500·SOX·VIX·US10Y·USD/KRW·JPY/KRW·DXY·WTI·GOLD·BITCOIN): 실패하거나 기준일이 맞지 않는 지표는 `global_indicators.unavailable`에 적고, 해당 객체는 값·`source_date`가 모두 `null`인 `data_state=unavailable`로 싣는다. 목록에 없는 지표는 기존 기준일 규칙을 그대로 통과해야 한다. KOSPI·KOSDAQ은 SOFT가 아니다.
+- **시장 폭**: `complete`이면 KOSPI·KOSDAQ 모두 `source_date=market_date`. 확인하지 못하면 `market_breadth={}`, `status=unavailable`. 다른 날짜 값이나 오래된 숫자로 채우지 않는다. 화면은 숫자 대신 "이날 시장 폭 데이터 없음"을 표시한다.
 - `section_status`는 1.2.0에만 있다. 1.0.1·1.1.0 payload에 이 필드가 있으면 기존처럼 계약에 없는 필드로 거부한다.
 
 ### 정규장 복원 불가 세부값 (schema 1.1.0 호환)

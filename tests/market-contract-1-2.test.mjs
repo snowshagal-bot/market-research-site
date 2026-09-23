@@ -48,7 +48,8 @@ function complete12() {
       ordered.section_status = {
         five_day_flows: { status: 'complete', reason: null, expected_sessions: 5, available_sessions: 5, missing_sessions: [] },
         krx_groups: { status: 'complete', reason: null },
-        global_indicators: { status: 'complete', reason: null, unavailable: [] }
+        global_indicators: { status: 'complete', reason: null, unavailable: [] },
+        market_breadth: { status: 'complete', reason: null }
       };
     }
     ordered[key] = value;
@@ -86,6 +87,12 @@ function globalsUnavailable(payload, codes) {
     reason: 'source_unavailable',
     unavailable: GLOBAL.map(([, code]) => code).filter(code => codes.includes(code))
   };
+  return payload;
+}
+
+function breadthUnavailable(payload, reason = 'source_unavailable') {
+  payload.market_breadth = {};
+  payload.section_status.market_breadth = { status: 'unavailable', reason };
   return payload;
 }
 
@@ -332,5 +339,52 @@ test('MARKET shows unavailable global indicators as unavailable, not as a stale 
     assert.ok(at > 0);
     assert.match(card, /instrument-value">--</);
     assert.ok(card.includes(word), `${lang}`);
+  }
+});
+
+test('1.2.0 market breadth complete passes and is still required per market', () => {
+  assert.deepEqual(verdict(complete12()), { passed: true, errors: [] });
+  const missing = complete12();
+  delete missing.market_breadth.KOSDAQ;
+  assert.ok(verdict(missing).errors.some(error => error.startsWith('$.market_breadth.KOSDAQ')));
+});
+
+test('1.2.0 market breadth unavailable is final-publishable (SOFT)', () => {
+  assert.deepEqual(verdict(breadthUnavailable(complete12())), { passed: true, errors: [] });
+  assert.deepEqual(verdict(breadthUnavailable(complete12(), 'replay_without_stored_source')), { passed: true, errors: [] });
+});
+
+test('1.2.0 market breadth never carries stale or other-date counts', () => {
+  const otherDate = complete12();
+  otherDate.market_breadth.KOSPI.source_date = '2026-08-27';
+  assert.ok(verdict(otherDate).errors.some(error => error.includes('market_breadth.KOSPI.source_date')));
+  const staleUnderUnavailable = complete12();
+  staleUnderUnavailable.section_status.market_breadth = { status: 'unavailable', reason: 'stale_source_date' };
+  assert.ok(verdict(staleUnderUnavailable).errors.some(error => error.startsWith('$.market_breadth:')));
+  const noReason = breadthUnavailable(complete12());
+  noReason.section_status.market_breadth.reason = null;
+  assert.equal(verdict(noReason).passed, false);
+  const partialWord = complete12();
+  partialWord.section_status.market_breadth.status = 'partial';
+  assert.equal(verdict(partialWord).passed, false);
+});
+
+test('1.2.0 HARD missing still fails when market breadth is complete', () => {
+  const payload = complete12();
+  payload.market_cap_top10 = payload.market_cap_top10.slice(0, 9);
+  assert.equal(payload.section_status.market_breadth.status, 'complete');
+  assert.equal(verdict(payload).passed, false);
+});
+
+test('MARKET shows unavailable breadth as a state, never as counts (KO/EN)', async () => {
+  const payload = breadthUnavailable(complete12());
+  for (const [lang, text] of [['ko', '이날 시장 폭 데이터 없음'], ['en', 'Market breadth unavailable for this session']]) {
+    const runtime = await marketRuntime(lang);
+    const target = { innerHTML: '' };
+    runtime.render(payload, target);
+    const start = target.innerHTML.indexOf('id="market-section-4"');
+    const section = target.innerHTML.slice(start, target.innerHTML.indexOf('</section>', start));
+    assert.ok(section.includes(text), lang);
+    assert.doesNotMatch(section, /breadth-card|breadth-bar/);
   }
 });
