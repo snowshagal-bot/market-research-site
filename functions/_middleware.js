@@ -71,6 +71,26 @@ function replaceCategoryAlternates(body, markup) {
   return markup ? withoutAlternates.replace(/<\/head>/i, `${markup}</head>`) : withoutAlternates;
 }
 
+const LEGACY_REPORT_HTML = /^\/reports\/.+\.html$/i;
+
+// /reports/<path>.html → 301 /reports/<path>(?query). Pages answers an existing
+// report's .html with its own 308 and a missing one with 404; only that 308 (or a
+// file served directly with 200) is upgraded, so missing reports keep their direct
+// 404 and any other redirect keeps its own status and Location. url.pathname is
+// already percent-encoded, so Hangul paths are not encoded twice.
+export function legacyReportHtmlRedirect(request, url, response) {
+  if (request.method !== 'GET' && request.method !== 'HEAD') return null;
+  if (!LEGACY_REPORT_HTML.test(url.pathname)) return null;
+  if (!(response.ok || response.status === 308)) return null;
+  return new Response(null, {
+    status: 301,
+    headers: {
+      location: `${url.origin}${url.pathname.replace(/\.html$/i, '')}${url.search}`,
+      'cache-control': 'public, max-age=3600'
+    }
+  });
+}
+
 export async function onRequest(context) {
   const url = new URL(context.request.url);
   const hostClass = classifyHost(url);
@@ -112,6 +132,9 @@ export async function onRequest(context) {
   }
 
   let response = await context.next();
+
+  const legacyReportRedirect = legacyReportHtmlRedirect(context.request, url, response);
+  if (legacyReportRedirect) return legacyReportRedirect;
 
   if (isAdminHost(url)) {
     const contentType = response.headers.get('content-type') || '';

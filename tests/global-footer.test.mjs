@@ -97,7 +97,7 @@ test('middleware injects footer CSS into head and siteFooter into body for repor
 
   // KO Report
   const koRes = await middlewareRequest({
-    request: new Request('https://snowshagal.com/reports/sample.html'),
+    request: new Request('https://snowshagal.com/reports/sample'),
     next,
     env: {}
   });
@@ -108,7 +108,7 @@ test('middleware injects footer CSS into head and siteFooter into body for repor
 
   // EN Report
   const enRes = await middlewareRequest({
-    request: new Request('https://snowshagal.com/reports/en/sample.html'),
+    request: new Request('https://snowshagal.com/reports/en/sample'),
     next,
     env: {}
   });

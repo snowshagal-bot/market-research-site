@@ -106,7 +106,7 @@ async function withServer(options, fn) {
     }
     if (pathname === '/reports/ko-smoke.html' || pathname === '/reports/en/en-smoke.html') {
       const clean = options.wrongRedirect ? '/wrong-report' : pathname.replace(/\.html$/, '');
-      response.writeHead(308, { location: clean });
+      response.writeHead(options.legacyStatus || 301, { location: clean });
       response.end();
       return;
     }
@@ -172,7 +172,7 @@ async function expectFailure(options, expectedName, expectedMessage) {
   });
 }
 
-test('deployment smoke accepts valid 200 pages, 308 redirects, 404, sitemap, and API JSON', async () => {
+test('deployment smoke accepts valid 200 pages, 301 redirects, 404, sitemap, and API JSON', async () => {
   await withServer({}, async origin => {
     const result = await runSmoke({ origin, mode: 'production', posts, logger: quiet, enforceOrigin: false, now: SMOKE_NOW });
     assert.equal(result.failed, 0);
@@ -207,6 +207,10 @@ test('deployment smoke rejects an unexpected page 500', async () => {
 
 test('deployment smoke rejects a wrong legacy redirect destination', async () => {
   await expectFailure({ wrongRedirect: true }, 'legacy KO report redirect', /expected redirect/);
+});
+
+test('deployment smoke requires the legacy report redirect to be a permanent 301', async () => {
+  await expectFailure({ legacyStatus: 308 }, 'legacy KO report redirect', /expected HTTP 301, received 308/);
 });
 
 test('deployment smoke recovers Cloudflare UTF-8 redirect headers exposed as latin1 by Node fetch', () => {
