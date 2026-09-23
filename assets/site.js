@@ -1142,13 +1142,35 @@
       .catch(() => null);
   }
 
-  // The markup ships a neutral placeholder, so there is exactly one paint and it
-  // happens after the request settles. Painting the static file first would put
-  // a past session on screen for a frame whenever the network was slow, which is
-  // the opposite of market-summary.js being a failure-only fallback.
+  // What the server already rendered into this page (functions/_home-initial.js):
+  // the published session behind the TODAY strip and the active notice, taken
+  // from the same handlers as /api/market/latest and /api/announcements. A
+  // source missing here was not rendered, and is fetched exactly as before.
+  function readHomeBootstrap(){
+    const node = document.getElementById('home-initial-data');
+    if (!node) return null;
+    try {
+      const data = JSON.parse(node.textContent || '');
+      return data && typeof data === 'object' ? data : null;
+    } catch (_) {
+      return null;
+    }
+  }
+  const HOME_BOOTSTRAP = readHomeBootstrap();
+
+  // Without a server-rendered session the markup ships a neutral placeholder, so
+  // there is exactly one paint and it happens after the request settles.
+  // Painting the static file first would put a past session on screen for a
+  // frame whenever the network was slow, which is the opposite of
+  // market-summary.js being a failure-only fallback. With one, the same session
+  // is painted again from the bootstrap and the page makes no second request.
   function renderTodayMarket(){
     if (!document.querySelector('.today-strip')) return;
-    return fetchPublishedMarketClose().then(result => {
+    const initial = HOME_BOOTSTRAP?.market;
+    const source = initial && initial.payload
+      ? Promise.resolve({ payload: initial.payload, expectedDate: String(initial.expectedDate || '') })
+      : fetchPublishedMarketClose();
+    return source.then(result => {
       const session = todayStripSession(result?.payload, result?.expectedDate);
       paintTodayStrip(session);
       return session;
@@ -1335,6 +1357,47 @@
       }
     }, { passive: true });
 
+    let activeNoticeItem = null;
+
+    function bindNotice(notice) {
+      activeNoticeItem = notice;
+
+      const dateFormatted = formatAnnouncementDate(notice.exposureStartAt || notice.createdAt, isEn);
+
+      // Hero slide binding (strictly textContent, no translation or language parsing)
+      const heroNoticeDate = document.getElementById('hero-notice-date');
+      const heroNoticeTitle = document.getElementById('hero-notice-title');
+      const heroNoticeSnippet = document.getElementById('hero-notice-snippet');
+
+      if (heroNoticeDate) heroNoticeDate.textContent = dateFormatted;
+      if (heroNoticeTitle) heroNoticeTitle.textContent = notice.title || '';
+      if (heroNoticeSnippet) heroNoticeSnippet.textContent = notice.content || '';
+
+      // Dialog binding (strictly textContent)
+      const dialogDate = document.getElementById('notice-dialog-date');
+      const dialogTitle = document.getElementById('notice-dialog-title');
+      const dialogContent = document.getElementById('notice-dialog-content');
+
+      if (dialogDate) dialogDate.textContent = dateFormatted;
+      if (dialogTitle) dialogTitle.textContent = notice.title || '';
+      if (dialogContent) dialogContent.textContent = notice.content || '';
+
+      // Unhide notice slide
+      slideNotice.hidden = false;
+
+      // Rebuild activeSlides: [BRAND, NOTICE, LATEST RESEARCH]
+      activeSlides = [slide1, slideNotice];
+      if (latestResearch && !slide2.hidden) {
+        activeSlides.push(slide2);
+      }
+    }
+
+    // A notice the server already rendered (or its confirmed absence) is bound
+    // before the first paint, so the counter starts at its final total.
+    const hasInitialNotice = !!HOME_BOOTSTRAP && Object.prototype.hasOwnProperty.call(HOME_BOOTSTRAP, 'announcement');
+    const initialNotice = hasInitialNotice ? HOME_BOOTSTRAP.announcement : null;
+    if (initialNotice && typeof initialNotice === 'object' && slideNotice) bindNotice(initialNotice);
+
     // Initial state
     goTo(0);
 
@@ -1394,52 +1457,22 @@
       });
     }
 
-    let activeNoticeItem = null;
-
-    // Asynchronous announcement binding (single request to /api/announcements)
-    const noticePromise = fetch('/api/announcements', { headers: { Accept: 'application/json' } })
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        const items = Array.isArray(data?.items) ? data.items : [];
-        if (items.length > 0 && slideNotice) {
-          const notice = items[0];
-          activeNoticeItem = notice;
-
-          const dateFormatted = formatAnnouncementDate(notice.exposureStartAt || notice.createdAt, isEn);
-
-          // Hero slide binding (strictly textContent, no translation or language parsing)
-          const heroNoticeDate = document.getElementById('hero-notice-date');
-          const heroNoticeTitle = document.getElementById('hero-notice-title');
-          const heroNoticeSnippet = document.getElementById('hero-notice-snippet');
-
-          if (heroNoticeDate) heroNoticeDate.textContent = dateFormatted;
-          if (heroNoticeTitle) heroNoticeTitle.textContent = notice.title || '';
-          if (heroNoticeSnippet) heroNoticeSnippet.textContent = notice.content || '';
-
-          // Dialog binding (strictly textContent)
-          const dialogDate = document.getElementById('notice-dialog-date');
-          const dialogTitle = document.getElementById('notice-dialog-title');
-          const dialogContent = document.getElementById('notice-dialog-content');
-
-          if (dialogDate) dialogDate.textContent = dateFormatted;
-          if (dialogTitle) dialogTitle.textContent = notice.title || '';
-          if (dialogContent) dialogContent.textContent = notice.content || '';
-
-          // Unhide notice slide
-          slideNotice.hidden = false;
-
-          // Rebuild activeSlides: [BRAND, NOTICE, LATEST RESEARCH]
-          activeSlides = [slide1, slideNotice];
-          if (latestResearch && !slide2.hidden) {
-            activeSlides.push(slide2);
+    // Asynchronous announcement binding (single request to /api/announcements),
+    // only when the server did not already render it.
+    const noticePromise = hasInitialNotice
+      ? Promise.resolve(activeNoticeItem)
+      : fetch('/api/announcements', { headers: { Accept: 'application/json' } })
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          const items = Array.isArray(data?.items) ? data.items : [];
+          if (items.length > 0 && slideNotice) {
+            bindNotice(items[0]);
+            // Refresh current position & controls
+            goTo(activeIndex);
           }
-
-          // Refresh current position & controls
-          goTo(activeIndex);
-        }
-        return activeNoticeItem;
-      })
-      .catch(() => null);
+          return activeNoticeItem;
+        })
+        .catch(() => null);
 
     const controller = {
       goTo,

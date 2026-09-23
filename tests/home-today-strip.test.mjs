@@ -562,7 +562,9 @@ test('site.js paints the strip exactly once, after the request settles', async (
   // No pre-fetch paint: every paintTodayStrip call sits inside the fetch continuation.
   assert.doesNotMatch(renderBody, /paintTodayStrip\(todayStripSession\(null\)\)/);
   assert.equal((renderBody.match(/paintTodayStrip\(/g) || []).length, 1);
-  assert.match(renderBody, /fetchPublishedMarketClose\(\)\.then/);
+  // The request is made only when the server did not render the session.
+  assert.match(renderBody, /: fetchPublishedMarketClose\(\);/);
+  assert.match(renderBody, /return source\.then\(result => \{/);
 });
 
 test('homepage markup exposes the nodes the strip renders into', async () => {

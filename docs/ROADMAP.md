@@ -10,11 +10,15 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
-0. **SEO Phase 1 — report canonical URL consolidation (Draft PR, Preview only)**:
+0. **SEO Phase 2 — homepage initial HTML (Draft PR, Preview only)**:
+   - `/` and `/en/` ship Latest Research, the active notice (or its absence, with the matching carousel total) and the TODAY strip in the raw HTML, from the same handlers and helpers the page script uses; `site.js` reuses the server data from a JSON bootstrap instead of refetching.
+   - Remaining manual steps: Preview raw-HTML and JS-disabled QA → owner approval → Production merge → Production `curl` check of `/` and `/en/` (no "—" in the strip, bootstrap present) and a browser check that the homepage makes no `/api/market/latest` or `/api/announcements` request on load.
+
+0. **SEO Phase 1 — report canonical URL consolidation (merged #138, Production verified)**:
    - An existing report's `/reports/<path>.html` answers one `301` to the extensionless canonical `/reports/<path>` (query preserved, Hangul percent-encoding unchanged); missing reports keep a direct 404. Production previously answered with the Pages default 308.
    - The Naver verification file `/naver96f43741acd96bcdeb679f22cddc4a80.html` gets a `_redirects` 200 rewrite like Yandex (Production currently 308s it).
    - The Market page Daily CTA links to the extensionless report URL.
-   - Remaining manual steps: Preview QA → owner approval → Production merge → Production `curl -I` check of one KO/EN legacy URL (301) and both verification files (200) → Search Console / Naver Search Advisor URL inspection.
+   - Production checked: legacy KO/EN 301 → 200, both verification files 200, sitemap 0 `.html`. Remaining: Search Console / Naver Search Advisor URL inspection.
 
 0. **Market Close contract 1.2.0 (Draft PR, website first)**:
    - Publish API/validator accepts `1.0.1`, `1.1.0`, and `1.2.0`; `1.0.1`/`1.1.0` payloads get exactly the pre-1.2.0 result (differential check over every stored payload plus mutations). Existing D1 rows are not migrated.
