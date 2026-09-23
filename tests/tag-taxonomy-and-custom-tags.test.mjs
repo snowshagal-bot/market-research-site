@@ -655,7 +655,7 @@ test('Regression 6: Report middleware bootstraps TAG_REGISTRY with correct scrip
 
   // 1. Success case: both posts and tags load
   const context = {
-    request: new Request('https://snowshagal.com/reports/2026-08-25-test.html'),
+    request: new Request('https://snowshagal.com/reports/2026-08-25-test'),
     env: {
       ASSETS: {
         fetch: async (req) => {
@@ -698,7 +698,7 @@ test('Regression 6: Report middleware bootstraps TAG_REGISTRY with correct scrip
 
   // 2. Fail-safe case: tags.json fails to load (404/error)
   const failContext = {
-    request: new Request('https://snowshagal.com/reports/2026-08-25-test.html'),
+    request: new Request('https://snowshagal.com/reports/2026-08-25-test'),
     env: {
       ASSETS: {
         fetch: async (req) => {

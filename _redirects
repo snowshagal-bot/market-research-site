@@ -1,2 +1,4 @@
 # Yandex Webmaster requires the literal verification filename to return HTTP 200.
 /yandex_9866f357776964b4.html /yandex_9866f357776964b4 200
+# Naver Search Advisor verification must also answer HTTP 200 at the literal filename.
+/naver96f43741acd96bcdeb679f22cddc4a80.html /naver96f43741acd96bcdeb679f22cddc4a80 200

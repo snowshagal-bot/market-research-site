@@ -10,6 +10,12 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+0. **SEO Phase 1 — report canonical URL consolidation (Draft PR, Preview only)**:
+   - An existing report's `/reports/<path>.html` answers one `301` to the extensionless canonical `/reports/<path>` (query preserved, Hangul percent-encoding unchanged); missing reports keep a direct 404. Production previously answered with the Pages default 308.
+   - The Naver verification file `/naver96f43741acd96bcdeb679f22cddc4a80.html` gets a `_redirects` 200 rewrite like Yandex (Production currently 308s it).
+   - The Market page Daily CTA links to the extensionless report URL.
+   - Remaining manual steps: Preview QA → owner approval → Production merge → Production `curl -I` check of one KO/EN legacy URL (301) and both verification files (200) → Search Console / Naver Search Advisor URL inspection.
+
 0. **Market Close contract 1.2.0 (Draft PR, website first)**:
    - Publish API/validator accepts `1.0.1`, `1.1.0`, and `1.2.0`; `1.0.1`/`1.1.0` payloads get exactly the pre-1.2.0 result (differential check over every stored payload plus mutations). Existing D1 rows are not migrated.
    - `1.2.0`: HARD sections (INDEX, TOP10, TURNOVER, INVESTOR, PROGRAM, SHORT, FUTURES) gate `final`; SOFT sections (last-5-session flows, KRX sectors/themes, global/24h indicators, market breadth) are declared in `section_status` and carried empty, never stale.

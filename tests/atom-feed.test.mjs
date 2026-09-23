@@ -271,7 +271,7 @@ test('withFeedLink removes any Atom link already there and writes exactly one ba
 test('the middleware gives a report exactly one feed link for its language, keeps hreflang it adds, and drops any the upload carried', async () => {
   const uploaded = '<!doctype html><html><head><title>Sample</title><link rel="alternate" type="application/atom+xml" title="stale" href="/stale.xml"><link rel="alternate" hreflang="ko" href="https://snowshagal.com/reports/sample"></head><body><p>Body</p></body></html>';
   const next = async () => new Response(uploaded, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } });
-  for (const [pathname, lang] of [['/reports/sample.html', 'ko'], ['/reports/en/sample.html', 'en']]) {
+  for (const [pathname, lang] of [['/reports/sample', 'ko'], ['/reports/en/sample', 'en']]) {
     const res = await middlewareRequest({ request: new Request(`https://snowshagal.com${pathname}`), next, env: {} });
     const html = await res.text();
     const links = html.match(ATOM_LINK) || [];
@@ -287,7 +287,7 @@ test('hreflang links added by the middleware survive next to the feed link on a 
   const posts = [post('known', { href: 'reports/known.html', translationGroup: 'g' }), post('known-en', { lang: 'en', href: 'reports/en/known-en.html', translationGroup: 'g' })];
   const uploaded = '<!doctype html><html><head><title>Known</title></head><body><p>Body</p></body></html>';
   const next = async () => new Response(uploaded, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } });
-  const res = await middlewareRequest({ request: new Request('https://snowshagal.com/reports/known.html'), next, env: envWith(posts) });
+  const res = await middlewareRequest({ request: new Request('https://snowshagal.com/reports/known'), next, env: envWith(posts) });
   const html = await res.text();
   assert.equal(count(html, ATOM_LINK), 1);
   assert.ok(count(html, /<link rel="alternate" hreflang=/g) >= 2, 'hreflang pair present');

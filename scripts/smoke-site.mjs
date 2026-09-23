@@ -228,7 +228,7 @@ export async function runSmoke({ origin, mode, posts, fetchImpl = fetch, logger 
 
     await check(`legacy ${locale.toUpperCase()} report redirect`, async () => {
       const response = await request(legacyPath, { redirect: 'manual' });
-      assertStatus(response, 308, legacyPath);
+      assertStatus(response, 301, legacyPath);
       const location = normalizeLocationHeader(response.headers.get('location'));
       if (!location) throw new Error(`${legacyPath}: redirect location is missing`);
       const actual = new URL(location, baseOrigin);

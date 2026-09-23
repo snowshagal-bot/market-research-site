@@ -263,7 +263,7 @@ Cloudflare Preview validation must not perform real `/api/manage` mutations. The
 
 Search Console should use a Domain property for `snowshagal.com`, verified with its Google-provided DNS TXT record. After verification, submit `sitemap.xml` and inspect the apex homepage. Do not commit a verification token or add it to application secrets.
 
-The root `404.html` is required for Cloudflare Pages to return an actual HTTP 404 instead of using `index.html` as an SPA fallback for unknown paths. Pages Functions middleware must leave redirect and error responses unchanged apart from the existing Preview `X-Robots-Tag` header. After changing this behavior, verify both a random root path and a random `/reports/` path on Preview before Production deployment.
+The root `404.html` is required for Cloudflare Pages to return an actual HTTP 404 instead of using `index.html` as an SPA fallback for unknown paths. Pages Functions middleware must leave redirect and error responses unchanged apart from the existing Preview `X-Robots-Tag` header, with one exception: an existing report's legacy `/reports/<path>.html` address, which Pages answers with its own 308, is upgraded to a single `301` to the extensionless canonical URL `/reports/<path>` with the query string preserved (a missing report keeps its direct 404). Root search-engine verification files are outside `/reports/` and are served with HTTP 200 through `_redirects` 200 rewrites (`yandex_9866f357776964b4.html`, `naver96f43741acd96bcdeb679f22cddc4a80.html`); without the rewrite Pages would 308 them to the extensionless path. After changing this behavior, verify both a random root path and a random `/reports/` path on Preview before Production deployment.
 
 ## Comment dependencies
 
@@ -380,7 +380,7 @@ Repository verification and deployed-site smoke are intentionally separate:
 
 The smoke engine loads current `data/posts.json` to select the latest real KO and EN report;
 it does not hardcode a report URL. It verifies the two homepages, all ten locale/category
-routes, latest Clean report URLs, legacy `.html` 308 redirects and destinations, a
+routes, latest Clean report URLs, legacy `.html` 301 redirects and destinations, a
 deterministic 404, dynamic sitemap structure/current populated categories, report/home
 canonicals, `/api/market/latest`, and comments GET. API numbers and comment counts are not
 fixed. No POST, PUT, PATCH, or DELETE request is made.

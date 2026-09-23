@@ -317,7 +317,7 @@ test('findExactDaily strictly matches post.reportDate and locale with zero fallb
   const targetWithDaily = { innerHTML: '', addEventListener() {} };
   runtime.render(d26, targetWithDaily);
   assert.match(targetWithDaily.innerHTML, /이날의 데일리 리포트 보기/);
-  assert.match(targetWithDaily.innerHTML, /reports\/daily-0826\.html/);
+  assert.match(targetWithDaily.innerHTML, /href="https:\/\/snowshagal\.com\/reports\/daily-0826"/);
 
   // Render on 2026-08-27 (historical date without matching daily)
   const d27 = JSON.parse(JSON.stringify(data));
