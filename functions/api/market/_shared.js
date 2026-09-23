@@ -1,9 +1,9 @@
-export const SCHEMA_VERSION = '1.1.0';
-export const SUPPORTED_SCHEMA_VERSIONS = Object.freeze(['1.0.1', '1.1.0']);
+export const SCHEMA_VERSION = '1.2.0';
+export const SUPPORTED_SCHEMA_VERSIONS = Object.freeze(['1.0.1', '1.1.0', '1.2.0']);
 export const MAX_PAYLOAD_BYTES = 512 * 1024;
 import { isAdminHost, isPreviewHost, isPublicHost, validateHumanAdminMutation } from '../../_host-policy.js';
 import { requireAdminMutation } from '../../_auth.js';
-import { validateSourceFreshness } from './_freshness.js';
+import { GLOBAL_INDICATOR_SECTIONS, validateSourceFreshness } from './_freshness.js';
 
 export const TABLE_NAME = 'market_close_snapshots';
 export const SCHEMA_PATH = '/contracts/market_close/market_close.schema.json';
@@ -265,10 +265,132 @@ function validateNode(value, schema, path, errors, rootSchema) {
   }
 }
 
+const SECTION_STATES = Object.freeze(['complete', 'partial', 'unavailable']);
+const FIVE_DAY_MARKETS = Object.freeze(['KOSPI', 'KOSDAQ', 'KOSPI200선물']);
+const INSTRUMENT_VALUES = Object.freeze(['close', 'current', 'change', 'change_pct', 'open', 'high', 'low', 'previous_close', 'source_date']);
+
+function isEmptyObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0;
+}
+
+/*
+ * 1.2.0 section availability. HARD sections are enforced by the schema's final
+ * rules; SOFT sections (last-5-session flows, KRX sectors/themes, global/24h
+ * indicators, market breadth) may be partial or unavailable, but an empty section must really
+ * be empty: a partial 5-session window never carries a 4-session sum, missing
+ * groups are null, and an unavailable indicator carries no value. Earlier
+ * versions are validated against the schema without section_status (see
+ * schemaForVersion), so a 1.0.1/1.1.0 payload gets exactly the result it got
+ * before 1.2.0 existed.
+ */
+export function validateSectionStatus(payload) {
+  const errors = [];
+  const version = payload?.meta?.schema_version;
+  const status = payload?.section_status;
+  if (version !== '1.2.0') return errors;
+  if (!status || typeof status !== 'object') return errors; // the schema reports the missing object
+
+  const five = status.five_day_flows || {};
+  const flows = payload.recent_5d_flows || {};
+  const missing = Array.isArray(five.missing_sessions) ? five.missing_sessions : [];
+  const available = five.available_sessions;
+  if (SECTION_STATES.includes(five.status)) {
+    if (five.status === 'complete') {
+      if (available !== 5 || missing.length !== 0) errors.push('$.section_status.five_day_flows: complete는 5/5 거래일, 누락 없음이어야 합니다.');
+      if (five.reason !== null) errors.push('$.section_status.five_day_flows.reason: complete에는 사유가 없어야 합니다.');
+      if (flows.used_trading_days !== 5) errors.push('$.recent_5d_flows.used_trading_days: complete이면 5여야 합니다.');
+      for (const market of FIVE_DAY_MARKETS) {
+        if (!flows.markets || !Object.hasOwn(flows.markets, market)) errors.push(`$.recent_5d_flows.markets.${market}: complete이면 필수입니다.`);
+      }
+    } else {
+      if (five.reason === null) errors.push('$.section_status.five_day_flows.reason: partial/unavailable에는 사유가 필요합니다.');
+      if (five.status === 'partial' && !(available >= 1 && available <= 4 && missing.length === 5 - available)) {
+        errors.push('$.section_status.five_day_flows: partial은 확보 1~4일과 누락일 수가 합쳐 5거래일이어야 합니다.');
+      }
+      if (five.status === 'unavailable' && available !== 0) errors.push('$.section_status.five_day_flows: unavailable은 확보 0일이어야 합니다.');
+      // 4거래일 합계를 5거래일 누적 자리에 싣지 않는다.
+      if (!isEmptyObject(flows.markets) || flows.used_trading_days !== 0) {
+        errors.push('$.recent_5d_flows: 5거래일이 완전하지 않으면 누적 숫자를 싣지 않습니다(markets={}, used_trading_days=0).');
+      }
+    }
+    if (new Set(missing).size !== missing.length || missing.some(day => day >= payload?.meta?.market_date && day !== payload?.meta?.market_date)) {
+      errors.push('$.section_status.five_day_flows.missing_sessions: 중복되거나 market_date 이후인 날짜가 있습니다.');
+    }
+  }
+
+  const groups = status.krx_groups || {};
+  if (groups.status === 'complete') {
+    if (!payload.krx_groups) errors.push('$.krx_groups: section_status가 complete이면 업종·테마가 필요합니다.');
+    if (groups.reason !== null) errors.push('$.section_status.krx_groups.reason: complete에는 사유가 없어야 합니다.');
+  } else if (groups.status === 'unavailable') {
+    if (payload.krx_groups !== null) errors.push('$.krx_groups: unavailable이면 null이어야 합니다(다른 날짜 값 대체 금지).');
+    if (groups.reason === null) errors.push('$.section_status.krx_groups.reason: unavailable에는 사유가 필요합니다.');
+  }
+
+  // Market breadth (SOFT): complete means both markets for this very session;
+  // unavailable means no breadth numbers at all — never another date's counts.
+  const breadthStatus = status.market_breadth || {};
+  const breadth = payload.market_breadth;
+  if (breadthStatus.status === 'complete') {
+    if (breadthStatus.reason !== null) errors.push('$.section_status.market_breadth.reason: complete에는 사유가 없어야 합니다.');
+    for (const market of ['KOSPI', 'KOSDAQ']) {
+      const item = breadth?.[market];
+      if (!item) errors.push(`$.market_breadth.${market}: section_status가 complete이면 필수입니다.`);
+      else if (item.source_date !== payload?.meta?.market_date) errors.push(`$.market_breadth.${market}.source_date: market_date와 일치해야 합니다(다른 날짜 대체 금지).`);
+    }
+  } else if (breadthStatus.status === 'unavailable') {
+    if (breadthStatus.reason === null) errors.push('$.section_status.market_breadth.reason: unavailable에는 사유가 필요합니다.');
+    if (!isEmptyObject(breadth)) errors.push('$.market_breadth: unavailable이면 값을 싣지 않습니다(stale 값 금지).');
+  }
+
+  const global = status.global_indicators || {};
+  const listed = Array.isArray(global.unavailable) ? global.unavailable : [];
+  const allCodes = GLOBAL_INDICATOR_SECTIONS.flatMap(([, codes]) => codes);
+  if (new Set(listed).size !== listed.length) errors.push('$.section_status.global_indicators.unavailable: 중복 코드가 있습니다.');
+  if (global.status === 'complete' && (listed.length !== 0 || global.reason !== null)) {
+    errors.push('$.section_status.global_indicators: complete에는 unavailable 코드와 사유가 없어야 합니다.');
+  }
+  if (global.status === 'partial' && !(listed.length >= 1 && listed.length < allCodes.length)) {
+    errors.push('$.section_status.global_indicators: partial은 일부 코드만 unavailable이어야 합니다.');
+  }
+  if (global.status === 'unavailable' && listed.length !== allCodes.length) {
+    errors.push('$.section_status.global_indicators: unavailable은 모든 글로벌 지표가 비어 있어야 합니다.');
+  }
+  if (global.status !== 'complete' && global.reason === null) errors.push('$.section_status.global_indicators.reason: partial/unavailable에는 사유가 필요합니다.');
+  for (const [section, codes] of GLOBAL_INDICATOR_SECTIONS) {
+    for (const code of codes) {
+      const item = payload?.[section]?.[code];
+      const path = `$.${section}.${code}`;
+      if (listed.includes(code)) {
+        if (item !== null && (item?.data_state !== 'unavailable' || INSTRUMENT_VALUES.some(key => item?.[key] !== null))) {
+          errors.push(`${path}: unavailable 지표에는 값이 없어야 합니다(stale 값 금지).`);
+        }
+      } else if (!item || item.data_state === 'unavailable') {
+        errors.push(`${path}: section_status.global_indicators.unavailable에 없는 지표는 값이 있어야 합니다.`);
+      }
+    }
+  }
+  return errors;
+}
+
+const legacySchemas = new WeakMap();
+
+// section_status exists only in 1.2.0. Every other version is checked against
+// the schema without it, so an older payload that carries the block is still
+// rejected as an unknown field, exactly as before 1.2.0.
+function schemaForVersion(schema, version) {
+  if (version === '1.2.0' || !schema?.properties?.section_status) return schema;
+  if (!legacySchemas.has(schema)) {
+    const { section_status: _omitted, ...properties } = schema.properties;
+    legacySchemas.set(schema, { ...schema, properties });
+  }
+  return legacySchemas.get(schema);
+}
+
 export function validateMarketPayload(payload, schema) {
   const errors = [];
   if (!schema || typeof schema !== 'object') errors.push('$: JSON Schema가 없습니다.');
-  else validateNode(payload, schema, '$', errors, schema);
+  else validateNode(payload, schemaForVersion(schema, payload?.meta?.schema_version), '$', errors, schema);
   if (payload?.meta?.status !== 'final') errors.push('$.meta.status: publish API는 final 데이터만 허용합니다.');
   if (!SUPPORTED_SCHEMA_VERSIONS.includes(payload?.meta?.schema_version)) errors.push(`$.meta.schema_version: 지원 버전(${SUPPORTED_SCHEMA_VERSIONS.join(', ')})이어야 합니다.`);
   if (payload?.validation?.passed !== true) errors.push('$.validation.passed: true여야 합니다.');
@@ -286,6 +408,7 @@ export function validateMarketPayload(payload, schema) {
       });
     }
   }
+  errors.push(...validateSectionStatus(payload));
   const freshness = validateSourceFreshness(payload);
   errors.push(...freshness.errors);
   return { passed: errors.length === 0, errors: Array.from(new Set(errors)).slice(0, 100) };

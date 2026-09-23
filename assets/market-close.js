@@ -24,6 +24,10 @@
     recent5Days: '최근 5거래일', recent20Days: '최근 20거래일',
     sectorThemeBuilding: '업종 · 테마 기간 데이터 축적 중',
     sectorThemeBuildingDesc: (used, total) => `현재 ${used} / ${total} 거래일 · KRX 공식 업종·테마는 v1.1.0 스냅샷부터 누적됩니다.`,
+    fiveDayIncomplete: (used, total) => `데이터 불완전 · ${used}/${total} 거래일 확보`,
+    fiveDayMissing: days => `${days} 데이터 없음`,
+    breadthUnavailable: '이날 시장 폭 데이터 없음',
+    breadthUnavailableDesc: '등락 종목 수를 확인하지 못해 표시하지 않습니다.',
     strongest: '상승 상위', weakest: '하락 상위',
     avgRiseRatio: '평균 상승비율', avgFallRatio: '평균 하락비율',
     advancerDominant: '상승 우세', declinerDominant: '하락 우세', neutralDominant: '중립',
@@ -53,6 +57,10 @@
     recent5Days: 'Last 5 Sessions', recent20Days: 'Last 20 Sessions',
     sectorThemeBuilding: 'Sector & theme history is building',
     sectorThemeBuildingDesc: (used, total) => `Currently ${used} / ${total} sessions available`,
+    fiveDayIncomplete: (used, total) => `Incomplete data · ${used}/${total} sessions available`,
+    fiveDayMissing: days => `No data for ${days}`,
+    breadthUnavailable: 'Market breadth unavailable for this session',
+    breadthUnavailableDesc: 'Advance/decline counts could not be confirmed, so none are shown.',
     strongest: 'STRONGEST', weakest: 'WEAKEST',
     avgRiseRatio: 'Avg. advance ratio', avgFallRatio: 'Avg. decline ratio',
     advancerDominant: 'Advancer dominant', declinerDominant: 'Decliner dominant', neutralDominant: 'Neutral',
@@ -436,6 +444,27 @@
       return [marketName, flow(inv['외국인']?.net_buy), flow(inv['기관']?.net_buy), flow(inv['개인']?.net_buy)];
     });
 
+    // Contract 1.2.0: a last-5-session window missing a session carries no
+    // cumulative numbers, only its availability. Never sum fewer sessions
+    // into the five-session slot.
+    const fiveDayStatus = data.meta?.schema_version === '1.2.0' ? data.section_status?.five_day_flows : null;
+    const fiveDayIncomplete = !!fiveDayStatus && fiveDayStatus.status !== 'complete';
+    const monthDay = value => {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return html(value || '--');
+      const [, m, d] = value.split('-').map(Number);
+      return ko ? `${m}월 ${d}일` : new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(2000, m - 1, d)));
+    };
+    const fiveDayBody = fiveDayIncomplete
+      ? `<div class="market-group-empty market-five-day-status" role="note"><p class="group-empty-title">${html(copy.fiveDayIncomplete(fiveDayStatus.available_sessions ?? 0, fiveDayStatus.expected_sessions ?? 5))}</p>${
+        (fiveDayStatus.missing_sessions || []).length ? `<p class="group-empty-desc">${html(copy.fiveDayMissing(fiveDayStatus.missing_sessions.map(monthDay).join(', ')))}</p>` : ''}</div>`
+      : null;
+
+    // Contract 1.2.0 SOFT: unavailable breadth shows its state, never old counts.
+    const breadthUnavailable = data.meta?.schema_version === '1.2.0' && data.section_status?.market_breadth?.status === 'unavailable';
+    const breadthBody = breadthUnavailable
+      ? `<div class="market-group-empty market-breadth-status" role="note"><p class="group-empty-title">${html(copy.breadthUnavailable)}</p><p class="group-empty-desc">${html(copy.breadthUnavailableDesc)}</p></div>`
+      : `<div class="breadth-grid">${['KOSPI', 'KOSDAQ'].map(key => breadthCard(key, breadth[key])).join('')}</div>`;
+
     const fiveRows = ['KOSPI', 'KOSDAQ', 'KOSPI200선물'].map(marketKey => {
       const marketName = marketKey === 'KOSPI200선물' ? (ko ? '선물' : 'KOSPI 200 Futures') : marketKey;
       const inv = recentFlows.markets?.[marketKey] || {};
@@ -502,10 +531,10 @@
           ${section(2, copy.sections[1], `<div class="mini-instrument-grid">${['SOX', 'VIX', 'US10Y', 'USDKRW', 'JPYKRW', 'DXY'].map(key => instrumentCard(key, rates[key])).join('')}</div>`)}
           ${section(3, copy.sections[2], `<div class="mini-instrument-grid commodity-grid">${['WTI', 'GOLD', 'BITCOIN'].map(key => instrumentCard(key, commodities[key])).join('')}</div>`)}
         </div>
-        ${section(4, copy.sections[3], `<div class="breadth-grid">${['KOSPI', 'KOSDAQ'].map(key => breadthCard(key, breadth[key])).join('')}</div>`)}
+        ${section(4, copy.sections[3], breadthBody)}
         <div class="market-pair market-pair-tables">
           ${section(5, copy.sections[4], dataTable([copy.market, copy.foreign, copy.institution, copy.individual], investorRows))}
-          ${section(6, copy.sections[5], `${dataTable([copy.market, copy.foreign, copy.institution, copy.individual], fiveRows)}<p class="unit-note">${dateText(data.recent_5d_flows?.start_date)} – ${dateText(data.recent_5d_flows?.end_date)}</p>`)}
+          ${section(6, copy.sections[5], fiveDayBody || `${dataTable([copy.market, copy.foreign, copy.institution, copy.individual], fiveRows)}<p class="unit-note">${dateText(data.recent_5d_flows?.start_date)} – ${dateText(data.recent_5d_flows?.end_date)}</p>`)}
         </div>
         <div class="market-trio">
           ${section(7, copy.sections[6], `<div class="program-grid"><div><h3>${ko ? '프로그램 매매' : 'Program trading'}</h3>${dataTable(['', copy.netBuy], programRows, 'compact')}</div><div class="basis-panel">${metric(copy.spot, number(program.basis?.kospi200_spot, 2))}${metric(program.basis?.future_name || copy.future, number(program.basis?.future, 2))}${metric(copy.basis, signed(program.basis?.basis, 2), signClass(program.basis?.basis))}<span class="state-chip">${html(program.basis?.market_state || '--')}</span></div></div>`)}

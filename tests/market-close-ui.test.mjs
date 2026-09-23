@@ -32,7 +32,7 @@ test('authoritative Market Close contract copies remain internally consistent', 
   assert.equal(example.meta.status, 'final');
   assert.equal(example.validation.passed, true);
   assert.deepEqual(example.validation.errors, []);
-  assert.deepEqual(schema.properties.meta.properties.schema_version.enum, ['1.0.1', '1.1.0']);
+  assert.deepEqual(schema.properties.meta.properties.schema_version.enum, ['1.0.1', '1.1.0', '1.2.0']);
   assert.equal(example.krx_groups.sectors.length, 46);
   assert.equal(example.krx_groups.themes.length, 39);
   assert.match(contract, /schema_version/);

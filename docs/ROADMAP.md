@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated: 2026-09-06
+Updated: 2026-09-23
 
 This roadmap records implementation order, completed capabilities, and operational priorities, not a promise to build every future idea. Keep the current site small and stable until real traffic, indexing, and operational needs justify added complexity.
 
@@ -9,6 +9,12 @@ This roadmap records implementation order, completed capabilities, and operation
 The core site architecture, bilingual structure, SEO/clean URLs, category discovery, analytics, and publishing pipeline are fully implemented and running in Production. Admin Origin Isolation (Phase 1A) is enforced on `admin.snowshagal.com`.
 
 ### Next action
+
+0. **Market Close contract 1.2.0 (Draft PR, website first)**:
+   - Publish API/validator accepts `1.0.1`, `1.1.0`, and `1.2.0`; `1.0.1`/`1.1.0` payloads get exactly the pre-1.2.0 result (differential check over every stored payload plus mutations). Existing D1 rows are not migrated.
+   - `1.2.0`: HARD sections (INDEX, TOP10, TURNOVER, INVESTOR, PROGRAM, SHORT, FUTURES) gate `final`; SOFT sections (last-5-session flows, KRX sectors/themes, global/24h indicators, market breadth) are declared in `section_status` and carried empty, never stale.
+   - MARKET shows an incomplete 5-session window as availability (KO/EN) instead of a partial sum; HOME keeps the live session when a 1.2.0 payload declares USD/KRW, US 10Y, or GOLD unavailable (`--`).
+   - Remaining manual steps, in order: Preview QA of this PR → Production merge → install the matching core (never before this site contract is live) → offline 09-23 reconstruction from the frozen evidence → website validator dry-run → owner decision on the 09-23 POST.
 
 0. **Admin Phase 2 announcements (Draft implementation)**:
    - Session-authenticated CRUD at `/admin/market/announcements/` for major/general, all/future-group audience, Draft/Published state, and KST-authored UTC exposure windows.

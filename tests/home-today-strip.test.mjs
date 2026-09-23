@@ -777,3 +777,39 @@ test('U. temporary transparency notice is hidden when 2026-09-18 is fresh (not s
   assert.equal(strip.transparency.hidden, true);
   assert.equal(strip.transparency.innerHTML, '');
 });
+
+// Contract 1.2.0: a SOFT global indicator the payload itself declares
+// unavailable reads "--"; it never pulls the static (older) value in.
+function soft12(marketDate, unavailable) {
+  const payload = marketPayload(marketDate, { ko: '1.2.0 문장', en: '1.2.0 line' });
+  payload.meta.schema_version = '1.2.0';
+  for (const code of unavailable) {
+    const group = code === 'GOLD' ? 'commodities_crypto' : code === 'KOSPI' || code === 'KOSDAQ' ? 'indices' : 'rates_fx_volatility';
+    payload[group][code] = { close: null, change: null, change_pct: null, data_state: 'unavailable' };
+  }
+  payload.section_status = { global_indicators: { status: 'partial', reason: 'source_unavailable', unavailable } };
+  return payload;
+}
+
+test('P. 1.2.0 declared-unavailable USD/KRW keeps the live session and reads "--"', async () => {
+  const strip = await runHomepage({ fetchResult: soft12('2026-08-26', ['USDKRW']) });
+  assert.equal(strip.date.textContent, 'AUG 26');
+  assert.match(strip.grid.innerHTML, /6,808\.21/);
+  assert.match(strip.grid.innerHTML, /USD\/KRW<\/span><span class="today-value">--<\/span>/);
+  assert.doesNotMatch(strip.grid.innerHTML, /1,386\.10/);
+  assert.doesNotMatch(strip.grid.innerHTML, /6,742\.74/);
+});
+
+test('P2. an undeclared gap in a 1.2.0 payload still falls back as a whole', async () => {
+  const payload = soft12('2026-08-26', []);
+  delete payload.commodities_crypto.GOLD;
+  const strip = await runHomepage({ fetchResult: payload });
+  assert.equal(strip.date.textContent, 'AUG 25');
+  assert.doesNotMatch(strip.grid.innerHTML, /6,808\.21/);
+});
+
+test('P3. KOSPI can never be declared away: the session falls back as a whole', async () => {
+  const strip = await runHomepage({ fetchResult: soft12('2026-08-26', ['KOSPI']) });
+  assert.equal(strip.date.textContent, 'AUG 25');
+  assert.doesNotMatch(strip.grid.innerHTML, /6,808\.21/);
+});

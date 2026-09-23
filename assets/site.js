@@ -954,13 +954,24 @@
 
   // Build the strip from a published Market Close payload. Returns null unless
   // every item resolves, so a changed contract falls back to the static file as
-  // a whole instead of mixing two sources into one row.
+  // a whole instead of mixing two sources into one row. The one exception is a
+  // contract 1.2.0 payload that itself declares a SOFT global indicator
+  // (USD/KRW, US 10Y, GOLD) unavailable: that item reads "--" rather than
+  // pulling an older session's value into today's strip. KOSPI and KOSDAQ are
+  // HARD and never qualify.
+  function declaredUnavailable(payload){
+    if (payload?.meta?.schema_version !== '1.2.0') return new Set();
+    const listed = payload?.section_status?.global_indicators?.unavailable;
+    return new Set(Array.isArray(listed) ? listed.filter(code => code !== 'KOSPI' && code !== 'KOSDAQ') : []);
+  }
   function publishedStripItems(payload){
+    const soft = declaredUnavailable(payload);
+    const unavailable = spec => (soft.has(spec.key) ? { label: spec.label, value: '--', change: '', direction: 'flat' } : null);
     const items = TODAY_STRIP_ITEMS.map(spec => {
       const quote = payload?.[spec.group]?.[spec.key];
-      if (!quote || !finiteNumber(quote.close)) return null;
+      if (!quote || !finiteNumber(quote.close)) return unavailable(spec);
       const movement = spec.format === 'index' || spec.format === 'usd' ? quote.change_pct : quote.change;
-      if (!finiteNumber(movement)) return null;
+      if (!finiteNumber(movement)) return unavailable(spec);
       const arrow = movement < 0 ? '▼' : '▲';
       const size = Math.abs(movement);
       let value = '';

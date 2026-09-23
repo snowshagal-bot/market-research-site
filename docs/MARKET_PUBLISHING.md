@@ -1,6 +1,6 @@
 # Market Close publishing
 
-The current Market Close payload is contract version `1.1.0`; legacy `1.0.1` payloads remain readable and publishable. The canonical contract, compatibility schema, and development fixture are stored in `contracts/market_close/`.
+The current Market Close payload is contract version `1.2.0`; `1.1.0` and legacy `1.0.1` payloads remain readable and publishable unchanged (no migration or rewrite). `1.2.0` splits sections into HARD (INDEX, TOP10, TURNOVER, INVESTOR, PROGRAM, SHORT, FUTURES — any failure blocks `final`) and SOFT (last-5-session flows, KRX sectors/themes, global/24h indicators, market breadth — may be `partial`/`unavailable`, declared in `section_status`, and then carried empty rather than stale). See `contracts/market_close/MARKET_DATA_CONTRACT.md`. The canonical contract, compatibility schema, and development fixture are stored in `contracts/market_close/`.
 
 ## Endpoints
 
@@ -38,8 +38,10 @@ The browser keeps the typed admin key in session storage only. The key is never 
 Before any D1 write, the server enforces the copied JSON Schema and these publishing gates:
 
 - body size is at most 512KB;
-- `meta.schema_version` is supported (`1.0.1` or `1.1.0`);
+- `meta.schema_version` is supported (`1.0.1`, `1.1.0`, or `1.2.0`);
 - `1.1.0` includes complete `krx_groups`; `1.0.1` may omit it;
+- `1.2.0` includes `section_status`; a `partial`/`unavailable` last-5-session window carries `markets: {}` and `used_trading_days: 0`, unavailable KRX groups are `null`, unavailable market breadth is `{}` (a complete one carries both markets for `market_date` only), and every indicator listed in `section_status.global_indicators.unavailable` carries no value (freshness rules skip only those listed indicators; KOSPI and KOSDAQ are never exempt);
+- `1.0.1`/`1.1.0` payloads are validated exactly as before `1.2.0` (a `section_status` field on them is rejected as an unknown field);
 - KRX group codes are unique per array, names are non-empty, all numeric fields are finite, every `source_date` matches `market_date`, and every source is `KRX`;
 - `meta.status` is exactly `final`;
 - `validation.passed` is `true` and `validation.errors` is empty;
