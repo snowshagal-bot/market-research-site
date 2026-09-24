@@ -190,5 +190,17 @@ window.TAG_REGISTRY = {
     "en": "Japan",
     "group": "market",
     "custom": true
+  },
+  "price": {
+    "ko": "물가",
+    "en": "Price",
+    "group": "market",
+    "custom": true
+  },
+  "pce": {
+    "ko": "PCE",
+    "en": "PCE",
+    "group": "market",
+    "custom": true
   }
 };
