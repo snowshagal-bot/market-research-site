@@ -1,5 +1,30 @@
 [
   {
+    "id": "2026-09-24-note-gpogsf",
+    "type": "note",
+    "typeLabel": "투자 노트",
+    "lang": "ko",
+    "date": "2026-09-24",
+    "reportDate": "2026-09-24",
+    "registeredDate": "2026-09-24",
+    "registeredAt": "2026-09-24T12:02:41.843Z",
+    "legacyImport": false,
+    "title": "물가를 재는자가 바뀐다",
+    "subtitle": "",
+    "description": "시장과 투자에 관한 생각을 자유롭게 정리한 투자 노트.",
+    "tags": [
+      "liquidity",
+      "fed",
+      "price",
+      "pce"
+    ],
+    "readingMinutes": 15,
+    "href": "reports/20260924_Investment_Note_PCE_Methodology_Change.html",
+    "coverImage": "covers/2026-09-24-note-gpogsf.webp",
+    "shareCardImage": "covers/share/2026-09-24-note-gpogsf.jpg",
+    "coverThumbnail": "covers/2026-09-24-note-gpogsf-450.webp"
+  },
+  {
     "id": "2026-09-23-daily-1nzub7c",
     "type": "daily",
     "typeLabel": "Daily",

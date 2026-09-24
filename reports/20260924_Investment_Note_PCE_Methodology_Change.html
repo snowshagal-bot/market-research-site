@@ -1,0 +1,1056 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>INVESTMENT NOTE NO.05 · 물가를 재는 자가 바뀐다 · 2026.09.24</title>
+<meta name="description" content="9월 30일 미국 8월 PCE와 BEA 2026년 연례 개정 동시 공개 · 근원 PCE 세 항목 계산 방식 변경 · 주된 소급 개정창도 함께 다시 써서 같은 날 공개 · 볼 것은 끊김이 아니라 개정폭, 그리고 공개된 대표 기관 추정과의 차이">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#e9e2d3;--sheet:#f6f1e6;--sheet2:#efe7d7;--sheet3:#e8dfcc;
+  --ink:#1a1e23;--body:#3c4046;--muted:#6c685f;--line:#d8cfbc;--line2:#bcae93;--rule:#1d2126;
+  --brass:#9a6b22;--brass-l:#d6b06a;--brass-p:#efe1bf;
+  --vault:#0e171c;--vault2:#142129;--vault3:#1b2b34;--vink:#efe7d6;--vbody:#c9c2b3;--vmut:#8f9ea3;--vline:#2a3b44;
+  --crayon:#8f2f2b;
+  --serif:"Noto Serif KR","Noto Serif CJK KR","Nanum Myeongjo","AppleMyungjo",Georgia,serif;
+  --sans:"Pretendard Variable","Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif;
+  --mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+  --grain:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .3 0 0 0 0 .22 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --ticks:repeating-linear-gradient(90deg,rgba(214,176,106,.55) 0 1px,transparent 1px 8px);
+  --ticks-l:repeating-linear-gradient(90deg,rgba(154,107,34,.55) 0 1px,transparent 1px 8px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;background:var(--paper);overflow-x:hidden}
+body{margin:0;background:var(--paper) var(--grain);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.72;word-break:keep-all;line-break:strict;overflow-wrap:break-word;-webkit-font-smoothing:antialiased;letter-spacing:-.018em;overflow-x:hidden}
+a{color:inherit} img,svg{max-width:100%} button{font:inherit}
+b,strong{font-weight:750;color:var(--ink)}
+.mono{font-family:var(--mono);letter-spacing:.04em}
+
+/* top bar */
+.topbar{position:sticky;top:0;z-index:90;background:rgba(14,23,28,.93);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(214,176,106,.18);color:var(--vink)}
+.tbin{max-width:1120px;margin:0 auto;padding:9px 18px 8px;display:flex;justify-content:space-between;align-items:center;gap:14px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.tbin b{color:var(--brass-l);font-weight:600}.tbin span{color:var(--vmut)}
+.pgbar{position:absolute;left:0;bottom:-1px;height:2px;width:0;background:var(--brass-l)}
+.rail{display:none}
+@media(min-width:1180px){
+  .rail{display:flex;flex-direction:column;gap:5px;position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:80}
+  .rail a{display:block;width:36px;padding:4px 0;text-align:center;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-decoration:none;color:var(--muted);background:rgba(246,241,230,.88);border:1px solid var(--line);transition:.2s}
+  .rail a.on{background:var(--vault);color:var(--brass-l);border-color:var(--vault);transform:translateX(-4px)}
+}
+
+/* cover */
+.cover{position:relative;background:var(--vault);color:var(--vink);overflow:hidden;isolation:isolate}
+.cover::before{content:"";position:absolute;inset:0;background:var(--grain);opacity:.6;z-index:-1;mix-blend-mode:screen}
+.cover::after{content:"";position:absolute;left:0;right:0;bottom:0;height:22px;background:var(--ticks);opacity:.35;z-index:-1;-webkit-mask:linear-gradient(transparent,#000);mask:linear-gradient(transparent,#000)}
+.cvin{max-width:1120px;margin:0 auto;padding:24px 20px 40px}
+.cv-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--vmut)}
+.cv-top .brandline b{display:block;color:var(--vink);font-family:var(--serif);letter-spacing:.01em;text-transform:none;font-size:17px;margin-bottom:2px}
+.serial{border:1px solid rgba(214,176,106,.55);padding:8px 12px 7px;text-align:right;line-height:1.5;position:relative;background:rgba(14,23,28,.5);flex:none}
+.serial::before,.serial::after{content:"";position:absolute;width:6px;height:6px;border:1px solid var(--brass-l)}
+.serial::before{left:-4px;top:-4px}.serial::after{right:-4px;bottom:-4px}
+.serial b{display:block;font-size:26px;letter-spacing:.06em;color:var(--brass-l);font-weight:600;line-height:1.1;margin-top:3px}
+.cv-grid{display:grid;gap:8px;margin-top:26px}
+.cv-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--brass-l);text-transform:uppercase}
+.cv-title{font-family:var(--serif);font-weight:900;font-size:clamp(46px,13.4vw,86px);white-space:nowrap;line-height:1.02;letter-spacing:-.05em;margin:12px 0 18px;color:#f5eedf}
+.cv-title .l1{display:block;font-size:.5em;font-weight:700;letter-spacing:-.035em;line-height:1.15;color:var(--vink);margin-bottom:.14em}
+.cv-title .l2{display:block}
+.cv-title em{font-style:normal;color:var(--brass-l);position:relative;display:inline-block}
+.cv-sub{font-family:var(--serif);font-size:clamp(19px,3.8vw,25px);font-weight:700;line-height:1.5;color:var(--vink);margin:0 0 12px;max-width:560px}
+.cv-deck{font-size:15px;line-height:1.75;color:var(--vbody);max-width:540px;margin:0}
+.cv-deck b{color:var(--vink)}
+.cv-art{margin:8px auto 0;width:100%;max-width:540px}
+.cv-art svg{display:block;width:100%;height:auto;overflow:visible}
+.cv-art .cap2{font-family:var(--sans);font-size:11.5px;letter-spacing:0;color:var(--vmut);text-align:center;margin-top:6px;line-height:1.5}
+.notes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:26px}
+.bn{position:relative;padding:13px 13px 12px;border:1px solid rgba(214,176,106,.45);background:linear-gradient(180deg,rgba(214,176,106,.07),rgba(214,176,106,.02));min-width:0}
+.bn::before{content:"";position:absolute;inset:3px;border:1px solid rgba(214,176,106,.16);pointer-events:none}
+.bn .band{height:8px;background:var(--ticks);margin:-3px -3px 9px;opacity:.8}
+.bn .k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--brass-l);text-transform:uppercase}
+.bn .v{font-family:var(--serif);font-weight:900;font-size:clamp(26px,6.8vw,38px);line-height:1.08;letter-spacing:-.03em;color:#f5eedf;margin:6px 0 6px;white-space:nowrap}
+.bn .v small{font-size:.48em;font-weight:700;margin-left:3px;color:var(--vbody)}
+.bn .d{font-size:12.5px;line-height:1.5;color:var(--vbody)}
+.bn sup a{color:var(--brass-l)}
+.bn.q .v{color:var(--brass-l)}
+.cv-foot{margin-top:24px;padding-top:16px;border-top:1px solid var(--vline);display:grid;gap:14px}
+.cv-thesis{font-family:var(--serif);font-size:clamp(18px,3.9vw,23px);line-height:1.6;font-weight:700;color:var(--vink);margin:0}
+.cv-thesis mark{background:none;color:var(--brass-l);box-shadow:inset 0 -.36em 0 rgba(214,176,106,.18)}
+.cv-note{font-size:12px;line-height:1.65;color:var(--vmut);margin:0}
+.cv-site{display:inline-flex;align-items:center;gap:9px;font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--brass-l);text-decoration:none;margin-top:8px}
+.cv-site:before{content:"";display:block;width:34px;height:1.4px;background:var(--brass-l);opacity:.75}
+@media(min-width:900px){
+  .cvin{padding:30px 36px 50px}
+  .cv-grid{grid-template-columns:1.02fr .98fr;align-items:center;gap:30px}
+  .notes{grid-template-columns:repeat(4,1fr);gap:14px}
+  .cv-foot{grid-template-columns:1.35fr 1fr;align-items:end;gap:34px}
+}
+
+/* at-a-glance */
+.glance{max-width:880px;margin:0 auto;padding:30px 20px 6px}
+.glance h4{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--brass);margin:0 0 4px;font-weight:600}
+.w6{display:grid;grid-template-columns:1fr;border-top:2px solid var(--rule);border-bottom:1px solid var(--rule);margin:8px 0 0;background:rgba(246,241,230,.6)}
+.w6 div{display:grid;grid-template-columns:64px 1fr;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);font-size:14px;line-height:1.6}
+.w6 div:last-child{border-bottom:0}
+.w6 dt{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--brass);padding-top:2px;font-weight:600}
+.w6 dd{margin:0;color:var(--body)}
+@media(min-width:760px){.w6{grid-template-columns:1fr 1fr 1fr}.w6 div{grid-template-columns:1fr;gap:2px;padding:12px 14px;border-right:1px solid var(--line)}.w6 div:nth-child(3n){border-right:0}.w6 div:nth-child(-n+3){border-bottom:1px solid var(--line)}.w6 div:nth-child(n+4){border-bottom:0}}
+
+/* pages */
+.page{position:relative;padding:54px 0 58px;background:var(--sheet) var(--grain);scroll-margin-top:40px;overflow:hidden}
+.page.alt{background:var(--sheet2) var(--grain)}
+.page.dark{background:var(--vault);color:var(--vink)}
+.page.dark::before{content:"";position:absolute;inset:0;background:var(--grain);opacity:.55;mix-blend-mode:screen;pointer-events:none}
+.wrap{position:relative;max-width:880px;margin:0 auto;padding:0 20px}
+.ph{display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding-bottom:10px;border-bottom:1px solid var(--line2)}
+.dark .ph{color:var(--vmut);border-color:var(--vline)}
+.ph .pg{display:inline-flex;align-items:center;gap:8px;color:var(--ink);font-weight:600}
+.dark .ph .pg{color:var(--brass-l)}
+.ph .pg::before{content:"";width:24px;height:9px;background:var(--ticks-l)}
+.dark .ph .pg::before{background:var(--ticks)}
+.chno{position:absolute;right:10px;top:-26px;font-family:var(--serif);font-weight:900;font-size:clamp(110px,26vw,210px);line-height:1;color:transparent;-webkit-text-stroke:1px rgba(154,107,34,.26);letter-spacing:-.06em;pointer-events:none;user-select:none;z-index:0}
+.dark .chno{-webkit-text-stroke:1px rgba(214,176,106,.2)}
+.kick{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--brass);text-transform:uppercase;margin:28px 0 8px;font-weight:600;position:relative}
+.dark .kick{color:var(--brass-l)}
+h2{font-family:var(--serif);font-weight:900;font-size:clamp(33px,7.6vw,54px);line-height:1.15;letter-spacing:-.045em;margin:0 0 14px;position:relative}
+.dark h2{color:#f5eedf}
+h2 em{font-style:normal;color:var(--brass)}
+.dark h2 em{color:var(--brass-l)}
+.dek{display:inline-block;font-family:var(--serif);font-size:16.5px;font-weight:700;line-height:1.55;margin:0 0 22px;padding:2px 0 2px 12px;border-left:3px solid var(--brass);position:relative}
+.dark .dek{border-color:var(--brass-l);color:var(--vink)}
+h3{font-family:var(--serif);font-size:21px;line-height:1.4;letter-spacing:-.03em;margin:36px 0 10px}
+h3 .n{font-family:var(--mono);font-size:12px;color:var(--brass);letter-spacing:.08em;margin-right:8px;vertical-align:3px}
+.dark h3{color:#f5eedf}
+p{margin:0 0 14px;color:var(--body)}
+.dark p{color:var(--vbody)}
+.dark b,.dark strong{color:#f5eedf}
+.lead{font-size:17.5px;line-height:1.8;color:var(--ink)}
+.dark .lead{color:var(--vink)}
+ul.pts{list-style:none;margin:0 0 16px;padding:0}
+ul.pts li{position:relative;padding:0 0 0 18px;margin:0 0 9px;color:var(--body);line-height:1.7}
+ul.pts li::before{content:"";position:absolute;left:2px;top:.72em;width:8px;height:1.5px;background:var(--brass)}
+.dark ul.pts li{color:var(--vbody)}.dark ul.pts li::before{background:var(--brass-l)}
+sup{line-height:0;font-size:.62em;margin-left:1px}
+sup a{color:var(--brass);text-decoration:none;font-weight:700;font-family:var(--mono)}
+.dark sup a{color:var(--brass-l)}
+.hl{background:linear-gradient(transparent 58%,rgba(214,176,106,.42) 58%,rgba(214,176,106,.42) 92%,transparent 92%)}
+.dark .hl{background:linear-gradient(transparent 60%,rgba(214,176,106,.25) 60%)}
+.small{font-size:12.5px;line-height:1.6;color:var(--muted)}
+.dark .small{color:var(--vmut)}
+.tt{border-bottom:1px dotted var(--brass);cursor:help}
+.dark .tt{border-bottom-color:var(--brass-l)}
+
+/* crayon */
+.crayon{position:relative;display:inline-block;white-space:nowrap}
+.crayon svg{max-width:none;position:absolute;left:-10px;top:-8px;width:calc(100% + 20px);height:calc(100% + 16px);overflow:visible;pointer-events:none}
+.crayon path{fill:none;stroke:var(--crayon);stroke-width:2.2;stroke-linecap:round;opacity:.85}
+
+/* figures */
+.fig{margin:28px 0;padding:0}
+.fig-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-top:2px solid var(--rule);padding:8px 0 10px}
+.dark .fig-h{border-color:var(--vink)}
+.fig-h b{font-size:14.5px;font-weight:750;line-height:1.45}
+.fig-h span{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);white-space:nowrap}
+.dark .fig-h span{color:var(--vmut)}
+.cap{font-size:12.5px;line-height:1.6;color:var(--muted);margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
+.dark .cap{color:var(--vmut);border-color:var(--vline)}
+.svgbox{max-width:520px;margin:0 auto}
+.svgbox svg{display:block;width:100%;height:auto;overflow:visible}
+.tag{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;padding:2px 7px;border:1px solid var(--line2);color:var(--muted);vertical-align:2px;margin-left:6px;white-space:nowrap;font-weight:500}
+.dark .tag{border-color:var(--vline);color:var(--vmut)}
+
+/* quote cards */
+.quotes{display:grid;gap:12px;margin:20px 0}
+.qc{position:relative;padding:16px 16px 14px 18px;border:1px solid var(--line2);background:#fbf8f1}
+.qc::before{content:"BEA · 원문";position:absolute;top:-9px;left:12px;background:var(--sheet);padding:0 6px;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--brass)}
+.qc q{display:block;font-family:Georgia,var(--serif);font-size:18px;line-height:1.5;color:var(--ink);quotes:"“" "”";font-style:italic}
+.qc .ko{display:block;font-size:13.5px;color:var(--muted);margin-top:8px}
+@media(min-width:720px){.quotes{grid-template-columns:1fr 1fr}}
+
+/* timeline */
+.tl{display:grid;gap:0;margin:22px 0 6px;border-top:2px solid var(--rule)}
+.tl>div{display:grid;grid-template-columns:92px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.tl .d{font-family:var(--serif);font-weight:900;font-size:21px;line-height:1.1;letter-spacing:-.02em}
+.tl .d small{display:block;font-family:var(--mono);font-size:10.5px;font-weight:500;color:var(--muted);letter-spacing:.08em;margin-top:3px}
+.tl b{display:block;font-size:15px}
+.tl span{font-size:13.5px;color:var(--muted)}
+.tl .now .d{color:var(--brass)}
+@media(min-width:760px){.tl{grid-template-columns:repeat(4,1fr);border-top:0}.tl>div{grid-template-columns:1fr;gap:6px;border-bottom:0;border-top:2px solid var(--rule);padding:12px 14px 4px 0;position:relative}.tl>div::before{content:"";position:absolute;left:0;top:-7px;width:12px;height:12px;border-radius:50%;background:var(--sheet);border:2px solid var(--rule)}.tl .now::before{background:var(--brass);border-color:var(--brass)}.tl>div+div{padding-left:14px}.tl>div+div::before{left:14px}}
+
+/* item cards */
+.items{display:grid;gap:12px;margin:22px 0}
+.it{display:grid;grid-template-columns:52px 1fr;gap:14px;padding:16px;border:1px solid var(--line2);background:rgba(255,255,255,.38);position:relative}
+.it .ic{width:52px;height:52px}
+.it .ic svg{width:52px;height:52px;display:block}
+.it .ic path,.it .ic rect,.it .ic circle,.it .ic line,.it .ic polyline{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.it .ic .acc{stroke:var(--brass)}
+.it h4{margin:0;font-family:var(--serif);font-size:18px;line-height:1.35;letter-spacing:-.02em;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.it h4 span{font-family:var(--serif);font-weight:900;font-size:24px;color:var(--brass);white-space:nowrap}
+.it h4 span small{font-size:.5em;margin-left:1px}
+.it .fromto{display:grid;gap:4px;margin-top:8px;font-size:13.5px;line-height:1.55;color:var(--body)}
+.it .fromto i{font-style:normal;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);display:inline-block;width:34px}
+.it .since{margin-top:8px;font-family:var(--sans);font-size:12.5px;font-weight:600;letter-spacing:-.01em;color:var(--brass)}
+@media(min-width:820px){.items{grid-template-columns:repeat(3,1fr)}.it{grid-template-columns:1fr}}
+
+/* summary box */
+.sumbox{margin:34px 0 0;padding:18px 18px 14px;border:1px solid var(--rule);background:#fbf8f1;position:relative}
+.sumbox .t{position:absolute;top:-10px;left:14px;background:var(--rule);color:var(--brass-l);font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;padding:3px 8px}
+.sumbox ol{margin:6px 0 0;padding:0;list-style:none;counter-reset:sb}
+.sumbox li{counter-increment:sb;display:grid;grid-template-columns:28px 1fr;gap:6px;padding:7px 0;border-bottom:1px dashed var(--line2);font-size:14.5px;line-height:1.6;color:var(--body)}
+.sumbox li:last-child{border-bottom:0}
+.sumbox li::before{content:"0" counter(sb);font-family:var(--mono);font-size:12px;color:var(--brass);padding-top:2px;font-weight:600}
+.dark .sumbox{background:var(--vault2);border-color:var(--vline)}
+.dark .sumbox .t{background:var(--brass-l);color:var(--vault)}
+.dark .sumbox li{color:var(--vbody);border-color:var(--vline)}
+.dark .sumbox li::before{color:var(--brass-l)}
+
+/* pull */
+.pull{position:relative;margin:36px 0;padding:18px 0 18px 22px;border-left:4px solid var(--brass);font-family:var(--serif);font-size:clamp(21px,4.6vw,28px);font-weight:800;line-height:1.5;letter-spacing:-.035em;color:var(--ink)}
+.dark .pull{border-color:var(--brass-l);color:#f5eedf}
+.pull small{display:block;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--muted);letter-spacing:-.01em;margin-top:8px}
+
+/* mechanism flow */
+.mech{display:grid;gap:14px;margin:24px 0}
+.mc{border:1px solid var(--line2);background:rgba(255,255,255,.4);padding:14px 14px 12px}
+.mc.new{border:1.5px solid var(--rule);background:#fbf8f1}
+.mc .t{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--muted);margin-bottom:10px}
+.mc.new .t{color:var(--brass)}
+.flow{display:grid;grid-template-columns:1fr;gap:0}
+.fs{padding:9px 12px;border:1px solid var(--line2);background:var(--sheet);font-size:14px;line-height:1.5;position:relative}
+.fs b{display:block;font-size:14.5px}
+.fs .num{font-family:var(--serif);font-weight:900;font-size:22px;letter-spacing:-.02em;color:var(--ink)}
+.fs.res{background:var(--rule);color:var(--vink);border-color:var(--rule)}
+.fs.res b,.fs.res .num{color:#f5eedf}
+.mc.new .fs.res .num{color:var(--brass-l)}
+.fs.res small{color:var(--vbody)}
+.arr{height:28px;position:relative;font-family:var(--sans);font-size:12.5px;color:var(--muted);padding-left:34px;display:flex;align-items:center;letter-spacing:.04em}
+.arr::before{content:"";position:absolute;left:18px;top:2px;bottom:6px;border-left:1.5px solid var(--rule)}
+.arr::after{content:"";position:absolute;left:14px;bottom:2px;border:4.5px solid transparent;border-top:6px solid var(--rule);border-bottom:0}
+.fs small{display:block;font-size:12.5px;color:var(--muted);line-height:1.5}
+@media(min-width:760px){.mech{grid-template-columns:1fr 1fr}}
+
+/* gauge + historic */
+.two{display:grid;gap:18px}
+@media(min-width:760px){.two{grid-template-columns:1.1fr .9fr;align-items:center}}
+.sim{border:1px dashed var(--line2);padding:14px 14px 10px;background:rgba(255,255,255,.3)}
+.sim .t{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--brass);margin-bottom:6px}
+.sim table{width:100%;border-collapse:collapse;font-size:14px}
+.sim th,.sim td{padding:7px 4px;border-bottom:1px solid var(--line);text-align:right}
+.sim th:first-child,.sim td:first-child{text-align:left}
+.sim th{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--muted);font-weight:500}
+.sim td b{font-family:var(--serif);font-size:16px}
+
+/* diverging bars (neutral) */
+.dv{display:grid;gap:14px;margin-top:4px}
+.dvr{display:grid;grid-template-columns:118px 1fr;gap:12px;align-items:center}
+.dvl{font-size:14px;font-weight:700;line-height:1.3;color:var(--vink)}
+.dvl small{display:block;font-weight:500;font-family:var(--mono);font-size:10.5px;color:var(--vmut);letter-spacing:.04em;margin-top:2px}
+.dvt{position:relative;height:40px}
+.dvt::before{content:"";position:absolute;left:75%;top:-8px;bottom:-8px;border-left:1px solid var(--vink)}
+.dvb{position:absolute;top:6px;height:28px;display:flex;align-items:center;font-family:var(--serif);font-weight:900;font-size:17px;cursor:default}
+.dvb.neg{background:var(--vink);color:var(--vault);justify-content:flex-start;padding-left:9px;border-radius:3px 0 0 3px}
+.dvb.pos{background:repeating-linear-gradient(45deg,rgba(239,231,214,.55) 0 3px,transparent 3px 7px);border:1px solid var(--vink);border-left:0;justify-content:flex-end;border-radius:0 3px 3px 0}
+.dvb.pos em{position:absolute;left:calc(100% + 8px);font-style:normal;color:var(--vink)}
+.dvsum{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--vline);font-size:13.5px;color:var(--vbody)}
+.dvsum b{font-family:var(--serif);font-size:30px;color:var(--brass-l);font-weight:900;letter-spacing:-.02em;white-space:nowrap}
+.dvax{display:grid;grid-template-columns:118px 1fr;gap:12px;margin-top:6px}
+.dvax div{position:relative;height:16px;font-family:var(--mono);font-size:10.5px;color:var(--vmut)}
+.dvax span{position:absolute;transform:translateX(-50%)}
+
+/* horizontal compare bars */
+.hb{display:grid;gap:10px;margin:14px 0 4px}
+.hbr{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center;font-size:13.5px}
+.hbr .l{color:var(--vbody);line-height:1.35}
+.hbr .l small{display:block;font-family:var(--mono);font-size:10.5px;color:var(--vmut)}
+.hbt{position:relative;height:30px;background:rgba(239,231,214,.06);border-left:1px solid var(--vink)}
+.hbt i{position:absolute;left:0;top:3px;bottom:3px;background:var(--vink);display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-style:normal;font-family:var(--serif);font-weight:900;font-size:16px;color:var(--vault)}
+.hbt i.o{background:transparent;border:1px dashed var(--vmut);color:var(--vink)}
+
+/* grid of 12 */
+.cells{margin:18px 0 6px;display:grid;gap:12px}
+.cellrow .lab{font-size:13.5px;font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.cellrow .lab span{font-weight:500;color:var(--muted);font-size:12.5px}
+.cg{display:grid;grid-template-columns:repeat(12,1fr);gap:3px}
+.cg i{height:30px;border:1px solid var(--line2);background:#fbf8f1;display:flex;align-items:center;justify-content:center;font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.cg i.eq{background:var(--sheet3);color:var(--ink);text-decoration:line-through;text-decoration-color:var(--crayon)}
+.cg i.z{background:#fbf8f1}
+.cg i.q{background:repeating-linear-gradient(135deg,transparent 0 4px,rgba(29,33,38,.13) 4px 5px);color:var(--ink);font-weight:600}
+.cg i.na{border-style:dashed;background:transparent}
+.cg2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cg2 .yr{font-family:var(--mono);font-size:11px;color:var(--muted);margin:0 0 4px;letter-spacing:.06em}
+.cg2 .cg{grid-template-columns:repeat(6,1fr)}
+
+/* KUM cards */
+.kum{display:grid;gap:12px;margin:22px 0}
+.km{border:1px solid var(--line2);background:rgba(255,255,255,.4);padding:14px 16px 12px;position:relative}
+.km .b{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.16em;padding:3px 8px;border:1px solid var(--rule);font-weight:600}
+.km.k .b{background:var(--rule);color:var(--vink)}
+.km.u .b{border-style:dashed;color:var(--ink)}
+.km.m{border:1.5px solid var(--brass);background:#fbf8f1}
+.km.m .b{background:var(--brass);border-color:var(--brass);color:#fff}
+.km h4{font-family:var(--serif);font-size:17px;margin:10px 0 6px;letter-spacing:-.02em;line-height:1.4}
+.km ul.pts{margin:0}.km ul.pts li{font-size:14px;margin-bottom:5px}
+@media(min-width:780px){.kum{grid-template-columns:1fr 1fr 1fr}}
+
+/* market band */
+.band{margin:18px 0 4px;padding:0 4px}
+.bt{position:relative;height:128px}
+.bt .axis{position:absolute;left:0;right:0;top:58px;height:2px;background:var(--rule)}
+.bt .rng{position:absolute;top:44px;height:30px;background:repeating-linear-gradient(90deg,rgba(154,107,34,.28) 0 2px,rgba(154,107,34,.12) 2px 6px);border-left:1.5px solid var(--brass);border-right:1.5px solid var(--brass)}
+.bt .mk{position:absolute;transform:translateX(-50%);text-align:center;font-size:12.5px;line-height:1.3;white-space:nowrap;cursor:default}
+.bt .mk b{display:block;font-family:var(--serif);font-size:18px;font-weight:900}
+.bt .mk.up{bottom:92px}.bt .mk.dn{top:78px}
+.bt .mk::after{content:"";position:absolute;left:50%;width:1px;background:var(--rule)}
+.bt .mk.up::after{top:100%;height:14px}.bt .mk.dn::after{bottom:100%;height:12px}
+.bt .mk.dn b{color:var(--muted)}
+.bt .dot{position:absolute;top:53px;width:12px;height:12px;border-radius:50%;background:var(--rule);transform:translateX(-50%);border:2px solid var(--sheet)}
+.bt .dot.o{background:var(--sheet);border:2px solid var(--muted)}
+.bticks{position:relative;height:18px;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.bticks span{position:absolute;transform:translateX(-50%)}
+.zones{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px}
+.zones div{border-top:2px solid var(--rule);padding:6px 2px 0;font-size:12.5px;line-height:1.45;color:var(--body)}
+.zones div b{display:block;font-size:13.5px}
+.zones .mid{border-top-color:var(--brass)}
+
+/* sep chart */
+.sepbox{display:grid;gap:16px;margin:16px 0}
+@media(min-width:760px){.sepbox{grid-template-columns:1.1fr .9fr;align-items:center}}
+
+/* counter cards */
+.cc{display:grid;gap:10px;margin:18px 0}
+.ccd{display:grid;grid-template-columns:40px 1fr;gap:12px;padding:14px 14px 12px;border-top:2px solid var(--rule);background:rgba(255,255,255,.3)}
+.ccd .n{font-family:var(--serif);font-weight:900;font-size:26px;line-height:1;color:var(--brass)}
+.ccd h4{margin:0 0 4px;font-size:16px;font-family:var(--serif);letter-spacing:-.02em;line-height:1.4}
+.ccd p{margin:0;font-size:14px;line-height:1.65}
+@media(min-width:760px){.cc{grid-template-columns:1fr 1fr}.cc .ccd:last-child:nth-child(odd){grid-column:1/-1}}
+
+/* watch list */
+.watch{display:grid;gap:12px;margin:18px 0}
+.wc{display:grid;grid-template-columns:auto 1fr;gap:14px;padding:16px;border:1px solid var(--rule);background:#fbf8f1;position:relative}
+.wc .no{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--brass);font-weight:600;writing-mode:vertical-rl;transform:rotate(180deg);border-left:1px solid var(--line2);padding-left:8px}
+.wc h4{margin:0 0 5px;font-family:var(--serif);font-size:17px;letter-spacing:-.02em;line-height:1.4;display:flex;gap:8px;align-items:flex-start}
+.wc h4::before{content:"";flex:none;width:15px;height:15px;border:1.6px solid var(--rule);margin-top:4px}
+.wc p{margin:0;font-size:14px;line-height:1.65}
+.wc .st{position:absolute;top:10px;right:12px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);border:1px dashed var(--line2);padding:1px 6px}
+@media(min-width:760px){.watch{grid-template-columns:1fr 1fr}}
+
+/* korea box */
+.kr{margin:30px 0 0;padding:18px;border-left:4px solid var(--rule);background:rgba(255,255,255,.35)}
+.kr .t{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--brass);font-weight:600;margin-bottom:6px}
+
+/* details */
+details.fold{margin:22px 0;border:1px solid var(--line2);background:rgba(255,255,255,.35)}
+details.fold summary{cursor:pointer;list-style:none;padding:13px 16px;font-family:var(--serif);font-weight:700;font-size:16px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+details.fold summary::-webkit-details-marker{display:none}
+details.fold summary::after{content:"+";font-family:var(--mono);font-size:18px;color:var(--brass)}
+details.fold[open] summary::after{content:"−"}
+details.fold .in{padding:0 16px 14px}
+
+/* closing */
+.closing{position:relative;background:var(--vault);color:var(--vink);padding:64px 0 60px;overflow:hidden;isolation:isolate}
+.closing::before{content:"";position:absolute;inset:0;background:var(--grain);opacity:.55;mix-blend-mode:screen;z-index:-1}
+.closing .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.24em;color:var(--brass-l)}
+.closing .big{font-family:var(--serif);font-weight:900;font-size:clamp(34px,8vw,62px);line-height:1.18;letter-spacing:-.045em;color:#f5eedf;margin:14px 0 26px}
+.closing .big em{font-style:normal;color:var(--brass-l)}
+.closing ul.pts li{font-size:16px}
+.closing .last{margin:26px 0 0;padding:18px 0 0;border-top:1px solid var(--vline);font-family:var(--serif);font-size:clamp(20px,4.4vw,26px);font-weight:800;line-height:1.5;color:var(--vink)}
+.closing .disc{margin-top:28px;font-size:12px;line-height:1.7;color:var(--vmut)}
+
+/* back matter */
+.back{background:var(--sheet) var(--grain);padding:40px 0 60px}
+.gl{display:grid;gap:0;border-top:2px solid var(--rule);margin-top:10px}
+.gl div{display:grid;grid-template-columns:110px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.6}
+.gl dt{font-weight:750;font-family:var(--serif)}
+.gl dd{margin:0;color:var(--body)}
+details.sources{margin-top:26px;border-top:2px solid var(--rule)}
+details.sources summary{cursor:pointer;padding:12px 0;font-family:var(--mono);font-size:12px;letter-spacing:.14em;font-weight:600;list-style:none}
+details.sources summary::-webkit-details-marker{display:none}
+details.sources summary::before{content:"+ ";color:var(--brass)}
+details.sources[open] summary::before{content:"− "}
+.cutoff{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--brass);padding:8px 10px;border:1px dashed var(--line2);margin:0 0 10px;line-height:1.6}
+.src{font-size:12.5px;line-height:1.7;color:var(--body);padding:9px 0;border-bottom:1px solid var(--line);scroll-margin-top:60px}
+.src:target{background:var(--brass-p)}
+.src a{color:var(--brass)}
+.foot{margin-top:26px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+/* tooltip */
+#tip{position:fixed;z-index:200;max-width:280px;padding:10px 12px;background:var(--vault);color:var(--vink);font-size:13px;line-height:1.55;border-top:2px solid var(--brass-l);box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .12s;left:0;top:0}
+#tip.show{opacity:1}
+[data-tip]{cursor:help}
+
+@media(max-width:420px){
+  .dvr,.dvax{grid-template-columns:96px 1fr}
+  .dvl{font-size:13px}
+  .it h4 span{font-size:22px}
+}
+.closing ul.pts li{color:var(--vbody)}.closing ul.pts li::before{background:var(--brass-l)}
+.dvax span:last-child{transform:translateX(-100%)}.dvax span:first-child{transform:none}
+.mini{display:grid;gap:6px;margin-top:10px}
+.mini div{display:grid;grid-template-columns:44px 1fr;gap:8px;align-items:center;font-size:12.5px;color:var(--muted)}
+.mini i{display:block;height:18px;background:var(--rule);position:relative}
+.mini i.o{background:repeating-linear-gradient(45deg,var(--rule) 0 2px,transparent 2px 5px);border:1px solid var(--rule)}
+.mini i b{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-family:var(--serif);font-size:13px;color:#f6f1e6;line-height:1}
+.mini i.o b{color:var(--ink);background:var(--sheet);padding:0 4px}
+@media(max-width:480px){.tbin{font-size:10px;letter-spacing:.08em;padding:9px 14px 8px}.tbin>div,.tbin>span{white-space:nowrap}}
+.yb{display:grid;gap:12px;margin:16px 0 8px}
+.ybx{border:1.5px solid var(--rule);background:#fbf8f1}
+.ybx .yr2{background:var(--rule);color:var(--vink);font-family:var(--serif);font-weight:900;font-size:19px;padding:8px 14px;letter-spacing:-.02em}
+.ybx dl{margin:0}
+.ybx dl div{display:grid;grid-template-columns:92px 1fr;gap:10px;padding:12px 14px;border-top:1px solid var(--line);font-size:14.5px;line-height:1.5}
+.ybx dt{font-family:var(--sans);font-weight:700;font-size:13px;color:var(--muted);padding-top:2px}
+.ybx dd{margin:0;color:var(--body)}
+.ybx dd b{font-family:var(--serif);font-size:22px;font-weight:900;color:var(--ink);letter-spacing:-.02em}
+.ybx .unk{background:repeating-linear-gradient(135deg,transparent 0 6px,rgba(29,33,38,.06) 6px 7px);border-top:1px dashed var(--line2)}
+.ybx .unk dd{color:var(--muted)}
+.ynote{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px 0 4px;font-size:14px;font-weight:700;color:var(--ink)}
+.ynote i{position:relative;width:64px;height:2px;background:var(--rule)}
+.ynote i::after{content:"";position:absolute;right:-2px;top:-4px;border:5px solid transparent;border-left:7px solid var(--rule);border-right:0}
+.ynote i::before{content:"✕";position:absolute;left:50%;top:-13px;transform:translateX(-50%);color:var(--crayon);font-size:18px;font-weight:900;background:var(--sheet);padding:0 3px;line-height:1}
+.ynote .x{text-decoration:line-through;text-decoration-color:var(--crayon);text-decoration-thickness:2px;color:var(--muted)}
+@media(min-width:720px){.yb{grid-template-columns:1fr 1fr}}
+.pull .crayon svg{left:-16px;top:-12px;width:calc(100% + 32px);height:calc(100% + 26px)}
+.voice{margin:30px 0 0;padding:16px 18px 14px;border:1px solid var(--rule);background:#fbf8f1;position:relative}
+.voice::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--brass)}
+.voice .vh{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--brass);font-weight:600;margin-bottom:8px}
+.voice .vh span+span{color:var(--muted);font-family:var(--sans);letter-spacing:0;font-weight:500}
+.voice q{display:block;font-family:Georgia,var(--serif);font-style:italic;font-size:clamp(18px,3.8vw,21px);line-height:1.5;color:var(--ink);quotes:"“" "”"}
+.voice .vk{margin:10px 0 0;font-size:14.5px;color:var(--body)}
+.voice .vl{margin:8px 0 0;padding-top:8px;border-top:1px dashed var(--line2);font-size:13px;color:var(--muted)}
+.voice.dk{background:var(--vault2);border-color:var(--vline)}
+.voice.dk::before{background:var(--brass-l)}
+.voice.dk .vh{color:var(--brass-l)}.voice.dk .vh span+span{color:var(--vmut)}
+.voice.dk .vk,.voice.dk ul.pts li{color:var(--vbody)}.voice.dk .vl{color:var(--vmut);border-color:var(--vline)}
+.voice.dk{margin-top:22px;margin-bottom:14px}
+.frame{margin:18px 0 0;padding:14px 18px;border:1px dashed var(--line2);background:rgba(255,255,255,.25)}
+.frame .t{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--brass);font-weight:600;margin-bottom:6px}
+.frame .fr{display:grid;gap:3px;font-size:14px;line-height:1.6}
+.frame .fr b{font-family:var(--serif);font-size:15px}
+.frame .fr span{color:var(--body)}
+.fly{animation:float 5s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@media(prefers-reduced-motion:reduce){.fly{animation:none}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="tbin"><div><b>Snowshagal</b> · INVESTMENT NOTE</div><span>NO.05 · 2026.09.24</span></div><div class="pgbar" id="pgbar"></div></div>
+<nav class="rail" aria-label="페이지 이동"><a href="#p0">00</a><a href="#p1">01</a><a href="#p2">02</a><a href="#p3">03</a><a href="#p4">04</a><a href="#p5">05</a><a href="#p6">06</a><a href="#back">SRC</a></nav>
+
+<header class="cover" id="p0">
+<div class="cvin">
+  <div class="cv-top">
+    <div class="brandline"><b>Snowshagal Report</b>US INFLATION · BEA 2026 ANNUAL UPDATE</div>
+    <div class="serial">INVESTMENT NOTE<b>NO.05</b>2026.09.24</div>
+  </div>
+  <div class="cv-grid">
+    <div>
+      <div class="cv-kicker">9.30 · 8월 PCE와 연례 개정 동시 공개</div>
+      <h1 class="cv-title"><span class="l1">물가를 재는</span><span class="l2"><em>자</em>가 바뀐다</span></h1>
+      <p class="cv-sub">근원 PCE 세 항목의 계산 방식 변경 · 주된 소급 개정창도 함께 다시 써서 같은 날 공개</p>
+      <p class="cv-deck">볼 것은 시계열이 끊기는지가 아니라 <b>개정폭</b> · 그리고 그 개정폭이 공개된 대표 추정 <b>10~20bp</b>와 얼마나 다른지</p>
+    </div>
+    <figure class="cv-art" style="margin:8px auto 0">
+      <svg viewBox="0 0 420 300" role="img" aria-label="같은 실물을 기존 자와 새 자로 재면 3.34와 3.15로 다르게 읽히는 개념도">
+<style>
+.at{stroke:#8f9ea3;stroke-width:1} .an{fill:#8f9ea3;font:500 14px var(--mono)}
+.bt2{stroke:#d6b06a;stroke-width:1.1} .bn2{fill:#d6b06a;font:600 14px var(--mono)}
+.cvlab{font:700 15px var(--sans)}
+</style>
+<g class="fly">
+<path d="M50 52 L64 38 L364 38 L350 52 Z" fill="#f5ecd6" stroke="#0e171c" stroke-width=".8"/>
+<path d="M350 52 L364 38 L364 84 L350 98 Z" fill="#cdb887" stroke="#0e171c" stroke-width=".8"/>
+<rect x="50" y="52" width="300" height="46" fill="#efe4c8" stroke="#0e171c" stroke-width=".8"/>
+<text x="200" y="81" text-anchor="middle" style="font:800 17px var(--serif);fill:#0e171c;letter-spacing:-.02em">2026년 7월 근원 PCE</text>
+</g>
+<line x1="50" y1="100" x2="50" y2="262" stroke="#d6b06a" stroke-dasharray="3 4" opacity=".55"/>
+<line x1="350" y1="100" x2="350" y2="262" stroke="#d6b06a" stroke-dasharray="3 4" opacity=".55"/>
+<text x="12" y="126" class="cvlab" fill="#8f9ea3">기존 자</text>
+<rect x="30" y="134" width="372" height="44" rx="2" fill="#16242c" stroke="#3a4c55"/>
+<line x1="50.0" y1="134" x2="50.0" y2="148" class="at"/>
+<text x="50.0" y="165" class="an" text-anchor="middle">0</text>
+<line x1="59.0" y1="134" x2="59.0" y2="139" class="at"/>
+<line x1="68.0" y1="134" x2="68.0" y2="139" class="at"/>
+<line x1="76.9" y1="134" x2="76.9" y2="139" class="at"/>
+<line x1="85.9" y1="134" x2="85.9" y2="139" class="at"/>
+<line x1="94.9" y1="134" x2="94.9" y2="143" class="at"/>
+<line x1="103.9" y1="134" x2="103.9" y2="139" class="at"/>
+<line x1="112.9" y1="134" x2="112.9" y2="139" class="at"/>
+<line x1="121.9" y1="134" x2="121.9" y2="139" class="at"/>
+<line x1="130.8" y1="134" x2="130.8" y2="139" class="at"/>
+<line x1="139.8" y1="134" x2="139.8" y2="148" class="at"/>
+<text x="139.8" y="165" class="an" text-anchor="middle">1</text>
+<line x1="148.8" y1="134" x2="148.8" y2="139" class="at"/>
+<line x1="157.8" y1="134" x2="157.8" y2="139" class="at"/>
+<line x1="166.8" y1="134" x2="166.8" y2="139" class="at"/>
+<line x1="175.7" y1="134" x2="175.7" y2="139" class="at"/>
+<line x1="184.7" y1="134" x2="184.7" y2="143" class="at"/>
+<line x1="193.7" y1="134" x2="193.7" y2="139" class="at"/>
+<line x1="202.7" y1="134" x2="202.7" y2="139" class="at"/>
+<line x1="211.7" y1="134" x2="211.7" y2="139" class="at"/>
+<line x1="220.7" y1="134" x2="220.7" y2="139" class="at"/>
+<line x1="229.6" y1="134" x2="229.6" y2="148" class="at"/>
+<text x="229.6" y="165" class="an" text-anchor="middle">2</text>
+<line x1="238.6" y1="134" x2="238.6" y2="139" class="at"/>
+<line x1="247.6" y1="134" x2="247.6" y2="139" class="at"/>
+<line x1="256.6" y1="134" x2="256.6" y2="139" class="at"/>
+<line x1="265.6" y1="134" x2="265.6" y2="139" class="at"/>
+<line x1="274.6" y1="134" x2="274.6" y2="143" class="at"/>
+<line x1="283.5" y1="134" x2="283.5" y2="139" class="at"/>
+<line x1="292.5" y1="134" x2="292.5" y2="139" class="at"/>
+<line x1="301.5" y1="134" x2="301.5" y2="139" class="at"/>
+<line x1="310.5" y1="134" x2="310.5" y2="139" class="at"/>
+<line x1="319.5" y1="134" x2="319.5" y2="148" class="at"/>
+<text x="319.5" y="165" class="an" text-anchor="middle">3</text>
+<line x1="328.4" y1="134" x2="328.4" y2="139" class="at"/>
+<line x1="337.4" y1="134" x2="337.4" y2="139" class="at"/>
+<line x1="346.4" y1="134" x2="346.4" y2="139" class="at"/>
+<path d="M350 132 l-6 -9 h12 Z" fill="#8f9ea3"/>
+<text x="360" y="126" style="font:800 22px var(--serif);fill:#8f9ea3">3.34</text>
+<text x="12" y="208" class="cvlab" fill="#d6b06a">새 자</text>
+<rect x="30" y="216" width="372" height="44" rx="2" fill="#1d2a2f" stroke="#9a6b22"/>
+<line x1="50.0" y1="216" x2="50.0" y2="230" class="bt2"/>
+<text x="50.0" y="247" class="bn2" text-anchor="middle">0</text>
+<line x1="59.5" y1="216" x2="59.5" y2="221" class="bt2"/>
+<line x1="69.0" y1="216" x2="69.0" y2="221" class="bt2"/>
+<line x1="78.6" y1="216" x2="78.6" y2="221" class="bt2"/>
+<line x1="88.1" y1="216" x2="88.1" y2="221" class="bt2"/>
+<line x1="97.6" y1="216" x2="97.6" y2="225" class="bt2"/>
+<line x1="107.1" y1="216" x2="107.1" y2="221" class="bt2"/>
+<line x1="116.7" y1="216" x2="116.7" y2="221" class="bt2"/>
+<line x1="126.2" y1="216" x2="126.2" y2="221" class="bt2"/>
+<line x1="135.7" y1="216" x2="135.7" y2="221" class="bt2"/>
+<line x1="145.2" y1="216" x2="145.2" y2="230" class="bt2"/>
+<text x="145.2" y="247" class="bn2" text-anchor="middle">1</text>
+<line x1="154.8" y1="216" x2="154.8" y2="221" class="bt2"/>
+<line x1="164.3" y1="216" x2="164.3" y2="221" class="bt2"/>
+<line x1="173.8" y1="216" x2="173.8" y2="221" class="bt2"/>
+<line x1="183.3" y1="216" x2="183.3" y2="221" class="bt2"/>
+<line x1="192.9" y1="216" x2="192.9" y2="225" class="bt2"/>
+<line x1="202.4" y1="216" x2="202.4" y2="221" class="bt2"/>
+<line x1="211.9" y1="216" x2="211.9" y2="221" class="bt2"/>
+<line x1="221.4" y1="216" x2="221.4" y2="221" class="bt2"/>
+<line x1="231.0" y1="216" x2="231.0" y2="221" class="bt2"/>
+<line x1="240.5" y1="216" x2="240.5" y2="230" class="bt2"/>
+<text x="240.5" y="247" class="bn2" text-anchor="middle">2</text>
+<line x1="250.0" y1="216" x2="250.0" y2="221" class="bt2"/>
+<line x1="259.5" y1="216" x2="259.5" y2="221" class="bt2"/>
+<line x1="269.0" y1="216" x2="269.0" y2="221" class="bt2"/>
+<line x1="278.6" y1="216" x2="278.6" y2="221" class="bt2"/>
+<line x1="288.1" y1="216" x2="288.1" y2="225" class="bt2"/>
+<line x1="297.6" y1="216" x2="297.6" y2="221" class="bt2"/>
+<line x1="307.1" y1="216" x2="307.1" y2="221" class="bt2"/>
+<line x1="316.7" y1="216" x2="316.7" y2="221" class="bt2"/>
+<line x1="326.2" y1="216" x2="326.2" y2="221" class="bt2"/>
+<line x1="335.7" y1="216" x2="335.7" y2="230" class="bt2"/>
+<text x="335.7" y="247" class="bn2" text-anchor="middle">3</text>
+<line x1="345.2" y1="216" x2="345.2" y2="221" class="bt2"/>
+<path d="M350 214 l-6 -9 h12 Z" fill="#d6b06a"/>
+<text x="360" y="208" style="font:900 26px var(--serif);fill:#d6b06a">3.15</text>
+<text x="210" y="290" text-anchor="middle" style="font:500 15px var(--sans);fill:#8f9ea3">같은 실물 · 다른 눈금 · 다른 숫자</text>
+</svg>
+      <figcaption class="cap2">개념도 · 눈금 위 숫자는 한화투자증권의 7월 근원 PCE 전년비 재현치 · BEA 공식치 아님</figcaption>
+    </figure>
+  </div>
+  <div class="notes">
+    <div class="bn"><div class="band"></div><div class="k">발표 · 한국시간</div><div class="v">09.30<small>21:30</small></div><div class="d">8월 PCE와 같은 시각 · 개정된 월별 시계열 동시 공개<sup><a href="#s1">1</a></sup></div></div>
+    <div class="bn"><div class="band"></div><div class="k">바뀌는 항목 비중</div><div class="v">4.16<small>%</small></div><div class="d">PCE 기준 · 한화투자증권 집계 · BEA 공식 가중치 아님<sup><a href="#s2">2</a></sup></div></div>
+    <div class="bn"><div class="band"></div><div class="k">BEA 공식 효과치</div><div class="v">미공개</div><div class="d">예고문에 효과 크기·부호 수치 없음<sup><a href="#s3">3</a></sup></div></div>
+    <div class="bn q"><div class="band"></div><div class="k">공개된 주요 기관 사전 추정</div><div class="v">10~20<small>bp</small></div><div class="d">근원 PCE 하향 추정 · GS 20 · JPM 10 · 6월 추정, 5월 기준 · 시장가격 아님<sup><a href="#s4">4</a></sup></div></div>
+  </div>
+  <div class="cv-foot">
+    <p class="cv-thesis">공식 시계열은 끊기지 않음 · 위험은 개정 전 숫자와 개정 후 숫자를 섞어 읽는 것 · 방법론 변경에 관한 새 정보는 <mark>대표 추정과의 차이</mark></p>
+    <div><p class="cv-note">정보 기준 시각 · 한국시간 2026.09.24 20시 · 그 이후 나온 지표 결과와 해외 장중 값은 담지 않음 · 신구 방식 비교 수치는 전부 민간 추정치</p><a class="cv-site" href="https://www.snowshagal.com" target="_blank" rel="noopener noreferrer">snowshagal.com</a></div>
+  </div>
+</div>
+</header>
+
+<section class="glance" aria-label="한눈에">
+  <h4>AT A GLANCE · 한눈에</h4>
+  <dl class="w6">
+    <div><dt>언제</dt><dd><b>9월 30일(수) 21:30</b> 한국시간 · 8월 PCE와 같은 시각</dd></div>
+    <div><dt>무엇</dt><dd>근원 PCE 세 항목 계산 방식 변경 · 주된 소급 개정창 <b>2021년 1분기~2026년 1분기</b></dd></div>
+    <div><dt>얼마나</dt><dd>BEA 공식치 미공개 · 한화 재현 7월 근원 PCE <b>−0.19%p</b></dd></div>
+    <div><dt>대표 추정</dt><dd>GS 약 20bp · JPM 약 10bp 하향 · 공개된 기관 추정 · 5월 기준</dd></div>
+    <div><dt>위험</dt><dd>개정 전 아카이브와 개정 후 숫자를 <b>표시 없이 이어 붙이기</b></dd></div>
+    <div><dt>볼 것</dt><dd>대표 추정과의 괴리 · 월별 경로 · 같은 시각 GDP 3차 추정 등 동시 공개</dd></div>
+  </dl>
+</section>
+
+<section class="page" id="p1">
+<div class="wrap">
+  <div class="chno" aria-hidden="true">01</div>
+  <div class="ph"><span class="pg">PAGE 01</span><span>발표 구조</span></div>
+  <div class="kick">Two numbers · one timestamp</div>
+  <h2>같은 날,<br><em>두 개의 숫자</em></h2>
+  <div class="dek">8월 신규치 + 주된 소급 개정창 재계산 · 같은 시각 공개</div>
+  <p class="lead">BEA 7월 개인소득·지출 보도자료 말미 · 다음 발표를 <b>9월 30일 오전 8시 30분(동부시간), 2026년 8월 개인소득·지출</b>로 못박음 · 같은 자료에 국가·산업·지역 통계 연례 개정이 <b>사상 처음 같은 날 시작</b>된다는 문구도 명시<sup><a href="#s1">1</a></sup> · 한국시간 9월 30일 밤 9시 30분</p>
+  <div class="quotes">
+    <div class="qc"><q>With the next release, today’s data will be superseded</q><span class="ko">다음 발표에서 지금 숫자는 새 숫자로 대체됨</span></div>
+    <div class="qc"><q>Updated monthly estimates of personal income and outlays will be released on September 30, along with the estimate for August 2026.</q><span class="ko">개정된 월별 추정치가 8월 추정치와 함께 공개<sup><a href="#s1">1</a></sup></span></div>
+  </div>
+  <h3>끊기는 것이 아니라 통째로 다시 씀</h3>
+  <ul class="pts">
+    <li>과거치도 새 방식으로 다시 계산해 같은 날 공개 · 주된 소급 개정창은 <b>2021년 1분기~2026년 1분기</b><sup><a href="#s3">3</a>, <a href="#s5">5</a></sup> · 같은 날 나오는 8월 PCE와 2분기 GDP 3차 추정도 개정된 체계 위의 숫자</li>
+    <li>9월 30일 이후 공식 시계열은 BEA가 연례 개정으로 다시 연결한 하나의 최신 vintage · 내부 일관성 유지 · 다만 적용 시점은 항목마다 다름(법률 서비스는 2024년부터)</li>
+    <li>실수가 나오는 곳은 하나 · 개정 전에 받아둔 <span class="tt" data-tip="같은 지표라도 발표 시점마다 달라지는 판본 · 개정 전 아카이브와 개정 후 값은 서로 다른 vintage">vintage</span> 숫자와 개정 후 숫자를 <b>표시 없이 이어 붙일 때</b></li>
+  </ul>
+  <figure class="fig">
+    <div class="fig-h"><b>같은 달, 두 개의 판본</b><span>개념도</span></div>
+    <div class="svgbox"><svg viewBox="0 0 400 250" role="img" aria-label="개정 전 판본과 개정 후 판본을 이어 붙이면 가짜 하락이 생기는 개념도">
+<g font-family="var(--sans)" font-size="14.5">
+<line x1="40" y1="16" x2="66" y2="16" stroke="#6c685f" stroke-width="2" stroke-dasharray="5 4"/><text x="74" y="21" fill="#6c685f">개정 전 아카이브 · 7월까지</text>
+<line x1="40" y1="40" x2="66" y2="40" stroke="#1a1e23" stroke-width="2.4"/><text x="74" y="45" fill="#1a1e23">9월 30일 개정 판본 · 8월까지</text>
+</g>
+<line x1="40" y1="206" x2="380" y2="206" stroke="#1d2126"/>
+<g font-family="var(--sans)" font-size="14.5" fill="#6c685f" text-anchor="middle">
+<text x="40" y="228">2021</text><text x="140" y="228">2023</text><text x="250" y="228">2025</text><text x="366" y="228">26.8</text>
+</g>
+<path d="M40 176 C80 164,100 99,140 86 C180 74,215 124,250 136 C285 146,320 128,360 116" fill="none" stroke="#6c685f" stroke-width="2" stroke-dasharray="5 4"/>
+<path d="M40 178 C80 166,100 97,140 84 C180 72,215 122,250 134 C285 144,320 146,360 146 L372 148" fill="none" stroke="#1a1e23" stroke-width="2.4"/>
+<circle cx="360" cy="116" r="4.5" fill="#f6f1e6" stroke="#6c685f" stroke-width="2"/>
+<circle cx="360" cy="146" r="4" fill="#1a1e23"/><circle cx="372" cy="148" r="4.5" fill="#1a1e23"/>
+<line x1="360" y1="116" x2="372" y2="148" stroke="#8f2f2b" stroke-width="2.4"/>
+<path d="M351 108 C343 122,352 160,374 158 C392 156,386 118,368 108 C360 103,352 106,349 112" fill="none" stroke="#8f2f2b" stroke-width="2" stroke-linecap="round" opacity=".85"/>
+<path d="M300 84 C318 86,334 92,346 106" fill="none" stroke="#8f2f2b" stroke-width="1.6" stroke-linecap="round"/>
+<path d="M340 100 l7 7 l1 -9" fill="none" stroke="#8f2f2b" stroke-width="1.6" stroke-linecap="round"/>
+<text x="296" y="70" text-anchor="end" font-family="var(--serif)" font-weight="800" font-size="16" fill="#8f2f2b">섞으면 생기는 가짜 하락</text>
+<text x="372" y="184" text-anchor="end" font-family="var(--sans)" font-size="14.5" fill="#1a1e23">같은 판본끼리 비교</text>
+<line x1="366" y1="170" x2="366" y2="155" stroke="#1a1e23" stroke-width="1"/>
+</svg></div>
+    <div class="cap">선 모양과 간격은 설명용 · 실제 PCE 값 아님 · 7월(개정 전)과 8월(개정 후)을 바로 붙이면 물가가 아니라 자의 차이가 하락처럼 보임</div>
+  </figure>
+  <div class="tl">
+    <div class="now"><div class="d">09.30<small>WED · 21:30 KST</small></div><div><b>BEA 8월 PCE + 연례 개정</b><span>8월 신규치와 개정된 월별 시계열 · 2분기 GDP 3차 추정도 같은 날<sup><a href="#s1">1</a>, <a href="#s3">3</a>, <a href="#s6">6</a></sup></span></div></div>
+    <div><div class="d">10.22<small>THU</small></div><div><b>한국은행 금통위</b><span>9월 30일 발표와 10월 FOMC 사이<sup><a href="#s7">7</a></sup></span></div></div>
+    <div><div class="d">10.27~28<small>FOMC · SEP 없음</small></div><div><b>개정 후 첫 회의</b><span>새 물가 숫자를 받고 여는 첫 회의<sup><a href="#s8">8</a></sup></span></div></div>
+    <div><div class="d">12.08~09<small>FOMC · SEP 있음</small></div><div><b>개정 후 첫 전망</b><span>새 자로 작성되는 첫 경제전망요약<sup><a href="#s8">8</a></sup></span></div></div>
+  </div>
+</div>
+</section>
+
+<section class="page alt" id="p2">
+<div class="wrap">
+  <div class="chno" aria-hidden="true">02</div>
+  <div class="ph"><span class="pg">PAGE 02</span><span>바뀌는 항목</span></div>
+  <div class="kick">Three line items</div>
+  <h2>세 항목,<br><em>PCE의 4.16%</em></h2>
+  <div class="dek">셋 다 식품·에너지 밖 · 근원 PCE에 그대로 반영</div>
+  <p>BEA가 6월 <i>Survey of Current Business</i>에 실은 연례 개정 예고에 세 항목 명시<sup><a href="#s3">3</a></sup> · 비중은 BEA 공식 가중치가 아니라 <b>한화투자증권이 집계한 PCE 기준 비중</b> · 이 노트는 분모를 PCE 전체로 통일<sup><a href="#s2">2</a></sup></p>
+  <figure class="fig">
+    <div class="fig-h"><b>PCE 전체에서 바뀌는 조각</b><span>PCE 기준 비중 · %</span></div>
+    <div class="svgbox"><svg viewBox="0 0 400 200" role="img" aria-label="PCE 전체 중 4.16% 조각을 확대하면 포트폴리오 관리 2.11, 소프트웨어 1.23, 법률 0.82">
+<text x="20" y="18" font-family="var(--sans)" font-size="14.5" fill="#6c685f">PCE 전체 100%</text>
+<rect x="20" y="28" width="360" height="24" fill="#e8dfcc" stroke="#bcae93"/>
+<rect x="365.0" y="28" width="15.0" height="24" fill="#9a6b22"/>
+<text x="359.0" y="45" text-anchor="end" font-family="var(--serif)" font-weight="900" font-size="15" fill="#9a6b22">4.16%</text>
+<path d="M365.0 52 L20 118 L380 118 L380 52 Z" fill="rgba(154,107,34,.10)" stroke="#9a6b22" stroke-width=".8" stroke-dasharray="3 3"/>
+<rect x="20" y="118" width="182.6" height="40" fill="#1a1e23"/>
+<rect x="202.6" y="118" width="106.4" height="40" fill="#5b5a55"/>
+<rect x="309.0" y="118" width="71.0" height="40" fill="#f6f1e6" stroke="#1a1e23"/>
+<text x="111.3" y="144" text-anchor="middle" font-family="var(--serif)" font-weight="900" font-size="17" fill="#f6f1e6">2.11</text>
+<text x="255.8" y="144" text-anchor="middle" font-family="var(--serif)" font-weight="900" font-size="17" fill="#f6f1e6">1.23</text>
+<text x="344.5" y="144" text-anchor="middle" font-family="var(--serif)" font-weight="900" font-size="17" fill="#1a1e23">0.82</text>
+<g font-family="var(--sans)" font-size="14" font-weight="600" fill="#3c4046" text-anchor="middle">
+<text x="111.3" y="180">포트폴리오 관리</text>
+<text x="255.8" y="180">소프트웨어</text>
+<text x="344.5" y="180">법률</text>
+</g>
+</svg></div>
+    <div class="cap">한화투자증권 집계 · BEA 공식 가중치 아님 · 위 막대의 끝 조각을 확대한 것이 아래 막대</div>
+  </figure>
+  <div class="items">
+    <div class="it">
+      <div class="ic"><svg viewBox="0 0 52 52"><rect x="7" y="16" width="38" height="28" rx="2"/><path d="M19 16 v-5 h14 v5"/><polyline class="acc" points="12,37 20,30 27,33 38,23"/><path class="acc" d="M34 23 h4 v4"/></svg></div>
+      <div><h4>포트폴리오 관리·투자자문<span>2.11<small>%</small></span></h4>
+      <div class="fromto"><div><i>기존</i>명목 지출 ÷ 자산가격에 민감한 PPI</div><div><i>변경</i>실질 수량을 BLS 고용통계(<span class="tt" data-tip="Current Employment Statistics · 미국 노동통계국의 사업체 고용 조사 · 업종별 고용 증가율을 수량 추정에 사용">CES</span>) 기반으로 외삽</div></div>
+      <div class="since">주된 소급 개정창 전체 · 2021년 1분기~</div></div>
+    </div>
+    <div class="it">
+      <div class="ic"><svg viewBox="0 0 52 52"><rect x="6" y="10" width="40" height="30" rx="2"/><line x1="6" y1="17" x2="46" y2="17"/><polyline class="acc" points="18,24 13,28.5 18,33"/><polyline class="acc" points="34,24 39,28.5 34,33"/><line x1="28" y1="23" x2="24" y2="34"/><line x1="18" y1="46" x2="34" y2="46"/></svg></div>
+      <div><h4>컴퓨터 소프트웨어·액세서리<span>1.23<small>%</small></span></h4>
+      <div class="fromto"><div><i>기존</i>CPI 기반</div><div><i>변경</i>CPI + 게임소프트웨어 출판 PPI + 호스팅 PPI 합성지수</div></div>
+      <div class="since">주된 소급 개정창 전체 · 2021년 1분기~</div></div>
+    </div>
+    <div class="it">
+      <div class="ic"><svg viewBox="0 0 52 52"><line x1="26" y1="8" x2="26" y2="44"/><line x1="12" y1="14" x2="40" y2="14"/><path class="acc" d="M12 14 l-6 14 h12 Z"/><path class="acc" d="M40 14 l-6 14 h12 Z"/><line x1="17" y1="44" x2="35" y2="44"/></svg></div>
+      <div><h4>법률 서비스<span>0.82<small>%</small></span></h4>
+      <div class="fromto"><div><i>기존</i>CPI</div><div><i>변경</i>가계 소비 법률서비스 세부 PPI 기반 BEA 합성지수</div></div>
+      <div class="since">2024년부터 · 원문 “beginning in 2024”</div></div>
+    </div>
+  </div>
+  <ul class="pts">
+    <li>법률 서비스 대체는 2024년부터 · <b>2021~2023년 구간 조정은 소프트웨어와 포트폴리오 관리 두 항목에서만</b> 발생<sup><a href="#s3">3</a></sup></li>
+    <li>BEA 예고문에 변경 효과의 크기·부호 수치 없음 · 아래 조정폭은 모두 민간 추정치 · 9월 30일 실제치와 다를 수 있음</li>
+    <li>4.16%가 작아 보여도 항목 상승률이 극단적이면 기여도는 커짐 · 비중 1.23% 소프트웨어 하나가 근원 PCE 전년비 −0.14%p(PAGE 04)</li>
+  </ul>
+</div>
+</section>
+<section class="page" id="p3">
+<div class="wrap">
+  <div class="chno" aria-hidden="true">03</div>
+  <div class="ph"><span class="pg">PAGE 03</span><span>작동 원리</span></div>
+  <div class="kick">Where stocks leaked into prices</div>
+  <h2>주가가 물가로<br><em>새던 통로</em></h2>
+  <div class="dek">나누는 자를 바꾸는 것이 아니라 수량을 따로 셈</div>
+  <p class="lead">개념상 가장 큰 변화는 포트폴리오 관리 · 자산운용 보수는 통상 운용자산에 비례 · 주가가 오르면 같은 서비스에 붙는 수수료가 자동으로 커지고, 기존 방식에서는 그 움직임이 <b>가격 쪽으로 흡수</b><sup><a href="#s2">2</a></sup></p>
+  <div class="mech">
+    <div class="mc">
+      <div class="t"><span>기존 방식</span><span>한화 설명 기준</span></div>
+      <div class="flow">
+        <div class="fs"><b>명목 수수료 총액</b><span class="num">+18.5%</span><small>2026년 6월 전년동월비</small></div>
+        <div class="arr">÷ 자산가격 연동 PPI로 나눔</div>
+        <div class="fs"><b>실질 수량</b><span class="num">약 −3.1%</span><small>PPI로 나눈 뒤 역으로 나오는 값</small></div>
+        <div class="arr">주가 움직임이 가격에 남음</div>
+        <div class="fs res"><b>가격 상승률</b><span class="num">약 22%</span></div>
+      </div>
+    </div>
+    <div class="mc new">
+      <div class="t"><span>새 방식</span><span>BEA 예고 · CES 수량 외삽</span></div>
+      <div class="flow">
+        <div class="fs"><b>명목 수수료 총액</b><span class="num">+18.5%</span><small>같은 출발점</small></div>
+        <div class="arr">수량을 먼저 셈</div>
+        <div class="fs"><b>실질 수량 · 업종 고용으로 외삽</b><span class="num">+4.7%</span><small>CES 업종 고용 증가율</small></div>
+        <div class="arr">나머지만 가격으로</div>
+        <div class="fs res"><b>가격 상승률</b><span class="num">약 13.2%</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="small">2026년 6월 전년동월비 · 한화투자증권 재현 · 기존 방식의 수량은 BEA 발표치가 아니라 PPI 디플레이트에서 역으로 나오는 잔차<sup><a href="#s2">2</a>, <a href="#s3">3</a></sup> · <span class="tt" data-tip="명목 지출을 실질로 바꿀 때 나누는 가격지수 · 어떤 지수로 나누느냐가 물가와 실질 수량의 몫을 바꿈">디플레이터</span>를 갈아끼우는 것이 아니라 <span class="tt" data-tip="가격지수로 나누는 대신 고용 같은 다른 자료로 실질 수량을 직접 추정하는 방법">수량 외삽</span>으로 방향을 뒤집은 변경</p>
+  <div class="two" style="margin-top:30px">
+    <figure class="fig" style="margin:0">
+      <div class="fig-h"><b>S&amp;P500 1% 변동 → 가격 반응</b><span>%p · 한화투자증권</span></div>
+      <div class="svgbox" style="max-width:420px"><svg viewBox="0 0 360 244" role="img" aria-label="S&amp;P500 1% 변동에 대한 PCE 가격 반응이 0.67에서 0.43으로 축소">
+<path d="M44 176 A136 136 0 0 1 316 176" fill="none" stroke="#1d2126" stroke-width="1.4"/>
+<path d="M150.8 45.2 A134 134 0 0 0 248.2 60.7 L234.0 84.8 A106 106 0 0 1 156.9 72.6 Z" fill="rgba(154,107,34,.22)"/>
+<line x1="44.0" y1="176.0" x2="56.0" y2="176.0" stroke="#1d2126" stroke-width="1.4"/><text x="28.0" y="181.0" text-anchor="middle" font-family="var(--sans)" font-size="14.5" fill="#6c685f">0</text><line x1="45.7" y1="154.7" x2="51.6" y2="155.7" stroke="#1d2126" stroke-width="0.8"/><line x1="50.7" y1="134.0" x2="56.4" y2="135.8" stroke="#1d2126" stroke-width="0.8"/><line x1="58.8" y1="114.3" x2="64.2" y2="117.0" stroke="#1d2126" stroke-width="0.8"/><line x1="70.0" y1="96.1" x2="74.8" y2="99.6" stroke="#1d2126" stroke-width="0.8"/><line x1="83.8" y1="79.8" x2="92.3" y2="88.3" stroke="#1d2126" stroke-width="1.4"/><text x="72.5" y="73.5" text-anchor="middle" font-family="var(--sans)" font-size="14.5" fill="#6c685f">0.25</text><line x1="100.1" y1="66.0" x2="103.6" y2="70.8" stroke="#1d2126" stroke-width="0.8"/><line x1="118.3" y1="54.8" x2="121.0" y2="60.2" stroke="#1d2126" stroke-width="0.8"/><line x1="138.0" y1="46.7" x2="139.8" y2="52.4" stroke="#1d2126" stroke-width="0.8"/><line x1="158.7" y1="41.7" x2="159.7" y2="47.6" stroke="#1d2126" stroke-width="0.8"/><line x1="180.0" y1="40.0" x2="180.0" y2="52.0" stroke="#1d2126" stroke-width="1.4"/><text x="180.0" y="29.0" text-anchor="middle" font-family="var(--sans)" font-size="14.5" fill="#6c685f">0.50</text><line x1="201.3" y1="41.7" x2="200.3" y2="47.6" stroke="#1d2126" stroke-width="0.8"/><line x1="222.0" y1="46.7" x2="220.2" y2="52.4" stroke="#1d2126" stroke-width="0.8"/><line x1="241.7" y1="54.8" x2="239.0" y2="60.2" stroke="#1d2126" stroke-width="0.8"/><line x1="259.9" y1="66.0" x2="256.4" y2="70.8" stroke="#1d2126" stroke-width="0.8"/><line x1="276.2" y1="79.8" x2="267.7" y2="88.3" stroke="#1d2126" stroke-width="1.4"/><text x="287.5" y="73.5" text-anchor="middle" font-family="var(--sans)" font-size="14.5" fill="#6c685f">0.75</text><line x1="290.0" y1="96.1" x2="285.2" y2="99.6" stroke="#1d2126" stroke-width="0.8"/><line x1="301.2" y1="114.3" x2="295.8" y2="117.0" stroke="#1d2126" stroke-width="0.8"/><line x1="309.3" y1="134.0" x2="303.6" y2="135.8" stroke="#1d2126" stroke-width="0.8"/><line x1="314.3" y1="154.7" x2="308.4" y2="155.7" stroke="#1d2126" stroke-width="0.8"/><line x1="316.0" y1="176.0" x2="304.0" y2="176.0" stroke="#1d2126" stroke-width="1.4"/><text x="332.0" y="181.0" text-anchor="middle" font-family="var(--sans)" font-size="14.5" fill="#6c685f">1.0</text>
+<line x1="180" y1="176" x2="236.0" y2="81.3" stroke="#6c685f" stroke-width="2" stroke-dasharray="5 4"/>
+<line x1="180" y1="176" x2="156.0" y2="68.6" stroke="#1a1e23" stroke-width="3.2" stroke-linecap="round"/>
+<circle cx="180" cy="176" r="8" fill="#9a6b22" stroke="#1a1e23" stroke-width="1.5"/>
+
+
+
+<g font-family="var(--sans)" font-size="15">
+<line x1="14" y1="230" x2="42" y2="230" stroke="#1a1e23" stroke-width="3.2"/><text x="48" y="235" fill="#1a1e23" font-weight="700">새 방식 0.43</text>
+<line x1="150" y1="230" x2="178" y2="230" stroke="#6c685f" stroke-width="2" stroke-dasharray="5 4"/><text x="184" y="235" fill="#6c685f" font-weight="600">기존 0.67</text>
+<rect x="266" y="223" width="14" height="14" fill="rgba(154,107,34,.22)"/><text x="285" y="235" fill="#6c685f">줄어든 몫</text></g></svg></div>
+    </figure>
+    <div>
+      <div class="kick" style="margin-top:0">Sensitivity</div>
+      <div style="font-family:var(--serif);font-weight:900;font-size:clamp(54px,13vw,84px);line-height:1;letter-spacing:-.04em">−36<span style="font-size:.45em">%</span></div>
+      <p style="margin-top:12px">민감도 <b>0.67%p → 0.43%p</b><sup><a href="#s2">2</a></sup> · 반응이 3분의 2 수준으로 남는다는 뜻 · <b>사라지는 것 아님</b></p>
+    </div>
+  </div>
+  <div class="voice">
+    <div class="vh"><span>FED · STEPHEN MIRAN · 2025.12.15</span><span>당시 연준 이사 · 공식 연설</span></div>
+    <q>What ought to be recorded as an increased quantity of services consumed is instead recorded as increased prices.</q>
+    <p class="vk">주가 상승으로 늘어난 운용수수료 가운데 일부는 서비스 가격 상승이 아니라 서비스 수량 증가로 봐야 한다는 문제 제기<sup><a href="#s9">9</a></sup></p>
+    <p class="vl">BEA가 이번 연례 개정에서 도입하는 CES 기반 수량 외삽은 바로 이 가격·수량 구분 문제를 다루는 방향<sup><a href="#s3">3</a></sup></p>
+  </div>
+  <div class="pull">증시와 PCE 가격의 연결 · 끊기는 것이 아니라 약해짐<small>자산가격 움직임이 포트폴리오 관리 PCE 가격에 스며들던 구조 · 그 통로를 좁히는 변경</small></div>
+  <div class="sim">
+    <div class="t">한화 모의재현 · 2009년은 공식 개정창 밖</div>
+    <table>
+      <thead><tr><th>국면</th><th>기존 방식</th><th>새 방식</th></tr></thead>
+      <tbody>
+        <tr><td>2009.03 금융위기</td><td><b>−0.26</b></td><td><b>+0.05</b></td></tr>
+        <tr><td>2021.04 주가 급등기</td><td><b>+0.48</b></td><td><b>+0.22</b></td></tr>
+      </tbody>
+    </table>
+    <p class="small" style="margin:8px 0 0">포트폴리오 관리 항목의 근원 PCE 기여도 · %p · 한화 계산상 위아래 폭 축소 · 주된 소급 개정창은 2021년 1분기~2026년 1분기라 2009년 값은 한화투자증권이 새 방식을 과거에 대입해 본 역사적 모의재현 · 2021년 4월 값도 BEA 공식치 아님<sup><a href="#s2">2</a>, <a href="#s3">3</a></sup></p>
+  </div>
+  <div class="sumbox"><span class="t">PAGE 03 · 정리</span><ol>
+    <li>기존 · 명목 지출을 자산가격 연동 PPI로 나눔 → 주가 움직임이 가격으로 흡수</li>
+    <li>변경 · 수량을 고용자료로 먼저 셈 → 가격은 나머지</li>
+    <li>결과 · 증시→PCE 가격 민감도 약 3분의 1 축소 · 연결 자체는 유지</li>
+  </ol></div>
+</div>
+</section>
+
+<section class="page dark" id="p4">
+<div class="wrap">
+  <div class="chno" aria-hidden="true">04</div>
+  <div class="ph"><span class="pg">PAGE 04</span><span>숫자의 무게</span></div>
+  <div class="kick">The heavy digit</div>
+  <h2>정작 가장 크게<br>내리는 것은 <em>소프트웨어</em></h2>
+  <div class="dek">비중 1.23% · 조정폭 −0.14%p</div>
+  <p class="lead">이야기의 무게는 포트폴리오 관리 · 숫자의 무게는 소프트웨어 · 2026년 7월 기준 신구 방식 차이를 항목별로 나눈 결과<sup><a href="#s2">2</a></sup></p>
+  <figure class="fig">
+    <div class="fig-h"><b>2026년 7월 근원 PCE 전년비 · 항목별 조정폭</b><span>%p · 한화 재현</span></div>
+    <div class="dv">
+      <div class="dvr"><div class="dvl">소프트웨어<small>PCE 비중 1.23%</small></div><div class="dvt"><div class="dvb neg" style="left:5%;width:70%" data-tip="소프트웨어 −0.14%p · 현행 지수 +21.2% vs 새 합성지수 +8.6% · 한화 재현">−0.14</div></div></div>
+      <div class="dvr"><div class="dvl">포트폴리오 관리<small>PCE 비중 2.11%</small></div><div class="dvt"><div class="dvb neg" style="left:40%;width:35%" data-tip="포트폴리오 관리 −0.07%p · 비중은 가장 크지만 조정폭은 소프트웨어의 절반 · 한화 재현">−0.07</div></div></div>
+      <div class="dvr"><div class="dvl">법률 서비스<small>PCE 비중 0.82%</small></div><div class="dvt"><div class="dvb pos" style="left:75%;width:10%" data-tip="법률 서비스 +0.02%p · 세 항목 중 유일하게 위쪽 조정 · 2024년부터 적용 · 한화 재현"><em>+0.02</em></div></div></div>
+    </div>
+    <div class="dvax"><div></div><div><span style="left:0%">−0.15</span><span style="left:25%">−0.10</span><span style="left:50%">−0.05</span><span style="left:75%">0</span><span style="left:100%">+0.05</span></div></div>
+    <div class="dvsum"><span>세 항목 합계 · 근원 PCE 전년비 3.34% → 3.15%<br>한화 재현 기준 · BEA 7월 공식치는 3.3%</span><b>−0.19%p</b></div>
+    <div class="cap">세로선이 0 · 왼쪽 하향, 오른쪽 상향 · 모두 한화투자증권 자체 계산 · BEA 공식 재계산 결과 아님 · 7월 숫자도 9월 30일 개정 월별 시계열에서 새 값으로 대체 예정이나 이 추정과 같다는 보장 없음<sup><a href="#s1">1</a>, <a href="#s2">2</a></sup></div>
+  </figure>
+  <h3>비중은 6할, 조정폭은 두 배인 이유</h3>
+  <p>기존 소프트웨어 지수의 상승률 자체가 극단적 · 2025년 7월 70.3 → 2026년 7월 85.2<sup><a href="#s2">2</a></sup></p>
+  <div class="hb">
+    <div class="hbr"><div class="l">현행 지수<small>CPI 기반</small></div><div class="hbt"><i style="width:100%">+21.2%</i></div></div>
+    <div class="hbr"><div class="l">새 합성지수<small>CPI+PPI 2종</small></div><div class="hbt"><i class="o" style="width:40.6%">+8.6%</i></div></div>
+  </div>
+  <div class="voice dk">
+    <div class="vh"><span>FEDS NOTE · 2026.05.22</span><span>Barbarino · Diercks · Miran</span></div>
+    <p class="vk">Fed 연구진도 같은 측정 문제를 먼저 짚음 · 2025년 11월~2026년 3월 PCE 소프트웨어 가격 상승 <b>연율 73%</b> · 역사 평균 대비 <b>9표준편차 이상</b><sup><a href="#s10">10</a></sup></p>
+    <ul class="pts" style="margin:8px 0 0"><li>범주 불일치 · PCE 소프트웨어는 소프트웨어 출판 중심인데, 이를 디플레이트하는 CPI 쪽에는 플래시드라이브·공미디어가 포함</li><li>SaaS·AI 결합 상품의 가격 측정과 품질 조정 공백도 함께 지적</li></ul>
+    <p class="vl">FEDS Note는 필자 개인 견해 · 연준 공식 입장 아님 · 한화 재현과 별개로 같은 이상치를 확인한 외부 근거</p>
+  </div>
+  <p class="small" style="margin-top:10px">PAGE 03 수치는 2026년 6월, 여기는 7월 기준 · 포트폴리오 관리의 신구 격차는 시점에 따라 크게 달라져 두 페이지 수치를 곱해 맞춰보는 계산은 성립하지 않음</p>
+  <div class="two" style="margin-top:26px">
+    <div class="svgbox" style="max-width:380px"><svg viewBox="0 0 340 150" role="img" aria-label="소프트웨어 비중 CPI 0.035% 대 PCE 1.2%대 면적 비교">
+<circle cx="64" cy="70" r="6" fill="none" stroke="#efe7d6" stroke-width="1.6"/>
+<circle cx="236" cy="70" r="35" fill="#efe7d6"/>
+<text x="150" y="78" text-anchor="middle" font-family="var(--serif)" font-weight="900" font-size="22" fill="#d6b06a">×30+</text>
+<line x1="84" y1="70" x2="116" y2="70" stroke="#8f9ea3" stroke-dasharray="2 3"/><line x1="184" y1="70" x2="196" y2="70" stroke="#8f9ea3" stroke-dasharray="2 3"/>
+<text x="64" y="128" text-anchor="middle" font-family="var(--sans)" font-size="14.5" fill="#c9c2b3">근원 CPI</text>
+<text x="64" y="146" text-anchor="middle" font-family="var(--serif)" font-weight="800" font-size="17" fill="#efe7d6">0.035%</text>
+<text x="236" y="128" text-anchor="middle" font-family="var(--sans)" font-size="14.5" fill="#c9c2b3">근원 PCE</text>
+<text x="236" y="146" text-anchor="middle" font-family="var(--serif)" font-weight="800" font-size="17" fill="#efe7d6">1.2%대</text>
+</svg></div>
+    <div><h3 style="margin-top:0">같은 항목, 30배 넘는 비중 차이</h3><p>소프트웨어 비중 · 근원 CPI 0.035% vs 근원 PCE 1.2%대<sup><a href="#s2">2</a></sup> · 같은 물가를 두고 <b>CPI와 PCE가 갈라지는 대표 지점</b> · JP모건 Abiel Reinhart도 PCE 쪽 가중치가 30배 넘는데 CPI가 재는 품목은 PCE 정의와 개념상 같지 않다고 지적<sup><a href="#s4">4</a></sup></p></div>
+  </div>
+</div>
+</section>
+<section class="page" id="p5">
+<div class="wrap">
+  <div class="chno" aria-hidden="true">05</div>
+  <div class="ph"><span class="pg">PAGE 05</span><span>정책 해석</span></div>
+  <div class="kick">How far into policy</div>
+  <h2>정책 판단에<br><em>어디까지</em> 들어오는가</h2>
+  <div class="dek">전년비 개정폭 ≠ 월간 정책 신호</div>
+  <div class="sepbox">
+    <figure class="fig" style="margin:0">
+      <div class="fig-h"><b>9월 SEP · 근원 PCE 중앙값</b><span>4분기 전년동기비 · %</span></div>
+      <div class="svgbox" style="max-width:440px"><svg viewBox="0 0 380 200" role="img" aria-label="9월 SEP 근원 PCE 중앙값 2026년 3.4, 2027년 2.5, 2028년 2.2, 2029년 2.0">
+<line x1="30" y1="160" x2="360" y2="160" stroke="#9a6b22" stroke-width="1.4" stroke-dasharray="6 4"/>
+<text x="32" y="152" font-family="var(--sans)" font-weight="600" font-size="14" fill="#9a6b22">목표 2%</text>
+<polyline points="60,38.6 150,116.7 240,142.7 330,160.0" fill="none" stroke="#1a1e23" stroke-width="2.4"/>
+<circle cx="60" cy="38.6" r="5" fill="#1a1e23"/><circle cx="150" cy="116.7" r="5" fill="#1a1e23"/><circle cx="240" cy="142.7" r="5" fill="#1a1e23"/><circle cx="330" cy="160.0" r="5" fill="#1a1e23"/>
+<circle cx="60" cy="47.3" r="5" fill="#f6f1e6" stroke="#6c685f" stroke-width="1.8"/>
+<circle cx="240" cy="151.3" r="5" fill="#f6f1e6" stroke="#6c685f" stroke-width="1.8"/>
+<text x="60" y="26.6" text-anchor="middle" font-family="var(--serif)" font-weight="900" font-size="17" fill="#1a1e23">3.4</text><text x="150" y="104.7" text-anchor="middle" font-family="var(--serif)" font-weight="900" font-size="17" fill="#1a1e23">2.5</text><text x="240" y="130.7" text-anchor="middle" font-family="var(--serif)" font-weight="900" font-size="17" fill="#1a1e23">2.2</text>
+<text x="330" y="148.0" text-anchor="middle" font-family="var(--serif)" font-weight="900" font-size="17" fill="#1a1e23">2.0</text>
+
+
+<g font-family="var(--mono)" font-size="14" fill="#6c685f" text-anchor="middle"><text x="60" y="190">2026</text><text x="150" y="190">2027</text><text x="240" y="190">2028</text><text x="330" y="190">2029</text></g>
+<g font-family="var(--sans)" font-size="14"><circle cx="262" cy="16" r="5" fill="#1a1e23"/><text x="272" y="21" fill="#1a1e23">9월</text><circle cx="316" cy="16" r="5" fill="#f6f1e6" stroke="#6c685f" stroke-width="1.8"/><text x="326" y="21" fill="#6c685f">6월</text></g></svg></div>
+    </figure>
+    <ul class="pts">
+      <li>9월 16일 FOMC 경제전망요약 · <b>개정 발표 2주 전</b> 작성<sup><a href="#s11">11</a></sup></li>
+      <li>근원 PCE 2026년 3.4%(6월 3.3%) → 2029년 2.0% · <b>2% 복귀가 전망 지평 끝까지 밀림</b></li>
+      <li>연방기금금리 2026년 말 중앙값 3.8% → 4.1%</li>
+      <li>참가자들의 개정 반영 정도는 비공개 · BEA가 6월·8월 두 차례 예고해 몰랐다고 보기는 어려움<sup><a href="#s3">3</a>, <a href="#s5">5</a></sup></li>
+    </ul>
+  </div>
+
+  <h3><span class="n">①</span>전년비 격차를 12로 나누지 말 것</h3>
+  <p>유안타증권은 자사 12월 인상 시나리오에서 근원 PCE 월간 상승률 <b>0.25~0.30%면 인상 · 두 달 연속 0.2% 이하면 동결 여지</b>로 제시 · 연준 공표 기준이 아니라 한 증권사의 시나리오<sup><a href="#s12">12</a></sup></p>
+  <p>여기에 한화 추정 전년비 −0.19%p를 12로 나눠 대보고 싶은 유혹 · <b>성립하지 않는 계산</b> · 전년비 격차는 12개월치 월간 격차의 누적일 뿐 각 달의 대표값이 아님<sup><a href="#s13">13</a></sup></p>
+  <figure class="fig">
+    <div class="fig-h"><b>집계 숫자가 말하는 것 · 말하지 않는 것</b><span>한화 재현 · 전년비</span></div>
+    <div class="yb">
+      <div class="ybx"><div class="yr2">2025</div><dl><div><dt>연간 결과</dt><dd><b>0.00%p</b> · 동일</dd></div><div class="unk"><dt>월별 경로</dt><dd>확인 불가 · 공개된 월별 값 없음</dd></div></dl></div>
+      <div class="ybx"><div class="yr2">2026 · 1~7월</div><dl><div><dt>1~7월 결과</dt><dd><b>−0.13%p</b></dd></div><div><dt>월별 격차 평균</dt><dd><b>−0.12%p</b></dd></div><div class="unk"><dt>월별 분포</dt><dd>9월 30일 개정 시계열로 확인</dd></div></dl></div>
+    </div>
+    <div class="ynote"><span>집계 숫자</span><i aria-hidden="true"></i><span class="x">월간 경로 역산</span></div>
+    <div class="cap">출처가 밝힌 것은 연도별 값뿐 · 2025년 “동일”은 연간 결과이지 12개월 내내 차이가 없었다는 뜻 아님 · 특정 달의 격차는 평균보다 훨씬 클 수도, 부호가 반대일 수도 있음 · 월간 경로는 9월 30일 개정 월별 시계열이 나와야 확인<sup><a href="#s2">2</a>, <a href="#s13">13</a></sup></div>
+  </figure>
+
+  <h3><span class="n">②</span>알려진 것 · 추정 · 모르는 것</h3>
+  <p>비밀이 아닌 변경 · BEA 6월 예고 직후부터 주요 기관이 하향 폭을 추정 · Reuters 2026년 6월 29일 보도 기준 <b>골드만삭스는 5월 근원 PCE 3.4% → 3.2%(약 20bp), JP모건은 3.3%(약 10bp)</b> 추정<sup><a href="#s4">4</a></sup> · Axios도 분석가들의 대체적 전망을 약 0.2%p 하향으로 정리<sup><a href="#s14">14</a></sup></p>
+  <figure class="fig">
+    <div class="fig-h"><b>근원 PCE 전년비 하향폭 · 대표 기관 추정 지도</b><span>bp</span></div>
+    <div class="band">
+      <div class="bt">
+        <div class="rng" style="left:33.33%;width:33.34%"></div>
+        <div class="axis"></div>
+        <div class="dot" style="left:33.33%"></div><div class="dot" style="left:66.67%"></div><div class="dot o" style="left:63.33%"></div>
+        <div class="mk up" style="left:33.33%" data-tip="JP모건 · 5월 근원 PCE 3.4% → 3.3% · 약 10bp · 2026.06.29 보도"><b>10</b>JP모건</div>
+        <div class="mk up" style="left:66.67%" data-tip="골드만삭스 · 5월 근원 PCE 3.4% → 3.2% · 약 20bp · 2026.06.29 보도"><b>20</b>골드만삭스</div>
+        <div class="mk dn" style="left:63.33%" data-tip="한화투자증권 재현 · 7월 근원 PCE 3.34% → 3.15% · 19bp · 기준 달이 다름"><b>19</b>한화 · 7월</div>
+      </div>
+      <div class="bticks"><span style="left:0">0</span><span style="left:33.33%">10</span><span style="left:66.67%">20</span><span style="left:100%">30</span></div>
+      <div class="zones"><div><b>10 미만</b>대표 추정보다 덜 내림</div><div class="mid"><b>10~20</b>대표 기관 추정 범위</div><div><b>20 초과</b>대표 추정보다 더 내림</div></div>
+    </div>
+    <div class="cap">기준 달이 다른 추정 · GS·JPM은 5월 근원 PCE, 한화는 7월 기준 · 셋 다 BEA 공식치 아님 · 컨센서스나 시장가격이 아니라 공개된 기관 추정을 겹쳐 본 지도<sup><a href="#s2">2</a>, <a href="#s4">4</a></sup></div>
+  </figure>
+  <div class="kum">
+    <div class="km k"><span class="b">KNOWN</span><h4>이미 알려진 것</h4><ul class="pts"><li>세 항목의 방법론 변경</li><li>주된 소급 개정창 · 2021년 1분기~2026년 1분기</li><li>9월 30일 공개</li></ul></div>
+    <div class="km m"><span class="b">ESTIMATE</span><h4>공개된 주요 기관 추정</h4><ul class="pts"><li>주요 기관 추정은 하향 방향</li><li>GS 약 20bp · JPM 약 10bp</li><li>한화 7월 재현 19bp</li></ul></div>
+    <div class="km u"><span class="b">UNKNOWN</span><h4>9월 30일에야 나오는 것</h4><ul class="pts"><li>BEA 공식 개정폭과 부호</li><li>월별 경로</li><li>8월 실물 물가</li><li>신규 원자료 반영분</li></ul></div>
+  </div>
+  <div class="pull" style="margin-top:24px">9월 30일 첫 비교 · <span class="crayon">대표 추정과 실제 총개정폭의 차이<svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M8 24 C6 8,90 2,96 17 C101 32,20 40,5 27 C0 19,18 9,44 6"/></svg></span><small>방법론 몫은 BEA의 revision 자료를 확인한 뒤 판단 · “근원 PCE 0.2%p 하향”만으로는 새 정보 아님 · 실제 총 개정에는 신규 원자료 반영분도 섞여, 추정 20bp에 실제 25bp가 나와도 곧바로 “방법론 서프라이즈 +5bp”로 읽을 수 없음<sup><a href="#s3">3</a>, <a href="#s5">5</a>, <a href="#s6">6</a></sup></small></div>
+  <div class="kr" style="margin-top:8px">
+    <div class="t">놓치기 쉬운 것 · 8월 예상치의 기준</div>
+    <ul class="pts" style="margin:0">
+      <li>8월 예상치가 새 방법론을 어느 정도 반영했는지는 <b>기관별로 다를 수 있음</b><sup><a href="#s13">13</a></sup></li>
+      <li>BEA가 6월부터 변경을 공개해 주요 기관이 구방식을 그대로 썼다고 볼 근거도 없음</li>
+      <li>컨센서스 숫자와 실제치의 차이를 <b>전부 실물 물가 서프라이즈로 읽지 말 것</b></li>
+    </ul>
+  </div>
+  <details class="fold">
+    <summary><span><span class="n" style="font-family:var(--mono);font-size:12px;color:var(--brass);margin-right:8px">③</span>중립금리 산식에 넣을 값은 아님</span></summary>
+    <div class="in"><ul class="pts">
+      <li>키움증권 명목 중립금리 4.20% = 근원 PCE 2.5% 가정 · 2.0%를 넣으면 3.735%<sup><a href="#s15">15</a></sup></li>
+      <li>두 점의 차 · 4.20−2.5=1.70 · 3.735−2.0=1.735 · 잔차 0.035%p → 사실상 <b>명목 = 실질 중립금리 + 물가 가정</b> 형태<sup><a href="#s13">13</a></sup></li>
+      <li>2.5%는 장기 기대물가 가정 · 당월 실측치 아님 → 방법론 변경만으로 기계적으로 낮출 이유 없음</li>
+      <li>한화 재현 누적 상승률 차이도 0.1%p · 2021.01~2026.07 현행 22.9% vs 수정 23.0%<sup><a href="#s2">2</a></sup></li>
+      <li>다만 미 10년물은 정책 경로·물가 서프라이즈·<span class="tt" data-tip="장기채를 보유하는 데 요구되는 추가 보상 · 중립금리에 더해 장기금리 수준을 설명">기간프리미엄</span>이 함께 움직임 · 개정 결과가 예상 밖으로 크면 시장금리 반응 가능</li>
+    </ul></div>
+  </details>
+  <div class="sumbox"><span class="t">PAGE 05 · 정리</span><ol>
+    <li>전년비 개정폭 ≠ 월간 신호 · 12로 나누는 계산 금지</li>
+    <li>9월 30일 첫 비교는 공개된 대표 추정 10~20bp와 실제 총개정폭 · 방법론 몫은 BEA revision 자료 확인 뒤 판단</li>
+    <li>8월 예상치의 방법론 반영 정도는 기관별로 다를 수 있음 · 예상치와 실제치 차이를 전부 실물 서프라이즈로 읽지 말 것</li>
+  </ol></div>
+</div>
+</section>
+
+<section class="page alt" id="p6">
+<div class="wrap">
+  <div class="chno" aria-hidden="true">06</div>
+  <div class="ph"><span class="pg">PAGE 06</span><span>반론과 확인</span></div>
+  <div class="kick">Counterpoints · checkpoints</div>
+  <h2>반대편 근거와<br><em>확인 지점</em></h2>
+  <div class="dek">한화 재현 · 누적 차이는 작고 부호는 국면마다 갈림</div>
+  <div class="cc">
+    <div class="ccd"><div class="n">01</div><div><h4>누적보다 국면별 차이</h4><p>2021.01~2026.07 근원 PCE 누적 상승률 현행 22.9% · 수정 23.0% · 5년 7개월 동안 0.1%p 차이 · 한화 재현에서는 장기 누적 레벨보다 국면별 차이가 크게 나타남 · BEA 공식 결과 아님<sup><a href="#s2">2</a></sup></p><div class="mini"><div>현행<i style="width:99.6%"><b>22.9%</b></i></div><div>수정<i class="o" style="width:100%"><b>23.0%</b></i></div></div></div></div>
+    <div class="ccd"><div class="n">02</div><div><h4>연도·구간별로는 부호가 갈림</h4><svg viewBox="0 0 320 132" style="display:block;width:100%;max-width:340px;height:auto;margin:6px 0 10px" role="img" aria-label="연도별 격차 2021년 -0.10, 2022~2024년 +0.05~+0.13, 2025년 0, 2026년 1~7월 -0.13">
+<defs><pattern id="hz" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.2" height="5" fill="#1a1e23"/></pattern></defs>
+<line x1="4" y1="62" x2="316" y2="62" stroke="#1d2126"/>
+<rect x="22" y="62" width="46" height="34.6" fill="#1a1e23"/>
+<text x="45" y="113.6" text-anchor="middle" font-family="var(--serif)" font-weight="800" font-size="15" fill="#1a1e23">−0.10</text>
+<rect x="100" y="17.0" width="46" height="27.7" fill="url(#hz)" stroke="#1a1e23"/>
+<text x="123" y="11.0" text-anchor="middle" font-family="var(--serif)" font-weight="800" font-size="14" fill="#1a1e23">+0.05~0.13</text>
+<line x1="178" y1="62" x2="224" y2="62" stroke="#1a1e23" stroke-width="4"/>
+<text x="201" y="52" text-anchor="middle" font-family="var(--serif)" font-weight="800" font-size="15" fill="#1a1e23">0</text>
+<rect x="256" y="62" width="46" height="45.0" fill="#1a1e23"/>
+<text x="279" y="124.0" text-anchor="middle" font-family="var(--serif)" font-weight="800" font-size="15" fill="#1a1e23">−0.13</text>
+<g font-family="var(--mono)" font-size="14" fill="#6c685f" text-anchor="middle"><text x="45" y="54">2021</text><text x="123" y="82">22~24</text><text x="201" y="82">2025</text><text x="279" y="54">2026</text></g>
+</svg><p>월별 격차 평균은 2026년 1~7월 −0.12%p, 전 구간 +0.01%p · 모두 전년비 기준 · 일방적 하향 아님<sup><a href="#s2">2</a></sup></p></div></div>
+    <div class="ccd"><div class="n">03</div><div><h4>숫자 자체가 아직 추정</h4><p>본문 조정폭 전부 한화투자증권 재현 · BEA <span class="tt" data-tip="항목별 가격·수량 변화를 인접 두 기간 가중치로 평균해 이어 붙이는 BEA의 지수 계산법">피셔 연쇄지수</span> 계산을 재현할 수 없어 월별 지출 비중 가중 합산으로 근사 · 법률·소프트웨어 하위지수 가중치도 임의로 각 3분의 1 적용했다고 작성자 명시<sup><a href="#s2">2</a></sup></p></div></div>
+    <div class="ccd"><div class="n">04</div><div><h4>연례 개정에는 방법론만 들어오지 않음</h4><p>같은 개정에 신규 원자료 반영분 동반 · 구값과 신값의 차이를 전부 세 가지 계산 방식 변경 탓으로 돌릴 수 없음<sup><a href="#s3">3</a>, <a href="#s5">5</a></sup></p></div></div>
+    <div class="ccd"><div class="n">05</div><div><h4>에너지의 직접 효과는 헤드라인 쪽</h4><p>7월 헤드라인 PCE 전년비 +3.7% vs 근원 +3.3% · 방법론 변경은 근원 항목에, 에너지 구성효과는 헤드라인에 작용 · 다만 에너지 비용은 서비스·운송으로 간접 전가 가능 · 연준 목표는 헤드라인 PCE, 근원은 기조 신호<sup><a href="#s1">1</a></sup></p></div></div>
+    <div class="ccd"><div class="n">06</div><div><h4>기술적 타당성과 별개인 신뢰 문제</h4><p>Axios는 분석가들의 대체적 전망을 약 0.2%p 하향으로 정리하며 변경 자체는 기술적으로 충분히 방어 가능하다고 평가 · 동시에 통계기관 독립성이 공격받는 시점이라 외관은 좋지 않다고 지적<sup><a href="#s14">14</a></sup></p></div></div>
+  </div>
+  <h3>9월 30일 밤, 확인할 네 가지</h3>
+  <div class="watch">
+    <div class="wc"><div class="no">WATCH 01</div><div><h4>개정 전후 월별 시계열 대조</h4><p>개정 전 아카이브와 새 월별 시계열을 대조해 총 수정폭 확인 · 같은 날 공개되는 NIPA revision table과 SCB annual-update article에서 신규 원자료와 방법론 변경 설명까지 확인<sup><a href="#s1">1</a>, <a href="#s6">6</a></sup></p></div></div>
+    <div class="wc"><div class="no">WATCH 02</div><div><h4>대표 추정 10~20bp와의 거리</h4><p>첫 비교는 대표 기관 추정과 실제 총개정폭의 괴리<sup><a href="#s4">4</a></sup> · 신규 원자료와 방법론 변경의 영향은 revision table과 SCB annual-update article을 함께 대조해 분해 가능한 범위를 확인 · 다만 같은 시각 8월 신규 PCE와 2분기 GDP 3차 추정 등이 함께 나오므로 장중 금리 반응을 방법론 개정 하나에 귀속하지 말 것<sup><a href="#s6">6</a></sup></p></div></div>
+    <div class="wc"><div class="no">WATCH 03</div><div><h4>월별 경로의 쏠림</h4><p>전년비 격차가 어느 달에 몰렸는지 · 개정 월별 시계열이 나와야 특정 달 격차 크기 확인 · 그 뒤에야 월간 상승률 기준 판단 가능<sup><a href="#s2">2</a>, <a href="#s13">13</a></sup></p></div></div>
+    <div class="wc"><div class="no">WATCH 04</div><div><h4>12월 SEP와 9월 3.4%의 비교</h4><p>12월 9일 SEP는 개정 이후 첫 전망 · 두 값의 차이에 방법론 요인과 실제 물가 변화가 섞임 · 차이 전부를 전망 하향으로 읽지 말 것<sup><a href="#s8">8</a>, <a href="#s11">11</a></sup></p></div></div>
+  </div>
+  <div class="kr">
+    <div class="t">한국에 오는 경로</div>
+    <ul class="pts" style="margin:0">
+      <li>직접 경로 아님 · 미국 물가의 변화가 연준 정책경로 기대를 바꾸면 미 장기금리를 거쳐 국내 장기금리에도 전달될 수 있음</li>
+      <li>한국은행 최근 연구(BOK경제연구 2026-15)도 한·미 장기금리 동조화에서 <b>글로벌 인플레이션 충격</b>의 기여가 가장 크고(41.0%), 미국발 충격은 위험보상보다 <b>향후 통화정책 기대경로</b>로 주로 넘어온다고 분석<sup><a href="#s16">16</a></sup></li>
+      <li>따라서 이번 방법론 변경만으로 한국 국고채 금리의 하락폭을 기계적으로 계산할 수는 없음(PAGE 05 ③)</li>
+      <li>가장 흔할 실수 · 낮아진 근원 PCE를 <b>실물 물가 둔화로 읽고 12월 인상 확률을 깎아 잡는 것</b> · 반대로 전부 방법론 몫으로 치부하는 것도 같은 실수 · 둘의 분해는 개정 전후 대조 이후</li>
+      <li>한국 쪽 실물 변수는 NO.04에서 다룬 자사주 종료와 거래대금<sup><a href="#s7">7</a></sup></li>
+    </ul>
+  </div>
+  <div class="frame">
+    <div class="t">FED의 현재 프레임</div>
+    <div class="fr"><b>Warsh 의장 · 2026.08.28 잭슨홀</b><span>“Nor should we rely on isolated data points. Trends matter most.” · PCE 199개 세부 항목을 분해해 보는 것이 유익하다고 설명<sup><a href="#s17">17</a></sup></span></div>
+    <p class="small" style="margin:8px 0 0">낮아진 숫자 하나가 곧바로 정책 완화로 이어진다고 읽지 말아야 하는 이유 · 연설은 BEA 방법론 변경을 직접 언급하지 않음</p>
+  </div>
+</div>
+</section>
+
+<section class="closing">
+<div class="wrap">
+  <div class="lbl">CLOSING NOTE</div>
+  <div class="big">지표는 사실이 아니라<br><em>약속이다.</em></div>
+  <ul class="pts">
+    <li>같은 실물 · 다른 자 · 다른 숫자</li>
+    <li>BEA는 자만 바꾸지 않고 주된 소급 개정창도 함께 다시 씀</li>
+    <li>볼 것은 끊김이 아니라 개정폭 · 그중 방법론 몫이 공개된 대표 추정 10~20bp와 얼마나 다른지</li>
+  </ul>
+  <p class="last">낮아진 숫자의 일부는 물가가 아니라 자의 변화일 수 있다.</p>
+  <p class="disc">지표 정의가 바뀌는 날을 미리 점검하기 위한 문서 · 특정 자산의 방향 예측이나 매매 권고 아님 · 신구 방식 비교 수치는 전부 민간 재현 추정치이며 BEA 공식 재계산 결과 아님 · BEA는 예고문에서 변경 효과의 크기·부호를 수치로 제시하지 않음 · 대표 기관 추정 10~20bp는 2026년 6월 29일 보도 기준이며 컨센서스나 시장가격 아님 · 연준 전망치는 2026년 9월 16일 SEP 기준, 연도별 값은 4분기 전년동기비 · 실측 물가는 2026년 7월분(8월 26일 발표) 전년동월비 · 9월 30일 실제 발표치는 본문 추정과 다를 수 있음</p>
+</div>
+</section>
+
+<section class="back" id="back">
+<div class="wrap">
+  <div class="ph"><span class="pg">GLOSSARY</span><span>용어 간단히 보기</span></div>
+  <dl class="gl">
+    <div><dt>PCE 물가지수</dt><dd>개인소비지출 물가지수 · 연준 목표 물가는 헤드라인 PCE, 근원은 기조를 읽는 신호</dd></div>
+    <div><dt>근원 PCE</dt><dd>식품·에너지를 뺀 PCE · 통화정책이 영향을 줄 수 있는 부분에 가까움</dd></div>
+    <div><dt>BEA</dt><dd>미 상무부 경제분석국 · GDP와 PCE를 만드는 기관</dd></div>
+    <div><dt>연례 개정</dt><dd>매년 한 차례 과거 수치를 새 자료·새 방법으로 다시 계산해 발표 · 방법론 변경과 신규 원자료 반영이 함께 들어감</dd></div>
+    <div><dt>디플레이터</dt><dd>명목 지출을 실질로 바꿀 때 나누는 가격지수 · 어떤 지수를 쓰느냐가 물가와 실질 수량의 몫을 바꿈</dd></div>
+    <div><dt>수량 외삽</dt><dd>가격으로 나누는 대신 고용 같은 다른 자료로 실질 수량을 직접 추정하는 방법</dd></div>
+    <div><dt>vintage</dt><dd>같은 지표라도 발표 시점마다 달라지는 판본 · 개정 전 아카이브와 개정 후 값은 다른 vintage</dd></div>
+    <div><dt>SEP</dt><dd>FOMC 참가자 경제전망요약 · 점도표 포함 · 3·6·9·12월 회의에서 공개 · 연도별 값은 4분기 전년동기비</dd></div>
+    <div><dt>중립금리</dt><dd>경기를 부양하지도 억제하지도 않는 금리 수준 · 추정치이며 장기 기대물가 가정에 따라 달라짐</dd></div>
+    <div><dt>기간프리미엄</dt><dd>장기채를 보유하는 데 요구되는 추가 보상 · 중립금리에 더해 장기금리 수준을 설명</dd></div>
+  </dl>
+  <details class="sources" id="srcbox"><summary>출처 · SOURCES (17)</summary>
+  <p class="cutoff">정보 기준 시각 · 한국시간 2026.09.24 20시 · 그 이후 나온 지표 결과와 해외 장중 값은 담지 않음</p>
+  <div class="src" id="s1">1. U.S. Bureau of Economic Analysis · <a href="https://www.bea.gov/news/2026/personal-income-and-outlays-july-2026">Personal Income and Outlays, July 2026</a>(2026.08.26 발표) · 7월 PCE 전월비 +0.2% · 전년비 +3.7% · 근원 전월비 +0.2% · 전년비 +3.3% · <b>“Next release: September 30, 2026, at 8:30 a.m. EDT, Personal Income and Outlays, August 2026”</b> · <b>“With the next release, today’s data will be superseded”</b> · <b>“Updated monthly estimates of personal income and outlays will be released on September 30, along with the estimate for August 2026.”</b> · <b>“the 2026 annual updates of national, industry, and regional data will begin on the same day for the first time: September 30, 2026”</b> · 연례 개정 대상에 monthly personal income and outlays가 포함됨을 명시 · 한국시간 환산은 EDT(UTC−4) 기준 09.30 21:30.</div>
+<div class="src" id="s2">2. 한화투자증권 「STRATEGY NOTE · PCE 산출방식 변경 영향 점검」 <b>보고서 표기 2026.09.21 · 홈페이지 게시 09.22</b>(김성수) · 변경 항목 PCE 기준 비중 포트폴리오 관리·투자자문 2.11% · 법률 서비스 0.82% · 컴퓨터 소프트웨어·액세서리 1.23%(<b>BEA 공식 가중치가 아니라 작성자 집계</b>) · 2026년 7월 근원 PCE 3.34%→3.15% · 항목별 조정폭 소프트웨어 −0.14%p · 포트폴리오 관리 −0.07%p · 법률 서비스 +0.02%p · 포트폴리오 관리 2026년 6월 전년동월비 수수료 총액 +18.5%, 업종 고용 +4.7%, 신방식 가격 약 13.2% vs 기존 약 22%(실질 수량 약 −3.1%는 PPI 디플레이트에서 함축되는 잔차) · S&amp;P500 1% 변동 시 가격 반응 0.67%p→0.43%p · 2009년 3월 기여도 −0.26%p→+0.05%p · 2021년 4월 +0.48%p→+0.22%p(<b>2009년은 BEA 공식 소급 창 밖의 역사적 모의재현</b>) · 현행 소프트웨어 지수 2025.07 70.3→2026.07 85.2(+21.2%), 신방식 +8.6% · 근원 CPI 비중 0.035% vs 근원 PCE 비중 1.2% · 2021.01~2026.07 누적 현행 22.9% vs 수정 23.0%, 전 구간 월별 차이 평균 +0.01%p · 연도별 차이 2021년 −0.10%p, 2022~2024년 +0.05~+0.13%p, 2025년 동일, 2026년(1~7월) −0.13%p, 2026년 월평균 −0.12%p · <b>작성자가 BEA 피셔 연쇄지수 재현 불가로 월별 지출 비중 가중 합산 근사, 법률·소프트웨어 하위지수는 임의 균등(각 1/3) 가중을 적용했다고 명시한 자체 재현 추정치</b> · 같은 리포트가 소프트웨어 비중을 PCE 기준 1.23%와 근원 PCE 기준 1.2%로 함께 적어 분모가 다르므로, 본 노트는 표와 본문 모두 <b>PCE 기준</b>으로 통일하고 CPI 대비 배수는 “30배 넘게”로만 표기함.</div>
+<div class="src" id="s3">3. U.S. Bureau of Economic Analysis · <a href="https://apps.bea.gov/scb/issues/2026/06-june/0626-nea-preview.htm">Preview of the 2026 Annual Update of the National Economic Accounts</a>, <i>Survey of Current Business</i> 2026년 6월 · 포트폴리오 관리 “The quantity of portfolio management services will be derived using a U.S. Bureau of Labor Statistics (BLS) Current Employment Statistics (CES)-based quantity extrapolator” · 법률 서비스 “A BEA composite price index derived using detailed PPIs for selected legal services consumed by households will replace the consumer price index (CPI) for legal services <b>beginning in 2024</b>” · 소프트웨어 “A BEA-composite price index derived using the CPI for computer software and accessories; the PPI for game software publishing; and the PPI for hosting, ASP and other IT infrastructure provisioning services” · 소급 재계산 “first quarter of 2021 through the first quarter of 2026” · 연례 개정은 방법론 변경과 함께 <b>“more complete source data”</b> 반영을 포함함 · <b>BEA는 이 예고문에서 변경의 효과 크기를 수치로 제시하지 않음</b>.</div>
+<div class="src" id="s4">4. Reuters · <a href="https://money.usnews.com/investing/news/articles/2026-06-29/methodology-changes-could-lower-us-may-core-pce-inflation-economists-say">Methodology changes could lower US May core PCE inflation, economists say</a> 2026.06.29(Lucia Mutikani) · <b>골드만삭스는 2026년 5월 근원 PCE 전년비가 3.4%에서 3.2%로, JP모건은 3.3%로 낮아질 것으로 추정</b> · JP모건 Abiel Reinhart “the PCE index receives more than 30 times as much weight as the CPI index, while the items priced for the CPI index are not conceptually identical to the PCE definition” · 같은 내용을 <a href="https://www.investing.com/news/economy-news/core-pce-inflation-may-be-revised-lower-on-methodology-changes-4766041">Investing.com</a>(Jaiveer Shekhawat)도 같은 날 게재 · 추정 기준 시점은 5월 근원 PCE · <b>두 기관의 추정일 뿐 컨센서스 조사나 시장가격에 10~20bp가 반영됐다는 근거는 아님</b></div>
+<div class="src" id="s5">5. U.S. Bureau of Economic Analysis · <a href="https://www.bea.gov/news/blog/2026-08-17/annual-update-gdp-industry-and-state-stats-publicly-available-starting-sept-30">Annual Update of GDP, Industry, and State Stats Publicly Available Starting Sept. 30</a> 2026.08.17 · 연례 개정에 “inflation-adjusted consumer spending statistics and the personal consumption expenditures (PCE) price index” 개선이 포함됨을 재확인 · 개정 목적으로 “more complete source data”와 “methodological improvements”를 함께 제시 · 대부분 통계의 개정 범위는 2021년 1분기~2026년 1분기.</div>
+<div class="src" id="s6">6. U.S. Bureau of Economic Analysis · <a href="https://www.bea.gov/information-updates-national-regional-economic-accounts">Information on 2026 Annual Updates to the National, Industry, State, and County Statistics</a> · 9월 30일 공개 목록에 <b>“News releases for 2nd Quarter 2026 GDP (Third Estimate) and August Personal Income and Outlays”</b> · 전 월별·분기별 NIPA 표와 산업별 경제계정 표 · <b>“Table of NIPA Revisions: Components Detail and Major Source Data and Conceptual Changes Incorporated, 2021–2025”</b> · SCB 기사 <b>“The 2026 Annual Update of the National Economic Accounts”</b>와 <b>“Updated Summary of NIPA Methodologies”</b> 동시 공개 명시 · 페이지에 발표 시각은 따로 적혀 있지 않아 시각은 출처 1의 08:30 EDT 기준</div>
+<div class="src" id="s7">7. 한국은행 · <a href="https://www.bok.or.kr/portal/singl/crncyPolicyDrcMtg/listYear.do?menuNo=200755&amp;mtgSe=A">통화정책방향 결정회의 일정 및 자료</a> · 2026년 결정회의 8회(1·2·4·5·7·8·10·11월) · 다음 결정회의 10월 22일(목) / 국내 수급 구간은 Snowshagal INVESTMENT NOTE NO.04(2026.09.19) 참조.</div>
+<div class="src" id="s8">8. Federal Reserve Board · <a href="https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm">FOMC Calendars, Statements, and Minutes</a> · 2026년 정기회의 8회 · <b>10월 27~28일(SEP 없음) · 12월 8~9일(SEP 공개)</b> · 2026년 SEP 공개 회의는 3·6·9·12월 4회.</div>
+<div class="src" id="s9">9. Federal Reserve Board · Governor Stephen I. Miran, <a href="https://www.federalreserve.gov/newsevents/speech/miran20251215a.htm">The Inflation Outlook</a> 2025.12.15(Columbia University SIPA) · 포트폴리오 관리 PCE에 대해 <b>“What ought to be recorded as an increased quantity of services consumed is instead recorded as increased prices.”</b> · “The PCE portfolio management measure contains no signal regarding tightness in the asset management industry, let alone the economy.” · “It contains no signal for the inflation forecast going forward.” · 당시 연준 이사 발언이며 BEA 2026년 변경 발표 이전</div>
+<div class="src" id="s10">10. Federal Reserve Board · FEDS Notes, Alessandro Barbarino · Anthony M. Diercks · Stephen Miran, <a href="https://www.federalreserve.gov/econres/notes/feds-notes/measurement-of-computer-software-and-accessories-inflation-20260522.html">Measurement of “Computer Software and Accessories” Inflation</a> 2026.05.22 · 2025년 11월~2026년 3월 해당 범주 가격 <b>“a record 73 percent annualized increase”</b> · 역사 평균 대비 <b>“more than 9 standard deviations”</b> · CPI 범주의 플래시드라이브·공미디어는 PCE 가중치 0인데 CPI에는 포함되는 범주 불일치 · SaaS·AI 결합 상품의 가격 측정·품질 조정 문제 · <b>FEDS Notes는 필자 견해이며 연준 공식 입장 아님</b></div>
+<div class="src" id="s11">11. Federal Reserve Board · <a href="https://www.federalreserve.gov/monetarypolicy/fomcprojtabl20260916.htm">Summary of Economic Projections, September 16, 2026</a> · 근원 PCE 중앙값 2026년 3.4%(6월 3.3%) · 2027년 2.5% · 2028년 2.2%(6월 2.1%) · 2029년 2.0% · PCE 중앙값 2026년 3.7%(6월 3.6%) · 연방기금금리 중앙값 2026년 4.1%(6월 3.8%) · 실업률 2026~2029년 4.1% · 실질 GDP 2026년 2.3% · <b>SEP 연도별 값은 4분기 전년동기비 기준으로 월별 전년동월비 실측과 직접 비교 대상이 아님</b>.</div>
+<div class="src" id="s12">12. 유안타증권 「9월 FOMC 리뷰 · 범위를 말하지 않은 케빈 워시」 2026.09.17 · 12월 25bp 추가 인상 전망 · 10월 동결 · 자사 시나리오에서 판단 기준을 근원 PCE 월간 상승률로 잡아 0.25~0.30% 유지 시 인상, 두 달 연속 0.2% 이하면 동결 여지로 제시 · <b>연준이 공표한 기준이 아니라 해당 증권사의 12월 인상 시나리오임</b> · 2년물 4.65~4.75% · 10년물 5.00% 부근 전망.</div>
+<div class="src" id="s13">13. <b>본 노트의 계산과 판단</b> · 전년비 격차를 12로 나눠 월간 신호로 환산하는 계산은 <b>사용하지 않았음</b> · 전년비 격차는 12개월치 월간 격차가 누적된 값이라 각 달의 대표값이 아니고, 출처 2 자체가 2025년 격차 0 · 2026년 1~7월 월평균 −0.12%p로 격차의 시간 쏠림을 보여주기 때문 · 항등식 분해는 출처 15가 제시한 두 점(근원 PCE 2.5%→중립금리 4.20%, 2.0%→3.735%)의 차를 구해 4.20−2.5=1.70, 3.735−2.0=1.735(잔차 0.035%p)를 얻은 것으로, <b>명목 = 실질 중립금리 + 물가 가정 형태임을 확인한 것이며 키움증권이 그 식을 명시한 것은 아님</b> · 8월 예상치 관련 판단 · 월간 근원 PCE 예상치는 통상 CPI·PPI 세부 항목을 PCE 항목으로 옮겨 계산하는데, 출처 3의 세 항목은 옮기는 규칙이 바뀌므로 기관별 반영 정도에 따라 예상치와 실제치 차이에 계산 방식 차이가 섞일 수 있다는 본 노트의 판단 · 특정 기관 예상치를 확인한 결과가 아니며, BEA가 6월부터 변경을 공개해 주요 기관이 구방식을 그대로 썼다고 단정하지도 않음</div>
+<div class="src" id="s14">14. Axios · Neil Irwin, <a href="https://www.axios.com/2026/07/06/inflation-fed-pce">Measurement tweaks will make inflation data look better</a> 2026.07.06 · 분석가들의 대체적 전망을 근원 PCE 약 0.2%p 하향으로 정리(“consensus view that they will reduce core PCE inflation by about 0.2 percentage point”) · 변경은 “entirely defensible on technical grounds” · 통계기관 독립성이 공격받는 시점이라 “the optics aren't great” · 본 노트는 이 표현을 시장가격 반영의 근거로 쓰지 않음</div>
+<div class="src" id="s15">15. 키움증권 「연준 정책 TF로 읽는 정책 재설계 · 미국채 10년물 5% 시대?」 2026.09.22 · <b>명목 중립금리 4.20%는 주요 모형 평균에 근원 PCE 2.5% 가정을 더한 리포트 계산치이며, 2.0% 가정 시 3.735%</b> · 10년물 추정 4.20+0.89=5.09% · 4.20+1.09=5.29% · 스트레스 4.20+1.28=5.48% · 기간프리미엄은 연준 DKW 모델 8월 말 0.78% · 2000년 이후 장기평균 0.50% · +1σ 0.89% · 리포트 표기 중간값 1.09% · +2σ 1.28%.</div>
+<div class="src" id="s16">16. 한국은행 경제연구원 · <a href="https://www.bok.or.kr/imer/bbs/P0002455/view.do?nttId=11064887&amp;menuNo=500788&amp;pageIndex=1">BOK경제연구 제2026-15호 「한·미 장기금리 동조화 현상 분석」</a> 등록일 2026.09.20(윤재호 이화여대 · 김도완 · 이형석 한국은행) · 공식 요약 · 동조화를 설명하는 가장 중요한 요인은 글로벌 인플레이션 충격 · 외부 충격은 위험보상보다 <b>향후 통화정책에 대한 기대경로</b>로 주로 전달 · 기대를 적절히 관리하면 동조화를 일정 폭 완화할 수 있다는 시사점 · 기여도 세부 수치(글로벌 인플레이션 41.0% · 미국 장기금리 22.7% · 연준 통화정책 18.3% · 미국 경기 18.0%)와 위험보상 경로 기여가 네 충격 중 셋에서 음수라는 내용은 보도로 교차 확인: <a href="https://www.newspim.com/news/view/20260918001028">뉴스핌</a> · <a href="https://www.etoday.co.kr/news/view/2627395">이투데이</a> · <a href="https://www.e-focus.co.kr/news/articleView.html?idxno=3002904">이포커스</a></div>
+<div class="src" id="s17">17. Federal Reserve Board · Chairman Kevin Warsh, <a href="https://www.federalreserve.gov/newsevents/speech/warsh20260828a.htm">Keynote remarks at the 2026 Jackson Hole Economic Policy Symposium</a> 2026.08.28 · “Nor should we rely on isolated data points. Trends matter most.” · “we must interrogate reality to make sure we are not setting forward-looking policy based on stale or inaccurate data” · “I find it instructive to disaggregate the 199 individual components of the PCE price measure” · <b>연설은 BEA 방법론 변경을 직접 언급하지 않음</b></div>
+
+  </details>
+  <div class="foot"><span>2026.09.24 · Snowshagal INVESTMENT NOTE NO.05</span><a href="https://www.snowshagal.com" target="_blank" rel="noopener noreferrer">snowshagal.com</a></div>
+</div>
+</section>
+<div id="tip" role="tooltip"></div>
+<script>
+(function(){
+  var bar=document.getElementById('pgbar');
+  var secs=[].slice.call(document.querySelectorAll('#p0,#p1,#p2,#p3,#p4,#p5,#p6,#back'));
+  var nav=[].slice.call(document.querySelectorAll('.rail a'));
+  function upd(){
+    var h=document.documentElement.scrollHeight-innerHeight;
+    bar.style.width=(h>0?scrollY/h*100:0)+'%';
+    var y=scrollY+innerHeight*.35,a=0;
+    secs.forEach(function(el,i){if(el.getBoundingClientRect().top+scrollY<=y)a=i;});
+    nav.forEach(function(el,i){el.classList.toggle('on',i===a);});
+  }
+  addEventListener('scroll',upd,{passive:true});addEventListener('resize',upd);upd();
+})();
+(function(){
+  /* stuck(탭·클릭 고정)과 hover 표시 분리 · 되돌리지 말 것 (2026.09.01 규칙) */
+  var tip=document.getElementById('tip'),active=null,stuck=null;
+  function place(el){var r=el.getBoundingClientRect(),t=tip.getBoundingClientRect();var l=Math.min(innerWidth-t.width-10,Math.max(10,r.left+r.width/2-t.width/2));var tp=r.top-t.height-10;if(tp<52)tp=r.bottom+10;tip.style.left=l+'px';tip.style.top=tp+'px';}
+  function show(el){tip.textContent=el.getAttribute('data-tip');tip.classList.add('show');active=el;place(el);}
+  function hide(){tip.classList.remove('show');active=null;stuck=null;}
+  [].forEach.call(document.querySelectorAll('[data-tip]'),function(el){
+    el.setAttribute('tabindex','0');el.setAttribute('aria-describedby','tip');
+    el.addEventListener('mouseenter',function(){if(!stuck)show(el);});
+    el.addEventListener('mouseleave',function(){if(stuck!==el)hide();});
+    el.addEventListener('focus',function(){var kb=false;try{kb=el.matches(':focus-visible');}catch(_){kb=false;}if(kb){stuck=el;show(el);}});
+    el.addEventListener('blur',function(){if(stuck===el)hide();});
+    el.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(stuck===el){hide();}else{stuck=el;show(el);}});
+  });
+  document.addEventListener('click',function(){if(stuck)hide();});
+  addEventListener('scroll',function(){if(active&&!stuck)hide();else if(active)place(active);},{passive:true});
+})();
+(function(){
+  function open(h){if(!h)return;var t=document.getElementById(h.slice(1));if(!t)return;var d=t.closest('details');if(d)d.open=true;t.scrollIntoView({block:'center'});}
+  document.addEventListener('click',function(e){var a=e.target.closest('a[href^="#s"]');if(a){e.preventDefault();var h=a.getAttribute('href');open(h);history.replaceState(null,'',h);}});
+  addEventListener('hashchange',function(){open(location.hash);});
+  if(/^#s\d+$/.test(location.hash))open(location.hash);
+})();
+</script>
+</body>
+</html>
