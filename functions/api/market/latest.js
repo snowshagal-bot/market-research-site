@@ -1,17 +1,22 @@
-import { EXPECTED_MARKET_DATE_HEADER, TABLE_NAME, MarketDbError, ensureMarketTable, formatMarketResponse, json } from './_shared.js';
-import { expectedPublishedKrxTradingDate } from '../../_trading-calendar.js';
+import { EXPECTED_MARKET_DATE_HEADER, KRX_SESSION_HEADER, TABLE_NAME, MarketDbError, encodeKrxSessionHeader, ensureMarketTable, formatMarketResponse, json } from './_shared.js';
+import { expectedPublishedKrxTradingDate, krxSessionStatus } from '../../_trading-calendar.js';
 
 // The session that should be on the site by now, computed with the response so
 // a cached copy carries the expectation of the moment its body was read. The
 // body is untouched; a date outside the configured calendar sends no header
 // and the page keeps its ordinary TODAY display.
 function expectedDateHeaders(now) {
+  const headers = {};
   try {
-    return { [EXPECTED_MARKET_DATE_HEADER]: expectedPublishedKrxTradingDate(now) };
+    headers[EXPECTED_MARKET_DATE_HEADER] = expectedPublishedKrxTradingDate(now);
   } catch (error) {
     console.error('expected market date unavailable', error);
-    return {};
   }
+  // Whether the KRX trades today, for the "closed" line. Separate from the
+  // expectation above: a holiday after a published close is not stale.
+  const session = krxSessionStatus(now);
+  if (session) headers[KRX_SESSION_HEADER] = encodeKrxSessionHeader(session);
+  return headers;
 }
 
 export async function onRequestGet({ request, env, now = new Date() }) {

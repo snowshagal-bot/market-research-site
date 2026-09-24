@@ -139,6 +139,7 @@ const VIEW = {
   'notice-dialog-date': ['text'],
   'notice-dialog-title': ['text'],
   'notice-dialog-content': ['text'],
+  'today-strip-heading': ['data-session'],
   'today-strip-tag': ['text'],
   'today-strip-date': ['text'],
   'today-strip-notice': ['text', 'hidden'],
@@ -312,7 +313,7 @@ async function assertParity(scenario) {
 /* ------------------------------------------------------------ scenarios */
 
 const NORMAL_DATE = '2026-09-23';
-const NORMAL_NOW = kst('2026-09-24', '18:00'); // Chuseok: 09-23 is still the expected session
+const NORMAL_NOW = kst('2026-09-23', '18:00'); // a KRX trading day after the 16:05 publish time
 const STALE_NOW = kst('2026-09-29', '18:00');
 
 function researchPost(lang, overrides = {}) {
@@ -685,4 +686,59 @@ test('22. only / and /en/ are home pages; /disclosures/ and /calendar/ are untou
   });
   assert.equal(response.status, 200);
   assert.doesNotMatch(await response.text(), /home-initial-data/);
+});
+
+/* ------------------------------------------------------ KRX session state */
+
+test('KRX closed days read as closed from the first HTML, separate from freshness (KO/EN, holiday and weekend)', async () => {
+  const db = await database({ market: [{ payload: payloadFor(NORMAL_DATE) }] });
+  const cases = [
+    ['2026-09-24', { ko: 'KRX 휴장 · 추석 전날', en: 'KRX CLOSED · CHUSEOK EVE' }],
+    ['2026-09-25', { ko: 'KRX 휴장 · 추석', en: 'KRX CLOSED · CHUSEOK DAY' }],
+    ['2026-09-26', { ko: 'KRX 휴장 · 주말', en: 'KRX CLOSED · WEEKEND' }],
+    ['2026-09-27', { ko: 'KRX 휴장 · 주말', en: 'KRX CLOSED · WEEKEND' }]
+  ];
+  for (const [day, labels] of cases) {
+    const now = kst(day, '12:00');
+    assert.equal(expectedPublishedKrxTradingDate(now), NORMAL_DATE, `${day}: 09-23 is still the expected close`);
+    for (const lang of ['ko', 'en']) {
+      const { rendered, server } = await assertParity({ lang, db, now });
+      assert.equal(rendered['today-strip-heading']['data-session'], 'closed', `${day} ${lang}`);
+      assert.equal(rendered['today-strip-tag'].text, labels[lang]);
+      assert.equal(rendered['today-strip-date'].text, lang === 'en' ? 'LAST CLOSE · SEP 23' : '최근 종가 · SEP 23');
+      // Closed is not stale: no stale notice, the numbers are the 09-23 close.
+      assert.equal(rendered['today-strip-notice'].hidden, true);
+      assert.match(rendered['today-market-grid'].html, /6,788\.88/);
+      const boot = JSON.parse(nodeById(server.html, 'home-initial-data').inner);
+      assert.deepEqual(Object.keys(boot.market.krxSession).sort(), ['calendarDate', 'holidayName', 'lastTradingDate', 'state']);
+      assert.equal(boot.market.krxSession.calendarDate, day);
+      assert.equal(boot.market.krxSession.lastTradingDate, NORMAL_DATE);
+    }
+  }
+});
+
+test('trading days keep TODAY: 09-23 and the next trading day after Chuseok', async () => {
+  const db = await database({ market: [{ payload: payloadFor(NORMAL_DATE) }] });
+  for (const now of [kst('2026-09-23', '18:00'), kst('2026-09-28', '10:00')]) {
+    for (const lang of ['ko', 'en']) {
+      const { rendered, server } = await assertParity({ lang, db, now });
+      assert.equal(rendered['today-strip-heading']['data-session'], null);
+      assert.equal(rendered['today-strip-tag'].text, 'TODAY');
+      assert.equal(rendered['today-strip-date'].text, 'SEP 23');
+      assert.equal(JSON.parse(nodeById(server.html, 'home-initial-data').inner).market.krxSession.state, 'trading');
+    }
+  }
+});
+
+test('a closed day whose close is also behind shows both: closed, and the stale label with its notice', async () => {
+  const db = await database({ market: [{ payload: payloadFor('2026-09-21') }] });
+  const now = kst('2026-09-24', '12:00');
+  for (const lang of ['ko', 'en']) {
+    const { rendered } = await assertParity({ lang, db, now });
+    assert.equal(rendered['today-strip-heading']['data-session'], 'closed');
+    assert.equal(rendered['today-strip-tag'].text, lang === 'en' ? 'KRX CLOSED · CHUSEOK EVE' : 'KRX 휴장 · 추석 전날');
+    assert.equal(rendered['today-strip-date'].text, lang === 'en' ? 'LAST VERIFIED CLOSE · SEP 21' : '마지막 검증 완료 · 9월 21일');
+    assert.equal(rendered['today-strip-notice'].hidden, false);
+    assert.match(rendered['today-strip-notice'].text, lang === 'en' ? /Sep 23/ : /9월 23일/);
+  }
 });
