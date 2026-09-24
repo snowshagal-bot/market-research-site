@@ -48,6 +48,8 @@ Locale structure:
 
 Whether the KRX trades today is kept apart from Market Close freshness. `krxSessionStatus(now)` in `functions/_trading-calendar.js` (the only holiday list) returns the Seoul date, `trading` / `holiday` / `weekend`, the KO/EN holiday name and the last trading date; `/api/market/latest` sends it in the `x-krx-session` header (percent-encoded JSON, beside `x-market-expected-date`; body, ETag and caching unchanged). `assets/locale.js` parses it and words it (`krxSessionDisplay`) for both the homepage strip — server-rendered by `functions/_home-initial.js` and repainted by `assets/site.js` from the bootstrap — and a TODAY-only line on MARKET (`sessionNotice` in `assets/market-close.js`). A holiday after a published close is not stale; a stale close on a holiday shows the closed line and the existing stale/outage notice together. HISTORY, 1W and 1M never show it.
 
+Global Latest is a second, separate market data channel: the current observation of twelve global instruments (NASDAQ, DOW, SP500, SOX, VIX, US10Y, USDKRW, JPYKRW, DXY, WTI, GOLD, BITCOIN), independent of the KRX calendar, where Market Close stays the KRX trading-session historical snapshot. `functions/api/market/global/` holds the only instrument list, the 1.0.0 contract validation (`contracts/global_latest/`), and `POST /api/market/global/publish` / `GET /api/market/global/latest` over the `market_global_latest` table (migration `0002`, no runtime DDL). Each instrument's stored observation only moves forward in `as_of`; a valid publish updates the newer items and skips older ones; an invalid one writes nothing. GET returns the stored rows with their own timestamps and does not judge freshness. **Status: website receiver ready, collector pending** — no page reads it yet (TODAY overlay is B3).
+
 `/market/` and `/en/market/` are the Market Close pages. They read the published close from
 `GET /api/market/latest`, which serves the newest row of the D1-backed `market_close` table.
 The record is uploaded through `/admin/market/` against the JSON Schema in
@@ -465,6 +467,8 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `admin/market/announcements/index.html` / `assets/admin-announcements.js` / `assets/admin-announcements.css` — session-authenticated operational notice CRUD UI
 - `functions/api/admin/announcements.js` / `functions/api/announcements.js` / `functions/_announcements.js` — admin CRUD, public active-window projection, validation and status calculation
 - `migrations/comments/0001_admin_announcements.sql` — idempotent `COMMENTS_DB` announcement migration
+- `migrations/comments/0002_market_global_latest.sql` — idempotent Global Latest table (`market_global_latest`)
+- `functions/api/market/global/` — Global Latest contract validation, publish and read endpoints
 - `data/market-summary.js` — fallback data and editorial one-liner for the homepage TODAY strip
 - `data/tags.json` / `data/tags.js` — canonical topic tag registry
 - `scripts/build-search-index.mjs` — builds the search index and syncs reading time

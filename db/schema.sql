@@ -212,3 +212,17 @@ CREATE TABLE IF NOT EXISTS market_calendar_sources (
   last_note TEXT NOT NULL DEFAULT '',
   updated_at TEXT NOT NULL
 );
+
+-- Global Latest (migrations/comments/0002_market_global_latest.sql): one row per
+-- global instrument, the current observation, separate from Market Close.
+CREATE TABLE IF NOT EXISTS market_global_latest (
+  code TEXT PRIMARY KEY,
+  schema_version TEXT NOT NULL,
+  source_date TEXT NOT NULL,
+  as_of TEXT NOT NULL,
+  retrieved_at TEXT NOT NULL,
+  data_state TEXT NOT NULL CHECK(data_state IN ('intraday', 'final_close')),
+  payload_json TEXT NOT NULL,
+  published_at TEXT NOT NULL,
+  auth_source TEXT NOT NULL
+);

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://snowshagal.com/contracts/global_latest/global_latest.schema.json",
+  "title": "Snowshagal Global Latest publish document",
+  "description": "Current observations of global indicators, independent of the KRX calendar. Not a Market Close payload. The server additionally enforces the semantic rules in GLOBAL_LATEST_CONTRACT.md (change arithmetic, timestamp order and skew, NYSE calendar for completed US closes).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "generated_at", "items"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "generated_at": { "$ref": "#/$defs/dateTime" },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/item" }
+    }
+  },
+  "$defs": {
+    "dateTime": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?(?:Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "nullableNumber": { "type": ["number", "null"] },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "ticker", "value", "previous_close", "change", "change_pct", "source_date", "as_of", "retrieved_at", "data_state", "source"],
+      "properties": {
+        "code": { "enum": ["NASDAQ", "DOW", "SP500", "SOX", "VIX", "US10Y", "USDKRW", "JPYKRW", "DXY", "WTI", "GOLD", "BITCOIN"] },
+        "ticker": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "value": { "type": "number" },
+        "previous_close": { "$ref": "#/$defs/nullableNumber" },
+        "change": { "$ref": "#/$defs/nullableNumber" },
+        "change_pct": { "$ref": "#/$defs/nullableNumber" },
+        "source_date": { "type": "string", "format": "date", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "as_of": { "$ref": "#/$defs/dateTime" },
+        "retrieved_at": { "$ref": "#/$defs/dateTime" },
+        "data_state": { "enum": ["intraday", "final_close"] },
+        "source": { "type": "string", "minLength": 1, "maxLength": 64 }
+      }
+    }
+  }
+}

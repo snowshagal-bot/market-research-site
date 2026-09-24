@@ -228,6 +228,24 @@ npx wrangler d1 execute market-research-comments --remote --file=migrations/comm
 
 Preview and Production must retain different D1 database IDs. Preview CRUD fixtures must be clearly synthetic and deleted before acceptance completes. The application fails closed with `503 ANNOUNCEMENT_SCHEMA_NOT_READY` when the table is missing; request handlers do not run DDL implicitly.
 
+### Global Latest on the existing D1 binding
+
+Global Latest (`contracts/global_latest/`) is the current observation of twelve global instruments, published independently of the KRX calendar. It is **not** Market Close, the KRX trading-session historical snapshot: it has its own contract (1.0.0), table (`market_global_latest`, one row per instrument) and endpoints (`GET /api/market/global/latest`, `POST /api/market/global/publish`), and it never reads or writes `market_close_snapshots`. It reuses `COMMENTS_DB`, the Market Close write-host policy and `MARKET_PUBLISH_KEY`; no new Secret or binding is required.
+
+Apply the checked-in idempotent migration to the isolated Preview database first:
+
+```bash
+npx wrangler d1 execute market-research-comments-preview --remote --file=migrations/comments/0002_market_global_latest.sql
+```
+
+Only after approval, and before the Production merge, apply the same file to Production:
+
+```bash
+npx wrangler d1 execute market-research-comments --remote --file=migrations/comments/0002_market_global_latest.sql
+```
+
+Request handlers never create the table: without it both endpoints answer `503 GLOBAL_LATEST_SCHEMA_NOT_READY`; with an empty table `GET` answers `200` with `items: []`. Preview acceptance uses synthetic items whose `source` is `preview-global-latest-fixture` and deletes them afterwards, on Preview only: `DELETE FROM market_global_latest WHERE json_extract(payload_json, '$.source') = 'preview-global-latest-fixture';`. Status after B1: website receiver ready, collector pending.
+
 Public `GET /api/announcements` returns only `publish_state = published`, `audience = all` rows whose UTC exposure window contains the current server time. Admin create/update/delete require an authenticated administrator session, exact Preview or Production admin Origin, and the session CSRF token. No new Secret or environment variable is required.
 
 ### Automated OpenDART Daily Sync (`DISCLOSURE_SYNC_KEY`)

@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-09-24T13:49:40Z",
+  "items": [
+    {
+      "code": "NASDAQ",
+      "ticker": "^IXIC",
+      "value": 26753.24,
+      "previous_close": 26936.04,
+      "change": -182.8,
+      "change_pct": -0.6786,
+      "source_date": "2026-09-24",
+      "as_of": "2026-09-24T13:49:31Z",
+      "retrieved_at": "2026-09-24T13:49:34Z",
+      "data_state": "intraday",
+      "source": "Yahoo Finance"
+    },
+    {
+      "code": "US10Y",
+      "ticker": "^TNX",
+      "value": 5.11,
+      "previous_close": 5.071,
+      "change": 0.039,
+      "change_pct": 0.7691,
+      "source_date": "2026-09-23",
+      "as_of": "2026-09-23T19:00:00Z",
+      "retrieved_at": "2026-09-24T13:49:35Z",
+      "data_state": "final_close",
+      "source": "Yahoo Finance"
+    },
+    {
+      "code": "BITCOIN",
+      "ticker": "BTC-USD",
+      "value": 83883.81,
+      "previous_close": 84383.01,
+      "change": -499.2,
+      "change_pct": -0.5916,
+      "source_date": "2026-09-24",
+      "as_of": "2026-09-24T13:49:34Z",
+      "retrieved_at": "2026-09-24T13:49:36Z",
+      "data_state": "intraday",
+      "source": "Yahoo Finance"
+    }
+  ]
+}
