@@ -10,10 +10,15 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
-0. **Market UX Phase A — KRX non-trading day state (Draft PR, Preview only)**:
+0. **Global Latest B1 — website contract, D1 and publish/read API (Draft PR, Preview only)**:
+   - Separate channel from Market Close: `contracts/global_latest/` 1.0.0, `market_global_latest` (migration `0002`), `POST /api/market/global/publish` (MARKET_PUBLISH_KEY, Market Close host policy, per-instrument monotonic `as_of`, one D1 batch), `GET /api/market/global/latest` (stored rows as published, ETag/304).
+   - Status: website receiver ready, collector pending. No page reads it yet.
+   - Remaining steps, in order: Preview QA → approval → Production migration → schema readiness check → merge → Production GET empty 200 → B2 core collector → B3 TODAY/homepage overlay.
+
+0. **Market UX Phase A — KRX non-trading day state (merged #143, Production verified on 2026-09-24)**:
    - `krxSessionStatus(now)` in `functions/_trading-calendar.js` (the only holiday source) reports trading / holiday / weekend, the holiday name and the last trading date; `/api/market/latest` sends it as `x-krx-session` (percent-encoded JSON) with the body, ETag and caching unchanged.
    - HOME reads "KRX 휴장 · 추석 전날 | 최근 종가 · SEP 23" (EN "KRX CLOSED · CHUSEOK EVE | LAST CLOSE · SEP 23") from the first HTML on closed days; MARKET TODAY adds a quiet closed line. Freshness is untouched: a holiday after a published close is not stale, and a stale close on a holiday shows both lines.
-   - Remaining manual steps: Preview QA → owner approval → Production merge → Production check on the next closed day and the next trading day.
+   - Production checked on Chuseok Eve: raw HTML closed state KO/EN, API body byte-identical, zero first-load API requests. Remaining: the next trading day (09-28) returns to TODAY.
 
 0. **SEO Phase 3 — search integrity audit & regression gate (merged #141, Production verified)**:
    - `scripts/audit-seo.mjs` audits the whole public indexable corpus (counts derived from `data/posts.json` and `sitemapXml()`) and runs as `verify.mjs` step 4/5; `--origin=` audits a Preview or Production over HTTP.
