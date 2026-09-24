@@ -50,6 +50,16 @@ export function fingerprint(text) {
 // published (functions/_trading-calendar.js, publishEligible boundary).
 export const EXPECTED_MARKET_DATE_HEADER = 'x-market-expected-date';
 
+// Also /api/market/latest only: today's KRX session state
+// (functions/_trading-calendar.js krxSessionStatus), which is independent of
+// freshness. Percent-encoded JSON so the Korean holiday name stays ASCII in
+// the header; read it with MARKET_LOCALE.parseKrxSessionHeader.
+export const KRX_SESSION_HEADER = 'x-krx-session';
+
+export function encodeKrxSessionHeader(status) {
+  return encodeURIComponent(JSON.stringify(status));
+}
+
 export function formatMarketResponse(row, request, extraHeaders = {}) {
   const stamp = `${row.generated_at}|${row.published_at || ''}|${row.takeaway_ko || ''}|${row.takeaway_en || ''}`;
   const etag = `W/"market-${row.market_date}-${fingerprint(stamp)}"`;

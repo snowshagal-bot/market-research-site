@@ -225,9 +225,23 @@
     // The session /api/market/latest says should already be published
     // (x-market-expected-date, from functions/_trading-calendar.js).
     expectedDate: null,
+    // Today's KRX session (x-krx-session, functions/_trading-calendar.js
+    // krxSessionStatus), independent of the expectation above.
+    krxSession: null,
     popstateBound: false
   };
   const EXPECTED_MARKET_DATE_HEADER = 'x-market-expected-date';
+  const KRX_SESSION_HEADER = 'x-krx-session';
+
+  // TODAY view only: a KRX holiday or weekend is the market resting, not missing
+  // data, so it is its own quiet line and never replaces the stale/outage notice
+  // below, which still appears when the close on screen is also behind.
+  function sessionNotice(marketDate, isHistory) {
+    if (isHistory || state.mode !== 'today') return '';
+    const display = root.MARKET_LOCALE?.krxSessionDisplay?.(state.krxSession, ko ? 'ko' : 'en', { latestDate: marketDate });
+    if (!display) return '';
+    return `<div class="market-session" role="note"><p class="market-session-badge">${html(display.label)}</p><p class="market-session-note">${display.sentences.map(html).join(' ')}</p></div>`;
+  }
 
   // TODAY view only: when the latest close is older than the expected session,
   // name the last verified close and the session that is not provided.
@@ -517,6 +531,7 @@
       <section class="market-hero" aria-labelledby="market-close-heading"><div class="market-wrap market-hero-inner"><div class="market-hero-copy">
         <p class="market-eyebrow">SNOWSHAGAL</p><h1 id="market-close-heading">${copy.title}</h1><p class="market-subtitle">${copy.subtitle}</p>
         <p class="market-date">${dateText(data.meta?.market_date)} · ${copy.closeBasis}</p>
+        ${sessionNotice(marketDate, isHistory)}
         ${availabilityNotice(marketDate, isHistory)}
         ${integrityNotice(marketDate)}
         <p class="market-update">${copy.updateNotice}</p>
@@ -940,6 +955,7 @@
         const data = await response.json();
         state.currentDate = data.meta?.market_date || null;
         state.expectedDate = response.headers?.get?.(EXPECTED_MARKET_DATE_HEADER) || null;
+        state.krxSession = root.MARKET_LOCALE?.parseKrxSessionHeader?.(response.headers?.get?.(KRX_SESSION_HEADER)) || null;
         render(data, rootEl);
       }
     } catch (error) {

@@ -17,6 +17,9 @@ html[data-theme="dark"] .market-close-page{--market-ink:#e5edf7;--market-blue:#7
 .market-availability{margin:8px 0 6px;padding:7px 10px;max-width:48ch;border-left:2px solid var(--market-blue);background:color-mix(in srgb,var(--bg) 88%,transparent)}
 .market-availability-badge{margin:0;font-size:10px;font-weight:900;letter-spacing:.14em;color:var(--market-blue)}
 .market-availability-note{margin:2px 0 0;font-size:12px;line-height:1.45;color:var(--text-2);word-break:keep-all;overflow-wrap:break-word}
+.market-session{margin:8px 0 6px;padding:7px 10px;max-width:48ch;border-left:2px solid color-mix(in srgb,var(--line) 85%,transparent);background:color-mix(in srgb,var(--bg) 88%,transparent)}
+.market-session-badge{margin:0;font-size:10px;font-weight:900;letter-spacing:.14em;color:var(--market-ink)}
+.market-session-note{margin:2px 0 0;font-size:12px;line-height:1.45;color:var(--text-2);word-break:keep-all;overflow-wrap:break-word}
 .market-integrity{margin:8px 0 6px;padding:7px 10px;max-width:46ch;border-left:2px solid color-mix(in srgb,var(--line) 85%,transparent);background:color-mix(in srgb,var(--bg) 88%,transparent)}
 .market-availability .market-transparency-card{margin-top:8px;padding-top:7px;border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
 .market-integrity .market-transparency-title,.market-availability .market-transparency-title{margin:0 0 5px;font-size:11.5px;font-weight:800;letter-spacing:-.01em;color:var(--market-ink)}

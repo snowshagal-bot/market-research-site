@@ -251,6 +251,42 @@ export function expectedPublishedKrxTradingDate(now = new Date()) {
   return latestKrxTradingDateAfter(now, 'publishEligibleMinutes');
 }
 
+/**
+ * Today's KRX session state in Seoul, independent of Market Close freshness:
+ * a holiday with the previous session's close on the site is closed, not
+ * stale. `lastTradingDate` is the latest KRX trading date on or before today
+ * (today itself on a trading day), null when the calendar cannot resolve it.
+ * Special sessions (delayed open/close) are trading days. Null when the
+ * current year's KRX calendar is not configured, so callers keep their
+ * ordinary display.
+ *
+ *   { calendarDate, state: 'trading' | 'holiday' | 'weekend',
+ *     holidayName: { ko, en } | null, lastTradingDate }
+ */
+export function krxSessionStatus(now = new Date()) {
+  if (!(now instanceof Date) || !Number.isFinite(now.getTime())) return null;
+  const calendarDate = kstParts(now).date;
+  let trading;
+  try {
+    trading = isTradingDate(calendarDate, 'KRX');
+  } catch (_) {
+    return null;
+  }
+  const day = parseDate(calendarDate).getUTCDay();
+  const state = trading ? 'trading' : (day === 0 || day === 6 ? 'weekend' : 'holiday');
+  const name = state === 'holiday' ? HOLIDAY_NAMES.KRX[calendarDate] : null;
+  let lastTradingDate = null;
+  try {
+    lastTradingDate = trading ? calendarDate : previousTradingDate(calendarDate, 'KRX');
+  } catch (_) {}
+  return {
+    calendarDate,
+    state,
+    holidayName: name ? { ko: name.ko, en: name.en } : null,
+    lastTradingDate
+  };
+}
+
 export function getMonthlyTradingCalendar(year, month) {
   const yearNum = Number(year);
   const monthNum = Number(month);

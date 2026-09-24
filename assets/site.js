@@ -929,6 +929,7 @@
      previous trading session, so they stay on TODAY.
   -------------------------------------------------------------------------- */
   const EXPECTED_MARKET_DATE_HEADER = 'x-market-expected-date';
+  const KRX_SESSION_HEADER = 'x-krx-session';
   const MARKET_LATEST_ENDPOINT = '/api/market/latest';
   const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
   const TODAY_STRIP_ITEMS = [
@@ -1028,7 +1029,7 @@
     return String(post?.takeaway || '').replace(/\s+/g, ' ').trim();
   }
 
-  function todayStripSession(payload, expectedDate){
+  function todayStripSession(payload, expectedDate, krxSession){
     const summary = window.TODAY_MARKET_SUMMARY;
     const publishedDate = isoDate(payload?.meta?.market_date);
     if (publishedDate) {
@@ -1040,7 +1041,10 @@
         // daily supplies the line by itself, which is the everyday path.
         const override = localeTakeaway(payload?.takeaway);
         const availability = localeApi?.marketCloseAvailability?.(publishedDate, expectedDate, locale) || { stale: false };
-        return { marketDate: publishedDate, items, takeaway: override || postTakeaway(daily), daily, live: true, availability };
+        // Whether the KRX trades today is a separate fact from freshness: a
+        // holiday after a published close is closed, not stale.
+        const krx = localeApi?.krxSessionDisplay?.(krxSession, locale, { latestDate: publishedDate }) || null;
+        return { marketDate: publishedDate, items, takeaway: override || postTakeaway(daily), daily, live: true, availability, krx };
       }
     }
     // Emergency fallback only, and then the whole static record is used: its
@@ -1072,8 +1076,24 @@
     const dateLabel = availability.stale
       ? availability.dateLabel
       : stripDateLabel(session.marketDate) || window.TODAY_MARKET_SUMMARY?.dateDisplay?.[locale] || '';
-    if (tagEl) tagEl.textContent = availability.stale ? availability.tag : 'TODAY';
-    if (dateEl && dateLabel) dateEl.textContent = dateLabel;
+    // On a closed KRX day the eyebrow names the closure and then the close on
+    // screen: "KRX 휴장 · 추석 전날 | 최근 종가 · SEP 23", or the stale label
+    // and date when that close is also behind the expected session.
+    const krx = session.krx || null;
+    const eyebrowEl = document.getElementById('today-strip-heading');
+    if (eyebrowEl) {
+      if (krx) eyebrowEl.setAttribute('data-session', 'closed');
+      else eyebrowEl.removeAttribute('data-session');
+    }
+    if (krx) {
+      if (tagEl) tagEl.textContent = krx.label;
+      if (dateEl) dateEl.textContent = availability.stale
+        ? `${availability.tag} · ${availability.dateLabel}`
+        : `${krx.lastCloseLabel} · ${stripDateLabel(session.marketDate)}`;
+    } else {
+      if (tagEl) tagEl.textContent = availability.stale ? availability.tag : 'TODAY';
+      if (dateEl && dateLabel) dateEl.textContent = dateLabel;
+    }
     if (noticeEl) {
       noticeEl.textContent = availability.stale ? availability.notice : '';
       noticeEl.hidden = !availability.stale || !availability.notice;
@@ -1137,7 +1157,11 @@
     if (typeof fetch !== 'function') return Promise.resolve(null);
     return fetch(MARKET_LATEST_ENDPOINT, { headers: { Accept: 'application/json' } })
       .then(response => (response.ok
-        ? response.json().then(payload => ({ payload, expectedDate: response.headers?.get?.(EXPECTED_MARKET_DATE_HEADER) || '' }))
+        ? response.json().then(payload => ({
+          payload,
+          expectedDate: response.headers?.get?.(EXPECTED_MARKET_DATE_HEADER) || '',
+          krxSession: localeApi?.parseKrxSessionHeader?.(response.headers?.get?.(KRX_SESSION_HEADER)) || null
+        }))
         : null))
       .catch(() => null);
   }
@@ -1168,10 +1192,14 @@
     if (!document.querySelector('.today-strip')) return;
     const initial = HOME_BOOTSTRAP?.market;
     const source = initial && initial.payload
-      ? Promise.resolve({ payload: initial.payload, expectedDate: String(initial.expectedDate || '') })
+      ? Promise.resolve({
+        payload: initial.payload,
+        expectedDate: String(initial.expectedDate || ''),
+        krxSession: localeApi?.normalizeKrxSession?.(initial.krxSession) || null
+      })
       : fetchPublishedMarketClose();
     return source.then(result => {
-      const session = todayStripSession(result?.payload, result?.expectedDate);
+      const session = todayStripSession(result?.payload, result?.expectedDate, result?.krxSession);
       paintTodayStrip(session);
       return session;
     });

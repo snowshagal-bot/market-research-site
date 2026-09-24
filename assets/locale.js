@@ -130,6 +130,81 @@
     }
   };
 
+  /**
+   * Today's KRX session as /api/market/latest sends it (x-krx-session:
+   * percent-encoded JSON from functions/_trading-calendar.js krxSessionStatus).
+   * The holiday list and names live only there. Returns null for a missing or
+   * malformed header, so the page keeps its ordinary display.
+   */
+  const KRX_SESSION_STATES = ['trading', 'holiday', 'weekend'];
+  function parseKrxSessionHeader(value) {
+    if (!value) return null;
+    let data;
+    try { data = JSON.parse(decodeURIComponent(String(value))); } catch (_) { return null; }
+    return normalizeKrxSession(data);
+  }
+
+  /** The same shape check for a session that arrives already parsed (the homepage bootstrap). */
+  function normalizeKrxSession(data) {
+    if (!data || typeof data !== 'object') return null;
+    if (!ISO_DATE.test(String(data.calendarDate || '')) || !KRX_SESSION_STATES.includes(data.state)) return null;
+    const name = data.holidayName;
+    const holidayName = name && typeof name.ko === 'string' && typeof name.en === 'string' && name.ko && name.en
+      ? { ko: name.ko, en: name.en }
+      : null;
+    return {
+      calendarDate: data.calendarDate,
+      state: data.state,
+      holidayName: data.state === 'holiday' ? holidayName : null,
+      lastTradingDate: ISO_DATE.test(String(data.lastTradingDate || '')) ? data.lastTradingDate : null
+    };
+  }
+
+  const KRX_SESSION_COPY = {
+    ko: {
+      closed: 'KRX 휴장',
+      weekend: '주말',
+      lastClose: '최근 종가',
+      today: '오늘은 KRX 휴장일입니다.',
+      basis: date => `국내 지수와 수급은 ${date} 마지막 거래일 기준입니다.`
+    },
+    en: {
+      closed: 'KRX CLOSED',
+      weekend: 'WEEKEND',
+      lastClose: 'LAST CLOSE',
+      today: 'The KRX is closed today.',
+      basis: date => `Korean indices and investor flows reflect the ${date} last trading session.`
+    }
+  };
+
+  /**
+   * How a closed KRX day reads, or null on a trading day (or with no session
+   * information), where the page keeps its TODAY display. It never judges
+   * freshness: `latestDate` is the published close on screen, and the
+   * "reflects the last trading session" sentence is added only when that close
+   * is the last trading session — otherwise the stale notice explains the date.
+   */
+  function krxSessionDisplay(session, language, { latestDate } = {}) {
+    if (!session || session.state === 'trading') return null;
+    const lang = language === 'en' ? 'en' : 'ko';
+    const text = KRX_SESSION_COPY[lang];
+    const reason = session.state === 'holiday' && session.holidayName
+      ? (lang === 'en' ? session.holidayName.en.toUpperCase() : session.holidayName.ko)
+      : (session.state === 'weekend' ? text.weekend : '');
+    const label = reason ? `${text.closed} · ${reason}` : text.closed;
+    const last = session.lastTradingDate;
+    const basis = last && latestDate === last
+      ? text.basis(MARKET_AVAILABILITY_COPY[lang].date(Number(last.slice(5, 7)), Number(last.slice(8, 10))))
+      : '';
+    return {
+      closed: true,
+      state: session.state,
+      label,
+      lastCloseLabel: text.lastClose,
+      sentences: [text.today, basis].filter(Boolean)
+    };
+  }
+
   /** The note for exactly this market date, or null for every other date. */
   function marketIntegrityNotice(marketDate, language) {
     const date = String(marketDate || '');
@@ -396,6 +471,9 @@
     formatDataUpdated,
     dataUpdatedLabel,
     marketCloseAvailability,
+    parseKrxSessionHeader,
+    normalizeKrxSession,
+    krxSessionDisplay,
     marketIntegrityNotice
   };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -46,6 +46,8 @@ Locale structure:
 - browser language never redirects visitors automatically; `site-language` is written only after an explicit KO/EN choice and is read only on `/` to restore an English choice while preserving `?category=`;
 - English can remain empty without mixing Korean posts into its carousel, latest cards, archive, counts, or search.
 
+Whether the KRX trades today is kept apart from Market Close freshness. `krxSessionStatus(now)` in `functions/_trading-calendar.js` (the only holiday list) returns the Seoul date, `trading` / `holiday` / `weekend`, the KO/EN holiday name and the last trading date; `/api/market/latest` sends it in the `x-krx-session` header (percent-encoded JSON, beside `x-market-expected-date`; body, ETag and caching unchanged). `assets/locale.js` parses it and words it (`krxSessionDisplay`) for both the homepage strip — server-rendered by `functions/_home-initial.js` and repainted by `assets/site.js` from the bootstrap — and a TODAY-only line on MARKET (`sessionNotice` in `assets/market-close.js`). A holiday after a published close is not stale; a stale close on a holiday shows the closed line and the existing stale/outage notice together. HISTORY, 1W and 1M never show it.
+
 `/market/` and `/en/market/` are the Market Close pages. They read the published close from
 `GET /api/market/latest`, which serves the newest row of the D1-backed `market_close` table.
 The record is uploaded through `/admin/market/` against the JSON Schema in

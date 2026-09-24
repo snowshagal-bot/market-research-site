@@ -892,6 +892,22 @@ html[data-theme="dark"] .hero-art img {
   color: var(--text-2);
 }
 
+/* A closed KRX day (holiday or weekend) is an ordinary state, not an alert:
+   "KRX 휴장 · 추석 전날 | 최근 종가 · SEP 23". The dot between the two halves
+   becomes a hairline, and the line may wrap on a narrow screen. */
+.today-strip-eyebrow[data-session="closed"] {
+  flex-wrap: wrap;
+  row-gap: 3px;
+}
+
+.today-strip-eyebrow[data-session="closed"] .today-strip-dot {
+  width: 1px;
+  height: 10px;
+  margin: 0 3px;
+  background: var(--line);
+  font-size: 0;
+}
+
 /* Shown only when the published close is older than the session the calendar
    expects; the eyebrow then reads LAST VERIFIED CLOSE. */
 .today-strip-notice {

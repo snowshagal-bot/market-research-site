@@ -1,7 +1,7 @@
 import '../assets/locale.js';
 import { onRequestGet as marketLatestGet } from './api/market/latest.js';
 import { onRequestGet as announcementsGet } from './api/announcements.js';
-import { EXPECTED_MARKET_DATE_HEADER } from './api/market/_shared.js';
+import { EXPECTED_MARKET_DATE_HEADER, KRX_SESSION_HEADER } from './api/market/_shared.js';
 import { escapeHtml } from './_initial-html.js';
 import { cleanReportHref } from './_seo.js';
 
@@ -211,7 +211,7 @@ export function publishedStripItems(payload, lang) {
 }
 
 /** site.js todayStripSession for a live published session, or null. */
-export function liveStripSession(payload, expectedDate, posts, lang) {
+export function liveStripSession(payload, expectedDate, posts, lang, krxSession = null) {
   const marketDate = ISO_DATE.test(String(payload?.meta?.market_date || '')) ? payload.meta.market_date : '';
   if (!marketDate) return null;
   const items = publishedStripItems(payload, lang);
@@ -222,7 +222,9 @@ export function liveStripSession(payload, expectedDate, posts, lang) {
   const override = String(payload?.takeaway?.[lang] || '').trim();
   const dailyLine = String(daily?.takeaway || '').replace(/\s+/g, ' ').trim();
   const availability = api.marketCloseAvailability(marketDate, expectedDate, lang) || { stale: false };
-  return { marketDate, items, takeaway: override || dailyLine, daily, availability };
+  // Today's KRX session, separate from freshness (site.js todayStripSession).
+  const krx = api.krxSessionDisplay(krxSession, lang, { latestDate: marketDate }) || null;
+  return { marketDate, items, takeaway: override || dailyLine, daily, availability, krx };
 }
 
 function stripEdits(session, lang) {
@@ -234,8 +236,22 @@ function stripEdits(session, lang) {
     `<div class="today-item" role="listitem"><span class="today-label">${escapeHtml(item.label)}</span><span class="today-value">${escapeHtml(item.value)}</span><span class="today-change ${item.direction}">${escapeHtml(item.change)}</span></div>`
   )).join('');
   const edits = [
-    { id: 'today-strip-tag', text: availability.stale ? availability.tag : 'TODAY' },
-    dateLabel ? { id: 'today-strip-date', text: dateLabel } : null,
+    ...(session.krx
+      ? [
+        { id: 'today-strip-heading', attrs: { 'data-session': 'closed' } },
+        { id: 'today-strip-tag', text: session.krx.label },
+        {
+          id: 'today-strip-date',
+          text: availability.stale
+            ? `${availability.tag} · ${availability.dateLabel}`
+            : `${session.krx.lastCloseLabel} · ${stripDateLabel(session.marketDate)}`
+        }
+      ]
+      : [
+        { id: 'today-strip-heading', removeAttrs: ['data-session'] },
+        { id: 'today-strip-tag', text: availability.stale ? availability.tag : 'TODAY' },
+        dateLabel ? { id: 'today-strip-date', text: dateLabel } : null
+      ]),
     notice
       ? { id: 'today-strip-notice', text: notice, removeAttrs: ['hidden'] }
       : { id: 'today-strip-notice', text: '', attrs: { hidden: '' } },
@@ -307,12 +323,16 @@ function withinBudget(promise, ms) {
   ]);
 }
 
-/** { payload, expectedDate } from the /api/market/latest handler, or null. */
+/** { payload, expectedDate, krxSession } from the /api/market/latest handler, or null. */
 async function readMarketLatest(url, env, now) {
   const request = new Request(new URL('/api/market/latest', url), { headers: { accept: 'application/json' } });
   const response = await marketLatestGet({ request, env, now });
   if (response.status !== 200) return null;
-  return { payload: await response.json(), expectedDate: response.headers.get(EXPECTED_MARKET_DATE_HEADER) || '' };
+  return {
+    payload: await response.json(),
+    expectedDate: response.headers.get(EXPECTED_MARKET_DATE_HEADER) || '',
+    krxSession: localeApi().parseKrxSessionHeader(response.headers.get(KRX_SESSION_HEADER))
+  };
 }
 
 /** { notice } (items[0] or null) from the /api/announcements handler, or null on failure. */
@@ -366,10 +386,10 @@ export async function buildHomeInitial(url, env, posts, { now = new Date(), budg
       edits.push(...researchEdits(research, lang));
     }
 
-    const session = market && hasPosts ? liveStripSession(market.payload, market.expectedDate, posts, lang) : null;
+    const session = market && hasPosts ? liveStripSession(market.payload, market.expectedDate, posts, lang, market.krxSession) : null;
     if (session) {
       edits.push(...stripEdits(session, lang));
-      bootstrap.market = { payload: bootstrapPayload(market.payload, lang), expectedDate: market.expectedDate };
+      bootstrap.market = { payload: bootstrapPayload(market.payload, lang), expectedDate: market.expectedDate, krxSession: market.krxSession || null };
     }
 
     if (!edits.length) return null;
