@@ -12,14 +12,16 @@ console.log('================================================================');
 console.log('         Snowshagal Repository Verification Gate');
 console.log('================================================================\n');
 
+const TOTAL_STEPS = 5;
+
 function runStep(stepNum, title, fn) {
-  console.log(`[${stepNum}/4] ${title}...`);
+  console.log(`[${stepNum}/${TOTAL_STEPS}] ${title}...`);
   try {
     const result = fn();
     console.log(`  ✔ ${title} passed.\n`);
     return result;
   } catch (err) {
-    console.error(`\n❌ FAILED at step [${stepNum}/4]: ${title}`);
+    console.error(`\n❌ FAILED at step [${stepNum}/${TOTAL_STEPS}]: ${title}`);
     console.error(`Error details: ${err.message}`);
     if (err.details) {
       console.error(err.details);
@@ -29,7 +31,7 @@ function runStep(stepNum, title, fn) {
 }
 
 // -----------------------------------------------------------------------------
-// [1/4] Automated tests
+// [1/5] Automated tests
 // -----------------------------------------------------------------------------
 runStep(1, 'Running automated test suites', () => {
   const testsDir = path.join(rootDir, 'tests');
@@ -59,7 +61,7 @@ runStep(1, 'Running automated test suites', () => {
 });
 
 // -----------------------------------------------------------------------------
-// [2/4] JavaScript & MJS syntax validation
+// [2/5] JavaScript & MJS syntax validation
 // -----------------------------------------------------------------------------
 runStep(2, 'Validating JavaScript & MJS syntax', () => {
   const targetDirs = ['assets', 'functions', 'scripts', 'tests', 'data'];
@@ -116,7 +118,7 @@ runStep(2, 'Validating JavaScript & MJS syntax', () => {
 });
 
 // -----------------------------------------------------------------------------
-// [3/4] Repository invariants & integrity (including committed + uncommitted diffs)
+// [3/5] Repository invariants & integrity (including committed + uncommitted diffs)
 // -----------------------------------------------------------------------------
 runStep(3, 'Checking repository invariants & git diff whitespace checks', () => {
   // A. posts.json & posts.js sanity & synchronization
@@ -387,9 +389,24 @@ runStep(3, 'Checking repository invariants & git diff whitespace checks', () => 
 });
 
 // -----------------------------------------------------------------------------
-// [4/4] Verification complete
+// [4/5] SEO integrity audit (repository mode: no network, whole public corpus)
 // -----------------------------------------------------------------------------
-console.log('[4/4] Verification complete!');
+runStep(4, 'Running SEO integrity audit', () => {
+  const result = spawnSync(process.execPath, [path.join('scripts', 'audit-seo.mjs')], {
+    cwd: rootDir,
+    stdio: 'inherit'
+  });
+  if (result.status !== 0) {
+    throw new Error(result.status === 1
+      ? 'SEO integrity audit found hard failures (see the audit output above)'
+      : `SEO integrity audit could not run (exit ${result.status})`);
+  }
+});
+
+// -----------------------------------------------------------------------------
+// [5/5] Verification complete
+// -----------------------------------------------------------------------------
+console.log('[5/5] Verification complete!');
 console.log('================================================================');
 console.log('  ✔ All test suites, syntax checks, and invariants passed.');
 console.log('================================================================\n');
