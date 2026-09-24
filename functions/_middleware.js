@@ -67,6 +67,21 @@ function replaceElementContentsById(body, id, markup) {
 }
 
 
+/**
+ * The string-path equivalent of HTMLRewriter's setAttribute('lang') on <html>:
+ * replaces a double-, single- or un-quoted lang on the first <html> tag, or
+ * adds one when there is none. xml:lang and other attributes are left alone.
+ */
+export function setHtmlLang(body, lang) {
+  return body.replace(/<html\b((?:[^>"']|"[^"]*"|'[^']*')*)>/i, (whole, attributes) => {
+    const existing = /(\s)lang\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'>]+)/i;
+    const next = existing.test(attributes)
+      ? attributes.replace(existing, `$1lang="${lang}"`)
+      : ` lang="${lang}"${attributes}`;
+    return `<html${next}>`;
+  });
+}
+
 function replaceCategoryAlternates(body, markup) {
   const withoutAlternates = body.replace(/<link\b(?=[^>]*\brel=["']alternate["'])(?=[^>]*\bhreflang=["'][^"']+["'])[^>]*>/gi, '');
   return markup ? withoutAlternates.replace(/<\/head>/i, `${markup}</head>`) : withoutAlternates;
@@ -289,7 +304,10 @@ export async function onRequest(context) {
   try { decodedPath = decodeURIComponent(url.pathname); } catch (_) {}
 
   let active = '';
-  const lang = /^\/reports\/en\//i.test(url.pathname) ? 'en' : 'ko';
+  // The page language is the matched post's own `lang`; the URL only decides
+  // when no post matches. Uploaded files keep whatever <html lang> they were
+  // written with, so the final <html lang> is set from this value too.
+  let lang = /^\/reports\/en\//i.test(url.pathname) ? 'en' : 'ko';
   if (/시장\s*입문|시장\s*공부|경제\s*공부|주식\s*공부|market[\s_-]*basics|investing[\s_-]*basics|explainer/i.test(decodedPath)) active = 'basics';
   else if (/주식리포트|데일리|daily/i.test(decodedPath)) active = 'daily';
   else if (/위클리|weekly/i.test(decodedPath)) active = 'weekly';
@@ -309,6 +327,7 @@ export async function onRequest(context) {
       const posts = postsRes.value;
       const post = findPostByPath(posts, url.pathname);
       if (post) {
+        lang = postLanguage(post);
         // The published Market Close for the report's date supplies the
         // numbers the <title> and description quote; without one they fall
         // back to dated wording with no numbers.
@@ -342,6 +361,7 @@ export async function onRequest(context) {
     body = body.replace(/<link\s+rel="manifest"[\s\S]*?>/gi, '');
     body = body.replace(/<\/head>/i, `${FAVICON_TAGS}${seo}${feedLink}${footerStyle}</head>`);
     body = body.replace(/<\/body>/i, `${footerMarkup}${shell}</body>`);
+    body = setHtmlLang(body, lang);
     const headers = new Headers(response.headers);
     headers.delete('content-length');
     return new Response(body, {
@@ -352,6 +372,7 @@ export async function onRequest(context) {
   }
 
   return new HTMLRewriter()
+    .on('html', { element(element) { element.setAttribute('lang', lang); } })
     .on('title', { element(element) { if (seo) element.remove(); } })
     .on('link[rel="canonical"]', { element(element) { element.remove(); } })
     .on('link[rel="alternate"][hreflang]', { element(element) { element.remove(); } })
