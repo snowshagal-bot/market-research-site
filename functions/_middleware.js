@@ -68,6 +68,37 @@ function replaceElementContentsById(body, id, markup) {
 
 
 /**
+ * Attributes of one start tag's source (everything between the tag name and
+ * `>`), as the HTML parser sees them: names lower-cased, values unquoted
+ * (double, single or none), a bare attribute as ''. Values keep their case,
+ * as the HTMLRewriter attribute selectors compare them.
+ */
+export function tagAttributes(source) {
+  const attrs = {};
+  for (const match of String(source).matchAll(/([^\s=/"'>]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+)))?/g)) {
+    const name = match[1].toLowerCase();
+    if (!(name in attrs)) attrs[name] = match[2] ?? match[3] ?? match[4] ?? '';
+  }
+  return attrs;
+}
+
+/** `rel` as the whitespace-separated token list `[rel~="…"]` matches against. */
+export function relTokens(attrs) {
+  return String(attrs.rel ?? '').split(/\s+/).filter(Boolean);
+}
+
+/**
+ * Drops every <name …> start tag whose attributes satisfy `predicate`,
+ * whatever the attribute order or quoting — the string-path counterpart of
+ * removing the elements an HTMLRewriter selector matches (used for the void
+ * <meta> and <link> elements).
+ */
+export function removeTags(body, name, predicate) {
+  const pattern = new RegExp(`<${name}\\b((?:[^>"']|"[^"]*"|'[^']*')*)>`, 'gi');
+  return body.replace(pattern, (whole, source) => (predicate(tagAttributes(source)) ? '' : whole));
+}
+
+/**
  * The string-path equivalent of HTMLRewriter's setAttribute('lang') on <html>:
  * replaces a double-, single- or un-quoted lang on the first <html> tag, or
  * adds one when there is none. xml:lang and other attributes are left alone.
@@ -347,18 +378,24 @@ export async function onRequest(context) {
 
   if (typeof HTMLRewriter === 'undefined') {
     let body = await response.text();
+    // The same elements the HTMLRewriter selectors below remove, matched by
+    // attribute rather than by attribute order.
     if (seo) {
       body = body.replace(/<title>[\s\S]*?<\/title>/i, '');
-      body = body.replace(/<meta\s+name="description"[\s\S]*?>/gi, '');
-      body = body.replace(/<meta\s+property="og:[^"]*"[\s\S]*?>/gi, '');
-      body = body.replace(/<meta\s+name="twitter:[^"]*"[\s\S]*?>/gi, '');
+      body = removeTags(body, 'meta', attrs => (
+        attrs.name === 'description'
+        || String(attrs.property ?? '').startsWith('og:')
+        || String(attrs.name ?? '').startsWith('twitter:')
+      ));
     }
-    body = body.replace(/<link\s+rel="canonical"[\s\S]*?>/gi, '');
-    body = body.replace(/<link\s+rel="alternate"\s+hreflang[\s\S]*?>/gi, '');
-    body = body.replace(/<link\b[^>]*type="application\/atom\+xml"[^>]*>/gi, '');
-    body = body.replace(/<link\s+rel~?="icon"[\s\S]*?>/gi, '');
-    body = body.replace(/<link\s+rel="apple-touch-icon"[\s\S]*?>/gi, '');
-    body = body.replace(/<link\s+rel="manifest"[\s\S]*?>/gi, '');
+    body = removeTags(body, 'link', attrs => (
+      attrs.rel === 'canonical'
+      || (attrs.rel === 'alternate' && 'hreflang' in attrs)
+      || attrs.type === 'application/atom+xml'
+      || relTokens(attrs).includes('icon')
+      || attrs.rel === 'apple-touch-icon'
+      || attrs.rel === 'manifest'
+    ));
     body = body.replace(/<\/head>/i, `${FAVICON_TAGS}${seo}${feedLink}${footerStyle}</head>`);
     body = body.replace(/<\/body>/i, `${footerMarkup}${shell}</body>`);
     body = setHtmlLang(body, lang);

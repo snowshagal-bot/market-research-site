@@ -10,9 +10,17 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
-0. **SEO Phase 2 — homepage initial HTML (Draft PR, Preview only)**:
+0. **SEO Phase 3 — search integrity audit & regression gate (Draft PR, Preview audit)**:
+   - `scripts/audit-seo.mjs` audits the whole public indexable corpus (counts derived from `data/posts.json` and `sitemapXml()`) and runs as `verify.mjs` step 4/5; `--origin=` audits a Preview or Production over HTTP.
+   - The middleware's Node/string fallback now removes uploaded `<meta>`/`<link>` tags by attribute, whatever their order, matching the Production HTMLRewriter selectors (Production output unchanged).
+   - Remaining manual steps: Preview live audit → owner approval → Production merge → Production live audit.
+
+0. **SEO hotfix — report `<html lang>` from post metadata (merged #140, Production verified)**:
+   - Four EN dailies uploaded with `<html lang="ko">` are served as `lang="en"`; the middleware sets `<html lang>` from the matched post. 127/127 reports match in Production; every other field is unchanged.
+
+0. **SEO Phase 2 — homepage initial HTML (merged #139, Production verified)**:
    - `/` and `/en/` ship Latest Research, the active notice (or its absence, with the matching carousel total) and the TODAY strip in the raw HTML, from the same handlers and helpers the page script uses; `site.js` reuses the server data from a JSON bootstrap instead of refetching.
-   - Remaining manual steps: Preview raw-HTML and JS-disabled QA → owner approval → Production merge → Production `curl` check of `/` and `/en/` (no "—" in the strip, bootstrap present) and a browser check that the homepage makes no `/api/market/latest` or `/api/announcements` request on load.
+   - Production checked: no "—" in the raw strip, bootstrap present once, zero first-load `/api/market/latest` and `/api/announcements` requests, TTFB unchanged against the pre-merge baseline.
 
 0. **SEO Phase 1 — report canonical URL consolidation (merged #138, Production verified)**:
    - An existing report's `/reports/<path>.html` answers one `301` to the extensionless canonical `/reports/<path>` (query preserved, Hangul percent-encoding unchanged); missing reports keep a direct 404. Production previously answered with the Pages default 308.

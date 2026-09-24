@@ -372,7 +372,16 @@ After changing a Secret, Binding, Function behavior, or Pages build setting:
 Repository verification and deployed-site smoke are intentionally separate:
 
 - `node scripts/verify.mjs` is hermetic, local, and read-only. It does not contact
-  Production or Preview.
+  Production or Preview. Its step 4 is the repository-mode SEO integrity audit
+  (`node scripts/audit-seo.mjs`): every public indexable page and report is rendered by the
+  real middleware and checked for canonical, title/description, hreflang pairs, JSON-LD,
+  referenced image files, indexability, `<html lang>` and the exact sitemap set. A hard
+  failure fails verification; length warnings never do.
+- `node scripts/audit-seo.mjs --origin=<preview-or-production-url>` runs the same checks over
+  HTTP for every sitemap URL (6 concurrent requests), plus legacy `.html` → 301 for every
+  report, a missing-report 404 and the two verification files. On a Preview it also requires
+  `X-Robots-Tag: noindex, nofollow`. It is a QA command and is not part of CI. `--json`
+  prints one machine-readable result object.
 - `node scripts/smoke-site.mjs --origin https://snowshagal.com --mode production` performs
   GET-only Production checks.
 - `node scripts/smoke-site.mjs --origin <branch-preview-url> --mode preview` runs the same
