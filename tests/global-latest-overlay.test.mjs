@@ -133,7 +133,7 @@ test('basis labels: KO/EN say the same thing', () => {
     ['latest', { source_date: '2026-09-25', data_state: 'intraday' }, '9/25 · 장중', 'SEP 25 · INTRADAY'],
     ['latest', { source_date: '2026-09-25', data_state: 'final_close' }, '9/25 · 종가', 'SEP 25 · CLOSE'],
     ['krx', { source_date: '2026-09-23' }, '9/23 · 종가', 'SEP 23 · CLOSE'],
-    ['snapshot', { source_date: '2026-09-23', data_state: 'intraday' }, '9/23 · 마감 시점', 'SEP 23 · AT KRX CLOSE'],
+    ['snapshot', { source_date: '2026-09-23', data_state: 'intraday' }, '9/23 · 마감 시점', 'SEP 23 · KRX CLOSE'],
     ['snapshot', { source_date: '2026-09-22', data_state: 'final_close' }, '9/22 · 종가', 'SEP 22 · CLOSE'],
     ['latest', { source_date: '2026-09-05', data_state: 'intraday' }, '9/5 · 장중', 'SEP 05 · INTRADAY']
   ];

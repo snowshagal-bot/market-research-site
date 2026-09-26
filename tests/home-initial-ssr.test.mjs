@@ -800,7 +800,7 @@ test('B3 1-5. HOME: KOSPI/KOSDAQ stay Market Close; USD/KRW and US 10Y show fres
       KOSDAQ: ['844.48', '▼ 0.19%', 'SEP 23 · CLOSE'],
       'USD/KRW': ['1,354.40', '▼ ₩13.0', 'SEP 25 · INTRADAY'],
       'US 10Y': ['5.18%', '▲ 2bp', 'SEP 25 · CLOSE'],
-      GOLD: ['$4,356.40', '▲ 0.61%', 'SEP 23 · AT KRX CLOSE']
+      GOLD: ['$4,356.40', '▲ 0.61%', 'SEP 23 · KRX CLOSE']
     }
   };
   for (const lang of ['ko', 'en']) {
@@ -858,7 +858,7 @@ test('B3 10. HOME: a single usable item is a partial overlay of that card only',
   const onlyGold = [latestItem('GOLD', 4327.8, 4298, { source_date: '2026-09-25', as_of: '2026-09-25T19:20:00Z', retrieved_at: '2026-09-25T19:20:03Z', data_state: 'intraday' })];
   const { rendered } = await assertParity({ lang: 'en', db: await b3Database(onlyGold), now: NOW });
   assert.deepEqual(stripCells(rendered['today-market-grid'].html).map(cell => [cell.label, cell.basis]), [
-    ['KOSPI', 'SEP 23 · CLOSE'], ['KOSDAQ', 'SEP 23 · CLOSE'], ['USD/KRW', 'SEP 23 · AT KRX CLOSE'], ['US 10Y', 'SEP 22 · CLOSE'], ['GOLD', 'SEP 25 · INTRADAY']
+    ['KOSPI', 'SEP 23 · CLOSE'], ['KOSDAQ', 'SEP 23 · CLOSE'], ['USD/KRW', 'SEP 23 · KRX CLOSE'], ['US 10Y', 'SEP 22 · CLOSE'], ['GOLD', 'SEP 25 · INTRADAY']
   ]);
   assert.equal(cellOf(rendered, 'GOLD').value, '$4,327.80');
 });

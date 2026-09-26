@@ -598,7 +598,7 @@
 
   const GLOBAL_BASIS_COPY = {
     ko: { intraday: '장중', final_close: '종가', krx: '종가', snapshot: '마감 시점' },
-    en: { intraday: 'INTRADAY', final_close: 'CLOSE', krx: 'CLOSE', snapshot: 'AT KRX CLOSE' }
+    en: { intraday: 'INTRADAY', final_close: 'CLOSE', krx: 'CLOSE', snapshot: 'KRX CLOSE' }
   };
 
   function basisDate(value, language) {
