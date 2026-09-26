@@ -927,10 +927,22 @@
      turns TODAY into LAST VERIFIED CLOSE with a notice naming the missing
      session; weekends, holidays and the hours before the publish cutoff expect the
      previous trading session, so they stay on TODAY.
+
+     USD/KRW, US 10Y and GOLD may show Global Latest instead of the snapshot
+     figure (locale.js globalLatestOverlay: fresh by as_of and newer than the
+     snapshot), each on its own. KOSPI and KOSDAQ are always the Market Close.
+     When any figure is overlaid, every card carries its own basis line
+     ("9/23 · 종가", "9/25 · 장중"), since the strip then holds more than one
+     date. Global Latest is an enhancement: when it is missing, late or
+     malformed the strip is exactly the Market Close strip.
   -------------------------------------------------------------------------- */
   const EXPECTED_MARKET_DATE_HEADER = 'x-market-expected-date';
   const KRX_SESSION_HEADER = 'x-krx-session';
   const MARKET_LATEST_ENDPOINT = '/api/market/latest';
+  const GLOBAL_LATEST_ENDPOINT = '/api/market/global/latest';
+  const GLOBAL_LATEST_SERVED_AT_HEADER = 'x-global-latest-served-at';
+  // The strip never waits longer than this for Global Latest.
+  const GLOBAL_LATEST_WAIT_MS = 2500;
   const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
   const TODAY_STRIP_ITEMS = [
     { label: 'KOSPI', group: 'indices', key: 'KOSPI', format: 'index' },
@@ -953,7 +965,8 @@
       .format(new Date(Date.UTC(year, month - 1, day))).toUpperCase();
   }
 
-  // Build the strip from a published Market Close payload. Returns null unless
+  // Build the strip from a published Market Close payload, with the Global
+  // Latest figures `overlay` accepted over it. Returns null unless
   // every item resolves, so a changed contract falls back to the static file as
   // a whole instead of mixing two sources into one row. The one exception is a
   // contract 1.2.0 payload that itself declares a SOFT global indicator
@@ -965,32 +978,49 @@
     const listed = payload?.section_status?.global_indicators?.unavailable;
     return new Set(Array.isArray(listed) ? listed.filter(code => code !== 'KOSPI' && code !== 'KOSDAQ') : []);
   }
-  function publishedStripItems(payload){
+  function stripFigures(spec, quote){
+    if (!quote || !finiteNumber(quote.close)) return null;
+    const movement = spec.format === 'index' || spec.format === 'usd' ? quote.change_pct : quote.change;
+    if (!finiteNumber(movement)) return null;
+    const arrow = movement < 0 ? '▼' : '▲';
+    const size = Math.abs(movement);
+    let value = '';
+    let change = '';
+    if (spec.format === 'index') {
+      value = decimal(quote.close, 2);
+      change = `${arrow} ${decimal(size, 2)}%`;
+    } else if (spec.format === 'usd') {
+      value = `$${decimal(quote.close, 2)}`;
+      change = `${arrow} ${decimal(size, 2)}%`;
+    } else if (spec.format === 'won') {
+      value = decimal(quote.close, 2);
+      change = locale === 'en' ? `${arrow} ₩${decimal(size, 1)}` : `${arrow} ${decimal(size, 1)}원`;
+    } else {
+      value = `${decimal(quote.close, 2)}%`;
+      change = `${arrow} ${Math.round(size * 100)}bp`;
+    }
+    return { value, change, direction: movement < 0 ? 'down' : 'up' };
+  }
+  function publishedStripItems(payload, overlay){
     const soft = declaredUnavailable(payload);
-    const unavailable = spec => (soft.has(spec.key) ? { label: spec.label, value: '--', change: '', direction: 'flat' } : null);
+    const latest = overlay?.items || {};
+    const marketDate = isoDate(payload?.meta?.market_date);
+    const overlaid = spec => (localeApi?.isGlobalLatestCode?.(spec.key) && latest[spec.key]) || null;
+    // Basis lines appear only when the strip mixes Market Close with Global Latest.
+    const mixed = TODAY_STRIP_ITEMS.some(overlaid);
+    const basis = (kind, source) => (mixed ? localeApi?.todayStripBasis?.(kind, source, locale) || '' : '');
     const items = TODAY_STRIP_ITEMS.map(spec => {
       const quote = payload?.[spec.group]?.[spec.key];
-      if (!quote || !finiteNumber(quote.close)) return unavailable(spec);
-      const movement = spec.format === 'index' || spec.format === 'usd' ? quote.change_pct : quote.change;
-      if (!finiteNumber(movement)) return unavailable(spec);
-      const arrow = movement < 0 ? '▼' : '▲';
-      const size = Math.abs(movement);
-      let value = '';
-      let change = '';
-      if (spec.format === 'index') {
-        value = decimal(quote.close, 2);
-        change = `${arrow} ${decimal(size, 2)}%`;
-      } else if (spec.format === 'usd') {
-        value = `$${decimal(quote.close, 2)}`;
-        change = `${arrow} ${decimal(size, 2)}%`;
-      } else if (spec.format === 'won') {
-        value = decimal(quote.close, 2);
-        change = locale === 'en' ? `${arrow} ₩${decimal(size, 1)}` : `${arrow} ${decimal(size, 1)}원`;
-      } else {
-        value = `${decimal(quote.close, 2)}%`;
-        change = `${arrow} ${Math.round(size * 100)}bp`;
+      const snapshot = stripFigures(spec, quote);
+      if (!snapshot && !soft.has(spec.key)) return null;
+      const item = overlaid(spec);
+      if (item) {
+        const figures = stripFigures(spec, { close: item.value, change: item.change, change_pct: item.change_pct });
+        if (figures) return { label: spec.label, ...figures, basis: basis('latest', item) };
       }
-      return { label: spec.label, value, change, direction: movement < 0 ? 'down' : 'up' };
+      if (!snapshot) return { label: spec.label, value: '--', change: '', direction: 'flat', basis: '' };
+      const kind = localeApi?.isGlobalLatestCode?.(spec.key) ? 'snapshot' : 'krx';
+      return { label: spec.label, ...snapshot, basis: basis(kind, kind === 'krx' ? { source_date: marketDate } : quote) };
     }).filter(Boolean);
     return items.length === TODAY_STRIP_ITEMS.length ? items : null;
   }
@@ -1029,11 +1059,16 @@
     return String(post?.takeaway || '').replace(/\s+/g, ' ').trim();
   }
 
-  function todayStripSession(payload, expectedDate, krxSession){
+  // `globalLatest` is { items, now } — the Global Latest items and the instant
+  // to judge them at — or null.
+  function todayStripSession(payload, expectedDate, krxSession, globalLatest){
     const summary = window.TODAY_MARKET_SUMMARY;
     const publishedDate = isoDate(payload?.meta?.market_date);
     if (publishedDate) {
-      const items = publishedStripItems(payload);
+      const overlay = globalLatest && localeApi?.globalLatestOverlay
+        ? localeApi.globalLatestOverlay(globalLatest.items, payload, globalLatest.now)
+        : null;
+      const items = publishedStripItems(payload, overlay);
       if (items) {
         const daily = dailyForDate(publishedDate);
         // What the editor typed into /admin/market/ wins, because it exists
@@ -1115,7 +1150,7 @@
     }
     if (gridEl) {
       gridEl.innerHTML = session.items.map(item => (
-        `<div class="today-item" role="listitem"><span class="today-label">${esc(item.label)}</span><span class="today-value">${esc(item.value)}</span><span class="today-change ${item.direction}">${esc(item.change)}</span></div>`
+        `<div class="today-item" role="listitem"><span class="today-label">${esc(item.label)}</span><span class="today-value">${esc(item.value)}</span><span class="today-change ${item.direction}">${esc(item.change)}</span>${item.basis ? `<span class="today-basis">${esc(item.basis)}</span>` : ''}</div>`
       )).join('');
       gridEl.removeAttribute('aria-busy');
     }
@@ -1166,6 +1201,34 @@
       .catch(() => null);
   }
 
+  // { items, servedAt } from /api/market/global/latest, or null on any failure
+  // or when it takes longer than GLOBAL_LATEST_WAIT_MS: the strip is then the
+  // Market Close strip alone.
+  function fetchGlobalLatest(){
+    if (typeof fetch !== 'function' || !localeApi?.globalLatestOverlay) return Promise.resolve(null);
+    let timer = null;
+    let pending;
+    try {
+      pending = fetch(GLOBAL_LATEST_ENDPOINT, { headers: { Accept: 'application/json' } });
+    } catch (_) {
+      return Promise.resolve(null);
+    }
+    const request = Promise.resolve(pending)
+      .then(response => (response.ok
+        ? response.json().then(body => ({
+          items: Array.isArray(body?.items) ? body.items : [],
+          servedAt: response.headers?.get?.(GLOBAL_LATEST_SERVED_AT_HEADER) || ''
+        }))
+        : null))
+      .catch(() => null);
+    if (typeof setTimeout !== 'function') return request;
+    const deadline = new Promise(resolve => { timer = setTimeout(() => resolve(null), GLOBAL_LATEST_WAIT_MS); });
+    return Promise.race([request, deadline]).then(result => {
+      clearTimeout(timer);
+      return result;
+    });
+  }
+
   // What the server already rendered into this page (functions/_home-initial.js):
   // the published session behind the TODAY strip and the active notice, taken
   // from the same handlers as /api/market/latest and /api/announcements. A
@@ -1188,18 +1251,29 @@
   // frame whenever the network was slow, which is the opposite of
   // market-summary.js being a failure-only fallback. With one, the same session
   // is painted again from the bootstrap and the page makes no second request.
+  // The server's Global Latest judgement travels in the bootstrap too: its
+  // items and the instant it judged them at, so the same figures are chosen
+  // again here and nothing is requested. Without a bootstrap both sources are
+  // fetched together and the strip is painted once, when both have settled.
   function renderTodayMarket(){
     if (!document.querySelector('.today-strip')) return;
     const initial = HOME_BOOTSTRAP?.market;
-    const source = initial && initial.payload
-      ? Promise.resolve({
+    let source;
+    if (initial && initial.payload) {
+      const latest = HOME_BOOTSTRAP.globalLatest;
+      source = Promise.resolve({
         payload: initial.payload,
         expectedDate: String(initial.expectedDate || ''),
-        krxSession: localeApi?.normalizeKrxSession?.(initial.krxSession) || null
-      })
-      : fetchPublishedMarketClose();
+        krxSession: localeApi?.normalizeKrxSession?.(initial.krxSession) || null,
+        globalLatest: latest && Array.isArray(latest.items) ? { items: latest.items, now: latest.judgedAt } : null
+      });
+    } else {
+      source = Promise.all([fetchPublishedMarketClose(), fetchGlobalLatest()]).then(([market, latest]) => (market
+        ? { ...market, globalLatest: latest ? { items: latest.items, now: localeApi?.globalLatestNow?.(latest.servedAt, Date.now()) } : null }
+        : null));
+    }
     return source.then(result => {
-      const session = todayStripSession(result?.payload, result?.expectedDate, result?.krxSession);
+      const session = todayStripSession(result?.payload, result?.expectedDate, result?.krxSession, result?.globalLatest);
       paintTodayStrip(session);
       return session;
     });

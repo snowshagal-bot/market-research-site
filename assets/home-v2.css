@@ -1048,6 +1048,17 @@ html[data-theme="dark"] .hero-art img {
   color: var(--muted);
 }
 
+/* Per-card basis, present only when the strip mixes Market Close and Global Latest. */
+.today-basis {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .03em;
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+}
+
 .today-change.up {
   color: #c74754;
 }

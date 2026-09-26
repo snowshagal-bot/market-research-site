@@ -244,7 +244,7 @@ Only after approval, and before the Production merge, apply the same file to Pro
 npx wrangler d1 execute market-research-comments --remote --file=migrations/comments/0002_market_global_latest.sql
 ```
 
-Request handlers never create the table: without it both endpoints answer `503 GLOBAL_LATEST_SCHEMA_NOT_READY`; with an empty table `GET` answers `200` with `items: []`. Preview acceptance uses synthetic items whose `source` is `preview-global-latest-fixture` and deletes them afterwards, on Preview only: `DELETE FROM market_global_latest WHERE json_extract(payload_json, '$.source') = 'preview-global-latest-fixture';`. Status after B1: website receiver ready, collector pending.
+Request handlers never create the table: without it both endpoints answer `503 GLOBAL_LATEST_SCHEMA_NOT_READY`; with an empty table `GET` answers `200` with `items: []`. Preview acceptance uses synthetic items whose `source` is `preview-global-latest-fixture` and deletes them afterwards, on Preview only: `DELETE FROM market_global_latest WHERE json_extract(payload_json, '$.source') = 'preview-global-latest-fixture';`. Status: receiver live (B1), collector publishing to Production every 30 minutes (B2), TODAY overlay on HOME and `/market/` (B3, see `docs/PROJECT_STATE.md`). The overlay needs no Secret, binding or migration beyond B1.
 
 Public `GET /api/announcements` returns only `publish_state = published`, `audience = all` rows whose UTC exposure window contains the current server time. Admin create/update/delete require an authenticated administrator session, exact Preview or Production admin Origin, and the session CSRF token. No new Secret or environment variable is required.
 

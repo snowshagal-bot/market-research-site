@@ -237,7 +237,8 @@ async function runHomepage({ fetchResult = null, expectedDate = '', ...rest } = 
 test('A. published Market Close wins over the static fallback and links its own daily report', async () => {
   const strip = await runHomepage({ fetchResult: marketPayload('2026-08-26', { ko: KO_LINE, en: EN_LINE }) });
 
-  assert.deepEqual(strip.requestedUrls, ['/api/market/latest']);
+  // Global Latest is requested alongside; this stub has no items for it.
+  assert.deepEqual(strip.requestedUrls, ['/api/market/latest', '/api/market/global/latest']);
   assert.equal(strip.date.textContent, 'AUG 26');
 
   // Numbers come from the API, not from the 08-25 static file.
@@ -468,7 +469,7 @@ test('F. while the request is in flight nothing from the static fallback is pain
   });
   // The request is already out; the DOM must still be the neutral placeholder.
   await flush();
-  assert.deepEqual(requestedUrls, ['/api/market/latest']);
+  assert.deepEqual(requestedUrls, ['/api/market/latest', '/api/market/global/latest']);
 
   assert.equal(nodes.date.textContent, DASH);
   assert.notEqual(nodes.date.textContent, 'AUG 25');
@@ -562,8 +563,9 @@ test('site.js paints the strip exactly once, after the request settles', async (
   // No pre-fetch paint: every paintTodayStrip call sits inside the fetch continuation.
   assert.doesNotMatch(renderBody, /paintTodayStrip\(todayStripSession\(null\)\)/);
   assert.equal((renderBody.match(/paintTodayStrip\(/g) || []).length, 1);
-  // The request is made only when the server did not render the session.
-  assert.match(renderBody, /: fetchPublishedMarketClose\(\);/);
+  // The requests are made only when the server did not render the session,
+  // and both settle before the single paint.
+  assert.match(renderBody, /Promise\.all\(\[fetchPublishedMarketClose\(\), fetchGlobalLatest\(\)\]\)/);
   assert.match(renderBody, /return source\.then\(result => \{/);
 });
 

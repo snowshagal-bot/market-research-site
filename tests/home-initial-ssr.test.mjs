@@ -17,14 +17,16 @@ import { buildHomeInitial, homeInitialLang, latestResearchPost, serializeHomeBoo
 import { applyInitialHtmlToString } from '../functions/_initial-html.js';
 import { onRequestGet as marketLatestGet } from '../functions/api/market/latest.js';
 import { onRequestGet as announcementsGet } from '../functions/api/announcements.js';
+import { onRequestGet as globalLatestGet } from '../functions/api/market/global/latest.js';
 import { ensureMarketTable, TABLE_NAME } from '../functions/api/market/_shared.js';
 import { expectedPublishedKrxTradingDate } from '../functions/_trading-calendar.js';
+import { NOW, globalLatest0925, latestItem, snapshot0923 } from './helpers/global-latest-fixtures.mjs';
 
 const ORIGIN = 'https://snowshagal.com';
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
-const [KO_SHELL, EN_SHELL, LOCALE_JS, SITE_JS, SUMMARY_JS, MIGRATION, EXAMPLE, POSTS_JSON, TAGS_JSON] = await Promise.all([
+const [KO_SHELL, EN_SHELL, LOCALE_JS, SITE_JS, SUMMARY_JS, MIGRATION, GLOBAL_MIGRATION, EXAMPLE, POSTS_JSON, TAGS_JSON] = await Promise.all([
   read('index.html'), read('en/index.html'), read('assets/locale.js'), read('assets/site.js'),
-  read('data/market-summary.js'), read('migrations/comments/0001_admin_announcements.sql'),
+  read('data/market-summary.js'), read('migrations/comments/0001_admin_announcements.sql'), read('migrations/comments/0002_market_global_latest.sql'),
   read('contracts/market_close/market_close.example.v1.2.0.json'), read('data/posts.json'), read('data/tags.json')
 ]);
 const REAL_POSTS = JSON.parse(POSTS_JSON);
@@ -44,9 +46,21 @@ function payloadFor(marketDate, mutate) {
   return payload;
 }
 
-async function database({ market = [], notices = [] } = {}) {
+/**
+ * `global`: Global Latest items to store (the table exists only when given,
+ * so the other tests keep a database without it, which the handler answers 503).
+ */
+async function database({ market = [], notices = [], global = null } = {}) {
   const db = new SqliteD1();
   db.exec(MIGRATION);
+  if (global) {
+    db.exec(GLOBAL_MIGRATION);
+    for (const item of global) {
+      await db.prepare('INSERT INTO market_global_latest (code, schema_version, source_date, as_of, retrieved_at, data_state, payload_json, published_at, auth_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        .bind(item.code, '1.0.0', item.source_date, item.as_of, item.retrieved_at, item.data_state, JSON.stringify(item), item.retrieved_at, 'test')
+        .run();
+    }
+  }
   await ensureMarketTable({ COMMENTS_DB: db });
   for (const row of market) {
     await db.prepare(`INSERT INTO ${TABLE_NAME} (market_date, schema_version, generated_at, status, payload_json, published_at, auth_source, takeaway_ko, takeaway_en) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`)
@@ -229,6 +243,18 @@ function elementView(nodes) {
   return view;
 }
 
+/** A Date whose "now" is `now`; every other use is the real Date. */
+function fixedClock(now) {
+  const fixed = new Date(now).getTime();
+  return class FixedDate extends Date {
+    constructor(...args) {
+      if (args.length) super(...args);
+      else super(fixed);
+    }
+    static now() { return fixed; }
+  };
+}
+
 /**
  * Boot the real locale.js + site.js on `html`. Requests to the two homepage
  * APIs are answered by their real handlers at `now`; every request is recorded.
@@ -259,9 +285,12 @@ async function runBrowser({ html, lang = 'ko', db, posts = REAL_POSTS, now }) {
     sessionStorage: { getItem: () => null, setItem() {} },
     history: { replaceState() {} },
     location: { pathname: lang === 'en' ? '/en/' : '/', search: '', href: `${ORIGIN}/`, replace() {} },
+    // The browser's clock reads `now`, as the server's did.
+    Date: fixedClock(now),
     fetch: async url => {
       requests.push(url);
       const request = new Request(new URL(url, ORIGIN));
+      if (url === '/api/market/global/latest') return globalLatestGet({ request, env, now });
       if (url === '/api/market/latest') return marketLatestGet({ request, env, now });
       if (url === '/api/announcements') return announcementsGet({ request, env, now });
       return new Response('{}', { status: 404 });
@@ -306,7 +335,7 @@ async function assertParity(scenario) {
   const warm = await runBrowser({ ...scenario, html: server.html });
   assert.deepEqual(warm.view, rendered, 'site.js leaves the server HTML as it is');
   assert.deepEqual(warm.requests, [], 'nothing the server rendered is requested again');
-  assert.deepEqual([...cold.requests].sort(), ['/api/announcements', '/api/market/latest']);
+  assert.deepEqual([...cold.requests].sort(), ['/api/announcements', '/api/market/global/latest', '/api/market/latest']);
   return { server, rendered };
 }
 
@@ -563,7 +592,7 @@ test('15. Market failure: homepage 200, strip left to the script, notice still r
   assert.equal(decode(nodeById(server.html, 'today-strip-date').inner), '—');
   assert.equal(nodeById(server.html, 'today-market-grid').attrs['aria-busy'], 'true');
   const browser = await runBrowser({ html: server.html, db: noticeDb, now: NORMAL_NOW });
-  assert.deepEqual(browser.requests, ['/api/market/latest'], 'the script fetches only what the server did not render');
+  assert.deepEqual(browser.requests, ['/api/market/latest', '/api/market/global/latest'], 'the script fetches only what the server did not render');
 
   const response = await middlewareHome('ko', { COMMENTS_DB: broken });
   assert.equal(response.status, 200);
@@ -618,10 +647,11 @@ test('bootstrap carries only public fields the page uses', async () => {
   });
   const { html } = await serverHome({ lang: 'ko', db, now: NORMAL_NOW });
   const boot = JSON.parse(nodeById(html, 'home-initial-data').inner);
-  assert.deepEqual(Object.keys(boot).sort(), ['announcement', 'market']);
+  assert.deepEqual(Object.keys(boot).sort(), ['announcement', 'globalLatest', 'market']);
   assert.deepEqual(Object.keys(boot.announcement).sort(), ['content', 'createdAt', 'exposureStartAt', 'title']);
   assert.deepEqual(Object.keys(boot.market.payload).sort(), ['commodities_crypto', 'indices', 'meta', 'rates_fx_volatility', 'section_status', 'takeaway']);
-  assert.deepEqual(Object.keys(boot.market.payload.indices.KOSPI).sort(), ['change', 'change_pct', 'close']);
+  assert.deepEqual(Object.keys(boot.market.payload.indices.KOSPI).sort(), ['change', 'change_pct', 'close', 'data_state', 'retrieved_at', 'source_date']);
+  assert.deepEqual(Object.keys(boot.globalLatest).sort(), ['items', 'judgedAt']);
   assert.ok(JSON.stringify(boot).length < 2000);
 });
 
@@ -637,7 +667,7 @@ test('19. with a bootstrap the script makes no initial request to either API', a
 test('20. without a bootstrap the script fetches both APIs as before', async () => {
   const db = await database({ market: [{ payload: payloadFor(NORMAL_DATE) }] });
   const browser = await runBrowser({ lang: 'ko', html: KO_SHELL, db, now: NORMAL_NOW });
-  assert.deepEqual([...browser.requests].sort(), ['/api/announcements', '/api/market/latest']);
+  assert.deepEqual([...browser.requests].sort(), ['/api/announcements', '/api/market/global/latest', '/api/market/latest']);
 });
 
 test('21. parity matrix: KO/EN × normal/stale × notice/no notice × schema 1.0.1/1.2.0', async () => {
@@ -741,4 +771,129 @@ test('a closed day whose close is also behind shows both: closed, and the stale 
     assert.equal(rendered['today-strip-notice'].hidden, false);
     assert.match(rendered['today-strip-notice'].text, lang === 'en' ? /Sep 23/ : /9월 23일/);
   }
+});
+
+/* ===================================================== Global Latest (B3) */
+
+// Market Close 09-23 on screen, Global Latest 09-24/25 in mixed states, at
+// Friday 19:30Z (tests/helpers/global-latest-fixtures.mjs).
+const stripCells = html => [...String(html).matchAll(/<div class="today-item" role="listitem"><span class="today-label">([^<]*)<\/span><span class="today-value">([^<]*)<\/span><span class="today-change (\w+)">([^<]*)<\/span>(?:<span class="today-basis">([^<]*)<\/span>)?<\/div>/g)]
+  .map(([, label, value, direction, change, basis]) => ({ label: decode(label), value: decode(value), change: decode(change), direction, basis: basis === undefined ? null : decode(basis) }));
+const cellOf = (rendered, label) => stripCells(rendered['today-market-grid'].html).find(cell => cell.label === label);
+
+async function b3Database(global = globalLatest0925()) {
+  return database({ market: [{ payload: snapshot0923() }], global });
+}
+
+test('B3 1-5. HOME: KOSPI/KOSDAQ stay Market Close; USD/KRW and US 10Y show fresh Global Latest; stale GOLD falls back — each with its own date (KO/EN)', async () => {
+  const db = await b3Database();
+  const expected = {
+    ko: {
+      KOSPI: ['7,080.92', '▲ 0.86%', '9/23 · 종가'],
+      KOSDAQ: ['844.48', '▼ 0.19%', '9/23 · 종가'],
+      'USD/KRW': ['1,354.40', '▼ 13.0원', '9/25 · 장중'],
+      'US 10Y': ['5.18%', '▲ 2bp', '9/25 · 종가'],
+      GOLD: ['$4,356.40', '▲ 0.61%', '9/23 · 마감 시점']
+    },
+    en: {
+      KOSPI: ['7,080.92', '▲ 0.86%', 'SEP 23 · CLOSE'],
+      KOSDAQ: ['844.48', '▼ 0.19%', 'SEP 23 · CLOSE'],
+      'USD/KRW': ['1,354.40', '▼ ₩13.0', 'SEP 25 · INTRADAY'],
+      'US 10Y': ['5.18%', '▲ 2bp', 'SEP 25 · CLOSE'],
+      GOLD: ['$4,356.40', '▲ 0.61%', 'SEP 23 · AT KRX CLOSE']
+    }
+  };
+  for (const lang of ['ko', 'en']) {
+    const { rendered } = await assertParity({ lang, db, now: NOW });
+    const cells = stripCells(rendered['today-market-grid'].html);
+    assert.deepEqual(cells.map(cell => cell.label), ['KOSPI', 'KOSDAQ', 'USD/KRW', 'US 10Y', 'GOLD']);
+    for (const [label, [value, change, basis]] of Object.entries(expected[lang])) {
+      const cell = cellOf(rendered, label);
+      assert.deepEqual([cell.value, cell.change, cell.basis], [value, change, basis], `${lang} ${label}`);
+    }
+    // The strip's own heading still names the KRX close; Global Latest never moves it.
+    assert.match(rendered['today-strip-date'].text, /SEP 23/);
+  }
+});
+
+test('B3 6-8. HOME: stale, future and malformed Global Latest items fall back one by one', async () => {
+  const base = globalLatest0925().filter(item => ['USDKRW', 'US10Y', 'GOLD'].includes(item.code));
+  const allStale = base.map(item => ({ ...item, as_of: '2026-09-25T15:00:00Z', retrieved_at: '2026-09-25T15:00:05Z', data_state: 'intraday' }));
+  const futureUsd = base.map(item => (item.code === 'USDKRW' ? { ...item, as_of: '2026-09-25T20:30:00Z', retrieved_at: '2026-09-25T20:30:02Z' } : item));
+  const malformedRate = base.map(item => (item.code === 'US10Y' ? { ...item, change_pct: 7 } : item));
+  const plain = await assertParity({ lang: 'ko', db: await database({ market: [{ payload: snapshot0923() }] }), now: NOW });
+
+  const stale = await assertParity({ lang: 'ko', db: await b3Database(allStale), now: NOW });
+  // Nothing usable: exactly the Market Close strip, without basis lines.
+  assert.deepEqual(stale.rendered['today-market-grid'], plain.rendered['today-market-grid']);
+  assert.ok(stripCells(stale.rendered['today-market-grid'].html).every(cell => cell.basis === null));
+
+  const future = await assertParity({ lang: 'ko', db: await b3Database(futureUsd), now: NOW });
+  assert.deepEqual([cellOf(future.rendered, 'USD/KRW').value, cellOf(future.rendered, 'USD/KRW').basis], ['1,358.70', '9/23 · 마감 시점']);
+  assert.equal(cellOf(future.rendered, 'US 10Y').basis, '9/25 · 종가');
+
+  const malformed = await assertParity({ lang: 'ko', db: await b3Database(malformedRate), now: NOW });
+  assert.deepEqual([cellOf(malformed.rendered, 'US 10Y').value, cellOf(malformed.rendered, 'US 10Y').basis], ['4.97%', '9/22 · 종가']);
+  assert.equal(cellOf(malformed.rendered, 'USD/KRW').basis, '9/25 · 장중');
+});
+
+test('B3 9. HOME: Global Latest failure (handler error, missing table, timeout) leaves the Market Close strip, with no request after load', async () => {
+  const db = await database({ market: [{ payload: snapshot0923() }] });
+  const plainView = htmlView((await serverHome({ lang: 'ko', db, now: NOW })).html);
+  // No table: the real handler answers 503 on the server and in the browser.
+  await assertParity({ lang: 'ko', db, now: NOW });
+  for (const readGlobal of [async () => { throw new Error('global down'); }, () => new Promise(() => {})]) {
+    const withRows = await b3Database();
+    const server = await serverHome({ lang: 'ko', db: withRows, now: NOW, readGlobal, budgetMs: 50 });
+    assert.deepEqual(htmlView(server.html)['today-market-grid'], plainView['today-market-grid']);
+    const boot = JSON.parse(nodeById(server.html, 'home-initial-data').inner);
+    assert.deepEqual(boot.globalLatest.items, []);
+    const warm = await runBrowser({ lang: 'ko', html: server.html, db: withRows, now: NOW });
+    assert.deepEqual(warm.requests, [], 'a server-side Global Latest failure is not retried by the page');
+    assert.deepEqual(warm.view['today-market-grid'], plainView['today-market-grid']);
+  }
+});
+
+test('B3 10. HOME: a single usable item is a partial overlay of that card only', async () => {
+  const onlyGold = [latestItem('GOLD', 4327.8, 4298, { source_date: '2026-09-25', as_of: '2026-09-25T19:20:00Z', retrieved_at: '2026-09-25T19:20:03Z', data_state: 'intraday' })];
+  const { rendered } = await assertParity({ lang: 'en', db: await b3Database(onlyGold), now: NOW });
+  assert.deepEqual(stripCells(rendered['today-market-grid'].html).map(cell => [cell.label, cell.basis]), [
+    ['KOSPI', 'SEP 23 · CLOSE'], ['KOSDAQ', 'SEP 23 · CLOSE'], ['USD/KRW', 'SEP 23 · AT KRX CLOSE'], ['US 10Y', 'SEP 22 · CLOSE'], ['GOLD', 'SEP 25 · INTRADAY']
+  ]);
+  assert.equal(cellOf(rendered, 'GOLD').value, '$4,327.80');
+});
+
+test('B3 18-20. HOME: SSR equals hydration, and the first load requests neither Market Close nor Global Latest again', async () => {
+  const db = await b3Database();
+  for (const lang of ['ko', 'en']) {
+    const server = await serverHome({ lang, db, now: NOW });
+    const warm = await runBrowser({ lang, html: server.html, db, now: NOW });
+    assert.deepEqual(warm.requests, []);
+    assert.deepEqual(warm.view, htmlView(server.html));
+    // A browser whose clock is hours off still paints what the server judged:
+    // the bootstrap carries the server's instant, not the browser's clock.
+    const later = await runBrowser({ lang, html: server.html, db, now: new Date(NOW.getTime() + 6 * 60 * 60 * 1000) });
+    assert.deepEqual(later.view, htmlView(server.html));
+    assert.deepEqual(later.requests, []);
+  }
+});
+
+test('B3 bootstrap: only the strip Global Latest codes, only the fields the overlay reads', async () => {
+  const { html } = await serverHome({ lang: 'ko', db: await b3Database(), now: NOW });
+  const boot = JSON.parse(nodeById(html, 'home-initial-data').inner);
+  assert.equal(boot.globalLatest.judgedAt, NOW.toISOString());
+  assert.deepEqual(boot.globalLatest.items.map(item => item.code).sort(), ['GOLD', 'US10Y', 'USDKRW']);
+  for (const item of boot.globalLatest.items) {
+    assert.deepEqual(Object.keys(item).sort(), ['as_of', 'change', 'change_pct', 'code', 'data_state', 'previous_close', 'retrieved_at', 'source_date', 'value']);
+  }
+  assert.ok(JSON.stringify(boot).length < 4000);
+});
+
+test('B3 HOME: a KRX trading evening with no fresh Global Latest keeps the strip as before B3', async () => {
+  // 09-23 18:00 KST: the close on screen is today's; the stored US figures are
+  // from later sessions and would be "future" at this instant, so nothing is overlaid.
+  const db = await b3Database();
+  const { rendered } = await assertParity({ lang: 'ko', db, now: kst('2026-09-23', '18:00') });
+  assert.ok(stripCells(rendered['today-market-grid'].html).every(cell => cell.basis === null));
+  assert.equal(rendered['today-strip-tag'].text, 'TODAY');
 });

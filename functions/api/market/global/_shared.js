@@ -14,6 +14,8 @@ import { isTradingDate } from '../../../_trading-calendar.js';
 export const GLOBAL_LATEST_TABLE = 'market_global_latest';
 export const GLOBAL_LATEST_SCHEMA_VERSION = '1.0.0';
 export const GLOBAL_LATEST_MAX_BYTES = 64 * 1024;
+// When the GET body was read (ISO); the page's freshness clock never runs behind it.
+export const GLOBAL_LATEST_SERVED_AT_HEADER = 'x-global-latest-served-at';
 // Collector and server clocks may disagree a little; nothing may be dated
 // further ahead than this.
 export const FUTURE_SKEW_MS = 5 * 60 * 1000;
