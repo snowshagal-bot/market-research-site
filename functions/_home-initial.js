@@ -1,5 +1,6 @@
 import '../assets/locale.js';
 import { onRequestGet as marketLatestGet } from './api/market/latest.js';
+import { onRequestGet as globalLatestGet } from './api/market/global/latest.js';
 import { onRequestGet as announcementsGet } from './api/announcements.js';
 import { EXPECTED_MARKET_DATE_HEADER, KRX_SESSION_HEADER } from './api/market/_shared.js';
 import { escapeHtml } from './_initial-html.js';
@@ -15,7 +16,10 @@ import { cleanReportHref } from './_seo.js';
  *   (the helpers site.js calls), first `research`.
  * - TODAY: the /api/market/latest handler itself, so the page and the API read
  *   the same published row and the same x-market-expected-date; stale/notice
- *   copy comes from locale.js marketCloseAvailability.
+ *   copy comes from locale.js marketCloseAvailability. USD/KRW, US 10Y and GOLD
+ *   may be overlaid with the /api/market/global/latest handler's items, judged
+ *   by locale.js globalLatestOverlay at this request's time; KOSPI and KOSDAQ
+ *   never are.
  * - Notice: the /api/announcements handler itself, items[0].
  *
  * The formatting below mirrors assets/site.js (publishedStripItems,
@@ -26,7 +30,10 @@ import { cleanReportHref } from './_seo.js';
  * Nothing here may break the homepage: each source fails, or runs past the
  * budget, on its own and is then simply left to the page script, which fetches
  * it exactly as before. The data the server did render is handed to the script
- * in a JSON bootstrap so it is not requested a second time.
+ * in a JSON bootstrap so it is not requested a second time. Global Latest rides
+ * with the strip: its items and the instant they were judged at, so the script
+ * reaches the same overlay without a request, and an empty list when the
+ * server could not read it (the strip is then the Market Close strip alone).
  */
 
 export const HOME_INITIAL_TIME_BUDGET_MS = 1500;
@@ -179,42 +186,65 @@ function declaredUnavailable(payload) {
   return new Set(Array.isArray(listed) ? listed.filter(code => code !== 'KOSPI' && code !== 'KOSDAQ') : []);
 }
 
+/** site.js stripFigures: the formatted value and movement of one quote, or null. */
+function stripFigures(spec, quote, lang) {
+  if (!quote || !finiteNumber(quote.close)) return null;
+  const movement = spec.format === 'index' || spec.format === 'usd' ? quote.change_pct : quote.change;
+  if (!finiteNumber(movement)) return null;
+  const arrow = movement < 0 ? '▼' : '▲';
+  const size = Math.abs(movement);
+  let value;
+  let change;
+  if (spec.format === 'index') {
+    value = decimal(quote.close, 2, lang);
+    change = `${arrow} ${decimal(size, 2, lang)}%`;
+  } else if (spec.format === 'usd') {
+    value = `$${decimal(quote.close, 2, lang)}`;
+    change = `${arrow} ${decimal(size, 2, lang)}%`;
+  } else if (spec.format === 'won') {
+    value = decimal(quote.close, 2, lang);
+    change = lang === 'en' ? `${arrow} ₩${decimal(size, 1, lang)}` : `${arrow} ${decimal(size, 1, lang)}원`;
+  } else {
+    value = `${decimal(quote.close, 2, lang)}%`;
+    change = `${arrow} ${Math.round(size * 100)}bp`;
+  }
+  return { value, change, direction: movement < 0 ? 'down' : 'up' };
+}
+
 /** site.js publishedStripItems: all five items or null. */
-export function publishedStripItems(payload, lang) {
+export function publishedStripItems(payload, lang, overlay = null) {
+  const api = localeApi();
   const soft = declaredUnavailable(payload);
-  const unavailable = spec => (soft.has(spec.key) ? { label: spec.label, value: '--', change: '', direction: 'flat' } : null);
+  const latest = overlay?.items || {};
+  const marketDate = ISO_DATE.test(String(payload?.meta?.market_date || '')) ? payload.meta.market_date : '';
+  const overlaid = spec => (api.isGlobalLatestCode(spec.key) && latest[spec.key]) || null;
+  const mixed = STRIP_ITEMS.some(overlaid);
+  const basis = (kind, source) => (mixed ? api.todayStripBasis(kind, source, lang) : '');
   const items = STRIP_ITEMS.map(spec => {
     const quote = payload?.[spec.group]?.[spec.key];
-    if (!quote || !finiteNumber(quote.close)) return unavailable(spec);
-    const movement = spec.format === 'index' || spec.format === 'usd' ? quote.change_pct : quote.change;
-    if (!finiteNumber(movement)) return unavailable(spec);
-    const arrow = movement < 0 ? '▼' : '▲';
-    const size = Math.abs(movement);
-    let value;
-    let change;
-    if (spec.format === 'index') {
-      value = decimal(quote.close, 2, lang);
-      change = `${arrow} ${decimal(size, 2, lang)}%`;
-    } else if (spec.format === 'usd') {
-      value = `$${decimal(quote.close, 2, lang)}`;
-      change = `${arrow} ${decimal(size, 2, lang)}%`;
-    } else if (spec.format === 'won') {
-      value = decimal(quote.close, 2, lang);
-      change = lang === 'en' ? `${arrow} ₩${decimal(size, 1, lang)}` : `${arrow} ${decimal(size, 1, lang)}원`;
-    } else {
-      value = `${decimal(quote.close, 2, lang)}%`;
-      change = `${arrow} ${Math.round(size * 100)}bp`;
+    const snapshot = stripFigures(spec, quote, lang);
+    if (!snapshot && !soft.has(spec.key)) return null;
+    const item = overlaid(spec);
+    if (item) {
+      const figures = stripFigures(spec, { close: item.value, change: item.change, change_pct: item.change_pct }, lang);
+      if (figures) return { label: spec.label, ...figures, basis: basis('latest', item) };
     }
-    return { label: spec.label, value, change, direction: movement < 0 ? 'down' : 'up' };
+    if (!snapshot) return { label: spec.label, value: '--', change: '', direction: 'flat', basis: '' };
+    const kind = api.isGlobalLatestCode(spec.key) ? 'snapshot' : 'krx';
+    return { label: spec.label, ...snapshot, basis: basis(kind, kind === 'krx' ? { source_date: marketDate } : quote) };
   }).filter(Boolean);
   return items.length === STRIP_ITEMS.length ? items : null;
 }
 
-/** site.js todayStripSession for a live published session, or null. */
-export function liveStripSession(payload, expectedDate, posts, lang, krxSession = null) {
+/**
+ * site.js todayStripSession for a live published session, or null.
+ * `globalLatest` is { items, now } or null.
+ */
+export function liveStripSession(payload, expectedDate, posts, lang, krxSession = null, globalLatest = null) {
   const marketDate = ISO_DATE.test(String(payload?.meta?.market_date || '')) ? payload.meta.market_date : '';
   if (!marketDate) return null;
-  const items = publishedStripItems(payload, lang);
+  const overlay = globalLatest ? localeApi().globalLatestOverlay(globalLatest.items, payload, globalLatest.now) : null;
+  const items = publishedStripItems(payload, lang, overlay);
   if (!items) return null;
   const api = localeApi();
   const localized = api.sortPosts(api.localePosts(posts, lang));
@@ -233,7 +263,7 @@ function stripEdits(session, lang) {
   const notice = availability.stale ? availability.notice : '';
   const transparency = availability.transparencyNotice;
   const grid = session.items.map(item => (
-    `<div class="today-item" role="listitem"><span class="today-label">${escapeHtml(item.label)}</span><span class="today-value">${escapeHtml(item.value)}</span><span class="today-change ${item.direction}">${escapeHtml(item.change)}</span></div>`
+    `<div class="today-item" role="listitem"><span class="today-label">${escapeHtml(item.label)}</span><span class="today-value">${escapeHtml(item.value)}</span><span class="today-change ${item.direction}">${escapeHtml(item.change)}</span>${item.basis ? `<span class="today-basis">${escapeHtml(item.basis)}</span>` : ''}</div>`
   )).join('');
   const edits = [
     ...(session.krx
@@ -281,7 +311,11 @@ function stripEdits(session, lang) {
 
 /** The published payload cut down to what site.js reads for the strip. */
 function bootstrapPayload(payload, lang) {
-  const pick = ({ close, change, change_pct: changePct }) => ({ close, change, change_pct: changePct });
+  // source_date, data_state and retrieved_at: the overlay's newer-than-snapshot
+  // test and the snapshot basis line.
+  const pick = ({ close, change, change_pct: changePct, source_date: sourceDate, data_state: dataState, retrieved_at: retrievedAt }) => (
+    { close, change, change_pct: changePct, source_date: sourceDate, data_state: dataState, retrieved_at: retrievedAt }
+  );
   const out = {
     meta: { market_date: payload.meta.market_date, schema_version: payload.meta.schema_version },
     takeaway: { [lang]: String(payload?.takeaway?.[lang] || '') }
@@ -335,6 +369,26 @@ async function readMarketLatest(url, env, now) {
   };
 }
 
+const GLOBAL_ITEM_KEYS = ['code', 'value', 'previous_close', 'change', 'change_pct', 'source_date', 'as_of', 'retrieved_at', 'data_state'];
+
+/** { items } from the /api/market/global/latest handler, or null on failure. */
+async function readGlobalLatest(url, env, now) {
+  const request = new Request(new URL('/api/market/global/latest', url), { headers: { accept: 'application/json' } });
+  const response = await globalLatestGet({ request, env, now });
+  if (response.status !== 200) return null;
+  const body = await response.json();
+  return { items: Array.isArray(body?.items) ? body.items : [] };
+}
+
+/** The strip's Global Latest items, cut down to what the overlay reads. */
+function bootstrapGlobalItems(items) {
+  const api = localeApi();
+  const strip = new Set(STRIP_ITEMS.map(spec => spec.key).filter(code => api.isGlobalLatestCode(code)));
+  return (Array.isArray(items) ? items : [])
+    .filter(item => item && typeof item === 'object' && strip.has(item.code))
+    .map(item => Object.fromEntries(GLOBAL_ITEM_KEYS.map(key => [key, item[key] ?? null])));
+}
+
 /** { notice } (items[0] or null) from the /api/announcements handler, or null on failure. */
 async function readActiveNotice(url, env, now) {
   const request = new Request(new URL('/api/announcements', url), { headers: { accept: 'application/json' } });
@@ -357,13 +411,14 @@ function settle(promise, label) {
  * a homepage or nothing could be rendered. Market and notice are read in
  * parallel under one budget and fail independently.
  */
-export async function buildHomeInitial(url, env, posts, { now = new Date(), budgetMs = HOME_INITIAL_TIME_BUDGET_MS, readMarket = readMarketLatest, readNotice = readActiveNotice } = {}) {
+export async function buildHomeInitial(url, env, posts, { now = new Date(), budgetMs = HOME_INITIAL_TIME_BUDGET_MS, readMarket = readMarketLatest, readNotice = readActiveNotice, readGlobal = readGlobalLatest } = {}) {
   const lang = homeInitialLang(url.pathname);
   if (!lang) return null;
   try {
-    const [market, notice] = await Promise.all([
+    const [market, notice, global] = await Promise.all([
       withinBudget(settle(readMarket(url, env, now), 'market'), budgetMs),
-      withinBudget(settle(readNotice(url, env, now), 'notice'), budgetMs)
+      withinBudget(settle(readNotice(url, env, now), 'notice'), budgetMs),
+      withinBudget(settle(readGlobal(url, env, now), 'global latest'), budgetMs)
     ]);
     const edits = [];
     const bootstrap = {};
@@ -386,10 +441,14 @@ export async function buildHomeInitial(url, env, posts, { now = new Date(), budg
       edits.push(...researchEdits(research, lang));
     }
 
-    const session = market && hasPosts ? liveStripSession(market.payload, market.expectedDate, posts, lang, market.krxSession) : null;
+    // Judged once, at this request's time; the bootstrap carries both the
+    // items and that instant so site.js reaches the same figures.
+    const globalLatest = { items: bootstrapGlobalItems(global?.items), now: new Date(now).toISOString() };
+    const session = market && hasPosts ? liveStripSession(market.payload, market.expectedDate, posts, lang, market.krxSession, globalLatest) : null;
     if (session) {
       edits.push(...stripEdits(session, lang));
       bootstrap.market = { payload: bootstrapPayload(market.payload, lang), expectedDate: market.expectedDate, krxSession: market.krxSession || null };
+      bootstrap.globalLatest = { items: globalLatest.items, judgedAt: globalLatest.now };
     }
 
     if (!edits.length) return null;

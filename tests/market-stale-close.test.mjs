@@ -228,6 +228,8 @@ test('9. a newly published close returns MARKET KO/EN to TODAY on the next load 
   let now = kst('2026-09-16T16:05');
   // Market data is only ever read through the real /api/market/latest handler.
   const respond = url => {
+    // Global Latest is not part of this check: unavailable here.
+    if (url === '/api/market/global/latest') return Promise.resolve(new Response('{}', { status: 503 }));
     assert.equal(url, '/api/market/latest');
     return latestRequest({ request: new Request(`https://snowshagal.com${url}`), env, now });
   };

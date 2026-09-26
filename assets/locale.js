@@ -447,6 +447,186 @@
     return `${dataUpdatedLabel[language === 'en' ? 'en' : 'ko']} · ${stamp}`;
   }
 
+  /* Global Latest overlay ---------------------------------------------------
+     Market Close (market_close_snapshots) is the base of every market view.
+     On TODAY views only — the homepage strip and /market/ TODAY, KO and EN —
+     a global instrument's displayed figures may come from Global Latest
+     (/api/market/global/latest) instead, as a view projection: the published
+     payload is never changed. HISTORY, 1W and 1M never call this.
+
+     An observation replaces the snapshot's figures only when, at `now`:
+     - it is well formed (finite positive value and previous close, a change
+       and change_pct that agree with them, strict ISO timestamps, a real
+       source_date next to as_of);
+     - as_of is not in the future;
+     - it is fresh by as_of, never retrieved_at: intraday within the
+       instrument's window; final_close only for instruments the collector
+       finalises (VIX never is) and for at most four days;
+     - it is newer than the snapshot's own figure (as_of after the snapshot
+       item's retrieved_at), so an old close never covers a newer snapshot.
+     Anything else keeps the snapshot figure; one bad item affects only itself.
+  -------------------------------------------------------------------------- */
+  const GLOBAL_LATEST_POLICY = Object.freeze({
+    NASDAQ: { group: 'indices', intradayMinutes: 60, finalClose: true },
+    DOW: { group: 'indices', intradayMinutes: 60, finalClose: true },
+    SP500: { group: 'indices', intradayMinutes: 60, finalClose: true },
+    SOX: { group: 'rates_fx_volatility', intradayMinutes: 60, finalClose: true },
+    VIX: { group: 'rates_fx_volatility', intradayMinutes: 60, finalClose: false },
+    US10Y: { group: 'rates_fx_volatility', intradayMinutes: 60, finalClose: true },
+    USDKRW: { group: 'rates_fx_volatility', intradayMinutes: 90, finalClose: false },
+    JPYKRW: { group: 'rates_fx_volatility', intradayMinutes: 90, finalClose: false },
+    DXY: { group: 'rates_fx_volatility', intradayMinutes: 90, finalClose: false },
+    WTI: { group: 'commodities_crypto', intradayMinutes: 90, finalClose: false },
+    GOLD: { group: 'commodities_crypto', intradayMinutes: 90, finalClose: false },
+    BITCOIN: { group: 'commodities_crypto', intradayMinutes: 60, finalClose: false }
+  });
+  const GLOBAL_LATEST_FUTURE_SKEW_MS = 5 * 60 * 1000;
+  const GLOBAL_LATEST_FINAL_CLOSE_MAX_MS = 4 * 24 * 60 * 60 * 1000;
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const STRICT_DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
+
+  function isGlobalLatestCode(code) {
+    return typeof code === 'string' && Object.prototype.hasOwnProperty.call(GLOBAL_LATEST_POLICY, code);
+  }
+
+  function strictInstant(value) {
+    if (typeof value !== 'string' || !STRICT_DATE_TIME.test(value)) return null;
+    const date = parseTimestamp(value);
+    return date ? date.getTime() : null;
+  }
+
+  function calendarDay(value) {
+    if (typeof value !== 'string' || !ISO_DATE.test(value)) return null;
+    const date = new Date(`${value}T00:00:00Z`);
+    return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value ? date.getTime() : null;
+  }
+
+  function instantOf(value) {
+    if (value instanceof Date) return Number.isFinite(value.getTime()) ? value.getTime() : null;
+    if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+    const date = parseTimestamp(value);
+    return date ? date.getTime() : null;
+  }
+
+  const finitePositive = value => typeof value === 'number' && Number.isFinite(value) && value > 0;
+  const finiteValue = value => typeof value === 'number' && Number.isFinite(value);
+
+  /** The snapshot's figure for a global instrument, or null. */
+  function snapshotGlobalQuote(payload, code) {
+    const policy = isGlobalLatestCode(code) ? GLOBAL_LATEST_POLICY[code] : null;
+    const quote = policy ? payload?.[policy.group]?.[code] : null;
+    return quote && typeof quote === 'object' ? quote : null;
+  }
+
+  /** { usable, reason } for one Global Latest item against the snapshot figure at `now`. */
+  function globalLatestItemStatus(item, now, snapshotQuote = null) {
+    const nowMs = instantOf(now);
+    if (nowMs === null) return { usable: false, reason: 'no_clock' };
+    if (!item || typeof item !== 'object' || !isGlobalLatestCode(item.code)) return { usable: false, reason: 'unknown_code' };
+    const policy = GLOBAL_LATEST_POLICY[item.code];
+    const { value, previous_close: previousClose, change, change_pct: changePct } = item;
+    if (!finitePositive(value) || !finitePositive(previousClose) || !finiteValue(change) || !finiteValue(changePct)) {
+      return { usable: false, reason: 'malformed' };
+    }
+    // The receiver's own tolerances: the change must be arithmetic on value and previous_close.
+    if (Math.abs(change - (value - previousClose)) > 0.006 + Math.abs(value) * 1e-4) return { usable: false, reason: 'malformed' };
+    const expectedPct = (value / previousClose - 1) * 100;
+    if (Math.abs(changePct - expectedPct) > 0.01 + Math.abs(expectedPct) * 0.005) return { usable: false, reason: 'malformed' };
+    if (item.data_state !== 'intraday' && item.data_state !== 'final_close') return { usable: false, reason: 'malformed' };
+    const asOf = strictInstant(item.as_of);
+    const retrievedAt = strictInstant(item.retrieved_at);
+    const sourceDay = calendarDay(item.source_date);
+    if (asOf === null || retrievedAt === null || sourceDay === null || asOf > retrievedAt) return { usable: false, reason: 'malformed' };
+    // A session date is the exchange's local date, at most a day from as_of in UTC.
+    const asOfDay = Math.floor(asOf / DAY_MS) * DAY_MS;
+    if (Math.abs(asOfDay - sourceDay) > DAY_MS) return { usable: false, reason: 'malformed' };
+    if (asOf > nowMs + GLOBAL_LATEST_FUTURE_SKEW_MS || sourceDay > nowMs + DAY_MS) return { usable: false, reason: 'future' };
+    const age = nowMs - asOf;
+    if (item.data_state === 'final_close') {
+      if (!policy.finalClose) return { usable: false, reason: 'unexpected_final_close' };
+      if (age > GLOBAL_LATEST_FINAL_CLOSE_MAX_MS) return { usable: false, reason: 'stale' };
+    } else if (age > policy.intradayMinutes * 60 * 1000) {
+      return { usable: false, reason: 'stale' };
+    }
+    if (snapshotQuote) {
+      const snapshotRetrieved = instantOf(snapshotQuote.retrieved_at);
+      if (snapshotRetrieved !== null) {
+        if (asOf <= snapshotRetrieved) return { usable: false, reason: 'older_than_snapshot' };
+      } else if (ISO_DATE.test(String(snapshotQuote.source_date || '')) && item.source_date < snapshotQuote.source_date) {
+        return { usable: false, reason: 'older_than_snapshot' };
+      }
+    }
+    return { usable: true, reason: 'fresh' };
+  }
+
+  /**
+   * The Global Latest items that may be shown over this Market Close payload
+   * at `now`: { items: { CODE: item }, reasons: { CODE: reason } }. KOSPI and
+   * KOSDAQ are not Global Latest instruments and can never appear. A code sent
+   * twice is dropped altogether.
+   */
+  function globalLatestOverlay(items, payload, now) {
+    const accepted = {};
+    const reasons = {};
+    if (!Array.isArray(items)) return { items: accepted, reasons };
+    const seen = new Set();
+    for (const item of items) {
+      const code = item && typeof item === 'object' ? item.code : null;
+      if (!isGlobalLatestCode(code)) continue;
+      if (seen.has(code)) {
+        delete accepted[code];
+        reasons[code] = 'duplicate';
+        continue;
+      }
+      seen.add(code);
+      const status = globalLatestItemStatus(item, now, snapshotGlobalQuote(payload, code));
+      reasons[code] = status.reason;
+      if (status.usable) accepted[code] = item;
+    }
+    return { items: accepted, reasons };
+  }
+
+  /**
+   * The instant to judge a fetched response at: the later of this browser's
+   * clock and the server's `x-global-latest-served-at`, so a clock running
+   * behind can never make an old observation look fresh.
+   */
+  function globalLatestNow(servedAt, clock) {
+    const candidates = [instantOf(servedAt), instantOf(clock)].filter(value => value !== null);
+    return candidates.length ? Math.max(...candidates) : null;
+  }
+
+  const GLOBAL_BASIS_COPY = {
+    ko: { intraday: '장중', final_close: '종가', krx: '종가', snapshot: '마감 시점' },
+    en: { intraday: 'INTRADAY', final_close: 'CLOSE', krx: 'CLOSE', snapshot: 'KRX CLOSE' }
+  };
+
+  function basisDate(value, language) {
+    if (!ISO_DATE.test(String(value || ''))) return '';
+    const [, month, day] = String(value).split('-').map(Number);
+    return language === 'en' ? `${SHORT_MONTHS[month - 1].toUpperCase()} ${String(day).padStart(2, '0')}` : `${month}/${day}`;
+  }
+
+  /**
+   * The small per-card basis line of the homepage strip: "9/25 · 장중",
+   * "SEP 25 · CLOSE". `kind` is 'latest' (a Global Latest item), 'krx'
+   * (KOSPI/KOSDAQ close) or 'snapshot' (a global figure kept from the
+   * Market Close payload: its own session date, "종가" when that figure was a
+   * completed close, otherwise "마감 시점" — the value as captured with the
+   * KRX close).
+   */
+  function todayStripBasis(kind, source, language) {
+    const lang = language === 'en' ? 'en' : 'ko';
+    const text = GLOBAL_BASIS_COPY[lang];
+    const date = basisDate(source?.source_date, lang);
+    if (!date) return '';
+    let state;
+    if (kind === 'latest') state = text[source.data_state] || '';
+    else if (kind === 'krx') state = text.krx;
+    else state = source.data_state === 'final_close' ? text.final_close : text.snapshot;
+    return state ? `${date} · ${state}` : '';
+  }
+
   root.MARKET_LOCALE = {
     validLanguages,
     copy,
@@ -474,6 +654,12 @@
     parseKrxSessionHeader,
     normalizeKrxSession,
     krxSessionDisplay,
-    marketIntegrityNotice
+    marketIntegrityNotice,
+    GLOBAL_LATEST_POLICY,
+    isGlobalLatestCode,
+    globalLatestItemStatus,
+    globalLatestOverlay,
+    globalLatestNow,
+    todayStripBasis
   };
 })(typeof window !== 'undefined' ? window : globalThis);

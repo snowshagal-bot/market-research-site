@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated: 2026-09-23
+Updated: 2026-09-26
 
 This roadmap records implementation order, completed capabilities, and operational priorities, not a promise to build every future idea. Keep the current site small and stable until real traffic, indexing, and operational needs justify added complexity.
 
@@ -10,10 +10,14 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
-0. **Global Latest B1 — website contract, D1 and publish/read API (Draft PR, Preview only)**:
-   - Separate channel from Market Close: `contracts/global_latest/` 1.0.0, `market_global_latest` (migration `0002`), `POST /api/market/global/publish` (MARKET_PUBLISH_KEY, Market Close host policy, per-instrument monotonic `as_of`, one D1 batch), `GET /api/market/global/latest` (stored rows as published, ETag/304).
-   - Status: website receiver ready, collector pending. No page reads it yet.
-   - Remaining steps, in order: Preview QA → approval → Production migration → schema readiness check → merge → Production GET empty 200 → B2 core collector → B3 TODAY/homepage overlay.
+0. **Global Latest B3 — HOME + MARKET TODAY overlay (Draft PR, Preview only)**:
+   - Market Close stays the base; on TODAY views only (HOME strip, `/market/` TODAY, KO/EN) fresh Global Latest replaces a global instrument's displayed figures, per item, as a view projection. HISTORY / 1W / 1M never use it; no payload is rewritten. KOSPI/KOSDAQ are never overlaid.
+   - Freshness is a pure policy in `assets/locale.js` (by `as_of`; intraday 60/90 min; `final_close` for US indices and US10Y up to 4 days; never older than the snapshot figure). HOME is judged at request time on the server and hydrated from the bootstrap with zero extra requests; MARKET TODAY requests Global Latest at most once per TODAY load.
+   - Remaining steps, in order: Preview QA (synthetic Preview data, cleaned up) → review/approval → merge → Production check (HOME raw HTML basis lines, zero first-load requests, MARKET TODAY/HISTORY).
+
+0. **Global Latest B1/B2 — receiver and collector (Production)**:
+   - B1 (#144, merged ba789ca): `contracts/global_latest/` 1.0.0, `market_global_latest` (migration `0002`), `POST /api/market/global/publish`, `GET /api/market/global/latest`.
+   - B2 (publisher repo): core collector live in Production since 2026-09-26, Task `시장지표-GlobalLatest` every 30 minutes; rollback backup kept on the publisher PC.
 
 0. **Market UX Phase A — KRX non-trading day state (merged #143, Production verified on 2026-09-24)**:
    - `krxSessionStatus(now)` in `functions/_trading-calendar.js` (the only holiday source) reports trading / holiday / weekend, the holiday name and the last trading date; `/api/market/latest` sends it as `x-krx-session` (percent-encoded JSON) with the body, ETag and caching unchanged.

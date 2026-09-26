@@ -8,6 +8,7 @@
     calendarToggle: '달력으로 날짜 선택', selectDate: '날짜 선택', closeCalendar: '달력 닫기',
     sections: ['주요 지수', '금리 · 환율 · 변동성', '원자재 · 가상자산', '시장 폭', 'KRX 투자자 매매동향 (당일)', '최근 5거래일 누적 수급', '프로그램 & 베이시스', '시장 내부 지표', '공매도 현황', '시가총액 상위 10종목'],
     open: '시가', high: '고가', low: '저가', previous: '전일', close: '종가', current: '현재', fixedClose: '15:30 확정', intraday: '장중', recentClose: '최근 종가', unavailable: '데이터 없음',
+    latestClose: '종가', snapshotBasis: '마감 시점', asOf: stamp => `${stamp} 기준`,
     rise: '상승종목', fall: '하락종목', flat: '보합종목', upper: '상한가', lower: '하한가', riseRatio: '상승비율', fallRatio: '하락비율',
     foreign: '외국인', institution: '기관', individual: '개인', market: '시장', fiveDays: '5거래일', billion: '억원',
     arbitrage: '차익', nonArbitrage: '비차익', total: '전체', netBuy: '순매수', spot: 'KOSPI200 현물', future: '선물', basis: '베이시스',
@@ -41,6 +42,7 @@
     calendarToggle: 'Select date from calendar', selectDate: 'Select date', closeCalendar: 'Close calendar',
     sections: ['Major Indices', 'Rates · FX · Volatility', 'Commodities · Crypto', 'Market Breadth', 'KRX Investor Flows (Daily)', 'Cumulative Flows: Last 5 Sessions', 'Program Trading & Basis', 'Market Internals', 'Short Selling', 'Top 10 by Market Cap'],
     open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', close: 'Close', current: 'Latest', fixedClose: '15:30 close', intraday: 'Intraday', recentClose: 'Recent close', unavailable: 'Unavailable',
+    latestClose: 'Close', snapshotBasis: 'At KRX close', asOf: stamp => `As of ${stamp}`,
     rise: 'Advancers', fall: 'Decliners', flat: 'Unchanged', upper: 'Limit up', lower: 'Limit down', riseRatio: 'Advance ratio', fallRatio: 'Decline ratio',
     foreign: 'Foreign', institution: 'Institution', individual: 'Retail', market: 'Market', fiveDays: '5 sessions', billion: 'KRW 100m',
     arbitrage: 'Arbitrage', nonArbitrage: 'Non-arbitrage', total: 'Total', netBuy: 'Net buy', spot: 'KOSPI 200 spot', future: 'Futures', basis: 'Basis',
@@ -173,26 +175,48 @@
   const metric = (label, value, extra = '') => `<div class="market-metric"><span>${html(label)}</span><strong class="${extra}">${value}</strong></div>`;
   const section = (numberValue, title, body, extra = '') => `<section class="market-section ${extra}" aria-labelledby="market-section-${numberValue}"><h2 id="market-section-${numberValue}"><span>${numberValue}.</span> ${html(title)}</h2>${body}</section>`;
 
-  function instrumentCard(key, item, major = false) {
-    const display = displayValue(key, item);
-    const movement = item?.change;
+  // The basis of a Global Latest figure: its session date and state, and for
+  // an intraday value the moment it was observed (as_of, in KST).
+  function latestStateHtml(latest) {
+    const state = `${dateText(latest.source_date)} · ${latest.data_state === 'final_close' ? copy.latestClose : copy.intraday}`;
+    if (latest.data_state !== 'intraday') return state;
+    const stamp = root.MARKET_LOCALE?.formatKstTimestamp?.(latest.as_of, ko ? 'ko' : 'en');
+    return stamp ? `${state}<span class="instrument-asof">${html(copy.asOf(stamp))}</span>` : state;
+  }
+
+  // `view.latest`: a Global Latest item shown in place of the snapshot figure
+  // (TODAY only). Only its own value, change, previous close and basis are
+  // shown; the snapshot's 15:30 fixing and open/high/low belong to another
+  // moment and are left out. `view.mixed`: some card on the page is
+  // overlaid, so a snapshot figure that was intraday when the Market Close
+  // was captured says so ("마감 시점") instead of "장중".
+  function instrumentCard(key, item, major = false, view = {}) {
+    const latest = view.latest || null;
+    const display = latest ? latest.value : displayValue(key, item);
+    const movement = latest ? latest.change : item?.change;
+    const movementPct = latest ? latest.change_pct : item?.change_pct;
     const movementClass = signClass(movement);
     const movementArrow = movementClass === 'up' ? '▲' : movementClass === 'down' ? '▼' : '—';
     const isFx = key === 'USDKRW' || key === 'JPYKRW';
     const changeContent = key === 'US10Y'
       ? `${movementArrow} ${valid(movement) ? `${number(Math.abs(movement * 100), 1)}bp` : '--'}`
       : isFx
-        ? `${movementArrow} ${valid(movement) ? number(Math.abs(movement), 2) : '--'} <span>(${pct(item?.change_pct)})</span>`
-        : `${movementArrow} ${signed(movement, 2)} <span>(${pct(item?.change_pct)})</span>`;
-    const fxContext = isFx ? `<div class="instrument-close-label">${copy.fixedClose}</div><div class="instrument-current"><span>${copy.current}</span><strong>${valueUnit(key, item?.current)}</strong></div>` : '';
-    const detail = major ? `<dl class="market-ohlc">
+        ? `${movementArrow} ${valid(movement) ? number(Math.abs(movement), 2) : '--'} <span>(${pct(movementPct)})</span>`
+        : `${movementArrow} ${signed(movement, 2)} <span>(${pct(movementPct)})</span>`;
+    const fxContext = isFx && !latest ? `<div class="instrument-close-label">${copy.fixedClose}</div><div class="instrument-current"><span>${copy.current}</span><strong>${valueUnit(key, item?.current)}</strong></div>` : '';
+    const detail = !major ? '' : latest
+      ? `<dl class="market-ohlc"><div><dt>${copy.previous}</dt><dd>${number(latest.previous_close, 2)}</dd></div></dl>`
+      : `<dl class="market-ohlc">
       <div><dt>${copy.open}</dt><dd>${number(item?.open, 2)}</dd></div><div><dt>${copy.high}</dt><dd>${number(item?.high, 2)}</dd></div><div><dt>${copy.low}</dt><dd>${number(item?.low, 2)}</dd></div><div><dt>${copy.previous}</dt><dd>${number(item?.previous_close, 2)}</dd></div>
-    </dl>` : '';
-    return `<article class="instrument-card ${major ? 'major' : ''}">
+    </dl>`;
+    const snapshotState = view.mixed && item?.data_state === 'intraday' ? copy.snapshotBasis : stateText(item);
+    const stateHtml = latest ? latestStateHtml(latest) : `${dateText(item?.source_date)} · ${snapshotState}`;
+    const basisAttr = latest ? ' data-basis="latest"' : view.mixed ? ' data-basis="snapshot"' : '';
+    return `<article class="instrument-card ${major ? 'major' : ''}"${basisAttr}>
       <div class="instrument-heading"><span>${html(instrumentName(key, item))}</span>${item?.ticker ? `<small>${html(item.ticker)}</small>` : ''}</div>
       <strong class="instrument-value">${valueUnit(key, display)}</strong>
       ${fxContext}<div class="instrument-change ${movementClass}">${changeContent}</div>
-      ${detail}<div class="instrument-state">${dateText(item?.source_date)} · ${stateText(item)}</div>
+      ${detail}<div class="instrument-state">${stateHtml}</div>
     </article>`;
   }
 
@@ -228,8 +252,44 @@
     // Today's KRX session (x-krx-session, functions/_trading-calendar.js
     // krxSessionStatus), independent of the expectation above.
     krxSession: null,
+    // Each loadAndRender call takes a number; a response that arrives after
+    // a newer call started is dropped, so a slow TODAY can never paint over
+    // HISTORY (or the other way round).
+    loadToken: 0,
     popstateBound: false
   };
+  const GLOBAL_LATEST_ENDPOINT = '/api/market/global/latest';
+  const GLOBAL_LATEST_SERVED_AT_HEADER = 'x-global-latest-served-at';
+  // TODAY never waits longer than this for Global Latest.
+  const GLOBAL_LATEST_WAIT_MS = 2500;
+
+  // { items, servedAt } from /api/market/global/latest, or null on any
+  // failure, on a late answer, or without the locale policy to judge it by
+  // (then nothing is requested).
+  function fetchGlobalLatest() {
+    if (typeof fetch !== 'function' || typeof root.MARKET_LOCALE?.globalLatestOverlay !== 'function') return Promise.resolve(null);
+    let timer = null;
+    let pending;
+    try {
+      pending = fetch(GLOBAL_LATEST_ENDPOINT, { headers: { Accept: 'application/json' } });
+    } catch (_) {
+      return Promise.resolve(null);
+    }
+    const request = Promise.resolve(pending)
+      .then(response => (response.ok
+        ? response.json().then(body => ({
+          items: Array.isArray(body?.items) ? body.items : [],
+          servedAt: response.headers?.get?.(GLOBAL_LATEST_SERVED_AT_HEADER) || ''
+        }))
+        : null))
+      .catch(() => null);
+    if (typeof setTimeout !== 'function') return request;
+    const deadline = new Promise(resolve => { timer = setTimeout(() => resolve(null), GLOBAL_LATEST_WAIT_MS); });
+    return Promise.race([request, deadline]).then(result => {
+      clearTimeout(timer);
+      return result;
+    });
+  }
   const EXPECTED_MARKET_DATE_HEADER = 'x-market-expected-date';
   const KRX_SESSION_HEADER = 'x-krx-session';
 
@@ -426,12 +486,28 @@
   /* ==========================================================================
      TODAY & HISTORY Daily Snapshot Renderer
      ========================================================================== */
-  function render(data, target = document.getElementById('market-close-root')) {
+  // `options.globalLatest` ({ items, now }) is passed by the TODAY load only,
+  // and is applied only while the page is on TODAY: HISTORY, 1W and 1M are
+  // always the Market Close alone, whatever was fetched before.
+  function render(data, target = document.getElementById('market-close-root'), options = {}) {
     if (!target || !data || typeof data !== 'object') return;
 
     state.currentPayload = data;
     const marketDate = data.meta?.market_date || state.currentDate;
     const isHistory = (state.mode === 'history' || (marketDate && state.latestDate && marketDate !== state.latestDate)) && (!state.isLatest || (state.latestDate && marketDate !== state.latestDate));
+    const latestInput = options.globalLatest;
+    const overlay = latestInput && state.mode === 'today' && !isHistory
+      ? root.MARKET_LOCALE?.globalLatestOverlay?.(latestInput.items, data, latestInput.now) || null
+      : null;
+    const latestItems = overlay?.items || {};
+    const mixed = Object.keys(latestItems).length > 0;
+    // KOSPI and KOSDAQ are never Global Latest instruments: their cards are
+    // the Market Close exactly as without an overlay.
+    const krx = key => key === 'KOSPI' || key === 'KOSDAQ';
+    const card = (key, item, major = false) => instrumentCard(key, item, major, {
+      latest: krx(key) ? null : latestItems[key] || null,
+      mixed: !krx(key) && mixed
+    });
 
     const indices = data.indices || {};
     const rates = data.rates_fx_volatility || {};
@@ -540,11 +616,11 @@
       <div class="market-wrap">
         ${renderHistoryStrip()}
       </div>
-      <div id="market-dashboard-view" class="market-wrap market-dashboard">
-        ${section(1, copy.sections[0], `<div class="major-index-grid">${['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500'].map(key => instrumentCard(key, indices[key], true)).join('')}</div>`)}
+      <div id="market-dashboard-view" class="market-wrap market-dashboard" data-global-latest="${Object.keys(latestItems).length}">
+        ${section(1, copy.sections[0], `<div class="major-index-grid">${['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500'].map(key => card(key, indices[key], true)).join('')}</div>`)}
         <div class="market-pair">
-          ${section(2, copy.sections[1], `<div class="mini-instrument-grid">${['SOX', 'VIX', 'US10Y', 'USDKRW', 'JPYKRW', 'DXY'].map(key => instrumentCard(key, rates[key])).join('')}</div>`)}
-          ${section(3, copy.sections[2], `<div class="mini-instrument-grid commodity-grid">${['WTI', 'GOLD', 'BITCOIN'].map(key => instrumentCard(key, commodities[key])).join('')}</div>`)}
+          ${section(2, copy.sections[1], `<div class="mini-instrument-grid">${['SOX', 'VIX', 'US10Y', 'USDKRW', 'JPYKRW', 'DXY'].map(key => card(key, rates[key])).join('')}</div>`)}
+          ${section(3, copy.sections[2], `<div class="mini-instrument-grid commodity-grid">${['WTI', 'GOLD', 'BITCOIN'].map(key => card(key, commodities[key])).join('')}</div>`)}
         </div>
         ${section(4, copy.sections[3], breadthBody)}
         <div class="market-pair market-pair-tables">
@@ -910,6 +986,8 @@
     const rootEl = document.getElementById('market-close-root');
     if (!rootEl) return;
 
+    const token = ++state.loadToken;
+    const superseded = () => token !== state.loadToken;
     state.mode = mode;
     state.currentDate = targetDate;
     state.isLatest = mode === 'today';
@@ -927,6 +1005,7 @@
           return renderRangeError(mode, rootEl);
         }
         const data = await response.json();
+        if (superseded()) return;
         renderRangeView(data, mode, rootEl);
       } else if (mode === 'history' && targetDate) {
         const dateEndpoint = `/api/market/date?date=${encodeURIComponent(targetDate)}`;
@@ -938,9 +1017,12 @@
           throw new Error(`HTTP ${response.status}`);
         }
         const data = await response.json();
+        if (superseded()) return;
         render(data, rootEl);
       } else {
-        // Today
+        // Today: the Market Close, and Global Latest for the global cards,
+        // requested together; a Global Latest failure only leaves it out.
+        const latestRequest = fetchGlobalLatest();
         const source = document.body.dataset.marketSource || '/api/market/latest';
         const response = await fetch(source, { headers: { Accept: 'application/json' } });
         if (!response.ok) {
@@ -953,10 +1035,15 @@
           throw new Error(`HTTP ${response.status}`);
         }
         const data = await response.json();
+        const latest = await latestRequest;
+        if (superseded()) return;
         state.currentDate = data.meta?.market_date || null;
         state.expectedDate = response.headers?.get?.(EXPECTED_MARKET_DATE_HEADER) || null;
         state.krxSession = root.MARKET_LOCALE?.parseKrxSessionHeader?.(response.headers?.get?.(KRX_SESSION_HEADER)) || null;
-        render(data, rootEl);
+        const globalLatest = latest
+          ? { items: latest.items, now: root.MARKET_LOCALE.globalLatestNow(latest.servedAt, Date.now()) }
+          : null;
+        render(data, rootEl, { globalLatest });
       }
     } catch (error) {
       console.error('Failed to load market close data', error);
