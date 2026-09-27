@@ -176,7 +176,7 @@ test('date-suffixed standalone image covers are detected regardless of rendered 
     body: node('리포트 본문', { children: 8 }),
     querySelector: () => null,
     querySelectorAll(selector) {
-      return selector === 'body > section, body > div' ? [finalCover] : [];
+      return selector === 'body section, body div' ? [finalCover] : [];
     }
   };
 
@@ -226,6 +226,40 @@ test('a cover-screen without a usable cover frame remains the capture target', a
   const result = api.findCaptureTarget(doc);
   assert.equal(result.target, screen);
   assert.equal(result.selector, '.cover-screen');
+});
+
+test('a cover section nested in a page shell is captured, with the selector the server would pick', async () => {
+  const api = await generatorApi();
+  const container = (text, { classes = [], id = '', label = '', visual = false }) => ({
+    ...node(text, { visual, children: 4 }),
+    classList: classes,
+    id,
+    getAttribute: name => (name === 'aria-label' ? label : null)
+  });
+  // Research NO.07: <div class="sheet"> wraps <section class="cv7" id="cover">,
+  // so the cover is a grandchild of <body> and its class is not cover-like.
+  for (const label of ['리서치 NO.07 표지', 'Research NO.07 cover']) {
+    const shell = container('리포트 전체', { classes: ['sheet'] });
+    const cover = container('돈은 이미 쌓여 있다', { classes: ['cv7'], id: 'cover', label, visual: true });
+    const doc = {
+      body: node('본문'),
+      querySelector: () => null,
+      querySelectorAll: selector => (selector === 'body section, body div' ? [shell, cover] : [])
+    };
+    const result = api.findCaptureTarget(doc);
+    assert.equal(result.target, cover, label);
+    assert.equal(result.selector, '#cover', label);
+    assert.equal(result.source, 'heuristic', label);
+  }
+
+  // /api/generate-cover selects the same element from the same markup, so the
+  // suggestion this side sends never competes with the server's own choice.
+  const { __test } = await import('../functions/api/generate-cover.js');
+  const html = '<!doctype html><html><body><header class="topbar">목차</header><div class="sheet">'
+    + '<section class="cv7" id="cover" aria-label="리서치 NO.07 표지"><div class="cv7-bg"><img src="cover.webp"></div>'
+    + '<h1>돈은 이미 쌓여 있다</h1></section></div></body></html>';
+  assert.equal(__test.selectCaptureSelector(html, ''), '#cover');
+  assert.equal(__test.selectCaptureSelector(html, '#cover'), '#cover');
 });
 
 test('ambiguous minimal HTML falls through to the standard template path', async () => {

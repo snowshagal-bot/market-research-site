@@ -60,7 +60,11 @@
   }
 
   function findStandaloneImageCover(doc) {
-    const candidates = Array.from(doc.querySelectorAll?.('body > section, body > div') || []).slice(0, 12);
+    // A cover is not always a direct child of <body>: a report may wrap its
+    // pages in a shell element first. Scan the same first twelve containers in
+    // document order that /api/generate-cover scans, so the selector this side
+    // suggests and the one the server would pick on its own stay the same.
+    const candidates = Array.from(doc.querySelectorAll?.('body section, body div') || []).slice(0, 12);
     for (const target of candidates) {
       if (!usableCandidate(target)) continue;
       const selector = standaloneCoverSelector(target);
