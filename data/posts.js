@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-27-research-qzmn83",
+    "type": "research",
+    "typeLabel": "Research",
+    "lang": "en",
+    "date": "2026-09-27",
+    "reportDate": "2026-09-27",
+    "registeredDate": "2026-09-27",
+    "registeredAt": "2026-09-27T14:12:36.663Z",
+    "legacyImport": false,
+    "title": "The cash is already there",
+    "subtitle": "",
+    "description": "Independent research on specific industries, companies, policies, and market structure.",
+    "tags": [
+      "earnings",
+      "shareholder-returns",
+      "kospi",
+      "semiconductors",
+      "liquidity"
+    ],
+    "readingMinutes": 23,
+    "href": "reports/en/20260927_Research_NO07_The_Cash_Is_Already_There_EN.html",
+    "translationGroup": "2026-09-27-research-lrzzr9",
+    "coverImage": "covers/2026-09-27-research-qzmn83.webp",
+    "shareCardImage": "covers/share/2026-09-27-research-qzmn83.jpg",
+    "coverThumbnail": "covers/2026-09-27-research-qzmn83-450.webp"
+  },
+  {
     "id": "2026-09-27-research-lrzzr9",
     "type": "research",
     "typeLabel": "비정기 리서치",
