@@ -1023,6 +1023,32 @@ window.RESEARCH_POSTS = [
     "coverThumbnail": "covers/2026-09-05-weekly-19wkhfg-450.webp"
   },
   {
+    "id": "2026-09-04-weekly-14auhmi",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-09-04",
+    "reportDate": "2026-09-04",
+    "registeredDate": "2026-09-27",
+    "registeredAt": "2026-09-27T14:56:59.828Z",
+    "legacyImport": false,
+    "title": "오른 것은 지수, 넓어진 것은 아니었다",
+    "subtitle": "",
+    "description": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 7,
+    "href": "reports/위클리_2026년 9월 4주차 위클리.html",
+    "coverImage": "covers/2026-09-04-weekly-14auhmi.webp",
+    "shareCardImage": "covers/share/2026-09-04-weekly-14auhmi.jpg",
+    "coverThumbnail": "covers/2026-09-04-weekly-14auhmi-450.webp"
+  },
+  {
     "id": "2026-09-04-daily-1y780gf",
     "type": "daily",
     "typeLabel": "Daily",
