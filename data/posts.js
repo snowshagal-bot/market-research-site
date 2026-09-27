@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-27-weekly-1lwrnnv",
+    "type": "weekly",
+    "typeLabel": "Weekly",
+    "lang": "en",
+    "date": "2026-09-27",
+    "reportDate": "2026-09-27",
+    "registeredDate": "2026-09-28",
+    "registeredAt": "2026-09-27T15:01:09.011Z",
+    "legacyImport": false,
+    "title": "The Index Rose. Breadth Didn't.",
+    "subtitle": "",
+    "description": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 11,
+    "href": "reports/en/2026-09-27_Korea_Weekly_Report_EN.html",
+    "translationGroup": "2026-09-04-weekly-14auhmi",
+    "coverImage": "covers/2026-09-27-weekly-1lwrnnv.webp",
+    "shareCardImage": "covers/share/2026-09-27-weekly-1lwrnnv.jpg",
+    "coverThumbnail": "covers/2026-09-27-weekly-1lwrnnv-450.webp"
+  },
+  {
     "id": "2026-09-04-weekly-14auhmi",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
