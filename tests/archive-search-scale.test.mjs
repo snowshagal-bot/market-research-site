@@ -41,12 +41,15 @@ test('the index is published as one canonical file plus three browser files', ()
   assert.deepEqual(JSON.parse(artifacts[0].content), SAMPLE);
 });
 
-test('metadata carries every field except the report body', () => {
+test('metadata carries the fields the search dialog reads, and never the report body', () => {
   const entry = searchMetaEntry(SAMPLE[0]);
   assert.equal(entry.bodyText, undefined);
-  for (const field of ['id', 'lang', 'category', 'title', 'date', 'summary', 'tags', 'readingMinutes', 'url', 'coverImage']) {
+  for (const field of ['id', 'lang', 'category', 'title', 'date', 'summary', 'tags', 'readingMinutes', 'url']) {
     assert.deepEqual(entry[field], SAMPLE[0][field], field);
   }
+  // Kept in data/search-index.json for the publisher and manager, not shipped
+  // to browsers: no search code reads them (tests/search-index-lazy-body.test.mjs).
+  for (const field of ['typeLabel', 'registeredAt', 'coverImage']) assert.equal(entry[field], undefined, field);
 
   const meta = searchIndexArtifacts(SAMPLE)[1].content;
   assert.match(meta, /^window\.SEARCH_INDEX_META = \[/);
@@ -110,14 +113,18 @@ test('the superseded single-file index is gone', async () => {
 
 /* ---------------- site.js wiring ---------------- */
 
-test('search loads metadata first and report bodies in the background', async () => {
+test('search loads metadata on open and report bodies only for a typed query', async () => {
   const site = await read('assets/site.js');
 
   assert.match(site, /const SEARCH_META_SRC = '\/data\/search-index-meta\.js/);
   assert.match(site, /const SEARCH_BODY_SRC = `\/data\/search-index-body-\$\{locale\}\.js/);
 
-  // Opening the dialog renders from metadata, then re-runs when bodies land.
-  assert.match(site, /loadSearchMeta\(\(\) => \{[\s\S]*?loadSearchBodies\(\(\) => performSearch/);
+  // Opening the dialog renders from metadata; a non-empty query asks for the
+  // bodies, and their arrival re-runs whatever is in the box at that moment.
+  // Behaviour is covered end to end by tests/search-index-lazy-body.test.mjs.
+  assert.match(site, /loadSearchMeta\(\(\) => \{[\s\S]*?runSearch\(globalSearchInput\?\.value \|\| ''\);/);
+  assert.match(site, /function ensureSearchBodies\(queryStr\)\{\s*if \(!String\(queryStr \|\| ''\)\.trim\(\)\) return;/);
+  assert.match(site, /loadSearchBodies\(\(\) => \{\s*if \(!searchDialogIsOpen\(\)\) return;\s*performSearch\(globalSearchInput\?\.value \|\| ''\);/);
   // Scoring reads the body through the shard, never from the metadata entry.
   assert.match(site, /const body = searchBodyText\(item\)\.toLowerCase\(\);/);
   assert.doesNotMatch(site, /item\.bodyText/);

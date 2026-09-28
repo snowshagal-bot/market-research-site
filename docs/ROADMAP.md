@@ -10,6 +10,11 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+0. **Search loading — report bodies on the first query (Draft PR, Preview only; supersedes #130)**:
+   - Opening the search dialog loads only `search-index-meta.js`; the first non-empty query or tag chip requests this locale's body shard once, and its arrival re-runs the box's current query only while the dialog is open. Results are unchanged.
+   - The browser meta drops `typeLabel`, `registeredAt` and `coverImage`; `data/search-index.json` stays, because publish/manage rebuild the index from it.
+   - Remaining steps, in order: review/approval → merge → Production check (dialog open requests no body, KO/EN isolation).
+
 0. **Global Latest B3 — HOME + MARKET TODAY overlay (Draft PR, Preview only)**:
    - Market Close stays the base; on TODAY views only (HOME strip, `/market/` TODAY, KO/EN) fresh Global Latest replaces a global instrument's displayed figures, per item, as a view projection. HISTORY / 1W / 1M never use it; no payload is rewritten. KOSPI/KOSDAQ are never overlaid.
    - Freshness is a pure policy in `assets/locale.js` (by `as_of`; intraday 60/90 min; `final_close` for US indices and US10Y up to 4 days; never older than the snapshot figure). HOME is judged at request time on the server and hydrated from the bootstrap with zero extra requests; MARKET TODAY requests Global Latest at most once per TODAY load.
