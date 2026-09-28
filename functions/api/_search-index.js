@@ -6,14 +6,21 @@
 // before it could answer anything.
 //
 // Splitting it keeps full-body search intact while making the common case cheap:
-// the metadata file carries every field except bodyText and comes in around
-// 34KB, enough to answer title, tag and summary queries immediately. Report
+// the metadata file carries the fields the search dialog reads and nothing
+// else, enough to answer title, tag and summary queries immediately. Report
 // bodies are shipped per locale, so a Korean reader never downloads the English
-// bodies, and they load in the background rather than blocking results.
+// bodies, and the dialog asks for them only once a query is typed.
+//
+// SEARCH_META_FIELDS is exactly what assets/site.js reads from a search entry
+// (matching, ranking, rendering, the tag cloud and the language filter).
+// typeLabel, registeredAt and coverImage stay in data/search-index.json, which
+// the publisher and the post manager read back, but no browser code reads them
+// from the metadata file, so they are not shipped there.
+// tests/search-index-lazy-body.test.mjs holds site.js to this list.
 
 export const SEARCH_META_FIELDS = [
-  'id', 'lang', 'category', 'typeLabel', 'title', 'subtitle',
-  'date', 'registeredAt', 'summary', 'tags', 'readingMinutes', 'url', 'coverImage'
+  'id', 'lang', 'category', 'title', 'subtitle',
+  'date', 'summary', 'tags', 'readingMinutes', 'url'
 ];
 
 export const SEARCH_INDEX_PATH = 'data/search-index.json';
