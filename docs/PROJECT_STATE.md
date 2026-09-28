@@ -1,6 +1,6 @@
 # Project state
 
-Updated: 2026-09-07
+Updated: 2026-09-29
 
 ## Purpose
 
@@ -24,7 +24,7 @@ routes return HTTP 307 redirects to `admin.snowshagal.com/admin/*`, and human-ad
 
 Phase 1B-A introduced the account foundation (`users`, `password_credentials`, `sessions`, `auth_rate_limits`, `audit_events`), PBKDF2-HMAC-SHA256 authentication, `__Host-snowshagal-admin-session` HttpOnly cookie sessions, CSRF token verification, rate limiting, and `/admin/login/` UI. Human admin operations no longer require or expose `ADMIN_KEY` in the browser. Unbound `AUTH_DB` safely fails closed with 503 `AUTH_NOT_CONFIGURED`.
 
-## Admin announcements (Phase 2 Draft)
+## Admin announcements (Phase 2, Production — #90)
 
 Admin page: `/admin/market/announcements/`
 Admin API: `/api/admin/announcements`
@@ -50,7 +50,7 @@ Whether the KRX trades today is kept apart from Market Close freshness. `krxSess
 
 Global Latest is a second, separate market data channel: the current observation of twelve global instruments (NASDAQ, DOW, SP500, SOX, VIX, US10Y, USDKRW, JPYKRW, DXY, WTI, GOLD, BITCOIN), independent of the KRX calendar, where Market Close stays the KRX trading-session historical snapshot. `functions/api/market/global/` holds the only instrument list, the 1.0.0 contract validation (`contracts/global_latest/`), and `POST /api/market/global/publish` / `GET /api/market/global/latest` over the `market_global_latest` table (migration `0002`, no runtime DDL). Each instrument's stored observation only moves forward in `as_of`; a valid publish updates the newer items and skips older ones; an invalid one writes nothing. GET returns the stored rows with their own timestamps (plus `x-global-latest-served-at`, the instant the body was read) and does not judge freshness. **Status: B1 receiver merged (#144, Production table live); B2 collector live in Production since 2026-09-26** (core task `시장지표-GlobalLatest`, every 30 minutes, Yahoo only, `final_close` for the US indices and US10Y only, never VIX).
 
-**Global Latest overlay (B3).** Market Close stays the base of every market view; on TODAY views only — the homepage strip (`/`, `/en/`) and `/market/` TODAY (KO/EN) — a global instrument's displayed figures may come from Global Latest as a view projection. No payload is rewritten and nothing is stored. HISTORY, 1W and 1M never read or apply it.
+**Global Latest overlay (B3). Status: merged (#145, 43b1eb7), Production.** Market Close stays the base of every market view; on TODAY views only — the homepage strip (`/`, `/en/`) and `/market/` TODAY (KO/EN) — a global instrument's displayed figures may come from Global Latest as a view projection. No payload is rewritten and nothing is stored. HISTORY, 1W and 1M never read or apply it.
 
 - Policy: `assets/locale.js` `globalLatestOverlay(items, payload, now)` (pure; shared by the server and both page scripts). An item is used only when it is well formed (finite positive value/previous close, change and change_pct consistent with them, strict ISO timestamps, `as_of ≤ retrieved_at`, `source_date` within a day of `as_of`), `as_of` is not in the future (5-minute skew), it is fresh **by `as_of`** (intraday: US indices/VIX/US10Y and BITCOIN 60 min, FX/DXY/WTI/GOLD 90 min; `final_close`: only NASDAQ/DOW/SP500/SOX/US10Y, up to 4 days), and it is newer than the snapshot's own figure (`as_of` after that item's `retrieved_at`). Anything else keeps the snapshot figure, per item. KOSPI and KOSDAQ are not Global Latest codes and can never be overlaid.
 - Clock: the homepage is judged once at the request's time in `functions/_home-initial.js`; the bootstrap (`globalLatest: { items, judgedAt }`, strip codes only) lets `site.js` reach the same figures with no request. `/market/` TODAY judges at `max(browser clock, x-global-latest-served-at)`, so a browser clock running behind cannot make an old value look current.
@@ -66,7 +66,7 @@ The record is uploaded through `/admin/market/` against the JSON Schema in
 hosts only because their `COMMENTS_DB` is isolated; the bare Pages hostname and unrelated
 Preview hosts remain blocked, and all non-Market mutation APIs keep their existing policy.
 
-## Atom feeds (Phase 2, Draft PR)
+## Atom feeds (Phase 2, Production — #105)
 
 Two Atom 1.0 feeds carry the published reports, one per language, at the addresses readers
 expect: `/rss.xml` (Korean) and `/en/rss.xml` (English). Both are Pages Functions

@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated: 2026-09-26
+Updated: 2026-09-29
 
 This roadmap records implementation order, completed capabilities, and operational priorities, not a promise to build every future idea. Keep the current site small and stable until real traffic, indexing, and operational needs justify added complexity.
 
@@ -10,83 +10,30 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
-0. **Search loading — report bodies on the first query (Draft PR, Preview only; supersedes #130)**:
-   - Opening the search dialog loads only `search-index-meta.js`; the first non-empty query or tag chip requests this locale's body shard once, and its arrival re-runs the box's current query only while the dialog is open. Results are unchanged.
-   - The browser meta drops `typeLabel`, `registeredAt` and `coverImage`; `data/search-index.json` stays, because publish/manage rebuild the index from it.
-   - Remaining steps, in order: review/approval → merge → Production check (dialog open requests no body, KO/EN isolation).
-
-0. **Global Latest B3 — HOME + MARKET TODAY overlay (Draft PR, Preview only)**:
-   - Market Close stays the base; on TODAY views only (HOME strip, `/market/` TODAY, KO/EN) fresh Global Latest replaces a global instrument's displayed figures, per item, as a view projection. HISTORY / 1W / 1M never use it; no payload is rewritten. KOSPI/KOSDAQ are never overlaid.
-   - Freshness is a pure policy in `assets/locale.js` (by `as_of`; intraday 60/90 min; `final_close` for US indices and US10Y up to 4 days; never older than the snapshot figure). HOME is judged at request time on the server and hydrated from the bootstrap with zero extra requests; MARKET TODAY requests Global Latest at most once per TODAY load.
-   - Remaining steps, in order: Preview QA (synthetic Preview data, cleaned up) → review/approval → merge → Production check (HOME raw HTML basis lines, zero first-load requests, MARKET TODAY/HISTORY).
-
-0. **Global Latest B1/B2 — receiver and collector (Production)**:
-   - B1 (#144, merged ba789ca): `contracts/global_latest/` 1.0.0, `market_global_latest` (migration `0002`), `POST /api/market/global/publish`, `GET /api/market/global/latest`.
-   - B2 (publisher repo): core collector live in Production since 2026-09-26, Task `시장지표-GlobalLatest` every 30 minutes; rollback backup kept on the publisher PC.
-
-0. **Market UX Phase A — KRX non-trading day state (merged #143, Production verified on 2026-09-24)**:
-   - `krxSessionStatus(now)` in `functions/_trading-calendar.js` (the only holiday source) reports trading / holiday / weekend, the holiday name and the last trading date; `/api/market/latest` sends it as `x-krx-session` (percent-encoded JSON) with the body, ETag and caching unchanged.
-   - HOME reads "KRX 휴장 · 추석 전날 | 최근 종가 · SEP 23" (EN "KRX CLOSED · CHUSEOK EVE | LAST CLOSE · SEP 23") from the first HTML on closed days; MARKET TODAY adds a quiet closed line. Freshness is untouched: a holiday after a published close is not stale, and a stale close on a holiday shows both lines.
-   - Production checked on Chuseok Eve: raw HTML closed state KO/EN, API body byte-identical, zero first-load API requests. Remaining: the next trading day (09-28) returns to TODAY.
-
-0. **SEO Phase 3 — search integrity audit & regression gate (merged #141, Production verified)**:
-   - `scripts/audit-seo.mjs` audits the whole public indexable corpus (counts derived from `data/posts.json` and `sitemapXml()`) and runs as `verify.mjs` step 4/5; `--origin=` audits a Preview or Production over HTTP.
-   - The middleware's Node/string fallback now removes uploaded `<meta>`/`<link>` tags by attribute, whatever their order, matching the Production HTMLRewriter selectors (Production output unchanged).
-   - Production checked: repository, Preview and Production audits PASS with 0 hard errors; the corpus grew with each publish without code changes.
-
-0. **SEO hotfix — report `<html lang>` from post metadata (merged #140, Production verified)**:
-   - Four EN dailies uploaded with `<html lang="ko">` are served as `lang="en"`; the middleware sets `<html lang>` from the matched post. 127/127 reports match in Production; every other field is unchanged.
-
-0. **SEO Phase 2 — homepage initial HTML (merged #139, Production verified)**:
-   - `/` and `/en/` ship Latest Research, the active notice (or its absence, with the matching carousel total) and the TODAY strip in the raw HTML, from the same handlers and helpers the page script uses; `site.js` reuses the server data from a JSON bootstrap instead of refetching.
-   - Production checked: no "—" in the raw strip, bootstrap present once, zero first-load `/api/market/latest` and `/api/announcements` requests, TTFB unchanged against the pre-merge baseline.
-
-0. **SEO Phase 1 — report canonical URL consolidation (merged #138, Production verified)**:
-   - An existing report's `/reports/<path>.html` answers one `301` to the extensionless canonical `/reports/<path>` (query preserved, Hangul percent-encoding unchanged); missing reports keep a direct 404. Production previously answered with the Pages default 308.
-   - The Naver verification file `/naver96f43741acd96bcdeb679f22cddc4a80.html` gets a `_redirects` 200 rewrite like Yandex (Production currently 308s it).
-   - The Market page Daily CTA links to the extensionless report URL.
-   - Production checked: legacy KO/EN 301 → 200, both verification files 200, sitemap 0 `.html`. Remaining: Search Console / Naver Search Advisor URL inspection.
-
-0. **Market Close contract 1.2.0 (Draft PR, website first)**:
-   - Publish API/validator accepts `1.0.1`, `1.1.0`, and `1.2.0`; `1.0.1`/`1.1.0` payloads get exactly the pre-1.2.0 result (differential check over every stored payload plus mutations). Existing D1 rows are not migrated.
-   - `1.2.0`: HARD sections (INDEX, TOP10, TURNOVER, INVESTOR, PROGRAM, SHORT, FUTURES) gate `final`; SOFT sections (last-5-session flows, KRX sectors/themes, global/24h indicators, market breadth) are declared in `section_status` and carried empty, never stale.
-   - MARKET shows an incomplete 5-session window as availability (KO/EN) instead of a partial sum; HOME keeps the live session when a 1.2.0 payload declares USD/KRW, US 10Y, or GOLD unavailable (`--`).
-   - Remaining manual steps, in order: Preview QA of this PR → Production merge → install the matching core (never before this site contract is live) → offline 09-23 reconstruction from the frozen evidence → website validator dry-run → owner decision on the 09-23 POST.
-
-0. **Admin Phase 2 announcements (Draft implementation)**:
-   - Session-authenticated CRUD at `/admin/market/announcements/` for major/general, all/future-group audience, Draft/Published state, and KST-authored UTC exposure windows.
-   - Dedicated `admin_announcements` entity on the existing environment-isolated `COMMENTS_DB`; OpenDART filings remain unchanged.
-   - Public `/api/announcements` exposes only active all-audience notices and feeds a compact Korean MARKET notice section before the existing Section 11 disclosure UI.
-   - Apply `migrations/comments/0001_admin_announcements.sql` to the isolated Preview DB, run synthetic create/update/publish/delete acceptance, and remove the fixture.
-   - Complete mobile/dark-mode Preview checks and keep Production merge pending owner review.
-
 1. **Google Search Console Domain property confirmation & Sitemap monitoring**:
    - Verify `snowshagal.com` DNS Domain-property in Google Search Console.
    - Confirm `/sitemap.xml` coverage, indexing status, and crawl rates for KO/EN homepages, category landings, and published reports.
+   - Run Search Console / Naver Search Advisor URL inspection on legacy report `.html` URLs, which now 301 to the canonical address (SEO Phase 1, #138).
 2. **Observe real visitor traffic & reading engagement**:
    - Accumulate baseline data across `/admin/analytics/` (Cloudflare Web Analytics: Visits, Page views, referrers, devices, connection countries; and Privacy-minimal Engagement Analytics: active reading time, scroll depth, session completion).
 3. **Operational stabilization**:
    - Defer large feature additions; focus on publishing rhythm and monitor for real friction in day-to-day writing and report management.
-4. **Preview D1 parity (complete)**:
-   - Code-level Production/Preview smoke and exact-SHA Cloudflare deployment waiting are implemented on the deployment reliability branch.
-   - Preview `COMMENTS_DB` uses the isolated `market-research-comments-preview` database; Production continues to use `market-research-comments`, and no Production data was copied.
-   - The Preview schema is initialized and contains one explicit `1900-01-01` / `preview-smoke-test` Market Close fixture solely for read smoke validation.
-   - Preview Market/comments GET and the complete shared Preview smoke are verified at HTTP 200 and 20/20 PASS.
-   - The Market Close publish API now permits authenticated branch-Preview writes to that isolated D1 for contract E2E; no Production row is copied or written during Preview validation.
-5. **OpenDART Disclosure Watchlist & MARKET Public Feed (PR #79 & Post-Merge Refinements)**:
-   - **Admin Management**: Broad collection and full search/filter across OpenDART filings with Watchlist manager (seed of ~30 core Korean companies) and manual publish toggles.
-   - **Selective MARKET Feed**: Auto-publishes Watchlist companies with High/Critical priority (Rule Score >= 7) and `rcept_dt === KST today` (Date Guard) to public `/market/` Section 11 (`/api/disclosures/feed`); past filings remain `admin_only`.
-   - **Minimal Public DTO & Clean Separation**: Public feed serves minimal `{ rceptNo, priority, fact, ai }` DTO without internal columns. Fact Box displays official DART metadata and correction badge; AI Insight Box displays Gemini 3.5 structured insight (`summary`, `what_it_means`, `watch_points`, `impact`, `importance`, `limitation`) without invented `key_figures`.
-   - **Error Isolation**: AI and location errors are fully isolated, ensuring OpenDART collection, D1 storage, and public feed display succeed independently.
-6. **MARKET publish reliability (Draft PR)**:
-   - Fail closed when a final payload carries stale KRX, US, FX, commodity, or crypto source dates.
-   - Compare Production `market_date` with the expected latest KRX session after the close grace period instead of treating HTTP 200 as sufficient.
-   - Run a read-only weekday freshness alert that opens one operator Issue on stale/network/server/validation failures and closes it after recovery.
-   - Keep Publisher process exit propagation in the separate private `snowshagal-market-publisher` repository; do not mix Windows executable changes into this Pages repository.
-7. **OpenDART automated daily sync (`.github/workflows/disclosure-daily-sync.yml`)**:
-   - Triggered weekdays at 16:05 KST (`5 7 * * 1-5` UTC) using `DISCLOSURE_SYNC_KEY` machine authentication.
-   - Idempotent execution preserves manual Admin sync at 15:55 without duplicating D1 records.
-   - Dedicated GitHub Issue alert `[Alert] OpenDART daily sync failure` opens on failure and auto-closes on recovery.
+
+### Recently completed (Production)
+
+- **Search loading — report bodies on the first query (#147, merged a230365)**: opening the search dialog loads only `search-index-meta.js`; the first non-empty query or tag chip requests this locale's body shard once, and its arrival re-runs the box's current query only while the dialog is open. The browser meta drops `typeLabel`, `registeredAt` and `coverImage`; `data/search-index.json` stays because publish/manage rebuild the index from it. Production checked on KO/EN desktop/mobile: no search request on page load, meta only on open, own-locale body once on the first query, none on later queries or reopen, results identical to the previous code, metadata search intact when the body fails. Supersedes #130 (closed).
+- **Global Latest B3 — HOME + MARKET TODAY overlay (#145, merged 43b1eb7)**: on TODAY views only (HOME strip, `/market/` TODAY, KO/EN) fresh Global Latest replaces a global instrument's displayed figures per item as a view projection; HISTORY / 1W / 1M never use it, no payload is rewritten, KOSPI/KOSDAQ are never overlaid. Production HOME raw HTML carries the per-card basis lines.
+- **Global Latest B1/B2 — receiver and collector**: B1 (#144, merged ba789ca) adds `contracts/global_latest/` 1.0.0, `market_global_latest` (migration `0002`), `POST /api/market/global/publish` and `GET /api/market/global/latest`. B2 (publisher repo) collects every 30 minutes (Task `시장지표-GlobalLatest`); Production `/api/market/global/latest` is receiving its observations.
+- **Market UX Phase A — KRX non-trading day state (#143)**: `krxSessionStatus(now)` in `functions/_trading-calendar.js` (the only holiday source) feeds the `x-krx-session` header; HOME and MARKET TODAY show the closed state on holidays and weekends, freshness untouched. Production checked on Chuseok Eve (closed state KO/EN, zero first-load API requests) and after the holidays (2026-09-28 final served as TODAY; header `trading`, no closed line in the HOME raw HTML).
+- **SEO Phase 3 — search integrity audit & regression gate (#141)**: `scripts/audit-seo.mjs` audits the whole public indexable corpus and runs as `verify.mjs` step 4/5; `--origin=` audits a Preview or Production over HTTP. Repository, Preview and Production audits PASS with 0 hard errors.
+- **SEO hotfix — report `<html lang>` from post metadata (#140)**: the middleware sets `<html lang>` from the matched post.
+- **SEO Phase 2 — homepage initial HTML (#139)**: `/` and `/en/` ship Latest Research, the active notice and the TODAY strip in the raw HTML; `site.js` reuses the server data from a JSON bootstrap. Zero first-load `/api/market/latest` and `/api/announcements` requests; TTFB unchanged.
+- **SEO Phase 1 — report canonical URL consolidation (#138)**: an existing report's `/reports/<path>.html` answers one `301` to the extensionless canonical URL; missing reports keep a direct 404; the Naver and Yandex verification files answer 200. Search-engine URL inspection is still open (Next action 1).
+- **Market Close contract 1.2.0 (#137, merged f8ae7ca)**: the publish API/validator accepts `1.0.1`, `1.1.0` and `1.2.0`, older payloads unchanged. In `1.2.0`, HARD sections (INDEX, TOP10, TURNOVER, INVESTOR, PROGRAM, SHORT, FUTURES) gate `final` and SOFT sections are declared in `section_status` and carried empty, never stale. Production serves `1.2.0` finals, including 2026-09-23 and 2026-09-28.
+- **Admin Phase 2 announcements (#90)**: session-authenticated CRUD at `/admin/market/announcements/` over a dedicated `admin_announcements` table on `COMMENTS_DB`; public `/api/announcements` exposes only active all-audience notices (HOME carousels and the MARKET notice section).
+- **MARKET publish reliability (#91)**: final payloads with stale source dates fail closed; `.github/workflows/market-freshness-alert.yml` compares Production `market_date` with the expected KRX session on weekdays and opens/closes one operator Issue. Publisher process changes stay in the private `snowshagal-market-publisher` repository.
+- **OpenDART Disclosure Watchlist & MARKET Public Feed (#79, #81) and daily sync (#92)**: Watchlist admin, selective High/Critical same-day public feed with a minimal DTO, isolated AI/location errors; `.github/workflows/disclosure-daily-sync.yml` runs weekdays at 16:05 KST with an auto-closing failure Issue.
+- **Preview D1 parity & deployment-aware smoke (#74)**: Preview `COMMENTS_DB` is the isolated `market-research-comments-preview`; Production smoke waits for Cloudflare's success check on the exact main SHA. Authenticated Market Close writes are allowed only on branch Preview hosts against that isolated D1.
 
 
 ## Near-term Priorities
@@ -143,7 +90,7 @@ Refine `/admin/` and `/admin/manage/` only when recurring operational pain point
 
 ### Atom Feeds & Global Footer (2026-09)
 - **Global Editorial Footer** (PR #104): one canonical `siteFooter` across every public surface, synced into the static pages and injected into reports by the middleware.
-- **Atom Feeds Phase 2** (Draft PR, Preview only): `/rss.xml` and `/en/rss.xml` Atom 1.0 feeds from `data/posts.json` through the site's own canonical URL, description and language helpers; registration-based `published`/`updated`; XML-safe text; one discovery `<link>` per public page from a single helper; footer FOLLOW → RSS. Email subscription deliberately excluded.
+- **Atom Feeds Phase 2** (PR #105, Production): `/rss.xml` and `/en/rss.xml` Atom 1.0 feeds from `data/posts.json` through the site's own canonical URL, description and language helpers; registration-based `published`/`updated`; XML-safe text; one discovery `<link>` per public page from a single helper; footer FOLLOW → RSS. Email subscription deliberately excluded.
 
 ### SEO Foundation & Public Shells (2026-08)
 - **SEO Foundation** (PR #57): Server-rendered crawlable report anchors, 10 static KO/EN category landing shells, dynamic metadata generation (`<title>`, `<meta name="description">`), self-canonicals, reciprocal `hreflang` for translation pairs, dynamic `sitemap.xml`, and crawler-friendly `robots.txt`.
