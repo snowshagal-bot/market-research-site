@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-28-daily-tf6bj3",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-28",
+    "reportDate": "2026-09-28",
+    "registeredDate": "2026-09-29",
+    "registeredAt": "2026-09-28T17:00:22.184Z",
+    "legacyImport": false,
+    "title": "Broad Gains, Heavyweight Losses",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-28_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-09-28-daily-daeox6",
+    "coverImage": "covers/2026-09-28-daily-tf6bj3.webp",
+    "shareCardImage": "covers/share/2026-09-28-daily-tf6bj3.jpg",
+    "coverThumbnail": "covers/2026-09-28-daily-tf6bj3-450.webp"
+  },
+  {
     "id": "2026-09-28-daily-daeox6",
     "type": "daily",
     "typeLabel": "주식 리포트",
