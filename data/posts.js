@@ -1,5 +1,31 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-28-daily-daeox6",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-09-28",
+    "reportDate": "2026-09-28",
+    "registeredDate": "2026-09-29",
+    "registeredAt": "2026-09-28T16:55:55.863Z",
+    "legacyImport": false,
+    "title": "넓게 올랐고, 무겁게 내렸다",
+    "subtitle": "",
+    "description": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-09-28_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-09-28-daily-daeox6.webp",
+    "shareCardImage": "covers/share/2026-09-28-daily-daeox6.jpg",
+    "coverThumbnail": "covers/2026-09-28-daily-daeox6-450.webp"
+  },
+  {
     "id": "2026-09-27-weekly-1lwrnnv",
     "type": "weekly",
     "typeLabel": "Weekly",
