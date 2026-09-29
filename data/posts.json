@@ -1,5 +1,30 @@
 [
   {
+    "id": "2026-09-29-note-1yl5lhk",
+    "type": "note",
+    "typeLabel": "투자 노트",
+    "lang": "ko",
+    "date": "2026-09-29",
+    "reportDate": "2026-09-29",
+    "registeredDate": "2026-09-29",
+    "registeredAt": "2026-09-29T10:38:49.098Z",
+    "legacyImport": false,
+    "title": "사흘치 금리를하루에",
+    "subtitle": "",
+    "description": "시장과 투자에 관한 생각을 자유롭게 정리한 투자 노트.",
+    "tags": [
+      "rates",
+      "treasuries",
+      "kospi",
+      "banks-financials"
+    ],
+    "readingMinutes": 12,
+    "href": "reports/20260929_Investment_Note_Holiday_Rate_Gap.html",
+    "coverImage": "covers/2026-09-29-note-1yl5lhk.webp",
+    "shareCardImage": "covers/share/2026-09-29-note-1yl5lhk.jpg",
+    "coverThumbnail": "covers/2026-09-29-note-1yl5lhk-450.webp"
+  },
+  {
     "id": "2026-09-28-daily-tf6bj3",
     "type": "daily",
     "typeLabel": "Daily",
