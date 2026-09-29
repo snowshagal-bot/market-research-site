@@ -42,15 +42,15 @@ Homepage public categories:
 - 데일리
 - 위클리
 - 리서치
-- 시장 공부
-- 끄적끄적
+- 투자 노트
+- 시장 입문
 - 소개
 
-Internal category values are `daily`, `weekly`, `research`, `basics`, `note`. Market Basics is a core category; Notes remains a secondary category without being renamed or removed. `소개` links to `/about/` and is a secondary site page rather than a report category.
+Internal category values are `daily`, `weekly`, `research`, `note`, `basics`. Public labels are the category labels in `assets/locale.js` (KO `투자 노트` / `시장 입문`, EN `Investment Note` / `Market Basics`); the static HTML repeats them literally and `tests/category-naming.test.mjs` keeps the two in step. Market Basics is a core category; Investment Note remains a secondary category and is not removed. `소개` links to `/about/` and is a secondary site page rather than a report category.
 
 Report pages use a fixed shared top bar:
 
-`← 홈 | 데일리 | 위클리 | 리서치 | 시장 공부 | 끄적끄적 | 소개`
+`← 홈 | 데일리 | 위클리 | 리서치 | 투자 노트 | 시장 입문 | 소개`
 
 The current category should have a clear but restrained active state. The report navigation is injected outside the original report design and must remain visually stable regardless of report-specific CSS.
 
@@ -66,7 +66,7 @@ The homepage opens with the Snowshagal brand rather than a rotating post or a ge
 - avoid photorealistic winter/travel imagery and avoid decorative red/blue finance colors outside actual data;
 - on desktop, keep the copy readable on the left and let the illustration breathe across the right side;
 - at 320–480px, show the headline and supporting copy first, then continue the artwork below as a deliberate mobile composition rather than a scaled desktop spread;
-- keep Daily / Weekly / Research as concise hero entry points and retain Market Basics / Notes in the main navigation and archive;
+- keep Daily / Weekly / Research as concise hero entry points and retain Investment Note / Market Basics in the main navigation and archive;
 - the latest report cards must continue to render from localized post data and may use the existing optional `coverImage` or a restrained CSS fallback;
 - respect `prefers-reduced-motion` and keep hover movement subtle.
 
