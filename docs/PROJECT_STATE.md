@@ -4,7 +4,7 @@ Updated: 2026-09-29
 
 ## Purpose
 
-개인 시장 리서치 웹사이트. 주요 콘텐츠는 데일리 리포트 HTML, 위클리 HTML, 비정기 리서치 HTML, 시장 공부, 자유 글(끄적끄적)이다. 현재는 낮은 트래픽을 전제로 단순하고 유지보수 쉬운 구조를 우선한다.
+개인 시장 리서치 웹사이트. 주요 콘텐츠는 데일리 리포트 HTML, 위클리 HTML, 비정기 리서치 HTML, 투자 노트, 시장 입문이다. 현재는 낮은 트래픽을 전제로 단순하고 유지보수 쉬운 구조를 우선한다.
 
 ## Current stack
 
@@ -193,8 +193,8 @@ Main categories:
 - `daily` → 데일리
 - `weekly` → 위클리
 - `research` → 리서치
-- `basics` → 시장 공부 / Market Basics
-- `note` → 끄적끄적
+- `note` → 투자 노트 / Investment Note
+- `basics` → 시장 입문 / Market Basics
 
 Each category also has a landing route in both locales:
 
@@ -388,7 +388,7 @@ Instagram deep link and no Kakao SDK or app key exist in the codebase. Cancellin
 is not reported as a failure, and copy falls back from the async clipboard to `execCommand`
 and finally to a selectable field holding the URL.
 
-The shared navigation is fixed at the top and inserts spacing so it does not cover the original report. Public links are `데일리 / 위클리 / 리서치 / 시장 공부 / 끄적끄적 / 소개`.
+The shared navigation is fixed at the top and inserts spacing so it does not cover the original report. Public links are `데일리 / 위클리 / 리서치 / 투자 노트 / 시장 입문 / 소개`.
 
 ## Icons, social cards and report metadata
 
