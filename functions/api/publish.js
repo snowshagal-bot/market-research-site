@@ -11,6 +11,7 @@ import {
   parseAndValidateTags,
   generateTagsJs
 } from '../_tags.js';
+import '../../assets/report-metadata.js';
 
 const OWNER = 'snowshagal-bot';
 const REPO = 'market-research-site';
@@ -634,7 +635,9 @@ export async function onRequestPost(context) {
   const reportDate = String(form.get('reportDate') || '').trim();
   const title = String(form.get('title') || '').trim().slice(0, 180);
   const subtitle = String(form.get('subtitle') || '').trim().slice(0, 240);
-  const description = String(form.get('description') || '').trim().slice(0, 700);
+  // The editor's own description, or ''. A category sentence the publisher
+  // once filled in by itself is never stored, whichever client sent it.
+  const description = globalThis.REPORT_METADATA.editorialDescription(form.get('description')).slice(0, 700);
   const summary = String(form.get('summary') || '').trim().slice(0, 500);
   // The TODAY one-liner the report itself carried. Only a Daily has one:
   // the strip shows a market session, and nothing else stands in for it.

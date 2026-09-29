@@ -1,0 +1,10 @@
+{
+  "_comment": "Published posts whose stored title runs two cover rows together: they went out before the publisher's title reader (assets/admin.js detectTitle) knew these cover rows. The reader now reads each as the value below; the stored titles are corrected by the historical backfill (PR C), not by the reader. tests/report-metadata-detection.test.mjs and tests/report-title-spacing.test.mjs fail on any other title that differs from its cover by spacing alone.",
+  "pendingBackfill": {
+    "2026-09-29-note-1jmzktg": "Three Days of Rates One Session",
+    "2026-09-29-note-1yl5lhk": "사흘치 금리를 하루에",
+    "2026-09-24-note-9bg9k4": "Inflation Gets a New Ruler",
+    "2026-09-24-note-gpogsf": "물가를 재는 자가 바뀐다",
+    "2026-09-17-daily-1cs8i2o": "Same Level, Different Market"
+  }
+}

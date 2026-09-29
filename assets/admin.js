@@ -40,6 +40,8 @@
   let pendingCustomTags = [];
   const filename = $('post-filename');
   const takeawayStatus = $('takeaway-status');
+  const descriptionSource = $('description-source');
+  const summarySource = $('summary-source');
   const coverInput = $('cover-file');
   const coverInfo = $('cover-info');
   const generateCoverBtn = $('generate-cover-btn');
@@ -76,6 +78,11 @@
   // Read from the report, never typed. Kept whatever the category is, and
   // only sent when the category is still Daily at publish time.
   let detectedTakeaway = '';
+  // Where the description, summary and one-liner of the chosen report were
+  // read from, shown beside each field; null until a report is chosen.
+  let takeawayReading = null;
+  let descriptionReading = null;
+  let summaryReading = null;
   let generatingCover = false;
   let coverGenerationVersion = 0;
   let coverDecodePending = false;
@@ -465,36 +472,10 @@
     postLanguage.value = value;
     languageOptions.forEach(option => { option.checked = option.value === value; });
     populateTranslationSources();
-    updateCategoryDescription(type.value);
   }
 
   function isPreviewHost(hostname) {
     return Boolean(hostname) && hostname !== 'snowshagal.com' && hostname !== 'admin.snowshagal.com';
-  }
-
-  const defaultDescriptions = {
-    ko: {
-      daily: '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.',
-      weekly: '지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.',
-      research: '특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.',
-      basics: '경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 입문.',
-      note: '시장과 투자에 관한 생각을 자유롭게 정리한 투자 노트.'
-    },
-    en: {
-      daily: 'A daily report on market trends, investor flows, sectors, and macro drivers.',
-      weekly: 'A weekly report reviewing recent market moves and the key variables for the week ahead.',
-      research: 'Independent research on specific industries, companies, policies, and market structure.',
-      basics: 'A clear guide to the essential concepts behind markets, economics, and investing.',
-      note: 'Notes and observations on markets and investing.'
-    }
-  };
-
-  function defaultDescription(typeValue, language = postLanguage?.value) {
-    return defaultDescriptions[language === 'en' ? 'en' : 'ko'][typeValue] || '';
-  }
-
-  function isDefaultDescription(value) {
-    return Object.values(defaultDescriptions).some(descriptions => Object.values(descriptions).includes(value));
   }
 
   async function loadAuth() {
@@ -580,12 +561,21 @@
   // emphasis, and `.cvtitle span` is display:block. This is deliberately a
   // list and not a rule about elements — the gloss in "고도 (高度)를 기다리며"
   // is a span inside .cover-title, and it is inline, so it stays as it reads.
+  //
+  // The later covers add three: `.cv-title` sets its title as `span.l1` and
+  // `span.l2`, `.dcv-h1` as `span.dcv-line`, and `.dcv-ol` sets the Daily
+  // one-liner as `<i>` rows, each display:block in the report's stylesheet.
+  // Only direct children count, so `<em>자</em>가` inside `span.l2` — an
+  // inline-block accent on part of one word — still reads "자가".
   const COVER_ROWS = [
     ['.cover-title', 'i'],
     ['.cover-oneline', 'i'],
     ['.cover-idx', 'i'],
     ['.cv-one', 'i'],
-    ['.cvtitle', 'span']
+    ['.cvtitle', 'span'],
+    ['.cv-title', 'span'],
+    ['.dcv-h1', 'span'],
+    ['.dcv-ol', 'i']
   ];
 
   function brokenLineText(element) {
@@ -613,6 +603,9 @@
     if (meta) return meta;
     const candidates = [
       doc.querySelector('.cv-h1'),
+      // The Daily cover's title. The page below it has an h1 of its own, so
+      // the cover is named rather than left to "the first h1".
+      doc.querySelector('.dcv-h1'),
       doc.querySelector('.cv-title'),
       doc.querySelector('.cover-title'),
       doc.querySelector('.cover-frame .cover-copy h1, .cover-frame .cover-copy h2, .cover-frame h1, .cover-frame h2'),
@@ -634,18 +627,57 @@
     return node ? brokenLineText(node).replace(/\s+/g,' ').trim().slice(0,120) : '';
   }
 
-  function detectSummary(doc) {
+  // Description, summary and one-liner are three different fields, each read
+  // only from a place the report marks as that field. Nothing is inferred
+  // from the title or the body, and every reading says where it came from so
+  // the publish form can show it before anything is sent.
+
+  // The report's own description for search and sharing. The category
+  // sentences the publisher used to fill in by itself are not descriptions;
+  // one found in a report is set aside and the field stays empty.
+  function readDescription(doc) {
+    const meta = doc?.querySelector('meta[name="description"]');
+    const value = String(meta?.content || '').trim();
+    if (!value) return { text: '', source: 'none' };
+    if (window.REPORT_METADATA.isCategoryBoilerplate(value)) return { text: '', source: 'rejected-boilerplate' };
+    return { text: value, source: 'meta-description' };
+  }
+
+  function summaryText(value) {
     // A declared summary can still be written across lines in the attribute,
     // and it travels into a search result on one, so it is collapsed too.
-    const declared = (doc.querySelector('meta[name="report-summary"]')?.content || '').replace(/\s+/g, ' ').trim();
-    if (declared) return declared.slice(0, 500);
-    for (const selector of ['.cover-oneline', '.opener .stand', '.cover-summary', '.cover-description', '[data-report-summary]']) {
+    return String(value || '').replace(/\s+/g, ' ').trim().slice(0, 500);
+  }
+
+  // A summary is the report's own short account of itself. `.cover-oneline`
+  // is not read here: it is the old covers' one-liner, a takeaway.
+  function readSummary(doc, reportType) {
+    const declared = summaryText(doc?.querySelector('meta[name="report-summary"]')?.content);
+    if (declared) return { text: declared, source: 'report-summary' };
+    const marked = doc?.querySelector('[data-report-summary]');
+    if (marked) {
+      // The attribute either carries the summary or just marks the element.
+      const text = summaryText(marked.getAttribute?.('data-report-summary')) || summaryText(brokenLineText(marked));
+      if (text) return { text, source: 'data-report-summary' };
+    }
+    // The Daily's own one-sentence account of the session sits in its hero,
+    // as a div.quote or a p.quote. Other reports use .quote for quotations,
+    // and none of them sits in a hero; both limits hold regardless.
+    if (reportType === 'daily') {
+      const text = summaryText(brokenLineText(doc?.querySelector('section.hero .quote')));
+      if (text) return { text, source: 'daily-hero-quote' };
+    }
+    for (const selector of ['.opener .stand', '.cover-summary', '.cover-description']) {
       // Covers set these across rows exactly as they set a title, so the rows
       // are read apart rather than run together.
-      const text = brokenLineText(doc.querySelector(selector)).replace(/\s+/g, ' ').trim();
-      if (text) return text.slice(0, 500);
+      const text = summaryText(brokenLineText(doc?.querySelector(selector)));
+      if (text) return { text, source: 'legacy-marker', selector };
     }
-    return '';
+    return { text: '', source: 'none' };
+  }
+
+  function detectSummary(doc, reportType) {
+    return readSummary(doc, reportType).text;
   }
 
   // The TODAY one-liner is a sentence the report marks as such, not a summary
@@ -668,23 +700,73 @@
     return normalizeTakeaway(brokenLineText(element));
   }
 
-  function detectTakeaway(doc) {
+  function readTakeaway(doc) {
     const declared = normalizeTakeaway(doc?.querySelector('meta[name="report-takeaway"]')?.content);
-    if (declared) return declared;
+    if (declared) return { text: declared, source: 'report-takeaway' };
     const marked = doc?.querySelector('[data-report-takeaway]');
     if (marked) {
       // The attribute either carries the line or just marks the element.
       const text = normalizeTakeaway(marked.getAttribute?.('data-report-takeaway')) || elementTakeaway(marked);
-      if (text) return text;
+      if (text) return { text, source: 'data-report-takeaway' };
     }
-    // Where the covers put it. Editorial Ledger v2 gives the line its own
-    // field under an ONE LINE TODAY label; the older covers wrote it beside
-    // the scroll nudge, and those reports are still published.
-    for (const selector of ['.cv-line', '.cover-hint .cv-one', '.cover-oneline']) {
+    // Where the covers put it. The Daily cover since 2026-09-09 labels the
+    // line and sets it as .dcv-one .oc; the first September covers set it as
+    // .dcv-one .dcv-ol, one <i> row per line. Editorial Ledger v2 gave it its
+    // own field under an ONE LINE TODAY label; the older covers wrote it
+    // beside the scroll nudge, and those reports are still published.
+    for (const [selector, source] of [
+      ['.dcv-one .oc', 'dcv-one-oc'],
+      ['.dcv-one .dcv-ol', 'dcv-ol'],
+      ['.cv-line', 'legacy-marker'],
+      ['.cover-hint .cv-one', 'legacy-marker'],
+      ['.cover-oneline', 'legacy-marker']
+    ]) {
       const text = elementTakeaway(doc?.querySelector(selector));
-      if (text) return text;
+      if (text) return { text, source, selector };
     }
-    return '';
+    return { text: '', source: 'none' };
+  }
+
+  function detectTakeaway(doc) {
+    return readTakeaway(doc).text;
+  }
+
+  // Where each field was read, as the publish form names it.
+  const SOURCE_LABELS = {
+    description: {
+      'meta-description': '출처 · 리포트 meta description',
+      'rejected-boilerplate': '출처 없음 · 리포트의 meta description이 카테고리 기본 문장이라 제외했습니다',
+      none: '출처 없음 · 비워 두면 설명 없이 게시됩니다',
+      manual: '직접 입력'
+    },
+    summary: {
+      'report-summary': '출처 · report-summary 메타',
+      'data-report-summary': '출처 · data-report-summary',
+      'daily-hero-quote': '출처 · Daily 상단 요약 문장 (section.hero .quote)',
+      'legacy-marker': '출처 · 표지 요약',
+      none: '출처 없음 · 비워 두면 요약 없이 게시됩니다',
+      manual: '직접 입력'
+    },
+    takeaway: {
+      'report-takeaway': 'report-takeaway 메타',
+      'data-report-takeaway': 'data-report-takeaway',
+      'dcv-one-oc': '표지 .dcv-one .oc',
+      'dcv-ol': '표지 .dcv-one .dcv-ol',
+      'legacy-marker': '표지'
+    }
+  };
+
+  function sourceLabel(field, reading) {
+    const label = SOURCE_LABELS[field][reading?.source] || '';
+    return reading?.selector && reading.source === 'legacy-marker' ? `${label} (${reading.selector})` : label;
+  }
+
+  function renderSourceLabels() {
+    for (const [node, field, reading] of [[descriptionSource, 'description', descriptionReading], [summarySource, 'summary', summaryReading]]) {
+      if (!node) continue;
+      node.textContent = reading ? sourceLabel(field, reading) : '';
+      node.hidden = !reading;
+    }
   }
 
   // Read-only: there is no box to fill in here. The Daily carries the line, or
@@ -698,7 +780,7 @@
     }
     takeawayStatus.hidden = false;
     takeawayStatus.textContent = detectedTakeaway
-      ? `TODAY 한 줄 자동 감지 · "${detectedTakeaway}"`
+      ? `TODAY 한 줄 자동 감지 · "${detectedTakeaway}" · ${sourceLabel('takeaway', takeawayReading)}`
       : 'TODAY 한 줄 감지 없음 · 홈페이지에서는 한 줄이 숨겨집니다.';
   }
 
@@ -719,16 +801,11 @@
     return '';
   }
 
-  function updateCategoryDescription(value) {
-    if (!description.value.trim() || isDefaultDescription(description.value.trim())) {
-      description.value = defaultDescription(value);
-    }
-  }
-
   function setCategory(value, source = '') {
     type.value = value;
     categoryOptions.forEach(option => { option.checked = option.value === value; });
-    updateCategoryDescription(value);
+    // The category never writes into the description or the summary: what the
+    // report carried, or what the editor typed, stays as it is.
     populateTranslationSources();
     if (categoryStatus) {
       if (source === 'auto' && value) categoryStatus.textContent = `자동 인식: ${labels[value]} · 필요하면 직접 변경하세요.`;
@@ -848,7 +925,7 @@
           category: labels[type.value] || '리포트',
           date: date.value,
           title: title.value.trim(),
-          metaSummary: detectSummary(selectedHtmlDocument),
+          metaSummary: detectSummary(selectedHtmlDocument, type.value),
           summary: postSummary.value.trim(),
           description: description.value.trim()
         }
@@ -969,7 +1046,11 @@
     selectedHtmlText = '';
     selectedHtmlDocument = null;
     detectedTakeaway = '';
+    takeawayReading = null;
+    descriptionReading = null;
+    summaryReading = null;
     renderTakeawayStatus();
+    renderSourceLabels();
     registeredDate.value = '게시 시 자동 기록';
     status.textContent = 'HTML을 분석하는 중…';
     const text = await file.text();
@@ -981,17 +1062,20 @@
     const detectedDate = detectDate(file.name, doc, text);
     const detectedTitle = detectTitle(file.name, doc);
     const detectedSubtitle = detectSubtitle(doc);
-    const detectedSummary = detectSummary(doc);
-    detectedTakeaway = detectTakeaway(doc);
+    descriptionReading = readDescription(doc);
+    summaryReading = readSummary(doc, detectedType);
+    takeawayReading = readTakeaway(doc);
+    detectedTakeaway = takeawayReading.text;
 
     setCategory(detectedType, 'auto');
     date.value = detectedDate;
     if (translationSource?.value) syncPairedReportDate();
     title.value = detectedTitle;
     subtitle.value = detectedSubtitle;
-    description.value = defaultDescription(detectedType);
-    postSummary.value = detectedSummary;
+    description.value = descriptionReading.text;
+    postSummary.value = summaryReading.text;
     renderTakeawayStatus();
+    renderSourceLabels();
     filename.value = safeFilename(file.name);
 
     fileInfo.classList.add('on');
@@ -1153,6 +1237,18 @@
     button.addEventListener('click', () => setCoverPreviewMode(button.dataset.coverPreviewMode));
   });
   [date,title,subtitle,description,postSummary].forEach(el => el?.addEventListener('input', updatePublishState));
+  // Once the editor types into the description or the summary, the value is
+  // theirs and the label says so; nothing later writes over it.
+  description?.addEventListener('input', () => {
+    if (!descriptionReading) return;
+    descriptionReading = { text: description.value, source: 'manual' };
+    renderSourceLabels();
+  });
+  postSummary?.addEventListener('input', () => {
+    if (!summaryReading) return;
+    summaryReading = { text: postSummary.value, source: 'manual' };
+    renderSourceLabels();
+  });
   categoryOptions.forEach((option, index) => {
     option.addEventListener('change', () => {
       if (option.checked) setCategory(option.value, 'manual');

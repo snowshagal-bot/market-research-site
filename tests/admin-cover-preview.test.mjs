@@ -44,6 +44,8 @@ async function loadAdmin({
   pendingReportFile = null
 } = {}) {
   const source = await read('assets/admin.js');
+  // The admin page loads the shared report metadata rules before admin.js.
+  const metadataSource = await read('assets/report-metadata.js');
   const ids = [
     'html-file', 'drop-zone', 'file-info', 'parse-status', 'preview-wrap', 'post-type',
     'post-date', 'registered-date', 'post-title', 'post-subtitle', 'post-description', 'post-summary',
@@ -55,6 +57,7 @@ async function loadAdmin({
     'publish-error-actions', 'publish-error-close',
     'publish-next-report', 'published-report-link', 'published-home-link', 'category-status'
     , 'post-language', 'translation-source', 'translation-source-status', 'generate-cover-btn', 'cover-generator-status'
+    , 'description-source', 'summary-source', 'takeaway-status'
   ];
   const elements = Object.fromEntries(ids.map(id => [id, createElement(id)]));
   const themeButton = createElement('theme-toggle');
@@ -165,7 +168,9 @@ async function loadAdmin({
     },
     window: windowState
   };
-  vm.runInNewContext(source, context);
+  vm.createContext(context);
+  vm.runInContext(metadataSource, context);
+  vm.runInContext(source, context);
   return { elements, modeButtons, categoryOptions, languageOptions, createdUrls, revokedUrls, windowListeners, submissions, confirmMessages, location, windowState };
 }
 
@@ -409,7 +414,7 @@ test('manual category override becomes the final publish FormData value', async 
   assert.equal(submissions[0].entries.find(([name]) => name === 'type')?.[1], 'weekly');
 });
 
-test('report-summary metadata takes priority and cover copy supplies a language-neutral editable fallback', async () => {
+test('report-summary metadata takes priority, an explicit summary marker is an editable fallback, and nothing is filled in by category', async () => {
   const { elements, submissions } = await loadAdmin({ confirmResult: true });
   elements['admin-key'].value = 'test-key';
   elements['html-file'].files = [{
@@ -433,8 +438,10 @@ test('report-summary metadata takes priority and cover copy supplies a language-
     text: async () => '<!doctype html><title>Daily report</title><span class="cover-oneline">Two heavyweight stocks dragged the index,<br>while the rest of the market went its own way.</span>'
   }];
   await english.elements['html-file'].emit('change');
-  assert.equal(english.elements['post-summary'].value, 'Two heavyweight stocks dragged the index, while the rest of the market went its own way.');
-  assert.equal(english.elements['post-description'].value, 'A daily report on market trends, investor flows, sectors, and macro drivers.');
+  // .cover-oneline is the old covers' one-liner, a takeaway, never a summary;
+  // and the description is no longer the category's stock sentence.
+  assert.equal(english.elements['post-summary'].value, '');
+  assert.equal(english.elements['post-description'].value, '');
 
   const korean = await loadAdmin();
   korean.elements['html-file'].files = [{
@@ -444,7 +451,81 @@ test('report-summary metadata takes priority and cover copy supplies a language-
   }];
   await korean.elements['html-file'].emit('change');
   assert.equal(korean.elements['post-summary'].value, '보이는 수급 아래, 잠긴 구조를 읽는다.');
-  assert.equal(korean.elements['post-description'].value, '특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.');
+  assert.equal(korean.elements['post-description'].value, '');
+});
+
+/* ------------------------------------ description / summary (PR B1 form) */
+
+async function chooseReport(admin, name, html) {
+  admin.elements['html-file'].files = [{ name, size: html.length, text: async () => html }];
+  await admin.elements['html-file'].emit('change');
+}
+
+test('the description is what the report declares, and no category or language change writes over it', async () => {
+  const admin = await loadAdmin();
+  const { elements, categoryOptions, languageOptions } = admin;
+  await chooseReport(admin, 'weekly-report.html',
+    '<!doctype html><meta name="report-type" content="weekly"><meta name="description" content="편집자가 쓴 고유 설명"><title>Weekly report</title>');
+  assert.equal(elements['post-description'].value, '편집자가 쓴 고유 설명');
+  assert.equal(elements['description-source'].hidden, false);
+  assert.equal(elements['description-source'].textContent, '출처 · 리포트 meta description');
+
+  for (const value of ['daily', 'research', 'note']) {
+    const option = categoryOptions.find(entry => entry.value === value);
+    option.checked = true;
+    await option.emit('change');
+    assert.equal(elements['post-type'].value, value);
+    assert.equal(elements['post-description'].value, '편집자가 쓴 고유 설명', `category ${value} keeps the description`);
+  }
+  const english = languageOptions.find(option => option.value === 'en');
+  english.checked = true;
+  await english.emit('change');
+  assert.equal(elements['post-description'].value, '편집자가 쓴 고유 설명', 'a language change keeps it too');
+
+  // What the editor types is theirs, and stays through a category change.
+  elements['post-description'].value = '직접 고친 설명';
+  await elements['post-description'].emit('input');
+  assert.equal(elements['description-source'].textContent, '직접 입력');
+  const weekly = categoryOptions.find(entry => entry.value === 'weekly');
+  weekly.checked = true;
+  await weekly.emit('change');
+  assert.equal(elements['post-description'].value, '직접 고친 설명');
+});
+
+test('a report without a description of its own leaves the field empty, and a category sentence in it is set aside', async () => {
+  const blank = await loadAdmin();
+  await chooseReport(blank, '2026-09-28_Snowshagal_Daily.html',
+    '<!doctype html><meta name="report-type" content="daily"><title>Daily</title><section class="hero"><div class="quote">히어로 요약 문장</div></section>');
+  assert.equal(blank.elements['post-description'].value, '');
+  assert.equal(blank.elements['description-source'].textContent, '출처 없음 · 비워 두면 설명 없이 게시됩니다');
+  assert.equal(blank.elements['post-summary'].value, '히어로 요약 문장');
+  assert.equal(blank.elements['summary-source'].textContent, '출처 · Daily 상단 요약 문장 (section.hero .quote)');
+
+  const stock = await loadAdmin();
+  await chooseReport(stock, 'weekly-report.html',
+    '<!doctype html><meta name="report-type" content="weekly"><meta name="description" content="지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트."><title>Weekly</title>');
+  assert.equal(stock.elements['post-description'].value, '');
+  assert.match(stock.elements['description-source'].textContent, /카테고리 기본 문장이라 제외/);
+  assert.equal(stock.elements['summary-source'].textContent, '출처 없음 · 비워 두면 요약 없이 게시됩니다');
+});
+
+test('the publish form sends the description the editor sees, blank included', async () => {
+  const admin = await loadAdmin({ confirmResult: true });
+  admin.elements['admin-key'].value = 'test-key';
+  await chooseReport(admin, '2026-09-28_Snowshagal_Daily.html',
+    '<!doctype html><meta name="report-type" content="daily"><meta name="report-date" content="2026-09-28"><title>Daily</title>');
+  await admin.elements['publish-btn'].emit('click');
+  const sent = new Map(admin.submissions[0].entries.map(([name, value]) => [name, value]));
+  assert.equal(sent.get('description'), '');
+});
+
+test('the one-liner stays read-only on the publish form', async () => {
+  const page = await read('admin/index.html');
+  // A status line shows what was read; there is nothing to type into.
+  assert.match(page, /<p class="takeaway-status" id="takeaway-status"/);
+  assert.doesNotMatch(page, /<(?:input|textarea)\b[^>]*takeaway/i);
+  // The shared rules load before the publisher that uses them.
+  assert.ok(page.indexOf('/assets/report-metadata.js') < page.indexOf('/assets/admin.js'));
 });
 
 test('language defaults to Korean and English selection submits an optional translation group', async () => {

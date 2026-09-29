@@ -3,6 +3,7 @@ import { findLateCoverStyle, lateCoverStyleMessage } from "../_cover-style.js";
 import { SOCIAL_REPORT_CARD_DIR } from "../_seo.js";
 import { isHumanAdminHost, validateHumanAdminMutation } from "../_host-policy.js";
 import { requireAdminMutation } from "../_auth.js";
+import "../../assets/report-metadata.js";
 import {
   MAX_POST_TAGS,
   parseAndValidateTags
@@ -37,6 +38,18 @@ function postLanguage(post) {
 
 function typeLabel(type, lang) {
   return lang === "en" ? EN_TYPE_LABELS[type] : TYPE_LABELS[type];
+}
+
+// A description saved here is the editor's own words or ''. Posts published
+// before the publisher stopped writing category sentences still carry one;
+// saving such a post with that description untouched keeps it exactly as it
+// is (history is corrected separately, not by an unrelated edit), but a
+// category sentence is never newly written.
+function managedDescription(submitted, existing) {
+  const metadata = globalThis.REPORT_METADATA;
+  const text = String(submitted ?? "").trim();
+  if (!metadata.isCategoryBoilerplate(text)) return text;
+  return metadata.normalizeMetadataText(text) === metadata.normalizeMetadataText(existing) ? existing : "";
 }
 
 function reply(body, status = 200) {
@@ -867,7 +880,7 @@ export async function onRequestPost(context) {
         reportDate: editFields.reportDate,
         title: editFields.title,
         subtitle: editFields.subtitle,
-        description: editFields.description,
+        description: managedDescription(editFields.description, existing.description),
         updatedAt: new Date().toISOString(),
       };
       if (editFields.summaryProvided) {

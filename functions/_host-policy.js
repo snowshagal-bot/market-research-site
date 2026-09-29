@@ -20,6 +20,7 @@ const ADMIN_STATIC_PATHS = new Set([
   '/assets/site.css',
   '/assets/ui-polish.css',
   '/assets/admin.js',
+  '/assets/report-metadata.js',
   '/assets/admin-manage.js',
   '/assets/admin-manage.css',
   '/assets/admin-analytics.js',

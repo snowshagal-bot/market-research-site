@@ -235,6 +235,40 @@ test('summary updates are capped at 500 characters and omitted fields preserve e
   } finally { globalThis.fetch = originalFetch; }
 });
 
+/* ------------------------------------------ description (PR B1 invariant) */
+
+const DAILY_SENTENCE = '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.';
+
+async function savedDescription(existingDescription, submitted) {
+  const calls = githubMock([{ ...basePost, description: existingDescription }]);
+  try {
+    const { response } = await run({ description: submitted });
+    assert.equal(response.status, 200);
+    return postsFromTree(treeFrom(calls))[0].description;
+  } finally { globalThis.fetch = originalFetch; }
+}
+
+test('a manage save never newly writes a category sentence as a description', async () => {
+  assert.equal(await savedDescription('기존 설명', DAILY_SENTENCE), '');
+  assert.equal(await savedDescription('', 'A weekly report reviewing recent market moves and the key variables for the week ahead.'), '');
+  // A post carrying one category sentence cannot be switched to another.
+  assert.equal(await savedDescription(DAILY_SENTENCE, 'Notes and observations on markets and investing.'), '');
+});
+
+test('a manage save leaves a post\'s existing category sentence exactly as it was', async () => {
+  // Posts published before the publisher stopped writing these still carry
+  // one; saving such a post for any other reason must not rewrite history.
+  assert.equal(await savedDescription(DAILY_SENTENCE, DAILY_SENTENCE), DAILY_SENTENCE);
+  assert.equal(await savedDescription(DAILY_SENTENCE, `  ${DAILY_SENTENCE.replace('흐름과 ', '흐름과  ')}\n`), DAILY_SENTENCE);
+});
+
+test('a manage save keeps the editor\'s own description, trimmed, even one close to a category sentence', async () => {
+  assert.equal(await savedDescription('기존 설명', '  편집자가 쓴 설명  '), '편집자가 쓴 설명');
+  assert.equal(await savedDescription(DAILY_SENTENCE, '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트입니다.'),
+    '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트입니다.');
+  assert.equal(await savedDescription(DAILY_SENTENCE, ''), '');
+});
+
 test('optional HTML replacement keeps href and validates standalone HTML before GitHub access', async () => {
   const calls = githubMock();
   try {

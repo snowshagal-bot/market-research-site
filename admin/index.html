@@ -77,8 +77,8 @@
       <div class="date-note">과거 리포트를 지금 올려도 아카이브 순서는 <b>리포트 기준일</b>로 정렬합니다. 등록일은 별도 기록으로 남습니다.</div>
       <div class="field full"><label for="post-title">제목</label><input id="post-title" type="text" placeholder="예: 8월 7일 주식시장 리포트"></div>
       <div class="field full"><label for="post-subtitle">부제</label><input id="post-subtitle" type="text" placeholder="선택 사항"></div>
-      <div class="field full"><label for="post-description">목록 설명</label><textarea id="post-description" placeholder="홈페이지 목록과 검색에 사용하는 설명"></textarea></div>
-      <div class="field full"><label for="post-summary">홈페이지 요약 <span>(선택)</span></label><textarea id="post-summary" maxlength="500" placeholder="리포트 내용을 2~3문장으로 요약해 주세요"></textarea><small>리포트 HTML의 report-summary 또는 커버 한 줄 문구를 자동 인식합니다. 게시 전에 수정할 수 있습니다.</small><p class="takeaway-status" id="takeaway-status" aria-live="polite" hidden></p></div>
+      <div class="field full"><label for="post-description">설명 <span>(선택 · 검색·공유용)</span></label><textarea id="post-description" placeholder="리포트의 meta description을 자동 인식합니다. 없으면 비워 둡니다." aria-describedby="description-source"></textarea><small id="description-source" aria-live="polite" hidden></small></div>
+      <div class="field full"><label for="post-summary">홈페이지 요약 <span>(선택)</span></label><textarea id="post-summary" maxlength="500" placeholder="리포트 내용을 2~3문장으로 요약해 주세요" aria-describedby="summary-source"></textarea><small id="summary-source" aria-live="polite" hidden></small><small>리포트의 report-summary 메타, Daily는 상단 요약 문장을 자동 인식합니다. 게시 전에 수정할 수 있습니다.</small><p class="takeaway-status" id="takeaway-status" aria-live="polite" hidden></p></div>
       <fieldset class="field full tag-field"><legend id="tags-label">주제 태그 <span>(선택 · 최대 5개)</span> <span id="tags-count" class="tags-count">0/5</span></legend>
         <div class="selected-tags-container" id="selected-tags-container" hidden>
           <div class="selected-tags-label">선택됨</div>
@@ -146,6 +146,7 @@
 <script src="/assets/locale.js?v=c032c526fd"></script>
 <script src="/assets/cover-generator.js?v=970214902e"></script>
 <script src="/assets/share-card.js?v=685158069d"></script>
-<script src="/assets/admin.js?v=7a27aabcad"></script>
+<script src="/assets/report-metadata.js?v=851de4ef7f"></script>
+<script src="/assets/admin.js?v=fcce8c4e34"></script>
 </body>
 </html>
