@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-29-daily-x3mvkw",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-09-29",
+    "reportDate": "2026-09-29",
+    "registeredDate": "2026-09-29",
+    "registeredAt": "2026-09-29T12:56:13.645Z",
+    "legacyImport": false,
+    "title": "Roles Reversed",
+    "subtitle": "",
+    "description": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "foreign-investors",
+      "rates",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-09-29_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-09-29-daily-fdg044",
+    "coverImage": "covers/2026-09-29-daily-x3mvkw.webp",
+    "shareCardImage": "covers/share/2026-09-29-daily-x3mvkw.jpg",
+    "coverThumbnail": "covers/2026-09-29-daily-x3mvkw-450.webp"
+  },
+  {
     "id": "2026-09-29-daily-fdg044",
     "type": "daily",
     "typeLabel": "주식 리포트",
