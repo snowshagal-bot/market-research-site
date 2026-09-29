@@ -1,5 +1,31 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-29-note-1jmzktg",
+    "type": "note",
+    "typeLabel": "Investment Note",
+    "lang": "en",
+    "date": "2026-09-29",
+    "reportDate": "2026-09-29",
+    "registeredDate": "2026-09-29",
+    "registeredAt": "2026-09-29T10:40:21.276Z",
+    "legacyImport": false,
+    "title": "Three Days of RatesOne Session",
+    "subtitle": "",
+    "description": "Notes and observations on markets and investing.",
+    "tags": [
+      "rates",
+      "treasuries",
+      "kospi",
+      "banks-financials"
+    ],
+    "readingMinutes": 14,
+    "href": "reports/en/20260929_Investment_Note_Holiday_Rate_Gap_EN (1).html",
+    "translationGroup": "2026-09-29-note-1yl5lhk",
+    "coverImage": "covers/2026-09-29-note-1jmzktg.webp",
+    "shareCardImage": "covers/share/2026-09-29-note-1jmzktg.jpg",
+    "coverThumbnail": "covers/2026-09-29-note-1jmzktg-450.webp"
+  },
+  {
     "id": "2026-09-29-note-1yl5lhk",
     "type": "note",
     "typeLabel": "투자 노트",
