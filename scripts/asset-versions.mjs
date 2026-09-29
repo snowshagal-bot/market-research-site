@@ -31,6 +31,7 @@ export const TRACKED_ASSETS = [
 
   // Admin styles & scripts
   'assets/admin.js',
+  'assets/report-metadata.js',
   'assets/admin-manage.css',
   'assets/admin-manage.js',
   'assets/admin-market.css',

@@ -6,6 +6,8 @@ import vm from 'node:vm';
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 const SCRIPT = await read('assets/admin.js');
+// The admin page loads the shared report metadata rules before admin.js.
+const METADATA_SCRIPT = await read('assets/report-metadata.js');
 
 /**
  * assets/admin.js is one IIFE over a large form, so the harness hands it a
@@ -199,7 +201,9 @@ function harness() {
     },
     console
   };
-  vm.runInNewContext(SCRIPT, context);
+  vm.createContext(context);
+  vm.runInContext(METADATA_SCRIPT, context);
+  vm.runInContext(SCRIPT, context);
 
   async function analyze(htmlOrDoc, name = '2026-08-27_daily.html') {
     parsed = typeof htmlOrDoc === 'string' ? null : htmlOrDoc;
@@ -233,7 +237,7 @@ test('the shipping Daily cover hands over its own one-liner', async () => {
   const status = app.get('takeaway-status');
   assert.equal(status.hidden, false);
   // The real 8/26 cover, zero-width breaks and non-breaking spaces normalized.
-  assert.equal(status.textContent, 'TODAY 한 줄 자동 감지 · "PCE· 엔비디아· 금통위가 한 장에 겹친다"');
+  assert.equal(status.textContent, 'TODAY 한 줄 자동 감지 · "PCE· 엔비디아· 금통위가 한 장에 겹친다" · 표지 (.cover-hint .cv-one)');
   // The scroll nudge sits in the same .cover-hint and must not come along.
   assert.doesNotMatch(status.textContent, /아래로 넘기면/);
 });
@@ -287,12 +291,14 @@ test('a Daily with no marked line reports none, and invents nothing', async () =
   assert.doesNotMatch(status.textContent, /제목이|설명이|본문 첫 문장/);
 });
 
-test('the detector reads only the five marked places, in order', async () => {
+test('the detector reads only the seven marked places, in order', async () => {
   const script = await read('assets/admin.js');
-  const body = /function detectTakeaway\(doc\)[\s\S]*?\n  }/.exec(script)?.[0] || '';
-  assert.ok(body, 'detectTakeaway must exist');
+  const body = /function readTakeaway\(doc\)[\s\S]*?\n  }/.exec(script)?.[0] || '';
+  assert.ok(body, 'readTakeaway must exist');
 
-  const order = ['report-takeaway', 'data-report-takeaway', '.cv-line', '.cover-hint .cv-one', '.cover-oneline'];
+  // The two September Daily covers (.dcv-one .oc, then the earlier
+  // .dcv-one .dcv-ol) come before the covers they replaced.
+  const order = ['report-takeaway', 'data-report-takeaway', '.dcv-one .oc', '.dcv-one .dcv-ol', '.cv-line', '.cover-hint .cv-one', '.cover-oneline'];
   let at = -1;
   for (const source of order) {
     const found = body.indexOf(source);
@@ -387,7 +393,7 @@ test('the lightweight 8/27 layout is detected through its head tag alone', async
   '8월 27일 주식리포트_커버통합.html');
 
   assert.equal(app.get('takeaway-status').hidden, false);
-  assert.equal(app.get('takeaway-status').textContent, 'TODAY 한 줄 자동 감지 · "지수는 되돌렸지만 거래대금은 따라오지 않았다."');
+  assert.equal(app.get('takeaway-status').textContent, 'TODAY 한 줄 자동 감지 · "지수는 되돌렸지만 거래대금은 따라오지 않았다." · report-takeaway 메타');
 
   await app.ready({ title: '두 개의 와이어', filename: '8월 27일 주식리포트_커버통합.html' });
   await app.get('publish-btn').fire('click');
@@ -418,7 +424,7 @@ test('the v2 cover field is read on its own', async () => {
   const app = harness();
   await app.analyze(LEDGER_V2('Nearly reached it, but never broke through'));
   assert.equal(app.get('takeaway-status').textContent,
-    'TODAY 한 줄 자동 감지 · "Nearly reached it, but never broke through"');
+    'TODAY 한 줄 자동 감지 · "Nearly reached it, but never broke through" · 표지 (.cv-line)');
 });
 
 test('a line broken across two rows comes back as one sentence', async () => {
@@ -426,7 +432,7 @@ test('a line broken across two rows comes back as one sentence', async () => {
   // Exactly what the shipped 8/27 report writes.
   await app.analyze(LEDGER_V2('Nearly reached it,<br/>but never broke through'));
   assert.equal(app.get('takeaway-status').textContent,
-    'TODAY 한 줄 자동 감지 · "Nearly reached it, but never broke through"',
+    'TODAY 한 줄 자동 감지 · "Nearly reached it, but never broke through" · 표지 (.cv-line)',
     'the break must become a space, not disappear');
 });
 
@@ -434,7 +440,7 @@ test('several breaks and stray spacing collapse to single spaces', async () => {
   const app = harness();
   await app.analyze(LEDGER_V2('  지수는<br>되돌렸지만<br />\n  거래대금은​   따라오지 않았다.  '));
   assert.equal(app.get('takeaway-status').textContent,
-    'TODAY 한 줄 자동 감지 · "지수는 되돌렸지만 거래대금은 따라오지 않았다."');
+    'TODAY 한 줄 자동 감지 · "지수는 되돌렸지만 거래대금은 따라오지 않았다." · 표지 (.cv-line)');
 });
 
 test('a head tag still outranks the v2 field', async () => {
@@ -443,7 +449,7 @@ test('a head tag still outranks the v2 field', async () => {
     'Nearly reached it,<br/>but never broke through',
     '\n    <meta name="report-takeaway" content="헤드 태그가 이깁니다.">'
   ));
-  assert.equal(app.get('takeaway-status').textContent, 'TODAY 한 줄 자동 감지 · "헤드 태그가 이깁니다."');
+  assert.equal(app.get('takeaway-status').textContent, 'TODAY 한 줄 자동 감지 · "헤드 태그가 이깁니다." · report-takeaway 메타');
 });
 
 test('a v2 Daily sends its line, and a v2 Weekly sends none', async () => {

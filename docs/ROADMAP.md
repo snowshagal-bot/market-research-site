@@ -10,6 +10,10 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+0. **Report metadata correctness — PR B1, publisher (Draft PR, forward fix only)**:
+   - New reports: the description is the report's own `meta[name="description"]` or blank, never a category sentence (list in `assets/report-metadata.js`, enforced by `/api/publish` and `/api/manage` too); the summary and the Daily one-liner are read from their marked places, including the September Daily covers (`.dcv-one .oc` / `.dcv-ol`, hero `.quote`); cover title rows are no longer run together; the publish form shows where each value came from.
+   - Existing posts are unchanged. Remaining, in order: review/approval → merge → B2 (display + SEO fallback, owner decisions already taken) → C (historical backfill: manifest → owner approval → change) → observation → D (SEO `<title>` format).
+
 1. **Google Search Console Domain property confirmation & Sitemap monitoring**:
    - Verify `snowshagal.com` DNS Domain-property in Google Search Console.
    - Confirm `/sitemap.xml` coverage, indexing status, and crawl rates for KO/EN homepages, category landings, and published reports.

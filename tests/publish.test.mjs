@@ -204,14 +204,14 @@ async function getAuthEnv() {
   return sharedAuthEnv;
 }
 
-function publishRequest({ type = 'daily', cover = null, shareCard = null, coverThumbnail = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, takeaway, tags = null, html = null } = {}, url = 'https://admin.snowshagal.com/api/publish', session = sharedAuthEnv?._authSession) {
+function publishRequest({ type = 'daily', cover = null, shareCard = null, coverThumbnail = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, takeaway, tags = null, html = null, description = '테스트 설명' } = {}, url = 'https://admin.snowshagal.com/api/publish', session = sharedAuthEnv?._authSession) {
   const form = new FormData();
   form.append('file', new File([html || '<!doctype html><html><body>report content with some words</body></html>'], 'report.html', { type: 'text/html' }));
   form.append('type', type);
   form.append('reportDate', reportDate);
   form.append('title', type === 'basics' ? '시장을 읽는 기본' : '테스트 리포트');
   form.append('subtitle', '테스트 부제');
-  form.append('description', '테스트 설명');
+  form.append('description', description);
   if (summary !== undefined) form.append('summary', summary);
   if (takeaway !== undefined) form.append('takeaway', takeaway);
   if (tags !== null) {
@@ -497,6 +497,54 @@ test('publishing stores an optional trimmed homepage summary up to 500 character
       const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
       const post = JSON.parse(tree.find(entry => entry.path === 'data/posts.json').content).find(item => item.id === data.id);
       assert.equal(post.summary, expected);
+    } finally { globalThis.fetch = originalFetch; }
+  }
+});
+
+/* ------------------------------------------ description (PR B1 invariant) */
+
+function publishedFromCalls(calls, id) {
+  const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+  const post = JSON.parse(tree.find(entry => entry.path === 'data/posts.json').content).find(item => item.id === id);
+  const entry = JSON.parse(tree.find(entry => entry.path === 'data/search-index.json').content).find(item => item.id === id);
+  return { post, entry };
+}
+
+test('publish never stores a category sentence as a description, whichever client sent it', async () => {
+  const cases = [
+    ['ko', 'daily', '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.'],
+    ['en', 'daily', '  A daily report on market trends,  investor flows, sectors, and macro drivers.\n'],
+    ['ko', 'basics', '경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 공부.'],
+    ['ko', 'note', '시장과 투자에 관한 생각을 자유롭게\u200B 정리한 투자 노트.']
+  ];
+  for (const [lang, type, description] of cases) {
+    const calls = githubMock();
+    try {
+      const { response, data } = await runPublish({ lang, type, description });
+      assert.equal(response.status, 200, description);
+      const { post, entry } = publishedFromCalls(calls, data.id);
+      // Blank is stored as an empty string, the way the manager stores a
+      // cleared description; it is never the category sentence.
+      assert.equal(post.description, '', description);
+      assert.equal(entry.summary, '', 'no category sentence reaches the search index either');
+    } finally { globalThis.fetch = originalFetch; }
+  }
+});
+
+test('publish keeps an editor\'s description, even one that reads like a category sentence', async () => {
+  for (const [description, stored] of [
+    ['  2026년 9월 4주차 한국 증시 주간 리포트. 코스피 +2.71%.  ', '2026년 9월 4주차 한국 증시 주간 리포트. 코스피 +2.71%.'],
+    ['당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트입니다.', '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트입니다.'],
+    ['', '']
+  ]) {
+    const calls = githubMock();
+    try {
+      const { response, data } = await runPublish({ description, summary: '편집자 요약' });
+      assert.equal(response.status, 200);
+      const { post, entry } = publishedFromCalls(calls, data.id);
+      assert.equal(post.description, stored);
+      assert.equal(post.summary, '편집자 요약');
+      assert.equal(entry.summary, '편집자 요약', 'the search summary is still summary || description');
     } finally { globalThis.fetch = originalFetch; }
   }
 });
