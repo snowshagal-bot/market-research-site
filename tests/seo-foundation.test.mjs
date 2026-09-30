@@ -183,7 +183,7 @@ test('category lists contain only their locale and category and every link resol
   }
 });
 
-test('report SEO title and description are non-empty, unique, and preserve explicit summaries before dated fallbacks', async () => {
+test('report SEO title and description are non-empty, unique, and use the editorial blurb before the factual fallback', async () => {
   const posts = JSON.parse(await read('data/posts.json'));
   const titles = posts.map(reportSeoTitle);
   const descriptions = posts.map(reportDescription);
@@ -200,11 +200,12 @@ test('report SEO title and description are non-empty, unique, and preserve expli
     assert.match(tags, /<title>[^<]+<\/title>/);
     assert.match(tags, /<meta name="description" content="[^"]+">/);
     assert.ok(tags.includes(`rel="canonical" href="${reportSiteUrl(post.href)}`));
-    const summary = String(post.summary || '').replace(/\s+/g, ' ').trim();
-    if (summary) assert.equal(description, clippedDescription(summary), `${post.id} description is its summary`);
-    else if (post.title && (post.reportDate || post.date)) {
-      assert.match(description, new RegExp(String(post.reportDate || post.date).slice(0, 4)));
-      assert.ok(description.includes(post.title), `${post.id} lacks title context`);
+    // Without Market Close facts (none are passed here): summary, else description, as written.
+    const blurb = String(post.summary || '').replace(/\s+/g, ' ').trim() || String(post.description || '').replace(/\s+/g, ' ').trim();
+    if (blurb) assert.equal(description, clippedDescription(blurb), `${post.id} description is its editorial blurb`);
+    else {
+      assert.match(description, new RegExp(String(post.reportDate || post.date).slice(0, 4)), `${post.id} fallback states the date`);
+      assert.ok(description.includes(post.title), `${post.id} fallback names the title`);
     }
   }
   const fallback = { lang: 'en', type: 'note', title: 'A Small Observation', href: 'reports/en/note.html' };

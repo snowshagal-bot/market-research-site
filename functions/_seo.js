@@ -1,3 +1,8 @@
+// The site's shared labels and the editorial blurb rule, the same file the
+// pages load (MARKET_LOCALE), so a card reads the same before and after the
+// browser re-renders it.
+import '../assets/locale.js';
+
 export const PRODUCTION_ORIGIN = 'https://snowshagal.com';
 
 // Landscape 1200x630 card used wherever a page has no artwork of its own.
@@ -499,9 +504,42 @@ function dailyTakeaway(post, facts, lang) {
   return normalizeText(facts?.takeaway?.[lang]) || normalizeText(post?.takeaway) || normalizeText(post?.summary);
 }
 
+// A text written as a sentence: kept as it is when it already ends one — a
+// full stop, question or exclamation mark or an ellipsis, with any closing
+// quotes or brackets after it — and given a full stop otherwise. A question
+// stays a question, so "되는가?" never turns into "되는가?.".
+const SENTENCE_END = /[.!?…。！？]["'”’」』)\]]*$/;
+export function sentence(value) {
+  const text = normalizeText(value);
+  if (!text) return '';
+  return SENTENCE_END.test(text) ? text : `${text}.`;
+}
+
+// The public name of a post's category, as the site's own labels give it
+// (assets/locale.js): 데일리 · 위클리 · 리서치 · 투자 노트 · 시장 입문.
+function categoryLabel(type, lang) {
+  return globalThis.MARKET_LOCALE.copy[lang === 'en' ? 'en' : 'ko'].categories[type]?.label || (lang === 'en' ? 'Report' : '리포트');
+}
+
+// What a post is, in facts alone, for one with no editorial line: its date,
+// its category and its title. Whatever of the three exists is used, so the
+// result is never empty and never claims anything the post does not say.
+function factualDescription(post, lang) {
+  const head = [reportDateLabel(post, lang), categoryLabel(post?.type, lang)].filter(Boolean).join(' ');
+  return sentence([head, normalizeText(post?.title)].filter(Boolean).join(' — '));
+}
+
+/**
+ * A report's search and share description, one of three things:
+ * - a Daily or a Weekly with a published Market Close: the facts, then the
+ *   editor's line for the session (Daily: its takeaway, else its summary;
+ *   Weekly: its summary only — the description repeats the week's numbers);
+ * - otherwise the editorial blurb, as written;
+ * - with no editorial line at all, the date, category and title.
+ * The meta, Open Graph, X and JSON-LD descriptions all use this one text.
+ */
 export function reportDescription(post, options = {}) {
   const lang = postLanguage(post);
-  const title = normalizeText(post?.title);
   const date = reportDateLabel(post, lang);
 
   if (post?.type === 'daily') {
@@ -511,11 +549,10 @@ export function reportDescription(post, options = {}) {
       const kosdaq = facts.kosdaq ? `${formatIndexLevel(facts.kosdaq.close)} (${formatSignedPct(facts.kosdaq.pct)})` : '';
       const flows = [flowPhrase('foreign', facts.foreignNet, lang, 'sentence'), flowPhrase('institution', facts.institutionNet, lang, 'sentence')]
         .filter(Boolean);
-      const takeaway = dailyTakeaway(post, facts, lang).replace(/[.。]+$/, '');
       const parts = lang === 'en'
-        ? [`${date}: KOSPI closed at ${kospi}${kosdaq ? `, KOSDAQ ${kosdaq}` : ''}.`, flows.length ? `${flows.join('; ')}.` : '', takeaway ? `${takeaway}.` : '']
-        : [`${date} 코스피 ${kospi}${kosdaq ? `, 코스닥 ${kosdaq}` : ''} 마감.`, flows.length ? `${flows.join(' · ')}.` : '', takeaway ? `${takeaway}.` : ''];
-      return limitText(parts.filter(Boolean).join(' '));
+        ? [`${date}: KOSPI closed at ${kospi}${kosdaq ? `, KOSDAQ ${kosdaq}` : ''}.`, flows.length ? `${flows.join('; ')}.` : '']
+        : [`${date} 코스피 ${kospi}${kosdaq ? `, 코스닥 ${kosdaq}` : ''} 마감.`, flows.length ? `${flows.join(' · ')}.` : ''];
+      return limitText([...parts, sentence(dailyTakeaway(post, facts, lang))].filter(Boolean).join(' '));
     }
   }
 
@@ -526,48 +563,27 @@ export function reportDescription(post, options = {}) {
       const themes = postTagLabels(post, lang, options.tagRegistry);
       const year = isoDateParts(facts.period.end)?.year;
       const move = `${formatIndexLevel(facts.previousClose)} → ${formatIndexLevel(facts.close)}`;
-      const line = (normalizeText(post?.takeaway) || normalizeText(post?.summary)).replace(/[.。]+$/, '');
       const parts = lang === 'en'
-        ? [`${period}, ${year}: KOSPI ${formatSignedPct(facts.pct)} for the week (${move}).`, themes.length ? `Key variables ahead: ${themes.join(', ')}.` : '', line ? `${line}.` : '']
-        : [`${year}년 ${period} 코스피 주간 ${formatSignedPct(facts.pct)} (${move}).`, themes.length ? `다음 주 변수: ${themes.join('·')}.` : '', line ? `${line}.` : ''];
-      return limitText(parts.filter(Boolean).join(' '));
+        ? [`${period}, ${year}: KOSPI ${formatSignedPct(facts.pct)} for the week (${move}).`, themes.length ? `Key variables ahead: ${themes.join(', ')}.` : '']
+        : [`${year}년 ${period} 코스피 주간 ${formatSignedPct(facts.pct)} (${move}).`, themes.length ? `다음 주 변수: ${themes.join('·')}.` : ''];
+      return limitText([...parts, sentence(post?.summary)].filter(Boolean).join(' '));
     }
   }
 
-  const summary = normalizeText(post?.summary);
-  if (summary) return limitText(summary);
-
-  // The sentence the report itself chose as its point. It says something no
-  // other report says, which is what a search result needs and what the
-  // category boilerplate below can never be.
-  const takeaway = normalizeText(post?.takeaway);
-  const supplied = takeaway || normalizeText(post?.description || post?.subtitle);
-  const category = CATEGORY_LANDINGS[post?.type]?.[lang]?.heading || (lang === 'en' ? 'market report' : '시장 리포트');
-  let context = category;
-  if (post?.type === 'daily') context = lang === 'en' ? 'Korean market daily report' : '한국 주식시장 데일리';
-  if (post?.type === 'weekly') context = lang === 'en' ? 'Korean market weekly outlook' : '주간 시장 전망';
-  if (date && title) {
-    const detail = supplied || (lang === 'en'
-      ? `A Snowshagal ${category.toLowerCase()} covering the market context and key variables.`
-      : `시장 흐름과 핵심 변수를 정리한 Snowshagal의 ${category} 콘텐츠입니다.`);
-    const cleanDetail = detail.replace(/[.!?。]+$/, '');
-    return limitText(lang === 'en'
-      ? `${context} — ${date}: ${title}. ${cleanDetail}.`
-      : `${date} ${context} — ${title}. ${cleanDetail}.`);
-  }
-
-  if (supplied) return limitText(supplied);
-  return limitText(lang === 'en'
-    ? `${title || 'This report'} — a Snowshagal ${category.toLowerCase()}.`
-    : `${title || '이 글'} — Snowshagal의 ${category} 콘텐츠입니다.`);
+  const blurb = globalThis.MARKET_LOCALE.editorialBlurb(post);
+  return limitText(blurb || factualDescription(post, lang));
 }
 
-function reportRowMarkup(post, lang, isLatest = false) {
+// One archive row, drawn as the browser draws it (assets/site.js for the
+// HOME archive, assets/category-landing.js for a category archive): the
+// public category name, date and reading time, title, a line, tags, read.
+// The line is the caller's: the HOME archive shows only an explicit subtitle,
+// a category archive the editorial blurb.
+function reportRowMarkup(post, lang, { line = '', tagRegistry = null, isLatest = false } = {}) {
   const date = String(post?.reportDate || post?.date || '');
-  const category = isLatest
-    ? (lang === 'en' ? 'LATEST' : '최신 리포트')
-    : (CATEGORY_LANDINGS[post?.type]?.[lang]?.heading || (lang === 'en' ? 'Report' : '리포트'));
-  const subtitle = String(post?.subtitle || post?.summary || post?.description || '').trim();
+  const category = isLatest ? (lang === 'en' ? 'LATEST' : '최신 리포트') : categoryLabel(post?.type, lang);
+  const text = normalizeText(line);
+  const tags = Array.isArray(post?.tags) ? post.tags.map((tag) => tagLabel(tag, lang, tagRegistry)).filter(Boolean).join(' · ') : '';
   const mins = typeof post?.readingMinutes === 'number' && post.readingMinutes > 0 ? post.readingMinutes : 0;
   const readLabel = mins > 0 ? (lang === 'en' ? ` · ${mins} min read` : ` · 약 ${mins}분`) : '';
   const latestAttr = isLatest ? ' data-latest="true"' : '';
@@ -575,7 +591,8 @@ function reportRowMarkup(post, lang, isLatest = false) {
     + `<div><span class="report-type ${escapeHtml(post?.type || '')}">${escapeHtml(category)}</span>`
     + `<span class="report-date">${escapeHtml(date)}${escapeHtml(readLabel)}</span></div>`
     + `<div><div class="report-title">${escapeHtml(post?.title || '')}</div>`
-    + `${subtitle ? `<div class="report-subtitle">${escapeHtml(subtitle)}</div>` : ''}</div>`
+    + `${text ? `<div class="report-subtitle">${escapeHtml(text)}</div>` : ''}`
+    + `${tags ? `<div class="report-tags">${escapeHtml(tags)}</div>` : ''}</div>`
     + `<span class="report-arrow"><span class="report-read-label">${lang === 'en' ? 'Read' : '읽기'}</span><span aria-hidden="true">→</span></span></a>`;
 }
 
@@ -602,9 +619,7 @@ export function categoryFeaturedCards(posts, type, lang, tagRegistry = null) {
     })
     .slice(0, 2)
     .map((post, index) => {
-      const summary = String(post?.summary || post?.description || post?.subtitle || '')
-        .replace(/\s+/g, ' ')
-        .trim();
+      const summary = globalThis.MARKET_LOCALE.editorialBlurb(post);
       const cover = normalizeSitePath(post?.coverImage);
       // The first card's cover is the landing's largest contentful paint on
       // every measured page. Lazy, the browser only asks for it once all seven
@@ -635,7 +650,7 @@ export function categoryFeaturedCards(posts, type, lang, tagRegistry = null) {
     }).join('');
 }
 
-export function categoryArchiveLinks(posts, type, lang) {
+export function categoryArchiveLinks(posts, type, lang, tagRegistry = null) {
   return (Array.isArray(posts) ? posts : [])
     .filter((post) => postLanguage(post) === lang && post?.type === type && normalizeSitePath(post?.href))
     .sort((left, right) => {
@@ -643,31 +658,39 @@ export function categoryArchiveLinks(posts, type, lang) {
       return byDate || String(right?.registeredAt || '').localeCompare(String(left?.registeredAt || ''));
     })
     .slice(2)
-    .map((post) => reportRowMarkup(post, lang, false))
+    .map((post) => reportRowMarkup(post, lang, { line: globalThis.MARKET_LOCALE.editorialBlurb(post), tagRegistry }))
     .join('');
 }
 
-export function categoryReportLinks(posts, type, lang) {
+export function categoryReportLinks(posts, type, lang, tagRegistry = null) {
   return (Array.isArray(posts) ? posts : [])
     .filter((post) => postLanguage(post) === lang && post?.type === type && normalizeSitePath(post?.href))
     .sort((left, right) => {
       const byDate = String(right?.reportDate || right?.date || '').localeCompare(String(left?.reportDate || left?.date || ''));
       return byDate || String(right?.registeredAt || '').localeCompare(String(left?.registeredAt || ''));
     })
-    .map((post, idx) => reportRowMarkup(post, lang, idx === 0))
+    .map((post, idx) => reportRowMarkup(post, lang, { line: globalThis.MARKET_LOCALE.editorialBlurb(post), tagRegistry, isLatest: idx === 0 }))
     .join('');
 }
 
-export function homepageReportLinks(posts, lang, limit = 20) {
-  return (Array.isArray(posts) ? posts : [])
+// The HOME archive is a compact index: a row carries an explicit subtitle
+// when the post has one and never a summary or description in its place, and
+// past the first page the same "more" button the browser draws, so the first
+// HTML and the page after assets/site.js runs show the same list.
+export function homepageReportLinks(posts, lang, limit = 20, tagRegistry = null) {
+  const localized = (Array.isArray(posts) ? posts : [])
     .filter((post) => postLanguage(post) === lang && normalizeSitePath(post?.href))
     .sort((left, right) => {
       const byDate = String(right?.reportDate || right?.date || '').localeCompare(String(left?.reportDate || left?.date || ''));
       return byDate || String(right?.registeredAt || '').localeCompare(String(left?.registeredAt || ''));
-    })
+    });
+  const remaining = localized.length - limit;
+  const more = globalThis.MARKET_LOCALE.copy[lang === 'en' ? 'en' : 'ko'].archiveMore;
+  return localized
     .slice(0, limit)
-    .map((post) => reportRowMarkup(post, lang))
-    .join('');
+    .map((post) => reportRowMarkup(post, lang, { line: post?.subtitle, tagRegistry }))
+    .join('')
+    + (remaining > 0 ? `<button type="button" class="archive-more" id="archive-more">${escapeHtml(more)} <span>${remaining}</span></button>` : '');
 }
 
 export function homepageLatestLinks(posts, lang, tagRegistry = null) {
@@ -676,12 +699,9 @@ export function homepageLatestLinks(posts, lang, tagRegistry = null) {
     .sort((left, right) => String(right?.reportDate || right?.date || '').localeCompare(String(left?.reportDate || left?.date || '')));
   return ['daily', 'weekly', 'research'].map((type) => localized.find((post) => post?.type === type)).filter(Boolean)
     .map((post) => {
-      // Keep homepage card copy editorial-only. SEO descriptions add dated
-      // context when summary is absent, but that context must not change the
-      // approved card design or duplicate the visible card title.
-      const summary = String(post?.summary || post?.description || post?.subtitle || '')
-        .replace(/\s+/g, ' ')
-        .trim();
+      // Card copy is the editorial blurb only: never the SEO description's
+      // dated fallback, which would repeat the card's own title and date.
+      const summary = globalThis.MARKET_LOCALE.editorialBlurb(post);
       const cover = normalizeSitePath(post?.coverImage);
       const visual = cover
         ? `<span class="latest-card-cover">${coverImageMarkup(post, LATEST_CARD_COVER_SIZES)}</span>`

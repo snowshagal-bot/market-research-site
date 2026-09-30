@@ -183,31 +183,33 @@ test('a title the editor spaced by hand is never rewritten from the markup', asy
   assert.equal(post.title, '고도 (高度)를 기다리며');
 });
 
-test('a report describes itself with its own line rather than its category', () => {
+test('a Daily without a Market Close describes itself with its own editorial line, else only with facts', () => {
   const base = {
     id: 'r-1', type: 'daily', lang: 'ko', href: 'reports/r-1.html',
     date: '2026-09-01', reportDate: '2026-09-01',
-    title: '붙잡힌 시장 가라앉은 지수',
-    description: '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.'
+    title: '붙잡힌 시장 가라앉은 지수'
   };
 
-  const generic = reportDescription(base);
-  assert.match(generic, /붙잡힌 시장 가라앉은 지수/);
-  assert.match(generic, /당일 시장의 핵심 흐름/, 'with nothing better, the category line still stands in');
-
-  const withLine = reportDescription({ ...base, takeaway: '지수를 올린 쪽은 회사가 산 자기 주식' });
-  assert.match(withLine, /지수를 올린 쪽은 회사가 산 자기 주식/);
-  assert.doesNotMatch(withLine, /당일 시장의 핵심 흐름/, 'the report own words displace the boilerplate');
-  assert.match(withLine, /2026년 9월 1일/, 'the date still leads');
-  assert.match(withLine, /붙잡힌 시장 가라앉은 지수/, 'and the title is still named');
+  // Nothing written by the editor: the date, the category and the title, no claim.
+  assert.equal(reportDescription(base), '2026년 9월 1일 데일리 — 붙잡힌 시장 가라앉은 지수.');
+  // The session's one-liner belongs to the Market Close description; alone it is not one.
+  assert.equal(reportDescription({ ...base, takeaway: '지수를 올린 쪽은 회사가 산 자기 주식' }), '2026년 9월 1일 데일리 — 붙잡힌 시장 가라앉은 지수.');
+  // The report's own description, then the summary above it, as written.
+  assert.equal(reportDescription({ ...base, description: '자사주 매입이 지수를 받친 하루를 따라간다' }), '자사주 매입이 지수를 받친 하루를 따라간다');
+  assert.equal(reportDescription({ ...base, description: '자사주 매입이 지수를 받친 하루를 따라간다', summary: '지수를 올린 쪽은 회사가 산 자기 주식' }), '지수를 올린 쪽은 회사가 산 자기 주식');
+  // A subtitle is not a description.
+  assert.equal(reportDescription({ ...base, subtitle: 'KOSPI Daily Report' }), '2026년 9월 1일 데일리 — 붙잡힌 시장 가라앉은 지수.');
 });
 
 test('two reports from one day and one category still describe themselves apart', () => {
-  const shared = {
-    type: 'daily', lang: 'ko', date: '2026-09-01', reportDate: '2026-09-01',
-    description: '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.'
-  };
-  const first = reportDescription({ ...shared, id: 'a', href: 'reports/a.html', title: '붙잡힌 시장', takeaway: '지수를 올린 쪽은 회사가 산 자기 주식' });
-  const second = reportDescription({ ...shared, id: 'b', href: 'reports/b.html', title: '붙잡힌 시장', takeaway: '오른 종목은 열에 넷' });
+  const shared = { type: 'daily', lang: 'ko', date: '2026-09-01', reportDate: '2026-09-01' };
+  // By their own words when they have them…
+  const first = reportDescription({ ...shared, id: 'a', href: 'reports/a.html', title: '붙잡힌 시장', summary: '지수를 올린 쪽은 회사가 산 자기 주식' });
+  const second = reportDescription({ ...shared, id: 'b', href: 'reports/b.html', title: '붙잡힌 시장', summary: '오른 종목은 열에 넷' });
   assert.notEqual(first, second);
+  // …and by their titles when they have none.
+  assert.notEqual(
+    reportDescription({ ...shared, id: 'c', href: 'reports/c.html', title: '붙잡힌 시장' }),
+    reportDescription({ ...shared, id: 'd', href: 'reports/d.html', title: '가라앉은 지수' })
+  );
 });

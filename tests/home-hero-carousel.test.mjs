@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
+import '../assets/locale.js';
 
 const read = (relPath) => readFile(new URL(`../${relPath}`, import.meta.url), 'utf8');
 
@@ -139,6 +140,8 @@ async function loadSiteScriptContext(initialPosts = [], currentLocale = 'ko', an
         validLanguages: ['ko', 'en'],
         pageLanguagePath: () => '',
         categoryCounts: () => ({}),
+        // The real rule, so the slide is tested with what the page loads.
+        editorialBlurb: globalThis.MARKET_LOCALE.editorialBlurb,
         copy: {
           ko: { categories: {}, read: '읽기', archiveMore: '더보기', reportOrder: '최신순', takeawayLabel: 'TODAY' },
           en: { categories: {}, read: 'Read', archiveMore: 'Load more', reportOrder: 'Latest', takeawayLabel: 'TODAY' }
@@ -200,18 +203,26 @@ test('Slide 02 Featured Research: EN homepage picks latest EN Research without m
   assert.equal(elements['hero-featured-img'].src, '/covers/semi.jpg');
 });
 
-test('Slide 02 Featured Research: Copy fallback priority: summary -> subtitle -> description', async () => {
+test('Slide 02 Featured Research: copy is summary, then description, then nothing — never the subtitle or takeaway', async () => {
   const postWithSummary = [
     { id: '1', type: 'research', lang: 'ko', title: '글 1', reportDate: '2026-08-27', takeaway: '데일리용', summary: '리서치 요약문', subtitle: '부제', description: '설명', href: 'reports/1.html' }
   ];
   const { elements: el1 } = await loadSiteScriptContext(postWithSummary, 'ko');
   assert.equal(el1['hero-featured-snippet'].textContent, '리서치 요약문');
+  assert.equal(el1['hero-featured-snippet'].hidden, false);
 
-  const postWithSubtitle = [
+  const postWithDescription = [
     { id: '2', type: 'research', lang: 'ko', title: '글 2', reportDate: '2026-08-27', subtitle: '부제문구', description: '설명문구', href: 'reports/2.html' }
   ];
-  const { elements: el2 } = await loadSiteScriptContext(postWithSubtitle, 'ko');
-  assert.equal(el2['hero-featured-snippet'].textContent, '부제문구');
+  const { elements: el2 } = await loadSiteScriptContext(postWithDescription, 'ko');
+  assert.equal(el2['hero-featured-snippet'].textContent, '설명문구');
+
+  const postWithSubtitleOnly = [
+    { id: '3', type: 'research', lang: 'ko', title: '글 3', reportDate: '2026-08-27', subtitle: '부제문구', takeaway: '한 줄', href: 'reports/3.html' }
+  ];
+  const { elements: el3 } = await loadSiteScriptContext(postWithSubtitleOnly, 'ko');
+  assert.equal(el3['hero-featured-snippet'].textContent, '');
+  assert.equal(el3['hero-featured-snippet'].hidden, true, 'no copy: the paragraph is hidden, not left empty');
 });
 
 test('Slide 02 Featured Research: Fallback when 0 research posts exist (hide slide 2 and controls)', async () => {

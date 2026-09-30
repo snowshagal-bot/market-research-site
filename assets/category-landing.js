@@ -9,6 +9,9 @@
   if (!category || (!featuredHost && !archiveHost)) return;
 
   const copy = localeApi?.copy?.[lang] || localeApi?.copy?.ko;
+  // Featured and archive copy: summary, else description, else nothing — the
+  // rule in assets/locale.js, which functions/_seo.js renders the page with.
+  const editorialBlurb = (post) => localeApi?.editorialBlurb?.(post) || '';
   const allPosts = Array.isArray(window.RESEARCH_POSTS) ? window.RESEARCH_POSTS : [];
   const posts = (localeApi?.sortPosts(localeApi?.localePosts(allPosts, lang)) || allPosts)
     .filter((post) => post?.type === category);
@@ -106,7 +109,7 @@
   if (featuredHost) {
     if (featuredSection) featuredSection.hidden = false;
     featuredHost.innerHTML = featuredPosts.map((post, index) => {
-      const summary = String(post.summary || post.description || post.subtitle || '').trim();
+      const summary = editorialBlurb(post);
       const readLabel = lang === 'en' ? 'Read report' : '리포트 보기';
       const visual = post.coverImage
         ? `<span class="category-featured-cover">${coverImageMarkup(post, CATEGORY_FEATURED_COVER_SIZES, { loading: index === 0 ? 'eager' : 'lazy' })}</span>`
@@ -142,8 +145,8 @@
     if (archiveSection) archiveSection.hidden = false;
     if (archiveHost) {
       archiveHost.innerHTML = archivePosts.map((post) => {
-        const subtitle = String(post.subtitle || post.summary || post.description || '').trim();
-        const subtitleMarkup = subtitle ? `<div class="report-subtitle">${esc(subtitle)}</div>` : '';
+        const blurb = editorialBlurb(post);
+        const subtitleMarkup = blurb ? `<div class="report-subtitle">${esc(blurb)}</div>` : '';
         const tags = Array.isArray(post.tags) ? post.tags.map(tagLabel).filter(Boolean).join(' · ') : '';
         const tagsMarkup = tags ? `<div class="report-tags">${esc(tags)}</div>` : '';
         const date = post.reportDate || post.date || '';
