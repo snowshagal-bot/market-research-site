@@ -32,6 +32,35 @@ function sitemapLocations(posts) {
   return [...sitemapXml(posts).matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
 }
 
+// reportDescription's length rule, restated because limitText is internal to
+// functions/_seo.js: up to 180 characters a text is used whole; past that it
+// keeps the text up to the last separator (space , ; : · -) before the 180th
+// character and ends in an ellipsis. The pinned cases in the test below hold
+// this statement of the rule to real output.
+function clippedDescription(text) {
+  if (text.length <= 180) return text;
+  const head = text.slice(0, 179);
+  return `${head.replace(/[\s,;:·-]+\S*$/, '').trim() || head.trim()}…`;
+}
+
+const attributeText = (value) => value
+  .replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+
+function descriptionTags(markup) {
+  const meta = (attribute) => {
+    const found = new RegExp(`<meta ${attribute} content="([^"]*)">`).exec(markup);
+    return found ? attributeText(found[1]) : null;
+  };
+  const jsonLd = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(markup);
+  const article = jsonLd ? JSON.parse(jsonLd[1])['@graph'].find((node) => node['@type'] === 'Article') : null;
+  return {
+    meta: meta('name="description"'),
+    og: meta('property="og:description"'),
+    twitter: meta('name="twitter:description"'),
+    jsonLd: article ? article.description : null
+  };
+}
+
 function categoryShell(lang) {
   const prefix = lang === 'en' ? '/en' : '';
   return `<!doctype html><html><head>
@@ -172,7 +201,7 @@ test('report SEO title and description are non-empty, unique, and preserve expli
     assert.match(tags, /<meta name="description" content="[^"]+">/);
     assert.ok(tags.includes(`rel="canonical" href="${reportSiteUrl(post.href)}`));
     const summary = String(post.summary || '').replace(/\s+/g, ' ').trim();
-    if (summary) assert.equal(description, summary);
+    if (summary) assert.equal(description, clippedDescription(summary), `${post.id} description is its summary`);
     else if (post.title && (post.reportDate || post.date)) {
       assert.match(description, new RegExp(String(post.reportDate || post.date).slice(0, 4)));
       assert.ok(description.includes(post.title), `${post.id} lacks title context`);
@@ -183,6 +212,32 @@ test('report SEO title and description are non-empty, unique, and preserve expli
   assert.equal(reportDescription({ lang: 'en', type: 'daily', title: 'No date', description: 'Safe copy.' }), 'Safe copy.');
   assert.equal(reportDescription({ lang: 'ko', type: 'daily', reportDate: '2026-08-27', description: '안전 문구.' }), '안전 문구.');
   assert.ok(reportDescription({ lang: 'en', type: 'daily', title: 'Long', reportDate: '2026-08-27', summary: 'word '.repeat(100) }).length <= 180);
+});
+
+test('a summary over 180 characters is clipped once, at a word, and every description tag carries the same text', async () => {
+  const posts = JSON.parse(await read('data/posts.json'));
+  // The Daily hero quotes of 2026-09-09 and 2026-09-10 (EN), backfilled from
+  // their reports, run past the limit; each description is pinned whole.
+  const pinned = {
+    '2026-09-09-daily-kwiiyd': 'The index was lifted not by Samsung Electronics alone but by a broader growth-stock complex spanning semiconductors, batteries and power equipment · among retail, foreign and…',
+    '2026-09-10-daily-m6v33p': 'The index returned near the previous close, but advancers again fell below half the market · what held the 7,000 line was not broad buying, but concentrated buying that absorbed…'
+  };
+  for (const [id, expected] of Object.entries(pinned)) {
+    const post = posts.find((candidate) => candidate.id === id);
+    assert.ok(post, `${id} is published`);
+    const summary = post.summary.replace(/\s+/g, ' ').trim();
+    assert.ok(summary.length > 180, `${id} summary is over the limit`);
+    assert.ok(summary.startsWith(expected.slice(0, -1)), `${id} keeps the start of its summary`);
+    assert.equal(clippedDescription(summary), expected);
+    assert.equal(reportDescription(post), expected);
+    assert.deepEqual(descriptionTags(reportSeoTags(posts, post)), { meta: expected, og: expected, twitter: expected, jsonLd: expected });
+  }
+  // Every long summary in the corpus, not only the pinned ones, behaves the same.
+  for (const post of posts.filter((candidate) => String(candidate.summary || '').replace(/\s+/g, ' ').trim().length > 180)) {
+    const expected = clippedDescription(post.summary.replace(/\s+/g, ' ').trim());
+    assert.ok(expected.length <= 180 && expected.endsWith('…'), post.id);
+    assert.deepEqual(descriptionTags(reportSeoTags(posts, post)), { meta: expected, og: expected, twitter: expected, jsonLd: expected }, post.id);
+  }
 });
 
 test('report hreflang is reciprocal only for real KO and EN translation pairs', async () => {
