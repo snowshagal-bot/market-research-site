@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-09-30-daily-lvm821",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-09-30",
+    "reportDate": "2026-09-30",
+    "registeredDate": "2026-10-01",
+    "registeredAt": "2026-09-30T19:11:33.258Z",
+    "legacyImport": false,
+    "title": "한 달을 돌아, 같은 자리",
+    "subtitle": "",
+    "description": "",
+    "summary": "열 때는 미국 반도체를 따랐고, 닫을 때는 외국인 매도를 따른 하루.",
+    "takeaway": "지수 2.24p, 외국인 21.5조원 순매도",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "volatility"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-09-30_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-09-30-daily-lvm821.webp",
+    "shareCardImage": "covers/share/2026-09-30-daily-lvm821.jpg",
+    "coverThumbnail": "covers/2026-09-30-daily-lvm821-450.webp"
+  },
+  {
     "id": "2026-09-29-daily-x3mvkw",
     "type": "daily",
     "typeLabel": "Daily",
