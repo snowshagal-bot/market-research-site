@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-01-daily-1vnxfzg",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-01",
+    "reportDate": "2026-10-01",
+    "registeredDate": "2026-10-02",
+    "registeredAt": "2026-10-01T17:40:05.559Z",
+    "legacyImport": false,
+    "title": "금리 위에서 반도체가 이겼다",
+    "subtitle": "",
+    "description": "",
+    "summary": "어제는 아침 강세를 지키지 못했고, 오늘은 아침 약세를 마감까지 뒤집은 하루.",
+    "takeaway": "-1.07% 저점에서 사실상 고가 마감",
+    "tags": [
+      "semiconductors",
+      "kospi",
+      "kosdaq",
+      "flows",
+      "treasuries"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-10-01_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-01-daily-1vnxfzg.webp",
+    "shareCardImage": "covers/share/2026-10-01-daily-1vnxfzg.jpg",
+    "coverThumbnail": "covers/2026-10-01-daily-1vnxfzg-450.webp"
+  },
+  {
     "id": "2026-09-30-daily-1agazd8",
     "type": "daily",
     "typeLabel": "Daily",
