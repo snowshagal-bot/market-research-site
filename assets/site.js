@@ -12,6 +12,9 @@
     return;
   }
   const categories = messages.categories;
+  // Card and preview copy: summary, else description, else nothing — the one
+  // rule in assets/locale.js, which the server renders with too.
+  const editorialBlurb = post => localeApi?.editorialBlurb?.(post) || '';
   const coreTypes = ['daily', 'weekly', 'research', 'note', 'basics'];
   const validTypes = ['all', ...coreTypes];
   const allPosts = (window.RESEARCH_POSTS || []).slice();
@@ -587,7 +590,7 @@
     if(section) section.hidden=!highlights.length;
     host.innerHTML=highlights.map(post=>{
       const info=categoryInfo(post.type);
-      const summary=String(post.summary||post.description||post.subtitle||'').trim();
+      const summary=editorialBlurb(post);
       const readLabel=locale==='en'?'Read report':'리포트 보기';
       const visual=post.coverImage
         ? `<span class="latest-card-cover">${coverImageMarkup(post, LATEST_CARD_COVER_SIZES)}</span>`
@@ -721,10 +724,12 @@
               const readingTimeStr = formatReadingTime(p.readingMinutes, locale);
               const tagsStr = formatTags(p.tags, locale);
               const tagsHtml = tagsStr ? `<div class="calendar-preview-tags">${esc(tagsStr)}</div>` : '';
+              const blurb = editorialBlurb(p);
+              const summaryHtml = blurb ? `<p class="calendar-preview-summary">${esc(blurb)}</p>` : '';
               return `
               <div class="calendar-preview-card">
                 <h5 class="calendar-preview-title">${esc(p.title)}</h5>
-                <p class="calendar-preview-summary">${esc(p.summary || p.description || '')}</p>
+                ${summaryHtml}
                 ${tagsHtml}
                 <div class="calendar-preview-meta">
                   <span>${esc(categoryInfo(p.type).label)} · ${esc(readingTimeStr)}</span>
@@ -1358,7 +1363,7 @@
       const href = cleanReportUrl(latestResearch.href);
       const dateStr = reportDate(latestResearch);
       const readingStr = formatReadingTime(latestResearch.readingMinutes, locale);
-      const copySnippet = String(latestResearch.summary || latestResearch.subtitle || latestResearch.description || '').trim();
+      const copySnippet = editorialBlurb(latestResearch);
 
       if (dateEl) dateEl.textContent = dateStr || '—';
       if (readingEl) {
@@ -1373,7 +1378,10 @@
         titleLink.textContent = latestResearch.title || '';
         titleLink.href = href;
       }
-      if (snippetEl) snippetEl.textContent = copySnippet;
+      if (snippetEl) {
+        snippetEl.textContent = copySnippet;
+        snippetEl.hidden = !copySnippet;
+      }
       if (actionBtn) actionBtn.href = href;
       if (imgLink) imgLink.href = href;
       if (imgEl) {

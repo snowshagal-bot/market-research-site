@@ -68,6 +68,7 @@ The homepage opens with the Snowshagal brand rather than a rotating post or a ge
 - at 320–480px, show the headline and supporting copy first, then continue the artwork below as a deliberate mobile composition rather than a scaled desktop spread;
 - keep Daily / Weekly / Research as concise hero entry points and retain Investment Note / Market Basics in the main navigation and archive;
 - the latest report cards must continue to render from localized post data and may use the existing optional `coverImage` or a restrained CSS fallback;
+- card and preview copy (HOME latest cards, Latest Research slide, category featured cards and archive rows, calendar preview, Related Reading) is the editorial blurb from `assets/locale.js` `editorialBlurb()`: `summary`, else `description`, else nothing. `subtitle` and the Daily `takeaway` never stand in for it, and without a blurb the element is left out rather than rendered empty or filled with a category sentence;
 - respect `prefers-reduced-motion` and keep hover movement subtle.
 
 ## Homepage archive
@@ -75,6 +76,7 @@ The homepage opens with the Snowshagal brand rather than a rotating post or a ge
 - on desktop, use a restrained two-column editorial layout: the recent-report list takes the flexible main column and a 270–300px category index sits alongside it;
 - calculate category counts from the loaded post data, including explicit zero counts, and reuse the existing `?category=` navigation;
 - keep report rows compact and omit empty subtitle markup so missing subtitles do not create artificial space;
+- a HOME archive row shows the public category name, date and reading time, title, an explicit `subtitle` only when the post has one, tags and the read affordance — never a summary or description in the subtitle slot. The server (`functions/_seo.js`) renders the same rows and "more" button that `assets/site.js` renders, so the list does not change on hydration;
 - at tablet and mobile widths, stack the recent reports first and the archive index second without horizontal overflow;
 - keep the index typographic and border-led rather than turning it into a dashboard or adding popularity metrics.
 

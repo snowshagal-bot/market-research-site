@@ -102,8 +102,9 @@ test('numbers are used only when the snapshot is final, regular-session and for 
   const stale = extractDailyFacts(snapshot('2026-09-14'));
   assert.equal(reportSeoTitle(koDaily, { facts: stale }), '9월 15일 증시 마감 · 바람은 다른 곳으로 갔다 | Snowshagal');
   assert.equal(reportSeoTitle(enDaily, { facts: null }), 'Sep 15 Korea Market Close · The Wind Moved Elsewhere | Snowshagal');
-  // Without numbers the description keeps the existing dated wording.
-  assert.match(reportDescription(koDaily), /^2026년 9월 15일 한국 주식시장 데일리 — 바람은 다른 곳으로 갔다\./);
+  // Without numbers, and with no editorial line, the description is the facts of the page.
+  assert.equal(reportDescription(koDaily), '2026년 9월 15일 데일리 — 바람은 다른 곳으로 갔다.');
+  assert.equal(reportDescription(enDaily), 'Sep 15, 2026 Daily — The Wind Moved Elsewhere.');
   for (const text of [reportSeoTitle(koDaily), reportSeoTitle(enDaily), reportDescription(koDaily), reportDescription(enDaily)]) {
     assert.doesNotMatch(text, /\d{1,3}(,\d{3})+\.\d{2}|NaN|undefined|null/);
   }
@@ -193,7 +194,7 @@ test('titles and descriptions escape &, <, ₩ and % safely and leave canonical,
   // Without options the tags are the same shape they always were.
   const plain = reportSeoTags(posts, enDaily);
   assert.match(plain, /<title>Sep 15 Korea Market Close · The Wind Moved Elsewhere \| Snowshagal<\/title>/);
-  assert.match(plain, /<meta name="description" content="Korean market daily report — Sep 15, 2026: The Wind Moved Elsewhere\./);
+  assert.match(plain, /<meta name="description" content="Sep 15, 2026 Daily — The Wind Moved Elsewhere\.">/);
 });
 
 // A D1 stand-in that answers the two queries the facts loader makes.

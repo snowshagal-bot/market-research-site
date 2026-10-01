@@ -91,6 +91,7 @@ export function latestResearchPost(posts, lang) {
 function researchEdits(post, lang) {
   const href = cleanReportHref(post.href);
   const reading = formatReadingTime(post.readingMinutes, lang);
+  const blurb = localeApi().editorialBlurb(post);
   const cover = post.coverImage ? rootPath(post.coverImage) : '';
   const thumbnail = cover ? coverThumbnailOf(post) : '';
   const image = { src: cover || DEFAULT_FEATURED_IMAGE, alt: post.title || '' };
@@ -104,7 +105,10 @@ function researchEdits(post, lang) {
       ? { id: 'hero-featured-reading', text: reading, removeAttrs: ['hidden'] }
       : { id: 'hero-featured-reading', attrs: { hidden: '' } },
     { id: 'hero-featured-title-link', text: post.title || '', attrs: { href } },
-    { id: 'hero-featured-snippet', text: String(post.summary || post.subtitle || post.description || '').trim() },
+    // The editorial blurb or nothing, exactly as assets/site.js sets it.
+    blurb
+      ? { id: 'hero-featured-snippet', text: blurb, removeAttrs: ['hidden'] }
+      : { id: 'hero-featured-snippet', text: '', attrs: { hidden: '' } },
     { id: 'hero-featured-action-btn', attrs: { href } },
     { id: 'hero-featured-img-link', attrs: { href } },
     { id: 'hero-featured-img', attrs: image, removeAttrs: cover && thumbnail ? [] : ['srcset', 'sizes'] }

@@ -250,6 +250,16 @@
     };
   }
 
+  // The one short line a card or preview may show about a post: the editor's
+  // summary, else the report's own description, else nothing. The subtitle
+  // and the Daily takeaway have roles of their own and never stand in for it.
+  // Stored descriptions carry no category sentence since the historical
+  // backfill (scripts/backfill-report-metadata.mjs), so none is filtered here.
+  function editorialBlurb(post) {
+    const text = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
+    return text(post?.summary) || text(post?.description);
+  }
+
   function postLanguage(post) {
     return post?.lang === 'en' ? 'en' : 'ko';
   }
@@ -631,6 +641,7 @@
     validLanguages,
     copy,
     postLanguage,
+    editorialBlurb,
     siteLanguage,
     groupKey,
     normalizeReportPath,

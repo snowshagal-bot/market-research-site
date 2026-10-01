@@ -138,14 +138,20 @@ the report's date (D1 `market_close_snapshots`, final snapshots only) and `funct
 writes Daily titles as `코스피 {close} 마감 · {secondary fact} | {M월 D일} 증시 | Snowshagal`
 (`KOSPI {close} Close · {fact} | {Mon D} | Snowshagal`), Weekly titles as
 `코스피 주간 {pct} · {tag labels} | {Mon–Fri period} | Snowshagal`, and Research titles
-topic-first (`{title} | {tag labels} 리서치 | Snowshagal`). Descriptions carry the KOSPI and
+topic-first (`{title} | {tag labels} 리서치 | Snowshagal`). Daily descriptions carry the KOSPI and
 KOSDAQ close with change, foreign/institution net flows, then the row takeaway, post takeaway
-or summary. The secondary fact prefers a foreign net flow of at least 5,000억, then a KOSDAQ
+or summary; Weekly descriptions carry the week's move and tag themes, then the post's summary
+only (never its description, which repeats the week's numbers). Without a published close a
+description is the editorial blurb as written (`summary`, else `description`; never `subtitle`
+or `takeaway`), else a factual line — report date, public category name, title
+(`2026년 8월 29일 시장 입문 — {title}` / `Aug 29, 2026 Market Basics — {title}`) — with no
+generic claim. Sentences keep their own closing punctuation (`sentence()`), so a title ending in
+`?` or `.` is never followed by another full stop. The secondary fact prefers a foreign net flow of at least 5,000억, then a KOSDAQ
 move of at least 1.5%, then a flow of at least 1,000억, then the KOSDAQ close. The Weekly move
 is measured only between the exact KRX sessions from `functions/_trading-calendar.js` (the
 session before the Mon–Fri period and the period's last session); if either row is missing or
 the year has no calendar, the title carries no number. A date without
-a published close falls back to dated wording with no numbers; nothing is scraped from the
+a published close gets a dated title with no numbers; nothing is scraped from the
 report HTML. `/market/` keeps a data-page title (`코스피·코스닥 마감, 원달러 환율 | 한국 시장
 데이터`) so it does not compete with dated Daily pages. og:title, twitter:title, canonical,
 hreflang and the JSON-LD headline are unchanged; the JSON-LD description matches the meta tag.
@@ -364,7 +370,7 @@ Files under `reports/` are standalone HTML documents that may contain their own 
 
 `functions/_middleware.js` intercepts HTML responses under `/reports/` and injects `/assets/report-shell.js`.
 
-The same middleware injects canonical `snowshagal.com` metadata into published report responses and marks non-Production hosts `noindex, nofollow` by response header. It generates the report `<title>` from the real report date, category, and editorial title. Description preserves an explicit `summary`; otherwise it prefixes the available `description`, `subtitle`, or localized default with the report date and title so generic editorial copy remains report-specific. Missing date/title values retain the safe fallback. It adds `hreflang` only when both sides of an explicit `translationGroup` exist, so untranslated reports never point to invented English pages.
+The same middleware injects canonical `snowshagal.com` metadata into published report responses and marks non-Production hosts `noindex, nofollow` by response header. It generates the report `<title>` from the real report date, category, and editorial title. The description is `reportDescription()` (see the report `<title>` / description rules above): Market Close facts for a Daily or Weekly that has them, otherwise the editorial blurb as written, otherwise the factual date · category · title line; meta, Open Graph, X and JSON-LD all carry that one text, and whatever pieces exist are used so it is never empty. It adds `hreflang` only when both sides of an explicit `translationGroup` exist, so untranslated reports never point to invented English pages.
 
 For the homepage and category landings, the middleware reads the current `data/posts.json` asset and places real report `<a href>` elements in the HTML response before client JavaScript runs. `assets/site.js` and `assets/category-landing.js` then render the interactive views from `data/posts.js`, preserving search, filters, list/calendar modes, and category browsing without duplicating post data. Static KO/EN category shells keep self-canonicals, while locale alternates, navigation exposure and sitemap inclusion are generated only for populated locale categories. The data-driven `/sitemap.xml` lists eligible locale/category pages and current published reports. `/robots.txt` allows public crawling and excludes administrator/API routes.
 

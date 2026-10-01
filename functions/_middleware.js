@@ -253,13 +253,13 @@ export async function onRequest(context) {
       let body = await response.text();
       if (posts && homeLang) {
         body = replaceElementContentsById(body, 'latest-category-cards', homepageLatestLinks(posts, homeLang, tags));
-        body = replaceElementContentsById(body, 'report-list', homepageReportLinks(posts, homeLang));
+        body = replaceElementContentsById(body, 'report-list', homepageReportLinks(posts, homeLang, 20, tags));
       }
       if (posts && landing) {
         const categoryPosts = (Array.isArray(posts) ? posts : [])
           .filter((p) => postLanguage(p) === landing.lang && p?.type === landing.type && normalizeSitePath(p?.href));
         body = replaceElementContentsById(body, 'category-featured-cards', categoryFeaturedCards(posts, landing.type, landing.lang, tags));
-        body = replaceElementContentsById(body, 'category-report-list', categoryArchiveLinks(posts, landing.type, landing.lang));
+        body = replaceElementContentsById(body, 'category-report-list', categoryArchiveLinks(posts, landing.type, landing.lang, tags));
         if (categoryPosts.length <= 2) {
           body = body.replace(/(<section\b[^>]*\bid=["']category-archive-section["'][^>]*)/i, '$1 hidden');
         }
@@ -290,7 +290,7 @@ export async function onRequest(context) {
     let rewriter = new HTMLRewriter();
     if (posts && homeLang) {
       const latest = homepageLatestLinks(posts, homeLang, tags);
-      const archive = homepageReportLinks(posts, homeLang);
+      const archive = homepageReportLinks(posts, homeLang, 20, tags);
       rewriter = rewriter
         .on('#latest-category-cards', { element(element) { element.setInnerContent(latest, { html: true }); } })
         .on('#report-list', { element(element) { element.setInnerContent(archive, { html: true }); } });
@@ -299,7 +299,7 @@ export async function onRequest(context) {
       const categoryPosts = (Array.isArray(posts) ? posts : [])
         .filter((p) => postLanguage(p) === landing.lang && p?.type === landing.type && normalizeSitePath(p?.href));
       const featuredCards = categoryFeaturedCards(posts, landing.type, landing.lang, tags);
-      const archiveLinks = categoryArchiveLinks(posts, landing.type, landing.lang);
+      const archiveLinks = categoryArchiveLinks(posts, landing.type, landing.lang, tags);
       rewriter = rewriter
         .on('#category-featured-cards', {
           element(element) { element.setInnerContent(featuredCards, { html: true }); }
@@ -369,7 +369,7 @@ export async function onRequest(context) {
   } catch (_) {}
 
   const tagBootstrap = serializeTagRegistryBootstrap(tags);
-  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=c032c526fd"></script><script src="/assets/report-shell.js?v=43526f9b5f" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
+  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=55ee2ee40e"></script><script src="/assets/report-shell.js?v=6c85f312e2" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
   const footerStyle = `<style id="site-footer-css">${footerCss()}</style>`;
   const footerMarkup = siteFooter(lang);
   // One feed link per page, for the page's own language. Any Atom link the

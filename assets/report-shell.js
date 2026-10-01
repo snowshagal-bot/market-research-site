@@ -718,7 +718,8 @@
       if (related && related.length) {
         const itemsHtml = related.map((item, idx) => {
           const num = String(idx + 1).padStart(2, '0');
-          const summary = String(item.subtitle || item.summary || item.description || '').trim();
+          // Summary, else description, else nothing (assets/locale.js).
+          const summary = localeApi?.editorialBlurb?.(item) || '';
           const readTime = formatReadingTime(item.readingMinutes, locale);
           const tags = formatTags(item.tags, locale);
           const metaParts = [item.reportDate || item.date, readTime, tags].filter(Boolean);
