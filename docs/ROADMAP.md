@@ -1,6 +1,6 @@
 # Roadmap
 
-Updated: 2026-09-29
+Updated: 2026-10-01
 
 This roadmap records implementation order, completed capabilities, and operational priorities, not a promise to build every future idea. Keep the current site small and stable until real traffic, indexing, and operational needs justify added complexity.
 
@@ -10,9 +10,11 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
-0. **Report metadata correctness — PR B1, publisher (Draft PR, forward fix only)**:
-   - New reports: the description is the report's own `meta[name="description"]` or blank, never a category sentence (list in `assets/report-metadata.js`, enforced by `/api/publish` and `/api/manage` too); the summary and the Daily one-liner are read from their marked places, including the September Daily covers (`.dcv-one .oc` / `.dcv-ol`, hero `.quote`); cover title rows are no longer run together; the publish form shows where each value came from.
-   - Existing posts are unchanged. Remaining, in order: review/approval → merge → B2 (display + SEO fallback, owner decisions already taken) → C (historical backfill: manifest → owner approval → change) → observation → D (SEO `<title>` format).
+0. **Report metadata correctness**:
+   - **B1 — forward metadata correctness: complete in Production (#151)**. New reports: the description is the report's own `meta[name="description"]` or blank, never a category sentence (list in `assets/report-metadata.js`, enforced by `/api/publish` and `/api/manage` too); the summary and the Daily one-liner are read from their marked places, including the September Daily covers (`.dcv-one .oc` / `.dcv-ol`, hero `.quote`); cover title rows are no longer run together; the publish form shows where each value came from.
+   - **C — historical stored metadata normalized (Draft PR, Preview only; not in Production)**. `scripts/backfill-report-metadata.mjs` applies the owner-approved manifest (`scripts/backfill-report-metadata.manifest.json`) to `data/posts.json` and regenerates `data/posts.js` and the search artifacts: no stored category sentence remains (134 exact + 3 owner-listed near copies → the report's own meta description or blank), 44 Daily hero quotes became summaries, 26 `.dcv-one .oc` lines became takeaways, 5 run-together titles were respaced, one summary lost stray Markdown `**`. Stored values only: how pages and SEO show them is unchanged.
+   - **B2 — display / SEO contract: still pending** (shared blurb, SEO description fallback, punctuation; owner decisions already taken). Until B2, the HOME archive's server-rendered rows show a summary/description line that the browser's re-render drops, and some SEO descriptions keep the generic Snowshagal sentence.
+   - Deployment: C is not merged alone. After C is approved, B2 is built on C's head and checked on Preview; both then go to Production in one maintenance session (C, then B2 re-verified on the new main, then B2). Then observation → D (SEO `<title>` format).
 
 1. **Google Search Console Domain property confirmation & Sitemap monitoring**:
    - Verify `snowshagal.com` DNS Domain-property in Google Search Console.

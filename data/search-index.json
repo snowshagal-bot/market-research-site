@@ -52,7 +52,7 @@
     "subtitle": "",
     "date": "2026-09-29",
     "registeredAt": "2026-09-29T12:56:13.645Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "Yesterday, stocks held up while the index broke down. Today, the index held up while most stocks broke down.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -74,7 +74,7 @@
     "subtitle": "",
     "date": "2026-09-29",
     "registeredAt": "2026-09-29T12:52:38.599Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "전날은 종목이 버티고 지수가 무너졌고, 오늘은 지수가 버티는 동안 종목이 무너진 하루.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -92,11 +92,11 @@
     "lang": "en",
     "category": "note",
     "typeLabel": "Investment Note",
-    "title": "Three Days of RatesOne Session",
+    "title": "Three Days of Rates One Session",
     "subtitle": "",
     "date": "2026-09-29",
     "registeredAt": "2026-09-29T10:40:21.276Z",
-    "summary": "Notes and observations on markets and investing.",
+    "summary": "Over Korea’s Chuseok market closure, the U.S. 10-year Treasury yield rose 21bp. On Sep 28, Korea’s 10-year government yield rose 14.7bp in one reopening session. Real yields drove the U.S. move while the breakeven proxy barely changed; historically, policy expectations have been the main transmission channel into Korean long rates.",
     "tags": [
       "rates",
       "treasuries",
@@ -113,11 +113,11 @@
     "lang": "ko",
     "category": "note",
     "typeLabel": "투자 노트",
-    "title": "사흘치 금리를하루에",
+    "title": "사흘치 금리를 하루에",
     "subtitle": "",
     "date": "2026-09-29",
     "registeredAt": "2026-09-29T10:38:49.098Z",
-    "summary": "시장과 투자에 관한 생각을 자유롭게 정리한 투자 노트.",
+    "summary": "추석 휴장 사흘 동안 미국 10년 금리 +21bp · 9월 28일 국고 10년 +14.7bp · 공식 종가 기준 상승은 TIPS 실질금리가 주도, BEI(근사)는 거의 그대로 · 역사적으로 한국에 넘어온 통로는 정책기대 · 10월 휴장 두 번과 점검 달력",
     "tags": [
       "rates",
       "treasuries",
@@ -138,7 +138,7 @@
     "subtitle": "",
     "date": "2026-09-28",
     "registeredAt": "2026-09-28T17:00:22.184Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "Most stocks rose. KOSPI still fell with its two chip heavyweights.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -160,7 +160,7 @@
     "subtitle": "",
     "date": "2026-09-28",
     "registeredAt": "2026-09-28T16:55:55.863Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "종목은 넓게 올랐고, 지수는 반도체 두 종목을 따라 내려간 하루.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -182,7 +182,7 @@
     "subtitle": "",
     "date": "2026-09-27",
     "registeredAt": "2026-09-27T15:01:09.011Z",
-    "summary": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
+    "summary": "Week 4 of September 2026 (Sep 21–23) Korea equity weekly. KOSPI +2.71%, KOSDAQ +2.10%. The indices rose in all three sessions, but KOSPI advancers stayed below 50% each day; Samsung Electronics and SK hynix diverged within the same memory complex. During the Chuseok closure, the U.S. 10-year reached 5.17% and the U.S.–China tariff truce was extended by two months. Includes conditions to watch at the Sep 28 reopening.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -204,7 +204,7 @@
     "subtitle": "",
     "date": "2026-09-27",
     "registeredAt": "2026-09-27T14:56:59.828Z",
-    "summary": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "summary": "2026년 9월 4주차(9월 21일~9월 23일) 한국 증시 주간 리포트. 코스피 +2.71% · 코스닥 +2.10%. 사흘 모두 오른 지수와 사흘 모두 절반 아래였던 코스피 오른 종목 비율, 같은 메모리 안에서 갈린 삼성전자와 SK하이닉스. 추석 휴장 중 미 10년물 5.17%와 미중 관세 휴전 두 달 연장, 9월 28일 재개장 확인 조건까지.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -226,7 +226,7 @@
     "subtitle": "",
     "date": "2026-09-27",
     "registeredAt": "2026-09-27T14:12:36.663Z",
-    "summary": "Independent research on specific industries, companies, policies, and market structure.",
+    "summary": "In Q1 2026, South Korean nonfinancial corporations swung from net borrowing to net lending. Snowshagal Research NO.07 traces where that cash is now and whether it moves into capex, overseas investment, shareholder returns, M&A, or remains unallocated.",
     "tags": [
       "earnings",
       "shareholder-returns",
@@ -248,7 +248,7 @@
     "subtitle": "",
     "date": "2026-09-27",
     "registeredAt": "2026-09-27T14:09:03.006Z",
-    "summary": "특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.",
+    "summary": "2026년 1분기 한국 비금융기업이 돈을 빌리는 쪽에서 남기는 쪽으로 돌아섬 · 그 돈이 지금 어디에 있고 설비투자·해외투자·주주환원·인수합병·대기 중 어디로 갈지를 원자료로 추적한 Snowshagal 리서치 NO.07",
     "tags": [
       "earnings",
       "shareholder-returns",
@@ -266,11 +266,11 @@
     "lang": "en",
     "category": "note",
     "typeLabel": "Investment Note",
-    "title": "Inflation Getsa New Ruler",
+    "title": "Inflation Gets a New Ruler",
     "subtitle": "",
     "date": "2026-09-24",
     "registeredAt": "2026-09-24T12:05:45.116Z",
-    "summary": "Notes and observations on markets and investing.",
+    "summary": "September 30 release of U.S. August PCE and the BEA 2026 annual update · calculation methods change for three core PCE components · the main revision window is recalculated and released the same day · watch the size of the revision, not a break in the series, and the gap versus published benchmark estimates",
     "tags": [
       "liquidity",
       "fed",
@@ -287,11 +287,11 @@
     "lang": "ko",
     "category": "note",
     "typeLabel": "투자 노트",
-    "title": "물가를 재는자가 바뀐다",
+    "title": "물가를 재는 자가 바뀐다",
     "subtitle": "",
     "date": "2026-09-24",
     "registeredAt": "2026-09-24T12:02:41.843Z",
-    "summary": "시장과 투자에 관한 생각을 자유롭게 정리한 투자 노트.",
+    "summary": "9월 30일 미국 8월 PCE와 BEA 2026년 연례 개정 동시 공개 · 근원 PCE 세 항목 계산 방식 변경 · 주된 소급 개정창도 함께 다시 써서 같은 날 공개 · 볼 것은 끊김이 아니라 개정폭, 그리고 공개된 대표 기관 추정과의 차이",
     "tags": [
       "liquidity",
       "fed",
@@ -312,7 +312,7 @@
     "subtitle": "",
     "date": "2026-09-23",
     "registeredAt": "2026-09-23T17:36:02.598Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "The index and the stocks split directions again.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -334,7 +334,7 @@
     "subtitle": "",
     "date": "2026-09-23",
     "registeredAt": "2026-09-23T17:33:30.050Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "지수의 방향과 종목의 방향이 또 갈린 하루.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -356,7 +356,7 @@
     "subtitle": "",
     "date": "2026-09-22",
     "registeredAt": "2026-09-22T17:43:56.047Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "Opening high and finishing strong are two different things.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -377,7 +377,7 @@
     "subtitle": "",
     "date": "2026-09-22",
     "registeredAt": "2026-09-22T17:33:50.457Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "높게 열린 것과 강하게 끝난 것은 다른 하루.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -398,7 +398,7 @@
     "subtitle": "",
     "date": "2026-09-21",
     "registeredAt": "2026-09-21T12:12:41.128Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "7,000 was not a broadly shared number.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -419,7 +419,7 @@
     "subtitle": "",
     "date": "2026-09-21",
     "registeredAt": "2026-09-21T12:06:37.113Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "7,000은 넓게 오른 숫자가 아니었음.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -440,7 +440,7 @@
     "subtitle": "",
     "date": "2026-09-20",
     "registeredAt": "2026-09-20T15:14:01.526Z",
-    "summary": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
+    "summary": "Korea stock market weekly report for Sep. 14–18, 2026. KOSPI -0.23% · KOSDAQ +0.79%. The index recovered in two days what it lost in two, but the share of KOSPI advancers stayed below half on all five sessions while KOSDAQ moved above half late in the week. What to watch in foreign flows, market breadth and the first U.S.-investment announcement over the three sessions before the Chuseok holiday.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -462,7 +462,7 @@
     "subtitle": "",
     "date": "2026-09-20",
     "registeredAt": "2026-09-20T15:12:24.498Z",
-    "summary": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "summary": "2026년 9월 3주차(9월 14일~9월 18일) 한국 증시 주간 리포트. 코스피 -0.23% · 코스닥 +0.79%. 이틀에 잃은 자리를 이틀에 되찾았지만 코스피 오른 종목 비율은 닷새 모두 절반 아래, 코스닥은 주 후반 먼저 절반 위. 추석 휴장 앞 사흘의 외국인 수급·시장 폭·대미투자 확인 조건까지.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -484,7 +484,7 @@
     "subtitle": "",
     "date": "2026-09-19",
     "registeredAt": "2026-09-19T15:11:32.554Z",
-    "summary": "Independent research on specific industries, companies, policies, and market structure.",
+    "summary": "The question after more than 20,000 humanoids shipped: separating units shipped from actual work, human intervention and economics, then locating Korea in the industry using public evidence. Snowshagal Research.",
     "tags": [
       "robotics",
       "valuation"
@@ -503,7 +503,7 @@
     "subtitle": "",
     "date": "2026-09-19",
     "registeredAt": "2026-09-19T15:08:03.153Z",
-    "summary": "특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.",
+    "summary": "2만 대가 출하된 뒤에 남은 질문. 출하 대수와 실제 노동, 사람이 붙은 정도, 그래도 경제성이 남는지를 나눠 세고 한국의 위치까지 공개 증거로 확인한 Snowshagal Research.",
     "tags": [
       "robotics",
       "valuation"
@@ -522,7 +522,7 @@
     "subtitle": "",
     "date": "2026-09-18",
     "registeredAt": "2026-09-18T16:47:33.285Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "When one pillar surges, it can make the whole market look higher.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -544,7 +544,7 @@
     "subtitle": "",
     "date": "2026-09-18",
     "registeredAt": "2026-09-18T16:45:01.543Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "한 축이 크게 오르면, 전체가 오른 것처럼 보임.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -562,11 +562,11 @@
     "lang": "en",
     "category": "daily",
     "typeLabel": "Daily",
-    "title": "Same Level,Different Market",
+    "title": "Same Level, Different Market",
     "subtitle": "",
     "date": "2026-09-17",
     "registeredAt": "2026-09-17T15:59:51.072Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "The hike mattered less than the path that followed.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -588,7 +588,7 @@
     "subtitle": "",
     "date": "2026-09-17",
     "registeredAt": "2026-09-17T15:47:41.227Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "인상 자체보다, 그 뒤의 경로가 재료.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -610,7 +610,7 @@
     "subtitle": "",
     "date": "2026-09-16",
     "registeredAt": "2026-09-16T17:01:52.616Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "An index rising and the market rising are not the same thing.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -631,7 +631,7 @@
     "subtitle": "",
     "date": "2026-09-16",
     "registeredAt": "2026-09-16T16:49:22.189Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "지수가 오른 것과 시장이 오른 것은 다른 일.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -652,7 +652,7 @@
     "subtitle": "",
     "date": "2026-09-15",
     "registeredAt": "2026-09-15T16:17:26.663Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "Bad news priced first is not priced twice.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -673,7 +673,7 @@
     "subtitle": "",
     "date": "2026-09-15",
     "registeredAt": "2026-09-15T16:14:46.667Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "먼저 값이 매겨진 악재는 두 번 값이 매겨지지 않음.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -694,7 +694,7 @@
     "subtitle": "",
     "date": "2026-09-14",
     "registeredAt": "2026-09-14T15:15:54.904Z",
-    "summary": "Notes and observations on markets and investing.",
+    "summary": "Sep. 15 U.S. funding markets, Sep. 16 FOMC, Sep. 17–18 Bank of Japan. Three different tests are compressed into four days, while short-term funding remains quiet and long-term yields have already repriced.",
     "tags": [
       "treasuries",
       "fed",
@@ -714,7 +714,7 @@
     "subtitle": "",
     "date": "2026-09-14",
     "registeredAt": "2026-09-14T15:14:35.582Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "What was marked down in memory today was not earnings · it was the expectation attached to the timing of the next orders",
     "tags": [
       "kosdaq",
       "flows",
@@ -736,7 +736,7 @@
     "subtitle": "",
     "date": "2026-09-14",
     "registeredAt": "2026-09-14T15:11:59.998Z",
-    "summary": "시장과 투자에 관한 생각을 자유롭게 정리한 투자 노트.",
+    "summary": "9월 15일 미국 자금시장, 16일 FOMC, 17~18일 일본은행. 성격이 다른 세 이벤트가 나흘에 몰렸고 뒤의 두 통화정책 회의는 같은 방향을 가리킨다. 자금시장은 아직 조용하지만 장기금리는 이미 올라와 있는 구간을 점검하는 투자 노트.",
     "tags": [
       "treasuries",
       "fed",
@@ -756,7 +756,7 @@
     "subtitle": "",
     "date": "2026-09-14",
     "registeredAt": "2026-09-14T15:07:02.531Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "메모리에서 오늘 깎인 것은 실적이 아니라 · 다음 발주 시점에 붙어 있던 기대",
     "tags": [
       "kosdaq",
       "flows",
@@ -778,7 +778,7 @@
     "subtitle": "",
     "date": "2026-09-11",
     "registeredAt": "2026-09-13T16:51:00.189Z",
-    "summary": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
+    "summary": "Korea stock market weekly report for Week 2 of September 2026 (Sep. 7–Sep. 11). KOSPI +3.33% · KOSDAQ +0.88%. The first trading day created the weekly gain, and the next four sessions gave part of it back. Includes next-week checkpoints for the Fed decision, power/construction and semiconductors.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -798,7 +798,7 @@
     "subtitle": "",
     "date": "2026-09-11",
     "registeredAt": "2026-09-13T16:24:35.302Z",
-    "summary": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "summary": "2026년 9월 2주차(9월 7일~9월 11일) 한국 증시 주간 리포트. 코스피 +3.33% · 코스닥 +0.88%. 주간 상승은 첫 거래일 하나가 만들었고 남은 나흘은 그 하루를 덜어냄. 다음 주 연준 결정과 전력·건설·반도체 확인 조건까지.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -818,7 +818,7 @@
     "subtitle": "",
     "date": "2026-09-11",
     "registeredAt": "2026-09-11T17:09:56.107Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "The overnight shock was paid for at the opening print, and prices recovered · Yet only four in ten stocks advanced",
     "tags": [
       "kospi",
       "kosdaq",
@@ -838,7 +838,7 @@
     "subtitle": "",
     "date": "2026-09-11",
     "registeredAt": "2026-09-11T17:06:07.531Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "밤사이 충격은 첫 체결에서 치렀고 가격은 되돌렸지만 · 오른 종목은 열에 넷",
     "tags": [
       "kospi",
       "kosdaq",
@@ -858,7 +858,7 @@
     "subtitle": "",
     "date": "2026-09-10",
     "registeredAt": "2026-09-10T16:11:54.204Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "The index returned near the previous close, but advancers again fell below half the market · what held the 7,000 line was not broad buying, but concentrated buying that absorbed supply",
     "tags": [
       "kospi",
       "kosdaq",
@@ -878,7 +878,7 @@
     "subtitle": "",
     "date": "2026-09-10",
     "registeredAt": "2026-09-10T15:48:43.272Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "지수는 전일 종가 근처로 돌아왔지만 오른 종목은 다시 절반 아래 · 7,000선을 지킨 힘은 넓은 매수보다 받아내는 매수",
     "tags": [
       "kospi",
       "kosdaq",
@@ -898,7 +898,7 @@
     "subtitle": "",
     "date": "2026-09-09",
     "registeredAt": "2026-09-09T16:13:37.727Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "The index was lifted not by Samsung Electronics alone but by a broader growth-stock complex spanning semiconductors, batteries and power equipment · among retail, foreign and institutional investors, institutions were the only net buyers",
     "tags": [
       "kospi",
       "kosdaq",
@@ -919,7 +919,7 @@
     "subtitle": "",
     "date": "2026-09-09",
     "registeredAt": "2026-09-09T16:11:50.888Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "지수를 든 것은 삼성전자 하나가 아니라 반도체·배터리·전력기기로 넓어진 성장주 축 · 다만 개인·외국인·기관 세 주체 중 유일한 순매수는 기관",
     "tags": [
       "kospi",
       "kosdaq",
@@ -940,7 +940,7 @@
     "subtitle": "",
     "date": "2026-09-08",
     "registeredAt": "2026-09-08T17:27:51.781Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "External catalysts reversed the direction, but the market had been vulnerable to a breakdown since the morning",
     "tags": [
       "kospi",
       "kosdaq",
@@ -962,7 +962,7 @@
     "subtitle": "",
     "date": "2026-09-08",
     "registeredAt": "2026-09-08T17:23:47.757Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "외부 재료가 방향을 꺾었지만, 무너질 준비는 오전부터 되어 있던 하루",
     "tags": [
       "kospi",
       "kosdaq",
@@ -984,7 +984,7 @@
     "subtitle": "",
     "date": "2026-09-07",
     "registeredAt": "2026-09-07T19:06:18.308Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "A Memory-Stock Price Signal That Reached Korea with a Lag",
     "tags": [
       "kospi",
       "kosdaq",
@@ -1006,7 +1006,7 @@
     "subtitle": "",
     "date": "2026-09-07",
     "registeredAt": "2026-09-07T18:58:29.540Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "국내장이 뒤늦게 받은 메모리 가격 신호",
     "tags": [
       "kospi",
       "kosdaq",
@@ -1028,7 +1028,7 @@
     "subtitle": "",
     "date": "2026-09-05",
     "registeredAt": "2026-09-06T17:36:09.776Z",
-    "summary": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
+    "summary": "Korea stock market weekly report for Week 1 of September 2026 (Aug. 31–Sep. 4). KOSPI -1.50% · KOSDAQ -2.97%. Oil and U.S. yields set the direction, while offsetting buying in two mega-caps filled the flow gap. Includes next-week checkpoints for semiconductors, power and biotech.",
     "tags": [
       "semiconductors",
       "rates",
@@ -1048,7 +1048,7 @@
     "subtitle": "",
     "date": "2026-09-05",
     "registeredAt": "2026-09-06T17:33:12.869Z",
-    "summary": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "summary": "2026년 9월 1주차(8월 31일~9월 4일) 한국 증시 주간 리포트. 코스피 -1.50% · 코스닥 -2.97%. 방향을 정한 것은 유가와 미 금리, 빈자리를 메운 것은 두 종목의 반대편 매수. 다음 주 반도체·전력·바이오 확인 조건까지.",
     "tags": [
       "semiconductors",
       "rates",
@@ -1068,7 +1068,7 @@
     "subtitle": "",
     "date": "2026-09-04",
     "registeredAt": "2026-09-04T16:46:00.159Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "It Wasn't Just the Close That Came Back",
     "tags": [
       "semiconductors",
       "rates",
@@ -1088,7 +1088,7 @@
     "subtitle": "",
     "date": "2026-09-04",
     "registeredAt": "2026-09-04T16:37:41.741Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "돌아온 것은 종가만이 아니었다",
     "tags": [
       "semiconductors",
       "rates",
@@ -1108,7 +1108,7 @@
     "subtitle": "",
     "date": "2026-09-03",
     "registeredAt": "2026-09-03T14:44:14.725Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "The market's leaders in the morning were different from those at the close",
     "tags": [
       "flows",
       "geopolitics"
@@ -1127,7 +1127,7 @@
     "subtitle": "",
     "date": "2026-09-03",
     "registeredAt": "2026-09-03T14:37:08.168Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "오전의 상승축과 마감의 상승축이 달랐던 하루",
     "tags": [
       "flows",
       "geopolitics"
@@ -1146,7 +1146,7 @@
     "subtitle": "",
     "date": "2026-09-02",
     "registeredAt": "2026-09-02T19:19:49.228Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "The hand supporting the index was still there.",
     "tags": [
       "flows"
     ],
@@ -1164,7 +1164,7 @@
     "subtitle": "",
     "date": "2026-09-02",
     "registeredAt": "2026-09-02T19:18:02.398Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "지수를 붙잡던 손은 그대로.",
     "tags": [
       "flows"
     ],
@@ -1182,7 +1182,7 @@
     "subtitle": "",
     "date": "2026-09-02",
     "registeredAt": "2026-09-01T15:29:52.609Z",
-    "summary": "Notes and observations on markets and investing.",
+    "summary": "The phase-in of South Korean government bonds into the WGBI has completed 5 of 8 tranches. Foreign holdings of Korean Treasury Bonds have risen less than expected, but the maturity profile of new purchases is getting longer. This investment note examines the remaining September-November flows.",
     "tags": [
       "rates"
     ],
@@ -1200,7 +1200,7 @@
     "subtitle": "",
     "date": "2026-09-02",
     "registeredAt": "2026-09-01T15:28:35.359Z",
-    "summary": "시장과 투자에 관한 생각을 자유롭게 정리한 투자 노트.",
+    "summary": "한국 국채의 WGBI 편입은 8회 중 5회가 진행됐다. 외국인 국고채 보유 증가는 기대 경로를 밑돌았지만 매입 만기는 길어지고 있다. 남은 9~11월의 자금 흐름을 점검하는 투자 노트.",
     "tags": [
       "rates"
     ],
@@ -1218,7 +1218,7 @@
     "subtitle": "",
     "date": "2026-09-01",
     "registeredAt": "2026-09-01T10:26:53.459Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "The index was defended, but risk appetite did not return.",
     "tags": [
       "flows"
     ],
@@ -1236,7 +1236,7 @@
     "subtitle": "",
     "date": "2026-09-01",
     "registeredAt": "2026-09-01T10:07:27.803Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "지수는 방어됐지만, 위험선호는 돌아오지 않았다.",
     "tags": [
       "flows"
     ],
@@ -1254,7 +1254,7 @@
     "subtitle": "",
     "date": "2026-09-01",
     "registeredAt": "2026-08-31T19:35:33.720Z",
-    "summary": "Notes and observations on markets and investing.",
+    "summary": "September 15 brings Treasury settlements and tax payments on the same day. There are no current signs of funding stress, but this note examines the shock-absorbing capacity of U.S. short-term funding markets in a high-rate environment.",
     "tags": [
       "rates",
       "treasuries",
@@ -1274,7 +1274,7 @@
     "subtitle": "",
     "date": "2026-09-01",
     "registeredAt": "2026-08-31T19:33:43.733Z",
-    "summary": "시장과 투자에 관한 생각을 자유롭게 정리한 투자 노트.",
+    "summary": "국채 결제와 세금 납부가 겹치는 9월 15일. 현재 경색 신호는 없지만, 높아진 금리 환경에서 미국 단기자금시장의 충격 흡수력을 점검하는 투자 노트.",
     "tags": [
       "rates",
       "treasuries",
@@ -1294,7 +1294,7 @@
     "subtitle": "",
     "date": "2026-08-31",
     "registeredAt": "2026-08-31T11:09:31.201Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "A recovered index is not the same as a recovered market.",
     "tags": [],
     "readingMinutes": 3,
     "url": "/reports/en/2026-08-31_KOSPI_Daily_Report_EN_Cover",
@@ -1310,7 +1310,7 @@
     "subtitle": "",
     "date": "2026-08-31",
     "registeredAt": "2026-08-31T10:20:26.939Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "지수의 복구와 시장의 복구는 다른 문제",
     "tags": [],
     "readingMinutes": 3,
     "url": "/reports/8월 31일 주식리포트",
@@ -1326,7 +1326,7 @@
     "subtitle": "",
     "date": "2026-08-29",
     "registeredAt": "2026-09-05T17:04:21.240Z",
-    "summary": "A clear guide to the essential concepts behind markets, economics, and investing.",
+    "summary": "",
     "tags": [
       "stablecoins"
     ],
@@ -1344,7 +1344,7 @@
     "subtitle": "",
     "date": "2026-08-29",
     "registeredAt": "2026-09-05T16:50:53.736Z",
-    "summary": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 입문.",
+    "summary": "",
     "tags": [
       "stablecoins"
     ],
@@ -1362,7 +1362,7 @@
     "subtitle": "",
     "date": "2026-08-29",
     "registeredAt": "2026-08-29T09:30:15.250Z",
-    "summary": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
+    "summary": "",
     "tags": [
       "semiconductors",
       "cloud-datacenter",
@@ -1382,7 +1382,7 @@
     "subtitle": "",
     "date": "2026-08-29",
     "registeredAt": "2026-08-29T09:24:15.928Z",
-    "summary": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "summary": "",
     "tags": [
       "semiconductors",
       "cloud-datacenter",
@@ -1402,7 +1402,7 @@
     "subtitle": "",
     "date": "2026-08-29",
     "registeredAt": "2026-08-28T20:00:01.843Z",
-    "summary": "Independent research on specific industries, companies, policies, and market structure.",
+    "summary": "Stablecoins do not buy America’s 30-year debt. This research traces how, under the GENIUS Act framework, global dollar demand connects to U.S. Treasuries maturing in 93 days or less.",
     "tags": [
       "treasuries",
       "stablecoins",
@@ -1422,7 +1422,7 @@
     "subtitle": "",
     "date": "2026-08-29",
     "registeredAt": "2026-08-28T19:57:57.475Z",
-    "summary": "특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.",
+    "summary": "스테이블코인은 미국의 30년을 사지 않는다. 지니어스법 이후 세계의 달러 수요가 93일 이하 국채와 연결되는 구조를 추적한 리서치.",
     "tags": [
       "treasuries",
       "stablecoins",
@@ -1442,7 +1442,7 @@
     "subtitle": "",
     "date": "2026-08-28",
     "registeredAt": "2026-08-28T11:07:27.630Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "The index and market breadth reversed yesterday's roles today",
     "tags": [
       "ai",
       "cloud-datacenter",
@@ -1462,7 +1462,7 @@
     "subtitle": "",
     "date": "2026-08-28",
     "registeredAt": "2026-08-28T11:05:50.258Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "지수와 시장 내부가 어제와 자리를 바꾼 하루",
     "tags": [
       "ai",
       "cloud-datacenter",
@@ -1482,7 +1482,7 @@
     "subtitle": "",
     "date": "2026-08-27",
     "registeredAt": "2026-08-27T13:14:22.915Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "The index's leadership and individual investors' preferred trades · a day pulling in opposite directions",
     "tags": [
       "rates",
       "ai",
@@ -1502,7 +1502,7 @@
     "subtitle": "",
     "date": "2026-08-27",
     "registeredAt": "2026-08-27T13:10:35.606Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "지수가 고른 축과 개인이 고른 축 · 서로 다른 곳을 향한 하루",
     "tags": [
       "rates",
       "ai",
@@ -1522,7 +1522,7 @@
     "subtitle": "",
     "date": "2026-08-26",
     "registeredAt": "2026-08-26T14:03:00.177Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "",
     "tags": [
       "rates",
       "ai",
@@ -1542,7 +1542,7 @@
     "subtitle": "",
     "date": "2026-08-26",
     "registeredAt": "2026-08-26T13:58:29.784Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "",
     "tags": [
       "rates",
       "ai",
@@ -1562,7 +1562,7 @@
     "subtitle": "",
     "date": "2026-08-25",
     "registeredAt": "2026-08-25T15:43:04.681Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "",
     "tags": [
       "flows",
       "semiconductors",
@@ -1582,7 +1582,7 @@
     "subtitle": "",
     "date": "2026-08-25",
     "registeredAt": "2026-08-25T15:40:08.431Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "",
     "tags": [
       "flows",
       "semiconductors",
@@ -1602,7 +1602,7 @@
     "subtitle": "",
     "date": "2026-08-24",
     "registeredAt": "2026-08-24T18:29:58.339Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "",
     "tags": [
       "futures",
       "flows",
@@ -1622,7 +1622,7 @@
     "subtitle": "",
     "date": "2026-08-24",
     "registeredAt": "2026-08-24T11:28:23.355Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "",
     "tags": [
       "futures",
       "flows",
@@ -1642,7 +1642,7 @@
     "subtitle": "",
     "date": "2026-08-23",
     "registeredAt": "2026-08-25T15:44:42.398Z",
-    "summary": "Independent research on specific industries, companies, policies, and market structure.",
+    "summary": "RESEARCH NO.04 · America’s 30-Year Money. Breaking down what makes up a 30-year yield above 5%, and asking which prevails first if that price persists: America’s strength or its burden.",
     "tags": [
       "treasuries",
       "rates",
@@ -1662,7 +1662,7 @@
     "subtitle": "",
     "date": "2026-08-23",
     "registeredAt": "2026-08-25T14:40:56.666Z",
-    "summary": "특정 산업·기업·정책 이슈를 별도로 분석한 비정기 리서치.",
+    "summary": "리서치 NO.04 · 미국의 30년. 30년물 5%대의 성분을 갈라 보고, 이 가격이 오래 지속될 때 미국의 강함과 부담 중 어느 쪽이 먼저 이기는지를 묻는다.",
     "tags": [
       "treasuries",
       "rates",
@@ -1720,7 +1720,7 @@
     "subtitle": "",
     "date": "2026-08-20",
     "registeredAt": "2026-08-28T20:03:42.497Z",
-    "summary": "A clear guide to the essential concepts behind markets, economics, and investing.",
+    "summary": "",
     "tags": [
       "flows",
       "futures"
@@ -1739,7 +1739,7 @@
     "subtitle": "",
     "date": "2026-08-20",
     "registeredAt": "2026-08-28T20:02:13.999Z",
-    "summary": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 입문.",
+    "summary": "",
     "tags": [
       "flows",
       "futures"
@@ -1857,7 +1857,7 @@
     "subtitle": "",
     "date": "2026-08-18",
     "registeredAt": "2026-08-23T19:31:42.711Z",
-    "summary": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
+    "summary": "",
     "tags": [
       "rates",
       "fx",
@@ -1877,7 +1877,7 @@
     "subtitle": "",
     "date": "2026-08-18",
     "registeredAt": "2026-08-23T18:04:38.587Z",
-    "summary": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "summary": "",
     "tags": [
       "rates",
       "fx",
@@ -1916,7 +1916,7 @@
     "subtitle": "",
     "date": "2026-08-16",
     "registeredAt": "2026-08-23T17:27:37.020Z",
-    "summary": "Independent research on specific industries, companies, policies, and market structure.",
+    "summary": "Special Research · Can a GPU Become a Bond? Following how AI compute is turning into a financial asset after NVIDIA and six financial firms announced a $500bn compute-financing platform on August 10, 2026.",
     "tags": [
       "ai",
       "cloud-datacenter",
@@ -1956,7 +1956,7 @@
     "subtitle": "",
     "date": "2026-08-15",
     "registeredAt": "2026-08-28T16:30:43.438Z",
-    "summary": "A clear guide to the essential concepts behind markets, economics, and investing.",
+    "summary": "",
     "tags": [],
     "readingMinutes": 7,
     "url": "/reports/en/Market_Language_Ep4_Why_a_Good_Company_Isnt_Always_a_Good_Stock",
@@ -1972,7 +1972,7 @@
     "subtitle": "",
     "date": "2026-08-15",
     "registeredAt": "2026-08-25T15:49:32.286Z",
-    "summary": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 입문.",
+    "summary": "",
     "tags": [],
     "readingMinutes": 6,
     "url": "/reports/시장을읽는말들_4편_좋은회사가왜좋은주식은아닌가",
@@ -2008,7 +2008,7 @@
     "subtitle": "",
     "date": "2026-08-14",
     "registeredAt": "2026-08-18T13:25:25.050Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "",
     "tags": [
       "fx",
       "flows",
@@ -2028,7 +2028,7 @@
     "subtitle": "",
     "date": "2026-08-13",
     "registeredAt": "2026-08-25T15:51:11.804Z",
-    "summary": "A clear guide to the essential concepts behind markets, economics, and investing.",
+    "summary": "",
     "tags": [
       "flows",
       "semiconductors",
@@ -2048,7 +2048,7 @@
     "subtitle": "",
     "date": "2026-08-13",
     "registeredAt": "2026-08-25T11:10:09.848Z",
-    "summary": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 입문.",
+    "summary": "",
     "tags": [
       "rates",
       "fx",
@@ -2106,7 +2106,7 @@
     "subtitle": "",
     "date": "2026-08-12",
     "registeredAt": "2026-08-25T11:08:22.548Z",
-    "summary": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 입문.",
+    "summary": "",
     "tags": [
       "futures",
       "flows"
@@ -2163,7 +2163,7 @@
     "subtitle": "",
     "date": "2026-08-11",
     "registeredAt": "2026-08-25T15:47:11.805Z",
-    "summary": "A clear guide to the essential concepts behind markets, economics, and investing.",
+    "summary": "",
     "tags": [
       "flows",
       "semiconductors",
@@ -2201,7 +2201,7 @@
     "subtitle": "",
     "date": "2026-08-11",
     "registeredAt": "2026-08-11T17:01:07.192Z",
-    "summary": "경제와 투자, 시장 구조의 기본 개념을 이해하기 쉽게 정리한 시장 입문.",
+    "summary": "",
     "tags": [
       "flows"
     ],
@@ -2219,7 +2219,7 @@
     "subtitle": "",
     "date": "2026-08-11",
     "registeredAt": "2026-08-11T10:06:02.296Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "",
     "tags": [
       "flows"
     ],
@@ -2237,7 +2237,7 @@
     "subtitle": "",
     "date": "2026-08-10",
     "registeredAt": "2026-08-25T15:46:19.514Z",
-    "summary": "A clear guide to the essential concepts behind markets, economics, and investing.",
+    "summary": "",
     "tags": [
       "flows",
       "semiconductors",
@@ -2276,7 +2276,7 @@
     "subtitle": "",
     "date": "2026-08-10",
     "registeredAt": "2026-08-23T18:01:50.087Z",
-    "summary": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
+    "summary": "",
     "tags": [
       "semiconductors",
       "autos",
@@ -2296,7 +2296,7 @@
     "subtitle": "",
     "date": "2026-08-10",
     "registeredAt": "2026-08-23T17:56:47.515Z",
-    "summary": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "summary": "",
     "tags": [
       "semiconductors",
       "autos",
@@ -2316,7 +2316,7 @@
     "subtitle": "",
     "date": "2026-08-10",
     "registeredAt": "2026-08-10T09:56:35.777Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "",
     "tags": [
       "semiconductors",
       "flows"
@@ -2335,7 +2335,7 @@
     "subtitle": "",
     "date": "2026-08-09",
     "registeredAt": "2026-08-23T17:13:42.753Z",
-    "summary": "Independent research on specific industries, companies, policies, and market structure.",
+    "summary": "A special research report on what sovereign AI is meant to protect, which layers—model, compute, data and operational control—make AI meaningfully ours, and how fifteen countries and regions have made different choices, including the NAVER–NVIDIA case.",
     "tags": [
       "ai",
       "policy",
@@ -2415,7 +2415,7 @@
     "subtitle": "",
     "date": "2026-08-06",
     "registeredAt": "2026-08-24T14:08:01.154Z",
-    "summary": "A daily report on market trends, investor flows, sectors, and macro drivers.",
+    "summary": "",
     "tags": [
       "semiconductors",
       "flows",
@@ -2475,7 +2475,7 @@
     "subtitle": "",
     "date": "2026-08-05",
     "registeredAt": "2026-08-13T14:42:18.890Z",
-    "summary": "당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.",
+    "summary": "",
     "tags": [
       "energy",
       "rates",
@@ -2533,7 +2533,7 @@
     "subtitle": "",
     "date": "2026-08-03",
     "registeredAt": "2026-08-23T17:33:36.749Z",
-    "summary": "A weekly report reviewing recent market moves and the key variables for the week ahead.",
+    "summary": "",
     "tags": [
       "rates",
       "semiconductors",
@@ -2592,7 +2592,7 @@
     "subtitle": "2026.08.03–08.07",
     "date": "2026-08-03",
     "registeredAt": "",
-    "summary": "지난주 시장을 복기하고 다음 주 변수와 주도 업종의 조건을 정리한 주간 리포트.",
+    "summary": "",
     "tags": [
       "rates",
       "semiconductors",
@@ -2689,7 +2689,7 @@
     "subtitle": "",
     "date": "2026-07-29",
     "registeredAt": "2026-08-12T08:08:46.956Z",
-    "summary": "외국인은 대규모로 팔았는데 보유비중은 오르고, 급락의 범인으로 지목된 레버리지는 단독 원인으로 보기 어렵다. 외국인 수급·대형주 쏠림·레버리지 리밸런싱을 따라가며 **숫자 뒤에 숨은 시장 구조**를 살펴본다.",
+    "summary": "외국인은 대규모로 팔았는데 보유비중은 오르고, 급락의 범인으로 지목된 레버리지는 단독 원인으로 보기 어렵다. 외국인 수급·대형주 쏠림·레버리지 리밸런싱을 따라가며 숫자 뒤에 숨은 시장 구조를 살펴본다.",
     "tags": [
       "flows",
       "futures"
@@ -2787,7 +2787,7 @@
     "subtitle": "",
     "date": "2026-07-13",
     "registeredAt": "2026-08-12T17:51:16.570Z",
-    "summary": "지난주 흐름을 점검하고 다음 주 변수와 주도 업종의 조건을 정리한 위클리 리포트.",
+    "summary": "",
     "tags": [
       "semiconductors",
       "rates",
