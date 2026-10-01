@@ -1,5 +1,34 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-01-daily-bozyzg",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-10-01",
+    "reportDate": "2026-10-01",
+    "registeredDate": "2026-10-02",
+    "registeredAt": "2026-10-01T18:15:14.074Z",
+    "legacyImport": false,
+    "title": "Chips Beat the Yield Drag",
+    "subtitle": "",
+    "description": "",
+    "summary": "Yesterday, an early rally faded. Today, an early selloff was fully reversed by the close.",
+    "takeaway": "Down 1.07% early. Closed near the high.",
+    "tags": [
+      "semiconductors",
+      "kospi",
+      "kosdaq",
+      "flows",
+      "treasuries"
+    ],
+    "readingMinutes": 4,
+    "href": "reports/en/2026-10-01_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-10-01-daily-1vnxfzg",
+    "coverImage": "covers/2026-10-01-daily-bozyzg.webp",
+    "shareCardImage": "covers/share/2026-10-01-daily-bozyzg.jpg",
+    "coverThumbnail": "covers/2026-10-01-daily-bozyzg-450.webp"
+  },
+  {
     "id": "2026-10-01-daily-1vnxfzg",
     "type": "daily",
     "typeLabel": "주식 리포트",
