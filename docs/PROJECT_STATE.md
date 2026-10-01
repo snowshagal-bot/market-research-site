@@ -476,7 +476,7 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `assets/category-state.css` — category state styles
 - `assets/site.js` — homepage category filtering, TODAY strip, paged archive, calendar, search dialog, theme/menu behavior
 - `assets/category-landing.js` / `assets/category-landing.css` — shared KO/EN category archive rendering and presentation
-- `assets/locale.js` — shared locale copy, legacy-language normalization, filtering, URL, and translation-pair helpers
+- `assets/locale.js` — shared locale copy, legacy-language normalization, filtering, URL, and translation-pair helpers, and `editorialBlurb()` (summary → description → none), the card/preview copy rule shared by the server renderers and the page scripts
 - `assets/language.css` — restrained desktop/mobile language selector styling
 - `en/index.html` — English homepage shell
 - `market/index.html` / `en/market/index.html` — Market Close pages
@@ -494,6 +494,7 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `data/market-summary.js` — fallback data and editorial one-liner for the homepage TODAY strip
 - `data/tags.json` / `data/tags.js` — canonical topic tag registry
 - `scripts/build-search-index.mjs` — builds the search index and syncs reading time
+- `scripts/backfill-report-metadata.mjs` / `scripts/backfill-report-metadata.manifest.json` — one-off historical metadata backfill (PR C, applied in Production): compare-and-swap against the owner-approved manifest, regenerated through the canonical build; a rerun is a no-op
 - `functions/api/_search-index.js` — shared search index serializer used by the build script, publisher and manager
 - `data/search-index.json` — canonical full index; `data/search-index-meta.js` and `data/search-index-body-{ko,en}.js` are the browser tiers
 - `data/posts.json` — canonical post metadata used by publishing flow and deployment checks
@@ -501,6 +502,7 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `admin/index.html` — report publishing admin UI
 - `assets/admin.js` — local HTML parsing, client-only cover crop preview, publish flow, deployment polling
 - `functions/api/publish.js` — authenticated server-side publisher using GitHub API
+- `assets/report-metadata.js` — the closed list of category default sentences that `assets/admin.js`, `/api/publish` and `/api/manage` refuse to store as a description
 - `admin/manage/index.html` — existing-post search, edit, cover/HTML replacement, and deletion UI
 - `assets/admin-manage.js` / `assets/admin-manage.css` — post-management client flow and responsive presentation
 - `functions/api/manage.js` — authenticated atomic update/delete commits with ref-conflict protection

@@ -10,23 +10,33 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
-0. **Report metadata correctness**:
-   - **B1 — forward metadata correctness: complete in Production (#151)**. New reports: the description is the report's own `meta[name="description"]` or blank, never a category sentence (list in `assets/report-metadata.js`, enforced by `/api/publish` and `/api/manage` too); the summary and the Daily one-liner are read from their marked places, including the September Daily covers (`.dcv-one .oc` / `.dcv-ol`, hero `.quote`); cover title rows are no longer run together; the publish form shows where each value came from.
-   - **C — historical stored metadata normalized (Draft PR, Preview only; not in Production)**. `scripts/backfill-report-metadata.mjs` applies the owner-approved manifest (`scripts/backfill-report-metadata.manifest.json`) to `data/posts.json` and regenerates `data/posts.js` and the search artifacts: no stored category sentence remains (134 exact + 3 owner-listed near copies → the report's own meta description or blank), 44 Daily hero quotes became summaries, 26 `.dcv-one .oc` lines became takeaways, 5 run-together titles were respaced, one summary lost stray Markdown `**`. Stored values only: how pages and SEO show them is unchanged.
-   - **B2 — display / SEO contract (stacked Draft PR on C, Preview only; not in Production)**. One editorial blurb (`assets/locale.js` `editorialBlurb()`: summary → description → none, never subtitle or takeaway) for cards, the Latest Research slide, category rows, the calendar preview and Related Reading; HOME archive rows show an explicit subtitle only, rendered identically by the server and `assets/site.js`; `reportDescription()` is Market Close facts, else the blurb as written, else a factual date · category · title line, with no generic Snowshagal sentence and no `?.` / `..`. SEO `<title>` and the search index are unchanged. Until B2 ships, the HOME archive's server-rendered rows show a summary/description line that the browser's re-render drops, and some SEO descriptions keep the generic Snowshagal sentence.
-   - Deployment: C is not merged alone. After C is approved, B2 is built on C's head and checked on Preview; both then go to Production in one maintenance session (C, then B2 re-verified on the new main, then B2). Then observation → D (SEO `<title>` format).
-
 1. **Google Search Console Domain property confirmation & Sitemap monitoring**:
    - Verify `snowshagal.com` DNS Domain-property in Google Search Console.
    - Confirm `/sitemap.xml` coverage, indexing status, and crawl rates for KO/EN homepages, category landings, and published reports.
    - Run Search Console / Naver Search Advisor URL inspection on legacy report `.html` URLs, which now 301 to the canonical address (SEO Phase 1, #138).
-2. **Observe real visitor traffic & reading engagement**:
+2. **SEO title optimization (D) — observation first, not scheduled for implementation**:
+   - The current report `<title>` format stays unchanged.
+   - First observe how search engines index and show reports after the metadata cycle (C #154, B2 #155): Search Console impressions, CTR and queries, plus manual SERP checks and URL inspection of representative reports.
+   - Only then decide whether a title-format experiment is justified.
+3. **Observe real visitor traffic & reading engagement**:
    - Accumulate baseline data across `/admin/analytics/` (Cloudflare Web Analytics: Visits, Page views, referrers, devices, connection countries; and Privacy-minimal Engagement Analytics: active reading time, scroll depth, session completion).
-3. **Operational stabilization**:
+4. **Operational stabilization**:
    - Defer large feature additions; focus on publishing rhythm and monitor for real friction in day-to-day writing and report management.
+
+### Open follow-ups
+
+- **D — SEO `<title>` format**: observation pending (Next action 2).
+- **#150** — discoverability of horizontally scrolling UI on mobile (one common rule, not shorter labels).
+- **#152** — authenticated Preview Admin environment (Preview `AUTH_PEPPER` and admin account).
+- **Report vs MARKET count (612 vs 611)** — investigation on hold.
+- **Daily SEO description time horizon** — content semantics, not a confirmed defect: a Daily with a Market Close states the day's investor flows and then the report's own line, which can speak on a different time scale (2026-09-30: the day's foreign net selling, then a month-scale foreign-selling line from the cover).
 
 ### Recently completed (Production)
 
+- **Report metadata correctness — B1 (#151), C (#154), B2 (#155), Production complete 2026-10-01**:
+  - **B1 — forward metadata correctness**: a newly published report's description is its own `meta[name="description"]` or blank, never a category sentence (the closed list in `assets/report-metadata.js`, also enforced by `/api/publish` and `/api/manage`); the summary and the Daily one-liner are read from their marked places (hero `.quote`, `.dcv-one .oc` / `.dcv-ol`); cover title rows are no longer run together; the publish form shows where each value came from.
+  - **C — historical stored metadata normalized**: the owner-approved manifest was applied by `scripts/backfill-report-metadata.mjs` (compare-and-swap, regenerated through the canonical build). As of deployment the Production corpus stores no category-boilerplate description; Daily hero-quote summaries and `.dcv-one .oc` takeaways were backfilled; 5 run-together titles were respaced; one stray Markdown `**` was removed. Later publishes are covered by B1.
+  - **B2 — display + SEO description contract**: one editorial blurb (`assets/locale.js` `editorialBlurb()`: summary → description → none, never subtitle or takeaway) for HOME latest cards, the Latest Research slide, category cards and rows, the calendar preview and Related Reading; HOME archive rows show an explicit subtitle only, and their server HTML equals what `assets/site.js` renders, so the list no longer changes on hydration. `reportDescription()` is Market Close facts, else the blurb as written, else a factual date · category · title line: no generic Snowshagal sentence, no `?.` / `..`, and one text for meta, Open Graph, X and JSON-LD (also the Atom feed summaries). The SEO `<title>` format and the search contract (#147) are unchanged.
 - **Search loading — report bodies on the first query (#147, merged a230365)**: opening the search dialog loads only `search-index-meta.js`; the first non-empty query or tag chip requests this locale's body shard once, and its arrival re-runs the box's current query only while the dialog is open. The browser meta drops `typeLabel`, `registeredAt` and `coverImage`; `data/search-index.json` stays because publish/manage rebuild the index from it. Production checked on KO/EN desktop/mobile: no search request on page load, meta only on open, own-locale body once on the first query, none on later queries or reopen, results identical to the previous code, metadata search intact when the body fails. Supersedes #130 (closed).
 - **Global Latest B3 — HOME + MARKET TODAY overlay (#145, merged 43b1eb7)**: on TODAY views only (HOME strip, `/market/` TODAY, KO/EN) fresh Global Latest replaces a global instrument's displayed figures per item as a view projection; HISTORY / 1W / 1M never use it, no payload is rewritten, KOSPI/KOSDAQ are never overlaid. Production HOME raw HTML carries the per-card basis lines.
 - **Global Latest B1/B2 — receiver and collector**: B1 (#144, merged ba789ca) adds `contracts/global_latest/` 1.0.0, `market_global_latest` (migration `0002`), `POST /api/market/global/publish` and `GET /api/market/global/latest`. B2 (publisher repo) collects every 30 minutes (Task `시장지표-GlobalLatest`); Production `/api/market/global/latest` is receiving its observations.
