@@ -1,5 +1,31 @@
 [
   {
+    "id": "2026-10-03-note-1km4ezj",
+    "type": "note",
+    "typeLabel": "투자 노트",
+    "lang": "ko",
+    "date": "2026-10-03",
+    "reportDate": "2026-10-03",
+    "registeredDate": "2026-10-03",
+    "registeredAt": "2026-10-02T18:30:57.671Z",
+    "legacyImport": false,
+    "title": "수출은 최대, 배수는 바닥권",
+    "subtitle": "",
+    "description": "9월 수출 1,209.4억달러 사상 최대 · 3분기 코스피 −19.3% · 1년 보폭은 수출과 비슷하고 석 달 괴리의 대부분은 7월 한 달(−22.2%) · 원화 12.7% 강세로 달러 환산 낙폭은 −7.6% · 선행 EPS +17%, 선행 PER 약 7.8배 → 저점 4.74배 → 5.55배 · 3분기 외국인 약 41.6조원 순매도와 자사주 · 4분기 점검표",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "policy",
+      "tariffs-trade"
+    ],
+    "readingMinutes": 17,
+    "href": "reports/20261003_Investment_Note_Exports_vs_KOSPI.html",
+    "coverImage": "covers/2026-10-03-note-1km4ezj.webp",
+    "shareCardImage": "covers/share/2026-10-03-note-1km4ezj.jpg",
+    "coverThumbnail": "covers/2026-10-03-note-1km4ezj-450.webp"
+  },
+  {
     "id": "2026-10-02-daily-mj4vwv",
     "type": "daily",
     "typeLabel": "Daily",
