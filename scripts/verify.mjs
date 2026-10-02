@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { modifiedReportSources } from './report-source-invariant.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -371,19 +372,13 @@ runStep(3, 'Checking repository invariants & git diff whitespace checks', () => 
     throw err;
   }
 
-  // 5. Invariant: reports/** directory must not have modified HTML files
+  // 5. Invariant: existing reports/** source HTML must not be modified (a newly added report is fine)
   if (baseRef) {
-    const reportDiff = spawnSync('git', ['diff', '--name-only', baseRef, '--', 'reports/'], {
-      cwd: rootDir,
-      encoding: 'utf8'
-    });
-    if (reportDiff.status === 0 && reportDiff.stdout.trim().length > 0) {
-      const changed = reportDiff.stdout.trim().split(/\r?\n/).filter(Boolean);
-      if (changed.length > 0) {
-        const err = new Error(`reports/** source HTML files must not be modified (${changed.length} file(s) changed)`);
-        err.details = changed.join('\n');
-        throw err;
-      }
+    const changed = modifiedReportSources(baseRef, { cwd: rootDir });
+    if (changed.length > 0) {
+      const err = new Error(`reports/** source HTML files must not be modified (${changed.length} file(s) changed)`);
+      err.details = changed.join('\n');
+      throw err;
     }
   }
 });
