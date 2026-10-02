@@ -202,5 +202,17 @@ window.TAG_REGISTRY = {
     "en": "PCE",
     "group": "market",
     "custom": true
+  },
+  "china": {
+    "ko": "중국",
+    "en": "China",
+    "group": "market",
+    "custom": true
+  },
+  "oil": {
+    "ko": "정유",
+    "en": "oil",
+    "group": "sector",
+    "custom": true
   }
 };

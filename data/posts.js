@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-02-daily-34p8ch",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-02",
+    "reportDate": "2026-10-02",
+    "registeredDate": "2026-10-03",
+    "registeredAt": "2026-10-02T15:02:26.500Z",
+    "legacyImport": false,
+    "title": "문턱 위에 걸쳤다",
+    "subtitle": "",
+    "description": "",
+    "summary": "전날은 반도체가, 오늘은 중국발 공급 재료의 정유와 중동 긴장의 방산이 앞줄에 선 하루.",
+    "takeaway": "중국 석유제품 수출 중단에 정유주 급등",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "china",
+      "oil"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-10-02_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-02-daily-34p8ch.webp",
+    "shareCardImage": "covers/share/2026-10-02-daily-34p8ch.jpg",
+    "coverThumbnail": "covers/2026-10-02-daily-34p8ch-450.webp"
+  },
+  {
     "id": "2026-10-01-daily-bozyzg",
     "type": "daily",
     "typeLabel": "Daily",
