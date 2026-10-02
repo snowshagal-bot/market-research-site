@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-03-note-1suk7ev",
+    "type": "note",
+    "typeLabel": "Investment Note",
+    "lang": "en",
+    "date": "2026-10-03",
+    "reportDate": "2026-10-03",
+    "registeredDate": "2026-10-03",
+    "registeredAt": "2026-10-02T18:32:32.751Z",
+    "legacyImport": false,
+    "title": "Record Exports, Depressed Multiples",
+    "subtitle": "",
+    "description": "September exports hit a record USD 120.94bn · KOSPI −19.3% in Q3 · one-year moves broadly tracked exports while most of the three-month divergence came in July (−22.2%) · 12.7% won appreciation narrowed the in USD terms decline to −7.6% · forward EPS +17%, forward P/E ~7.8x → low 4.74x → 5.55x · foreigners sold ~KRW 41.6tn net in Q3 alongside major buybacks · Q4 checklist",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "policy",
+      "tariffs-trade"
+    ],
+    "readingMinutes": 19,
+    "href": "reports/en/20261003_Investment_Note_Exports_vs_KOSPI_EN.html",
+    "translationGroup": "2026-10-03-note-1km4ezj",
+    "coverImage": "covers/2026-10-03-note-1suk7ev.webp",
+    "shareCardImage": "covers/share/2026-10-03-note-1suk7ev.jpg",
+    "coverThumbnail": "covers/2026-10-03-note-1suk7ev-450.webp"
+  },
+  {
     "id": "2026-10-03-note-1km4ezj",
     "type": "note",
     "typeLabel": "투자 노트",
