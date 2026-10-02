@@ -1,5 +1,34 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-02-daily-mj4vwv",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-10-02",
+    "reportDate": "2026-10-02",
+    "registeredDate": "2026-10-03",
+    "registeredAt": "2026-10-02T15:05:33.934Z",
+    "legacyImport": false,
+    "title": "Just Above the Line",
+    "subtitle": "",
+    "description": "",
+    "summary": "Chips led yesterday. Today, refiners on China supply headlines and defense names on Middle East tensions moved to the front.",
+    "takeaway": "Below at 15:20. Back above at the close.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "china",
+      "oil"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-10-02_KOSPI_Daily_Report_EN_publish.html",
+    "translationGroup": "2026-10-02-daily-34p8ch",
+    "coverImage": "covers/2026-10-02-daily-mj4vwv.webp",
+    "shareCardImage": "covers/share/2026-10-02-daily-mj4vwv.jpg",
+    "coverThumbnail": "covers/2026-10-02-daily-mj4vwv-450.webp"
+  },
+  {
     "id": "2026-10-02-daily-34p8ch",
     "type": "daily",
     "typeLabel": "주식 리포트",
