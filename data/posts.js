@@ -1,5 +1,30 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-03-research-1w4e1ln",
+    "type": "research",
+    "typeLabel": "비정기 리서치",
+    "lang": "ko",
+    "date": "2026-10-03",
+    "reportDate": "2026-10-03",
+    "registeredDate": "2026-10-03",
+    "registeredAt": "2026-10-03T13:30:17.622Z",
+    "legacyImport": false,
+    "title": "엔진이 병목이다",
+    "subtitle": "",
+    "description": "가스터빈과 전력망 대기가 길어지며 데이터센터 현장 발전 수요 일부가 4행정 엔진으로 이동 · 선박 발전기와 데이터센터가 만나는 일부 4행정 중속 생산·시험 기반, 주문의 시차와 병목의 유통기한을 추적한 Snowshagal 리서치 NO.08",
+    "tags": [
+      "shipbuilding",
+      "kospi",
+      "kosdaq",
+      "tariffs-trade"
+    ],
+    "readingMinutes": 17,
+    "href": "reports/리서치_NO.08_엔진이병목이다_2026.10.03_매거진시안.html",
+    "coverImage": "covers/2026-10-03-research-1w4e1ln.webp",
+    "shareCardImage": "covers/share/2026-10-03-research-1w4e1ln.jpg",
+    "coverThumbnail": "covers/2026-10-03-research-1w4e1ln-450.webp"
+  },
+  {
     "id": "2026-10-03-note-1suk7ev",
     "type": "note",
     "typeLabel": "Investment Note",
