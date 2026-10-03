@@ -1,5 +1,31 @@
 [
   {
+    "id": "2026-10-03-research-25yqi0",
+    "type": "research",
+    "typeLabel": "Research",
+    "lang": "en",
+    "date": "2026-10-03",
+    "reportDate": "2026-10-03",
+    "registeredDate": "2026-10-03",
+    "registeredAt": "2026-10-03T14:22:06.476Z",
+    "legacyImport": false,
+    "title": "The Engine Is the Bottleneck",
+    "subtitle": "",
+    "description": "As grid and gas-turbine queues lengthen, some data-center on-site power demand is shifting to four-stroke engines. Snowshagal Research NO.08 traces where shipboard generators and data-center power plants meet on parts of the same medium-speed manufacturing and test base—and how long that bottleneck can last.",
+    "tags": [
+      "shipbuilding",
+      "kospi",
+      "kosdaq",
+      "tariffs-trade"
+    ],
+    "readingMinutes": 22,
+    "href": "reports/en/20261003_Research_NO08_The_Engine_Is_the_Bottleneck_EN.html",
+    "translationGroup": "2026-10-03-research-1w4e1ln",
+    "coverImage": "covers/2026-10-03-research-25yqi0.webp",
+    "shareCardImage": "covers/share/2026-10-03-research-25yqi0.jpg",
+    "coverThumbnail": "covers/2026-10-03-research-25yqi0-450.webp"
+  },
+  {
     "id": "2026-10-03-research-1w4e1ln",
     "type": "research",
     "typeLabel": "비정기 리서치",
