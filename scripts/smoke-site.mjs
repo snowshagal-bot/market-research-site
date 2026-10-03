@@ -16,6 +16,23 @@ const CATEGORY_SLUG = {
 const LOCALES = ['ko', 'en'];
 const CATEGORY_TYPES = Object.keys(CATEGORY_SLUG);
 
+// Cloudflare marks a Pages deployment complete a few seconds before every edge
+// serves its new files. In 20 of 80 publish runs (2026-08-31..10-02) the report
+// that commit had just added answered 404 between 2.1 and 10.1 s after the
+// check-run completed, while a neighbouring request already got 200. Only the
+// latest-report checks wait that out, only for 404, and all of them share one
+// window that starts with the smoke; a 404 still there afterwards fails.
+export const REPORT_PROPAGATION_WINDOW_MS = 90_000;
+export const REPORT_PROPAGATION_INTERVAL_MS = 5_000;
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function seconds(ms) {
+  return `${(ms / 1000).toFixed(1)}s`;
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
@@ -80,9 +97,9 @@ function canonicalFromHtml(html) {
   return '';
 }
 
-function assertStatus(response, expected, label) {
+function assertStatus(response, expected, label, detail = '') {
   if (response.status !== expected) {
-    throw new Error(`${label}: expected HTTP ${expected}, received ${response.status}`);
+    throw new Error(`${label}: expected HTTP ${expected}, received ${response.status}${detail}`);
   }
 }
 
@@ -149,7 +166,19 @@ function validateModeOrigin(origin, mode) {
   }
 }
 
-export async function runSmoke({ origin, mode, posts, fetchImpl = fetch, logger = console, enforceOrigin = true, now = new Date() }) {
+export async function runSmoke({
+  origin,
+  mode,
+  posts,
+  fetchImpl = fetch,
+  logger = console,
+  enforceOrigin = true,
+  now = new Date(),
+  sleepImpl = sleep,
+  clock = Date.now,
+  propagationWindowMs = REPORT_PROPAGATION_WINDOW_MS,
+  propagationIntervalMs = REPORT_PROPAGATION_INTERVAL_MS
+}) {
   if (!['production', 'preview'].includes(mode)) throw new Error('Mode must be production or preview.');
   if (!Array.isArray(posts) || posts.length === 0) throw new Error('Smoke requires current data/posts.json records.');
 
@@ -161,12 +190,13 @@ export async function runSmoke({ origin, mode, posts, fetchImpl = fetch, logger 
     en: latestPost(posts, 'en')
   };
   const checks = [];
+  const propagationDeadline = clock() + propagationWindowMs;
 
   async function check(name, fn) {
     try {
-      await fn();
+      const note = await fn();
       checks.push({ name, ok: true });
-      logger.log(`PASS ${name}`);
+      logger.log(`PASS ${name}${note ? ` (${note})` : ''}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       checks.push({ name, ok: false, message });
@@ -179,6 +209,28 @@ export async function runSmoke({ origin, mode, posts, fetchImpl = fetch, logger 
     if (!headers.has('accept')) headers.set('accept', '*/*');
     headers.set('user-agent', 'Snowshagal-Deployment-Smoke/1.0');
     return fetchImpl(new URL(pathname, baseOrigin), { ...options, headers });
+  }
+
+  // A newly published report: a 404 is asked again every few seconds until the
+  // shared propagation window closes. Any other status returns at once and is
+  // judged by the caller exactly as before.
+  async function requestPublishedReport(name, pathname, options) {
+    const started = clock();
+    let attempt = 1;
+    for (;;) {
+      const response = await request(pathname, options);
+      if (response.status !== 404 || clock() + propagationIntervalMs > propagationDeadline) {
+        const summary = `attempts=${attempt}, waited ${seconds(clock() - started)}, propagation window ${seconds(propagationWindowMs)}`;
+        let failureDetail = '';
+        if (response.status === 404) failureDetail = ` (${summary}, last cf-ray ${response.headers.get('cf-ray') || 'n/a'})`;
+        else if (attempt > 1) failureDetail = ` (${summary})`;
+        return { response, retried: attempt > 1 ? summary : '', failureDetail };
+      }
+      try { await response.body?.cancel(); } catch (_) {}
+      logger.log(`RETRY ${name}: HTTP 404 on attempt ${attempt} (cf-ray ${response.headers.get('cf-ray') || 'n/a'}); asking again in ${seconds(propagationIntervalMs)}, window closes in ${seconds(Math.max(0, propagationDeadline - clock()))}`);
+      await sleepImpl(propagationIntervalMs);
+      attempt += 1;
+    }
   }
 
   for (const route of ['/', '/en/']) {
@@ -215,20 +267,23 @@ export async function runSmoke({ origin, mode, posts, fetchImpl = fetch, logger 
     const cleanPath = cleanReportPath(post.href);
     const legacyPath = physicalReportPath(post.href);
 
-    await check(`latest ${locale.toUpperCase()} report`, async () => {
-      const response = await request(cleanPath, { headers: { accept: 'text/html' } });
-      assertStatus(response, 200, cleanPath);
+    const latestName = `latest ${locale.toUpperCase()} report`;
+    await check(latestName, async () => {
+      const { response, retried, failureDetail } = await requestPublishedReport(latestName, cleanPath, { headers: { accept: 'text/html' } });
+      assertStatus(response, 200, cleanPath, failureDetail);
       const html = await response.text();
       const expectedCanonical = `${PRODUCTION_ORIGIN}${encodeURI(cleanPath)}`;
       const actualCanonical = canonicalFromHtml(html);
       if (decodeURI(actualCanonical) !== decodeURI(expectedCanonical)) {
         throw new Error(`${cleanPath}: canonical mismatch (${actualCanonical || 'missing'})`);
       }
+      return retried;
     });
 
-    await check(`legacy ${locale.toUpperCase()} report redirect`, async () => {
-      const response = await request(legacyPath, { redirect: 'manual' });
-      assertStatus(response, 301, legacyPath);
+    const legacyName = `legacy ${locale.toUpperCase()} report redirect`;
+    await check(legacyName, async () => {
+      const { response, retried, failureDetail } = await requestPublishedReport(legacyName, legacyPath, { redirect: 'manual' });
+      assertStatus(response, 301, legacyPath, failureDetail);
       const location = normalizeLocationHeader(response.headers.get('location'));
       if (!location) throw new Error(`${legacyPath}: redirect location is missing`);
       const actual = new URL(location, baseOrigin);
@@ -236,6 +291,7 @@ export async function runSmoke({ origin, mode, posts, fetchImpl = fetch, logger 
       if (decodeURI(actual.href) !== decodeURI(expected.href)) {
         throw new Error(`${legacyPath}: expected redirect to ${expected.href}, received ${actual.href}`);
       }
+      return retried;
     });
   }
 

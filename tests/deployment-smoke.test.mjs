@@ -3,7 +3,13 @@ import { Buffer } from 'node:buffer';
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
-import { SmokeFailure, normalizeLocationHeader, runSmoke } from '../scripts/smoke-site.mjs';
+import {
+  REPORT_PROPAGATION_INTERVAL_MS,
+  REPORT_PROPAGATION_WINDOW_MS,
+  SmokeFailure,
+  normalizeLocationHeader,
+  runSmoke
+} from '../scripts/smoke-site.mjs';
 import { waitForCloudflareDeployment } from '../scripts/wait-for-cloudflare-deployment.mjs';
 
 const posts = [
@@ -83,6 +89,25 @@ async function withServer(options, fn) {
       return;
     }
 
+    // Per-path answers in order, the last one repeating; 'ok' falls through to
+    // the normal route below.
+    const sequence = options.sequence?.[pathname];
+    if (sequence) {
+      const seen = options.requests.get(pathname) || 0;
+      options.requests.set(pathname, seen + 1);
+      const status = sequence[Math.min(seen, sequence.length - 1)];
+      if (status !== 'ok') {
+        response.writeHead(status, { 'content-type': 'text/html', 'cf-ray': `fixture-${seen + 1}-ICN` });
+        response.end('not served yet');
+        return;
+      }
+    }
+    if (pathname === options.missingCategory) {
+      response.writeHead(404, { 'content-type': 'text/html' });
+      response.end('missing');
+      return;
+    }
+
     const commonHeaders = options.noindex ? { 'x-robots-tag': 'noindex, nofollow' } : {};
     if (pathname === '/') {
       response.writeHead(200, { 'content-type': 'text/html', ...commonHeaders });
@@ -101,7 +126,7 @@ async function withServer(options, fn) {
     }
     if (pathname === '/reports/ko-smoke' || pathname === '/reports/en/en-smoke') {
       response.writeHead(200, { 'content-type': 'text/html', ...commonHeaders });
-      response.end(html(`https://snowshagal.com${pathname}`));
+      response.end(html(options.wrongCanonical ? 'https://snowshagal.com/elsewhere' : `https://snowshagal.com${pathname}`));
       return;
     }
     if (pathname === '/reports/ko-smoke.html' || pathname === '/reports/en/en-smoke.html') {
@@ -251,6 +276,123 @@ test('deployment smoke rejects stale per-market source dates despite a current s
 
 test('deployment smoke rejects comments GET 503 instead of treating a missing binding as PASS', async () => {
   await expectFailure({ noindex: true, comments503: true }, 'comments read API', /expected HTTP 200, received 503/);
+});
+
+/** Runs the Production smoke on a fake clock: sleeping advances time, nothing really waits. */
+async function runWithClock(options) {
+  let now = 0;
+  const sleeps = [];
+  const logs = [];
+  const errors = [];
+  const requests = new Map();
+  const outcome = await withServer({ ...options, requests }, async origin => {
+    try {
+      return await runSmoke({
+        origin,
+        mode: 'production',
+        posts,
+        enforceOrigin: false,
+        now: SMOKE_NOW,
+        logger: { log: line => logs.push(line), error: line => errors.push(line) },
+        clock: () => now,
+        sleepImpl: async ms => { sleeps.push(ms); now += ms; }
+      });
+    } catch (error) {
+      assert.ok(error instanceof SmokeFailure, String(error));
+      return error.result;
+    }
+  });
+  return { result: outcome, sleeps, slept: sleeps.reduce((sum, ms) => sum + ms, 0), logs, errors, requests };
+}
+
+const failedCheck = (result, name) => result.checks.find(item => item.name === name && !item.ok);
+
+test('a just-published report that answers 404 for a few seconds passes once every edge serves it', async () => {
+  const run = await runWithClock({ sequence: { '/reports/ko-smoke': [404, 404, 'ok'] } });
+  assert.equal(run.result.failed, 0);
+  assert.equal(run.result.total, 20);
+  assert.equal(run.requests.get('/reports/ko-smoke'), 3);
+  assert.deepEqual(run.sleeps, [REPORT_PROPAGATION_INTERVAL_MS, REPORT_PROPAGATION_INTERVAL_MS]);
+  const retries = run.logs.filter(line => line.startsWith('RETRY latest KO report'));
+  assert.equal(retries.length, 2);
+  assert.match(retries[0], /HTTP 404 on attempt 1 \(cf-ray fixture-1-ICN\); asking again in 5\.0s, window closes in 90\.0s$/);
+  assert.ok(run.logs.includes('PASS latest KO report (attempts=3, waited 10.0s, propagation window 90.0s)'));
+  // A check that never saw a 404 logs exactly as before.
+  assert.ok(run.logs.includes('PASS legacy KO report redirect'));
+});
+
+test('the legacy .html redirect of a just-published report gets the same 404 grace', async () => {
+  const run = await runWithClock({ sequence: { '/reports/en/en-smoke.html': [404, 'ok'] } });
+  assert.equal(run.result.failed, 0);
+  assert.equal(run.requests.get('/reports/en/en-smoke.html'), 2);
+  assert.ok(run.logs.includes('PASS legacy EN report redirect (attempts=2, waited 5.0s, propagation window 90.0s)'));
+});
+
+test('a report that stays 404 still fails after the bounded window, with its attempts and last answer', async () => {
+  const run = await runWithClock({ sequence: { '/reports/ko-smoke': [404] } });
+  const attempts = REPORT_PROPAGATION_WINDOW_MS / REPORT_PROPAGATION_INTERVAL_MS + 1;
+  assert.equal(run.result.failed, 1);
+  assert.equal(run.requests.get('/reports/ko-smoke'), attempts);
+  assert.equal(run.slept, REPORT_PROPAGATION_WINDOW_MS);
+  const message = `/reports/ko-smoke: expected HTTP 200, received 404 (attempts=${attempts}, waited 90.0s, propagation window 90.0s, last cf-ray fixture-${attempts}-ICN)`;
+  assert.equal(failedCheck(run.result, 'latest KO report').message, message);
+  assert.ok(run.errors.includes(`FAIL latest KO report: ${message}`));
+});
+
+test('every report check shares one window, so several missing reports cannot multiply the wait', async () => {
+  const run = await runWithClock({
+    sequence: {
+      '/reports/ko-smoke': [404],
+      '/reports/ko-smoke.html': [404],
+      '/reports/en/en-smoke': [404],
+      '/reports/en/en-smoke.html': [404]
+    }
+  });
+  assert.equal(run.result.failed, 4);
+  assert.equal(run.slept, REPORT_PROPAGATION_WINDOW_MS);
+  for (const pathname of ['/reports/ko-smoke.html', '/reports/en/en-smoke', '/reports/en/en-smoke.html']) {
+    assert.equal(run.requests.get(pathname), 1, pathname);
+  }
+  assert.match(
+    failedCheck(run.result, 'latest EN report').message,
+    /received 404 \(attempts=1, waited 0\.0s, propagation window 90\.0s, last cf-ray fixture-1-ICN\)$/
+  );
+});
+
+test('only 404 is asked again: any other report error fails on the answer it got', async () => {
+  const immediate = await runWithClock({ sequence: { '/reports/ko-smoke': [500] } });
+  assert.deepEqual(immediate.sleeps, []);
+  assert.equal(immediate.requests.get('/reports/ko-smoke'), 1);
+  assert.equal(failedCheck(immediate.result, 'latest KO report').message, '/reports/ko-smoke: expected HTTP 200, received 500');
+
+  const after404 = await runWithClock({ sequence: { '/reports/en/en-smoke': [404, 503] } });
+  assert.equal(after404.sleeps.length, 1);
+  assert.equal(
+    failedCheck(after404.result, 'latest EN report').message,
+    '/reports/en/en-smoke: expected HTTP 200, received 503 (attempts=2, waited 5.0s, propagation window 90.0s)'
+  );
+
+  const legacy308 = await runWithClock({ sequence: { '/reports/ko-smoke.html': [404, 308] } });
+  assert.match(failedCheck(legacy308.result, 'legacy KO report redirect').message, /expected HTTP 301, received 308 \(attempts=2,/);
+});
+
+test('the 404 grace is limited to the latest reports: a 404 anywhere else fails at once', async () => {
+  const run = await runWithClock({ missingCategory: '/en/notes/' });
+  assert.deepEqual(run.sleeps, []);
+  assert.equal(run.result.failed, 1);
+  assert.equal(failedCheck(run.result, 'category /en/notes/').message, '/en/notes/: expected HTTP 200, received 404');
+});
+
+test('a report that appears after a 404 is still held to its canonical', async () => {
+  const run = await runWithClock({ sequence: { '/reports/ko-smoke': [404, 'ok'] }, wrongCanonical: true });
+  assert.match(failedCheck(run.result, 'latest KO report').message, /canonical mismatch/);
+});
+
+test('the propagation window fits in the smoke job together with the Cloudflare wait before it', async () => {
+  const workflow = await readFile(new URL('../.github/workflows/deployment-smoke.yml', import.meta.url), 'utf8');
+  const jobMs = Number(/timeout-minutes:\s*(\d+)/.exec(workflow)[1]) * 60_000;
+  const cloudflareWaitMs = 36 * 5000; // wait-for-cloudflare-deployment.mjs defaults
+  assert.ok(REPORT_PROPAGATION_WINDOW_MS + cloudflareWaitMs <= jobMs / 2);
 });
 
 function checkRun(status, conclusion = null) {
