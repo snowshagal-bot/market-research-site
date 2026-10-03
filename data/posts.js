@@ -187,6 +187,32 @@ window.RESEARCH_POSTS = [
     "coverThumbnail": "covers/2026-10-02-daily-34p8ch-450.webp"
   },
   {
+    "id": "2026-10-01-weekly-1j4vlsj",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-10-01",
+    "reportDate": "2026-10-01",
+    "registeredDate": "2026-10-04",
+    "registeredAt": "2026-10-03T16:06:31.376Z",
+    "legacyImport": false,
+    "title": "같은 닷새, 다른 방향",
+    "subtitle": "",
+    "description": "2026년 10월 1주차(9월 28일~10월 2일) 한국 증시 주간 리포트. 코스피 -1.09% · 코스닥 +5.78%. 외국인이 닷새 모두 판 코스피 현물 8조8,730억원과 그 반대편의 산술상 기타법인, 코스피가 내린 사흘에도 오른 코스닥. 다음 주 10월 8일 하루에 겹친 미 연준 의사록 · 중국 증시 재개장 · 삼성전자 3분기 잠정실적 예상 일정(보도 기준)과 확인 조건까지.",
+    "summary": "5%대 미 장기금리 부담과 외국인 매도 속 코스피는 사흘 내린 뒤 마이크론 실적·반도체 수출과 중국 석유제품 수출 중단 재료로 이틀 반등했고, 코스닥은 바이오와 반도체 장비가 받쳐 코스피가 내린 날에도 오른 한 주",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 7,
+    "href": "reports/위클리_2026년 10월 1주차 위클리.html",
+    "coverImage": "covers/2026-10-01-weekly-1j4vlsj.webp",
+    "shareCardImage": "covers/share/2026-10-01-weekly-1j4vlsj.jpg",
+    "coverThumbnail": "covers/2026-10-01-weekly-1j4vlsj-450.webp"
+  },
+  {
     "id": "2026-10-01-daily-bozyzg",
     "type": "daily",
     "typeLabel": "Daily",
