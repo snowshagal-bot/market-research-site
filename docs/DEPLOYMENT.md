@@ -255,8 +255,12 @@ Public `GET /api/announcements` returns only `publish_state = published`, `audie
 - **Engine**: `scripts/sync-disclosures.mjs`
 - **Secret**: `DISCLOSURE_SYNC_KEY` (must be identically configured in GitHub Actions Repository Secrets and Cloudflare Pages Production secrets)
 - **Authentication**: `POST https://snowshagal.com/api/disclosures/sync` with header `x-disclosure-sync-key: <key>`
-- **Idempotency**: Existing `upsertFiling()` ensures safe repeated runs (e.g. manual admin sync at 15:55 followed by automated sync at 16:05).
-- **Failure Alerting**: Failed runs open or update the GitHub Issue `[Alert] OpenDART daily sync failure` (`<!-- snowshagal-disclosure-sync-alert -->` marker) and auto-close upon subsequent successful recovery.
+- **Logical date**: GitHub starts the scheduled run up to eight hours late (observed 21:00–00:09 KST). The script still syncs the date of its 16:05 KST slot, never the date it happens to start on. It sends the window explicitly, so `DISCLOSURE_LOOKBACK_DAYS` no longer affects scheduled runs.
+- **Catch-up**: each scheduled or undated run reads the previous KRX trading day through its own date (for example Monday 10-05, a KRX holiday, reads 10-02..10-05). One failed or skipped day therefore comes back with the next passing run. If a year is not in the KRX calendar yet, the previous weekday is used instead.
+- **Backfill**: **Run workflow** with `date=YYYY-MM-DD` syncs exactly that day. Date Guard keeps backfilled and catch-up filings `admin_only`; publish them from Admin if wanted.
+- **Truncation**: a run whose read hit `DISCLOSURE_DART_MAX_PAGES_PER_CLASS` (`truncated`) fails instead of passing. Raise the cap (at most 20) or sync the dates one by one. A run makes at most classes × pages OpenDART calls (default Y,K × 10 = 20). Calls are reserved in D1 against `DISCLOSURE_DART_DAILY_BUDGET` (default 1,000, clamped below 19,000), which stays under OpenDART's 20,000 calls a day per key.
+- **Idempotency**: Existing `upsertFiling()` ensures safe repeated runs (e.g. manual admin sync at 15:55 followed by automated sync at 16:05). Re-reading a day never duplicates a filing and keeps `manual`, `suppressed` and `auto` decisions.
+- **Failure Alerting**: Failed runs open or update the GitHub Issue `[Alert] OpenDART daily sync failure` (`<!-- snowshagal-disclosure-sync-alert -->` marker). The issue records the dates still not synced (`<!-- snowshagal-disclosure-sync-pending: … -->`) and the latest failure report. For a Cloudflare-generated error the report also carries `http_status`, `content_type`, `cf_ray` and the allowlisted `cloudflare.*` fields (`error_code`, `ray_id`, …), with the sync key redacted. A passing run closes the issue only when its range covered every pending date. Otherwise it comments what was recovered and what is still missing. An issue opened before date tracking existed is never auto-closed.
 
 ## Report publishing dependencies
 

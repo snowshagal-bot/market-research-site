@@ -697,10 +697,34 @@ export async function setFilingPublishStatus(db, rceptNo, publishStatus, now = n
   return publicFiling(row);
 }
 
-export function buildInsertStatement(db, filing, { watchlistCodes = null, now = new Date() } = {}) {
+// The daily sync workflow's cron, `5 7 * * 1-5`: 07:05 UTC on weekdays, which
+// is 16:05 KST on the same calendar date.
+export const DISCLOSURE_SCHEDULE_SLOT_UTC = Object.freeze({ hour: 7, minute: 5, cron: '5 7 * * 1-5' });
+
+/**
+ * The KST date of the latest schedule slot at or before `now`: the day a
+ * scheduled sync is for, however late GitHub starts it (runs have started up to
+ * eight hours late, after midnight KST).
+ */
+export function scheduledSyncDate(now = new Date()) {
+  const slot = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), DISCLOSURE_SCHEDULE_SLOT_UTC.hour, DISCLOSURE_SCHEDULE_SLOT_UTC.minute));
+  if (slot > now) slot.setUTCDate(slot.getUTCDate() - 1);
+  while ([0, 6].includes(slot.getUTCDay())) slot.setUTCDate(slot.getUTCDate() - 1);
+  return kstDate(slot);
+}
+
+/**
+ * Date Guard: only "today's" filings auto-publish. Today is the server's KST date,
+ * except for the machine's scheduled run, whose today is its schedule slot date as
+ * the server computes it (`publishDate`) — never a date the request chose.
+ */
+export function isPublishDate(filing, { publishDate = '', now = new Date() } = {}) {
+  return filing.receiptDate === (publishDate || compactDate(kstDate(now)));
+}
+
+export function buildInsertStatement(db, filing, { watchlistCodes = null, now = new Date(), publishDate = '' } = {}) {
   if (!/^\d{14}$/.test(filing.rceptNo)) return null;
-  const todayReceiptDate = compactDate(kstDate(now));
-  const isToday = filing.receiptDate === todayReceiptDate;
+  const isToday = isPublishDate(filing, { publishDate, now });
   const initialAiStatus = filing.aiEligible ? 'available' : 'skipped';
   const isWatchlist = watchlistCodes ? (watchlistCodes.has(filing.stockCode) ? 1 : 0) : 0;
   const autoPublish = Boolean(isWatchlist && filing.ruleScore >= 7 && isToday);
@@ -722,10 +746,9 @@ export function buildInsertStatement(db, filing, { watchlistCodes = null, now = 
     );
 }
 
-export function buildUpdateStatement(db, filing, { watchlistCodes = null, now = new Date() } = {}) {
+export function buildUpdateStatement(db, filing, { watchlistCodes = null, now = new Date(), publishDate = '' } = {}) {
   if (!/^\d{14}$/.test(filing.rceptNo)) return null;
-  const todayReceiptDate = compactDate(kstDate(now));
-  const isToday = filing.receiptDate === todayReceiptDate;
+  const isToday = isPublishDate(filing, { publishDate, now });
   const isWatchlist = watchlistCodes ? (watchlistCodes.has(filing.stockCode) ? 1 : 0) : 0;
 
   return db.prepare(`UPDATE ${FILINGS_TABLE} SET
