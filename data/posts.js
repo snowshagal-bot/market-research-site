@@ -1,31 +1,5 @@
 window.RESEARCH_POSTS = [
   {
-    "id": "2026-10-03-weekly-xwn9zc",
-    "type": "weekly",
-    "typeLabel": "위클리 리포트",
-    "lang": "ko",
-    "date": "2026-10-03",
-    "reportDate": "2026-10-03",
-    "registeredDate": "2026-10-04",
-    "registeredAt": "2026-10-03T16:05:02.635Z",
-    "legacyImport": false,
-    "title": "Same five days, different directions",
-    "subtitle": "",
-    "description": "Korea market weekly for the first week of October 2026 (Sep. 28–Oct. 2). KOSPI -1.09% · KOSDAQ +5.78%. Foreign investors sold KRW 8.873tn of KOSPI cash equities across all five sessions, with implied other-corporation buying on the other side, while KOSDAQ rose on each of the three days KOSPI fell. Next week, Oct. 8 brings the Fed minutes, China’s market reopening, and Samsung Electronics Q3 preliminary earnings expected based on media reports, along with the conditions to watch.",
-    "summary": "With U.S. long-term yields above 5% and persistent foreign selling, KOSPI fell for three sessions before rebounding for two on Micron earnings, semiconductor exports and news of China’s refined-product export halt. KOSDAQ, supported by biotech and semiconductor equipment, rose even on the days KOSPI fell.",
-    "tags": [
-      "kospi",
-      "kosdaq",
-      "flows",
-      "semiconductors"
-    ],
-    "readingMinutes": 23,
-    "href": "reports/2026-10-03_Korea_Weekly_Report_EN.html",
-    "coverImage": "covers/2026-10-03-weekly-xwn9zc.webp",
-    "shareCardImage": "covers/share/2026-10-03-weekly-xwn9zc.jpg",
-    "coverThumbnail": "covers/2026-10-03-weekly-xwn9zc-450.webp"
-  },
-  {
     "id": "2026-10-03-research-25yqi0",
     "type": "research",
     "typeLabel": "Research",
