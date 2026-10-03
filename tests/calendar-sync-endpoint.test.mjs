@@ -305,9 +305,12 @@ test('the workflow runs daily, after the disclosure sync, and alerts once', asyn
   assert.doesNotMatch(workflow, /The per-source lines in the run log say which source stopped answering/);
 });
 
-test('the disclosure sync workflow is untouched', async () => {
+test('the disclosure sync workflow keeps its schedule, script and alert issue', async () => {
   const workflow = await readFile(new URL('../.github/workflows/disclosure-daily-sync.yml', import.meta.url), 'utf8');
   assert.match(workflow, /cron: "5 7 \* \* 1-5"/);
   assert.match(workflow, /node scripts\/sync-disclosures\.mjs/);
-  assert.match(workflow, /\[Alert\] OpenDART daily sync failure/);
+  // The alert title now lives in the module the workflow imports (#157).
+  assert.match(workflow, /scripts\/disclosure-sync-alert\.mjs/);
+  const { ALERT_TITLE } = await import('../scripts/disclosure-sync-alert.mjs');
+  assert.equal(ALERT_TITLE, '[Alert] OpenDART daily sync failure');
 });

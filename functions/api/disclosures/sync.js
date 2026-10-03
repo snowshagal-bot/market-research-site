@@ -13,6 +13,7 @@ import {
   publicFiling,
   releaseAnalysisClaim,
   reserveRequest,
+  scheduledSyncDate,
   setState,
   upsertFiling,
   upsertFilingsBatch,
@@ -129,7 +130,12 @@ export async function onRequestPost({ request, env, now = new Date() }) {
       now
     });
 
-    const created = await upsertFilingsBatch(db, source.filings, { watchlistCodes, now });
+    // Date Guard: the machine's scheduled run publishes its own schedule slot date
+    // even when GitHub starts it after midnight KST. The server derives that date
+    // from its own clock; any other caller or flag keeps KST today.
+    const scheduledRun = authSource === 'disclosure-sync-key' && input.scheduled === true;
+    const publishDate = compactDate(scheduledRun ? scheduledSyncDate(now) : kstDate(now));
+    const created = await upsertFilingsBatch(db, source.filings, { watchlistCodes, now, publishDate });
     const ai = await analyzeQueue(db, env, config, now);
     const syncedAt = new Date().toISOString();
     await setState(db, 'last_sync_at', syncedAt);
@@ -151,7 +157,8 @@ export async function onRequestPost({ request, env, now = new Date() }) {
         created,
         updated: source.filings.length - created,
         truncated: source.truncated,
-        classes: source.classes
+        classes: source.classes,
+        publishDate
       },
       ai,
       usage,
