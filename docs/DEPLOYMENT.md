@@ -412,6 +412,19 @@ deterministic 404, dynamic sitemap structure/current populated categories, repor
 canonicals, `/api/market/latest`, and comments GET. API numbers and comment counts are not
 fixed. No POST, PUT, PATCH, or DELETE request is made.
 
+A report added by the commit being smoked can still answer 404 for a few seconds after
+Cloudflare reports the deployment complete: between 2026-08-31 and 10-02, 20 of 80 publish
+runs saw that 404 2.1–10.1 s after the check-run completed, while the next request was
+already 200. Only the four latest-report checks (Clean URL and legacy `.html` redirect, KO
+and EN) therefore ask again after a **404**, every 5 s, within one 90 s window that starts
+with the smoke and is shared by all four. Every retry is logged as `RETRY` with the attempt
+and `cf-ray`; a check that passed after retrying says so on its `PASS` line. A 404 still
+there when the window closes fails with the attempt count, the time waited and the last
+`cf-ray`. Any other status (500, 503, 524, a 308 instead of 301, …) fails on the answer it
+got, the canonical and redirect checks apply to the eventual answer unchanged, and a 404 on
+any other route is never retried. A truly missing report therefore adds at most 90 s to a
+failing run.
+
 `.github/workflows/deployment-smoke.yml` runs on `push` to `main` and may also be dispatched
 manually from `main`. It does **not** smoke Production immediately after the push. The job
 queries GitHub check-runs for the exact `${GITHUB_SHA}` and waits for the check named

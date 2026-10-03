@@ -521,7 +521,7 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `scripts/audit-seo.mjs` — corpus-wide SEO integrity audit (repository mode in `verify.mjs`; `--origin=` live mode for Preview/Production QA)
 - `.github/workflows/verify.yml` — lightweight GitHub Actions CI running `node scripts/verify.mjs` and `git diff --check` on pull requests and main pushes
 - `.github/workflows/deployment-smoke.yml` — waits for the exact main SHA's Cloudflare Pages success check before GET-only Production smoke
-- `scripts/smoke-site.mjs` — shared Production/Preview deployed-site smoke engine using current post data
+- `scripts/smoke-site.mjs` — shared Production/Preview deployed-site smoke engine using current post data; latest-report checks re-ask a 404 every 5 s within one shared 90 s propagation window
 - `scripts/wait-for-cloudflare-deployment.mjs` — bounded GitHub check-run poller that prevents pre-deployment Production PASS
 - `scripts/build-category-pages.mjs` — regenerates the ten static KO/EN category landing shells from shared metadata
 - `scripts/sync-static-footers.mjs` — synchronizes canonical `siteFooter` markup across all static public HTML pages, rebuilds category pages and re-stamps feed discovery links
