@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>레버리지 ETF 음의 복리: 왜 2배가 아닌가 | Snowshagal</title>
+<!-- 검색·공유 미리보기 (사이트 생성기가 자체 값으로 덮어쓰면 이 값을 쓰도록 설정) -->
+<meta name="description" content="레버리지 ETF의 목표는 하루 2배다. SK하이닉스 7주 종가로 계산하면 주가 −7.2%에 2배는 −29.2%, 곱버스는 −33.0%. 음의 복리(변동성 끌림)와 장 마감 리밸런싱을 퀴즈·시뮬레이터로 설명한다."/>
+<link rel="canonical" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_7%ED%8E%B8_2%EB%B0%B0ETF%EB%8A%94%EC%99%9C2%EB%B0%B0%EA%B0%80%EC%95%84%EB%8B%8C%EA%B0%80"/>
+<meta name="robots" content="index,follow,max-image-preview:large"/>
+<meta property="og:type" content="article"/>
+<meta property="og:site_name" content="Snowshagal"/>
+<meta property="og:locale" content="ko_KR"/>
+<meta property="og:title" content="종가로 계산하면 주가 −7%에 2배 −29%, 곱버스 −33%. 왜?"/>
+<meta property="og:description" content="SK하이닉스 7주 종가로 계산한 레버리지 ETF 성적표. 하루 2배가 기간 2배가 아닌 이유를 퀴즈와 시뮬레이터로 풀었다. 시장을 읽는 말들 7편."/>
+<meta property="og:url" content="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_7%ED%8E%B8_2%EB%B0%B0ETF%EB%8A%94%EC%99%9C2%EB%B0%B0%EA%B0%80%EC%95%84%EB%8B%8C%EA%B0%80"/>
+<meta property="og:image" content="https://snowshagal.com/assets/social/basics-07-leverage-etf.jpg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:alt" content="SK하이닉스 7주 종가로 계산한 이론값. 주가 −7.2%, 2배 −29.2%, 거꾸로 2배 −33.0%. 2배 ETF는 왜 2배가 아닌가"/>
+<meta property="article:published_time" content="2026-10-04"/>
+<meta property="article:section" content="시장 입문"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="종가로 계산하면 주가 −7%에 2배 −29%, 곱버스 −33%. 왜?"/>
+<meta name="twitter:description" content="SK하이닉스 7주 종가로 계산한 레버리지 ETF 성적표. 하루 2배가 기간 2배가 아닌 이유를 퀴즈와 시뮬레이터로 풀었다. 시장을 읽는 말들 7편."/>
+<meta name="twitter:image" content="https://snowshagal.com/assets/social/basics-07-leverage-etf.jpg"/>
+<meta name="theme-color" content="#2A362E"/>
+<script type="application/ld+json">
+[
+ {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "2배 ETF는 왜 2배가 아닌가",
+  "alternativeHeadline": "레버리지 ETF 음의 복리와 곱버스, 하루 2배의 진짜 의미",
+  "description": "레버리지 ETF의 목표는 하루 2배다. SK하이닉스 7주 종가로 계산하면 주가 −7.2%에 2배는 −29.2%, 곱버스는 −33.0%. 음의 복리(변동성 끌림)와 장 마감 리밸런싱을 퀴즈·시뮬레이터로 설명한다.",
+  "inLanguage": "ko-KR",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "image": [
+   "https://snowshagal.com/assets/social/basics-07-leverage-etf-16x9.jpg",
+   "https://snowshagal.com/assets/social/basics-07-leverage-etf-4x3.jpg",
+   "https://snowshagal.com/assets/social/basics-07-leverage-etf-1x1.jpg"
+  ],
+  "mainEntityOfPage": "https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_7%ED%8E%B8_2%EB%B0%B0ETF%EB%8A%94%EC%99%9C2%EB%B0%B0%EA%B0%80%EC%95%84%EB%8B%8C%EA%B0%80",
+  "author": {
+   "@type": "Organization",
+   "name": "Snowshagal",
+   "url": "https://snowshagal.com/"
+  },
+  "publisher": {
+   "@type": "Organization",
+   "name": "Snowshagal",
+   "url": "https://snowshagal.com/"
+  },
+  "isPartOf": {
+   "@type": "CreativeWorkSeries",
+   "name": "시장을 읽는 말들",
+   "url": "https://snowshagal.com/basics/"
+  },
+  "keywords": "레버리지 ETF, 음의 복리, 변동성 끌림, 곱버스, 인버스 2배, 단일종목 레버리지 ETF, 리밸런싱, SK하이닉스, 삼성전자"
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+   {
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Snowshagal",
+    "item": "https://snowshagal.com/"
+   },
+   {
+    "@type": "ListItem",
+    "position": 2,
+    "name": "시장 입문",
+    "item": "https://snowshagal.com/basics/"
+   },
+   {
+    "@type": "ListItem",
+    "position": 3,
+    "name": "2배 ETF는 왜 2배가 아닌가",
+    "item": "https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_7%ED%8E%B8_2%EB%B0%B0ETF%EB%8A%94%EC%99%9C2%EB%B0%B0%EA%B0%80%EC%95%84%EB%8B%8C%EA%B0%80"
+   }
+  ]
+ }
+]
+</script>
+<style>
+:root{
+  --surface-page:#ECEAE5;
+  --surface-band:#E3E0D9;
+  --surface-inner:#F1EFEA;
+  --surface-detail:#E8E5DF;
+  --surface-muted:#DAD6CE;
+  --ink:#2E2E2C;
+  --ink2:#43423E;
+  --body:#53514C;
+  --sub:#706D66;
+  --muted:#8B867E;
+  --line:#CEC9BF;
+  --line2:#DCD7CE;
+  /* 시리즈 공통 */
+  --green:#46584D;
+  --green-dark:#2F3C34;
+  --green-soft:#DCE3DD;
+  --green-line:#AAB6AC;
+  --green-pale:#A8C6B4;
+  /* 이번 편 세 역할 */
+  --stk:#3A3632;         /* 주가 */
+  --stk-soft:#E4E1DB;
+  --l2:#A9784A;          /* 2배 */
+  --l2-dark:#7A5A34;
+  --l2-soft:#EFE2CF;
+  --l2-line:#D2B48C;
+  --i2:#7A3F44;          /* 거꾸로 2배 */
+  --i2-soft:#EBDCDD;
+  --i2-line:#C29A9E;
+  /* 가격 방향 전용 */
+  --up:#C74754;
+  --down:#4F78A8;
+  /* 판서 */
+  --board:#2F3C34;
+  --chalk:#ECEAE3;
+  --chalk2:#B9C9BE;
+  --chalk-mark:#E6C98F;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:58px;overflow-x:hidden}
+html,body{max-width:100%}
+body{
+  margin:0;background:var(--surface-page);color:var(--ink);
+  font-family:"Pretendard Variable","Pretendard","SUIT","Noto Sans KR","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  line-height:1.58;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;
+  word-break:keep-all;line-break:strict;
+}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(38px + env(safe-area-inset-bottom,0px));width:100%;position:relative}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.up{color:var(--up)}.down{color:var(--down)}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;letter-spacing:inherit}
+
+/* ── 상단바 ── */
+.topbar{position:sticky;top:0;z-index:50;margin:0 -16px;
+  background:rgba(236,234,229,.92);-webkit-backdrop-filter:saturate(150%) blur(12px);backdrop-filter:saturate(150%) blur(12px);
+  border-bottom:1px solid rgba(90,84,74,.13)}
+.tbin{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0)) 18px 9px}
+.tbin .brand{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.tbin .brand i{font-style:normal;color:var(--green)}
+.tbin .ep{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.prog{height:2px;background:rgba(90,84,74,.10)}
+.prog i{display:block;height:100%;width:0;background:var(--green);transition:width .1s linear}
+
+/* ── 표지 ── */
+.cover{margin:0 -16px;padding:18px 22px 15px;
+  background:linear-gradient(158deg,#36443B 0%,#2A362E 52%,#1F2721 100%);color:#EFEDE7}
+.cvkick{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.06em;
+  color:#BFD2C6;border:1px solid rgba(168,198,180,.34);border-radius:999px;padding:5px 12px}
+.cvkick b{color:#EFEDE7;font-weight:800}
+.cvdate{display:inline-block;margin-left:8px;font-size:11.5px;font-weight:700;color:#9FB2A6;letter-spacing:.02em;vertical-align:middle}
+.cvtitle{margin:11px 0 0;font-size:30px;line-height:1.22;font-weight:800;letter-spacing:-.05em;color:#F4F2ED}
+.cvtitle span{display:block;color:var(--green-pale)}
+.cvsub{margin:11px 0 0;font-size:14px;line-height:1.58;font-weight:600;color:#C6D2CA}
+.cvmotif{margin:12px 0 0}
+.cvmotif svg{display:block;width:100%;height:auto}
+.cvlg{display:flex;gap:12px;flex-wrap:wrap;margin:6px 0 0;font-size:11px;font-weight:800;color:#AFC0B5}
+.cvlg span{display:inline-flex;align-items:center;gap:5px}
+.cvlg i{display:inline-block;width:14px;height:2.5px;border-radius:2px}
+.cvidx{display:flex;gap:6px;margin:12px 0 0;flex-wrap:wrap}
+.cvidx a{font-size:11.5px;font-weight:800;color:#D3DED7;background:rgba(255,255,255,.07);
+  border:1px solid rgba(168,198,180,.22);border-radius:999px;padding:6px 12px}
+.cvidx a b{color:var(--green-pale);font-weight:800;margin-right:5px}
+
+/* ── 챕터 오프너 ── */
+.ch{margin:22px 0 8px}
+.chtop{display:flex;align-items:center;gap:9px;margin-bottom:7px;flex-wrap:wrap}
+.chn{font-size:12px;font-weight:800;color:#EFEDE7;background:var(--ink);border-radius:4px;padding:3px 8px;letter-spacing:.04em}
+.chk{font-size:11.5px;font-weight:800;letter-spacing:.11em;color:var(--sub)}
+.cht{margin:0;font-size:24px;line-height:1.3;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.chrule{display:flex;height:3px;margin-top:11px;gap:2px}
+.chrule i{display:block;height:100%;flex:1}
+.chrule .r1{background:var(--stk)}
+.chrule .r2{background:var(--l2)}
+.chrule .r3{background:var(--i2)}
+.chrule .r4{background:var(--green)}
+
+/* ── 본문 ── */
+.p{margin:9px 0 0;font-size:14px;line-height:1.64;color:var(--body);font-weight:500}
+.p b{color:var(--ink);font-weight:800}
+.p.lead{font-size:15px;color:var(--ink2);font-weight:600}
+.hd{margin:20px 0 0;font-size:17px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.44}
+.hd small{display:block;font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin-bottom:3px}
+.cap{margin:6px 0 0;font-size:11.5px;line-height:1.5;color:var(--muted);font-weight:600}
+.q{margin:12px 0 0;font-size:19px;line-height:1.45;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.mk{background:linear-gradient(transparent 58%,rgba(230,201,143,.72) 58%);padding:0 1px}
+.c-stk{color:var(--stk)}.c-l2{color:var(--l2-dark)}.c-i2{color:var(--i2)}
+
+/* ── 배지 ── */
+.vb{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;letter-spacing:.03em;
+  color:#4A4438;background:var(--l2-soft);border:1px solid var(--l2-line);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.vb.real{color:var(--green-dark);background:var(--green-soft);border-color:var(--green-line)}
+
+/* ── 한 문장 답 ── */
+.ans{margin:14px -16px 0;padding:14px 22px;background:var(--green);color:#EFEDE7;position:relative;overflow:hidden}
+.ans:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green-pale)}
+.ans .ak{font-size:11px;font-weight:800;letter-spacing:.14em;color:#A8BCAE;margin-bottom:8px}
+.ans .av{font-size:19px;line-height:1.46;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.ans .aw{margin:9px 0 0;padding-top:9px;border-top:1px solid rgba(168,198,180,.24);font-size:13px;line-height:1.6;font-weight:600;color:#CBD8CF}
+
+/* ── 강조 줄 ── */
+.keyb{margin:12px 0 0;padding:11px 14px;background:var(--stk);color:#F4F2ED;border-radius:10px;
+  font-size:15px;line-height:1.5;font-weight:800;letter-spacing:-.03em}
+.keyb b{color:var(--chalk-mark)}
+
+/* ── 문제 카드 ── */
+.pop{margin:14px 0 0;background:var(--surface-inner);border:1.5px solid var(--ink);border-radius:14px;overflow:hidden}
+.poph{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;background:var(--ink);color:#EDEAE4}
+.poph b{font-size:12px;font-weight:800;letter-spacing:.06em}
+.poph .vb{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#D9D4CA}
+.popb{padding:13px 14px 14px}
+.popq{margin:0;font-size:15.5px;line-height:1.52;font-weight:800;letter-spacing:-.03em;color:var(--ink)}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0 0}
+.opt{appearance:none;-webkit-appearance:none;border:1.5px solid var(--line);background:#F7F6F2;border-radius:10px;padding:11px 6px;
+  font-size:16px;font-weight:800;color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums;transition:background .15s,border-color .15s;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.opt:hover{border-color:var(--sub)}
+.opt.ok{background:var(--green);border-color:var(--green);color:#F4F2ED}
+.opt.no{background:var(--surface-muted);border-color:var(--surface-muted);color:var(--muted);text-decoration:line-through}
+.opt[disabled]{cursor:default}
+.popans{margin:12px 0 0;padding-top:11px;border-top:1px dashed var(--line)}
+.popans[hidden]{display:none}
+.verdict{display:inline-block;font-size:12px;font-weight:800;color:#F4F2ED;background:var(--green);border-radius:6px;padding:3px 9px;margin-bottom:8px}
+.calc{display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums}
+.calc span{padding:7px 9px;font-size:12.5px;font-weight:700;color:var(--body);background:#F7F6F2;border-bottom:1px solid var(--line2);text-align:right}
+.calc span.h{font-size:11px;font-weight:800;color:var(--muted);background:var(--surface-detail);text-align:right}
+.calc span.l{text-align:left;font-weight:800;color:var(--ink)}
+.calc span.e{border-bottom:0}
+.calc b{font-weight:800}
+.popnote{margin:9px 0 0;font-size:13px;line-height:1.6;font-weight:600;color:var(--body)}
+.popnote b{color:var(--ink);font-weight:800}
+
+/* ── 실제 사례 카드 ── */
+.case7{margin:14px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:14px;padding:13px 14px 12px}
+.cshd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.cshd b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.lg{display:flex;gap:12px;flex-wrap:wrap;margin:9px 0 0;font-size:11.5px;font-weight:800;color:var(--ink2)}
+.lg span{display:inline-flex;align-items:center;gap:6px}
+.lg i{display:inline-block;width:16px;height:3px;border-radius:2px}
+.lg .k1 i{background:var(--stk)}.lg .k2 i{background:var(--l2)}.lg .k3 i{background:var(--i2)}
+.chart{margin:6px 0 0}
+.chart svg{display:block;width:100%;height:auto}
+.legs{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;margin:10px 0 0;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums}
+.legs span{padding:7px 8px;font-size:12.5px;font-weight:800;text-align:right;background:#F7F6F2;border-bottom:1px solid var(--line2)}
+.legs span.h{font-size:10.5px;color:var(--muted);background:var(--surface-detail);letter-spacing:.01em}
+.legs span.l{text-align:left;color:var(--ink2);font-size:12px}
+.legs span.l small{display:block;font-size:10.5px;color:var(--muted);font-weight:700}
+.legs .tot{background:var(--stk);color:#F4F2ED;border-bottom:0}
+.legs .tot.l{color:#F4F2ED}
+.legs .tot.up{color:#F2A7AE}.legs .tot.down{color:#A9C3E3}
+.csnote{margin:9px 0 0;font-size:12.3px;line-height:1.55;font-weight:700;color:var(--ink2)}
+.csnote b{color:var(--ink)}
+
+/* ── 성적표 ── */
+.score{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0 0}
+.sc{background:var(--surface-inner);border:1px solid var(--line);border-top:3px solid var(--stk);border-radius:10px;padding:9px 9px 10px}
+.sc.s2{border-top-color:var(--l2)}.sc.s3{border-top-color:var(--i2)}
+.sc .sk{font-size:11px;font-weight:800;color:var(--sub);letter-spacing:.01em}
+.sc .sv{margin-top:3px;font-size:21px;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1.15}
+.sc .sn{margin-top:5px;padding-top:5px;border-top:1px dashed var(--line);font-size:10.5px;line-height:1.4;font-weight:700;color:var(--muted)}
+.sc .sn b{color:var(--ink2);font-variant-numeric:tabular-nums}
+.sc .sn b.up{color:var(--up)}.sc .sn b.down{color:var(--down)}
+
+/* ── 판서 ── */
+.board{margin:14px -16px 0;padding:15px 22px 16px;background:var(--board);color:var(--chalk);position:relative;overflow:hidden}
+.board:after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 20% 0%,rgba(255,255,255,.06),transparent 55%),radial-gradient(ellipse at 90% 100%,rgba(255,255,255,.04),transparent 50%)}
+.bdk{position:relative;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--chalk2);margin-bottom:9px}
+.bdk:before{content:"";width:18px;height:2px;background:var(--chalk-mark);border-radius:2px}
+.bdt{position:relative;margin:0;font-size:20px;line-height:1.42;font-weight:800;letter-spacing:-.04em;color:#F6F4EE}
+.bdt u{text-decoration:none;background:linear-gradient(transparent 62%,rgba(230,201,143,.38) 62%)}
+.bdp{position:relative;margin:9px 0 0;font-size:13px;line-height:1.62;font-weight:600;color:#CFDBD2}
+.bdp b{color:#F6F4EE}
+.btab{position:relative;display:grid;grid-template-columns:1.35fr .8fr .9fr .9fr;margin:12px 0 0;border:1px solid rgba(236,234,227,.22);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums}
+.btab span{padding:8px 8px;font-size:12.5px;font-weight:800;text-align:right;border-bottom:1px solid rgba(236,234,227,.12);color:#EDEBE4}
+.btab span.h{font-size:10.5px;color:var(--chalk2);background:rgba(255,255,255,.05);letter-spacing:.02em}
+.btab span.l{text-align:left;font-size:12.3px}
+.btab span.l small{display:block;font-size:10.5px;color:var(--chalk2);font-weight:700}
+.btab span.e{border-bottom:0}
+.btab .hi{color:var(--chalk-mark)}
+.btab .tg{display:inline-block;margin-left:4px;font-size:10px;font-weight:800;padding:1px 5px;border-radius:4px;background:rgba(230,201,143,.18);color:var(--chalk-mark);vertical-align:1px}
+.btab .tg.bad{background:rgba(242,167,174,.16);color:#F2A7AE}
+.bdline{position:relative;margin:12px 0 0;padding:10px 12px;border:1.5px dashed rgba(230,201,143,.55);border-radius:10px;font-size:14.5px;line-height:1.52;font-weight:800;color:#F6F4EE;letter-spacing:-.03em}
+.bdline b{color:var(--chalk-mark)}
+
+/* ── 4컷 ── */
+.strip{margin:16px 0 0;border:1.5px solid var(--ink);border-radius:4px;overflow:hidden;background:var(--ink)}
+.striphead{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--ink);color:#EDEAE4}
+.striphead b{font-size:11.5px;font-weight:800;letter-spacing:.03em}
+.striphead i{font-style:normal;font-size:11px;font-weight:700;color:#A9A49B}
+.stripgrid{display:grid;grid-template-columns:1fr 1fr;gap:1.5px}
+.pnl{background:var(--surface-inner);position:relative}
+.pnl svg{display:block;width:100%;height:auto}
+.pno{position:absolute;left:0;top:0;font-size:11px;font-weight:800;color:#EDEAE4;background:var(--ink);padding:3px 8px 4px 8px;border-radius:0 0 6px 0}
+.pcap{padding:9px 11px 11px;font-size:12px;line-height:1.48;font-weight:700;color:var(--ink2);border-top:1px solid var(--line2);background:var(--surface-detail);min-height:52px}
+.pcap b{color:var(--ink)}
+.stripfoot{padding:9px 12px;background:var(--ink);color:#D9D4CA;font-size:12px;font-weight:700;line-height:1.5}
+.stripfoot b{color:#F4F2ED}
+
+/* ── 두 줄 대비 ── */
+.duo{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden;margin:12px 0 0}
+.duo .di{margin:0;background:var(--surface-inner);padding:10px 14px}
+.duo .di>b{display:inline-block;font-size:11px;font-weight:800;color:#EFEDE7;border-radius:4px;padding:2px 7px;margin-bottom:5px;letter-spacing:-.01em}
+.duo .di p{margin:0;font-size:13.2px;line-height:1.55;font-weight:700;color:var(--ink2)}
+.duo .d1>b{background:var(--stk)}
+.duo .d2>b{background:var(--l2-dark)}
+.duo .d3>b{background:var(--i2)}
+.duo .di p b{color:var(--ink);font-weight:800}
+
+/* ── 시뮬레이터 ── */
+.sim{margin:14px -16px 0;padding:14px 16px 15px;background:var(--surface-band);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)}
+.simhd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:0 4px}
+.simhd b{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.simhd span{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.simp{margin:5px 4px 0;font-size:12.5px;line-height:1.55;font-weight:600;color:var(--body)}
+.simread{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0 0}
+.rd{background:var(--surface-inner);border:1px solid var(--line);border-left:3px solid var(--stk);border-radius:9px;padding:7px 8px 8px}
+.rd.r2{border-left-color:var(--l2)}.rd.r3{border-left-color:var(--i2)}
+.rd .rk{font-size:10.5px;font-weight:800;color:var(--sub)}
+.rd .rv{font-size:18px;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1.2;margin-top:1px}
+.rd .rn{font-size:10.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:3px;line-height:1.35}
+.rd .rn b{color:var(--ink2)}
+.rd .rn b.up{color:var(--up)}.rd .rn b.down{color:var(--down)}
+.simchart{margin:8px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;padding:6px 4px 2px}
+.simchart svg{display:block;width:100%;height:auto}
+.ctrl{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:9px 0 0}
+.bt{appearance:none;-webkit-appearance:none;border:0;border-radius:10px;padding:12px 8px;font-size:15px;font-weight:800;cursor:pointer;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .08s}
+.bt:active{transform:scale(.97)}
+.bt.upb{background:var(--up);color:#fff}
+.bt.dnb{background:var(--down);color:#fff}
+.ctrl2{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0 0}
+.ctrl2 .lb{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.04em;margin-right:2px}
+.chip{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:var(--surface-inner);border-radius:999px;padding:6px 11px;
+  font-size:12px;font-weight:800;color:var(--ink2);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#F4F2ED}
+.chip.ghost{background:transparent}
+.chip[disabled]{opacity:.45;cursor:default}
+.ctrl3{display:flex;gap:6px;justify-content:flex-end;margin:-31px 0 0;pointer-events:none}
+.ctrl3 .chip{pointer-events:auto}
+@media(max-width:420px){.ctrl3{margin:7px 0 0;justify-content:flex-start}}
+.presets{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0 0}
+.pre{appearance:none;-webkit-appearance:none;text-align:left;border:1px solid var(--line);background:var(--surface-inner);border-radius:10px;padding:8px 10px;cursor:pointer;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.pre b{display:block;font-size:12.3px;font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.35}
+.pre i{display:block;font-style:normal;font-size:10.5px;font-weight:700;color:var(--muted);margin-top:2px}
+.pre.real{border-color:var(--green-line);background:#EEF1EC}
+.pre.real i{color:var(--green)}
+.pre.on{outline:2px solid var(--ink);outline-offset:-1px}
+.simfoot{margin:8px 4px 0;font-size:11px;line-height:1.5;font-weight:600;color:var(--muted)}
+
+/* ── 벌어진 폭 표 ── */
+.gtab{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.gth{padding:8px 12px;font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--sub);background:var(--surface-detail);border-bottom:1px solid var(--line2)}
+.gg{display:grid;grid-template-columns:.9fr 1fr 1fr;font-variant-numeric:tabular-nums}
+.gg span{padding:8px 9px;border-bottom:1px solid var(--line2);text-align:right}
+.gg span.e{border-bottom:0}
+.gg span.h{font-size:10.5px;font-weight:800;color:var(--muted);padding-top:6px;padding-bottom:6px}
+.gg span.l{text-align:left;font-size:12.3px;font-weight:800;color:var(--ink);line-height:1.35}
+.gg span.l small{display:block;font-size:10.5px;color:var(--muted);font-weight:700}
+.gg i{display:block;font-style:normal;font-size:11.5px;font-weight:700;color:var(--body);line-height:1.4}
+.gg b{display:inline-block;margin-top:3px;font-size:12px;font-weight:800;color:#F4F2ED;background:var(--l2-dark);border-radius:5px;padding:1px 6px}
+.gg b.b3{background:var(--i2)}
+
+/* ── 리밸런싱 두 카드 ── */
+.rb2{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:12px 0 0}
+.rbc{background:var(--surface-inner);border:1px solid var(--line);border-top:3px solid var(--l2);border-radius:11px;padding:9px 10px 10px}
+.rbc.r3{border-top-color:var(--i2)}
+.rbh{font-size:12.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.rbh:after{content:"주가 −10%인 날";display:block;font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:0;margin-top:1px}
+.rbg{display:grid;grid-template-columns:auto 1fr;gap:5px 8px;margin:8px 0 0;align-items:baseline;font-variant-numeric:tabular-nums}
+.rbg .k{font-size:11px;font-weight:800;color:var(--muted)}
+.rbg .v{font-size:13.5px;font-weight:800;color:var(--ink);text-align:right;letter-spacing:-.02em;line-height:1.3}
+.rbg .v small{display:block;font-size:10.5px;font-weight:700;color:var(--muted)}
+.rbr{margin:8px 0 0;padding:6px 8px;border-radius:7px;background:var(--stk);color:#F4F2ED;text-align:center;font-size:14.5px;font-weight:800;letter-spacing:-.02em}
+.rbc.r3 .rbr{background:var(--i2)}
+.rbr small{display:block;font-size:10.5px;font-weight:700;color:rgba(244,242,237,.72);letter-spacing:0;margin-top:1px}
+
+/* ── 더 알아보기 ── */
+.foldwrap.more{margin-top:16px}
+.foldwrap.more summary em{font-style:normal;display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.06em;color:var(--green);border:1px solid var(--green-line);border-radius:999px;padding:1px 7px;margin-right:7px;vertical-align:1px}
+.fb .trio{margin-top:4px}
+
+/* ── 숙제 표 ── */
+.hw{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.hwhd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.hwhd b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.hwsteps{margin:10px 0 0;display:grid;gap:5px}
+.hws{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start}
+.hws i{font-style:normal;width:20px;height:20px;border-radius:50%;background:var(--stk);color:#F4F2ED;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.hws p{margin:0;font-size:13px;line-height:1.55;font-weight:600;color:var(--body)}
+.hws p b{color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums}
+.hwres{margin:9px 0 0;padding:9px 12px;background:var(--stk);border-radius:9px;color:#EFEDE7;font-size:13px;line-height:1.52;font-weight:700}
+.hwres b{color:#fff}
+
+/* ── 세 가지 ── */
+.trio{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden;margin:12px 0 0}
+.trio .ti{background:var(--surface-inner);padding:9px 14px}
+.trio .th{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.trio .th b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.trio .th i{font-style:normal;font-size:11px;font-weight:800;color:var(--sub);background:var(--surface-detail);
+  border:1px solid var(--line2);border-radius:999px;padding:2px 8px}
+.trio .td{margin-top:4px;font-size:12.5px;line-height:1.56;font-weight:600;color:var(--body)}
+.trio .td b{color:var(--ink);font-weight:800}
+
+/* ── 이름표 해부 ── */
+.ntag{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.ntag .nk{font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--muted)}
+.nname{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0 0}
+.nname span{font-size:17px;font-weight:800;letter-spacing:-.03em;padding:4px 8px 5px;border-radius:7px;background:var(--surface-detail);color:var(--ink);border-bottom:3px solid var(--line)}
+.nname .n1{border-bottom-color:var(--muted)}
+.nname .n2{border-bottom-color:var(--stk)}
+.nname .n3{border-bottom-color:var(--green)}
+.nname .n4{border-bottom-color:var(--i2)}
+.nname .n5{border-bottom-color:var(--l2)}
+.nlist{display:grid;gap:5px;margin:10px 0 0}
+.nlist div{display:grid;grid-template-columns:62px 1fr;gap:8px;font-size:12.5px;line-height:1.5}
+.nlist dt,.nlist .t{font-weight:800;color:var(--ink)}
+.nlist .d{color:var(--body);font-weight:600}
+.nlist .d b{color:var(--ink)}
+
+/* ── 날씨표 ── */
+.wx{margin:12px 0 0}
+.wxgrid{display:grid;grid-template-columns:54px 1fr 1fr;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden}
+.wxgrid .wh{background:var(--surface-detail);padding:7px 8px;font-size:11px;font-weight:800;color:var(--sub);text-align:center;display:flex;align-items:center;justify-content:center;line-height:1.35}
+.wxgrid .wc{background:var(--surface-inner);padding:9px 10px}
+.wxgrid .wc b{display:block;font-size:13px;font-weight:800;letter-spacing:-.02em;line-height:1.35}
+.wxgrid .wc p{margin:4px 0 0;font-size:11.3px;line-height:1.48;font-weight:700;color:var(--body)}
+.wxgrid .wc p em{font-style:normal;color:var(--green);font-weight:800}
+.wxgrid .good b{color:var(--green-dark)}
+.wxgrid .bad b{color:var(--i2)}
+.wxgrid .bad2{background:var(--i2-soft)}
+.wxgrid .good2{background:var(--green-soft)}
+.wxnote{margin:7px 0 0;padding:8px 12px;background:var(--surface-detail);border:1px solid var(--line);border-radius:10px;font-size:12px;line-height:1.58;font-weight:700;color:var(--ink2)}
+
+/* ── 체크 ── */
+.chk4{margin:12px 0 0;display:grid;gap:8px}
+.ck{border-left:3px solid var(--green-line);padding:1px 0 1px 12px}
+.ck .ct{margin:1px 0 0;font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.03em;line-height:1.4}
+.ck .ct i{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--muted);margin-right:8px;vertical-align:2px}
+.ck .cd{margin:5px 0 0;padding:7px 11px;background:var(--surface-detail);border-radius:9px;font-size:12.8px;line-height:1.52;font-weight:700;color:var(--ink2)}
+.ck .cd b{color:var(--ink)}
+
+/* ── 오답노트 ── */
+.trapwrap{margin:16px 0 0;border:1.5px solid var(--i2);border-radius:12px;overflow:hidden}
+.traphd{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;background:var(--i2);color:#F6EEEF}
+.traphd b{font-size:12px;font-weight:800;letter-spacing:.06em}
+.traphd i{font-style:normal;font-size:11px;font-weight:700;color:#E5C9CC}
+.trap{display:grid;gap:1.5px;background:var(--line)}
+.trap .ti{padding:10px 13px;background:var(--surface-inner)}
+.trap .tk{font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.trap .tx{margin-top:3px;font-size:14px;font-weight:800;color:var(--i2);line-height:1.48;letter-spacing:-.02em;text-decoration:line-through;text-decoration-color:rgba(122,63,68,.45);text-decoration-thickness:1.5px}
+.trap .to{margin-top:5px;font-size:12.5px;font-weight:600;color:var(--body);line-height:1.56}
+.trap .to b{color:var(--ink);font-weight:800}
+
+/* ── 엔딩 ── */
+.final{margin:16px -16px 0;padding:18px 22px;background:linear-gradient(155deg,#36443B 0%,#232C26 100%);color:#EFEDE7;position:relative;overflow:hidden}
+.final:before{content:"";position:absolute;right:-46px;bottom:-58px;width:160px;height:160px;border-radius:50%;border:1px solid rgba(168,198,180,.18)}
+.final .fk{position:relative;font-size:11px;font-weight:800;letter-spacing:.13em;color:#A0B4A6;margin-bottom:10px}
+.final p{position:relative;margin:0;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.final .f1{font-size:19px;line-height:1.5}
+.final .f2{margin-top:11px;padding-top:10px;border-top:1px solid rgba(168,198,180,.22);font-size:15px;line-height:1.58;color:#DCE6DE}
+.final p b{color:var(--green-pale)}
+
+/* ── 다음 편 ── */
+.next{margin:16px -16px 0;padding:20px 22px;background:linear-gradient(150deg,#454F5C 0%,#2B323C 100%);color:#E9EBEE;position:relative;overflow:hidden}
+.next:before{content:"";position:absolute;right:-40px;bottom:-52px;width:150px;height:150px;border-radius:50%;border:1px solid rgba(180,190,202,.18)}
+.next .nh{position:relative;font-size:11px;font-weight:800;letter-spacing:.12em;color:#A3ACB8;margin-bottom:10px}
+.next p{position:relative;margin:0;font-size:16px;line-height:1.56;font-weight:800;letter-spacing:-.03em;color:#EDEFF2}
+.next p b{color:#FFFFFF}
+.next .nt{position:relative;margin-top:14px;padding-top:12px;border-top:1px solid rgba(180,190,202,.22);font-size:12.5px;font-weight:800;color:#B9C1CB}
+.next .nt b{color:#EDEFF2;font-weight:800;margin-right:6px}
+
+/* ── 본문 링크 ── */
+.ilink{color:inherit;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px;text-decoration-color:rgba(230,201,143,.7)}
+
+/* ── 공유 ── */
+.qshare{appearance:none;-webkit-appearance:none;margin:10px 0 0;width:100%;border:1.5px dashed var(--line);background:transparent;border-radius:10px;padding:9px 10px;
+  font-size:13px;font-weight:800;color:var(--ink2);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.qshare:hover{border-color:var(--sub)}
+.sharebox{margin:16px 0 0;padding:14px 14px 13px;background:var(--surface-inner);border:1px solid var(--line);border-radius:14px;text-align:center}
+.shq{margin:0;font-size:14.5px;line-height:1.5;font-weight:800;color:var(--ink);letter-spacing:-.03em}
+.shbtns{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px;margin:11px 0 0}
+.shb{appearance:none;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#F7F6F2;border-radius:10px;
+  padding:10px 6px;font-size:13px;font-weight:800;color:var(--ink);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;text-align:center}
+.shb.main{background:var(--green);border-color:var(--green);color:#F4F2ED}
+.shmsg{margin:7px 0 0;min-height:1em;font-size:12px;font-weight:700;color:var(--green)}
+
+/* ── 이어 읽기 ── */
+.more7{margin:12px 0 0;display:grid;gap:6px}
+.m7h{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--muted);margin:2px 2px 2px}
+.m7{display:block;background:var(--surface-inner);border:1px solid var(--line);border-radius:11px;padding:10px 13px;position:relative}
+.m7:after{content:"→";position:absolute;right:13px;top:50%;transform:translateY(-50%);font-weight:800;color:var(--muted)}
+.m7 i{font-style:normal;display:inline-block;font-size:10.5px;font-weight:800;color:var(--green);margin-right:6px}
+.m7 b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.m7 span{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--sub);padding-right:18px}
+.m7.all{background:var(--surface-detail)}
+.m7.cta{background:var(--green);border-color:var(--green)}
+.m7.cta b{color:#F4F2ED}.m7.cta span{color:#C6D2CA}.m7.cta:after{color:#C6D2CA}
+
+/* ── 접힘 ── */
+.foldwrap{margin:14px 0 0}
+details.fold{border:1px solid var(--line);border-radius:12px;background:var(--surface-detail);margin:0 0 8px;overflow:hidden}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:11px 15px;font-size:13px;font-weight:800;color:var(--ink)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary:after{content:"+";font-size:18px;font-weight:800;color:var(--green);line-height:.9}
+details.fold[open]>summary:after{content:"−"}
+details.fold .fb{padding:0 15px 14px}
+.fb p{margin:0 0 8px;font-size:12.5px;line-height:1.62;color:var(--body);font-weight:600}
+.fb p:last-child{margin-bottom:0}
+.fb p b{color:var(--ink);font-weight:800}
+.gloss{display:grid;grid-template-columns:100px 1fr;gap:7px 11px;margin:2px 0 0;font-size:12.5px}
+.gloss dt{font-weight:800;color:#4B4740}
+.gloss dd{margin:0;color:var(--body);line-height:1.52}
+.case{margin:0 0 9px;padding:9px 11px;background:var(--surface-inner);border:1px solid var(--line2);border-radius:9px}
+.case b{display:block;font-size:12.5px;font-weight:800;color:var(--ink);line-height:1.45}
+.case p{margin:4px 0 0;font-size:12.2px;line-height:1.55;font-weight:600;color:var(--body)}
+.src{margin:0;padding-left:16px;display:grid;gap:5px}
+.src li{font-size:12px;line-height:1.52;color:var(--body);font-weight:600}
+.src li b{color:var(--ink)}
+.disc{font-size:11.5px;color:var(--muted);text-align:center;line-height:1.5;padding:12px 8px 0;font-weight:500}
+.foot{text-align:center;font-size:11.5px;color:var(--sub);padding:9px 0 4px;font-weight:800;letter-spacing:-.01em}
+
+/* ── 툴팁 ── */
+.term{border-bottom:1.5px dashed #8B867E;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;font-weight:800;color:var(--ink);
+  display:inline-block;padding:3px 4px;margin:-3px -4px;line-height:1.3;
+  touch-action:manipulation;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.term .tip{position:fixed;left:12px;top:0;min-width:160px;max-width:min(248px,calc(100vw - 28px));
+  background:#33322F;color:#F2F0EB;font-size:12px;font-weight:600;line-height:1.52;padding:9px 11px;border-radius:9px;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);z-index:60;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease;white-space:normal;text-align:left}
+.term .tip:after{content:"";position:absolute;top:100%;left:var(--ax,50%);transform:translateX(-50%);border:6px solid transparent;border-top-color:#33322F}
+.term .tip.below:after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#33322F}
+.term.open .tip{opacity:1;visibility:visible;pointer-events:auto}
+.board .term,.keyb .term{color:inherit;border-bottom-color:rgba(236,234,227,.55)}
+
+@media(max-width:360px){
+  .cvtitle{font-size:27px}
+  .q{font-size:17px}
+  .ans .av{font-size:17.5px}
+  .final .f1{font-size:17px}
+  .cht{font-size:21px}
+  .sc .sv{font-size:18px}
+  .rd .rv{font-size:16px}
+  .legs span,.btab span{padding:7px 6px;font-size:11.8px}
+  .gloss{grid-template-columns:86px 1fr}
+  .opt{font-size:15px}
+}
+
+/* ── 데스크톱 ── */
+@media(min-width:768px){
+  .app{max-width:770px;padding-left:28px;padding-right:28px}
+  .topbar{margin:0 -28px}
+  .cover{margin:0 -28px;padding:44px 40px 34px}
+  .cvtitle{font-size:44px}
+  .cvsub{font-size:15px;max-width:30em}
+  .ch{margin-top:48px}
+  .cht{font-size:29px}
+  .q{font-size:24px}
+  .ans,.board,.sim,.final,.next{margin-left:-28px;margin-right:-28px}
+  .ans{padding:26px 40px}
+  .ans .av{font-size:23px}
+  .board{padding:26px 40px}
+  .bdt{font-size:24px}
+  .sim{padding:24px 34px}
+  .final{padding:32px 40px}
+  .final .f1{font-size:25px}
+  .final .f2{font-size:18px}
+  .next{padding:28px 40px}
+  .stripgrid{grid-template-columns:repeat(4,1fr)}
+  .trio{grid-template-columns:1fr 1fr 1fr}
+  .chk4{grid-template-columns:1fr 1fr;gap:14px 20px}
+  .trap{grid-template-columns:1fr 1fr 1fr}
+  .presets{grid-template-columns:repeat(4,1fr)}
+  .simchart svg,.chart svg{max-width:600px;margin:0 auto}
+  .duo{grid-template-columns:1fr 1fr}
+  .more7{grid-template-columns:1fr 1fr 1fr}
+  .m7.all,.m7.cta{grid-column:span 3}
+  .m7.all{grid-column:span 1}
+  .m7.cta{grid-column:span 2}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<span id="top"></span>
+
+<div class="topbar">
+  <div class="tbin">
+    <span class="brand"><i>시장을 읽는 말들</i> · 제7편</span>
+    <span class="ep">07</span>
+  </div>
+  <div class="prog"><i id="pg"></i></div>
+</div>
+
+<!-- ══════ 표지 ══════ -->
+<div class="cover">
+  <span class="cvkick">경제·주식 용어 연재 <b>07</b></span>
+  <time class="cvdate" datetime="2026-10-04">2026.10.04 · 시장 입문</time>
+  <h1 class="cvtitle">2배 ETF는<span>왜 2배가 아닌가</span></h1>
+  <p class="cvsub">주가가 내렸는데, 2배에 건 쪽도<br/>거꾸로 2배에 건 쪽도 잃을 수 있다.<br/>무엇이 둘 다를 깎았나.</p>
+  <div class="cvmotif">
+    <svg viewBox="0 0 340 92" role="img" aria-label="같은 점에서 출발한 세 개의 지그재그 선. 가운데 선은 출발점 근처로 돌아오고, 나머지 두 선은 더 크게 흔들린 뒤 둘 다 아래에서 끝난다">
+      <line x1="8" y1="40" x2="332" y2="40" stroke="rgba(216,224,218,.22)" stroke-width="1" stroke-dasharray="3 4"/>
+      <polyline points="10,40 50,30 90,44 130,26 170,46 210,30 250,48 290,36 330,44" fill="none" stroke="rgba(236,234,227,.85)" stroke-width="2" stroke-linejoin="round"/>
+      <polyline points="10,40 50,20 90,48 130,12 170,54 210,22 250,62 290,40 330,62" fill="none" stroke="#D2B48C" stroke-width="2" stroke-linejoin="round"/>
+      <polyline points="10,40 50,60 90,36 130,72 170,36 210,66 250,40 290,58 330,68" fill="none" stroke="#C29A9E" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="10" cy="40" r="3.2" fill="#EFEDE7"/>
+    </svg>
+    <div class="cvlg"><span><i style="background:rgba(236,234,227,.85)"></i>주가</span><span><i style="background:#D2B48C"></i>2배</span><span><i style="background:#C29A9E"></i>거꾸로 2배</span></div>
+  </div>
+  <div class="cvidx">
+    <a href="#p1"><b>01</b>둘 다 잃은 7주</a>
+    <a href="#p2"><b>02</b>하루라는 두 글자</a>
+    <a href="#p3"><b>03</b>득이 되는 날씨, 독이 되는 날씨</a>
+  </div>
+</div>
+
+<!-- ══════ 1페이지 ══════ -->
+<div class="ch" id="p1">
+  <div class="chtop"><span class="chn">01</span><span class="chk">사건과 질문</span></div>
+  <h2 class="cht">둘 다 잃은 7주</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">본론 전에 문제 하나를 먼저 푼다. 계산기는 필요 없다.</p>
+
+<div class="pop" id="quiz1">
+  <div class="poph"><b>워밍업</b><span class="vb">가상 예시</span></div>
+  <div class="popb">
+    <p class="popq">어떤 주식이 오늘 10% 오르고, 내일 10% 내린다. 이 주식의 <span class="c-l2">2배 ETF</span>는 이틀 뒤 출발점보다 얼마나 달라져 있을까?</p>
+    <div class="opts">
+      <button class="opt" type="button" data-ok="0">0%</button>
+      <button class="opt" type="button" data-ok="0">−2%</button>
+      <button class="opt" type="button" data-ok="1">−4%</button>
+    </div>
+    <div class="popans" hidden>
+      <span class="verdict">정답 −4%</span>
+      <div class="calc">
+        <span class="h"></span><span class="h">출발</span><span class="h">+10%인 날</span><span class="h">−10%인 날</span>
+        <span class="l">주가</span><span>100</span><span>110</span><span><b>99</b></span>
+        <span class="l e c-l2">2배 ETF</span><span class="e">100</span><span class="e">120</span><span class="e"><b class="c-l2">96</b></span>
+      </div>
+      <p class="popnote">주가는 1 빠졌다. 2배 ETF는 2가 아니라 <b>4</b> 빠졌다. 이 이틀짜리 장난감이 이번 편의 전부다. 실제 시장에서는 이 일이 7주 동안 이어졌다.</p>
+      <button class="qshare" type="button" data-share="quiz">이 문제, 주변에도 내 보기</button>
+    </div>
+  </div>
+</div>
+
+<h3 class="hd"><small>2026.05.27 · 실제 시장</small>2배 상품이 한꺼번에 상장된 날</h3>
+<p class="p">2026년 5월 27일, 8개 운용사가 삼성전자 또는 SK하이닉스 한 종목만을 기초로 하는 레버리지·인버스 ETF 16종을 한꺼번에 상장했다. 주가가 하루 1% 움직이면 2% 움직이도록 설계된 상품과, 반대 방향으로 움직이도록 설계된 상품이다. 이 편에서는 하루 2배를 <b class="c-l2">2배</b>, 하루 −2배를 <b class="c-i2">거꾸로 2배</b>라고 부른다. 시장에서 「곱버스」라고 부르는 인버스 2배다.</p>
+<p class="p">상장일 SK하이닉스 종가에 세 가지를 똑같이 100씩 샀다고 하자. 주식 그대로, 2배, 거꾸로 2배. 그리고 7주 뒤인 7월 15일 종가에 성적표를 연다.</p>
+
+<div class="case7">
+  <div class="cshd"><b>SK하이닉스 · 상장일 종가 = 100</b><span class="vb">종가로 계산한 이론값</span></div>
+  <div class="lg"><span class="k1"><i></i>주가</span><span class="k2"><i></i>2배</span><span class="k3"><i></i>거꾸로 2배</span></div>
+  <div class="chart">
+    <svg viewBox="0 0 340 190" role="img" aria-label="2026년 5월 27일부터 7월 15일까지 SK하이닉스 주가와 2배, 거꾸로 2배 이론값. 6월 22일 주가는 130, 2배는 159, 거꾸로 2배는 48. 7월 15일 주가는 93, 2배는 71, 거꾸로 2배는 67">
+      <line x1="34" y1="26.7" x2="330" y2="26.7" stroke="#DCD7CE" stroke-width="1"/>
+      <line x1="34" y1="153.3" x2="330" y2="153.3" stroke="#DCD7CE" stroke-width="1"/>
+      <line x1="34" y1="90" x2="330" y2="90" stroke="#8B867E" stroke-width="1" stroke-dasharray="3 3"/>
+      <text x="28" y="30" text-anchor="end" font-size="9.5" font-weight="700" fill="#8B867E">150</text>
+      <text x="28" y="93.5" text-anchor="end" font-size="9.5" font-weight="700" fill="#706D66">100</text>
+      <text x="28" y="156.8" text-anchor="end" font-size="9.5" font-weight="700" fill="#8B867E">50</text>
+      <line x1="182" y1="10" x2="182" y2="166" stroke="#B8B2A7" stroke-width="1" stroke-dasharray="2 3"/>
+      <polyline fill="none" stroke="#7A3F44" stroke-width="2" stroke-linejoin="round" points="34.0,90.0 42.7,95.2 51.4,99.9 60.1,102.9 68.8,102.6 77.5,96.6 86.2,72.8 94.9,50.7 103.6,103.5 112.4,86.4 121.1,93.1 129.8,98.9 138.5,114.0 147.2,122.5 155.9,133.5 164.6,144.3 173.3,148.5 182.0,156.2 190.7,141.1 199.4,145.0 208.1,161.2 216.8,151.9 225.5,149.7 234.2,150.8 242.9,146.4 251.6,125.9 260.4,145.6 269.1,140.8 277.8,131.7 286.5,122.0 295.2,132.0 303.9,131.6 312.6,105.4 321.3,113.6 330.0,131.8"/>
+      <polyline fill="none" stroke="#A9784A" stroke-width="2" stroke-linejoin="round" points="34.0,90.0 42.7,84.8 51.4,79.7 60.1,76.2 68.8,76.6 77.5,83.9 86.2,110.3 94.9,126.6 103.6,98.0 112.4,115.9 121.1,110.6 129.8,105.7 138.5,91.5 147.2,81.2 155.9,65.4 164.6,45.7 173.3,35.6 182.0,15.3 190.7,65.5 199.4,57.7 208.1,21.8 216.8,54.4 225.5,59.9 234.2,57.2 242.9,68.1 251.6,111.4 260.4,88.5 269.1,97.1 277.8,111.6 286.5,123.5 295.2,113.7 303.9,114.2 312.6,145.7 321.3,140.5 330.0,127.0"/>
+      <polyline fill="none" stroke="#3A3632" stroke-width="2.4" stroke-linejoin="round" points="34.0,90.0 42.7,87.4 51.4,84.9 60.1,83.2 68.8,83.4 77.5,86.9 86.2,99.8 94.9,108.7 103.6,91.6 112.4,101.0 121.1,98.0 129.8,95.3 138.5,87.5 147.2,82.2 155.9,74.3 164.6,65.0 173.3,60.6 182.0,51.8 190.7,72.4 199.4,68.7 208.1,51.9 216.8,65.7 225.5,68.3 234.2,67.0 242.9,72.1 251.6,93.2 260.4,79.7 269.1,84.4 277.8,92.4 286.5,99.4 295.2,93.2 303.9,93.6 312.6,112.5 321.3,108.6 330.0,99.1"/>
+      <circle cx="182" cy="15.3" r="3.2" fill="#A9784A"/>
+      <circle cx="182" cy="51.8" r="3.2" fill="#3A3632"/>
+      <circle cx="182" cy="156.2" r="3.2" fill="#7A3F44"/>
+      <circle cx="330" cy="99.1" r="3.2" fill="#3A3632"/>
+      <circle cx="330" cy="127" r="3.2" fill="#A9784A"/>
+      <circle cx="330" cy="131.8" r="3.2" fill="#7A3F44"/>
+      <text x="34" y="182" font-size="9.5" font-weight="800" fill="#706D66">5/27</text>
+      <text x="182" y="182" text-anchor="middle" font-size="9.5" font-weight="800" fill="#706D66">6/22</text>
+      <text x="330" y="182" text-anchor="end" font-size="9.5" font-weight="800" fill="#706D66">7/15</text>
+    </svg>
+  </div>
+  <div class="legs">
+    <span class="h l">구간</span><span class="h">주가</span><span class="h">2배</span><span class="h">거꾸로 2배</span>
+    <span class="l">올라간 구간<small>5/27 → 6/22</small></span><span class="up">+30.1%</span><span class="up">+59.0%</span><span class="down">−52.2%</span>
+    <span class="l">내려온 구간<small>6/22 → 7/15</small></span><span class="down">−28.7%</span><span class="down">−55.5%</span><span class="up">+40.3%</span>
+    <span class="l tot">이어 붙이면<small style="color:#B9B3A8">5/27 → 7/15</small></span><span class="tot down">−7.2%</span><span class="tot down">−29.2%</span><span class="tot down">−33.0%</span>
+  </div>
+  <p class="csnote">2배는 구간마다 보면 거의 단순 계산대로다. 올라간 구간 +59.0%는 단순 계산 +60.3%에, 내려온 구간 −55.5%는 −57.3%에 가깝다. 거꾸로 2배는 구간 안에서도 단순 계산(−60.3%, +57.3%)에서 크게 벗어났다. 그리고 <b>두 구간을 이어 붙이자 2배가 사라졌다.</b></p>
+</div>
+
+<div class="score">
+  <div class="sc"><div class="sk">주가</div><div class="sv down">−7.2%</div><div class="sn">출발점 근처로<br/>돌아옴</div></div>
+  <div class="sc s2"><div class="sk">2배</div><div class="sv down">−29.2%</div><div class="sn">단순 계산이면<br/><b class="down">−14.4%</b></div></div>
+  <div class="sc s3"><div class="sk">거꾸로 2배</div><div class="sv down">−33.0%</div><div class="sn">단순 계산이면<br/><b class="up">+14.4%</b></div></div>
+</div>
+
+<p class="q">주가가 내렸으니 거꾸로 2배는<br/>벌었어야 하지 않나?</p>
+<p class="p">단순 계산은 이렇다. 주가 −7.2%의 두 배는 −14.4%, 거꾸로 두 배는 +14.4%. 계산해 보면 2배는 단순 계산의 두 배를 잃었고, 거꾸로 2배는 벌기는커녕 가장 많이 잃었다. <b>방향을 맞힌 쪽까지 잃었다.</b></p>
+
+<div class="ans">
+  <div class="ak">한 문장 답</div>
+  <div class="av">레버리지 ETF의 목표는 「하루」 2배다. 7주 2배는 처음부터 목표가 아니었다.</div>
+  <div class="aw">위 숫자는 매일 종가 기준 수익률에 2배와 −2배를 곱해 이어 붙인 이론값이다. 보수·괴리·추적오차를 넣으면 실제 상품의 성적은 이론값과 달라질 수 있다.</div>
+</div>
+
+<!-- ══════ 2페이지 ══════ -->
+<div class="ch" id="p2">
+  <div class="chtop"><span class="chn">02</span><span class="chk">구조와 용어</span></div>
+  <h2 class="cht">하루라는 두 글자</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<h3 class="hd" style="margin-top:12px">레버리지 ETF는 2배를 어떻게 만드나</h3>
+<p class="p">투자자가 100을 넣으면, 운용사는 선물이나 스왑 같은 계약으로 주가가 움직일 때 200어치를 가진 것처럼 손익이 나게 만든다. 이 200을 <span class="term">노출<span class="tip">시장이 움직일 때 손익이 따라 움직이는 금액의 크기. 100을 넣고 노출이 200이면 주가 1% 변화에 손익이 2 움직인다.</span></span>이라고 한다. 그리고 <b>매일 장 마감 무렵, 노출을 그날의 순자산의 두 배로 다시 맞춘다.</b> 이것이 <span class="term">리밸런싱<span class="tip">정해진 배수가 유지되도록 노출을 매일 다시 맞추는 일.</span></span>이다.</p>
+
+<div class="board">
+  <div class="bdk">판서 · 오늘의 두 글자</div>
+  <p class="bdt"><u>하루</u> 수익률의 2배 ≠ <u>기간</u> 수익률의 2배</p>
+  <p class="bdp">2배는 매일 새로 건다. 어제 번 돈은 오늘의 판돈에 더해지고, 어제 잃은 돈은 오늘의 판돈에서 빠진다. 그래서 여러 날의 성적은 기간 전체의 등락률이 아니라 <b>그사이 하루하루 얼마씩 움직였는가</b>가 정한다.</p>
+  <div class="btab">
+    <span class="h l">장면 (이틀)</span><span class="h">주가</span><span class="h">단순 2배</span><span class="h">2배 ETF</span>
+    <span class="l">쭉 오름<small>+10%, +10%</small></span><span>+21%</span><span>+42%</span><span class="hi">+44%<span class="tg">더 범</span></span>
+    <span class="l">쭉 내림<small>−10%, −10%</small></span><span>−19%</span><span>−38%</span><span class="hi">−36%<span class="tg">덜 잃음</span></span>
+    <span class="l e">왕복<small>+10%, −10%</small></span><span class="e">−1%</span><span class="e">−2%</span><span class="e hi">−4%<span class="tg bad">더 잃음</span></span>
+  </div>
+  <div class="bdline">흔들림에 비해 <b>한쪽으로 크게 움직일수록</b> 단순 2배보다 유리하고,<br/><b>크게 흔들리고도 제자리 근처</b>면 단순 2배보다 불리하다.</div>
+</div>
+
+<h3 class="hd">음의 복리는 어디서 생기나</h3>
+<div class="strip">
+  <div class="striphead"><b>몸집이 바뀐 채로 2배</b><i>가상 예시</i></div>
+  <div class="stripgrid">
+    <div class="pnl">
+      <span class="pno">01</span>
+      <svg viewBox="0 0 168 140" role="img" aria-label="주가 막대와 2배 ETF 막대가 둘 다 100으로 같은 높이">
+        <rect width="168" height="140" fill="#F1EFEA"/>
+        <line x1="12" y1="122" x2="156" y2="122" stroke="#CEC9BF" stroke-width="2"/>
+        <rect x="34" y="42" width="38" height="80" rx="3" fill="#3A3632"/>
+        <rect x="94" y="42" width="38" height="80" rx="3" fill="#A9784A"/>
+        <text x="53" y="36" text-anchor="middle" font-size="13" font-weight="800" fill="#3A3632">100</text>
+        <text x="113" y="36" text-anchor="middle" font-size="13" font-weight="800" fill="#7A5A34">100</text>
+        <text x="53" y="135" text-anchor="middle" font-size="9.5" font-weight="800" fill="#706D66">주가</text>
+        <text x="113" y="135" text-anchor="middle" font-size="9.5" font-weight="800" fill="#706D66">2배</text>
+      </svg>
+      <div class="pcap">출발. 주가도 2배 ETF도 <b>100</b></div>
+    </div>
+    <div class="pnl">
+      <span class="pno">02</span>
+      <svg viewBox="0 0 168 140" role="img" aria-label="주가 110, 2배 ETF 120으로 커짐">
+        <rect width="168" height="140" fill="#F1EFEA"/>
+        <line x1="12" y1="122" x2="156" y2="122" stroke="#CEC9BF" stroke-width="2"/>
+        <rect x="34" y="34" width="38" height="88" rx="3" fill="#3A3632"/>
+        <rect x="94" y="26" width="38" height="96" rx="3" fill="#A9784A"/>
+        <rect x="94" y="26" width="38" height="16" rx="3" fill="#D2B48C"/>
+        <text x="53" y="28" text-anchor="middle" font-size="13" font-weight="800" fill="#3A3632">110</text>
+        <text x="113" y="20" text-anchor="middle" font-size="13" font-weight="800" fill="#7A5A34">120</text>
+        <path d="M150 50 l0 -22 m-6 7 l6 -8 l6 8" stroke="#C74754" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="53" y="135" text-anchor="middle" font-size="9.5" font-weight="800" fill="#706D66">주가</text>
+        <text x="113" y="135" text-anchor="middle" font-size="9.5" font-weight="800" fill="#706D66">2배</text>
+      </svg>
+      <div class="pcap">주가 +10%. 2배는 +20%로 <b>120</b>. 몸집이 커졌다</div>
+    </div>
+    <div class="pnl">
+      <span class="pno">03</span>
+      <svg viewBox="0 0 168 140" role="img" aria-label="주가 99, 2배 ETF 96. 2배 ETF는 120에서 24가 빠짐">
+        <rect width="168" height="140" fill="#F1EFEA"/>
+        <line x1="12" y1="122" x2="156" y2="122" stroke="#CEC9BF" stroke-width="2"/>
+        <rect x="34" y="42.8" width="38" height="79.2" rx="3" fill="#3A3632"/>
+        <rect x="94" y="26" width="38" height="19.2" rx="3" fill="none" stroke="#A9784A" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <rect x="94" y="45.2" width="38" height="76.8" rx="3" fill="#A9784A"/>
+        <text x="113" y="39" text-anchor="middle" font-size="10.5" font-weight="800" fill="#7A3F44">−24</text>
+        <text x="53" y="36" text-anchor="middle" font-size="13" font-weight="800" fill="#3A3632">99</text>
+        <text x="113" y="62" text-anchor="middle" font-size="13" font-weight="800" fill="#F4F2ED">96</text>
+        <path d="M150 28 l0 22 m-6 -7 l6 8 l6 -8" stroke="#4F78A8" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="53" y="135" text-anchor="middle" font-size="9.5" font-weight="800" fill="#706D66">주가</text>
+        <text x="113" y="135" text-anchor="middle" font-size="9.5" font-weight="800" fill="#706D66">2배</text>
+      </svg>
+      <div class="pcap">주가 −10%. 2배의 −20%는 <b>커진 120</b>에 붙어 24가 빠진다</div>
+    </div>
+    <div class="pnl">
+      <span class="pno">04</span>
+      <svg viewBox="0 0 168 140" role="img" aria-label="주가는 1 빠지고 2배 ETF는 4 빠졌다는 비교">
+        <rect width="168" height="140" fill="#F1EFEA"/>
+        <text x="46" y="52" text-anchor="middle" font-size="11" font-weight="800" fill="#706D66">주가</text>
+        <text x="46" y="88" text-anchor="middle" font-size="34" font-weight="800" fill="#3A3632">−1</text>
+        <text x="84" y="80" text-anchor="middle" font-size="16" font-weight="800" fill="#B8B2A7">vs</text>
+        <text x="122" y="52" text-anchor="middle" font-size="11" font-weight="800" fill="#706D66">2배</text>
+        <text x="122" y="88" text-anchor="middle" font-size="34" font-weight="800" fill="#7A3F44">−4</text>
+        <line x1="22" y1="108" x2="146" y2="108" stroke="#CEC9BF" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <text x="84" y="126" text-anchor="middle" font-size="10" font-weight="700" fill="#706D66">단순 2배라면 −2</text>
+      </svg>
+      <div class="pcap">주가는 <b>1</b> 빠졌는데 2배는 <b>4</b> 빠졌다</div>
+    </div>
+  </div>
+  <div class="stripfoot">오른 뒤에는 <b>커진 몸집</b>으로 2배를 맞고, 내린 뒤에는 <b>작아진 몸집</b>으로 2배를 번다.</div>
+</div>
+
+<p class="p">이 차이를 <span class="term">변동성 끌림<span class="tip">오르내림이 반복될 때 레버리지 상품이 단순 배수 계산보다 뒤처지는 현상. 음의 복리라고도 부른다.</span></span>이라고 하고, 뉴스에서는 「음의 복리」라고도 부른다.</p>
+
+<!-- 시뮬레이터 -->
+<div class="sim" id="sim">
+  <div class="simhd"><b>직접 돌려보기</b><span id="simday">0일째</span></div>
+  <p class="simp">버튼 한 번이 하루다. 오르고 내리기를 번갈아 눌러 보면 2배와 거꾸로 2배가 어디로 가는지 보인다.</p>
+  <div class="simread">
+    <div class="rd"><div class="rk">주가</div><div class="rv" id="rv0">100.0</div><div class="rn" id="rn0">출발점</div></div>
+    <div class="rd r2"><div class="rk">2배</div><div class="rv" id="rv1">100.0</div><div class="rn" id="rn1">매일 2배 <b>0.0%</b><br/>단순 계산 <b>0.0%</b></div></div>
+    <div class="rd r3"><div class="rk">거꾸로 2배</div><div class="rv" id="rv2">100.0</div><div class="rn" id="rn2">매일 −2배 <b>0.0%</b><br/>단순 계산 <b>0.0%</b></div></div>
+  </div>
+  <div class="simchart"><svg id="simsvg" viewBox="0 0 340 150" role="img" aria-label="주가, 2배, 거꾸로 2배의 움직임을 보여주는 선 그래프"></svg></div>
+  <div class="ctrl">
+    <button class="bt upb" type="button" id="bUp">▲ 오른 날</button>
+    <button class="bt dnb" type="button" id="bDn">▼ 내린 날</button>
+  </div>
+  <div class="ctrl2">
+    <span class="lb">하루 움직임</span>
+    <button class="chip stp" type="button" data-s="3">3%</button>
+    <button class="chip stp on" type="button" data-s="5">5%</button>
+    <button class="chip stp" type="button" data-s="10">10%</button>
+  </div>
+  <div class="ctrl3">
+    <button class="chip ghost" type="button" id="bUndo">하루 되돌리기</button>
+    <button class="chip ghost" type="button" id="bReset">처음으로</button>
+  </div>
+  <div class="presets">
+    <button class="pre" type="button" data-p="zig"><b>제자리 왕복 10번</b><i>±5% 번갈아 20일</i></button>
+    <button class="pre" type="button" data-p="trend"><b>매일 +2% 열흘</b><i>한쪽으로 움직이는 장</i></button>
+    <button class="pre real" type="button" data-p="sk"><b>SK하이닉스 7주</b><i>실제 종가 · 5/27→7/15</i></button>
+    <button class="pre real" type="button" data-p="ss"><b>삼성전자 5주</b><i>실제 종가 · 6/25→7/30</i></button>
+  </div>
+  <p class="simfoot">「단순 계산」은 주가 누적 수익률에 2배, −2배를 곱한 값이다. 실제 종가 경로는 매일 종가 수익률로 계산한 이론값이며 보수·괴리는 넣지 않았다.</p>
+</div>
+
+<h3 class="hd">거꾸로 2배(곱버스)는 단순 계산과 더 멀어진다</h3>
+<p class="p">워밍업 문제를 거꾸로 2배로 풀면 100 → 80 → 96. 결과는 2배와 같은 −4%다. 그런데 출발할 때의 기대가 달랐다. 단순 계산으로는 2배가 −2%, 거꾸로 2배가 +2%였다.</p>
+<div class="gtab">
+  <div class="gth">단순 계산 → 매일 2배·−2배로 계산한 값(이론값)</div>
+  <div class="gg">
+    <span class="h l">사례</span><span class="h">2배</span><span class="h">거꾸로 2배</span>
+    <span class="l">워밍업<small>왕복</small></span><span><i>−2% → −4%</i><b>2%p</b></span><span><i>+2% → −4%</i><b class="b3">6%p</b></span>
+    <span class="l">SK하이닉스 7주<small>크게 흔들리고 제자리 근처</small></span><span><i>−14.4% → −29.2%</i><b>약 14.8%p</b></span><span><i>+14.4% → −33.0%</i><b class="b3">약 47.4%p</b></span>
+    <span class="l e">삼성전자 5주<small>한쪽으로 크게 기욺</small></span><span class="e"><i>−84.5% → −70.0%</i><b>약 14.5%p</b></span><span class="e"><i>+84.5% → +128.9%</i><b class="b3">약 44.4%p</b></span>
+  </div>
+</div>
+<p class="p">세 사례 모두 거꾸로 2배가 단순 계산에서 2배보다 <b>약 세 배</b> 멀리 벗어났다. 정확히 세 배가 되는 법칙은 아니다. 하루 움직임과 기간 전체 변화가 모두 작을수록 세 배에 가까워지고, 경로에 따라 이보다 작거나 클 수 있다. 크게 흔들리고 제자리 근처면 더 잃는 쪽으로, 흔들림에 비해 한쪽으로 크게 기울면 더 버는 쪽으로 벗어나기 쉽다. 거꾸로 2배는 경로를 더 크게 탄다.</p>
+
+<h3 class="hd"><small>장 마감 무렵</small>매일 치르는 숙제</h3>
+<p class="p">리밸런싱은 계산만이 아니다. 실제 주문이다. 순자산 100짜리 상품으로, 주가가 −10%인 날을 따라가 본다.</p>
+
+<div class="rb2">
+  <div class="rbc r2">
+    <div class="rbh">2배</div>
+    <div class="rbg">
+      <span class="k">순자산</span><span class="v">100 → 80</span>
+      <span class="k">노출</span><span class="v">+200 → +180</span>
+      <span class="k">목표</span><span class="v">+160<small>80 × 2</small></span>
+    </div>
+    <div class="rbr">20 매도<small>노출 축소</small></div>
+  </div>
+  <div class="rbc r3">
+    <div class="rbh">거꾸로 2배</div>
+    <div class="rbg">
+      <span class="k">순자산</span><span class="v">100 → 120</span>
+      <span class="k">노출</span><span class="v">−200 → −180</span>
+      <span class="k">목표</span><span class="v">−240<small>120 × −2</small></span>
+    </div>
+    <div class="rbr">60 매도<small>음의 노출 확대</small></div>
+  </div>
+</div>
+<p class="cap">가상 예시. 노출의 마이너스는 주가가 내릴 때 이익이 나는 방향이라는 뜻이다. 오른 날에는 반대로 둘 다 산다.</p>
+
+<div class="board">
+  <div class="bdk">판서 · 숙제의 크기</div>
+  <div class="btab" style="grid-template-columns:1.2fr 1fr 1fr;margin-top:2px">
+    <span class="h l">순자산 100인 상품</span><span class="h">주가 +10%인 날</span><span class="h">주가 −10%인 날</span>
+    <span class="l">2배</span><span>매수 20</span><span>매도 20</span>
+    <span class="l">거꾸로 1배</span><span>매수 20</span><span>매도 20</span>
+    <span class="l e">거꾸로 2배</span><span class="e hi">매수 60</span><span class="e hi">매도 60</span>
+  </div>
+  <div class="bdline">2배든 거꾸로 2배든, 장 막판 숙제는 <b>그날의 방향을 따라간다.</b><br/>거꾸로 2배는 숙제가 <b>세 배</b> 크다.</div>
+  <p class="bdp"><a class="ilink" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_5%ED%8E%B8_%EA%B8%89%EB%9D%BD%EC%9D%80%EC%96%B4%EB%96%BB%EA%B2%8C%EB%8D%94%ED%81%B0%EA%B8%89%EB%9D%BD%EC%9D%84%EB%A7%8C%EB%93%9C%EB%8A%94%EA%B0%80">제5편</a>에서 본 되먹임과 방향이 같다. 내린 날 더 팔고, 오른 날 더 산다. 다만 이 주문이 그날 가격을 실제로 얼마나 움직였는지는 상품 규모와 그날 거래대금을 함께 봐야 알 수 있다. 숙제가 있다는 것과 숙제가 가격을 바꿨다는 것은 다른 말이다.</p>
+</div>
+
+<div class="duo">
+  <div class="di d1"><b>제5편의 레버리지 계좌</b><p>빚으로 키운다. 경계선을 넘으면 강제매도가 한꺼번에 나온다. 원금보다 더 잃을 수 있다.</p></div>
+  <div class="di d2"><b>레버리지 ETF</b><p>계약으로 키운다. 경계선을 기다리지 않고 매일 맞춘다. 현금으로 샀다면 넣은 돈 이상을 잃지 않는다.</p></div>
+</div>
+
+<div class="foldwrap more">
+<details class="fold">
+  <summary><span><em>더 알아보기</em>같은 2배도 성적이 갈린다</span></summary>
+  <div class="fb">
+    <p>이론값은 출발선이다. 실제 상품에는 비용과 오차가 더해진다.</p>
+    <div class="trio">
+  <div class="ti">
+    <div class="th"><b><span class="term">총보수<span class="tip">운용·판매 등에 드는 연간 비용. 순자산에서 매일 나눠 빠진다.</span></span></b><i>매일 조금씩</i></div>
+    <div class="td">운용 비용이 순자산에서 매일 나눠 빠진다.</div>
+  </div>
+  <div class="ti">
+    <div class="th"><b><span class="term">괴리율<span class="tip">ETF의 시장 가격이 순자산가치(NAV)에서 벗어난 정도.</span></span></b><i>사고팔 때</i></div>
+    <div class="td">화면 가격이 ETF의 실제 가치인 <span class="term">순자산가치<span class="tip">ETF가 가진 자산에서 부채를 뺀 1주당 가치. NAV라고 쓴다.</span></span>와 다를 수 있다. 비싸게 사거나 싸게 팔 수 있다.</div>
+  </div>
+  <div class="ti">
+    <div class="th"><b><span class="term">추적오차<span class="tip">목표 성과(예: 하루 2배)와 실제 성과의 차이.</span></span></b><i>목표와 실제</i></div>
+    <div class="td">하루 2배를 정확히 맞추지 못한 몫. 선물로 따라가는 상품은 <b>롤오버</b> 비용도 섞인다(<a class="ilink" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_2%ED%8E%B8_%ED%98%84%EB%AC%BC%EA%B3%BC%EC%84%A0%EB%AC%BC%EC%9D%B4%EC%97%87%EA%B0%88%EB%A6%B4%EB%95%8C">제2편</a>).</div>
+  </div>
+</div>
+    <p style="margin-top:10px">실제로 같은 날 상장한 삼성전자 2배 ETF들의 첫 주 수익률은 <b>33.86%에서 35.46%까지 1.6%p</b> 갈렸다고 보도됐다. 기초자산도, 배수도 같은데 그렇다.</p>
+  </div>
+</details>
+<details class="fold">
+  <summary><span><em>더 알아보기</em>상품 이름표 읽는 법</span></summary>
+  <div class="fb">
+    <div class="ntag" style="margin-top:0">
+  <div class="nk">이름표 해부 · 가상의 상품명</div>
+  <div class="nname"><span class="n1">○○○○</span><span class="n2">200</span><span class="n3">선물</span><span class="n4">인버스</span><span class="n5">2X</span></div>
+  <div class="nlist">
+    <div><span class="t">○○○○</span><span class="d">운용사 브랜드</span></div>
+    <div><span class="t">200</span><span class="d">기초지수. 코스피200. 한 종목이면 종목명이 온다</span></div>
+    <div><span class="t">선물</span><span class="d">주식 대신 선물 가격을 따라간다</span></div>
+    <div><span class="t">인버스</span><span class="d">반대 방향. 없으면 같은 방향</span></div>
+    <div><span class="t">2X</span><span class="d"><b>하루</b> 수익률에 붙는 배수. 「레버리지」라고 쓰기도 한다</span></div>
+  </div>
+  <p class="cap" style="margin-top:9px">인버스 2배를 시장에서는 「곱버스」라고 부른다.</p>
+</div>
+  </div>
+</details>
+</div>
+
+<div class="ans">
+  <div class="ak">2페이지의 답</div>
+  <div class="av">2배 ETF의 성적표에는 방향과 함께 경로가 적힌다.</div>
+  <div class="aw">같은 출발점, 같은 도착점이어도 그 사이를 어떻게 지나왔느냐에 따라 결과가 다르다.</div>
+</div>
+
+<!-- ══════ 3페이지 ══════ -->
+<div class="ch" id="p3">
+  <div class="chtop"><span class="chn">03</span><span class="chk">판정과 복습</span></div>
+  <h2 class="cht">득이 되는 날씨,<br/>독이 되는 날씨</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">레버리지 ETF의 성적은 두 가지가 가른다. 기간 전체로 한쪽으로 얼마나 움직였는가, 그리고 그사이 하루하루 얼마나 크게 흔들렸는가.</p>
+
+<div class="wx">
+  <div class="wxgrid">
+    <div class="wh"></div><div class="wh">흔들림 작음</div><div class="wh">흔들림 큼</div>
+    <div class="wh">한쪽으로<br/>크게 움직임</div>
+    <div class="wc good"><b>단순 계산보다 조금 낫다</b><p>매일 +1% 20일: 주가 +22.0%, 2배 +48.6% (단순 +44.0%)</p></div>
+    <div class="wc good good2"><b>단순 계산보다 크게 낫다</b><p><em>실제 종가</em> 삼성전자 6/25→7/30 주가 −42.3%, 거꾸로 2배 +128.9% (단순 +84.5%)</p></div>
+    <div class="wh">제자리<br/>근처</div>
+    <div class="wc bad"><b>조금씩 깎인다</b><p>±2% 왕복 10번: 주가 −0.4%, 2배 −1.6%, 거꾸로 2배 −1.6%</p></div>
+    <div class="wc bad bad2"><b>크게 깎인다</b><p><em>실제 종가</em> SK하이닉스 5/27→7/15 주가 −7.2%, 2배 −29.2%, 거꾸로 2배 −33.0%</p></div>
+  </div>
+  <p class="wxnote">실제 종가 두 칸도 매일 2배·−2배로 계산한 이론값이다. 삼성전자 구간은 한쪽으로 크게 기운 구간을 일부러 골랐다. 같은 구간 2배도 −70.0%로, 단순 계산 −84.5%보다 덜 잃었다. <b>흔들림에 비해 한쪽으로 크게 움직인 구간에서는 맞힌 쪽은 더 벌고, 틀린 쪽은 덜 잃기 쉽다.</b> 같은 시장도 기간을 어떻게 자르느냐에 따라 다른 칸에 들어간다. 어느 칸이 올지 미리 아는 방법은 이 글에 없다.</p>
+</div>
+
+<h3 class="hd">레버리지 ETF 문장을 만나면 네 가지를 본다</h3>
+<div class="chk4">
+  <div class="ck"><p class="ct"><i>01</i>하루치인가, 여러 날치인가</p><div class="cd">2배가 성립하는 것은 <b>하루</b>다. 여러 날이면 2배라는 말을 일단 내려놓는다.</div></div>
+  <div class="ck"><p class="ct"><i>02</i>그사이 얼마나 크게 흔들렸나</p><div class="cd">같은 도착점이어도 <b>하루하루 크게 오르내렸다면</b> 단순 계산보다 뒤처졌을 가능성이 크다.</div></div>
+  <div class="ck"><p class="ct"><i>03</i>%인가, %p인가</p><div class="cd">누적수익률이 몇 %p 줄었다는 말과 가격이 몇 % 내렸다는 말은 <b>크기가 다르다.</b></div></div>
+  <div class="ck"><p class="ct"><i>04</i>이론값인가, 실제 가격인가</p><div class="cd">보수·괴리·추적오차 때문에 <b>실제 성적은 이론값과 달라질 수 있다.</b> 같은 2배 상품끼리도 갈린다.</div></div>
+</div>
+
+<div class="trapwrap">
+  <div class="traphd"><b>오답노트</b><i>그럴듯하지만 틀린 문장</i></div>
+  <div class="trap">
+    <div class="ti">
+      <div class="tk">오답 01</div>
+      <div class="tx">"주가가 20% 오르면 2배 ETF는 40% 오른다"</div>
+      <div class="to">하루라면 그것이 목표다(보수·오차 제외). 여러 날에 걸친 20%라면 <b>경로에 따라 40%보다 많을 수도, 적을 수도 있다.</b></div>
+    </div>
+    <div class="ti">
+      <div class="tk">오답 02</div>
+      <div class="tx">"하락을 맞히면 거꾸로 2배로 반드시 번다"</div>
+      <div class="to">SK하이닉스 7주 동안 주가는 내렸지만 거꾸로 2배 이론값은 −33.0%였다. <b>방향과 함께 경로가 맞아야 한다.</b></div>
+    </div>
+    <div class="ti">
+      <div class="tk">오답 03</div>
+      <div class="tx">"2배 ETF, 하루 만에 48% 폭락"</div>
+      <div class="to">6월 23일 한 SK하이닉스 2배 ETF의 누적수익률이 87.63%에서 39.82%로 내려갔다고 보도됐다. 줄어든 것은 <b>누적수익률 47.81%p</b>다. 100에서 출발한 가격으로 바꾸면 187.63에서 139.82로, <b>약 25%</b> 내렸다. 그날 SK하이닉스는 −12.47%였다. 이 누적수익률은 상장 첫날 상승분까지 포함한 값이라, 상장일 종가에서 출발한 이 편의 차트와 숫자가 다르다.</div>
+    </div>
+  </div>
+</div>
+
+<div class="pop" id="quiz2">
+  <div class="poph"><b>연습 문제</b><span class="vb">가상 예시</span></div>
+  <div class="popb">
+    <p class="popq">어떤 주식이 나흘 동안 +20%, −20%, +20%, −20% 움직였다. 나흘 뒤 덜 잃은 쪽은?</p>
+    <div class="opts">
+      <button class="opt" type="button" data-ok="0" style="font-size:14px">2배</button>
+      <button class="opt" type="button" data-ok="0" style="font-size:14px">거꾸로 2배</button>
+      <button class="opt" type="button" data-ok="1" style="font-size:14px">똑같다</button>
+    </div>
+    <div class="popans" hidden>
+      <span class="verdict">정답 · 똑같다</span>
+      <div class="calc" style="grid-template-columns:auto repeat(5,1fr)">
+        <span class="h"></span><span class="h">출발</span><span class="h">+20%</span><span class="h">−20%</span><span class="h">+20%</span><span class="h">−20%</span>
+        <span class="l">주가</span><span>100</span><span>120</span><span>96</span><span>115.2</span><span><b>92.2</b></span>
+        <span class="l c-l2">2배</span><span>100</span><span>140</span><span>84</span><span>117.6</span><span><b class="c-l2">70.6</b></span>
+        <span class="l e c-i2">거꾸로 2배</span><span class="e">100</span><span class="e">60</span><span class="e">84</span><span class="e">50.4</span><span class="e"><b class="c-i2">70.6</b></span>
+      </div>
+      <p class="popnote">주가는 −7.84%. 2배도, 거꾸로 2배도 똑같이 <b>−29.44%</b>다. 단순 계산이었다면 2배 −15.68%, 거꾸로 2배 +15.68%였다. 방향이 매일 바뀌고 흔들림이 크면, <b>어느 쪽에 걸었는지보다 얼마나 흔들렸는지</b>가 결과를 정한다.</p>
+    </div>
+  </div>
+</div>
+
+<div class="final">
+  <div class="fk">제7편의 한 문장</div>
+  <p class="f1">레버리지 ETF의 목표는 <b>하루</b> 2배다. 여러 날의 성적은 그사이 하루하루 얼마씩 움직였는지가 정한다.</p>
+  <p class="f2">흔들림에 비해 한쪽으로 크게 움직일수록 단순 2배보다 유리하고, 크게 흔들리고도 제자리 근처면 불리하다. 그래서 같은 주가 아래에서 2배와 거꾸로 2배가 함께 잃을 수 있다.</p>
+</div>
+
+<div class="sharebox">
+  <p class="shq">2배라서 샀는데 2배가 아니었던 사람,<br/>주변에 한 명쯤 있다.</p>
+  <div class="shbtns">
+    <button class="shb main" type="button" data-share="page">공유하기</button>
+    <button class="shb" type="button" data-share="copy">링크 복사</button>
+    <a class="shb" id="shX" href="https://twitter.com/intent/tweet?text=%EC%A2%85%EA%B0%80%EB%A1%9C%20%EA%B3%84%EC%82%B0%ED%95%98%EB%A9%B4%20%EC%A3%BC%EA%B0%80%20%E2%88%927%25%EC%97%90%202%EB%B0%B0%20%E2%88%9229%25%2C%20%EA%B3%B1%EB%B2%84%EC%8A%A4%20%E2%88%9233%25.%202%EB%B0%B0%20ETF%EB%8A%94%20%EC%99%9C%202%EB%B0%B0%EA%B0%80%20%EC%95%84%EB%8B%8C%EA%B0%80&amp;url=https%3A%2F%2Fsnowshagal.com%2Freports%2F%25EC%258B%259C%25EC%259E%25A5%25EC%259D%2584%25EC%259D%25BD%25EB%258A%2594%25EB%25A7%2590%25EB%2593%25A4_7%25ED%258E%25B8_2%25EB%25B0%25B0ETF%25EB%258A%2594%25EC%2599%259C2%25EB%25B0%25B0%25EA%25B0%2580%25EC%2595%2584%25EB%258B%258C%25EA%25B0%2580" target="_blank" rel="noopener">X에 올리기</a>
+  </div>
+  <p class="shmsg" id="shmsg" aria-live="polite"></p>
+</div>
+
+<div class="more7">
+  <div class="m7h">이어 읽기</div>
+  <a class="m7" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_5%ED%8E%B8_%EA%B8%89%EB%9D%BD%EC%9D%80%EC%96%B4%EB%96%BB%EA%B2%8C%EB%8D%94%ED%81%B0%EA%B8%89%EB%9D%BD%EC%9D%84%EB%A7%8C%EB%93%9C%EB%8A%94%EA%B0%80"><i>제5편</i><b>급락은 어떻게 더 큰 급락을 만드는가</b><span>빚으로 키운 계좌가 강제로 팔 때</span></a>
+  <a class="m7" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_4%ED%8E%B8_%EC%A2%8B%EC%9D%80%ED%9A%8C%EC%82%AC%EA%B0%80%EC%99%9C%EC%A2%8B%EC%9D%80%EC%A3%BC%EC%8B%9D%EC%9D%80%EC%95%84%EB%8B%8C%EA%B0%80"><i>제4편</i><b>좋은 회사가 왜 좋은 주식은 아닌가</b><span>삼성전자·SK하이닉스 실적 발표일의 주가</span></a>
+  <a class="m7" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_2%ED%8E%B8_%ED%98%84%EB%AC%BC%EA%B3%BC%EC%84%A0%EB%AC%BC%EC%9D%B4%EC%97%87%EA%B0%88%EB%A6%B4%EB%95%8C"><i>제2편</i><b>현물과 선물이 엇갈릴 때</b><span>2배 상품이 따라가는 선물부터</span></a>
+  <a class="m7 all" href="https://snowshagal.com/basics/"><b>시장 입문 전체 보기</b><span>1편부터 순서대로</span></a>
+  <a class="m7 cta" href="https://snowshagal.com/daily/"><b>오늘 장은 어떻게 움직였나</b><span>Snowshagal 데일리 · 매일 장 마감 리포트</span></a>
+</div>
+
+<div class="next">
+  <div class="nh">다음 편</div>
+  <p>거꾸로 2배는 하락에 거는 방법 중 하나일 뿐이다. <b>주식을 빌려서 먼저 팔고, 나중에 되사는 방법</b>도 있다. 그 매도는 하락을 만드는가, 따라가는가.</p>
+  <div class="nt"><b>제8편</b>공매도는 하락을 만드는가, 따라가는가</div>
+</div>
+
+<div class="foldwrap">
+<details class="fold">
+  <summary>함께 나오는 말 한 줄 사전</summary>
+  <div class="fb">
+    <dl class="gloss">
+      <dt>ETF</dt><dd>거래소에서 주식처럼 사고파는 펀드</dd>
+      <dt>레버리지 ETF</dt><dd>기초자산 하루 수익률에 배수(예: 2배)를 곱한 성과를 목표로 하는 ETF</dd>
+      <dt>인버스 ETF</dt><dd>기초자산 하루 수익률의 반대 방향을 목표로 하는 ETF</dd>
+      <dt>곱버스</dt><dd>인버스 2배 ETF를 부르는 시장 속칭</dd>
+      <dt>단일종목 레버리지</dt><dd>지수가 아니라 한 종목을 기초로 하는 레버리지 ETF</dd>
+      <dt>일간 수익률</dt><dd>하루 동안의 수익률. 레버리지 ETF의 배수는 여기에 붙는다</dd>
+      <dt>누적수익률</dt><dd>출발점부터 지금까지의 수익률</dd>
+      <dt>복리</dt><dd>번 돈과 잃은 돈이 다음 날 원금에 반영돼, 다음 수익률이 바뀐 원금에 붙는 것</dd>
+      <dt>변동성 끌림</dt><dd>오르내림이 반복될 때 레버리지 상품이 단순 배수 계산보다 뒤처지는 현상. 음의 복리라고도 한다</dd>
+      <dt>노출</dt><dd>시장이 움직일 때 손익이 따라 움직이는 금액의 크기</dd>
+      <dt>리밸런싱</dt><dd>정해진 배수가 유지되도록 노출을 매일 다시 맞추는 일</dd>
+      <dt>순자산가치</dt><dd>ETF가 가진 자산에서 부채를 뺀 1주당 가치. NAV</dd>
+      <dt>괴리율</dt><dd>시장 가격이 순자산가치에서 벗어난 정도</dd>
+      <dt>추적오차</dt><dd>목표 성과와 실제 성과의 차이</dd>
+      <dt>총보수</dt><dd>운용·판매 등에 드는 연간 비용. 순자산에서 매일 나눠 빠진다</dd>
+      <dt>%p</dt><dd>퍼센트끼리의 차이. 87%가 40%가 되면 47%p 하락</dd>
+      <dt>기본예탁금</dt><dd>레버리지 상품을 사기 전 계좌에 있어야 하는 최소 금액</dd>
+      <dt>사전교육</dt><dd>레버리지 상품 거래 전에 이수해야 하는 온라인 교육</dd>
+    </dl>
+  </div>
+</details>
+
+<details class="fold">
+  <summary>한국에서 레버리지 ETF를 사려면</summary>
+  <div class="fb">
+    <p>국내외 레버리지 상품은 거래 전에 <b>사전교육 이수</b>와 <b>기본예탁금</b> 요건을 채워야 한다.</p>
+    <p><b>단일종목 레버리지 ETF</b> · 2026년 7월 31일부터 기본예탁금이 1,000만 원에서 <b>현금 3,000만 원</b>으로 올랐다. 주식을 판 돈은 결제(T+2)로 입금된 뒤에야 예탁금으로 인정된다.</p>
+    <p><b>해외 상장 레버리지 ETF·ETN</b> · 2026년 5월 22일부터 처음 거래하는 투자자는 기본예탁금 1,000만 원이 필요하고, 사전교육은 2시간으로 늘었다.</p>
+    <p>세부 기준은 계속 바뀌고 있다. 거래 전 증권사 안내를 확인한다.</p>
+  </div>
+</details>
+
+<details class="fold">
+  <summary>본문에 나온 실제 시장 사례</summary>
+  <div class="fb">
+    <div class="case"><b>2026.05.27 · 단일종목 레버리지·인버스 ETF 상장</b><p>8개 운용사가 삼성전자·SK하이닉스를 기초로 하는 ETF 16종을 상장했다. 같은 날 SK하이닉스는 +9.31%(2,052,000 → 2,243,000원).</p></div>
+    <div class="case"><b>2026.05.27 → 07.15 · SK하이닉스 7주</b><p>종가 2,243,000 → 2,082,000원(−7.18%). 중간인 6월 22일 2,919,000원(+30.14%). 이론값 2배 −29.24%, 거꾸로 2배 −33.02%.</p></div>
+    <div class="case"><b>2026.06.23 · SK하이닉스 −12.47%</b><p>2,919,000 → 2,555,000원. 한 SK하이닉스 2배 ETF의 누적수익률이 87.63%에서 39.82%로 내려갔다는 보도. 같은 날 이론값 2배의 하루 변화는 −24.94%.</p></div>
+    <div class="case"><b>2026.06.25 → 07.30 · 삼성전자 5주</b><p>종가 358,500 → 207,000원(−42.26%). 이론값 2배 −70.05%(단순 −84.52%), 거꾸로 2배 +128.89%(단순 +84.52%).</p></div>
+  </div>
+</details>
+
+<details class="fold">
+  <summary>이론값 계산 방법과 이 편에서 쓰지 않은 숫자</summary>
+  <div class="fb">
+    <p><b>계산 방법</b> · 매일 종가 기준 수익률에 2배 또는 −2배를 곱해 이어 붙였다. 보수·괴리·추적오차, 배당(SK하이닉스 5월 28일, 삼성전자 6월 29일 배당락), 상품별 운용 방식 차이는 넣지 않았다.</p>
+    <p><b>실제 ETF별 누적수익률</b> · 보도마다 출발점(상장 기준가, 상장일 종가)과 기준일이 달라 기간을 맞춘 비교가 어려웠다. 그래서 종가로 이론값을 직접 계산했다.</p>
+    <p><b>리밸런싱 주문의 실제 규모</b> · 장 마감 무렵 실제로 나온 주문량을 모은 공식 집계를 확인하지 못했다. 그래서 순자산 100 기준의 가상 예시로만 다뤘다.</p>
+    <p><b>개인 투자자 손실 총액</b> · 추정 방식이 보도마다 달라 쓰지 않았다.</p>
+    <p><b>거꾸로 2배가 단순 계산과 멀어지는 정도</b> · 하루 움직임과 기간 전체 변화가 모두 작을수록 2배 상품의 약 세 배에 가까워진다. 본문의 세 사례도 약 세 배였다. 다만 매일 +2%씩 열흘처럼 한쪽으로만 이어지면 약 2.4배, ±20% 왕복 두 번처럼 크게 흔들리면 약 3.3배로 경로에 따라 달라진다.</p>
+    <p>확인되지 않은 숫자는 채우지 않는다.</p>
+  </div>
+</details>
+
+<details class="fold">
+  <summary>출처 및 데이터 기준</summary>
+  <div class="fb">
+    <ol class="src">
+      <li><b>종가</b> · Yahoo Finance 일별 시세(005930.KS, 000660.KS). YTN 마감 시황(2026.05.28·06.11·06.26·07.06)과 제4편 수치(07.29·07.30)로 대조</li>
+      <li><b>상장</b> · 파이낸셜뉴스 2026.05.27(8개 운용사, ETF 16종), SBS Biz 2026.05.27</li>
+      <li><b>첫 주 수익률 차이</b> · 머니투데이 2026.06.06</li>
+      <li><b>6월 23일 누적수익률</b> · 헤럴드경제 2026.06.24</li>
+      <li><b>단일종목 기본예탁금</b> · 경향신문 2026.07.31, SBS Biz 2026.07</li>
+      <li><b>해외 레버리지 기본예탁금·사전교육</b> · 헤럴드경제 2026.05.19</li>
+      <li>워밍업, 판서 표, 네 컷, 시뮬레이터 버튼과 가상 프리셋, 숙제 예시, 날씨표의 가상 칸, 연습 문제의 수치는 설명을 위해 만든 가상 값이다.</li>
+    </ol>
+  </div>
+</details>
+</div>
+
+<p class="disc">이 글은 경제·주식 용어의 뜻과 읽는 방법을 설명하는 교양 자료입니다. 특정 상품의 매매를 권유하지 않으며, 투자 판단과 그 결과는 투자자 본인에게 있습니다. 본문의 이론값은 실제 상품의 성과가 아닙니다.</p>
+<p class="foot">시장을 읽는 말들 · 07</p>
+
+</div>
+
+<script>
+(function(){
+  if(window.__mwWords7) return; window.__mwWords7 = true;
+
+  /* 진행 막대 */
+  var pg=document.getElementById('pg');
+  function updateProg(){
+    if(!pg) return;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var y=window.scrollY||window.pageYOffset||0;
+    pg.style.width=(h>0?Math.min(100,Math.max(0,y/h*100)):0)+'%';
+  }
+  window.addEventListener('scroll',updateProg,{passive:true});
+  window.addEventListener('resize',updateProg);
+  updateProg();
+
+  /* 툴팁 */
+  function resetTip(el){ var tp=el.querySelector('.tip'); if(tp){ tp.classList.remove('below'); tp.removeAttribute('style'); } }
+  function clampTip(t){
+    var tip=t.querySelector('.tip'); if(!tip) return;
+    var vw=window.innerWidth, pad=12;
+    var w=Math.min(248, vw-2*pad);
+    tip.style.position='fixed'; tip.style.bottom='auto'; tip.style.transform='none';
+    tip.style.width=w+'px'; tip.style.left='0px'; tip.style.top='0px';
+    var tr=t.getBoundingClientRect();
+    var th=tip.getBoundingClientRect().height;
+    var left=tr.left+tr.width/2-w/2;
+    if(left<pad) left=pad;
+    if(left+w>vw-pad) left=vw-pad-w;
+    var top=tr.top-th-9, below=false;
+    if(top<pad+50){ top=tr.bottom+9; below=true; }
+    var vh=window.innerHeight;
+    if(top+th>vh-pad){ top=vh-pad-th; }
+    if(top<pad){ top=pad; }
+    tip.style.left=Math.round(left)+'px';
+    tip.style.top=Math.round(top)+'px';
+    var tb=tip.getBoundingClientRect();
+    var dx=tb.left-left, dy=tb.top-top;
+    if(dx||dy){ tip.style.left=Math.round(left-dx)+'px'; tip.style.top=Math.round(top-dy)+'px'; }
+    tip.classList.toggle('below', below);
+    var ax=tr.left+tr.width/2-left;
+    ax=Math.max(12, Math.min(w-12, ax));
+    tip.style.setProperty('--ax', Math.round(ax)+'px');
+  }
+  function closeTerms(except){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++){ if(open[i]!==except){ open[i].classList.remove('open'); resetTip(open[i]); } }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.term'), function(t){
+    t.setAttribute('tabindex','0'); t.setAttribute('role','button');
+    t.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); t.click(); } if(e.key==='Escape'){ closeTerms(null); } });
+    t.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var willOpen=!t.classList.contains('open');
+      closeTerms(t);
+      t.classList.toggle('open', willOpen);
+      if(willOpen){ openedAt=Date.now(); clampTip(t); }
+    });
+  });
+  document.addEventListener('click', function(){ closeTerms(null); });
+  var openedAt=0;
+  window.addEventListener('scroll', function(){ if(Date.now()-openedAt>700) closeTerms(null); }, {passive:true});
+  window.addEventListener('resize', function(){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++) clampTip(open[i]);
+  });
+
+  /* 문제 카드 */
+  Array.prototype.forEach.call(document.querySelectorAll('.pop'), function(card){
+    var opts=card.querySelectorAll('.opt'), ans=card.querySelector('.popans');
+    Array.prototype.forEach.call(opts, function(b){
+      b.addEventListener('click', function(){
+        Array.prototype.forEach.call(opts, function(o){
+          o.disabled=true;
+          if(o.getAttribute('data-ok')==='1') o.classList.add('ok');
+          else if(o===b) o.classList.add('no');
+        });
+        if(ans) ans.hidden=false;
+      });
+    });
+  });
+
+  /* 시뮬레이터 */
+  var SK=[2243000,2289000,2333000,2363000,2360000,2298000,2070000,1911000,2215000,2048000,2101000,2150000,2288000,2382000,2521000,2685000,2764000,2919000,2555000,2621000,2917000,2673000,2628000,2650000,2560000,2187000,2425000,2343000,2201000,2076000,2186000,2180000,1845000,1913000,2082000];
+  var SS=[358500,339500,323000,334000,314500,286000,309500,318000,296000,277500,278000,285000,254500,263000,279500,255000,244000,259000,260500,270000,249500,254000,220000,208500,207000];
+  function rets(px){ var r=[]; for(var i=1;i<px.length;i++) r.push(px[i]/px[i-1]-1); return r; }
+  var PRESET={
+    zig:(function(){ var r=[]; for(var i=0;i<10;i++){ r.push(.05); r.push(-.05); } return r; })(),
+    trend:(function(){ var r=[]; for(var i=0;i<10;i++) r.push(.02); return r; })(),
+    sk:rets(SK),
+    ss:rets(SS)
+  };
+  var step=.05, R=[], timer=null;
+  var svg=document.getElementById('simsvg');
+  var dayEl=document.getElementById('simday');
+  var rv=[0,1,2].map(function(i){return document.getElementById('rv'+i);});
+  var rn=[0,1,2].map(function(i){return document.getElementById('rn'+i);});
+  var NS='http://www.w3.org/2000/svg';
+  function series(){
+    var s=[100],a=[100],b=[100];
+    for(var i=0;i<R.length;i++){
+      s.push(s[i]*(1+R[i]));
+      a.push(Math.max(0,a[i]*(1+2*R[i])));
+      b.push(Math.max(0,b[i]*(1-2*R[i])));
+    }
+    return [s,a,b];
+  }
+  function fmtPct(x){ var v=(x*100); var t=Math.abs(v).toFixed(1); if(t==='0.0') return '0.0%'; return (v>0?'+':'−')+t+'%'; }
+  function cls(x){ return Math.abs(x)<0.0005?'':(x>0?'up':'down'); }
+  function el(tag,attrs){ var e=document.createElementNS(NS,tag); for(var k in attrs) e.setAttribute(k,attrs[k]); return e; }
+  function draw(){
+    var S=series(), n=Math.max(R.length,10);
+    var all=S[0].concat(S[1],S[2],[100]);
+    var lo=Math.min.apply(null,all), hi=Math.max.apply(null,all);
+    var pad=(hi-lo)*.08+2; lo-=pad; hi+=pad;
+    var X0=30,X1=332,Y0=10,Y1=138;
+    function X(i){ return X0+(X1-X0)*i/n; }
+    function Y(v){ return Y1-(v-lo)/(hi-lo)*(Y1-Y0); }
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+    svg.appendChild(el('line',{x1:X0,x2:X1,y1:Y(100),y2:Y(100),stroke:'#8B867E','stroke-width':1,'stroke-dasharray':'3 3'}));
+    var t=el('text',{x:X0-4,y:Y(100)+3.5,'text-anchor':'end','font-size':9.5,'font-weight':700,fill:'#706D66'}); t.textContent='100'; svg.appendChild(t);
+    var cols=['#3A3632','#A9784A','#7A3F44'], order=[2,1,0];
+    order.forEach(function(k){
+      var pts=S[k].map(function(v,i){ return X(i).toFixed(1)+','+Y(v).toFixed(1); }).join(' ');
+      if(S[k].length>1) svg.appendChild(el('polyline',{points:pts,fill:'none',stroke:cols[k],'stroke-width':k===0?2.4:2,'stroke-linejoin':'round','stroke-linecap':'round'}));
+      var L=S[k].length-1;
+      svg.appendChild(el('circle',{cx:X(L),cy:Y(S[k][L]),r:3.2,fill:cols[k]}));
+    });
+    var stockChg=S[0][S[0].length-1]/100-1;
+    for(var k=0;k<3;k++){
+      var last=S[k][S[k].length-1], chg=last/100-1;
+      rv[k].textContent=last.toFixed(1);
+      rv[k].className='rv '+cls(chg);
+      if(k===0){ rn[k].innerHTML= R.length? '출발점 대비 <b class="'+cls(chg)+'">'+fmtPct(chg)+'</b>' : '출발점'; }
+      else{
+        var naive=(k===1?2:-2)*stockChg;
+        rn[k].innerHTML=(k===1?'매일 2배':'매일 −2배')+' <b class="'+cls(chg)+'">'+fmtPct(chg)+'</b><br/>단순 계산 <b>'+fmtPct(naive)+'</b>';
+      }
+    }
+    dayEl.textContent=R.length+'일째';
+    document.getElementById('bUndo').disabled=!R.length;
+  }
+  function stop(){ if(timer){ clearInterval(timer); timer=null; } }
+  function clearPre(){ Array.prototype.forEach.call(document.querySelectorAll('.pre'),function(p){p.classList.remove('on');}); }
+  function push(r){ if(R.length>=80) return; R.push(r); draw(); }
+  document.getElementById('bUp').addEventListener('click',function(){ stop(); clearPre(); push(step); });
+  document.getElementById('bDn').addEventListener('click',function(){ stop(); clearPre(); push(-step); });
+  document.getElementById('bUndo').addEventListener('click',function(){ stop(); clearPre(); R.pop(); draw(); });
+  document.getElementById('bReset').addEventListener('click',function(){ stop(); clearPre(); R=[]; draw(); });
+  Array.prototype.forEach.call(document.querySelectorAll('.stp'),function(b){
+    b.addEventListener('click',function(){
+      step=parseFloat(b.getAttribute('data-s'))/100;
+      Array.prototype.forEach.call(document.querySelectorAll('.stp'),function(o){o.classList.toggle('on',o===b);});
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.pre'),function(b){
+    b.addEventListener('click',function(){
+      stop(); clearPre(); b.classList.add('on');
+      var seq=PRESET[b.getAttribute('data-p')].slice(); R=[]; draw();
+      var i=0, ms=seq.length>25?70:110;
+      timer=setInterval(function(){
+        if(i>=seq.length){ stop(); return; }
+        R.push(seq[i++]); draw();
+      },ms);
+    });
+  });
+  draw();
+
+  /* 공유 */
+  var CANON="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_7%ED%8E%B8_2%EB%B0%B0ETF%EB%8A%94%EC%99%9C2%EB%B0%B0%EA%B0%80%EC%95%84%EB%8B%8C%EA%B0%80";
+  function pageUrl(){ var h=location.href.split('#')[0]; return /^https?:/.test(h)?h:CANON; }
+  var msg=document.getElementById('shmsg');
+  function say(t){ if(msg){ msg.textContent=t; setTimeout(function(){ msg.textContent=''; },2500); } }
+  function legacy(text){
+    var ta=document.createElement('textarea'); ta.value=text; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); var ok=false;
+    try{ ok=document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+    say(ok?'링크를 복사했다':'복사가 막혀 있다. 주소창의 링크를 복사하면 된다');
+  }
+  function copy(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(function(){ say('링크를 복사했다'); },function(){ legacy(text); }); }
+    else legacy(text);
+  }
+  var TXT={
+    page:'종가로 계산하면 주가 −7%에 2배 −29%, 곱버스 −33%. 2배 ETF는 왜 2배가 아닌가',
+    quiz:'문제. 주가가 오늘 +10%, 내일 −10%면 2배 ETF는 이틀 뒤 몇 %일까? (0%는 아니다)'
+  };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-share]'),function(b){
+    b.addEventListener('click',function(){
+      var k=b.getAttribute('data-share'), url=pageUrl();
+      if(k==='copy'){ copy(url); return; }
+      if(k==='quiz') url=url+'#quiz1';
+      var data={title:'2배 ETF는 왜 2배가 아닌가',text:TXT[k]||TXT.page,url:url};
+      if(navigator.share){ navigator.share(data).catch(function(){}); }
+      else{ copy(data.text+' '+url); }
+    });
+  });
+  var x=document.getElementById('shX');
+  if(x){ x.href='https://twitter.com/intent/tweet?text='+encodeURIComponent(TXT.page)+'&url='+encodeURIComponent(pageUrl()); }
+})();
+</script>
+</body>
+</html>

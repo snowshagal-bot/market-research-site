@@ -1,5 +1,29 @@
 [
   {
+    "id": "2026-10-04-basics-qbz2ki",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-10-04",
+    "reportDate": "2026-10-04",
+    "registeredDate": "2026-10-05",
+    "registeredAt": "2026-10-04T16:16:31.596Z",
+    "legacyImport": false,
+    "title": "2배 ETF는 왜 2배가 아닌가",
+    "subtitle": "",
+    "description": "레버리지 ETF의 목표는 하루 2배다. SK하이닉스 7주 종가로 계산하면 주가 −7.2%에 2배는 −29.2%, 곱버스는 −33.0%. 음의 복리(변동성 끌림)와 장 마감 리밸런싱을 퀴즈·시뮬레이터로 설명한다.",
+    "tags": [
+      "etf",
+      "flows",
+      "futures"
+    ],
+    "readingMinutes": 7,
+    "href": "reports/시장을읽는말들_7편_2배ETF는왜2배가아닌가.html",
+    "coverImage": "covers/2026-10-04-basics-qbz2ki.webp",
+    "shareCardImage": "covers/share/2026-10-04-basics-qbz2ki.jpg",
+    "coverThumbnail": "covers/2026-10-04-basics-qbz2ki-450.webp"
+  },
+  {
     "id": "2026-10-03-research-25yqi0",
     "type": "research",
     "typeLabel": "Research",

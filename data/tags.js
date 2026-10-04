@@ -214,5 +214,11 @@ window.TAG_REGISTRY = {
     "en": "oil",
     "group": "sector",
     "custom": true
+  },
+  "etf": {
+    "ko": "ETF",
+    "en": "ETF",
+    "group": "market",
+    "custom": true
   }
 };
