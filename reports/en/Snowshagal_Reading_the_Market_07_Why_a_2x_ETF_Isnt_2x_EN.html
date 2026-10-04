@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Leveraged ETF Volatility Drag: Why a 2× ETF Isn’t 2× | Snowshagal</title>
+<!-- Search and social preview metadata -->
+<meta content="A 2× leveraged ETF targets twice the DAILY return—not twice the return over weeks. Using seven weeks of SK hynix closes, the stock fell 7.2% while a theoretical +2× path fell 29.2% and a −2× path fell 33.0%. Quizzes and a simulator explain volatility drag, path dependence, and daily rebalancing." name="description"/>
+<link href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_7%ED%8E%B8_2%EB%B0%B0ETF%EB%8A%94%EC%99%9C2%EB%B0%B0%EA%B0%80%EC%95%84%EB%8B%8C%EA%B0%80" rel="canonical"/>
+<meta content="index,follow,max-image-preview:large" name="robots"/>
+<meta content="article" property="og:type"/>
+<meta content="Snowshagal" property="og:site_name"/>
+<meta content="en_US" property="og:locale"/>
+<meta content="Stock −7%, +2× path −29%, −2× path −33%. How can both lose?" property="og:title"/>
+<meta content="Seven weeks of SK hynix closes show why a daily 2× target is not a multiweek 2× return. An interactive guide to volatility drag, path dependence, and daily resets." property="og:description"/>
+<meta content="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_7%ED%8E%B8_2%EB%B0%B0ETF%EB%8A%94%EC%99%9C2%EB%B0%B0%EA%B0%80%EC%95%84%EB%8B%8C%EA%B0%80" property="og:url"/>
+<meta content="https://snowshagal.com/assets/social/basics-07-leverage-etf.jpg" property="og:image"/>
+<meta content="1200" property="og:image:width"/>
+<meta content="630" property="og:image:height"/>
+<meta content="Theoretical values calculated from seven weeks of SK hynix closing prices: stock −7.2%, +2× path −29.2%, −2× path −33.0%. Why a 2× ETF isn’t 2×." property="og:image:alt"/>
+<meta content="2026-10-04" property="article:published_time"/>
+<meta content="Market Basics" property="article:section"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="Stock −7%, +2× path −29%, −2× path −33%. How can both lose?" name="twitter:title"/>
+<meta content="Seven weeks of SK hynix closes show why a daily 2× target is not a multiweek 2× return. An interactive guide to volatility drag and daily resets." name="twitter:description"/>
+<meta content="https://snowshagal.com/assets/social/basics-07-leverage-etf.jpg" name="twitter:image"/>
+<meta content="#2A362E" name="theme-color"/>
+<script type="application/ld+json">[
+ {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Why a 2× ETF Isn’t 2×",
+  "alternativeHeadline": "Leveraged ETF Volatility Drag: What a Daily 2× Target Really Means",
+  "description": "A leveraged ETF targets a daily multiple. Using seven weeks of SK hynix closes, the stock fell 7.2% while a theoretical +2× path fell 29.2% and a −2× path fell 33.0%. This guide explains volatility drag, path dependence, and daily rebalancing with quizzes and an interactive simulator.",
+  "inLanguage": "en-US",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "image": [
+   "https://snowshagal.com/assets/social/basics-07-leverage-etf-16x9.jpg",
+   "https://snowshagal.com/assets/social/basics-07-leverage-etf-4x3.jpg",
+   "https://snowshagal.com/assets/social/basics-07-leverage-etf-1x1.jpg"
+  ],
+  "mainEntityOfPage": "https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_7%ED%8E%B8_2%EB%B0%B0ETF%EB%8A%94%EC%99%9C2%EB%B0%B0%EA%B0%80%EC%95%84%EB%8B%8C%EA%B0%80",
+  "author": {
+   "@type": "Organization",
+   "name": "Snowshagal",
+   "url": "https://snowshagal.com/"
+  },
+  "publisher": {
+   "@type": "Organization",
+   "name": "Snowshagal",
+   "url": "https://snowshagal.com/"
+  },
+  "isPartOf": {
+   "@type": "CreativeWorkSeries",
+   "name": "Reading the Market",
+   "url": "https://snowshagal.com/basics/"
+  },
+  "keywords": "leveraged ETF, volatility drag, negative compounding, inverse ETF, 2x ETF, -2x ETF, single-stock leveraged ETF, daily reset, rebalancing, path dependence, SK hynix, Samsung Electronics"
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+   {
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Snowshagal",
+    "item": "https://snowshagal.com/"
+   },
+   {
+    "@type": "ListItem",
+    "position": 2,
+    "name": "Market Basics",
+    "item": "https://snowshagal.com/basics/"
+   },
+   {
+    "@type": "ListItem",
+    "position": 3,
+    "name": "Why a 2× ETF Isn’t 2×",
+    "item": "https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_7%ED%8E%B8_2%EB%B0%B0ETF%EB%8A%94%EC%99%9C2%EB%B0%B0%EA%B0%80%EC%95%84%EB%8B%8C%EA%B0%80"
+   }
+  ]
+ }
+]</script>
+<style>
+:root{
+  --surface-page:#ECEAE5;
+  --surface-band:#E3E0D9;
+  --surface-inner:#F1EFEA;
+  --surface-detail:#E8E5DF;
+  --surface-muted:#DAD6CE;
+  --ink:#2E2E2C;
+  --ink2:#43423E;
+  --body:#53514C;
+  --sub:#706D66;
+  --muted:#8B867E;
+  --line:#CEC9BF;
+  --line2:#DCD7CE;
+  /* series shared */
+  --green:#46584D;
+  --green-dark:#2F3C34;
+  --green-soft:#DCE3DD;
+  --green-line:#AAB6AC;
+  --green-pale:#A8C6B4;
+  /* three roles in this installment */
+  --stk:#3A3632;         /* stock */
+  --stk-soft:#E4E1DB;
+  --l2:#A9784A;          /* 2x */
+  --l2-dark:#7A5A34;
+  --l2-soft:#EFE2CF;
+  --l2-line:#D2B48C;
+  --i2:#7A3F44;          /* -2x */
+  --i2-soft:#EBDCDD;
+  --i2-line:#C29A9E;
+  /* price direction */
+  --up:#C74754;
+  --down:#4F78A8;
+  /* board */
+  --board:#2F3C34;
+  --chalk:#ECEAE3;
+  --chalk2:#B9C9BE;
+  --chalk-mark:#E6C98F;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:58px;overflow-x:hidden}
+html,body{max-width:100%}
+body{
+  margin:0;background:var(--surface-page);color:var(--ink);
+  font-family:"Pretendard Variable","Pretendard","SUIT","Noto Sans KR","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  line-height:1.58;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;
+  word-break:keep-all;line-break:strict;
+}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(38px + env(safe-area-inset-bottom,0px));width:100%;position:relative}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.up{color:var(--up)}.down{color:var(--down)}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;letter-spacing:inherit}
+
+/* ── top bar ── */
+.topbar{position:sticky;top:0;z-index:50;margin:0 -16px;
+  background:rgba(236,234,229,.92);-webkit-backdrop-filter:saturate(150%) blur(12px);backdrop-filter:saturate(150%) blur(12px);
+  border-bottom:1px solid rgba(90,84,74,.13)}
+.tbin{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0)) 18px 9px}
+.tbin .brand{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.tbin .brand i{font-style:normal;color:var(--green)}
+.tbin .ep{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.prog{height:2px;background:rgba(90,84,74,.10)}
+.prog i{display:block;height:100%;width:0;background:var(--green);transition:width .1s linear}
+
+/* ── cover ── */
+.cover{margin:0 -16px;padding:18px 22px 15px;
+  background:linear-gradient(158deg,#36443B 0%,#2A362E 52%,#1F2721 100%);color:#EFEDE7}
+.cvkick{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.06em;
+  color:#BFD2C6;border:1px solid rgba(168,198,180,.34);border-radius:999px;padding:5px 12px}
+.cvkick b{color:#EFEDE7;font-weight:800}
+.cvdate{display:inline-block;margin-left:8px;font-size:11.5px;font-weight:700;color:#9FB2A6;letter-spacing:.02em;vertical-align:middle}
+.cvtitle{margin:11px 0 0;font-size:30px;line-height:1.22;font-weight:800;letter-spacing:-.05em;color:#F4F2ED}
+.cvtitle span{display:block;color:var(--green-pale)}
+.cvsub{margin:11px 0 0;font-size:14px;line-height:1.58;font-weight:600;color:#C6D2CA}
+.cvmotif{margin:12px 0 0}
+.cvmotif svg{display:block;width:100%;height:auto}
+.cvlg{display:flex;gap:12px;flex-wrap:wrap;margin:6px 0 0;font-size:11px;font-weight:800;color:#AFC0B5}
+.cvlg span{display:inline-flex;align-items:center;gap:5px}
+.cvlg i{display:inline-block;width:14px;height:2.5px;border-radius:2px}
+.cvidx{display:flex;gap:6px;margin:12px 0 0;flex-wrap:wrap}
+.cvidx a{font-size:11.5px;font-weight:800;color:#D3DED7;background:rgba(255,255,255,.07);
+  border:1px solid rgba(168,198,180,.22);border-radius:999px;padding:6px 12px}
+.cvidx a b{color:var(--green-pale);font-weight:800;margin-right:5px}
+
+/* ── chapter opener ── */
+.ch{margin:22px 0 8px}
+.chtop{display:flex;align-items:center;gap:9px;margin-bottom:7px;flex-wrap:wrap}
+.chn{font-size:12px;font-weight:800;color:#EFEDE7;background:var(--ink);border-radius:4px;padding:3px 8px;letter-spacing:.04em}
+.chk{font-size:11.5px;font-weight:800;letter-spacing:.11em;color:var(--sub)}
+.cht{margin:0;font-size:24px;line-height:1.3;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.chrule{display:flex;height:3px;margin-top:11px;gap:2px}
+.chrule i{display:block;height:100%;flex:1}
+.chrule .r1{background:var(--stk)}
+.chrule .r2{background:var(--l2)}
+.chrule .r3{background:var(--i2)}
+.chrule .r4{background:var(--green)}
+
+/* ── body ── */
+.p{margin:9px 0 0;font-size:14px;line-height:1.64;color:var(--body);font-weight:500}
+.p b{color:var(--ink);font-weight:800}
+.p.lead{font-size:15px;color:var(--ink2);font-weight:600}
+.hd{margin:20px 0 0;font-size:17px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.44}
+.hd small{display:block;font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin-bottom:3px}
+.cap{margin:6px 0 0;font-size:11.5px;line-height:1.5;color:var(--muted);font-weight:600}
+.q{margin:12px 0 0;font-size:19px;line-height:1.45;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.mk{background:linear-gradient(transparent 58%,rgba(230,201,143,.72) 58%);padding:0 1px}
+.c-stk{color:var(--stk)}.c-l2{color:var(--l2-dark)}.c-i2{color:var(--i2)}
+
+/* ── badge ── */
+.vb{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;letter-spacing:.03em;
+  color:#4A4438;background:var(--l2-soft);border:1px solid var(--l2-line);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.vb.real{color:var(--green-dark);background:var(--green-soft);border-color:var(--green-line)}
+
+/* ── one-sentence answer ── */
+.ans{margin:14px -16px 0;padding:14px 22px;background:var(--green);color:#EFEDE7;position:relative;overflow:hidden}
+.ans:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green-pale)}
+.ans .ak{font-size:11px;font-weight:800;letter-spacing:.14em;color:#A8BCAE;margin-bottom:8px}
+.ans .av{font-size:19px;line-height:1.46;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.ans .aw{margin:9px 0 0;padding-top:9px;border-top:1px solid rgba(168,198,180,.24);font-size:13px;line-height:1.6;font-weight:600;color:#CBD8CF}
+
+/* ── highlight line ── */
+.keyb{margin:12px 0 0;padding:11px 14px;background:var(--stk);color:#F4F2ED;border-radius:10px;
+  font-size:15px;line-height:1.5;font-weight:800;letter-spacing:-.03em}
+.keyb b{color:var(--chalk-mark)}
+
+/* ── quiz card ── */
+.pop{margin:14px 0 0;background:var(--surface-inner);border:1.5px solid var(--ink);border-radius:14px;overflow:hidden}
+.poph{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;background:var(--ink);color:#EDEAE4}
+.poph b{font-size:12px;font-weight:800;letter-spacing:.06em}
+.poph .vb{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#D9D4CA}
+.popb{padding:13px 14px 14px}
+.popq{margin:0;font-size:15.5px;line-height:1.52;font-weight:800;letter-spacing:-.03em;color:var(--ink)}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0 0}
+.opt{appearance:none;-webkit-appearance:none;border:1.5px solid var(--line);background:#F7F6F2;border-radius:10px;padding:11px 6px;
+  font-size:16px;font-weight:800;color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums;transition:background .15s,border-color .15s;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.opt:hover{border-color:var(--sub)}
+.opt.ok{background:var(--green);border-color:var(--green);color:#F4F2ED}
+.opt.no{background:var(--surface-muted);border-color:var(--surface-muted);color:var(--muted);text-decoration:line-through}
+.opt[disabled]{cursor:default}
+.popans{margin:12px 0 0;padding-top:11px;border-top:1px dashed var(--line)}
+.popans[hidden]{display:none}
+.verdict{display:inline-block;font-size:12px;font-weight:800;color:#F4F2ED;background:var(--green);border-radius:6px;padding:3px 9px;margin-bottom:8px}
+.calc{display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums}
+.calc span{padding:7px 9px;font-size:12.5px;font-weight:700;color:var(--body);background:#F7F6F2;border-bottom:1px solid var(--line2);text-align:right}
+.calc span.h{font-size:11px;font-weight:800;color:var(--muted);background:var(--surface-detail);text-align:right}
+.calc span.l{text-align:left;font-weight:800;color:var(--ink)}
+.calc span.e{border-bottom:0}
+.calc b{font-weight:800}
+.popnote{margin:9px 0 0;font-size:13px;line-height:1.6;font-weight:600;color:var(--body)}
+.popnote b{color:var(--ink);font-weight:800}
+
+/* ── real-market case ── */
+.case7{margin:14px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:14px;padding:13px 14px 12px}
+.cshd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.cshd b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.lg{display:flex;gap:12px;flex-wrap:wrap;margin:9px 0 0;font-size:11.5px;font-weight:800;color:var(--ink2)}
+.lg span{display:inline-flex;align-items:center;gap:6px}
+.lg i{display:inline-block;width:16px;height:3px;border-radius:2px}
+.lg .k1 i{background:var(--stk)}.lg .k2 i{background:var(--l2)}.lg .k3 i{background:var(--i2)}
+.chart{margin:6px 0 0}
+.chart svg{display:block;width:100%;height:auto}
+.legs{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;margin:10px 0 0;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums}
+.legs span{padding:7px 8px;font-size:12.5px;font-weight:800;text-align:right;background:#F7F6F2;border-bottom:1px solid var(--line2)}
+.legs span.h{font-size:10.5px;color:var(--muted);background:var(--surface-detail);letter-spacing:.01em}
+.legs span.l{text-align:left;color:var(--ink2);font-size:12px}
+.legs span.l small{display:block;font-size:10.5px;color:var(--muted);font-weight:700}
+.legs .tot{background:var(--stk);color:#F4F2ED;border-bottom:0}
+.legs .tot.l{color:#F4F2ED}
+.legs .tot.up{color:#F2A7AE}.legs .tot.down{color:#A9C3E3}
+.csnote{margin:9px 0 0;font-size:12.3px;line-height:1.55;font-weight:700;color:var(--ink2)}
+.csnote b{color:var(--ink)}
+
+/* ── scorecard ── */
+.score{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0 0}
+.sc{background:var(--surface-inner);border:1px solid var(--line);border-top:3px solid var(--stk);border-radius:10px;padding:9px 9px 10px}
+.sc.s2{border-top-color:var(--l2)}.sc.s3{border-top-color:var(--i2)}
+.sc .sk{font-size:11px;font-weight:800;color:var(--sub);letter-spacing:.01em}
+.sc .sv{margin-top:3px;font-size:21px;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1.15}
+.sc .sn{margin-top:5px;padding-top:5px;border-top:1px dashed var(--line);font-size:10.5px;line-height:1.4;font-weight:700;color:var(--muted)}
+.sc .sn b{color:var(--ink2);font-variant-numeric:tabular-nums}
+.sc .sn b.up{color:var(--up)}.sc .sn b.down{color:var(--down)}
+
+/* ── board ── */
+.board{margin:14px -16px 0;padding:15px 22px 16px;background:var(--board);color:var(--chalk);position:relative;overflow:hidden}
+.board:after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 20% 0%,rgba(255,255,255,.06),transparent 55%),radial-gradient(ellipse at 90% 100%,rgba(255,255,255,.04),transparent 50%)}
+.bdk{position:relative;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--chalk2);margin-bottom:9px}
+.bdk:before{content:"";width:18px;height:2px;background:var(--chalk-mark);border-radius:2px}
+.bdt{position:relative;margin:0;font-size:20px;line-height:1.42;font-weight:800;letter-spacing:-.04em;color:#F6F4EE}
+.bdt u{text-decoration:none;background:linear-gradient(transparent 62%,rgba(230,201,143,.38) 62%)}
+.bdp{position:relative;margin:9px 0 0;font-size:13px;line-height:1.62;font-weight:600;color:#CFDBD2}
+.bdp b{color:#F6F4EE}
+.btab{position:relative;display:grid;grid-template-columns:1.35fr .8fr .9fr .9fr;margin:12px 0 0;border:1px solid rgba(236,234,227,.22);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums}
+.btab span{padding:8px 8px;font-size:12.5px;font-weight:800;text-align:right;border-bottom:1px solid rgba(236,234,227,.12);color:#EDEBE4}
+.btab span.h{font-size:10.5px;color:var(--chalk2);background:rgba(255,255,255,.05);letter-spacing:.02em}
+.btab span.l{text-align:left;font-size:12.3px}
+.btab span.l small{display:block;font-size:10.5px;color:var(--chalk2);font-weight:700}
+.btab span.e{border-bottom:0}
+.btab .hi{color:var(--chalk-mark)}
+.btab .tg{display:inline-block;margin-left:4px;font-size:10px;font-weight:800;padding:1px 5px;border-radius:4px;background:rgba(230,201,143,.18);color:var(--chalk-mark);vertical-align:1px}
+.btab .tg.bad{background:rgba(242,167,174,.16);color:#F2A7AE}
+.bdline{position:relative;margin:12px 0 0;padding:10px 12px;border:1.5px dashed rgba(230,201,143,.55);border-radius:10px;font-size:14.5px;line-height:1.52;font-weight:800;color:#F6F4EE;letter-spacing:-.03em}
+.bdline b{color:var(--chalk-mark)}
+
+/* ── four panels ── */
+.strip{margin:16px 0 0;border:1.5px solid var(--ink);border-radius:4px;overflow:hidden;background:var(--ink)}
+.striphead{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--ink);color:#EDEAE4}
+.striphead b{font-size:11.5px;font-weight:800;letter-spacing:.03em}
+.striphead i{font-style:normal;font-size:11px;font-weight:700;color:#A9A49B}
+.stripgrid{display:grid;grid-template-columns:1fr 1fr;gap:1.5px}
+.pnl{background:var(--surface-inner);position:relative}
+.pnl svg{display:block;width:100%;height:auto}
+.pno{position:absolute;left:0;top:0;font-size:11px;font-weight:800;color:#EDEAE4;background:var(--ink);padding:3px 8px 4px 8px;border-radius:0 0 6px 0}
+.pcap{padding:9px 11px 11px;font-size:12px;line-height:1.48;font-weight:700;color:var(--ink2);border-top:1px solid var(--line2);background:var(--surface-detail);min-height:52px}
+.pcap b{color:var(--ink)}
+.stripfoot{padding:9px 12px;background:var(--ink);color:#D9D4CA;font-size:12px;font-weight:700;line-height:1.5}
+.stripfoot b{color:#F4F2ED}
+
+/* ── two-way comparison ── */
+.duo{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden;margin:12px 0 0}
+.duo .di{margin:0;background:var(--surface-inner);padding:10px 14px}
+.duo .di>b{display:inline-block;font-size:11px;font-weight:800;color:#EFEDE7;border-radius:4px;padding:2px 7px;margin-bottom:5px;letter-spacing:-.01em}
+.duo .di p{margin:0;font-size:13.2px;line-height:1.55;font-weight:700;color:var(--ink2)}
+.duo .d1>b{background:var(--stk)}
+.duo .d2>b{background:var(--l2-dark)}
+.duo .d3>b{background:var(--i2)}
+.duo .di p b{color:var(--ink);font-weight:800}
+
+/* ── simulator ── */
+.sim{margin:14px -16px 0;padding:14px 16px 15px;background:var(--surface-band);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)}
+.simhd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:0 4px}
+.simhd b{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.simhd span{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.simp{margin:5px 4px 0;font-size:12.5px;line-height:1.55;font-weight:600;color:var(--body)}
+.simread{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0 0}
+.rd{background:var(--surface-inner);border:1px solid var(--line);border-left:3px solid var(--stk);border-radius:9px;padding:7px 8px 8px}
+.rd.r2{border-left-color:var(--l2)}.rd.r3{border-left-color:var(--i2)}
+.rd .rk{font-size:10.5px;font-weight:800;color:var(--sub)}
+.rd .rv{font-size:18px;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1.2;margin-top:1px}
+.rd .rn{font-size:10.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:3px;line-height:1.35}
+.rd .rn b{color:var(--ink2)}
+.rd .rn b.up{color:var(--up)}.rd .rn b.down{color:var(--down)}
+.simchart{margin:8px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;padding:6px 4px 2px}
+.simchart svg{display:block;width:100%;height:auto}
+.ctrl{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:9px 0 0}
+.bt{appearance:none;-webkit-appearance:none;border:0;border-radius:10px;padding:12px 8px;font-size:15px;font-weight:800;cursor:pointer;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .08s}
+.bt:active{transform:scale(.97)}
+.bt.upb{background:var(--up);color:#fff}
+.bt.dnb{background:var(--down);color:#fff}
+.ctrl2{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0 0}
+.ctrl2 .lb{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.04em;margin-right:2px}
+.chip{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:var(--surface-inner);border-radius:999px;padding:6px 11px;
+  font-size:12px;font-weight:800;color:var(--ink2);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#F4F2ED}
+.chip.ghost{background:transparent}
+.chip[disabled]{opacity:.45;cursor:default}
+.ctrl3{display:flex;gap:6px;justify-content:flex-end;margin:-31px 0 0;pointer-events:none}
+.ctrl3 .chip{pointer-events:auto}
+@media(max-width:420px){.ctrl3{margin:7px 0 0;justify-content:flex-start}}
+.presets{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0 0}
+.pre{appearance:none;-webkit-appearance:none;text-align:left;border:1px solid var(--line);background:var(--surface-inner);border-radius:10px;padding:8px 10px;cursor:pointer;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.pre b{display:block;font-size:12.3px;font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.35}
+.pre i{display:block;font-style:normal;font-size:10.5px;font-weight:700;color:var(--muted);margin-top:2px}
+.pre.real{border-color:var(--green-line);background:#EEF1EC}
+.pre.real i{color:var(--green)}
+.pre.on{outline:2px solid var(--ink);outline-offset:-1px}
+.simfoot{margin:8px 4px 0;font-size:11px;line-height:1.5;font-weight:600;color:var(--muted)}
+
+/* ── deviation table ── */
+.gtab{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.gth{padding:8px 12px;font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--sub);background:var(--surface-detail);border-bottom:1px solid var(--line2)}
+.gg{display:grid;grid-template-columns:.9fr 1fr 1fr;font-variant-numeric:tabular-nums}
+.gg span{padding:8px 9px;border-bottom:1px solid var(--line2);text-align:right}
+.gg span.e{border-bottom:0}
+.gg span.h{font-size:10.5px;font-weight:800;color:var(--muted);padding-top:6px;padding-bottom:6px}
+.gg span.l{text-align:left;font-size:12.3px;font-weight:800;color:var(--ink);line-height:1.35}
+.gg span.l small{display:block;font-size:10.5px;color:var(--muted);font-weight:700}
+.gg i{display:block;font-style:normal;font-size:11.5px;font-weight:700;color:var(--body);line-height:1.4}
+.gg b{display:inline-block;margin-top:3px;font-size:12px;font-weight:800;color:#F4F2ED;background:var(--l2-dark);border-radius:5px;padding:1px 6px}
+.gg b.b3{background:var(--i2)}
+
+/* ── two rebalancing cards ── */
+.rb2{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:12px 0 0}
+.rbc{background:var(--surface-inner);border:1px solid var(--line);border-top:3px solid var(--l2);border-radius:11px;padding:9px 10px 10px}
+.rbc.r3{border-top-color:var(--i2)}
+.rbh{font-size:12.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.rbh:after{content:"On a −10% stock day";display:block;font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:0;margin-top:1px}
+.rbg{display:grid;grid-template-columns:auto 1fr;gap:5px 8px;margin:8px 0 0;align-items:baseline;font-variant-numeric:tabular-nums}
+.rbg .k{font-size:11px;font-weight:800;color:var(--muted)}
+.rbg .v{font-size:13.5px;font-weight:800;color:var(--ink);text-align:right;letter-spacing:-.02em;line-height:1.3}
+.rbg .v small{display:block;font-size:10.5px;font-weight:700;color:var(--muted)}
+.rbr{margin:8px 0 0;padding:6px 8px;border-radius:7px;background:var(--stk);color:#F4F2ED;text-align:center;font-size:14.5px;font-weight:800;letter-spacing:-.02em}
+.rbc.r3 .rbr{background:var(--i2)}
+.rbr small{display:block;font-size:10.5px;font-weight:700;color:rgba(244,242,237,.72);letter-spacing:0;margin-top:1px}
+
+/* ── deeper dive ── */
+.foldwrap.more{margin-top:16px}
+.foldwrap.more summary em{font-style:normal;display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.06em;color:var(--green);border:1px solid var(--green-line);border-radius:999px;padding:1px 7px;margin-right:7px;vertical-align:1px}
+.fb .trio{margin-top:4px}
+
+/* ── rebalance table ── */
+.hw{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.hwhd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.hwhd b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.hwsteps{margin:10px 0 0;display:grid;gap:5px}
+.hws{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start}
+.hws i{font-style:normal;width:20px;height:20px;border-radius:50%;background:var(--stk);color:#F4F2ED;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.hws p{margin:0;font-size:13px;line-height:1.55;font-weight:600;color:var(--body)}
+.hws p b{color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums}
+.hwres{margin:9px 0 0;padding:9px 12px;background:var(--stk);border-radius:9px;color:#EFEDE7;font-size:13px;line-height:1.52;font-weight:700}
+.hwres b{color:#fff}
+
+/* ── three items ── */
+.trio{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden;margin:12px 0 0}
+.trio .ti{background:var(--surface-inner);padding:9px 14px}
+.trio .th{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.trio .th b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.trio .th i{font-style:normal;font-size:11px;font-weight:800;color:var(--sub);background:var(--surface-detail);
+  border:1px solid var(--line2);border-radius:999px;padding:2px 8px}
+.trio .td{margin-top:4px;font-size:12.5px;line-height:1.56;font-weight:600;color:var(--body)}
+.trio .td b{color:var(--ink);font-weight:800}
+
+/* ── label breakdown ── */
+.ntag{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.ntag .nk{font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--muted)}
+.nname{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0 0}
+.nname span{font-size:17px;font-weight:800;letter-spacing:-.03em;padding:4px 8px 5px;border-radius:7px;background:var(--surface-detail);color:var(--ink);border-bottom:3px solid var(--line)}
+.nname .n1{border-bottom-color:var(--muted)}
+.nname .n2{border-bottom-color:var(--stk)}
+.nname .n3{border-bottom-color:var(--green)}
+.nname .n4{border-bottom-color:var(--i2)}
+.nname .n5{border-bottom-color:var(--l2)}
+.nlist{display:grid;gap:5px;margin:10px 0 0}
+.nlist div{display:grid;grid-template-columns:62px 1fr;gap:8px;font-size:12.5px;line-height:1.5}
+.nlist dt,.nlist .t{font-weight:800;color:var(--ink)}
+.nlist .d{color:var(--body);font-weight:600}
+.nlist .d b{color:var(--ink)}
+
+/* ── path matrix ── */
+.wx{margin:12px 0 0}
+.wxgrid{display:grid;grid-template-columns:54px 1fr 1fr;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden}
+.wxgrid .wh{background:var(--surface-detail);padding:7px 8px;font-size:11px;font-weight:800;color:var(--sub);text-align:center;display:flex;align-items:center;justify-content:center;line-height:1.35}
+.wxgrid .wc{background:var(--surface-inner);padding:9px 10px}
+.wxgrid .wc b{display:block;font-size:13px;font-weight:800;letter-spacing:-.02em;line-height:1.35}
+.wxgrid .wc p{margin:4px 0 0;font-size:11.3px;line-height:1.48;font-weight:700;color:var(--body)}
+.wxgrid .wc p em{font-style:normal;color:var(--green);font-weight:800}
+.wxgrid .good b{color:var(--green-dark)}
+.wxgrid .bad b{color:var(--i2)}
+.wxgrid .bad2{background:var(--i2-soft)}
+.wxgrid .good2{background:var(--green-soft)}
+.wxnote{margin:7px 0 0;padding:8px 12px;background:var(--surface-detail);border:1px solid var(--line);border-radius:10px;font-size:12px;line-height:1.58;font-weight:700;color:var(--ink2)}
+
+/* ── checklist ── */
+.chk4{margin:12px 0 0;display:grid;gap:8px}
+.ck{border-left:3px solid var(--green-line);padding:1px 0 1px 12px}
+.ck .ct{margin:1px 0 0;font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.03em;line-height:1.4}
+.ck .ct i{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--muted);margin-right:8px;vertical-align:2px}
+.ck .cd{margin:5px 0 0;padding:7px 11px;background:var(--surface-detail);border-radius:9px;font-size:12.8px;line-height:1.52;font-weight:700;color:var(--ink2)}
+.ck .cd b{color:var(--ink)}
+
+/* ── common mistakes ── */
+.trapwrap{margin:16px 0 0;border:1.5px solid var(--i2);border-radius:12px;overflow:hidden}
+.traphd{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;background:var(--i2);color:#F6EEEF}
+.traphd b{font-size:12px;font-weight:800;letter-spacing:.06em}
+.traphd i{font-style:normal;font-size:11px;font-weight:700;color:#E5C9CC}
+.trap{display:grid;gap:1.5px;background:var(--line)}
+.trap .ti{padding:10px 13px;background:var(--surface-inner)}
+.trap .tk{font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.trap .tx{margin-top:3px;font-size:14px;font-weight:800;color:var(--i2);line-height:1.48;letter-spacing:-.02em;text-decoration:line-through;text-decoration-color:rgba(122,63,68,.45);text-decoration-thickness:1.5px}
+.trap .to{margin-top:5px;font-size:12.5px;font-weight:600;color:var(--body);line-height:1.56}
+.trap .to b{color:var(--ink);font-weight:800}
+
+/* ── ending ── */
+.final{margin:16px -16px 0;padding:18px 22px;background:linear-gradient(155deg,#36443B 0%,#232C26 100%);color:#EFEDE7;position:relative;overflow:hidden}
+.final:before{content:"";position:absolute;right:-46px;bottom:-58px;width:160px;height:160px;border-radius:50%;border:1px solid rgba(168,198,180,.18)}
+.final .fk{position:relative;font-size:11px;font-weight:800;letter-spacing:.13em;color:#A0B4A6;margin-bottom:10px}
+.final p{position:relative;margin:0;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.final .f1{font-size:19px;line-height:1.5}
+.final .f2{margin-top:11px;padding-top:10px;border-top:1px solid rgba(168,198,180,.22);font-size:15px;line-height:1.58;color:#DCE6DE}
+.final p b{color:var(--green-pale)}
+
+/* ── next ── */
+.next{margin:16px -16px 0;padding:20px 22px;background:linear-gradient(150deg,#454F5C 0%,#2B323C 100%);color:#E9EBEE;position:relative;overflow:hidden}
+.next:before{content:"";position:absolute;right:-40px;bottom:-52px;width:150px;height:150px;border-radius:50%;border:1px solid rgba(180,190,202,.18)}
+.next .nh{position:relative;font-size:11px;font-weight:800;letter-spacing:.12em;color:#A3ACB8;margin-bottom:10px}
+.next p{position:relative;margin:0;font-size:16px;line-height:1.56;font-weight:800;letter-spacing:-.03em;color:#EDEFF2}
+.next p b{color:#FFFFFF}
+.next .nt{position:relative;margin-top:14px;padding-top:12px;border-top:1px solid rgba(180,190,202,.22);font-size:12.5px;font-weight:800;color:#B9C1CB}
+.next .nt b{color:#EDEFF2;font-weight:800;margin-right:6px}
+
+/* ── inline links ── */
+.ilink{color:inherit;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px;text-decoration-color:rgba(230,201,143,.7)}
+
+/* ── share ── */
+.qshare{appearance:none;-webkit-appearance:none;margin:10px 0 0;width:100%;border:1.5px dashed var(--line);background:transparent;border-radius:10px;padding:9px 10px;
+  font-size:13px;font-weight:800;color:var(--ink2);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.qshare:hover{border-color:var(--sub)}
+.sharebox{margin:16px 0 0;padding:14px 14px 13px;background:var(--surface-inner);border:1px solid var(--line);border-radius:14px;text-align:center}
+.shq{margin:0;font-size:14.5px;line-height:1.5;font-weight:800;color:var(--ink);letter-spacing:-.03em}
+.shbtns{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px;margin:11px 0 0}
+.shb{appearance:none;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#F7F6F2;border-radius:10px;
+  padding:10px 6px;font-size:13px;font-weight:800;color:var(--ink);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;text-align:center}
+.shb.main{background:var(--green);border-color:var(--green);color:#F4F2ED}
+.shmsg{margin:7px 0 0;min-height:1em;font-size:12px;font-weight:700;color:var(--green)}
+
+/* ── keep reading ── */
+.more7{margin:12px 0 0;display:grid;gap:6px}
+.m7h{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--muted);margin:2px 2px 2px}
+.m7{display:block;background:var(--surface-inner);border:1px solid var(--line);border-radius:11px;padding:10px 13px;position:relative}
+.m7:after{content:"→";position:absolute;right:13px;top:50%;transform:translateY(-50%);font-weight:800;color:var(--muted)}
+.m7 i{font-style:normal;display:inline-block;font-size:10.5px;font-weight:800;color:var(--green);margin-right:6px}
+.m7 b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.m7 span{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--sub);padding-right:18px}
+.m7.all{background:var(--surface-detail)}
+.m7.cta{background:var(--green);border-color:var(--green)}
+.m7.cta b{color:#F4F2ED}.m7.cta span{color:#C6D2CA}.m7.cta:after{color:#C6D2CA}
+
+/* ── folds ── */
+.foldwrap{margin:14px 0 0}
+details.fold{border:1px solid var(--line);border-radius:12px;background:var(--surface-detail);margin:0 0 8px;overflow:hidden}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:11px 15px;font-size:13px;font-weight:800;color:var(--ink)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary:after{content:"+";font-size:18px;font-weight:800;color:var(--green);line-height:.9}
+details.fold[open]>summary:after{content:"−"}
+details.fold .fb{padding:0 15px 14px}
+.fb p{margin:0 0 8px;font-size:12.5px;line-height:1.62;color:var(--body);font-weight:600}
+.fb p:last-child{margin-bottom:0}
+.fb p b{color:var(--ink);font-weight:800}
+.gloss{display:grid;grid-template-columns:100px 1fr;gap:7px 11px;margin:2px 0 0;font-size:12.5px}
+.gloss dt{font-weight:800;color:#4B4740}
+.gloss dd{margin:0;color:var(--body);line-height:1.52}
+.case{margin:0 0 9px;padding:9px 11px;background:var(--surface-inner);border:1px solid var(--line2);border-radius:9px}
+.case b{display:block;font-size:12.5px;font-weight:800;color:var(--ink);line-height:1.45}
+.case p{margin:4px 0 0;font-size:12.2px;line-height:1.55;font-weight:600;color:var(--body)}
+.src{margin:0;padding-left:16px;display:grid;gap:5px}
+.src li{font-size:12px;line-height:1.52;color:var(--body);font-weight:600}
+.src li b{color:var(--ink)}
+.disc{font-size:11.5px;color:var(--muted);text-align:center;line-height:1.5;padding:12px 8px 0;font-weight:500}
+.foot{text-align:center;font-size:11.5px;color:var(--sub);padding:9px 0 4px;font-weight:800;letter-spacing:-.01em}
+
+/* ── tooltips ── */
+.term{border-bottom:1.5px dashed #8B867E;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;font-weight:800;color:var(--ink);
+  display:inline-block;padding:3px 4px;margin:-3px -4px;line-height:1.3;
+  touch-action:manipulation;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.term .tip{position:fixed;left:12px;top:0;min-width:160px;max-width:min(248px,calc(100vw - 28px));
+  background:#33322F;color:#F2F0EB;font-size:12px;font-weight:600;line-height:1.52;padding:9px 11px;border-radius:9px;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);z-index:60;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease;white-space:normal;text-align:left}
+.term .tip:after{content:"";position:absolute;top:100%;left:var(--ax,50%);transform:translateX(-50%);border:6px solid transparent;border-top-color:#33322F}
+.term .tip.below:after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#33322F}
+.term.open .tip{opacity:1;visibility:visible;pointer-events:auto}
+.board .term,.keyb .term{color:inherit;border-bottom-color:rgba(236,234,227,.55)}
+
+@media(max-width:360px){
+  .cvtitle{font-size:27px}
+  .q{font-size:17px}
+  .ans .av{font-size:17.5px}
+  .final .f1{font-size:17px}
+  .cht{font-size:21px}
+  .sc .sv{font-size:18px}
+  .rd .rv{font-size:16px}
+  .legs span,.btab span{padding:7px 6px;font-size:11.8px}
+  .gloss{grid-template-columns:86px 1fr}
+  .opt{font-size:15px}
+}
+
+/* ── desktop ── */
+@media(min-width:768px){
+  .app{max-width:770px;padding-left:28px;padding-right:28px}
+  .topbar{margin:0 -28px}
+  .cover{margin:0 -28px;padding:44px 40px 34px}
+  .cvtitle{font-size:44px}
+  .cvsub{font-size:15px;max-width:30em}
+  .ch{margin-top:48px}
+  .cht{font-size:29px}
+  .q{font-size:24px}
+  .ans,.board,.sim,.final,.next{margin-left:-28px;margin-right:-28px}
+  .ans{padding:26px 40px}
+  .ans .av{font-size:23px}
+  .board{padding:26px 40px}
+  .bdt{font-size:24px}
+  .sim{padding:24px 34px}
+  .final{padding:32px 40px}
+  .final .f1{font-size:25px}
+  .final .f2{font-size:18px}
+  .next{padding:28px 40px}
+  .stripgrid{grid-template-columns:repeat(4,1fr)}
+  .trio{grid-template-columns:1fr 1fr 1fr}
+  .chk4{grid-template-columns:1fr 1fr;gap:14px 20px}
+  .trap{grid-template-columns:1fr 1fr 1fr}
+  .presets{grid-template-columns:repeat(4,1fr)}
+  .simchart svg,.chart svg{max-width:600px;margin:0 auto}
+  .duo{grid-template-columns:1fr 1fr}
+  .more7{grid-template-columns:1fr 1fr 1fr}
+  .m7.all,.m7.cta{grid-column:span 3}
+  .m7.all{grid-column:span 1}
+  .m7.cta{grid-column:span 2}
+}
+
+/* English edition */
+body{word-break:normal;line-break:auto;letter-spacing:-.012em}
+.cvtitle,.cht,.q,.ans .av,.bdt,.final p,.next p{letter-spacing:-.03em}
+@media(max-width:360px){.cvidx a{font-size:10.5px;padding:6px 9px}.gg span{padding-left:6px;padding-right:6px}.btab span{padding-left:5px;padding-right:5px}}
+</style>
+</head>
+<body>
+<div class="app">
+<span id="top"></span>
+<div class="topbar">
+<div class="tbin">
+<span class="brand"><i>Reading the Market</i> · Part 7</span>
+<span class="ep">07</span>
+</div>
+<div class="prog"><i id="pg"></i></div>
+</div>
+<!-- ══════ cover ══════ -->
+<div class="cover">
+<span class="cvkick">MARKET &amp; INVESTING BASICS <b>07</b></span>
+<time class="cvdate" datetime="2026-10-04">OCT 4, 2026 · MARKET BASICS</time>
+<h1 class="cvtitle">A 2× ETF<span>isn’t really 2×</span></h1>
+<p class="cvsub">The stock fell—and the +2× side<br/>and the −2× side can both lose money.<br/>What can drag both of them down?</p>
+<div class="cvmotif">
+<svg aria-label="Three zigzag lines start at the same point. The stock line returns near its start; the +2× and −2× lines swing more widely and both finish lower." role="img" viewbox="0 0 340 92">
+<line stroke="rgba(216,224,218,.22)" stroke-dasharray="3 4" stroke-width="1" x1="8" x2="332" y1="40" y2="40"></line>
+<polyline fill="none" points="10,40 50,30 90,44 130,26 170,46 210,30 250,48 290,36 330,44" stroke="rgba(236,234,227,.85)" stroke-linejoin="round" stroke-width="2"></polyline>
+<polyline fill="none" points="10,40 50,20 90,48 130,12 170,54 210,22 250,62 290,40 330,62" stroke="#D2B48C" stroke-linejoin="round" stroke-width="2"></polyline>
+<polyline fill="none" points="10,40 50,60 90,36 130,72 170,36 210,66 250,40 290,58 330,68" stroke="#C29A9E" stroke-linejoin="round" stroke-width="2"></polyline>
+<circle cx="10" cy="40" fill="#EFEDE7" r="3.2"></circle>
+</svg>
+<div class="cvlg"><span><i style="background:rgba(236,234,227,.85)"></i>Stock</span><span><i style="background:#D2B48C"></i>2×</span><span><i style="background:#C29A9E"></i>−2×</span></div>
+</div>
+<div class="cvidx">
+<a href="#p1"><b>01</b>Seven weeks in which both sides lost</a>
+<a href="#p2"><b>02</b>The word that matters: daily</a>
+<a href="#p3"><b>03</b>Paths that help—and paths that hurt</a>
+</div>
+</div>
+<!-- ══════ page 1 ══════ -->
+<div class="ch" id="p1">
+<div class="chtop"><span class="chn">01</span><span class="chk">THE CASE &amp; THE QUESTION</span></div>
+<h2 class="cht">Seven weeks in which both sides lost</h2>
+<div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+<p class="p lead">Start with one question. No calculator needed.</p>
+<div class="pop" id="quiz1">
+<div class="poph"><b>WARM-UP</b><span class="vb">HYPOTHETICAL</span></div>
+<div class="popb">
+<p class="popq">A stock rises 10% today and falls 10% tomorrow. Where will its <span class="c-l2">2× ETF</span> end up after two days, relative to where it started?</p>
+<div class="opts">
+<button class="opt" data-ok="0" type="button">0%</button>
+<button class="opt" data-ok="0" type="button">−2%</button>
+<button class="opt" data-ok="1" type="button">−4%</button>
+</div>
+<div class="popans" hidden="">
+<span class="verdict">ANSWER · −4%</span>
+<div class="calc">
+<span class="h"></span><span class="h">Start</span><span class="h">+10% day</span><span class="h">−10% day</span>
+<span class="l">Stock</span><span>100</span><span>110</span><span><b>99</b></span>
+<span class="l e c-l2">2× ETF</span><span class="e">100</span><span class="e">120</span><span class="e"><b class="c-l2">96</b></span>
+</div>
+<p class="popnote">The stock lost 1. The 2× ETF did not lose 2—it lost <b>4</b>. This two-day toy example contains the whole idea. In the real market, the same mechanics played out over seven weeks.</p>
+<button class="qshare" data-share="quiz" type="button">Share this question</button>
+</div>
+</div>
+</div>
+<h3 class="hd"><small>MAY 27, 2026 · REAL MARKET</small>The day a wave of 2× products listed at once</h3>
+<p class="p">On May 27, 2026, eight asset managers simultaneously listed 16 leveraged and inverse ETFs tied to a single stock—either Samsung Electronics or SK hynix. Some target twice the stock’s daily move; others target twice the daily move in the opposite direction. In this article, we’ll call the daily +2× product <b class="c-l2">2×</b>, and the daily −2× product <b class="c-i2">−2×</b>. It is the −2× inverse ETF that Korean traders often nickname “gopbus.”</p>
+<p class="p">Suppose you put 100 into each of three positions at SK hynix’s closing price on listing day: the stock itself, +2×, and −2×. Seven weeks later, at the July 15 close, we open the scorecard.</p>
+<div class="case7">
+<div class="cshd"><b>SK hynix · Listing-day close = 100</b><span class="vb">THEORETICAL VALUES FROM DAILY CLOSES</span></div>
+<div class="lg"><span class="k1"><i></i>Stock</span><span class="k2"><i></i>2×</span><span class="k3"><i></i>−2×</span></div>
+<div class="chart">
+<svg aria-label="SK hynix stock and theoretical +2× and −2× paths from May 27 to July 15, 2026. On June 22: stock 130, +2× 159, −2× 48. On July 15: stock 93, +2× 71, −2× 67." role="img" viewbox="0 0 340 190">
+<line stroke="#DCD7CE" stroke-width="1" x1="34" x2="330" y1="26.7" y2="26.7"></line>
+<line stroke="#DCD7CE" stroke-width="1" x1="34" x2="330" y1="153.3" y2="153.3"></line>
+<line stroke="#8B867E" stroke-dasharray="3 3" stroke-width="1" x1="34" x2="330" y1="90" y2="90"></line>
+<text fill="#8B867E" font-size="9.5" font-weight="700" text-anchor="end" x="28" y="30">150</text>
+<text fill="#706D66" font-size="9.5" font-weight="700" text-anchor="end" x="28" y="93.5">100</text>
+<text fill="#8B867E" font-size="9.5" font-weight="700" text-anchor="end" x="28" y="156.8">50</text>
+<line stroke="#B8B2A7" stroke-dasharray="2 3" stroke-width="1" x1="182" x2="182" y1="10" y2="166"></line>
+<polyline fill="none" points="34.0,90.0 42.7,95.2 51.4,99.9 60.1,102.9 68.8,102.6 77.5,96.6 86.2,72.8 94.9,50.7 103.6,103.5 112.4,86.4 121.1,93.1 129.8,98.9 138.5,114.0 147.2,122.5 155.9,133.5 164.6,144.3 173.3,148.5 182.0,156.2 190.7,141.1 199.4,145.0 208.1,161.2 216.8,151.9 225.5,149.7 234.2,150.8 242.9,146.4 251.6,125.9 260.4,145.6 269.1,140.8 277.8,131.7 286.5,122.0 295.2,132.0 303.9,131.6 312.6,105.4 321.3,113.6 330.0,131.8" stroke="#7A3F44" stroke-linejoin="round" stroke-width="2"></polyline>
+<polyline fill="none" points="34.0,90.0 42.7,84.8 51.4,79.7 60.1,76.2 68.8,76.6 77.5,83.9 86.2,110.3 94.9,126.6 103.6,98.0 112.4,115.9 121.1,110.6 129.8,105.7 138.5,91.5 147.2,81.2 155.9,65.4 164.6,45.7 173.3,35.6 182.0,15.3 190.7,65.5 199.4,57.7 208.1,21.8 216.8,54.4 225.5,59.9 234.2,57.2 242.9,68.1 251.6,111.4 260.4,88.5 269.1,97.1 277.8,111.6 286.5,123.5 295.2,113.7 303.9,114.2 312.6,145.7 321.3,140.5 330.0,127.0" stroke="#A9784A" stroke-linejoin="round" stroke-width="2"></polyline>
+<polyline fill="none" points="34.0,90.0 42.7,87.4 51.4,84.9 60.1,83.2 68.8,83.4 77.5,86.9 86.2,99.8 94.9,108.7 103.6,91.6 112.4,101.0 121.1,98.0 129.8,95.3 138.5,87.5 147.2,82.2 155.9,74.3 164.6,65.0 173.3,60.6 182.0,51.8 190.7,72.4 199.4,68.7 208.1,51.9 216.8,65.7 225.5,68.3 234.2,67.0 242.9,72.1 251.6,93.2 260.4,79.7 269.1,84.4 277.8,92.4 286.5,99.4 295.2,93.2 303.9,93.6 312.6,112.5 321.3,108.6 330.0,99.1" stroke="#3A3632" stroke-linejoin="round" stroke-width="2.4"></polyline>
+<circle cx="182" cy="15.3" fill="#A9784A" r="3.2"></circle>
+<circle cx="182" cy="51.8" fill="#3A3632" r="3.2"></circle>
+<circle cx="182" cy="156.2" fill="#7A3F44" r="3.2"></circle>
+<circle cx="330" cy="99.1" fill="#3A3632" r="3.2"></circle>
+<circle cx="330" cy="127" fill="#A9784A" r="3.2"></circle>
+<circle cx="330" cy="131.8" fill="#7A3F44" r="3.2"></circle>
+<text fill="#706D66" font-size="9.5" font-weight="800" x="34" y="182">5/27</text>
+<text fill="#706D66" font-size="9.5" font-weight="800" text-anchor="middle" x="182" y="182">6/22</text>
+<text fill="#706D66" font-size="9.5" font-weight="800" text-anchor="end" x="330" y="182">7/15</text>
+</svg>
+</div>
+<div class="legs">
+<span class="h l">Period</span><span class="h">Stock</span><span class="h">2×</span><span class="h">−2×</span>
+<span class="l">Rising leg<small>5/27 → 6/22</small></span><span class="up">+30.1%</span><span class="up">+59.0%</span><span class="down">−52.2%</span>
+<span class="l">Falling leg<small>6/22 → 7/15</small></span><span class="down">−28.7%</span><span class="down">−55.5%</span><span class="up">+40.3%</span>
+<span class="l tot">Full period<small style="color:#B9B3A8">5/27 → 7/15</small></span><span class="tot down">−7.2%</span><span class="tot down">−29.2%</span><span class="tot down">−33.0%</span>
+</div>
+<p class="csnote">On each leg, the +2× path stays fairly close to simple multiplication: +59.0% versus a simple +60.3% on the way up, and −55.5% versus −57.3% on the way down. The −2× path strays much farther from its simple-multiple figures (−60.3%, +57.3%) even within each leg. Then, <b>once the two legs are chained together, the “2×” intuition falls apart.</b></p>
+</div>
+<div class="score">
+<div class="sc"><div class="sk">Stock</div><div class="sv down">−7.2%</div><div class="sn">Back near<br/>the start</div></div>
+<div class="sc s2"><div class="sk">2×</div><div class="sv down">−29.2%</div><div class="sn">Simple multiple:<br/><b class="down">−14.4%</b></div></div>
+<div class="sc s3"><div class="sk">−2×</div><div class="sv down">−33.0%</div><div class="sn">Simple multiple:<br/><b class="up">+14.4%</b></div></div>
+</div>
+<p class="q">If the stock fell, shouldn’t the −2× ETF<br/>have made money?</p>
+<p class="p">The simple math says this: twice a −7.2% stock return is −14.4%; the opposite is +14.4%. But the calculated path tells a different story. The +2× side lost roughly twice as much as that simple figure, while the −2× side did not profit at all—it lost the most. <b>Even the side that got the direction right lost money.</b></p>
+<div class="ans">
+<div class="ak">ONE-SENTENCE ANSWER</div>
+<div class="av">A leveraged ETF targets 2× the DAILY return. It never promised 2× over seven weeks.</div>
+<div class="aw">The figures above are theoretical paths created by applying +2× and −2× to each day’s close-to-close return and compounding the results. Fees, premiums/discounts, and tracking error can make an actual ETF perform differently.</div>
+</div>
+<!-- ══════ page 2 ══════ -->
+<div class="ch" id="p2">
+<div class="chtop"><span class="chn">02</span><span class="chk">MECHANICS &amp; TERMS</span></div>
+<h2 class="cht">The word that matters: daily</h2>
+<div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+<h3 class="hd" style="margin-top:12px">How does a leveraged ETF create 2× exposure?</h3>
+<p class="p">If an investor puts in 100, the fund can use futures, swaps, or similar contracts so that gains and losses behave as if 200 were exposed to the stock. That 200 is called <span class="term">exposure<span class="tip">The amount of market exposure driving gains and losses. If you invest 100 and the fund has 200 of exposure, a 1% move in the underlying produces roughly a 2% move before costs and tracking differences.</span></span>. Then <b>around each market close, the fund resets that exposure to twice its current net asset value.</b> That daily reset is called <span class="term">rebalancing<span class="tip">Resetting exposure each day so the fund maintains its stated daily multiple.</span></span>.</p>
+<div class="board">
+<div class="bdk">ON THE BOARD · THE ONE WORD TO REMEMBER</div>
+<p class="bdt"><u>daily</u> return × 2 ≠ <u>period</u> return × 2</p>
+<p class="bdp">The 2× target resets every day. Yesterday’s gains enlarge today’s base; yesterday’s losses shrink it. So a multi-day result is determined not by the period’s total move alone, but by <b>how much the underlying moved on each individual day</b>.</p>
+<div class="btab">
+<span class="h l">Two-day path</span><span class="h">Stock</span><span class="h">Simple 2×</span><span class="h">2× ETF</span>
+<span class="l">Up, then up<small>+10%, +10%</small></span><span>+21%</span><span>+42%</span><span class="hi">+44%<span class="tg">MORE</span></span>
+<span class="l">Down, then down<small>−10%, −10%</small></span><span>−19%</span><span>−38%</span><span class="hi">−36%<span class="tg">LOSES LESS</span></span>
+<span class="l e">Up, then down<small>+10%, −10%</small></span><span class="e">−1%</span><span class="e">−2%</span><span class="e hi">−4%<span class="tg bad">LOSES MORE</span></span>
+</div>
+<div class="bdline">When the move is strongly one-directional relative to the day-to-day volatility, <b>the stronger the trend</b> the more the compounded 2× path can beat simple multiplication; <br/><b>if the price swings hard but ends near where it started</b>, compounding works against the leveraged path.</div>
+</div>
+<h3 class="hd">Where volatility drag comes from</h3>
+<div class="strip">
+<div class="striphead"><b>2× on a changing base</b><i>HYPOTHETICAL</i></div>
+<div class="stripgrid">
+<div class="pnl">
+<span class="pno">01</span>
+<svg aria-label="Stock and 2× ETF bars both start at 100." role="img" viewbox="0 0 168 140">
+<rect fill="#F1EFEA" height="140" width="168"></rect>
+<line stroke="#CEC9BF" stroke-width="2" x1="12" x2="156" y1="122" y2="122"></line>
+<rect fill="#3A3632" height="80" rx="3" width="38" x="34" y="42"></rect>
+<rect fill="#A9784A" height="80" rx="3" width="38" x="94" y="42"></rect>
+<text fill="#3A3632" font-size="13" font-weight="800" text-anchor="middle" x="53" y="36">100</text>
+<text fill="#7A5A34" font-size="13" font-weight="800" text-anchor="middle" x="113" y="36">100</text>
+<text fill="#706D66" font-size="9.5" font-weight="800" text-anchor="middle" x="53" y="135">Stock</text>
+<text fill="#706D66" font-size="9.5" font-weight="800" text-anchor="middle" x="113" y="135">2×</text>
+</svg>
+<div class="pcap">Start: both the stock and the 2× ETF are <b>100</b></div>
+</div>
+<div class="pnl">
+<span class="pno">02</span>
+<svg aria-label="Stock rises to 110 and the 2× ETF rises to 120." role="img" viewbox="0 0 168 140">
+<rect fill="#F1EFEA" height="140" width="168"></rect>
+<line stroke="#CEC9BF" stroke-width="2" x1="12" x2="156" y1="122" y2="122"></line>
+<rect fill="#3A3632" height="88" rx="3" width="38" x="34" y="34"></rect>
+<rect fill="#A9784A" height="96" rx="3" width="38" x="94" y="26"></rect>
+<rect fill="#D2B48C" height="16" rx="3" width="38" x="94" y="26"></rect>
+<text fill="#3A3632" font-size="13" font-weight="800" text-anchor="middle" x="53" y="28">110</text>
+<text fill="#7A5A34" font-size="13" font-weight="800" text-anchor="middle" x="113" y="20">120</text>
+<path d="M150 50 l0 -22 m-6 7 l6 -8 l6 8" fill="none" stroke="#C74754" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"></path>
+<text fill="#706D66" font-size="9.5" font-weight="800" text-anchor="middle" x="53" y="135">Stock</text>
+<text fill="#706D66" font-size="9.5" font-weight="800" text-anchor="middle" x="113" y="135">2×</text>
+</svg>
+<div class="pcap">Stock +10%. The 2× ETF rises 20% to <b>120</b>. Its base is now larger.</div>
+</div>
+<div class="pnl">
+<span class="pno">03</span>
+<svg aria-label="Stock falls to 99 and the 2× ETF to 96; the ETF loses 24 from 120." role="img" viewbox="0 0 168 140">
+<rect fill="#F1EFEA" height="140" width="168"></rect>
+<line stroke="#CEC9BF" stroke-width="2" x1="12" x2="156" y1="122" y2="122"></line>
+<rect fill="#3A3632" height="79.2" rx="3" width="38" x="34" y="42.8"></rect>
+<rect fill="none" height="19.2" rx="3" stroke="#A9784A" stroke-dasharray="3 3" stroke-width="1.5" width="38" x="94" y="26"></rect>
+<rect fill="#A9784A" height="76.8" rx="3" width="38" x="94" y="45.2"></rect>
+<text fill="#7A3F44" font-size="10.5" font-weight="800" text-anchor="middle" x="113" y="39">−24</text>
+<text fill="#3A3632" font-size="13" font-weight="800" text-anchor="middle" x="53" y="36">99</text>
+<text fill="#F4F2ED" font-size="13" font-weight="800" text-anchor="middle" x="113" y="62">96</text>
+<path d="M150 28 l0 22 m-6 -7 l6 8 l6 -8" fill="none" stroke="#4F78A8" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"></path>
+<text fill="#706D66" font-size="9.5" font-weight="800" text-anchor="middle" x="53" y="135">Stock</text>
+<text fill="#706D66" font-size="9.5" font-weight="800" text-anchor="middle" x="113" y="135">2×</text>
+</svg>
+<div class="pcap">Stock −10%. The ETF’s −20% now applies to the <b>larger base of 120</b>, so it loses 24.</div>
+</div>
+<div class="pnl">
+<span class="pno">04</span>
+<svg aria-label="Comparison showing the stock down 1 while the 2× ETF is down 4." role="img" viewbox="0 0 168 140">
+<rect fill="#F1EFEA" height="140" width="168"></rect>
+<text fill="#706D66" font-size="11" font-weight="800" text-anchor="middle" x="46" y="52">Stock</text>
+<text fill="#3A3632" font-size="34" font-weight="800" text-anchor="middle" x="46" y="88">−1</text>
+<text fill="#B8B2A7" font-size="16" font-weight="800" text-anchor="middle" x="84" y="80">vs</text>
+<text fill="#706D66" font-size="11" font-weight="800" text-anchor="middle" x="122" y="52">2×</text>
+<text fill="#7A3F44" font-size="34" font-weight="800" text-anchor="middle" x="122" y="88">−4</text>
+<line stroke="#CEC9BF" stroke-dasharray="3 3" stroke-width="1.5" x1="22" x2="146" y1="108" y2="108"></line>
+<text fill="#706D66" font-size="10" font-weight="700" text-anchor="middle" x="84" y="126">Simple 2× would be −2</text>
+</svg>
+<div class="pcap">The stock lost <b>1</b>; the 2× ETF lost <b>4</b>.</div>
+</div>
+</div>
+<div class="stripfoot">After an up day, the next 2× move is applied to a <b>larger base</b>; after a down day, a positive 2× move is applied to a <b>smaller base</b>.</div>
+</div>
+<p class="p">This gap is commonly called <span class="term">volatility drag<span class="tip">The tendency for a leveraged product to lag a simple multiple when gains and losses alternate. It is also described as negative compounding.</span></span>. In Korean financial coverage, the same idea is often described literally as “negative compounding.”</p>
+<!-- simulator -->
+<div class="sim" id="sim">
+<div class="simhd"><b>TRY IT YOURSELF</b><span id="simday">Day 0</span></div>
+<p class="simp">Each click is one trading day. Alternate up and down days and watch where the +2× and −2× paths end up.</p>
+<div class="simread">
+<div class="rd"><div class="rk">Stock</div><div class="rv" id="rv0">100.0</div><div class="rn" id="rn0">Start</div></div>
+<div class="rd r2"><div class="rk">2×</div><div class="rv" id="rv1">100.0</div><div class="rn" id="rn1">Daily +2× <b>0.0%</b><br/>Simple multiple <b>0.0%</b></div></div>
+<div class="rd r3"><div class="rk">−2×</div><div class="rv" id="rv2">100.0</div><div class="rn" id="rn2">Daily −2× <b>0.0%</b><br/>Simple multiple <b>0.0%</b></div></div>
+</div>
+<div class="simchart"><svg aria-label="Line chart showing the stock, +2× path, and −2× path." id="simsvg" role="img" viewbox="0 0 340 150"></svg></div>
+<div class="ctrl">
+<button class="bt upb" id="bUp" type="button">▲ Up day</button>
+<button class="bt dnb" id="bDn" type="button">▼ Down day</button>
+</div>
+<div class="ctrl2">
+<span class="lb">Daily move</span>
+<button class="chip stp" data-s="3" type="button">3%</button>
+<button class="chip stp on" data-s="5" type="button">5%</button>
+<button class="chip stp" data-s="10" type="button">10%</button>
+</div>
+<div class="ctrl3">
+<button class="chip ghost" id="bUndo" type="button">Undo one day</button>
+<button class="chip ghost" id="bReset" type="button">Reset</button>
+</div>
+<div class="presets">
+<button class="pre" data-p="zig" type="button"><b>10 round trips</b><i>Alternate ±5% for 20 days</i></button>
+<button class="pre" data-p="trend" type="button"><b>Ten days of +2%</b><i>A one-way trend</i></button>
+<button class="pre real" data-p="sk" type="button"><b>SK hynix · 7 weeks</b><i>Actual closes · 5/27→7/15</i></button>
+<button class="pre real" data-p="ss" type="button"><b>Samsung Electronics · 5 weeks</b><i>Actual closes · 6/25→7/30</i></button>
+</div>
+<p class="simfoot">“Simple multiple” means the stock’s cumulative return multiplied by +2 or −2. The actual-close presets are theoretical paths compounded from daily close-to-close returns; fees and market-price/NAV gaps are excluded.</p>
+</div>
+<h3 class="hd">Why the −2× inverse path can stray even farther</h3>
+<p class="p">Run the warm-up through a −2× inverse ETF: 100 → 80 → 96. It ends at the same −4% as the +2× ETF. But the simple-multiple expectations were very different: −2% for +2×, and +2% for −2×.</p>
+<div class="gtab">
+<div class="gth">Simple multiple → daily-reset compounded path (theoretical)</div>
+<div class="gg">
+<span class="h l">Case</span><span class="h">2×</span><span class="h">−2×</span>
+<span class="l">WARM-UP<small>Up, then down</small></span><span><i>−2% → −4%</i><b>2%p</b></span><span><i>+2% → −4%</i><b class="b3">6%p</b></span>
+<span class="l">SK hynix · 7 weeks<small>Large swings, ends near start</small></span><span><i>−14.4% → −29.2%</i><b>about 14.8 pp</b></span><span><i>+14.4% → −33.0%</i><b class="b3">about 47.4 pp</b></span>
+<span class="l e">Samsung Electronics · 5 weeks<small>Strong one-way move</small></span><span class="e"><i>−84.5% → −70.0%</i><b>about 14.5 pp</b></span><span class="e"><i>+84.5% → +128.9%</i><b class="b3">about 44.4 pp</b></span>
+</div>
+</div>
+<p class="p">In all three examples, the −2× path deviated from the simple multiple by roughly <b>three times</b> as much as the +2× path did. That is not a universal “three-times” rule. When both daily moves and the period’s overall change are small, the ratio tends to approach three; depending on the path, it can be smaller or larger. Big back-and-forth swings tend to push results toward larger losses, while a strong trend relative to volatility can push them toward larger gains. The −2× product is even more path-dependent.</p>
+<h3 class="hd"><small>AROUND THE CLOSE</small>The daily rebalance you cannot skip</h3>
+<p class="p">Rebalancing is not just a calculation. It requires actual trades. Take a fund with net assets of 100 on a day when the stock falls 10%.</p>
+<div class="rb2">
+<div class="rbc r2">
+<div class="rbh">2×</div>
+<div class="rbg">
+<span class="k">Net assets</span><span class="v">100 → 80</span>
+<span class="k">exposure</span><span class="v">+200 → +180</span>
+<span class="k">Target</span><span class="v">+160<small>80 × 2</small></span>
+</div>
+<div class="rbr">Sell 20<small>Reduce exposure</small></div>
+</div>
+<div class="rbc r3">
+<div class="rbh">−2×</div>
+<div class="rbg">
+<span class="k">Net assets</span><span class="v">100 → 120</span>
+<span class="k">exposure</span><span class="v">−200 → −180</span>
+<span class="k">Target</span><span class="v">−240<small>120 × −2</small></span>
+</div>
+<div class="rbr">Sell 60<small>Increase short exposure</small></div>
+</div>
+</div>
+<p class="cap">Hypothetical example. A negative exposure means the position profits when the stock falls. On an up day, the direction reverses: both funds buy to rebalance.</p>
+<div class="board">
+<div class="bdk">ON THE BOARD · HOW BIG IS THE REBALANCE?</div>
+<div class="btab" style="grid-template-columns:1.2fr 1fr 1fr;margin-top:2px">
+<span class="h l">Fund with NAV 100</span><span class="h">Stock +10% day</span><span class="h">Stock −10% day</span>
+<span class="l">2×</span><span>Buy 20</span><span>Sell 20</span>
+<span class="l">−1× inverse</span><span>Buy 20</span><span>Sell 20</span>
+<span class="l e">−2×</span><span class="e hi">Buy 60</span><span class="e hi">Sell 60</span>
+</div>
+<div class="bdline">For both +2× and −2× funds, the end-of-day rebalance <b>follows the day’s direction:</b><br/>the −2× fund’s required trade is <b>three times</b> as large in this example.</div>
+<p class="bdp"><a class="ilink" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_5%ED%8E%B8_%EA%B8%89%EB%9D%BD%EC%9D%80%EC%96%B4%EB%96%BB%EA%B2%8C%EB%8D%94%ED%81%B0%EA%B8%89%EB%9D%BD%EC%9D%84%EB%A7%8C%EB%93%9C%EB%8A%94%EA%B0%80">Part 5</a>This is the same direction of feedback discussed in Part 5: sell more after a down day, buy more after an up day. But whether those orders actually move the stock price depends on the size of the products relative to that day’s trading volume. The existence of a rebalance does not, by itself, prove that the rebalance moved the market.</p>
+</div>
+<div class="duo">
+<div class="di d1"><b>The leveraged account in Part 5</b><p>Leverage comes from borrowing. Cross a margin threshold and forced selling can hit all at once. Losses can exceed the original capital.</p></div>
+<div class="di d2"><b>Leveraged ETF</b><p>Leverage comes from derivatives. The fund resets daily instead of waiting for a margin threshold. If you buy the ETF for cash, you cannot lose more than the amount invested.</p></div>
+</div>
+<div class="foldwrap more">
+<details class="fold">
+<summary><span><em>DEEPER DIVE</em>Even two 2× ETFs can produce different returns</span></summary>
+<div class="fb">
+<p>The theoretical path is only a starting point. Real products add costs and implementation differences.</p>
+<div class="trio">
+<div class="ti">
+<div class="th"><b><span class="term">Expense ratio<span class="tip">Annual management and distribution costs, accrued gradually out of fund assets.</span></span></b><i>Day by day</i></div>
+<div class="td">Operating expenses are accrued out of net assets over time.</div>
+</div>
+<div class="ti">
+<div class="th"><b><span class="term">Premium / discount<span class="tip">How far an ETF’s market price trades above or below its net asset value (NAV).</span></span></b><i>When you trade</i></div>
+<div class="td">The market price on your screen can differ from the ETF’s <span class="term">net asset value<span class="tip">The per-share value of an ETF’s assets minus liabilities, usually abbreviated NAV.</span></span>. You can end up buying at a premium or selling at a discount.</div>
+</div>
+<div class="ti">
+<div class="th"><b><span class="term">Tracking error<span class="tip">The gap between the stated target—such as 2× the daily return—and the fund’s realized performance.</span></span></b><i>Target vs. actual</i></div>
+<div class="td">The fund may not hit its daily target exactly. Products using futures can also face <b>roll costs</b> (<a class="ilink" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_2%ED%8E%B8_%ED%98%84%EB%AC%BC%EA%B3%BC%EC%84%A0%EB%AC%BC%EC%9D%B4%EC%97%87%EA%B0%88%EB%A6%B4%EB%95%8C">Part 2</a>).</div>
+</div>
+</div>
+<p style="margin-top:10px">Reports said that Samsung Electronics 2× ETFs listed on the same day posted first-week returns ranging from <b>33.86% to 35.46%—a 1.6 percentage-point spread</b>, even though the underlying stock and target multiple were the same.</p>
+</div>
+</details>
+<details class="fold">
+<summary><span><em>DEEPER DIVE</em>How to read the label</span></summary>
+<div class="fb">
+<div class="ntag" style="margin-top:0">
+<div class="nk">LABEL BREAKDOWN · HYPOTHETICAL PRODUCT NAME</div>
+<div class="nname"><span class="n1">○○○○</span><span class="n2">200</span><span class="n3">Futures</span><span class="n4">Inverse</span><span class="n5">2X</span></div>
+<div class="nlist">
+<div><span class="t">○○○○</span><span class="d">Asset-manager brand</span></div>
+<div><span class="t">200</span><span class="d">Underlying index, such as KOSPI 200. A single-stock product would show the company name instead.</span></div>
+<div><span class="t">Futures</span><span class="d">Tracks futures rather than the cash stock or index.</span></div>
+<div><span class="t">Inverse</span><span class="d">Targets the opposite direction. If “Inverse” is absent, the direction is the same as the underlying.</span></div>
+<div><span class="t">2X</span><span class="d"><b>daily</b> multiple applied to the daily return. Some products use the word “Leveraged” instead.</span></div>
+</div>
+<p class="cap" style="margin-top:9px">In Korea, traders commonly call a −2× inverse ETF “gopbus.”</p>
+</div>
+</div>
+</details>
+</div>
+<div class="ans">
+<div class="ak">CHAPTER 2 · THE TAKEAWAY</div>
+<div class="av">A 2× ETF’s return depends on the path, not just the direction.</div>
+<div class="aw">Two paths can start and end at the same stock price yet produce different leveraged returns because the journey in between was different.</div>
+</div>
+<!-- ══════ page 3 ══════ -->
+<div class="ch" id="p3">
+<div class="chtop"><span class="chn">03</span><span class="chk">HOW TO READ IT</span></div>
+<h2 class="cht">Paths that help,<br/>paths that hurt</h2>
+<div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+<p class="p lead">Two things largely shape a leveraged ETF’s multi-day result: how strongly the underlying trended over the full period, and how violently it moved day to day along the way.</p>
+<div class="wx">
+<div class="wxgrid">
+<div class="wh"></div><div class="wh">Lower daily volatility</div><div class="wh">Higher daily volatility</div>
+<div class="wh">Strong<br/>trend</div>
+<div class="wc good"><b>A little better than simple multiplication</b><p>+1% every day for 20 days: stock +22.0%, +2× +48.6% (simple +44.0%)</p></div>
+<div class="wc good good2"><b>Much better than simple multiplication</b><p><em>Actual closes</em> · Samsung Electronics 6/25→7/30: stock −42.3%, −2× +128.9% (simple +84.5%)</p></div>
+<div class="wh">Ends<br/>near start</div>
+<div class="wc bad"><b>Gradual drag</b><p>Ten ±2% round trips: stock −0.4%, +2× −1.6%, −2× −1.6%</p></div>
+<div class="wc bad bad2"><b>Heavy drag</b><p><em>Actual closes</em> · SK hynix 5/27→7/15: stock −7.2%, +2× −29.2%, −2× −33.0%</p></div>
+</div>
+<p class="wxnote">The two cells marked “Actual closes” still show theoretical +2×/−2× paths calculated from daily closing returns. The Samsung Electronics window was deliberately chosen as a strongly trending example. Over that same period, the +2× path fell 70.0%, less than the simple-multiple loss of 84.5%. <b>When the trend is strong relative to the volatility, the side that gets the direction right can compound to a larger gain, while the wrong side can sometimes lose less than simple multiplication implies.</b> The same market can fall into a different box depending on where you start and stop the measurement. This article does not offer a way to know in advance which box will come next.</p>
+</div>
+<h3 class="hd">Four questions to ask whenever you read a leveraged-ETF claim</h3>
+<div class="chk4">
+<div class="ck"><p class="ct"><i>01</i>Is the claim about one day or many days?</p><div class="cd">The 2× target applies to <b>daily</b>. Over multiple days, stop assuming the period return will be exactly 2×.</div></div>
+<div class="ck"><p class="ct"><i>02</i>How volatile was the path?</p><div class="cd">Even with the same endpoint, <b>large daily swings</b> make it more likely that a leveraged path lagged simple multiplication.</div></div>
+<div class="ck"><p class="ct"><i>03</i>Percent or percentage points?</p><div class="cd">A cumulative return falling by a certain number of percentage points and a price falling by the same percentage are <b>not the same move.</b></div></div>
+<div class="ck"><p class="ct"><i>04</i>Theoretical path or actual ETF price?</p><div class="cd">Because of fees, premiums/discounts, and tracking error, <b>actual ETF performance can differ from the theoretical path.</b> Even two products targeting the same 2× multiple can diverge.</div></div>
+</div>
+<div class="trapwrap">
+<div class="traphd"><b>COMMON MISTAKES</b><i>Claims that sound right—but are not</i></div>
+<div class="trap">
+<div class="ti">
+<div class="tk">MISTAKE 01</div>
+<div class="tx">“If the stock rises 20%, a 2× ETF rises 40%.”</div>
+<div class="to">If that 20% move happens in one day, that is the target before fees and tracking differences. If the stock gains 20% over multiple days, <b>the ETF can return more or less than 40%, depending on the path.</b></div>
+</div>
+<div class="ti">
+<div class="tk">MISTAKE 02</div>
+<div class="tx">“If I correctly call a decline, a −2× ETF must make money.”</div>
+<div class="to">SK hynix fell over the seven-week period, yet the theoretical −2× path lost 33.0%. <b>Getting the direction right is not enough; the path matters too.</b></div>
+</div>
+<div class="ti">
+<div class="tk">MISTAKE 03</div>
+<div class="tx">“2× ETF crashes 48% in one day.”</div>
+<div class="to">On June 23, one report said the cumulative return of an SK hynix 2× ETF fell from 87.63% to 39.82%. What fell by 47.81 was the <b>cumulative return, measured in percentage points: 47.81 pp</b>. Expressed as a price starting from 100, the level would move from 187.63 to 139.82—a decline of <b>about 25%</b>. SK hynix itself fell 12.47% that day. The reported cumulative return included the first trading day’s gain, so it uses a different starting point from the chart in this article, which starts at the listing-day close.</div>
+</div>
+</div>
+</div>
+<div class="pop" id="quiz2">
+<div class="poph"><b>PRACTICE</b><span class="vb">HYPOTHETICAL</span></div>
+<div class="popb">
+<p class="popq">A stock moves +20%, −20%, +20%, −20% over four days. Which leveraged side loses less?</p>
+<div class="opts">
+<button class="opt" data-ok="0" style="font-size:14px" type="button">2×</button>
+<button class="opt" data-ok="0" style="font-size:14px" type="button">−2×</button>
+<button class="opt" data-ok="1" style="font-size:14px" type="button">Same</button>
+</div>
+<div class="popans" hidden="">
+<span class="verdict">ANSWER · SAME</span>
+<div class="calc" style="grid-template-columns:auto repeat(5,1fr)">
+<span class="h"></span><span class="h">Start</span><span class="h">+20%</span><span class="h">−20%</span><span class="h">+20%</span><span class="h">−20%</span>
+<span class="l">Stock</span><span>100</span><span>120</span><span>96</span><span>115.2</span><span><b>92.2</b></span>
+<span class="l c-l2">2×</span><span>100</span><span>140</span><span>84</span><span>117.6</span><span><b class="c-l2">70.6</b></span>
+<span class="l e c-i2">−2×</span><span class="e">100</span><span class="e">60</span><span class="e">84</span><span class="e">50.4</span><span class="e"><b class="c-i2">70.6</b></span>
+</div>
+<p class="popnote">The stock ends down 7.84%. Both +2× and −2× end at exactly <b>−29.44%</b>. Simple multiplication would have suggested −15.68% for +2× and +15.68% for −2×. When direction flips repeatedly and the swings are large, <b>how violently the path swings can matter more than which side you chose</b>.</p>
+</div>
+</div>
+</div>
+<div class="final">
+<div class="fk">PART 7 · IN ONE SENTENCE</div>
+<p class="f1">A leveraged ETF targets <b>daily</b> 2×. Over multiple days, the outcome is determined by the sequence of daily returns along the way.</p>
+<p class="f2">A strong trend relative to volatility can make the compounded result better than simple multiplication; heavy back-and-forth movement that ends near the starting point makes it worse. That is why +2× and −2× products can both lose money even when they reference the same stock.</p>
+</div>
+<div class="sharebox">
+<p class="shq">Know someone who bought “2×”<br/>and discovered it was not 2× over time?</p>
+<div class="shbtns">
+<button class="shb main" data-share="page" type="button">Share</button>
+<button class="shb" data-share="copy" type="button">Copy link</button>
+<a class="shb" href="https://twitter.com/intent/tweet?text=Why%20a%202%C3%97%20ETF%20isn%27t%202%C3%97&amp;url=https%3A%2F%2Fsnowshagal.com%2F" id="shX" rel="noopener" target="_blank">Post to X</a>
+</div>
+<p aria-live="polite" class="shmsg" id="shmsg"></p>
+</div>
+<div class="more7">
+<div class="m7h">KEEP READING</div>
+<a class="m7" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_5%ED%8E%B8_%EA%B8%89%EB%9D%BD%EC%9D%80%EC%96%B4%EB%96%BB%EA%B2%8C%EB%8D%94%ED%81%B0%EA%B8%89%EB%9D%BD%EC%9D%84%EB%A7%8C%EB%93%9C%EB%8A%94%EA%B0%80"><i>Part 5</i><b>How a Selloff Becomes a Bigger Selloff</b><span>When leveraged accounts are forced to sell</span></a>
+<a class="m7" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_4%ED%8E%B8_%EC%A2%8B%EC%9D%80%ED%9A%8C%EC%82%AC%EA%B0%80%EC%99%9C%EC%A2%8B%EC%9D%80%EC%A3%BC%EC%8B%9D%EC%9D%80%EC%95%84%EB%8B%8C%EA%B0%80"><i>Part 4</i><b>Why a Good Company Isn’t Always a Good Stock</b><span>What Samsung Electronics and SK hynix did on earnings days</span></a>
+<a class="m7" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_2%ED%8E%B8_%ED%98%84%EB%AC%BC%EA%B3%BC%EC%84%A0%EB%AC%BC%EC%9D%B4%EC%97%87%EA%B0%88%EB%A6%B4%EB%95%8C"><i>Part 2</i><b>When Spot and Futures Diverge</b><span>Start with the futures contracts leveraged products may track</span></a>
+<a class="m7 all" href="https://snowshagal.com/basics/"><b>View all Market Basics</b><span>Start from Part 1</span></a>
+<a class="m7 cta" href="https://snowshagal.com/daily/"><b>What Moved the Market Today?</b><span>Snowshagal Daily · Post-close market report</span></a>
+</div>
+<div class="next">
+<div class="nh">NEXT</div>
+<p>A −2× ETF is only one way to position for a decline. Another is to <b>borrow shares, sell them first, and buy them back later</b>. Does that selling cause a decline—or merely follow one?</p>
+<div class="nt"><b>Part 8</b>Does Short Selling Cause a Drop—or Follow It?</div>
+</div>
+<div class="foldwrap">
+<details class="fold">
+<summary>One-line glossary</summary>
+<div class="fb">
+<dl class="gloss">
+<dt>ETF</dt><dd>A fund that trades on an exchange like a stock.</dd>
+<dt>Leveraged ETF</dt><dd>An ETF targeting a stated multiple—such as 2×—of an underlying asset’s daily return.</dd>
+<dt>Inverse ETF</dt><dd>An ETF targeting the opposite of an underlying asset’s daily return.</dd>
+<dt>Gopbus</dt><dd>Korean market slang for a −2× inverse ETF.</dd>
+<dt>Single-stock leverage</dt><dd>A leveraged ETF tied to one stock rather than an index.</dd>
+<dt>Daily return</dt><dd>The return over one trading day. A leveraged ETF’s stated multiple applies to this return.</dd>
+<dt>Cumulative return</dt><dd>The return from the starting point to the present.</dd>
+<dt>Compounding</dt><dd>Gains and losses change the capital base, so the next day’s return applies to a different amount.</dd>
+<dt>volatility drag</dt><dd>When repeated up-and-down moves cause a leveraged product to lag a simple multiple. Often called volatility drag or negative compounding.</dd>
+<dt>exposure</dt><dd>The amount of market exposure that drives gains and losses.</dd>
+<dt>rebalancing</dt><dd>Resetting exposure each day to maintain the stated daily multiple.</dd>
+<dt>net asset value</dt><dd>The per-share value of an ETF’s assets minus its liabilities. Abbreviated NAV.</dd>
+<dt>Premium / discount</dt><dd>How far the market price is above or below NAV.</dd>
+<dt>Tracking error</dt><dd>The difference between the target return and the realized return.</dd>
+<dt>Expense ratio</dt><dd>Annual operating and distribution costs, accrued gradually from fund assets.</dd>
+<dt>%p</dt><dd>The difference between percentages. A move from 87% to 40% is a decline of 47 percentage points, not 47%.</dd>
+<dt>Minimum deposit requirement</dt><dd>The minimum amount that must be in an account before trading certain leveraged products in Korea.</dd>
+<dt>Pre-trading education</dt><dd>Mandatory online education required before trading certain leveraged products in Korea.</dd>
+</dl>
+</div>
+</details>
+<details class="fold">
+<summary>Trading leveraged ETFs in Korea</summary>
+<div class="fb">
+<p>Before trading domestic or overseas leveraged products, Korean investors must satisfy both <b>the pre-trading education requirement</b> and <b>Minimum deposit requirement</b>.</p>
+<p><b>Single-stock leveraged ETFs</b> · From July 31, 2026, the minimum deposit requirement rose from KRW 10 million to <b>KRW 30 million in cash</b>. Proceeds from stock sales count only after settlement (T+2) credits the cash to the account.</p>
+<p><b>Overseas-listed leveraged ETFs and ETNs</b> · From May 22, 2026, first-time investors need a KRW 10 million minimum deposit, and the required pre-trading education was extended to two hours.</p>
+<p>Detailed rules continue to change. Check your broker’s current requirements before trading.</p>
+</div>
+</details>
+<details class="fold">
+<summary>Real-market cases used in this article</summary>
+<div class="fb">
+<div class="case"><b>MAY 27, 2026 · Single-stock leveraged and inverse ETFs list</b><p>Eight asset managers listed 16 ETFs tied to Samsung Electronics or SK hynix. SK hynix rose 9.31% that day (KRW 2,052,000 → KRW 2,243,000).</p></div>
+<div class="case"><b>MAY 27 → JUL 15, 2026 · SK hynix · 7 weeks</b><p>Close: KRW 2,243,000 → KRW 2,082,000 (−7.18%). The June 22 midpoint was KRW 2,919,000 (+30.14%). Theoretical path: +2× −29.24%, −2× −33.02%.</p></div>
+<div class="case"><b>JUN 23, 2026 · SK hynix −12.47%</b><p>KRW 2,919,000 → KRW 2,555,000. One report said an SK hynix 2× ETF’s cumulative return fell from 87.63% to 39.82%. The theoretical +2× one-day move for that session was −24.94%.</p></div>
+<div class="case"><b>JUN 25 → JUL 30, 2026 · Samsung Electronics · 5 weeks</b><p>Close: KRW 358,500 → KRW 207,000 (−42.26%). Theoretical +2× path −70.05% (simple −84.52%); −2× path +128.89% (simple +84.52%).</p></div>
+</div>
+</details>
+<details class="fold">
+<summary>How the theoretical paths were calculated—and what we left out</summary>
+<div class="fb">
+<p><b>Method</b> · We multiplied each daily close-to-close return by +2 or −2 and compounded the sequence. We excluded fees, market-price/NAV gaps, tracking error, dividends (SK hynix ex-dividend May 28; Samsung Electronics ex-dividend June 29), and product-specific implementation differences.</p>
+<p><b>Actual ETF cumulative returns</b> · News reports used different starting points—listing reference prices versus listing-day closes—and different end dates, making like-for-like comparisons difficult. We therefore calculated a consistent theoretical path from closing prices.</p>
+<p><b>Actual size of rebalancing orders</b> · We did not find an official aggregate of the actual orders executed around the close. The article therefore uses only a hypothetical fund with net assets of 100.</p>
+<p><b>Total losses of retail investors</b> · Estimates varied by methodology across reports, so we did not use a figure.</p>
+<p><b>How far the −2× path can diverge from simple multiplication</b> · When both daily moves and the total period change are small, the deviation for a −2× product tends to be roughly three times that of the +2× product; the three examples in the article were also near that ratio. But the ratio is path-dependent: about 2.4× for ten straight +2% days, and about 3.3× for two ±20% round trips.</p>
+<p>We do not fill gaps with numbers we cannot verify.</p>
+</div>
+</details>
+<details class="fold">
+<summary>Sources and data conventions</summary>
+<div class="fb">
+<ol class="src">
+<li><b>Closing prices</b> · Yahoo Finance daily prices (005930.KS, 000660.KS), cross-checked against YTN closing-market reports (2026.05.28, 06.11, 06.26, 07.06) and figures used in Part 4 (07.29, 07.30).</li>
+<li><b>Listings</b> · Financial News, 2026.05.27 (eight asset managers, 16 ETFs); SBS Biz, 2026.05.27.</li>
+<li><b>First-week return spread</b> · MoneyToday, 2026.06.06.</li>
+<li><b>June 23 cumulative return</b> · Herald Economy, 2026.06.24.</li>
+<li><b>Single-stock minimum deposit</b> · Kyunghyang Shinmun, 2026.07.31; SBS Biz, 2026.07.</li>
+<li><b>Overseas leveraged-product deposit and education rules</b> · Herald Economy, 2026.05.19.</li>
+<li>The warm-up, board examples, four-panel illustration, simulator buttons and hypothetical presets, rebalancing example, hypothetical matrix cells, and practice question use illustrative values created for explanation.</li>
+</ol>
+</div>
+</details>
+</div>
+<p class="disc">This article is educational material explaining market and investing concepts. It is not a recommendation to buy or sell any product. Investment decisions and outcomes remain the investor’s responsibility. The theoretical paths shown here are not actual ETF performance.</p>
+<p class="foot">Reading the Market · 07</p>
+</div>
+<script>
+(function(){
+  if(window.__mwWords7) return; window.__mwWords7 = true;
+
+  /* progress bar */
+  var pg=document.getElementById('pg');
+  function updateProg(){
+    if(!pg) return;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var y=window.scrollY||window.pageYOffset||0;
+    pg.style.width=(h>0?Math.min(100,Math.max(0,y/h*100)):0)+'%';
+  }
+  window.addEventListener('scroll',updateProg,{passive:true});
+  window.addEventListener('resize',updateProg);
+  updateProg();
+
+  /* tooltips */
+  function resetTip(el){ var tp=el.querySelector('.tip'); if(tp){ tp.classList.remove('below'); tp.removeAttribute('style'); } }
+  function clampTip(t){
+    var tip=t.querySelector('.tip'); if(!tip) return;
+    var vw=window.innerWidth, pad=12;
+    var w=Math.min(248, vw-2*pad);
+    tip.style.position='fixed'; tip.style.bottom='auto'; tip.style.transform='none';
+    tip.style.width=w+'px'; tip.style.left='0px'; tip.style.top='0px';
+    var tr=t.getBoundingClientRect();
+    var th=tip.getBoundingClientRect().height;
+    var left=tr.left+tr.width/2-w/2;
+    if(left<pad) left=pad;
+    if(left+w>vw-pad) left=vw-pad-w;
+    var top=tr.top-th-9, below=false;
+    if(top<pad+50){ top=tr.bottom+9; below=true; }
+    var vh=window.innerHeight;
+    if(top+th>vh-pad){ top=vh-pad-th; }
+    if(top<pad){ top=pad; }
+    tip.style.left=Math.round(left)+'px';
+    tip.style.top=Math.round(top)+'px';
+    var tb=tip.getBoundingClientRect();
+    var dx=tb.left-left, dy=tb.top-top;
+    if(dx||dy){ tip.style.left=Math.round(left-dx)+'px'; tip.style.top=Math.round(top-dy)+'px'; }
+    tip.classList.toggle('below', below);
+    var ax=tr.left+tr.width/2-left;
+    ax=Math.max(12, Math.min(w-12, ax));
+    tip.style.setProperty('--ax', Math.round(ax)+'px');
+  }
+  function closeTerms(except){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++){ if(open[i]!==except){ open[i].classList.remove('open'); resetTip(open[i]); } }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.term'), function(t){
+    t.setAttribute('tabindex','0'); t.setAttribute('role','button');
+    t.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); t.click(); } if(e.key==='Escape'){ closeTerms(null); } });
+    t.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var willOpen=!t.classList.contains('open');
+      closeTerms(t);
+      t.classList.toggle('open', willOpen);
+      if(willOpen){ openedAt=Date.now(); clampTip(t); }
+    });
+  });
+  document.addEventListener('click', function(){ closeTerms(null); });
+  var openedAt=0;
+  window.addEventListener('scroll', function(){ if(Date.now()-openedAt>700) closeTerms(null); }, {passive:true});
+  window.addEventListener('resize', function(){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++) clampTip(open[i]);
+  });
+
+  /* quiz card */
+  Array.prototype.forEach.call(document.querySelectorAll('.pop'), function(card){
+    var opts=card.querySelectorAll('.opt'), ans=card.querySelector('.popans');
+    Array.prototype.forEach.call(opts, function(b){
+      b.addEventListener('click', function(){
+        Array.prototype.forEach.call(opts, function(o){
+          o.disabled=true;
+          if(o.getAttribute('data-ok')==='1') o.classList.add('ok');
+          else if(o===b) o.classList.add('no');
+        });
+        if(ans) ans.hidden=false;
+      });
+    });
+  });
+
+  /* simulator */
+  var SK=[2243000,2289000,2333000,2363000,2360000,2298000,2070000,1911000,2215000,2048000,2101000,2150000,2288000,2382000,2521000,2685000,2764000,2919000,2555000,2621000,2917000,2673000,2628000,2650000,2560000,2187000,2425000,2343000,2201000,2076000,2186000,2180000,1845000,1913000,2082000];
+  var SS=[358500,339500,323000,334000,314500,286000,309500,318000,296000,277500,278000,285000,254500,263000,279500,255000,244000,259000,260500,270000,249500,254000,220000,208500,207000];
+  function rets(px){ var r=[]; for(var i=1;i<px.length;i++) r.push(px[i]/px[i-1]-1); return r; }
+  var PRESET={
+    zig:(function(){ var r=[]; for(var i=0;i<10;i++){ r.push(.05); r.push(-.05); } return r; })(),
+    trend:(function(){ var r=[]; for(var i=0;i<10;i++) r.push(.02); return r; })(),
+    sk:rets(SK),
+    ss:rets(SS)
+  };
+  var step=.05, R=[], timer=null;
+  var svg=document.getElementById('simsvg');
+  var dayEl=document.getElementById('simday');
+  var rv=[0,1,2].map(function(i){return document.getElementById('rv'+i);});
+  var rn=[0,1,2].map(function(i){return document.getElementById('rn'+i);});
+  var NS='http://www.w3.org/2000/svg';
+  function series(){
+    var s=[100],a=[100],b=[100];
+    for(var i=0;i<R.length;i++){
+      s.push(s[i]*(1+R[i]));
+      a.push(Math.max(0,a[i]*(1+2*R[i])));
+      b.push(Math.max(0,b[i]*(1-2*R[i])));
+    }
+    return [s,a,b];
+  }
+  function fmtPct(x){ var v=(x*100); var t=Math.abs(v).toFixed(1); if(t==='0.0') return '0.0%'; return (v>0?'+':'−')+t+'%'; }
+  function cls(x){ return Math.abs(x)<0.0005?'':(x>0?'up':'down'); }
+  function el(tag,attrs){ var e=document.createElementNS(NS,tag); for(var k in attrs) e.setAttribute(k,attrs[k]); return e; }
+  function draw(){
+    var S=series(), n=Math.max(R.length,10);
+    var all=S[0].concat(S[1],S[2],[100]);
+    var lo=Math.min.apply(null,all), hi=Math.max.apply(null,all);
+    var pad=(hi-lo)*.08+2; lo-=pad; hi+=pad;
+    var X0=30,X1=332,Y0=10,Y1=138;
+    function X(i){ return X0+(X1-X0)*i/n; }
+    function Y(v){ return Y1-(v-lo)/(hi-lo)*(Y1-Y0); }
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+    svg.appendChild(el('line',{x1:X0,x2:X1,y1:Y(100),y2:Y(100),stroke:'#8B867E','stroke-width':1,'stroke-dasharray':'3 3'}));
+    var t=el('text',{x:X0-4,y:Y(100)+3.5,'text-anchor':'end','font-size':9.5,'font-weight':700,fill:'#706D66'}); t.textContent='100'; svg.appendChild(t);
+    var cols=['#3A3632','#A9784A','#7A3F44'], order=[2,1,0];
+    order.forEach(function(k){
+      var pts=S[k].map(function(v,i){ return X(i).toFixed(1)+','+Y(v).toFixed(1); }).join(' ');
+      if(S[k].length>1) svg.appendChild(el('polyline',{points:pts,fill:'none',stroke:cols[k],'stroke-width':k===0?2.4:2,'stroke-linejoin':'round','stroke-linecap':'round'}));
+      var L=S[k].length-1;
+      svg.appendChild(el('circle',{cx:X(L),cy:Y(S[k][L]),r:3.2,fill:cols[k]}));
+    });
+    var stockChg=S[0][S[0].length-1]/100-1;
+    for(var k=0;k<3;k++){
+      var last=S[k][S[k].length-1], chg=last/100-1;
+      rv[k].textContent=last.toFixed(1);
+      rv[k].className='rv '+cls(chg);
+      if(k===0){ rn[k].innerHTML= R.length? 'vs. start <b class="'+cls(chg)+'">'+fmtPct(chg)+'</b>' : 'Start'; }
+      else{
+        var naive=(k===1?2:-2)*stockChg;
+        rn[k].innerHTML=(k===1?'Daily +2×':'Daily −2×')+' <b class="'+cls(chg)+'">'+fmtPct(chg)+'</b><br/>Simple multiple <b>'+fmtPct(naive)+'</b>';
+      }
+    }
+    dayEl.textContent='Day '+R.length;
+    document.getElementById('bUndo').disabled=!R.length;
+  }
+  function stop(){ if(timer){ clearInterval(timer); timer=null; } }
+  function clearPre(){ Array.prototype.forEach.call(document.querySelectorAll('.pre'),function(p){p.classList.remove('on');}); }
+  function push(r){ if(R.length>=80) return; R.push(r); draw(); }
+  document.getElementById('bUp').addEventListener('click',function(){ stop(); clearPre(); push(step); });
+  document.getElementById('bDn').addEventListener('click',function(){ stop(); clearPre(); push(-step); });
+  document.getElementById('bUndo').addEventListener('click',function(){ stop(); clearPre(); R.pop(); draw(); });
+  document.getElementById('bReset').addEventListener('click',function(){ stop(); clearPre(); R=[]; draw(); });
+  Array.prototype.forEach.call(document.querySelectorAll('.stp'),function(b){
+    b.addEventListener('click',function(){
+      step=parseFloat(b.getAttribute('data-s'))/100;
+      Array.prototype.forEach.call(document.querySelectorAll('.stp'),function(o){o.classList.toggle('on',o===b);});
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.pre'),function(b){
+    b.addEventListener('click',function(){
+      stop(); clearPre(); b.classList.add('on');
+      var seq=PRESET[b.getAttribute('data-p')].slice(); R=[]; draw();
+      var i=0, ms=seq.length>25?70:110;
+      timer=setInterval(function(){
+        if(i>=seq.length){ stop(); return; }
+        R.push(seq[i++]); draw();
+      },ms);
+    });
+  });
+  draw();
+
+  /* share */
+  var CANON="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_7%ED%8E%B8_2%EB%B0%B0ETF%EB%8A%94%EC%99%9C2%EB%B0%B0%EA%B0%80%EC%95%84%EB%8B%8C%EA%B0%80";
+  function pageUrl(){ var h=location.href.split('#')[0]; return /^https?:/.test(h)?h:CANON; }
+  var msg=document.getElementById('shmsg');
+  function say(t){ if(msg){ msg.textContent=t; setTimeout(function(){ msg.textContent=''; },2500); } }
+  function legacy(text){
+    var ta=document.createElement('textarea'); ta.value=text; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); var ok=false;
+    try{ ok=document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+    say(ok?'Link copied':'Copy failed. Copy the URL from the address bar instead.');
+  }
+  function copy(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(function(){ say('Link copied'); },function(){ legacy(text); }); }
+    else legacy(text);
+  }
+  var TXT={
+    page:'Stock −7%, theoretical +2× −29%, −2× −33%. Why a 2× ETF isn’t 2×.',
+    quiz:'Quick question: if a stock rises 10% today and falls 10% tomorrow, where does a 2× ETF end up after two days? (Not 0%.)'
+  };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-share]'),function(b){
+    b.addEventListener('click',function(){
+      var k=b.getAttribute('data-share'), url=pageUrl();
+      if(k==='copy'){ copy(url); return; }
+      if(k==='quiz') url=url+'#quiz1';
+      var data={title:'Why a 2× ETF Isn’t 2×',text:TXT[k]||TXT.page,url:url};
+      if(navigator.share){ navigator.share(data).catch(function(){}); }
+      else{ copy(data.text+' '+url); }
+    });
+  });
+  var x=document.getElementById('shX');
+  if(x){ x.href='https://twitter.com/intent/tweet?text='+encodeURIComponent(TXT.page)+'&url='+encodeURIComponent(pageUrl()); }
+})();
+</script>
+</body>
+</html>

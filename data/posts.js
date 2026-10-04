@@ -1,5 +1,30 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-04-basics-1oz1lc1",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-10-04",
+    "reportDate": "2026-10-04",
+    "registeredDate": "2026-10-05",
+    "registeredAt": "2026-10-04T16:32:02.993Z",
+    "legacyImport": false,
+    "title": "A 2× ETF isn’t really 2×",
+    "subtitle": "",
+    "description": "A 2× leveraged ETF targets twice the DAILY return—not twice the return over weeks. Using seven weeks of SK hynix closes, the stock fell 7.2% while a theoretical +2× path fell 29.2% and a −2× path fell 33.0%. Quizzes and a simulator explain volatility drag, path dependence, and daily rebalancing.",
+    "tags": [
+      "etf",
+      "flows",
+      "futures"
+    ],
+    "readingMinutes": 10,
+    "href": "reports/en/Snowshagal_Reading_the_Market_07_Why_a_2x_ETF_Isnt_2x_EN.html",
+    "translationGroup": "2026-10-04-basics-qbz2ki",
+    "coverImage": "covers/2026-10-04-basics-1oz1lc1.webp",
+    "shareCardImage": "covers/share/2026-10-04-basics-1oz1lc1.jpg",
+    "coverThumbnail": "covers/2026-10-04-basics-1oz1lc1-450.webp"
+  },
+  {
     "id": "2026-10-04-basics-qbz2ki",
     "type": "basics",
     "typeLabel": "시장 입문",
