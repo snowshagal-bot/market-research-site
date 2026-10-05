@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-04-note-13vdfus",
+    "type": "note",
+    "typeLabel": "Investment Note",
+    "lang": "en",
+    "date": "2026-10-04",
+    "reportDate": "2026-10-04",
+    "registeredDate": "2026-10-06",
+    "registeredAt": "2026-10-05T15:01:05.019Z",
+    "legacyImport": false,
+    "title": "The Election Calendar Matters Less Watch the Rate Calendar",
+    "subtitle": "",
+    "description": "Can the familiar post-midterm rally pattern be trusted in 2026? The S&P 500 rose in 5 of 6 cases from end-September to year-end since 2002, but the sample is only six elections. 2018 (−14.0%) and 2022 (+7.1%) ended in opposite directions despite both being Fed hiking-cycle years. This year starts from an already elevated market; the next four weeks are better judged through rates and semiconductor earnings.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "rates",
+      "u-s-a",
+      "policy"
+    ],
+    "readingMinutes": 16,
+    "href": "reports/en/Snowshagal_Investment_Note_08_Midterm_Seasonality_EN.html",
+    "translationGroup": "2026-10-04-note-11jy2jl",
+    "coverImage": "covers/2026-10-04-note-13vdfus.webp",
+    "shareCardImage": "covers/share/2026-10-04-note-13vdfus.jpg",
+    "coverThumbnail": "covers/2026-10-04-note-13vdfus-450.webp"
+  },
+  {
     "id": "2026-10-04-note-11jy2jl",
     "type": "note",
     "typeLabel": "투자 노트",
