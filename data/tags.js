@@ -220,5 +220,11 @@ window.TAG_REGISTRY = {
     "en": "ETF",
     "group": "market",
     "custom": true
+  },
+  "u-s-a": {
+    "ko": "미국",
+    "en": "U.S.A",
+    "group": "market",
+    "custom": true
   }
 };

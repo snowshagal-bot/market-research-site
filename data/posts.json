@@ -1,5 +1,31 @@
 [
   {
+    "id": "2026-10-04-note-11jy2jl",
+    "type": "note",
+    "typeLabel": "투자 노트",
+    "lang": "ko",
+    "date": "2026-10-04",
+    "reportDate": "2026-10-04",
+    "registeredDate": "2026-10-05",
+    "registeredAt": "2026-10-05T14:58:35.282Z",
+    "legacyImport": false,
+    "title": "선거 달력보다 금리 달력",
+    "subtitle": "",
+    "description": "중간선거 뒤 오른다는 계절성을 2026년에도 그대로 믿어도 되나 · 9월 말~연말 S&P500은 6번 중 5번 상승이지만 표본은 여섯 번 · 같은 인상기였던 2018년(−14.0%)과 2022년(+7.1%)은 반대로 끝남 · 올해는 이미 크게 오른 채 출발 · 앞으로 네 주는 금리와 반도체 이익으로 판정",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "rates",
+      "u-s-a",
+      "policy"
+    ],
+    "readingMinutes": 14,
+    "href": "reports/20261004_Investment_Note_Midterm_Seasonality.html",
+    "coverImage": "covers/2026-10-04-note-11jy2jl.webp",
+    "shareCardImage": "covers/share/2026-10-04-note-11jy2jl.jpg",
+    "coverThumbnail": "covers/2026-10-04-note-11jy2jl-450.webp"
+  },
+  {
     "id": "2026-10-04-basics-1oz1lc1",
     "type": "basics",
     "typeLabel": "Market Basics",
