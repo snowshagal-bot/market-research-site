@@ -47,6 +47,34 @@
     "coverThumbnail": "covers/2026-10-07-basics-gofwdc-450.webp"
   },
   {
+    "id": "2026-10-06-daily-rgd39k",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-10-06",
+    "reportDate": "2026-10-06",
+    "registeredDate": "2026-10-07",
+    "registeredAt": "2026-10-06T18:06:58.665Z",
+    "legacyImport": false,
+    "title": "Selling centered on Samsung Electronics · SK hynix",
+    "subtitle": "",
+    "description": "",
+    "summary": "U.S. AI strength carried only through the open; after that, selling in the memory heavyweights set the tone for the KOSPI.",
+    "takeaway": "KOSDAQ surges as large-cap semiconductors retreat",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 5,
+    "href": "reports/en/Snowshagal_Daily_2026-10-06_EN.html",
+    "translationGroup": "2026-10-06-daily-1wtk7ix",
+    "coverImage": "covers/2026-10-06-daily-rgd39k.webp",
+    "shareCardImage": "covers/share/2026-10-06-daily-rgd39k.jpg",
+    "coverThumbnail": "covers/2026-10-06-daily-rgd39k-450.webp"
+  },
+  {
     "id": "2026-10-06-daily-1wtk7ix",
     "type": "daily",
     "typeLabel": "주식 리포트",
