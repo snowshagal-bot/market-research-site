@@ -226,5 +226,11 @@
     "en": "U.S.A",
     "group": "market",
     "custom": true
+  },
+  "short-selling": {
+    "ko": "공매",
+    "en": "short selling",
+    "group": "market",
+    "custom": true
   }
 }
