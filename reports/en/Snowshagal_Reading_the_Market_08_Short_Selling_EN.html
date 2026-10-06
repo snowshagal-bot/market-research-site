@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta content="only light" name="color-scheme"/>
+<title>How to Read Net Short Positions and Stock-Lending Balances: Are They Bearish Signals? | Snowshagal</title>
+<!-- Search and social preview metadata -->
+<meta content="KOSPI reported net short positions hit a record KRW 22 trillion on the same day the KOSPI itself closed at an all-time high. This guide explains how short selling works, short covering, and the differences among reported net short positions, stock-lending balances, and short-sale trading share using real numbers and quizzes." name="description"/>
+<link href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_8%ED%8E%B8_%EA%B3%B5%EB%A7%A4%EB%8F%84%EB%8A%94%ED%95%98%EB%9D%BD%EC%9D%84%EB%A7%8C%EB%93%9C%EB%8A%94%EA%B0%80%EB%94%B0%EB%9D%BC%EA%B0%80%EB%8A%94%EA%B0%80" rel="canonical"/>
+<meta content="index,follow,max-image-preview:large" name="robots"/>
+<meta content="article" property="og:type"/>
+<meta content="Snowshagal" property="og:site_name"/>
+<meta content="en_US" property="og:locale"/>
+<meta content="Net Short Positions Hit a Record—and So Did the KOSPI. Was It a Bearish Signal?" property="og:title"/>
+<meta content="Reported net short positions reached KRW 22.0697tn while the KOSPI closed at 8,228.70—both records at the time. A practical guide to reading position value vs. share count, net short positions vs. stock-lending balances, and short-covering data." property="og:description"/>
+<meta content="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_8%ED%8E%B8_%EA%B3%B5%EB%A7%A4%EB%8F%84%EB%8A%94%ED%95%98%EB%9D%BD%EC%9D%84%EB%A7%8C%EB%93%9C%EB%8A%94%EA%B0%80%EB%94%B0%EB%9D%BC%EA%B0%80%EB%8A%94%EA%B0%80" property="og:url"/>
+<meta content="https://snowshagal.com/assets/social/basics-08-short-selling.jpg" property="og:image"/>
+<meta content="1200" property="og:image:width"/>
+<meta content="630" property="og:image:height"/>
+<meta content="On May 27, 2026, KOSPI reported net short positions reached a then-record KRW 22.0697tn while the KOSPI closed at a then-record 8,228.70." property="og:image:alt"/>
+<meta content="2026-10-06" property="article:published_time"/>
+<meta content="Market Basics" property="article:section"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="Net Short Positions Hit a Record—and So Did the KOSPI. Was It a Bearish Signal?" name="twitter:title"/>
+<meta content="Reported net short positions reached KRW 22.0697tn while the KOSPI closed at 8,228.70—both records at the time. A guide to reading short-selling data." name="twitter:description"/>
+<meta content="https://snowshagal.com/assets/social/basics-08-short-selling.jpg" name="twitter:image"/>
+<meta content="#2A362E" name="theme-color"/>
+<script type="application/ld+json">[
+ {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Does Short Selling Drive the Drop—or Follow It?",
+  "alternativeHeadline": "How to Read Net Short Positions, Stock-Lending Balances and Short Covering",
+  "description": "KOSPI reported net short positions hit a record KRW 22 trillion on the same day the KOSPI itself closed at an all-time high. This guide explains short-selling mechanics, profit and loss, short covering, and the differences among net short positions, stock-lending balances and short-sale trading share.",
+  "inLanguage": "en",
+  "datePublished": "2026-10-06",
+  "dateModified": "2026-10-06",
+  "image": [
+   "https://snowshagal.com/assets/social/basics-08-short-selling-16x9.jpg",
+   "https://snowshagal.com/assets/social/basics-08-short-selling-4x3.jpg",
+   "https://snowshagal.com/assets/social/basics-08-short-selling-1x1.jpg"
+  ],
+  "mainEntityOfPage": "https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_8%ED%8E%B8_%EA%B3%B5%EB%A7%A4%EB%8F%84%EB%8A%94%ED%95%98%EB%9D%BD%EC%9D%84%EB%A7%8C%EB%93%9C%EB%8A%94%EA%B0%80%EB%94%B0%EB%9D%BC%EA%B0%80%EB%8A%94%EA%B0%80",
+  "author": {
+   "@type": "Organization",
+   "name": "Snowshagal",
+   "url": "https://snowshagal.com/"
+  },
+  "publisher": {
+   "@type": "Organization",
+   "name": "Snowshagal",
+   "url": "https://snowshagal.com/"
+  },
+  "isPartOf": {
+   "@type": "CreativeWorkSeries",
+   "name": "Reading the Market",
+   "url": "https://snowshagal.com/basics/"
+  },
+  "keywords": "short selling, net short position balance, stock lending balance, short covering, short squeeze, uptick rule, short-sale share, securities lending, retail stock borrowing"
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+   {
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Snowshagal",
+    "item": "https://snowshagal.com/"
+   },
+   {
+    "@type": "ListItem",
+    "position": 2,
+    "name": "Market Basics",
+    "item": "https://snowshagal.com/basics/"
+   },
+   {
+    "@type": "ListItem",
+    "position": 3,
+    "name": "Does Short Selling Drive the Drop—or Follow It?",
+    "item": "https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_8%ED%8E%B8_%EA%B3%B5%EB%A7%A4%EB%8F%84%EB%8A%94%ED%95%98%EB%9D%BD%EC%9D%84%EB%A7%8C%EB%93%9C%EB%8A%94%EA%B0%80%EB%94%B0%EB%9D%BC%EA%B0%80%EB%8A%94%EA%B0%80"
+   }
+  ]
+ }
+]</script>
+<style>
+
+:root{
+  --surface-page:#ECEAE5;
+  --surface-band:#E3E0D9;
+  --surface-inner:#F1EFEA;
+  --surface-detail:#E8E5DF;
+  --surface-muted:#DAD6CE;
+  --ink:#2E2E2C;
+  --ink2:#43423E;
+  --body:#53514C;
+  --sub:#706D66;
+  --muted:#8B867E;
+  --line:#CEC9BF;
+  --line2:#DCD7CE;
+  /* series palette */
+  --green:#46584D;
+  --green-dark:#2F3C34;
+  --green-soft:#DCE3DD;
+  --green-line:#AAB6AC;
+  --green-pale:#A8C6B4;
+  /* three roles */
+  --stk:#3A3632;         /* stock */
+  --stk-soft:#E4E1DB;
+  --l2:#A9784A;          /* 2x */
+  --l2-dark:#7A5A34;
+  --l2-soft:#EFE2CF;
+  --l2-line:#D2B48C;
+  --i2:#7A3F44;          /* inverse 2x */
+  --i2-soft:#EBDCDD;
+  --i2-line:#C29A9E;
+  /* price direction */
+  --up:#C74754;
+  --down:#4F78A8;
+  /* board */
+  --board:#2F3C34;
+  --chalk:#ECEAE3;
+  --chalk2:#B9C9BE;
+  --chalk-mark:#E6C98F;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:58px;overflow-x:hidden}
+html,body{max-width:100%}
+body{
+  margin:0;background:var(--surface-page);color:var(--ink);
+  font-family:"Pretendard Variable","Pretendard","SUIT","Noto Sans KR","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  line-height:1.58;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;
+  word-break:keep-all;line-break:strict;
+}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(38px + env(safe-area-inset-bottom,0px));width:100%;position:relative}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.up{color:var(--up)}.down{color:var(--down)}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;letter-spacing:inherit}
+
+/* ── top bar ── */
+.topbar{position:sticky;top:0;z-index:50;margin:0 -16px;
+  background:rgba(236,234,229,.92);-webkit-backdrop-filter:saturate(150%) blur(12px);backdrop-filter:saturate(150%) blur(12px);
+  border-bottom:1px solid rgba(90,84,74,.13)}
+.tbin{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0)) 18px 9px}
+.tbin .brand{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.tbin .brand i{font-style:normal;color:var(--green)}
+.tbin .ep{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.prog{height:2px;background:rgba(90,84,74,.10)}
+.prog i{display:block;height:100%;width:0;background:var(--green);transition:width .1s linear}
+
+/* ── cover ── */
+.cover{margin:0 -16px;padding:18px 22px 15px;
+  background:linear-gradient(158deg,#36443B 0%,#2A362E 52%,#1F2721 100%);color:#EFEDE7}
+.cvkick{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.06em;
+  color:#BFD2C6;border:1px solid rgba(168,198,180,.34);border-radius:999px;padding:5px 12px}
+.cvkick b{color:#EFEDE7;font-weight:800}
+.cvdate{display:inline-block;margin-left:8px;font-size:11.5px;font-weight:700;color:#9FB2A6;letter-spacing:.02em;vertical-align:middle}
+.cvtitle{margin:11px 0 0;font-size:30px;line-height:1.22;font-weight:800;letter-spacing:-.05em;color:#F4F2ED}
+.cvtitle span{display:block;color:var(--green-pale)}
+.cvsub{margin:11px 0 0;font-size:14px;line-height:1.58;font-weight:600;color:#C6D2CA}
+.cvmotif{margin:12px 0 0}
+.cvmotif svg{display:block;width:100%;height:auto}
+.cvlg{display:flex;gap:12px;flex-wrap:wrap;margin:6px 0 0;font-size:11px;font-weight:800;color:#AFC0B5}
+.cvlg span{display:inline-flex;align-items:center;gap:5px}
+.cvlg i{display:inline-block;width:14px;height:2.5px;border-radius:2px}
+.cvidx{display:flex;gap:6px;margin:12px 0 0;flex-wrap:wrap}
+.cvidx a{font-size:11.5px;font-weight:800;color:#D3DED7;background:rgba(255,255,255,.07);
+  border:1px solid rgba(168,198,180,.22);border-radius:999px;padding:6px 12px}
+.cvidx a b{color:var(--green-pale);font-weight:800;margin-right:5px}
+
+/* ── chapter opener ── */
+.ch{margin:22px 0 8px}
+.chtop{display:flex;align-items:center;gap:9px;margin-bottom:7px;flex-wrap:wrap}
+.chn{font-size:12px;font-weight:800;color:#EFEDE7;background:var(--ink);border-radius:4px;padding:3px 8px;letter-spacing:.04em}
+.chk{font-size:11.5px;font-weight:800;letter-spacing:.11em;color:var(--sub)}
+.cht{margin:0;font-size:24px;line-height:1.3;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.chrule{display:flex;height:3px;margin-top:11px;gap:2px}
+.chrule i{display:block;height:100%;flex:1}
+.chrule .r1{background:var(--stk)}
+.chrule .r2{background:var(--l2)}
+.chrule .r3{background:var(--i2)}
+.chrule .r4{background:var(--green)}
+
+/* ── body ── */
+.p{margin:9px 0 0;font-size:14px;line-height:1.64;color:var(--body);font-weight:500}
+.p b{color:var(--ink);font-weight:800}
+.p.lead{font-size:15px;color:var(--ink2);font-weight:600}
+.hd{margin:20px 0 0;font-size:17px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.44}
+.hd small{display:block;font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin-bottom:3px}
+.cap{margin:6px 0 0;font-size:11.5px;line-height:1.5;color:var(--muted);font-weight:600}
+.q{margin:12px 0 0;font-size:19px;line-height:1.45;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.mk{background:linear-gradient(transparent 58%,rgba(230,201,143,.72) 58%);padding:0 1px}
+.c-stk{color:var(--stk)}.c-l2{color:var(--l2-dark)}.c-i2{color:var(--i2)}
+
+/* ── badge ── */
+.vb{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;letter-spacing:.03em;
+  color:#4A4438;background:var(--l2-soft);border:1px solid var(--l2-line);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.vb.real{color:var(--green-dark);background:var(--green-soft);border-color:var(--green-line)}
+
+/* ── one-sentence answer ── */
+.ans{margin:14px -16px 0;padding:14px 22px;background:var(--green);color:#EFEDE7;position:relative;overflow:hidden}
+.ans:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green-pale)}
+.ans .ak{font-size:11px;font-weight:800;letter-spacing:.14em;color:#A8BCAE;margin-bottom:8px}
+.ans .av{font-size:19px;line-height:1.46;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.ans .aw{margin:9px 0 0;padding-top:9px;border-top:1px solid rgba(168,198,180,.24);font-size:13px;line-height:1.6;font-weight:600;color:#CBD8CF}
+
+/* ── key line ── */
+.keyb{margin:12px 0 0;padding:11px 14px;background:var(--stk);color:#F4F2ED;border-radius:10px;
+  font-size:15px;line-height:1.5;font-weight:800;letter-spacing:-.03em}
+.keyb b{color:var(--chalk-mark)}
+
+/* ── quiz card ── */
+.pop{margin:14px 0 0;background:var(--surface-inner);border:1.5px solid var(--ink);border-radius:14px;overflow:hidden}
+.poph{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;background:var(--ink);color:#EDEAE4}
+.poph b{font-size:12px;font-weight:800;letter-spacing:.06em}
+.poph .vb{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#D9D4CA}
+.popb{padding:13px 14px 14px}
+.popq{margin:0;font-size:15.5px;line-height:1.52;font-weight:800;letter-spacing:-.03em;color:var(--ink)}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0 0}
+.opt{appearance:none;-webkit-appearance:none;border:1.5px solid var(--line);background:#F7F6F2;border-radius:10px;padding:11px 6px;
+  font-size:16px;font-weight:800;color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums;transition:background .15s,border-color .15s;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.opt:hover{border-color:var(--sub)}
+.opt.ok{background:var(--green);border-color:var(--green);color:#F4F2ED}
+.opt.no{background:var(--surface-muted);border-color:var(--surface-muted);color:var(--muted);text-decoration:line-through}
+.opt[disabled]{cursor:default}
+.popans{margin:12px 0 0;padding-top:11px;border-top:1px dashed var(--line)}
+.popans[hidden]{display:none}
+.verdict{display:inline-block;font-size:12px;font-weight:800;color:#F4F2ED;background:var(--green);border-radius:6px;padding:3px 9px;margin-bottom:8px}
+.calc{display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums}
+.calc span{padding:7px 9px;font-size:12.5px;font-weight:700;color:var(--body);background:#F7F6F2;border-bottom:1px solid var(--line2);text-align:right}
+.calc span.h{font-size:11px;font-weight:800;color:var(--muted);background:var(--surface-detail);text-align:right}
+.calc span.l{text-align:left;font-weight:800;color:var(--ink)}
+.calc span.e{border-bottom:0}
+.calc b{font-weight:800}
+.popnote{margin:9px 0 0;font-size:13px;line-height:1.6;font-weight:600;color:var(--body)}
+.popnote b{color:var(--ink);font-weight:800}
+
+/* ── case card ── */
+.case7{margin:14px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:14px;padding:13px 14px 12px}
+.cshd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.cshd b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.lg{display:flex;gap:12px;flex-wrap:wrap;margin:9px 0 0;font-size:11.5px;font-weight:800;color:var(--ink2)}
+.lg span{display:inline-flex;align-items:center;gap:6px}
+.lg i{display:inline-block;width:16px;height:3px;border-radius:2px}
+.lg .k1 i{background:var(--stk)}.lg .k2 i{background:var(--l2)}.lg .k3 i{background:var(--i2)}
+.chart{margin:6px 0 0}
+.chart svg{display:block;width:100%;height:auto}
+.legs{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;margin:10px 0 0;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums}
+.legs span{padding:7px 8px;font-size:12.5px;font-weight:800;text-align:right;background:#F7F6F2;border-bottom:1px solid var(--line2)}
+.legs span.h{font-size:10.5px;color:var(--muted);background:var(--surface-detail);letter-spacing:.01em}
+.legs span.l{text-align:left;color:var(--ink2);font-size:12px}
+.legs span.l small{display:block;font-size:10.5px;color:var(--muted);font-weight:700}
+.legs .tot{background:var(--stk);color:#F4F2ED;border-bottom:0}
+.legs .tot.l{color:#F4F2ED}
+.legs .tot.up{color:#F2A7AE}.legs .tot.down{color:#A9C3E3}
+.csnote{margin:9px 0 0;font-size:12.3px;line-height:1.55;font-weight:700;color:var(--ink2)}
+.csnote b{color:var(--ink)}
+
+/* ── scorecard ── */
+.score{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0 0}
+.sc{background:var(--surface-inner);border:1px solid var(--line);border-top:3px solid var(--stk);border-radius:10px;padding:9px 9px 10px}
+.sc.s2{border-top-color:var(--l2)}.sc.s3{border-top-color:var(--i2)}
+.sc .sk{font-size:11px;font-weight:800;color:var(--sub);letter-spacing:.01em}
+.sc .sv{margin-top:3px;font-size:21px;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1.15}
+.sc .sn{margin-top:5px;padding-top:5px;border-top:1px dashed var(--line);font-size:10.5px;line-height:1.4;font-weight:700;color:var(--muted)}
+.sc .sn b{color:var(--ink2);font-variant-numeric:tabular-nums}
+.sc .sn b.up{color:var(--up)}.sc .sn b.down{color:var(--down)}
+
+/* ── board ── */
+.board{margin:14px -16px 0;padding:15px 22px 16px;background:var(--board);color:var(--chalk);position:relative;overflow:hidden}
+.board:after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 20% 0%,rgba(255,255,255,.06),transparent 55%),radial-gradient(ellipse at 90% 100%,rgba(255,255,255,.04),transparent 50%)}
+.bdk{position:relative;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--chalk2);margin-bottom:9px}
+.bdk:before{content:"";width:18px;height:2px;background:var(--chalk-mark);border-radius:2px}
+.bdt{position:relative;margin:0;font-size:20px;line-height:1.42;font-weight:800;letter-spacing:-.04em;color:#F6F4EE}
+.bdt u{text-decoration:none;background:linear-gradient(transparent 62%,rgba(230,201,143,.38) 62%)}
+.bdp{position:relative;margin:9px 0 0;font-size:13px;line-height:1.62;font-weight:600;color:#CFDBD2}
+.bdp b{color:#F6F4EE}
+.btab{position:relative;display:grid;grid-template-columns:1.35fr .8fr .9fr .9fr;margin:12px 0 0;border:1px solid rgba(236,234,227,.22);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums}
+.btab span{padding:8px 8px;font-size:12.5px;font-weight:800;text-align:right;border-bottom:1px solid rgba(236,234,227,.12);color:#EDEBE4}
+.btab span.h{font-size:10.5px;color:var(--chalk2);background:rgba(255,255,255,.05);letter-spacing:.02em}
+.btab span.l{text-align:left;font-size:12.3px}
+.btab span.l small{display:block;font-size:10.5px;color:var(--chalk2);font-weight:700}
+.btab span.e{border-bottom:0}
+.btab .hi{color:var(--chalk-mark)}
+.btab .tg{display:inline-block;margin-left:4px;font-size:10px;font-weight:800;padding:1px 5px;border-radius:4px;background:rgba(230,201,143,.18);color:var(--chalk-mark);vertical-align:1px}
+.btab .tg.bad{background:rgba(242,167,174,.16);color:#F2A7AE}
+.bdline{position:relative;margin:12px 0 0;padding:10px 12px;border:1.5px dashed rgba(230,201,143,.55);border-radius:10px;font-size:14.5px;line-height:1.52;font-weight:800;color:#F6F4EE;letter-spacing:-.03em}
+.bdline b{color:var(--chalk-mark)}
+
+/* ── four panels ── */
+.strip{margin:16px 0 0;border:1.5px solid var(--ink);border-radius:4px;overflow:hidden;background:var(--ink)}
+.striphead{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--ink);color:#EDEAE4}
+.striphead b{font-size:11.5px;font-weight:800;letter-spacing:.03em}
+.striphead i{font-style:normal;font-size:11px;font-weight:700;color:#A9A49B}
+.stripgrid{display:grid;grid-template-columns:1fr 1fr;gap:1.5px}
+.pnl{background:var(--surface-inner);position:relative}
+.pnl svg{display:block;width:100%;height:auto}
+.pno{position:absolute;left:0;top:0;font-size:11px;font-weight:800;color:#EDEAE4;background:var(--ink);padding:3px 8px 4px 8px;border-radius:0 0 6px 0}
+.pcap{padding:9px 11px 11px;font-size:12px;line-height:1.48;font-weight:700;color:var(--ink2);border-top:1px solid var(--line2);background:var(--surface-detail);min-height:52px}
+.pcap b{color:var(--ink)}
+.stripfoot{padding:9px 12px;background:var(--ink);color:#D9D4CA;font-size:12px;font-weight:700;line-height:1.5}
+.stripfoot b{color:#F4F2ED}
+
+/* ── comparison ── */
+.duo{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden;margin:12px 0 0}
+.duo .di{margin:0;background:var(--surface-inner);padding:10px 14px}
+.duo .di>b{display:inline-block;font-size:11px;font-weight:800;color:#EFEDE7;border-radius:4px;padding:2px 7px;margin-bottom:5px;letter-spacing:-.01em}
+.duo .di p{margin:0;font-size:13.2px;line-height:1.55;font-weight:700;color:var(--ink2)}
+.duo .d1>b{background:var(--stk)}
+.duo .d2>b{background:var(--l2-dark)}
+.duo .d3>b{background:var(--i2)}
+.duo .di p b{color:var(--ink);font-weight:800}
+
+/* ── simulator ── */
+.sim{margin:14px -16px 0;padding:14px 16px 15px;background:var(--surface-band);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)}
+.simhd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:0 4px}
+.simhd b{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.simhd span{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.simp{margin:5px 4px 0;font-size:12.5px;line-height:1.55;font-weight:600;color:var(--body)}
+.simread{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0 0}
+.rd{background:var(--surface-inner);border:1px solid var(--line);border-left:3px solid var(--stk);border-radius:9px;padding:7px 8px 8px}
+.rd.r2{border-left-color:var(--l2)}.rd.r3{border-left-color:var(--i2)}
+.rd .rk{font-size:10.5px;font-weight:800;color:var(--sub)}
+.rd .rv{font-size:18px;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1.2;margin-top:1px}
+.rd .rn{font-size:10.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:3px;line-height:1.35}
+.rd .rn b{color:var(--ink2)}
+.rd .rn b.up{color:var(--up)}.rd .rn b.down{color:var(--down)}
+.simchart{margin:8px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;padding:6px 4px 2px}
+.simchart svg{display:block;width:100%;height:auto}
+.ctrl{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:9px 0 0}
+.bt{appearance:none;-webkit-appearance:none;border:0;border-radius:10px;padding:12px 8px;font-size:15px;font-weight:800;cursor:pointer;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .08s}
+.bt:active{transform:scale(.97)}
+.bt.upb{background:var(--up);color:#fff}
+.bt.dnb{background:var(--down);color:#fff}
+.ctrl2{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0 0}
+.ctrl2 .lb{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.04em;margin-right:2px}
+.chip{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:var(--surface-inner);border-radius:999px;padding:6px 11px;
+  font-size:12px;font-weight:800;color:var(--ink2);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#F4F2ED}
+.chip.ghost{background:transparent}
+.chip[disabled]{opacity:.45;cursor:default}
+.ctrl3{display:flex;gap:6px;justify-content:flex-end;margin:-31px 0 0;pointer-events:none}
+.ctrl3 .chip{pointer-events:auto}
+@media(max-width:420px){.ctrl3{margin:7px 0 0;justify-content:flex-start}}
+.presets{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0 0}
+.pre{appearance:none;-webkit-appearance:none;text-align:left;border:1px solid var(--line);background:var(--surface-inner);border-radius:10px;padding:8px 10px;cursor:pointer;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.pre b{display:block;font-size:12.3px;font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.35}
+.pre i{display:block;font-style:normal;font-size:10.5px;font-weight:700;color:var(--muted);margin-top:2px}
+.pre.real{border-color:var(--green-line);background:#EEF1EC}
+.pre.real i{color:var(--green)}
+.pre.on{outline:2px solid var(--ink);outline-offset:-1px}
+.simfoot{margin:8px 4px 0;font-size:11px;line-height:1.5;font-weight:600;color:var(--muted)}
+
+/* ── gap table ── */
+.gtab{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.gth{padding:8px 12px;font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--sub);background:var(--surface-detail);border-bottom:1px solid var(--line2)}
+.gg{display:grid;grid-template-columns:.9fr 1fr 1fr;font-variant-numeric:tabular-nums}
+.gg span{padding:8px 9px;border-bottom:1px solid var(--line2);text-align:right}
+.gg span.e{border-bottom:0}
+.gg span.h{font-size:10.5px;font-weight:800;color:var(--muted);padding-top:6px;padding-bottom:6px}
+.gg span.l{text-align:left;font-size:12.3px;font-weight:800;color:var(--ink);line-height:1.35}
+.gg span.l small{display:block;font-size:10.5px;color:var(--muted);font-weight:700}
+.gg i{display:block;font-style:normal;font-size:11.5px;font-weight:700;color:var(--body);line-height:1.4}
+.gg b{display:inline-block;margin-top:3px;font-size:12px;font-weight:800;color:#F4F2ED;background:var(--l2-dark);border-radius:5px;padding:1px 6px}
+.gg b.b3{background:var(--i2)}
+
+/* ── rebalance cards ── */
+.rb2{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:12px 0 0}
+.rbc{background:var(--surface-inner);border:1px solid var(--line);border-top:3px solid var(--l2);border-radius:11px;padding:9px 10px 10px}
+.rbc.r3{border-top-color:var(--i2)}
+.rbh{font-size:12.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.rbh:after{content:"On a −10% stock day";display:block;font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:0;margin-top:1px}
+.rbg{display:grid;grid-template-columns:auto 1fr;gap:5px 8px;margin:8px 0 0;align-items:baseline;font-variant-numeric:tabular-nums}
+.rbg .k{font-size:11px;font-weight:800;color:var(--muted)}
+.rbg .v{font-size:13.5px;font-weight:800;color:var(--ink);text-align:right;letter-spacing:-.02em;line-height:1.3}
+.rbg .v small{display:block;font-size:10.5px;font-weight:700;color:var(--muted)}
+.rbr{margin:8px 0 0;padding:6px 8px;border-radius:7px;background:var(--stk);color:#F4F2ED;text-align:center;font-size:14.5px;font-weight:800;letter-spacing:-.02em}
+.rbc.r3 .rbr{background:var(--i2)}
+.rbr small{display:block;font-size:10.5px;font-weight:700;color:rgba(244,242,237,.72);letter-spacing:0;margin-top:1px}
+
+/* ── learn more ── */
+.foldwrap.more{margin-top:16px}
+.foldwrap.more summary em{font-style:normal;display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.06em;color:var(--green);border:1px solid var(--green-line);border-radius:999px;padding:1px 7px;margin-right:7px;vertical-align:1px}
+.fb .trio{margin-top:4px}
+
+/* ── exercise table ── */
+.hw{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.hwhd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.hwhd b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.hwsteps{margin:10px 0 0;display:grid;gap:5px}
+.hws{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start}
+.hws i{font-style:normal;width:20px;height:20px;border-radius:50%;background:var(--stk);color:#F4F2ED;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.hws p{margin:0;font-size:13px;line-height:1.55;font-weight:600;color:var(--body)}
+.hws p b{color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums}
+.hwres{margin:9px 0 0;padding:9px 12px;background:var(--stk);border-radius:9px;color:#EFEDE7;font-size:13px;line-height:1.52;font-weight:700}
+.hwres b{color:#fff}
+
+/* ── three items ── */
+.trio{display:grid;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden;margin:12px 0 0}
+.trio .ti{background:var(--surface-inner);padding:9px 14px}
+.trio .th{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.trio .th b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.trio .th i{font-style:normal;font-size:11px;font-weight:800;color:var(--sub);background:var(--surface-detail);
+  border:1px solid var(--line2);border-radius:999px;padding:2px 8px}
+.trio .td{margin-top:4px;font-size:12.5px;line-height:1.56;font-weight:600;color:var(--body)}
+.trio .td b{color:var(--ink);font-weight:800}
+
+/* ── name breakdown ── */
+.ntag{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.ntag .nk{font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--muted)}
+.nname{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0 0}
+.nname span{font-size:17px;font-weight:800;letter-spacing:-.03em;padding:4px 8px 5px;border-radius:7px;background:var(--surface-detail);color:var(--ink);border-bottom:3px solid var(--line)}
+.nname .n1{border-bottom-color:var(--muted)}
+.nname .n2{border-bottom-color:var(--stk)}
+.nname .n3{border-bottom-color:var(--green)}
+.nname .n4{border-bottom-color:var(--i2)}
+.nname .n5{border-bottom-color:var(--l2)}
+.nlist{display:grid;gap:5px;margin:10px 0 0}
+.nlist div{display:grid;grid-template-columns:62px 1fr;gap:8px;font-size:12.5px;line-height:1.5}
+.nlist dt,.nlist .t{font-weight:800;color:var(--ink)}
+.nlist .d{color:var(--body);font-weight:600}
+.nlist .d b{color:var(--ink)}
+
+/* ── matrix ── */
+.wx{margin:12px 0 0}
+.wxgrid{display:grid;grid-template-columns:54px 1fr 1fr;gap:1.5px;background:var(--line);border-radius:12px;overflow:hidden}
+.wxgrid .wh{background:var(--surface-detail);padding:7px 8px;font-size:11px;font-weight:800;color:var(--sub);text-align:center;display:flex;align-items:center;justify-content:center;line-height:1.35}
+.wxgrid .wc{background:var(--surface-inner);padding:9px 10px}
+.wxgrid .wc b{display:block;font-size:13px;font-weight:800;letter-spacing:-.02em;line-height:1.35}
+.wxgrid .wc p{margin:4px 0 0;font-size:11.3px;line-height:1.48;font-weight:700;color:var(--body)}
+.wxgrid .wc p em{font-style:normal;color:var(--green);font-weight:800}
+.wxgrid .good b{color:var(--green-dark)}
+.wxgrid .bad b{color:var(--i2)}
+.wxgrid .bad2{background:var(--i2-soft)}
+.wxgrid .good2{background:var(--green-soft)}
+.wxnote{margin:7px 0 0;padding:8px 12px;background:var(--surface-detail);border:1px solid var(--line);border-radius:10px;font-size:12px;line-height:1.58;font-weight:700;color:var(--ink2)}
+
+/* ── checklist ── */
+.chk4{margin:12px 0 0;display:grid;gap:8px}
+.ck{border-left:3px solid var(--green-line);padding:1px 0 1px 12px}
+.ck .ct{margin:1px 0 0;font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.03em;line-height:1.4}
+.ck .ct i{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--muted);margin-right:8px;vertical-align:2px}
+.ck .cd{margin:5px 0 0;padding:7px 11px;background:var(--surface-detail);border-radius:9px;font-size:12.8px;line-height:1.52;font-weight:700;color:var(--ink2)}
+.ck .cd b{color:var(--ink)}
+
+/* ── misreads ── */
+.trapwrap{margin:16px 0 0;border:1.5px solid var(--i2);border-radius:12px;overflow:hidden}
+.traphd{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;background:var(--i2);color:#F6EEEF}
+.traphd b{font-size:12px;font-weight:800;letter-spacing:.06em}
+.traphd i{font-style:normal;font-size:11px;font-weight:700;color:#E5C9CC}
+.trap{display:grid;gap:1.5px;background:var(--line)}
+.trap .ti{padding:10px 13px;background:var(--surface-inner)}
+.trap .tk{font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.trap .tx{margin-top:3px;font-size:14px;font-weight:800;color:var(--i2);line-height:1.48;letter-spacing:-.02em;text-decoration:line-through;text-decoration-color:rgba(122,63,68,.45);text-decoration-thickness:1.5px}
+.trap .to{margin-top:5px;font-size:12.5px;font-weight:600;color:var(--body);line-height:1.56}
+.trap .to b{color:var(--ink);font-weight:800}
+
+/* ── ending ── */
+.final{margin:16px -16px 0;padding:18px 22px;background:linear-gradient(155deg,#36443B 0%,#232C26 100%);color:#EFEDE7;position:relative;overflow:hidden}
+.final:before{content:"";position:absolute;right:-46px;bottom:-58px;width:160px;height:160px;border-radius:50%;border:1px solid rgba(168,198,180,.18)}
+.final .fk{position:relative;font-size:11px;font-weight:800;letter-spacing:.13em;color:#A0B4A6;margin-bottom:10px}
+.final p{position:relative;margin:0;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.final .f1{font-size:19px;line-height:1.5}
+.final .f2{margin-top:11px;padding-top:10px;border-top:1px solid rgba(168,198,180,.22);font-size:15px;line-height:1.58;color:#DCE6DE}
+.final p b{color:var(--green-pale)}
+
+/* ── next ── */
+.next{margin:16px -16px 0;padding:20px 22px;background:linear-gradient(150deg,#454F5C 0%,#2B323C 100%);color:#E9EBEE;position:relative;overflow:hidden}
+.next:before{content:"";position:absolute;right:-40px;bottom:-52px;width:150px;height:150px;border-radius:50%;border:1px solid rgba(180,190,202,.18)}
+.next .nh{position:relative;font-size:11px;font-weight:800;letter-spacing:.12em;color:#A3ACB8;margin-bottom:10px}
+.next p{position:relative;margin:0;font-size:16px;line-height:1.56;font-weight:800;letter-spacing:-.03em;color:#EDEFF2}
+.next p b{color:#FFFFFF}
+.next .nt{position:relative;margin-top:14px;padding-top:12px;border-top:1px solid rgba(180,190,202,.22);font-size:12.5px;font-weight:800;color:#B9C1CB}
+.next .nt b{color:#EDEFF2;font-weight:800;margin-right:6px}
+
+/* inline links */
+.ilink{color:inherit;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px;text-decoration-color:rgba(230,201,143,.7)}
+
+/* ── share ── */
+.qshare{appearance:none;-webkit-appearance:none;margin:10px 0 0;width:100%;border:1.5px dashed var(--line);background:transparent;border-radius:10px;padding:9px 10px;
+  font-size:13px;font-weight:800;color:var(--ink2);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.qshare:hover{border-color:var(--sub)}
+.sharebox{margin:16px 0 0;padding:14px 14px 13px;background:var(--surface-inner);border:1px solid var(--line);border-radius:14px;text-align:center}
+.shq{margin:0;font-size:14.5px;line-height:1.5;font-weight:800;color:var(--ink);letter-spacing:-.03em}
+.shbtns{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px;margin:11px 0 0}
+.shb{appearance:none;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#F7F6F2;border-radius:10px;
+  padding:10px 6px;font-size:13px;font-weight:800;color:var(--ink);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;text-align:center}
+.shb.main{background:var(--green);border-color:var(--green);color:#F4F2ED}
+.shmsg{margin:7px 0 0;min-height:1em;font-size:12px;font-weight:700;color:var(--green)}
+
+/* ── read next ── */
+.more7{margin:12px 0 0;display:grid;gap:6px}
+.m7h{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--muted);margin:2px 2px 2px}
+.m7{display:block;background:var(--surface-inner);border:1px solid var(--line);border-radius:11px;padding:10px 13px;position:relative}
+.m7:after{content:"→";position:absolute;right:13px;top:50%;transform:translateY(-50%);font-weight:800;color:var(--muted)}
+.m7 i{font-style:normal;display:inline-block;font-size:10.5px;font-weight:800;color:var(--green);margin-right:6px}
+.m7 b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.m7 span{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--sub);padding-right:18px}
+.m7.all{background:var(--surface-detail)}
+.m7.cta{background:var(--green);border-color:var(--green)}
+.m7.cta b{color:#F4F2ED}.m7.cta span{color:#C6D2CA}.m7.cta:after{color:#C6D2CA}
+
+/* ── fold ── */
+.foldwrap{margin:14px 0 0}
+details.fold{border:1px solid var(--line);border-radius:12px;background:var(--surface-detail);margin:0 0 8px;overflow:hidden}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:11px 15px;font-size:13px;font-weight:800;color:var(--ink)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary:after{content:"+";font-size:18px;font-weight:800;color:var(--green);line-height:.9}
+details.fold[open]>summary:after{content:"−"}
+details.fold .fb{padding:0 15px 14px}
+.fb p{margin:0 0 8px;font-size:12.5px;line-height:1.62;color:var(--body);font-weight:600}
+.fb p:last-child{margin-bottom:0}
+.fb p b{color:var(--ink);font-weight:800}
+.gloss{display:grid;grid-template-columns:100px 1fr;gap:7px 11px;margin:2px 0 0;font-size:12.5px}
+.gloss dt{font-weight:800;color:#4B4740}
+.gloss dd{margin:0;color:var(--body);line-height:1.52}
+.case{margin:0 0 9px;padding:9px 11px;background:var(--surface-inner);border:1px solid var(--line2);border-radius:9px}
+.case b{display:block;font-size:12.5px;font-weight:800;color:var(--ink);line-height:1.45}
+.case p{margin:4px 0 0;font-size:12.2px;line-height:1.55;font-weight:600;color:var(--body)}
+.src{margin:0;padding-left:16px;display:grid;gap:5px}
+.src li{font-size:12px;line-height:1.52;color:var(--body);font-weight:600}
+.src li b{color:var(--ink)}
+.disc{font-size:11.5px;color:var(--muted);text-align:center;line-height:1.5;padding:12px 8px 0;font-weight:500}
+.foot{text-align:center;font-size:11.5px;color:var(--sub);padding:9px 0 4px;font-weight:800;letter-spacing:-.01em}
+
+/* ── tooltip ── */
+.term{border-bottom:1.5px dashed #8B867E;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent;font-weight:800;color:var(--ink);
+  display:inline-block;padding:3px 4px;margin:-3px -4px;line-height:1.3;
+  touch-action:manipulation;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.term .tip{position:fixed;left:12px;top:0;min-width:160px;max-width:min(248px,calc(100vw - 28px));
+  background:#33322F;color:#F2F0EB;font-size:12px;font-weight:600;line-height:1.52;padding:9px 11px;border-radius:9px;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);z-index:60;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease;white-space:normal;text-align:left}
+.term .tip:after{content:"";position:absolute;top:100%;left:var(--ax,50%);transform:translateX(-50%);border:6px solid transparent;border-top-color:#33322F}
+.term .tip.below:after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#33322F}
+.term.open .tip{opacity:1;visibility:visible;pointer-events:auto}
+.board .term,.keyb .term{color:inherit;border-bottom-color:rgba(236,234,227,.55)}
+
+@media(max-width:360px){
+  .cvtitle{font-size:27px}
+  .q{font-size:17px}
+  .ans .av{font-size:17.5px}
+  .final .f1{font-size:17px}
+  .cht{font-size:21px}
+  .sc .sv{font-size:18px}
+  .rd .rv{font-size:16px}
+  .legs span,.btab span{padding:7px 6px;font-size:11.8px}
+  .gloss{grid-template-columns:86px 1fr}
+  .opt{font-size:15px}
+}
+
+/* ── desktop ── */
+@media(min-width:768px){
+  .app{max-width:770px;padding-left:28px;padding-right:28px}
+  .topbar{margin:0 -28px}
+  .cover{margin:0 -28px;padding:44px 40px 34px}
+  .cvtitle{font-size:44px}
+  .cvsub{font-size:15px;max-width:30em}
+  .ch{margin-top:48px}
+  .cht{font-size:29px}
+  .q{font-size:24px}
+  .ans,.board,.sim,.final,.next{margin-left:-28px;margin-right:-28px}
+  .ans{padding:26px 40px}
+  .ans .av{font-size:23px}
+  .board{padding:26px 40px}
+  .bdt{font-size:24px}
+  .sim{padding:24px 34px}
+  .final{padding:32px 40px}
+  .final .f1{font-size:25px}
+  .final .f2{font-size:18px}
+  .next{padding:28px 40px}
+  .stripgrid{grid-template-columns:repeat(4,1fr)}
+  .trio{grid-template-columns:1fr 1fr 1fr}
+  .chk4{grid-template-columns:1fr 1fr;gap:14px 20px}
+  .trap{grid-template-columns:1fr 1fr 1fr}
+  .presets{grid-template-columns:repeat(4,1fr)}
+  .simchart svg,.chart svg{max-width:600px;margin:0 auto}
+  .duo{grid-template-columns:1fr 1fr}
+  .more7{grid-template-columns:1fr 1fr 1fr}
+  .m7.all,.m7.cta{grid-column:span 3}
+  .m7.all{grid-column:span 1}
+  .m7.cta{grid-column:span 2}
+}
+
+/* ═════ episode 8 additions ═════ */
+:root{--sh:#7A3F44;--sh-soft:#EBDCDD}
+.c-sh{color:var(--sh)}
+.cmp{display:grid;gap:12px;margin:12px 0 2px}
+.cmr{display:grid;grid-template-columns:1fr 64px;gap:4px 10px;align-items:center}
+.cml{grid-column:1/3;display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.cml b{font-size:13.5px;font-weight:800;color:var(--ink)}
+.cml span{font-size:11.5px;font-weight:700;color:var(--sub);font-variant-numeric:tabular-nums}
+.cmb{height:14px;background:var(--surface-detail);border-radius:7px;overflow:hidden}
+.cmb i{display:block;height:100%;border-radius:7px}
+.cmb .b-sh{background:var(--sh)}
+.cmb .b-ix{background:var(--stk)}
+.cmv{font-size:16px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+.mini{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-left:4px solid var(--up);border-radius:12px;padding:11px 14px 12px}
+.mnh{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.mnh b{font-size:13px;font-weight:800;color:var(--ink)}
+.mnrow{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:8px 0 0}
+.mnrow span{font-size:12.5px;font-weight:800;color:var(--sub)}
+.mnrow b{font-size:22px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.mnrow i{font-style:normal;font-size:12px;font-weight:700;color:var(--sub)}
+.mini p{margin:8px 0 0;font-size:13px;line-height:1.6;font-weight:600;color:var(--body)}
+.mini p.mnq{padding-top:8px;border-top:1px dashed var(--line);font-weight:800;color:var(--ink)}
+.num3{display:grid;gap:8px;margin:12px 0 0}
+.n3{background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:10px 13px 11px}
+.n3h{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+.n3h i{font-style:normal;font-size:14px;font-weight:800;color:var(--sh)}
+.n3h b{font-size:14.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.n3h em{font-style:normal;font-size:11px;font-weight:800;color:var(--sub);background:var(--surface-detail);border:1px solid var(--line2);border-radius:999px;padding:2px 8px}
+.n3 p{margin:5px 0 0;font-size:12.8px;line-height:1.56;font-weight:600;color:var(--body)}
+.n3x{display:block;margin-top:6px;padding:6px 10px;background:var(--surface-detail);border-radius:8px;font-size:12px;line-height:1.5;font-weight:700;color:var(--ink2);font-variant-numeric:tabular-nums}
+.three{display:grid;gap:8px;margin:12px 0 0}
+.t3{background:var(--surface-inner);border:1px solid var(--line);border-top:3px solid var(--sh);border-radius:12px;padding:10px 13px 11px}
+.t3.b{border-top-color:var(--muted)}.t3.c{border-top-color:var(--up)}
+.t3h{display:flex;align-items:baseline;gap:8px}
+.t3h i{font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.06em;color:var(--muted)}
+.t3h b{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.t3 p{margin:5px 0 0;font-size:12.8px;line-height:1.56;font-weight:600;color:var(--body)}
+.slwrap{margin:10px 2px 0}
+.slwrap input{width:100%;accent-color:var(--sh);height:28px}
+.simmsg{margin:8px 2px 0;padding:9px 12px;background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;font-size:13px;line-height:1.55;font-weight:700;color:var(--ink);min-height:3.2em}
+.pj.on{background:var(--ink);border-color:var(--ink);color:#F4F2ED}
+.tl{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:11px 14px 6px}
+.tlh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.tlh b{font-size:13.5px;font-weight:800;color:var(--ink)}
+.tlr{display:grid;grid-template-columns:62px 72px 1fr;gap:8px;align-items:baseline;padding:7px 0;border-bottom:1px dashed var(--line);font-variant-numeric:tabular-nums}
+.tlr.e{border-bottom:0}
+.tlr .d{font-size:12px;font-weight:800;color:var(--sub)}
+.tlr .v{font-size:14.5px;font-weight:800;color:var(--ink);text-align:right}
+.tlr .n{font-size:12px;font-weight:700;color:var(--body)}
+.tlr .n.up{color:var(--up)}.tlr .n.down{color:var(--down)}
+.calc span.up{color:var(--up)}.calc span.down{color:var(--down)}
+@media(min-width:768px){
+  .num3,.three{grid-template-columns:1fr 1fr 1fr}
+}
+
+/* ═════ episode 8 readability and accessibility ═════ */
+:root{--muted:#65625B;--sub:#5A5751;--up:#B23A47;--down:#3D6595}
+.p{font-size:15px;line-height:1.7}
+.p.lead{font-size:16px}
+.n3 p,.t3 p,.ck .cd,.trap .to,.fb p,.csnote,.wxnote,.mini p{font-size:13.5px}
+.sc .sn,.rd .rk,.rd .rn,.t3h i,.trap .tk,.m7 i,.calc span.h,.n3h em,.simfoot,.hd small{font-size:12px}
+.cml span{font-size:12.5px}
+.sc .sk,.disc,.m7h,.ans .ak,.final .fk,.next .nh{font-size:12px}
+.foldwrap.more summary em{font-size:11.5px}
+.ans .ak{color:#C2D2C7}
+.next .nh{color:#C3CAD3}
+.opt{white-space:nowrap;padding:11px 3px;letter-spacing:-.04em}
+.opt.no{background:#E3E0D9;border-color:#E3E0D9}
+.opt.ok::before{content:"✓ "}
+.opt.no::before{content:"✗ "}
+.opt[aria-disabled="true"]{cursor:default}
+.verdict:focus{outline:none}
+.verdict:focus-visible{outline:2px solid #2E2E2C;outline-offset:2px}
+.term{display:inline;padding:6px 3px;margin:0 -3px;border-bottom:0;line-height:inherit;white-space:nowrap;
+  text-decoration:underline dashed #8B867E;text-decoration-thickness:1.5px;text-underline-offset:4px;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;-webkit-user-select:text;user-select:text}
+.board .term,.keyb .term{text-decoration-color:rgba(236,234,227,.55)}
+.sim .ctrl2{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.ctrl2 .chip{min-height:44px;padding:0 2px;font-size:12.5px}
+.cvidx a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px}
+.slwrap input{-webkit-appearance:none;appearance:none;height:44px;background:transparent;width:100%;margin:0}
+.slwrap input::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:#CEC9BF}
+.slwrap input::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;margin-top:-11px;border-radius:50%;background:#7A3F44;border:3px solid #F1EFEA;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.slwrap input::-moz-range-track{height:6px;border-radius:3px;background:#CEC9BF}
+.slwrap input::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#7A3F44;border:3px solid #F1EFEA}
+.ans .av,.q,.bdt,.final .f1,.popq,.pcap,.ck .ct,.shq,.hd,.cht,.cvsub{text-wrap:balance}
+.p,.final .f2,.trap .to,.csnote,.n3 p,.wxnote,.mini p,.aw,.stripfoot,.popnote,.bdp,.cd{text-wrap:pretty}
+.nw{white-space:nowrap}
+.shb{white-space:nowrap;padding:10px 4px;min-height:48px}
+details.fold>summary{min-height:48px}
+.qshare{min-height:44px}
+.sc .sv{white-space:nowrap}
+.sc .sv.sm{font-size:16.5px}
+.m7{padding-right:36px}.m7 span{padding-right:0}
+.ilink{color:var(--ink);font-weight:700;text-decoration-color:#A9784A;padding:4px 0}
+:focus-visible{outline:2px solid #2E2E2C;outline-offset:2px}
+.cover :focus-visible,.shb.main:focus-visible,.m7.cta:focus-visible{outline-color:#F4F2ED}
+@media(max-width:400px){
+  .tlr{grid-template-columns:58px 1fr}
+  .tlr .v{text-align:left}
+  .tlr .n{grid-column:2;margin-top:-4px}
+}
+@media(max-width:360px){.sc .sv.sm{font-size:15px}}
+@media(min-width:768px){.p{font-size:16px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+/* English localization */
+body{word-break:normal;line-break:auto;overflow-wrap:break-word;letter-spacing:-.008em}
+.cvtitle,.cht,.q,.ans .av,.final .f1{letter-spacing:-.03em}
+@media(max-width:360px){.cvtitle{font-size:25px}.cvidx a{font-size:10.8px;padding:0 10px}.opt{font-size:13.5px}}
+</style>
+</head>
+<body>
+<div class="app">
+<span id="top"></span>
+<header class="topbar">
+<div class="tbin">
+<span class="brand"><i>Reading the Market</i> · Episode 08</span>
+<span aria-hidden="true" class="ep">08</span>
+</div>
+<div class="prog"><i id="pg"></i></div>
+</header>
+<main>
+<!-- cover -->
+<div class="cover">
+<span class="cvkick">ECONOMICS &amp; MARKET TERMS <b>08</b></span>
+<time class="cvdate" datetime="2026-10-06">2026.10.06 · MARKET BASICS</time>
+<h1 class="cvtitle">Does Short Selling<span>Drive the Drop—or Follow It?</span></h1>
+<p class="cvsub">The day “bets on a decline” hit a record,<br/>the KOSPI was at an all-time high too.<br/>So how should short-selling data be read?</p>
+<div class="cvmotif">
+<svg aria-label="A price line marking two points: sell borrowed shares first, then buy them back later." role="img" viewbox="0 0 340 88">
+<polyline fill="none" points="10,52 50,40 90,30 120,22 150,34 180,46 210,58 240,50 270,40 300,30 330,24" stroke="rgba(236,234,227,.85)" stroke-linejoin="round" stroke-width="2"></polyline>
+<circle cx="120" cy="22" fill="#C29A9E" r="4.5"></circle>
+<path d="M120 30 l0 16 m-5 -6 l5 7 l5 -7" fill="none" stroke="#C29A9E" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<text fill="#E6C7CA" font-size="11" font-weight="800" text-anchor="middle" x="120" y="66">Borrow and sell</text>
+<circle cx="210" cy="58" fill="#A8C6B4" r="4.5"></circle>
+<path d="M210 50 l0 -16 m-5 6 l5 -7 l5 7" fill="none" stroke="#A8C6B4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<text fill="#CFE0D5" font-size="11" font-weight="800" text-anchor="middle" x="210" y="80">Buy back and return</text>
+</svg>
+</div>
+<div class="cvidx">
+<a href="#p1"><b>01</b>The day both records fell</a>
+<a href="#p2"><b>02</b>Borrow, sell, buy back</a>
+<a href="#p3"><b>03</b>How to read short-selling data</a>
+</div>
+</div>
+<!-- page 1 -->
+<div class="ch" id="p1">
+<div class="chtop"><span class="chn">01</span><span class="chk">THE EVENT AND THE QUESTION</span></div>
+<h2 class="cht">When reported net shorts<br/>hit a record high</h2>
+<div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+<h3 class="hd"><small>2026.05.27 · ACTUAL MARKET</small>Two records on the same day</h3>
+<p class="p">On May 27, 2026, the KOSPI’s <span class="term">reported net short position balance<span class="tip">The aggregate of investor- and security-level net short positions that exceed Korea’s reporting thresholds. The KRX statistic is formally called the “net short position balance.” Smaller positions below the reporting threshold are not included.</span></span>reached KRW 22.0697 trillion, the largest value on record at the time.</p>
+<p class="p">That same day, the KOSPI closed at 8,228.70—also an all-time high at the time. It was the very day the single-stock leveraged ETFs covered in <a class="ilink" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_7%ED%8E%B8_2%EB%B0%B0ETF%EB%8A%94%EC%99%9C2%EB%B0%B0%EA%B0%80%EC%95%84%EB%8B%8C%EA%B0%80">Episode 07</a> were listed.</p>
+<div class="score">
+<div class="sc"><div class="sk">Net short position value</div><div class="sv sm">KRW 22.07tn</div><div class="sn">Record then<br/>May 27</div></div>
+<div class="sc s3"><div class="sk">Share of market cap</div><div class="sv">About 0.3%</div><div class="sn">Of total KOSPI<br/>equity value</div></div>
+<div class="sc s2"><div class="sk">KOSPI that day</div><div class="sv sm">8,228.70</div><div class="sn">All-time high<br/>close at the time</div></div>
+</div>
+<h3 class="hd">What does the net short balance actually count?</h3>
+<p class="p">Put simply, the net short position balance measures short positions that have been opened but not yet closed. The position is said to be <span class="nw">“open position”</span>.</p>
+<p class="p">But it is not a simple total of every short sale. For each investor and stock, the system calculates how many more shares must be returned than are currently held. That difference—the<span class="term">net short position<span class="tip">A position in which the investor owes more borrowed shares than they own. The difference is the size of the net short position.</span></span>—is included only when it exceeds the reporting threshold.</p>
+<p class="p">Before reading too much into that KRW 22 trillion figure, try this question.</p>
+<div class="pop" id="quiz1">
+<div class="poph"><b>QUICK QUESTION</b><span class="vb">HYPOTHETICAL</span></div>
+<div class="popb">
+<p class="popq">A stock’s reported net short position value rises from KRW 100 billion to KRW 120 billion. Over the same period, the share price also rises 20%, from KRW 100,000 to KRW 120,000. What happened to the number of <span class="c-sh">shares</span>in the reported balance?</p>
+<div class="opts">
+<button class="opt" data-ok="0" style="font-size:14px" type="button">Up 20%</button>
+<button class="opt" data-ok="1" style="font-size:14px" type="button">Unchanged</button>
+<button class="opt" data-ok="0" style="font-size:14px" type="button">Decreased</button>
+</div>
+<div class="popans" hidden="">
+<span class="verdict" tabindex="-1">Unchanged</span>
+<div class="calc" style="grid-template-columns:auto 1fr 1fr 1fr">
+<span class="h"></span><span class="h">Share price</span><span class="h">shares</span><span class="h">Position value</span>
+<span class="l">Start</span><span>KRW 100,000</span><span>1.0m shares</span><span>KRW 100bn</span>
+<span class="l e">Later</span><span class="e">KRW 120,000</span><span class="e"><b>1.0m shares</b></span><span class="e">KRW 120bn</span>
+</div>
+<p class="popnote">The share count is unchanged; only the market value rose 20%, because the stock price rose. Conversely, if the stock price fell while the reported value stayed unchanged, the share count must have increased. This is why, when you see a headline saying “record high,” <b>check the share count first</b>.</p>
+<button class="qshare" data-share="quiz" type="button">Share this question</button>
+</div>
+</div>
+</div>
+<h3 class="hd">The KRW 22 trillion figure is a market value</h3>
+<p class="p">The reported net short position balance is published both in shares and in value. The KRW 22 trillion figure that makes headlines is the value: for each stock, the reported share count is multiplied by that day’s closing price and then summed. As the quiz showed, the value can rise even when the number of shares does not.</p>
+<p class="p">The same thing had happened four months earlier, on February 3. The reported net short position value was at a record then too—and the KOSPI also closed at an all-time high.</p>
+<div class="case7">
+<div class="cshd"><b>How much changed in four months?</b><span class="vb real">2026.02.03 → 05.27 · KOSPI</span></div>
+<div class="cmp">
+<div class="cmr">
+<div class="cml"><b>Reported net short position value</b><span>KRW 14.3582tn → KRW 22.0697tn</span></div>
+<div class="cmb"><i class="b-sh" style="width:96.6%"></i></div>
+<div class="cmv up">+53.7%</div>
+</div>
+<div class="cmr">
+<div class="cml"><b>KOSPI Index</b><span>5,288.08 → 8,228.70</span></div>
+<div class="cmb"><i class="b-ix" style="width:100%"></i></div>
+<div class="cmv up">+55.6%</div>
+</div>
+</div>
+<p class="csnote">Because the bars are similar, it is tempting to conclude that the number of shorted shares barely changed. You cannot make that inference. The stocks carrying the largest reported short positions were not necessarily the same stocks driving the index higher. And a 53.7% rise in value does <b>not mean the share count rose 53.7%.</b> To know how the number of shares actually changed, you need the share-count data itself.</p>
+</div>
+<h3 class="q">Was the record net short balance<br/>a bearish signal?</h3>
+<div class="tl">
+<div class="tlh"><b>What the KOSPI did next</b><span class="vb real">Close · change from prior row</span></div>
+<div class="tlr"><span class="d">May 27</span><span class="v">8,228.70</span><span class="n">Record net short balance</span></div>
+<div class="tlr"><span class="d">Jun 18</span><span class="v">9,063.84</span><span class="n up">+10.1% · First close above 9,000</span></div>
+<div class="tlr"><span class="d">Jul 30</span><span class="v">5,593.56</span><span class="n down">−38.3%</span></div>
+<div class="tlr e"><span class="d">Jul 31</span><span class="v">6,595.45</span><span class="n up">+17.91% · Largest one-day gain on record</span></div>
+</div>
+<p class="p">After the record was set, the KOSPI kept rising for a little over three weeks and closed above 9,000 for the first time. It then fell more than 38% by late July. But that does not prove the May 27 short-position balance had “called” the selloff. The composition and size of the positions kept changing in the meantime.</p>
+<p class="p">A single short-position number cannot explain that entire rise and fall. To read the balance properly, first understand what one short sale leaves behind in the market.</p>
+<div class="ans">
+<div class="ak">ONE-SENTENCE ANSWER</div>
+<div class="av">A record net short balance by itself is not a bearish signal.</div>
+<div class="aw">The value can set a record simply because share prices rise. And those open short positions can later turn into buying demand when they are closed.</div>
+</div>
+<!-- page 2 -->
+<div class="ch" id="p2">
+<div class="chtop"><span class="chn">02</span><span class="chk">MECHANICS AND TERMS</span></div>
+<h2 class="cht">Borrow, sell, buy back</h2>
+<div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+<p class="p lead">There is more than one way to bet on a decline. You can buy an inverse product, such as the −2× ETF discussed in <a class="ilink" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_7%ED%8E%B8_2%EB%B0%B0ETF%EB%8A%94%EC%99%9C2%EB%B0%B0%EA%B0%80%EC%95%84%EB%8B%8C%EA%B0%80">Episode 07</a>, or borrow shares and sell them first. This episode is about the second method. But first, one question.</p>
+<div class="pop" id="quiz2">
+<div class="poph"><b>WARM-UP</b><span class="vb">HYPOTHETICAL</span></div>
+<div class="popb">
+<p class="popq">You borrow a stock worth KRW 100 and sell it. What is the <span class="c-sh">maximum profit</span>as a percentage of the sale proceeds? Ignore fees.</p>
+<div class="opts">
+<button class="opt" data-ok="1" type="button">100%</button>
+<button class="opt" data-ok="0" type="button">200%</button>
+<button class="opt" data-ok="0" style="font-size:14px" type="button">Unlimited</button>
+</div>
+<div class="popans" hidden="">
+<span class="verdict" tabindex="-1">100%</span>
+<div class="calc" style="grid-template-columns:auto repeat(4,1fr)">
+<span class="h">Share price</span><span class="h">KRW 0</span><span class="h">KRW 50</span><span class="h">KRW 150</span><span class="h">KRW 300</span>
+<span class="l">Buyer</span><span class="down">−100</span><span class="down">−50</span><span class="up">+50</span><span class="up">+200</span>
+<span class="l e c-sh">Short seller</span><span class="e up"><b>+100</b></span><span class="e up">+50</span><span class="e down">−50</span><span class="e down"><b>−200</b></span>
+</div>
+<p class="popnote">The short seller earns the most if the stock falls to zero. Even then, the maximum profit is 100% of the sale proceeds. The downside is different. If the stock rises to KRW 300, the loss is KRW 200; at KRW 1,000, the loss is KRW 900.</p>
+</div>
+</div>
+</div>
+<h3 class="hd">The life cycle of a short sale</h3>
+<p class="p">Short selling means selling shares you do not own. In a covered short sale, you borrow the shares and sell them. Selling first without having borrowed the shares— <span class="term">naked short selling<span class="tip">Selling shares before borrowing or otherwise securing them. It is prohibited in Korea and can carry heavy monetary and criminal penalties.</span></span>—is prohibited in Korea.</p>
+<div class="strip">
+<div class="striphead"><b>ONE SHORT SALE, START TO FINISH</b><i>HYPOTHETICAL</i></div>
+<div class="stripgrid">
+<div class="pnl">
+<span class="pno">01</span>
+<svg aria-label="Illustration of borrowing shares from a lender and paying a borrowing fee." role="img" viewbox="0 0 168 140">
+<rect fill="#F1EFEA" height="140" width="168"></rect>
+<line stroke="#CEC9BF" stroke-width="2" x1="10" x2="158" y1="122" y2="122"></line>
+<path d="M18 60 L44 44 L70 60 Z" fill="#8B867E"></path>
+<rect fill="#B8B2A7" height="62" width="44" x="22" y="60"></rect>
+<rect fill="#F1EFEA" height="9" width="9" x="30" y="70"></rect><rect fill="#F1EFEA" height="9" width="9" x="49" y="70"></rect>
+<rect fill="#F1EFEA" height="9" width="9" x="30" y="88"></rect><rect fill="#F1EFEA" height="9" width="9" x="49" y="88"></rect>
+<rect fill="#706D66" height="16" width="12" x="38" y="106"></rect>
+<text fill="#706D66" font-size="11.5" font-weight="800" text-anchor="middle" x="44" y="38">Lender</text>
+<circle cx="132" cy="70" fill="#7A3F44" r="9"></circle>
+<rect fill="#7A3F44" height="30" rx="8" width="20" x="122" y="81"></rect>
+<rect fill="#C9B18C" height="20" rx="3" stroke="#A78F6C" stroke-width="1.2" width="26" x="84" y="62"></rect>
+<text fill="#5D4E38" font-size="11" font-weight="800" text-anchor="middle" x="97" y="76">Shares</text>
+<path d="M74 72 L82 72 M112 72 L120 72 m-5 -4 l5 4 l-5 4" fill="none" stroke="#7A3F44" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+<circle cx="97" cy="104" fill="#E6C98F" r="8" stroke="#B89A5C"></circle>
+<text fill="#6B5226" font-size="8" font-weight="800" text-anchor="middle" x="97" y="107.5">₩</text>
+<path d="M116 104 L110 104 M84 104 L76 104 m5 -4 l-5 4 l5 4" fill="none" stroke="#B89A5C" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path>
+</svg>
+<div class="pcap"><b>Borrow</b> the shares. Pay a borrowing fee.</div>
+</div>
+<div class="pnl">
+<span class="pno">02</span>
+<svg aria-label="Illustration of selling borrowed shares into the market for 100." role="img" viewbox="0 0 168 140">
+<rect fill="#F1EFEA" height="140" width="168"></rect>
+<line stroke="#CEC9BF" stroke-width="2" x1="10" x2="158" y1="122" y2="122"></line>
+<circle cx="36" cy="70" fill="#7A3F44" r="9"></circle>
+<rect fill="#7A3F44" height="30" rx="8" width="20" x="26" y="81"></rect>
+<rect fill="#E8E5DF" height="68" rx="4" stroke="#CEC9BF" stroke-width="1.5" width="58" x="96" y="54"></rect>
+<text fill="#706D66" font-size="11.5" font-weight="800" text-anchor="middle" x="125" y="70">Market</text>
+<text fill="#3A3632" font-size="18" font-weight="800" text-anchor="middle" x="125" y="96">100</text>
+<rect fill="#C9B18C" height="20" rx="3" stroke="#A78F6C" stroke-width="1.2" width="26" x="56" y="58"></rect>
+<text fill="#5D4E38" font-size="11" font-weight="800" text-anchor="middle" x="69" y="72">Shares</text>
+<path d="M84 68 L94 68 m-5 -4 l5 4 l-5 4" fill="none" stroke="#3D6595" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+<circle cx="69" cy="102" fill="#E6C98F" r="8" stroke="#B89A5C"></circle>
+<text fill="#6B5226" font-size="7.5" font-weight="800" text-anchor="middle" x="69" y="105.5">100</text>
+<path d="M94 102 L80 102 m5 -4 l-5 4 l5 4" fill="none" stroke="#B89A5C" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path>
+<text fill="#3D6595" font-size="12" font-weight="800" text-anchor="middle" x="84" y="36">SELL</text>
+</svg>
+<div class="pcap"><b>Sell</b> the borrowed shares into the market.</div>
+</div>
+<div class="pnl">
+<span class="pno">03</span>
+<svg aria-label="Illustration showing a profit if the stock falls to 80 and a loss if it rises to 150." role="img" viewbox="0 0 168 140">
+<rect fill="#F1EFEA" height="140" width="168"></rect>
+<rect fill="#E8E5DF" height="30" rx="5" stroke="#CEC9BF" stroke-width="1.5" width="52" x="58" y="56"></rect>
+<text fill="#3A3632" font-size="15" font-weight="800" text-anchor="middle" x="84" y="76">100</text>
+<path d="M84 52 L84 30 m-6 7 l6 -8 l6 8" fill="none" stroke="#B23A47" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path>
+<text fill="#B23A47" font-size="11" font-weight="800" text-anchor="middle" x="84" y="22">150 · loss 50</text>
+<path d="M84 90 L84 112 m-6 -7 l6 8 l6 -8" fill="none" stroke="#3D6595" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path>
+<text fill="#3D6595" font-size="11" font-weight="800" text-anchor="middle" x="84" y="128">80 · profit 20</text>
+</svg>
+<div class="pcap"><b>Wait</b>. A fall helps; a rise hurts.</div>
+</div>
+<div class="pnl">
+<span class="pno">04</span>
+<svg aria-label="Illustration of buying shares back in the market and returning them to the lender." role="img" viewbox="0 0 168 140">
+<rect fill="#F1EFEA" height="140" width="168"></rect>
+<line stroke="#CEC9BF" stroke-width="2" x1="10" x2="158" y1="122" y2="122"></line>
+<rect fill="#E8E5DF" height="68" rx="4" stroke="#CEC9BF" stroke-width="1.5" width="46" x="112" y="54"></rect>
+<text fill="#706D66" font-size="11.5" font-weight="800" text-anchor="middle" x="135" y="72">Market</text>
+<path d="M14 66 L34 52 L54 66 Z" fill="#8B867E"></path>
+<rect fill="#B8B2A7" height="56" width="34" x="17" y="66"></rect>
+<rect fill="#706D66" height="16" width="10" x="29" y="106"></rect>
+<circle cx="84" cy="78" fill="#7A3F44" r="9"></circle>
+<rect fill="#7A3F44" height="30" rx="8" width="20" x="74" y="89"></rect>
+<rect fill="#C9B18C" height="20" rx="3" stroke="#A78F6C" stroke-width="1.2" width="26" x="71" y="44"></rect>
+<text fill="#5D4E38" font-size="11" font-weight="800" text-anchor="middle" x="84" y="58">Shares</text>
+<path d="M110 54 L100 54 m5 -4 l-5 4 l5 4" fill="none" stroke="#B23A47" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+<path d="M68 54 L58 54 m5 -4 l-5 4 l5 4" fill="none" stroke="#7A3F44" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+<text fill="#B23A47" font-size="12" font-weight="800" text-anchor="middle" x="135" y="36">BUY</text>
+</svg>
+<div class="pcap"><b>Buy back and return</b> the shares. This creates a buy order.</div>
+</div>
+</div>
+<div class="stripfoot">A typical short sale leaves <b>one sell and one buy</b>in the market. Between steps 02 and 04, an open net short position that exceeds the reporting threshold appears in the reported balance.</div>
+</div>
+<p class="p">The borrower usually buys the shares back in the market before returning them. The obligation can also be settled with shares already owned or obtained through another route.</p>
+<p class="p">Retail investors usually borrow shares through a broker’s <span class="term">retail stock-borrowing service<span class="tip">A brokerage service through which a securities firm lends shares to retail investors.</span></span> Institutions and foreign investors mainly use <span class="term">securities lending<span class="tip">Stock lending and borrowing transactions used mainly by institutions and foreign investors.</span></span>transactions. Shares borrowed for short selling generally have 90-day repayment periods that may be renewed, but the total period cannot exceed 12 months.</p>
+<div class="board">
+<div class="bdk">BOARD · THE PAYOFFS ARE REVERSED</div>
+<p class="bdt">A buyer can <u>lose at most 100%</u>,<br/>a short seller can <u>gain at most 100%</u></p>
+<p class="bdp">A buyer can lose no more than the purchase price. A short seller can earn no more than the sale proceeds. In the other direction, there is no comparable ceiling: a long position can keep gaining as the stock rises, while a short position can keep losing.</p>
+<div class="bdline">As the stock rises, the short seller’s <b>loss can keep growing.</b><br/>That is why a rising stock can trigger urgent buying to cover.</div>
+</div>
+<!-- P/L interactive -->
+<div class="sim" id="sim">
+<div class="simhd"><b>MOVE THE PRICE YOURSELF</b><span id="simp">Price · KRW 100</span></div>
+<p class="simp">One investor buys at KRW 100; another borrows and sells at KRW 100. Move the price to see how their profit and loss diverge.</p>
+<div class="simread">
+<div class="rd"><div class="rk">Share price</div><div class="rv" id="pv">100</div><div class="rn">Started at KRW 100</div></div>
+<div class="rd r2" style="border-left-color:var(--stk)"><div class="rk">Buyer</div><div class="rv" id="lv">0</div><div class="rn" id="ln">Max loss: 100</div></div>
+<div class="rd r3"><div class="rk">Short seller</div><div class="rv" id="sv">0</div><div class="rn" id="sn">Max gain: 100</div></div>
+</div>
+<div class="simchart"><svg aria-label="Profit-and-loss chart for a buyer and a short seller as the share price changes." id="plsvg" role="img" viewbox="0 0 290 180"></svg></div>
+<div class="slwrap"><input aria-label="Share price" id="psl" max="400" min="0" step="5" type="range" value="100"/></div>
+<div class="ctrl2" style="justify-content:space-between">
+<button class="chip pj" data-p="0" type="button">₩0</button>
+<button class="chip pj" data-p="50" type="button">₩50</button>
+<button class="chip pj on" data-p="100" type="button">₩100</button>
+<button class="chip pj" data-p="200" type="button">₩200</button>
+<button class="chip pj" data-p="400" type="button">₩400</button>
+</div>
+<p aria-live="polite" class="simmsg" id="pmsg">This is the starting point. Neither side has a profit or loss yet.</p>
+<p class="simfoot">Hypothetical example. Borrowing fees, taxes and trading costs are excluded. The chart stops at KRW 400 for readability; in theory, there is no upper limit to how far a stock price can rise.</p>
+</div>
+<h3 class="hd">Buying back: short covering</h3>
+<p class="p">Buying back shares that were sold short and returning them is called <span class="term">short covering<span class="tip">Buying back shares that were sold short in order to return them. In the market, it appears as buying demand.</span></span>.</p>
+<p class="p">When the stock rises, the problem is not just the mark-to-market loss. The borrowed shares become more valuable, which can make the posted collateral insufficient and trigger a margin call. It is the mirror image of the leveraged-long squeeze described in <a class="ilink" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_5%ED%8E%B8_%EA%B8%89%EB%9D%BD%EC%9D%80%EC%96%B4%EB%96%BB%EA%B2%8C%EB%8D%94%ED%81%B0%EA%B8%89%EB%9D%BD%EC%9D%84%EB%A7%8C%EB%93%9C%EB%8A%94%EA%B0%80">Episode 05</a>: there, falling prices pressure the long account; here, rising prices pressure the short. If short sellers cannot hold on and rush to buy back at the same time, that buying can push the stock higher still. This is a <span class="term">short squeeze<span class="tip">A move in which rising prices force short sellers to buy back shares to limit losses, and that concentrated buying amplifies the rise.</span></span>.</p>
+<div class="mini">
+<div class="mnh"><b>2026.07.31 · ACTUAL MARKET</b><span class="vb real">Based on reported data</span></div>
+<div class="mnrow"><span>KOSPI</span><b class="up">+17.91%</b><i>5,593.56 → 6,595.45 · Largest one-day gain on record</i></div>
+<p>During the sharp rebound from July 30 through August 3, 14 stocks in sectors with heavy short positioning rose more than 10%. An analysis found that the reported net short position balance fell in 10 of those 14 stocks.</p>
+<p class="mnq">If the share price rose more than 10% while the position value fell, the reported share count must have fallen as well. That means net short positions were reduced, and short covering may have been one reason. The data do not tell us how much that buying amplified the rebound.</p>
+</div>
+<h3 class="hd">An order a short seller generally cannot place</h3>
+<p class="p">Short selling is subject to a price rule. As a rule, a short-sale order must be quoted above the most recently executed price; if the last price moved up, an order at that same price is permitted. This is the <span class="term">uptick rule<span class="tip">A rule that generally requires short-sale orders to be quoted above the latest execution price. If the latest price moved up, a short sale at that price is allowed. Some transactions are exempt.</span></span>, first introduced in Korea in 1996.</p>
+<p class="p">There are exemptions. But mapped onto the order-book ladder from <a class="ilink" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_1%ED%8E%B8_%EC%A3%BC%EA%B0%80%EB%8A%94%EB%88%84%EA%B0%80%EC%9B%80%EC%A7%81%EC%9D%B4%EB%8A%94%EA%B0%80">Episode 01</a>, a normal short sale looks like this: when buy orders are stacked below the market, a trader generally cannot use a short-sale order to hit the highest bid, then the next, and directly walk the price down. That kind of aggressive selling is usually done by holders selling shares they own. Short sellers can instead add sell supply above the market, making it harder for the price to rise.</p>
+<p class="p">The uptick rule does not mean short selling cannot pressure prices. It limits one specific mechanism: directly sweeping lower bids.</p>
+<div class="foldwrap more">
+<details class="fold">
+<summary><span><em>LEARN MORE</em>Korea’s short-selling rules</span></summary>
+<div class="fb">
+<p><b>Ban and resumption</b> · Short selling was broadly banned from November 6, 2023 and fully resumed on March 31, 2025.</p>
+<p><b>Borrow before you sell</b> · Naked short selling is illegal. Monetary penalties were increased to four to six times illicit gains, and the Korea Exchange’s Naked Short-selling Detection System (NSDS) monitors for violations.</p>
+<p><b>Repayment period</b> · Shares borrowed for short selling have 90-day repayment periods that can be renewed, up to a total of 12 months. The limit applies to both retail and institutional investors.</p>
+<p><b>Collateral</b> · For retail investors borrowing through a brokerage, the cash collateral ratio is 105%.</p>
+<p><b>Uptick-rule exemptions</b> · Certain trades—such as index and stock arbitrage, short sales of ETFs and ETNs, and hedging by liquidity providers or market makers—are exempt from the last-price restriction.</p>
+<p><b>Overheated short-selling designation</b> · A stock with a sudden surge in short selling can be designated an “overheated short-selling stock,” triggering a one-day short-sale ban on the next trading day. If the stock falls at least 5% during the ban, the restriction is extended through the following trading day.</p>
+<p><b>Reporting and disclosure</b> · An investor must report a net short position within two business days if it is at least 0.01% of a company’s issued shares and worth at least KRW 100 million, or worth at least KRW 1 billion regardless of the percentage. Since December 2024, the public disclosure threshold has been aligned with the same standard. The “net short position balance” used in this article is the aggregate of positions reported under these rules.</p>
+<p><b>Retail investors</b> · Retail investors generally use broker stock-borrowing services and may face requirements such as prior education, simulated trading and investment limits. Check the broker’s current rules for details.</p>
+</div>
+</details>
+</div>
+<div class="ans">
+<div class="ak">PAGE 02 ANSWER</div>
+<div class="av">A short sale starts with a sell and usually ends with a buy.</div>
+<div class="aw">A large reported balance means a large amount of net short exposure remains open. Closing those positions usually requires buying shares back, so the open balance also represents potential future buying demand.</div>
+</div>
+<!-- page 3 -->
+<div class="ch" id="p3">
+<div class="chtop"><span class="chn">03</span><span class="chk">INTERPRETATION AND REVIEW</span></div>
+<h2 class="cht">When you see<br/>short-selling data</h2>
+<div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+<p class="p lead">Back to the question in the title: does short selling drive a decline or follow it? It can do either—and there is a third possibility.</p>
+<div class="three">
+<div class="t3 a"><div class="t3h"><i>CASE 1</i><b>It adds to the decline</b></div><p>A short sale is still a sale. When buy-side liquidity is thin, short-sale supply stacked above the market can cap rebounds and add downward pressure.</p></div>
+<div class="t3 b"><div class="t3h"><i>CASE 2</i><b>It follows the decline</b></div><p>Short selling may increase after bad news arrives or after the price has already broken lower. In that case it is closer to a consequence of the decline than its cause.</p></div>
+<div class="t3 c"><div class="t3h"><i>CASE 3</i><b>It amplifies the rebound</b></div><p>When the stock rises, short sellers may buy back shares to limit losses. That buying can push the rebound further.</p></div>
+</div>
+<p class="wxnote">In every case, the headline data may say only that “short selling increased” or “the balance fell.” To infer which mechanism was at work, you need intraday prices, each stock’s short-sale share, and the reported share balance side by side. Even then, it is an inference—not proof that short selling caused the move.</p>
+<h3 class="hd">Three numbers that look similar—but are not</h3>
+<p class="p">Short-selling articles repeatedly use three different numbers, and their similar names make them easy to confuse. One is a <b>FLOW measured during the day</b>; the other two are <b>STOCK balances measured at a point in time</b>.</p>
+<div class="num3">
+<div class="n3">
+<div class="n3h"><i>①</i><b>Short-sale share of trading value</b><em>FLOW · sold short today</em></div>
+<p>The share of that day’s total trading value that came from short sales.</p>
+<span class="n3x">KOSPI: 3.89% on Aug. 6, the first reading back in the 3% range since July 23.</span>
+</div>
+<div class="n3">
+<div class="n3h"><i>②</i><b>reported net short position balance</b><em>STOCK · reported net short positions still open</em></div>
+<p>The aggregate of open net short positions that exceed the reporting threshold. The formal KRX term is “net short position balance.” It is published both in shares and in value.</p>
+<span class="n3x">KOSPI: KRW 22.0697tn on May 27.</span>
+</div>
+<div class="n3">
+<div class="n3h"><i>③</i><b>Stock-lending balance</b><em>STOCK · shares borrowed and not yet returned</em></div>
+<p>All shares borrowed and not yet returned. It includes shares that have not been sold short, as well as shares borrowed for settlement or re-lending.</p>
+<span class="n3x">Samsung Electronics stock-lending balance: KRW 22.1987tn (Aug. 25); reported net short position balance: KRW 2.1215tn (Aug. 21).</span>
+</div>
+</div>
+<div class="keyb">The dates differ by four days, but even for Samsung Electronics alone, the stock-lending balance was roughly <b>ten times</b> the reported net short position balance. That does not mean 90% of borrowed shares had not been sold. The two statistics cover different populations and use different reference dates.</div>
+<p class="p">The reported net short position balance can also include shorts that are not outright bets on a stock falling. An investor might buy a related future or ETF and short an equivalent amount of stock as a hedge or arbitrage trade, leaving little net directional exposure. Those shorts can still appear in the balance. That is why calling the entire balance “money betting on a decline” is an oversimplification.</p>
+<h3 class="hd">Four checks for short-selling data</h3>
+<div class="chk4">
+<div class="ck"><p class="ct"><i>01</i>Value or share count?</p><div class="cd">The market value can rise <b>just because the share price rises.</b> When a headline says “record high,” check the share count first.</div></div>
+<div class="ck"><p class="ct"><i>02</i>How large is it relative to market cap?</p><div class="cd">KRW 22 trillion is a large number, but it was only <b>about 0.3%</b>of total KOSPI market capitalization. Before reacting to the absolute number, check its share of the whole market.</div></div>
+<div class="ck"><p class="ct"><i>03</i>Net short positions or stock-lending balance?</p><div class="cd">The stock-lending balance includes all borrowed shares and is therefore much larger. For Samsung Electronics, it was roughly <b>ten times larger</b>. Because the two statistics cover different populations, subtracting one from the other does not reveal an “unused” share count.</div></div>
+<div class="ck"><p class="ct"><i>04</i>If the open balance grows, does future buyback demand grow too?</p><div class="cd">A larger open short balance can mean more potential <b>buy-to-cover demand</b>later. It may arrive in a rush when the stock rises. But the balance alone cannot tell you when—or how much—will be covered.</div></div>
+</div>
+<div class="trapwrap">
+<div class="traphd"><b>COMMON MISREADS</b><i>Plausible, but wrong</i></div>
+<div class="trap">
+<div class="ti">
+<div class="tk">MISREAD 01</div>
+<div class="tx">“Net short positions at a record high—stocks are about to fall.”</div>
+<div class="to">The balance was also at a record on February 3, yet four months later, on May 27, the KOSPI was 55.6% higher. After the May 27 record, the index rose for another three-plus weeks before falling sharply into late July. <b>One record cannot tell you when the market will move—or in which direction.</b></div>
+</div>
+<div class="ti">
+<div class="tk">MISREAD 02</div>
+<div class="tx">“KRW 140tn in stock loans—ammunition for future short selling.”</div>
+<div class="to">The stock-lending balance includes shares already sold short, as well as shares borrowed for settlement or re-lending. <b>The lending balance alone cannot tell you how many shares will be sold short in the future.</b></div>
+</div>
+<div class="ti">
+<div class="tk">MISREAD 03</div>
+<div class="tx">“The short-sale share was high, so short sellers caused the day’s decline.”</div>
+<div class="to">A high share tells you only that short sales accounted for a large portion of the day’s trading value. Under the uptick rule, a short-sale order generally cannot be submitted below the last execution price. Some of the short selling may simply have followed a price that was already falling. <b>The short-sale share does not identify which orders actually pushed the price lower.</b></div>
+</div>
+</div>
+</div>
+<div class="final">
+<div class="fk">EPISODE 08 IN ONE SENTENCE</div>
+<p class="f1">Short selling starts with a <b>sale</b> of borrowed shares and is usually followed by a <b>purchase</b> when the position is closed. The reported balance shows how much net short exposure remains open.</p>
+<p class="f2">Short selling can therefore add to a decline, follow a decline, or amplify a rebound. A single <span class="nw">“record high”</span> balance cannot tell you which of the three is happening.</p>
+</div>
+<div class="sharebox">
+<p class="shq">Know someone who gets nervous<br/>every time they see a short-selling headline?</p>
+<div class="shbtns">
+<button class="shb main" data-share="page" type="button">Share</button>
+<button class="shb" data-share="copy" type="button">Copy link</button>
+<a class="shb" href="https://twitter.com/intent/tweet?text=Net%20short%20positions%20hit%20a%20record%20on%20the%20same%20day%20the%20KOSPI%20hit%20an%20all-time%20high.%20Does%20short%20selling%20drive%20the%20drop%E2%80%94or%20follow%20it%3F&amp;url=https%3A%2F%2Fsnowshagal.com%2Freports%2F%25EC%258B%259C%25EC%259E%25A5%25EC%259D%2584%25EC%259D%25BD%25EB%258A%2594%25EB%25A7%2590%25EB%2593%25A4_8%25ED%258E%25B8_%25EA%25B3%25B5%25EB%25A7%25A4%25EB%258F%2584%25EB%258A%2594%25ED%2595%2598%25EB%259D%25BD%25EC%259D%2584%25EB%25A7%258C%25EB%2593%259C%25EB%258A%2594%25EA%25B0%2580%25EB%2594%25B0%25EB%259D%25BC%25EA%25B0%2580%25EB%258A%2594%25EA%25B0%2580" id="shX" rel="noopener" target="_blank">Post on X</a>
+</div>
+<p aria-live="polite" class="shmsg" id="shmsg"></p>
+</div>
+<div class="more7">
+<div class="m7h">READ NEXT</div>
+<a class="m7" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_7%ED%8E%B8_2%EB%B0%B0ETF%EB%8A%94%EC%99%9C2%EB%B0%B0%EA%B0%80%EC%95%84%EB%8B%8C%EA%B0%80"><i>Episode 07</i><b>Why a 2× ETF Isn’t 2×</b><span>Betting on a decline without borrowing shares</span></a>
+<a class="m7" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_5%ED%8E%B8_%EA%B8%89%EB%9D%BD%EC%9D%80%EC%96%B4%EB%96%BB%EA%B2%8C%EB%8D%94%ED%81%B0%EA%B8%89%EB%9D%BD%EC%9D%84%EB%A7%8C%EB%93%9C%EB%8A%94%EA%B0%80"><i>Episode 05</i><b>How a Selloff Can Feed a Bigger Selloff</b><span>What happens when collateral runs short</span></a>
+<a class="m7" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_1%ED%8E%B8_%EC%A3%BC%EA%B0%80%EB%8A%94%EB%88%84%EA%B0%80%EC%9B%80%EC%A7%81%EC%9D%B4%EB%8A%94%EA%B0%80"><i>Episode 01</i><b>Who Moves a Stock Price?</b><span>The basics of the order book and execution</span></a>
+<a class="m7 all" href="https://snowshagal.com/basics/"><b>View all Market Basics</b><span>Start from Episode 01</span></a>
+<a class="m7 cta" href="https://snowshagal.com/daily/"><b>How Did Today’s Market Move?</b><span>Snowshagal Daily · Market-close report</span></a>
+</div>
+<div class="next">
+<div class="nh">NEXT EPISODE</div>
+<p>Whether the selling comes from short sellers or forced liquidation, how far it moves the price depends on <b>how much buy-side liquidity is waiting</b>. Why can it still be hard to sell on a high-volume day?</p>
+<div class="nt"><b>Episode 09</b>Why Can It Be Hard to Sell Even When Volume Is High?</div>
+</div>
+<div class="foldwrap">
+<details class="fold">
+<summary>ONE-LINE GLOSSARY</summary>
+<div class="fb">
+<dl class="gloss">
+<dt>Short selling</dt><dd>Selling borrowed shares that you do not own. The position is usually closed by buying the shares back and returning them.</dd>
+<dt>Naked short selling</dt><dd>Selling shares short without first borrowing or securing them. Illegal in Korea.</dd>
+<dt>Securities lending</dt><dd>Stock lending and borrowing transactions used mainly by institutions and foreign investors.</dd>
+<dt>Retail stock borrowing</dt><dd>A brokerage service that lends shares to retail investors.</dd>
+<dt>Stock-borrow fee</dt><dd>The fee paid for borrowing shares.</dd>
+<dt>Return / repayment</dt><dd>Returning borrowed shares to the lender.</dd>
+<dt>Short covering</dt><dd>Buying back shares sold short and returning them to the lender. It appears in the market as buying.</dd>
+<dt>Short squeeze</dt><dd>A move in which short sellers rush to buy back shares as prices rise, amplifying the advance.</dd>
+<dt>Position</dt><dd>An open trade created by buying or selling. Ending it is called “closing the position.”</dd>
+<dt>Net short position</dt><dd>A position in which an investor owes more borrowed shares than they own. The difference is the size of the net short position.</dd>
+<dt>Net short position balance</dt><dd>The aggregate of investors’ net short positions that exceed the reporting threshold. The formal term is net short position balance. Published in both shares and value.</dd>
+<dt>Stock-lending balance</dt><dd>All shares borrowed and not yet returned, including shares that have not been sold.</dd>
+<dt>Short-sale share of trading value</dt><dd>The share of that day’s trading value accounted for by short sales.</dd>
+<dt>Uptick rule</dt><dd>A rule that generally requires short-sale orders to be priced above the latest execution price; if the last price moved up, the same price is allowed.</dd>
+<dt>Overheated short-selling stock</dt><dd>A stock designated after a sudden surge in short selling. Short selling is then banned on the next trading day.</dd>
+<dt>Collateral ratio</dt><dd>Required collateral as a percentage of the value of borrowed shares.</dd>
+</dl>
+</div>
+</details>
+<details class="fold">
+<summary>ACTUAL MARKET CASES USED IN THIS EPISODE</summary>
+<div class="fb">
+<div class="case"><b>2026.02.03 · KOSPI reported net short position value: KRW 14.3582tn, then a record</b><p>The KOSPI closed at 5,288.08 (+6.84%) the same day, an all-time high at the time.</p></div>
+<div class="case"><b>2026.05.27 · KOSPI reported net short position value: KRW 22.0697tn, then a record</b><p>The KOSPI closed at 8,228.70 (+2.25%) the same day, an all-time high at the time. The reported net short position value was about 0.3% of market capitalization. It stood at KRW 21.9875tn on May 29 and KRW 22.1575tn on June 4.</p></div>
+<div class="case"><b>2026.06.18 · KOSPI 9,063.84</b><p>First-ever close above 9,000 (+2.25%).</p></div>
+<div class="case"><b>2026.07.30 → 07.31 · KOSPI 5,593.56 → 6,595.45 (+17.91%)</b><p>Both the one-day percentage gain and point gain were records. During the July 30–Aug. 3 rebound, an analysis found that 10 of 14 stocks that rose more than 10% in heavily shorted sectors saw their reported net short balances decline.</p></div>
+<div class="case"><b>2026.08 · Samsung Electronics: net short positions vs. stock-lending balance</b><p>Reported net short position value: KRW 2.1215tn on Aug. 21, up 90.7% from KRW 1.1127tn at end-July. Stock-lending balance: KRW 22.1987tn on Aug. 25, down 10.5% from end-July.</p></div>
+</div>
+</details>
+<details class="fold">
+<summary>NUMBERS WE DID NOT USE</summary>
+<div class="fb">
+<p><b>Market-wide stock-lending balance</b> · Reports used different dates and coverage (above KRW 190tn on Jun. 1; KRW 182.3022tn on Jun. 2; KRW 166.1272tn on Jun. 8). We therefore used only one stock and one article for the comparison, and even those two figures are four days apart.</p>
+<p><b>Subtracting net short positions from the stock-lending balance</b> · The net short position balance includes only investor-level net short positions above reporting thresholds. The stock-lending balance covers a different universe, so subtracting one from the other cannot reveal an “unsold portion.”</p>
+<p><b>Share count in the reported net short position balance</b> · We could not verify a market-wide time series for the share count. We therefore placed the growth in reported position value next to the index gain, but that comparison cannot prove that the share count was unchanged because the composition of the short positions differs from the index.</p>
+<p><b>Size of buy-to-cover activity on July 31</b> · We did not find data that separately aggregate shares bought back and returned that day.</p>
+<p><b>Retail short-selling education hours and investment limits</b> · We left the figures out because some requirements may have changed after implementation.</p>
+<p>We do not fill in numbers we cannot verify.</p>
+</div>
+</details>
+<details class="fold">
+<summary>SOURCES AND DATA NOTES</summary>
+<div class="fb">
+<ol class="src">
+<li><b>Reported net short position value KRW 22.0697tn (5/27) · KRW 21.9875tn (5/29), stock-lending balance KRW 182.3022tn (6/2), about 0.3% of market cap</b> · MoneyToday, 2026.06.04</li>
+<li><b>Reported net short position value KRW 22.1575tn (6/4), about 0.3% of market cap; stock-lending balance above KRW 190tn (6/1) · KRW 166.1272tn (6/8)</b> · Seoul Finance, 2026.06.09</li>
+<li><b>Reported net short position value KRW 14.3582tn (2/3)</b> · Herald Economy, 2026.02.05</li>
+<li><b>KOSPI 5,288.08 (2/3)</b> · Kyunghyang Shinmun, 2026.02.03</li>
+<li><b>KOSPI 8,228.70 (5/27)</b> · Financial News, 2026.05.27</li>
+<li><b>KOSPI 9,063.84 (6/18)</b> · Seoul Shinmun, 2026.06.18</li>
+<li><b>KOSPI 5,593.56 (7/30)</b> · Episode 04 · MoneyToday, 2026.07.30</li>
+<li><b>KOSPI 6,595.45, +17.91% (7/31)</b> · MoneyToday, 2026.07.31</li>
+<li><b>Decline in reported net short positions during the sharp rebound; short-sale share 3.89% on Aug. 6</b> · MoneyToday, 2026.08.06</li>
+<li><b>Samsung Electronics reported net short position value (8/21) · stock-lending balance (8/25)</b> · Toyo Economy, 2026.08.26</li>
+<li><b>“KRW 140tn of short-selling ammunition” phrasing</b> · MoneyToday, 2026.02.02</li>
+<li><b>Resumption date, repayment period, collateral ratio, penalties and NSDS</b> · Financial Services Commission (FSC), reference release, 2025.03.21</li>
+<li><b>Meaning of net short position balance (shares held − shares owed), reporting and disclosure thresholds</b> · Financial Supervisory Service (FSS), “Key Details of Short Position Reporting and Disclosure,” 2024.12; Korea Exchange guidance on net short position balances</li>
+<li><b>Disclosure threshold expanded from 0.5% to 0.01% (2024.12)</b> · Aju Business Daily, 2024.11.05</li>
+<li><b>Introduction of the uptick rule (1996) and regulatory history</b> · Korea Exchange, short-selling regulatory history</li>
+<li><b>Uptick-rule price test and exempt transactions</b> · Korea Exchange short-selling Q&amp;A</li>
+<li><b>Market-wide short-selling ban (2023.11.6)</b> · YTN 2023.11.06</li>
+<li><b>Duration of short-sale ban for overheated short-selling stocks</b> · Toyo Economy, 2025.04.01</li>
+<li>Figures in the quick question, warm-up, four-panel illustration and interactive example are hypothetical and used only for explanation.</li>
+</ol>
+</div>
+</details>
+</div>
+</main>
+<p class="disc">This article is educational material explaining financial and market terms and how to interpret them. It does not recommend any security or trading strategy. Investment decisions and outcomes remain the investor’s responsibility.</p>
+<p class="foot">Reading the Market · 08</p>
+</div>
+<script>
+(function(){
+  if(window.__mwWords8) return; window.__mwWords8 = true;
+
+  /* progress bar */
+  var pg=document.getElementById('pg');
+  function updateProg(){
+    if(!pg) return;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var y=window.scrollY||window.pageYOffset||0;
+    pg.style.width=(h>0?Math.min(100,Math.max(0,y/h*100)):0)+'%';
+  }
+  window.addEventListener('scroll',updateProg,{passive:true});
+  window.addEventListener('resize',updateProg);
+  updateProg();
+
+  /* tooltip */
+  var openedAt=0;
+  function resetTip(el){ var tp=el.querySelector('.tip'); if(tp){ tp.classList.remove('below'); tp.removeAttribute('style'); } }
+  function clampTip(t){
+    var tip=t.querySelector('.tip'); if(!tip) return;
+    var vw=window.innerWidth, pad=12;
+    var w=Math.min(248, vw-2*pad);
+    tip.style.position='fixed'; tip.style.bottom='auto'; tip.style.transform='none';
+    tip.style.width=w+'px'; tip.style.left='0px'; tip.style.top='0px';
+    var tr=t.getBoundingClientRect();
+    var th=tip.getBoundingClientRect().height;
+    var left=tr.left+tr.width/2-w/2;
+    if(left<pad) left=pad;
+    if(left+w>vw-pad) left=vw-pad-w;
+    var top=tr.top-th-9, below=false;
+    if(top<pad+50){ top=tr.bottom+9; below=true; }
+    var vh=window.innerHeight;
+    if(top+th>vh-pad){ top=vh-pad-th; }
+    if(top<pad){ top=pad; }
+    tip.style.left=Math.round(left)+'px';
+    tip.style.top=Math.round(top)+'px';
+    var tb=tip.getBoundingClientRect();
+    var dx=tb.left-left, dy=tb.top-top;
+    if(dx||dy){ tip.style.left=Math.round(left-dx)+'px'; tip.style.top=Math.round(top-dy)+'px'; }
+    tip.classList.toggle('below', below);
+    var ax=tr.left+tr.width/2-left;
+    ax=Math.max(12, Math.min(w-12, ax));
+    tip.style.setProperty('--ax', Math.round(ax)+'px');
+  }
+  function closeTerms(except){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++){ if(open[i]!==except){ open[i].classList.remove('open'); open[i].setAttribute('aria-expanded','false'); resetTip(open[i]); } }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.term'), function(t){
+    t.setAttribute('tabindex','0'); t.setAttribute('role','button');
+    t.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); t.click(); } if(e.key==='Escape'){ closeTerms(null); } });
+    t.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var willOpen=!t.classList.contains('open');
+      closeTerms(t);
+      t.classList.toggle('open', willOpen);
+      t.setAttribute('aria-expanded', willOpen?'true':'false');
+      if(willOpen){ openedAt=Date.now(); clampTip(t); }
+    });
+    t.setAttribute('aria-expanded','false');
+    t.addEventListener('focusout', function(){ if(t.classList.contains('open')){ t.classList.remove('open'); t.setAttribute('aria-expanded','false'); resetTip(t); } });
+  });
+  document.addEventListener('click', function(){ closeTerms(null); });
+  window.addEventListener('scroll', function(){ if(Date.now()-openedAt>700) closeTerms(null); }, {passive:true});
+  window.addEventListener('resize', function(){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++) clampTip(open[i]);
+  });
+
+  /* quiz cards */
+  Array.prototype.forEach.call(document.querySelectorAll('.pop'), function(card){
+    var opts=card.querySelectorAll('.opt'), ans=card.querySelector('.popans');
+    var done=false;
+    Array.prototype.forEach.call(opts, function(b){
+      b.addEventListener('click', function(){
+        if(done) return; done=true;
+        Array.prototype.forEach.call(opts, function(o){
+          o.setAttribute('aria-disabled','true');
+          if(o.getAttribute('data-ok')==='1') o.classList.add('ok');
+          else if(o===b) o.classList.add('no');
+        });
+        b.setAttribute('aria-pressed','true');
+        if(ans){
+          ans.hidden=false;
+          var v=ans.querySelector('.verdict');
+          if(v){ v.textContent=(b.getAttribute('data-ok')==='1'?'Correct · ':'Not quite · ')+v.textContent; try{ v.focus({preventScroll:true}); }catch(e){ v.focus(); } }
+        }
+      });
+    });
+  });
+
+  /* P/L interactive */
+  var NS='http://www.w3.org/2000/svg';
+  var svg=document.getElementById('plsvg'), sl=document.getElementById('psl');
+  var pv=document.getElementById('pv'), lv=document.getElementById('lv'), sv=document.getElementById('sv');
+  var ln=document.getElementById('ln'), sn=document.getElementById('sn'), msg=document.getElementById('pmsg'), simp=document.getElementById('simp');
+  var X0=30,X1=282,Y0=12,Y1=160,PMAX=400,LMAX=300;
+  function X(p){ return X0+(X1-X0)*p/PMAX; }
+  function Y(v){ var mid=(Y0+Y1)/2; return mid-v*((Y1-Y0)/2)/LMAX; }
+  function el(tag,a){ var e=document.createElementNS(NS,tag); for(var k in a) e.setAttribute(k,a[k]); return e; }
+  function tx(x,y,t,a){ var e=el('text',a||{}); e.setAttribute('x',x); e.setAttribute('y',y); e.textContent=t; return e; }
+  function base(){
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+    svg.appendChild(el('polygon',{points:X(100)+','+Y(0)+' '+X(400)+','+Y(0)+' '+X(400)+','+Y(-300),fill:'rgba(122,63,68,.10)'}));
+    svg.appendChild(el('line',{x1:X0,x2:X1,y1:Y(0),y2:Y(0),stroke:'#65625B','stroke-width':1}));
+    svg.appendChild(el('line',{x1:X0,x2:X1,y1:Y(100),y2:Y(100),stroke:'#C29A9E','stroke-width':1,'stroke-dasharray':'3 3'}));
+    svg.appendChild(tx(X1-2,Y(100)+14,'Short seller max +100',{'font-size':11,'font-weight':800,fill:'#7A3F44','text-anchor':'end'}));
+    [0,100,200,300,400].forEach(function(p){ svg.appendChild(tx(X(p),Y1+16,p+'',{'font-size':11,'font-weight':700,fill:'#65625B','text-anchor':p===0?'start':(p===400?'end':'middle')})); });
+    svg.appendChild(tx(X0-4,Y(0)+4,'0',{'font-size':11,'font-weight':700,fill:'#5A5751','text-anchor':'end'}));
+    svg.appendChild(el('line',{x1:X(0),y1:Y(-100),x2:X(400),y2:Y(300),stroke:'#3A3632','stroke-width':2.4,'stroke-linecap':'round'}));
+    svg.appendChild(el('line',{x1:X(0),y1:Y(100),x2:X(400),y2:Y(-300),stroke:'#7A3F44','stroke-width':2.4,'stroke-linecap':'round'}));
+    svg.appendChild(tx(X(262),Y(162)-8,'Buyer',{'font-size':12,'font-weight':800,fill:'#3A3632','text-anchor':'end'}));
+    svg.appendChild(tx(X(226),Y(-126)+24,'Short seller',{'font-size':12,'font-weight':800,fill:'#7A3F44','text-anchor':'end'}));
+    svg.appendChild(tx(X(330),Y(-60),'Losses have no upper limit',{'font-size':11.5,'font-weight':800,fill:'#7A3F44','text-anchor':'middle'}));
+  }
+  var mk=[];
+  function sgn(v){ return v>0?'+'+v:(v<0?'−'+Math.abs(v):'0'); }
+  function cls(v){ return v>0?'rv up':(v<0?'rv down':'rv'); }
+  function upd(){
+    var p=+sl.value;
+    mk.forEach(function(m){ svg.removeChild(m); }); mk=[];
+    mk.push(svg.appendChild(el('line',{x1:X(p),x2:X(p),y1:Y0,y2:Y1,stroke:'#B8B2A7','stroke-width':1,'stroke-dasharray':'2 3'})));
+    mk.push(svg.appendChild(el('circle',{cx:X(p),cy:Y(p-100),r:4,fill:'#3A3632'})));
+    mk.push(svg.appendChild(el('circle',{cx:X(p),cy:Y(100-p),r:4,fill:'#7A3F44'})));
+    pv.textContent=p; simp.textContent='Price · KRW '+p;
+    lv.textContent=sgn(p-100); lv.className=cls(p-100);
+    sv.textContent=sgn(100-p); sv.className=cls(100-p);
+    var m;
+    if(p===0) m='If the stock falls to zero, the short seller earns 100. That is the maximum.';
+    else if(p<100) m='The stock has fallen, so the short seller is in profit. The gain still cannot exceed 100.';
+    else if(p===100) m='This is the starting point. Neither side has a profit or loss yet.';
+    else if(p<200) m='The stock has risen. The short seller is losing and may face a margin call for additional collateral.';
+    else if(p===200) m='The short seller has now lost 100, equal to the original sale proceeds. If the stock rises further, the loss keeps growing.';
+    else m='The short seller has already lost more than 100. Further gains in the stock keep increasing the loss, and this is where urgent buy-to-cover demand can appear.';
+    msg.textContent=m;
+    Array.prototype.forEach.call(document.querySelectorAll('.pj'),function(b){ var on=+b.getAttribute('data-p')===p; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on?'true':'false'); });
+    sl.setAttribute('aria-valuetext', 'Price KRW '+p+', buyer '+sgn(p-100)+', short seller '+sgn(100-p));
+  }
+  base(); sl.addEventListener('input',upd);
+  Array.prototype.forEach.call(document.querySelectorAll('.pj'),function(b){ b.addEventListener('click',function(){ sl.value=b.getAttribute('data-p'); upd(); }); });
+  upd();
+
+  /* sharing */
+  var CANON="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_8%ED%8E%B8_%EA%B3%B5%EB%A7%A4%EB%8F%84%EB%8A%94%ED%95%98%EB%9D%BD%EC%9D%84%EB%A7%8C%EB%93%9C%EB%8A%94%EA%B0%80%EB%94%B0%EB%9D%BC%EA%B0%80%EB%8A%94%EA%B0%80";
+  function pageUrl(){ var h=location.href.split('#')[0]; return /^https?:/.test(h)?h:CANON; }
+  var smsg=document.getElementById('shmsg');
+  function say(t){ if(smsg){ smsg.textContent=t; setTimeout(function(){ smsg.textContent=''; },2500); } }
+  function legacy(text){
+    var ta=document.createElement('textarea'); ta.value=text; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); var ok=false;
+    try{ ok=document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+    say(ok?'Link copied':'Copying was blocked. Copy the URL from the address bar instead.');
+  }
+  function copy(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(function(){ say('Link copied'); },function(){ legacy(text); }); }
+    else legacy(text);
+  }
+  var TXT={ page:"Net short positions hit a record on the same day the KOSPI hit an all-time high. Does short selling drive the drop—or follow it?", quiz:"Question: reported net short position value rose from KRW 100bn to KRW 120bn while the stock price also rose 20%. Did the number of shares in the balance increase?" };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-share]'),function(b){
+    b.addEventListener('click',function(){
+      var k=b.getAttribute('data-share'), url=pageUrl();
+      if(k==='copy'){ copy(url); return; }
+      if(k==='quiz') url=url+'#quiz1';
+      var data={title:'Does Short Selling Drive the Drop—or Follow It?',text:TXT[k]||TXT.page,url:url};
+      if(navigator.share){ navigator.share(data).catch(function(){}); }
+      else{ copy(data.text+' '+url); }
+    });
+  });
+})();
+</script>
+</body>
+</html>

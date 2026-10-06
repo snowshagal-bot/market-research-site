@@ -1,5 +1,29 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-07-basics-14uhqp6",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-10-07",
+    "reportDate": "2026-10-07",
+    "registeredDate": "2026-10-07",
+    "registeredAt": "2026-10-06T17:36:03.392Z",
+    "legacyImport": false,
+    "title": "Does Short Selling Drive the Drop—or Follow It?",
+    "subtitle": "",
+    "description": "KOSPI reported net short positions hit a record KRW 22 trillion on the same day the KOSPI itself closed at an all-time high. This guide explains how short selling works, short covering, and the differences among reported net short positions, stock-lending balances, and short-sale trading share using real numbers and quizzes.",
+    "tags": [
+      "liquidity",
+      "short-selling"
+    ],
+    "readingMinutes": 12,
+    "href": "reports/en/Snowshagal_Reading_the_Market_08_Short_Selling_EN.html",
+    "translationGroup": "2026-10-07-basics-gofwdc",
+    "coverImage": "covers/2026-10-07-basics-14uhqp6.webp",
+    "shareCardImage": "covers/share/2026-10-07-basics-14uhqp6.jpg",
+    "coverThumbnail": "covers/2026-10-07-basics-14uhqp6-450.webp"
+  },
+  {
     "id": "2026-10-07-basics-gofwdc",
     "type": "basics",
     "typeLabel": "시장 입문",
