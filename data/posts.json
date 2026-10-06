@@ -47,6 +47,33 @@
     "coverThumbnail": "covers/2026-10-07-basics-gofwdc-450.webp"
   },
   {
+    "id": "2026-10-06-daily-1wtk7ix",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-06",
+    "reportDate": "2026-10-06",
+    "registeredDate": "2026-10-07",
+    "registeredAt": "2026-10-06T17:45:59.930Z",
+    "legacyImport": false,
+    "title": "삼성전자·SK하이닉스에 집중된 매도",
+    "subtitle": "",
+    "description": "",
+    "summary": "미국의 AI 강세는 시가까지였고, 그 뒤 코스피는 메모리 대형주 매도에 끌려간 하루.",
+    "takeaway": "반도체 대형주 약세 속 코스닥 급등",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-10-06_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-06-daily-1wtk7ix.webp",
+    "shareCardImage": "covers/share/2026-10-06-daily-1wtk7ix.jpg",
+    "coverThumbnail": "covers/2026-10-06-daily-1wtk7ix-450.webp"
+  },
+  {
     "id": "2026-10-04-note-13vdfus",
     "type": "note",
     "typeLabel": "Investment Note",
