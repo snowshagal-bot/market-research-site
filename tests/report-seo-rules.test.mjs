@@ -288,3 +288,48 @@ test('Market data pages carry the data-page title on every head tag so they do n
     assert.match(page, /rel="canonical" href="https:\/\/snowshagal\.com\/(en\/)?market\/"/);
   }
 });
+
+// ---------------------------------------------------------------------------
+// A post's own search title (seoTitle), confirmed in the admin at publish time
+// ---------------------------------------------------------------------------
+const basics07 = { id: 'b07', type: 'basics', lang: 'ko', reportDate: '2026-10-04', title: '2배 ETF는 왜 2배가 아닌가', href: 'reports/b07.html', tags: ['etf'] };
+
+test('Research, Note and Basics use their own search title with the brand added once', () => {
+  assert.equal(reportSeoTitle(basics07), '2026년 10월 4일 시장 입문 | 2배 ETF는 왜 2배가 아닌가 | Snowshagal', 'without one, the category rule');
+  const own = { ...basics07, seoTitle: '레버리지 ETF 음의 복리: 왜 2배가 아닌가' };
+  assert.equal(reportSeoTitle(own), '레버리지 ETF 음의 복리: 왜 2배가 아닌가 | Snowshagal');
+  // A brand the author already wrote is not doubled, whatever the separator.
+  for (const written of ['레버리지 ETF 음의 복리: 왜 2배가 아닌가 | Snowshagal', '레버리지 ETF 음의 복리: 왜 2배가 아닌가 - snowshagal', '  레버리지 ETF   음의 복리: 왜 2배가 아닌가 · Snowshagal | Snowshagal ']) {
+    assert.equal(reportSeoTitle({ ...basics07, seoTitle: written }), '레버리지 ETF 음의 복리: 왜 2배가 아닌가 | Snowshagal', written);
+  }
+  assert.equal(reportSeoTitle({ ...basics07, seoTitle: 'Snowshagal' }), reportSeoTitle(basics07), 'a brand alone is no title');
+  const research = { id: 'r1', type: 'research', lang: 'en', reportDate: '2026-10-03', title: 'The Engine Is the Bottleneck', href: 'reports/en/r1.html', tags: ['semiconductors'] };
+  assert.equal(reportSeoTitle({ ...research, seoTitle: 'HBM Supply: Why the Engine Is the Bottleneck' }, { tagRegistry }), 'HBM Supply: Why the Engine Is the Bottleneck | Snowshagal');
+  assert.equal(reportSeoTitle({ ...basics07, type: 'note', seoTitle: '선거 달력보다 금리 달력' }), '선거 달력보다 금리 달력 | Snowshagal');
+});
+
+test('a Daily or a Weekly keeps its close-based title in Korean and in English, whatever seoTitle says', () => {
+  for (const daily of [koDaily, enDaily]) {
+    assert.equal(reportSeoTitle({ ...daily, seoTitle: '다른 제목' }, { facts: facts0915 }), reportSeoTitle(daily, { facts: facts0915 }), daily.id);
+    assert.equal(reportSeoTitle({ ...daily, seoTitle: '다른 제목' }), reportSeoTitle(daily), `${daily.id} without facts`);
+  }
+  const weekly = { id: 'w1', type: 'weekly', lang: 'en', reportDate: '2026-09-05', title: 'Same five days', href: 'reports/en/w1.html', tags: ['kospi'] };
+  assert.equal(reportSeoTitle({ ...weekly, seoTitle: 'Other' }), reportSeoTitle(weekly));
+});
+
+test('the search title changes the <title> only: og:title, twitter:title and the JSON-LD headline stay the H1', () => {
+  const own = { ...basics07, seoTitle: '레버리지 ETF 음의 복리: 왜 2배가 아닌가' };
+  const tags = reportSeoTags([own], own);
+  assert.match(tags, /<title>레버리지 ETF 음의 복리: 왜 2배가 아닌가 \| Snowshagal<\/title>/);
+  assert.match(tags, /<meta property="og:title" content="2배 ETF는 왜 2배가 아닌가">/);
+  assert.match(tags, /<meta name="twitter:title" content="2배 ETF는 왜 2배가 아닌가">/);
+  const article = reportStructuredData(own)['@graph'].find((node) => node['@type'] === 'Article');
+  assert.equal(article.headline, '2배 ETF는 왜 2배가 아닌가');
+});
+
+test('a chosen share card is og:image like a composed one, and only the post’s own slot is trusted', () => {
+  const custom = { ...basics07, id: '2026-10-04-basics-qbz2ki', shareCardImage: 'covers/share/2026-10-04-basics-qbz2ki.jpg', shareCardSource: 'custom' };
+  assert.match(reportSeoTags([custom], custom), /<meta property="og:image" content="https:\/\/snowshagal\.com\/covers\/share\/2026-10-04-basics-qbz2ki\.jpg">/);
+  const elsewhere = { ...custom, shareCardImage: 'assets/social/basics-07-leverage-etf.jpg' };
+  assert.match(reportSeoTags([elsewhere], elsewhere), /<meta property="og:image" content="https:\/\/snowshagal\.com\/assets\/social\/snowshagal-home\.jpg">/);
+});

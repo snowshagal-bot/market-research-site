@@ -2,6 +2,8 @@
 // pages load (MARKET_LOCALE), so a card reads the same before and after the
 // browser re-renders it.
 import '../assets/locale.js';
+// The search-title rule the admin publisher applies before it stores one.
+import '../assets/report-metadata.js';
 
 export const PRODUCTION_ORIGIN = 'https://snowshagal.com';
 
@@ -444,6 +446,13 @@ function legacyContext(post, lang) {
   return type;
 }
 
+// The post's own search title, when its category takes one (never a Daily or
+// a Weekly, whose titles carry the session's close).
+export function postSeoTitle(post) {
+  const rules = globalThis.REPORT_METADATA;
+  return rules.acceptsSeoTitle(post?.type) ? rules.seoTitleText(post?.seoTitle) : '';
+}
+
 export function reportSeoTitle(post, options = {}) {
   const lang = postLanguage(post);
   const title = normalizeText(post?.title);
@@ -483,6 +492,11 @@ export function reportSeoTitle(post, options = {}) {
         : `${period} 주간 시장 전망 · ${title} | Snowshagal`;
     }
   }
+
+  // A Research, Note or Basics post whose author wrote its own search title
+  // keeps it; the brand is the only thing added.
+  const ownTitle = postSeoTitle(post);
+  if (ownTitle) return `${ownTitle} | Snowshagal`;
 
   if (post?.type === 'research') {
     const themes = postTagLabels(post, lang, options.tagRegistry);

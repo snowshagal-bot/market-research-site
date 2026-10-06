@@ -37,6 +37,7 @@ function createElement(id = '') {
 
 async function loadAdmin({
   confirmResult = false,
+  shareCard,
   generateCover,
   publishResponse,
   deploymentResponses = [],
@@ -58,6 +59,8 @@ async function loadAdmin({
     'publish-next-report', 'published-report-link', 'published-home-link', 'category-status'
     , 'post-language', 'translation-source', 'translation-source-status', 'generate-cover-btn', 'cover-generator-status'
     , 'description-source', 'summary-source', 'takeaway-status'
+    , 'post-seo-title', 'seo-title-source', 'seo-title-hint'
+    , 'share-image-file', 'share-image-info', 'share-image-hint', 'share-image-preview'
   ];
   const elements = Object.fromEntries(ids.map(id => [id, createElement(id)]));
   const themeButton = createElement('theme-toggle');
@@ -104,6 +107,7 @@ async function loadAdmin({
       { id: 'ko-daily-source', type: 'daily', title: '한국어 데일리 원문', reportDate: '2026-08-10', href: 'reports/daily-source.html' },
       { id: 'en-source', type: 'weekly', lang: 'en', title: 'English source', reportDate: '2026-08-10', href: 'reports/en/source.html' }
     ],
+    ...(shareCard ? { SHARE_CARD: shareCard } : {}),
     __SNOWSHAGAL_ADMIN_READY__: false,
     __SNOWSHAGAL_PENDING_REPORT_FILE__: pendingReportFile,
     addEventListener(type, handler) { windowListeners.set(type, handler); }
@@ -134,9 +138,10 @@ async function loadAdmin({
         return {
           title,
           querySelector(selector) {
-            const metaName = selector.match(/^meta\[name="([^"]+)"\]$/)?.[1];
+            if (selector === 'title') return title ? { textContent: title } : null;
+            const [, metaAttribute, metaName] = selector.match(/^meta\[(name|property)="([^"]+)"\]$/) || [];
             if (metaName) {
-              const tag = text.match(new RegExp(`<meta\\s+[^>]*name=["']${metaName}["'][^>]*>`, 'i'))?.[0];
+              const tag = text.match(new RegExp(`<meta\\s+[^>]*${metaAttribute}=["']${metaName}["'][^>]*>`, 'i'))?.[0];
               const content = tag?.match(/content=["']([^"']*)["']/i)?.[1];
               return content === undefined ? null : { content };
             }
@@ -994,4 +999,116 @@ test('J: report B publishes only the newly generated and decoded B cover', async
   assert.equal(coverEntry?.[2], 'b-generated.webp');
   assert.notEqual(coverEntry?.[1], coverA);
   assert.doesNotMatch(confirmMessages[0], /fallback cover/);
+});
+
+/* ---------------- search title and a chosen share image ---------------- */
+
+const basicsReport = (head) => ({
+  name: 'reading-the-market-08.html',
+  size: 100,
+  text: async () => `<!doctype html><html><head><meta name="report-type" content="basics"><meta name="report-date" content="2026-10-11">${head}</head><body><h1 class="cv-h1">공매도 잔고 읽는 법</h1></body></html>`
+});
+
+test('the report’s own <title> fills the search title without the brand, and is sent for Basics', async () => {
+  const { elements, submissions } = await loadAdmin({ confirmResult: true });
+  elements['admin-key'].value = 'test-key';
+  elements['html-file'].files = [basicsReport('<title>공매도 잔고·대차잔고 뜻과 읽는 법: 하락 신호일까 | Snowshagal</title>')];
+  await elements['html-file'].emit('change');
+  assert.equal(elements['post-type'].value, 'basics');
+  assert.equal(elements['post-seo-title'].value, '공매도 잔고·대차잔고 뜻과 읽는 법: 하락 신호일까');
+  assert.equal(elements['post-seo-title'].disabled, false);
+  assert.equal(elements['seo-title-source'].hidden, false);
+  assert.match(elements['seo-title-source'].textContent, /리포트 <title>/);
+
+  await elements['publish-btn'].emit('click');
+  assert.equal(submissions[0].entries.find(([name]) => name === 'seoTitle')?.[1], '공매도 잔고·대차잔고 뜻과 읽는 법: 하락 신호일까');
+});
+
+test('a <title> that only repeats the headline leaves the search title empty', async () => {
+  const { elements } = await loadAdmin();
+  elements['html-file'].files = [basicsReport('<title>공매도 잔고 읽는 법 | Snowshagal</title>')];
+  await elements['html-file'].emit('change');
+  assert.equal(elements['post-title'].value, '공매도 잔고 읽는 법');
+  assert.equal(elements['post-seo-title'].value, '');
+  assert.match(elements['seo-title-source'].textContent, /제목과 같아/);
+});
+
+test('a Daily switches the search title off and never sends one, in either language', async () => {
+  for (const language of ['ko', 'en']) {
+    const { elements, languageOptions, submissions } = await loadAdmin({ confirmResult: true });
+    elements['admin-key'].value = 'test-key';
+    if (language === 'en') {
+      languageOptions.forEach(option => { option.checked = option.value === 'en'; });
+      languageOptions.find(option => option.value === 'en').emit('change');
+    }
+    elements['html-file'].files = [{
+      name: '데일리.html',
+      size: 100,
+      text: async () => '<!doctype html><html><head><meta name="report-date" content="2026-08-10"><title>코스피 마감 정리 | Snowshagal</title></head><body></body></html>'
+    }];
+    await elements['html-file'].emit('change');
+    assert.equal(elements['post-type'].value, 'daily');
+    assert.equal(elements['post-seo-title'].disabled, true, language);
+    assert.match(elements['seo-title-hint'].textContent, /한국어·영문 모두/);
+    await elements['publish-btn'].emit('click');
+    assert.equal(submissions[0].entries.some(([name]) => name === 'seoTitle'), false, language);
+  }
+});
+
+test('the share image the report names is pointed out by file name', async () => {
+  const { elements } = await loadAdmin();
+  elements['html-file'].files = [basicsReport('<title>공매도</title><meta property="og:image" content="https://snowshagal.com/assets/social/basics-08-short-selling.jpg">')];
+  await elements['html-file'].emit('change');
+  assert.equal(elements['share-image-hint'].hidden, false);
+  assert.match(elements['share-image-hint'].textContent, /basics-08-short-selling\.jpg/);
+});
+
+test('a chosen share image is sent as the card, marked custom, and no card is composed from the cover', async () => {
+  const prepared = { name: 'share-card.jpg', type: 'image/jpeg', size: 1000 };
+  const composed = [];
+  const { elements, submissions, confirmMessages } = await loadAdmin({
+    confirmResult: true,
+    shareCard: {
+      prepareShareImage: async () => ({ blob: prepared, width: 1600, height: 900, cropped: true }),
+      renderShareCard: async () => { composed.push('card'); return { name: 'composed.jpg' }; },
+      renderCoverThumbnail: async () => ({ name: 'thumb.webp' })
+    }
+  });
+  elements['admin-key'].value = 'test-key';
+  elements['html-file'].files = [basicsReport('<title>공매도</title>')];
+  await elements['html-file'].emit('change');
+
+  elements['share-image-file'].files = [{ name: 'basics-08.png', type: 'image/png', size: 200 * 1024 }];
+  await elements['share-image-file'].emit('change');
+  assert.equal(elements['share-image-preview'].hidden, false);
+  assert.match(elements['share-image-info'].textContent, /1600×900 → 1200×630/);
+  assert.match(elements['share-image-info'].textContent, /가장자리가 잘립니다/);
+
+  elements['cover-file'].files = [validCover()];
+  await elements['cover-file'].emit('change');
+  elements['cover-preview-image'].naturalWidth = 900;
+  elements['cover-preview-image'].naturalHeight = 1350;
+  elements['cover-preview-image'].onload?.();
+
+  await elements['publish-btn'].emit('click');
+  const entries = submissions[0].entries;
+  assert.equal(entries.find(([name]) => name === 'shareCard')?.[1], prepared);
+  assert.equal(entries.find(([name]) => name === 'shareCardSource')?.[1], 'custom');
+  assert.equal(entries.filter(([name]) => name === 'shareCard').length, 1);
+  assert.deepEqual(composed, []);
+  assert.match(confirmMessages[0], /공유 이미지: 직접 선택한 이미지/);
+});
+
+test('choosing a new report clears a chosen share image', async () => {
+  const { elements } = await loadAdmin({
+    shareCard: { prepareShareImage: async (file) => ({ blob: file, width: 1200, height: 630, cropped: false }) }
+  });
+  elements['html-file'].files = [basicsReport('<title>공매도</title>')];
+  await elements['html-file'].emit('change');
+  elements['share-image-file'].files = [{ name: 'card.jpg', type: 'image/jpeg', size: 1000 }];
+  await elements['share-image-file'].emit('change');
+  assert.match(elements['share-image-info'].textContent, /그대로 사용합니다/);
+  await elements['html-file'].emit('change');
+  assert.equal(elements['share-image-preview'].hidden, true);
+  assert.equal(elements['share-image-info'].textContent, '고르지 않으면 대표 커버로 공유 카드를 자동으로 만듭니다.');
 });

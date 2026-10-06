@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { onRequestPost } from '../functions/api/manage.js';
 import { createMockAuthEnv } from './helpers/auth-test-helper.mjs';
+import { jpegFile } from './helpers/jpeg.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -680,4 +681,141 @@ test('a delete still removes files, and a null sha is not mistaken for content',
     const removed = treeFrom(calls).filter((entry) => entry.sha === null).map((entry) => entry.path);
     assert.ok(removed.includes(basePost.href), 'the report HTML is deleted');
   } finally { globalThis.fetch = originalFetch; }
+});
+
+/* ---------------- search title and a chosen share image ---------------- */
+
+const basicsPost = { ...basePost, type: 'basics', typeLabel: '시장 입문', coverImage: `covers/${basePost.id}.webp`, shareCardImage: `covers/share/${basePost.id}.jpg` };
+const cardPath = `covers/share/${basePost.id}.jpg`;
+const cardEntries = (tree) => tree.filter((entry) => entry.path === cardPath);
+
+test('the search title is set, cleared, and dropped when the post becomes a Daily or a Weekly', async () => {
+  let calls = githubMock([basicsPost]);
+  try {
+    const { response } = await run({ type: 'basics', seoTitle: '레버리지 ETF 음의 복리: 왜 2배가 아닌가 | Snowshagal' });
+    assert.equal(response.status, 200);
+    assert.equal(postsFromTree(treeFrom(calls))[0].seoTitle, '레버리지 ETF 음의 복리: 왜 2배가 아닌가');
+  } finally { globalThis.fetch = originalFetch; }
+
+  calls = githubMock([{ ...basicsPost, seoTitle: '이전 검색 제목' }]);
+  try {
+    const { response } = await run({ type: 'basics', seoTitle: '' });
+    assert.equal(response.status, 200);
+    assert.equal(Object.hasOwn(postsFromTree(treeFrom(calls))[0], 'seoTitle'), false);
+  } finally { globalThis.fetch = originalFetch; }
+
+  // An older client that does not send the field keeps what is stored.
+  calls = githubMock([{ ...basicsPost, seoTitle: '이전 검색 제목' }]);
+  try {
+    const { response } = await run({ type: 'basics' });
+    assert.equal(response.status, 200);
+    assert.equal(postsFromTree(treeFrom(calls))[0].seoTitle, '이전 검색 제목');
+  } finally { globalThis.fetch = originalFetch; }
+
+  calls = githubMock([{ ...basicsPost, seoTitle: '이전 검색 제목' }]);
+  try {
+    const { response } = await run({ type: 'weekly', seoTitle: '이전 검색 제목' });
+    assert.equal(response.status, 200);
+    assert.equal(Object.hasOwn(postsFromTree(treeFrom(calls))[0], 'seoTitle'), false);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('replacing the share image stores the chosen JPEG in the post’s card slot and marks it custom', async () => {
+  const calls = githubMock([basicsPost]);
+  try {
+    const { response } = await run({ type: 'basics', shareImageAction: 'replace', shareImage: jpegFile(1200, 630) });
+    assert.equal(response.status, 200);
+    const tree = treeFrom(calls);
+    assert.deepEqual(cardEntries(tree).map((entry) => entry.sha), ['cover-blob-sha']);
+    const saved = postsFromTree(tree)[0];
+    assert.equal(saved.shareCardImage, cardPath);
+    assert.equal(saved.shareCardSource, 'custom');
+    assert.equal(saved.coverImage, basicsPost.coverImage, 'the cover is untouched');
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('a chosen share image survives replacing or removing the cover', async () => {
+  const custom = { ...basicsPost, shareCardSource: 'custom' };
+  let calls = githubMock([custom]);
+  try {
+    const { response } = await run({
+      type: 'basics', coverAction: 'replace',
+      cover: new File(['new'], 'new.webp', { type: 'image/webp' }),
+      coverThumbnail: new File(['thumb'], 'cover-450.webp', { type: 'image/webp' }),
+      shareCard: jpegFile(1200, 630, 'share-card.jpg')
+    });
+    assert.equal(response.status, 200);
+    const tree = treeFrom(calls);
+    assert.equal(cardEntries(tree).length, 0, 'neither overwritten nor deleted');
+    const saved = postsFromTree(tree)[0];
+    assert.equal(saved.shareCardImage, cardPath);
+    assert.equal(saved.shareCardSource, 'custom');
+  } finally { globalThis.fetch = originalFetch; }
+
+  calls = githubMock([custom]);
+  try {
+    const { response } = await run({ type: 'basics', coverAction: 'remove' });
+    assert.equal(response.status, 200);
+    const tree = treeFrom(calls);
+    assert.ok(tree.some((entry) => entry.path === custom.coverImage && entry.sha === null), 'the cover itself is removed');
+    assert.equal(cardEntries(tree).length, 0);
+    const saved = postsFromTree(tree)[0];
+    assert.equal(Object.hasOwn(saved, 'coverImage'), false);
+    assert.equal(saved.shareCardImage, cardPath);
+    assert.equal(saved.shareCardSource, 'custom');
+  } finally { globalThis.fetch = originalFetch; }
+
+  // A card the cover made still goes with the cover, as before.
+  calls = githubMock([basicsPost]);
+  try {
+    const { response } = await run({ type: 'basics', coverAction: 'remove' });
+    assert.equal(response.status, 200);
+    const tree = treeFrom(calls);
+    assert.deepEqual(cardEntries(tree).map((entry) => entry.sha), [null]);
+    assert.equal(Object.hasOwn(postsFromTree(tree)[0], 'shareCardImage'), false);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('going back to the automatic card recomposes it from the cover, or falls back when there is none', async () => {
+  const custom = { ...basicsPost, shareCardSource: 'custom' };
+  let calls = githubMock([custom]);
+  try {
+    const { response } = await run({ type: 'basics', shareImageAction: 'auto', shareCard: jpegFile(1200, 630, 'share-card.jpg') });
+    assert.equal(response.status, 200);
+    const tree = treeFrom(calls);
+    assert.deepEqual(cardEntries(tree).map((entry) => entry.sha), ['cover-blob-sha']);
+    const saved = postsFromTree(tree)[0];
+    assert.equal(saved.shareCardImage, cardPath);
+    assert.equal(Object.hasOwn(saved, 'shareCardSource'), false);
+  } finally { globalThis.fetch = originalFetch; }
+
+  // No cover to compose from: the chosen image goes and the brand card is used.
+  const { coverImage: _cover, ...noCover } = custom;
+  calls = githubMock([noCover]);
+  try {
+    const { response } = await run({ type: 'basics', shareImageAction: 'auto' });
+    assert.equal(response.status, 200);
+    const tree = treeFrom(calls);
+    assert.deepEqual(cardEntries(tree).map((entry) => entry.sha), [null]);
+    const saved = postsFromTree(tree)[0];
+    assert.equal(Object.hasOwn(saved, 'shareCardImage'), false);
+    assert.equal(Object.hasOwn(saved, 'shareCardSource'), false);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('a share image that is not a 1200x630 JPEG, or one sent without choosing to replace, is refused', async () => {
+  for (const [fields, error] of [
+    [{ shareImageAction: 'replace', shareImage: jpegFile(800, 418) }, 'BAD_SHARE_IMAGE'],
+    [{ shareImageAction: 'replace' }, 'BAD_SHARE_IMAGE'],
+    [{ shareImageAction: 'keep', shareImage: jpegFile(1200, 630) }, 'UNEXPECTED_SHARE_IMAGE'],
+    [{ shareImageAction: 'delete' }, 'INVALID_SHARE_IMAGE_ACTION']
+  ]) {
+    const calls = githubMock([basicsPost]);
+    try {
+      const { response, data } = await run({ type: 'basics', ...fields });
+      assert.equal(response.status, 400, error);
+      assert.equal(data.error, error);
+      assert.equal(calls.length, 0);
+    } finally { globalThis.fetch = originalFetch; }
+  }
 });

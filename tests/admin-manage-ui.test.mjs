@@ -111,7 +111,10 @@ async function loadClientHelpers({
     },
     window: { addEventListener() {} }
   };
-  vm.runInNewContext(source, context);
+  // The manage page loads the shared report metadata rules first, as here.
+  vm.createContext(context);
+  vm.runInContext(await read('assets/report-metadata.js'), context);
+  vm.runInContext(source, context);
   await Promise.resolve();
   await Promise.resolve();
   return { helpers: context.window.__adminManageTest, elements, coverKeep, fetchCalls, allFetchCalls, timers, clearedTimers, location };
@@ -407,4 +410,62 @@ test('responsive management CSS retains full-cover preview behavior and visible 
   assert.match(css, /@media\(max-width:900px\)/);
   assert.match(css, /@media\(max-width:600px\)/);
   assert.match(css, /:focus-visible/);
+});
+
+/* ---------------- search title and a chosen share image ---------------- */
+
+const basicsWithCard = {
+  id: 'b07', type: 'basics', reportDate: '2026-10-04', date: '2026-10-04',
+  registeredDate: '2026-10-05', registeredAt: '2026-10-04T16:16:31.596Z',
+  title: '2배 ETF는 왜 2배가 아닌가', subtitle: '', description: '설명', href: 'reports/b07.html',
+  coverImage: 'covers/b07.webp', shareCardImage: 'covers/share/b07.jpg'
+};
+
+test('manage page offers the search title and the share image with keep / replace / back-to-automatic', async () => {
+  const html = await read('admin/manage/index.html');
+  assert.match(html, /id="manage-seo-title"[^>]*maxlength="150"/);
+  assert.match(html, /name="share-image-action" value="keep" checked/);
+  assert.match(html, /name="share-image-action" value="replace"/);
+  assert.match(html, /id="share-image-auto-option" hidden><input type="radio" name="share-image-action" value="auto"/);
+  assert.match(html, /id="replacement-share-image"[^>]*accept="[^"]*image\/jpeg/);
+  assert.ok(html.indexOf('/assets/report-metadata.js') < html.indexOf('/assets/admin-manage.js'), 'the rules load before the page script');
+});
+
+test('the manage editor shows and sends the search title, and switches it off for a Daily or a Weekly', async () => {
+  const { helpers, elements } = await loadClientHelpers();
+  helpers.setPosts([{ ...basicsWithCard, seoTitle: '레버리지 ETF 음의 복리: 왜 2배가 아닌가' }]);
+  helpers.selectPost('b07');
+  assert.equal(elements['manage-seo-title'].value, '레버리지 ETF 음의 복리: 왜 2배가 아닌가');
+  assert.equal(elements['manage-seo-title'].disabled, false);
+  elements['manage-seo-title'].value = '  고친 검색 제목 ';
+  let form = await helpers.buildUpdateForm();
+  assert.equal(form.get('seoTitle'), '고친 검색 제목');
+  assert.equal(form.get('shareImageAction'), 'keep');
+  assert.equal(form.has('shareImage'), false);
+
+  elements['manage-type'].value = 'daily';
+  helpers.updateSeoTitleField('daily');
+  assert.equal(elements['manage-seo-title'].disabled, true);
+  assert.match(elements['manage-seo-title-hint'].textContent, /한국어·영문 모두/);
+  form = await helpers.buildUpdateForm();
+  assert.equal(form.get('seoTitle'), '', 'a Daily sends an empty search title, which the server drops');
+});
+
+test('the manage editor names the current share image and offers going back only from a chosen one', async () => {
+  const { helpers, elements } = await loadClientHelpers();
+  helpers.setPosts([basicsWithCard, { ...basicsWithCard, id: 'b07c', shareCardSource: 'custom' }, { ...basicsWithCard, id: 'bare', shareCardImage: undefined }]);
+
+  helpers.selectPost('b07');
+  assert.equal(elements['current-share-image-label'].textContent, '커버로 만든 자동 카드');
+  assert.equal(elements['share-image-auto-option'].hidden, true);
+  assert.match(elements['manage-share-image'].src, /^\.\.\/\.\.\/covers\/share\/b07\.jpg\?v=/);
+  assert.equal(elements['manage-share-image'].hidden, false);
+
+  helpers.selectPost('b07c');
+  assert.equal(elements['current-share-image-label'].textContent, '직접 고른 이미지');
+  assert.equal(elements['share-image-auto-option'].hidden, false);
+
+  helpers.selectPost('bare');
+  assert.equal(elements['current-share-image-label'].textContent, '없음 · 사이트 기본 이미지 사용');
+  assert.equal(elements['manage-share-image'].hidden, true);
 });

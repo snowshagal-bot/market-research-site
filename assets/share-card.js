@@ -161,5 +161,41 @@
     }
   }
 
-  root.SHARE_CARD = { renderShareCard, renderCoverThumbnail, categoryLabel, formatDate, WIDTH, HEIGHT, THUMBNAIL_WIDTH };
+  /**
+   * A finished share image the editor chose in place of the composed card.
+   * A JPEG that is already 1200x630 is sent byte for byte; anything else is
+   * drawn to fill the card, centred, and encoded as one — `cropped` says
+   * whether its proportions differed enough for edges to be cut.
+   * @param {Blob|File} file
+   * @returns {Promise<{blob: Blob, width: number, height: number, cropped: boolean}>}
+   */
+  async function prepareShareImage(file) {
+    const url = URL.createObjectURL(file);
+    try {
+      const image = await loadImage(url);
+      const width = image.naturalWidth || image.width;
+      const height = image.naturalHeight || image.height;
+      if (file.type === 'image/jpeg' && width === WIDTH && height === HEIGHT) {
+        return { blob: file, width, height, cropped: false };
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = WIDTH;
+      canvas.height = HEIGHT;
+      const context = canvas.getContext('2d');
+      context.fillStyle = IVORY;
+      context.fillRect(0, 0, WIDTH, HEIGHT);
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = 'high';
+      const scale = Math.max(WIDTH / width, HEIGHT / height);
+      const drawWidth = width * scale;
+      const drawHeight = height * scale;
+      context.drawImage(image, (WIDTH - drawWidth) / 2, (HEIGHT - drawHeight) / 2, drawWidth, drawHeight);
+      const cropped = Math.abs(width / height - WIDTH / HEIGHT) > 0.01;
+      return { blob: await toBlob(canvas), width, height, cropped };
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  root.SHARE_CARD = { renderShareCard, renderCoverThumbnail, prepareShareImage, categoryLabel, formatDate, WIDTH, HEIGHT, THUMBNAIL_WIDTH };
 })(typeof window !== 'undefined' ? window : globalThis);

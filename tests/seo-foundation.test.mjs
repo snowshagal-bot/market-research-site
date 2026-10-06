@@ -14,6 +14,7 @@ import {
   homepageLatestLinks,
   homepageReportLinks,
   postLanguage,
+  postSeoTitle,
   reportAlternates,
   reportDescription,
   reportSeoTags,
@@ -194,7 +195,8 @@ test('report SEO title and description are non-empty, unique, and use the editor
     const description = reportDescription(post);
     const tags = reportSeoTags(posts, post);
     assert.ok(title.includes('Snowshagal'));
-    assert.ok(title.includes(post.title));
+    // The author's own search title when the post has one, else the headline.
+    assert.ok(title.includes(postSeoTitle(post) || post.title), post.id);
     assert.ok(description.length > 0);
     assert.ok(description.length <= 180, `${post.id} description is too long`);
     assert.match(tags, /<title>[^<]+<\/title>/);

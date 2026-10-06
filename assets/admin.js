@@ -16,6 +16,9 @@
   const date = $('post-date');
   const registeredDate = $('registered-date');
   const title = $('post-title');
+  const seoTitleInput = $('post-seo-title');
+  const seoTitleSource = $('seo-title-source');
+  const seoTitleHint = $('seo-title-hint');
   const subtitle = $('post-subtitle');
   const description = $('post-description');
   const postSummary = $('post-summary');
@@ -43,6 +46,10 @@
   const descriptionSource = $('description-source');
   const summarySource = $('summary-source');
   const coverInput = $('cover-file');
+  const shareImageInput = $('share-image-file');
+  const shareImageInfo = $('share-image-info');
+  const shareImageHint = $('share-image-hint');
+  const shareImagePreview = $('share-image-preview');
   const coverInfo = $('cover-info');
   const generateCoverBtn = $('generate-cover-btn');
   const coverGeneratorStatus = $('cover-generator-status');
@@ -83,6 +90,13 @@
   let takeawayReading = null;
   let descriptionReading = null;
   let summaryReading = null;
+  let seoTitleReading = null;
+  // A finished 1200x630 image the editor chose for sharing, already prepared
+  // (SHARE_CARD.prepareShareImage); null means the cover's card is composed.
+  let selectedShareImage = null;
+  let shareImagePending = false;
+  let shareImageVersion = 0;
+  let shareImagePreviewUrl = '';
   let generatingCover = false;
   let coverGenerationVersion = 0;
   let coverDecodePending = false;
@@ -93,6 +107,9 @@
   const PUBLIC_ORIGIN = 'https://snowshagal.com';
   const localeApi = window.MARKET_LOCALE;
 
+  const defaultShareImageInfo = '고르지 않으면 대표 커버로 공유 카드를 자동으로 만듭니다.';
+  const defaultSeoTitleHint = '끝에 " | Snowshagal"이 자동으로 붙습니다. 홈페이지 카드와 리포트 제목은 위 「제목」을 씁니다.';
+  const marketSeoTitleHint = '데일리·위클리는 그날 마감 수치로 검색 제목을 자동으로 만듭니다(한국어·영문 모두). 이 칸은 쓰지 않습니다.';
   const defaultCoverInfo = 'JPG, PNG, WebP · 최대 4MB · 원본 리포트 HTML과 별도로 저장됩니다.';
   const defaultCoverGeneratorStatus = '업로드한 리포트 HTML의 첫 화면을 기준으로 생성합니다. 결과는 게시 전에 미리보고 교체할 수 있습니다.';
   const defaultCoverPreviewNote = '커버 미선택 · 게시 후 홈페이지에서는 fallback cover 사용';
@@ -643,6 +660,31 @@
     return { text: value, source: 'meta-description' };
   }
 
+  // The report's own search title: its <title>, without the brand the site
+  // adds back. A <title> that only repeats the headline is not a title of its
+  // own — the category rule then writes one — so the field stays empty.
+  function readSeoTitle(doc, editorialTitle) {
+    const rules = window.REPORT_METADATA;
+    const text = rules.seoTitleText(doc?.querySelector('title')?.textContent);
+    if (!text) return { text: '', source: 'none' };
+    if (text === rules.normalizeMetadataText(editorialTitle)) return { text: '', source: 'same-as-title' };
+    return { text, source: 'report-title' };
+  }
+
+  // The image the report names for sharing, by file name only: the file
+  // itself is on the editor's computer, not at that address yet.
+  function declaredShareImageName(doc) {
+    const content = String(doc?.querySelector('meta[property="og:image"]')?.content || '').trim();
+    if (!content) return '';
+    try {
+      const path = new URL(content, PUBLIC_ORIGIN).pathname;
+      if (path.startsWith('/covers/share/') || path === '/assets/social/snowshagal-home.jpg') return '';
+      return decodeURIComponent(path.split('/').pop() || '');
+    } catch (_) {
+      return '';
+    }
+  }
+
   function summaryText(value) {
     // A declared summary can still be written across lines in the attribute,
     // and it travels into a search result on one, so it is collapsed too.
@@ -733,6 +775,12 @@
 
   // Where each field was read, as the publish form names it.
   const SOURCE_LABELS = {
+    seoTitle: {
+      'report-title': '출처 · 리포트 <title> (끝의 브랜드 표기는 사이트가 붙입니다)',
+      'same-as-title': '리포트 <title>이 제목과 같아 비워 둡니다 · 사이트 규칙으로 만듭니다',
+      none: '출처 없음 · 비워 두면 사이트 규칙으로 만듭니다',
+      manual: '직접 입력'
+    },
     description: {
       'meta-description': '출처 · 리포트 meta description',
       'rejected-boilerplate': '출처 없음 · 리포트의 meta description이 카테고리 기본 문장이라 제외했습니다',
@@ -762,7 +810,7 @@
   }
 
   function renderSourceLabels() {
-    for (const [node, field, reading] of [[descriptionSource, 'description', descriptionReading], [summarySource, 'summary', summaryReading]]) {
+    for (const [node, field, reading] of [[seoTitleSource, 'seoTitle', seoTitleReading], [descriptionSource, 'description', descriptionReading], [summarySource, 'summary', summaryReading]]) {
       if (!node) continue;
       node.textContent = reading ? sourceLabel(field, reading) : '';
       node.hidden = !reading;
@@ -788,7 +836,81 @@
     return original.replace(/[\\/:*?"<>|]/g,'-').replace(/\s+/g,' ').trim();
   }
 
-  function validateCover(file) {
+  // Only Research, Note and Basics take a search title of their own; the
+  // field keeps its value while it is switched off, in case the category
+  // changes back, and is not sent.
+  function renderSeoTitleField() {
+    if (!seoTitleInput) return;
+    const accepts = !type.value || window.REPORT_METADATA.acceptsSeoTitle(type.value);
+    seoTitleInput.disabled = !accepts;
+    if (seoTitleHint) seoTitleHint.textContent = accepts ? defaultSeoTitleHint : marketSeoTitleHint;
+  }
+
+  function revokeShareImagePreview() {
+    if (!shareImagePreviewUrl) return;
+    URL.revokeObjectURL(shareImagePreviewUrl);
+    shareImagePreviewUrl = '';
+  }
+
+  function resetShareImage() {
+    shareImageVersion += 1;
+    shareImagePending = false;
+    selectedShareImage = null;
+    revokeShareImagePreview();
+    if (shareImageInput) shareImageInput.value = '';
+    if (shareImagePreview) {
+      shareImagePreview.hidden = true;
+      shareImagePreview.removeAttribute('src');
+    }
+    if (shareImageInfo) shareImageInfo.textContent = defaultShareImageInfo;
+  }
+
+  async function chooseShareImage(file) {
+    const version = ++shareImageVersion;
+    selectedShareImage = null;
+    revokeShareImagePreview();
+    shareImagePreview.hidden = true;
+    shareImagePreview.removeAttribute('src');
+    if (!file) {
+      shareImagePending = false;
+      shareImageInfo.textContent = defaultShareImageInfo;
+      updatePublishState();
+      return;
+    }
+    const error = validateCover(file, '공유 이미지');
+    if (error) {
+      shareImagePending = false;
+      shareImageInput.value = '';
+      shareImageInfo.textContent = error;
+      updatePublishState();
+      return;
+    }
+    shareImagePending = true;
+    shareImageInfo.textContent = '공유 이미지를 확인하는 중…';
+    updatePublishState();
+    try {
+      const prepared = await window.SHARE_CARD.prepareShareImage(file);
+      if (version !== shareImageVersion) return;
+      selectedShareImage = prepared;
+      shareImagePreviewUrl = URL.createObjectURL(prepared.blob);
+      shareImagePreview.src = shareImagePreviewUrl;
+      shareImagePreview.hidden = false;
+      shareImageInfo.textContent = prepared.blob === file
+        ? `${file.name} · 1200×630 JPEG · 그대로 사용합니다.`
+        : `${file.name} · 원본 ${prepared.width}×${prepared.height} → 1200×630 JPEG로 맞춥니다${prepared.cropped ? ' · 비율이 달라 가장자리가 잘립니다' : ''}.`;
+    } catch (_) {
+      if (version !== shareImageVersion) return;
+      shareImageInput.value = '';
+      shareImageInfo.textContent = '이미지를 읽을 수 없습니다. 다른 파일을 선택해 주세요.';
+    } finally {
+      if (version === shareImageVersion) {
+        shareImagePending = false;
+        updatePublishState();
+      }
+    }
+  }
+
+  function validateCover(file, label = '대표 커버 이미지') {
     if (!file) return '';
     const extension = file.name.split('.').pop()?.toLowerCase() || '';
     const allowed = {
@@ -797,7 +919,7 @@
       'image/webp': ['webp']
     };
     if (!allowed[file.type]?.includes(extension)) return 'JPG, PNG, WebP 이미지만 선택할 수 있습니다.';
-    if (file.size > 4 * 1024 * 1024) return '대표 커버 이미지는 4MB 이하여야 합니다.';
+    if (file.size > 4 * 1024 * 1024) return `${label}는 4MB 이하여야 합니다.`;
     return '';
   }
 
@@ -814,6 +936,7 @@
     }
     // Switching away from Daily withdraws the one-liner along with it.
     renderTakeawayStatus();
+    renderSeoTitleField();
     updatePublishState();
   }
 
@@ -905,7 +1028,7 @@
 
   function updatePublishState() {
     const ready = selectedFile && type.value && /^\d{4}-\d{2}-\d{2}$/.test(date.value) && title.value.trim() && filename.value.trim();
-    publishBtn.disabled = publishing || generatingCover || coverDecodePending || !ready;
+    publishBtn.disabled = publishing || generatingCover || coverDecodePending || shareImagePending || !ready;
     if (generateCoverBtn) generateCoverBtn.disabled = generatingCover || coverDecodePending || !selectedFile || !selectedHtmlText || !selectedHtmlDocument;
   }
 
@@ -1042,6 +1165,7 @@
     coverInput.value = '';
     coverInfo.textContent = defaultCoverInfo;
     resetCoverPreview();
+    resetShareImage();
     selectedFile = file;
     selectedHtmlText = '';
     selectedHtmlDocument = null;
@@ -1049,6 +1173,8 @@
     takeawayReading = null;
     descriptionReading = null;
     summaryReading = null;
+    seoTitleReading = null;
+    if (shareImageHint) shareImageHint.hidden = true;
     renderTakeawayStatus();
     renderSourceLabels();
     registeredDate.value = '게시 시 자동 기록';
@@ -1062,6 +1188,7 @@
     const detectedDate = detectDate(file.name, doc, text);
     const detectedTitle = detectTitle(file.name, doc);
     const detectedSubtitle = detectSubtitle(doc);
+    seoTitleReading = readSeoTitle(doc, detectedTitle);
     descriptionReading = readDescription(doc);
     summaryReading = readSummary(doc, detectedType);
     takeawayReading = readTakeaway(doc);
@@ -1071,6 +1198,14 @@
     date.value = detectedDate;
     if (translationSource?.value) syncPairedReportDate();
     title.value = detectedTitle;
+    if (seoTitleInput) seoTitleInput.value = seoTitleReading.text;
+    const declaredShareImage = declaredShareImageName(doc);
+    if (shareImageHint) {
+      shareImageHint.textContent = declaredShareImage
+        ? `리포트가 지정한 공유 이미지 · ${declaredShareImage} · 이 파일을 선택하면 그대로 씁니다.`
+        : '';
+      shareImageHint.hidden = !declaredShareImage;
+    }
     subtitle.value = detectedSubtitle;
     description.value = descriptionReading.text;
     postSummary.value = summaryReading.text;
@@ -1116,8 +1251,9 @@
         return;
       }
     }
+    const shareNote = selectedShareImage ? '\n공유 이미지: 직접 선택한 이미지' : '';
     const coverWarning = selectedCover ? '' : '\n\n대표 커버가 선택되지 않았습니다. 게시 후 홈페이지에서는 fallback cover가 사용됩니다.';
-    const summary = `${date.value} · ${labels[postType]} · ${languageLabel}\n${title.value.trim()}${coverWarning}\n\n이 내용으로 홈페이지에 게시할까요?`;
+    const summary = `${date.value} · ${labels[postType]} · ${languageLabel}\n${title.value.trim()}${shareNote}${coverWarning}\n\n이 내용으로 홈페이지에 게시할까요?`;
     if (!confirm(summary)) return;
 
     publishing = true;
@@ -1132,6 +1268,7 @@
     form.append('type', postType);
     form.append('reportDate', date.value);
     form.append('title', title.value.trim());
+    if (seoTitleInput && window.REPORT_METADATA.acceptsSeoTitle(postType)) form.append('seoTitle', seoTitleInput.value.trim());
     form.append('subtitle', subtitle.value.trim());
     form.append('description', description.value.trim());
     form.append('summary', postSummary.value.trim());
@@ -1146,16 +1283,23 @@
     if (activeCustomTags.length > 0) {
       form.append('newTags', JSON.stringify(activeCustomTags));
     }
+    if (selectedShareImage) {
+      // The editor's own share image stands in for the composed card.
+      form.append('shareCard', selectedShareImage.blob, 'share-card.jpg');
+      form.append('shareCardSource', 'custom');
+    }
     if (selectedCover) {
       form.append('cover', selectedCover, selectedCover.name);
       // The 1200x630 social card is composed from the same cover, so an
       // unfurler never has to crop the portrait artwork. A failure here must
       // not block publishing: the report falls back to the brand card.
-      try {
-        const card = await window.SHARE_CARD.renderShareCard(selectedCover, { category: postType, date: date.value });
-        form.append('shareCard', card, 'share-card.jpg');
-      } catch (error) {
-        console.warn('share card generation failed; falling back to the brand card', error);
+      if (!selectedShareImage) {
+        try {
+          const card = await window.SHARE_CARD.renderShareCard(selectedCover, { category: postType, date: date.value });
+          form.append('shareCard', card, 'share-card.jpg');
+        } catch (error) {
+          console.warn('share card generation failed; falling back to the brand card', error);
+        }
       }
       // The 450px thumbnail the homepage cards draw from, made here from the
       // same cover so a new report never goes out without one. If it cannot
@@ -1233,6 +1377,12 @@
     else resetCoverPreview();
   });
   generateCoverBtn?.addEventListener('click', generateCover);
+  shareImageInput?.addEventListener('change', () => chooseShareImage(shareImageInput.files?.[0] || null));
+  seoTitleInput?.addEventListener('input', () => {
+    if (!seoTitleReading) return;
+    seoTitleReading = { text: seoTitleInput.value, source: 'manual' };
+    renderSourceLabels();
+  });
   coverPreviewModes.forEach(button => {
     button.addEventListener('click', () => setCoverPreviewMode(button.dataset.coverPreviewMode));
   });

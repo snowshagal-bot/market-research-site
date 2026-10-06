@@ -1,6 +1,7 @@
 import { searchIndexArtifacts } from "./_search-index.js";
 import { findLateCoverStyle, lateCoverStyleMessage } from "../_cover-style.js";
 import { SOCIAL_REPORT_CARD_DIR } from "../_seo.js";
+import { customShareCardProblem } from "../_share-image.js";
 import { isHumanAdminHost, validateHumanAdminMutation } from "../_host-policy.js";
 import { requireAdminMutation } from "../_auth.js";
 import "../../assets/report-metadata.js";
@@ -693,6 +694,8 @@ function validateEditableFields(form) {
     description: String(form.get("description") || "").trim(),
     summaryProvided: form.has("summary"),
     summary: String(form.get("summary") || "").trim().slice(0, 500),
+    seoTitleProvided: form.has("seoTitle"),
+    seoTitle: globalThis.REPORT_METADATA.seoTitleText(form.get("seoTitle")),
     tagsProvided,
     tags,
     takeawayProvided: form.has("takeaway"),
@@ -733,6 +736,8 @@ export async function onRequestPost(context) {
   let replacementHtml = null;
   let coverFile = null;
   let coverAction = "keep";
+  let shareImageFile = null;
+  let shareImageAction = "keep";
 
   if (action === "update") {
     editFields = validateEditableFields(form);
@@ -765,6 +770,22 @@ export async function onRequestPost(context) {
       if (coverFile.size > MAX_COVER_BYTES) return reply({ ok: false, error: "COVER_TOO_LARGE", message: "커버 이미지는 4MB 이하여야 합니다." }, 413);
     } else if (coverFile) {
       return reply({ ok: false, error: "UNEXPECTED_COVER", message: "커버 교체를 선택한 경우에만 이미지를 첨부할 수 있습니다." }, 400);
+    }
+
+    // keep: leave the share image as it is; replace: store the image the
+    // editor chose; auto: drop a chosen image and go back to the card the
+    // cover makes.
+    shareImageAction = String(form.get("shareImageAction") || "keep");
+    if (!new Set(["keep", "replace", "auto"]).has(shareImageAction)) {
+      return reply({ ok: false, error: "INVALID_SHARE_IMAGE_ACTION", message: "공유 이미지 처리 방식을 확인해 주세요." }, 400);
+    }
+    const shareCandidate = form.get("shareImage");
+    if (isFile(shareCandidate) && shareCandidate.size > 0) shareImageFile = shareCandidate;
+    if (shareImageAction === "replace") {
+      const problem = await customShareCardProblem(shareImageFile, MAX_COVER_BYTES);
+      if (problem) return reply({ ok: false, error: "BAD_SHARE_IMAGE", message: problem }, 400);
+    } else if (shareImageFile) {
+      return reply({ ok: false, error: "UNEXPECTED_SHARE_IMAGE", message: "공유 이미지 교체를 선택한 경우에만 이미지를 첨부할 수 있습니다." }, 400);
     }
   }
 
@@ -888,6 +909,15 @@ export async function onRequestPost(context) {
         else delete updated.summary;
       }
 
+      // Only a category that takes a search title keeps one: a post moved to
+      // Daily or Weekly gets the dated title with the close instead.
+      if (!globalThis.REPORT_METADATA.acceptsSeoTitle(editFields.type)) {
+        delete updated.seoTitle;
+      } else if (editFields.seoTitleProvided) {
+        if (editFields.seoTitle) updated.seoTitle = editFields.seoTitle;
+        else delete updated.seoTitle;
+      }
+
       if (editFields.type === 'daily') {
         if (editFields.takeawayProvided) {
           if (editFields.takeaway) updated.takeaway = editFields.takeaway;
@@ -908,6 +938,45 @@ export async function onRequestPost(context) {
         updated.readingMinutes = calculateReadingMinutes(replacementHtml, postLanguage(existing), existing.type);
       }
 
+      const cardPath = `${SOCIAL_REPORT_CARD_DIR}/${existing.id}.jpg`;
+      const composedCard = form.get("shareCard");
+      const usableComposedCard = composedCard && typeof composedCard.arrayBuffer === "function" && Number(composedCard.size || 0) > 0;
+      if (shareImageAction !== "keep" && !/^[A-Za-z0-9._-]+$/.test(existing.id)) {
+        return reply({ ok: false, error: "UNSAFE_POST_ID", message: "안전하지 않은 게시물 ID에는 공유 이미지를 저장할 수 없습니다." }, 400);
+      }
+      if (shareImageAction === "replace") {
+        const shareBlob = await gh(env.GITHUB_TOKEN, "/git/blobs", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ content: encodeBase64(await shareImageFile.arrayBuffer()), encoding: "base64" }),
+        });
+        entries.push({ path: cardPath, mode: "100644", type: "blob", sha: shareBlob.sha });
+        updated.shareCardImage = cardPath;
+        updated.shareCardSource = "custom";
+      } else if (shareImageAction === "auto" && existing.shareCardSource === "custom") {
+        delete updated.shareCardSource;
+        // With the cover unchanged, the card is recomposed in the browser from
+        // the cover the post already has; a cover being replaced or removed
+        // decides the card below, as it does for any composed card.
+        if (coverAction === "keep") {
+          if (existing.coverImage && usableComposedCard) {
+            const cardBlob = await gh(env.GITHUB_TOKEN, "/git/blobs", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ content: encodeBase64(await composedCard.arrayBuffer()), encoding: "base64" }),
+            });
+            entries.push({ path: cardPath, mode: "100644", type: "blob", sha: cardBlob.sha });
+            updated.shareCardImage = cardPath;
+          } else {
+            if (existing.shareCardImage) entries.push(deletedEntry(existing.shareCardImage));
+            delete updated.shareCardImage;
+          }
+        }
+      }
+      // A chosen share image does not depict the cover, so replacing or
+      // removing the cover leaves it where it is.
+      const keepsChosenCard = updated.shareCardSource === "custom";
+
       if (coverAction === "remove") {
         if (existing.coverImage) {
           entries.push(deletedEntry(existing.coverImage));
@@ -917,9 +986,11 @@ export async function onRequestPost(context) {
         }
         // Nothing to compose a card from any more, so the report falls back to
         // the brand card and the stale card is removed rather than orphaned.
-        if (existing.shareCardImage) entries.push(deletedEntry(existing.shareCardImage));
+        if (!keepsChosenCard) {
+          if (existing.shareCardImage) entries.push(deletedEntry(existing.shareCardImage));
+          delete updated.shareCardImage;
+        }
         delete updated.coverImage;
-        delete updated.shareCardImage;
         delete updated.coverThumbnail;
       } else if (coverAction === "replace") {
         if (!/^[A-Za-z0-9._-]+$/.test(existing.id)) {
@@ -938,19 +1009,19 @@ export async function onRequestPost(context) {
         // Recomposed in the browser from the replacement cover. If that failed
         // the previous card is deleted rather than left beside artwork it no
         // longer depicts; the report falls back to the brand card.
-        const cardFile = form.get("shareCard");
-        const nextCardPath = `${SOCIAL_REPORT_CARD_DIR}/${existing.id}.jpg`;
-        if (cardFile && typeof cardFile.arrayBuffer === "function" && Number(cardFile.size || 0) > 0) {
-          const cardBlob = await gh(env.GITHUB_TOKEN, "/git/blobs", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ content: encodeBase64(await cardFile.arrayBuffer()), encoding: "base64" }),
-          });
-          entries.push({ path: nextCardPath, mode: "100644", type: "blob", sha: cardBlob.sha });
-          updated.shareCardImage = nextCardPath;
-        } else {
-          if (existing.shareCardImage) entries.push(deletedEntry(existing.shareCardImage));
-          delete updated.shareCardImage;
+        if (!keepsChosenCard) {
+          if (usableComposedCard) {
+            const cardBlob = await gh(env.GITHUB_TOKEN, "/git/blobs", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ content: encodeBase64(await composedCard.arrayBuffer()), encoding: "base64" }),
+            });
+            entries.push({ path: cardPath, mode: "100644", type: "blob", sha: cardBlob.sha });
+            updated.shareCardImage = cardPath;
+          } else {
+            if (existing.shareCardImage) entries.push(deletedEntry(existing.shareCardImage));
+            delete updated.shareCardImage;
+          }
         }
 
         // The homepage thumbnail is derived from the cover's name, so a new

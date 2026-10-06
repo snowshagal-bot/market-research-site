@@ -63,6 +63,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-04T16:32:02.993Z",
     "legacyImport": false,
     "title": "A 2× ETF isn’t really 2×",
+    "seoTitle": "Leveraged ETF Volatility Drag: Why a 2× ETF Isn’t 2×",
     "subtitle": "",
     "description": "A 2× leveraged ETF targets twice the DAILY return—not twice the return over weeks. Using seven weeks of SK hynix closes, the stock fell 7.2% while a theoretical +2× path fell 29.2% and a −2× path fell 33.0%. Quizzes and a simulator explain volatility drag, path dependence, and daily rebalancing.",
     "tags": [
@@ -88,6 +89,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-04T16:16:31.596Z",
     "legacyImport": false,
     "title": "2배 ETF는 왜 2배가 아닌가",
+    "seoTitle": "레버리지 ETF 음의 복리: 왜 2배가 아닌가",
     "subtitle": "",
     "description": "레버리지 ETF의 목표는 하루 2배다. SK하이닉스 7주 종가로 계산하면 주가 −7.2%에 2배는 −29.2%, 곱버스는 −33.0%. 음의 복리(변동성 끌림)와 장 마감 리밸런싱을 퀴즈·시뮬레이터로 설명한다.",
     "tags": [

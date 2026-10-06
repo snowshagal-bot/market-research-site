@@ -50,10 +50,34 @@
     return isCategoryBoilerplate(text) ? '' : text;
   }
 
+  // A report's own search title: the <title> its author wrote, as the editor
+  // confirmed it at publish time. Only the categories whose <title> is not
+  // built from Market Close numbers take one — a Daily or a Weekly keeps the
+  // dated title with the day's close, in Korean and in English alike. The
+  // site appends the brand itself, so a "| Snowshagal" the author already
+  // wrote is dropped rather than doubled.
+  const SEO_TITLE_TYPES = Object.freeze(['research', 'note', 'basics']);
+  const SEO_TITLE_MAX = 150;
+  const BRAND_SUFFIX = /\s*[|\-–—·:]\s*Snowshagal\s*$/i;
+
+  function acceptsSeoTitle(type) {
+    return SEO_TITLE_TYPES.includes(type);
+  }
+
+  function seoTitleText(value) {
+    let text = normalizeMetadataText(value);
+    while (BRAND_SUFFIX.test(text)) text = text.replace(BRAND_SUFFIX, '').trim();
+    if (/^snowshagal$/i.test(text)) return '';
+    return text.slice(0, SEO_TITLE_MAX).trim();
+  }
+
   root.REPORT_METADATA = Object.freeze({
     CATEGORY_DEFAULT_DESCRIPTIONS,
     normalizeMetadataText,
     isCategoryBoilerplate,
-    editorialDescription
+    editorialDescription,
+    SEO_TITLE_TYPES,
+    acceptsSeoTitle,
+    seoTitleText
   });
 })(typeof window !== 'undefined' ? window : globalThis);
