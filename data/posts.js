@@ -1,5 +1,28 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-07-basics-gofwdc",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-10-07",
+    "reportDate": "2026-10-07",
+    "registeredDate": "2026-10-07",
+    "registeredAt": "2026-10-06T17:34:43.670Z",
+    "legacyImport": false,
+    "title": "공매도는 하락을 만드는가, 따라가는가",
+    "subtitle": "",
+    "description": "공매도 잔고(순보유잔고)·대차잔고·거래 비중은 어떻게 다를까. 코스피 공매도 잔고가 22조 원으로 기록을 세운 날 코스피도 사상 최고였다. 공매도 뜻부터 숏커버, 업틱룰까지 실제 숫자와 퀴즈로 설명한다.",
+    "tags": [
+      "liquidity",
+      "short-selling"
+    ],
+    "readingMinutes": 8,
+    "href": "reports/시장을읽는말들_8편_공매도는하락을만드는가따라가는가.html",
+    "coverImage": "covers/2026-10-07-basics-gofwdc.webp",
+    "shareCardImage": "covers/share/2026-10-07-basics-gofwdc.jpg",
+    "coverThumbnail": "covers/2026-10-07-basics-gofwdc-450.webp"
+  },
+  {
     "id": "2026-10-04-note-13vdfus",
     "type": "note",
     "typeLabel": "Investment Note",
