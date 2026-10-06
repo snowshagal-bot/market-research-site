@@ -144,9 +144,10 @@ test('publishing and cover replacement both keep the card in step', async () => 
   // Replacing a cover without a new card deletes the old one rather than
   // leaving it beside artwork it no longer depicts.
   assert.match(manageFn, /\} else \{[\s\S]{0,160}?if \(existing\.shareCardImage\) entries\.push\(deletedEntry\(existing\.shareCardImage\)\);[\s\S]{0,60}?delete updated\.shareCardImage;/);
-  assert.match(manageFn, /updated\.shareCardImage = nextCardPath;/);
-  // Removal and deletion both take the recorded card with them.
-  assert.equal((manageFn.match(/deletedEntry\(existing\.shareCardImage\)/g) || []).length, 3);
+  assert.match(manageFn, /updated\.shareCardImage = cardPath;/);
+  // Removal and deletion both take the recorded card with them, and so does
+  // going back from a chosen share image to a cover with no card to recompose.
+  assert.equal((manageFn.match(/deletedEntry\(existing\.shareCardImage\)/g) || []).length, 4);
   assert.match(manageFn, /delete updated\.shareCardImage;/);
 });
 

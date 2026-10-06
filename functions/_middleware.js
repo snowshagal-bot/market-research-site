@@ -382,6 +382,7 @@ export async function onRequest(context) {
     // attribute rather than by attribute order.
     if (seo) {
       body = body.replace(/<title>[\s\S]*?<\/title>/i, '');
+      body = body.replace(/<script\b[^>]*\btype=(["']?)application\/ld\+json\1[^>]*>[\s\S]*?<\/script>/gi, '');
       body = removeTags(body, 'meta', attrs => (
         attrs.name === 'description'
         || String(attrs.property ?? '').startsWith('og:')
@@ -417,6 +418,10 @@ export async function onRequest(context) {
     .on('meta[name="description"]', { element(element) { if (seo) element.remove(); } })
     .on('meta[property^="og:"]', { element(element) { if (seo) element.remove(); } })
     .on('meta[name^="twitter:"]', { element(element) { if (seo) element.remove(); } })
+    // The site writes the page's Article and breadcrumb itself; one the
+    // report carried would describe the same page a second time, with images
+    // and dates the site does not serve.
+    .on('script[type="application/ld+json"]', { element(element) { if (seo) element.remove(); } })
     // Uploaded report HTML carries no icon of its own.
     .on('link[rel~="icon"]', { element(element) { element.remove(); } })
     .on('link[rel="apple-touch-icon"]', { element(element) { element.remove(); } })

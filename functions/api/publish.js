@@ -1,6 +1,7 @@
 import { searchIndexArtifacts } from './_search-index.js';
 import { findLateCoverStyle, lateCoverStyleMessage } from '../_cover-style.js';
 import { SOCIAL_REPORT_CARD_DIR } from '../_seo.js';
+import { customShareCardProblem } from '../_share-image.js';
 import { isHumanAdminHost, validateHumanAdminMutation } from '../_host-policy.js';
 import { requireAdminMutation } from '../_auth.js';
 import {
@@ -639,6 +640,14 @@ export async function onRequestPost(context) {
   // once filled in by itself is never stored, whichever client sent it.
   const description = globalThis.REPORT_METADATA.editorialDescription(form.get('description')).slice(0, 700);
   const summary = String(form.get('summary') || '').trim().slice(0, 500);
+  // The report's own search title, kept only for a category that takes one
+  // (a Daily or a Weekly title is built from the session's close).
+  const seoTitle = globalThis.REPORT_METADATA.acceptsSeoTitle(type)
+    ? globalThis.REPORT_METADATA.seoTitleText(form.get('seoTitle'))
+    : '';
+  // 'custom': the editor chose a finished 1200x630 image for sharing, which
+  // stands on its own; otherwise any card was composed from the cover.
+  const customShareCard = String(form.get('shareCardSource') || '') === 'custom';
   // The TODAY one-liner the report itself carried. Only a Daily has one:
   // the strip shows a market session, and nothing else stands in for it.
   const takeaway = type === 'daily'
@@ -660,6 +669,13 @@ export async function onRequestPost(context) {
   const coverExt = hasCover ? coverExtension(cover) : '';
   if (hasCover && !coverExt) return reply({ error: 'BAD_COVER_TYPE', message: '대표 커버는 JPG, PNG, WebP 이미지만 지원합니다.' }, 400);
   if (hasCover && Number(cover.size || 0) > MAX_COVER_BYTES) return reply({ error: 'COVER_TOO_LARGE', message: '대표 커버 이미지는 4MB 이하여야 합니다.' }, 413);
+  // A share image the editor chose is refused outright when it is not what it
+  // claims to be: silently dropping it would publish the report with a card
+  // the editor did not pick.
+  if (customShareCard) {
+    const problem = await customShareCardProblem(shareCard, MAX_COVER_BYTES);
+    if (problem) return reply({ error: 'BAD_SHARE_IMAGE', message: problem }, 400);
+  }
 
   const html = await file.text();
   if (!/<(?:!doctype\s+html|html\b)/i.test(html.slice(0, 10000))) {
@@ -782,7 +798,8 @@ export async function onRequestPost(context) {
     const coverPath = hasCover ? `covers/${id}.${coverExt}` : null;
     // A cover does not imply a card: composing one can fail and publishing
     // continues without it, so the metadata records only what is committed.
-    const hasShareCard = Boolean(
+    // A chosen share image needs no cover; a composed card exists only beside one.
+    const hasShareCard = customShareCard || Boolean(
       coverPath && shareCard && typeof shareCard.arrayBuffer === 'function'
       && Number(shareCard.size || 0) > 0 && Number(shareCard.size || 0) <= MAX_COVER_BYTES
     );
@@ -806,6 +823,7 @@ export async function onRequestPost(context) {
       registeredAt,
       legacyImport: false,
       title,
+      ...(seoTitle ? { seoTitle } : {}),
       subtitle,
       description,
       ...(summary ? { summary } : {}),
@@ -818,6 +836,9 @@ export async function onRequestPost(context) {
       ...(translationGroup ? { translationGroup } : {}),
       ...(coverPath ? { coverImage: coverPath } : {}),
       ...(shareCardPath ? { shareCardImage: shareCardPath } : {}),
+      // Marks a card the cover did not produce, so replacing or removing the
+      // cover later leaves it alone.
+      ...(shareCardPath && customShareCard ? { shareCardSource: 'custom' } : {}),
       // Recorded only when the file is in this same commit, so the homepage
       // cards never name a thumbnail that was merely expected.
       ...(coverThumbnailPath ? { coverThumbnail: coverThumbnailPath } : {})

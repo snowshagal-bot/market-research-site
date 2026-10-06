@@ -15,7 +15,8 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
    - Confirm `/sitemap.xml` coverage, indexing status, and crawl rates for KO/EN homepages, category landings, and published reports.
    - Run Search Console / Naver Search Advisor URL inspection on legacy report `.html` URLs, which now 301 to the canonical address (SEO Phase 1, #138).
 2. **SEO title optimization (D) — observation first, not scheduled for implementation**:
-   - The current report `<title>` format stays unchanged.
+   - The Daily / Weekly `<title>` format (KO and EN) stays unchanged.
+   - Owner decision 2026-10-06: a Research, Note or Basics post may carry its author's own search title (`seoTitle`, read from the report `<title>` at publish and confirmed in the admin form). After deployment, check 시장 입문 7편 KO/EN (backfilled) shows `{seoTitle} | Snowshagal`; 7편's chosen share image still has to be uploaded in `/admin/manage/` (its file was never in the repository).
    - First observe how search engines index and show reports after the metadata cycle (C #154, B2 #155): Search Console impressions, CTR and queries, plus manual SERP checks and URL inspection of representative reports.
    - Only then decide whether a title-format experiment is justified.
 3. **Observe real visitor traffic & reading engagement**:

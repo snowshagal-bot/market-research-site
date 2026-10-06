@@ -63,13 +63,19 @@ const CASES = [
   ['L4', '<link href="/old-l4.png" rel="apple-touch-icon">', true],
   ['L5', '<link href="/old-l5.webmanifest" rel="manifest">', true],
   ['L6', '<LINK HREF="/old-l6.ico" REL="icon">', true],
+  // The site writes the page's structured data itself.
+  ['N1', '<script type="application/ld+json">{"@type":"Article","name":"old-n1"}</script>', true],
+  ['N2', `<script id='ld' type='application/ld+json'>[{"name":"old-n2"}]</script>`, true],
+  ['N3', '<SCRIPT TYPE="application/ld+json">{"name":"old-n3"}</SCRIPT>', true],
   ['M1', '<meta name="keywords" content="keep-m1">', false],
   ['M2', '<meta content="keep-m2" name="author">', false],
   ['M3', '<link href="/keep-m3.css" rel="stylesheet">', false],
   ['M4', '<link rel="preconnect" href="https://keep-m4.example">', false],
   ['M5', '<meta property="article:section" content="keep-m5">', false],
   ['M6', '<link rel="alternate" href="/keep-m6.pdf" type="application/pdf">', false],
-  ['M7', '<meta name="description-extra" content="keep-m7">', false]
+  ['M7', '<meta name="description-extra" content="keep-m7">', false],
+  ['M8', '<script type="application/json">{"name":"keep-m8"}</script>', false],
+  ['M9', '<script>window.keepM9 = "keep-m9";</script>', false]
 ];
 
 test('A–M. the string fallback removes the Production-removed tags in any attribute order and keeps the rest', async () => {
@@ -91,6 +97,7 @@ test('the replacement metadata is present exactly once after the originals are r
   assert.equal(count(/type="application\/atom\+xml"/g), 1);
   assert.equal(count(/<link rel="manifest"/g), 1);
   assert.equal(count(/<link rel="apple-touch-icon"/g), 1);
+  assert.equal(count(/application\/ld\+json/g), 1);
 });
 
 test('tagAttributes: quoting, case of names, bare attributes, ">" inside values', () => {
@@ -122,6 +129,8 @@ test('every published report renders through the string fallback with one set of
       icon: [count(/<link\b[^>]*rel="(?:[^"]*\s)?icon(?:\s[^"]*)?"/g), faviconIcons],
       appleTouchIcon: [count(/<link\b[^>]*rel="apple-touch-icon"/g), 1],
       manifest: [count(/<link\b[^>]*rel="manifest"/g), 1],
+      // The site's one structured-data block, whatever the report carried.
+      structuredData: [(html.match(/application\/ld\+json/g) || []).length, 1],
       lang: [(/<html\b[^>]*\blang="([^"]*)"/.exec(html) || [])[1], postLanguage(post)]
     };
     for (const [name, [actual, expected]] of Object.entries(checks)) {

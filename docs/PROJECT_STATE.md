@@ -138,7 +138,14 @@ the report's date (D1 `market_close_snapshots`, final snapshots only) and `funct
 writes Daily titles as `코스피 {close} 마감 · {secondary fact} | {M월 D일} 증시 | Snowshagal`
 (`KOSPI {close} Close · {fact} | {Mon D} | Snowshagal`), Weekly titles as
 `코스피 주간 {pct} · {tag labels} | {Mon–Fri period} | Snowshagal`, and Research titles
-topic-first (`{title} | {tag labels} 리서치 | Snowshagal`). Daily descriptions carry the KOSPI and
+topic-first (`{title} | {tag labels} 리서치 | Snowshagal`). A Research, Note or Basics post may
+carry its own search title (`seoTitle` in `data/posts.json`, owner decision 2026-10-06): the
+admin publisher fills it from the report's `<title>`, without a trailing `| Snowshagal`, and the
+editor confirms or edits it before publishing; the page `<title>` is then `{seoTitle} | Snowshagal`.
+The rule (`SEO_TITLE_TYPES`, `seoTitleText`) lives in `assets/report-metadata.js` and is applied
+by `/api/publish`, `/api/manage` and `postSeoTitle()` in `functions/_seo.js`. A Daily or a Weekly
+never takes one, in Korean or in English: an English Daily gets the English close-based title
+from the same Market Close row, so a translated report needs no `<title>` of its own. Daily descriptions carry the KOSPI and
 KOSDAQ close with change, foreign/institution net flows, then the row takeaway, post takeaway
 or summary; Weekly descriptions carry the week's move and tag themes, then the post's summary
 only (never its description, which repeats the week's numbers). Without a published close a
@@ -152,7 +159,7 @@ is measured only between the exact KRX sessions from `functions/_trading-calenda
 session before the Mon–Fri period and the period's last session); if either row is missing or
 the year has no calendar, the title carries no number. A date without
 a published close gets a dated title with no numbers; nothing is scraped from the
-report HTML. `/market/` keeps a data-page title (`코스피·코스닥 마감, 원달러 환율 | 한국 시장
+report HTML at request time (a `seoTitle` is read once, at publish, and stored). `/market/` keeps a data-page title (`코스피·코스닥 마감, 원달러 환율 | 한국 시장
 데이터`) so it does not compete with dated Daily pages. og:title, twitter:title, canonical,
 hreflang and the JSON-LD headline are unchanged; the JSON-LD description matches the meta tag.
 
@@ -287,7 +294,7 @@ Admin page: `/admin/`
 3. The administrator chooses Korean (default) or English and may optionally connect an opposite-language post as its translation pair. Selecting a pair copies its `reportDate` into the form. Both the browser and `/api/publish` reject a paired submission whose date differs from its counterpart.
 4. Title extraction prefers report metadata/HTML content such as `meta[name="report-title"]`, the cover title (`.cv-h1`, the Daily cover's `.dcv-h1`, `.cv-title`, `.cover-title`), `h1`, generic title class, and finally document title/file name. A cover that sets its title on two rows (a `<br>`, or a child its stylesheet makes a block: the `COVER_ROWS` list) is read with the rows apart; styling inside a word is left as it reads.
 5. An optional cover can be reviewed locally with the homepage's actual `cover` / `center top` crop at PC 1280, mobile 430, and mobile 360 before publishing. The preview uses a temporary browser object URL and does not upload the image. The admin can also generate a 900×1350 cover once at publish time from the uploaded HTML: `report-cover-selector` metadata wins, conservative first-page heuristics follow, and failed or ambiguous capture uses a restrained Canvas template. The generated file enters the same preview/upload path as a manual cover, which remains available.
-6. User can review/edit the extracted publishing metadata before publishing (the one-liner is read-only there; `/admin/manage/` edits it after publishing). `summary` is an optional homepage hero teaser, separate from `description`; 2–3 sentences or about 90–140 characters is recommended.
+6. User can review/edit the extracted publishing metadata before publishing (the one-liner is read-only there; `/admin/manage/` edits it after publishing). The search title (Research / Note / Basics only) is read from the report's `<title>` minus the brand, left empty when it only repeats the headline, and switched off for Daily and Weekly. An optional share image (1200×630) can be chosen instead of the card composed from the cover: `SHARE_CARD.prepareShareImage` keeps a 1200×630 JPEG byte for byte and draws anything else to fill the card, and the form names the file the report's own `og:image` points to so the editor can pick the same one. `summary` is an optional homepage hero teaser, separate from `description`; 2–3 sentences or about 90–140 characters is recommended.
 7. `/api/publish` authenticates with `ADMIN_KEY` and uses `GITHUB_TOKEN` server-side. It accepts only `ko` or `en`; Korean reports keep `reports/`, while English reports are written under `reports/en/`.
 8. An optional JPG/PNG/WebP cover image can be uploaded separately from the report HTML.
 9. A single Git commit updates the report HTML, optional `covers/` asset, `data/posts.json`, and `data/posts.js`.
@@ -310,7 +317,8 @@ The management page extends the existing static admin and GitHub-backed publishi
 
 - loads and sorts the canonical `data/posts.json` list, with title/URL search and category filters;
 - displays each post's language, treating legacy missing `lang` as Korean, and shows but does not edit `translationGroup`;
-- edits category, report date, title, subtitle, description, and optional homepage summary while preserving post ID, public URL, registration fields, and legacy-import state;
+- edits category, report date, title, search title (Research / Note / Basics; cleared when a post becomes Daily or Weekly), subtitle, description, and optional homepage summary while preserving post ID, public URL, registration fields, and legacy-import state;
+- keeps, replaces (a chosen 1200×630 image), or — for a chosen image only — returns to the automatic share card; a chosen image is marked `shareCardSource: "custom"` and is left alone when the cover is replaced or removed;
 - optionally replaces standalone report HTML at its existing `reports/` path;
 - keeps, replaces, or removes the optional homepage cover with the same PC/mobile crop preview used by the homepage;
 - requires a confirmation prompt plus exact-title entry before deletion;
@@ -370,7 +378,7 @@ Files under `reports/` are standalone HTML documents that may contain their own 
 
 `functions/_middleware.js` intercepts HTML responses under `/reports/` and injects `/assets/report-shell.js`.
 
-The same middleware injects canonical `snowshagal.com` metadata into published report responses and marks non-Production hosts `noindex, nofollow` by response header. It generates the report `<title>` from the real report date, category, and editorial title. The description is `reportDescription()` (see the report `<title>` / description rules above): Market Close facts for a Daily or Weekly that has them, otherwise the editorial blurb as written, otherwise the factual date · category · title line; meta, Open Graph, X and JSON-LD all carry that one text, and whatever pieces exist are used so it is never empty. It adds `hreflang` only when both sides of an explicit `translationGroup` exist, so untranslated reports never point to invented English pages.
+The same middleware injects canonical `snowshagal.com` metadata into published report responses and marks non-Production hosts `noindex, nofollow` by response header. It generates the report `<title>` from the real report date, category, and editorial title, or from the post's stored search title (see above). The report's own `<title>`, description, Open Graph, X and `application/ld+json` blocks are removed so each appears exactly once: the site's JSON-LD (Article + BreadcrumbList) is the only structured data on a report page. The description is `reportDescription()` (see the report `<title>` / description rules above): Market Close facts for a Daily or Weekly that has them, otherwise the editorial blurb as written, otherwise the factual date · category · title line; meta, Open Graph, X and JSON-LD all carry that one text, and whatever pieces exist are used so it is never empty. It adds `hreflang` only when both sides of an explicit `translationGroup` exist, so untranslated reports never point to invented English pages.
 
 For the homepage and category landings, the middleware reads the current `data/posts.json` asset and places real report `<a href>` elements in the HTML response before client JavaScript runs. `assets/site.js` and `assets/category-landing.js` then render the interactive views from `data/posts.js`, preserving search, filters, list/calendar modes, and category browsing without duplicating post data. Static KO/EN category shells keep self-canonicals, while locale alternates, navigation exposure and sitemap inclusion are generated only for populated locale categories. The data-driven `/sitemap.xml` lists eligible locale/category pages and current published reports. `/robots.txt` allows public crawling and excludes administrator/API routes.
 
@@ -412,11 +420,14 @@ crawler art are separate.
 
 Report covers are 900x1350 portrait, and a 1.91:1 unfurl keeps only the middle third of
 them — measured on five representative covers, four lost their title outright. So
-`og:image` always carries a 1200x630 landscape card while `twitter:image` keeps the report's
-own cover under `twitter:card=summary`, where a thumbnail is shown rather than a cropped
-band. `SOCIAL_REPORT_IMAGE` in `functions/_seo.js` is the seam a per-report card would plug
-into if Social Card v2 is ever built. No X handle is claimed: `twitter:site` and
-`twitter:creator` are omitted rather than guessed.
+`og:image` and `twitter:image` (`summary_large_image`) carry one 1200x630 landscape card per
+report, stored at `covers/share/<id>.jpg` and trusted only at that path (`reportCardPath`):
+either composed in the admin browser from the cover, or a finished image the editor chose
+(`shareCardSource: "custom"`, checked server-side as a 1200x630 JPEG by
+`functions/_share-image.js`). Without one the brand card is used. An image path written in the
+report HTML's own `og:image` is never served; the editor uploads that file in the admin form
+instead. No X handle is claimed: `twitter:site` and `twitter:creator` are omitted rather than
+guessed.
 
 ## Comments feature
 

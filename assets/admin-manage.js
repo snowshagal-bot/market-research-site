@@ -46,6 +46,17 @@
   const takeawayField = $('manage-takeaway-field');
   const takeawayInput = $('manage-takeaway');
   const typeSelect = $('manage-type');
+  const seoTitleInput = $('manage-seo-title');
+  const seoTitleHint = $('manage-seo-title-hint');
+  const shareImageInput = $('replacement-share-image');
+  const shareImageFileField = $('share-image-file-field');
+  const shareImageStatus = $('share-image-status');
+  const shareImagePreview = $('manage-share-image');
+  const shareImageAutoOption = $('share-image-auto-option');
+  const currentShareImageLabel = $('current-share-image-label');
+  const SEO_TITLE_HINT = '끝에 " | Snowshagal"이 자동으로 붙습니다. 비워 두면 사이트 규칙으로 만듭니다.';
+  const MARKET_SEO_TITLE_HINT = '데일리·위클리는 그날 마감 수치로 검색 제목을 자동으로 만듭니다(한국어·영문 모두). 저장하면 이 칸의 값은 지워집니다.';
+  const SHARE_IMAGE_STATUS = 'JPG, PNG, WebP · 최대 4MB · 1200×630이 아니면 가운데 기준으로 맞춥니다.';
   const tagRegistry = (window.TAG_REGISTRY && typeof window.TAG_REGISTRY === 'object')
     ? { ...window.TAG_REGISTRY }
     : {};
@@ -111,6 +122,18 @@
     takeawayField.hidden = type !== 'daily';
   }
 
+  // The rule is assets/report-metadata.js's; the server enforces it either way.
+  function acceptsSeoTitle(type) {
+    return window.REPORT_METADATA?.acceptsSeoTitle ? window.REPORT_METADATA.acceptsSeoTitle(type) : true;
+  }
+
+  function updateSeoTitleField(type) {
+    if (!seoTitleInput) return;
+    const accepts = !type || acceptsSeoTitle(type);
+    seoTitleInput.disabled = !accepts;
+    if (seoTitleHint) seoTitleHint.textContent = accepts ? SEO_TITLE_HINT : MARKET_SEO_TITLE_HINT;
+  }
+
   let posts = [];
   let activeFilter = 'all';
   let activeLanguage = 'all';
@@ -120,6 +143,11 @@
   let coverObjectUrl = '';
   let coverDecodePending = false;
   let coverDecodeVersion = 0;
+  // A finished share image the editor chose (SHARE_CARD.prepareShareImage).
+  let selectedShareImage = null;
+  let shareImagePending = false;
+  let shareImageVersion = 0;
+  let shareImageObjectUrl = '';
   let saving = false;
   let deploymentCheckVersion = 0;
   let redirectTimer = 0;
@@ -175,12 +203,12 @@
     return '';
   }
 
-  function validateCover(file) {
-    if (!file) return '새 커버 이미지를 선택해 주세요.';
+  function validateCover(file, label = '커버 이미지') {
+    if (!file) return `새 ${label}를 선택해 주세요.`;
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
     const allowed = { 'image/jpeg': ['jpg', 'jpeg'], 'image/png': ['png'], 'image/webp': ['webp'] };
     if (!allowed[file.type]?.includes(ext)) return 'JPG, PNG 또는 WebP 파일을 선택해 주세요.';
-    if (file.size > 4 * 1024 * 1024) return '커버 이미지는 4MB 이하여야 합니다.';
+    if (file.size > 4 * 1024 * 1024) return `${label}는 4MB 이하여야 합니다.`;
     return '';
   }
 
@@ -193,6 +221,104 @@
   function revokeCoverUrl() {
     if (coverObjectUrl) URL.revokeObjectURL(coverObjectUrl);
     coverObjectUrl = '';
+  }
+
+  function revokeShareImageUrl() {
+    if (shareImageObjectUrl) URL.revokeObjectURL(shareImageObjectUrl);
+    shareImageObjectUrl = '';
+  }
+
+  function shareImageAction() {
+    return document.querySelector('input[name="share-image-action"]:checked')?.value || 'keep';
+  }
+
+  // What the post shares today: the image the editor chose, the card its
+  // cover made, or nothing (the site's brand image).
+  function showExistingShareImage() {
+    revokeShareImageUrl();
+    if (!shareImagePreview) return;
+    const card = selectedPost?.shareCardImage || '';
+    const custom = selectedPost?.shareCardSource === 'custom';
+    if (currentShareImageLabel) {
+      currentShareImageLabel.textContent = card ? (custom ? '직접 고른 이미지' : '커버로 만든 자동 카드') : '없음 · 사이트 기본 이미지 사용';
+    }
+    if (shareImageAutoOption) shareImageAutoOption.hidden = !(card && custom);
+    if (card) {
+      const version = encodeURIComponent(selectedPost.updatedAt || selectedPost.registeredAt || '');
+      shareImagePreview.src = `../../${card}${version ? `?v=${version}` : ''}`;
+      shareImagePreview.hidden = false;
+    } else {
+      shareImagePreview.removeAttribute('src');
+      shareImagePreview.hidden = true;
+    }
+  }
+
+  function resetShareImage() {
+    shareImageVersion += 1;
+    shareImagePending = false;
+    selectedShareImage = null;
+    if (shareImageInput) shareImageInput.value = '';
+    if (shareImageStatus) shareImageStatus.textContent = SHARE_IMAGE_STATUS;
+    showExistingShareImage();
+  }
+
+  function syncShareImageAction() {
+    const action = shareImageAction();
+    if (shareImageFileField) shareImageFileField.hidden = action !== 'replace';
+    if (action !== 'replace') resetShareImage();
+    if (action === 'auto' && shareImagePreview) {
+      shareImagePreview.hidden = true;
+      if (currentShareImageLabel) {
+        currentShareImageLabel.textContent = selectedPost?.coverImage ? '저장하면 커버로 공유 카드를 다시 만듭니다' : '커버가 없어 저장 후 사이트 기본 이미지 사용';
+      }
+    }
+    updateSaveButton();
+  }
+
+  async function chooseShareImage(file) {
+    const version = ++shareImageVersion;
+    selectedShareImage = null;
+    if (!file) {
+      shareImagePending = false;
+      shareImageStatus.textContent = SHARE_IMAGE_STATUS;
+      showExistingShareImage();
+      updateSaveButton();
+      return;
+    }
+    const error = validateCover(file, '공유 이미지');
+    if (error) {
+      shareImagePending = false;
+      shareImageInput.value = '';
+      shareImageStatus.textContent = error;
+      showExistingShareImage();
+      updateSaveButton();
+      return;
+    }
+    shareImagePending = true;
+    shareImageStatus.textContent = '이미지 확인 중…';
+    updateSaveButton();
+    try {
+      const prepared = await window.SHARE_CARD.prepareShareImage(file);
+      if (version !== shareImageVersion) return;
+      selectedShareImage = prepared;
+      revokeShareImageUrl();
+      shareImageObjectUrl = URL.createObjectURL(prepared.blob);
+      shareImagePreview.src = shareImageObjectUrl;
+      shareImagePreview.hidden = false;
+      shareImageStatus.textContent = prepared.blob === file
+        ? `${file.name} · 1200×630 JPEG · 그대로 사용합니다.`
+        : `${file.name} · 원본 ${prepared.width}×${prepared.height} → 1200×630 JPEG로 맞춥니다${prepared.cropped ? ' · 비율이 달라 가장자리가 잘립니다' : ''}.`;
+    } catch (_) {
+      if (version !== shareImageVersion) return;
+      shareImageInput.value = '';
+      shareImageStatus.textContent = '이미지를 읽을 수 없습니다. 다른 JPG, PNG 또는 WebP 파일을 선택해 주세요.';
+      showExistingShareImage();
+    } finally {
+      if (version === shareImageVersion) {
+        shareImagePending = false;
+        updateSaveButton();
+      }
+    }
   }
 
   function resetReplacementFiles() {
@@ -270,7 +396,7 @@
   }
 
   function updateSaveButton() {
-    $('save-post').disabled = saving || coverDecodePending;
+    $('save-post').disabled = saving || coverDecodePending || shareImagePending;
   }
 
   function syncCoverAction() {
@@ -312,6 +438,8 @@
     $('manage-type').value = next.type || '';
     $('manage-date').value = next.reportDate || next.date || '';
     $('manage-title').value = next.title || '';
+    if (seoTitleInput) seoTitleInput.value = next.seoTitle || '';
+    updateSeoTitleField(next.type || '');
     $('manage-subtitle').value = next.subtitle || '';
     $('manage-description').value = next.description || '';
     $('manage-summary').value = next.summary || '';
@@ -320,6 +448,10 @@
     $('current-report-link').href = `https://snowshagal.com/${String(next.href || '').replace(/^\/+/, '')}`;
     setSelectedManageTags(next.tags || []);
     document.querySelector('input[name="cover-action"][value="keep"]').checked = true;
+    const keepShareImage = document.querySelector('input[name="share-image-action"][value="keep"]');
+    if (keepShareImage) keepShareImage.checked = true;
+    if (shareImageFileField) shareImageFileField.hidden = true;
+    resetShareImage();
     deleteConfirmation.hidden = true;
     deleteTitleConfirm.value = '';
     deleteExpectedTitle.textContent = next.title || '';
@@ -397,6 +529,7 @@
     body.append('type', currentType);
     body.append('reportDate', $('manage-date').value);
     body.append('title', $('manage-title').value.trim());
+    if (seoTitleInput) body.append('seoTitle', acceptsSeoTitle(currentType) ? seoTitleInput.value.trim() : '');
     body.append('subtitle', $('manage-subtitle').value.trim());
     body.append('description', $('manage-description').value.trim());
     body.append('summary', $('manage-summary').value.trim());
@@ -413,14 +546,29 @@
       body.append('tags', '');
     }
     if (selectedHtml) body.append('file', selectedHtml, selectedHtml.name);
+    const shareAction = shareImageAction();
+    body.append('shareImageAction', shareAction);
+    if (shareAction === 'replace' && selectedShareImage) body.append('shareImage', selectedShareImage.blob, 'share-image.jpg');
+    // A chosen share image is left alone by the cover; any other card follows it.
+    const cardFollowsCover = shareAction === 'auto' || (shareAction === 'keep' && selectedPost.shareCardSource !== 'custom');
+    if (shareAction === 'auto' && coverAction() === 'keep' && selectedPost.coverImage) {
+      try {
+        const card = await window.SHARE_CARD.renderShareCard(`../../${selectedPost.coverImage}`, { category: currentType, date: $('manage-date').value });
+        body.append('shareCard', card, 'share-card.jpg');
+      } catch (error) {
+        console.warn('share card generation failed; the report will use the brand card', error);
+      }
+    }
     if (coverAction() === 'replace' && selectedCover) {
       body.append('cover', selectedCover, selectedCover.name);
       // Keep the social card in step with the cover it is composed from.
-      try {
-        const card = await window.SHARE_CARD.renderShareCard(selectedCover, { category: $('manage-type').value, date: $('manage-date').value });
-        body.append('shareCard', card, 'share-card.jpg');
-      } catch (error) {
-        console.warn('share card generation failed; the previous card is kept', error);
+      if (cardFollowsCover) {
+        try {
+          const card = await window.SHARE_CARD.renderShareCard(selectedCover, { category: $('manage-type').value, date: $('manage-date').value });
+          body.append('shareCard', card, 'share-card.jpg');
+        } catch (error) {
+          console.warn('share card generation failed; the previous card is kept', error);
+        }
       }
       // And the 450px thumbnail the homepage cards use, from the same cover.
       try {
@@ -564,6 +712,14 @@
       status.textContent = '교체할 커버 이미지를 선택해 주세요.';
       return;
     }
+    if (shareImagePending) {
+      status.textContent = '공유 이미지 확인이 끝날 때까지 기다려 주세요.';
+      return;
+    }
+    if (shareImageAction() === 'replace' && !selectedShareImage) {
+      status.textContent = '교체할 공유 이미지를 선택해 주세요.';
+      return;
+    }
     if (!confirm('변경사항을 main에 한 커밋으로 저장할까요?')) return;
     saving = true;
     updateSaveButton();
@@ -647,7 +803,12 @@
   }));
   htmlInput.addEventListener('change', () => chooseHtml(htmlInput.files?.[0] || null));
   coverInput.addEventListener('change', () => chooseCover(coverInput.files?.[0] || null));
-  typeSelect?.addEventListener('change', () => updateTakeawayVisibility(typeSelect.value));
+  typeSelect?.addEventListener('change', () => {
+    updateTakeawayVisibility(typeSelect.value);
+    updateSeoTitleField(typeSelect.value);
+  });
+  shareImageInput?.addEventListener('change', () => chooseShareImage(shareImageInput.files?.[0] || null));
+  document.querySelectorAll('input[name="share-image-action"]').forEach((input) => input.addEventListener('change', syncShareImageAction));
   document.querySelectorAll('input[name="cover-action"]').forEach((input) => input.addEventListener('change', syncCoverAction));
   previewModes.forEach((button) => button.addEventListener('click', () => {
     $('manage-cover-preview').dataset.previewMode = button.dataset.previewMode;
@@ -669,6 +830,7 @@
     cancelRedirect();
     revokeHtmlUrl();
     revokeCoverUrl();
+    revokeShareImageUrl();
   });
 
   window.__adminManageTest = {
@@ -678,6 +840,8 @@
     validateCover,
     isPreviewHost,
     chooseCover,
+    chooseShareImage,
+    updateSeoTitleField,
     buildUpdateForm,
     save,
     deletePost,
@@ -689,6 +853,7 @@
     deploymentPostMatches,
     setPosts(items) { posts = items; },
     coverState() { return { selectedCover, coverDecodePending }; },
+    shareImageState() { return { selectedShareImage, shareImagePending }; },
     deploymentState() { return { activeOperation, redirectTimer }; },
     getSelectedManageTags,
     setSelectedManageTags,

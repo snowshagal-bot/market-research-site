@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { onRequestPost } from '../functions/api/publish.js';
 import { createMockAuthEnv } from './helpers/auth-test-helper.mjs';
+import { jpegFile } from './helpers/jpeg.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -204,7 +205,7 @@ async function getAuthEnv() {
   return sharedAuthEnv;
 }
 
-function publishRequest({ type = 'daily', cover = null, shareCard = null, coverThumbnail = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, takeaway, tags = null, html = null, description = '테스트 설명' } = {}, url = 'https://admin.snowshagal.com/api/publish', session = sharedAuthEnv?._authSession) {
+function publishRequest({ type = 'daily', cover = null, shareCard = null, shareCardSource, seoTitle, coverThumbnail = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, takeaway, tags = null, html = null, description = '테스트 설명' } = {}, url = 'https://admin.snowshagal.com/api/publish', session = sharedAuthEnv?._authSession) {
   const form = new FormData();
   form.append('file', new File([html || '<!doctype html><html><body>report content with some words</body></html>'], 'report.html', { type: 'text/html' }));
   form.append('type', type);
@@ -223,6 +224,8 @@ function publishRequest({ type = 'daily', cover = null, shareCard = null, coverT
   if (translationGroup) form.append('translationGroup', translationGroup);
   if (cover) form.append('cover', cover, cover.name);
   if (shareCard) form.append('shareCard', shareCard, shareCard.name);
+  if (shareCardSource !== undefined) form.append('shareCardSource', shareCardSource);
+  if (seoTitle !== undefined) form.append('seoTitle', seoTitle);
   if (coverThumbnail) form.append('coverThumbnail', coverThumbnail, coverThumbnail.name);
   const headers = {
     origin: new URL(url).origin,
@@ -1105,4 +1108,75 @@ test('a branch update is never retried, and the failure names the call that fail
     assert.match(data.message, /PATCH \/git\/refs\/heads\/main → 520/);
     assert.match(data.message, /error code: 520/);
   } finally { globalThis.fetch = originalFetch; }
+});
+
+/* ---------------- search title and a chosen share image ---------------- */
+
+function publishedPost(calls) {
+  const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+  const posts = JSON.parse(tree.find(entry => entry.path === 'data/posts.json').content);
+  return { tree, post: posts.find(post => post.href.endsWith('-report.html')) };
+}
+
+test('a Basics search title is stored without the brand; a Daily never stores one', async () => {
+  let calls = githubMock();
+  try {
+    const { response } = await runPublish({ type: 'basics', seoTitle: '  레버리지 ETF 음의 복리: 왜 2배가 아닌가 | Snowshagal ' });
+    assert.equal(response.status, 200);
+    assert.equal(publishedPost(calls).post.seoTitle, '레버리지 ETF 음의 복리: 왜 2배가 아닌가');
+  } finally { globalThis.fetch = originalFetch; }
+
+  calls = githubMock();
+  try {
+    const { response } = await runPublish({ type: 'basics', seoTitle: '' });
+    assert.equal(response.status, 200);
+    assert.equal(Object.hasOwn(publishedPost(calls).post, 'seoTitle'), false);
+  } finally { globalThis.fetch = originalFetch; }
+
+  calls = githubMock();
+  try {
+    const { response } = await runPublish({ type: 'daily', seoTitle: '다른 제목' });
+    assert.equal(response.status, 200);
+    assert.equal(Object.hasOwn(publishedPost(calls).post, 'seoTitle'), false);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('a chosen share image is committed to the post’s card slot without a cover and marked custom', async () => {
+  const calls = githubMock();
+  try {
+    const { response, data } = await runPublish({ type: 'basics', shareCard: jpegFile(1200, 630), shareCardSource: 'custom' });
+    assert.equal(response.status, 200);
+    const { tree, post } = publishedPost(calls);
+    assert.equal(post.shareCardImage, `covers/share/${data.id}.jpg`);
+    assert.equal(post.shareCardSource, 'custom');
+    assert.equal(Object.hasOwn(post, 'coverImage'), false);
+    assert.ok(tree.some(entry => entry.path === post.shareCardImage && entry.sha));
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('a composed card still needs a cover and is not marked custom', async () => {
+  const calls = githubMock();
+  try {
+    const { response } = await runPublish({ type: 'basics', shareCard: jpegFile(1200, 630) });
+    assert.equal(response.status, 200);
+    const { post } = publishedPost(calls);
+    assert.equal(Object.hasOwn(post, 'shareCardImage'), false);
+    assert.equal(Object.hasOwn(post, 'shareCardSource'), false);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('a chosen share image that is not a 1200x630 JPEG is refused before GitHub is touched', async () => {
+  for (const shareCard of [
+    jpegFile(1080, 1080),
+    new File([new Uint8Array([0x89, 0x50, 0x4E, 0x47])], 'share.png', { type: 'image/png' }),
+    null
+  ]) {
+    const calls = githubMock();
+    try {
+      const { response, data } = await runPublish({ type: 'basics', shareCard, shareCardSource: 'custom' });
+      assert.equal(response.status, 400);
+      assert.equal(data.error, 'BAD_SHARE_IMAGE');
+      assert.equal(calls.length, 0);
+    } finally { globalThis.fetch = originalFetch; }
+  }
 });
