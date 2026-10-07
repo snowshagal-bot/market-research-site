@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-10-07-daily-m8ruhy",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-07",
+    "reportDate": "2026-10-07",
+    "registeredDate": "2026-10-08",
+    "registeredAt": "2026-10-07T17:22:33.253Z",
+    "legacyImport": false,
+    "title": "받침은 줄고 매도는 넓어지고",
+    "subtitle": "",
+    "description": "",
+    "summary": "받쳐주던 자사주 매수는 줄고 외국인 매도는 커진 하루.",
+    "takeaway": "삼성전자 실적 전날 외국인·기관 매도",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 4,
+    "href": "reports/2026-10-07_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-07-daily-m8ruhy.webp",
+    "shareCardImage": "covers/share/2026-10-07-daily-m8ruhy.jpg",
+    "coverThumbnail": "covers/2026-10-07-daily-m8ruhy-450.webp"
+  },
+  {
     "id": "2026-10-07-basics-14uhqp6",
     "type": "basics",
     "typeLabel": "Market Basics",
