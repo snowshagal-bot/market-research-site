@@ -1,5 +1,34 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-07-daily-13qt6wd",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-10-07",
+    "reportDate": "2026-10-07",
+    "registeredDate": "2026-10-08",
+    "registeredAt": "2026-10-07T18:03:01.919Z",
+    "legacyImport": false,
+    "title": "Support fades, selling broadens",
+    "subtitle": "",
+    "description": "",
+    "summary": "Buyback support faded while foreign selling grew.",
+    "takeaway": "Foreign and institutional selling before Samsung earnings",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 6,
+    "href": "reports/en/Snowshagal_Daily_2026-10-07_EN.html",
+    "translationGroup": "2026-10-07-daily-m8ruhy",
+    "coverImage": "covers/2026-10-07-daily-13qt6wd.webp",
+    "shareCardImage": "covers/share/2026-10-07-daily-13qt6wd.jpg",
+    "coverThumbnail": "covers/2026-10-07-daily-13qt6wd-450.webp"
+  },
+  {
     "id": "2026-10-07-daily-m8ruhy",
     "type": "daily",
     "typeLabel": "주식 리포트",
