@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-08-note-6z0z0h",
+    "type": "note",
+    "typeLabel": "Investment Note",
+    "lang": "en",
+    "date": "2026-10-08",
+    "reportDate": "2026-10-08",
+    "registeredDate": "2026-10-09",
+    "registeredAt": "2026-10-08T15:05:26.356Z",
+    "legacyImport": false,
+    "title": "When the Buyback Bid Steps Away",
+    "seoTitle": "INVESTMENT NOTE NO.09 · When the Buyback Bid Steps Away · 2026.10.08",
+    "subtitle": "",
+    "description": "Samsung Electronics completed its KRW 15tn buyback on Oct. 6 while SK hynix still has about KRW 6.3tn left. From Aug. 24 to Oct. 2, the KRX 'other corporations' category bought a net KRW 43.4tn, with the two buybacks at the core of that demand. This note separates compensation shares from shares slated for cancellation, tests the historical post-buyback average against the median, filters the Oct. 8 options-expiry and ETF-rebalancing noise, and lays out three numbers to watch for the next source of demand.",
+    "tags": [
+      "kospi",
+      "semiconductors",
+      "shareholder-returns",
+      "governance",
+      "valuation"
+    ],
+    "readingMinutes": 22,
+    "href": "reports/en/20261008_Investment_Note_Buyback_Exit_EN.html",
+    "translationGroup": "2026-10-08-note-13i5jnp",
+    "coverImage": "covers/2026-10-08-note-6z0z0h.webp",
+    "shareCardImage": "covers/share/2026-10-08-note-6z0z0h.jpg",
+    "coverThumbnail": "covers/2026-10-08-note-6z0z0h-450.webp"
+  },
+  {
     "id": "2026-10-08-daily-dlf2l6",
     "type": "daily",
     "typeLabel": "Daily",
