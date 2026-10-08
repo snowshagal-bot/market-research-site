@@ -1,5 +1,34 @@
 [
   {
+    "id": "2026-10-08-daily-dlf2l6",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-10-08",
+    "reportDate": "2026-10-08",
+    "registeredDate": "2026-10-08",
+    "registeredAt": "2026-10-08T14:47:15.935Z",
+    "legacyImport": false,
+    "title": "Good News Became a Reason to Sell",
+    "subtitle": "",
+    "description": "",
+    "summary": "KRW 107tn was not too small; flows and the discount rate simply mattered more today.",
+    "takeaway": "Samsung: record profit, then sell-the-news",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "foreign-investors",
+      "semiconductors",
+      "batteries"
+    ],
+    "readingMinutes": 5,
+    "href": "reports/en/Snowshagal_Daily_2026-10-08_EN.html",
+    "translationGroup": "2026-10-08-daily-18is6c2",
+    "coverImage": "covers/2026-10-08-daily-dlf2l6.webp",
+    "shareCardImage": "covers/share/2026-10-08-daily-dlf2l6.jpg",
+    "coverThumbnail": "covers/2026-10-08-daily-dlf2l6-450.webp"
+  },
+  {
     "id": "2026-10-08-note-13i5jnp",
     "type": "note",
     "typeLabel": "투자 노트",
