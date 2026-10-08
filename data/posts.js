@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-08-daily-18is6c2",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-08",
+    "reportDate": "2026-10-08",
+    "registeredDate": "2026-10-08",
+    "registeredAt": "2026-10-08T14:16:22.407Z",
+    "legacyImport": false,
+    "title": "좋은 소식이 팔 기회가 된 날",
+    "subtitle": "",
+    "description": "",
+    "summary": "107조가 부족했던 게 아니라, 그 숫자보다 수급과 할인율이 더 컸던 하루.",
+    "takeaway": "삼성전자 사상 최대 실적에도 셀온",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "foreign-investors",
+      "semiconductors",
+      "batteries"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-10-08_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-08-daily-18is6c2.webp",
+    "shareCardImage": "covers/share/2026-10-08-daily-18is6c2.jpg",
+    "coverThumbnail": "covers/2026-10-08-daily-18is6c2-450.webp"
+  },
+  {
     "id": "2026-10-07-daily-13qt6wd",
     "type": "daily",
     "typeLabel": "Daily",
