@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-10-08-note-13i5jnp",
+    "type": "note",
+    "typeLabel": "투자 노트",
+    "lang": "ko",
+    "date": "2026-10-08",
+    "reportDate": "2026-10-08",
+    "registeredDate": "2026-10-08",
+    "registeredAt": "2026-10-08T14:45:01.280Z",
+    "legacyImport": false,
+    "title": "받아주던 손이 빠진 자리",
+    "seoTitle": "INVESTMENT NOTE NO.09 · 받아주던 손이 빠진 자리 · 2026.10.08",
+    "subtitle": "",
+    "description": "삼성전자 15조원 자사주가 10월 6일 끝났고 SK하이닉스는 6.3조원이 남음 · 8/24~10/2 순매도를 받아낸 기타법인 +43.4조 매수의 핵심은 두 회사 자사주(삼성전자는 보상용, SK하이닉스는 소각용) · 과거 사례 평균은 +6.4%지만 중앙값은 그림상 0% 부근 · 영업이익 107.4조원(잠정)이 나온 10월 8일 코스피 −2.62%는 옵션 만기·ETF 리밸런싱이 겹쳐 종료 효과로 떼어 읽기 어려움 · 다음 손을 가늠할 세 숫자",
+    "tags": [
+      "kospi",
+      "semiconductors",
+      "shareholder-returns",
+      "governance",
+      "valuation"
+    ],
+    "readingMinutes": 18,
+    "href": "reports/20261008_Investment_Note_Buyback_Exit.html",
+    "coverImage": "covers/2026-10-08-note-13i5jnp.webp",
+    "shareCardImage": "covers/share/2026-10-08-note-13i5jnp.jpg",
+    "coverThumbnail": "covers/2026-10-08-note-13i5jnp-450.webp"
+  },
+  {
     "id": "2026-10-08-daily-18is6c2",
     "type": "daily",
     "typeLabel": "주식 리포트",
