@@ -1,5 +1,30 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-09-note-1a56yum",
+    "type": "note",
+    "typeLabel": "투자 노트",
+    "lang": "ko",
+    "date": "2026-10-09",
+    "reportDate": "2026-10-09",
+    "registeredDate": "2026-10-10",
+    "registeredAt": "2026-10-09T17:41:30.243Z",
+    "legacyImport": false,
+    "title": "원화 강세의 청구서",
+    "seoTitle": "원화 강세의 청구서 · Snowshagal Investment Note NO.10 · 2026.10.09",
+    "subtitle": "",
+    "description": "환율은 내렸는데 이익은 왜 버틴다고 하나. 현대차 환율 몫 +9,800억(대신증권 추정 두 항목 합)은 올해 번 환산이익이 아니라 작년보다 좋아진 폭. 같은 환율에도 갈린 전기전자 전망과 4분기에 확인할 것.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "fx"
+    ],
+    "readingMinutes": 14,
+    "href": "reports/20261009_Investment_Note_Won_Strength_Bill.html",
+    "coverImage": "covers/2026-10-09-note-1a56yum.png",
+    "shareCardImage": "covers/share/2026-10-09-note-1a56yum.jpg",
+    "coverThumbnail": "covers/2026-10-09-note-1a56yum-450.webp"
+  },
+  {
     "id": "2026-10-08-note-6z0z0h",
     "type": "note",
     "typeLabel": "Investment Note",
