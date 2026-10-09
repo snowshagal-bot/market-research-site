@@ -1,5 +1,31 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-09-note-9l8bif",
+    "type": "note",
+    "typeLabel": "Investment Note",
+    "lang": "en",
+    "date": "2026-10-09",
+    "reportDate": "2026-10-09",
+    "registeredDate": "2026-10-10",
+    "registeredAt": "2026-10-09T17:43:57.589Z",
+    "legacyImport": false,
+    "title": "The Cost of a Stronger Won",
+    "seoTitle": "The Cost of a Stronger Won · Snowshagal Investment Note No.10 · 2026.10.09",
+    "subtitle": "",
+    "description": "The won strengthened, yet earnings have held up. Hyundai Motor’s KRW 980bn FX contribution—our sum of two Daishin Securities estimates—is a year-on-year improvement, not translation profit earned this year. Why electronics forecasts diverged under the same currency move, and what to watch in Q4.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "fx"
+    ],
+    "readingMinutes": 16,
+    "href": "reports/en/Snowshagal_Investment_Note_10_Stronger_Won_EN.html",
+    "translationGroup": "2026-10-09-note-1a56yum",
+    "coverImage": "covers/2026-10-09-note-9l8bif.png",
+    "shareCardImage": "covers/share/2026-10-09-note-9l8bif.jpg",
+    "coverThumbnail": "covers/2026-10-09-note-9l8bif-450.webp"
+  },
+  {
     "id": "2026-10-09-note-1a56yum",
     "type": "note",
     "typeLabel": "투자 노트",
