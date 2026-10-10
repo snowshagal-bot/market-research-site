@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-10-10-weekly-r64u17",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-10-10",
+    "reportDate": "2026-10-10",
+    "registeredDate": "2026-10-11",
+    "registeredAt": "2026-10-10T16:41:00.040Z",
+    "legacyImport": false,
+    "title": "사흘에 5.4%, 무엇이 눌렀나",
+    "subtitle": "",
+    "description": "2026년 10월 2주차(10월 6~8일) 한국 증시 주간 리포트. 코스피 -5.39% · 코스닥 -0.11%. 삼성전자 사상 최대 3분기 실적에도 높은 할인율 위에 외국인·기관 사흘 합 8.7조원 순매도가 낙폭을 키운 조정의 성격과 코스닥·2차전지의 선방. 끝난 수급 이벤트와 남은 변수, 다음 주 미국 9월 소비자물가 · TSMC 실적 · SK하이닉스 자사주 매입 막바지와 확인 조건까지.",
+    "summary": "미 장기금리 부담 위에 외국인 대형주 매도와 자사주 매입 종료, 옵션 만기·ETF 리밸런싱이 겹치며 삼성전자 사상 최대 실적에도 코스피가 사흘 연속 내렸고, 코스닥과 2차전지는 버틴 한 주",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 8,
+    "href": "reports/2026-10-10_Snowshagal_Weekly.html",
+    "coverImage": "covers/2026-10-10-weekly-r64u17.webp",
+    "shareCardImage": "covers/share/2026-10-10-weekly-r64u17.jpg",
+    "coverThumbnail": "covers/2026-10-10-weekly-r64u17-450.webp"
+  },
+  {
     "id": "2026-10-09-note-9l8bif",
     "type": "note",
     "typeLabel": "Investment Note",
