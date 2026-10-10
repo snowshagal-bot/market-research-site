@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-10-weekly-18wf4u4",
+    "type": "weekly",
+    "typeLabel": "Weekly",
+    "lang": "en",
+    "date": "2026-10-10",
+    "reportDate": "2026-10-10",
+    "registeredDate": "2026-10-11",
+    "registeredAt": "2026-10-10T16:56:50.676Z",
+    "legacyImport": false,
+    "title": "Three Days, Down 5.4% What Drove It?",
+    "subtitle": "",
+    "description": "Snowshagal Weekly, October 6-8, 2026. KOSPI -5.39%, KOSDAQ -0.11%. Foreign and institutional selling compounded the pressure from high U.S. yields even as Samsung Electronics posted record third-quarter results. What changed, what remains, and the tests ahead: U.S. CPI, TSMC earnings and the final stretch of SK hynix's buyback.",
+    "summary": "High U.S. long-term yields, foreign selling of Korean index heavyweights, fading buyback support, options expiry and ETF rebalancing drove three consecutive KOSPI declines. The KOSDAQ and battery shares held up better despite record Samsung earnings.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 12,
+    "href": "reports/en/2026-10-10_Korea_Weekly_Report_EN.html",
+    "translationGroup": "2026-10-10-weekly-r64u17",
+    "coverImage": "covers/2026-10-10-weekly-18wf4u4.webp",
+    "shareCardImage": "covers/share/2026-10-10-weekly-18wf4u4.jpg",
+    "coverThumbnail": "covers/2026-10-10-weekly-18wf4u4-450.webp"
+  },
+  {
     "id": "2026-10-10-weekly-r64u17",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
