@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-10-11-research-1oo7mli",
+    "type": "research",
+    "typeLabel": "Research",
+    "lang": "en",
+    "date": "2026-10-11",
+    "reportDate": "2026-10-11",
+    "registeredDate": "2026-10-11",
+    "registeredAt": "2026-10-11T11:26:10.354Z",
+    "legacyImport": false,
+    "title": "Where Did $690 Billion Go?",
+    "seoTitle": "Where Did $690 Billion Go? | Snowshagal Research No.09 | October 11, 2026",
+    "subtitle": "",
+    "description": "Korea's net international investment position fell by $689.5 billion in Q2 2026. That was not an equivalent capital outflow. A fact-check of transactions, equity valuation and external liabilities using Bank of Korea statistics.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "geopolitics",
+      "rates",
+      "korea"
+    ],
+    "readingMinutes": 9,
+    "href": "reports/en/Snowshagal_Research_No09_Where_Did_690_Billion_Go_EN_Cover_Integrated.html",
+    "translationGroup": "2026-10-11-research-n8d83k",
+    "coverImage": "covers/2026-10-11-research-1oo7mli.webp",
+    "shareCardImage": "covers/share/2026-10-11-research-1oo7mli.jpg",
+    "coverThumbnail": "covers/2026-10-11-research-1oo7mli-450.webp"
+  },
+  {
     "id": "2026-10-11-research-n8d83k",
     "type": "research",
     "typeLabel": "비정기 리서치",
