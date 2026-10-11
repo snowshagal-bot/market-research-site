@@ -232,5 +232,11 @@ window.TAG_REGISTRY = {
     "en": "short selling",
     "group": "market",
     "custom": true
+  },
+  "korea": {
+    "ko": "한국",
+    "en": "Korea",
+    "group": "market",
+    "custom": true
   }
 };

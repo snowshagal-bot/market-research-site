@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-10-11-research-n8d83k",
+    "type": "research",
+    "typeLabel": "비정기 리서치",
+    "lang": "ko",
+    "date": "2026-10-11",
+    "reportDate": "2026-10-11",
+    "registeredDate": "2026-10-11",
+    "registeredAt": "2026-10-11T11:23:49.983Z",
+    "legacyImport": false,
+    "title": "6,900억달러는 어디로 갔나",
+    "seoTitle": "6,900억달러는 어디로 갔나 · Snowshagal Research NO.09 · 2026.10.11",
+    "subtitle": "",
+    "description": "2분기 순대외금융자산 6,895억달러 감소. 같은 규모의 자금이 해외로 유출됐다는 뜻은 아니다. 국내 주가 상승과 대외금융부채의 평가 증가가 만든 변화를 한국은행 통계로 검증했다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "geopolitics",
+      "rates",
+      "korea"
+    ],
+    "readingMinutes": 6,
+    "href": "reports/리서치_NO.09_6900억달러는어디로갔나_2026.10.11_커버통합.html",
+    "coverImage": "covers/2026-10-11-research-n8d83k.webp",
+    "shareCardImage": "covers/share/2026-10-11-research-n8d83k.jpg",
+    "coverThumbnail": "covers/2026-10-11-research-n8d83k-450.webp"
+  },
+  {
     "id": "2026-10-10-weekly-18wf4u4",
     "type": "weekly",
     "typeLabel": "Weekly",
