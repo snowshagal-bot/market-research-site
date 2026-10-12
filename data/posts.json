@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-10-12-daily-1hgkql",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-12",
+    "reportDate": "2026-10-12",
+    "registeredDate": "2026-10-12",
+    "registeredAt": "2026-10-12T12:18:10.008Z",
+    "legacyImport": false,
+    "title": "사흘 쌓인 물이 한 번에 내려온 날",
+    "subtitle": "",
+    "description": "",
+    "summary": "반도체 수출은 늘었지만, 투자자들은 AI에 들어간 돈이 언제 이익으로 돌아올지를 따진 하루.",
+    "takeaway": "미국 반도체 약세에 외국인 매도 겹쳐",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "foreign-investors",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-10-12_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-12-daily-1hgkql.webp",
+    "shareCardImage": "covers/share/2026-10-12-daily-1hgkql.jpg",
+    "coverThumbnail": "covers/2026-10-12-daily-1hgkql-450.webp"
+  },
+  {
     "id": "2026-10-11-research-1oo7mli",
     "type": "research",
     "typeLabel": "Research",
