@@ -1,5 +1,34 @@
 [
   {
+    "id": "2026-10-12-daily-k07alk",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-10-12",
+    "reportDate": "2026-10-12",
+    "registeredDate": "2026-10-12",
+    "registeredAt": "2026-10-12T12:40:26.616Z",
+    "legacyImport": false,
+    "title": "Three Days of Pressure Released All at Once",
+    "subtitle": "",
+    "description": "",
+    "summary": "Chip exports were surging. Investors were asking when the money spent on AI would turn into earnings.",
+    "takeaway": "U.S. chip losses met foreign selling",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "foreign-investors",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 5,
+    "href": "reports/en/Snowshagal_Daily_2026-10-12_EN_Cover_Integrated.html",
+    "translationGroup": "2026-10-12-daily-1hgkql",
+    "coverImage": "covers/2026-10-12-daily-k07alk.webp",
+    "shareCardImage": "covers/share/2026-10-12-daily-k07alk.jpg",
+    "coverThumbnail": "covers/2026-10-12-daily-k07alk-450.webp"
+  },
+  {
     "id": "2026-10-12-daily-1hgkql",
     "type": "daily",
     "typeLabel": "주식 리포트",
