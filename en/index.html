@@ -35,8 +35,9 @@
 <link rel="stylesheet" href="/assets/category-state.css?v=4328e4b8c2">
 <link rel="stylesheet" href="/assets/ui-polish.css?v=6ec39e1026">
 <link rel="stylesheet" href="/assets/home-v2.css?v=6def21ee7c">
-<link rel="preload" as="image" href="/assets/snowshagal-hero.webp" media="(min-width: 761px)">
-<link rel="preload" as="image" href="/assets/snowshagal-hero-mobile.webp" media="(max-width: 760px)">
+<link rel="stylesheet" href="/assets/home-editorial.css?v=94cedeca6a">
+<link rel="preload" as="image" href="/assets/snowshagal-research-desk.webp" media="(min-width: 761px)">
+<link rel="preload" as="image" href="/assets/snowshagal-research-desk-mobile.webp" media="(max-width: 760px)">
 <script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
 </head>
 <body class="home-page">
@@ -87,8 +88,8 @@
               <h1 id="home-hero-heading"><span>From today's moves</span><span>to what comes next.</span></h1>
               <span class="hero-rule" aria-hidden="true"></span>
               <p class="hero-description">
-                <span>Daily reviews of the Korean market, weekly outlooks,</span>
-                <span>and thoughtful insights for long-term investors.</span>
+                <span>Connecting prices, flows, rates and currencies</span>
+                <span>to make sense of Korean markets.</span>
               </p>
               <nav class="hero-entries" aria-label="Explore research">
                 <a href="/en/daily/"><span class="entry-symbol entry-daily" aria-hidden="true"></span><span><strong>DAILY</strong><small>Today's market</small></span></a>
@@ -98,8 +99,8 @@
             </div>
             <div class="hero-art" aria-hidden="true">
               <picture>
-                <source media="(max-width: 760px)" srcset="/assets/snowshagal-hero-mobile.webp">
-                <img src="/assets/snowshagal-hero.webp" alt="" width="1536" height="1024" fetchpriority="high">
+                <source media="(max-width: 760px)" srcset="/assets/snowshagal-research-desk-mobile.webp">
+                <img src="/assets/snowshagal-research-desk.webp" alt="" width="1944" height="810" fetchpriority="high">
               </picture>
             </div>
           </div>
@@ -174,6 +175,7 @@
 
   <section class="today-strip" aria-labelledby="today-strip-heading">
     <div class="site-wrap">
+      <p class="market-section-label">Market snapshot <span>Korea close &amp; global reference indicators</span></p>
       <div class="today-strip-head">
         <div class="today-strip-eyebrow" id="today-strip-heading">
           <span class="today-strip-tag" id="today-strip-tag">TODAY</span>
@@ -188,6 +190,7 @@
       <p class="today-strip-notice" id="today-strip-notice" role="status" hidden></p>
       <div class="today-strip-transparency" id="today-strip-transparency" role="region" aria-label="Market Close Notice" hidden></div>
       <div class="today-strip-scroll-wrap">
+        <div class="market-group-labels" aria-hidden="true"><span>Korea · closing prices</span><span>Global indicators · individual timestamps</span></div>
         <div class="today-strip-grid" id="today-market-grid" role="list" aria-busy="true">
           <div class="today-item" role="listitem">
             <span class="today-label">KOSPI</span>
@@ -216,6 +219,7 @@
           </div>
         </div>
       </div>
+      <p class="market-source-link"><a href="/en/market/">Data sources &amp; timestamps <span aria-hidden="true">↗</span></a></p>
       <div class="today-takeaway-row" id="today-takeaway-row" hidden>
         <span class="today-takeaway-label" id="today-takeaway-label">Today's takeaway</span>
         <a class="today-takeaway-link" id="today-takeaway-link" href="/en/market/">
@@ -224,6 +228,8 @@
       </div>
     </div>
   </section>
+
+  <section class="home-editorial" id="home-editorial" aria-label="Latest daily and research approach"></section>
 
   <section class="site-introduction" aria-labelledby="latest-heading">
     <div class="site-wrap">
@@ -385,6 +391,7 @@
 <script src="/data/posts.js"></script>
 <script src="/data/market-summary.js"></script>
 <script src="/assets/locale.js?v=55ee2ee40e"></script>
-<script src="/assets/site.js?v=b45e2315ff"></script>
+<script src="/assets/home-editorial.js?v=9ddfa1771c"></script>
+<script src="/assets/site.js?v=82846affba"></script>
 </body>
 </html>

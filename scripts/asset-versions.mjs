@@ -14,6 +14,7 @@ export const TRACKED_ASSETS = [
   'assets/category-state.css',
   'assets/ui-polish.css',
   'assets/home-v2.css',
+  'assets/home-editorial.css',
   'assets/category-landing.css',
   'assets/market-close.css',
   'assets/disclosures.css',
@@ -21,6 +22,7 @@ export const TRACKED_ASSETS = [
 
   // Core site scripts
   'assets/site.js',
+  'assets/home-editorial.js',
   'assets/category-landing.js',
   'assets/locale.js',
   'assets/market-close.js',

@@ -38,6 +38,14 @@ The Korean MARKET page adds a compact operational-notice section before the exis
 
 ## Public information architecture
 
+### Homepage editorial refresh (2026-10-12, branch Preview)
+
+The two locale homepages use the approved research-desk watercolor (new versioned filenames; old artwork retained), encoded as 1944×810 / 960×400 WebP. `assets/home-editorial.css` scopes the typography, border-led latest cards and mobile two-row market strip to HOME. The manual Research/announcement carousel and all category navigation remain available.
+
+`assets/home-editorial.js` renders the newest same-locale Daily from post metadata through the shared `editorialBlurb` policy, with optional actual topic tags and a static reading guide. The middleware and browser call the same renderer, so it needs no extra fetch, stored summary or publishing input. Empty locales produce no editorial block. No sample market commentary or sample values are shipped.
+
+Every valid Market Close instrument now shows its own basis date even when no Global Latest item overlays it. Overlay eligibility, stale/holiday states, takeaway date matching and the emergency fallback are unchanged. Global reference indicators are visually separated from the two KRX indices.
+
 Locale structure:
 
 - Korean is the default at `/`; English uses `/en/` on the same domain.

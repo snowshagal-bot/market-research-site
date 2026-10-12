@@ -253,6 +253,7 @@ export async function onRequest(context) {
       let body = await response.text();
       if (posts && homeLang) {
         body = replaceElementContentsById(body, 'latest-category-cards', homepageLatestLinks(posts, homeLang, tags));
+        body = replaceElementContentsById(body, 'home-editorial', globalThis.HOME_EDITORIAL.render(posts, homeLang, tags));
         body = replaceElementContentsById(body, 'report-list', homepageReportLinks(posts, homeLang, 20, tags));
       }
       if (posts && landing) {
@@ -293,6 +294,7 @@ export async function onRequest(context) {
       const archive = homepageReportLinks(posts, homeLang, 20, tags);
       rewriter = rewriter
         .on('#latest-category-cards', { element(element) { element.setInnerContent(latest, { html: true }); } })
+        .on('#home-editorial', { element(element) { element.setInnerContent(globalThis.HOME_EDITORIAL.render(posts, homeLang, tags), { html: true }); } })
         .on('#report-list', { element(element) { element.setInnerContent(archive, { html: true }); } });
     }
     if (posts && landing) {

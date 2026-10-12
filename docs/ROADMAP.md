@@ -10,6 +10,8 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+- **Homepage editorial refresh (Preview review pending, 2026-10-12)**: KO/EN research-desk watercolor, explicit instrument basis dates, shared post-driven latest Daily and reading guide, restrained report list, mobile two-row market strip. Verify the branch Preview on desktop/mobile and light/dark before owner review. No Production merge or data write is part of this change.
+
 1. **Google Search Console Domain property confirmation & Sitemap monitoring**:
    - Verify `snowshagal.com` DNS Domain-property in Google Search Console.
    - Confirm `/sitemap.xml` coverage, indexing status, and crawl rates for KO/EN homepages, category landings, and published reports.

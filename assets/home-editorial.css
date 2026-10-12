@@ -1,0 +1,130 @@
+/* Homepage only: watercolor identity above a quiet, data-led editorial grid. */
+.home-page { background: var(--bg); }
+.home-page .hero-shell { min-height: 390px; }
+.home-page .hero-copy { padding: 38px 0 66px; max-width: 480px; }
+.home-page .hero-copy h1 {
+  font-family: inherit;
+  font-size: clamp(34px, 3.1vw, 44px);
+  font-weight: 600;
+  letter-spacing: -.055em;
+  line-height: 1.3;
+}
+html[lang="en"] .home-page .hero-copy h1 {
+  max-width: none;
+  font-size: clamp(32px, 3vw, 42px);
+  letter-spacing: -.035em;
+  line-height: 1.2;
+}
+.home-page .hero-description { margin-top: 18px; font-size: 15px; line-height: 1.7; }
+.home-page .hero-rule { display: none; }
+.home-page .hero-entries { gap: 24px; margin-top: 24px; }
+.home-page .hero-entries a { grid-template-columns: 1fr; min-width: 75px; padding: 4px 0; }
+.home-page .entry-symbol { display: none; }
+.home-page .hero-entries small { font-size: 11px; color: var(--text-2); }
+.home-page .hero-art { inset: 0 -40px 0 0; width: auto; }
+.home-page .hero-art img { object-position: right center; }
+.home-page .hero-art::after {
+  background: linear-gradient(90deg, var(--bg) 0%, transparent 46%, transparent 95%, var(--bg) 100%);
+}
+.home-page .market-section-label {
+  display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 0 0 18px;
+  color: var(--text); font-size: 16px; font-weight: 650;
+}
+.home-page .market-section-label > span { color: var(--muted); font-size: 12px; font-weight: 400; align-self: center; }
+.home-page .today-strip-head { margin-bottom: 18px; }
+.home-page .market-group-labels { display: grid; grid-template-columns: 2fr 3fr; margin-bottom: 12px; font-size: 11px; color: var(--text-2); }
+.home-page .market-group-labels span:last-child { padding-left: 20px; }
+.home-page .today-strip-grid { gap: 0; }
+.home-page .today-item { padding: 0 20px; }
+.home-page .today-item:first-child { padding-left: 0; }
+.home-page .today-item:nth-child(3) { border-left: 1px solid var(--text-2); }
+.home-page .today-value { font-variant-numeric: tabular-nums; letter-spacing: -.025em; }
+.home-page .today-item:nth-child(-n+2) .today-value { font-size: 27px; }
+.home-page .today-basis { color: var(--text-2); }
+.home-page .market-source-link { margin: 10px 0; text-align: right; font-size: 11px; color: var(--text-2); }
+.home-page .market-source-link a { display: inline-flex; align-items: center; gap: 8px; min-height: 32px; }
+.home-page .today-takeaway-row { padding: 14px 0; }
+.home-editorial:empty { display: none; }
+.home-reading-grid { display: grid; grid-template-columns: minmax(0, 1.85fr) minmax(260px, 1fr); gap: 48px; padding-top: 38px; padding-bottom: 38px; }
+.home-daily { min-width: 0; }
+.home-daily-meta { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; color: var(--text-2); font-size: 12px; }
+.home-daily-meta > span { font-weight: 650; letter-spacing: .06em; }
+.home-daily-meta time { font-variant-numeric: tabular-nums; color: var(--muted); }
+.home-daily h2 { margin: 17px 0; max-width: 22ch; font-size: clamp(26px, 2.6vw, 34px); font-weight: 600; line-height: 1.4; letter-spacing: -.035em; word-break: keep-all; overflow-wrap: anywhere; }
+html[lang="en"] .home-daily h2 { max-width: 29ch; line-height: 1.25; }
+.home-daily-summary { max-width: 60ch; margin: 0 0 22px; font-size: 15px; line-height: 1.85; color: var(--text-2); overflow-wrap: anywhere; }
+.home-daily-topics { display: flex; flex-wrap: wrap; gap: 6px 18px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 12px; line-height: 1.8; color: var(--text-2); }
+.home-daily-topics > span { color: var(--muted); }
+.home-reading-link { display: inline-flex; gap: 16px; align-items: center; min-height: 44px; margin-top: 8px; color: var(--navy); font-size: 13px; font-weight: 600; }
+.home-reading-guide { border-left: 1px solid var(--line); padding-left: 30px; }
+.home-reading-guide h3 { margin: 0; padding-top: 12px; border-top: 2px solid var(--navy); font-size: 16px; font-weight: 600; }
+.home-reading-guide dl { margin: 12px 0 18px; }
+.home-reading-guide dl > div { display: grid; grid-template-columns: 48px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.home-reading-guide dt { font-size: 12px; font-weight: 600; }
+.home-reading-guide dd { margin: 0; font-size: 12px; line-height: 1.7; color: var(--text-2); }
+.home-guide-links { display: grid; }
+.home-guide-links a { width: fit-content; min-height: 36px; display: inline-flex; align-items: center; gap: 10px; font-size: 12px; color: var(--navy); }
+.home-page .site-introduction { border-top: 1px solid var(--line); padding-top: 26px; padding-bottom: 30px; }
+.home-page .latest-head h2 { font-size: 20px; }
+.home-page .latest-head > div > span { display: none; }
+.home-page .latest-cards { gap: 26px; }
+.home-page .latest-card { background: none; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; padding: 18px 0 0; }
+.home-page .latest-card:hover { background: none; box-shadow: none; transform: none; }
+.home-page .latest-card-title { font-size: 21px; font-weight: 600; line-height: 1.45; }
+.home-page .latest-card-meta { font-size: 10px; }
+.home-page .latest-card-meta b { color: var(--text-2); font-weight: 600; }
+.home-page .latest-card-body { grid-template-columns: minmax(0, 1fr); align-items: start; }
+.home-page .latest-card-cover, .home-page .latest-card-art { display: none; }
+.home-page .latest-card-summary { font-size: 13px; -webkit-line-clamp: 3; }
+.home-page .latest-card-tags { display: none; }
+.home-page .latest-card-read { font-size: 12px; font-weight: 500; }
+.home-page .archive-section { padding-top: 30px; }
+.home-page .archive-lead { font-size: 14px; }
+.home-page a:focus-visible { outline: 2px solid var(--navy); outline-offset: 4px; }
+.home-reading-link:hover, .home-guide-links a:hover, .market-source-link a:hover, .home-daily h2 a:hover { text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 960px) {
+  .home-reading-grid { gap: 28px; grid-template-columns: minmax(0, 1.6fr) minmax(230px, 1fr); }
+  .home-reading-guide { padding-left: 22px; }
+  .home-page .hero-copy { max-width: 410px; }
+}
+@media (max-width: 760px) {
+  .home-page .hero-shell { min-height: 0; }
+  .home-page .hero-copy { max-width: none; padding: 28px 0 0; }
+  .home-page .hero-copy h1 { font-size: clamp(29px, 7.8vw, 36px); line-height: 1.3; }
+  html[lang="en"] .home-page .hero-copy h1 { font-size: clamp(28px, 7vw, 35px); }
+  .home-page .hero-description { margin-top: 14px; font-size: 13px; }
+  .home-page .hero-description span { display: inline; }
+  .home-page .hero-description span + span::before { content: ' '; }
+  .home-page .hero-entries { margin-top: 16px; gap: 28px; }
+  .home-page .hero-art { position: relative; inset: auto; width: calc(100% + 40px); height: 180px; margin: 0 -20px 35px; }
+  .home-page .hero-art img { object-fit: cover; object-position: right center; }
+  .home-page .hero-art::after { background: linear-gradient(0deg, var(--bg), transparent 16%, transparent 85%, var(--bg)); }
+  .home-page .hero-carousel-controls { bottom: 8px; }
+  .home-page .market-section-label { gap: 6px; flex-direction: column; margin-bottom: 16px; }
+  .home-page .market-section-label > span { align-self: start; font-size: 11px; }
+  .home-page .today-strip-scroll-wrap { overflow: visible; mask-image: none; -webkit-mask-image: none; }
+  .home-page .market-group-labels { display: none; }
+  .home-page .today-strip-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 20px 0; overflow: visible; min-width: 0; }
+  .home-page .today-item { grid-column: span 2; min-width: 0; padding: 0 10px; }
+  .home-page .today-item:nth-child(-n+2) { grid-column: span 3; }
+  .home-page .today-item:nth-child(3) { padding-left: 0; border-left: 0; }
+  .home-page .today-item:nth-child(n+3) { border-top: 1px solid var(--line); padding-top: 14px; }
+  .home-page .today-item:nth-child(3) .today-label::before { content: 'GLOBAL · '; font-size: 8px; }
+  .home-page .today-value { font-size: 18px; }
+  .home-page .today-item:nth-child(-n+2) .today-value { font-size: 27px; }
+  .home-page .today-basis { font-size: 9px; }
+  .home-page .today-change { font-size: 11px; }
+  .home-page .today-takeaway-row { align-items: start; gap: 8px; }
+  .home-reading-grid { grid-template-columns: minmax(0, 1fr); gap: 30px; padding-top: 28px; padding-bottom: 28px; }
+  .home-daily h2 { max-width: none; font-size: 27px; margin: 14px 0; }
+  .home-daily-summary { font-size: 14px; margin-bottom: 16px; }
+  .home-reading-guide { padding: 0; border-left: 0; }
+  .home-reading-guide dl > div { grid-template-columns: 54px 1fr; }
+  .home-guide-links { display: flex; flex-wrap: wrap; gap: 0 22px; }
+  .home-guide-links a { min-height: 44px; }
+  .home-page .latest-cards { gap: 20px; }
+  .home-page .latest-card { padding-top: 18px; }
+  .home-page .latest-card-title { font-size: 21px; }
+  .home-page .latest-card-body { grid-template-columns: minmax(0, 1fr); }
+  .home-page .latest-card-summary { -webkit-line-clamp: 3; }
+}

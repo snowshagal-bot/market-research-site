@@ -19,8 +19,8 @@ test('homepage presents the Snowshagal brand hero before latest reports and arch
   assert.doesNotMatch(html, /class="hero-kicker"/);
   assert.doesNotMatch(englishHtml, /class="hero-kicker"/);
   assert.match(html, /<span>하루의 움직임에서,<\/span><span>다음 흐름까지\.<\/span>/);
-  assert.match(html, /한국 시장의 데일리 복기부터 위클리 전망,/);
-  assert.match(html, /그리고 투자에 참고할 만한 인사이트까지\./);
+  assert.match(html, /가격·수급·금리·환율을 연결해/);
+  assert.match(html, /한국 시장의 흐름을 읽습니다\./);
   assert.match(html, /class="hero-entries"/);
   assert.doesNotMatch(html, /Login|data-carousel|featured-slide/);
   assert.match(html, /<footer[^>]*>[\s\S]*?<span[^>]*>SNOWSHAGAL<\/span>/);
@@ -35,17 +35,17 @@ test('homepage presents the Snowshagal brand hero before latest reports and arch
   assert.match(englishHtml, /src="\/data\/market-summary\.js"/);
 });
 
-test('homepage serves a smaller eager hero asset on mobile without changing desktop art', async () => {
+test('homepage serves the approved research desk watercolor with a smaller eager mobile asset', async () => {
   const [html, englishHtml] = await Promise.all([read('index.html'), read('en/index.html')]);
   for (const source of [html, englishHtml]) {
-    assert.match(source, /rel="preload" as="image" href="\/assets\/snowshagal-hero\.webp" media="\(min-width: 761px\)"/);
-    assert.match(source, /rel="preload" as="image" href="\/assets\/snowshagal-hero-mobile\.webp" media="\(max-width: 760px\)"/);
-    assert.match(source, /<picture>[\s\S]*?<source media="\(max-width: 760px\)" srcset="\/assets\/snowshagal-hero-mobile\.webp">[\s\S]*?<img src="\/assets\/snowshagal-hero\.webp"[^>]*fetchpriority="high">[\s\S]*?<\/picture>/);
-    assert.doesNotMatch(source, /snowshagal-hero-mobile\.webp[^>]*loading="lazy"/);
+    assert.match(source, /rel="preload" as="image" href="\/assets\/snowshagal-research-desk\.webp" media="\(min-width: 761px\)"/);
+    assert.match(source, /rel="preload" as="image" href="\/assets\/snowshagal-research-desk-mobile\.webp" media="\(max-width: 760px\)"/);
+    assert.match(source, /<picture>[\s\S]*?<source media="\(max-width: 760px\)" srcset="\/assets\/snowshagal-research-desk-mobile\.webp">[\s\S]*?<img src="\/assets\/snowshagal-research-desk\.webp"[^>]*fetchpriority="high">[\s\S]*?<\/picture>/);
+    assert.doesNotMatch(source, /snowshagal-research-desk-mobile\.webp[^>]*loading="lazy"/);
   }
   const [desktopHero, mobileHero] = await Promise.all([
-    stat(new URL('../assets/snowshagal-hero.webp', import.meta.url)),
-    stat(new URL('../assets/snowshagal-hero-mobile.webp', import.meta.url))
+    stat(new URL('../assets/snowshagal-research-desk.webp', import.meta.url)),
+    stat(new URL('../assets/snowshagal-research-desk-mobile.webp', import.meta.url))
   ]);
   assert.ok(desktopHero.size > mobileHero.size);
   assert.ok(mobileHero.size <= 150_000);
@@ -362,4 +362,3 @@ test('homepage presents TODAY market summary strip between brand hero and latest
   assert.doesNotMatch(home, new RegExp(summary.dateDisplay.ko));
   assert.doesNotMatch(enHome, new RegExp(summary.dateDisplay.en));
 });
-
