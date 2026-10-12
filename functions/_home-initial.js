@@ -1,4 +1,5 @@
 import '../assets/locale.js';
+import '../assets/home-editorial.js';
 import { onRequestGet as marketLatestGet } from './api/market/latest.js';
 import { onRequestGet as globalLatestGet } from './api/market/global/latest.js';
 import { onRequestGet as announcementsGet } from './api/announcements.js';
@@ -222,8 +223,7 @@ export function publishedStripItems(payload, lang, overlay = null) {
   const latest = overlay?.items || {};
   const marketDate = ISO_DATE.test(String(payload?.meta?.market_date || '')) ? payload.meta.market_date : '';
   const overlaid = spec => (api.isGlobalLatestCode(spec.key) && latest[spec.key]) || null;
-  const mixed = STRIP_ITEMS.some(overlaid);
-  const basis = (kind, source) => (mixed ? api.todayStripBasis(kind, source, lang) : '');
+  const basis = (kind, source) => api.todayStripBasis(kind, source, lang);
   const items = STRIP_ITEMS.map(spec => {
     const quote = payload?.[spec.group]?.[spec.key];
     const snapshot = stripFigures(spec, quote, lang);

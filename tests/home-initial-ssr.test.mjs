@@ -824,9 +824,9 @@ test('B3 6-8. HOME: stale, future and malformed Global Latest items fall back on
   const plain = await assertParity({ lang: 'ko', db: await database({ market: [{ payload: snapshot0923() }] }), now: NOW });
 
   const stale = await assertParity({ lang: 'ko', db: await b3Database(allStale), now: NOW });
-  // Nothing usable: exactly the Market Close strip, without basis lines.
+  // Nothing usable: exactly the Market Close strip, with its own source dates.
   assert.deepEqual(stale.rendered['today-market-grid'], plain.rendered['today-market-grid']);
-  assert.ok(stripCells(stale.rendered['today-market-grid'].html).every(cell => cell.basis === null));
+  assert.ok(stripCells(stale.rendered['today-market-grid'].html).every(cell => cell.basis));
 
   const future = await assertParity({ lang: 'ko', db: await b3Database(futureUsd), now: NOW });
   assert.deepEqual([cellOf(future.rendered, 'USD/KRW').value, cellOf(future.rendered, 'USD/KRW').basis], ['1,358.70', '9/23 · 마감 시점']);
@@ -894,6 +894,6 @@ test('B3 HOME: a KRX trading evening with no fresh Global Latest keeps the strip
   // from later sessions and would be "future" at this instant, so nothing is overlaid.
   const db = await b3Database();
   const { rendered } = await assertParity({ lang: 'ko', db, now: kst('2026-09-23', '18:00') });
-  assert.ok(stripCells(rendered['today-market-grid'].html).every(cell => cell.basis === null));
+  assert.ok(stripCells(rendered['today-market-grid'].html).every(cell => cell.basis));
   assert.equal(rendered['today-strip-tag'].text, 'TODAY');
 });

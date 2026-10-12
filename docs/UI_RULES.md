@@ -61,8 +61,8 @@ English report pages use the same isolated top bar with English category and com
 The homepage opens with the Snowshagal brand rather than a rotating post or a generic research-archive title.
 
 - keep `SNOWSHAGAL` visually primary and treat `MARKET RESEARCH` as a small descriptor;
-- preserve the Korean headline `하루의 움직임에서, 다음 흐름까지.` and its requested supporting copy without embellishment;
-- use the original watercolor artwork as atmosphere, with ample ivory negative space and restrained chart, paper, moon, and small-town motifs;
+- preserve the Korean headline `하루의 움직임에서, 다음 흐름까지.`; supporting copy describes connecting prices, flows, rates and currencies, with matching English copy;
+- use the owner-approved research-desk watercolor (`snowshagal-research-desk.webp`) once in the brand hero, with ivory negative space, printed research charts and an annotating hand; no repeated watercolor decoration in the data or report sections;
 - avoid photorealistic winter/travel imagery and avoid decorative red/blue finance colors outside actual data;
 - on desktop, keep the copy readable on the left and let the illustration breathe across the right side;
 - at 320–480px, show the headline and supporting copy first, then continue the artwork below as a deliberate mobile composition rather than a scaled desktop spread;

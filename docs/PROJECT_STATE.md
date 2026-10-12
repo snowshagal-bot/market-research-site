@@ -38,6 +38,14 @@ The Korean MARKET page adds a compact operational-notice section before the exis
 
 ## Public information architecture
 
+### Homepage editorial refresh (2026-10-12, branch Preview)
+
+The two locale homepages use the approved research-desk watercolor (new versioned filenames; old artwork retained), encoded as 1944×810 / 960×400 WebP. `assets/home-editorial.css` scopes the typography, border-led latest cards and mobile two-row market strip to HOME. The manual Research/announcement carousel and all category navigation remain available.
+
+`assets/home-editorial.js` renders the newest same-locale Daily from post metadata through the shared `editorialBlurb` policy, with optional actual topic tags and a static reading guide. The middleware and browser call the same renderer, so it needs no extra fetch, stored summary or publishing input. Empty locales produce no editorial block. No sample market commentary or sample values are shipped.
+
+Every valid Market Close instrument now shows its own basis date even when no Global Latest item overlays it. Overlay eligibility, stale/holiday states, takeaway date matching and the emergency fallback are unchanged. Global reference indicators are visually separated from the two KRX indices.
+
 Locale structure:
 
 - Korean is the default at `/`; English uses `/en/` on the same domain.
@@ -54,7 +62,7 @@ Global Latest is a second, separate market data channel: the current observation
 
 - Policy: `assets/locale.js` `globalLatestOverlay(items, payload, now)` (pure; shared by the server and both page scripts). An item is used only when it is well formed (finite positive value/previous close, change and change_pct consistent with them, strict ISO timestamps, `as_of ≤ retrieved_at`, `source_date` within a day of `as_of`), `as_of` is not in the future (5-minute skew), it is fresh **by `as_of`** (intraday: US indices/VIX/US10Y and BITCOIN 60 min, FX/DXY/WTI/GOLD 90 min; `final_close`: only NASDAQ/DOW/SP500/SOX/US10Y, up to 4 days), and it is newer than the snapshot's own figure (`as_of` after that item's `retrieved_at`). Anything else keeps the snapshot figure, per item. KOSPI and KOSDAQ are not Global Latest codes and can never be overlaid.
 - Clock: the homepage is judged once at the request's time in `functions/_home-initial.js`; the bootstrap (`globalLatest: { items, judgedAt }`, strip codes only) lets `site.js` reach the same figures with no request. `/market/` TODAY judges at `max(browser clock, x-global-latest-served-at)`, so a browser clock running behind cannot make an old value look current.
-- HOME: USD/KRW, US 10Y and GOLD may be overlaid. When any card is, every card carries a small basis line — KRX `9/23 · 종가`, Global Latest `9/25 · 장중` / `9/25 · 종가`, a snapshot figure kept `9/23 · 마감 시점` (captured with the KRX close) or `9/22 · 종가` (a completed close) — because the strip then shows more than one date; with no overlay the strip is exactly the pre-B3 strip. The heading date stays the KRX close.
+- HOME: USD/KRW, US 10Y and GOLD may be overlaid. Every valid card carries a small basis line — KRX `9/23 · 종가`, Global Latest `9/25 · 장중` / `9/25 · 종가`, a snapshot figure kept `9/23 · 마감 시점` (captured with the KRX close) or `9/22 · 종가` (a completed close). The editorial refresh keeps these basis lines visible even without an overlay. The heading date stays the KRX close.
 - MARKET TODAY: Market Close and Global Latest are requested together (Global Latest at most once per TODAY load, never on a direct HISTORY/1W/1M entry, never waited for more than 2.5 s). An overlaid card shows the observation's value, change, previous close and `source_date · 장중/종가` (intraday adds `as_of` in KST); the snapshot's 15:30 fixing and open/high/low are omitted there. KRX cards and every KRX section are the snapshot, unchanged. `render()` applies the overlay only when passed by the TODAY load and only while the mode is TODAY; each load takes a token so a slow TODAY response can never paint over HISTORY.
 - Failure: a Global Latest timeout, error, malformed body or missing item leaves exactly the Market Close view.
 - Tests: `tests/global-latest-overlay.test.mjs` (policy, MARKET TODAY/HISTORY/1W/1M, KO/EN), the B3 cases in `tests/home-initial-ssr.test.mjs` (SSR/hydration parity, zero first-load requests), fixtures in `tests/helpers/global-latest-fixtures.mjs`.

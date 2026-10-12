@@ -1034,9 +1034,8 @@
     const latest = overlay?.items || {};
     const marketDate = isoDate(payload?.meta?.market_date);
     const overlaid = spec => (localeApi?.isGlobalLatestCode?.(spec.key) && latest[spec.key]) || null;
-    // Basis lines appear only when the strip mixes Market Close with Global Latest.
-    const mixed = TODAY_STRIP_ITEMS.some(overlaid);
-    const basis = (kind, source) => (mixed ? localeApi?.todayStripBasis?.(kind, source, locale) || '' : '');
+    // Each instrument keeps its own basis, even without a Global Latest overlay.
+    const basis = (kind, source) => localeApi?.todayStripBasis?.(kind, source, locale) || '';
     const items = TODAY_STRIP_ITEMS.map(spec => {
       const quote = payload?.[spec.group]?.[spec.key];
       const snapshot = stripFigures(spec, quote);
@@ -1625,5 +1624,9 @@
   initHeroCarousel();
   renderTodayMarket();
   renderHighlights();
+  const editorialHost = document.getElementById('home-editorial');
+  if (editorialHost && window.HOME_EDITORIAL) {
+    editorialHost.innerHTML = window.HOME_EDITORIAL.render(allPosts, locale, TAG_REGISTRY);
+  }
   renderArchive();
 })();
