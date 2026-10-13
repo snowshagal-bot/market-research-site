@@ -66,7 +66,9 @@ The homepage opens with the Snowshagal brand rather than a rotating post or a ge
 - avoid photorealistic winter/travel imagery and avoid decorative red/blue finance colors outside actual data;
 - on desktop, keep the copy readable on the left and let the illustration breathe across the right side;
 - at 320–480px, show the headline and supporting copy first, then continue the artwork below as a deliberate mobile composition rather than a scaled desktop spread;
-- keep Daily / Weekly / Research as concise hero entry points and retain Investment Note / Market Basics in the main navigation and archive;
+- keep Daily / Weekly / Investment Note / Research as concise hero entry points, while Market Basics remains in the main navigation and archive;
+- the second hero slide shows the newest same-locale report in each of those four categories with its real cover thumbnail and a direct reading link; the latest-reports grid follows the same four-category selection;
+- do not repeat the removed Daily/reading-guide editorial block between the market strip and latest reports;
 - the latest report cards must continue to render from localized post data and may use the existing optional `coverImage` or a restrained CSS fallback;
 - card and preview copy (HOME latest cards, Latest Research slide, category featured cards and archive rows, calendar preview, Related Reading) is the editorial blurb from `assets/locale.js` `editorialBlurb()`: `summary`, else `description`, else nothing. `subtitle` and the Daily `takeaway` never stand in for it, and without a blurb the element is left out rather than rendered empty or filled with a category sentence;
 - respect `prefers-reduced-motion` and keep hover movement subtle.

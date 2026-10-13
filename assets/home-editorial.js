@@ -42,5 +42,37 @@
       <div class="home-guide-links"><a href="${prefix}/market/">${text.market} <span aria-hidden="true">↗</span></a><a href="${prefix}/about/">${text.about} <span aria-hidden="true">↗</span></a></div>
     </aside></div>`;
   }
-  root.HOME_EDITORIAL = { render };
+  // The second hero slide uses the same localized post selection on the server
+  // and in the browser. The Research card keeps its existing hydration IDs.
+  function renderFeatureCards(posts, language) {
+    const api = root.MARKET_LOCALE;
+    const lang = language === 'en' ? 'en' : 'ko';
+    const labels = lang === 'en'
+      ? { daily: 'DAILY', weekly: 'WEEKLY', note: 'INVESTMENT NOTE', read: 'Read report' }
+      : { daily: 'DAILY', weekly: 'WEEKLY', note: 'INVESTMENT NOTE', read: '리포트 읽기' };
+    const localized = api.sortPosts(api.localePosts(posts, lang));
+    return ['daily', 'weekly', 'note'].map(type => {
+      const post = localized.find(item => item.type === type);
+      if (!post) return '';
+      const path = api.normalizeReportPath(post.href);
+      if (!path || !path.startsWith('reports/')) return '';
+      const href = `/${path.replace(/\.html?$/i, '')}`;
+      const date = post.reportDate || post.date || '';
+      const blurb = api.editorialBlurb(post);
+      const cover = String(post.coverImage || '').replace(/^\/+/, '');
+      const thumb = /-450\.webp$/i.test(String(post.coverThumbnail || ''))
+        ? String(post.coverThumbnail).replace(/^\/+/, '') : '';
+      const image = cover
+        ? `<img src="/${esc(thumb || cover)}"${thumb ? ` srcset="/${esc(thumb)} 450w, /${esc(cover)} 900w" sizes="(max-width: 760px) 48px, 78px"` : ''} alt="" loading="lazy" width="78" height="118">`
+        : '<span class="hero-report-cover-fallback" aria-hidden="true">SNOWSHAGAL</span>';
+      return `<article class="hero-report-card hero-report-${type}">
+        <div class="featured-copy"><div class="featured-eyebrow"><span class="featured-badge">${labels[type]}</span><span class="featured-dot" aria-hidden="true">·</span><time datetime="${esc(date)}">${esc(date)}</time></div>
+        <h2 class="featured-title"><a href="${esc(href)}">${esc(post.title || '')}</a></h2>
+        ${blurb ? `<p class="featured-snippet">${esc(blurb)}</p>` : ''}
+        <div class="featured-action"><a class="btn-editorial" href="${esc(href)}">${labels.read} <span aria-hidden="true">→</span></a></div></div>
+        <div class="featured-art"><a class="featured-cover-wrap" href="${esc(href)}" tabindex="-1" aria-hidden="true">${image}</a></div>
+      </article>`;
+    }).join('');
+  }
+  root.HOME_EDITORIAL = { render, renderFeatureCards };
 })(typeof window !== 'undefined' ? window : globalThis);

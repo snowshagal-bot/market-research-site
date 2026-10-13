@@ -36,7 +36,7 @@
 <link rel="stylesheet" href="assets/category-state.css?v=4328e4b8c2">
 <link rel="stylesheet" href="assets/ui-polish.css?v=6ec39e1026">
 <link rel="stylesheet" href="/assets/home-v2.css?v=6def21ee7c">
-<link rel="stylesheet" href="/assets/home-editorial.css?v=af9de179a6">
+<link rel="stylesheet" href="/assets/home-editorial.css?v=0dd36ca3d5">
 <link rel="preload" as="image" href="/assets/snowshagal-research-desk.webp" media="(min-width: 761px)">
 <link rel="preload" as="image" href="/assets/snowshagal-research-desk-mobile.webp" media="(max-width: 760px)">
 <script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
@@ -95,6 +95,7 @@
               <nav class="hero-entries" aria-label="주요 리서치 바로가기">
                 <a href="/daily/"><span class="entry-symbol entry-daily" aria-hidden="true"></span><span><strong>DAILY</strong><small>오늘의 시장</small></span></a>
                 <a href="/weekly/"><span class="entry-symbol entry-weekly" aria-hidden="true"></span><span><strong>WEEKLY</strong><small>한 주의 흐름</small></span></a>
+                <a href="/notes/"><span class="entry-symbol entry-note" aria-hidden="true"></span><span><strong>INVESTMENT NOTE</strong><small>투자 노트</small></span></a>
                 <a href="/research/"><span class="entry-symbol entry-research" aria-hidden="true"></span><span><strong>RESEARCH</strong><small>깊이 읽기</small></span></a>
               </nav>
             </div>
@@ -135,15 +136,17 @@
           </div>
         </div>
 
-        <div class="hero-slide" id="hero-slide-2" role="group" aria-roledescription="slide" aria-label="2 of 2: 최신 리서치" aria-hidden="true">
-          <div class="hero-shell hero-shell-featured">
+        <div class="hero-slide" id="hero-slide-2" role="group" aria-roledescription="slide" aria-label="2 of 2: 최신 리포트" aria-hidden="true">
+          <div class="hero-shell hero-shell-featured hero-four-shell">
+            <div class="hero-four-grid" aria-label="데일리·위클리·투자 노트·리서치 최신 글">
+              <div id="hero-report-extra"></div>
+              <article class="hero-report-card hero-report-research">
             <div class="featured-copy">
               <div class="featured-eyebrow">
-                <span class="featured-badge">LATEST RESEARCH</span>
+                <span class="featured-badge">RESEARCH · 비정기</span>
                 <span class="featured-dot" aria-hidden="true">·</span>
                 <span class="featured-date" id="hero-featured-date">—</span>
-                <span class="featured-dot" aria-hidden="true">·</span>
-                <span class="featured-reading" id="hero-featured-reading">—</span>
+                <span class="featured-reading" id="hero-featured-reading" hidden>—</span>
               </div>
               <h2 class="featured-title"><a id="hero-featured-title-link" href="/research/">—</a></h2>
               <p class="featured-snippet" id="hero-featured-snippet">—</p>
@@ -159,6 +162,8 @@
                   <img id="hero-featured-img" src="/assets/social/snowshagal-home.jpg" alt="" loading="lazy">
                 </a>
               </div>
+            </div>
+              </article>
             </div>
           </div>
         </div>
@@ -230,7 +235,6 @@
     </div>
   </section>
 
-  <section class="home-editorial" id="home-editorial" aria-label="최신 데일리와 분석 기준"></section>
 
   <section class="site-introduction" aria-labelledby="latest-heading">
     <div class="site-wrap">
@@ -392,7 +396,7 @@
 <script src="/data/posts.js"></script>
 <script src="/data/market-summary.js"></script>
 <script src="/assets/locale.js?v=55ee2ee40e"></script>
-<script src="/assets/home-editorial.js?v=9ddfa1771c"></script>
-<script src="/assets/site.js?v=82846affba"></script>
+<script src="/assets/home-editorial.js?v=8267c0034c"></script>
+<script src="/assets/site.js?v=53fc86e7b4"></script>
 </body>
 </html>

@@ -8,7 +8,7 @@ import { escapeHtml } from './_initial-html.js';
 import { cleanReportHref } from './_seo.js';
 
 /**
- * Initial HTML for the two homepages (/ and /en/): the Latest Research slide,
+ * Initial HTML for the two homepages (/ and /en/): the four-report slide,
  * the active notice slide and the TODAY market strip, which the static shell
  * ships as "—" placeholders for assets/site.js to fill.
  *
@@ -49,11 +49,11 @@ const STRIP_ITEMS = [
   { label: 'GOLD', group: 'commodities_crypto', key: 'GOLD', format: 'usd' }
 ];
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
-const HERO_FEATURED_COVER_SIZES = '(max-width: 760px) 140px, 220px';
+const HERO_FEATURED_COVER_SIZES = '(max-width: 760px) 48px, 78px';
 const DEFAULT_FEATURED_IMAGE = '/assets/social/snowshagal-home.jpg';
 const SLIDE_TITLES = {
-  ko: { brand: '브랜드', notice: '공지사항', research: '최신 리서치' },
-  en: { brand: 'Brand', notice: 'Announcement', research: 'Latest Research' }
+  ko: { brand: '브랜드', notice: '공지사항', research: '최신 리포트' },
+  en: { brand: 'Brand', notice: 'Announcement', research: 'Latest Reports' }
 };
 const EN_MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
@@ -431,6 +431,7 @@ export async function buildHomeInitial(url, env, posts, { now = new Date(), budg
     // rendered only when both are known; otherwise site.js builds it as before.
     const hasPosts = Array.isArray(posts);
     const research = hasPosts ? latestResearchPost(posts, lang) : null;
+    if (hasPosts) edits.push({ id: 'hero-report-extra', html: globalThis.HOME_EDITORIAL.renderFeatureCards(posts, lang) });
     if (hasPosts && notice) {
       if (research) edits.push(...researchEdits(research, lang));
       if (notice.notice) edits.push(...noticeEdits(notice.notice, lang));

@@ -43,7 +43,7 @@
   const COVER_THUMBNAIL_WIDTH = 450;
   const COVER_ORIGINAL_WIDTH = 900;
   const LATEST_CARD_COVER_SIZES = '(max-width: 760px) 30vw, 112px';
-  const HERO_FEATURED_COVER_SIZES = '(max-width: 760px) 140px, 220px';
+  const HERO_FEATURED_COVER_SIZES = '(max-width: 760px) 48px, 78px';
   // Only a thumbnail the post's metadata records is offered: the field is
   // written when the file was committed and dropped when it was not, and a
   // browser shows a broken image for a missing srcset candidate rather than
@@ -585,7 +585,7 @@
   function renderHighlights(){
     const host=document.getElementById('latest-category-cards');
     if (!host) return;
-    const highlights=['daily','weekly','research'].map(type=>latestFor(type)).filter(Boolean);
+    const highlights=['daily','weekly','note','research'].map(type=>latestFor(type)).filter(Boolean);
     const section=host.closest('.site-introduction');
     if(section) section.hidden=!highlights.length;
     host.innerHTML=highlights.map(post=>{
@@ -1342,6 +1342,11 @@
     const counterTotal = heroSection?.querySelector('.carousel-total');
     if (!heroSection || !slide1 || !slide2) return null;
 
+    const extraCards = document.getElementById('hero-report-extra');
+    if (extraCards && window.HOME_EDITORIAL?.renderFeatureCards) {
+      extraCards.innerHTML = window.HOME_EDITORIAL.renderFeatureCards(allPosts, locale);
+    }
+
     const isEn = locale === 'en';
 
     // Track active slide elements
@@ -1408,7 +1413,7 @@
         } else if (slide === slideNotice) {
           title = isEn ? 'Announcement' : '공지사항';
         } else if (slide === slide2) {
-          title = isEn ? 'Latest Research' : '최신 리서치';
+          title = isEn ? 'Latest Reports' : '최신 리포트';
         }
         slide.setAttribute('aria-label', `${num} of ${total}: ${title}`);
       });
@@ -1624,9 +1629,5 @@
   initHeroCarousel();
   renderTodayMarket();
   renderHighlights();
-  const editorialHost = document.getElementById('home-editorial');
-  if (editorialHost && window.HOME_EDITORIAL) {
-    editorialHost.innerHTML = window.HOME_EDITORIAL.render(allPosts, locale, TAG_REGISTRY);
-  }
   renderArchive();
 })();

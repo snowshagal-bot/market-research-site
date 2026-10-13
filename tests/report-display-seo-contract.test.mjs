@@ -192,7 +192,7 @@ test('HOME latest cards: the editorial blurb, identical in the first HTML and af
   for (const lang of ['ko', 'en']) {
     const posts = corpus(lang);
     const server = cards(homepageLatestLinks(posts, lang, TAGS), 'latest-card');
-    assert.deepEqual(server.map((card) => card.summary), ['요약 문장', '설명 문장', null], `${lang}: A → summary, B → description, C → none`);
+    assert.deepEqual(server.map((card) => card.summary), ['요약 문장', '설명 문장', null, null], `${lang}: A → summary, B → description, C/D → none`);
     const browser = cards((await bootHome(posts, lang))('latest-category-cards').innerHTML, 'latest-card');
     assert.deepEqual(browser, server, lang);
   }

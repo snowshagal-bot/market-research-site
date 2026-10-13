@@ -38,11 +38,13 @@ The Korean MARKET page adds a compact operational-notice section before the exis
 
 ## Public information architecture
 
-### Homepage editorial refresh (2026-10-12, branch Preview)
+### Homepage editorial refresh (2026-10-12; four-report follow-up 2026-10-13)
 
-The two locale homepages use the approved research-desk watercolor (new versioned filenames; old artwork retained), encoded as 1944×810 / 960×400 WebP. `assets/home-editorial.css` scopes the typography, border-led latest cards and mobile two-row market strip to HOME. The manual Research/announcement carousel and all category navigation remain available.
+The follow-up four-report homepage layout (2026-10-13) keeps the approved watercolor first slide, adds Investment Note to its shortcuts, and uses the second slide for the newest same-locale Daily, Weekly, Investment Note and occasional Research. Each compact card uses the post's actual cover thumbnail and canonical report URL. The latest-reports grid also has four categories, while the separate Daily/reading-guide block was removed as redundant. Both initial HTML and browser hydration select from current `posts.json` metadata; newly published KO/EN reports require no homepage title or image edit.
 
-`assets/home-editorial.js` renders the newest same-locale Daily from post metadata through the shared `editorialBlurb` policy, with optional actual topic tags and a static reading guide. The middleware and browser call the same renderer, so it needs no extra fetch, stored summary or publishing input. Empty locales produce no editorial block. No sample market commentary or sample values are shipped.
+The two locale homepages use the approved research-desk watercolor (new versioned filenames; old artwork retained), encoded as 1944×810 / 960×400 WebP. `assets/home-editorial.css` scopes the typography, four-report hero, border-led latest cards and mobile two-row market strip to HOME. The manual carousel and announcement slide remain available.
+
+`assets/home-editorial.js` renders the first three category cards for the second hero slide from same-locale post metadata through the shared `editorialBlurb` policy; the existing Research card keeps its hydration contract. The server and browser call the same renderer, so it needs no extra fetch, stored summary or publishing input. No sample market commentary or sample values are shipped.
 
 Every valid Market Close instrument now shows its own basis date even when no Global Latest item overlays it. Overlay eligibility, stale/holiday states, takeaway date matching and the emergency fallback are unchanged. Global reference indicators are visually separated from the two KRX indices.
 
