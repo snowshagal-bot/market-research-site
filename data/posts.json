@@ -1,5 +1,34 @@
 [
   {
+    "id": "2026-10-13-note-yk8ebd",
+    "type": "note",
+    "typeLabel": "Investment Note",
+    "lang": "en",
+    "date": "2026-10-13",
+    "reportDate": "2026-10-13",
+    "registeredDate": "2026-10-13",
+    "registeredAt": "2026-10-13T14:46:43.869Z",
+    "legacyImport": false,
+    "title": "KRW 107tn in Profit—Why the Selloff?",
+    "seoTitle": "INVESTMENT NOTE NO.11 · KRW 107tn in Profit—Why the Selloff? · October 13, 2026",
+    "subtitle": "",
+    "description": "The KOSPI fell 6.2% in two sessions after Samsung Electronics reported KRW 107.4tn in Q3 operating profit. A close look at earnings size, growth rates and revisions—and what earnings alone cannot explain.",
+    "tags": [
+      "semiconductors",
+      "kospi",
+      "earnings",
+      "valuation",
+      "shareholder-returns"
+    ],
+    "readingMinutes": 17,
+    "href": "reports/en/Snowshagal_Investment_Note_11_Earnings_Growth_EN.html",
+    "translationGroup": "2026-10-13-note-14bc107",
+    "coverImage": "covers/2026-10-13-note-yk8ebd.webp",
+    "shareCardImage": "covers/share/2026-10-13-note-yk8ebd.jpg",
+    "shareCardSource": "custom",
+    "coverThumbnail": "covers/2026-10-13-note-yk8ebd-450.webp"
+  },
+  {
     "id": "2026-10-13-note-14bc107",
     "type": "note",
     "typeLabel": "투자 노트",
