@@ -44,8 +44,8 @@ window.RESEARCH_POSTS = [
     "subtitle": "",
     "description": "삼성전자 3분기 영업이익 107.4조원 발표 뒤 두 거래일 코스피는 6.2% 내렸다. 이익의 크기·속도·방향으로 증가율 경로와 추정치 조정을 점검하고, 이익만으로 설명되지 않는 부분도 짚었다.",
     "tags": [
-      "semiconductors",
       "kospi",
+      "semiconductors",
       "earnings",
       "valuation",
       "shareholder-returns"
@@ -55,7 +55,8 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-10-13-note-14bc107.webp",
     "shareCardImage": "covers/share/2026-10-13-note-14bc107.jpg",
     "shareCardSource": "custom",
-    "coverThumbnail": "covers/2026-10-13-note-14bc107-450.webp"
+    "coverThumbnail": "covers/2026-10-13-note-14bc107-450.webp",
+    "updatedAt": "2026-10-13T14:52:13.585Z"
   },
   {
     "id": "2026-10-12-daily-k07alk",
