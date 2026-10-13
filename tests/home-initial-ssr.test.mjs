@@ -373,7 +373,7 @@ test('1. KO Latest Research is the newest KO research, rendered as site.js rende
   assert.equal(rendered['hero-featured-title-link'].href, `/${post.href.replace(/\.html$/, '')}`);
   assert.equal(rendered['hero-featured-date'].text, post.reportDate);
   assert.equal(rendered['hero-featured-img'].src, `/${post.coverImage}`);
-  assert.equal(rendered['hero-featured-img'].sizes, '(max-width: 760px) 140px, 220px');
+  assert.equal(rendered['hero-featured-img'].sizes, '(max-width: 760px) 48px, 78px');
   assert.equal(rendered['hero-featured-img'].alt, post.title);
   assert.notEqual(rendered['hero-featured-snippet'].text, '—');
 });
@@ -386,6 +386,20 @@ test('2. EN Latest Research is the newest EN research with an extensionless link
   assert.equal(rendered['hero-featured-title-link'].text, post.title);
   assert.doesNotMatch(rendered['hero-featured-action-btn'].href, /\.html$/);
   assert.equal(rendered['hero-featured-reading'].text, `${post.readingMinutes} min read`);
+});
+
+test('initial HTML includes the same-locale Daily, Weekly and Note covers beside Research', async () => {
+  const db = await database({ market: [{ payload: payloadFor(NORMAL_DATE) }] });
+  for (const lang of ['ko', 'en']) {
+    const { html } = await serverHome({ lang, db, now: NORMAL_NOW });
+    const cards = nodeById(html, 'hero-report-extra').inner;
+    const localized = globalThis.MARKET_LOCALE.sortPosts(globalThis.MARKET_LOCALE.localePosts(REAL_POSTS, lang));
+    for (const type of ['daily', 'weekly', 'note']) {
+      const post = localized.find(item => item.type === type);
+      assert.ok(cards.includes(post.title.replaceAll('&', '&amp;')), `${lang} ${type} title in SSR`);
+      assert.ok(cards.includes(`/${post.coverThumbnail}`), `${lang} ${type} cover in SSR`);
+    }
+  }
 });
 
 test('summary → subtitle → description fallback, reading time and cover without thumbnail match site.js', async () => {
@@ -433,7 +447,7 @@ test('5. no active notice: the notice slide stays hidden and the carousel has tw
   const { rendered, server } = await assertParity({ lang: 'ko', db, now: NORMAL_NOW });
   assert.equal(rendered['hero-slide-notice'].hidden, true);
   assert.equal(rendered['carousel-total'].text, '02');
-  assert.equal(rendered['hero-slide-2']['aria-label'], '2 of 2: 최신 리서치');
+  assert.equal(rendered['hero-slide-2']['aria-label'], '2 of 2: 최신 리포트');
   assert.deepEqual(JSON.parse(nodeById(server.html, 'home-initial-data').inner).announcement, null);
 });
 

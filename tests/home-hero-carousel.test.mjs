@@ -552,23 +552,23 @@ test('Carousel Slide ARIA labels synchronize dynamically across 1/2/3 slide stat
   const { elements: ko3 } = await loadSiteScriptContext(samplePosts, 'ko', noticePayload);
   assert.equal(ko3['hero-slide-1'].getAttribute('aria-label'), '1 of 3: 브랜드');
   assert.equal(ko3['hero-slide-notice'].getAttribute('aria-label'), '2 of 3: 공지사항');
-  assert.equal(ko3['hero-slide-2'].getAttribute('aria-label'), '3 of 3: 최신 리서치');
+  assert.equal(ko3['hero-slide-2'].getAttribute('aria-label'), '3 of 3: 최신 리포트');
 
   // 2. 3 slides: Active Notice + Research on EN
   const { elements: en3 } = await loadSiteScriptContext(samplePostsEn, 'en', noticePayload);
   assert.equal(en3['hero-slide-1'].getAttribute('aria-label'), '1 of 3: Brand');
   assert.equal(en3['hero-slide-notice'].getAttribute('aria-label'), '2 of 3: Announcement');
-  assert.equal(en3['hero-slide-2'].getAttribute('aria-label'), '3 of 3: Latest Research');
+  assert.equal(en3['hero-slide-2'].getAttribute('aria-label'), '3 of 3: Latest Reports');
 
   // 3. 2 slides: No Notice + Research on KO
   const { elements: ko2 } = await loadSiteScriptContext(samplePosts, 'ko', { items: [] });
   assert.equal(ko2['hero-slide-1'].getAttribute('aria-label'), '1 of 2: 브랜드');
-  assert.equal(ko2['hero-slide-2'].getAttribute('aria-label'), '2 of 2: 최신 리서치');
+  assert.equal(ko2['hero-slide-2'].getAttribute('aria-label'), '2 of 2: 최신 리포트');
 
   // 4. 2 slides: No Notice + Research on EN
   const { elements: en2 } = await loadSiteScriptContext(samplePostsEn, 'en', { items: [] });
   assert.equal(en2['hero-slide-1'].getAttribute('aria-label'), '1 of 2: Brand');
-  assert.equal(en2['hero-slide-2'].getAttribute('aria-label'), '2 of 2: Latest Research');
+  assert.equal(en2['hero-slide-2'].getAttribute('aria-label'), '2 of 2: Latest Reports');
 
   // 5. 2 slides: Active Notice + No Research on KO
   const { elements: koNoticeOnly } = await loadSiteScriptContext([], 'ko', noticePayload);

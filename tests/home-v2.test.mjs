@@ -148,7 +148,7 @@ test('brand hero is fixed while latest cards remain post-driven and responsive',
     read('assets/ui-polish.css')
   ]);
   assert.match(script, /const coreTypes = \['daily', 'weekly', 'research', 'note', 'basics'\]/);
-  assert.match(script, /\['daily','weekly','research'\]\.map\(type=>latestFor\(type\)\)\.filter\(Boolean\)/);
+  assert.match(script, /\['daily','weekly','note','research'\]\.map\(type=>latestFor\(type\)\)\.filter\(Boolean\)/);
   assert.match(script, /const visual=post\.coverImage/);
   assert.match(script, /latest-card-cover/);
   // Card copy is the shared editorial blurb (assets/locale.js): never a subtitle stand-in.

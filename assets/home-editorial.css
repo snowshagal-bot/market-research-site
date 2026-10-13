@@ -19,6 +19,7 @@ html[lang="en"] .home-page .hero-copy h1 {
 .home-page .hero-rule { display: none; }
 .home-page .hero-entries { gap: 24px; margin-top: 24px; }
 .home-page .hero-entries a { grid-template-columns: 1fr; min-width: 75px; padding: 4px 0; }
+.home-page .hero-entries a:nth-child(3) { min-width: 122px; }
 .home-page .entry-symbol { display: none; }
 .home-page .hero-entries small { font-size: 11px; color: var(--text-2); }
 .home-page .hero-art { inset: 0 -40px 0 0; width: auto; }
@@ -26,6 +27,27 @@ html[lang="en"] .home-page .hero-copy h1 {
 .home-page .hero-art::after {
   background: linear-gradient(90deg, var(--bg) 0%, transparent 46%, transparent 95%, var(--bg) 100%);
 }
+/* A compact reading desk for four actual reports, not another decorative hero. */
+.home-page .hero-four-shell { display: block; min-height: 340px; }
+.home-page .hero-four-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); min-height: 340px; padding: 28px 0 44px; }
+.home-page #hero-report-extra { display: contents; }
+.home-page .hero-report-card { position: relative; min-width: 0; min-height: 268px; padding: 5px 18px 8px; border-left: 1px solid var(--line); }
+.home-page .hero-report-card:first-child { border-left: 0; padding-left: 0; }
+.home-page .hero-report-card:last-child { padding-right: 0; }
+.home-page .hero-report-card .featured-copy { display: flex; min-width: 0; height: 100%; padding: 0; justify-content: flex-start; }
+.home-page .hero-report-card .featured-eyebrow { min-height: 22px; flex-wrap: wrap; gap: 4px 6px; margin-bottom: 12px; font-size: 9px; letter-spacing: .06em; }
+.home-page .hero-report-card .featured-badge { padding: 0; border-radius: 0; background: none; color: var(--navy); font-size: 10px; }
+.home-page .hero-report-card .featured-eyebrow time, .home-page .hero-report-card .featured-date { color: var(--muted); white-space: nowrap; }
+.home-page .hero-report-card .featured-reading { display: none; }
+.home-page .hero-report-card .featured-title { display: -webkit-box; min-height: 3.5em; margin: 0 0 10px; overflow: hidden; overflow-wrap: anywhere; font-family: inherit; font-size: clamp(16px, 1.55vw, 20px); font-weight: 600; line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.home-page .hero-report-card .featured-snippet { width: calc(100% - 94px); max-width: none; margin: 0; font-size: 11px; line-height: 1.55; -webkit-line-clamp: 4; }
+.home-page .hero-report-card .featured-action { margin-top: auto; padding-top: 14px; }
+.home-page .hero-report-card .featured-action .btn-editorial { font-size: 11px; font-weight: 600; }
+.home-page .hero-report-card .featured-art { position: absolute; right: 18px; bottom: 36px; width: 78px; height: 118px; }
+.home-page .hero-report-card:last-child .featured-art { right: 0; }
+.home-page .hero-report-card .featured-cover-wrap { width: 78px; height: 118px; max-width: none; max-height: none; border-radius: 3px; box-shadow: none; }
+.home-page .hero-report-card .featured-cover-wrap img { object-fit: contain; }
+.home-page .hero-report-cover-fallback { display: grid; place-items: center; width: 100%; height: 100%; color: var(--muted); font-size: 8px; letter-spacing: .08em; }
 .home-page .market-section-label {
   display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 0 0 18px;
   color: var(--text); font-size: 16px; font-weight: 650;
@@ -67,14 +89,14 @@ html[lang="en"] .home-daily h2 { max-width: 29ch; line-height: 1.25; }
 .home-page .site-introduction { border-top: 1px solid var(--line); padding-top: 26px; padding-bottom: 30px; }
 .home-page .latest-head h2 { font-size: 20px; }
 .home-page .latest-head > div > span { display: none; }
-.home-page .latest-cards { gap: 26px; }
+.home-page .latest-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 26px; }
 .home-page .latest-card { background: none; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; padding: 18px 0 0; }
 .home-page .latest-card:hover { background: none; box-shadow: none; transform: none; }
 .home-page .latest-card-title { font-size: 21px; font-weight: 600; line-height: 1.45; }
 .home-page .latest-card-meta { font-size: 10px; }
 .home-page .latest-card-meta b { color: var(--text-2); font-weight: 600; }
-.home-page .latest-card-body { grid-template-columns: minmax(0, 1fr); align-items: start; }
-.home-page .latest-card-cover, .home-page .latest-card-art { display: none; }
+.home-page .latest-card-body { grid-template-columns: 58px minmax(0, 1fr); align-items: start; gap: 10px; }
+.home-page .latest-card-cover, .home-page .latest-card-art { display: block; border-radius: 3px; }
 .home-page .latest-card-summary { font-size: 13px; -webkit-line-clamp: 3; }
 .home-page .latest-card-tags { display: none; }
 .home-page .latest-card-read { font-size: 12px; font-weight: 500; }
@@ -86,6 +108,7 @@ html[lang="en"] .home-daily h2 { max-width: 29ch; line-height: 1.25; }
   .home-reading-grid { gap: 28px; grid-template-columns: minmax(0, 1.6fr) minmax(230px, 1fr); }
   .home-reading-guide { padding-left: 22px; }
   .home-page .hero-copy { max-width: 410px; }
+  .home-page .latest-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
   .home-page .hero-shell { min-height: 0; }
@@ -95,11 +118,22 @@ html[lang="en"] .home-daily h2 { max-width: 29ch; line-height: 1.25; }
   .home-page .hero-description { margin-top: 14px; font-size: 13px; }
   .home-page .hero-description span { display: inline; }
   .home-page .hero-description span + span::before { content: ' '; }
-  .home-page .hero-entries { margin-top: 16px; gap: 28px; }
+  .home-page .hero-entries { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 16px; gap: 8px; }
+  .home-page .hero-entries a, .home-page .hero-entries a:nth-child(3) { min-width: 0; }
+  .home-page .hero-entries strong { font-size: 8px; letter-spacing: .04em; }
+  .home-page .hero-entries small { font-size: 9px; white-space: normal; }
   .home-page .hero-art { position: relative; inset: auto; width: calc(100% + 40px); height: 180px; margin: 0 -20px; }
   .home-page .hero-art img { object-fit: cover; object-position: right center; }
   .home-page .hero-art::after { background: linear-gradient(0deg, var(--bg), transparent 16%, transparent 85%, var(--bg)); }
   .home-page .hero-carousel-controls { margin: 0 0 4px; }
+  .home-page .hero-four-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); min-height: 0; padding: 20px 0 32px; gap: 20px 0; }
+  .home-page .hero-report-card { min-height: 240px; padding: 0 10px; }
+  .home-page .hero-report-card:nth-child(odd) { border-left: 0; padding-left: 0; }
+  .home-page .hero-report-card:nth-child(even) { padding-right: 0; }
+  .home-page .hero-report-card .featured-title { min-height: 3.6em; font-size: 15px; }
+  .home-page .hero-report-card .featured-snippet { width: calc(100% - 55px); font-size: 10px; -webkit-line-clamp: 3; }
+  .home-page .hero-report-card .featured-art { right: 8px; bottom: 38px; width: 48px; height: 72px; }
+  .home-page .hero-report-card .featured-cover-wrap { width: 48px; height: 72px; }
   .home-page .market-section-label { gap: 6px; flex-direction: column; margin-bottom: 16px; }
   .home-page .market-section-label > span { align-self: start; font-size: 11px; }
   .home-page .today-strip-scroll-wrap { overflow: visible; mask-image: none; -webkit-mask-image: none; }
@@ -125,6 +159,9 @@ html[lang="en"] .home-daily h2 { max-width: 29ch; line-height: 1.25; }
   .home-page .latest-cards { gap: 20px; }
   .home-page .latest-card { padding-top: 18px; }
   .home-page .latest-card-title { font-size: 21px; }
-  .home-page .latest-card-body { grid-template-columns: minmax(0, 1fr); }
+  .home-page .latest-card-body { grid-template-columns: 58px minmax(0, 1fr); }
   .home-page .latest-card-summary { -webkit-line-clamp: 3; }
+}
+@media (max-width: 520px) {
+  .home-page .latest-cards { grid-template-columns: minmax(0, 1fr); }
 }

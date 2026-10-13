@@ -47,3 +47,31 @@ test('server and browser share identical editorial output for both locales', asy
     assert.equal(context.window.HOME_EDITORIAL.render(posts, lang, tags), HOME_EDITORIAL.render(posts, lang, tags));
   }
 });
+
+test('four-report hero uses current localized posts, real covers and direct canonical links', async () => {
+  const current = JSON.parse(await read('data/posts.json'));
+  const context = vm.createContext({ window: {} });
+  vm.runInContext(await read('assets/locale.js'), context);
+  vm.runInContext(await read('assets/home-editorial.js'), context);
+  for (const lang of ['ko', 'en']) {
+    const html = HOME_EDITORIAL.renderFeatureCards(current, lang);
+    assert.equal(html, context.window.HOME_EDITORIAL.renderFeatureCards(current, lang));
+    const localized = MARKET_LOCALE.sortPosts(MARKET_LOCALE.localePosts(current, lang));
+    for (const type of ['daily', 'weekly', 'note']) {
+      const post = localized.find(item => item.type === type);
+      assert.ok(post, `${lang} ${type} exists`);
+      assert.match(html, new RegExp(`hero-report-${type}`));
+      assert.ok(html.includes(post.title.replaceAll('&', '&amp;')), `${lang} ${type} latest title`);
+      assert.ok(html.includes(`/${post.coverThumbnail}`), `${lang} ${type} actual thumbnail`);
+      assert.ok(html.includes(`/${post.href.replace(/\.html$/, '')}`), `${lang} ${type} direct report link`);
+    }
+    assert.equal((html.match(/class="hero-report-card /g) || []).length, 3);
+    assert.doesNotMatch(html, lang === 'en' ? /가장 큰 나무|107조/ : /The Tallest Trees|KRW 107tn/);
+  }
+  for (const path of ['index.html', 'en/index.html']) {
+    const shell = await read(path);
+    assert.doesNotMatch(shell, /id="home-editorial"/);
+    assert.match(shell, /id="hero-report-extra"/);
+    assert.match(shell, /INVESTMENT NOTE/);
+  }
+});

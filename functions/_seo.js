@@ -137,7 +137,7 @@ export function coverThumbnailPath(cover) {
  * shared guess: a `100vw` here would send the 900px original to a 112px card.
  */
 export const LATEST_CARD_COVER_SIZES = '(max-width: 760px) 30vw, 112px';
-export const HERO_FEATURED_COVER_SIZES = '(max-width: 760px) 140px, 220px';
+export const HERO_FEATURED_COVER_SIZES = '(max-width: 760px) 48px, 78px';
 // A category landing's featured card holds the cover in a 16:10 box (16:9 up
 // to 680px) with object-fit: contain, so the picture is painted narrower than
 // the box: at 2:3 it fills the box's height and takes 5/12 of its width (3/8
@@ -711,7 +711,7 @@ export function homepageLatestLinks(posts, lang, tagRegistry = null) {
   const localized = (Array.isArray(posts) ? posts : [])
     .filter((post) => postLanguage(post) === lang && normalizeSitePath(post?.href))
     .sort((left, right) => String(right?.reportDate || right?.date || '').localeCompare(String(left?.reportDate || left?.date || '')));
-  return ['daily', 'weekly', 'research'].map((type) => localized.find((post) => post?.type === type)).filter(Boolean)
+  return ['daily', 'weekly', 'note', 'research'].map((type) => localized.find((post) => post?.type === type)).filter(Boolean)
     .map((post) => {
       // Card copy is the editorial blurb only: never the SEO description's
       // dated fallback, which would repeat the card's own title and date.
@@ -728,7 +728,7 @@ export function homepageLatestLinks(posts, lang, tagRegistry = null) {
       const readLabel = lang === 'en' ? 'Read report' : '리포트 보기';
       const date = post?.reportDate || post?.date || '';
       return `<a class="latest-card latest-card-${escapeHtml(post.type)}" href="${escapeHtml(cleanReportHref(post.href))}">`
-        + `<span class="latest-card-meta"><b>${escapeHtml(post.type.toUpperCase())}${escapeHtml(readingSuffix)}</b><time datetime="${escapeHtml(date)}">${escapeHtml(date)}</time></span>`
+        + `<span class="latest-card-meta"><b>${escapeHtml(post.type === 'note' ? 'INVESTMENT NOTE' : post.type.toUpperCase())}${escapeHtml(readingSuffix)}</b><time datetime="${escapeHtml(date)}">${escapeHtml(date)}</time></span>`
         + `<strong class="latest-card-title">${escapeHtml(post.title || '')}</strong>`
         + `<span class="latest-card-body">${visual}<span class="latest-card-copy">${summaryCopy}${tagsMarkup}`
         + `<span class="latest-card-read">${escapeHtml(readLabel)} <i aria-hidden="true">→</i></span></span></span></a>`;
