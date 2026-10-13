@@ -1,33 +1,5 @@
 [
   {
-    "id": "2026-10-13-note-14bc107",
-    "type": "note",
-    "typeLabel": "투자 노트",
-    "lang": "ko",
-    "date": "2026-10-13",
-    "reportDate": "2026-10-13",
-    "registeredDate": "2026-10-13",
-    "registeredAt": "2026-10-13T14:05:05.116Z",
-    "legacyImport": false,
-    "title": "107조를 냈는데 왜 빠지나",
-    "seoTitle": "INVESTMENT NOTE NO.11 · 107조를 냈는데 왜 빠지나 · 2026.10.13",
-    "subtitle": "",
-    "description": "삼성전자 3분기 영업이익 107.4조원 발표 뒤 두 거래일 코스피는 6.2% 내렸다. 이익의 크기·속도·방향으로 증가율 경로와 추정치 조정을 점검하고, 이익만으로 설명되지 않는 부분도 짚었다.",
-    "tags": [
-      "kospi",
-      "semiconductors",
-      "earnings",
-      "valuation",
-      "shareholder-returns"
-    ],
-    "readingMinutes": 17,
-    "href": "reports/20261013_Investment_Note_Earnings_Speed.html",
-    "coverImage": "covers/2026-10-13-note-14bc107.webp",
-    "shareCardImage": "covers/share/2026-10-13-note-14bc107.jpg",
-    "shareCardSource": "custom",
-    "coverThumbnail": "covers/2026-10-13-note-14bc107-450.webp"
-  },
-  {
     "id": "2026-10-12-daily-k07alk",
     "type": "daily",
     "typeLabel": "Daily",
