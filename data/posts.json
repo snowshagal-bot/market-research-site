@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-10-14-daily-a54p9f",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-14",
+    "reportDate": "2026-10-14",
+    "registeredDate": "2026-10-14",
+    "registeredAt": "2026-10-14T13:33:02.493Z",
+    "legacyImport": false,
+    "title": "숲은 먼저 일어서고 큰 나무는 아직",
+    "subtitle": "",
+    "description": "",
+    "summary": "전날 급락 뒤 반등은 오전에 2.6%까지 갔다가 13시대 1% 안팎으로 줄었고, 14시 ASML의 사상 최대 실적 발표 뒤 반도체 매물이 늘며 남은 상승분도 사라짐.",
+    "takeaway": "2차전지 강세 속 반도체 약세",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 5,
+    "href": "reports/2026-10-14_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-14-daily-a54p9f.webp",
+    "shareCardImage": "covers/share/2026-10-14-daily-a54p9f.jpg",
+    "coverThumbnail": "covers/2026-10-14-daily-a54p9f-450.webp"
+  },
+  {
     "id": "2026-10-13-daily-1b6qmu3",
     "type": "daily",
     "typeLabel": "Daily",
