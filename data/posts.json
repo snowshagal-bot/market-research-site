@@ -1,5 +1,34 @@
 [
   {
+    "id": "2026-10-15-daily-xoifq5",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-10-15",
+    "reportDate": "2026-10-15",
+    "registeredDate": "2026-10-15",
+    "registeredAt": "2026-10-15T13:03:14.921Z",
+    "legacyImport": false,
+    "title": "Two Giants Buckled The Forest Followed",
+    "subtitle": "",
+    "description": "",
+    "summary": "Overnight inflation and AI financing fears hit semiconductor stocks. With two chipmakers accounting for half its market value, KOSPI fell harder than Japan's and Taiwan's markets.",
+    "takeaway": "CPI and AI Fears Halt Trading",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors",
+      "foreign-investors"
+    ],
+    "readingMinutes": 5,
+    "href": "reports/en/Snowshagal_Daily_2026-10-15_EN_Cover_Integrated.html",
+    "translationGroup": "2026-10-15-daily-d30k6e",
+    "coverImage": "covers/2026-10-15-daily-xoifq5.webp",
+    "shareCardImage": "covers/share/2026-10-15-daily-xoifq5.jpg",
+    "coverThumbnail": "covers/2026-10-15-daily-xoifq5-450.webp"
+  },
+  {
     "id": "2026-10-15-daily-d30k6e",
     "type": "daily",
     "typeLabel": "주식 리포트",
