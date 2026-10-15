@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-15-note-1x312pc",
+    "type": "note",
+    "typeLabel": "투자 노트",
+    "lang": "ko",
+    "date": "2026-10-15",
+    "reportDate": "2026-10-15",
+    "registeredDate": "2026-10-16",
+    "registeredAt": "2026-10-15T15:52:21.257Z",
+    "legacyImport": false,
+    "title": "많이 빠진 코스피, 정말 싼 걸까",
+    "seoTitle": "많이 빠진 코스피, 정말 싼 걸까 | Snowshagal 투자노트 NO.12",
+    "subtitle": "",
+    "description": "코스피가 10월 15일 5,554.22까지 빠지며 12개월 선행 PER은 4배 중반(본 노트 환산)으로 내려왔다. 낮은 PER이 저평가의 결론이 아닌 이유, 정상 배수 가정에 따라 달라지는 이익 삭감 폭, 예상 이익 삭감과 실적 감소의 차이, 가격을 낮춘 세 경로(CXMT·금리와 AI 자금 조달·강제 매도)와 반론을 정리한 투자노트.",
+    "tags": [
+      "kospi",
+      "flows",
+      "foreign-investors",
+      "semiconductors",
+      "autos"
+    ],
+    "readingMinutes": 32,
+    "href": "reports/20261015_Investment_Note_Implied_Earnings_Cut.html",
+    "coverImage": "covers/2026-10-15-note-1x312pc.webp",
+    "shareCardImage": "covers/share/2026-10-15-note-1x312pc.jpg",
+    "coverThumbnail": "covers/2026-10-15-note-1x312pc-450.webp"
+  },
+  {
     "id": "2026-10-15-daily-xoifq5",
     "type": "daily",
     "typeLabel": "Daily",
