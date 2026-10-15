@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-10-15-daily-d30k6e",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-15",
+    "reportDate": "2026-10-15",
+    "registeredDate": "2026-10-15",
+    "registeredAt": "2026-10-15T11:53:17.592Z",
+    "legacyImport": false,
+    "title": "두 그루가 기울자 숲이 함께 누운 날",
+    "subtitle": "",
+    "description": "",
+    "summary": "밤사이 미국 물가와 AI 투자 자금 걱정이 반도체를 끌어내렸고, 시가총액 절반이 반도체 두 회사인 코스피가 일본⁠·⁠대만보다 더 크게 흔들림.",
+    "takeaway": "미국 물가·AI 우려에 서킷브레이커",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors",
+      "foreign-investors"
+    ],
+    "readingMinutes": 4,
+    "href": "reports/2026-10-15_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-15-daily-d30k6e.webp",
+    "shareCardImage": "covers/share/2026-10-15-daily-d30k6e.jpg",
+    "coverThumbnail": "covers/2026-10-15-daily-d30k6e-450.webp"
+  },
+  {
     "id": "2026-10-14-research-116f3rg",
     "type": "research",
     "typeLabel": "Research",
