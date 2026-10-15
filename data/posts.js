@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-15-note-kpfvir",
+    "type": "note",
+    "typeLabel": "Investment Note",
+    "lang": "en",
+    "date": "2026-10-15",
+    "reportDate": "2026-10-15",
+    "registeredDate": "2026-10-16",
+    "registeredAt": "2026-10-15T16:39:13.353Z",
+    "legacyImport": false,
+    "title": "After the Selloff, Is the KOSPI Really Cheap?",
+    "seoTitle": "After the Selloff, Is the KOSPI Really Cheap? | Snowshagal Investment Note No. 12",
+    "subtitle": "",
+    "description": "The KOSPI fell 20.7% in seven sessions. Is a forward P/E in the mid-4s genuinely cheap? A look at assumed earnings cuts, reference multiples, CXMT, AI financing pressures and forced selling—and the strongest counterarguments.",
+    "tags": [
+      "kospi",
+      "flows",
+      "foreign-investors",
+      "semiconductors",
+      "autos"
+    ],
+    "readingMinutes": 31,
+    "href": "reports/en/Snowshagal_Investment_Note_No12_2026-10-15_EN.html",
+    "translationGroup": "2026-10-15-note-1x312pc",
+    "coverImage": "covers/2026-10-15-note-kpfvir.webp",
+    "shareCardImage": "covers/share/2026-10-15-note-kpfvir.jpg",
+    "coverThumbnail": "covers/2026-10-15-note-kpfvir-450.webp"
+  },
+  {
     "id": "2026-10-15-note-1x312pc",
     "type": "note",
     "typeLabel": "투자 노트",
