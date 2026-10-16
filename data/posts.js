@@ -1,5 +1,31 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-16-basics-14mkq85",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-10-16",
+    "reportDate": "2026-10-16",
+    "registeredDate": "2026-10-16",
+    "registeredAt": "2026-10-16T14:22:34.088Z",
+    "legacyImport": false,
+    "title": "High Trading Volume. Why Is It Still Hard to Sell?",
+    "seoTitle": "Why High Trading Volume Does Not Guarantee an Easy Sale: Order-Book Depth, Spreads and Slippage",
+    "subtitle": "",
+    "description": "High trading volume does not guarantee an easy sale. On the KRX after-hours market’s first day, KRW 1.8177tn traded and volatility interruptions occurred 1,637 times. Learn how order-book depth, bid–ask spreads, market orders and slippage work with an interactive simulator.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows"
+    ],
+    "readingMinutes": 12,
+    "href": "reports/en/Snowshagal_Reading_the_Market_09_Order_Book_Liquidity_EN.html",
+    "translationGroup": "2026-09-14-basics-ebt0dh",
+    "coverImage": "covers/2026-10-16-basics-14mkq85.webp",
+    "shareCardImage": "covers/share/2026-10-16-basics-14mkq85.jpg",
+    "coverThumbnail": "covers/2026-10-16-basics-14mkq85-450.webp"
+  },
+  {
     "id": "2026-09-14-basics-ebt0dh",
     "type": "basics",
     "typeLabel": "시장 입문",
