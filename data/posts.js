@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-16-daily-1ubygpc",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-16",
+    "reportDate": "2026-10-16",
+    "registeredDate": "2026-10-17",
+    "registeredAt": "2026-10-16T15:15:07.490Z",
+    "legacyImport": false,
+    "title": "스무 계단 내려와 두 계단 오른 날",
+    "subtitle": "",
+    "description": "",
+    "summary": "미국 금리와 AI 자금 걱정이 누그러지며 7거래일 급락 뒤 처음 오름 · 다만 장중에 보탠 오름폭은 오후에 대부분 사라지고, 7거래일 낙폭 가운데 되찾은 것은 약 8%.",
+    "takeaway": "미국 금리 안도에 8거래일 만 반등",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "foreign-investors",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 4,
+    "href": "reports/2026-10-16_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-16-daily-1ubygpc.webp",
+    "shareCardImage": "covers/share/2026-10-16-daily-1ubygpc.jpg",
+    "coverThumbnail": "covers/2026-10-16-daily-1ubygpc-450.webp"
+  },
+  {
     "id": "2026-10-16-basics-14mkq85",
     "type": "basics",
     "typeLabel": "Market Basics",
