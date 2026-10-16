@@ -1,5 +1,31 @@
 [
   {
+    "id": "2026-09-14-basics-ebt0dh",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-10-16",
+    "reportDate": "2026-10-16",
+    "registeredDate": "2026-10-16",
+    "registeredAt": "2026-10-16T14:06:32.987Z",
+    "legacyImport": false,
+    "title": "거래량은 많은데 왜 팔기 어려운가",
+    "seoTitle": "거래량 많아도 제값에 못 파는 이유: 호가 잔량·스프레드·VI 뜻",
+    "subtitle": "",
+    "description": "거래량이 많으면 제값에 쉽게 팔 수 있을까. 한국거래소 애프터마켓 첫날 1조 8,177억 원이 거래됐지만 VI는 정규장의 네 배인 1,637번 걸렸다. 거래량과 거래대금, 호가 잔량과 스프레드, 시장가 매도의 슬리피지, VI·서킷브레이커를 퀴즈와 시뮬레이터로 정리했다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows"
+    ],
+    "readingMinutes": 8,
+    "href": "reports/시장을읽는말들_9편_거래량은많은데왜팔기어려운가.html",
+    "coverImage": "covers/2026-09-14-basics-ebt0dh.webp",
+    "shareCardImage": "covers/share/2026-09-14-basics-ebt0dh.jpg",
+    "coverThumbnail": "covers/2026-09-14-basics-ebt0dh-450.webp",
+    "updatedAt": "2026-10-16T14:16:56.677Z"
+  },
+  {
     "id": "2026-10-15-note-kpfvir",
     "type": "note",
     "typeLabel": "Investment Note",
@@ -2079,31 +2105,6 @@
     "coverImage": "covers/2026-09-15-daily-1e13zp5.webp",
     "shareCardImage": "covers/share/2026-09-15-daily-1e13zp5.jpg",
     "coverThumbnail": "covers/2026-09-15-daily-1e13zp5-450.webp"
-  },
-  {
-    "id": "2026-09-14-basics-ebt0dh",
-    "type": "basics",
-    "typeLabel": "시장 입문",
-    "lang": "ko",
-    "date": "2026-09-14",
-    "reportDate": "2026-09-14",
-    "registeredDate": "2026-10-16",
-    "registeredAt": "2026-10-16T14:06:32.987Z",
-    "legacyImport": false,
-    "title": "거래량은 많은데 왜 팔기 어려운가",
-    "seoTitle": "거래량 많아도 제값에 못 파는 이유: 호가 잔량·스프레드·VI 뜻",
-    "subtitle": "",
-    "description": "거래량이 많으면 제값에 쉽게 팔 수 있을까. 한국거래소 애프터마켓 첫날 1조 8,177억 원이 거래됐지만 VI는 정규장의 네 배인 1,637번 걸렸다. 거래량과 거래대금, 호가 잔량과 스프레드, 시장가 매도의 슬리피지, VI·서킷브레이커를 퀴즈와 시뮬레이터로 정리했다.",
-    "tags": [
-      "kospi",
-      "kosdaq",
-      "flows"
-    ],
-    "readingMinutes": 8,
-    "href": "reports/시장을읽는말들_9편_거래량은많은데왜팔기어려운가.html",
-    "coverImage": "covers/2026-09-14-basics-ebt0dh.webp",
-    "shareCardImage": "covers/share/2026-09-14-basics-ebt0dh.jpg",
-    "coverThumbnail": "covers/2026-09-14-basics-ebt0dh-450.webp"
   },
   {
     "id": "2026-09-14-note-19m98iv",
