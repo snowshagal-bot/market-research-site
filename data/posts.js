@@ -1,5 +1,34 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-16-daily-8s74l4",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-10-16",
+    "reportDate": "2026-10-16",
+    "registeredDate": "2026-10-17",
+    "registeredAt": "2026-10-16T16:11:01.888Z",
+    "legacyImport": false,
+    "title": "Twenty Steps Down Two Steps Back Up",
+    "subtitle": "",
+    "description": "South Korea's KOSPI bounced 2.05% on October 16 after seven straight declines, as U.S. yields fell and AI funding worries eased. Why the rally faded, what the flows showed, and what to watch next.",
+    "summary": "Lower U.S. yields and easing concerns about AI financing brought the first gain after seven straight losses. Most of the gains added during the session disappeared in the afternoon, however. The KOSPI clawed back only about 8% of its seven-session decline.",
+    "takeaway": "Rates ease; first gain in eight sessions",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "foreign-investors",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 6,
+    "href": "reports/en/Snowshagal_Daily_2026-10-16_EN.html",
+    "translationGroup": "2026-10-16-daily-1ubygpc",
+    "coverImage": "covers/2026-10-16-daily-8s74l4.webp",
+    "shareCardImage": "covers/share/2026-10-16-daily-8s74l4.jpg",
+    "coverThumbnail": "covers/2026-10-16-daily-8s74l4-450.webp"
+  },
+  {
     "id": "2026-10-16-daily-1ubygpc",
     "type": "daily",
     "typeLabel": "주식 리포트",
