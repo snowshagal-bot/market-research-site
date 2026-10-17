@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-17-weekly-18l70lv",
+    "type": "weekly",
+    "typeLabel": "Weekly",
+    "lang": "en",
+    "date": "2026-10-17",
+    "reportDate": "2026-10-17",
+    "registeredDate": "2026-10-18",
+    "registeredAt": "2026-10-17T21:17:50.672Z",
+    "legacyImport": false,
+    "title": "Five Sessions, -14% Is the Bottom In?",
+    "subtitle": "",
+    "description": "Snowshagal Weekly, October 12-16, 2026: KOSPI -14.46%, KOSDAQ -10.93%. AI financing worries, Chinese DRAM competition and concentrated foreign selling sent Korean chips sharply lower. What Friday's rebound means, and three tests for next week.",
+    "summary": "AI financing concerns spread through CoreWeave debt, China's CXMT heightened memory competition fears, and foreign investors sold Korean semiconductor heavyweights. Despite falling U.S. Treasury yields, the KOSPI declined for seven straight sessions before a one-day Friday rebound.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "foreign-investors",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 16,
+    "href": "reports/en/Snowshagal_Weekly_2026-10-17_EN.html",
+    "translationGroup": "2026-10-17-weekly-1wn2dea",
+    "coverImage": "covers/2026-10-17-weekly-18l70lv.webp",
+    "shareCardImage": "covers/share/2026-10-17-weekly-18l70lv.jpg",
+    "coverThumbnail": "covers/2026-10-17-weekly-18l70lv-450.webp"
+  },
+  {
     "id": "2026-10-17-weekly-1wn2dea",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
