@@ -4865,5 +4865,30 @@
     "readingMinutes": 3,
     "shareCardImage": "covers/share/2026-07-06-weekly-a0ek97.jpg",
     "coverThumbnail": "covers/2026-07-06-weekly-a0ek97-450.webp"
+  },
+  {
+    "id": "2025-12-31-basics-rts7dd",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2025-12-31",
+    "reportDate": "2025-12-31",
+    "registeredDate": "2026-10-17",
+    "registeredAt": "2026-10-17T12:23:10.605Z",
+    "legacyImport": false,
+    "title": "배당은 언제 사야 받나",
+    "seoTitle": "배당기준일·배당락일 뜻: 배당은 언제 사야 받나",
+    "subtitle": "",
+    "description": "배당은 언제 사야 받을까. 2025년 결산배당 기준일이 삼성전자는 2025년 12월 31일, KB금융은 2026년 2월 27일이었다. 배당기준일과 배당락일 세는 법, 배당성향과 배당수익률, 2026년 배당소득 분리과세를 퀴즈와 실제 일정으로 정리했다.",
+    "tags": [
+      "kosdaq",
+      "kospi",
+      "shareholder-returns"
+    ],
+    "readingMinutes": 10,
+    "href": "reports/시장을읽는말들_10편_배당은언제사야받나.html",
+    "coverImage": "covers/2025-12-31-basics-rts7dd.webp",
+    "shareCardImage": "covers/share/2025-12-31-basics-rts7dd.jpg",
+    "coverThumbnail": "covers/2025-12-31-basics-rts7dd-450.webp"
   }
 ]
