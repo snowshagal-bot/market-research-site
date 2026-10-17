@@ -1,5 +1,31 @@
 [
   {
+    "id": "2026-10-16-basics-1fiofh3",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-10-16",
+    "reportDate": "2026-10-16",
+    "registeredDate": "2026-10-17",
+    "registeredAt": "2026-10-17T12:31:52.490Z",
+    "legacyImport": false,
+    "title": "When Should You Buy to Receive a Dividend?",
+    "seoTitle": "When to Buy a Stock for Its Dividend: Record Dates, Ex-Dividend Dates and Settlement",
+    "subtitle": "",
+    "description": "When must you buy a Korean stock to receive its dividend? Samsung Electronics and KB Financial used different record dates for their 2025 year-end payouts. A practical guide to T+2 settlement, ex-dividend dates, payout ratios, yields and Korea’s 2026 dividend tax rules.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows"
+    ],
+    "readingMinutes": 13,
+    "href": "reports/en/Snowshagal_Reading_the_Market_10_Dividend_Record_Dates_EN.html",
+    "translationGroup": "2026-09-14-basics-ebt0dh",
+    "coverImage": "covers/2026-10-16-basics-1fiofh3.webp",
+    "shareCardImage": "covers/share/2026-10-16-basics-1fiofh3.jpg",
+    "coverThumbnail": "covers/2026-10-16-basics-1fiofh3-450.webp"
+  },
+  {
     "id": "2026-10-16-daily-8s74l4",
     "type": "daily",
     "typeLabel": "Daily",
