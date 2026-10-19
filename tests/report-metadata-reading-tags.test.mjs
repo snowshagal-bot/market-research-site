@@ -554,12 +554,14 @@ test('Engine Parity: publish.js, manage.js, and build-search-index.mjs calculate
   }
 });
 
-test('Representative Sample Reading Times (8/26 KO 8m, 8/26 EN 12m, 8/25 Daily 6m, Weekly 11m, Research 7m, Basics 6m)', () => {
+test('Representative Sample Reading Times (8/26 KO 7m, 8/26 EN 12m, 8/25 Daily 6m, Weekly 11m, Research 7m, Basics 6m)', () => {
   const posts = JSON.parse(fs.readFileSync(path.join(rootDir, 'data', 'posts.json'), 'utf8'));
 
+  // 8/26 KO was 8m while the word joiners (U+2060) around "·" were counted as characters;
+  // they are invisible and no longer counted, which puts it at 7m.
   const daily826Ko = posts.find(p => p.id === '2026-08-26-daily-1ufok0a');
   assert.ok(daily826Ko, '8/26 KO Daily must exist');
-  assert.equal(daily826Ko.readingMinutes, 8, `8/26 KO Daily expected 8m, got ${daily826Ko.readingMinutes}m`);
+  assert.equal(daily826Ko.readingMinutes, 7, `8/26 KO Daily expected 7m, got ${daily826Ko.readingMinutes}m`);
 
   const daily826En = posts.find(p => p.id === '2026-08-26-daily-15udspv');
   assert.ok(daily826En, '8/26 EN Daily must exist');

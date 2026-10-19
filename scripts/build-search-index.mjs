@@ -12,7 +12,7 @@ function cleanInlineText(str) {
     .replace(/&gt;/gi, '>')
     .replace(/&quot;/gi, '"')
     .replace(/&#39;/gi, "'")
-    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .replace(/[\u200B-\u200D\uFEFF\u2060]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 }
