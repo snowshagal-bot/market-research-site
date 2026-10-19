@@ -2,7 +2,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-10-20-note-1wntkqt",
     "type": "note",
-    "typeLabel": "Investment Note",
+    "typeLabel": "Investment Insights",
     "lang": "en",
     "date": "2026-10-20",
     "reportDate": "2026-10-20",
@@ -10,7 +10,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-19T16:52:45.843Z",
     "legacyImport": false,
     "title": "Stocks Are Tumbling. Will the BOK Still Hike?",
-    "seoTitle": "Stocks Are Tumbling. Will the BOK Still Hike? | Snowshagal Investment Note No. 13",
+    "seoTitle": "Stocks Are Tumbling. Will the BOK Still Hike? | Snowshagal Investment Insights No. 13",
     "subtitle": "",
     "description": "October 22 Bank of Korea Monetary Policy Board preview. Four brokerages explicitly forecasting the October vote all expect a hold at 3.00%; the disagreement is over dissenting votes and the subsequent hiking path. Examining the July equity rout, OIS forwards, bank NIMs and the stronger won.",
     "tags": [
@@ -30,7 +30,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-10-20-note-2wb72k",
     "type": "note",
-    "typeLabel": "투자 노트",
+    "typeLabel": "투자 인사이트",
     "lang": "ko",
     "date": "2026-10-20",
     "reportDate": "2026-10-20",
@@ -38,9 +38,9 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-19T16:21:13.502Z",
     "legacyImport": false,
     "title": "주가가 무너져도 한은은 올리나",
-    "seoTitle": "주가가 무너져도 한은은 올리나 | Snowshagal 투자노트 NO.13",
+    "seoTitle": "주가가 무너져도 한은은 올리나 | Snowshagal 투자 인사이트 NO.13",
     "subtitle": "",
-    "description": "10월 22일 금통위 프리뷰. 10월 결정을 적은 증권사 프리뷰 네 건은 모두 3.00% 동결을 예상하지만 인상 소수의견과 그 뒤 경로에서 갈린다. 주가가 급락한 7월 16일에 올린 선례, 가까운 인상과 먼 경로를 따로 움직인 시장 가격, 3분기 은행 NIM, 원화 강세라는 반론을 정리한 투자노트.",
+    "description": "10월 22일 금통위 프리뷰. 10월 결정을 적은 증권사 프리뷰 네 건은 모두 3.00% 동결을 예상하지만 인상 소수의견과 그 뒤 경로에서 갈린다. 주가가 급락한 7월 16일에 올린 선례, 가까운 인상과 먼 경로를 따로 움직인 시장 가격, 3분기 은행 NIM, 원화 강세라는 반론을 정리한 투자 인사이트.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -329,7 +329,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-10-15-note-kpfvir",
     "type": "note",
-    "typeLabel": "Investment Note",
+    "typeLabel": "Investment Insights",
     "lang": "en",
     "date": "2026-10-15",
     "reportDate": "2026-10-15",
@@ -337,7 +337,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-15T16:39:13.353Z",
     "legacyImport": false,
     "title": "After the Selloff, Is the KOSPI Really Cheap?",
-    "seoTitle": "After the Selloff, Is the KOSPI Really Cheap? | Snowshagal Investment Note No. 12",
+    "seoTitle": "After the Selloff, Is the KOSPI Really Cheap? | Snowshagal Investment Insights No. 12",
     "subtitle": "",
     "description": "The KOSPI fell 20.7% in seven sessions. Is a forward P/E in the mid-4s genuinely cheap? A look at assumed earnings cuts, reference multiples, CXMT, AI financing pressures and forced selling—and the strongest counterarguments.",
     "tags": [
@@ -357,7 +357,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-10-15-note-1x312pc",
     "type": "note",
-    "typeLabel": "투자 노트",
+    "typeLabel": "투자 인사이트",
     "lang": "ko",
     "date": "2026-10-15",
     "reportDate": "2026-10-15",
@@ -365,9 +365,9 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-15T15:52:21.257Z",
     "legacyImport": false,
     "title": "많이 빠진 코스피, 정말 싼 걸까",
-    "seoTitle": "많이 빠진 코스피, 정말 싼 걸까 | Snowshagal 투자노트 NO.12",
+    "seoTitle": "많이 빠진 코스피, 정말 싼 걸까 | Snowshagal 투자 인사이트 NO.12",
     "subtitle": "",
-    "description": "코스피가 10월 15일 5,554.22까지 빠지며 12개월 선행 PER은 4배 중반(본 노트 환산)으로 내려왔다. 낮은 PER이 저평가의 결론이 아닌 이유, 정상 배수 가정에 따라 달라지는 이익 삭감 폭, 예상 이익 삭감과 실적 감소의 차이, 가격을 낮춘 세 경로(CXMT·금리와 AI 자금 조달·강제 매도)와 반론을 정리한 투자노트.",
+    "description": "코스피가 10월 15일 5,554.22까지 빠지며 12개월 선행 PER은 4배 중반(자체 환산)으로 내려왔다. 낮은 PER이 저평가의 결론이 아닌 이유, 정상 배수 가정에 따라 달라지는 이익 삭감 폭, 예상 이익 삭감과 실적 감소의 차이, 가격을 낮춘 세 경로(CXMT·금리와 AI 자금 조달·강제 매도)와 반론을 정리한 투자 인사이트.",
     "tags": [
       "kospi",
       "flows",
@@ -613,7 +613,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-10-13-note-yk8ebd",
     "type": "note",
-    "typeLabel": "Investment Note",
+    "typeLabel": "Investment Insights",
     "lang": "en",
     "date": "2026-10-13",
     "reportDate": "2026-10-13",
@@ -621,7 +621,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-13T14:46:43.869Z",
     "legacyImport": false,
     "title": "KRW 107tn in Profit— Why the Selloff?",
-    "seoTitle": "INVESTMENT NOTE NO.11 · KRW 107tn in Profit—Why the Selloff? · October 13, 2026",
+    "seoTitle": "INVESTMENT INSIGHTS NO.11 · KRW 107tn in Profit—Why the Selloff? · October 13, 2026",
     "subtitle": "",
     "description": "The KOSPI fell 6.2% in two sessions after Samsung Electronics reported KRW 107.4tn in Q3 operating profit. A close look at earnings size, growth rates and revisions—and what earnings alone cannot explain.",
     "tags": [
@@ -643,7 +643,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-10-13-note-14bc107",
     "type": "note",
-    "typeLabel": "투자 노트",
+    "typeLabel": "투자 인사이트",
     "lang": "ko",
     "date": "2026-10-13",
     "reportDate": "2026-10-13",
@@ -651,7 +651,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-13T14:43:54.934Z",
     "legacyImport": false,
     "title": "107조를 냈는데 왜 빠지나",
-    "seoTitle": "INVESTMENT NOTE NO.11 · 107조를 냈는데 왜 빠지나 · 2026.10.13",
+    "seoTitle": "INVESTMENT INSIGHTS NO.11 · 107조를 냈는데 왜 빠지나 · 2026.10.13",
     "subtitle": "",
     "description": "삼성전자 3분기 영업이익 107.4조원 발표 뒤 두 거래일 코스피는 6.2% 내렸다. 이익의 크기·속도·방향으로 증가율 경로와 추정치 조정을 점검하고, 이익만으로 설명되지 않는 부분도 짚었다.",
     "tags": [
@@ -839,7 +839,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-10-09-note-9l8bif",
     "type": "note",
-    "typeLabel": "Investment Note",
+    "typeLabel": "Investment Insights",
     "lang": "en",
     "date": "2026-10-09",
     "reportDate": "2026-10-09",
@@ -847,7 +847,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-09T17:43:57.589Z",
     "legacyImport": false,
     "title": "The Cost of a Stronger Won",
-    "seoTitle": "The Cost of a Stronger Won · Snowshagal Investment Note No.10 · 2026.10.09",
+    "seoTitle": "The Cost of a Stronger Won · Snowshagal Investment Insights No.10 · 2026.10.09",
     "subtitle": "",
     "description": "The won strengthened, yet earnings have held up. Hyundai Motor’s KRW 980bn FX contribution—our sum of two Daishin Securities estimates—is a year-on-year improvement, not translation profit earned this year. Why electronics forecasts diverged under the same currency move, and what to watch in Q4.",
     "tags": [
@@ -865,7 +865,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-10-09-note-1a56yum",
     "type": "note",
-    "typeLabel": "투자 노트",
+    "typeLabel": "투자 인사이트",
     "lang": "ko",
     "date": "2026-10-09",
     "reportDate": "2026-10-09",
@@ -873,7 +873,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-09T17:41:30.243Z",
     "legacyImport": false,
     "title": "원화 강세의 청구서",
-    "seoTitle": "원화 강세의 청구서 · Snowshagal Investment Note NO.10 · 2026.10.09",
+    "seoTitle": "원화 강세의 청구서 · Snowshagal Investment Insights NO.10 · 2026.10.09",
     "subtitle": "",
     "description": "환율은 내렸는데 이익은 왜 버틴다고 하나. 현대차 환율 몫 +9,800억(대신증권 추정 두 항목 합)은 올해 번 환산이익이 아니라 작년보다 좋아진 폭. 같은 환율에도 갈린 전기전자 전망과 4분기에 확인할 것.",
     "tags": [
@@ -890,7 +890,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-10-08-note-6z0z0h",
     "type": "note",
-    "typeLabel": "Investment Note",
+    "typeLabel": "Investment Insights",
     "lang": "en",
     "date": "2026-10-08",
     "reportDate": "2026-10-08",
@@ -898,7 +898,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-08T15:05:26.356Z",
     "legacyImport": false,
     "title": "When the Buyback Bid Steps Away",
-    "seoTitle": "INVESTMENT NOTE NO.09 · When the Buyback Bid Steps Away · 2026.10.08",
+    "seoTitle": "INVESTMENT INSIGHTS NO.09 · When the Buyback Bid Steps Away · 2026.10.08",
     "subtitle": "",
     "description": "Samsung Electronics completed its KRW 15tn buyback on Oct. 6 while SK hynix still has about KRW 6.3tn left. From Aug. 24 to Oct. 2, the KRX 'other corporations' category bought a net KRW 43.4tn, with the two buybacks at the core of that demand. This note separates compensation shares from shares slated for cancellation, tests the historical post-buyback average against the median, filters the Oct. 8 options-expiry and ETF-rebalancing noise, and lays out three numbers to watch for the next source of demand.",
     "tags": [
@@ -947,7 +947,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-10-08-note-13i5jnp",
     "type": "note",
-    "typeLabel": "투자 노트",
+    "typeLabel": "투자 인사이트",
     "lang": "ko",
     "date": "2026-10-08",
     "reportDate": "2026-10-08",
@@ -955,7 +955,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-08T14:45:01.280Z",
     "legacyImport": false,
     "title": "받아주던 손이 빠진 자리",
-    "seoTitle": "INVESTMENT NOTE NO.09 · 받아주던 손이 빠진 자리 · 2026.10.08",
+    "seoTitle": "INVESTMENT INSIGHTS NO.09 · 받아주던 손이 빠진 자리 · 2026.10.08",
     "subtitle": "",
     "description": "삼성전자 15조원 자사주가 10월 6일 끝났고 SK하이닉스는 6.3조원이 남음 · 8/24~10/2 순매도를 받아낸 기타법인 +43.4조 매수의 핵심은 두 회사 자사주(삼성전자는 보상용, SK하이닉스는 소각용) · 과거 사례 평균은 +6.4%지만 중앙값은 그림상 0% 부근 · 영업이익 107.4조원(잠정)이 나온 10월 8일 코스피 −2.62%는 옵션 만기·ETF 리밸런싱이 겹쳐 종료 효과로 떼어 읽기 어려움 · 다음 손을 가늠할 세 숫자",
     "tags": [
@@ -1163,7 +1163,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-10-04-note-13vdfus",
     "type": "note",
-    "typeLabel": "Investment Note",
+    "typeLabel": "Investment Insights",
     "lang": "en",
     "date": "2026-10-04",
     "reportDate": "2026-10-04",
@@ -1190,7 +1190,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-10-04-note-11jy2jl",
     "type": "note",
-    "typeLabel": "투자 노트",
+    "typeLabel": "투자 인사이트",
     "lang": "ko",
     "date": "2026-10-04",
     "reportDate": "2026-10-04",
@@ -1318,7 +1318,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-10-03-note-1suk7ev",
     "type": "note",
-    "typeLabel": "Investment Note",
+    "typeLabel": "Investment Insights",
     "lang": "en",
     "date": "2026-10-03",
     "reportDate": "2026-10-03",
@@ -1345,7 +1345,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-10-03-note-1km4ezj",
     "type": "note",
-    "typeLabel": "투자 노트",
+    "typeLabel": "투자 인사이트",
     "lang": "ko",
     "date": "2026-10-03",
     "reportDate": "2026-10-03",
@@ -1652,7 +1652,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-09-29-note-1jmzktg",
     "type": "note",
-    "typeLabel": "Investment Note",
+    "typeLabel": "Investment Insights",
     "lang": "en",
     "date": "2026-09-29",
     "reportDate": "2026-09-29",
@@ -1678,7 +1678,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-09-29-note-1yl5lhk",
     "type": "note",
-    "typeLabel": "투자 노트",
+    "typeLabel": "투자 인사이트",
     "lang": "ko",
     "date": "2026-09-29",
     "reportDate": "2026-09-29",
@@ -1867,7 +1867,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-09-24-note-9bg9k4",
     "type": "note",
-    "typeLabel": "Investment Note",
+    "typeLabel": "Investment Insights",
     "lang": "en",
     "date": "2026-09-24",
     "reportDate": "2026-09-24",
@@ -1893,7 +1893,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-09-24-note-gpogsf",
     "type": "note",
-    "typeLabel": "투자 노트",
+    "typeLabel": "투자 인사이트",
     "lang": "ko",
     "date": "2026-09-24",
     "reportDate": "2026-09-24",
@@ -2410,7 +2410,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-09-14-note-19m98iv",
     "type": "note",
-    "typeLabel": "Investment Note",
+    "typeLabel": "Investment Insights",
     "lang": "en",
     "date": "2026-09-14",
     "reportDate": "2026-09-14",
@@ -2464,7 +2464,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-09-14-note-1v56yop",
     "type": "note",
-    "typeLabel": "투자 노트",
+    "typeLabel": "투자 인사이트",
     "lang": "ko",
     "date": "2026-09-14",
     "reportDate": "2026-09-14",
@@ -2473,7 +2473,7 @@ window.RESEARCH_POSTS = [
     "legacyImport": false,
     "title": "나흘에 몰린 세 개의 시험",
     "subtitle": "",
-    "description": "9월 15일 미국 자금시장, 16일 FOMC, 17~18일 일본은행. 성격이 다른 세 이벤트가 나흘에 몰렸고 뒤의 두 통화정책 회의는 같은 방향을 가리킨다. 자금시장은 아직 조용하지만 장기금리는 이미 올라와 있는 구간을 점검하는 투자 노트.",
+    "description": "9월 15일 미국 자금시장, 16일 FOMC, 17~18일 일본은행. 성격이 다른 세 이벤트가 나흘에 몰렸고 뒤의 두 통화정책 회의는 같은 방향을 가리킨다. 자금시장은 아직 조용하지만 장기금리는 이미 올라와 있는 구간을 점검하는 투자 인사이트.",
     "tags": [
       "treasuries",
       "fed",
@@ -3032,7 +3032,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-09-02-note-1ojta7j",
     "type": "note",
-    "typeLabel": "Investment Note",
+    "typeLabel": "Investment Insights",
     "lang": "en",
     "date": "2026-09-02",
     "reportDate": "2026-09-02",
@@ -3041,7 +3041,7 @@ window.RESEARCH_POSTS = [
     "legacyImport": false,
     "title": "WGBI, Three Tranches Left",
     "subtitle": "",
-    "description": "The phase-in of South Korean government bonds into the WGBI has completed 5 of 8 tranches. Foreign holdings of Korean Treasury Bonds have risen less than expected, but the maturity profile of new purchases is getting longer. This investment note examines the remaining September-November flows.",
+    "description": "The phase-in of South Korean government bonds into the WGBI has completed 5 of 8 tranches. Foreign holdings of Korean Treasury Bonds have risen less than expected, but the maturity profile of new purchases is getting longer. This piece examines the remaining September-November flows.",
     "tags": [
       "rates"
     ],
@@ -3055,7 +3055,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-09-02-note-xgdd5t",
     "type": "note",
-    "typeLabel": "투자 노트",
+    "typeLabel": "투자 인사이트",
     "lang": "ko",
     "date": "2026-09-02",
     "reportDate": "2026-09-02",
@@ -3064,7 +3064,7 @@ window.RESEARCH_POSTS = [
     "legacyImport": false,
     "title": "WGBI, 남은 세 번",
     "subtitle": "",
-    "description": "한국 국채의 WGBI 편입은 8회 중 5회가 진행됐다. 외국인 국고채 보유 증가는 기대 경로를 밑돌았지만 매입 만기는 길어지고 있다. 남은 9~11월의 자금 흐름을 점검하는 투자 노트.",
+    "description": "한국 국채의 WGBI 편입은 8회 중 5회가 진행됐다. 외국인 국고채 보유 증가는 기대 경로를 밑돌았지만 매입 만기는 길어지고 있다. 남은 9~11월의 자금 흐름을 점검하는 투자 인사이트.",
     "tags": [
       "rates"
     ],
@@ -3124,7 +3124,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-09-01-note-1k5d647",
     "type": "note",
-    "typeLabel": "Investment Note",
+    "typeLabel": "Investment Insights",
     "lang": "en",
     "date": "2026-09-01",
     "reportDate": "2026-09-01",
@@ -3149,7 +3149,7 @@ window.RESEARCH_POSTS = [
   {
     "id": "2026-09-01-note-u23dp3",
     "type": "note",
-    "typeLabel": "투자 노트",
+    "typeLabel": "투자 인사이트",
     "lang": "ko",
     "date": "2026-09-01",
     "reportDate": "2026-09-01",
@@ -3158,7 +3158,7 @@ window.RESEARCH_POSTS = [
     "legacyImport": false,
     "title": "9월 15일, 미국 자금시장 점검",
     "subtitle": "",
-    "description": "국채 결제와 세금 납부가 겹치는 9월 15일. 현재 경색 신호는 없지만, 높아진 금리 환경에서 미국 단기자금시장의 충격 흡수력을 점검하는 투자 노트.",
+    "description": "국채 결제와 세금 납부가 겹치는 9월 15일. 현재 경색 신호는 없지만, 높아진 금리 환경에서 미국 단기자금시장의 충격 흡수력을 점검하는 투자 인사이트.",
     "tags": [
       "rates",
       "treasuries",
