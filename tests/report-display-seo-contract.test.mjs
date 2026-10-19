@@ -307,19 +307,19 @@ test('a Weekly with facts adds its summary only — not its description, not a t
   assert.equal(reportDescription(base), '2026년 9월 20일 위클리 — 되찾은 자리.');
 });
 
-test('Research, Investment Note and Market Basics use the editorial blurb as written, else the facts of the page', () => {
+test('Research, Investment Insights and Market Basics use the editorial blurb as written, else the facts of the page', () => {
   const research = { id: 'r', type: 'research', lang: 'en', reportDate: '2026-09-19', title: 'Are Humanoids Really Working?', href: 'reports/r.html' };
   assert.equal(reportDescription({ ...research, description: 'Units shipped are not work done.' }), 'Units shipped are not work done.');
   assert.equal(reportDescription(research), 'Sep 19, 2026 Research — Are Humanoids Really Working?');
   const note = { id: 'n', type: 'note', lang: 'ko', reportDate: '2026-09-29', title: '사흘치 금리를 하루에', href: 'reports/n.html' };
   assert.equal(reportDescription({ ...note, description: '추석 휴장 사흘 동안 미국 10년 금리 +21bp' }), '추석 휴장 사흘 동안 미국 10년 금리 +21bp');
-  assert.equal(reportDescription(note), '2026년 9월 29일 투자 노트 — 사흘치 금리를 하루에.');
+  assert.equal(reportDescription(note), '2026년 9월 29일 투자 인사이트 — 사흘치 금리를 하루에.');
   const basics = { id: 'b', type: 'basics', lang: 'ko', reportDate: '2026-08-29', title: '1코인은 어떻게 1달러가 되는가?', href: 'reports/b.html' };
   assert.equal(reportDescription(basics), '2026년 8월 29일 시장 입문 — 1코인은 어떻게 1달러가 되는가?');
   assert.equal(reportDescription({ ...basics, lang: 'en', title: 'How Does 1 Coin Become $1?' }), 'Aug 29, 2026 Market Basics — How Does 1 Coin Become $1?');
   // Only the pieces that exist, and never an empty description.
   assert.equal(reportDescription({ type: 'basics', lang: 'en', title: 'Untitled Draft' }), 'Market Basics — Untitled Draft.');
-  assert.equal(reportDescription({ type: 'note', lang: 'ko', reportDate: '2026-09-01' }), '2026년 9월 1일 투자 노트.');
+  assert.equal(reportDescription({ type: 'note', lang: 'ko', reportDate: '2026-09-01' }), '2026년 9월 1일 투자 인사이트.');
   assert.equal(reportDescription({}), '리포트.');
 });
 

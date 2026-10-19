@@ -48,8 +48,8 @@
     const api = root.MARKET_LOCALE;
     const lang = language === 'en' ? 'en' : 'ko';
     const labels = lang === 'en'
-      ? { daily: 'DAILY', weekly: 'WEEKLY', note: 'INVESTMENT NOTE', read: 'Read report' }
-      : { daily: 'DAILY', weekly: 'WEEKLY', note: 'INVESTMENT NOTE', read: '리포트 읽기' };
+      ? { daily: 'DAILY', weekly: 'WEEKLY', note: 'INVESTMENT INSIGHTS', read: 'Read report' }
+      : { daily: 'DAILY', weekly: 'WEEKLY', note: 'INVESTMENT INSIGHTS', read: '리포트 읽기' };
     const localized = api.sortPosts(api.localePosts(posts, lang));
     return ['daily', 'weekly', 'note'].map(type => {
       const post = localized.find(item => item.type === type);

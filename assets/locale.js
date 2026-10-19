@@ -8,7 +8,7 @@
         weekly: { label: '위클리', english: 'WEEKLY', description: '한 주의 시장을 복기하고 다음 변수를 살핍니다.' },
         research: { label: '리서치', english: 'RESEARCH', description: '산업·기업·정책의 구조적 변화를 깊이 읽습니다.' },
         basics: { label: '시장 입문', english: 'MARKET BASICS', description: '경제와 투자의 기본 개념을 차분히 설명합니다.' },
-        note: { label: '투자 노트', english: 'INVESTMENT NOTE', description: '데일리·위클리·리서치에 담기 애매하지만 놓치기 아까운 시장 변수와 투자 아이디어를 기록합니다.' }
+        note: { label: '투자 인사이트', english: 'INVESTMENT INSIGHTS', description: '데일리·위클리·리서치에 담기 애매하지만 놓치기 아까운 시장 변수와 투자 아이디어를 기록합니다.' }
       },
       themeDark: '다크 모드로 전환',
       themeLight: '라이트 모드로 전환',
@@ -30,7 +30,7 @@
         weekly: { label: 'Weekly', english: 'WEEKLY', description: 'A weekly review of market moves and the variables ahead.' },
         research: { label: 'Research', english: 'RESEARCH', description: 'Deeper analysis of structural shifts in industries, companies, and policy.' },
         basics: { label: 'Market Basics', english: 'MARKET BASICS', description: 'Clear explanations of economic and investing fundamentals.' },
-        note: { label: 'Investment Note', english: 'INVESTMENT NOTE', description: 'Timely observations, market variables, and investment ideas.' }
+        note: { label: 'Investment Insights', english: 'INVESTMENT INSIGHTS', description: 'Timely observations, market variables, and investment ideas.' }
       },
       themeDark: 'Switch to dark mode',
       themeLight: 'Switch to light mode',

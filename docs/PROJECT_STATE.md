@@ -4,7 +4,7 @@ Updated: 2026-09-29
 
 ## Purpose
 
-개인 시장 리서치 웹사이트. 주요 콘텐츠는 데일리 리포트 HTML, 위클리 HTML, 비정기 리서치 HTML, 투자 노트, 시장 입문이다. 현재는 낮은 트래픽을 전제로 단순하고 유지보수 쉬운 구조를 우선한다.
+개인 시장 리서치 웹사이트. 주요 콘텐츠는 데일리 리포트 HTML, 위클리 HTML, 비정기 리서치 HTML, 투자 인사이트, 시장 입문이다. 현재는 낮은 트래픽을 전제로 단순하고 유지보수 쉬운 구조를 우선한다.
 
 ## Current stack
 
@@ -40,7 +40,7 @@ The Korean MARKET page adds a compact operational-notice section before the exis
 
 ### Homepage editorial refresh (2026-10-12; four-report follow-up 2026-10-13)
 
-The follow-up four-report homepage layout (2026-10-13) keeps the approved watercolor first slide, adds Investment Note to its shortcuts, and uses the second slide for the newest same-locale Daily, Weekly, Investment Note and occasional Research. Each compact card uses the post's actual cover thumbnail and canonical report URL. The latest-reports grid also has four categories, while the separate Daily/reading-guide block was removed as redundant. Both initial HTML and browser hydration select from current `posts.json` metadata; newly published KO/EN reports require no homepage title or image edit.
+The follow-up four-report homepage layout (2026-10-13) keeps the approved watercolor first slide, adds Investment Insights to its shortcuts, and uses the second slide for the newest same-locale Daily, Weekly, Investment Insights and occasional Research. Each compact card uses the post's actual cover thumbnail and canonical report URL. The latest-reports grid also has four categories, while the separate Daily/reading-guide block was removed as redundant. Both initial HTML and browser hydration select from current `posts.json` metadata; newly published KO/EN reports require no homepage title or image edit.
 
 The two locale homepages use the approved research-desk watercolor (new versioned filenames; old artwork retained), encoded as 1944×810 / 960×400 WebP. `assets/home-editorial.css` scopes the typography, four-report hero, border-led latest cards and mobile two-row market strip to HOME. The manual carousel and announcement slide remain available.
 
@@ -216,7 +216,7 @@ Main categories:
 - `daily` → 데일리
 - `weekly` → 위클리
 - `research` → 리서치
-- `note` → 투자 노트 / Investment Note
+- `note` → 투자 인사이트 / Investment Insights
 - `basics` → 시장 입문 / Market Basics
 
 Each category also has a landing route in both locales:
@@ -412,7 +412,7 @@ Instagram deep link and no Kakao SDK or app key exist in the codebase. Cancellin
 is not reported as a failure, and copy falls back from the async clipboard to `execCommand`
 and finally to a selectable field holding the URL.
 
-The shared navigation is fixed at the top and inserts spacing so it does not cover the original report. Public links are `데일리 / 위클리 / 리서치 / 투자 노트 / 시장 입문 / 소개`.
+The shared navigation is fixed at the top and inserts spacing so it does not cover the original report. Public links are `데일리 / 위클리 / 리서치 / 투자 인사이트 / 시장 입문 / 소개`.
 
 ## Icons, social cards and report metadata
 

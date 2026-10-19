@@ -72,6 +72,6 @@ test('four-report hero uses current localized posts, real covers and direct cano
     const shell = await read(path);
     assert.doesNotMatch(shell, /id="home-editorial"/);
     assert.match(shell, /id="hero-report-extra"/);
-    assert.match(shell, /INVESTMENT NOTE/);
+    assert.match(shell, /INVESTMENT INSIGHTS/);
   }
 });

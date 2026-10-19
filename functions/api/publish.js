@@ -27,14 +27,14 @@ const TYPE_LABELS = {
   weekly: '위클리 리포트',
   research: '비정기 리서치',
   basics: '시장 입문',
-  note: '투자 노트'
+  note: '투자 인사이트'
 };
 const EN_TYPE_LABELS = {
   daily: 'Daily',
   weekly: 'Weekly',
   research: 'Research',
   basics: 'Market Basics',
-  note: 'Investment Note'
+  note: 'Investment Insights'
 };
 
 function typeLabel(type, lang) {

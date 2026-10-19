@@ -81,7 +81,7 @@ test('mobile navigation exposes 7 horizontal swipe links without hamburger menu'
     assert.match(quickNav, /data-nav-category="daily"[^>]*>데일리<\/a>/);
     assert.match(quickNav, /data-nav-category="weekly"[^>]*>위클리<\/a>/);
     assert.match(quickNav, /data-nav-category="research"[^>]*>리서치<\/a>/);
-    assert.match(quickNav, /data-nav-category="note"[^>]*>투자 노트<\/a>/);
+    assert.match(quickNav, /data-nav-category="note"[^>]*>투자 인사이트<\/a>/);
     assert.match(quickNav, /data-nav-category="basics"[^>]*>시장 입문<\/a>/);
     assert.doesNotMatch(html, /class="mobile-nav"/);
     assert.doesNotMatch(html, /data-menu-toggle/);
@@ -94,7 +94,7 @@ test('mobile navigation exposes 7 horizontal swipe links without hamburger menu'
     assert.match(quickNav, /data-nav-category="daily"[^>]*>Daily<\/a>/);
     assert.match(quickNav, /data-nav-category="weekly"[^>]*>Weekly<\/a>/);
     assert.match(quickNav, /data-nav-category="research"[^>]*>Research<\/a>/);
-    assert.match(quickNav, /data-nav-category="note"[^>]*>Investment Note<\/a>/);
+    assert.match(quickNav, /data-nav-category="note"[^>]*>Investment Insights<\/a>/);
     assert.match(quickNav, /data-nav-category="basics"[^>]*>Market Basics<\/a>/);
     assert.doesNotMatch(html, /class="mobile-nav"/);
     assert.doesNotMatch(html, /data-menu-toggle/);

@@ -80,15 +80,15 @@ export const CATEGORY_LANDINGS = Object.freeze({
   },
   note: {
     ko: {
-      title: '시장·투자 아이디어와 관찰 | Snowshagal 투자 노트',
+      title: '시장·투자 아이디어와 관찰 | Snowshagal 투자 인사이트',
       description: '데일리·위클리·리서치로 다루기엔 가볍지만 놓치기 아까운 시장 변수, 투자 아이디어와 주요 이벤트의 체크포인트를 기록합니다.',
-      heading: '투자 노트',
+      heading: '투자 인사이트',
       lead: '데일리·위클리·리서치에 담기 애매하지만 놓치기 아까운 시장 변수와 투자 아이디어를 기록합니다.'
     },
     en: {
-      title: 'Investment Note | Snowshagal',
+      title: 'Investment Insights | Snowshagal',
       description: 'Timely observations, market variables, and investment ideas that sit between daily coverage and full-length research.',
-      heading: 'Investment Note',
+      heading: 'Investment Insights',
       lead: 'Timely observations, market variables, and investment ideas that sit between daily coverage and full-length research.'
     }
   }
@@ -530,7 +530,7 @@ export function sentence(value) {
 }
 
 // The public name of a post's category, as the site's own labels give it
-// (assets/locale.js): 데일리 · 위클리 · 리서치 · 투자 노트 · 시장 입문.
+// (assets/locale.js): 데일리 · 위클리 · 리서치 · 투자 인사이트 · 시장 입문.
 function categoryLabel(type, lang) {
   return globalThis.MARKET_LOCALE.copy[lang === 'en' ? 'en' : 'ko'].categories[type]?.label || (lang === 'en' ? 'Report' : '리포트');
 }
@@ -623,7 +623,7 @@ export function categoryFeaturedCards(posts, type, lang, tagRegistry = null) {
     weekly: 'WEEKLY',
     research: 'RESEARCH',
     basics: 'MARKET BASICS',
-    note: 'INVESTMENT NOTE'
+    note: 'INVESTMENT INSIGHTS'
   };
   return (Array.isArray(posts) ? posts : [])
     .filter((post) => postLanguage(post) === lang && post?.type === type && normalizeSitePath(post?.href))
@@ -728,7 +728,7 @@ export function homepageLatestLinks(posts, lang, tagRegistry = null) {
       const readLabel = lang === 'en' ? 'Read report' : '리포트 보기';
       const date = post?.reportDate || post?.date || '';
       return `<a class="latest-card latest-card-${escapeHtml(post.type)}" href="${escapeHtml(cleanReportHref(post.href))}">`
-        + `<span class="latest-card-meta"><b>${escapeHtml(post.type === 'note' ? 'INVESTMENT NOTE' : post.type.toUpperCase())}${escapeHtml(readingSuffix)}</b><time datetime="${escapeHtml(date)}">${escapeHtml(date)}</time></span>`
+        + `<span class="latest-card-meta"><b>${escapeHtml(post.type === 'note' ? 'INVESTMENT INSIGHTS' : post.type.toUpperCase())}${escapeHtml(readingSuffix)}</b><time datetime="${escapeHtml(date)}">${escapeHtml(date)}</time></span>`
         + `<strong class="latest-card-title">${escapeHtml(post.title || '')}</strong>`
         + `<span class="latest-card-body">${visual}<span class="latest-card-copy">${summaryCopy}${tagsMarkup}`
         + `<span class="latest-card-read">${escapeHtml(readLabel)} <i aria-hidden="true">→</i></span></span></span></a>`;
@@ -744,7 +744,7 @@ export const CATEGORY_BREADCRUMB_NAMES = Object.freeze({
   weekly: { ko: '위클리', en: 'Weekly' },
   research: { ko: '리서치', en: 'Research' },
   basics: { ko: '시장 입문', en: 'Market Basics' },
-  note: { ko: '투자 노트', en: 'Investment Note' }
+  note: { ko: '투자 인사이트', en: 'Investment Insights' }
 });
 
 export function serializeJsonLd(data) {

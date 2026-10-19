@@ -182,15 +182,15 @@ test('notes category is a core category and visible across navigation', async ()
 
 test('notes category is activated and promoted to core categories', async () => {
   const [locale, site] = await Promise.all([read('assets/locale.js'), read('assets/site.js')]);
-  assert.match(locale, /note: \{ label: '투자 노트'/);
-  assert.match(locale, /note: \{ label: 'Investment Note'/);
+  assert.match(locale, /note: \{ label: '투자 인사이트'/);
+  assert.match(locale, /note: \{ label: 'Investment Insights'/);
   assert.match(locale, /basics: \{ label: '시장 입문'/);
   assert.match(locale, /basics: \{ label: 'Market Basics'/);
   assert.match(site, /const coreTypes = \['daily', 'weekly', 'research', 'note', 'basics'\];/);
   assert.match(site, /const validTypes = \['all', \.\.\.coreTypes\];/);
 });
 
-test('no note posts state exposes Investment Note in KO and EN navs and in report shell without data-notes gating', async () => {
+test('no note posts state exposes Investment Insights in KO and EN navs and in report shell without data-notes gating', async () => {
   const [koHome, enHome, shell, middleware] = await Promise.all([
     read('index.html'),
     read('en/index.html'),
@@ -198,13 +198,13 @@ test('no note posts state exposes Investment Note in KO and EN navs and in repor
     read('functions/_middleware.js')
   ]);
 
-  // KO desktop & mobile nav has 투자 노트
-  assert.match(koHome, /<nav class="main-nav"[\s\S]*?data-nav-category="research"[\s\S]*?data-nav-category="note"[^>]*>투자 노트<\/a>[\s\S]*?data-nav-category="basics"[^>]*>시장 입문<\/a>/);
-  assert.match(koHome, /<nav class="mobile-quick-nav"[\s\S]*?data-nav-category="research"[\s\S]*?data-nav-category="note"[^>]*>투자 노트<\/a>[\s\S]*?data-nav-category="basics"[^>]*>시장 입문<\/a>/);
+  // KO desktop & mobile nav has 투자 인사이트
+  assert.match(koHome, /<nav class="main-nav"[\s\S]*?data-nav-category="research"[\s\S]*?data-nav-category="note"[^>]*>투자 인사이트<\/a>[\s\S]*?data-nav-category="basics"[^>]*>시장 입문<\/a>/);
+  assert.match(koHome, /<nav class="mobile-quick-nav"[\s\S]*?data-nav-category="research"[\s\S]*?data-nav-category="note"[^>]*>투자 인사이트<\/a>[\s\S]*?data-nav-category="basics"[^>]*>시장 입문<\/a>/);
 
-  // EN desktop & mobile nav has Investment Note
-  assert.match(enHome, /<nav class="main-nav"[\s\S]*?data-nav-category="research"[\s\S]*?data-nav-category="note"[^>]*>Investment Note<\/a>[\s\S]*?data-nav-category="basics"[^>]*>Market Basics<\/a>/);
-  assert.match(enHome, /<nav class="mobile-quick-nav"[\s\S]*?data-nav-category="research"[\s\S]*?data-nav-category="note"[^>]*>Investment Note<\/a>[\s\S]*?data-nav-category="basics"[^>]*>Market Basics<\/a>/);
+  // EN desktop & mobile nav has Investment Insights
+  assert.match(enHome, /<nav class="main-nav"[\s\S]*?data-nav-category="research"[\s\S]*?data-nav-category="note"[^>]*>Investment Insights<\/a>[\s\S]*?data-nav-category="basics"[^>]*>Market Basics<\/a>/);
+  assert.match(enHome, /<nav class="mobile-quick-nav"[\s\S]*?data-nav-category="research"[\s\S]*?data-nav-category="note"[^>]*>Investment Insights<\/a>[\s\S]*?data-nav-category="basics"[^>]*>Market Basics<\/a>/);
 
   // Report shell nav order: research -> note -> basics
   assert.ok(shell.indexOf("categoryPath('research')") < shell.indexOf("categoryPath('note')"));

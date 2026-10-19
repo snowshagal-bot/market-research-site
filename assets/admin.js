@@ -146,7 +146,7 @@
     weekly: '위클리',
     research: '비정기',
     basics: '시장 입문',
-    note: '투자 노트'
+    note: '투자 인사이트'
   };
 
   function escapeHtml(value) {
@@ -516,14 +516,14 @@
     if (/위클리|weekly/i.test(strongSignals)) return 'weekly';
     if (/주식리포트|데일리|daily(?:\s+market)?|kospi\s+daily/i.test(strongSignals)) return 'daily';
     if (/비정기|소버린|technology\s*&\s*policy|research\s+(?:report|brief|analysis)/i.test(strongSignals) || /^research(?:[-_\s]*(?:report|brief|analysis))?\.html?$/i.test(name)) return 'research';
-    if (/투자\s*노트|investment\s*notes?|끄적|essay|(?:^|[\s_.-])notes?(?=$|[\s_.-])/i.test(strongSignals)) return 'note';
+    if (/투자\s*(?:노트|인사이트)|investment\s*(?:notes?|insights?)|끄적|essay|(?:^|[\s_.-])notes?(?=$|[\s_.-])/i.test(strongSignals)) return 'note';
 
     const bodySignals = text.slice(0, 4000);
     if (/시장\s*입문|시장\s*공부|경제\s*공부|주식\s*공부|market\s*basics|investing\s*basics|explainer/i.test(bodySignals)) return 'basics';
     if (/위클리|weekly/i.test(bodySignals)) return 'weekly';
     if (/주식리포트|데일리|daily\s+market|kospi\s+daily/i.test(bodySignals)) return 'daily';
     if (/비정기|소버린|technology\s*&\s*policy|research\s+(?:report|brief|analysis)/i.test(bodySignals)) return 'research';
-    if (/투자\s*노트|investment\s*notes?|끄적|essay|(?:^|[\s_.-])notes?(?=$|[\s_.-])/i.test(bodySignals)) return 'note';
+    if (/투자\s*(?:노트|인사이트)|investment\s*(?:notes?|insights?)|끄적|essay|(?:^|[\s_.-])notes?(?=$|[\s_.-])/i.test(bodySignals)) return 'note';
     return '';
   }
 
