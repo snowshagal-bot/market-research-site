@@ -146,4 +146,34 @@ test('repository post files remain synchronized and allow optional locale metada
       assert.equal(post.reportDate, source.reportDate, `translation date mismatch for ${post.id}`);
     }
   }
+  // A translation group holds at most one post per language. A second post of the same
+  // language (an English edition pointed at the wrong Korean post) passes the checks above
+  // when the dates happen to match, and breaks the language switch and hreflang of both.
+  const languagesByGroup = new Map();
+  for (const post of posts) {
+    const key = post.translationGroup || post.id;
+    const language = post.lang === 'en' ? 'en' : 'ko';
+    const seen = languagesByGroup.get(key) || new Set();
+    assert.ok(!seen.has(language), `translation group ${key} has more than one ${language} post`);
+    seen.add(language);
+    languagesByGroup.set(key, seen);
+  }
+});
+
+test('post metadata and the search index carry no invisible formatting characters', async () => {
+  // U+2060 (word joiner) is used inside report HTML to keep "A·B" together; it must not leak into
+  // summaries or searchable text, where a typed "A·B" would no longer match.
+  const invisible = /[\u200B-\u200D\uFEFF\u2060]/;
+  const posts = JSON.parse(await read('data/posts.json'));
+  for (const post of posts) {
+    for (const [key, value] of Object.entries(post)) {
+      if (typeof value === 'string') assert.doesNotMatch(value, invisible, `${post.id}.${key}`);
+    }
+  }
+  const index = JSON.parse(await read('data/search-index.json'));
+  for (const entry of index) {
+    for (const [key, value] of Object.entries(entry)) {
+      if (typeof value === 'string') assert.doesNotMatch(value, invisible, `search index ${entry.id}.${key}`);
+    }
+  }
 });
