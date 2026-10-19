@@ -730,7 +730,7 @@
   function normalizeTakeaway(value) {
     return String(value || '')
       // Zero-width characters sit inside the cover copy as break hints.
-      .replace(/[\u200B-\u200D\uFEFF]/g, '')
+      .replace(/[\u200B-\u200D\uFEFF\u2060]/g, '')
       .replace(/\s+/g, ' ')
       .trim()
       .slice(0, MAX_TAKEAWAY_LENGTH);

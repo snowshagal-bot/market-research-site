@@ -96,7 +96,7 @@ window.RESEARCH_POSTS = [
     "title": "두 그루는 그대로, 숲이 키를 키운 날",
     "subtitle": "",
     "description": "",
-    "summary": "미국 반도체 급락을 개장 가격에 반영한 뒤로는 시가를 다시 밑돌지 않고 하루 고가에서 끝남 · 코스피 종목 넷 중 셋 가까이 올랐고 오름폭은 2차전지⁠·⁠바이오 대형주가 가장 컸음.",
+    "summary": "미국 반도체 급락을 개장 가격에 반영한 뒤로는 시가를 다시 밑돌지 않고 하루 고가에서 끝남 · 코스피 종목 넷 중 셋 가까이 올랐고 오름폭은 2차전지·바이오 대형주가 가장 컸음.",
     "takeaway": "중국 ESS 철수설에 2차전지 급등",
     "tags": [
       "kosdaq",
@@ -181,16 +181,41 @@ window.RESEARCH_POSTS = [
     "subtitle": "",
     "description": "When must you buy a Korean stock to receive its dividend? Samsung Electronics and KB Financial used different record dates for their 2025 year-end payouts. A practical guide to T+2 settlement, ex-dividend dates, payout ratios, yields and Korea’s 2026 dividend tax rules.",
     "tags": [
-      "kospi",
       "kosdaq",
-      "flows"
+      "kospi",
+      "shareholder-returns"
     ],
     "readingMinutes": 13,
     "href": "reports/en/Snowshagal_Reading_the_Market_10_Dividend_Record_Dates_EN.html",
-    "translationGroup": "2026-09-14-basics-ebt0dh",
+    "translationGroup": "2025-12-31-basics-rts7dd",
     "coverImage": "covers/2026-10-16-basics-1fiofh3.webp",
     "shareCardImage": "covers/share/2026-10-16-basics-1fiofh3.jpg",
     "coverThumbnail": "covers/2026-10-16-basics-1fiofh3-450.webp"
+  },
+  {
+    "id": "2025-12-31-basics-rts7dd",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-10-16",
+    "reportDate": "2026-10-16",
+    "registeredDate": "2026-10-17",
+    "registeredAt": "2026-10-17T12:23:10.605Z",
+    "legacyImport": false,
+    "title": "배당은 언제 사야 받나",
+    "seoTitle": "배당기준일·배당락일 뜻: 배당은 언제 사야 받나",
+    "subtitle": "",
+    "description": "배당은 언제 사야 받을까. 2025년 결산배당 기준일이 삼성전자는 2025년 12월 31일, KB금융은 2026년 2월 27일이었다. 배당기준일과 배당락일 세는 법, 배당성향과 배당수익률, 2026년 배당소득 분리과세를 퀴즈와 실제 일정으로 정리했다.",
+    "tags": [
+      "kosdaq",
+      "kospi",
+      "shareholder-returns"
+    ],
+    "readingMinutes": 10,
+    "href": "reports/시장을읽는말들_10편_배당은언제사야받나.html",
+    "coverImage": "covers/2025-12-31-basics-rts7dd.webp",
+    "shareCardImage": "covers/share/2025-12-31-basics-rts7dd.jpg",
+    "coverThumbnail": "covers/2025-12-31-basics-rts7dd-450.webp"
   },
   {
     "id": "2026-10-16-daily-8s74l4",
@@ -398,7 +423,7 @@ window.RESEARCH_POSTS = [
     "title": "두 그루가 기울자 숲이 함께 누운 날",
     "subtitle": "",
     "description": "",
-    "summary": "밤사이 미국 물가와 AI 투자 자금 걱정이 반도체를 끌어내렸고, 시가총액 절반이 반도체 두 회사인 코스피가 일본⁠·⁠대만보다 더 크게 흔들림.",
+    "summary": "밤사이 미국 물가와 AI 투자 자금 걱정이 반도체를 끌어내렸고, 시가총액 절반이 반도체 두 회사인 코스피가 일본·대만보다 더 크게 흔들림.",
     "takeaway": "미국 물가·AI 우려에 서킷브레이커",
     "tags": [
       "kospi",
@@ -3481,7 +3506,7 @@ window.RESEARCH_POSTS = [
       "ai",
       "cloud-datacenter"
     ],
-    "readingMinutes": 8,
+    "readingMinutes": 7,
     "href": "reports/8월 26일 주식리포트_커버통합.html",
     "coverImage": "covers/2026-08-26-daily-1ufok0a.webp",
     "shareCardImage": "covers/share/2026-08-26-daily-1ufok0a.jpg",
@@ -4427,7 +4452,7 @@ window.RESEARCH_POSTS = [
       "autos",
       "energy"
     ],
-    "readingMinutes": 11,
+    "readingMinutes": 10,
     "shareCardImage": "covers/share/2026-08-10-weekly-1rva1f6.jpg",
     "coverThumbnail": "covers/2026-08-10-weekly-1rva1f6-450.webp"
   },
@@ -4790,7 +4815,7 @@ window.RESEARCH_POSTS = [
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 12,
+    "readingMinutes": 11,
     "shareCardImage": "covers/share/2026-08-week1-weekly.jpg",
     "coverThumbnail": "covers/2026-08-week1-weekly-450.webp"
   },
@@ -5058,30 +5083,5 @@ window.RESEARCH_POSTS = [
     "readingMinutes": 3,
     "shareCardImage": "covers/share/2026-07-06-weekly-a0ek97.jpg",
     "coverThumbnail": "covers/2026-07-06-weekly-a0ek97-450.webp"
-  },
-  {
-    "id": "2025-12-31-basics-rts7dd",
-    "type": "basics",
-    "typeLabel": "시장 입문",
-    "lang": "ko",
-    "date": "2025-12-31",
-    "reportDate": "2025-12-31",
-    "registeredDate": "2026-10-17",
-    "registeredAt": "2026-10-17T12:23:10.605Z",
-    "legacyImport": false,
-    "title": "배당은 언제 사야 받나",
-    "seoTitle": "배당기준일·배당락일 뜻: 배당은 언제 사야 받나",
-    "subtitle": "",
-    "description": "배당은 언제 사야 받을까. 2025년 결산배당 기준일이 삼성전자는 2025년 12월 31일, KB금융은 2026년 2월 27일이었다. 배당기준일과 배당락일 세는 법, 배당성향과 배당수익률, 2026년 배당소득 분리과세를 퀴즈와 실제 일정으로 정리했다.",
-    "tags": [
-      "kosdaq",
-      "kospi",
-      "shareholder-returns"
-    ],
-    "readingMinutes": 10,
-    "href": "reports/시장을읽는말들_10편_배당은언제사야받나.html",
-    "coverImage": "covers/2025-12-31-basics-rts7dd.webp",
-    "shareCardImage": "covers/share/2025-12-31-basics-rts7dd.jpg",
-    "coverThumbnail": "covers/2025-12-31-basics-rts7dd-450.webp"
   }
 ];

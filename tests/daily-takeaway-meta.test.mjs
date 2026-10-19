@@ -94,7 +94,7 @@ test('the admin and the stamper normalize identically', async () => {
   const script = await read('assets/admin.js');
   const adminNormalize = /function normalizeTakeaway\(value\) \{[\s\S]*?\n  \}/.exec(script)?.[0] || '';
   assert.ok(adminNormalize, 'the admin must have its own normalizer');
-  for (const rule of ['\\u200B-\\u200D\\uFEFF', '\\s+', 'trim()', 'MAX_TAKEAWAY_LENGTH']) {
+  for (const rule of ['\\u200B-\\u200D\\uFEFF\\u2060', '\\s+', 'trim()', 'MAX_TAKEAWAY_LENGTH']) {
     assert.ok(adminNormalize.includes(rule), `${rule} must be part of it`);
   }
   assert.match(script, /const MAX_TAKEAWAY_LENGTH = 400;/);
