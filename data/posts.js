@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-20-note-1wntkqt",
+    "type": "note",
+    "typeLabel": "Investment Note",
+    "lang": "en",
+    "date": "2026-10-20",
+    "reportDate": "2026-10-20",
+    "registeredDate": "2026-10-20",
+    "registeredAt": "2026-10-19T16:52:45.843Z",
+    "legacyImport": false,
+    "title": "Stocks Are Tumbling. Will the BOK Still Hike?",
+    "seoTitle": "Stocks Are Tumbling. Will the BOK Still Hike? | Snowshagal Investment Note No. 13",
+    "subtitle": "",
+    "description": "October 22 Bank of Korea Monetary Policy Board preview. Four brokerages explicitly forecasting the October vote all expect a hold at 3.00%; the disagreement is over dissenting votes and the subsequent hiking path. Examining the July equity rout, OIS forwards, bank NIMs and the stronger won.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "rates",
+      "korea",
+      "fx"
+    ],
+    "readingMinutes": 23,
+    "href": "reports/en/Snowshagal_Investment_Note_13_2026-10-20_EN.html",
+    "translationGroup": "2026-10-20-note-2wb72k",
+    "coverImage": "covers/2026-10-20-note-1wntkqt.webp",
+    "shareCardImage": "covers/share/2026-10-20-note-1wntkqt.jpg",
+    "coverThumbnail": "covers/2026-10-20-note-1wntkqt-450.webp"
+  },
+  {
     "id": "2026-10-20-note-2wb72k",
     "type": "note",
     "typeLabel": "투자 노트",
