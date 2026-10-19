@@ -85,12 +85,12 @@ test('official Snowshagal owl branding replaces decorative sparkles without chan
 
 test('desktop and mobile navigation use the approved category order across pages', async () => {
   const pages = [
-    ['index.html', ['홈', '마켓', '데일리', '위클리', '리서치', '투자 노트', '시장 입문']],
-    ['en/index.html', ['Home', 'Market', 'Daily', 'Weekly', 'Research', 'Investment Note', 'Market Basics']],
-    ['market/index.html', ['홈', '마켓', '데일리', '위클리', '리서치', '투자 노트', '시장 입문']],
-    ['en/market/index.html', ['Home', 'Market', 'Daily', 'Weekly', 'Research', 'Investment Note', 'Market Basics']],
-    ['about/index.html', ['홈', '마켓', '데일리', '위클리', '리서치', '투자 노트', '시장 입문']],
-    ['en/about/index.html', ['Home', 'Market', 'Daily', 'Weekly', 'Research', 'Investment Note', 'Market Basics']]
+    ['index.html', ['홈', '마켓', '데일리', '위클리', '리서치', '투자 인사이트', '시장 입문']],
+    ['en/index.html', ['Home', 'Market', 'Daily', 'Weekly', 'Research', 'Investment Insights', 'Market Basics']],
+    ['market/index.html', ['홈', '마켓', '데일리', '위클리', '리서치', '투자 인사이트', '시장 입문']],
+    ['en/market/index.html', ['Home', 'Market', 'Daily', 'Weekly', 'Research', 'Investment Insights', 'Market Basics']],
+    ['about/index.html', ['홈', '마켓', '데일리', '위클리', '리서치', '투자 인사이트', '시장 입문']],
+    ['en/about/index.html', ['Home', 'Market', 'Daily', 'Weekly', 'Research', 'Investment Insights', 'Market Basics']]
   ];
 
   for (const [path, expectedLabels] of pages) {
@@ -134,7 +134,7 @@ test('basics is added without replacing notes across public and admin controls',
     assert.match(source, /basics/);
     assert.match(source, /시장 입문/);
     assert.match(source, /note/);
-    assert.match(source, /투자 노트/);
+    assert.match(source, /투자 인사이트/);
   }
   assert.ok(adminScript.includes('market\\s*basics'));
   assert.ok(adminScript.includes('investing\\s*basics'));

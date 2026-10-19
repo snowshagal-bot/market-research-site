@@ -5,7 +5,7 @@
 // runtime — so this file is what keeps the two from drifting apart again. It
 // did once: the filter kept "시장 공부 / 끄적끄적" and "Market Basics / Notes",
 // in basics → note order, after the navigation had moved on to
-// "투자 노트 / 시장 입문" in note → basics order.
+// "투자 인사이트 / 시장 입문" in note → basics order.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
@@ -57,9 +57,9 @@ for (const lang of ['ko', 'en']) {
 }
 
 test('the canonical note and basics labels, and the order the site script lists them in', async () => {
-  assert.equal(LOCALE.copy.ko.categories.note.label, '투자 노트');
+  assert.equal(LOCALE.copy.ko.categories.note.label, '투자 인사이트');
   assert.equal(LOCALE.copy.ko.categories.basics.label, '시장 입문');
-  assert.equal(LOCALE.copy.en.categories.note.label, 'Investment Note');
+  assert.equal(LOCALE.copy.en.categories.note.label, 'Investment Insights');
   assert.equal(LOCALE.copy.en.categories.basics.label, 'Market Basics');
 
   const site = await read('assets/site.js');

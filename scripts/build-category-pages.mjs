@@ -20,7 +20,7 @@ const FEATURED_HEADINGS = {
   weekly: { ko: '최신 위클리 리포트', en: 'Latest Weekly Reports' },
   research: { ko: '최신 리서치', en: 'Latest Research' },
   basics: { ko: '최신 시장 입문', en: 'Latest Market Basics' },
-  note: { ko: '최신 투자 노트', en: 'Latest Investment Notes' }
+  note: { ko: '최신 투자 인사이트', en: 'Latest Investment Insights' }
 };
 
 const CATEGORY_EYEBROWS = {
@@ -28,13 +28,13 @@ const CATEGORY_EYEBROWS = {
   weekly: 'WEEKLY',
   research: 'RESEARCH',
   basics: 'MARKET BASICS',
-  note: 'INVESTMENT NOTE'
+  note: 'INVESTMENT INSIGHTS'
 };
 
 function nav(lang) {
   const labels = lang === 'en'
-    ? { home: 'Home', market: 'Market', disclosures: 'Disclosure', calendar: 'Calendar', daily: 'Daily', weekly: 'Weekly', research: 'Research', note: 'Investment Note', basics: 'Market Basics' }
-    : { home: '홈', market: '마켓', disclosures: '공시', calendar: '캘린더', daily: '데일리', weekly: '위클리', research: '리서치', note: '투자 노트', basics: '시장 입문' };
+    ? { home: 'Home', market: 'Market', disclosures: 'Disclosure', calendar: 'Calendar', daily: 'Daily', weekly: 'Weekly', research: 'Research', note: 'Investment Insights', basics: 'Market Basics' }
+    : { home: '홈', market: '마켓', disclosures: '공시', calendar: '캘린더', daily: '데일리', weekly: '위클리', research: '리서치', note: '투자 인사이트', basics: '시장 입문' };
   const localePrefix = lang === 'en' ? '/en' : '';
   const homePath = lang === 'en' ? '/en/' : '/';
   const navTypes = ['daily', 'weekly', 'research', 'note', 'basics'];
@@ -89,7 +89,7 @@ ${structuredDataScript(categoryStructuredData(type, lang))}
 <main><section class="category-landing-hero"><div class="site-wrap"><p class="category-landing-eyebrow">${eyebrow}</p><h1>${escapeHtml(text.heading)}</h1><p class="category-landing-lead">${escapeHtml(text.lead)}</p></div></section><section class="category-landing-featured-section" id="category-featured-section" aria-labelledby="category-featured-heading"><div class="site-wrap"><div class="category-landing-list-head"><h2 id="category-featured-heading">${escapeHtml(featuredHeading)}</h2></div><div id="category-featured-cards" class="category-featured-grid" data-category-featured-cards></div></div></section><section class="category-landing-list-section" id="category-archive-section" aria-labelledby="category-list-heading"><div class="site-wrap"><div class="category-landing-list-head"><h2 id="category-list-heading">${en ? 'Previous Reports' : '지난 리포트'}</h2><a class="category-landing-home" href="${home}">${en ? 'All reports' : '전체 리포트'} <span aria-hidden="true">→</span></a></div><div id="category-report-list" class="report-list" data-category-report-list data-category="${type}"></div></div></section></main>
 ${siteFooter(lang)}
 ${searchDialog(lang)}
-<script src="/data/tags.js"></script><script src="/data/posts.js"></script><script src="/assets/locale.js?v=55ee2ee40e"></script><script src="/assets/site.js?v=53fc86e7b4"></script><script src="/assets/category-landing.js?v=188b464a28"></script>
+<script src="/data/tags.js"></script><script src="/data/posts.js"></script><script src="/assets/locale.js?v=dc631a04e3"></script><script src="/assets/site.js?v=53fc86e7b4"></script><script src="/assets/category-landing.js?v=142ae892bd"></script>
 </body></html>
 `;
 }

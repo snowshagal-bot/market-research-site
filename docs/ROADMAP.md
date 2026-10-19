@@ -10,6 +10,8 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+- **Investment Insights naming (2026-10-19, deployment pending)**: public KO `투자 인사이트` / EN `Investment Insights` labels are synchronized across navigation, HOME, category pages, report shell, footer, SEO and admin. Internal `note` and `/notes/` URLs stay unchanged; old and new upload labels both work. KO/EN mobile (390px iframe) and desktop (1280px iframe) checked without page overflow. Verification: 1,385/1,387 tests pass; the unchanged main data already fails summary-line-break and duplicate-translation-group checks. Changed JS syntax, whitespace and SEO audit pass. Resolve or review those existing data failures before Production deployment.
+
 - **Homepage editorial refresh (Preview review pending, 2026-10-12)**: KO/EN research-desk watercolor, explicit instrument basis dates, shared post-driven latest Daily and reading guide, restrained report list, mobile two-row market strip. Verify the branch Preview on desktop/mobile and light/dark before owner review. No Production merge or data write is part of this change.
 
 1. **Google Search Console Domain property confirmation & Sitemap monitoring**:

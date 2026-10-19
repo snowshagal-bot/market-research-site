@@ -55,7 +55,7 @@
     weekly: 'WEEKLY',
     research: 'RESEARCH',
     basics: 'MARKET BASICS',
-    note: 'INVESTMENT NOTE'
+    note: 'INVESTMENT INSIGHTS'
   };
 
   document.querySelectorAll('[data-nav-category]').forEach((link) => {

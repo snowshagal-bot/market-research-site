@@ -23,7 +23,7 @@ test('siteFooter("ko") generates canonical Korean footer markup with correct nav
 
   // Nav Groups
   assert.match(footer, /<p class="site-footer-heading" aria-hidden="true">리포트<\/p>/);
-  assert.match(footer, /<nav class="site-footer-nav" aria-label="푸터 리포트 메뉴">[\s\S]*?<a href="\/daily\/">데일리<\/a>[\s\S]*?<a href="\/weekly\/">위클리<\/a>[\s\S]*?<a href="\/research\/">리서치<\/a>[\s\S]*?<a href="\/notes\/">투자 노트<\/a>[\s\S]*?<a href="\/basics\/">시장 입문<\/a>/);
+  assert.match(footer, /<nav class="site-footer-nav" aria-label="푸터 리포트 메뉴">[\s\S]*?<a href="\/daily\/">데일리<\/a>[\s\S]*?<a href="\/weekly\/">위클리<\/a>[\s\S]*?<a href="\/research\/">리서치<\/a>[\s\S]*?<a href="\/notes\/">투자 인사이트<\/a>[\s\S]*?<a href="\/basics\/">시장 입문<\/a>/);
 
   assert.match(footer, /<p class="site-footer-heading" aria-hidden="true">마켓<\/p>/);
   assert.match(footer, /<nav class="site-footer-nav" aria-label="푸터 마켓 메뉴">[\s\S]*?<a href="\/market\/">마켓<\/a>[\s\S]*?<a href="\/disclosures\/">공시<\/a>[\s\S]*?<a href="\/calendar\/">캘린더<\/a>/);
@@ -45,7 +45,7 @@ test('siteFooter("en") generates canonical English footer markup with correct na
 
   // Nav Groups
   assert.match(footer, /<p class="site-footer-heading" aria-hidden="true">Reports<\/p>/);
-  assert.match(footer, /<nav class="site-footer-nav" aria-label="Footer Reports menu">[\s\S]*?<a href="\/en\/daily\/">Daily<\/a>[\s\S]*?<a href="\/en\/weekly\/">Weekly<\/a>[\s\S]*?<a href="\/en\/research\/">Research<\/a>[\s\S]*?<a href="\/en\/notes\/">Investment Note<\/a>[\s\S]*?<a href="\/en\/basics\/">Market Basics<\/a>/);
+  assert.match(footer, /<nav class="site-footer-nav" aria-label="Footer Reports menu">[\s\S]*?<a href="\/en\/daily\/">Daily<\/a>[\s\S]*?<a href="\/en\/weekly\/">Weekly<\/a>[\s\S]*?<a href="\/en\/research\/">Research<\/a>[\s\S]*?<a href="\/en\/notes\/">Investment Insights<\/a>[\s\S]*?<a href="\/en\/basics\/">Market Basics<\/a>/);
 
   assert.match(footer, /<p class="site-footer-heading" aria-hidden="true">Market<\/p>/);
   assert.match(footer, /<nav class="site-footer-nav" aria-label="Footer Market menu">[\s\S]*?<a href="\/en\/market\/">Market<\/a>[\s\S]*?<a href="\/en\/disclosures\/">Disclosure<\/a>[\s\S]*?<a href="\/en\/calendar\/">Calendar<\/a>/);

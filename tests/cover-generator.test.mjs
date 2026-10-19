@@ -339,18 +339,18 @@ test('configuration and authentication errors are never hidden while missing tar
   assert.equal(api.canUseTemplateFallback(new TypeError('network failure')), true);
 });
 
-test('Investment Note HTML with no formal cover section falls back cleanly to template cover (900x1350)', async () => {
+test('Investment Insights HTML with no formal cover section falls back cleanly to template cover (900x1350)', async () => {
   const api = await generatorApi();
   const noteHtml = `<!doctype html>
   <html>
   <head>
     <meta charset="utf-8">
-    <title>INVESTMENT NOTE · NO.01 · 미국 자금시장 점검</title>
+    <title>INVESTMENT INSIGHTS · NO.01 · 미국 자금시장 점검</title>
   </head>
   <body>
     <main class="page">
       <header class="mast">
-        <span class="eyebrow">INVESTMENT NOTE · NO.01</span>
+        <span class="eyebrow">INVESTMENT INSIGHTS · NO.01</span>
         <h1>미국 자금시장 점검</h1>
         <p class="lead">SOFR와 역레포 잔액 변화를 통해 보는 단기 유동성 환경</p>
       </header>
@@ -365,14 +365,14 @@ test('Investment Note HTML with no formal cover section falls back cleanly to te
   assert.equal(selector, '', 'Generic main/page elements must not be treated as server capture selectors');
 
   const templateInput = {
-    category: '투자 노트',
+    category: '투자 인사이트',
     date: '2026-09-15',
     title: '미국 자금시장 점검',
     description: 'SOFR와 역레포 잔액 변화를 통해 보는 단기 유동성 환경'
   };
 
   const template = api.templateData(templateInput);
-  assert.equal(template.category, '투자 노트');
+  assert.equal(template.category, '투자 인사이트');
   assert.equal(template.title, '미국 자금시장 점검');
   assert.equal(template.summary, 'SOFR와 역레포 잔액 변화를 통해 보는 단기 유동성 환경');
   assert.equal(api.OUTPUT_WIDTH, 900);

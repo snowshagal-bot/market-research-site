@@ -42,15 +42,15 @@ Homepage public categories:
 - 데일리
 - 위클리
 - 리서치
-- 투자 노트
+- 투자 인사이트
 - 시장 입문
 - 소개
 
-Internal category values are `daily`, `weekly`, `research`, `note`, `basics`. Public labels are the category labels in `assets/locale.js` (KO `투자 노트` / `시장 입문`, EN `Investment Note` / `Market Basics`); the static HTML repeats them literally and `tests/category-naming.test.mjs` keeps the two in step. Market Basics is a core category; Investment Note remains a secondary category and is not removed. `소개` links to `/about/` and is a secondary site page rather than a report category.
+Internal category values are `daily`, `weekly`, `research`, `note`, `basics`. Public labels are the category labels in `assets/locale.js` (KO `투자 인사이트` / `시장 입문`, EN `Investment Insights` / `Market Basics`); the static HTML repeats them literally and `tests/category-naming.test.mjs` keeps the two in step. Market Basics is a core category; Investment Insights remains a secondary category and is not removed. `소개` links to `/about/` and is a secondary site page rather than a report category.
 
 Report pages use a fixed shared top bar:
 
-`← 홈 | 데일리 | 위클리 | 리서치 | 투자 노트 | 시장 입문 | 소개`
+`← 홈 | 데일리 | 위클리 | 리서치 | 투자 인사이트 | 시장 입문 | 소개`
 
 The current category should have a clear but restrained active state. The report navigation is injected outside the original report design and must remain visually stable regardless of report-specific CSS.
 
@@ -66,7 +66,7 @@ The homepage opens with the Snowshagal brand rather than a rotating post or a ge
 - avoid photorealistic winter/travel imagery and avoid decorative red/blue finance colors outside actual data;
 - on desktop, keep the copy readable on the left and let the illustration breathe across the right side;
 - at 320–480px, show the headline and supporting copy first, then continue the artwork below as a deliberate mobile composition rather than a scaled desktop spread;
-- keep Daily / Weekly / Investment Note / Research as concise hero entry points, while Market Basics remains in the main navigation and archive;
+- keep Daily / Weekly / Investment Insights / Research as concise hero entry points, while Market Basics remains in the main navigation and archive;
 - the second hero slide shows the newest same-locale report in each of those four categories with its real cover thumbnail and a direct reading link; the latest-reports grid follows the same four-category selection;
 - do not repeat the removed Daily/reading-guide editorial block between the market strip and latest reports;
 - the latest report cards must continue to render from localized post data and may use the existing optional `coverImage` or a restrained CSS fallback;
