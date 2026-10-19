@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-10-19-daily-l3dlh0",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-19",
+    "reportDate": "2026-10-19",
+    "registeredDate": "2026-10-19",
+    "registeredAt": "2026-10-19T12:41:31.911Z",
+    "legacyImport": false,
+    "title": "두 그루는 그대로, 숲이 키를 키운 날",
+    "subtitle": "",
+    "description": "",
+    "summary": "미국 반도체 급락을 개장 가격에 반영한 뒤로는 시가를 다시 밑돌지 않고 하루 고가에서 끝남 · 코스피 종목 넷 중 셋 가까이 올랐고 오름폭은 2차전지⁠·⁠바이오 대형주가 가장 컸음.",
+    "takeaway": "중국 ESS 철수설에 2차전지 급등",
+    "tags": [
+      "kosdaq",
+      "kospi",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 5,
+    "href": "reports/2026-10-19_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-19-daily-l3dlh0.webp",
+    "shareCardImage": "covers/share/2026-10-19-daily-l3dlh0.jpg",
+    "coverThumbnail": "covers/2026-10-19-daily-l3dlh0-450.webp"
+  },
+  {
     "id": "2026-10-17-weekly-18l70lv",
     "type": "weekly",
     "typeLabel": "Weekly",
