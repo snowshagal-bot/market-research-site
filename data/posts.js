@@ -1,5 +1,34 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-19-daily-9xf83k",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-10-19",
+    "reportDate": "2026-10-19",
+    "registeredDate": "2026-10-19",
+    "registeredAt": "2026-10-19T13:00:33.277Z",
+    "legacyImport": false,
+    "title": "Two Giants Barely Budged. The Forest Grew Taller.",
+    "subtitle": "",
+    "description": "Snowshagal Daily, October 19, 2026: KOSPI closes at its session high after opening down 3.17%. Broad gains led by battery and biotech shares, with institutional buying, divergent foreign-flow measures and three tests for the next session.",
+    "summary": "The U.S. chip selloff was priced in at the open, but the KOSPI never revisited that low and finished at its intraday high. Nearly three in four KOSPI stocks advanced, with large-cap battery and biotech names leading the gains.",
+    "takeaway": "Battery Stocks Surge on Reports of Chinese ESS Exits",
+    "tags": [
+      "kosdaq",
+      "kospi",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 7,
+    "href": "reports/en/Snowshagal_Daily_2026-10-19_EN.html",
+    "translationGroup": "2026-10-19-daily-l3dlh0",
+    "coverImage": "covers/2026-10-19-daily-9xf83k.webp",
+    "shareCardImage": "covers/share/2026-10-19-daily-9xf83k.jpg",
+    "coverThumbnail": "covers/2026-10-19-daily-9xf83k-450.webp"
+  },
+  {
     "id": "2026-10-19-daily-l3dlh0",
     "type": "daily",
     "typeLabel": "주식 리포트",
