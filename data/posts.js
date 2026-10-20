@@ -1,5 +1,34 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-20-daily-y6t0ca",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-10-20",
+    "reportDate": "2026-10-20",
+    "registeredDate": "2026-10-20",
+    "registeredAt": "2026-10-20T10:35:32.577Z",
+    "legacyImport": false,
+    "title": "Frost Falls on Yesterday's Rally",
+    "subtitle": "",
+    "description": "Korean stocks sold off on October 20, 2026 despite a U.S. semiconductor rebound. KOSPI -3.73%; institutional and foreign selling; Hyundai Rotem earnings and a defense-sector rout.",
+    "summary": "Even as U.S. chip stocks posted their first gain in nine sessions, Korean shares fell across the board—including the sectors that led Monday's rebound. More than eight in ten KOSPI stocks declined.",
+    "takeaway": "Defense plunges despite a U.S. chip rebound",
+    "tags": [
+      "kosdaq",
+      "kospi",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 9,
+    "href": "reports/en/Snowshagal_Daily_2026-10-20_EN.html",
+    "translationGroup": "2026-10-20-daily-1cpfo00",
+    "coverImage": "covers/2026-10-20-daily-y6t0ca.webp",
+    "shareCardImage": "covers/share/2026-10-20-daily-y6t0ca.jpg",
+    "coverThumbnail": "covers/2026-10-20-daily-y6t0ca-450.webp"
+  },
+  {
     "id": "2026-10-20-daily-1cpfo00",
     "type": "daily",
     "typeLabel": "주식 리포트",
