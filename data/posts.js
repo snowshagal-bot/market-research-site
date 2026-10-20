@@ -43,7 +43,13 @@ window.RESEARCH_POSTS = [
     "description": "",
     "summary": "미국 반도체가 9거래일 만에 오른 날에도 국내는 19일 반등을 이끈 업종까지 함께 되돌린 넓은 하락 · 코스피 종목 열 중 여덟 넘게 내림.",
     "takeaway": "미국 반도체 반등에도 방산 급락",
-    "tags": [],
+    "tags": [
+      "kosdaq",
+      "kospi",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
     "readingMinutes": 7,
     "href": "reports/2026-10-20_Snowshagal_Daily.html",
     "coverImage": "covers/2026-10-20-daily-1cpfo00.webp",

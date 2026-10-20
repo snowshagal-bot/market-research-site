@@ -31,7 +31,13 @@
     "date": "2026-10-20",
     "registeredAt": "2026-10-20T10:13:49.359Z",
     "summary": "미국 반도체가 9거래일 만에 오른 날에도 국내는 19일 반등을 이끈 업종까지 함께 되돌린 넓은 하락 · 코스피 종목 열 중 여덟 넘게 내림.",
-    "tags": [],
+    "tags": [
+      "kosdaq",
+      "kospi",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
     "readingMinutes": 7,
     "url": "/reports/2026-10-20_Snowshagal_Daily",
     "coverImage": "/covers/2026-10-20-daily-1cpfo00.webp",

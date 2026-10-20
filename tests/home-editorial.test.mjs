@@ -61,7 +61,7 @@ test('four-report hero uses current localized posts, real covers and direct cano
       const post = localized.find(item => item.type === type);
       assert.ok(post, `${lang} ${type} exists`);
       assert.match(html, new RegExp(`hero-report-${type}`));
-      assert.ok(html.includes(post.title.replaceAll('&', '&amp;')), `${lang} ${type} latest title`);
+      assert.ok(html.includes(post.title.replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]))), `${lang} ${type} latest title`);
       assert.ok(html.includes(`/${post.coverThumbnail}`), `${lang} ${type} actual thumbnail`);
       assert.ok(html.includes(`/${post.href.replace(/\.html$/, '')}`), `${lang} ${type} direct report link`);
     }
