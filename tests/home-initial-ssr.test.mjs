@@ -396,7 +396,7 @@ test('initial HTML includes the same-locale Daily, Weekly and Note covers beside
     const localized = globalThis.MARKET_LOCALE.sortPosts(globalThis.MARKET_LOCALE.localePosts(REAL_POSTS, lang));
     for (const type of ['daily', 'weekly', 'note']) {
       const post = localized.find(item => item.type === type);
-      assert.ok(cards.includes(post.title.replaceAll('&', '&amp;')), `${lang} ${type} title in SSR`);
+      assert.ok(cards.includes(post.title.replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]))), `${lang} ${type} title in SSR`);
       assert.ok(cards.includes(`/${post.coverThumbnail}`), `${lang} ${type} cover in SSR`);
     }
   }
