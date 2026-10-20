@@ -79,6 +79,33 @@ window.RESEARCH_POSTS = [
     "coverThumbnail": "covers/2026-10-20-note-1wntkqt-450.webp"
   },
   {
+    "id": "2026-10-20-note-2wb72k",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-10-20",
+    "reportDate": "2026-10-20",
+    "registeredDate": "2026-10-20",
+    "registeredAt": "2026-10-19T16:21:13.502Z",
+    "legacyImport": false,
+    "title": "주가가 무너져도 한은은 올리나",
+    "seoTitle": "주가가 무너져도 한은은 올리나 | Snowshagal 투자 인사이트 NO.13",
+    "subtitle": "",
+    "description": "10월 22일 금통위 프리뷰. 10월 결정을 적은 증권사 프리뷰 네 건은 모두 3.00% 동결을 예상하지만 인상 소수의견과 그 뒤 경로에서 갈린다. 주가가 급락한 7월 16일에 올린 선례, 가까운 인상과 먼 경로를 따로 움직인 시장 가격, 3분기 은행 NIM, 원화 강세라는 반론을 정리한 투자 인사이트.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "rates",
+      "korea",
+      "fx"
+    ],
+    "readingMinutes": 21,
+    "href": "reports/20261020_Investment_Note_BOK_October_Preview.html",
+    "coverImage": "covers/2026-10-20-note-2wb72k.webp",
+    "shareCardImage": "covers/share/2026-10-20-note-2wb72k.jpg",
+    "coverThumbnail": "covers/2026-10-20-note-2wb72k-450.webp"
+  },
+  {
     "id": "2026-10-19-daily-9xf83k",
     "type": "daily",
     "typeLabel": "Daily",
