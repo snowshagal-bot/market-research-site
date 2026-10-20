@@ -1,5 +1,27 @@
 [
   {
+    "id": "2026-10-20-daily-1cpfo00",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-20",
+    "reportDate": "2026-10-20",
+    "registeredDate": "2026-10-20",
+    "registeredAt": "2026-10-20T10:13:49.359Z",
+    "legacyImport": false,
+    "title": "어제 자란 숲에 서리가 내린 날",
+    "subtitle": "",
+    "description": "",
+    "summary": "미국 반도체가 9거래일 만에 오른 날에도 국내는 19일 반등을 이끈 업종까지 함께 되돌린 넓은 하락 · 코스피 종목 열 중 여덟 넘게 내림.",
+    "takeaway": "미국 반도체 반등에도 방산 급락",
+    "tags": [],
+    "readingMinutes": 7,
+    "href": "reports/2026-10-20_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-20-daily-1cpfo00.webp",
+    "shareCardImage": "covers/share/2026-10-20-daily-1cpfo00.jpg",
+    "coverThumbnail": "covers/2026-10-20-daily-1cpfo00-450.webp"
+  },
+  {
     "id": "2026-10-20-note-1wntkqt",
     "type": "note",
     "typeLabel": "Investment Insights",
