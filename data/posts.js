@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-20-basics-wajgk3",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-10-20",
+    "reportDate": "2026-10-20",
+    "registeredDate": "2026-10-21",
+    "registeredAt": "2026-10-20T16:49:41.362Z",
+    "legacyImport": false,
+    "title": "The BOK Raised Rates. Why Did Bond Yields Fall?",
+    "seoTitle": "Why Did Korean Treasury Yields Fall After a Rate Hike? | BOK Decisions, Dissents and Dot Plots",
+    "subtitle": "",
+    "description": "On August 27, 2026, the Bank of Korea raised its Base Rate to 3.00%, yet the three-year Korean Treasury yield fell 6.1bp. A practical guide to bond yields, market expectations, BOK policy statements, dissents and its six-month rate-outlook dot plot.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "rates",
+      "credit-bonds",
+      "liquidity"
+    ],
+    "readingMinutes": 11,
+    "href": "reports/en/Snowshagal_Reading_the_Market_11_Bond_Yields_EN.html",
+    "translationGroup": "2026-10-20-basics-1diw1l3",
+    "coverImage": "covers/2026-10-20-basics-wajgk3.webp",
+    "shareCardImage": "covers/share/2026-10-20-basics-wajgk3.jpg",
+    "coverThumbnail": "covers/2026-10-20-basics-wajgk3-450.webp"
+  },
+  {
     "id": "2026-10-20-basics-1diw1l3",
     "type": "basics",
     "typeLabel": "시장 입문",
