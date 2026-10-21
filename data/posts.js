@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-21-daily-120uibg",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-21",
+    "reportDate": "2026-10-21",
+    "registeredDate": "2026-10-21",
+    "registeredAt": "2026-10-21T09:39:38.343Z",
+    "legacyImport": false,
+    "title": "서리 걷힌 아침, 볕은 두 그루에",
+    "subtitle": "",
+    "description": "",
+    "summary": "지수는 3% 넘게 올랐지만 체감은 달랐던 날 · 오름폭 대부분을 반도체 두 종목이 만듦.",
+    "takeaway": "스페이스X 실적에 반도체 대형주 급등",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "earnings"
+    ],
+    "readingMinutes": 5,
+    "href": "reports/2026-10-21_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-21-daily-120uibg.webp",
+    "shareCardImage": "covers/share/2026-10-21-daily-120uibg.jpg",
+    "coverThumbnail": "covers/2026-10-21-daily-120uibg-450.webp"
+  },
+  {
     "id": "2026-10-21-note-8csmgr",
     "type": "note",
     "typeLabel": "Investment Insights",
