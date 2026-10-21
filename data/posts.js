@@ -1,5 +1,34 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-21-daily-1bf9pt1",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-10-21",
+    "reportDate": "2026-10-21",
+    "registeredDate": "2026-10-21",
+    "registeredAt": "2026-10-21T10:00:31.707Z",
+    "legacyImport": false,
+    "title": "As the Frost Lifts, Two Trees Catch the Sun",
+    "subtitle": "",
+    "description": "The KOSPI rebounded 3.29% on October 21, 2026, but only 40.7% of its stocks advanced. Foreign investors bought Samsung Electronics and SK hynix, while AI earnings and chip exports drove a concentrated rally.",
+    "summary": "The index jumped more than 3%, but the broader market told a different story. Two chip giants accounted for most of the gain.",
+    "takeaway": "SpaceX Results Send Chip Heavyweights Soaring",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "earnings"
+    ],
+    "readingMinutes": 7,
+    "href": "reports/en/Snowshagal_Daily_2026-10-21_EN.html",
+    "translationGroup": "2026-10-21-daily-120uibg",
+    "coverImage": "covers/2026-10-21-daily-1bf9pt1.webp",
+    "shareCardImage": "covers/share/2026-10-21-daily-1bf9pt1.jpg",
+    "coverThumbnail": "covers/2026-10-21-daily-1bf9pt1-450.webp"
+  },
+  {
     "id": "2026-10-21-daily-120uibg",
     "type": "daily",
     "typeLabel": "주식 리포트",
