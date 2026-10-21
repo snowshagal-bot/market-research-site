@@ -1,5 +1,26 @@
 [
   {
+    "id": "2026-10-21-note-1af7sa6",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-10-21",
+    "reportDate": "2026-10-21",
+    "registeredDate": "2026-10-21",
+    "registeredAt": "2026-10-21T08:18:44.277Z",
+    "legacyImport": false,
+    "title": "미국 10년물 금리 고점은 마지막 인상 근처에서",
+    "seoTitle": "미국 10년물 금리 고점은 마지막 인상 근처에서 | Snowshagal 투자노트 NO.14",
+    "subtitle": "",
+    "description": "10월 27~28일 FOMC 프리뷰. 1990년 이후 연준 인상 사이클 여섯 번 중 다섯 번은 미국 10년물 금리 고점이 마지막 인상 전후 4개월 안에 나왔다. 다만 마지막 인상은 지나고 나서야 확인된다. 이번 회의에서 볼 것은 동결 여부보다 남은 긴축의 폭과 기간, 이어 11월 4일 QRA의 장기물 발행과 바이백.",
+    "tags": [],
+    "readingMinutes": 25,
+    "href": "reports/20261021_Investment_Note_FOMC_10Y_Peak.html",
+    "coverImage": "covers/2026-10-21-note-1af7sa6.webp",
+    "shareCardImage": "covers/share/2026-10-21-note-1af7sa6.jpg",
+    "coverThumbnail": "covers/2026-10-21-note-1af7sa6-450.webp"
+  },
+  {
     "id": "2026-10-20-basics-wajgk3",
     "type": "basics",
     "typeLabel": "Market Basics",
