@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-10-22-note-svvhsy",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-10-22",
+    "reportDate": "2026-10-22",
+    "registeredDate": "2026-10-23",
+    "registeredAt": "2026-10-22T16:32:11.798Z",
+    "legacyImport": false,
+    "title": "AI Credit Concerns: Where Are They Showing Up in Korea?",
+    "seoTitle": "Where Are AI Credit Concerns Showing Up in South Korea? | Snowshagal Investment Note No. 15",
+    "subtitle": "",
+    "description": "Where have AI credit concerns moved beyond CoreWeave, and can their effects be identified in South Korea? Five sets of market indicators distinguish credit repricing among US borrowers from broader high-yield spreads, Korean bond markets and the sharp fall in data-center supply-chain stocks. Korean corporate-credit spillovers cannot yet be isolated from domestic factors.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "ai",
+      "semiconductors"
+    ],
+    "readingMinutes": 27,
+    "href": "reports/en/Snowshagal_Investment_Note_15_2026-10-22_EN.html",
+    "translationGroup": "2026-10-22-note-177y93h",
+    "coverImage": "covers/2026-10-22-note-svvhsy.webp",
+    "shareCardImage": "covers/share/2026-10-22-note-svvhsy.jpg",
+    "coverThumbnail": "covers/2026-10-22-note-svvhsy-450.webp"
+  },
+  {
     "id": "2026-10-22-note-177y93h",
     "type": "note",
     "typeLabel": "투자 인사이트",
