@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-10-22-daily-1yitduh",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-22",
+    "reportDate": "2026-10-22",
+    "registeredDate": "2026-10-23",
+    "registeredAt": "2026-10-22T16:51:58.911Z",
+    "legacyImport": false,
+    "title": "볕은 하루로 지고, 바람은 숲 전체로",
+    "subtitle": "",
+    "description": "",
+    "summary": "반등 하루, 하락 하루 · 이번엔 하락이 반도체 밖으로 더 넓게 퍼진 장.",
+    "takeaway": "실적 반응 엇갈림에 유가 급등까지",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 5,
+    "href": "reports/2026-10-22_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-22-daily-1yitduh.webp",
+    "shareCardImage": "covers/share/2026-10-22-daily-1yitduh.jpg",
+    "coverThumbnail": "covers/2026-10-22-daily-1yitduh-450.webp"
+  },
+  {
     "id": "2026-10-22-note-svvhsy",
     "type": "note",
     "typeLabel": "Investment Insights",
