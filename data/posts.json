@@ -1,5 +1,34 @@
 [
   {
+    "id": "2026-10-22-daily-h6e5ew",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-10-22",
+    "reportDate": "2026-10-22",
+    "registeredDate": "2026-10-23",
+    "registeredAt": "2026-10-22T17:06:08.759Z",
+    "legacyImport": false,
+    "title": "Sunlight for a Day, Wind Across the Forest",
+    "subtitle": "",
+    "description": "KOSPI fell 3.52% and KOSDAQ 3.62% as a one-day rebound reversed. Track intraday price action, institutional and foreign flows, sector breadth, AI earnings and Samsung E&A.",
+    "summary": "One day of recovery, one day of losses. This time, selling spread well beyond semiconductors.",
+    "takeaway": "Mixed earnings reactions meet a surge in oil prices",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 8,
+    "href": "reports/en/Snowshagal_Daily_2026-10-22_EN.html",
+    "translationGroup": "2026-10-22-daily-1yitduh",
+    "coverImage": "covers/2026-10-22-daily-h6e5ew.webp",
+    "shareCardImage": "covers/share/2026-10-22-daily-h6e5ew.jpg",
+    "coverThumbnail": "covers/2026-10-22-daily-h6e5ew-450.webp"
+  },
+  {
     "id": "2026-10-22-daily-1yitduh",
     "type": "daily",
     "typeLabel": "주식 리포트",
