@@ -1,5 +1,31 @@
 [
   {
+    "id": "2026-10-22-note-177y93h",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-10-22",
+    "reportDate": "2026-10-22",
+    "registeredDate": "2026-10-23",
+    "registeredAt": "2026-10-22T16:29:03.393Z",
+    "legacyImport": false,
+    "title": "AI 신용 우려, 한국에서는 어디에 나타나나",
+    "seoTitle": "AI 신용 우려, 한국에서는 어디에 나타나나 | Snowshagal 투자노트 NO.15",
+    "subtitle": "",
+    "description": "코어위브에서 뚜렷해진 AI 신용 우려가 미국의 다른 차입자와 신용시장, 한국 주식·채권시장에 어디까지 나타났는지 다섯 관측소에서 확인했다. 미국에서는 코어위브와 저신용 임차인의 신용 가격이 뚜렷하게 움직였고, 한국 신용시장은 등급과 무관하게 13~19bp 넓어졌지만 국내 요인과 겹친다. 한국에서 가장 크게 움직인 곳은 데이터센터 공급망 주가지만 신용 우려만의 영향으로 나눌 수는 없다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "ai",
+      "semiconductors"
+    ],
+    "readingMinutes": 25,
+    "href": "reports/20261022_Investment_Note_AI_Credit_Korea.html",
+    "coverImage": "covers/2026-10-22-note-177y93h.webp",
+    "shareCardImage": "covers/share/2026-10-22-note-177y93h.jpg",
+    "coverThumbnail": "covers/2026-10-22-note-177y93h-450.webp"
+  },
+  {
     "id": "2026-10-21-daily-1bf9pt1",
     "type": "daily",
     "typeLabel": "Daily",
