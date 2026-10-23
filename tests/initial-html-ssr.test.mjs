@@ -5,6 +5,7 @@ import vm from 'node:vm';
 
 import { HOSTILE_CORP, HOSTILE_EVENT_TITLE, HOSTILE_REPORT, seededDatabase } from './helpers/initial-html-fixtures.mjs';
 import { onRequest as middlewareRequest } from '../functions/_middleware.js';
+import { ga4Tag, appendGa4ToHtml } from '../functions/_ga4.js';
 import { onRequestGet as feedGet } from '../functions/api/disclosures/feed.js';
 import { onRequestGet as calendarGet } from '../functions/api/calendar.js';
 import { loadDisclosureFeed } from '../functions/api/disclosures/_feed-data.js';
@@ -262,10 +263,11 @@ test('event titles are escaped in text and in title attributes', async () => {
 
 /* ======================================================== contract around SSR */
 
-test('head tags, canonical, hreflang and cache headers are exactly the static ones', async () => {
+test('head metadata stays static apart from GA4, and cache headers are unchanged', async () => {
   for (const path of Object.keys(SHELLS)) {
     const { response, html, shell } = await page(path);
-    assert.equal(head(html), head(shell), `${path} head unchanged`);
+    const expected = appendGa4ToHtml(shell, ga4Tag(new URL(`https://snowshagal.com${path}`)));
+    assert.equal(head(html), head(expected), `${path} metadata unchanged apart from GA4`);
     assert.equal(response.headers.get('cache-control'), STATIC_CACHE, `${path} cache-control unchanged`);
     assert.equal(response.headers.get('etag'), null);
   }

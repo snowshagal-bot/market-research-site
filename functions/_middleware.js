@@ -34,6 +34,7 @@ import { loadReportFacts } from './_report-facts.js';
 import { applyInitialHtmlToRewriter, applyInitialHtmlToString, buildInitialHtml } from './_initial-html.js';
 import { buildHomeInitial } from './_home-initial.js';
 import { getSession, validateSafeNextUrl } from './_auth.js';
+import { ga4Tag, appendGa4ToHtml, applyGa4ToRewriter } from './_ga4.js';
 
 function policyResponse(status, error) {
   return new Response(JSON.stringify({ ok: false, error }), {
@@ -206,6 +207,7 @@ export async function onRequest(context) {
 
   const contentType = response.headers.get('content-type') || '';
   if (!contentType.includes('text/html')) return response;
+  const ga4 = ga4Tag(url);
   const engagement = isProduction && !/^\/(?:admin|api|cdn-cgi)(?:\/|$)/i.test(url.pathname)
     ? '<script src="/assets/engagement.js?v=4fd1735fcd" defer></script>'
     : '';
@@ -248,7 +250,7 @@ export async function onRequest(context) {
       });
     }
 
-    if (!engagement && !posts && !initial && !home) return response;
+    if (!ga4 && !engagement && !posts && !initial && !home) return response;
     if (typeof HTMLRewriter === 'undefined') {
       let body = await response.text();
       if (posts && homeLang) {
@@ -278,6 +280,7 @@ export async function onRequest(context) {
         } catch (error) { console.error('home initial html apply failed', error); }
       }
       if (engagement) body = body.replace(/<\/body>/i, `${engagement}</body>`);
+      body = appendGa4ToHtml(body, ga4);
       const headers = new Headers(response.headers);
       headers.delete('content-length');
       return new Response(body, {
@@ -287,7 +290,7 @@ export async function onRequest(context) {
       });
     }
 
-    let rewriter = new HTMLRewriter();
+    let rewriter = applyGa4ToRewriter(new HTMLRewriter(), ga4);
     if (posts && homeLang) {
       const latest = homepageLatestLinks(posts, homeLang, tags);
       const archive = homepageReportLinks(posts, homeLang, 20, tags);
@@ -400,6 +403,7 @@ export async function onRequest(context) {
     body = body.replace(/<\/head>/i, `${FAVICON_TAGS}${seo}${feedLink}${footerStyle}</head>`);
     body = body.replace(/<\/body>/i, `${footerMarkup}${shell}</body>`);
     body = setHtmlLang(body, lang);
+    body = appendGa4ToHtml(body, ga4);
     const headers = new Headers(response.headers);
     headers.delete('content-length');
     return new Response(body, {
@@ -409,7 +413,7 @@ export async function onRequest(context) {
     });
   }
 
-  return new HTMLRewriter()
+  return applyGa4ToRewriter(new HTMLRewriter(), ga4)
     .on('html', { element(element) { element.setAttribute('lang', lang); } })
     .on('title', { element(element) { if (seo) element.remove(); } })
     .on('link[rel="canonical"]', { element(element) { element.remove(); } })
