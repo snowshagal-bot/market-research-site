@@ -8,7 +8,7 @@ Updated: 2026-09-29
 
 ## Current stack
 
-GA4 integration is prepared for review (2026-10-23, not deployed): `functions/_ga4.js` adds the official async gtag.js tag `G-L3XBBY93CG` through the public HTML middleware, including future reports. Private/Preview traffic is excluded. Before owner approval and deployment, an Editor must disable Enhanced measurement to avoid history-filter pageviews and automatic input/link data. See `docs/GA4.md` for privacy limits, verification and the required property settings. Existing Cloudflare and engagement analytics remain separate.
+GA4 integration is approved for rollout (2026-10-23, #177): `functions/_ga4.js` adds the official async gtag.js tag `G-L3XBBY93CG` through the public HTML middleware, including future reports. Private/Preview traffic is excluded. The owner disabled Enhanced measurement and user-provided data capabilities, verified against the public Google tag before merge. See `docs/GA4.md` for privacy limits and the required property settings; deployment verification is recorded in PR #177. Existing Cloudflare and engagement analytics remain separate.
 
 - Source: GitHub repository `snowshagal-bot/market-research-site`
 - Hosting: Cloudflare Pages

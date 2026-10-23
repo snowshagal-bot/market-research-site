@@ -21,7 +21,7 @@ Never store the token value in Git, source code, screenshots, issues, or documen
 
 ## Cloudflare Pages
 
-GA4 `G-L3XBBY93CG` is prepared in a review-only PR (2026-10-23). This ID is public, not a secret. Do not merge or deploy it without owner approval. Complete the property-level Enhanced measurement/privacy settings in [`GA4.md`](./GA4.md) first, then follow its Production Network/Realtime checks after an approved deployment. Preview traffic is deliberately excluded from this property.
+GA4 `G-L3XBBY93CG` rollout was owner-approved on 2026-10-23 (#177). This ID is public, not a secret. The owner disabled Enhanced measurement and user-provided data capabilities, confirmed in the public Google tag before merge. Preserve the property settings in [`GA4.md`](./GA4.md), which also documents Production Network/Realtime checks. Deployment verification is recorded in PR #177. Preview traffic is deliberately excluded from this property.
 
 Project name: `market-research-site`
 
