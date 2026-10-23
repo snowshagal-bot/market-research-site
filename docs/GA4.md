@@ -1,6 +1,6 @@
 # Google Analytics 4
 
-Measurement ID: `G-L3XBBY93CG`. Status: PR only; **owner approval is required before merge or Production deployment**.
+Measurement ID: `G-L3XBBY93CG`. Status: owner approved merge/deployment in chat; **deployment waits for the required Google property settings below**.
 
 ## Integration and installation audit
 
@@ -16,12 +16,14 @@ Repeated bootstrap execution cannot configure or load the tag twice. If an exist
 
 ## Pageviews and required property settings BEFORE approval/deployment
 
+Pre-deployment inspection on 2026-10-23 fetched the public `gtag/js?id=G-L3XBBY93CG` configuration without executing it or sending analytics events. The stream's `__ccd_em_page_view` has `vtp_historyEvents: true`; search, form, outbound, download and video measurement tags are present. The Google tag also has `__ogt_1p_data_v2` with automatic email/phone/address detection enabled. Email redaction is already enabled (`__ccd_auto_redact`, `vtp_redactEmail: true`). These are observed tag capabilities, not evidence that personal data has been sent. Merge/deployment must wait for Enhanced measurement and Allow user-provided data capabilities to be turned off; owner approval alone does not change those remote settings.
+
 The site uses full document navigation between pages. HOME category filters and MARKET date/range tabs use `pushState`/`replaceState`/`popstate` to change the current page's state; they are not virtual document navigation. There is no SPA router to instrument. This implementation sends the initial pageview through `config` only; it adds no manual `page_view`, router hooks or extra pageviews for filtering, hash anchors or tab changes.
 
 **An Editor of the GA4 property must complete the following before this PR is approved for Production. These account settings cannot be verified from the repository and have not been changed by this PR.**
 
 1. Admin → Data collection and modification → Data streams → the web stream whose measurement ID is `G-L3XBBY93CG`: turn **Enhanced measurement OFF**. This avoids automatic browser-history pageviews, site-search terms, outbound-link URLs, downloads, video and form-interaction events. The normal pageview from `gtag('config', ...)` remains enabled. If Enhanced measurement is re-enabled later, first review every event and keep **Page changes based on browser history events**, **Site search**, **Outbound clicks**, **File downloads**, **Video engagement** and **Form interactions** disabled for this integration.
-2. Under the web stream's Data redaction settings, enable email redaction as an additional safeguard. Inspect any other Google tag destinations and event settings; do not connect extra tags or enable user-provided-data collection as part of this change.
+2. Under Google tag → Configure tag settings → **Allow user-provided data capabilities**, turn that capability **OFF** (not just individual fields). This prevents automatic email/phone/address detection. Keep email redaction enabled as an additional safeguard. Inspect any other Google tag destinations and event settings; do not connect extra tags or enable user-provided-data collection as part of this change.
 3. Keep Google Signals and advertising personalization off. The code also sets `allow_google_signals: false` and `allow_ad_personalization_signals: false`.
 4. Record completion in the PR before merge. Without the Enhanced measurement setting, code-level single-config tests alone do **not** prove there are no extra automatically collected pageviews or input-related events.
 
@@ -58,3 +60,4 @@ Official references:
 - [Enhanced measurement and its collected fields](https://support.google.com/analytics/answer/9216061?hl=en)
 - [GA4 configuration fields](https://developers.google.com/analytics/devguides/collection/ga4/reference/config)
 - [Data redaction](https://support.google.com/analytics/answer/13544947?hl=en)
+- [User-provided data collection and how to disable it](https://support.google.com/analytics/answer/14077171?hl=en)
