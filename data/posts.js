@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-20-basics-rom7s5",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-10-23",
+    "reportDate": "2026-10-23",
+    "registeredDate": "2026-10-23",
+    "registeredAt": "2026-10-23T14:17:45.456Z",
+    "legacyImport": false,
+    "title": "자사주 매입은 주가를 받치나",
+    "seoTitle": "자사주 매입·소각 뜻: 회사가 제 주식을 사면 주가는 오를까",
+    "subtitle": "",
+    "description": "SK하이닉스가 두 달 동안 자사주 38조 8천억 원어치를 사는 사이 기타법인 순매수는 38조 4,900억 원이었다. 매입을 마친 10월 21일 주가는 결정 전날보다 22% 낮았다. 자사주 매입이 주가를 받치는 일과 주주에게 이로운 일이 왜 다른지, EPS가 올라도 주주가치가 꼭 오르지 않는 이유를 퀴즈와 시뮬레이터로 설명한다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "treasury-stock"
+    ],
+    "readingMinutes": 9,
+    "href": "reports/시장을읽는말들_12편_자사주매입은주가를받치나.html",
+    "coverImage": "covers/2026-08-20-basics-rom7s5.webp",
+    "shareCardImage": "covers/share/2026-08-20-basics-rom7s5.jpg",
+    "coverThumbnail": "covers/2026-08-20-basics-rom7s5-450.webp",
+    "updatedAt": "2026-10-23T14:26:27.634Z"
+  },
+  {
     "id": "2026-10-22-daily-h6e5ew",
     "type": "daily",
     "typeLabel": "Daily",
@@ -4030,32 +4057,6 @@ window.RESEARCH_POSTS = [
     "readingMinutes": 4,
     "shareCardImage": "covers/share/2026-08-21-daily-1i56f22.jpg",
     "coverThumbnail": "covers/2026-08-21-daily-1i56f22-450.webp"
-  },
-  {
-    "id": "2026-08-20-basics-rom7s5",
-    "type": "basics",
-    "typeLabel": "시장 입문",
-    "lang": "ko",
-    "date": "2026-08-20",
-    "reportDate": "2026-08-20",
-    "registeredDate": "2026-10-23",
-    "registeredAt": "2026-10-23T14:17:45.456Z",
-    "legacyImport": false,
-    "title": "자사주 매입은 주가를 받치나",
-    "seoTitle": "자사주 매입·소각 뜻: 회사가 제 주식을 사면 주가는 오를까",
-    "subtitle": "",
-    "description": "SK하이닉스가 두 달 동안 자사주 38조 8천억 원어치를 사는 사이 기타법인 순매수는 38조 4,900억 원이었다. 매입을 마친 10월 21일 주가는 결정 전날보다 22% 낮았다. 자사주 매입이 주가를 받치는 일과 주주에게 이로운 일이 왜 다른지, EPS가 올라도 주주가치가 꼭 오르지 않는 이유를 퀴즈와 시뮬레이터로 설명한다.",
-    "tags": [
-      "kospi",
-      "kosdaq",
-      "flows",
-      "treasury-stock"
-    ],
-    "readingMinutes": 9,
-    "href": "reports/시장을읽는말들_12편_자사주매입은주가를받치나.html",
-    "coverImage": "covers/2026-08-20-basics-rom7s5.webp",
-    "shareCardImage": "covers/share/2026-08-20-basics-rom7s5.jpg",
-    "coverThumbnail": "covers/2026-08-20-basics-rom7s5-450.webp"
   },
   {
     "id": "2026-08-20-basics-1txn8bp",
