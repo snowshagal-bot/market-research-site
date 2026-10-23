@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-23-daily-r6lv52",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-23",
+    "reportDate": "2026-10-23",
+    "registeredDate": "2026-10-24",
+    "registeredAt": "2026-10-23T17:26:03.522Z",
+    "legacyImport": false,
+    "title": "물은 다시 찼어도, 뜬 건 큰 배 몇 척",
+    "subtitle": "",
+    "description": "",
+    "summary": "장중 4% 넘게 밀린 지수는 되돌아왔지만 함께 오른 종목은 여전히 열에 둘.",
+    "takeaway": "메타 충격 뒤 반등, 대형주에 쏠림",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-10-23_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-23-daily-r6lv52.webp",
+    "shareCardImage": "covers/share/2026-10-23-daily-r6lv52.jpg",
+    "coverThumbnail": "covers/2026-10-23-daily-r6lv52-450.webp"
+  },
+  {
     "id": "2026-10-23-basics-tshdkv",
     "type": "basics",
     "typeLabel": "Market Basics",
