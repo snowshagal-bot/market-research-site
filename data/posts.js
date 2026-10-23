@@ -51,7 +51,7 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-10-24-note-vgs0zy.webp",
     "shareCardImage": "covers/share/2026-10-24-note-vgs0zy.jpg",
     "coverThumbnail": "covers/2026-10-24-note-vgs0zy-450.webp",
-    "updatedAt": "2026-10-23T21:26:13.130Z"
+    "updatedAt": "2026-10-23T21:27:25.315Z"
   },
   {
     "id": "2026-10-23-daily-nmxkxu",
