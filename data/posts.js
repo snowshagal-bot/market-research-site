@@ -40,12 +40,18 @@ window.RESEARCH_POSTS = [
     "seoTitle": "원화가 강해졌다는데, 실효환율로는 아직 약하다 | Snowshagal 투자노트 NO.16",
     "subtitle": "",
     "description": "원화는 6월 저점 이후 빠르게 강해졌지만 BIS 실질실효환율(9월 92.7)은 1994년 이후 평균(101.9)보다 9% 낮다. 다만 평균은 목표가 아니다. 10월 1~23일 원/달러 누적 평균(1,340.7원)은 증권사 4분기 가정과 거의 같고, 환율 가정을 낮춰도 이익 전망은 오를 수 있다.",
-    "tags": [],
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "rates",
+      "fx"
+    ],
     "readingMinutes": 12,
     "href": "reports/20261024_Investment_Note_Won_Effective_Rate.html",
     "coverImage": "covers/2026-10-24-note-vgs0zy.webp",
     "shareCardImage": "covers/share/2026-10-24-note-vgs0zy.jpg",
-    "coverThumbnail": "covers/2026-10-24-note-vgs0zy-450.webp"
+    "coverThumbnail": "covers/2026-10-24-note-vgs0zy-450.webp",
+    "updatedAt": "2026-10-23T21:26:13.130Z"
   },
   {
     "id": "2026-10-23-daily-nmxkxu",
