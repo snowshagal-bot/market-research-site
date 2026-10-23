@@ -2,7 +2,10 @@
 // published standalone reports receive it without changing their source HTML.
 export const GA4_MEASUREMENT_ID = 'G-L3XBBY93CG';
 
-function initializeGoogleAnalytics(measurementId) {
+// A literal browser asset, never a serialized server function: Cloudflare's
+// bundler adds helpers such as __name to server functions, and those helpers
+// do not exist in the visitor's browser when Function#toString is injected.
+const GA4_INITIALIZER = String.raw`(function initializeGoogleAnalytics(measurementId) {
   function start() {
     // Defence in depth: Preview, local and administrator visits must never
     // enter the public property's visitor counts.
@@ -51,12 +54,12 @@ function initializeGoogleAnalytics(measurementId) {
   } else {
     start();
   }
-}
+})`;
 
 export function ga4Tag(url) {
   if (url.protocol !== 'https:' || url.hostname !== 'snowshagal.com'
     || /^\/(?:admin|api|cdn-cgi)(?:\/|$)/i.test(url.pathname)) return '';
-  return `<script data-snowshagal-ga4="${GA4_MEASUREMENT_ID}">(${initializeGoogleAnalytics.toString()})('${GA4_MEASUREMENT_ID}');</script>`;
+  return `<script data-snowshagal-ga4="${GA4_MEASUREMENT_ID}">${GA4_INITIALIZER}('${GA4_MEASUREMENT_ID}');</script>`;
 }
 
 export function appendGa4ToHtml(html, tag) {
