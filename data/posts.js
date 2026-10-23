@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-23-basics-tshdkv",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-10-23",
+    "reportDate": "2026-10-23",
+    "registeredDate": "2026-10-23",
+    "registeredAt": "2026-10-23T14:28:56.079Z",
+    "legacyImport": false,
+    "title": "Can Share Buybacks Support the Stock Price?",
+    "seoTitle": "Share Buybacks and Cancellations: Does Buying Back Stock Lift the Share Price?",
+    "subtitle": "",
+    "description": "SK hynix spent KRW 38.8154 trillion repurchasing shares while the Korea Exchange reported KRW 38.49 trillion in net buying by other corporations. Why a buyback may support demand without guaranteeing price gains or added shareholder value. Includes a quiz and an interactive EPS simulator.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "treasury-stock"
+    ],
+    "readingMinutes": 12,
+    "href": "reports/en/Snowshagal_Market_Basics_12_Share_Buybacks_EN.html",
+    "translationGroup": "2026-08-20-basics-rom7s5",
+    "coverImage": "covers/2026-10-23-basics-tshdkv.webp",
+    "shareCardImage": "covers/share/2026-10-23-basics-tshdkv.jpg",
+    "coverThumbnail": "covers/2026-10-23-basics-tshdkv-450.webp"
+  },
+  {
     "id": "2026-08-20-basics-rom7s5",
     "type": "basics",
     "typeLabel": "시장 입문",
