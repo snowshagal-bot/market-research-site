@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-24-note-fwh5r4",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-10-24",
+    "reportDate": "2026-10-24",
+    "registeredDate": "2026-10-24",
+    "registeredAt": "2026-10-23T21:24:00.434Z",
+    "legacyImport": false,
+    "title": "The Won Has Rallied, Yet Its Trade-Weighted Value Remains Below Average",
+    "seoTitle": "The Won Has Rallied, but Its Real Effective Exchange Rate Remains Below Average | Snowshagal Investment Note No. 16",
+    "subtitle": "",
+    "description": "The won has rebounded, yet September's BIS real effective exchange rate (92.7) remains 9% below its 1994–present average (101.9). That mean is not a target. Q4 FX assumptions in Korean equity forecasts have largely caught up with the actual USD/KRW rate.",
+    "tags": [
+      "rates",
+      "fx",
+      "kospi",
+      "kosdaq"
+    ],
+    "readingMinutes": 13,
+    "href": "reports/en/Snowshagal_Investment_Note_16_Won_REER_EN.html",
+    "translationGroup": "2026-10-24-note-vgs0zy",
+    "coverImage": "covers/2026-10-24-note-fwh5r4.webp",
+    "shareCardImage": "covers/share/2026-10-24-note-fwh5r4.jpg",
+    "coverThumbnail": "covers/2026-10-24-note-fwh5r4-450.webp"
+  },
+  {
     "id": "2026-10-24-note-vgs0zy",
     "type": "note",
     "typeLabel": "투자 인사이트",
