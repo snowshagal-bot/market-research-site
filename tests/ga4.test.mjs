@@ -13,6 +13,12 @@ const marker = /<script data-snowshagal-ga4="G-L3XBBY93CG">/g;
 const shell = '<!doctype html><html><head><title>Public report</title></head><body>Report</body></html>';
 const bootstrap = ga4Tag(new URL('https://snowshagal.com/')).replace(/^<script[^>]*>|<\/script>$/g, '');
 
+test('browser code is a literal asset and never serialized from a bundled server function', async () => {
+  const source = await read('functions/_ga4.js');
+  assert.doesNotMatch(source, /\.toString\s*\(/, 'Function serialization can leak Cloudflare/esbuild helpers into the browser');
+  assert.doesNotMatch(bootstrap, /\b__name\s*\(|\b__defProp\b/);
+});
+
 async function render(path, html = shell, { origin = 'https://snowshagal.com', status = 200, type = 'text/html', method = 'GET', corpus = posts } = {}) {
   return onRequest({
     request: new Request(origin + path, { method }),
