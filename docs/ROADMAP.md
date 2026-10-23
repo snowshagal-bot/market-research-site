@@ -10,6 +10,8 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+- **GA4 public-site measurement (2026-10-23, PR review only)**: the common response layer adds `G-L3XBBY93CG` to all successful KO/EN public HTML and future automated reports. All 1,396 tests, syntax/invariant checks and the SEO audit pass; the GA4 suite checks 20 shells and 209 published reports. Before owner approval/merge, complete the Enhanced measurement and privacy settings in `docs/GA4.md`; then verify real `collect` pageviews and the GA4 Realtime report after an approved Production deployment. Do not merge or deploy without explicit owner approval.
+
 - **Investment Insights naming (2026-10-19, deployment pending)**: public KO `투자 인사이트` / EN `Investment Insights` labels are synchronized across navigation, HOME, category pages, report shell, footer, SEO and admin. Internal `note` and `/notes/` URLs stay unchanged; old and new upload labels both work. KO/EN mobile (390px iframe) and desktop (1280px iframe) checked without page overflow. Verification: 1,385/1,387 tests pass; the unchanged main data already fails summary-line-break and duplicate-translation-group checks. Changed JS syntax, whitespace and SEO audit pass. Resolve or review those existing data failures before Production deployment.
 
 - **Homepage editorial refresh (Preview review pending, 2026-10-12)**: KO/EN research-desk watercolor, explicit instrument basis dates, shared post-driven latest Daily and reading guide, restrained report list, mobile two-row market strip. Verify the branch Preview on desktop/mobile and light/dark before owner review. No Production merge or data write is part of this change.
