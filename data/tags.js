@@ -238,5 +238,11 @@ window.TAG_REGISTRY = {
     "en": "Korea",
     "group": "market",
     "custom": true
+  },
+  "treasury-stock": {
+    "ko": "자사주",
+    "en": "treasury stock",
+    "group": "market",
+    "custom": true
   }
 };
