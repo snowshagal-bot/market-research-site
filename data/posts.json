@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-10-24-weekly-1hvolaz",
+    "type": "weekly",
+    "typeLabel": "Weekly",
+    "lang": "en",
+    "date": "2026-10-24",
+    "reportDate": "2026-10-24",
+    "registeredDate": "2026-10-24",
+    "registeredAt": "2026-10-24T13:14:35.856Z",
+    "legacyImport": false,
+    "title": "Five Days of Whiplash. Earnings Hold the Key.",
+    "subtitle": "",
+    "description": "Snowshagal Weekly, October 19–23, 2026: KOSPI −2.08%, KOSDAQ −5.42%. AI spending and earnings headlines whipsawed Korean stocks as defense and shipbuilders slumped and large-cap pharma strengthened. Next: SK hynix and Samsung Electronics results, Big Tech capex and the Federal Reserve.",
+    "summary": "Meta spending commitments and U.S. AI earnings fueled three volatile sessions. KOSPI finished the week down 2.08%, while Samsung Electronics and SK hynix were broadly flat and defense, shipbuilding and KOSDAQ lagged.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 8,
+    "href": "reports/en/Snowshagal_Weekly_2026-10-24_EN.html",
+    "translationGroup": "2026-10-24-weekly-nx8bfu",
+    "coverImage": "covers/2026-10-24-weekly-1hvolaz.webp",
+    "shareCardImage": "covers/share/2026-10-24-weekly-1hvolaz.jpg",
+    "coverThumbnail": "covers/2026-10-24-weekly-1hvolaz-450.webp"
+  },
+  {
     "id": "2026-10-24-weekly-nx8bfu",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
