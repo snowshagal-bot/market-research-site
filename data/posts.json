@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-10-24-weekly-nx8bfu",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-10-24",
+    "reportDate": "2026-10-24",
+    "registeredDate": "2026-10-24",
+    "registeredAt": "2026-10-24T12:45:44.000Z",
+    "legacyImport": false,
+    "title": "뒤집힌 닷새, 답은 실적에서",
+    "subtitle": "",
+    "description": "2026년 10월 4주차(10월 19~23일) 한국 증시 주간 리포트. 코스피 -2.08% · 코스닥 -5.42%. 미국 AI 기업의 지출과 실적 소식에 하루씩 방향이 바뀐 닷새, 방산·조선 급락과 코스피 대형 제약주 강세. 다음 주 SK하이닉스·삼성전자 실적, 빅테크 투자 계획, 연준 결정.",
+    "summary": "메타의 지출 약정과 미국 AI 기업 실적에 코스피가 3%대 등락을 사흘 반복하며 -2.08%로 끝난 한 주 · 삼성전자·SK하이닉스는 제자리, 방산·조선과 코스닥은 크게 내림",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 5,
+    "href": "reports/2026-10-24_Snowshagal_Weekly.html",
+    "coverImage": "covers/2026-10-24-weekly-nx8bfu.webp",
+    "shareCardImage": "covers/share/2026-10-24-weekly-nx8bfu.jpg",
+    "coverThumbnail": "covers/2026-10-24-weekly-nx8bfu-450.webp"
+  },
+  {
     "id": "2026-10-24-note-fwh5r4",
     "type": "note",
     "typeLabel": "Investment Insights",
