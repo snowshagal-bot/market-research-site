@@ -7,7 +7,8 @@ import { requireAdminMutation } from "../_auth.js";
 import "../../assets/report-metadata.js";
 import {
   MAX_POST_TAGS,
-  parseAndValidateTags
+  parseAndValidateTags,
+  translationPartners
 } from "../_tags.js";
 
 const OWNER = "snowshagal-bot";
@@ -873,6 +874,7 @@ export async function onRequestPost(context) {
     const entries = [];
     let commitMessage;
     let resultPost = null;
+    let resultPairedTitles = [];
 
     if (action === "delete") {
       posts.splice(postIndex, 1);
@@ -1070,6 +1072,21 @@ export async function onRequestPost(context) {
         ...(replacementHtml !== null ? { bodyText: extractSearchText(replacementHtml) } : {})
       };
 
+      // A translation pair carries one tag list: the other-language post takes
+      // the saved tags, in the same order, in this same commit.
+      const pairedTitles = [];
+      if (editFields.tagsProvided) {
+        for (const partner of translationPartners(posts, updated)) {
+          if (JSON.stringify(partner.tags || []) === JSON.stringify(updated.tags)) continue;
+          const partnerIndex = posts.findIndex((post) => post.id === partner.id);
+          const partnerSearchIdx = searchIndex.findIndex((item) => item && item.id === partner.id);
+          if (partnerIndex < 0 || partnerSearchIdx < 0) continue;
+          posts[partnerIndex] = { ...partner, tags: [...updated.tags] };
+          searchIndex[partnerSearchIdx] = { ...searchIndex[partnerSearchIdx], tags: [...updated.tags] };
+          pairedTitles.push(partner.title);
+        }
+      }
+
       if (!hasMatchingUniqueIds(posts, searchIndex)) {
         return reply({
           ok: false,
@@ -1079,8 +1096,11 @@ export async function onRequestPost(context) {
       }
 
       entries.push(...metadataEntries(sortPosts(posts), searchIndex));
-      commitMessage = `Update ${updated.title}`;
+      commitMessage = pairedTitles.length
+        ? `Update ${updated.title} (tags also on ${pairedTitles.join(', ')})`
+        : `Update ${updated.title}`;
       resultPost = updated;
+      resultPairedTitles = pairedTitles;
     }
 
     const commit = await createCommit(env.GITHUB_TOKEN, baseSha, parentCommit.tree.sha, entries, commitMessage);
@@ -1088,7 +1108,7 @@ export async function onRequestPost(context) {
       return reply({ ok: false, error: "REPOSITORY_CHANGED", message: "저장소가 변경되었습니다. 새로고침 후 다시 시도하세요." }, 409);
     }
 
-    return reply({ ok: true, action, post: resultPost, commit: commit.sha, apiVersion: API_VERSION });
+    return reply({ ok: true, action, post: resultPost, pairedTagUpdates: resultPairedTitles, commit: commit.sha, apiVersion: API_VERSION });
   } catch (error) {
     console.error("post management failed", { status: error?.status, message: error?.message });
     if (error?.status === 409 || error?.status === 422) {

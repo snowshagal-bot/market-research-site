@@ -583,6 +583,48 @@ test('manage updates tags atomically in posts and searchIndex', async () => {
   }
 });
 
+test('a tag edit on one side of a translation pair is applied to the other side in the same commit', async () => {
+  const ko = { ...basePost, lang: 'ko', tags: ['kospi', 'kosdaq', 'rates', 'fx'], readingMinutes: 5 };
+  const en = { ...basePost, id: 'en-pair', lang: 'en', translationGroup: ko.id, title: 'English pair', href: 'reports/en/pair.html', tags: ['rates', 'fx', 'kospi', 'kosdaq'], readingMinutes: 4 };
+  const other = { ...basePost, id: 'unrelated', lang: 'en', title: 'Unrelated', href: 'reports/en/other.html', tags: ['flows'] };
+  const searchIndex = [ko, en, other].map(p => ({ id: p.id, lang: p.lang, category: 'daily', title: p.title, date: '2026-08-11', tags: p.tags }));
+
+  for (const [editedId, tags, expected] of [
+    [ko.id, 'kospi, kosdaq, rates, fx', ['kospi', 'kosdaq', 'rates', 'fx']],
+    [en.id, 'semiconductors, kospi', ['semiconductors', 'kospi']]
+  ]) {
+    const calls = githubMock([ko, en, other], { searchIndex });
+    try {
+      const { response, data } = await run({ id: editedId, type: 'daily', reportDate: '2026-08-11', tags });
+      assert.equal(response.status, 200);
+      const tree = treeFrom(calls);
+      const posts = postsFromTree(tree);
+      const index = JSON.parse(tree.find(entry => entry.path === 'data/search-index.json').content);
+      for (const id of [ko.id, en.id]) {
+        assert.deepEqual(posts.find(p => p.id === id).tags, expected, id);
+        assert.deepEqual(index.find(p => p.id === id).tags, expected, `${id} search index`);
+      }
+      assert.deepEqual(posts.find(p => p.id === 'unrelated').tags, ['flows']);
+      assert.equal(data.pairedTagUpdates.length, 1);
+      assert.match(calls.find(call => call.path.endsWith('/git/commits') && call.method === 'POST').body.message, /tags also on/);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  }
+
+  // An edit that does not send tags leaves both sides untouched.
+  const calls = githubMock([ko, en], { searchIndex: searchIndex.slice(0, 2) });
+  try {
+    const { response, data } = await run({ id: ko.id, type: 'daily', reportDate: '2026-08-11' });
+    assert.equal(response.status, 200);
+    const posts = postsFromTree(treeFrom(calls));
+    assert.deepEqual(posts.find(p => p.id === en.id).tags, en.tags);
+    assert.deepEqual(data.pairedTagUpdates, []);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('manage recalculates readingMinutes when replacement HTML is uploaded', async () => {
   const post = { ...basePost, tags: ['flows'], readingMinutes: 2 };
   const searchIndex = [{ id: post.id, lang: 'ko', category: 'daily', title: post.title, date: '2026-08-11', tags: ['flows'], readingMinutes: 2 }];
