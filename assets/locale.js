@@ -362,6 +362,8 @@
       if (Number.isInteger(year) && year >= 2020 && year <= 2030) params.set('year', String(year));
       if (Number.isInteger(month) && month >= 1 && month <= 12) params.set('month', String(month));
       if (['KRX', 'NYSE'].includes(market)) params.set('market', market);
+      const kind = input.get('kind');
+      if (['economic', 'earnings', 'corporate', 'expiry', 'trading'].includes(kind)) params.set('kind', kind);
       const base = targetLanguage === 'en' ? '/en/calendar/' : '/calendar/';
       return params.size ? `${base}?${params}` : base;
     }

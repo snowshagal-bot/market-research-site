@@ -34,7 +34,7 @@
 <link rel="stylesheet" href="/assets/brand.css?v=890e1e5732">
 <link rel="stylesheet" href="/assets/language.css?v=0c4ca7f4fc">
 <link rel="stylesheet" href="/assets/home-v2.css?v=6def21ee7c">
-<link rel="stylesheet" href="/assets/calendar.css?v=67f02deea5">
+<link rel="stylesheet" href="/assets/calendar.css?v=2b5eb690a5">
 <script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
 </head>
 <body class="home-page calendar-page">
@@ -88,6 +88,16 @@
           <button type="button" class="calendar-filter-btn" data-filter="KRX">한국 (KRX)</button>
           <button type="button" class="calendar-filter-btn" data-filter="NYSE">미국 (NYSE)</button>
         </div>
+        <label class="calendar-kind-control" for="calendar-kind-filter">일정 종류
+          <select id="calendar-kind-filter">
+            <option id="calendar-kind-all" value="all" selected>전체 일정</option>
+            <option id="calendar-kind-economic" value="economic">경제지표·통화정책</option>
+            <option id="calendar-kind-earnings" value="earnings">실적 발표</option>
+            <option id="calendar-kind-corporate" value="corporate">기업 일정</option>
+            <option id="calendar-kind-expiry" value="expiry">파생 만기</option>
+            <option id="calendar-kind-trading" value="trading">휴장·거래시간</option>
+          </select>
+        </label>
       </div>
     </div>
   </section>
@@ -108,6 +118,7 @@
           <p style="color:var(--muted);margin:0;">거래 일정을 불러오는 중입니다...</p>
         </div>
       </div>
+      <div id="calendar-agenda-mount" aria-live="polite"></div>
       <div id="calendar-upcoming-mount"></div>
     </div>
   </section>
@@ -189,8 +200,9 @@
 </dialog>
 
 <script src="/data/posts.js"></script>
-<script src="/assets/locale.js?v=74350679ef"></script>
+<script src="/assets/locale.js?v=ab208ee475"></script>
 <script src="/assets/site.js?v=53fc86e7b4"></script>
-<script src="/assets/calendar.js?v=8c99aaf542"></script>
+<script src="/assets/calendar-view.js?v=b698b9c05e"></script>
+<script src="/assets/calendar.js?v=c38366bcda"></script>
 </body>
 </html>

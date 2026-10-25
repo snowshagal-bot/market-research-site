@@ -10,22 +10,17 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
-- **Calendar company English names (2026-10-25, PR review/deployment pending)**:
-  fill missing names from official OpenDART company overviews during the existing
-  daily calendar sync. After approval and deployment, the next weekday 16:40 KST
-  sync starts filling names (up to eight per run); the existing 30-company seed
-  needs at least four successful runs, with extra tracked companies taking longer.
-  Verify `/api/calendar` returns populated `company.nameEn` and `/en/calendar/`
-  shows the same names before and after hydration and in day details. No Production
-  data writes, sync triggers or deployment were performed as part of this PR.
-  Calendar KO/EN switching now preserves the valid month/market selection on the
-  matching page. Local fixtures verified at mobile 390px and desktop 1280px
-  without page overflow. The full verification gate has one existing main-data
-  failure: the 2026-10-24 Investment Insights translation pair has a different tag
-  order (`rates,fx,kospi,kosdaq` vs `kospi,kosdaq,rates,fx`). Resolve before rollout;
-  this PR does not change published report metadata.
-  Validation: 1,408/1,409 tests pass (only that existing failure); supplemental
-  syntax/invariant checks and SEO audit pass (112 advisory warnings, no hard errors).
+- **Calendar improvements (2026-10-25, owner-approved rollout — #180)**:
+  official English company names are filled by the existing calendar sync (up to
+  eight per run). KO/EN month/market/type selections persist across language
+  changes. The grid and a new upcoming agenda share event-type filters and the
+  existing monthly payload; the agenda includes today onward in the selected
+  month with KST times, expandable remaining entries and day-detail links.
+  The 2026-10-24 Investment Insights pair's English tags were reordered to match
+  its Korean counterpart; tag membership and uploaded report HTML are unchanged.
+  Full repository verification now passes. Remaining rollout checks: exact-SHA
+  Cloudflare deployment, Production smoke, initial English-name backfill through
+  the existing workflow, and live KO/EN mobile/desktop filter/navigation checks.
 
 - **GA4 public-site measurement (2026-10-23, owner-approved rollout — #177)**: the common response layer adds `G-L3XBBY93CG` to successful KO/EN public HTML and future reports. All 1,396 tests, syntax/invariant checks and the SEO audit pass. The owner disabled Enhanced measurement and Allow user-provided data capabilities; the public Google tag configuration was rechecked before merge. Deployment and real collection verification are recorded in PR #177; preserve the settings in `docs/GA4.md`.
 

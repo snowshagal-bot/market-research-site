@@ -96,10 +96,10 @@
     "subtitle": "",
     "description": "The won has rebounded, yet September's BIS real effective exchange rate (92.7) remains 9% below its 1994–present average (101.9). That mean is not a target. Q4 FX assumptions in Korean equity forecasts have largely caught up with the actual USD/KRW rate.",
     "tags": [
-      "rates",
-      "fx",
       "kospi",
-      "kosdaq"
+      "kosdaq",
+      "rates",
+      "fx"
     ],
     "readingMinutes": 13,
     "href": "reports/en/Snowshagal_Investment_Note_16_Won_REER_EN.html",

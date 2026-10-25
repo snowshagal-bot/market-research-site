@@ -7,6 +7,7 @@ const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 const SCRIPT = await read('assets/calendar.js');
 const LOCALE_SCRIPT = await read('assets/locale.js');
+const VIEW_SCRIPT = await read('assets/calendar-view.js');
 const STYLES = await read('assets/calendar.css');
 
 /* ------------------------------------------------------------ a stub page */
@@ -60,6 +61,7 @@ async function render({ lang = 'ko', payload, search = '' }) {
     const next = new URL(url);
     Object.assign(location, { pathname: next.pathname, search: next.search, href: next.href });
   };
+  const requests = [];
 
   const context = {
     document: {
@@ -82,7 +84,7 @@ async function render({ lang = 'ko', payload, search = '' }) {
     location: { pathname: lang === 'en' ? '/en/calendar/' : '/calendar/', search: '', href: 'https://snowshagal.com/' },
     history: { replaceState() {}, pushState() {} },
     navigator: { language: lang },
-    fetch: async () => ({ ok: true, status: 200, json: async () => payload }),
+    fetch: async url => { requests.push(url); return { ok: true, status: 200, json: async () => payload }; },
     setTimeout: fn => { fn(); return 0; },
     URLSearchParams,
     URL,
@@ -91,6 +93,7 @@ async function render({ lang = 'ko', payload, search = '' }) {
   };
   context.window.document = context.document;
   vm.runInNewContext(LOCALE_SCRIPT, context);
+  vm.runInNewContext(VIEW_SCRIPT, context);
   vm.runInNewContext(SCRIPT, context);
 
   // The script binds to DOMContentLoaded when the document is still loading.
@@ -100,6 +103,7 @@ async function render({ lang = 'ko', payload, search = '' }) {
 
   return {
     grid: get('calendar-grid-mount').innerHTML,
+    requests,
     detail: () => get('calendar-day-detail-mount').innerHTML,
     get
   };
@@ -184,6 +188,20 @@ test('language links follow month navigation and market-filter changes', async (
   assert.equal(get('language-link').href, '/calendar/?year=2026&month=9&market=KRX');
   await get('cal-next-btn').fire('click');
   assert.equal(get('language-link').href, '/calendar/?year=2026&month=10&market=KRX');
+});
+
+test('kind changes filter the grid and agenda without an extra API request', async () => {
+  const en = await render({ lang: 'en', payload: payloadFor([fomc, briefing]), search: '?year=2026&month=9' });
+  const control = en.get('calendar-kind-filter');
+  control.value = 'economic';
+  await control.fire('change');
+  assert.match(en.get('calendar-grid-mount').innerHTML, /FOMC Rate Decision/);
+  assert.doesNotMatch(en.get('calendar-grid-mount').innerHTML, /삼성전자/);
+  assert.match(en.get('calendar-agenda-mount').innerHTML, /FOMC Rate Decision/);
+  assert.doesNotMatch(en.get('calendar-agenda-mount').innerHTML, /삼성전자/);
+  assert.match(en.get('language-link').href, /kind=economic/);
+  assert.equal(en.get('calendar-upcoming-mount').innerHTML, '');
+  assert.equal(en.requests.length, 1);
 });
 
 test('a busy day shows a couple of events and counts the rest', async () => {

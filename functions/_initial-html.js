@@ -1,5 +1,7 @@
 import { feedQuery, loadDisclosureFeed } from './api/disclosures/_feed-data.js';
 import { currentKstYearMonth, loadCalendarMonth } from './_calendar-data.js';
+import '../assets/calendar-view.js';
+const calendarView = globalThis.CALENDAR_VIEW;
 
 /**
  * Initial HTML for /disclosures/ and /calendar/ (KO and EN).
@@ -274,7 +276,8 @@ export function calendarUrlState(searchParams, now = new Date()) {
   return {
     year: searchParams.has('year') && Number.isInteger(y) && y >= 2020 && y <= 2030 ? y : current.year,
     month: searchParams.has('month') && Number.isInteger(m) && m >= 1 && m <= 12 ? m : current.month,
-    filter: ['ALL', 'KRX', 'NYSE'].includes(market) ? market : 'ALL'
+    filter: ['ALL', 'KRX', 'NYSE'].includes(market) ? market : 'ALL',
+    eventKind: calendarView.kind(searchParams.get('kind'))
   };
 }
 
@@ -292,7 +295,7 @@ function eventCompany(event, ko) {
   return event.company.name || event.company.stockCode || '';
 }
 
-export function renderCalendarGrid(data, { lang, filter }) {
+export function renderCalendarGrid(data, { lang, filter, eventKind = 'all' }) {
   const copy = CALENDAR_COPY[lang];
   const ko = lang === 'ko';
 
@@ -322,7 +325,8 @@ export function renderCalendarGrid(data, { lang, filter }) {
   const wanted = FILTER_MARKETS[filter];
   const eventsForDate = dateStr => (data.events || [])
     .filter(event => event.display?.date === dateStr)
-    .filter(event => !wanted || event.market === wanted);
+    .filter(event => !wanted || event.market === wanted)
+    .filter(event => calendarView.matches(event, eventKind));
 
   const cellEventsHtml = dateStr => {
     const events = eventsForDate(dateStr).filter(event => event.status !== 'cancelled');
@@ -351,7 +355,7 @@ export function renderCalendarGrid(data, { lang, filter }) {
     const isWeekend = day.isWeekend;
     let tagsHtml = '';
 
-    if (!isWeekend) {
+    if (!isWeekend && calendarView.showTrading(eventKind)) {
       if (day.isJointClosure && filter === 'ALL') {
         tagsHtml += `<span class="cal-tag joint">${ko ? '동시 휴장' : 'Joint Holiday'}</span>`;
       } else {
@@ -493,11 +497,14 @@ export function renderUpcomingEvents(events, { lang, filter, year }) {
 async function calendarEdits(url, env, lang, now) {
   const state = calendarUrlState(url.searchParams, now);
   const data = await loadCalendarMonth(env, { year: state.year, month: state.month, now });
-  const grid = renderCalendarGrid(data, { lang, filter: state.filter });
+  const grid = renderCalendarGrid(data, { lang, filter: state.filter, eventKind: state.eventKind });
   if (grid === null) return null;
   return {
     edits: [
       { id: 'calendar-month-label', text: CALENDAR_COPY[lang].monthFormat(state.year, state.month) },
+      { id: 'calendar-kind-filter', attrs: { 'data-selected-kind': state.eventKind } },
+      ...calendarView.kinds.map(value => ({ id: `calendar-kind-${value}`, attrs: value === state.eventKind ? { selected: '' } : {}, removeAttrs: value === state.eventKind ? [] : ['selected'] })),
+      { id: 'calendar-agenda-mount', html: calendarView.renderAgenda(data, { lang, filter: state.filter, eventKind: state.eventKind }) },
       {
         id: 'calendar-grid-mount',
         html: grid,
@@ -508,7 +515,7 @@ async function calendarEdits(url, env, lang, now) {
           'data-ssr-server-date': data.serverDate
         }
       },
-      { id: 'calendar-upcoming-mount', html: renderUpcomingEvents(data.upcoming || [], { lang, filter: state.filter, year: state.year }) }
+      { id: 'calendar-upcoming-mount', html: calendarView.showTrading(state.eventKind) ? renderUpcomingEvents(data.upcoming || [], { lang, filter: state.filter, year: state.year }) : '' }
     ],
     classToggles: [{ selector: 'calendar-filter-btn', attr: 'data-filter', active: state.filter }]
   };

@@ -78,6 +78,7 @@ test('calendar language switches retain the month and market on the matching cal
   assert.equal(api.pageLanguagePath('/calendar/', 'en'), '/en/calendar/');
   assert.equal(api.pageLanguagePath('/en/calendar/', 'ko'), '/calendar/');
   assert.equal(api.pageLanguagePath('/en/calendar/', 'ko', '?year=2026&month=11&market=NYSE'), '/calendar/?year=2026&month=11&market=NYSE');
+  assert.equal(api.pageLanguagePath('/en/calendar/', 'ko', '?year=2026&month=11&market=NYSE&kind=earnings'), '/calendar/?year=2026&month=11&market=NYSE&kind=earnings');
   assert.equal(api.pageLanguagePath('/calendar/index.html', 'en', '?month=10&market=krx'), '/en/calendar/?month=10&market=KRX');
   assert.equal(api.pageLanguagePath('/en/calendar', 'ko', '?year=9999&month=13&market=other&email=private&category=note'), '/calendar/');
 });

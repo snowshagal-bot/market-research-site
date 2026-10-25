@@ -1,6 +1,7 @@
 (() => {
   const lang = document.documentElement.dataset.siteLang === 'en' ? 'en' : 'ko';
   const ko = lang === 'ko';
+  const view = window.CALENDAR_VIEW;
 
   const copy = ko ? {
     title: 'MARKET CALENDAR',
@@ -136,6 +137,7 @@
     year: initialKst.year,
     month: initialKst.month,
     filter: 'ALL', // 'ALL' | 'KRX' | 'NYSE'
+    eventKind: 'all',
     selectedDate: null,
     serverDate: document.getElementById('calendar-grid-mount')?.dataset?.ssrServerDate || null,
     calendarData: null,
@@ -160,6 +162,7 @@
 
   function parseUrlState() {
     const params = new URLSearchParams(window.location.search);
+    state.eventKind = view.kind(params.get('kind'));
     const hasYear = params.has('year');
     const hasMonth = params.has('month');
     const y = Number(params.get('year'));
@@ -189,6 +192,8 @@
     const url = new URL(window.location.href);
     url.searchParams.set('year', String(state.year));
     url.searchParams.set('month', String(state.month));
+    if (state.eventKind !== 'all') url.searchParams.set('kind', state.eventKind);
+    else url.searchParams.delete('kind');
     if (state.filter !== 'ALL') {
       url.searchParams.set('market', state.filter);
     } else {
@@ -249,9 +254,12 @@
 
       renderCalendarGrid(data);
       renderUpcomingEvents(data.upcoming || []);
+      renderAgenda();
     } catch (err) {
       // A transient failure must not replace the server-rendered month.
       if (serverRendered) return;
+      const agenda = document.getElementById('calendar-agenda-mount');
+      if (agenda) agenda.innerHTML = '';
       if (gridMount) {
         gridMount.innerHTML = `
           <div class="calendar-detail-card" style="text-align:center;padding:40px 20px;">
@@ -277,7 +285,8 @@
     return (state.calendarData?.events || [])
       // The day a reader sees, not the day the source published.
       .filter(event => event.display?.date === dateStr)
-      .filter(event => !wanted || event.market === wanted);
+      .filter(event => !wanted || event.market === wanted)
+      .filter(event => view.matches(event, state.eventKind));
   }
 
   // Readers get the short name a market actually goes by. The IANA zone stays
@@ -398,7 +407,7 @@
 
       let tagsHtml = '';
 
-      if (!isWeekend) {
+      if (!isWeekend && view.showTrading(state.eventKind)) {
         if (day.isJointClosure && state.filter === 'ALL') {
           tagsHtml += `<span class="cal-tag joint">${ko ? '동시 휴장' : 'Joint Holiday'}</span>`;
         } else {
@@ -586,7 +595,7 @@
     const upcomingMount = document.getElementById('calendar-upcoming-mount');
     if (!upcomingMount) return;
 
-    if (!events.length) {
+    if (!events.length || !view.showTrading(state.eventKind)) {
       upcomingMount.innerHTML = '';
       return;
     }
@@ -663,7 +672,44 @@
     `;
   }
 
+  function renderAgenda() {
+    const mount = document.getElementById('calendar-agenda-mount');
+    if (mount && state.calendarData) mount.innerHTML = view.renderAgenda(state.calendarData, {
+      lang, filter: state.filter, eventKind: state.eventKind
+    });
+  }
+
+  function selectDate(date) {
+    state.selectedDate = state.selectedDate === date ? null : date;
+    document.querySelectorAll('.calendar-day-cell').forEach(c => c.classList.toggle('selected', c.dataset.date === state.selectedDate));
+    if (state.selectedDate) renderDayDetail(state.selectedDate);
+    else {
+      const mount = document.getElementById('calendar-day-detail-mount');
+      if (mount) mount.innerHTML = '';
+    }
+  }
+
   function bindEvents() {
+    const kindFilter = document.getElementById('calendar-kind-filter');
+    if (kindFilter) {
+      kindFilter.value = state.eventKind;
+      kindFilter.addEventListener('change', () => {
+        state.eventKind = view.kind(kindFilter.value);
+        state.selectedDate = null;
+        updateUrlState();
+        if (state.calendarData) {
+          renderCalendarGrid(state.calendarData);
+          renderUpcomingEvents(state.calendarData.upcoming || []);
+          renderAgenda();
+        }
+      });
+    }
+    document.getElementById('calendar-agenda-mount')?.addEventListener('click', event => {
+      const button = event.target.closest('[data-agenda-date]');
+      if (!button) return;
+      selectDate(button.dataset.agendaDate);
+      document.getElementById('calendar-day-detail-mount')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
     document.getElementById('cal-prev-btn')?.addEventListener('click', () => {
       let m = state.month - 1;
       let y = state.year;
@@ -712,6 +758,7 @@
         if (state.calendarData) {
           renderCalendarGrid(state.calendarData);
           renderUpcomingEvents(state.calendarData.upcoming || []);
+          renderAgenda();
         }
       });
     });
@@ -724,18 +771,12 @@
       const date = cell.dataset.date;
       if (!date) return;
 
-      state.selectedDate = (state.selectedDate === date) ? null : date;
-      document.querySelectorAll('.calendar-day-cell').forEach(c => c.classList.toggle('selected', c.dataset.date === state.selectedDate));
-      if (state.selectedDate) {
-        renderDayDetail(state.selectedDate);
-      } else {
-        const detailMount = document.getElementById('calendar-day-detail-mount');
-        if (detailMount) detailMount.innerHTML = '';
-      }
+      selectDate(date);
     });
 
     window.addEventListener('popstate', () => {
       parseUrlState();
+      if (kindFilter) kindFilter.value = state.eventKind;
       syncLanguageLinks();
       loadData();
     });

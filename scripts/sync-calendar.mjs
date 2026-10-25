@@ -336,8 +336,9 @@ export function describe(result) {
     const where = [result.stage, result.httpStatus ? `HTTP ${result.httpStatus}` : ''].filter(Boolean).join(' ');
     return `${result.sourceName || INTERNAL_SOURCE}: ERROR${where ? ` [${where}]` : ''} ${result.error}`;
   }
-  if (result.status === 'pending') return `${result.sourceName}: pending (not published yet)`;
-  const parts = [`events=${result.events}`];
+  if (result.status === 'pending') return `${result.sourceName}: pending (${result.note || 'not published yet'})`;
+  const parts = Number.isFinite(result.events) ? [`events=${result.events}`] : [];
+  if (Number.isFinite(result.updated)) parts.push(`namesUpdated=${result.updated}`, `attempted=${result.attempted}`, `requests=${result.requests}`);
   if (result.created) parts.push(`created=${result.created}`);
   if (result.changed) parts.push(`changed=${result.changed}`);
   if (result.cancelled) parts.push(`cancelled=${result.cancelled}`);
