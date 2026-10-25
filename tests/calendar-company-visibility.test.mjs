@@ -348,6 +348,29 @@ test('a company added without a DART code can use the code in its stored filings
   db.close();
 });
 
+test('official filing codes take precedence over stale seeded codes without changing registered metadata', async () => {
+  const db = await seeded();
+  await unnamedCompany(db, { corpCode: '99999999' });
+  await db.prepare(`INSERT INTO disclosure_filings
+    (rcept_no, corp_cls, corp_name, corp_code, stock_code, report_nm, rcept_dt, source_url, first_seen_at, updated_at)
+    VALUES ('20260902000001', 'Y', '대한전선', '00123456', '001440', '기업설명회', '20260902', '', '', '')`).run();
+  const result = await syncCompanyNames(db, { env: nameEnv, now: NOW, fetchImpl: async url => {
+    assert.equal(url.searchParams.get('corp_code'), '00123456');
+    return companyResponse('00123456', '001440');
+  } });
+  assert.equal(result.updated, 1);
+  assert.equal(db.row("SELECT corp_code FROM disclosure_watchlist WHERE stock_code='001440'").corp_code, '99999999');
+  db.close();
+});
+
+test('latest official filing-code lookup uses the stock/receipt index', async () => {
+  const db = await seeded();
+  const plan = db.rows("EXPLAIN QUERY PLAN SELECT corp_code FROM disclosure_filings WHERE stock_code='005930' ORDER BY rcept_dt DESC,rcept_no DESC LIMIT 1");
+  assert.match(plan.map(row => row.detail).join(' '), /idx_disclosure_stock_receipt/);
+  assert.doesNotMatch(plan.map(row => row.detail).join(' '), /USE TEMP B-TREE/);
+  db.close();
+});
+
 test('a pass is bounded and failed/empty names do not starve the rest of the queue', async () => {
   const db = await seeded();
   const requests = [];

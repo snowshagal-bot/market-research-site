@@ -10,6 +10,13 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+- **Calendar company-code provenance (2026-10-25)**: a read-only comparison found
+  18 seeded company codes disagreeing with their latest stored official filings,
+  plus one tracked company with no registered code. Name lookups now prefer the
+  latest official filing code, still validate the returned stock code and preserve
+  registered metadata/manual names. An indexed stock/receipt lookup avoids full
+  scans. Record complete initial name coverage in the rollout PR.
+
 - **Calendar Workers/provider request compatibility (2026-10-25)**: runtime/D1 diagnostics
   identified name fetches failing before HTTP because Workers does not implement
   Fetch `redirect: error`. Use `manual` and reject non-2xx responses, preserving

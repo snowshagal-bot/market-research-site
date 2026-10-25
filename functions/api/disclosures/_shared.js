@@ -216,6 +216,7 @@ async function runSchemaMigration(db) {
       updated_at TEXT NOT NULL
     )`),
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_disclosure_date_priority ON ${FILINGS_TABLE} (rcept_dt DESC, rule_score DESC)`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_disclosure_stock_receipt ON ${FILINGS_TABLE} (stock_code, rcept_dt DESC, rcept_no DESC)`),
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_disclosure_ai_queue ON ${FILINGS_TABLE} (ai_eligible, ai_status, rcept_dt DESC, rule_score DESC)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS ${WATCHLIST_TABLE} (
       stock_code TEXT PRIMARY KEY,
