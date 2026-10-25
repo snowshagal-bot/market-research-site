@@ -277,9 +277,9 @@ test('every published post still gets a unique, non-empty title and description 
 test('Market data pages carry the data-page title on every head tag so they do not compete with dated Daily pages', async () => {
   const ko = await read('market/index.html');
   const en = await read('en/market/index.html');
-  assert.match(ko, /<title>코스피·코스닥 마감, 원달러 환율 \| 한국 시장 데이터 \| Snowshagal<\/title>/);
-  assert.match(ko, /<meta property="og:title" content="코스피·코스닥 마감, 원달러 환율 \| 한국 시장 데이터 \| Snowshagal">/);
-  assert.match(ko, /<meta name="twitter:title" content="코스피·코스닥 마감, 원달러 환율 \| 한국 시장 데이터 \| Snowshagal">/);
+  assert.match(ko, /<title>오늘 한국 증시 현황 · 코스피·코스닥 마감, 수급, 원달러 환율 \| Snowshagal<\/title>/);
+  assert.match(ko, /<meta property="og:title" content="오늘 한국 증시 현황 · 코스피·코스닥 마감, 수급, 원달러 환율 \| Snowshagal">/);
+  assert.match(ko, /<meta name="twitter:title" content="오늘 한국 증시 현황 · 코스피·코스닥 마감, 수급, 원달러 환율 \| Snowshagal">/);
   assert.match(en, /<title>KOSPI &amp; KOSDAQ Close, USD\/KRW \| Korea Market Data \| Snowshagal<\/title>/);
   assert.match(en, /<meta property="og:title" content="KOSPI &amp; KOSDAQ Close, USD\/KRW \| Korea Market Data \| Snowshagal">/);
   assert.doesNotMatch(en, /<title>KOSPI & KOSDAQ|content="KOSPI & KOSDAQ/, 'ampersand is escaped in markup attributes and the title');
