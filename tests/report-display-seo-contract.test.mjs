@@ -276,7 +276,7 @@ const weeklyFacts = { kind: 'weekly', period: { start: '2026-09-14', end: '2026-
 test('a Daily with a Market Close keeps its facts and its day line: Market takeaway, then takeaway, then summary — never the description', () => {
   const base = { id: 'd', type: 'daily', lang: 'ko', reportDate: '2026-09-15', title: '바람', href: 'reports/d.html', description: '설명은 붙지 않는다' };
   const facts = dailyFacts('2026-09-15');
-  const lead = '2026년 9월 15일 코스피 6,627.26 (-0.85%), 코스닥 812.41 (+0.70%) 마감. 외국인 1.57조 순매도 · 기관 9,040억 순매도.';
+  const lead = '2026년 9월 15일 코스피 6,627.26 (-0.85%), 코스닥 812.41 (+0.70%) 마감. 수급: 외국인 1.57조 순매도 · 기관 9,040억 순매도.';
   assert.equal(reportDescription(base, { facts }), lead);
   assert.equal(reportDescription({ ...base, summary: '요약' }, { facts }), `${lead} 요약.`);
   assert.equal(reportDescription({ ...base, summary: '요약', takeaway: '한 줄' }, { facts }), `${lead} 한 줄.`);
