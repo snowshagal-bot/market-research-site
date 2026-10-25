@@ -10,10 +10,13 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
-- **Calendar Workers redirect compatibility (2026-10-25)**: runtime/D1 diagnostics
+- **Calendar Workers/provider request compatibility (2026-10-25)**: runtime/D1 diagnostics
   identified name fetches failing before HTTP because Workers does not implement
   Fetch `redirect: error`. Use `manual` and reject non-2xx responses, preserving
-  the no-redirect policy. After deployment, reset only today's failed name-attempt
+  the no-redirect policy. A credential-free Workers Preview probe also confirmed
+  missing User-Agent causes a 302 to OpenDART `/error1.html`; the existing disclosure
+  collector's User-Agent returns API JSON and is now used for names. After deployment,
+  reset only today's failed name-attempt
   markers whose company English name is still blank, then run bounded backfills.
   Record final coverage and ordinary sync recovery in the follow-up PR.
 

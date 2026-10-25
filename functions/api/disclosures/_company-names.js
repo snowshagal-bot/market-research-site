@@ -57,7 +57,9 @@ export async function syncCompanyNames(db, { env = {}, fetchImpl = fetch, now = 
       url.searchParams.set('crtfc_key', env.OPENDART_API_KEY);
       url.searchParams.set('corp_code', company.corp_code);
       const response = await fetchImpl(url, {
-        headers: { accept: 'application/json' },
+        // Match the existing disclosure collector: OpenDART redirects Workers
+        // requests without a User-Agent to /error1.html instead of its API.
+        headers: { accept: 'application/json', 'user-agent': 'snowshagal-disclosure-monitor/1.0' },
         // Workers does not support redirect:'error'. Manual mode returns 3xx
         // to the !ok guard below, so credentials never follow a redirect.
         redirect: 'manual',
