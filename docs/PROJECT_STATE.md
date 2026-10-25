@@ -213,8 +213,9 @@ is measured only between the exact KRX sessions from `functions/_trading-calenda
 session before the Mon–Fri period and the period's last session); if either row is missing or
 the year has no calendar, the title carries no number. A date without
 a published close gets a dated title with no numbers; nothing is scraped from the
-report HTML at request time (a `seoTitle` is read once, at publish, and stored). `/market/` keeps a data-page title (`코스피·코스닥 마감, 원달러 환율 | 한국 시장
-데이터`) so it does not compete with dated Daily pages. og:title, twitter:title, canonical,
+report HTML at request time (a `seoTitle` is read once, at publish, and stored). `/market/` keeps a data-page title (`오늘 한국 증시 현황 · 코스피·코스닥 마감, 수급, 원달러
+환율`, worded for the "오늘 한국 증시 현황" queries seen in Naver Search Advisor, owner request
+2026-10-25) so it does not compete with dated Daily pages. og:title, twitter:title, canonical,
 hreflang and the JSON-LD headline are unchanged; the JSON-LD description matches the meta tag.
 
 `/disclosures/`, `/en/disclosures/`, `/calendar/` and `/en/calendar/` render their core content
