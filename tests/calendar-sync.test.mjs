@@ -100,23 +100,24 @@ test('one pass fills the calendar from every source', async () => {
   db.close();
 });
 
-test('the normal calendar pass also fills missing official company names', async () => {
+test('the name-only pass fills official names without fetching any schedules or filings', async () => {
   const db = await freshDb();
   const pages = pageFetch();
   const outcome = await runCalendarSync(db, {
-    env: { OPENDART_API_KEY: 'test-key' }, now: NOW,
+    env: { OPENDART_API_KEY: 'test-key' }, now: NOW, scope: 'company-names',
     fetchImpl: async (url, options) => {
       if (String(url).includes('/api/company.json')) {
         const corpCode = new URL(url).searchParams.get('corp_code');
         const company = db.row('SELECT stock_code FROM disclosure_watchlist WHERE corp_code = ?', corpCode);
         return { ok: true, json: async () => ({ status: '000', corp_code: corpCode, stock_code: company.stock_code, corp_name_eng: `Company ${company.stock_code}` }) };
       }
-      return pages(url, options);
+      assert.fail('the name-only pass must never fetch a schedule or filing');
     }
   });
   assert.equal(outcome.ok, true);
   assert.equal(runOf(outcome.results, 'opendart-company-names').updated, 8);
-  assert.ok((await getEventsForMonth(db, 2026, 9)).length > 0);
+  assert.equal(outcome.results.length, 1);
+  assert.equal((await getEventsForMonth(db, 2026, 9)).length, 0);
   db.close();
 });
 
@@ -131,6 +132,17 @@ test('running the pass twice changes nothing', async () => {
   assert.deepEqual(after, before, 'a second pass must not add, move or cancel anything');
   assert.equal(second.results.every(result => (result.created ?? 0) === 0), true);
   assert.equal(second.results.every(result => (result.cancelled ?? 0) === 0), true);
+  db.close();
+});
+
+test('the full calendar invocation leaves company-name requests to the separate pass', async () => {
+  const db = await freshDb();
+  const pages = pageFetch();
+  const outcome = await runCalendarSync(db, { env: { OPENDART_API_KEY: 'fixture-key' }, fetchImpl: pages, now: NOW });
+  assert.equal(outcome.ok, true);
+  assert.equal(outcome.results.some(r => r.sourceName === 'opendart-company-names'), false);
+  assert.ok(pages.requested.every(url => !url.includes('/api/company.json')));
+  assert.ok((await getEventsForMonth(db, 2026, 9)).length > 0);
   db.close();
 });
 

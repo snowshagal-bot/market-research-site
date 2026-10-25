@@ -40,8 +40,8 @@ import { EVENTS_TABLE, recordSourceRun, upsertEvent } from '../../_calendar-even
  * invocation, which is 50 on the free plan. The official sources spend 22 of
  * those (one schedule page, sixteen monthly Fed pages, two BLS, one BEA, two
  * Bank of Korea), so eight documents at two requests each brings the pass to
- * 38. The following company-name step may spend eight more, leaving four
- * spare for redirects and retries.
+ * 38 and leaves a dozen spare for redirects and retries. Company names run
+ * in a separate invocation and do not spend this request's subrequest budget.
  *
  * The tracked companies file a handful of these a day between them, so the
  * ceiling is for the unusual day rather than the normal one. Anything over it

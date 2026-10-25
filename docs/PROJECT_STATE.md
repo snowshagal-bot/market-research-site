@@ -11,7 +11,7 @@ Updated: 2026-09-29
 Calendar improvements (2026-10-25, owner-approved rollout in #180): the existing daily
 calendar sync fills blank `disclosure_watchlist.corp_name_en` from OpenDART's
 official company overview `corp_name_eng`. `functions/api/disclosures/_company-names.js`
-runs after corporate-event collection, at most eight requests per pass, charged
+runs in its own authenticated invocation, at most eight requests per pass, charged
 to the shared OpenDART daily budget. Stored filing codes can resolve companies
 added without a DART code. Successful names are reused; administrator-entered
 names are preserved. Failed/empty lookups rotate and retry at most once per KST
@@ -19,6 +19,10 @@ day. The existing API, initial HTML, grid and day detail already read this field
 so existing events gain the name without fetching their filings again and public
 page requests never call OpenDART. If no official name is available, the existing
 Korean-name fallback remains. No machine translation or hard-coded name list.
+The weekday workflow runs the ordinary calendar request and then a separate
+`?scope=company-names` request even if the calendar request fails. The dispatcher
+also offers a name-only backfill mode. Both use the same production/auth/budget
+guards; name-only success cannot close an alert about a failed full-calendar run.
 The shared `pageLanguagePath()` also keeps Calendar's KO/EN switch on the matching
 calendar page with valid `year`, `month`, `market` and `kind` filters, instead of routing
 the reader to HOME. Other query parameters are not copied.

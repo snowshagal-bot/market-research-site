@@ -190,14 +190,16 @@ export async function syncCalendar({
   fetchImpl = fetch,
   origin = process.env.PUBLIC_ORIGIN || DEFAULT_ORIGIN,
   key = process.env.DISCLOSURE_SYNC_KEY || '',
-  timeoutMs = DEFAULT_TIMEOUT_MS
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+  scope = 'all'
 } = {}) {
   const trimmedKey = String(key || '').trim();
   if (!trimmedKey) {
     throw new CalendarSyncError('configuration', 'DISCLOSURE_SYNC_KEY is not configured');
   }
+  if (!['all', 'company-names'].includes(scope)) throw new CalendarSyncError('configuration', 'Unknown calendar sync scope');
 
-  const endpoint = `${origin.replace(/\/+$/, '')}/api/calendar/sync`;
+  const endpoint = `${origin.replace(/\/+$/, '')}/api/calendar/sync${scope === 'company-names' ? '?scope=company-names' : ''}`;
   let response;
   try {
     response = await fetchImpl(endpoint, {
@@ -320,6 +322,8 @@ function parseCliArgs(args) {
       options.key = args[++i];
     } else if (args[i] === '--timeout' && args[i + 1]) {
       options.timeoutMs = Number(args[++i]) || DEFAULT_TIMEOUT_MS;
+    } else if (args[i] === '--scope' && args[i + 1]) {
+      options.scope = args[++i];
     }
   }
   return options;

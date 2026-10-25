@@ -334,7 +334,8 @@ export function orchestrationFailure(error) {
   return { ok: false, years: [], results: [], failed: [INTERNAL_SOURCE], failures };
 }
 
-export async function runCalendarSync(db, { env = {}, fetchImpl = fetch, now = new Date() } = {}) {
+export async function runCalendarSync(db, { env = {}, fetchImpl = fetch, now = new Date(), scope = 'all' } = {}) {
+  if (!['all', 'company-names'].includes(scope)) throw new Error('Unknown calendar sync scope');
   const years = syncYears(now);
   const currentYear = years[0];
   const results = [];
@@ -350,6 +351,14 @@ export async function runCalendarSync(db, { env = {}, fetchImpl = fetch, now = n
     }
   };
 
+  // A separate invocation keeps official schedule fetches from delaying or
+  // exhausting the request budget for company-name backfills (and vice versa).
+  if (scope === 'company-names') {
+    await step('opendart-company-names', () => syncCompanyNames(db, { env, fetchImpl, now }));
+    const failures = failuresOf(results);
+    return { ok: failures.length === 0, years: [], results, failed: failures.map(f => f.source), failures };
+  }
+
   await step('federal-reserve', () => syncFomc(db, { years, fetchImpl, now }));
   for (const series of Object.keys(BLS_SERIES)) {
     await step(`bls-${BLS_SERIES[series].slug}`, () => syncBls(db, { series, fetchImpl, now }));
@@ -363,7 +372,6 @@ export async function runCalendarSync(db, { env = {}, fetchImpl = fetch, now = n
   // Company dates come last: they read filings the disclosure sync has already
   // stored, and they are the only part that spends the OpenDART budget.
   await step('opendart-corporate', () => syncCorporateEvents(db, { env, fetchImpl, now }));
-  await step('opendart-company-names', () => syncCompanyNames(db, { env, fetchImpl, now }));
 
   const failures = failuresOf(results);
   return {

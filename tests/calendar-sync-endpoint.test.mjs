@@ -43,8 +43,8 @@ async function freshDb() {
   return db;
 }
 
-const post = (db, { host = 'snowshagal.com', key = SYNC_KEY } = {}) => syncPost({
-  request: new Request(`https://${host}/api/calendar/sync`, {
+const post = (db, { host = 'snowshagal.com', key = SYNC_KEY, scope = '' } = {}) => syncPost({
+  request: new Request(`https://${host}/api/calendar/sync${scope ? `?scope=${scope}` : ''}`, {
     method: 'POST',
     headers: key ? { 'x-disclosure-sync-key': key } : {}
   }),
@@ -112,6 +112,43 @@ test('the method is checked', async () => {
     env: {}
   });
   assert.equal(response.status, 405);
+});
+
+test('company-name-only requests keep the production/auth guards and reject unknown scopes', async () => {
+  const db = await freshDb();
+  try {
+    assert.equal((await post(db, { scope: 'company-names', host: 'preview.pages.dev' })).status, 403);
+    assert.equal((await post(db, { scope: 'company-names', key: '' })).status, 401);
+    assert.equal((await post(db, { scope: 'other' })).status, 400);
+    const response = await post(db, { scope: 'company-names' });
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.results.length, 1);
+    assert.equal(body.results[0].sourceName, 'opendart-company-names');
+    assert.equal(body.results[0].status, 'pending', 'a test without an OpenDART key fetches nothing');
+  } finally { db.close(); }
+});
+
+test('the scoped runner sends only the fixed authenticated name-backfill URL', async () => {
+  const result = await syncCalendar({ key: SYNC_KEY, scope: 'company-names', fetchImpl: async (url, options) => {
+    assert.equal(url, 'https://snowshagal.com/api/calendar/sync?scope=company-names');
+    assert.equal(options.method, 'POST');
+    assert.equal(options.headers['x-disclosure-sync-key'], SYNC_KEY);
+    return new Response(JSON.stringify({ ok: true, years: [], results: [] }), { status: 200 });
+  } });
+  assert.equal(result.ok, true);
+  await assert.rejects(() => syncCalendar({ key: SYNC_KEY, scope: 'invalid', fetchImpl: () => assert.fail('must not fetch') }), /Unknown calendar sync scope/);
+});
+
+test('the workflow CLI scope reaches the name-only request implementation', async () => {
+  let called = false;
+  const exit = await runCli({ args: ['--scope', 'company-names'], log() {}, logError() {}, syncImpl: async options => {
+    called = true;
+    assert.equal(options.scope, 'company-names');
+    return { ok: true, years: [], results: [] };
+  } });
+  assert.equal(called, true);
+  assert.equal(exit, 0);
 });
 
 /* ---------------------------------------------------------- the runner script */
@@ -285,6 +322,9 @@ test('the workflow runs daily, after the disclosure sync, and alerts once', asyn
 
   assert.match(workflow, /cron: "40 7 \* \* 1-5"/, 'after the 07:40 UTC disclosure sync at 07:05');
   assert.match(workflow, /workflow_dispatch:/);
+  assert.match(workflow, /options: \[all, company-names\]/);
+  assert.match(workflow, /node scripts\/sync-calendar\.mjs --scope company-names \|\| calendar_run_status=\$\?/);
+  assert.match(workflow, /steps\.sync\.outcome == 'success' && inputs\.scope != 'company-names'/);
   assert.match(workflow, /node scripts\/sync-calendar\.mjs/);
   assert.match(workflow, /DISCLOSURE_SYNC_KEY: \$\{\{ secrets\.DISCLOSURE_SYNC_KEY \}\}/, 'no new secret is introduced');
 

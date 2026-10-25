@@ -37,6 +37,8 @@ export async function onRequestPost({ request, env, now = new Date() }) {
   if (!authSource) {
     return json({ ok: false, error: 'UNAUTHORIZED', message: '동기화 인증에 실패했습니다.' }, 401);
   }
+  const scope = new URL(request.url).searchParams.get('scope') || 'all';
+  if (!['all', 'company-names'].includes(scope)) return json({ ok: false, error: 'BAD_SCOPE' }, 400);
 
   let db;
   try {
@@ -48,7 +50,7 @@ export async function onRequestPost({ request, env, now = new Date() }) {
 
   let outcome;
   try {
-    outcome = await runCalendarSync(db, { env, fetchImpl: fetch, now });
+    outcome = await runCalendarSync(db, { env, fetchImpl: fetch, now, scope });
   } catch (error) {
     // Nothing escapes a source step, so this is the pass itself breaking. It is
     // still answered in the same shape, naming `internal`, so the runner never

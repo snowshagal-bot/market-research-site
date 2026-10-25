@@ -308,6 +308,16 @@ test('a name entered during lookup wins over the automatic response', async () =
   db.close();
 });
 
+test('name lookup diagnostics include safe status codes but never upstream text', async () => {
+  const db = await seeded();
+  await unnamedCompany(db);
+  const result = await syncCompanyNames(db, { env: nameEnv, now: NOW, fetchImpl: async () => ({ ok: false, status: 503, statusText: 'secret-key' }) });
+  assert.equal(result.httpStatus, 503);
+  assert.match(result.error, /HTTP 503/);
+  assert.doesNotMatch(JSON.stringify(result), /secret-key/);
+  db.close();
+});
+
 test('a company added without a DART code can use the code in its stored filings', async () => {
   const db = await seeded();
   await unnamedCompany(db, { corpCode: '' });
