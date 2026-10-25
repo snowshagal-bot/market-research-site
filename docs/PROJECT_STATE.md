@@ -42,6 +42,10 @@ disclosure. Agenda dates open the matching day detail. Market/type selections
 apply together and persist through language/history navigation. No new API calls,
 storage, external services or changes to the Market/report pipelines. An event
 store outage stays distinguishable from a quiet month.
+The first monthly API read bypasses browser HTTP cache (`cache: no-store`) so
+stored name updates, cancellations and `serverDate` cannot be replaced by an
+older browser response during hydration. The per-page month Map still deduplicates
+month revisits and filter changes; the public API's cache contract is unchanged.
 
 GA4 integration is approved for rollout (2026-10-23, #177): `functions/_ga4.js` adds the official async gtag.js tag `G-L3XBBY93CG` through the public HTML middleware, including future reports. Private/Preview traffic is excluded. The owner disabled Enhanced measurement and user-provided data capabilities, verified against the public Google tag before merge. See `docs/GA4.md` for privacy limits and the required property settings; deployment verification is recorded in PR #177. Existing Cloudflare and engagement analytics remain separate.
 

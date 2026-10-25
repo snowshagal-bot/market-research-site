@@ -223,7 +223,9 @@
     const key = `${year}-${month}`;
     if (cache.has(key)) return cache.get(key);
 
-    const res = await fetch(`/api/calendar?year=${year}&month=${month}`);
+    // Names, cancellations and the Seoul date must be fresh on a new page.
+    // The per-page Map above still reuses months and never refetches filters.
+    const res = await fetch(`/api/calendar?year=${year}&month=${month}`, { cache: 'no-store' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     cache.set(key, data);

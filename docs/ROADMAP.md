@@ -10,6 +10,14 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+- **Calendar rollout finalization (2026-10-25)**: all 31 active tracked companies
+  now have official English names. Bounded batches completed 8+8+8+7; the ordinary
+  full workflow then passed (nine calendar sources and a zero-request name pass),
+  closing its failure alert. Browser month reads now bypass old HTTP cache while
+  the existing per-page Map still deduplicates filter/month reuse. See the cache
+  follow-up PR for the final exact-SHA deployment, live KO/EN UI verification and
+  screenshots; earlier rollout details remain in #180 and #182–#185.
+
 - **Calendar company-code provenance (2026-10-25)**: a read-only comparison found
   18 seeded company codes disagreeing with their latest stored official filings,
   plus one tracked company with no registered code. Name lookups now prefer the
