@@ -227,6 +227,7 @@ test('official English names reach existing calendar events without recollecting
     assert.equal(url.origin + url.pathname, 'https://opendart.fss.or.kr/api/company.json');
     assert.equal(url.searchParams.get('crtfc_key'), 'test-key');
     assert.equal(options.redirect, 'manual');
+    assert.equal(options.headers['user-agent'], 'snowshagal-disclosure-monitor/1.0');
     return companyResponse(url.searchParams.get('corp_code'), '001440');
   };
   const result = await syncCompanyNames(db, { env: nameEnv, fetchImpl, now: NOW });

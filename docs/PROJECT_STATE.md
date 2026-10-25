@@ -19,6 +19,9 @@ day. The existing API, initial HTML, grid and day detail already read this field
 so existing events gain the name without fetching their filings again and public
 page requests never call OpenDART. If no official name is available, the existing
 Korean-name fallback remains. No machine translation or hard-coded name list.
+Company lookups use the disclosure collector's User-Agent and `redirect: manual`.
+An isolated Workers Preview probe confirmed that omitting User-Agent returns a
+302 to OpenDART `/error1.html`, while the collector header returns the API JSON.
 The weekday workflow runs the ordinary calendar request and then a separate
 `?scope=company-names` request even if the calendar request fails. The dispatcher
 also offers a name-only backfill mode. Both use the same production/auth/budget
