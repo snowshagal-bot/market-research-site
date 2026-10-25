@@ -581,7 +581,7 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `scripts/static-public-pages.mjs` — the hand-written public page list shared by the footer and feed-link sync scripts
 - `scripts/sync-static-feed-links.mjs` — idempotent feed discovery `<link>` stamp for the hand-written public pages
 - `functions/_footer.js` — canonical single source of truth for global editorial footer markup (`siteFooter`) and scoped report CSS (`footerCss`)
-- `functions/_middleware.js` — injects crawlable homepage/category report links, the shared report shell, global editorial footer and CSS, favicon set and report SEO, and marks non-Production hosts noindex
+- `functions/_middleware.js` — injects crawlable homepage/category report links, the shared report shell, global editorial footer and CSS, favicon set and report SEO, and marks non-Production hosts noindex; repository internals that ship with the Pages output (`/docs/`, `/scripts/`, `/tests/`, `/.github/`, `/db/`, `/migrations/`, `AGENTS.md`, `README.md`, `.gitignore`) answer with the site 404 page (`isRepoInternalPath`; `/contracts/` stays public for the market schema)
 - `functions/_seo.js` — canonical URLs, category metadata, report title/description, crawlable discovery markup, hreflang, sitemap, social constants, and footer re-exports
 - `scripts/verify.mjs` — single official repository verification gate running all test suites, JS/MJS syntax validation, integrity invariants, and the repository-mode SEO integrity audit
 - `scripts/audit-seo.mjs` — corpus-wide SEO integrity audit (repository mode in `verify.mjs`; `--origin=` live mode for Preview/Production QA)
