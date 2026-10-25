@@ -31,11 +31,11 @@ export async function syncCompanyNames(db, { env = {}, fetchImpl = fetch, now = 
   const config = disclosureConfig(env);
   const candidates = await db.prepare(`WITH missing AS (
     SELECT w.stock_code, w.corp_code AS registered_code, w.sort_order, s.state_value,
-      COALESCE(NULLIF(TRIM(w.corp_code), ''), (
+      COALESCE((
         SELECT f.corp_code FROM ${FILINGS_TABLE} f WHERE f.stock_code = w.stock_code
           AND LENGTH(f.corp_code) = 8 AND f.corp_code NOT GLOB '*[^0-9]*'
         ORDER BY f.rcept_dt DESC, f.rcept_no DESC LIMIT 1
-      )) AS corp_code
+      ), NULLIF(TRIM(w.corp_code), '')) AS corp_code
     FROM ${WATCHLIST_TABLE} w
     LEFT JOIN ${STATE_TABLE} s ON s.state_key = ? || w.stock_code
     WHERE w.active = 1 AND w.calendar_enabled = 1 AND TRIM(w.corp_name_en) = ''

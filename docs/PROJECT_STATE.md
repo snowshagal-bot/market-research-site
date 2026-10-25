@@ -12,8 +12,10 @@ Calendar improvements (2026-10-25, owner-approved rollout in #180): the existing
 calendar sync fills blank `disclosure_watchlist.corp_name_en` from OpenDART's
 official company overview `corp_name_eng`. `functions/api/disclosures/_company-names.js`
 runs in its own authenticated invocation, at most eight requests per pass, charged
-to the shared OpenDART daily budget. Stored filing codes can resolve companies
-added without a DART code. Successful names are reused; administrator-entered
+to the shared OpenDART daily budget. The latest official filing's company code
+takes precedence over stale seeded codes; the registered code remains a fallback
+and is never overwritten. `idx_disclosure_stock_receipt` avoids scanning the
+filings table for each company. Successful names are reused; administrator-entered
 names are preserved. Failed/empty lookups rotate and retry at most once per KST
 day. The existing API, initial HTML, grid and day detail already read this field,
 so existing events gain the name without fetching their filings again and public
