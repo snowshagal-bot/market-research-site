@@ -84,7 +84,7 @@ async function render({ lang = 'ko', payload, search = '' }) {
     location: { pathname: lang === 'en' ? '/en/calendar/' : '/calendar/', search: '', href: 'https://snowshagal.com/' },
     history: { replaceState() {}, pushState() {} },
     navigator: { language: lang },
-    fetch: async url => { requests.push(url); return { ok: true, status: 200, json: async () => payload }; },
+    fetch: async (url, options) => { assert.equal(options.cache, 'no-store'); requests.push(url); return { ok: true, status: 200, json: async () => payload }; },
     setTimeout: fn => { fn(); return 0; },
     URLSearchParams,
     URL,
