@@ -586,6 +586,42 @@ test('translation pairing rejects a missing counterpart, a mismatched report dat
   }
 });
 
+test('a translation takes its pair\'s tags in the pair\'s order, and a different set of tags is refused', async () => {
+  const koNote = { id: 'ko-note', type: 'note', lang: 'ko', reportDate: '2026-08-10', title: '원화 노트', tags: ['kospi', 'kosdaq', 'rates', 'fx'], href: 'reports/ko-note.html' };
+
+  // The same four tags, picked in another order (2026-10-24 case): stored in the KO order.
+  let calls = githubMock([koNote]);
+  try {
+    const { response, data } = await runPublish({ type: 'note', lang: 'en', translationGroup: 'ko-note', tags: ['rates', 'fx', 'kospi', 'kosdaq'] });
+    assert.equal(response.status, 200);
+    const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+    const post = JSON.parse(tree.find(entry => entry.path === 'data/posts.json').content).find(item => item.id === data.id);
+    assert.deepEqual(post.tags, ['kospi', 'kosdaq', 'rates', 'fx']);
+  } finally { globalThis.fetch = originalFetch; }
+
+  // A different set leaves the pair disagreeing: refused before any write.
+  for (const tags of [['kospi', 'kosdaq', 'rates'], ['kospi', 'kosdaq', 'rates', 'fx', 'flows']]) {
+    calls = githubMock([koNote]);
+    try {
+      const { response, data } = await runPublish({ type: 'note', lang: 'en', translationGroup: 'ko-note', tags });
+      assert.equal(response.status, 400);
+      assert.equal(data.error, 'PAIR_TAG_MISMATCH');
+      assert.match(data.message, /번역 짝의 태그: KOSPI/);
+      assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
+    } finally { globalThis.fetch = originalFetch; }
+  }
+
+  // A post with no pair keeps its tags as picked.
+  calls = githubMock([]);
+  try {
+    const { response, data } = await runPublish({ type: 'note', tags: ['rates', 'fx'] });
+    assert.equal(response.status, 200);
+    const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
+    const post = JSON.parse(tree.find(entry => entry.path === 'data/posts.json').content).find(item => item.id === data.id);
+    assert.deepEqual(post.tags, ['rates', 'fx']);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
 test('unsupported and oversized cover files are rejected before GitHub writes', async () => {
   for (const [cover, expectedStatus, expectedError] of [
     [new File(['gif'], 'cover.gif', { type: 'image/gif' }), 400, 'BAD_COVER_TYPE'],

@@ -10,6 +10,7 @@ import {
   customTagEntry,
   validateTagDefinition,
   parseAndValidateTags,
+  pairAlignedTags,
   generateTagsJs
 } from '../_tags.js';
 import '../../assets/report-metadata.js';
@@ -774,7 +775,21 @@ export async function onRequestPost(context) {
     if (tagValidation.error) {
       return reply({ error: 'BAD_TAGS', message: tagValidation.error }, 400);
     }
-    const tags = tagValidation.tags;
+    let tags = tagValidation.tags;
+    // A translation takes its pair's tags in the pair's order; a different set
+    // of tags would leave the pair disagreeing, so it is refused.
+    if (pairedPost) {
+      const aligned = pairAlignedTags(tags, pairedPost.tags);
+      if (!aligned) {
+        const pairTags = Array.isArray(pairedPost.tags) ? pairedPost.tags : [];
+        const names = pairTags.map((tag) => tagRegistry[tag]?.ko || tag).join(', ') || '없음';
+        return reply({
+          error: 'PAIR_TAG_MISMATCH',
+          message: `주제 태그는 번역 짝과 같아야 합니다. 번역 짝의 태그: ${names}. 태그를 바꾸려면 게시 후 게시물 관리에서 수정하세요. 짝에도 함께 적용됩니다.`
+        }, 400);
+      }
+      tags = aligned;
+    }
 
     // Server-side defense: verify that every declared new tag is actually referenced in the post's final tags
     if (validatedNewTags.length > 0) {

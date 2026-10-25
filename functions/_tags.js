@@ -225,6 +225,34 @@ export function customTagEntry(tag) {
   return { ko: tag.ko, en: tag.en, group: tag.group, custom: true };
 }
 
+// A KO/EN translation pair carries one tag list, in one order: the Verification
+// Gate compares the two lists exactly, and a pair whose tags differ only in
+// order turns it red until someone re-saves one side.
+
+const postLang = (post) => (post?.lang === 'en' ? 'en' : 'ko');
+const groupKey = (post) => String(post?.translationGroup || post?.id || '');
+
+/** The other-language posts in `post`'s translation group. */
+export function translationPartners(posts, post) {
+  const key = groupKey(post);
+  if (!key || !Array.isArray(posts)) return [];
+  return posts.filter((other) => other && other.id !== post.id
+    && postLang(other) !== postLang(post)
+    && groupKey(other) === key);
+}
+
+/**
+ * The tags to store for a post joining a pair whose other side already has
+ * `pairTags`: the pair's own list, in its order, when both name the same tags;
+ * null when they name different tags.
+ */
+export function pairAlignedTags(tags, pairTags) {
+  const mine = new Set(Array.isArray(tags) ? tags : []);
+  const theirs = Array.isArray(pairTags) ? pairTags : [];
+  if (mine.size !== new Set(theirs).size || theirs.some((tag) => !mine.has(tag))) return null;
+  return [...theirs];
+}
+
 /**
  * Validate and normalize a list of tags for a report post.
  */

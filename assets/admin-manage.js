@@ -726,7 +726,10 @@
     status.textContent = '변경사항을 저장하는 중입니다…';
     try {
       const data = await mutate(await buildUpdateForm());
-      status.textContent = `GitHub 저장 완료 · commit ${data.commit.slice(0, 7)}`;
+      const pairNote = Array.isArray(data.pairedTagUpdates) && data.pairedTagUpdates.length
+        ? ` · 번역 짝(${data.pairedTagUpdates.join(', ')})의 태그도 함께 맞췄습니다`
+        : '';
+      status.textContent = `GitHub 저장 완료 · commit ${data.commit.slice(0, 7)}${pairNote}`;
       void beginDeploymentCheck({ action: 'update', id: data.post.id, post: data.post, commit: data.commit });
     } catch (error) {
       status.textContent = error.message || '저장하지 못했습니다.';
