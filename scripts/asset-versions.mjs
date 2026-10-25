@@ -28,6 +28,7 @@ export const TRACKED_ASSETS = [
   'assets/market-close.js',
   'assets/disclosures.js',
   'assets/calendar.js',
+  'assets/calendar-view.js',
   'assets/report-shell.js',
   'assets/engagement.js',
 

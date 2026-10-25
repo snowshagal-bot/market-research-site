@@ -329,6 +329,7 @@ async function runScript(script, { lang, search, elements, fetchImpl, NowDate = 
   const context = vm.createContext({
     window, document, fetch: fetchImpl, URL, URLSearchParams, Intl, Date: NowDate, Map, Set, console: { ...console, error: (...a) => errors.push(a) }
   });
+  if (script === 'assets/calendar.js') vm.runInContext(await read('assets/calendar-view.js'), context);
   vm.runInContext(await read(script), context);
   for (let i = 0; i < 20; i += 1) await new Promise(resolve => setTimeout(resolve, 0));
   return { byId, errors, pushed };
@@ -393,10 +394,11 @@ test('the calendar script re-renders exactly what the server sent, stays on its 
     static now() { return RealDate.UTC(2029, 4, 15); }
   }
 
-  for (const [path, lang, search] of [['/calendar/', 'ko', ''], ['/en/calendar/', 'en', '?year=2026&month=9'], ['/calendar/', 'ko', '?year=2026&month=9&market=NYSE'], ['/calendar/', 'ko', '?year=2028&month=1']]) {
+  for (const [path, lang, search] of [['/calendar/', 'ko', ''], ['/en/calendar/', 'en', '?year=2026&month=9'], ['/calendar/', 'ko', '?year=2026&month=9&market=NYSE'], ['/calendar/', 'ko', '?year=2028&month=1'], ['/en/calendar/', 'en', '?year=2026&month=9&kind=economic'], ['/calendar/', 'ko', '?year=2026&month=9&kind=trading']]) {
     const { html } = await page(`${path}${search}`);
     const serverGrid = innerById(html, 'calendar-grid-mount');
     const serverUpcoming = innerById(html, 'calendar-upcoming-mount');
+    const serverAgenda = innerById(html, 'calendar-agenda-mount');
     const attrs = dataAttributes(openTag(html, 'calendar-grid-mount'));
     const grid = element('calendar-grid-mount', serverGrid, attrs);
     const upcoming = element('calendar-upcoming-mount', serverUpcoming);
@@ -405,18 +407,19 @@ test('the calendar script re-renders exactly what the server sent, stays on its 
 
     const { byId } = await runScript('assets/calendar.js', {
       lang, search, NowDate: FarFutureDate,
-      elements: [grid, upcoming, label, element('cal-prev-btn'), element('cal-next-btn'), element('cal-today-btn')],
+      elements: [grid, upcoming, label, element('calendar-agenda-mount', serverAgenda), element('cal-prev-btn'), element('cal-next-btn'), element('cal-today-btn')],
       fetchImpl: async (url) => { requested.push(url); return calendarGet({ request: new Request(`https://snowshagal.com${url}`), env: { COMMENTS_DB: db } }); }
     });
     assert.equal(requested[0], `/api/calendar?year=${attrs.ssrYear}&month=${attrs.ssrMonth}`, `${lang}${search}: fetches the server's month`);
     assert.equal(label.textContent, innerById(html, 'calendar-month-label'), `${lang}${search}: same month label`);
     assert.equal(normalize(byId.get('calendar-grid-mount').innerHTML), normalize(serverGrid), `${lang}${search}: identical grid`);
     assert.equal(normalize(byId.get('calendar-upcoming-mount').innerHTML), normalize(serverUpcoming), `${lang}${search}: identical upcoming`);
+    assert.equal(normalize(byId.get('calendar-agenda-mount').innerHTML), normalize(serverAgenda), `${lang}${search}: identical agenda`);
 
     const failingGrid = element('calendar-grid-mount', serverGrid, attrs);
     await runScript('assets/calendar.js', {
       lang, search, NowDate: FarFutureDate,
-      elements: [failingGrid, element('calendar-upcoming-mount', serverUpcoming), element('calendar-month-label'), element('cal-prev-btn'), element('cal-next-btn'), element('cal-today-btn')],
+      elements: [failingGrid, element('calendar-upcoming-mount', serverUpcoming), element('calendar-agenda-mount', serverAgenda), element('calendar-month-label'), element('cal-prev-btn'), element('cal-next-btn'), element('cal-today-btn')],
       fetchImpl: async () => { throw new Error('offline'); }
     });
     assert.equal(failingGrid.innerHTML, serverGrid, `${lang}${search}: kept on failure`);

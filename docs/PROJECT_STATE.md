@@ -8,6 +8,32 @@ Updated: 2026-09-29
 
 ## Current stack
 
+Calendar improvements (2026-10-25, owner-approved rollout in #180): the existing daily
+calendar sync fills blank `disclosure_watchlist.corp_name_en` from OpenDART's
+official company overview `corp_name_eng`. `functions/api/disclosures/_company-names.js`
+runs after corporate-event collection, at most eight requests per pass, charged
+to the shared OpenDART daily budget. Stored filing codes can resolve companies
+added without a DART code. Successful names are reused; administrator-entered
+names are preserved. Failed/empty lookups rotate and retry at most once per KST
+day. The existing API, initial HTML, grid and day detail already read this field,
+so existing events gain the name without fetching their filings again and public
+page requests never call OpenDART. If no official name is available, the existing
+Korean-name fallback remains. No machine translation or hard-coded name list.
+The shared `pageLanguagePath()` also keeps Calendar's KO/EN switch on the matching
+calendar page with valid `year`, `month`, `market` and `kind` filters, instead of routing
+the reader to HOME. Other query parameters are not copied.
+
+The monthly calendar now has a KO/EN event-type selector (economic/policy,
+earnings, corporate, derivatives expiry, holidays/hours) and an upcoming agenda
+below the grid. `assets/calendar-view.js` is the shared, read-only projection for
+SSR and browser rendering: only the selected month's dates on/after `serverDate`
+(Seoul) are listed, cancelled events are omitted, high-importance events lead
+within a date, and every event beyond the first eight is reachable in a native
+disclosure. Agenda dates open the matching day detail. Market/type selections
+apply together and persist through language/history navigation. No new API calls,
+storage, external services or changes to the Market/report pipelines. An event
+store outage stays distinguishable from a quiet month.
+
 GA4 integration is approved for rollout (2026-10-23, #177): `functions/_ga4.js` adds the official async gtag.js tag `G-L3XBBY93CG` through the public HTML middleware, including future reports. Private/Preview traffic is excluded. The owner disabled Enhanced measurement and user-provided data capabilities, verified against the public Google tag before merge. See `docs/GA4.md` for privacy limits and the required property settings; deployment verification is recorded in PR #177. Existing Cloudflare and engagement analytics remain separate.
 
 - Source: GitHub repository `snowshagal-bot/market-research-site`

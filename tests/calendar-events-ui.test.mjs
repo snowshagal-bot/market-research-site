@@ -6,6 +6,8 @@ import vm from 'node:vm';
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 const SCRIPT = await read('assets/calendar.js');
+const LOCALE_SCRIPT = await read('assets/locale.js');
+const VIEW_SCRIPT = await read('assets/calendar-view.js');
 const STYLES = await read('assets/calendar.css');
 
 /* ------------------------------------------------------------ a stub page */
@@ -40,12 +42,26 @@ function makeElement(id = '') {
  * hands back the markup it produced. The point is the rendering decisions —
  * which day a chip lands on, what a failure says — not the DOM plumbing.
  */
-async function render({ lang = 'ko', payload }) {
+async function render({ lang = 'ko', payload, search = '' }) {
   const elements = new Map();
   const get = id => {
     if (!elements.has(id)) elements.set(id, makeElement(id));
     return elements.get(id);
   };
+  const languageLink = get('language-link');
+  languageLink.dataset.languageChoice = lang === 'en' ? 'ko' : 'en';
+  const filters = ['ALL', 'KRX', 'NYSE'].map(filter => {
+    const element = get(`filter-${filter}`);
+    element.dataset.filter = filter;
+    return element;
+  });
+  const pageUrl = new URL(`https://snowshagal.com${lang === 'en' ? '/en' : ''}/calendar/${search}`);
+  const location = { pathname: pageUrl.pathname, search: pageUrl.search, href: pageUrl.href };
+  const updateLocation = (_state, _title, url) => {
+    const next = new URL(url);
+    Object.assign(location, { pathname: next.pathname, search: next.search, href: next.href });
+  };
+  const requests = [];
 
   const context = {
     document: {
@@ -53,22 +69,22 @@ async function render({ lang = 'ko', payload }) {
       documentElement: { lang, dataset: { siteLang: lang } },
       getElementById: get,
       querySelector: () => null,
-      querySelectorAll: () => [],
+      querySelectorAll: selector => selector === '[data-language-choice]' ? [languageLink] : selector === '.calendar-filter-btn' ? filters : [],
       createElement: tag => makeElement(tag),
       addEventListener(type, handler) { if (type === 'DOMContentLoaded') context.__ready = handler; },
       readyState: 'complete',
       body: makeElement()
     },
     window: {
-      location: { pathname: lang === 'en' ? '/en/calendar/' : '/calendar/', search: '', href: 'https://snowshagal.com/' },
-      history: { replaceState() {}, pushState() {} },
+      location,
+      history: { replaceState: updateLocation, pushState: updateLocation },
       addEventListener() {},
       matchMedia: () => ({ matches: false, addEventListener() {}, removeEventListener() {} })
     },
     location: { pathname: lang === 'en' ? '/en/calendar/' : '/calendar/', search: '', href: 'https://snowshagal.com/' },
     history: { replaceState() {}, pushState() {} },
     navigator: { language: lang },
-    fetch: async () => ({ ok: true, status: 200, json: async () => payload }),
+    fetch: async url => { requests.push(url); return { ok: true, status: 200, json: async () => payload }; },
     setTimeout: fn => { fn(); return 0; },
     URLSearchParams,
     URL,
@@ -76,6 +92,8 @@ async function render({ lang = 'ko', payload }) {
     console
   };
   context.window.document = context.document;
+  vm.runInNewContext(LOCALE_SCRIPT, context);
+  vm.runInNewContext(VIEW_SCRIPT, context);
   vm.runInNewContext(SCRIPT, context);
 
   // The script binds to DOMContentLoaded when the document is still loading.
@@ -85,6 +103,7 @@ async function render({ lang = 'ko', payload }) {
 
   return {
     grid: get('calendar-grid-mount').innerHTML,
+    requests,
     detail: () => get('calendar-day-detail-mount').innerHTML,
     get
   };
@@ -149,6 +168,40 @@ test('a company event shows the company, an economic one shows its name', async 
   const { grid } = await render({ payload: payloadFor([briefing, expiry]) });
   assert.match(grid, /삼성전자/);
   assert.match(grid, /KOSPI200 월물 옵션 만기/);
+});
+
+test('saved English company names appear in the grid and day detail after hydration', async () => {
+  const event = { ...briefing, company: { ...briefing.company, nameEn: 'Samsung Electronics' } };
+  const en = await render({ lang: 'en', payload: payloadFor([event]) });
+  assert.match(en.grid, /Samsung Electronics/);
+  assert.doesNotMatch(en.grid, /삼성전자/);
+  await en.get('calendar-grid-mount').fire('click', { target: { closest: () => ({ dataset: { date: '2026-09-10' } }) } });
+  assert.match(en.detail(), /Samsung Electronics · Investor Relations Briefing/);
+  assert.doesNotMatch(en.detail(), /삼성전자/);
+  assert.match((await render({ lang: 'ko', payload: payloadFor([event]) })).grid, /삼성전자/);
+});
+
+test('language links follow month navigation and market-filter changes', async () => {
+  const { get } = await render({ lang: 'en', payload: payloadFor([]), search: '?year=2026&month=9' });
+  assert.equal(get('language-link').href, '/calendar/?year=2026&month=9');
+  await get('filter-KRX').fire('click');
+  assert.equal(get('language-link').href, '/calendar/?year=2026&month=9&market=KRX');
+  await get('cal-next-btn').fire('click');
+  assert.equal(get('language-link').href, '/calendar/?year=2026&month=10&market=KRX');
+});
+
+test('kind changes filter the grid and agenda without an extra API request', async () => {
+  const en = await render({ lang: 'en', payload: payloadFor([fomc, briefing]), search: '?year=2026&month=9' });
+  const control = en.get('calendar-kind-filter');
+  control.value = 'economic';
+  await control.fire('change');
+  assert.match(en.get('calendar-grid-mount').innerHTML, /FOMC Rate Decision/);
+  assert.doesNotMatch(en.get('calendar-grid-mount').innerHTML, /삼성전자/);
+  assert.match(en.get('calendar-agenda-mount').innerHTML, /FOMC Rate Decision/);
+  assert.doesNotMatch(en.get('calendar-agenda-mount').innerHTML, /삼성전자/);
+  assert.match(en.get('language-link').href, /kind=economic/);
+  assert.equal(en.get('calendar-upcoming-mount').innerHTML, '');
+  assert.equal(en.requests.length, 1);
 });
 
 test('a busy day shows a couple of events and counts the rest', async () => {

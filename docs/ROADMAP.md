@@ -10,6 +10,20 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+- **Calendar improvements (2026-10-25, owner-approved rollout — #180)**:
+  official English company names are filled by the existing calendar sync (up to
+  eight per run). KO/EN month/market/type selections persist across language
+  changes. The grid and a new upcoming agenda share event-type filters and the
+  existing monthly payload; the agenda includes today onward in the selected
+  month with KST times, expandable remaining entries and day-detail links.
+  The 2026-10-24 Investment Insights pair's English tags were reordered to match
+  its Korean counterpart; tag membership and uploaded report HTML are unchanged.
+  Full repository verification passes (1,419 tests). Preview KO/EN filters,
+  language/month preservation and day-detail links were checked at 390px and
+  1280px without overflow. See PR #180 for the exact-SHA Cloudflare deployment,
+  Production smoke, initial English-name backfill through the existing workflow,
+  and live KO/EN verification results.
+
 - **GA4 public-site measurement (2026-10-23, owner-approved rollout — #177)**: the common response layer adds `G-L3XBBY93CG` to successful KO/EN public HTML and future reports. All 1,396 tests, syntax/invariant checks and the SEO audit pass. The owner disabled Enhanced measurement and Allow user-provided data capabilities; the public Google tag configuration was rechecked before merge. Deployment and real collection verification are recorded in PR #177; preserve the settings in `docs/GA4.md`.
 
 - **Investment Insights naming (2026-10-19, deployment pending)**: public KO `투자 인사이트` / EN `Investment Insights` labels are synchronized across navigation, HOME, category pages, report shell, footer, SEO and admin. Internal `note` and `/notes/` URLs stay unchanged; old and new upload labels both work. KO/EN mobile (390px iframe) and desktop (1280px iframe) checked without page overflow. Verification: 1,385/1,387 tests pass; the unchanged main data already fails summary-line-break and duplicate-translation-group checks. Changed JS syntax, whitespace and SEO audit pass. Resolve or review those existing data failures before Production deployment.

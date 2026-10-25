@@ -15,6 +15,9 @@ import {
   upsertEvent
 } from '../functions/_calendar-events.js';
 import { onRequestGet as calendarGet } from '../functions/api/calendar.js';
+import { MAX_COMPANY_NAMES_PER_RUN, syncCompanyNames } from '../functions/api/disclosures/_company-names.js';
+import { loadCalendarMonth } from '../functions/_calendar-data.js';
+import { renderCalendarGrid } from '../functions/_initial-html.js';
 
 class SqliteStatement {
   constructor(database, sql) { this.database = database; this.sql = sql; this.values = []; }
@@ -198,4 +201,139 @@ test('the English page prefers the official name and never translates', async ()
   const script = await readFile(new URL('../assets/calendar.js', import.meta.url), 'utf8');
   assert.match(script, /if \(!ko && event\.company\.nameEn\) return event\.company\.nameEn;/);
   assert.match(script, /return event\.company\.name \|\| event\.company\.stockCode \|\| '';/);
+});
+
+const nameEnv = { OPENDART_API_KEY: 'test-key' };
+const companyResponse = (code, stock, name = 'Taihan Cable & Solution') => ({
+  // The documented company overview response does not require corp_code.
+  ok: true, json: async () => ({ status: '000', stock_code: stock, corp_name_eng: name })
+});
+
+async function unnamedCompany(db, overrides = {}) {
+  // Isolate from the default watchlist seeded for a new deployment.
+  await db.prepare('UPDATE disclosure_watchlist SET calendar_enabled = 0').run();
+  await addWatchlistCompany(db, {
+    stockCode: '001440', corpCode: '00123456', corpName: '대한전선', calendarEnabled: true, ...overrides
+  }, NOW);
+}
+
+test('official English names reach existing calendar events without recollecting filings', async () => {
+  const db = await seeded();
+  await unnamedCompany(db);
+  await upsertEvent(db, briefing(), NOW);
+  let calls = 0;
+  const fetchImpl = async (url, options) => {
+    calls++;
+    assert.equal(url.origin + url.pathname, 'https://opendart.fss.or.kr/api/company.json');
+    assert.equal(url.searchParams.get('crtfc_key'), 'test-key');
+    assert.equal(options.redirect, 'error');
+    return companyResponse(url.searchParams.get('corp_code'), '001440');
+  };
+  const result = await syncCompanyNames(db, { env: nameEnv, fetchImpl, now: NOW });
+  assert.equal(result.updated, 1);
+  const [event] = await getEventsForDisplayMonth(db, 2026, 10);
+  assert.equal(event.company.nameEn, 'Taihan Cable & Solution');
+  assert.equal(event.company.name, '대한전선');
+  const data = await loadCalendarMonth({ COMMENTS_DB: db }, { year: 2026, month: 10, now: NOW });
+  const english = renderCalendarGrid(data, { lang: 'en', filter: 'ALL' });
+  assert.match(english, /Taihan Cable &amp; Solution/);
+  assert.doesNotMatch(english, /대한전선/);
+  assert.match(renderCalendarGrid(data, { lang: 'ko', filter: 'ALL' }), /대한전선/);
+  await syncCompanyNames(db, { env: nameEnv, fetchImpl, now: new Date('2026-09-03T00:00:00Z') });
+  assert.equal(calls, 1, 'a saved name is reused');
+  assert.equal(db.row("SELECT request_count FROM disclosure_usage_daily WHERE usage_date = '2026-09-02' AND kind = 'source:opendart'").request_count, 1);
+  db.close();
+});
+
+test('manual names, suspended companies and disclosure-only companies spend no requests', async () => {
+  const db = await seeded();
+  await unnamedCompany(db, { corpNameEn: 'Owner-approved Name' });
+  await addWatchlistCompany(db, { stockCode: '001441', corpCode: '00123457', corpName: '공시만', calendarEnabled: false }, NOW);
+  await addWatchlistCompany(db, { stockCode: '001442', corpCode: '00123458', corpName: '중단', calendarEnabled: true }, NOW);
+  await toggleWatchlistActive(db, '001442', false, NOW);
+  const result = await syncCompanyNames(db, { env: nameEnv, fetchImpl: () => assert.fail('must not fetch'), now: NOW });
+  assert.equal(result.attempted, 0);
+  db.close();
+});
+
+test('missing key and exhausted shared budget leave names unchanged', async () => {
+  const db = await seeded();
+  await unnamedCompany(db);
+  assert.equal((await syncCompanyNames(db, { now: NOW })).status, 'pending');
+  await db.prepare("INSERT INTO disclosure_usage_daily (usage_date, kind, request_count, updated_at) VALUES ('2026-09-02', 'source:opendart', 1000, '')").run();
+  const result = await syncCompanyNames(db, { env: nameEnv, now: NOW, fetchImpl: () => assert.fail('budget exhausted') });
+  assert.equal(result.budgetExhausted, true);
+  assert.equal(result.attempted, 0);
+  db.close();
+});
+
+test('failed lookups are redacted, rate limited per Seoul day, and never block stored events', async () => {
+  const db = await seeded();
+  await unnamedCompany(db);
+  await upsertEvent(db, briefing(), NOW);
+  let calls = 0;
+  const fetchImpl = async () => { calls++; throw new Error('secret-test-key in URL'); };
+  const first = await syncCompanyNames(db, { env: nameEnv, fetchImpl, now: NOW });
+  assert.equal(first.status, 'error');
+  assert.doesNotMatch(JSON.stringify(first), /secret-test-key/);
+  await syncCompanyNames(db, { env: nameEnv, fetchImpl, now: NOW });
+  assert.equal(calls, 1);
+  await syncCompanyNames(db, { env: nameEnv, fetchImpl, now: new Date('2026-09-02T15:01:00Z') });
+  assert.equal(calls, 2, 'the next Seoul day is eligible again');
+  assert.equal((await getEventsForDisplayMonth(db, 2026, 10)).length, 1);
+  assert.equal(db.row("SELECT corp_name_en FROM disclosure_watchlist WHERE stock_code = '001440'").corp_name_en, '');
+  db.close();
+});
+
+test('a mismatched or unsuccessful response never becomes a company name', async () => {
+  for (const response of [{ ok: true, json: async () => ({ status: '000', corp_code: '99999999', stock_code: '001440', corp_name_eng: 'Wrong company' }) }, companyResponse('00123456', '999999'),
+    { ok: false, status: 503 }, { ok: true, json: async () => ({ status: '020' }) }]) {
+    const db = await seeded();
+    await unnamedCompany(db);
+    assert.equal((await syncCompanyNames(db, { env: nameEnv, fetchImpl: async () => response, now: NOW })).updated, 0);
+    assert.equal(db.row("SELECT corp_name_en FROM disclosure_watchlist WHERE stock_code = '001440'").corp_name_en, '');
+    db.close();
+  }
+});
+
+test('a name entered during lookup wins over the automatic response', async () => {
+  const db = await seeded();
+  await unnamedCompany(db);
+  const result = await syncCompanyNames(db, { env: nameEnv, now: NOW, fetchImpl: async () => {
+    await db.prepare("UPDATE disclosure_watchlist SET corp_name_en = 'Manual Name' WHERE stock_code = '001440'").run();
+    return companyResponse('00123456', '001440');
+  } });
+  assert.equal(result.updated, 0);
+  assert.equal(db.row("SELECT corp_name_en FROM disclosure_watchlist WHERE stock_code = '001440'").corp_name_en, 'Manual Name');
+  db.close();
+});
+
+test('a company added without a DART code can use the code in its stored filings', async () => {
+  const db = await seeded();
+  await unnamedCompany(db, { corpCode: '' });
+  await db.prepare(`INSERT INTO disclosure_filings
+    (rcept_no, corp_cls, corp_name, corp_code, stock_code, report_nm, rcept_dt, source_url, first_seen_at, updated_at)
+    VALUES ('20260902000001', 'Y', '대한전선', '00123456', '001440', '기업설명회', '20260902', '', '', '')`).run();
+  const result = await syncCompanyNames(db, { env: nameEnv, now: NOW, fetchImpl: async url => {
+    assert.equal(url.searchParams.get('corp_code'), '00123456');
+    return companyResponse('00123456', '001440');
+  } });
+  assert.equal(result.updated, 1);
+  db.close();
+});
+
+test('a pass is bounded and failed/empty names do not starve the rest of the queue', async () => {
+  const db = await seeded();
+  const requests = [];
+  const fetchImpl = async url => {
+    requests.push(url.searchParams.get('corp_code'));
+    const stock = db.row('SELECT stock_code FROM disclosure_watchlist WHERE corp_code = ?', url.searchParams.get('corp_code')).stock_code;
+    return companyResponse(url.searchParams.get('corp_code'), stock, '');
+  };
+  const first = await syncCompanyNames(db, { env: nameEnv, fetchImpl, now: NOW });
+  assert.equal(first.attempted, MAX_COMPANY_NAMES_PER_RUN);
+  assert.equal(first.unavailable, MAX_COMPANY_NAMES_PER_RUN);
+  await syncCompanyNames(db, { env: nameEnv, fetchImpl, now: new Date('2026-09-03T00:00:00Z') });
+  assert.equal(new Set(requests).size, 2 * MAX_COMPANY_NAMES_PER_RUN, 'unattempted companies go first');
+  db.close();
 });

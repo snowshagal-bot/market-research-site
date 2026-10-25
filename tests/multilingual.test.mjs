@@ -73,6 +73,16 @@ test('language URLs preserve category queries without browser-language redirects
   assert.match(enHome, /data-site-lang="en"/);
 });
 
+test('calendar language switches retain the month and market on the matching calendar', async () => {
+  const api = await localeHelpers();
+  assert.equal(api.pageLanguagePath('/calendar/', 'en'), '/en/calendar/');
+  assert.equal(api.pageLanguagePath('/en/calendar/', 'ko'), '/calendar/');
+  assert.equal(api.pageLanguagePath('/en/calendar/', 'ko', '?year=2026&month=11&market=NYSE'), '/calendar/?year=2026&month=11&market=NYSE');
+  assert.equal(api.pageLanguagePath('/en/calendar/', 'ko', '?year=2026&month=11&market=NYSE&kind=earnings'), '/calendar/?year=2026&month=11&market=NYSE&kind=earnings');
+  assert.equal(api.pageLanguagePath('/calendar/index.html', 'en', '?month=10&market=krx'), '/en/calendar/?month=10&market=KRX');
+  assert.equal(api.pageLanguagePath('/en/calendar', 'ko', '?year=9999&month=13&market=other&email=private&category=note'), '/calendar/');
+});
+
 test('recent report archives use report-date ordering in both locale shells', async () => {
   const [site, koHome, enHome] = await Promise.all([
     read('assets/site.js'), read('index.html'), read('en/index.html')
