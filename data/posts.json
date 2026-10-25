@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-10-25-note-1wo3ckl",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-10-25",
+    "reportDate": "2026-10-25",
+    "registeredDate": "2026-10-25",
+    "registeredAt": "2026-10-25T11:31:55.226Z",
+    "legacyImport": false,
+    "title": "Same SK hynix. New York ADRs Trade Over 40% Higher",
+    "seoTitle": "Same SK hynix, but Its New York ADRs Trade at a 40%+ Premium | Snowshagal Investment Note No. 17",
+    "subtitle": "",
+    "description": "SK hynix ADRs trade at a 42.1% premium to the Seoul common shares as of Oct. 23, 2026. That is not a price target for Seoul: U.S. demand differs, conversion capacity is exhausted, and the KRW 40tn buyback ended Oct. 21. What to watch at the Oct. 28 earnings call.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors",
+      "u-s-a"
+    ],
+    "readingMinutes": 13,
+    "href": "reports/en/Snowshagal_Investment_Note_17_SK_hynix_ADR_Premium_EN.html",
+    "translationGroup": "2026-10-25-note-1ey6i0c",
+    "coverImage": "covers/2026-10-25-note-1wo3ckl.webp",
+    "shareCardImage": "covers/share/2026-10-25-note-1wo3ckl.jpg",
+    "coverThumbnail": "covers/2026-10-25-note-1wo3ckl-450.webp"
+  },
+  {
     "id": "2026-10-25-note-1ey6i0c",
     "type": "note",
     "typeLabel": "투자 인사이트",
