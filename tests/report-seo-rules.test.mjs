@@ -2,10 +2,6 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import {
-  FLOW_NOTABLE_BILLION,
-  FLOW_STRONG_BILLION,
-  KOSDAQ_UNUSUAL_PCT,
-  dailySecondaryFact,
   formatFlowAmount,
   formatSignedPct,
   reportDescription,
@@ -45,9 +41,9 @@ const enDaily = { id: 'en-0915', type: 'daily', lang: 'en', reportDate: '2026-09
 const facts0915 = extractDailyFacts(snapshot('2026-09-15'), { takeaway_ko: '', takeaway_en: '' });
 const tagRegistry = { kospi: { ko: 'KOSPI', en: 'KOSPI' }, kosdaq: { ko: 'KOSDAQ', en: 'KOSDAQ' }, flows: { ko: '수급', en: 'Flows' }, semiconductors: { ko: '반도체', en: 'Semiconductors' }, rates: { ko: '금리', en: 'Rates' }, policy: { ko: '정책', en: 'Policy' }, treasuries: { ko: '미국채', en: 'U.S. Treasuries' }, stablecoins: { ko: '스테이블코인', en: 'Stablecoins' } };
 
-test('Daily title reads market fact → date → brand and the H1 stays editorial', () => {
-  assert.equal(reportSeoTitle(koDaily, { facts: facts0915 }), '코스피 6,627.26 마감 · 외국인 1.57조 순매도 | 9월 15일 증시 | Snowshagal');
-  assert.equal(reportSeoTitle(enDaily, { facts: facts0915 }), 'KOSPI 6,627.26 Close · Foreign Net Sell KRW 1.57tn | Sep 15 | Snowshagal');
+test('Daily title reads date → closes → investor flows → brand and the H1 stays editorial', () => {
+  assert.equal(reportSeoTitle(koDaily, { facts: facts0915 }), '9월 15일 코스피 6,627.26 · 코스닥 812.41 마감 | 외국인·기관 수급 | Snowshagal');
+  assert.equal(reportSeoTitle(enDaily, { facts: facts0915 }), 'Sep 15 KOSPI 6,627.26 · KOSDAQ 812.41 Close & Flows | Snowshagal');
   // The literary headline is not in the <title> once real numbers exist…
   assert.doesNotMatch(reportSeoTitle(koDaily, { facts: facts0915 }), /바람은 다른 곳으로/);
   // …and it is exactly what the structured data still calls the headline.
@@ -59,7 +55,7 @@ test('Daily title reads market fact → date → brand and the H1 stays editoria
 
 test('Daily description carries close, change, flows and the takeaway without repeating the title', () => {
   const ko = reportDescription(koDaily, { facts: facts0915 });
-  assert.equal(ko, '2026년 9월 15일 코스피 6,627.26 (-0.85%), 코스닥 812.41 (+0.70%) 마감. 외국인 1.57조 순매도 · 기관 9,040억 순매도.');
+  assert.equal(ko, '2026년 9월 15일 코스피 6,627.26 (-0.85%), 코스닥 812.41 (+0.70%) 마감. 수급: 외국인 1.57조 순매도 · 기관 9,040억 순매도.');
   const en = reportDescription(enDaily, { facts: facts0915 });
   assert.equal(en, 'Sep 15, 2026: KOSPI closed at 6,627.26 (-0.85%), KOSDAQ 812.41 (+0.70%). Foreign investors net sold KRW 1.57tn; institutions net sold KRW 904bn.');
   assert.notEqual(ko, reportSeoTitle(koDaily, { facts: facts0915 }));
@@ -67,7 +63,7 @@ test('Daily description carries close, change, flows and the takeaway without re
 
   // The Market Close row's own takeaway wins, then the post's, then its summary.
   const withRow = extractDailyFacts(snapshot('2026-09-15'), { takeaway_ko: '반도체가 지수를 받쳤다.', takeaway_en: 'Chips held the index.' });
-  assert.match(reportDescription(koDaily, { facts: withRow }), /마감\. 외국인 1\.57조 순매도 · 기관 9,040억 순매도\. 반도체가 지수를 받쳤다\.$/);
+  assert.match(reportDescription(koDaily, { facts: withRow }), /마감\. 수급: 외국인 1\.57조 순매도 · 기관 9,040억 순매도\. 반도체가 지수를 받쳤다\.$/);
   assert.match(reportDescription(enDaily, { facts: withRow }), /KRW 904bn\. Chips held the index\.$/);
   assert.match(reportDescription({ ...koDaily, takeaway: '오늘의 한 줄' }, { facts: facts0915 }), /순매도\. 오늘의 한 줄\.$/);
   assert.match(reportDescription({ ...koDaily, summary: '요약 문장이다.' }, { facts: facts0915 }), /순매도\. 요약 문장이다\.$/);
@@ -76,13 +72,18 @@ test('Daily description carries close, change, flows and the takeaway without re
   assert.ok(long.length <= 180 && long.startsWith('2026년 9월 15일 코스피 6,627.26'));
 });
 
-test('secondary fact prefers a large foreign flow, then an unusual KOSDAQ move, then a notable flow, then the KOSDAQ close', () => {
+test('Daily title names only what the row has: no KOSDAQ close, no flows', () => {
   const at = (overrides) => extractDailyFacts(snapshot('2026-09-15', overrides));
-  assert.equal(dailySecondaryFact(at({ foreign: FLOW_STRONG_BILLION }), 'ko'), '외국인 5,000억 순매수');
-  assert.equal(dailySecondaryFact(at({ foreign: 120, kosdaq: [780.1, -KOSDAQ_UNUSUAL_PCT] }), 'ko'), '코스닥 780.10 (-1.50%)');
-  assert.equal(dailySecondaryFact(at({ foreign: 120, kosdaq: [812.41, 0.4] }), 'en'), 'Foreign Net Buy KRW 120bn');
-  assert.equal(dailySecondaryFact(at({ foreign: FLOW_NOTABLE_BILLION - 1, kosdaq: [812.41, 0.4] }), 'ko'), '코스닥 812.41 (+0.40%)');
-  assert.equal(dailySecondaryFact(at({ foreign: null, kosdaq: null }), 'ko'), '코스피 -0.85%');
+  assert.equal(reportSeoTitle(koDaily, { facts: at({ kosdaq: null }) }), '9월 15일 코스피 6,627.26 마감 | 외국인·기관 수급 | Snowshagal');
+  assert.equal(reportSeoTitle(enDaily, { facts: at({ kosdaq: null }) }), 'Sep 15 KOSPI 6,627.26 Close & Flows | Snowshagal');
+  // Flows of another date (or none) leave the flows segment out of the title and the description.
+  const noFlows = at({ flowDate: '2026-09-14' });
+  assert.equal(reportSeoTitle(koDaily, { facts: noFlows }), '9월 15일 코스피 6,627.26 · 코스닥 812.41 마감 | Snowshagal');
+  assert.equal(reportSeoTitle(enDaily, { facts: noFlows }), 'Sep 15 KOSPI 6,627.26 · KOSDAQ 812.41 Close | Snowshagal');
+  assert.doesNotMatch(reportDescription(koDaily, { facts: noFlows }), /수급/);
+  // One side of the flow is enough to name the flows.
+  assert.match(reportSeoTitle(koDaily, { facts: at({ institution: 0 }) }), /\| 외국인·기관 수급 \|/);
+  assert.match(reportDescription(koDaily, { facts: at({ institution: 0 }) }), /수급: 외국인 1\.57조 순매도\.$/);
   assert.equal(formatFlowAmount(-3338, 'ko'), '3.34조');
   assert.equal(formatFlowAmount(-2300, 'en'), 'KRW 2.3tn');
   assert.equal(formatFlowAmount(904, 'ko'), '9,040억');
@@ -100,8 +101,8 @@ test('numbers are used only when the snapshot is final, regular-session and for 
   assert.equal(extractDailyFacts(snapshot('2026-09-15', { kosdaq: null })).kosdaq, null);
   // Facts for another date never decorate this report.
   const stale = extractDailyFacts(snapshot('2026-09-14'));
-  assert.equal(reportSeoTitle(koDaily, { facts: stale }), '9월 15일 증시 마감 · 바람은 다른 곳으로 갔다 | Snowshagal');
-  assert.equal(reportSeoTitle(enDaily, { facts: null }), 'Sep 15 Korea Market Close · The Wind Moved Elsewhere | Snowshagal');
+  assert.equal(reportSeoTitle(koDaily, { facts: stale }), '9월 15일 코스피·코스닥 마감 · 바람은 다른 곳으로 갔다 | Snowshagal');
+  assert.equal(reportSeoTitle(enDaily, { facts: null }), 'Sep 15 KOSPI & KOSDAQ Close · The Wind Moved Elsewhere | Snowshagal');
   // Without numbers, and with no editorial line, the description is the facts of the page.
   assert.equal(reportDescription(koDaily), '2026년 9월 15일 데일리 — 바람은 다른 곳으로 갔다.');
   assert.equal(reportDescription(enDaily), 'Sep 15, 2026 Daily — The Wind Moved Elsewhere.');
@@ -177,7 +178,7 @@ test('titles and descriptions escape &, <, ₩ and % safely and leave canonical,
   const posts = [koDaily, enDaily, { ...koDaily, id: 'ko-pair', translationGroup: 'g1', href: 'reports/pair.html' }];
   const spiky = extractDailyFacts(snapshot('2026-09-15'), { takeaway_ko: 'A & B <c> ₩1,000 & 5%', takeaway_en: 'A & B <c> ₩1,000 & 5%' });
   const tags = reportSeoTags(posts, enDaily, { facts: spiky, tagRegistry });
-  assert.match(tags, /<title>KOSPI 6,627\.26 Close · Foreign Net Sell KRW 1\.57tn \| Sep 15 \| Snowshagal<\/title>/);
+  assert.match(tags, /<title>Sep 15 KOSPI 6,627\.26 · KOSDAQ 812\.41 Close &amp; Flows \| Snowshagal<\/title>/);
   assert.match(tags, /<meta name="description" content="[^"]*A &amp; B &lt;c&gt; ₩1,000 &amp; 5%\."/);
   assert.doesNotMatch(tags, /content="[^"]*<c>/);
   assert.match(tags, /<link rel="canonical" href="https:\/\/snowshagal\.com\/reports\/en\/2026-09-15_KOSPI_Daily_Report_EN_publish">/);
@@ -193,7 +194,7 @@ test('titles and descriptions escape &, <, ₩ and % safely and leave canonical,
   assert.ok(JSON.parse(jsonLd)['@graph'][1].description.includes('A & B <c> ₩1,000 & 5%'));
   // Without options the tags are the same shape they always were.
   const plain = reportSeoTags(posts, enDaily);
-  assert.match(plain, /<title>Sep 15 Korea Market Close · The Wind Moved Elsewhere \| Snowshagal<\/title>/);
+  assert.match(plain, /<title>Sep 15 KOSPI &amp; KOSDAQ Close · The Wind Moved Elsewhere \| Snowshagal<\/title>/);
   assert.match(plain, /<meta name="description" content="Sep 15, 2026 Daily — The Wind Moved Elsewhere\.">/);
 });
 
@@ -245,14 +246,14 @@ test('the middleware injects fact-based tags for a published report and dated fa
   const assets = { fetch: async (request) => (String(request.url).includes('tags.json') ? Response.json(tagRegistry) : Response.json(posts)) };
 
   const withFacts = await render({ ASSETS: assets, COMMENTS_DB: fakeDb({ '2026-09-15': { payload: snapshot('2026-09-15') } }) });
-  assert.match(withFacts, /<title>KOSPI 6,627\.26 Close · Foreign Net Sell KRW 1\.57tn \| Sep 15 \| Snowshagal<\/title>/);
+  assert.match(withFacts, /<title>Sep 15 KOSPI 6,627\.26 · KOSDAQ 812\.41 Close &amp; Flows \| Snowshagal<\/title>/);
   assert.match(withFacts, /<meta name="description" content="Sep 15, 2026: KOSPI closed at 6,627\.26 \(-0\.85%\), KOSDAQ 812\.41 \(\+0\.70%\)\. Foreign investors net sold KRW 1\.57tn; institutions net sold KRW 904bn\.">/);
   assert.equal((withFacts.match(/<title>/g) || []).length, 1, 'the uploaded title is replaced, not duplicated');
   assert.doesNotMatch(withFacts, /content="uploaded"/);
   assert.match(withFacts, /<h1>The Wind Moved Elsewhere<\/h1>/, 'H1 is untouched');
 
   const withoutFacts = await render({ ASSETS: assets });
-  assert.match(withoutFacts, /<title>Sep 15 Korea Market Close · The Wind Moved Elsewhere \| Snowshagal<\/title>/);
+  assert.match(withoutFacts, /<title>Sep 15 KOSPI &amp; KOSDAQ Close · The Wind Moved Elsewhere \| Snowshagal<\/title>/);
   assert.doesNotMatch(withoutFacts, /6,627/);
 });
 

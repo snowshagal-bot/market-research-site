@@ -330,11 +330,6 @@ function reportDateLabel(post, lang) {
 // never to a guess scraped out of the HTML.
 // ---------------------------------------------------------------------------
 const DESCRIPTION_MAX = 180;
-// KRW billion: 500 = 5,000억 is a flow worth leading the title with;
-// 100 = 1,000억 is still worth naming once KOSDAQ has nothing unusual.
-export const FLOW_STRONG_BILLION = 500;
-export const FLOW_NOTABLE_BILLION = 100;
-export const KOSDAQ_UNUSUAL_PCT = 1.5;
 const EN_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const normalizeText = (value) => String(value || '').replace(/\s+/g, ' ').trim();
@@ -414,18 +409,16 @@ export function postTagLabels(post, lang, tagRegistry = null, max = 3) {
     .slice(0, max);
 }
 
-// The one fact that follows the KOSPI close in a Daily title, in order of
-// how much it says about the day: a large foreign flow, an unusual KOSDAQ
-// move, a smaller but still notable flow, then simply the KOSDAQ close.
-export function dailySecondaryFact(facts, lang) {
-  const foreign = facts?.foreignNet;
-  const kosdaq = facts?.kosdaq;
-  const kosdaqText = kosdaq ? `${lang === 'en' ? 'KOSDAQ' : '코스닥'} ${formatIndexLevel(kosdaq.close)} (${formatSignedPct(kosdaq.pct)})` : '';
-  if (typeof foreign === 'number' && Math.abs(foreign) >= FLOW_STRONG_BILLION) return flowPhrase('foreign', foreign, lang);
-  if (kosdaq && Math.abs(kosdaq.pct) >= KOSDAQ_UNUSUAL_PCT) return kosdaqText;
-  if (typeof foreign === 'number' && Math.abs(foreign) >= FLOW_NOTABLE_BILLION) return flowPhrase('foreign', foreign, lang);
-  if (kosdaq) return kosdaqText;
-  return `${lang === 'en' ? 'KOSPI' : '코스피'} ${formatSignedPct(facts.kospi.pct)}`;
+// The closes a Daily title names, in the words people search with: the
+// KOSPI close, then the KOSDAQ close when the row has one.
+function dailyCloses(facts, lang) {
+  const kospi = `${lang === 'en' ? 'KOSPI' : '코스피'} ${formatIndexLevel(facts.kospi.close)}`;
+  return facts.kosdaq ? `${kospi} · ${lang === 'en' ? 'KOSDAQ' : '코스닥'} ${formatIndexLevel(facts.kosdaq.close)}` : kospi;
+}
+
+// Whether the row carries the session's foreign or institutional net flow.
+function hasDailyFlows(facts) {
+  return [facts?.foreignNet, facts?.institutionNet].some((value) => typeof value === 'number' && Number.isFinite(value) && value !== 0);
 }
 
 function dailyFactsFor(post, facts) {
@@ -462,17 +455,19 @@ export function reportSeoTitle(post, options = {}) {
   if (post?.type === 'daily') {
     const facts = dailyFactsFor(post, options.facts);
     const day = shortDateLabel(reportDate, lang);
+    // Date, the closes and the investor flows, as a search for the day's
+    // close is typed: "10월 22일 코스피 코스닥 마감 외국인 기관 수급".
     if (facts && day) {
-      const secondary = dailySecondaryFact(facts, lang);
+      const flows = hasDailyFlows(facts);
       return lang === 'en'
-        ? `KOSPI ${formatIndexLevel(facts.kospi.close)} Close · ${secondary} | ${day} | Snowshagal`
-        : `코스피 ${formatIndexLevel(facts.kospi.close)} 마감 · ${secondary} | ${day} 증시 | Snowshagal`;
+        ? `${day} ${dailyCloses(facts, lang)} Close${flows ? ' & Flows' : ''} | Snowshagal`
+        : `${day} ${dailyCloses(facts, lang)} 마감${flows ? ' | 외국인·기관 수급' : ''} | Snowshagal`;
     }
     // No published close for this date: say what the page is, with no number.
     if (day) {
       return lang === 'en'
-        ? `${day} Korea Market Close · ${title} | Snowshagal`
-        : `${day} 증시 마감 · ${title} | Snowshagal`;
+        ? `${day} KOSPI & KOSDAQ Close · ${title} | Snowshagal`
+        : `${day} 코스피·코스닥 마감 · ${title} | Snowshagal`;
     }
   }
 
@@ -565,7 +560,7 @@ export function reportDescription(post, options = {}) {
         .filter(Boolean);
       const parts = lang === 'en'
         ? [`${date}: KOSPI closed at ${kospi}${kosdaq ? `, KOSDAQ ${kosdaq}` : ''}.`, flows.length ? `${flows.join('; ')}.` : '']
-        : [`${date} 코스피 ${kospi}${kosdaq ? `, 코스닥 ${kosdaq}` : ''} 마감.`, flows.length ? `${flows.join(' · ')}.` : ''];
+        : [`${date} 코스피 ${kospi}${kosdaq ? `, 코스닥 ${kosdaq}` : ''} 마감.`, flows.length ? `수급: ${flows.join(' · ')}.` : ''];
       return limitText([...parts, sentence(dailyTakeaway(post, facts, lang))].filter(Boolean).join(' '));
     }
   }

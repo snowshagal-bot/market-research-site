@@ -186,8 +186,11 @@ basis notice; it never decides the Market date or stale state.
 Report `<title>` and meta description are generated for search intent while the H1 keeps
 the editorial headline. `functions/_report-facts.js` reads the published Market Close row for
 the report's date (D1 `market_close_snapshots`, final snapshots only) and `functions/_seo.js`
-writes Daily titles as `코스피 {close} 마감 · {secondary fact} | {M월 D일} 증시 | Snowshagal`
-(`KOSPI {close} Close · {fact} | {Mon D} | Snowshagal`), Weekly titles as
+writes Daily titles as `{M월 D일} 코스피 {close} · 코스닥 {close} 마감 | 외국인·기관 수급 | Snowshagal`
+(`{Mon D} KOSPI {close} · KOSDAQ {close} Close & Flows | Snowshagal`;
+the flows segment only when the row has a foreign or institutional net flow, owner request
+2026-10-25 after GSC showed date + 코스피·코스닥 + 마감 + 외국인·기관 수급 queries; the KO
+description labels the flow sentence `수급:`), Weekly titles as
 `코스피 주간 {pct} · {tag labels} | {Mon–Fri period} | Snowshagal`, and Research titles
 topic-first (`{title} | {tag labels} 리서치 | Snowshagal`). A Research, Note or Basics post may
 carry its own search title (`seoTitle` in `data/posts.json`, owner decision 2026-10-06): the
