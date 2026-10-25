@@ -119,6 +119,33 @@ function replaceCategoryAlternates(body, markup) {
   return markup ? withoutAlternates.replace(/<\/head>/i, `${markup}</head>`) : withoutAlternates;
 }
 
+// Repository files that ship with the Pages output but are not part of the
+// site: operating docs, tooling, tests, CI config and database schema. They
+// answer like any missing page. /contracts/ stays public: the market API reads
+// its JSON schema from there.
+const REPO_INTERNAL_PATH = /^\/(?:(?:docs|scripts|tests|\.github|db|migrations)(?:\/|$)|(?:AGENTS|README)\.md$|\.gitignore$)/i;
+
+export function isRepoInternalPath(pathname) {
+  let path = pathname;
+  try { path = decodeURIComponent(pathname); } catch (_) {}
+  return REPO_INTERNAL_PATH.test(path);
+}
+
+// The site's own 404 page, with its 404 status; a plain 404 when the asset
+// binding is unavailable.
+async function notFoundResponse(context, url) {
+  const headers = { 'x-robots-tag': 'noindex, nofollow', 'cache-control': 'public, max-age=300' };
+  try {
+    const page = await context.env?.ASSETS?.fetch(new Request(new URL('/__not-found__', url)));
+    if (page && page.status === 404) {
+      const merged = new Headers(page.headers);
+      for (const [name, value] of Object.entries(headers)) merged.set(name, value);
+      return new Response(page.body, { status: 404, headers: merged });
+    }
+  } catch (_) {}
+  return new Response('Not Found', { status: 404, headers: { ...headers, 'content-type': 'text/plain; charset=utf-8' } });
+}
+
 const LEGACY_REPORT_HTML = /^\/reports\/.+\.html$/i;
 
 // /reports/<path>.html → 301 /reports/<path>(?query). Pages answers an existing
@@ -153,6 +180,8 @@ export async function onRequest(context) {
       headers: { location: apexDecision.location, 'cache-control': 'private, no-store, max-age=0' }
     });
   }
+
+  if (isRepoInternalPath(url.pathname)) return notFoundResponse(context, url);
 
   if (isHumanAdminHost(url) && isAdminUiPath(url.pathname)) {
     const isLoginPath = url.pathname === '/admin/login' || url.pathname === '/admin/login/';
