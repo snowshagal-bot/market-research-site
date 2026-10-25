@@ -10,14 +10,17 @@ const COMPANY_URL = 'https://opendart.fss.or.kr/api/company.json';
 const SOURCE = 'opendart-company-names';
 const STATE_PREFIX = 'calendar-company-name:';
 export const MAX_COMPANY_NAMES_PER_RUN = 8;
+class CompanyLookupError extends Error {
+  constructor(reason, httpStatus = null) { super(reason); this.httpStatus = httpStatus; }
+}
 
 /**
  * Fill missing names once during the existing daily sync, never on a public
  * request. Existing/admin names win. Failed/empty lookups rotate to the back
  * of the queue and are tried at most once per Seoul day.
  *
- * At most 8 requests, after the 22 official-source and 16 document requests:
- * 46 total, leaving headroom under the existing 50-subrequest budget.
+ * At most eight requests in its own invocation, independent of the official
+ * schedule/document pass. Both still share the daily OpenDART budget.
  */
 export async function syncCompanyNames(db, { env = {}, fetchImpl = fetch, now = new Date() } = {}) {
   const result = { sourceName: SOURCE, status: 'ok', attempted: 0, updated: 0, unavailable: 0, requests: 0, budgetExhausted: false };
@@ -58,23 +61,33 @@ export async function syncCompanyNames(db, { env = {}, fetchImpl = fetch, now = 
         redirect: 'error',
         signal: AbortSignal.timeout(4000)
       });
-      if (!response.ok) throw new Error('HTTP failure');
+      if (!response.ok) {
+        const status = Number.isInteger(response.status) ? response.status : null;
+        throw new CompanyLookupError(status ? `HTTP ${status}` : 'HTTP failure', status);
+      }
       const payload = await response.json();
+      if (payload?.status !== '000') {
+        const code = /^\d{3}$/.test(String(payload?.status)) ? payload.status : 'invalid response';
+        throw new CompanyLookupError(`OpenDART ${code}`);
+      }
       // Do not persist a mismatched company or a translated/invented name.
-      if (payload?.status !== '000' || payload.stock_code !== company.stock_code ||
+      if (payload.stock_code !== company.stock_code ||
           (payload.corp_code && payload.corp_code !== company.corp_code)) {
-        throw new Error('Invalid company response');
+        throw new CompanyLookupError('company identifier mismatch');
       }
       name = String(payload.corp_name_eng || '').trim();
       if (!name || name.length > 200 || !/[A-Za-z]/.test(name) || /[\u0000-\u001f\u007f]/.test(name)) {
         result.unavailable += 1;
         continue;
       }
-    } catch (_) {
+    } catch (error) {
       // Never log a fetch error or upstream payload: it can contain the key
       // from the request URL or unrelated company-contact information.
       result.status = 'error';
-      result.error = 'Official company name lookup failed; existing names preserved';
+      const reason = error instanceof CompanyLookupError ? error.message
+        : ['TimeoutError', 'AbortError'].includes(error?.name) ? 'timeout' : 'network or invalid JSON';
+      result.error = `Official company name lookup failed (${reason}); existing names preserved`;
+      result.httpStatus = error instanceof CompanyLookupError ? error.httpStatus : null;
       result.stage = 'fetch';
       continue;
     }

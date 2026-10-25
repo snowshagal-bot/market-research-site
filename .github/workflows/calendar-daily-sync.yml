@@ -8,6 +8,12 @@ on:
     # 16:40 KST on weekdays (07:40 UTC), after the OpenDART sync at 16:05.
     - cron: "40 7 * * 1-5"
   workflow_dispatch:
+    inputs:
+      scope:
+        description: 'Full calendar and company names, or company-name backfill only'
+        type: choice
+        options: [all, company-names]
+        default: all
 
 permissions:
   contents: read
@@ -36,7 +42,14 @@ jobs:
           DISCLOSURE_SYNC_KEY: ${{ secrets.DISCLOSURE_SYNC_KEY }}
           # Every failure names its source and stage here; the alert quotes it.
           CALENDAR_SYNC_REPORT: ${{ runner.temp }}/calendar-sync-report.txt
-        run: node scripts/sync-calendar.mjs
+          CALENDAR_SYNC_SCOPE: ${{ inputs.scope || 'all' }}
+        run: |
+          calendar_run_status=0
+          if [ "$CALENDAR_SYNC_SCOPE" = "all" ]; then
+            node scripts/sync-calendar.mjs || calendar_run_status=$?
+          fi
+          node scripts/sync-calendar.mjs --scope company-names || calendar_run_status=$?
+          exit "$calendar_run_status"
 
       - name: Open or update the operator alert
         if: steps.sync.outcome == 'failure'
@@ -75,7 +88,7 @@ jobs:
             }
 
       - name: Close a recovered operator alert
-        if: steps.sync.outcome == 'success'
+        if: steps.sync.outcome == 'success' && inputs.scope != 'company-names'
         uses: actions/github-script@v7
         with:
           script: |

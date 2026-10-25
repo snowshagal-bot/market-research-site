@@ -10,6 +10,14 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+- **Calendar name-sync isolation (2026-10-25, follow-up rollout)**: #180 is
+  deployed and its exact-SHA Production smoke passed. Initial full sync attempts
+  returned Cloudflare `origin_bad_gateway` (502) before names were stored. The
+  workflow now runs names in an independent request even after a full-run failure,
+  with an optional `company-names` dispatch scope for initial backfill. Record
+  collection coverage and full-run recovery in the follow-up PR; a name-only run
+  must not close an outstanding full-calendar collection alert.
+
 - **Calendar improvements (2026-10-25, owner-approved rollout — #180)**:
   official English company names are filled by the existing calendar sync (up to
   eight per run). KO/EN month/market/type selections persist across language
