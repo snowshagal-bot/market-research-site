@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-25-note-1ey6i0c",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-10-25",
+    "reportDate": "2026-10-25",
+    "registeredDate": "2026-10-25",
+    "registeredAt": "2026-10-25T11:29:29.249Z",
+    "legacyImport": false,
+    "title": "같은 SK하이닉스, 뉴욕에서는 40% 넘게 비싸다",
+    "seoTitle": "같은 SK하이닉스, 뉴욕에서는 40% 넘게 비싸다 | Snowshagal 투자노트 NO.17",
+    "subtitle": "",
+    "description": "SK하이닉스 ADR은 본주보다 40% 넘게 비싸게 거래된다(10월 23일 42.1%). 뉴욕 가격은 서울 본주의 목표가가 아니다. 두 시장의 수요가 다르고, 본주를 ADR로 바꿔 차이를 좁히는 길은 예탁 한도가 차서 막혀 있다. 서울 주가를 받쳐 주던 40조원 자사주 매입(2,369만주)도 10월 21일 끝났다. 10월 28일 실적 발표에서 볼 것을 정리했다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors",
+      "u-s-a"
+    ],
+    "readingMinutes": 11,
+    "href": "reports/20261025_Investment_Note_SK_hynix_ADR_Gap.html",
+    "coverImage": "covers/2026-10-25-note-1ey6i0c.webp",
+    "shareCardImage": "covers/share/2026-10-25-note-1ey6i0c.jpg",
+    "coverThumbnail": "covers/2026-10-25-note-1ey6i0c-450.webp"
+  },
+  {
     "id": "2026-10-24-weekly-1hvolaz",
     "type": "weekly",
     "typeLabel": "Weekly",
