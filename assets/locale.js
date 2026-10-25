@@ -353,6 +353,18 @@
     if (/^\/en\/about\/?$/i.test(path) || /^\/about\/?$/i.test(path)) {
       return targetLanguage === 'en' ? '/en/about/' : '/about/';
     }
+    if (/^\/(?:en\/)?calendar\/(?:index\.html)?$/i.test(path) || /^\/(?:en\/)?calendar$/i.test(path)) {
+      const input = new URLSearchParams(String(search || '').replace(/^\?/, ''));
+      const params = new URLSearchParams();
+      const year = Number(input.get('year'));
+      const month = Number(input.get('month'));
+      const market = String(input.get('market') || '').toUpperCase();
+      if (Number.isInteger(year) && year >= 2020 && year <= 2030) params.set('year', String(year));
+      if (Number.isInteger(month) && month >= 1 && month <= 12) params.set('month', String(month));
+      if (['KRX', 'NYSE'].includes(market)) params.set('market', market);
+      const base = targetLanguage === 'en' ? '/en/calendar/' : '/calendar/';
+      return params.size ? `${base}?${params}` : base;
+    }
     if (/^\/en\/market\/?$/i.test(path) || /^\/market\/?$/i.test(path)) {
       const searchParams = new URLSearchParams(String(search || '').replace(/^\?/, ''));
       const date = searchParams.get('date');

@@ -31,6 +31,7 @@ import {
 } from './_calendar-sources.js';
 import { CalendarEventError, cancelMissingEvents, recordSourceRun, upsertEvent } from './_calendar-events.js';
 import { syncCorporateEvents } from './api/disclosures/_calendar-corporate.js';
+import { syncCompanyNames } from './api/disclosures/_company-names.js';
 
 /** How far ahead the calendar keeps events. Two years covers every source. */
 export const SYNC_YEARS_AHEAD = 1;
@@ -362,6 +363,7 @@ export async function runCalendarSync(db, { env = {}, fetchImpl = fetch, now = n
   // Company dates come last: they read filings the disclosure sync has already
   // stored, and they are the only part that spends the OpenDART budget.
   await step('opendart-corporate', () => syncCorporateEvents(db, { env, fetchImpl, now }));
+  await step('opendart-company-names', () => syncCompanyNames(db, { env, fetchImpl, now }));
 
   const failures = failuresOf(results);
   return {

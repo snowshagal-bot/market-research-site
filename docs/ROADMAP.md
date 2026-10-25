@@ -10,6 +10,23 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+- **Calendar company English names (2026-10-25, PR review/deployment pending)**:
+  fill missing names from official OpenDART company overviews during the existing
+  daily calendar sync. After approval and deployment, the next weekday 16:40 KST
+  sync starts filling names (up to eight per run); the existing 30-company seed
+  needs at least four successful runs, with extra tracked companies taking longer.
+  Verify `/api/calendar` returns populated `company.nameEn` and `/en/calendar/`
+  shows the same names before and after hydration and in day details. No Production
+  data writes, sync triggers or deployment were performed as part of this PR.
+  Calendar KO/EN switching now preserves the valid month/market selection on the
+  matching page. Local fixtures verified at mobile 390px and desktop 1280px
+  without page overflow. The full verification gate has one existing main-data
+  failure: the 2026-10-24 Investment Insights translation pair has a different tag
+  order (`rates,fx,kospi,kosdaq` vs `kospi,kosdaq,rates,fx`). Resolve before rollout;
+  this PR does not change published report metadata.
+  Validation: 1,408/1,409 tests pass (only that existing failure); supplemental
+  syntax/invariant checks and SEO audit pass (112 advisory warnings, no hard errors).
+
 - **GA4 public-site measurement (2026-10-23, owner-approved rollout — #177)**: the common response layer adds `G-L3XBBY93CG` to successful KO/EN public HTML and future reports. All 1,396 tests, syntax/invariant checks and the SEO audit pass. The owner disabled Enhanced measurement and Allow user-provided data capabilities; the public Google tag configuration was rechecked before merge. Deployment and real collection verification are recorded in PR #177; preserve the settings in `docs/GA4.md`.
 
 - **Investment Insights naming (2026-10-19, deployment pending)**: public KO `투자 인사이트` / EN `Investment Insights` labels are synchronized across navigation, HOME, category pages, report shell, footer, SEO and admin. Internal `note` and `/notes/` URLs stay unchanged; old and new upload labels both work. KO/EN mobile (390px iframe) and desktop (1280px iframe) checked without page overflow. Verification: 1,385/1,387 tests pass; the unchanged main data already fails summary-line-break and duplicate-translation-group checks. Changed JS syntax, whitespace and SEO audit pass. Resolve or review those existing data failures before Production deployment.

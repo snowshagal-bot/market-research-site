@@ -200,6 +200,18 @@
     } else {
       window.history.pushState({}, '', url.toString());
     }
+    syncLanguageLinks();
+  }
+
+  function syncLanguageLinks() {
+    const pathFor = window.MARKET_LOCALE?.pageLanguagePath;
+    if (typeof pathFor !== 'function') return;
+    document.querySelectorAll('[data-language-choice]').forEach(link => {
+      const target = link.dataset.languageChoice;
+      if (target === 'ko' || target === 'en') {
+        link.href = pathFor(window.location.pathname, target, window.location.search);
+      }
+    });
   }
 
   async function fetchCalendar(year, month) {
@@ -724,12 +736,14 @@
 
     window.addEventListener('popstate', () => {
       parseUrlState();
+      syncLanguageLinks();
       loadData();
     });
   }
 
   function init() {
     parseUrlState();
+    syncLanguageLinks();
     // Update active filter button
     document.querySelectorAll('.calendar-filter-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.filter === state.filter);

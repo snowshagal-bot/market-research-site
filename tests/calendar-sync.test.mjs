@@ -100,6 +100,26 @@ test('one pass fills the calendar from every source', async () => {
   db.close();
 });
 
+test('the normal calendar pass also fills missing official company names', async () => {
+  const db = await freshDb();
+  const pages = pageFetch();
+  const outcome = await runCalendarSync(db, {
+    env: { OPENDART_API_KEY: 'test-key' }, now: NOW,
+    fetchImpl: async (url, options) => {
+      if (String(url).includes('/api/company.json')) {
+        const corpCode = new URL(url).searchParams.get('corp_code');
+        const company = db.row('SELECT stock_code FROM disclosure_watchlist WHERE corp_code = ?', corpCode);
+        return { ok: true, json: async () => ({ status: '000', corp_code: corpCode, stock_code: company.stock_code, corp_name_eng: `Company ${company.stock_code}` }) };
+      }
+      return pages(url, options);
+    }
+  });
+  assert.equal(outcome.ok, true);
+  assert.equal(runOf(outcome.results, 'opendart-company-names').updated, 8);
+  assert.ok((await getEventsForMonth(db, 2026, 9)).length > 0);
+  db.close();
+});
+
 test('running the pass twice changes nothing', async () => {
   const db = await freshDb();
   await runCalendarSync(db, { fetchImpl: pageFetch(), now: NOW });
