@@ -432,6 +432,8 @@ html[data-theme="dark"] {
 
 /* Responsive adjustments */
 @media (max-width: 760px) {
+  /* The mobile header includes the 40px navigation row. */
+  .calendar-toolbar-section { top:100px; }
   .calendar-toolbar {
     flex-direction: column;
     align-items: stretch;
@@ -618,7 +620,7 @@ html[data-theme="dark"] {
 
 .calendar-kind-control { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-2); }
 .calendar-kind-control select { max-width:100%; min-height:40px; padding:6px 10px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--text); font:inherit; cursor:pointer; }
-.calendar-agenda { margin:0 0 24px; padding:20px; border:1px solid var(--line); border-radius:12px; background:var(--panel); }
+.calendar-agenda { margin:20px 0 24px; padding:20px; border:1px solid var(--line); border-radius:12px; background:var(--panel); }
 .calendar-agenda h2 { margin:0; font-size:18px; letter-spacing:-.02em; }
 .calendar-agenda-scope, .calendar-agenda-empty { margin:8px 0 0; font-size:12px; color:var(--muted); }
 .calendar-agenda-list { list-style:none; margin:12px 0 0; padding:0; }

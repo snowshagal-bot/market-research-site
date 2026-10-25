@@ -18,9 +18,11 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   month with KST times, expandable remaining entries and day-detail links.
   The 2026-10-24 Investment Insights pair's English tags were reordered to match
   its Korean counterpart; tag membership and uploaded report HTML are unchanged.
-  Full repository verification now passes. Remaining rollout checks: exact-SHA
-  Cloudflare deployment, Production smoke, initial English-name backfill through
-  the existing workflow, and live KO/EN mobile/desktop filter/navigation checks.
+  Full repository verification passes (1,419 tests). Preview KO/EN filters,
+  language/month preservation and day-detail links were checked at 390px and
+  1280px without overflow. See PR #180 for the exact-SHA Cloudflare deployment,
+  Production smoke, initial English-name backfill through the existing workflow,
+  and live KO/EN verification results.
 
 - **GA4 public-site measurement (2026-10-23, owner-approved rollout — #177)**: the common response layer adds `G-L3XBBY93CG` to successful KO/EN public HTML and future reports. All 1,396 tests, syntax/invariant checks and the SEO audit pass. The owner disabled Enhanced measurement and Allow user-provided data capabilities; the public Google tag configuration was rechecked before merge. Deployment and real collection verification are recorded in PR #177; preserve the settings in `docs/GA4.md`.
 
