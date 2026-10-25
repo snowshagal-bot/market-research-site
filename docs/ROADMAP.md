@@ -10,6 +10,13 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+- **Calendar Workers redirect compatibility (2026-10-25)**: runtime/D1 diagnostics
+  identified name fetches failing before HTTP because Workers does not implement
+  Fetch `redirect: error`. Use `manual` and reject non-2xx responses, preserving
+  the no-redirect policy. After deployment, reset only today's failed name-attempt
+  markers whose company English name is still blank, then run bounded backfills.
+  Record final coverage and ordinary sync recovery in the follow-up PR.
+
 - **Calendar name-sync isolation (2026-10-25, follow-up rollout)**: #180 is
   deployed and its exact-SHA Production smoke passed. Initial full sync attempts
   returned Cloudflare `origin_bad_gateway` (502) before names were stored. The

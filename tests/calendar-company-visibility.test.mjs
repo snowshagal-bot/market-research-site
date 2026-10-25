@@ -226,7 +226,7 @@ test('official English names reach existing calendar events without recollecting
     calls++;
     assert.equal(url.origin + url.pathname, 'https://opendart.fss.or.kr/api/company.json');
     assert.equal(url.searchParams.get('crtfc_key'), 'test-key');
-    assert.equal(options.redirect, 'error');
+    assert.equal(options.redirect, 'manual');
     return companyResponse(url.searchParams.get('corp_code'), '001440');
   };
   const result = await syncCompanyNames(db, { env: nameEnv, fetchImpl, now: NOW });
@@ -315,6 +315,21 @@ test('name lookup diagnostics include safe status codes but never upstream text'
   assert.equal(result.httpStatus, 503);
   assert.match(result.error, /HTTP 503/);
   assert.doesNotMatch(JSON.stringify(result), /secret-key/);
+  db.close();
+});
+
+test('redirects are rejected without following them or forwarding the API key', async () => {
+  const db = await seeded();
+  await unnamedCompany(db);
+  let calls = 0;
+  const result = await syncCompanyNames(db, { env: nameEnv, now: NOW, fetchImpl: async (_url, options) => {
+    calls++;
+    assert.equal(options.redirect, 'manual');
+    return { ok: false, status: 302 };
+  } });
+  assert.equal(calls, 1);
+  assert.equal(result.updated, 0);
+  assert.match(result.error, /HTTP 302/);
   db.close();
 });
 

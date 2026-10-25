@@ -58,7 +58,9 @@ export async function syncCompanyNames(db, { env = {}, fetchImpl = fetch, now = 
       url.searchParams.set('corp_code', company.corp_code);
       const response = await fetchImpl(url, {
         headers: { accept: 'application/json' },
-        redirect: 'error',
+        // Workers does not support redirect:'error'. Manual mode returns 3xx
+        // to the !ok guard below, so credentials never follow a redirect.
+        redirect: 'manual',
         signal: AbortSignal.timeout(4000)
       });
       if (!response.ok) {
