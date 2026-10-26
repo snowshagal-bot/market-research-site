@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-26-daily-1hzhyz9",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-26",
+    "reportDate": "2026-10-26",
+    "registeredDate": "2026-10-26",
+    "registeredAt": "2026-10-26T12:53:46.441Z",
+    "legacyImport": false,
+    "title": "지지대 뽑힌 자리, 약한 바람에도 휘청",
+    "subtitle": "",
+    "description": "",
+    "summary": "같은 해외 악재에도 일본은 오른 종목이 더 많았고 한국은 대부분 밀림 · 국내엔 자사주 매입까지 끝난 상태.",
+    "takeaway": "자사주 매수 끝난 뒤 업종 전부 하락",
+    "tags": [
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "kospi",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-10-26_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-26-daily-1hzhyz9.webp",
+    "shareCardImage": "covers/share/2026-10-26-daily-1hzhyz9.jpg",
+    "coverThumbnail": "covers/2026-10-26-daily-1hzhyz9-450.webp"
+  },
+  {
     "id": "2026-10-25-note-1wo3ckl",
     "type": "note",
     "typeLabel": "Investment Insights",
