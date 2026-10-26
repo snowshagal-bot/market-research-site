@@ -1,5 +1,34 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-26-daily-1pqxj5j",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-10-26",
+    "reportDate": "2026-10-26",
+    "registeredDate": "2026-10-26",
+    "registeredAt": "2026-10-26T13:32:42.678Z",
+    "legacyImport": false,
+    "title": "With the Backstop Gone, Even a Breeze Can Hurt",
+    "subtitle": "",
+    "description": "KOSPI fell below 5,500 on October 26, 2026, with only 11% of stocks rising. Why declines widened after Samsung Electronics and SK hynix completed their buybacks, plus investor flows, sectors and the next trading-day tests.",
+    "summary": "Japan had more winners than losers despite the same overseas headwinds. Most Korean stocks fell, with corporate buyback support already gone.",
+    "takeaway": "Every KOSPI sector fell after the buybacks ended",
+    "tags": [
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "kospi",
+      "semiconductors"
+    ],
+    "readingMinutes": 4,
+    "href": "reports/en/Snowshagal_Daily_2026-10-26_EN.html",
+    "translationGroup": "2026-10-26-daily-1hzhyz9",
+    "coverImage": "covers/2026-10-26-daily-1pqxj5j.webp",
+    "shareCardImage": "covers/share/2026-10-26-daily-1pqxj5j.jpg",
+    "coverThumbnail": "covers/2026-10-26-daily-1pqxj5j-450.webp"
+  },
+  {
     "id": "2026-10-26-daily-1hzhyz9",
     "type": "daily",
     "typeLabel": "주식 리포트",
