@@ -1,31 +1,5 @@
 window.RESEARCH_POSTS = [
   {
-    "id": "2026-10-26-research-1k97b59",
-    "type": "research",
-    "typeLabel": "비정기 리서치",
-    "lang": "ko",
-    "date": "2026-10-26",
-    "reportDate": "2026-10-26",
-    "registeredDate": "2026-10-26",
-    "registeredAt": "2026-10-26T13:09:28.821Z",
-    "legacyImport": false,
-    "title": "중국 D램은 정말 따라왔나",
-    "seoTitle": "중국 D램은 정말 따라왔나 | Snowshagal 리서치 NO.11",
-    "subtitle": "",
-    "description": "CXMT는 세계 D램 4위로 컸지만 제품마다 추격 수준이 다르다. 4F², G5·LPDDR6, 미국 수출통제와 증설 계획을 점검하고, 중국산 메모리가 한국 기업의 가격과 이익에 미칠 영향을 판매 가능한 비트와 장기계약을 중심으로 분석한다.",
-    "tags": [
-      "kospi",
-      "kosdaq",
-      "semiconductors",
-      "china"
-    ],
-    "readingMinutes": 16,
-    "href": "reports/리서치_NO.11_중국D램은정말따라왔나_2026.10.26_커버통합.html",
-    "coverImage": "covers/2026-10-26-research-1k97b59.webp",
-    "shareCardImage": "covers/share/2026-10-26-research-1k97b59.jpg",
-    "coverThumbnail": "covers/2026-10-26-research-1k97b59-450.webp"
-  },
-  {
     "id": "2026-10-26-daily-1hzhyz9",
     "type": "daily",
     "typeLabel": "주식 리포트",
