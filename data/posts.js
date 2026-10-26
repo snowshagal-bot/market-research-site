@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-26-research-pdnyv4",
+    "type": "research",
+    "typeLabel": "Research",
+    "lang": "en",
+    "date": "2026-10-26",
+    "reportDate": "2026-10-26",
+    "registeredDate": "2026-10-26",
+    "registeredAt": "2026-10-26T14:40:14.267Z",
+    "legacyImport": false,
+    "title": "Has China's DRAM Really Caught Up?",
+    "seoTitle": "Has China's DRAM Really Caught Up? | Snowshagal Research No. 11",
+    "subtitle": "",
+    "description": "CXMT has become the world's fourth-largest DRAM supplier, but its technological progress varies by product. This report examines 4F², G5, LPDDR6, U.S. export controls, and capacity expansion—and asks how much Chinese memory supply could pressure Korean producers' prices and profits, focusing on saleable bits and long-term agreements.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "semiconductors",
+      "china",
+      "u-s-a"
+    ],
+    "readingMinutes": 21,
+    "href": "reports/en/Snowshagal_Research_No11_Has_China_DRAM_Caught_Up_EN.html",
+    "translationGroup": "2026-10-26-research-qfwre0",
+    "coverImage": "covers/2026-10-26-research-pdnyv4.webp",
+    "shareCardImage": "covers/share/2026-10-26-research-pdnyv4.jpg",
+    "coverThumbnail": "covers/2026-10-26-research-pdnyv4-450.webp"
+  },
+  {
     "id": "2026-10-26-research-qfwre0",
     "type": "research",
     "typeLabel": "비정기 리서치",
