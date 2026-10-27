@@ -1,5 +1,30 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-27-basics-1tbz6bs",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-10-27",
+    "reportDate": "2026-10-27",
+    "registeredDate": "2026-10-28",
+    "registeredAt": "2026-10-27T17:59:08.179Z",
+    "legacyImport": false,
+    "title": "증시 대기자금은 어디로 갔나",
+    "seoTitle": "투자자예탁금 뜻: 증시 대기자금이 줄면 돈이 떠난 걸까",
+    "subtitle": "",
+    "description": "투자자예탁금이 6월 4일 139조 6,947억 원에서 10월 22일 88조 6,841억 원으로 51조 원 줄었다. 주식을 샀을까, 증시를 떠났을까. 예탁금이 늘고 주는 구조와 신용융자·반대매매·예탁금 회전율까지, 증시 대기자금 숫자 읽는 법을 퀴즈와 시뮬레이터로 설명한다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "liquidity"
+    ],
+    "readingMinutes": 6,
+    "href": "reports/시장을읽는말들_13편_증시대기자금은어디로갔나.html",
+    "coverImage": "covers/2026-10-27-basics-1tbz6bs.webp",
+    "shareCardImage": "covers/share/2026-10-27-basics-1tbz6bs.jpg",
+    "coverThumbnail": "covers/2026-10-27-basics-1tbz6bs-450.webp"
+  },
+  {
     "id": "2026-10-27-daily-rju6ai",
     "type": "daily",
     "typeLabel": "Daily",
