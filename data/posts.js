@@ -1,5 +1,34 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-27-daily-rju6ai",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-10-27",
+    "reportDate": "2026-10-27",
+    "registeredDate": "2026-10-28",
+    "registeredAt": "2026-10-27T17:50:18.563Z",
+    "legacyImport": false,
+    "title": "Kites Rose Overnight. Two Flew Highest.",
+    "subtitle": "",
+    "description": "Why the KOSPI rose 3.09% on October 27, 2026: Anthropic's S-1 filing sparked a semiconductor rally, while Samsung Electronics and SK hynix drove roughly 70% of the advance. An analysis of the opening gap, trading flows and next-day earnings risks.",
+    "summary": "The market jumped at the open on news of Anthropic's first quarterly operating profit. But it gave back roughly 100 points from its peak ahead of SK hynix's earnings release.",
+    "takeaway": "Anthropic's IPO Filing Lifts Chip Stocks",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 5,
+    "href": "reports/en/Snowshagal_Daily_2026-10-27_EN.html",
+    "translationGroup": "2026-10-27-daily-dziu95",
+    "coverImage": "covers/2026-10-27-daily-rju6ai.webp",
+    "shareCardImage": "covers/share/2026-10-27-daily-rju6ai.jpg",
+    "coverThumbnail": "covers/2026-10-27-daily-rju6ai-450.webp"
+  },
+  {
     "id": "2026-10-27-daily-dziu95",
     "type": "daily",
     "typeLabel": "주식 리포트",
