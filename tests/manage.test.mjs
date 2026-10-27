@@ -433,6 +433,37 @@ test('delete removes metadata, report HTML, and managed cover in one tree', asyn
   } finally { globalThis.fetch = originalFetch; }
 });
 
+test('delete also removes the cover thumbnail when the repository has one', async () => {
+  const thumbnail = `covers/${basePost.id}-450.webp`;
+  const post = { ...basePost, coverImage: `covers/${basePost.id}.webp`, coverThumbnail: thumbnail };
+
+  // Present: deleted with the cover.
+  let calls = githubMock([post]);
+  const mocked = globalThis.fetch;
+  globalThis.fetch = async (input, options = {}) => {
+    if (String(input).includes(`/contents/${thumbnail}?ref=base-sha`)) {
+      calls.push({ path: new URL(String(input)).pathname, method: 'GET', body: null });
+      return new Response(JSON.stringify({ sha: 'thumb-sha' }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    return mocked(input, options);
+  };
+  try {
+    const { response } = await run({ action: 'delete', confirmTitle: post.title });
+    assert.equal(response.status, 200);
+    const tree = treeFrom(calls);
+    assert.equal(tree.find((entry) => entry.path === thumbnail)?.sha, null);
+    assert.equal(tree.find((entry) => entry.path === post.coverImage)?.sha, null);
+  } finally { globalThis.fetch = originalFetch; }
+
+  // Absent: no delete entry, since deleting a missing path fails the commit.
+  calls = githubMock([post]);
+  try {
+    const { response } = await run({ action: 'delete', confirmTitle: post.title });
+    assert.equal(response.status, 200);
+    assert.equal(treeFrom(calls).some((entry) => entry.path === thumbnail), false);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
 test('delete requires the exact current title before creating a Git tree or commit', async () => {
   for (const confirmTitle of [undefined, '틀린 제목']) {
     const calls = githubMock();
