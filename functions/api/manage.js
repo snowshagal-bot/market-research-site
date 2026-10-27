@@ -889,7 +889,12 @@ export async function onRequestPost(context) {
       }
 
       entries.push(deletedEntry(existing.href));
-      if (existing.coverImage) entries.push(deletedEntry(existing.coverImage));
+      if (existing.coverImage) {
+        entries.push(deletedEntry(existing.coverImage));
+        // The homepage thumbnail beside it goes too, when there is one.
+        const thumbnail = existing.coverThumbnail || existing.coverImage.replace(/\.[a-z0-9]+$/i, "-450.webp");
+        if (await repoFileExists(env.GITHUB_TOKEN, thumbnail, baseSha)) entries.push(deletedEntry(thumbnail));
+      }
       // Only a card that was recorded exists to delete.
       if (existing.shareCardImage) entries.push(deletedEntry(existing.shareCardImage));
       entries.push(...metadataEntries(sortPosts(posts), searchIndex));
