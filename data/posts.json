@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-10-27-daily-dziu95",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-27",
+    "reportDate": "2026-10-27",
+    "registeredDate": "2026-10-28",
+    "registeredAt": "2026-10-27T17:35:21.926Z",
+    "legacyImport": false,
+    "title": "밤사이 뜬 연들, 가장 높이 두 개",
+    "subtitle": "",
+    "description": "",
+    "summary": "앤트로픽의 첫 분기 영업흑자 공개에 출발부터 뛰었고, 정점 뒤 약 100포인트를 내준 채 SK하이닉스 실적을 맞는 장.",
+    "takeaway": "앤트로픽 상장 서류에 반도체 강세",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-10-27_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-27-daily-dziu95.webp",
+    "shareCardImage": "covers/share/2026-10-27-daily-dziu95.jpg",
+    "coverThumbnail": "covers/2026-10-27-daily-dziu95-450.webp"
+  },
+  {
     "id": "2026-10-26-research-pdnyv4",
     "type": "research",
     "typeLabel": "Research",
