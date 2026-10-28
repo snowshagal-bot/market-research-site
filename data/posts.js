@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-28-daily-1smjxhs",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-28",
+    "reportDate": "2026-10-28",
+    "registeredDate": "2026-10-29",
+    "registeredAt": "2026-10-28T15:24:11.938Z",
+    "legacyImport": false,
+    "title": "아래부터 켜진 등불, 언덕 마루까지",
+    "subtitle": "",
+    "description": "",
+    "summary": "개장 전 나온 SK하이닉스의 숫자를 장중 매수가 이어받아 고가권까지 끌어올린 장.",
+    "takeaway": "SK하이닉스 실적에 반도체 급등",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-10-28_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-28-daily-1smjxhs.webp",
+    "shareCardImage": "covers/share/2026-10-28-daily-1smjxhs.jpg",
+    "coverThumbnail": "covers/2026-10-28-daily-1smjxhs-450.webp"
+  },
+  {
     "id": "2026-10-23-basics-1obaci2",
     "type": "basics",
     "typeLabel": "Market Basics",
