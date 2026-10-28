@@ -94,6 +94,11 @@ test('a sitemap missing a public URL fails, and one listing an unknown URL fails
   assert.ok(checks(extra).includes('sitemap.unexpected'));
   const duplicate = audit({ sitemap: full.replace('</urlset>', `<url><loc>${KO.canonical}</loc></url></urlset>`) });
   assert.ok(checks(duplicate).includes('sitemap.duplicate'));
+  // Market Close session pages come from D1 and are expected beside the corpus.
+  const sessions = sitemapXml(POSTS, { marketSessions: [{ market_date: '2026-10-28', published_at: '2026-10-28T07:10:35Z' }] });
+  assert.ok(!checks(audit({ sitemap: sessions })).includes('sitemap.unexpected'));
+  const lookalike = audit({ sitemap: full.replace('</urlset>', '<url><loc>https://snowshagal.com/market/2026-10-28/extra/</loc></url></urlset>') });
+  assert.ok(checks(lookalike).includes('sitemap.unexpected'));
 });
 
 test('warnings alone pass', () => {

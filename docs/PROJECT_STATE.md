@@ -117,6 +117,20 @@ The record is uploaded through `/admin/market/` against the JSON Schema in
 hosts only because their `COMMENTS_DB` is isolated; the bare Pages hostname and unrelated
 Preview hosts remain blocked, and all non-Market mutation APIs keep their existing policy.
 
+**Session pages (owner request 2026-10-28, value-up plan A).** Every final Market Close row also has its own page,
+`/market/YYYY-MM-DD/` and `/en/market/YYYY-MM-DD/`. `/market/archive/` and `/en/market/archive/` list every session by month.
+- `functions/market/[[path]].js` and `functions/en/market/[[path]].js` hand these paths to `functions/_market-date-page.js`; every other `/market/` path goes on to the static site.
+- The page is the `/market/` shell with its head rewritten for the session and `<main>` rendered on the server, numbers included.
+  - Head: title, description, canonical, KO/EN `hreflang`, Open Graph, and a WebPage + BreadcrumbList JSON-LD.
+  - Sections: indices, daily and 5-session investor flows, rates/FX and commodities, breadth, every KRX sector and theme, top 10 by market cap, and short selling.
+  - The dashboard script is not loaded, so nothing repaints the page.
+  - Classes come from `assets/market-close.css`.
+- Titles lead with the full date and the KOSPI close, then name the data: `2026년 10월 28일 코스피 종가 6,012.44(+6.63%) · 투자자별 매매동향·환율 | Snowshagal`. The Daily report title for the same day leads with the editorial close, so the two read differently.
+- Missing or non-final dates, and impossible dates, get the site 404. A path without the trailing slash gets a 301 to the slash form.
+- D1 has 5 s. After that the page answers a no-store 503 with `Retry-After` instead of hanging.
+- `sitemap.xml` lists the archive and every session in both languages when D1 answers within 2 s. The live SEO audit treats these D1-backed URLs as expected.
+- `/market/` links to the archive, and to the shown session's page once the script renders. `assets/locale.js` keeps the same address when switching KO/EN.
+
 ## Atom feeds (Phase 2, Production — #105)
 
 Two Atom 1.0 feeds carry the published reports, one per language, at the addresses readers
@@ -547,6 +561,7 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `assets/language.css` — restrained desktop/mobile language selector styling
 - `en/index.html` — English homepage shell
 - `market/index.html` / `en/market/index.html` — Market Close pages
+- `functions/_market-date-page.js` (+ `functions/market/[[path]].js`, `functions/en/market/[[path]].js`) — server-rendered Market Close session pages and the session archive
 - `assets/market-close.js` / `assets/market-close.css` — Market Close rendering
 - `functions/api/market/latest.js` / `publish.js` / `_shared.js` — D1-backed Market Close read, authenticated publish, shared validation
 - `functions/api/market/_freshness.js` — KRX/NYSE calendars, source-date and Production freshness rules
