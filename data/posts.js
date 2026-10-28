@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-29-note-qlt1h9",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-10-29",
+    "reportDate": "2026-10-29",
+    "registeredDate": "2026-10-29",
+    "registeredAt": "2026-10-28T17:07:10.102Z",
+    "legacyImport": false,
+    "title": "3.8% Growth FORECAST But Spending LagsChip profits are poised to reach households through Q1 2027 bonuses",
+    "seoTitle": "A 3.8% Growth Forecast, But Little Lift in Household Spending: Korea's Chip Windfall Moves Toward 2027 Bonuses | Snowshagal Investment Note No.18",
+    "subtitle": "",
+    "description": "Real GDI surged 18.8% year on year in Q3 2026, while private consumption rose only 1.1% year on year and fell 0.2% quarter on quarter. The semiconductor windfall is already reaching households, and the BOK estimates roughly KRW 60tn in early-2027 bonuses. But much of that compensation will be paid in shares, with timing and spending effects depending on recipients and payout rules.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors",
+      "korea"
+    ],
+    "readingMinutes": 15,
+    "href": "reports/en/20261029_Investment_Note_Chip_Bonus_Wallet_EN.html",
+    "translationGroup": "2026-10-29-note-mnz0fr",
+    "coverImage": "covers/2026-10-29-note-qlt1h9.webp",
+    "shareCardImage": "covers/share/2026-10-29-note-qlt1h9.jpg",
+    "coverThumbnail": "covers/2026-10-29-note-qlt1h9-450.webp"
+  },
+  {
     "id": "2026-10-29-note-mnz0fr",
     "type": "note",
     "typeLabel": "투자 인사이트",
