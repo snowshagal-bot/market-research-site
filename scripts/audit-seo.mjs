@@ -495,6 +495,8 @@ function parseSitemap(xml) {
   return { locs, alternates };
 }
 
+const MARKET_SESSION_URL = /^https:\/\/snowshagal\.com\/(?:en\/)?market\/(?:\d{4}-\d{2}-\d{2}|archive)\/$/;
+
 function checkSitemap(report, xml, pages) {
   const { locs, alternates } = parseSitemap(xml);
   const result = { urls: locs.length, duplicate: 0, legacyHtml: 0, malformed: 0, pagesDev: 0, missing: [], unexpected: [] };
@@ -513,7 +515,10 @@ function checkSitemap(report, xml, pages) {
   }
   const expected = new Set(pages.filter(page => page.indexable).map(page => page.canonical));
   result.missing = [...expected].filter(url => !seen.has(url));
-  result.unexpected = [...seen].filter(url => !expected.has(url));
+  // Market Close session pages and their archive come from D1, not from
+  // files, so the corpus cannot list them; tests/market-date-pages.test.mjs
+  // covers their markup. They are not unexpected.
+  result.unexpected = [...seen].filter(url => !expected.has(url) && !MARKET_SESSION_URL.test(url));
   for (const url of result.missing) fail(report, 'sitemap.missing', { url }, 'absent', 'listed (public indexable page)');
   for (const url of result.unexpected) fail(report, 'sitemap.unexpected', { url }, 'listed', 'not in the public corpus');
   return result;

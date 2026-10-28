@@ -954,7 +954,10 @@ export function reportSeoTags(posts, post, options = {}) {
     + jsonLd;
 }
 
-export function sitemapXml(posts) {
+// `marketSessions`: [{ market_date, published_at }] for every final Market
+// Close, newest first. Each becomes a KO and an EN session page
+// (/market/YYYY-MM-DD/), and the archive is listed once there is one.
+export function sitemapXml(posts, { marketSessions = [] } = {}) {
   const validPosts = posts.filter((post) => (
     post && typeof post.href === 'string' && /^reports\/.+\.html?$/i.test(normalizeSitePath(post.href))
   ));
@@ -1014,6 +1017,7 @@ export function sitemapXml(posts) {
     urlEntry(`${PRODUCTION_ORIGIN}/calendar/`, '', calendarAlternates),
     urlEntry(`${PRODUCTION_ORIGIN}/en/calendar/`, '', calendarAlternates),
     ...categoryEntries,
+    ...marketSessionEntries(marketSessions, urlEntry),
     ...validPosts.map((post) => urlEntry(
       reportSiteUrl(post.href),
       post.updatedAt || post.registeredAt || post.reportDate || post.date,
@@ -1021,6 +1025,26 @@ export function sitemapXml(posts) {
     ))
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${entries.join('')}</urlset>\n`;
+}
+
+function marketSessionEntries(sessions, urlEntry) {
+  const dates = (Array.isArray(sessions) ? sessions : [])
+    .filter((session) => /^\d{4}-\d{2}-\d{2}$/.test(String(session?.market_date || '')));
+  if (!dates.length) return [];
+  const pair = (path) => [
+    { lang: 'ko', href: `${PRODUCTION_ORIGIN}${path}` },
+    { lang: 'en', href: `${PRODUCTION_ORIGIN}/en${path}` },
+    { lang: 'x-default', href: `${PRODUCTION_ORIGIN}${path}` }
+  ];
+  const entries = [];
+  const archive = pair('/market/archive/');
+  entries.push(urlEntry(archive[0].href, dates[0].published_at, archive), urlEntry(archive[1].href, dates[0].published_at, archive));
+  for (const session of dates) {
+    const alternates = pair(`/market/${session.market_date}/`);
+    const lastmod = session.published_at || session.market_date;
+    entries.push(urlEntry(alternates[0].href, lastmod, alternates), urlEntry(alternates[1].href, lastmod, alternates));
+  }
+  return entries;
 }
 
 export async function loadPosts(request, env) {
