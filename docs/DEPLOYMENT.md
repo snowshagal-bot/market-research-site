@@ -138,7 +138,9 @@ smoke, seed only a clearly synthetic Market Close row based on the checked-in
 
 The schema source of truth remains `db/schema.sql`. The comments and Market Close Functions
 also perform the same guarded `CREATE TABLE`/index initialization at runtime; do not create a
-second migration system for Preview.
+second migration system for Preview. Market Close first reads `sqlite_master` once per isolate
+and skips those statements when the table, its takeaway columns and its index are already there,
+so a cold start right after a deploy sends no DDL writes.
 
 As of 2026-08-29, Preview D1 parity is complete. Preview `COMMENTS_DB` points to
 `market-research-comments-preview`, while Production `COMMENTS_DB` continues to point to
