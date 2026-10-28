@@ -1038,7 +1038,9 @@ function marketSessionEntries(sessions, urlEntry) {
   ];
   const entries = [];
   const archive = pair('/market/archive/');
+  const sectors = pair('/market/sectors/');
   entries.push(urlEntry(archive[0].href, dates[0].published_at, archive), urlEntry(archive[1].href, dates[0].published_at, archive));
+  entries.push(urlEntry(sectors[0].href, dates[0].published_at, sectors), urlEntry(sectors[1].href, dates[0].published_at, sectors));
   for (const session of dates) {
     const alternates = pair(`/market/${session.market_date}/`);
     const lastmod = session.published_at || session.market_date;

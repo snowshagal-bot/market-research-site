@@ -256,6 +256,7 @@ test('locale switch preserves Market routes and date query parameters', async ()
   assert.equal(localeApi.pageLanguagePath('/en/market/2026-10-28/', 'ko', ''), '/market/2026-10-28/');
   assert.equal(localeApi.pageLanguagePath('/market/archive/', 'en', ''), '/en/market/archive/');
   assert.equal(localeApi.pageLanguagePath('/en/market/archive/', 'ko', ''), '/market/archive/');
+  assert.equal(localeApi.pageLanguagePath('/market/sectors/', 'en', ''), '/en/market/sectors/');
 });
 
 test('Market History UI renders navigation strip, previous/next trading days, and calendar drawer', async () => {

@@ -25,6 +25,7 @@ import {
   websiteStructuredData
 } from './_seo.js';
 import { TABLE_NAME, ensureMarketTable } from './api/market/_shared.js';
+import { aggregateKrxGroups } from './api/market/_aggregate.js';
 
 export const MARKET_DATE_TIME_BUDGET_MS = 5000;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -43,15 +44,17 @@ export function marketArchivePath(lang = 'ko') {
 
 /**
  * { lang, date } for a session page, { lang, archive: true } for the list,
+ * { lang, sectors: true } for the sector and theme rankings,
  * or null for any other path. `canonical` is false when the path lacks the
  * trailing slash the canonical address has.
  */
 export function parseMarketPagePath(pathname) {
-  const match = String(pathname || '').match(/^\/(en\/)?market\/(\d{4}-\d{2}-\d{2}|archive)(\/?)$/);
+  const match = String(pathname || '').match(/^\/(en\/)?market\/(\d{4}-\d{2}-\d{2}|archive|sectors)(\/?)$/);
   if (!match) return null;
   const lang = match[1] ? 'en' : 'ko';
   const canonical = match[3] === '/';
   if (match[2] === 'archive') return { lang, archive: true, canonical };
+  if (match[2] === 'sectors') return { lang, sectors: true, canonical };
   if (!isCalendarDate(match[2])) return null;
   return { lang, date: match[2], canonical };
 }
@@ -160,6 +163,7 @@ const COPY = {
     source: '데이터 출처: KRX 한국거래소, 네이버 금융, 연합인포맥스, 야후 파이낸스',
     disclaimer: '투자 판단의 참고 자료이며, 매수·매도 권유가 아닙니다.',
     unit: '단위: 원 · 순매수는 매수-매도',
+    sectorsPage: '업종·테마 5일·20일 순위', sectorsLink: '업종·테마 등락률 순위',
     noteTitle: '숫자 너머의 의미를 해석합니다.', noteBody: '이날 시장의 흐름과 배경은 Snowshagal 데일리 리포트에서 이어서 읽을 수 있습니다.'
   },
   en: {
@@ -185,6 +189,7 @@ const COPY = {
     source: 'Sources: KRX, Naver Finance, Yonhap Infomax, Yahoo Finance',
     disclaimer: 'For reference only; not a recommendation to buy or sell.',
     unit: 'Net buying = buys minus sells',
+    sectorsPage: 'Sector & theme 5- and 20-session rankings', sectorsLink: 'Sector & theme rankings',
     noteTitle: 'We interpret the meaning beyond the numbers.', noteBody: 'Continue with the Snowshagal Daily report for the story behind this session.'
   }
 };
@@ -354,25 +359,38 @@ function breadthCard(key, item, f, copy) {
     </div><div class="breadth-bar" aria-label="${copy.riseRatio} ${f.ratioPct(item?.rise_ratio)}, ${copy.fallRatio} ${f.ratioPct(item?.fall_ratio)}"><span class="advance" style="width:${valid(item?.rise_ratio) ? item.rise_ratio * 100 : 0}%"></span><span class="decline" style="width:${valid(item?.fall_ratio) ? item.fall_ratio * 100 : 0}%"></span></div><div class="breadth-ratios"><span class="up">${copy.riseRatio} ${f.ratioPct(item?.rise_ratio)}</span><span class="down">${copy.fallRatio} ${f.ratioPct(item?.fall_ratio)}</span></div></article>`;
 }
 
-function rankList(title, items, type, f) {
-  return `<div class="range-rank-block"><h4 class="range-rank-title ${type}">${html(title)}</h4><ul class="rank-list">${items.map(it => `<li><span><b>${html(it.name)}</b>${it.market ? `<small>${html(it.market)}</small>` : ''}</span><strong class="${f.signClass(it.change_pct)}">${f.pct(it.change_pct)}</strong></li>`).join('')}</ul></div>`;
+function rankList(title, items, type, f, field = 'change_pct') {
+  return `<div class="range-rank-block"><h4 class="range-rank-title ${type}">${html(title)}</h4><ul class="rank-list">${items.map(it => `<li><span><b>${html(it.name)}</b>${it.market ? `<small>${html(it.market)}</small>` : ''}</span><strong class="${f.signClass(it[field])}">${f.pct(it[field])}</strong></li>`).join('')}</ul></div>`;
 }
 
-function groupBlock(title, allLabel, items, f, copy) {
-  const ranked = (items || []).filter(item => valid(item?.change_pct)).sort((a, b) => b.change_pct - a.change_pct);
+// Rows for a ranked sector or theme list. Themes carry no market, so the
+// market column is left out when no item has one.
+function groupColumns(items, copy) {
+  return items.some(item => item.market) ? copy.groupColumns : copy.groupColumns.filter((_, index) => index !== 2);
+}
+
+function groupRows(items, f, field) {
+  const withMarket = items.some(item => item.market);
+  return items.map((item, index) => [
+    String(index + 1),
+    html(item.name),
+    ...(withMarket ? [html(item.market || '--')] : []),
+    f.number(item.close ?? item.end_value, 2),
+    `<span class="${f.signClass(item[field])}">${f.pct(item[field])}</span>`
+  ]);
+}
+
+// `field`: change_pct for one session, return_pct for a period from
+// aggregateKrxGroups (which then carries end_value as its close).
+function groupBlock(title, allLabel, items, f, copy, field = 'change_pct') {
+  const ranked = (items || []).filter(item => valid(item?.[field])).sort((a, b) => b[field] - a[field]);
   if (!ranked.length) return '';
   const top = ranked.slice(0, 5);
   const bottom = ranked.length >= 10 ? ranked.slice(-5).reverse() : ranked.slice(5).reverse();
-  const rows = ranked.map((item, index) => [
-    String(index + 1),
-    html(item.name),
-    html(item.market || '--'),
-    f.number(item.close, 2),
-    `<span class="${f.signClass(item.change_pct)}">${f.pct(item.change_pct)}</span>`
-  ]);
+  const rows = groupRows(ranked, f, field);
   return `<div class="range-group-col"><h3 class="group-category-title">${html(title)}</h3>
-      <div class="range-rank-pair">${rankList(copy.strongest, top, 'up', f)}${bottom.length ? rankList(copy.weakest, bottom, 'down', f) : ''}</div>
-      <details class="market-date-all"><summary>${html(allLabel(ranked.length))}</summary>${dataTable(copy.groupColumns, rows, 'compact')}</details>
+      <div class="range-rank-pair">${rankList(copy.strongest, top, 'up', f, field)}${bottom.length ? rankList(copy.weakest, bottom, 'down', f, field) : ''}</div>
+      <details class="market-date-all"><summary>${html(allLabel(ranked.length))}</summary>${dataTable(groupColumns(ranked, copy), rows, 'compact market-sector-table')}</details>
     </div>`;
 }
 
@@ -445,7 +463,9 @@ export function renderMarketDateMain(payload, lang, context = {}) {
 
   const sectorBlock = groupBlock(copy.sectors, copy.allSectors, groups.sectors, f, copy);
   const themeBlock = groupBlock(copy.themes, copy.allThemes, groups.themes, f, copy);
-  const groupsBody = sectorBlock || themeBlock ? `<div class="range-groups-grid">${sectorBlock}${themeBlock}</div>` : '';
+  const groupsBody = sectorBlock || themeBlock
+    ? `<div class="range-groups-grid">${sectorBlock}${themeBlock}</div><p class="market-archive-links"><a href="${marketSectorsPath(lang)}">${html(copy.sectorsPage)} →</a></p>`
+    : '';
 
   const capRows = caps.map(item => [
     html(item?.rank ?? '--'),
@@ -560,6 +580,7 @@ export function renderMarketArchiveMain(rows, lang) {
   </section>
   <div class="market-wrap market-dashboard">
 ${blocks}
+    <p class="market-archive-links"><a href="${marketSectorsPath(lang)}">${html(copy.sectorsLink)} →</a></p>
     <div class="market-data-note"><p>${html(copy.source)}</p><p>${html(copy.disclaimer)}</p></div>
   </div>
 </main>`;
@@ -783,6 +804,12 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
   if (!route.canonical) return Response.redirect(`${url.origin}${url.pathname}/${url.search}`, 301);
 
   try {
+    if (route.sectors) {
+      const [rows, shell] = await Promise.all([loadMarketSectors(env, { budgetMs }), loadShell(env, url, route.lang)]);
+      const view = marketSectorsView(rows);
+      if (!view) return notFound(env, url);
+      return htmlResponse(marketSectorsPageHtml(shell, view, route.lang));
+    }
     if (route.archive) {
       const [rows, shell] = await Promise.all([loadMarketArchive(env, { budgetMs }), loadShell(env, url, route.lang)]);
       if (!rows.length) return notFound(env, url);
@@ -801,4 +828,199 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
     console.error('market date page unavailable', error);
     return unavailable(route.lang);
   }
+}
+
+/* ------------------------------------------------------- sectors & themes */
+
+// /market/sectors/ and /en/market/sectors/: every KRX sector and theme index
+// ranked by its move in the latest published session, and over the last 5 and
+// 20 published sessions. The period figures come from aggregateKrxGroups, the
+// same rule as the dashboard's 1W and 1M views.
+
+export function marketSectorsPath(lang = 'ko') {
+  return `${lang === 'en' ? '/en' : ''}/market/sectors/`;
+}
+
+const SECTORS_COPY = {
+  ko: {
+    eyebrow: 'KRX SECTORS & THEMES',
+    heading: '업종 · 테마 등락률 순위',
+    breadcrumb: '업종 · 테마',
+    lead: date => `${longDate(date, 'ko')} 마감 기준으로 KRX 업종지수와 테마지수를 등락률 순으로 정리했습니다. 최근 5거래일·20거래일 누적 순위도 함께 봅니다.`,
+    strongest: (kind, name, pct) => `가장 강한 ${kind} <b>${name}</b> ${pct}`,
+    sector: '업종', theme: '테마',
+    basis: 'KRX 업종·테마 지수 종가 기준 · 매 거래일 마감 후 갱신',
+    note: '지수 가격의 등락률이며, 투자자별 매매동향(수급)이 아닙니다.',
+    sections: ['업종지수 등락률', '테마지수 등락률', '최근 5거래일 누적', '최근 20거래일 누적'],
+    window: (start, end, n) => `${start} – ${end} · 게시된 ${n}거래일 기준`,
+    session: '이날 전체 마감 기록', archive: '전체 마감 기록',
+    title: date => `오늘 업종별 등락률·KRX 테마지수 순위 (${dateParts(date).m}월 ${dateParts(date).d}일) | Snowshagal`,
+    description: (date, top, bottom, theme) => [
+      `${longDate(date, 'ko')} KRX 업종·테마 지수 등락률 순위.`,
+      top ? `가장 강한 업종 ${top.name} ${formatSignedPct(top.change_pct)}${bottom ? `, 가장 약한 업종 ${bottom.name} ${formatSignedPct(bottom.change_pct)}` : ''}.` : '',
+      theme ? `테마 1위 ${theme.name} ${formatSignedPct(theme.change_pct)}.` : '',
+      '최근 5거래일·20거래일 누적 순위까지.'
+    ]
+  },
+  en: {
+    eyebrow: 'KRX SECTORS & THEMES',
+    heading: 'Korea Sector & Theme Rankings',
+    breadcrumb: 'Sectors & Themes',
+    lead: date => `KRX sector and theme indices ranked by their move at the ${longDate(date, 'en')} close, with cumulative rankings over the last 5 and 20 sessions.`,
+    strongest: (kind, name, pct) => `Strongest ${kind} <b>${name}</b> ${pct}`,
+    sector: 'sector', theme: 'theme',
+    basis: 'KRX sector and theme index closes · Updated after every session',
+    note: 'Index price moves, not investor flows.',
+    sections: ['Sector Indices', 'Theme Indices', 'Last 5 Sessions, Cumulative', 'Last 20 Sessions, Cumulative'],
+    window: (start, end, n) => `${start} – ${end} · ${n} published sessions`,
+    session: 'Full record for this session', archive: 'All sessions',
+    title: date => `Korea Sector & Theme Index Rankings, ${longDate(date, 'en')} | Snowshagal`,
+    description: (date, top, bottom, theme) => [
+      `KRX sector and theme index rankings for ${longDate(date, 'en')}.`,
+      top ? `Strongest sector: ${top.name} ${formatSignedPct(top.change_pct)}${bottom ? `; weakest: ${bottom.name} ${formatSignedPct(bottom.change_pct)}` : ''}.` : '',
+      theme ? `Top theme: ${theme.name} ${formatSignedPct(theme.change_pct)}.` : '',
+      'Plus 5- and 20-session cumulative rankings.'
+    ]
+  }
+};
+
+function rankedBy(items, field) {
+  return (Array.isArray(items) ? items : []).filter(item => valid(item?.[field])).sort((a, b) => b[field] - a[field]);
+}
+
+/**
+ * The figures the page shows, from the newest final rows (newest first, each
+ * { market_date, published_at, krx_groups }), or null when the newest
+ * session carries no sectors.
+ */
+export function marketSectorsView(rows) {
+  const latest = rows[0];
+  if (!latest || !rankedBy(latest.krx_groups?.sectors, 'change_pct').length) return null;
+  const period = (sessions) => {
+    if (rows.length < sessions) return null;
+    const window = rows.slice(0, sessions).reverse();
+    const groups = aggregateKrxGroups(window.map(row => ({ krx_groups: row.krx_groups })), window.length, sessions);
+    const complete = (items) => (items || []).filter(item => item.complete);
+    return { start: window[0].market_date, end: window.at(-1).market_date, sessions, sectors: complete(groups.sectors), themes: complete(groups.themes) };
+  };
+  return {
+    date: latest.market_date,
+    publishedAt: latest.published_at || '',
+    sectors: rankedBy(latest.krx_groups.sectors, 'change_pct'),
+    themes: rankedBy(latest.krx_groups.themes, 'change_pct'),
+    week: period(5),
+    month: period(20)
+  };
+}
+
+export function marketSectorsTitle(view, lang) {
+  return SECTORS_COPY[lang === 'en' ? 'en' : 'ko'].title(view.date);
+}
+
+export function marketSectorsDescription(view, lang) {
+  const parts = SECTORS_COPY[lang === 'en' ? 'en' : 'ko']
+    .description(view.date, view.sectors[0], view.sectors.length > 1 ? view.sectors.at(-1) : null, view.themes[0])
+    .filter(Boolean);
+  let text = parts.join(' ');
+  while (text.length > 180 && parts.length > 1) {
+    parts.pop();
+    text = parts.join(' ');
+  }
+  return text;
+}
+
+export function renderMarketSectorsMain(view, lang) {
+  const copy = COPY[lang === 'en' ? 'en' : 'ko'];
+  const sc = SECTORS_COPY[lang === 'en' ? 'en' : 'ko'];
+  const f = makeFormat(lang);
+  const base = lang === 'en' ? '/en/market/' : '/market/';
+  const fullTable = (items) => dataTable(groupColumns(items, copy), groupRows(items, f, 'change_pct'), 'compact market-sector-table');
+  const periodBody = (period) => {
+    if (!period || (!period.sectors.length && !period.themes.length)) return '';
+    const blocks = `${groupBlock(copy.sectors, copy.allSectors, period.sectors, f, copy, 'return_pct')}${groupBlock(copy.themes, copy.allThemes, period.themes, f, copy, 'return_pct')}`;
+    return `<div class="range-groups-grid">${blocks}</div><p class="unit-note">${html(sc.window(dotDate(period.start, lang), dotDate(period.end, lang), period.sessions))}</p>`;
+  };
+  const top = view.sectors[0];
+  const topTheme = view.themes[0];
+  const summary = [
+    top ? sc.strongest(sc.sector, html(top.name), `<span class="${f.signClass(top.change_pct)}">${f.pct(top.change_pct)}</span>`) : '',
+    topTheme ? sc.strongest(sc.theme, html(topTheme.name), `<span class="${f.signClass(topTheme.change_pct)}">${f.pct(topTheme.change_pct)}</span>`) : ''
+  ].filter(Boolean).map(item => `<span class="market-date-fact">${item}</span>`).join('<span class="market-date-sep" aria-hidden="true"> · </span>');
+
+  let n = 0;
+  const part = (index, body) => body ? section(++n, sc.sections[index], body) : '';
+  const sectorsPart = part(0, view.sectors.length ? fullTable(view.sectors) : '');
+  const themesPart = part(1, view.themes.length ? fullTable(view.themes) : '');
+  const weekPart = part(2, periodBody(view.week));
+  const monthPart = part(3, periodBody(view.month));
+  const links = `<p class="market-archive-links"><a href="${marketDatePath(view.date, lang)}">${html(sc.session)} →</a><a href="${marketArchivePath(lang)}">${html(sc.archive)} →</a></p>`;
+
+  return `<main id="market-date-root" class="market-date-page market-sectors-page" data-market-date="${html(view.date)}">
+  <section class="market-hero" aria-labelledby="market-sectors-heading">
+    <div class="market-wrap market-hero-inner">
+      <div class="market-hero-copy">
+        <p class="market-breadcrumb"><a href="${lang === 'en' ? '/en/' : '/'}">${html(copy.breadcrumbHome)}</a> › <a href="${base}">${html(copy.breadcrumbMarket)}</a> › ${html(sc.breadcrumb)}</p>
+        <p class="market-eyebrow">${html(sc.eyebrow)}</p>
+        <h1 id="market-sectors-heading">${html(sc.heading)}</h1>
+        <p class="market-date-summary">${summary}</p>
+        <p class="market-date">${dotDate(view.date, lang)} · ${html(sc.basis)}</p>
+        <p class="market-overseas">${html(sc.note)}</p>
+      </div>
+      <div class="market-mountain" aria-hidden="true"></div>
+    </div>
+  </section>
+  <div class="market-wrap market-dashboard">
+    <p class="market-sectors-lead">${html(sc.lead(view.date))}</p>
+    <div class="market-pair market-pair-tables">${sectorsPart}${themesPart}</div>
+${[weekPart, monthPart].filter(Boolean).join('\n')}
+    ${links}
+    <div class="market-data-note"><p>${html(copy.source)}</p><p>${html(copy.disclaimer)}</p></div>
+  </div>
+</main>`;
+}
+
+export function marketSectorsPageHtml(shell, view, lang) {
+  const title = marketSectorsTitle(view, lang);
+  const description = marketSectorsDescription(view, lang);
+  const canonical = `${PRODUCTION_ORIGIN}${marketSectorsPath(lang)}`;
+  const copy = COPY[lang === 'en' ? 'en' : 'ko'];
+  const sc = SECTORS_COPY[lang === 'en' ? 'en' : 'ko'];
+  return applyMarketShell(shell, {
+    lang,
+    title,
+    description,
+    canonical,
+    alternates: { ko: `${PRODUCTION_ORIGIN}${marketSectorsPath('ko')}`, en: `${PRODUCTION_ORIGIN}${marketSectorsPath('en')}` },
+    jsonLd: pageJsonLd({
+      lang,
+      title,
+      description,
+      canonical,
+      datePublished: String(view.publishedAt || '').slice(0, 10) || undefined,
+      breadcrumb: [
+        { name: copy.breadcrumbHome, url: `${PRODUCTION_ORIGIN}${lang === 'en' ? '/en/' : '/'}` },
+        { name: copy.breadcrumbMarket, url: `${PRODUCTION_ORIGIN}${lang === 'en' ? '/en/market/' : '/market/'}` },
+        { name: sc.breadcrumb, url: canonical }
+      ]
+    }),
+    main: renderMarketSectorsMain(view, lang)
+  });
+}
+
+/** The newest 20 final sessions' KRX groups, newest first. */
+export async function loadMarketSectors(env, { budgetMs = MARKET_DATE_TIME_BUDGET_MS } = {}) {
+  return withinBudget((async () => {
+    const db = await ensureMarketTable(env);
+    const result = await db.prepare(`SELECT market_date, published_at, json_extract(payload_json, '$.krx_groups') AS krx_groups
+      FROM ${TABLE_NAME} WHERE status = 'final' ORDER BY market_date DESC LIMIT 20`).all();
+    return (result?.results || [])
+      .filter(row => ISO_DATE.test(String(row?.market_date || '')))
+      .map(row => {
+        let groups = row.krx_groups;
+        if (typeof groups === 'string') {
+          try { groups = JSON.parse(groups); } catch (_) { groups = null; }
+        }
+        return { market_date: row.market_date, published_at: row.published_at || '', krx_groups: groups && typeof groups === 'object' ? groups : null };
+      });
+  })(), budgetMs);
 }
