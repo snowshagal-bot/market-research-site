@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { modifiedReportSources } from './report-source-invariant.mjs';
+import { diffCheckProblems, modifiedReportSources } from './report-source-invariant.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -281,6 +281,15 @@ runStep(3, 'Checking repository invariants & git diff whitespace checks', () => 
     return res.status === 0 ? res.stdout.trim() : null;
   }
 
+  // What a `git diff --check` run fails on, or '' when it passes. Whitespace inside
+  // reports/ is left out (see diffCheckProblems); a run that fails without saying
+  // why still fails.
+  function diffCheckFailure(result) {
+    if (result.status === 0) return '';
+    if (!result.stdout) return (result.stderr || '').trim() || `git exited with ${result.status}`;
+    return diffCheckProblems(result.stdout);
+  }
+
   // 1. Resolve base ref for committed diff comparison
   let baseRef = null;
   if (process.env.VERIFY_BASE_REF && process.env.VERIFY_BASE_REF !== '0000000000000000000000000000000000000000') {
@@ -329,9 +338,10 @@ runStep(3, 'Checking repository invariants & git diff whitespace checks', () => 
       encoding: 'utf8'
     });
 
-    if (committedDiff.status !== 0) {
+    const committedFailure = diffCheckFailure(committedDiff);
+    if (committedFailure) {
       const err = new Error(`git diff --check detected whitespace or conflict markers in committed changes (${committedRange})`);
-      err.details = (committedDiff.stdout || committedDiff.stderr || '').trim();
+      err.details = committedFailure;
       throw err;
     }
   } else {
@@ -340,9 +350,10 @@ runStep(3, 'Checking repository invariants & git diff whitespace checks', () => 
       cwd: rootDir,
       encoding: 'utf8'
     });
-    if (diffTree.status !== 0) {
+    const diffTreeFailure = diffCheckFailure(diffTree);
+    if (diffTreeFailure) {
       const err = new Error('git diff-tree --check detected whitespace/conflict errors in HEAD commit');
-      err.details = (diffTree.stdout || diffTree.stderr || '').trim();
+      err.details = diffTreeFailure;
       throw err;
     }
   }
@@ -354,9 +365,10 @@ runStep(3, 'Checking repository invariants & git diff whitespace checks', () => 
     encoding: 'utf8'
   });
 
-  if (workingTreeDiff.status !== 0) {
+  const workingTreeFailure = diffCheckFailure(workingTreeDiff);
+  if (workingTreeFailure) {
     const err = new Error('git diff --check detected errors in uncommitted working tree');
-    err.details = (workingTreeDiff.stdout || workingTreeDiff.stderr || '').trim();
+    err.details = workingTreeFailure;
     throw err;
   }
 
@@ -366,9 +378,10 @@ runStep(3, 'Checking repository invariants & git diff whitespace checks', () => 
     encoding: 'utf8'
   });
 
-  if (stagedDiff.status !== 0) {
+  const stagedFailure = diffCheckFailure(stagedDiff);
+  if (stagedFailure) {
     const err = new Error('git diff --cached --check detected errors in staged changes');
-    err.details = (stagedDiff.stdout || stagedDiff.stderr || '').trim();
+    err.details = stagedFailure;
     throw err;
   }
 

@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { modifiedReportSources, reportSourceDiffArgs } from '../scripts/report-source-invariant.mjs';
+import { diffCheckProblems, modifiedReportSources, reportSourceDiffArgs } from '../scripts/report-source-invariant.mjs';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const repos = [];
@@ -112,8 +112,44 @@ test('a publish-shaped diff (new KO and EN reports plus generated data and cover
 
 test('verify.mjs runs the report invariant through the shared helper with the same failure message', () => {
   const content = fs.readFileSync(path.join(rootDir, 'scripts/verify.mjs'), 'utf8');
-  assert.match(content, /import \{ modifiedReportSources \} from '\.\/report-source-invariant\.mjs';/);
+  assert.match(content, /import \{ diffCheckProblems, modifiedReportSources \} from '\.\/report-source-invariant\.mjs';/);
+  // Every diff check goes through the report-whitespace filter.
+  assert.equal((content.match(/diffCheckFailure\((?:committedDiff|diffTree|workingTreeDiff|stagedDiff)\)/g) || []).length, 4);
+  assert.doesNotMatch(content, /(?:committedDiff|diffTree|workingTreeDiff|stagedDiff)\.status !== 0/);
   assert.match(content, /modifiedReportSources\(baseRef, \{ cwd: rootDir \}\)/);
   assert.match(content, /reports\/\*\* source HTML files must not be modified/);
   assert.doesNotMatch(content, /\['diff', '--name-only', baseRef, '--', 'reports\/'\]/);
+});
+
+function diffCheck(cwd, base) {
+  return spawnSync('git', ['diff', '--check', `${base}...HEAD`], { cwd, encoding: 'utf8' });
+}
+
+test('whitespace in a new report does not fail the diff check; elsewhere it still does', () => {
+  const { cwd, base } = baseRepository();
+  commit(cwd, { [NEW_KO]: '<h1>KO 10-02</h1>\n<p>line </p>\n \t<p>mixed</p>\n\n' }, 'publish');
+  const report = diffCheck(cwd, base);
+  assert.notEqual(report.status, 0, 'git itself still flags the report');
+  assert.equal(diffCheckProblems(report.stdout), '');
+
+  commit(cwd, { 'assets/site.js': 'export const x = 1; \n' }, 'site edit');
+  const site = diffCheck(cwd, base);
+  assert.equal(diffCheckProblems(site.stdout), 'assets/site.js:1: trailing whitespace.\n+export const x = 1; ');
+});
+
+test('a conflict marker fails the diff check in a report too', () => {
+  const { cwd, base } = baseRepository();
+  commit(cwd, { [NEW_KO]: '<h1>KO 10-02</h1>\n<<<<<<< HEAD\n<p>a</p>\n=======\n<p>b</p>\n>>>>>>> branch\n' }, 'publish');
+  const problems = diffCheckProblems(diffCheck(cwd, base).stdout);
+  assert.match(problems, new RegExp(`^${NEW_KO}:2: leftover conflict marker`, 'm'));
+});
+
+test('report content that looks like a problem header is not read as one', () => {
+  const output = [
+    'reports/x.html:3: trailing whitespace.',
+    '+assets/site.js:1: trailing whitespace. ',
+    'assets/site.js:4: trailing whitespace.',
+    '+y '
+  ].join('\n');
+  assert.equal(diffCheckProblems(output), 'assets/site.js:4: trailing whitespace.\n+y ');
 });
