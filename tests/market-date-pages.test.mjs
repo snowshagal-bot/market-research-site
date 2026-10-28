@@ -9,6 +9,9 @@ import {
   marketDateDescription,
   marketDatePageHtml,
   marketDateTitle,
+  marketSectorsDescription,
+  marketSectorsPageHtml,
+  marketSectorsView,
   onMarketPageRequest,
   parseMarketPagePath
 } from '../functions/_market-date-page.js';
@@ -191,6 +194,12 @@ function marketDb(rows, { hang = false } = {}) {
         },
         async all() {
           if (hang) return new Promise(() => {});
+          if (/'\$\.krx_groups'/.test(sql)) {
+            return {
+              results: rows.filter((item) => item.status === 'final').sort((a, b) => b.market_date.localeCompare(a.market_date)).slice(0, 20)
+                .map((item) => ({ market_date: item.market_date, published_at: item.published_at, krx_groups: JSON.stringify(JSON.parse(item.payload_json).krx_groups ?? null) }))
+            };
+          }
           if (/json_extract/.test(sql)) {
             return {
               results: rows.filter((item) => item.status === 'final').sort((a, b) => b.market_date.localeCompare(a.market_date)).map((item) => {
@@ -289,4 +298,91 @@ test('the sitemap still answers when the database is missing', async () => {
   const response = await sitemapGet({ request: new Request('https://snowshagal.com/sitemap.xml'), env });
   assert.equal(response.status, 200);
   assert.doesNotMatch(await response.text(), /market\/archive/);
+});
+
+/* ------------------------------------------------------- sectors & themes */
+
+// `count` sessions, newest first, each moving every index by `step` percent.
+function groupRows(count, step = 1) {
+  const dates = [];
+  const day = new Date(Date.UTC(2026, 9, 28));
+  while (dates.length < count) {
+    if (day.getUTCDay() % 6 !== 0) dates.push(day.toISOString().slice(0, 10));
+    day.setUTCDate(day.getUTCDate() - 1);
+  }
+  return dates.map((date, index) => {
+    const factor = (1 + step / 100) ** (count - index);
+    const scale = (items) => items.map((item, rank) => {
+      const close = Number((1000 * factor * (1 + rank / 1000)).toFixed(2));
+      const previous = close / (1 + step / 100);
+      return { ...item, close, change: close - previous, change_pct: step + rank / 100, previous_close: undefined };
+    });
+    return { market_date: date, published_at: `${date}T07:10:00Z`, krx_groups: { sectors: scale(FIXTURE.krx_groups.sectors), themes: scale(FIXTURE.krx_groups.themes) } };
+  });
+}
+
+test('the sectors view ranks the latest session and the 5- and 20-session windows', () => {
+  assert.deepEqual(parseMarketPagePath('/market/sectors/'), { lang: 'ko', sectors: true, canonical: true });
+  assert.deepEqual(parseMarketPagePath('/en/market/sectors'), { lang: 'en', sectors: true, canonical: false });
+
+  const view = marketSectorsView(groupRows(20));
+  assert.equal(view.date, '2026-10-28');
+  assert.equal(view.sectors.length, 46);
+  assert.equal(view.themes.length, 39);
+  assert.ok(view.sectors[0].change_pct >= view.sectors.at(-1).change_pct);
+  assert.equal(view.week.sessions, 5);
+  assert.equal(view.week.end, '2026-10-28');
+  assert.equal(view.week.sectors.length, 46);
+  assert.equal(view.month.sectors.length, 46);
+  // Five sessions of +1% compound to about +5.1%.
+  assert.ok(Math.abs(view.week.sectors[0].return_pct - (1.01 ** 5 - 1) * 100) < 0.05, view.week.sectors[0].return_pct);
+
+  const short = marketSectorsView(groupRows(3));
+  assert.equal(short.week, null);
+  assert.equal(short.month, null);
+  assert.equal(marketSectorsView([{ market_date: '2026-10-28', krx_groups: null }, ...groupRows(5)]), null);
+});
+
+test('the sectors page lists every index and the windows it has, with its own head', () => {
+  for (const lang of ['ko', 'en']) {
+    const html = marketSectorsPageHtml(SHELLS[lang], marketSectorsView(groupRows(20)), lang);
+    const self = `https://snowshagal.com${lang === 'en' ? '/en' : ''}/market/sectors/`;
+    assert.match(html, new RegExp(`<link rel="canonical" href="${self}">`));
+    assert.match(html, /hreflang="en" href="https:\/\/snowshagal.com\/en\/market\/sectors\/"/);
+    assert.match(html, lang === 'en' ? /<title>Korea Sector &amp; Theme Index Rankings, Oct 28, 2026 \| Snowshagal<\/title>/ : /<title>오늘 업종별 등락률·KRX 테마지수 순위 \(10월 28일\) \| Snowshagal<\/title>/);
+    for (const item of [...FIXTURE.krx_groups.sectors, ...FIXTURE.krx_groups.themes]) assert.ok(html.includes(item.name.replace(/&/g, '&amp;')), item.name);
+    const titles = [...html.matchAll(/<h2 id="market-section-\d+"><span>(\d+)\.<\/span> ([^<]+)<\/h2>/g)].map((m) => m[2]);
+    assert.equal(titles.length, 4, titles.join(' | '));
+    assert.match(html, new RegExp(`href="${lang === 'en' ? '/en' : ''}/market/2026-10-28/"`));
+    assert.ok(marketSectorsDescription(marketSectorsView(groupRows(20)), lang).length <= 180);
+  }
+  const short = marketSectorsPageHtml(SHELLS.ko, marketSectorsView(groupRows(3)), 'ko');
+  assert.equal([...short.matchAll(/<h2 id="market-section-/g)].length, 2);
+});
+
+test('the sectors route serves the page, and 404s when the newest session has no sectors', async () => {
+  const rows = groupRows(6).map((item) => row(item.market_date, {
+    payload_json: JSON.stringify(payload({ meta: { ...FIXTURE.meta, market_date: item.market_date }, krx_groups: item.krx_groups }))
+  }));
+  let { response } = await call('https://snowshagal.com/market/sectors/', marketDb(rows));
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /<h1 id="market-sectors-heading">업종 · 테마 등락률 순위<\/h1>/);
+  assert.match(html, /최근 5거래일 누적/);
+  assert.doesNotMatch(html, /최근 20거래일 누적/);
+
+  const bare = [row('2026-10-29', { payload_json: JSON.stringify(payload({ meta: { ...FIXTURE.meta, market_date: '2026-10-29' }, krx_groups: undefined })) }), ...rows];
+  ({ response } = await call('https://snowshagal.com/market/sectors/', marketDb(bare)));
+  assert.equal(response.status, 404);
+
+  ({ response } = await call('https://snowshagal.com/market/sectors', marketDb(rows)));
+  assert.equal(response.status, 301);
+});
+
+test('session pages and the archive link to the sectors page, and the sitemap lists it', () => {
+  assert.match(page('ko'), /href="\/market\/sectors\/">업종·테마 5일·20일 순위 →<\/a>/);
+  assert.match(marketArchivePageHtml(SHELLS.en, [], 'en'), /href="\/en\/market\/sectors\/"/);
+  const xml = sitemapXml([], { marketSessions: [{ market_date: '2026-10-28', published_at: '2026-10-28T07:10:35Z' }] });
+  assert.match(xml, /<loc>https:\/\/snowshagal.com\/market\/sectors\/<\/loc>/);
+  assert.match(xml, /<loc>https:\/\/snowshagal.com\/en\/market\/sectors\/<\/loc>/);
 });

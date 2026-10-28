@@ -229,7 +229,7 @@ function aggregateBreadth(snapshots, sessionsUsed, requiredSessions) {
   return result;
 }
 
-function aggregateKrxGroups(snapshots, sessionsUsed, requiredSessions) {
+export function aggregateKrxGroups(snapshots, sessionsUsed, requiredSessions) {
   let sessionsWithData = 0;
   for (const s of snapshots) {
     if (

@@ -495,7 +495,7 @@ function parseSitemap(xml) {
   return { locs, alternates };
 }
 
-const MARKET_SESSION_URL = /^https:\/\/snowshagal\.com\/(?:en\/)?market\/(?:\d{4}-\d{2}-\d{2}|archive)\/$/;
+const MARKET_SESSION_URL = /^https:\/\/snowshagal\.com\/(?:en\/)?market\/(?:\d{4}-\d{2}-\d{2}|archive|sectors)\/$/;
 
 function checkSitemap(report, xml, pages) {
   const { locs, alternates } = parseSitemap(xml);
