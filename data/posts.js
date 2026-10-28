@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-29-note-mnz0fr",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-10-29",
+    "reportDate": "2026-10-29",
+    "registeredDate": "2026-10-29",
+    "registeredAt": "2026-10-28T17:04:42.376Z",
+    "legacyImport": false,
+    "title": "성장률 전망 3.8%인데 지갑은 그대로반도체 돈은 내년 1분기 성과급으로 넘어온다",
+    "seoTitle": "성장률 전망 3.8%인데 지갑은 그대로: 반도체 돈은 내년 1분기 성과급으로 넘어온다 | Snowshagal 투자노트 NO.18",
+    "subtitle": "",
+    "description": "3분기 실질 GDI는 1년 새 18.8% 늘었는데 민간소비는 1.1% 느는 데 그쳤고 전 분기보다는 0.2% 줄었다. 반도체 이익의 가계 파급은 이미 시작됐고, 내년 1분기 성과급(삼성전자·SK하이닉스 약 60조원, 한국은행 추정)이 이를 키운다. 다만 지급 규칙상 절반 이상이 주식이고, 소비 효과는 수령자와 지급 방식에 달려 있다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors",
+      "korea"
+    ],
+    "readingMinutes": 14,
+    "href": "reports/20261029_Investment_Note_Chip_Bonus_Wallet.html",
+    "coverImage": "covers/2026-10-29-note-mnz0fr.webp",
+    "shareCardImage": "covers/share/2026-10-29-note-mnz0fr.jpg",
+    "coverThumbnail": "covers/2026-10-29-note-mnz0fr-450.webp"
+  },
+  {
     "id": "2026-10-28-daily-rkv2g0",
     "type": "daily",
     "typeLabel": "Daily",
