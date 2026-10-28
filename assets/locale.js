@@ -371,7 +371,7 @@
       return targetLanguage === 'en' ? '/en/basics/glossary/' : '/basics/glossary/';
     }
     // A session page (/market/YYYY-MM-DD/) or the archive keeps its address.
-    const marketPage = path.match(/^\/(?:en\/)?market\/(\d{4}-\d{2}-\d{2}|archive)\/?$/i);
+    const marketPage = path.match(/^\/(?:en\/)?market\/(\d{4}-\d{2}-\d{2}|archive|sectors)\/?$/i);
     if (marketPage) return `${targetLanguage === 'en' ? '/en' : ''}/market/${marketPage[1].toLowerCase()}/`;
     if (/^\/en\/market\/?$/i.test(path) || /^\/market\/?$/i.test(path)) {
       const searchParams = new URLSearchParams(String(search || '').replace(/^\?/, ''));

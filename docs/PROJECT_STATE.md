@@ -130,6 +130,12 @@ Preview hosts remain blocked, and all non-Market mutation APIs keep their existi
 - D1 has 5 s. After that the page answers a no-store 503 with `Retry-After` instead of hanging.
 - `sitemap.xml` lists the archive and every session in both languages when D1 answers within 2 s. The live SEO audit treats these D1-backed URLs as expected.
 - `/market/` links to the archive, and to the shown session's page once the script renders. `assets/locale.js` keeps the same address when switching KO/EN.
+- **Sector & theme rankings (plan B)**: `/market/sectors/` and `/en/market/sectors/`.
+  - Every KRX sector and theme index from the newest session, ranked by change.
+  - Top and bottom five, plus the full list, over the last 5 and 20 published sessions. These use `aggregateKrxGroups`, the dashboard's 1W/1M rule; only complete windows are ranked.
+  - The page answers 404 when the newest session carries no sectors.
+  - Linked from `/market/`, each session page and the archive; listed in the sitemap.
+  - The figures are index price moves, not investor flows, and the page says so.
 
 ## Atom feeds (Phase 2, Production — #105)
 
