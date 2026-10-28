@@ -117,6 +117,8 @@ export const STAMP_TARGETS = [
   'en/disclosures/index.html',
   'calendar/index.html',
   'en/calendar/index.html',
+  'basics/glossary/index.html',
+  'en/basics/glossary/index.html',
   'admin/index.html',
   'admin/manage/index.html',
   'admin/market/index.html',

@@ -319,6 +319,7 @@ test('unchanged main publishes every artifact in one exact-SHA commit', async ()
     assert.deepEqual(
       tree.tree.map(entry => entry.path).sort(),
       [
+        'data/glossary.json',
         'data/posts.js',
         'data/posts.json',
         'data/search-index-body-en.js',
@@ -444,8 +445,8 @@ test('publishing without a cover preserves existing records and omits coverImage
     assert.equal(response.status, 200);
     assert.equal(data.coverImage, null);
     const treeCall = calls.find(call => call.path.endsWith('/git/trees'));
-    // report + posts.json + posts.js + the four search index artifacts
-    assert.equal(treeCall.body.tree.length, 7);
+    // report + posts.json + posts.js + the five search index artifacts
+    assert.equal(treeCall.body.tree.length, 8);
     assert.equal(treeCall.body.tree.some(entry => entry.path.startsWith('covers/')), false);
     assert.ok(treeCall.body.tree.some(entry => entry.path === 'data/search-index.json'));
     assert.ok(treeCall.body.tree.some(entry => entry.path === 'data/search-index-meta.js'));
@@ -1083,8 +1084,8 @@ test('every file is written as its own blob, and the tree carries hashes rather 
 
     const blobCalls = calls.filter(call => call.path.endsWith('/git/blobs') && call.method === 'POST');
     assert.deepEqual([...new Set(blobCalls.map(call => call.body.encoding))], ['utf-8']);
-    // The report, both posts files and all four search index artifacts.
-    assert.equal(blobCalls.length, 7);
+    // The report, both posts files and all five search index artifacts.
+    assert.equal(blobCalls.length, 8);
 
     const tree = JSON.parse(sent.body).tree;
     for (const entry of tree) {

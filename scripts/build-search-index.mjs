@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { searchIndexArtifacts } from '../functions/api/_search-index.js';
+import { extractGlossaryTerms } from '../functions/_glossary.js';
 
 function cleanInlineText(str) {
   return String(str || '')
@@ -393,7 +394,8 @@ export function buildSearchIndex(targetRootDir) {
       readingMinutes: post.readingMinutes,
       url: post.href ? (post.href.replace(/^\/+/, '').startsWith('reports/') ? `/${post.href.replace(/^\/+/, '').replace(/\.html?$/i, '')}` : `/${post.href.replace(/^\/+/, '')}`) : '',
       coverImage: post.coverImage ? `/${post.coverImage.replace(/^\/+/, '')}` : '',
-      bodyText: bodyText // Full text indexing without truncation
+      bodyText: bodyText, // Full text indexing without truncation
+      glossaryTerms: reportRelativePath && fs.existsSync(reportFullPath) ? extractGlossaryTerms(fs.readFileSync(reportFullPath, 'utf8')) : []
     };
   });
 

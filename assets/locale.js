@@ -367,6 +367,9 @@
       const base = targetLanguage === 'en' ? '/en/calendar/' : '/calendar/';
       return params.size ? `${base}?${params}` : base;
     }
+    if (/^\/(?:en\/)?basics\/glossary\/?$/i.test(path)) {
+      return targetLanguage === 'en' ? '/en/basics/glossary/' : '/basics/glossary/';
+    }
     // A session page (/market/YYYY-MM-DD/) or the archive keeps its address.
     const marketPage = path.match(/^\/(?:en\/)?market\/(\d{4}-\d{2}-\d{2}|archive)\/?$/i);
     if (marketPage) return `${targetLanguage === 'en' ? '/en' : ''}/market/${marketPage[1].toLowerCase()}/`;

@@ -1,4 +1,5 @@
 import { searchIndexArtifacts } from './_search-index.js';
+import { extractGlossaryTerms } from '../_glossary.js';
 import { findLateCoverStyle, lateCoverStyleMessage } from '../_cover-style.js';
 import { SOCIAL_REPORT_CARD_DIR } from '../_seo.js';
 import { customShareCardProblem } from '../_share-image.js';
@@ -899,7 +900,8 @@ export async function onRequestPost(context) {
       readingMinutes,
       url: cleanPublicUrl,
       coverImage: coverPath ? `/${coverPath.replace(/^\/+/, '')}` : '',
-      bodyText: extractSearchText(html)
+      bodyText: extractSearchText(html),
+      glossaryTerms: extractGlossaryTerms(html)
     };
 
     const existingIndexIdx = searchIndex.findIndex(item => item && item.id === id);

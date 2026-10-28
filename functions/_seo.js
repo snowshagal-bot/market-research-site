@@ -986,6 +986,11 @@ export function sitemapXml(posts, { marketSessions = [] } = {}) {
     { lang: 'en', href: `${PRODUCTION_ORIGIN}/en/calendar/` },
     { lang: 'x-default', href: `${PRODUCTION_ORIGIN}/calendar/` }
   ];
+  const glossaryAlternates = [
+    { lang: 'ko', href: `${PRODUCTION_ORIGIN}/basics/glossary/` },
+    { lang: 'en', href: `${PRODUCTION_ORIGIN}/en/basics/glossary/` },
+    { lang: 'x-default', href: `${PRODUCTION_ORIGIN}/basics/glossary/` }
+  ];
   const urlEntry = (loc, lastmod, alternates = []) => {
     const alternateTags = alternates.map((entry) => (
       `<xhtml:link rel="alternate" hreflang="${entry.lang}" href="${escapeHtml(entry.href)}"/>`
@@ -1016,6 +1021,8 @@ export function sitemapXml(posts, { marketSessions = [] } = {}) {
     urlEntry(`${PRODUCTION_ORIGIN}/en/disclosures/`, '', disclosuresAlternates),
     urlEntry(`${PRODUCTION_ORIGIN}/calendar/`, '', calendarAlternates),
     urlEntry(`${PRODUCTION_ORIGIN}/en/calendar/`, '', calendarAlternates),
+    urlEntry(`${PRODUCTION_ORIGIN}/basics/glossary/`, '', glossaryAlternates),
+    urlEntry(`${PRODUCTION_ORIGIN}/en/basics/glossary/`, '', glossaryAlternates),
     ...categoryEntries,
     ...marketSessionEntries(marketSessions, urlEntry),
     ...validPosts.map((post) => urlEntry(

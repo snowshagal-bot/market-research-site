@@ -29,13 +29,14 @@ const SAMPLE = [
 
 /* ---------------- artifact shape ---------------- */
 
-test('the index is published as one canonical file plus three browser files', () => {
+test('the index is published as one canonical file, three browser files and the glossary', () => {
   const artifacts = searchIndexArtifacts(SAMPLE);
   assert.deepEqual(artifacts.map(a => a.path), [
     'data/search-index.json',
     'data/search-index-meta.js',
     'data/search-index-body-ko.js',
-    'data/search-index-body-en.js'
+    'data/search-index-body-en.js',
+    'data/glossary.json'
   ]);
   // The full index stays the canonical server-side artifact.
   assert.deepEqual(JSON.parse(artifacts[0].content), SAMPLE);
@@ -86,7 +87,8 @@ test('shards merge rather than overwrite, so both locales can be loaded at once'
 
 test('an empty index still produces every file', () => {
   const artifacts = searchIndexArtifacts([]);
-  assert.equal(artifacts.length, 4);
+  assert.equal(artifacts.length, 5);
+  assert.equal(artifacts[4].content, '{}\n');
   assert.match(artifacts[1].content, /^window\.SEARCH_INDEX_META = \[\];/);
   assert.match(artifacts[2].content, /\{\}\);/);
 });
