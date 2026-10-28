@@ -1,5 +1,34 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-28-daily-rkv2g0",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-10-28",
+    "reportDate": "2026-10-28",
+    "registeredDate": "2026-10-29",
+    "registeredAt": "2026-10-28T15:27:30.786Z",
+    "legacyImport": false,
+    "title": "Lanterns Lit Below, All the Way to the Crest",
+    "subtitle": "",
+    "description": "",
+    "summary": "The SK hynix figures set the stage before the opening bell. Buying through the session carried the market toward its highs.",
+    "takeaway": "SK hynix earnings fuel a chip-stock rally",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 5,
+    "href": "reports/en/2026-10-28_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-10-28-daily-1smjxhs",
+    "coverImage": "covers/2026-10-28-daily-rkv2g0.webp",
+    "shareCardImage": "covers/share/2026-10-28-daily-rkv2g0.jpg",
+    "coverThumbnail": "covers/2026-10-28-daily-rkv2g0-450.webp"
+  },
+  {
     "id": "2026-10-28-daily-1smjxhs",
     "type": "daily",
     "typeLabel": "주식 리포트",
