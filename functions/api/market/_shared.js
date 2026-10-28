@@ -120,11 +120,35 @@ function isDuplicateColumnError(error) {
   return /duplicate column name/i.test(String(error?.message || error || ''));
 }
 
+const MARKET_INDEX = 'idx_market_close_generated';
+
+// Whether the table already has the shape the statements below would give it.
+// Every new isolate used to send CREATE TABLE, two ALTER TABLE and CREATE INDEX,
+// four writes to the D1 primary, before its first read; after a deploy that was
+// every daily report page and every market API request. One read of
+// sqlite_master answers the same question. SQLite rewrites the stored CREATE
+// statement when a column is added, so the one-liner columns show up there.
+// Anything unexpected, including an error, means "not known to be current", and
+// the statements run as before.
+async function marketSchemaCurrent(db) {
+  try {
+    const row = await db.prepare(`SELECT
+        (SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?) AS table_sql,
+        (SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = ?) AS has_index`)
+      .bind(TABLE_NAME, MARKET_INDEX).first();
+    const sql = String(row?.table_sql || '');
+    return row?.has_index === 1 && /\btakeaway_ko\b/.test(sql) && /\btakeaway_en\b/.test(sql);
+  } catch (_) {
+    return false;
+  }
+}
+
 export async function ensureMarketTable(env) {
   const db = env.COMMENTS_DB;
   if (!db) throw new MarketDbError('DB_NOT_CONFIGURED', 'Market Close 데이터베이스가 연결되지 않았습니다.', 503);
   if (!schemaPromises.has(db)) {
     const promise = (async () => {
+      if (await marketSchemaCurrent(db)) return;
       await db.prepare(`CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (
         market_date TEXT PRIMARY KEY,
         schema_version TEXT NOT NULL,
@@ -146,7 +170,7 @@ export async function ensureMarketTable(env) {
           if (!isDuplicateColumnError(error)) throw error;
         }
       }
-      await db.prepare(`CREATE INDEX IF NOT EXISTS idx_market_close_generated ON ${TABLE_NAME} (generated_at)`).run();
+      await db.prepare(`CREATE INDEX IF NOT EXISTS ${MARKET_INDEX} ON ${TABLE_NAME} (generated_at)`).run();
     })().catch(error => {
       schemaPromises.delete(db);
       throw error;

@@ -185,7 +185,8 @@ basis notice; it never decides the Market date or stale state.
 
 Report `<title>` and meta description are generated for search intent while the H1 keeps
 the editorial headline. `functions/_report-facts.js` reads the published Market Close row for
-the report's date (D1 `market_close_snapshots`, final snapshots only) and `functions/_seo.js`
+the report's date (D1 `market_close_snapshots`, final snapshots only; the page waits at most
+`REPORT_FACTS_TIME_BUDGET_MS` = 2 s, after which the title is written without numbers) and `functions/_seo.js`
 writes Daily titles as `{M월 D일} 코스피 {close} · 코스닥 {close} 마감 | 외국인·기관 수급 | Snowshagal`
 (`{Mon D} KOSPI {close} · KOSDAQ {close} Close & Flows | Snowshagal`;
 the flows segment only when the row has a foreign or institutional net flow, owner request

@@ -9,6 +9,7 @@ import { TABLE_NAME, ensureMarketTable } from './api/market/_shared.js';
 import { isTradingDate, previousTradingDate } from './_trading-calendar.js';
 
 export const FLOW_UNIT = 'KRW billion';
+export const REPORT_FACTS_TIME_BUDGET_MS = 2000;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const finite = (value) => typeof value === 'number' && Number.isFinite(value);
 
@@ -164,14 +165,35 @@ export async function loadWeeklyFacts(env, reportDate) {
  * or a date without a published close all mean "no numbers", and the SEO
  * layer then writes the fallback wording.
  */
-export async function loadReportFacts(env, post) {
+export async function loadReportFacts(env, post, { budgetMs = REPORT_FACTS_TIME_BUDGET_MS } = {}) {
+  const reportDate = String(post?.reportDate || post?.date || '').slice(0, 10);
+  let load;
+  if (post?.type === 'daily') load = loadDailyFacts;
+  else if (post?.type === 'weekly') load = loadWeeklyFacts;
+  else return null;
+
+  // The report page waits for this before sending a byte. D1 that does not
+  // answer must not hold the page: after the 10-28 deploy both daily reports
+  // ran into Cloudflare's 524 (Deployment Smoke). Past the budget the title
+  // goes without numbers, like any other miss.
+  let timer;
+  const late = new Promise(resolve => {
+    timer = setTimeout(() => {
+      console.error('report facts unavailable', `no answer within ${budgetMs} ms`);
+      resolve(null);
+    }, budgetMs);
+  });
+  const facts = (async () => {
+    try {
+      return await load(env, reportDate);
+    } catch (error) {
+      console.error('report facts unavailable', error);
+      return null;
+    }
+  })();
   try {
-    const reportDate = String(post?.reportDate || post?.date || '').slice(0, 10);
-    if (post?.type === 'daily') return await loadDailyFacts(env, reportDate);
-    if (post?.type === 'weekly') return await loadWeeklyFacts(env, reportDate);
-    return null;
-  } catch (error) {
-    console.error('report facts unavailable', error);
-    return null;
+    return await Promise.race([facts, late]);
+  } finally {
+    clearTimeout(timer);
   }
 }
