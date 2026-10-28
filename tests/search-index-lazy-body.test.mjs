@@ -204,10 +204,10 @@ test('the metadata carries exactly the fields the search dialog reads', async ()
   }
 });
 
-test('every writer emits the same four artifacts and the body shards match the index byte for byte', async () => {
+test('every writer emits the same five artifacts and the body shards match the index byte for byte', async () => {
   const index = JSON.parse(await read('data/search-index.json'));
   const artifacts = searchIndexArtifacts(index);
-  assert.deepEqual(artifacts.map(a => a.path), ['data/search-index.json', 'data/search-index-meta.js', 'data/search-index-body-ko.js', 'data/search-index-body-en.js']);
+  assert.deepEqual(artifacts.map(a => a.path), ['data/search-index.json', 'data/search-index-meta.js', 'data/search-index-body-ko.js', 'data/search-index-body-en.js', 'data/glossary.json']);
   for (const artifact of artifacts) {
     assert.equal(artifact.content, await read(artifact.path), `${artifact.path} is exactly what the writers produce`);
   }

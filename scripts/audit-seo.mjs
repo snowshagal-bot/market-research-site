@@ -45,7 +45,8 @@ const STATIC_PAGES = [
   { key: 'about', ko: '/about/', en: '/en/about/' },
   { key: 'market', ko: '/market/', en: '/en/market/' },
   { key: 'disclosures', ko: '/disclosures/', en: '/en/disclosures/' },
-  { key: 'calendar', ko: '/calendar/', en: '/en/calendar/' }
+  { key: 'calendar', ko: '/calendar/', en: '/en/calendar/' },
+  { key: 'glossary', ko: '/basics/glossary/', en: '/en/basics/glossary/' }
 ];
 
 // Advisory only: length never fails the audit.

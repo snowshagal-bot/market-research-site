@@ -335,6 +335,31 @@ The homepage also provides:
 - reading time per report, computed at publish time
 - a denser two-column desktop archive with the recent-report list beside a five-category index whose counts are calculated from the current post data; tablet and mobile stack the index after the list
 
+## Market glossary (value-up plan C)
+
+`/basics/glossary/` and `/en/basics/glossary/` gather the terms the reports already explain in their tooltips.
+
+**Markups read.** `span.term > span.tip` and `button.term[data-tip]`.
+
+**Where the terms live.**
+- `functions/_glossary.js` extracts each report's terms (`extractGlossaryTerms`) and keeps them on its search index entry as `glossaryTerms`.
+- The publisher, the post manager (when the HTML is replaced) and `scripts/build-search-index.mjs` all set that field.
+- `searchIndexArtifacts` writes `data/glossary.json` (one report per line) beside the other index files, so publishing, replacing or deleting a report updates the glossary with no extra step or request.
+
+**The page.**
+- The static pages (`basics/glossary/index.html`, `en/basics/glossary/index.html`) are filled at request time by `functions/{,en/}basics/[[path]].js` from `data/posts.json` and `data/glossary.json`.
+- If either file cannot be read, the static page goes out with its own short note.
+- `/basics/` and everything else under it is untouched.
+
+**Choosing a definition.**
+1. A Market Basics episode's tooltip.
+2. Otherwise, the most repeated tooltip that names no particular day, used in at least two reports.
+3. Otherwise the term is left out.
+
+Spellings that differ only by case merge. Each term links to up to three reports, Market Basics first, then newest.
+
+**Links and checks.** The `/basics/` landing links to the page; the sitemap lists it KO/EN; `locale.js` switches language in place. `tests/glossary.test.mjs` requires every search index entry's terms to match its report HTML. Report HTML is only read.
+
 ## Search
 
 A global dialog on every public shell. Every report body is indexed in full, deliberately:

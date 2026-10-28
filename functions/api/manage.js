@@ -1,4 +1,5 @@
 import { searchIndexArtifacts } from "./_search-index.js";
+import { extractGlossaryTerms } from "../_glossary.js";
 import { findLateCoverStyle, lateCoverStyleMessage } from "../_cover-style.js";
 import { SOCIAL_REPORT_CARD_DIR } from "../_seo.js";
 import { customShareCardProblem } from "../_share-image.js";
@@ -1074,7 +1075,7 @@ export async function onRequestPost(context) {
         tags: Array.isArray(updated.tags) ? updated.tags : [],
         readingMinutes: typeof updated.readingMinutes === 'number' ? updated.readingMinutes : 1,
         coverImage: updated.coverImage ? `/${updated.coverImage.replace(/^\/+/, '')}` : '',
-        ...(replacementHtml !== null ? { bodyText: extractSearchText(replacementHtml) } : {})
+        ...(replacementHtml !== null ? { bodyText: extractSearchText(replacementHtml), glossaryTerms: extractGlossaryTerms(replacementHtml) } : {})
       };
 
       // A translation pair carries one tag list: the other-language post takes

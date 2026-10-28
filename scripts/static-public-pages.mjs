@@ -12,5 +12,7 @@ export const STATIC_PUBLIC_PAGES = [
   { file: 'en/disclosures/index.html', lang: 'en' },
   { file: 'calendar/index.html', lang: 'ko' },
   { file: 'en/calendar/index.html', lang: 'en' },
+  { file: 'basics/glossary/index.html', lang: 'ko' },
+  { file: 'en/basics/glossary/index.html', lang: 'en' },
   { file: '404.html', lang: 'ko' }
 ];

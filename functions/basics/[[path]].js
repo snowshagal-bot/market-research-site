@@ -1,0 +1,6 @@
+import { onGlossaryRequest } from '../_glossary.js';
+
+// /basics/glossary/; /basics/ itself and everything else under it is served
+// by the static site.
+export const onRequestGet = (context) => onGlossaryRequest(context);
+export const onRequestHead = onRequestGet;

@@ -1,3 +1,5 @@
+import { GLOSSARY_PATH, serializeGlossary } from '../_glossary.js';
+
 // Browser-facing search index artifacts.
 //
 // Every report body is indexed in full — a deliberate product requirement, so
@@ -61,6 +63,9 @@ export function searchIndexArtifacts(searchIndex) {
     { path: SEARCH_INDEX_PATH, content: `${JSON.stringify(entries, null, 2)}\n` },
     { path: SEARCH_META_PATH, content: `window.SEARCH_INDEX_META = ${JSON.stringify(entries.map(searchMetaEntry))};\n` },
     { path: SEARCH_BODY_PATHS.ko, content: bodyScript(bodies.ko) },
-    { path: SEARCH_BODY_PATHS.en, content: bodyScript(bodies.en) }
+    { path: SEARCH_BODY_PATHS.en, content: bodyScript(bodies.en) },
+    // The glossary page reads each report's tooltip terms from here
+    // (functions/_glossary.js); search-index.json stays their source.
+    { path: GLOSSARY_PATH, content: serializeGlossary(entries) }
   ];
 }
