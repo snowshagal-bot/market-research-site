@@ -83,35 +83,6 @@ window.RESEARCH_POSTS = [
     "coverThumbnail": "covers/2026-10-29-note-mnz0fr-450.webp"
   },
   {
-    "id": "2026-10-28-daily-adi54d",
-    "type": "daily",
-    "typeLabel": "Daily",
-    "lang": "en",
-    "date": "2026-10-28",
-    "reportDate": "2026-10-28",
-    "registeredDate": "2026-10-30",
-    "registeredAt": "2026-10-29T17:29:32.746Z",
-    "legacyImport": false,
-    "title": "One Heavyweight, Tips the Scales",
-    "subtitle": "",
-    "description": "October 29, 2026 Korea stock market close: Samsung Electronics earnings and shareholder returns, the KOSPI reversal, foreign and institutional flows, sector breadth, and key levels for October 30.",
-    "summary": "Samsung delivered record earnings and a ₩30tn dividend, but not the additional shareholder-return figure investors wanted. The KOSPI reversed from 6,100.",
-    "takeaway": "Samsung Payout Letdown Hits KOSPI",
-    "tags": [
-      "kospi",
-      "kosdaq",
-      "flows",
-      "foreign-investors",
-      "semiconductors"
-    ],
-    "readingMinutes": 5,
-    "href": "reports/en/2026-10-29_Snowshagal_Daily_EN.html",
-    "translationGroup": "2026-10-28-daily-1smjxhs",
-    "coverImage": "covers/2026-10-28-daily-adi54d.webp",
-    "shareCardImage": "covers/share/2026-10-28-daily-adi54d.jpg",
-    "coverThumbnail": "covers/2026-10-28-daily-adi54d-450.webp"
-  },
-  {
     "id": "2026-10-28-daily-rkv2g0",
     "type": "daily",
     "typeLabel": "Daily",
