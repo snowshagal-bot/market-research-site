@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-29-daily-zz7ta1",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-29",
+    "reportDate": "2026-10-29",
+    "registeredDate": "2026-10-30",
+    "registeredAt": "2026-10-29T17:35:15.941Z",
+    "legacyImport": false,
+    "title": "가장 무거운 추 하나, 저울을 기울임",
+    "subtitle": "",
+    "description": "",
+    "summary": "삼성전자는 사상 최대 실적과 30조원 배당을 냈지만 시장이 기대한 추가 환원 숫자는 없었고, 지수는 6,100에서 돌아선 장.",
+    "takeaway": "삼성전자 주주환원 실망에 코스피 하락",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors",
+      "earnings"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-10-29_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-29-daily-zz7ta1.webp",
+    "shareCardImage": "covers/share/2026-10-29-daily-zz7ta1.jpg",
+    "coverThumbnail": "covers/2026-10-29-daily-zz7ta1-450.webp"
+  },
+  {
     "id": "2026-10-29-note-qlt1h9",
     "type": "note",
     "typeLabel": "Investment Insights",
