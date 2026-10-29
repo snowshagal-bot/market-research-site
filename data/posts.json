@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-10-30-note-3y5pze",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-10-30",
+    "reportDate": "2026-10-30",
+    "registeredDate": "2026-10-30",
+    "registeredAt": "2026-10-29T19:16:25.072Z",
+    "legacyImport": false,
+    "title": "하이닉스 100조원 환원, 앞으로 석 달 시장에서 사는 건 20조원",
+    "seoTitle": "하이닉스 100조원 환원, 앞으로 석 달 시장에서 사는 건 20조원 | Snowshagal 투자노트 NO.19",
+    "subtitle": "",
+    "description": "SK하이닉스 2026 회계연도 주주환원 약 100조원 가운데 앞으로 석 달(10/29~1/28) 장내에서 사는 자사주는 20조원. 하루 강도, 임직원 보상 몫 10조원, 자사주 공백 5거래일을 정리했다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "earnings",
+      "semiconductors",
+      "valuation"
+    ],
+    "readingMinutes": 11,
+    "href": "reports/20261030_Investment_Note_SK_hynix_Buyback_20T.html",
+    "coverImage": "covers/2026-10-30-note-3y5pze.webp",
+    "shareCardImage": "covers/share/2026-10-30-note-3y5pze.jpg",
+    "coverThumbnail": "covers/2026-10-30-note-3y5pze-450.webp"
+  },
+  {
     "id": "2026-10-29-daily-a3ijfe",
     "type": "daily",
     "typeLabel": "Daily",
