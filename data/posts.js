@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-30-note-co6e08",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-10-30",
+    "reportDate": "2026-10-30",
+    "registeredDate": "2026-10-30",
+    "registeredAt": "2026-10-29T19:19:45.975Z",
+    "legacyImport": false,
+    "title": "SK hynix's KRW 100tn return plan: Only KRW 20tn in new open-market buying over the next three months",
+    "seoTitle": "SK hynix's KRW 100tn Return Plan: Only KRW 20tn in New Market Buying | Snowshagal Investment Note No. 19",
+    "subtitle": "",
+    "description": "SK hynix's estimated FY2026 shareholder returns of KRW 100tn are not all new share purchases. Only KRW 20tn is slated for open-market buying from Oct 29 to Jan 28. Track the daily pace, cancellation versus employee awards, and the five-session buyback gap.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "earnings",
+      "semiconductors",
+      "valuation"
+    ],
+    "readingMinutes": 14,
+    "href": "reports/en/20261030_Investment_Note_SK_hynix_Buyback_20T_EN.html",
+    "translationGroup": "2026-10-30-note-3y5pze",
+    "coverImage": "covers/2026-10-30-note-co6e08.webp",
+    "shareCardImage": "covers/share/2026-10-30-note-co6e08.jpg",
+    "coverThumbnail": "covers/2026-10-30-note-co6e08-450.webp"
+  },
+  {
     "id": "2026-10-30-note-3y5pze",
     "type": "note",
     "typeLabel": "투자 인사이트",
