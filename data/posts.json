@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-10-30-research-txzwc7",
+    "type": "research",
+    "typeLabel": "비정기 리서치",
+    "lang": "ko",
+    "date": "2026-10-30",
+    "reportDate": "2026-10-30",
+    "registeredDate": "2026-10-30",
+    "registeredAt": "2026-10-30T14:59:05.717Z",
+    "legacyImport": false,
+    "title": "돈이 한 바퀴 도는 데 걸리는 시간",
+    "seoTitle": "돈이 한 바퀴 도는 데 걸리는 시간: AI 순환금융 지도 | Snowshagal 리서치 NO.12",
+    "subtitle": "",
+    "description": "앤트로픽 상장 서류, 브로드컴 630억달러 장비 금융, 메타 975억달러 주식 조달. AI에 들어간 돈이 고객 매출로 돌아오기까지 그 사이를 누가 메우고, 늦어지면 누가 손실을 지는지 따라간다.",
+    "tags": [
+      "kospi",
+      "semiconductors",
+      "ai",
+      "valuation",
+      "liquidity"
+    ],
+    "readingMinutes": 35,
+    "href": "reports/20261028_Research_NO12_AI_Circular_Financing_Cover.html",
+    "coverImage": "covers/2026-10-30-research-txzwc7.webp",
+    "shareCardImage": "covers/share/2026-10-30-research-txzwc7.jpg",
+    "coverThumbnail": "covers/2026-10-30-research-txzwc7-450.webp"
+  },
+  {
     "id": "2026-10-30-daily-pbyl9f",
     "type": "daily",
     "typeLabel": "Daily",
