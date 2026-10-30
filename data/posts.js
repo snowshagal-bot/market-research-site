@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-30-daily-1gygvzy",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-10-30",
+    "reportDate": "2026-10-30",
+    "registeredDate": "2026-10-30",
+    "registeredAt": "2026-10-30T13:18:17.758Z",
+    "legacyImport": false,
+    "title": "쏟아붓는 물, 독 바닥을 살핌",
+    "subtitle": "",
+    "description": "",
+    "summary": "미국 빅테크가 AI에 쓴 돈의 숫자가 한국 반도체 값에 가장 먼저 매겨진 장 · SK하이닉스 한 종목이 지수 하락의 절반 가까이를 차지.",
+    "takeaway": "빅테크 AI 투자 의구심에 코스피 급락",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-10-30_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-10-30-daily-1gygvzy.webp",
+    "shareCardImage": "covers/share/2026-10-30-daily-1gygvzy.jpg",
+    "coverThumbnail": "covers/2026-10-30-daily-1gygvzy-450.webp"
+  },
+  {
     "id": "2026-10-30-note-co6e08",
     "type": "note",
     "typeLabel": "Investment Insights",
