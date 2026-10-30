@@ -1,5 +1,34 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-30-daily-pbyl9f",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-10-30",
+    "reportDate": "2026-10-30",
+    "registeredDate": "2026-10-30",
+    "registeredAt": "2026-10-30T14:08:15.982Z",
+    "legacyImport": false,
+    "title": "Money Pours In. What Remains?",
+    "subtitle": "",
+    "description": "October 30, 2026 South Korean market close: Big Tech AI investment returns under scrutiny, a 3.48% KOSPI selloff, foreign cash-equity selling, Korean chip heavyweights and key levels for November 2.",
+    "summary": "Big Tech's AI spending was repriced in Korean chip shares before anywhere else · SK hynix alone accounted for nearly half the KOSPI's decline.",
+    "takeaway": "Big Tech AI Spending Doubts Send KOSPI Sliding",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 5,
+    "href": "reports/en/2026-10-30_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-10-30-daily-1gygvzy",
+    "coverImage": "covers/2026-10-30-daily-pbyl9f.webp",
+    "shareCardImage": "covers/share/2026-10-30-daily-pbyl9f.jpg",
+    "coverThumbnail": "covers/2026-10-30-daily-pbyl9f-450.webp"
+  },
+  {
     "id": "2026-10-30-daily-1gygvzy",
     "type": "daily",
     "typeLabel": "주식 리포트",
