@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-30-research-9769jp",
+    "type": "research",
+    "typeLabel": "Research",
+    "lang": "en",
+    "date": "2026-10-30",
+    "reportDate": "2026-10-30",
+    "registeredDate": "2026-10-31",
+    "registeredAt": "2026-10-30T15:02:44.471Z",
+    "legacyImport": false,
+    "title": "The Time It Takes for Money to Come Full Circle",
+    "seoTitle": "The Time It Takes for Money to Come Full Circle: Mapping AI Circular Financing | Snowshagal Research No. 12",
+    "subtitle": "",
+    "description": "Anthropic’s IPO filing, $63 billion in Broadcom equipment financing, and Meta’s $97.5 billion equity plan. This report maps the time between AI capital outlays and customer cash—and who bears the risk if repayment is delayed.",
+    "tags": [
+      "kospi",
+      "semiconductors",
+      "ai",
+      "valuation",
+      "liquidity"
+    ],
+    "readingMinutes": 43,
+    "href": "reports/en/20261030_Snowshagal_Research_No12_AI_Circular_Financing_EN.html",
+    "translationGroup": "2026-10-30-research-txzwc7",
+    "coverImage": "covers/2026-10-30-research-9769jp.webp",
+    "shareCardImage": "covers/share/2026-10-30-research-9769jp.jpg",
+    "coverThumbnail": "covers/2026-10-30-research-9769jp-450.webp"
+  },
+  {
     "id": "2026-10-30-research-txzwc7",
     "type": "research",
     "typeLabel": "비정기 리서치",
