@@ -584,6 +584,11 @@
   // one-liner as `<i>` rows, each display:block in the report's stylesheet.
   // Only direct children count, so `<em>자</em>가` inside `span.l2` — an
   // inline-block accent on part of one word — still reads "자가".
+  //
+  // A title also reads as rows wherever the report's own stylesheet says so
+  // (blockClasses below): the covers from late October stack `.l1`/`.l2`/`.l3`
+  // in a plain `.cover h1`, or add a `.h1b` deck line, and declare each one
+  // display:block. A class the stylesheet does not make a block stays inline.
   const COVER_ROWS = [
     ['.cover-title', 'i'],
     ['.cover-oneline', 'i'],
@@ -595,11 +600,48 @@
     ['.dcv-ol', 'i']
   ];
 
-  function brokenLineText(element) {
+  // The classes a report's own stylesheet sets display:block, read from its
+  // <style> blocks: `.cover h1 .l1{display:block}` names l1, `.h1b{…display:
+  // block…}` names h1b. Only the element a selector ends on counts, and a
+  // pseudo-element (`.x::before`) or a state (`.x:hover`) is not the element.
+  function blockClasses(doc) {
+    const css = Array.from(doc?.querySelectorAll?.('style') || [])
+      .map(style => style.textContent || '').join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
+    const classes = new Set();
+    const rule = /([^{}]+)\{([^{}]*)\}/g;
+    let found;
+    while ((found = rule.exec(css))) {
+      if (!/(^|;)\s*display\s*:\s*block\s*(!important\s*)?(;|$)/i.test(found[2].trim())) continue;
+      found[1].split(',').forEach(selector => {
+        const last = selector.trim().split(/[\s>+~]+/).pop() || '';
+        if (last.includes(':')) return;
+        (last.match(/\.[\w-]+/g) || []).forEach(name => classes.add(name.slice(1)));
+      });
+    }
+    return classes;
+  }
+
+  // Every element inside `root` carrying one of `classes`, innermost first so
+  // a row inside a row is spaced before its parent is read.
+  function blockRows(root, classes) {
+    const rows = [];
+    const visit = node => {
+      Array.from(node.children || []).forEach(child => {
+        visit(child);
+        const names = String(child.getAttribute?.('class') || '').split(/\s+/);
+        if (names.some(name => classes.has(name))) rows.push(child);
+      });
+    };
+    visit(root);
+    return rows;
+  }
+
+  function brokenLineText(element, { blocks = null } = {}) {
     if (!element) return '';
     const clone = element.cloneNode ? element.cloneNode(true) : null;
     if (!clone || typeof clone.querySelectorAll !== 'function') return element.textContent || '';
     clone.querySelectorAll('br').forEach(br => { br.replaceWith(' '); });
+    if (blocks?.size) blockRows(clone, blocks).forEach(row => { row.replaceWith(` ${row.textContent} `); });
     if (typeof clone.matches === 'function') {
       const pair = COVER_ROWS.find(([parent]) => clone.matches(parent));
       // Direct children only, and only the one tag this cover family uses for
@@ -618,6 +660,7 @@
   function detectTitle(name, doc) {
     const meta = doc.querySelector('meta[name="report-title"]')?.content?.trim();
     if (meta) return meta;
+    const blocks = blockClasses(doc);
     const candidates = [
       doc.querySelector('.cv-h1'),
       // The Daily cover's title. The page below it has an h1 of its own, so
@@ -630,7 +673,7 @@
       doc.querySelector('.cover-screen h1, .cover-page h1, .report-cover h1, .cover h1, .opener h1'),
       doc.querySelector('h1'),
       doc.querySelector('.title')
-    ].map(node => cleanTitle(brokenLineText(node)))
+    ].map(node => cleanTitle(brokenLineText(node, { blocks })))
       .concat(cleanTitle(doc.title || ''))
       .filter(Boolean);
     if (candidates.length) return candidates[0].replace(/\s+/g,' ');

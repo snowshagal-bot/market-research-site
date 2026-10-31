@@ -185,6 +185,23 @@ test('styling inside one word is never split into two (L)', async () => {
   assert.equal(api.detectTitle('x.html', plain), 'TwoWords');
 });
 
+test('a class the report\'s stylesheet makes display:block is a row of the title', () => {
+  // Investment Insight No.20 (2026-10-31): plain .cover h1, rows set by class.
+  const stacked = parseHtml('<style>.cover h1 .l1,.cover h1 .l2{display:block;color:#1b2230}\n.cover h1 .l3{display:block;position:relative}</style>'
+    + '<section class="cover"><h1><span class="l1">The Fed Tilts Toward</span><span class="l2"><span class="pen">a December Hike.</span></span>'
+    + '<span class="l3">What Comes Next Hinges on <span class="red">Oil</span></span></h1></section>');
+  assert.equal(api.detectTitle('x.html', stacked), 'The Fed Tilts Toward a December Hike. What Comes Next Hinges on Oil');
+  // Investment Note 2026-10-29: text rows split by <br>, then a .h1b deck line.
+  const deck = parseHtml('<style>.h1b{display:block;margin-top:16px}\n.h1b u{text-decoration:none}</style>'
+    + '<h1>성장률 <span class="est">전망</span> <span class="g">3.8%</span>인데<br>지갑은 <span class="mk">그대로</span>'
+    + '<span class="h1b">반도체 돈은 <u>내년 1분기 성과급</u>으로 넘어온다</span></h1>');
+  assert.equal(api.detectTitle('x.html', deck), '성장률 전망 3.8%인데 지갑은 그대로 반도체 돈은 내년 1분기 성과급으로 넘어온다');
+  // inline-block, a pseudo-element or a hover state is not a row.
+  const inline = parseHtml('<style>.a{display:inline-block}.b::before{display:block}.c:hover{display:block}</style>'
+    + '<h1><span class="a">자</span>가<span class="b">바</span>뀐<span class="c">다</span></h1>');
+  assert.equal(api.detectTitle('x.html', inline), '자가바뀐다');
+});
+
 test('the three new row families are exactly the ones the covers use', () => {
   const rows = api.COVER_ROWS.map(([parent, child]) => `${parent} ${child}`);
   for (const pair of ['.cv-title span', '.dcv-h1 span', '.dcv-ol i']) assert.ok(rows.includes(pair), pair);

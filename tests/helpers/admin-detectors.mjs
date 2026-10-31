@@ -8,7 +8,7 @@ import '../../assets/report-metadata.js';
 const read = (path) => readFile(new URL(`../../${path}`, import.meta.url), 'utf8');
 
 const READERS = [
-  'cleanTitle', 'brokenLineText', 'detectTitle', 'detectSubtitle',
+  'cleanTitle', 'blockClasses', 'blockRows', 'brokenLineText', 'detectTitle', 'detectSubtitle',
   'readDescription', 'summaryText', 'readSummary', 'detectSummary',
   'normalizeTakeaway', 'elementTakeaway', 'readTakeaway', 'detectTakeaway'
 ];
