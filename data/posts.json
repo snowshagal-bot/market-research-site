@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-10-31-weekly-1jogcfq",
+    "type": "weekly",
+    "typeLabel": "Weekly",
+    "lang": "en",
+    "date": "2026-10-31",
+    "reportDate": "2026-10-31",
+    "registeredDate": "2026-10-31",
+    "registeredAt": "2026-10-31T14:01:02.732Z",
+    "legacyImport": false,
+    "title": "The Tide Turns. The Election Comes Next.",
+    "subtitle": "",
+    "description": "Korean equities, October 26–30, 2026: KOSPI +3.25%, KOSDAQ −3.63%. SK hynix earnings and a roughly KRW 100tn shareholder-return plan briefly lifted the KOSPI above 6,000, but Big Tech cash-flow concerns reversed the advance. Ahead: the U.S. chip selloff, U.S. midterms and the October jobs report.",
+    "summary": "SK hynix and Samsung Electronics pushed the KOSPI above 6,000 before concerns over Big Tech cash flow erased the breakout in two sessions · KOSPI +3.25%, KOSDAQ −3.63% · Construction, shipbuilding and defense were among the laggards.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "earnings",
+      "semiconductors"
+    ],
+    "readingMinutes": 10,
+    "href": "reports/en/2026-10-31_Snowshagal_Weekly_EN.html",
+    "translationGroup": "2026-10-31-weekly-17rrb70",
+    "coverImage": "covers/2026-10-31-weekly-1jogcfq.webp",
+    "shareCardImage": "covers/share/2026-10-31-weekly-1jogcfq.jpg",
+    "coverThumbnail": "covers/2026-10-31-weekly-1jogcfq-450.webp"
+  },
+  {
     "id": "2026-10-31-weekly-17rrb70",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
