@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-31-weekly-17rrb70",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-10-31",
+    "reportDate": "2026-10-31",
+    "registeredDate": "2026-10-31",
+    "registeredAt": "2026-10-31T13:17:50.804Z",
+    "legacyImport": false,
+    "title": "밀물 뒤 썰물, 다음 물때는 선거",
+    "subtitle": "",
+    "description": "2026년 10월 5주차(10월 26~30일) 한국 증시 주간 리포트. 코스피 +3.25% · 코스닥 -3.63%. SK하이닉스 실적과 약 100조원 주주환원에 6천 선을 회복했다가 빅테크 현금흐름 걱정에 반납한 닷새. 다음 주 미국 반도체 급락 반영, 미국 중간선거, 10월 고용보고서.",
+    "summary": "SK하이닉스·삼성전자가 코스피를 6천 선 위로 끌어올렸다가 빅테크 현금흐름 걱정에 이틀 만에 내준 한 주 · 코스피 +3.25%, 코스닥 -3.63% · 건설·조선·방산은 크게 내림",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "earnings",
+      "semiconductors"
+    ],
+    "readingMinutes": 7,
+    "href": "reports/2026-10-31_Snowshagal_Weekly.html",
+    "coverImage": "covers/2026-10-31-weekly-17rrb70.webp",
+    "shareCardImage": "covers/share/2026-10-31-weekly-17rrb70.jpg",
+    "coverThumbnail": "covers/2026-10-31-weekly-17rrb70-450.webp"
+  },
+  {
     "id": "2026-10-30-research-9769jp",
     "type": "research",
     "typeLabel": "Research",
