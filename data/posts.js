@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-10-31-note-m5fle8",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-10-31",
+    "reportDate": "2026-10-31",
+    "registeredDate": "2026-10-31",
+    "registeredAt": "2026-10-31T14:03:48.726Z",
+    "legacyImport": false,
+    "title": "12월 인상에 기운 연준,그다음은 유가에 달렸다",
+    "seoTitle": "12월 인상에 기운 연준, 그다음은 유가에 달렸다 | Snowshagal 투자 인사이트 NO.20",
+    "subtitle": "",
+    "description": "10월 FOMC는 3.75~4.00% 동결이었지만 성명은 12월 인상 쪽으로 기울었고 반대 2표는 모두 인상 주장이었다. 12월 인상은 시장 가격에 상당 부분 반영됐다. 다음 금리 경로를 가를 것은 유가 상승 자체보다 그 충격이 근원 물가에 얼마나 오래 남느냐다.",
+    "tags": [
+      "u-s-a",
+      "treasuries",
+      "fed",
+      "rates",
+      "oil"
+    ],
+    "readingMinutes": 17,
+    "href": "reports/20261031_Investment_Note_Fed_December_Oil.html",
+    "coverImage": "covers/2026-10-31-note-m5fle8.webp",
+    "shareCardImage": "covers/share/2026-10-31-note-m5fle8.jpg",
+    "coverThumbnail": "covers/2026-10-31-note-m5fle8-450.webp"
+  },
+  {
     "id": "2026-10-31-weekly-1jogcfq",
     "type": "weekly",
     "typeLabel": "Weekly",
