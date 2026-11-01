@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-01-note-1dhfhcl",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-01",
+    "reportDate": "2026-11-01",
+    "registeredDate": "2026-11-01",
+    "registeredAt": "2026-11-01T13:01:51.070Z",
+    "legacyImport": false,
+    "title": "Snowshagal 투자 인사이트 · 실적 현황판2026.11.01 AI 3분기 현황판 빅테크에서 메모리·전력기기까지, AI 공급망 12곳의 3분기 성적 발표10곳 대기2곳 정보 기준11.01 남은 발표11.04 AMD · 11.18 엔비디아",
+    "seoTitle": "AI 3분기 현황판: 빅테크에서 메모리·전력기기까지 12곳의 성적 | Snowshagal 투자 인사이트 NO.21",
+    "subtitle": "",
+    "description": "AI 공급망 12곳(빅테크·칩·파운드리·메모리·장비·한국 전력·부품)의 3분기 실적을 컨센서스 대비 결과, 설비투자, 영업이익률, 발표 뒤 주가로 한 판에 정리한 현황판.",
+    "tags": [
+      "kospi",
+      "semiconductors",
+      "ai",
+      "cloud-datacenter",
+      "earnings"
+    ],
+    "readingMinutes": 20,
+    "href": "reports/20261101_Investment_Note_AI_3Q_Scoreboard.html",
+    "coverImage": "covers/2026-11-01-note-1dhfhcl.webp",
+    "shareCardImage": "covers/share/2026-11-01-note-1dhfhcl.jpg",
+    "coverThumbnail": "covers/2026-11-01-note-1dhfhcl-450.webp"
+  },
+  {
     "id": "2026-10-31-note-7iyxem",
     "type": "note",
     "typeLabel": "Investment Insights",
