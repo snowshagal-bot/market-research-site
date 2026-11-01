@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-01-note-1qvzy2p",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-01",
+    "reportDate": "2026-11-01",
+    "registeredDate": "2026-11-01",
+    "registeredAt": "2026-11-01T13:15:45.372Z",
+    "legacyImport": false,
+    "title": "Snowshagal Investment Insight · Earnings Scoreboard2026.11.01 AI Q3 Earnings Scoreboard From Big Tech to memory and power equipment: Q3 results across 12 companies in the AI supply",
+    "seoTitle": "AI Q3 Earnings Scoreboard: 12 Companies from Big Tech to Memory and Power Equipment | Snowshagal Investment Insight No. 21",
+    "subtitle": "",
+    "description": "An AI Q3 earnings scoreboard spanning 12 companies, from U.S. hyperscalers and chipmakers to foundries, memory, equipment, and Korean power and components. Compare earnings surprises, CapEx, operating margins and post-report stock moves.",
+    "tags": [
+      "kospi",
+      "semiconductors",
+      "ai",
+      "cloud-datacenter",
+      "earnings"
+    ],
+    "readingMinutes": 19,
+    "href": "reports/en/20261101_Snowshagal_Investment_Insight_No21_AI_Earnings_Scoreboard_EN.html",
+    "translationGroup": "2026-11-01-note-1dhfhcl",
+    "coverImage": "covers/2026-11-01-note-1qvzy2p.webp",
+    "shareCardImage": "covers/share/2026-11-01-note-1qvzy2p.jpg",
+    "coverThumbnail": "covers/2026-11-01-note-1qvzy2p-450.webp"
+  },
+  {
     "id": "2026-11-01-note-1dhfhcl",
     "type": "note",
     "typeLabel": "투자 인사이트",
