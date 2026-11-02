@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-02-note-ukq03w",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-02",
+    "reportDate": "2026-11-02",
+    "registeredDate": "2026-11-02",
+    "registeredAt": "2026-11-02T11:34:58.108Z",
+    "legacyImport": false,
+    "title": "SAMSUNG'S RETURNSUP TO ₩110tn₩55–75tn STILL OPENJANUARY DECIDES",
+    "seoTitle": "Samsung Electronics: Up to KRW 110 Trillion in Shareholder Returns, with KRW 55–75 Trillion to Be Decided in January | Snowshagal Investment Insight N",
+    "subtitle": "",
+    "description": "Samsung Electronics plans ₩90–110 trillion in 2026 shareholder returns. The ₩35 trillion confirmed so far is entirely cash dividends; a further ₩55–75 trillion is to be allocated in January. Korea’s 10% financial-sector ownership threshold could favor cancellations of non-voting preferred shares.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "semiconductors",
+      "earnings",
+      "shareholder-returns"
+    ],
+    "readingMinutes": 17,
+    "href": "reports/en/20261102_Snowshagal_Investment_Insight_No22_Samsung_Shareholder_Returns_EN.html",
+    "translationGroup": "2026-11-02-note-ymihe",
+    "coverImage": "covers/2026-11-02-note-ukq03w.webp",
+    "shareCardImage": "covers/share/2026-11-02-note-ukq03w.jpg",
+    "coverThumbnail": "covers/2026-11-02-note-ukq03w-450.webp"
+  },
+  {
     "id": "2026-11-02-note-ymihe",
     "type": "note",
     "typeLabel": "투자 인사이트",
