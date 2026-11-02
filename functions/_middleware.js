@@ -166,6 +166,26 @@ export function legacyReportHtmlRedirect(request, url, response) {
   });
 }
 
+// Reports whose file was renamed after they were published, by decoded path
+// without .html. The old address, with or without .html, moves to the new one
+// so links already shared keep working.
+export const RENAMED_REPORTS = Object.freeze({
+  '/reports/시장을읽는말들_14편_자회사가상장하면모회사주주는손해일까': '/reports/basics-14-subsidiary-ipo'
+});
+
+export function renamedReportRedirect(request, url) {
+  if (request.method !== 'GET' && request.method !== 'HEAD') return null;
+  if (!url.pathname.startsWith('/reports/')) return null;
+  let path;
+  try { path = decodeURIComponent(url.pathname); } catch (_) { return null; }
+  const target = RENAMED_REPORTS[path.normalize('NFC').replace(/\.html$/i, '')];
+  if (!target) return null;
+  return new Response(null, {
+    status: 301,
+    headers: { location: `${url.origin}${target}${url.search}`, 'cache-control': 'public, max-age=3600' }
+  });
+}
+
 export async function onRequest(context) {
   const url = new URL(context.request.url);
   const hostClass = classifyHost(url);
@@ -182,6 +202,8 @@ export async function onRequest(context) {
   }
 
   if (isRepoInternalPath(url.pathname)) return notFoundResponse(context, url);
+  const renamed = renamedReportRedirect(context.request, url);
+  if (renamed) return renamed;
 
   if (isHumanAdminHost(url) && isAdminUiPath(url.pathname)) {
     const isLoginPath = url.pathname === '/admin/login' || url.pathname === '/admin/login/';

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-import { onRequest as middleware } from '../functions/_middleware.js';
+import { onRequest as middleware, RENAMED_REPORTS } from '../functions/_middleware.js';
 import { PRODUCTION_ORIGIN, reportSiteUrl, sitemapXml } from '../functions/_seo.js';
 
 const ROOT = new URL('../', import.meta.url);
@@ -183,4 +183,23 @@ test('9. server-rendered and client-rendered internal links never point at repor
   }
   const market = await read('assets/market-close.js');
   assert.match(market, /String\(exactDaily\.href\)\.replace\(\/\^\\\/\+\/, ''\)\.replace\(\/\\\.html\?\$\/i, ''\)/);
+});
+
+test('10. a renamed report moves its old address, with or without .html, to the new file in one 301', async () => {
+  for (const [from, to] of Object.entries(RENAMED_REPORTS)) {
+    const post = posts.find(item => `/${item.href}`.replace(/\.html$/i, '') === to);
+    assert.ok(post, `${to} is a published report`);
+    assert.equal(await exists(`${to}.html`), true, `${to}.html exists`);
+    assert.equal(await exists(`${from}.html`), false, `${from}.html is gone`);
+    const encoded = new URL(from, PRODUCTION_ORIGIN).pathname;
+    for (const path of [encoded, `${encoded}.html`]) {
+      const response = await get(`${path}?utm_source=x`);
+      assert.equal(response.status, 301, path);
+      assert.equal(response.headers.get('location'), `${PRODUCTION_ORIGIN}${to}?utm_source=x`);
+    }
+    const head = await get(encoded, { method: 'HEAD' });
+    assert.equal(head.status, 301);
+    const posted = await get(encoded, { method: 'POST' });
+    assert.notEqual(posted.status, 301, 'only GET and HEAD move');
+  }
 });
