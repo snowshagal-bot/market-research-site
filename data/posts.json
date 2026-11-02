@@ -1,5 +1,31 @@
 [
   {
+    "id": "2026-11-02-basics-1betjp4",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-11-02",
+    "reportDate": "2026-11-02",
+    "registeredDate": "2026-11-02",
+    "registeredAt": "2026-11-02T14:24:32.383Z",
+    "legacyImport": false,
+    "title": "When a Subsidiary Goes Public, Do Parent Shareholders Lose Out?",
+    "seoTitle": "Does a Subsidiary IPO Hurt Parent-Company Shareholders? Understanding Double Listings",
+    "subtitle": "",
+    "description": "SK hynix halted its review of a U.S. IPO for Solidigm after 79 days. Learn how parent-subsidiary double listings, primary and secondary offerings, Korean corporate splits and new shareholder-protection rules affect investors—with a quiz and interactive simulator.",
+    "tags": [
+      "valuation",
+      "governance",
+      "treasury-stock"
+    ],
+    "readingMinutes": 10,
+    "href": "reports/en/Snowshagal_Market_Basics_14_Subsidiary_IPO_EN.html",
+    "translationGroup": "2026-08-03-basics-1xaxefm",
+    "coverImage": "covers/2026-11-02-basics-1betjp4.webp",
+    "shareCardImage": "covers/share/2026-11-02-basics-1betjp4.jpg",
+    "coverThumbnail": "covers/2026-11-02-basics-1betjp4-450.webp"
+  },
+  {
     "id": "2026-08-03-basics-1xaxefm",
     "type": "basics",
     "typeLabel": "시장 입문",
