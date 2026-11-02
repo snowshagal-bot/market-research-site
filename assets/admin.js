@@ -586,7 +586,7 @@
   // inline-block accent on part of one word — still reads "자가".
   //
   // A title also reads as rows wherever the report's own stylesheet says so
-  // (blockClasses below): the covers from late October stack `.l1`/`.l2`/`.l3`
+  // (blockSelectors below): the covers from late October stack `.l1`/`.l2`/`.l3`
   // in a plain `.cover h1`, or add a `.h1b` deck line, and declare each one
   // display:block. A class the stylesheet does not make a block stays inline.
   const COVER_ROWS = [
@@ -600,48 +600,58 @@
     ['.dcv-ol', 'i']
   ];
 
-  // The classes a report's own stylesheet sets display:block, read from its
-  // <style> blocks: `.cover h1 .l1{display:block}` names l1, `.h1b{…display:
-  // block…}` names h1b. Only the element a selector ends on counts, and a
-  // pseudo-element (`.x::before`) or a state (`.x:hover`) is not the element.
-  function blockClasses(doc) {
+  // The selectors a report's own stylesheet sets display:block, read from
+  // its <style> blocks: `.cover h1 .l1{display:block}`, `.h1b{…display:
+  // block…}`, `h1>span{display:block}`. Only tags, classes and the
+  // descendant and child combinators are kept; a pseudo-element
+  // (`.x::before`), a state (`.x:hover`) or a sibling selector is not
+  // something a title's own elements can be checked against here.
+  function blockSelectors(doc) {
     const css = Array.from(doc?.querySelectorAll?.('style') || [])
       .map(style => style.textContent || '').join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
-    const classes = new Set();
+    const selectors = new Set();
     const rule = /([^{}]+)\{([^{}]*)\}/g;
     let found;
     while ((found = rule.exec(css))) {
       if (!/(^|;)\s*display\s*:\s*block\s*(!important\s*)?(;|$)/i.test(found[2].trim())) continue;
-      found[1].split(',').forEach(selector => {
-        const last = selector.trim().split(/[\s>+~]+/).pop() || '';
-        if (last.includes(':')) return;
-        (last.match(/\.[\w-]+/g) || []).forEach(name => classes.add(name.slice(1)));
-      });
+      found[1].split(',').map(selector => selector.trim().replace(/\s+/g, ' '))
+        .filter(selector => /^[\w.-][\w.\s>-]*$/.test(selector) && !selector.endsWith('>'))
+        .forEach(selector => selectors.add(selector));
     }
-    return classes;
+    return Array.from(selectors);
   }
 
-  // Every element inside `root` carrying one of `classes`, innermost first so
-  // a row inside a row is spaced before its parent is read.
-  function blockRows(root, classes) {
-    const rows = [];
-    const visit = node => {
-      Array.from(node.children || []).forEach(child => {
-        visit(child);
-        const names = String(child.getAttribute?.('class') || '').split(/\s+/);
-        if (names.some(name => classes.has(name))) rows.push(child);
+  // Where, under `element`, each element one of `selectors` matches sits, as a
+  // path of child indexes. It is matched in the document so a selector that
+  // names the title's ancestors still applies, and read back on a copy.
+  // Innermost first, so a row inside a row is spaced before its parent.
+  function blockRowPaths(element, selectors) {
+    const paths = [];
+    const isRow = node => selectors.some(selector => {
+      try { return node.matches(selector); } catch (_) { return false; }
+    });
+    const visit = (node, path) => {
+      Array.from(node.childNodes || []).forEach((child, index) => {
+        if (child.nodeType !== 1) return;
+        const at = path.concat(index);
+        visit(child, at);
+        if (typeof child.matches === 'function' && isRow(child)) paths.push(at);
       });
     };
-    visit(root);
-    return rows;
+    visit(element, []);
+    return paths;
   }
 
   function brokenLineText(element, { blocks = null } = {}) {
     if (!element) return '';
+    const rows = blocks?.length ? blockRowPaths(element, blocks) : [];
     const clone = element.cloneNode ? element.cloneNode(true) : null;
     if (!clone || typeof clone.querySelectorAll !== 'function') return element.textContent || '';
     clone.querySelectorAll('br').forEach(br => { br.replaceWith(' '); });
-    if (blocks?.size) blockRows(clone, blocks).forEach(row => { row.replaceWith(` ${row.textContent} `); });
+    rows.forEach(path => {
+      const row = path.reduce((node, index) => node?.childNodes?.[index], clone);
+      if (row) row.replaceWith(` ${row.textContent} `);
+    });
     if (typeof clone.matches === 'function') {
       const pair = COVER_ROWS.find(([parent]) => clone.matches(parent));
       // Direct children only, and only the one tag this cover family uses for
@@ -660,7 +670,7 @@
   function detectTitle(name, doc) {
     const meta = doc.querySelector('meta[name="report-title"]')?.content?.trim();
     if (meta) return meta;
-    const blocks = blockClasses(doc);
+    const blocks = blockSelectors(doc);
     const candidates = [
       doc.querySelector('.cv-h1'),
       // The Daily cover's title. The page below it has an h1 of its own, so
@@ -673,7 +683,13 @@
       doc.querySelector('.cover-screen h1, .cover-page h1, .report-cover h1, .cover h1, .opener h1'),
       doc.querySelector('h1'),
       doc.querySelector('.title')
-    ].map(node => cleanTitle(brokenLineText(node, { blocks })))
+    ]
+      // A class named for the title can also be the box around it: the
+      // 2026-11-01 cover's `div.cv-title` holds a kicker, the h1, a subtitle
+      // and a table of figures. A box that is not a heading but holds an h1
+      // gives that h1.
+      .map(node => (node && !/^h[1-6]$/i.test(node.tagName || '') && node.querySelector?.('h1')) || node)
+      .map(node => cleanTitle(brokenLineText(node, { blocks })))
       .concat(cleanTitle(doc.title || ''))
       .filter(Boolean);
     if (candidates.length) return candidates[0].replace(/\s+/g,' ');

@@ -196,10 +196,33 @@ test('a class the report\'s stylesheet makes display:block is a row of the title
     + '<h1>성장률 <span class="est">전망</span> <span class="g">3.8%</span>인데<br>지갑은 <span class="mk">그대로</span>'
     + '<span class="h1b">반도체 돈은 <u>내년 1분기 성과급</u>으로 넘어온다</span></h1>');
   assert.equal(api.detectTitle('x.html', deck), '성장률 전망 3.8%인데 지갑은 그대로 반도체 돈은 내년 1분기 성과급으로 넘어온다');
+  // Investment Insight No.22 (2026-11-02): rows set by a tag selector, an
+  // accent span inside a row left inline.
+  const tagRows = parseHtml('<style>h1>span{display:block}\nh1 .am{color:#f0b04a}</style>'
+    + '<section class="cover"><h1><span class="l1">삼성전자 환원</span><span class="l2">최대 110조원,</span>'
+    + '<span class="l3">남은 <span class="am">55~75조원</span>은</span><span class="l4"><span class="u">1월에 갈린다</span></span></h1></section>');
+  assert.equal(api.detectTitle('x.html', tagRows), '삼성전자 환원 최대 110조원, 남은 55~75조원은 1월에 갈린다');
+  const enRows = parseHtml('<style>h1>span{display:block}</style>'
+    + '<h1><span class="l1">SAMSUNG\'S RETURNS</span><span class="l2">UP TO ₩110tn</span><span class="l3">₩<span class="am">55–75tn</span> STILL OPEN</span></h1>');
+  assert.equal(api.detectTitle('x.html', enRows), 'SAMSUNG\'S RETURNS UP TO ₩110tn ₩55–75tn STILL OPEN');
   // inline-block, a pseudo-element or a hover state is not a row.
   const inline = parseHtml('<style>.a{display:inline-block}.b::before{display:block}.c:hover{display:block}</style>'
     + '<h1><span class="a">자</span>가<span class="b">바</span>뀐<span class="c">다</span></h1>');
   assert.equal(api.detectTitle('x.html', inline), '자가바뀐다');
+});
+
+test('a title class that names the box around the h1 gives the h1, not the box', () => {
+  // Investment Insight No.21 (2026-11-01): div.cv-title holds a kicker, the
+  // h1, a subtitle and a list of figures.
+  const boxed = parseHtml('<section class="cover"><div class="cv-title">'
+    + '<p class="kick">Snowshagal 투자 인사이트 · 실적 현황판<i>2026.11.01</i></p>'
+    + '<h1>AI <span class="q">3</span>분기<br>현황판</h1>'
+    + '<p class="subt">빅테크에서 메모리·전력기기까지,<br>AI 공급망 12곳의 3분기 성적</p>'
+    + '<dl class="meta"><div><dt>발표</dt><dd>10곳</dd></div></dl></div></section>');
+  assert.equal(api.detectTitle('x.html', boxed), 'AI 3분기 현황판');
+  // A .cv-title that is the heading itself still reads its own rows.
+  const heading = parseHtml('<h1 class="cv-title"><span class="l1">물가를 재는</span><span class="l2">자가 바뀐다</span></h1>');
+  assert.equal(api.detectTitle('x.html', heading), '물가를 재는 자가 바뀐다');
 });
 
 test('the three new row families are exactly the ones the covers use', () => {
