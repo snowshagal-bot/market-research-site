@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-02-daily-1t7bb85",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-02",
+    "reportDate": "2026-11-02",
+    "registeredDate": "2026-11-03",
+    "registeredAt": "2026-11-02T15:28:22.809Z",
+    "legacyImport": false,
+    "title": "두레박 하나 내려가자, 다른 하나가 올라옴",
+    "subtitle": "",
+    "description": "",
+    "summary": "미국 반도체 급락을 시가에서 치르고 2.24% 반등, 오른 종목도 열에 일곱 · 다만 외국인 현물 매도와 원화 약세는 이어졌고 5,900선은 종가에 못 지킴.",
+    "takeaway": "인텔 부진에도 SK하이닉스·코스피 반등",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "foreign-investors",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 4,
+    "href": "reports/2026-11-02_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-02-daily-1t7bb85.webp",
+    "shareCardImage": "covers/share/2026-11-02-daily-1t7bb85.jpg",
+    "coverThumbnail": "covers/2026-11-02-daily-1t7bb85-450.webp"
+  },
+  {
     "id": "2026-11-02-basics-1betjp4",
     "type": "basics",
     "typeLabel": "Market Basics",
