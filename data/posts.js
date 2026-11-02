@@ -102,7 +102,7 @@ window.RESEARCH_POSTS = [
       "treasury-stock"
     ],
     "readingMinutes": 7,
-    "href": "reports/시장을읽는말들_14편_자회사가상장하면모회사주주는손해일까.html",
+    "href": "reports/basics-14-subsidiary-ipo.html",
     "coverImage": "covers/2026-08-03-basics-1xaxefm.webp",
     "shareCardImage": "covers/share/2026-08-03-basics-1xaxefm.jpg",
     "coverThumbnail": "covers/2026-08-03-basics-1xaxefm-450.webp",
