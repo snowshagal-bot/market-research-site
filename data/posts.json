@@ -1,5 +1,34 @@
 [
   {
+    "id": "2026-11-02-daily-z6iggg",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-02",
+    "reportDate": "2026-11-02",
+    "registeredDate": "2026-11-03",
+    "registeredAt": "2026-11-02T15:34:34.005Z",
+    "legacyImport": false,
+    "title": "As One Bucket Falls, the Other Rises",
+    "subtitle": "",
+    "description": "KOSPI rose 2.24% on November 2, 2026, as investors read Intel's weak PC outlook as evidence of strong memory pricing. SK hynix, Samsung Electronics and institutional buying led a broad Korean equity rebound.",
+    "summary": "The market absorbed Wall Street's chip sell-off at the open, then rebounded 2.24%, with seven in ten stocks rising. But foreigners kept selling cash equities, the won weakened, and KOSPI failed to hold 5,900 at the close.",
+    "takeaway": "SK hynix and KOSPI rebound despite Intel's weak outlook",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "foreign-investors",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 6,
+    "href": "reports/en/2026-11-02_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-02-daily-1t7bb85",
+    "coverImage": "covers/2026-11-02-daily-z6iggg.webp",
+    "shareCardImage": "covers/share/2026-11-02-daily-z6iggg.jpg",
+    "coverThumbnail": "covers/2026-11-02-daily-z6iggg-450.webp"
+  },
+  {
     "id": "2026-11-02-daily-1t7bb85",
     "type": "daily",
     "typeLabel": "주식 리포트",
