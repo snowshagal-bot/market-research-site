@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { __test as coverApi } from '../functions/api/generate-cover.js';
+import { loadAdminDetectors } from './helpers/admin-detectors.mjs';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
@@ -83,23 +84,8 @@ function parseHtmlDoc(html) {
 // families whose children stand for a row, so a change to that list is a
 // change to what these tests exercise.
 async function loadAdminTitleReader() {
-  const adminSource = await read('assets/admin.js');
-  const body = (name, signature) => {
-    const found = adminSource.match(new RegExp(`function ${name}\\(${signature}\\) \\{([\\s\\S]*?)\\n  \\}`));
-    assert.ok(found, `admin.js no longer defines ${name}`);
-    return found[1];
-  };
-  const rows = adminSource.match(/const COVER_ROWS = (\[[\s\S]*?\]);/);
-  assert.ok(rows, 'admin.js no longer declares COVER_ROWS');
-
-  const built = new Function(`
-    const COVER_ROWS = ${rows[1]};
-    function cleanTitle(s) { ${body('cleanTitle', 's')} }
-    function brokenLineText(element) { ${body('brokenLineText', 'element')} }
-    function detectTitle(name, doc) { ${body('detectTitle', 'name, doc')} }
-    return { detectTitle, brokenLineText, COVER_ROWS };
-  `)();
-  return built;
+  const { detectTitle, brokenLineText, COVER_ROWS } = await loadAdminDetectors();
+  return { detectTitle, brokenLineText, COVER_ROWS };
 }
 
 async function loadAdminDetectTitle() {
