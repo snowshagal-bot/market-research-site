@@ -1,5 +1,31 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-08-03-basics-1xaxefm",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-11-02",
+    "reportDate": "2026-11-02",
+    "registeredDate": "2026-11-02",
+    "registeredAt": "2026-11-02T13:05:13.303Z",
+    "legacyImport": false,
+    "title": "자회사가 상장하면 모회사 주주는 손해일까",
+    "seoTitle": "중복상장 뜻: 자회사가 상장하면 모회사 주주는 손해일까",
+    "subtitle": "",
+    "description": "SK하이닉스가 손자회사 솔리다임의 미국 상장 검토를 79일 만에 멈췄다. 자회사가 상장하면 모회사 주주의 몫은 줄어들까. 중복상장의 뜻, 물적분할과 인적분할, 신주와 구주, 8월부터 시행된 중복상장 규정(주주 동의 3%룰)을 퀴즈와 시뮬레이터로 설명한다.",
+    "tags": [
+      "valuation",
+      "governance",
+      "treasury-stock"
+    ],
+    "readingMinutes": 7,
+    "href": "reports/시장을읽는말들_14편_자회사가상장하면모회사주주는손해일까.html",
+    "coverImage": "covers/2026-08-03-basics-1xaxefm.webp",
+    "shareCardImage": "covers/share/2026-08-03-basics-1xaxefm.jpg",
+    "coverThumbnail": "covers/2026-08-03-basics-1xaxefm-450.webp",
+    "updatedAt": "2026-11-02T13:15:08.914Z"
+  },
+  {
     "id": "2026-11-02-note-ukq03w",
     "type": "note",
     "typeLabel": "Investment Insights",
@@ -6101,31 +6127,6 @@ window.RESEARCH_POSTS = [
     "readingMinutes": 3,
     "shareCardImage": "covers/share/2026-08-04-daily-wfcoi4.jpg",
     "coverThumbnail": "covers/2026-08-04-daily-wfcoi4-450.webp"
-  },
-  {
-    "id": "2026-08-03-basics-1xaxefm",
-    "type": "basics",
-    "typeLabel": "시장 입문",
-    "lang": "ko",
-    "date": "2026-08-03",
-    "reportDate": "2026-08-03",
-    "registeredDate": "2026-11-02",
-    "registeredAt": "2026-11-02T13:05:13.303Z",
-    "legacyImport": false,
-    "title": "자회사가 상장하면 모회사 주주는 손해일까",
-    "seoTitle": "중복상장 뜻: 자회사가 상장하면 모회사 주주는 손해일까",
-    "subtitle": "",
-    "description": "SK하이닉스가 손자회사 솔리다임의 미국 상장 검토를 79일 만에 멈췄다. 자회사가 상장하면 모회사 주주의 몫은 줄어들까. 중복상장의 뜻, 물적분할과 인적분할, 신주와 구주, 8월부터 시행된 중복상장 규정(주주 동의 3%룰)을 퀴즈와 시뮬레이터로 설명한다.",
-    "tags": [
-      "valuation",
-      "governance",
-      "treasury-stock"
-    ],
-    "readingMinutes": 7,
-    "href": "reports/시장을읽는말들_14편_자회사가상장하면모회사주주는손해일까.html",
-    "coverImage": "covers/2026-08-03-basics-1xaxefm.webp",
-    "shareCardImage": "covers/share/2026-08-03-basics-1xaxefm.jpg",
-    "coverThumbnail": "covers/2026-08-03-basics-1xaxefm-450.webp"
   },
   {
     "id": "2026-08-03-weekly-yqni0t",
