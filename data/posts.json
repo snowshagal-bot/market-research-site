@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-02-note-ymihe",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-02",
+    "reportDate": "2026-11-02",
+    "registeredDate": "2026-11-02",
+    "registeredAt": "2026-11-02T11:21:59.157Z",
+    "legacyImport": false,
+    "title": "삼성전자 환원최대 110조원,남은 55~75조원은1월에 갈린다",
+    "seoTitle": "삼성전자 환원 최대 110조원, 남은 55~75조원은 1월에 갈린다 | Snowshagal 투자 인사이트 NO.22",
+    "subtitle": "",
+    "description": "삼성전자 2026년 환원 90~110조원 가운데 확정된 35조원은 전부 현금배당이다. 남은 55~75조원은 1월 말 이사회에서 배당과 자사주 소각으로 나뉘고, 금산법 10% 벽 때문에 우선주 소각이 먼저일 가능성이 크다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "semiconductors",
+      "earnings",
+      "shareholder-returns"
+    ],
+    "readingMinutes": 15,
+    "href": "reports/20261102_Investment_Insight_Samsung_Return_January.html",
+    "coverImage": "covers/2026-11-02-note-ymihe.webp",
+    "shareCardImage": "covers/share/2026-11-02-note-ymihe.jpg",
+    "coverThumbnail": "covers/2026-11-02-note-ymihe-450.webp"
+  },
+  {
     "id": "2026-11-01-note-1qvzy2p",
     "type": "note",
     "typeLabel": "Investment Insights",
