@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-03-note-tayvlr",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-03",
+    "reportDate": "2026-11-03",
+    "registeredDate": "2026-11-03",
+    "registeredAt": "2026-11-03T09:40:21.176Z",
+    "legacyImport": false,
+    "title": "K뷰티,수출 호황이주가 호황은아니다",
+    "seoTitle": "K뷰티, 수출 호황이 주가 호황은 아니다 | Snowshagal 투자 인사이트 NO.23",
+    "subtitle": "",
+    "description": "10월 화장품 수출은 역대 10월 최대, 1~10월 누계는 작년 연간을 넘었다. 그러나 에이피알처럼 매출이 두 배가 돼도 이익은 기대에 못 미칠 수 있다. 수출 호황을 이익으로 가져오는 기업을 가리는 기준을 정리했다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "earnings",
+      "valuation",
+      "beauty"
+    ],
+    "readingMinutes": 15,
+    "href": "reports/20261103_Investment_Insight_K_Beauty_Exports.html",
+    "coverImage": "covers/2026-11-03-note-tayvlr.webp",
+    "shareCardImage": "covers/share/2026-11-03-note-tayvlr.jpg",
+    "coverThumbnail": "covers/2026-11-03-note-tayvlr-450.webp"
+  },
+  {
     "id": "2026-11-02-daily-z6iggg",
     "type": "daily",
     "typeLabel": "Daily",

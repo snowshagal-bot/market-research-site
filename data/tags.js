@@ -244,5 +244,11 @@ window.TAG_REGISTRY = {
     "en": "treasury stock",
     "group": "market",
     "custom": true
+  },
+  "beauty": {
+    "ko": "뷰티",
+    "en": "Beauty",
+    "group": "sector",
+    "custom": true
   }
 };
