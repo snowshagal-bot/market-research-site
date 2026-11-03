@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-03-note-183q26a",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-03",
+    "reportDate": "2026-11-03",
+    "registeredDate": "2026-11-03",
+    "registeredAt": "2026-11-03T09:57:59.728Z",
+    "legacyImport": false,
+    "title": "K-BEAUTY'S EXPORT BOOM ISN'T A STOCK BOOM",
+    "seoTitle": "K-Beauty's Export Boom Is Not a Stock-Market Boom | Snowshagal Investment Insight No. 23",
+    "subtitle": "",
+    "description": "October cosmetics exports set a record for the month, and January–October exceeded full-year 2025. APR doubled revenue but missed profit expectations. Which K-beauty businesses can turn the export boom into durable earnings?",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "earnings",
+      "valuation",
+      "beauty"
+    ],
+    "readingMinutes": 15,
+    "href": "reports/en/20261103_Snowshagal_Investment_Insight_No23_K_Beauty_Exports_EN.html",
+    "translationGroup": "2026-11-03-note-tayvlr",
+    "coverImage": "covers/2026-11-03-note-183q26a.webp",
+    "shareCardImage": "covers/share/2026-11-03-note-183q26a.jpg",
+    "coverThumbnail": "covers/2026-11-03-note-183q26a-450.webp"
+  },
+  {
     "id": "2026-11-03-note-tayvlr",
     "type": "note",
     "typeLabel": "투자 인사이트",
