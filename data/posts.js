@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-03-daily-1q4b3dc",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-03",
+    "reportDate": "2026-11-03",
+    "registeredDate": "2026-11-03",
+    "registeredAt": "2026-11-03T10:03:58.962Z",
+    "legacyImport": false,
+    "title": "길게 차린 상, 솥은 아직 작음",
+    "subtitle": "",
+    "description": "",
+    "summary": "2일 반등분을 하루 만에 모두 내주고 10월 30일 종가 아래로 · 30일 저점은 지켰지만 내린 종목이 코스피 658개⁠·⁠코스닥 1,350개로 넓게 번진 하락.",
+    "takeaway": "빅테크 자금 조달 부담에 코스피 급락",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 4,
+    "href": "reports/2026-11-03_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-03-daily-1q4b3dc.webp",
+    "shareCardImage": "covers/share/2026-11-03-daily-1q4b3dc.jpg",
+    "coverThumbnail": "covers/2026-11-03-daily-1q4b3dc-450.webp"
+  },
+  {
     "id": "2026-11-03-note-183q26a",
     "type": "note",
     "typeLabel": "Investment Insights",
