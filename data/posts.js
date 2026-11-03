@@ -1,5 +1,34 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-03-daily-118bhof",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-03",
+    "reportDate": "2026-11-03",
+    "registeredDate": "2026-11-03",
+    "registeredAt": "2026-11-03T10:06:00.576Z",
+    "legacyImport": false,
+    "title": "The Table Grows, The Pot Stays Small",
+    "subtitle": "",
+    "description": "Snowshagal Daily, November 3, 2026. South Korea’s KOSPI fell 3.59% as AI financing concerns weighed on semiconductors; foreign cash-market flows, intraday levels, sector breadth and next-session checkpoints.",
+    "summary": "The KOSPI surrendered all of Nov. 2's rebound in one session and slipped below its Oct. 30 close. It held above the Oct. 30 low, but losses spread to 658 KOSPI names and 1,350 KOSDAQ names.",
+    "takeaway": "Big Tech financing concerns send the KOSPI tumbling",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 6,
+    "href": "reports/en/2026-11-03_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-03-daily-1q4b3dc",
+    "coverImage": "covers/2026-11-03-daily-118bhof.webp",
+    "shareCardImage": "covers/share/2026-11-03-daily-118bhof.jpg",
+    "coverThumbnail": "covers/2026-11-03-daily-118bhof-450.webp"
+  },
+  {
     "id": "2026-11-03-daily-1q4b3dc",
     "type": "daily",
     "typeLabel": "주식 리포트",
