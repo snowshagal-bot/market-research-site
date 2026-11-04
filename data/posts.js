@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-04-daily-ceokbh",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-04",
+    "reportDate": "2026-11-04",
+    "registeredDate": "2026-11-04",
+    "registeredAt": "2026-11-04T12:07:10.573Z",
+    "legacyImport": false,
+    "title": "같은 바람이, 한쪽 돛만 채움",
+    "subtitle": "",
+    "description": "",
+    "summary": "개표가 본격화한 10시 무렵부터 반도체가 밀려 장중 -4.02% · 오후엔 반도체가 낙폭을 줄이고 2차전지⁠·⁠태양광이 올라 플러스 마감 · 외국인 매도는 이틀 연속 조 단위, 장중 VKOSPI는 2개월 만의 높은 수준이라 흔들림이 끝난 장은 아님.",
+    "takeaway": "중간선거에 2차전지 급등·반도체 약세",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "foreign-investors",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 4,
+    "href": "reports/2026-11-04_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-04-daily-ceokbh.webp",
+    "shareCardImage": "covers/share/2026-11-04-daily-ceokbh.jpg",
+    "coverThumbnail": "covers/2026-11-04-daily-ceokbh-450.webp"
+  },
+  {
     "id": "2026-11-04-note-1s8tzgj",
     "type": "note",
     "typeLabel": "Investment Insights",
