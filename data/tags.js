@@ -250,5 +250,11 @@ window.TAG_REGISTRY = {
     "en": "Beauty",
     "group": "sector",
     "custom": true
+  },
+  "pharma-stocks": {
+    "ko": "바이오 주",
+    "en": "pharma stocks",
+    "group": "sector",
+    "custom": true
   }
 };

@@ -1,5 +1,31 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-04-note-1wrut15",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-04",
+    "reportDate": "2026-11-04",
+    "registeredDate": "2026-11-04",
+    "registeredAt": "2026-11-04T11:15:22.296Z",
+    "legacyImport": false,
+    "title": "기술이전 '1조원 계약', 확정된 돈은 6%뿐",
+    "seoTitle": "기술이전 '1조원 계약', 확정된 돈은 6%뿐 | Snowshagal 투자 인사이트 NO.24",
+    "subtitle": "",
+    "description": "기술이전 뉴스의 '총 계약 규모'는 대부분 조건이 붙은 돈이다. 계약 때 확정되는 계약금은 세계 합산으로 총액의 6%였고, 권리가 돌아온 국내 9건은 총액의 6.9%(중앙값)를 받고 끝났다. 공시에서 먼저 볼 다섯 칸을 정리했다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "valuation",
+      "pharma-stocks"
+    ],
+    "readingMinutes": 15,
+    "href": "reports/20261104_Investment_Insight_Biotech_Licensing_Upfront.html",
+    "coverImage": "covers/2026-11-04-note-1wrut15.webp",
+    "shareCardImage": "covers/share/2026-11-04-note-1wrut15.jpg",
+    "coverThumbnail": "covers/2026-11-04-note-1wrut15-450.webp"
+  },
+  {
     "id": "2026-11-03-daily-118bhof",
     "type": "daily",
     "typeLabel": "Daily",
