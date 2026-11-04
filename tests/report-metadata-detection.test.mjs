@@ -299,3 +299,33 @@ test('the fixtures are real reports, trimmed', async () => {
     assert.ok(html.length < 4000, `${name} stays small`);
   }
 });
+
+/* ---------------------------------------------------------- report date */
+
+test('the report date comes from the report itself, never from a later date it quotes', async () => {
+  const at = new Date('2026-11-04T14:00:00Z');
+  // NO.25 quotes the new Congress's opening day, 2027.1.3, in its description
+  // ahead of any other date; it was published as a 2027 post.
+  for (const href of ['reports/20261104_Investment_Insight_Midterm_Scoreboard.html',
+    'reports/en/20261104_Snowshagal_Investment_Insight_No25_US_Midterms_Scoreboard_EN.html']) {
+    const html = await read(href);
+    assert.equal(api.detectDate(href.split('/').pop(), parseHtml(html), html, at), '2026-11-04', href);
+  }
+
+  // The publisher passes the parsed document and the raw HTML it came from.
+  const doc = (body, head = '') => `<html><head>${head}</head><body>${body}</body></html>`;
+  const date = (name, html, now = at) => api.detectDate(name, parseHtml(html), html, now);
+  // Its own meta wins, then its article metadata, then a date in its file name.
+  assert.equal(date('20261104_x.html', doc('', '<meta name="report-date" content="2026-11-03">')), '2026-11-03');
+  assert.equal(date('x.html', doc('', '<script type="application/ld+json">{"datePublished": "2026-11-02"}</script>')), '2026-11-02');
+  assert.equal(date('20261104_Report.html', doc('<p>2027.1.3 개원</p>')), '2026-11-04');
+  assert.equal(date('2026-10-03_Korea_Weekly_Report_EN.html', doc('')), '2026-10-03');
+  // A byline, as the reports write one.
+  assert.equal(date('x.html', doc('<p>2027.1.3 개원</p><p>발행 2026.11.04 · 읽는 시간 15분</p>')), '2026-11-04');
+  assert.equal(date('x.html', doc('<p class="byl">Published Nov. 4, 2026</p>')), '2026-11-04');
+  // Prose is not a byline: the first date that is not in the future is read instead.
+  assert.equal(date('x.html', doc('<p>The data was published June 10, 2026 and revised on 2026.06.12.</p>'), new Date('2026-08-13T00:00:00Z')), '2026-06-12');
+  // A date after tomorrow is not a report date; with nothing else, the field stays empty.
+  assert.equal(date('x.html', doc('<p>새 의회는 2027.1.3 개원</p>')), '');
+  assert.equal(date('x.html', doc('<p>2026.11.05 장 시작 전</p>')), '2026-11-05', 'tomorrow is allowed, for a time zone ahead');
+});

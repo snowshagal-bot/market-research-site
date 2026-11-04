@@ -527,36 +527,62 @@
     return '';
   }
 
-  function detectDate(name, doc, text) {
+  // The report date, from what the report says about itself first: its own
+  // report-date meta, its article metadata, the date in its file name
+  // (20261104_… as well as 2026-11-04_…), then a 발행/Published line. Only
+  // after those is the first date in the title or the opening HTML taken, and
+  // never one later than tomorrow: NO.25 was read as 2027-01-03, the new
+  // Congress's opening day quoted in its description, and listed as a future post.
+  function detectDate(name, doc, text, now) {
     const meta = doc.querySelector('meta[name="report-date"]')?.content?.trim();
     if (meta && /^\d{4}-\d{2}-\d{2}$/.test(meta)) return meta;
-    const sources = [name, doc.title || '', text.slice(0, 5000)];
+    const latest = new Date((now || new Date()).getTime() + 36 * 3600 * 1000).toISOString().slice(0, 10);
+    const declared = [doc.querySelector('meta[property="article:published_time"]')?.content || ''];
+    Array.from(doc.querySelectorAll?.('script[type="application/ld+json"]') || []).forEach(script => {
+      const published = /"datePublished"\s*:\s*"([^"]+)"/.exec(script.textContent || '');
+      if (published) declared.push(published[1]);
+    });
+    for (const value of declared) {
+      const iso = /^(20\d{2})-(\d{2})-(\d{2})/.exec(value.trim());
+      const found = iso && formatDate(iso[1], iso[2], iso[3]);
+      if (found && found <= latest) return found;
+    }
+    const compact = /(?:^|\D)(20\d{2})(\d{2})(\d{2})(?!\d)/.exec(name);
+    if (compact) {
+      const found = formatDate(compact[1], compact[2], compact[3]);
+      if (found && found <= latest) return found;
+    }
+    // A byline as the reports write it — "발행 2026.11.04", "Published Nov. 4,
+    // 2026" — and not prose such as "published June 10, 2026" or "국채 발행 2026년".
+    const issued = /(?:발행일?|게시일?)\s*[:：]?\s*(20\d{2}\.\s?\d{1,2}\.\s?\d{1,2})|\b(?:Published|Issued):?\s+([A-Z][a-z]{2,8}\.?\s+\d{1,2},?\s*20\d{2})/.exec(doc.body?.textContent || '');
+    const sources = [name, ...(issued ? [issued[1] || issued[2]] : []), doc.title || '', text.slice(0, 5000)];
+    return firstDate(sources, latest);
+  }
+
+  function formatDate(year, month, day) {
+    const parsed = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+    if (parsed.getUTCFullYear() !== Number(year) || parsed.getUTCMonth() + 1 !== Number(month) || parsed.getUTCDate() !== Number(day)) return '';
+    return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  }
+
+  function firstDate(sources, latest) {
     const months = {
       january: 1, jan: 1, february: 2, feb: 2, march: 3, mar: 3, april: 4, apr: 4,
       may: 5, june: 6, jun: 6, july: 7, jul: 7, august: 8, aug: 8,
       september: 9, sep: 9, sept: 9, october: 10, oct: 10, november: 11, nov: 11,
       december: 12, dec: 12
     };
-    const formatDate = (year, month, day) => {
-      const parsed = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
-      if (parsed.getUTCFullYear() !== Number(year) || parsed.getUTCMonth() + 1 !== Number(month) || parsed.getUTCDate() !== Number(day)) return '';
-      return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    };
+    const readings = [
+      [/(20\d{2})[.\-_\/년\s]+(\d{1,2})[.\-_\/월\s]+(\d{1,2})/g, m => formatDate(m[1], m[2], m[3])],
+      [/\b(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sept?|oct|nov|dec)\.?\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s*(20\d{2})\b/gi, m => formatDate(m[3], months[m[1].toLowerCase()], m[2])],
+      [/\b(\d{1,2})(?:st|nd|rd|th)?\s+(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sept?|oct|nov|dec)\.?\s*,?\s*(20\d{2})\b/gi, m => formatDate(m[3], months[m[2].toLowerCase()], m[1])]
+    ];
     for (const s of sources) {
-      const m = s.match(/(20\d{2})[.\-_\/년\s]+(\d{1,2})[.\-_\/월\s]+(\d{1,2})/);
-      if (m) {
-        const found = formatDate(m[1], m[2], m[3]);
-        if (found) return found;
-      }
-      const monthFirst = s.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sept?|oct|nov|dec)\.?\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s*(20\d{2})\b/i);
-      if (monthFirst) {
-        const found = formatDate(monthFirst[3], months[monthFirst[1].toLowerCase()], monthFirst[2]);
-        if (found) return found;
-      }
-      const dayFirst = s.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s+(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sept?|oct|nov|dec)\.?\s*,?\s*(20\d{2})\b/i);
-      if (dayFirst) {
-        const found = formatDate(dayFirst[3], months[dayFirst[2].toLowerCase()], dayFirst[1]);
-        if (found) return found;
+      for (const [pattern, read] of readings) {
+        for (const m of s.matchAll(pattern)) {
+          const found = read(m);
+          if (found && found <= latest) return found;
+        }
       }
     }
     return '';
