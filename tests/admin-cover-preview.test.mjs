@@ -42,7 +42,9 @@ async function loadAdmin({
   publishResponse,
   deploymentResponses = [],
   immediateTimers = false,
-  pendingReportFile = null
+  pendingReportFile = null,
+  loadedScriptSrc = '',
+  deployedAdminHtml = null
 } = {}) {
   const source = await read('assets/admin.js');
   // The admin page loads the shared report metadata rules before admin.js.
@@ -120,6 +122,9 @@ async function loadAdmin({
         submissions.push(options.body);
         return publishResponse || { ok: false, status: 500, json: async () => ({ message: 'test stop' }) };
       }
+      if (url === '/admin/' && deployedAdminHtml !== null) {
+        return { ok: true, status: 200, text: async () => deployedAdminHtml };
+      }
       if (String(url).startsWith('/data/posts.json?deploycheck=')) {
         const posts = deploymentResponses.length > 0 ? deploymentResponses.shift() : [];
         return { ok: true, status: 200, json: async () => posts };
@@ -162,6 +167,7 @@ async function loadAdmin({
       static revokeObjectURL(url) { revokedUrls.push(url); }
     },
     document: {
+      currentScript: loadedScriptSrc ? { src: loadedScriptSrc } : null,
       documentElement: { dataset: {} },
       getElementById: id => elements[id],
       querySelector: selector => selector === '[data-theme-toggle]' ? themeButton : selector === 'meta[name="theme-color"]' ? themeMeta : null,
@@ -1113,4 +1119,30 @@ test('choosing a new report clears a chosen share image', async () => {
   await elements['html-file'].emit('change');
   assert.equal(elements['share-image-preview'].hidden, true);
   assert.equal(elements['share-image-info'].textContent, '고르지 않으면 대표 커버로 공유 카드를 자동으로 만듭니다.');
+});
+
+test('a tab left open across a deploy is asked to reload before it publishes', async () => {
+  const page = version => `<script src="/assets/report-metadata.js?v=7596fc7e0b"></script>
+<script src="/assets/admin.js?v=${version}"></script>`;
+  const stale = await loadAdmin({
+    confirmResult: true,
+    loadedScriptSrc: 'https://admin.snowshagal.com/assets/admin.js?v=de7f0deb52',
+    deployedAdminHtml: page('6a92533441')
+  });
+  await makePublishReady(stale.elements);
+  await stale.elements['publish-btn'].emit('click');
+  assert.equal(stale.submissions.length, 0, 'nothing is published from the old code');
+  assert.equal(stale.confirmMessages.length, 0);
+  assert.match(stale.elements['parse-status'].textContent, /새로고침한 뒤 리포트를 다시 올려 주세요/);
+
+  for (const deployedAdminHtml of [page('de7f0deb52'), '<p>login</p>']) {
+    const current = await loadAdmin({
+      confirmResult: true,
+      loadedScriptSrc: 'https://admin.snowshagal.com/assets/admin.js?v=de7f0deb52',
+      deployedAdminHtml
+    });
+    await makePublishReady(current.elements);
+    await current.elements['publish-btn'].emit('click');
+    assert.equal(current.submissions.length, 1, 'the same version, or a page that names none, publishes');
+  }
 });
