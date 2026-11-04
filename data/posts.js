@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-04-note-1s8tzgj",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-04",
+    "reportDate": "2026-11-04",
+    "registeredDate": "2026-11-04",
+    "registeredAt": "2026-11-04T11:43:26.141Z",
+    "legacyImport": false,
+    "title": "BIOTECH ₩1TN DEAL? ONLY 6% UPFRONT",
+    "seoTitle": "Biotech Licensing: A ₩1 Trillion Deal, but Just 6% Upfront? | Snowshagal Investment Insight No. 24",
+    "subtitle": "",
+    "description": "Most of a biotech licensing deal's headline value is contingent. Upfront payments were 6% of announced global deal value in Jan–Sep 2026; nine selected Korean rights-reversion cases retained a median 6.9%. Five fields every investor should read.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "valuation",
+      "pharma-stocks"
+    ],
+    "readingMinutes": 15,
+    "href": "reports/en/20261104_Snowshagal_Investment_Insight_No24_Biotech_Licensing_Upfront_EN.html",
+    "translationGroup": "2026-11-04-note-1wrut15",
+    "coverImage": "covers/2026-11-04-note-1s8tzgj.webp",
+    "shareCardImage": "covers/share/2026-11-04-note-1s8tzgj.jpg",
+    "coverThumbnail": "covers/2026-11-04-note-1s8tzgj-450.webp"
+  },
+  {
     "id": "2026-11-04-note-1wrut15",
     "type": "note",
     "typeLabel": "투자 인사이트",
