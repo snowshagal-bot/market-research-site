@@ -892,3 +892,14 @@ test('a share image that is not a 1200x630 JPEG, or one sent without choosing to
     } finally { globalThis.fetch = originalFetch; }
   }
 });
+
+test('the repository files read back are decoded without a callback per byte', () => {
+  // A mapping callback per byte over the multi-megabyte search index took a
+  // manage update past the Worker CPU limit (Cloudflare 1102, answered as 503).
+  for (const file of ['functions/api/manage.js', 'functions/api/publish.js']) {
+    const source = fs.readFileSync(path.join(rootDir, file), 'utf8');
+    const decoder = /function decodeBase64Utf8\([^)]*\) \{[\s\S]*?\n\}/.exec(source)?.[0];
+    assert.ok(decoder, `${file} declares decodeBase64Utf8`);
+    assert.doesNotMatch(decoder, /Uint8Array\.from\(\s*\w+\s*,/, file);
+  }
+});

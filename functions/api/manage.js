@@ -66,9 +66,13 @@ function encodeRepoPath(path) {
   return path.split("/").map(encodeURIComponent).join("/");
 }
 
+// The search index read back here is several megabytes. A plain loop copies it
+// in milliseconds; Uint8Array.from with a mapping callback calls a function per
+// byte and took the update past the Worker CPU limit (Cloudflare 1102, a 503).
 function decodeBase64Utf8(value) {
-  const binary = atob(value.replace(/\n/g, ""));
-  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  const binary = atob(value.replace(/\s/g, ""));
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
   return new TextDecoder().decode(bytes);
 }
 
