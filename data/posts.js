@@ -1,5 +1,34 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-04-daily-njvx2d",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-04",
+    "reportDate": "2026-11-04",
+    "registeredDate": "2026-11-04",
+    "registeredAt": "2026-11-04T12:40:26.008Z",
+    "legacyImport": false,
+    "title": "The Same Wind, Only One Sail Fills",
+    "subtitle": "",
+    "description": "",
+    "summary": "As the vote count gathered pace around 10 a.m., semiconductor shares dropped and the KOSPI fell as much as -4.02% intraday. By afternoon, chip losses narrowed and battery and solar stocks pushed the index into positive territory. Foreign net selling exceeded KRW 1tn for a second straight session, while intraday VKOSPI hit a two-month high. The turbulence is not necessarily over.",
+    "takeaway": "Midterms: Batteries Up, Chips Lag",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "foreign-investors",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 6,
+    "href": "reports/en/2026-11-04_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-04-daily-ceokbh",
+    "coverImage": "covers/2026-11-04-daily-njvx2d.webp",
+    "shareCardImage": "covers/share/2026-11-04-daily-njvx2d.jpg",
+    "coverThumbnail": "covers/2026-11-04-daily-njvx2d-450.webp"
+  },
+  {
     "id": "2026-11-04-daily-ceokbh",
     "type": "daily",
     "typeLabel": "주식 리포트",
