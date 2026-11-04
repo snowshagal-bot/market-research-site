@@ -1,5 +1,8 @@
 (() => {
   const MAX_TAKEAWAY_LENGTH = 400;
+  // The asset version this tab loaded (admin.js?v=…), compared with the
+  // deployed page before publishing; see adminIsStale.
+  const LOADED_ADMIN_VERSION = /admin\.js\?v=([\w-]+)/.exec(document.currentScript?.src || '')?.[1] || '';
   const $ = (id) => document.getElementById(id);
   const fileInput = $('html-file');
   const dropZone = $('drop-zone');
@@ -1315,10 +1318,31 @@
     updatePublishState();
   }
 
+  // Whether the admin page deployed now loads a different admin.js than this
+  // tab did. A tab left open across a deploy keeps reading reports with the
+  // code it loaded: the 11-03 K-beauty title was published with the title
+  // reader replaced the night before, rows run together. Unknown is not stale.
+  async function adminIsStale() {
+    if (!LOADED_ADMIN_VERSION) return false;
+    try {
+      const response = await fetch('/admin/', { cache: 'no-store', credentials: 'same-origin' });
+      if (!response.ok) return false;
+      const deployed = /\/assets\/admin\.js\?v=([\w-]+)/.exec(await response.text())?.[1];
+      return Boolean(deployed) && deployed !== LOADED_ADMIN_VERSION;
+    } catch (_) {
+      return false;
+    }
+  }
+
   async function publish() {
     if (publishing || publishBtn.disabled || !selectedFile) return;
     if (isPreviewHost(location.hostname)) {
       status.textContent = 'Preview와 로컬 환경에서는 실제 게시를 실행할 수 없습니다.';
+      return;
+    }
+    if (await adminIsStale()) {
+      status.classList.add('error');
+      status.textContent = '관리 화면이 새 버전으로 바뀌었습니다. 이 탭은 이전 코드로 제목과 날짜를 읽었으니, 새로고침한 뒤 리포트를 다시 올려 주세요.';
       return;
     }
     const postType = type.value;
