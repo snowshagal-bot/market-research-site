@@ -256,5 +256,11 @@ window.TAG_REGISTRY = {
     "en": "pharma stocks",
     "group": "sector",
     "custom": true
+  },
+  "election": {
+    "ko": "선거",
+    "en": "Election",
+    "group": "market",
+    "custom": true
   }
 };

@@ -1,5 +1,32 @@
 [
   {
+    "id": "2027-01-03-note-1r9poww",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2027-01-03",
+    "reportDate": "2027-01-03",
+    "registeredDate": "2026-11-04",
+    "registeredAt": "2026-11-04T14:04:23.228Z",
+    "legacyImport": false,
+    "title": "의회는 바뀌었고, 관세 권한은 그대로다",
+    "seoTitle": "의회는 바뀌었고, 관세 권한은 그대로다 · Snowshagal 투자 인사이트 NO.25",
+    "subtitle": "",
+    "description": "미국 중간선거로 상원 7석, 하원 20석 넘게 공화당에서 민주당으로 옮겨갔다. 바뀐 건 추가 감세·재정 확대를 막는 힘이고, 관세 권한은 301·232조로 대통령에게 남는다. 선거 지도와 한국에 닿는 금리·원화·업종 칸을 현황판으로 정리했다.",
+    "tags": [
+      "ai",
+      "semiconductors",
+      "u-s-a",
+      "policy",
+      "election"
+    ],
+    "readingMinutes": 22,
+    "href": "reports/20261104_Investment_Insight_Midterm_Scoreboard.html",
+    "coverImage": "covers/2027-01-03-note-1r9poww.webp",
+    "shareCardImage": "covers/share/2027-01-03-note-1r9poww.jpg",
+    "coverThumbnail": "covers/2027-01-03-note-1r9poww-450.webp"
+  },
+  {
     "id": "2026-11-04-daily-njvx2d",
     "type": "daily",
     "typeLabel": "Daily",
