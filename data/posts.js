@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2027-01-03-note-1tjwanc",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2027-01-03",
+    "reportDate": "2027-01-03",
+    "registeredDate": "2026-11-04",
+    "registeredAt": "2026-11-04T14:48:57.804Z",
+    "legacyImport": false,
+    "title": "Congress Changed Hands. Tariff Powers Did Not.",
+    "seoTitle": "Congress Changed Hands. The President’s Tariff Powers Did Not. | Snowshagal Investment Insight No. 25",
+    "subtitle": "",
+    "description": "Democrats flipped seven Republican-held Senate seats and more than 20 House seats in the 2026 U.S. midterms. Congress can constrain new tax cuts and fiscal expansion, but existing Section 301 and 232 tariff powers remain with the president. A time-stamped scoreboard for Treasury yields, the Korean won, and sector orders.",
+    "tags": [
+      "ai",
+      "semiconductors",
+      "u-s-a",
+      "policy",
+      "election"
+    ],
+    "readingMinutes": 24,
+    "href": "reports/en/20261104_Snowshagal_Investment_Insight_No25_US_Midterms_Scoreboard_EN.html",
+    "translationGroup": "2027-01-03-note-1r9poww",
+    "coverImage": "covers/2027-01-03-note-1tjwanc.webp",
+    "shareCardImage": "covers/share/2027-01-03-note-1tjwanc.jpg",
+    "coverThumbnail": "covers/2027-01-03-note-1tjwanc-450.webp"
+  },
+  {
     "id": "2027-01-03-note-1r9poww",
     "type": "note",
     "typeLabel": "투자 인사이트",
