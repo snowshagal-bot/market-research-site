@@ -262,5 +262,11 @@ window.TAG_REGISTRY = {
     "en": "Election",
     "group": "market",
     "custom": true
+  },
+  "eco-friendly": {
+    "ko": "친환경",
+    "en": "Eco-friendly",
+    "group": "sector",
+    "custom": true
   }
 };
