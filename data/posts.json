@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-05-note-5jleer",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-05",
+    "reportDate": "2026-11-05",
+    "registeredDate": "2026-11-05",
+    "registeredAt": "2026-11-05T12:41:19.395Z",
+    "legacyImport": false,
+    "title": "한진칼, 1등이 되면 오히려 불리한 표",
+    "seoTitle": "한진칼, 1등이 되면 오히려 불리한 표 | Snowshagal 투자 인사이트 NO.26",
+    "subtitle": "",
+    "description": "호반이 한진칼 지분 1위(20.69%)에 올랐지만, 개정 상법에선 1위 쪽 감사위원 표가 3%로 묶이고 이사회 과반은 임기 만료 기준으로 빨라야 2028년 3월에 바뀔 수 있다. 공익법인 의결권 제한, 산업은행 10.58%, 주가 웃돈과 연말 기준일까지의 일정을 정리했다.",
+    "tags": [
+      "kospi",
+      "governance",
+      "policy",
+      "earnings",
+      "foreign-investors"
+    ],
+    "readingMinutes": 24,
+    "href": "reports/20261105_Investment_Insight_Hanjin_KAL_Vote_Math.html",
+    "coverImage": "covers/2026-11-05-note-5jleer.webp",
+    "shareCardImage": "covers/share/2026-11-05-note-5jleer.jpg",
+    "coverThumbnail": "covers/2026-11-05-note-5jleer-450.webp"
+  },
+  {
     "id": "2026-11-05-daily-1y79dy7",
     "type": "daily",
     "typeLabel": "Daily",
