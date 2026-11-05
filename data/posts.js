@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-05-note-1lmtjns",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-05",
+    "reportDate": "2026-11-05",
+    "registeredDate": "2026-11-05",
+    "registeredAt": "2026-11-05T13:01:37.616Z",
+    "legacyImport": false,
+    "title": "Hanjin KAL: First Place Can Mean Fewer Votes",
+    "seoTitle": "Hanjin KAL: Why Being No. 1 Can Mean Fewer Votes | Snowshagal Investment Insight No. 26",
+    "subtitle": "",
+    "description": "Hoban has become Hanjin KAL’s largest shareholder with 20.69%, but the amended Korean Commercial Act limits the largest shareholder group to 3% of audit committee votes. This analysis examines the 11.85–15.00% scenario for Chairman Cho, restrictions on foundation voting, KDB’s 10.58% stake, staggered board terms through March 2028 and the control premium in Hanjin KAL shares.",
+    "tags": [
+      "kospi",
+      "governance",
+      "policy",
+      "earnings",
+      "foreign-investors"
+    ],
+    "readingMinutes": 28,
+    "href": "reports/en/20261105_Investment_Insight_Hanjin_KAL_Vote_Math_EN.html",
+    "translationGroup": "2026-11-05-note-5jleer",
+    "coverImage": "covers/2026-11-05-note-1lmtjns.webp",
+    "shareCardImage": "covers/share/2026-11-05-note-1lmtjns.jpg",
+    "coverThumbnail": "covers/2026-11-05-note-1lmtjns-450.webp"
+  },
+  {
     "id": "2026-11-05-note-5jleer",
     "type": "note",
     "typeLabel": "투자 인사이트",
