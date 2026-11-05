@@ -1,5 +1,34 @@
 [
   {
+    "id": "2026-11-05-daily-1y79dy7",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-05",
+    "reportDate": "2026-11-05",
+    "registeredDate": "2026-11-05",
+    "registeredAt": "2026-11-05T12:24:00.968Z",
+    "legacyImport": false,
+    "title": "Sunshine Elsewhere, Rain on Our Roof",
+    "subtitle": "",
+    "description": "",
+    "summary": "U.S. benchmarks rose as election uncertainty faded, but AI chipmakers and data-center equipment stocks plunged on regulatory fears. Korea's semiconductor-heavy KOSPI fell from the open, and foreign selling intensified again in the afternoon, taking it down to -6.10%. Samsung Electronics and SK hynix bore most of the index's losses, but nearly six in ten KOSPI stocks declined: selling spread well beyond the two megacaps.",
+    "takeaway": "AI rule fears sink chips and the KOSPI",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "foreign-investors",
+      "semiconductors",
+      "eco-friendly"
+    ],
+    "readingMinutes": 6,
+    "href": "reports/en/2026-11-05_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-05-daily-4cvsb5",
+    "coverImage": "covers/2026-11-05-daily-1y79dy7.webp",
+    "shareCardImage": "covers/share/2026-11-05-daily-1y79dy7.jpg",
+    "coverThumbnail": "covers/2026-11-05-daily-1y79dy7-450.webp"
+  },
+  {
     "id": "2026-11-05-daily-4cvsb5",
     "type": "daily",
     "typeLabel": "주식 리포트",
