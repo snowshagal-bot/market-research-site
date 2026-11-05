@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-05-research-1yqt6bi",
+    "type": "research",
+    "typeLabel": "비정기 리서치",
+    "lang": "ko",
+    "date": "2026-11-05",
+    "reportDate": "2026-11-05",
+    "registeredDate": "2026-11-05",
+    "registeredAt": "2026-11-05T13:07:02.222Z",
+    "legacyImport": false,
+    "title": "AI는 2000년 광섬유처럼 끝날까",
+    "seoTitle": "AI는 2000년 광섬유처럼 끝날까 | Snowshagal 리서치 NO.13",
+    "subtitle": "",
+    "description": "AI 이용은 늘어도 투자자는 손실을 볼 수 있다. 2000년 광섬유 붕괴의 교훈을 빅테크 현금흐름, AI 인프라 계약, 조달금리와 비교하고, 확인된 위험과 아직 모르는 위험을 나눠 정리했다.",
+    "tags": [
+      "semiconductors",
+      "ai",
+      "cloud-datacenter",
+      "liquidity",
+      "earnings"
+    ],
+    "readingMinutes": 18,
+    "href": "reports/20261104_Research_NO13_AI_Fiber_Bubble_Cover.html",
+    "coverImage": "covers/2026-11-05-research-1yqt6bi.webp",
+    "shareCardImage": "covers/share/2026-11-05-research-1yqt6bi.jpg",
+    "coverThumbnail": "covers/2026-11-05-research-1yqt6bi-450.webp"
+  },
+  {
     "id": "2026-11-05-note-1lmtjns",
     "type": "note",
     "typeLabel": "Investment Insights",
