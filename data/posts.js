@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-05-research-12glm1l",
+    "type": "research",
+    "typeLabel": "Research",
+    "lang": "en",
+    "date": "2026-11-05",
+    "reportDate": "2026-11-05",
+    "registeredDate": "2026-11-05",
+    "registeredAt": "2026-11-05T13:40:17.787Z",
+    "legacyImport": false,
+    "title": "Could AI Repeat the Fiber-Optic Bust of 2000?",
+    "seoTitle": "Could AI Investment Repeat the Fiber-Optic Bust of 2000? | Snowshagal Research No. 13",
+    "subtitle": "",
+    "description": "AI adoption can keep growing while infrastructure investors lose money. What the 2000 fiber-optic bust teaches us about Big Tech cash flow, AI contracts, counterparty credit and returns on invested capital.",
+    "tags": [
+      "semiconductors",
+      "ai",
+      "cloud-datacenter",
+      "liquidity",
+      "earnings"
+    ],
+    "readingMinutes": 24,
+    "href": "reports/en/20261104_Snowshagal_Research_No13_AI_Fiber_Bubble_Cover_EN_v2.html",
+    "translationGroup": "2026-11-05-research-1yqt6bi",
+    "coverImage": "covers/2026-11-05-research-12glm1l.webp",
+    "shareCardImage": "covers/share/2026-11-05-research-12glm1l.jpg",
+    "coverThumbnail": "covers/2026-11-05-research-12glm1l-450.webp"
+  },
+  {
     "id": "2026-11-05-research-1yqt6bi",
     "type": "research",
     "typeLabel": "비정기 리서치",
