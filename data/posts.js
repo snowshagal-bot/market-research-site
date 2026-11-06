@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-07-basics-1kvi14e",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-11-07",
+    "reportDate": "2026-11-07",
+    "registeredDate": "2026-11-07",
+    "registeredAt": "2026-11-06T18:46:10.313Z",
+    "legacyImport": false,
+    "title": "영업이익은 83조인데 순이익은 왜 40조인가",
+    "seoTitle": "영업이익 순이익 차이: 영업이익은 83조인데 순이익은 왜 40조인가",
+    "subtitle": "",
+    "description": "SK하이닉스 3분기 영업이익은 83조 3,338억 원, 순이익은 39조 7,756억 원이었다. 영업이익과 순이익은 무엇이 다를까. 매출에서 순이익까지 내려가는 손익계산서 계단, 영업외손익·외환손실·투자자산 평가손실의 뜻, 순이익과 현금의 차이를 퀴즈와 시뮬레이터로 설명한다.",
+    "tags": [
+      "market-basic",
+      "kospi",
+      "kosdaq",
+      "korea",
+      "u-s-a"
+    ],
+    "readingMinutes": 8,
+    "href": "reports/basics-15-net-income.html",
+    "coverImage": "covers/2026-11-07-basics-1kvi14e.webp",
+    "shareCardImage": "covers/share/2026-11-07-basics-1kvi14e.jpg",
+    "coverThumbnail": "covers/2026-11-07-basics-1kvi14e-450.webp"
+  },
+  {
     "id": "2026-11-06-daily-1tfuaij",
     "type": "daily",
     "typeLabel": "Daily",

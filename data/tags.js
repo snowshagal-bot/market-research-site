@@ -268,5 +268,11 @@ window.TAG_REGISTRY = {
     "en": "Eco-friendly",
     "group": "sector",
     "custom": true
+  },
+  "market-basic": {
+    "ko": "시장입문",
+    "en": "Market Basic",
+    "group": "company-policy",
+    "custom": true
   }
 };
