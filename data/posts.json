@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-06-daily-18z6p3q",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-06",
+    "reportDate": "2026-11-06",
+    "registeredDate": "2026-11-07",
+    "registeredAt": "2026-11-06T16:57:09.511Z",
+    "legacyImport": false,
+    "title": "먼바다 돌풍이 닿자, 우산 열에 여덟이 뒤집힘",
+    "subtitle": "",
+    "description": "",
+    "summary": "4일 밤엔 반도체만 밀렸던 미국 장이 5일 밤엔 지수까지 무너짐 · 코스피는 대형주 첫 거래가 체결된 9시 2분 -8.78%까지 떨어져 올해 11번째 서킷브레이커를 맞음 · 낮에 5,215.58까지 되올랐지만 외국인 매도가 오후에 다시 커지며 5,000 위에서 겨우 마감.",
+    "takeaway": "데이터센터 규제 우려에 서킷브레이커",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 4,
+    "href": "reports/2026-11-06_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-06-daily-18z6p3q.webp",
+    "shareCardImage": "covers/share/2026-11-06-daily-18z6p3q.jpg",
+    "coverThumbnail": "covers/2026-11-06-daily-18z6p3q-450.webp"
+  },
+  {
     "id": "2026-11-05-research-12glm1l",
     "type": "research",
     "typeLabel": "Research",
