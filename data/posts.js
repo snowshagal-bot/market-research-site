@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-07-basics-bzejsh",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-11-07",
+    "reportDate": "2026-11-07",
+    "registeredDate": "2026-11-07",
+    "registeredAt": "2026-11-06T19:32:56.869Z",
+    "legacyImport": false,
+    "title": "Operating profit: KRW 83tn. Why is net income only KRW 40tn?",
+    "seoTitle": "Operating Profit vs. Net Income: How Can KRW 83 Trillion Become KRW 40 Trillion?",
+    "subtitle": "",
+    "description": "SK hynix posted record Q3 operating profit of KRW 83.3338 trillion, yet net income fell 58% to KRW 39.7756 trillion. Learn how non-operating gains, FX, investment valuations, income tax and cash flow fit into the income statement—with a quiz and an interactive simulator.",
+    "tags": [
+      "market-basic",
+      "kospi",
+      "kosdaq",
+      "korea",
+      "u-s-a"
+    ],
+    "readingMinutes": 10,
+    "href": "reports/en/basics-15-net-income_EN.html",
+    "translationGroup": "2026-11-07-basics-1kvi14e",
+    "coverImage": "covers/2026-11-07-basics-bzejsh.webp",
+    "shareCardImage": "covers/share/2026-11-07-basics-bzejsh.jpg",
+    "coverThumbnail": "covers/2026-11-07-basics-bzejsh-450.webp"
+  },
+  {
     "id": "2026-11-07-basics-1kvi14e",
     "type": "basics",
     "typeLabel": "시장 입문",
