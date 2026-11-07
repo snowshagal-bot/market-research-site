@@ -10,7 +10,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-07T14:53:17.836Z",
     "legacyImport": false,
     "title": "THE BLUE WAVE ON THE DATA CENTER MAP",
-    "seoTitle": "The Blue Wave on the Data Center Map: Why the Chip Index Fell 12% in a Day | Snowshagal Investment Insight No. 27",
+    "seoTitle": "U.S. Data Center Rules After the Midterms: Why Chip Stocks Fell 12%",
     "subtitle": "",
     "description": "After the U.S. midterms, the Philadelphia Semiconductor Index lost 12.2% in one session and the KOSPI fell 10.98% over two. Five states where the governorship flipped account for 41.2% of announced U.S. data center capacity under construction or planned—not capacity confirmed to be at risk. Federal constraints differ from state and local permitting holds. This report tracks costs, possible delays and three tests for investors.",
     "tags": [
@@ -38,7 +38,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-07T14:17:09.219Z",
     "legacyImport": false,
     "title": "데이터센터 지도 위의 블루웨이브",
-    "seoTitle": "데이터센터 지도 위의 블루웨이브: 반도체는 왜 하루 12% 빠졌나 | Snowshagal 투자 인사이트 NO.27",
+    "seoTitle": "미국 데이터센터 규제와 반도체 급락: 중간선거 블루웨이브 지도",
     "subtitle": "",
     "description": "미국 중간선거 뒤 이틀, 필라델피아 반도체 지수 −12.2%, 코스피 이틀 −10.98%. 주지사 소속 정당이 바뀐 5개 주에 착공·계획 데이터센터 전력의 41.2%(발표 기준)가 있다. 연방 금지는 문턱이 높지만 주·지방의 인허가 보류와 금지는 이미 현실이다. 어느 사업이 얼마나 늦어지고 누가 비용을 내느냐, 그리고 확인할 세 가지를 정리했다.",
     "tags": [
@@ -232,7 +232,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-05T13:40:17.787Z",
     "legacyImport": false,
     "title": "Could AI Repeat the Fiber-Optic Bust of 2000?",
-    "seoTitle": "Could AI Investment Repeat the Fiber-Optic Bust of 2000? | Snowshagal Research No. 13",
+    "seoTitle": "Could AI Repeat the 2000 Fiber-Optic Bust? A Big Tech Cash Flow Check",
     "subtitle": "",
     "description": "AI adoption can keep growing while infrastructure investors lose money. What the 2000 fiber-optic bust teaches us about Big Tech cash flow, AI contracts, counterparty credit and returns on invested capital.",
     "tags": [
@@ -260,7 +260,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-05T13:07:02.222Z",
     "legacyImport": false,
     "title": "AI는 2000년 광섬유처럼 끝날까",
-    "seoTitle": "AI는 2000년 광섬유처럼 끝날까 | Snowshagal 리서치 NO.13",
+    "seoTitle": "AI 버블은 2000년 광섬유 붕괴를 되풀이할까: 빅테크 현금흐름 점검",
     "subtitle": "",
     "description": "AI 이용은 늘어도 투자자는 손실을 볼 수 있다. 2000년 광섬유 붕괴의 교훈을 빅테크 현금흐름, AI 인프라 계약, 조달금리와 비교하고, 확인된 위험과 아직 모르는 위험을 나눠 정리했다.",
     "tags": [
@@ -287,7 +287,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-05T13:01:37.616Z",
     "legacyImport": false,
     "title": "Hanjin KAL: First Place Can Mean Fewer Votes",
-    "seoTitle": "Hanjin KAL: Why Being No. 1 Can Mean Fewer Votes | Snowshagal Investment Insight No. 26",
+    "seoTitle": "Hanjin KAL Control Fight: Why Being No. 1 Can Mean Fewer Votes",
     "subtitle": "",
     "description": "Hoban has become Hanjin KAL’s largest shareholder with 20.69%, but the amended Korean Commercial Act limits the largest shareholder group to 3% of audit committee votes. This analysis examines the 11.85–15.00% scenario for Chairman Cho, restrictions on foundation voting, KDB’s 10.58% stake, staggered board terms through March 2028 and the control premium in Hanjin KAL shares.",
     "tags": [
@@ -315,7 +315,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-05T12:41:19.395Z",
     "legacyImport": false,
     "title": "한진칼, 1등이 되면 오히려 불리한 표",
-    "seoTitle": "한진칼, 1등이 되면 오히려 불리한 표 | Snowshagal 투자 인사이트 NO.26",
+    "seoTitle": "한진칼 경영권 분쟁, 호반이 1대주주가 돼도 불리한 이유",
     "subtitle": "",
     "description": "호반이 한진칼 지분 1위(20.69%)에 올랐지만, 개정 상법에선 1위 쪽 감사위원 표가 3%로 묶이고 이사회 과반은 임기 만료 기준으로 빨라야 2028년 3월에 바뀔 수 있다. 공익법인 의결권 제한, 산업은행 10.58%, 주가 웃돈과 연말 기준일까지의 일정을 정리했다.",
     "tags": [
@@ -373,7 +373,7 @@ window.RESEARCH_POSTS = [
     "title": "볕은 건너편에, 비는 이쪽 지붕에",
     "subtitle": "",
     "description": "",
-    "summary": "미국 장은 선거 불확실성이 걷히며 올랐지만 AI 반도체⁠·⁠데이터센터 설비주는 규제 우려로 급락 · 반도체 비중이 큰 코스피는 그쪽을 따라 출발부터 밀렸고, 외국인 매도가 오후에 다시 커지며 -6.10%까지 · 지수 하락의 무게는 두 대형주에 쏠렸지만 코스피 종목 열에 여섯 가까이가 내려 매도는 넓게 번진 장.",
+    "summary": "미국 장은 선거 불확실성이 걷히며 올랐지만 AI 반도체·데이터센터 설비주는 규제 우려로 급락 · 반도체 비중이 큰 코스피는 그쪽을 따라 출발부터 밀렸고, 외국인 매도가 오후에 다시 커지며 -6.10%까지 · 지수 하락의 무게는 두 대형주에 쏠렸지만 코스피 종목 열에 여섯 가까이가 내려 매도는 넓게 번진 장.",
     "takeaway": "AI 규제 우려에 반도체·코스피 급락",
     "tags": [
       "kospi",
@@ -399,7 +399,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-04T14:48:57.804Z",
     "legacyImport": false,
     "title": "Congress Changed Hands. Tariff Powers Did Not.",
-    "seoTitle": "Congress Changed Hands. The President’s Tariff Powers Did Not. | Snowshagal Investment Insight No. 25",
+    "seoTitle": "2026 Midterm Results and Tariffs: Congress Flipped, Tariff Powers Didn't",
     "subtitle": "",
     "description": "Democrats flipped seven Republican-held Senate seats and more than 20 House seats in the 2026 U.S. midterms. Congress can constrain new tax cuts and fiscal expansion, but existing Section 301 and 232 tariff powers remain with the president. A time-stamped scoreboard for Treasury yields, the Korean won, and sector orders.",
     "tags": [
@@ -427,7 +427,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-04T14:04:23.228Z",
     "legacyImport": false,
     "title": "의회는 바뀌었고, 관세 권한은 그대로다",
-    "seoTitle": "의회는 바뀌었고, 관세 권한은 그대로다 · Snowshagal 투자 인사이트 NO.25",
+    "seoTitle": "2026 미국 중간선거 결과와 관세: 의회는 민주당, 관세 권한은 대통령에게",
     "subtitle": "",
     "description": "미국 중간선거로 상원 7석, 하원 20석 넘게 공화당에서 민주당으로 옮겨갔다. 바뀐 건 추가 감세·재정 확대를 막는 힘이고, 관세 권한은 301·232조로 대통령에게 남는다. 선거 지도와 한국에 닿는 금리·원화·업종 칸을 현황판으로 정리했다.",
     "tags": [
@@ -512,7 +512,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-04T11:43:26.141Z",
     "legacyImport": false,
     "title": "BIOTECH ₩1TN DEAL? ONLY 6% UPFRONT",
-    "seoTitle": "Biotech Licensing: A ₩1 Trillion Deal, but Just 6% Upfront? | Snowshagal Investment Insight No. 24",
+    "seoTitle": "Biotech Licensing Deals: Why Only 6% of the Headline Value Is Upfront",
     "subtitle": "",
     "description": "Most of a biotech licensing deal's headline value is contingent. Upfront payments were 6% of announced global deal value in Jan–Sep 2026; nine selected Korean rights-reversion cases retained a median 6.9%. Five fields every investor should read.",
     "tags": [
@@ -539,7 +539,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-04T11:15:22.296Z",
     "legacyImport": false,
     "title": "기술이전 '1조원 계약', 확정된 돈은 6%뿐",
-    "seoTitle": "기술이전 '1조원 계약', 확정된 돈은 6%뿐 | Snowshagal 투자 인사이트 NO.24",
+    "seoTitle": "바이오 기술이전 계약금은 6%뿐: '1조원 계약' 공시 제대로 읽는 법",
     "subtitle": "",
     "description": "기술이전 뉴스의 '총 계약 규모'는 대부분 조건이 붙은 돈이다. 계약 때 확정되는 계약금은 세계 합산으로 총액의 6%였고, 권리가 돌아온 국내 9건은 총액의 6.9%(중앙값)를 받고 끝났다. 공시에서 먼저 볼 다섯 칸을 정리했다.",
     "tags": [
@@ -622,7 +622,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-03T09:57:59.728Z",
     "legacyImport": false,
     "title": "K-BEAUTY'S EXPORT BOOM ISN'T A STOCK BOOM",
-    "seoTitle": "K-Beauty's Export Boom Is Not a Stock-Market Boom | Snowshagal Investment Insight No. 23",
+    "seoTitle": "K-Beauty's Record Exports Aren't Lifting Every Stock: What to Look For",
     "subtitle": "",
     "description": "October cosmetics exports set a record for the month, and January–October exceeded full-year 2025. APR doubled revenue but missed profit expectations. Which K-beauty businesses can turn the export boom into durable earnings?",
     "tags": [
@@ -650,7 +650,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-03T09:40:21.176Z",
     "legacyImport": false,
     "title": "K뷰티, 수출 호황이 주가 호황은 아니다",
-    "seoTitle": "K뷰티, 수출 호황이 주가 호황은 아니다 | Snowshagal 투자 인사이트 NO.23",
+    "seoTitle": "화장품 수출 역대 최대인데 K뷰티 주가는 왜 엇갈리나",
     "subtitle": "",
     "description": "10월 화장품 수출은 역대 10월 최대, 1~10월 누계는 작년 연간을 넘었다. 그러나 에이피알처럼 매출이 두 배가 돼도 이익은 기대에 못 미칠 수 있다. 수출 호황을 이익으로 가져오는 기업을 가리는 기준을 정리했다.",
     "tags": [
@@ -760,7 +760,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-02T13:05:13.303Z",
     "legacyImport": false,
     "title": "자회사가 상장하면 모회사 주주는 손해일까",
-    "seoTitle": "중복상장 뜻: 자회사가 상장하면 모회사 주주는 손해일까",
+    "seoTitle": "중복상장·모회사 뜻: 자회사가 상장하면 모회사 주주는 손해일까",
     "subtitle": "",
     "description": "SK하이닉스가 손자회사 솔리다임의 미국 상장 검토를 79일 만에 멈췄다. 자회사가 상장하면 모회사 주주의 몫은 줄어들까. 중복상장의 뜻, 물적분할과 인적분할, 신주와 구주, 8월부터 시행된 중복상장 규정(주주 동의 3%룰)을 퀴즈와 시뮬레이터로 설명한다.",
     "tags": [
@@ -786,7 +786,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-02T11:34:58.108Z",
     "legacyImport": false,
     "title": "SAMSUNG'S RETURNS UP TO ₩110tn ₩55–75tn STILL OPEN JANUARY DECIDES",
-    "seoTitle": "Samsung Electronics: Up to KRW 110 Trillion in Shareholder Returns, with KRW 55–75 Trillion to Be Decided in January | Snowshagal Investment Insight N",
+    "seoTitle": "Samsung Electronics Shareholder Returns: Up to KRW 110tn, January Decides",
     "subtitle": "",
     "description": "Samsung Electronics plans ₩90–110 trillion in 2026 shareholder returns. The ₩35 trillion confirmed so far is entirely cash dividends; a further ₩55–75 trillion is to be allocated in January. Korea’s 10% financial-sector ownership threshold could favor cancellations of non-voting preferred shares.",
     "tags": [
@@ -814,7 +814,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-02T11:21:59.157Z",
     "legacyImport": false,
     "title": "삼성전자 환원 최대 110조원, 남은 55~75조원은 1월에 갈린다",
-    "seoTitle": "삼성전자 환원 최대 110조원, 남은 55~75조원은 1월에 갈린다 | Snowshagal 투자 인사이트 NO.22",
+    "seoTitle": "삼성전자 주주환원 110조원, 남은 55~75조원은 1월 이사회에서",
     "subtitle": "",
     "description": "삼성전자 2026년 환원 90~110조원 가운데 확정된 35조원은 전부 현금배당이다. 남은 55~75조원은 1월 말 이사회에서 배당과 자사주 소각으로 나뉘고, 금산법 10% 벽 때문에 우선주 소각이 먼저일 가능성이 크다.",
     "tags": [
@@ -841,7 +841,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-01T13:15:45.372Z",
     "legacyImport": false,
     "title": "AI Q3 Earnings Scoreboard",
-    "seoTitle": "AI Q3 Earnings Scoreboard: 12 Companies from Big Tech to Memory and Power Equipment | Snowshagal Investment Insight No. 21",
+    "seoTitle": "AI Q3 Earnings Scoreboard: Big Tech, Foundries, Memory and Power",
     "subtitle": "",
     "description": "An AI Q3 earnings scoreboard spanning 12 companies, from U.S. hyperscalers and chipmakers to foundries, memory, equipment, and Korean power and components. Compare earnings surprises, CapEx, operating margins and post-report stock moves.",
     "tags": [
@@ -869,7 +869,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-01T13:01:51.070Z",
     "legacyImport": false,
     "title": "AI 3분기 현황판",
-    "seoTitle": "AI 3분기 현황판: 빅테크에서 메모리·전력기기까지 12곳의 성적 | Snowshagal 투자 인사이트 NO.21",
+    "seoTitle": "AI 3분기 실적 총정리: 빅테크·파운드리·메모리·전력기기 12곳 성적",
     "subtitle": "",
     "description": "AI 공급망 12곳(빅테크·칩·파운드리·메모리·장비·한국 전력·부품)의 3분기 실적을 컨센서스 대비 결과, 설비투자, 영업이익률, 발표 뒤 주가로 한 판에 정리한 현황판.",
     "tags": [
@@ -896,7 +896,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-31T14:27:03.653Z",
     "legacyImport": false,
     "title": "The Fed Tilts Toward a December Hike. What Comes Next Hinges on Oil",
-    "seoTitle": "The Fed Tilts Toward a December Hike. What Comes Next Hinges on Oil | Snowshagal Investment Insight No. 20",
+    "seoTitle": "October FOMC Recap: The Fed Tilts Toward a December Hike",
     "subtitle": "",
     "description": "The Fed held rates at 3.75–4.00% in October, but its statement tilted toward a December hike; both dissenters wanted higher rates. Markets have largely priced in the move. The path beyond December depends on whether higher oil prices persist in core inflation.",
     "tags": [
@@ -924,7 +924,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-31T14:03:48.726Z",
     "legacyImport": false,
     "title": "12월 인상에 기운 연준, 그다음은 유가에 달렸다",
-    "seoTitle": "12월 인상에 기운 연준, 그다음은 유가에 달렸다 | Snowshagal 투자 인사이트 NO.20",
+    "seoTitle": "10월 FOMC 정리: 연준 12월 금리 인상 가능성과 유가 변수",
     "subtitle": "",
     "description": "10월 FOMC는 3.75~4.00% 동결이었지만 성명은 12월 인상 쪽으로 기울었고 반대 2표는 모두 인상 주장이었다. 12월 인상은 시장 가격에 상당 부분 반영됐다. 다음 금리 경로를 가를 것은 유가 상승 자체보다 그 충격이 근원 물가에 얼마나 오래 남느냐다.",
     "tags": [
@@ -1006,7 +1006,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-30T15:02:44.471Z",
     "legacyImport": false,
     "title": "The Time It Takes for Money to Come Full Circle",
-    "seoTitle": "The Time It Takes for Money to Come Full Circle: Mapping AI Circular Financing | Snowshagal Research No. 12",
+    "seoTitle": "AI Circular Financing Map: Who Carries the Risk Until Revenue Arrives",
     "subtitle": "",
     "description": "Anthropic’s IPO filing, $63 billion in Broadcom equipment financing, and Meta’s $97.5 billion equity plan. This report maps the time between AI capital outlays and customer cash—and who bears the risk if repayment is delayed.",
     "tags": [
@@ -1034,7 +1034,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-30T14:59:05.717Z",
     "legacyImport": false,
     "title": "돈이 한 바퀴 도는 데 걸리는 시간",
-    "seoTitle": "돈이 한 바퀴 도는 데 걸리는 시간: AI 순환금융 지도 | Snowshagal 리서치 NO.12",
+    "seoTitle": "AI 순환금융 지도: 투자한 돈이 매출로 돌아오기까지 누가 위험을 지나",
     "subtitle": "",
     "description": "앤트로픽 상장 서류, 브로드컴 630억달러 장비 금융, 메타 975억달러 주식 조달. AI에 들어간 돈이 고객 매출로 돌아오기까지 그 사이를 누가 메우고, 늦어지면 누가 손실을 지는지 따라간다.",
     "tags": [
@@ -1118,7 +1118,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-29T19:19:45.975Z",
     "legacyImport": false,
     "title": "SK hynix's KRW 100tn return plan: Only KRW 20tn in new open-market buying over the next three months",
-    "seoTitle": "SK hynix's KRW 100tn Return Plan: Only KRW 20tn in New Market Buying | Snowshagal Investment Note No. 19",
+    "seoTitle": "SK hynix's KRW 100tn Shareholder Return: Only KRW 20tn in Market Buying",
     "subtitle": "",
     "description": "SK hynix's estimated FY2026 shareholder returns of KRW 100tn are not all new share purchases. Only KRW 20tn is slated for open-market buying from Oct 29 to Jan 28. Track the daily pace, cancellation versus employee awards, and the five-session buyback gap.",
     "tags": [
@@ -1146,7 +1146,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-29T19:16:25.072Z",
     "legacyImport": false,
     "title": "하이닉스 100조원 환원, 앞으로 석 달 시장에서 사는 건 20조원",
-    "seoTitle": "하이닉스 100조원 환원, 앞으로 석 달 시장에서 사는 건 20조원 | Snowshagal 투자노트 NO.19",
+    "seoTitle": "SK하이닉스 주주환원 100조원, 석 달간 장내 자사주 매입은 20조원",
     "subtitle": "",
     "description": "SK하이닉스 2026 회계연도 주주환원 약 100조원 가운데 앞으로 석 달(10/29~1/28) 장내에서 사는 자사주는 20조원. 하루 강도, 임직원 보상 몫 10조원, 자사주 공백 5거래일을 정리했다.",
     "tags": [
@@ -1230,7 +1230,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-28T17:07:10.102Z",
     "legacyImport": false,
     "title": "3.8% Growth FORECAST But Spending Lags Chip profits are poised to reach households through Q1 2027 bonuses",
-    "seoTitle": "A 3.8% Growth Forecast, But Little Lift in Household Spending: Korea's Chip Windfall Moves Toward 2027 Bonuses | Snowshagal Investment Note No.18",
+    "seoTitle": "Korea's Chip Windfall and Household Spending: The 2027 Bonus Effect",
     "subtitle": "",
     "description": "Real GDI surged 18.8% year on year in Q3 2026, while private consumption rose only 1.1% year on year and fell 0.2% quarter on quarter. The semiconductor windfall is already reaching households, and the BOK estimates roughly KRW 60tn in early-2027 bonuses. But much of that compensation will be paid in shares, with timing and spending effects depending on recipients and payout rules.",
     "tags": [
@@ -1258,7 +1258,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-28T17:04:42.376Z",
     "legacyImport": false,
     "title": "성장률 전망 3.8%인데 지갑은 그대로 반도체 돈은 내년 1분기 성과급으로 넘어온다",
-    "seoTitle": "성장률 전망 3.8%인데 지갑은 그대로: 반도체 돈은 내년 1분기 성과급으로 넘어온다 | Snowshagal 투자노트 NO.18",
+    "seoTitle": "반도체 성과급 60조원, 소비로 이어질까: GDI 급증에도 민간소비 부진",
     "subtitle": "",
     "description": "3분기 실질 GDI는 1년 새 18.8% 늘었는데 민간소비는 1.1% 느는 데 그쳤고 전 분기보다는 0.2% 줄었다. 반도체 이익의 가계 파급은 이미 시작됐고, 내년 1분기 성과급(삼성전자·SK하이닉스 약 60조원, 한국은행 추정)이 이를 키운다. 다만 지급 규칙상 절반 이상이 주식이고, 소비 효과는 수령자와 지급 방식에 달려 있다.",
     "tags": [
@@ -1454,7 +1454,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-26T14:40:14.267Z",
     "legacyImport": false,
     "title": "Has China's DRAM Really Caught Up?",
-    "seoTitle": "Has China's DRAM Really Caught Up? | Snowshagal Research No. 11",
+    "seoTitle": "Has China's CXMT Caught Up in DRAM? Impact on Samsung and SK hynix",
     "subtitle": "",
     "description": "CXMT has become the world's fourth-largest DRAM supplier, but its technological progress varies by product. This report examines 4F², G5, LPDDR6, U.S. export controls, and capacity expansion—and asks how much Chinese memory supply could pressure Korean producers' prices and profits, focusing on saleable bits and long-term agreements.",
     "tags": [
@@ -1482,7 +1482,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-26T14:30:27.302Z",
     "legacyImport": false,
     "title": "중국 D램은 정말 따라왔나",
-    "seoTitle": "중국 D램은 정말 따라왔나 | Snowshagal 리서치 NO.11",
+    "seoTitle": "중국 CXMT D램 추격 수준 점검: 삼성전자·SK하이닉스 가격과 이익 영향",
     "subtitle": "",
     "description": "CXMT는 세계 D램 4위로 컸지만 제품마다 추격 수준이 다르다. 4F², G5·LPDDR6, 미국 수출통제와 증설 계획을 점검하고, 중국산 메모리가 한국 기업의 가격과 이익에 미칠 영향을 판매 가능한 비트와 장기계약을 중심으로 분석한다.",
     "tags": [
@@ -1566,7 +1566,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-25T11:31:55.226Z",
     "legacyImport": false,
     "title": "Same SK hynix. New York ADRs Trade Over 40% Higher",
-    "seoTitle": "Same SK hynix, but Its New York ADRs Trade at a 40%+ Premium | Snowshagal Investment Note No. 17",
+    "seoTitle": "SK hynix ADR Premium Over 40%: Why New York Trades Above Seoul",
     "subtitle": "",
     "description": "SK hynix ADRs trade at a 42.1% premium to the Seoul common shares as of Oct. 23, 2026. That is not a price target for Seoul: U.S. demand differs, conversion capacity is exhausted, and the KRW 40tn buyback ended Oct. 21. What to watch at the Oct. 28 earnings call.",
     "tags": [
@@ -1594,7 +1594,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-25T11:29:29.249Z",
     "legacyImport": false,
     "title": "같은 SK하이닉스, 뉴욕에서는 40% 넘게 비싸다",
-    "seoTitle": "같은 SK하이닉스, 뉴욕에서는 40% 넘게 비싸다 | Snowshagal 투자노트 NO.17",
+    "seoTitle": "SK하이닉스 ADR 프리미엄 40%: 뉴욕 주가가 서울 본주보다 비싼 이유",
     "subtitle": "",
     "description": "SK하이닉스 ADR은 본주보다 40% 넘게 비싸게 거래된다(10월 23일 42.1%). 뉴욕 가격은 서울 본주의 목표가가 아니다. 두 시장의 수요가 다르고, 본주를 ADR로 바꿔 차이를 좁히는 길은 예탁 한도가 차서 막혀 있다. 서울 주가를 받쳐 주던 40조원 자사주 매입(2,369만주)도 10월 21일 끝났다. 10월 28일 실적 발표에서 볼 것을 정리했다.",
     "tags": [
@@ -1676,7 +1676,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-23T21:24:00.434Z",
     "legacyImport": false,
     "title": "The Won Has Rallied, Yet Its Trade-Weighted Value Remains Below Average",
-    "seoTitle": "The Won Has Rallied, but Its Real Effective Exchange Rate Remains Below Average | Snowshagal Investment Note No. 16",
+    "seoTitle": "Korean Won Real Effective Exchange Rate: Still 9% Below Average",
     "subtitle": "",
     "description": "The won has rebounded, yet September's BIS real effective exchange rate (92.7) remains 9% below its 1994–present average (101.9). That mean is not a target. Q4 FX assumptions in Korean equity forecasts have largely caught up with the actual USD/KRW rate.",
     "tags": [
@@ -1703,7 +1703,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-23T21:21:18.756Z",
     "legacyImport": false,
     "title": "원화가 강해졌다는데, 실효환율로는 아직 약하다",
-    "seoTitle": "원화가 강해졌다는데, 실효환율로는 아직 약하다 | Snowshagal 투자노트 NO.16",
+    "seoTitle": "원화 실질실효환율, 강세에도 평균보다 9% 낮다: 증권사 환율 가정 점검",
     "subtitle": "",
     "description": "원화는 6월 저점 이후 빠르게 강해졌지만 BIS 실질실효환율(9월 92.7)은 1994년 이후 평균(101.9)보다 9% 낮다. 다만 평균은 목표가 아니다. 10월 1~23일 원/달러 누적 평균(1,340.7원)은 증권사 4분기 가정과 거의 같고, 환율 가정을 낮춰도 이익 전망은 오를 수 있다.",
     "tags": [
@@ -1898,7 +1898,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-22T16:32:11.798Z",
     "legacyImport": false,
     "title": "AI Credit Concerns: Where Are They Showing Up in Korea?",
-    "seoTitle": "Where Are AI Credit Concerns Showing Up in South Korea? | Snowshagal Investment Note No. 15",
+    "seoTitle": "AI Credit Concerns and CoreWeave: Where They Show Up in South Korea",
     "subtitle": "",
     "description": "Where have AI credit concerns moved beyond CoreWeave, and can their effects be identified in South Korea? Five sets of market indicators distinguish credit repricing among US borrowers from broader high-yield spreads, Korean bond markets and the sharp fall in data-center supply-chain stocks. Korean corporate-credit spillovers cannot yet be isolated from domestic factors.",
     "tags": [
@@ -1925,7 +1925,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-22T16:29:03.393Z",
     "legacyImport": false,
     "title": "AI 신용 우려, 한국에서는 어디에 나타나나",
-    "seoTitle": "AI 신용 우려, 한국에서는 어디에 나타나나 | Snowshagal 투자노트 NO.15",
+    "seoTitle": "AI 신용 우려와 코어위브: 한국 주식·채권시장에는 어디에 나타났나",
     "subtitle": "",
     "description": "코어위브에서 뚜렷해진 AI 신용 우려가 미국의 다른 차입자와 신용시장, 한국 주식·채권시장에 어디까지 나타났는지 다섯 관측소에서 확인했다. 미국에서는 코어위브와 저신용 임차인의 신용 가격이 뚜렷하게 움직였고, 한국 신용시장은 등급과 무관하게 13~19bp 넓어졌지만 국내 요인과 겹친다. 한국에서 가장 크게 움직인 곳은 데이터센터 공급망 주가지만 신용 우려만의 영향으로 나눌 수는 없다.",
     "tags": [
@@ -2008,7 +2008,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-21T08:44:13.258Z",
     "legacyImport": false,
     "title": "The U.S. 10-Year Yield Tends to Peak Near the Final Rate Hike",
-    "seoTitle": "Where Does the U.S. 10-Year Treasury Yield Peak? Near the Fed's Final Hike | Snowshagal Investment Note No. 14",
+    "seoTitle": "Where Does the U.S. 10-Year Yield Peak? Near the Fed's Final Hike",
     "subtitle": "",
     "description": "Six Fed tightening cycles since 1990; in five, the U.S. 10-year Treasury yield peaked within four months of the final rate hike. A data-led October 27–28 FOMC preview covering term premia, the Kim–Wright model, Treasury buybacks, AI credit and the November QRA.",
     "tags": [],
@@ -2030,7 +2030,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-21T08:18:44.277Z",
     "legacyImport": false,
     "title": "미국 10년물 금리 고점은 마지막 인상 근처에서",
-    "seoTitle": "미국 10년물 금리 고점은 마지막 인상 근처에서 | Snowshagal 투자노트 NO.14",
+    "seoTitle": "미국 10년물 국채금리 고점은 언제: 연준 마지막 인상 근처에서",
     "subtitle": "",
     "description": "10월 27~28일 FOMC 프리뷰. 1990년 이후 연준 인상 사이클 여섯 번 중 다섯 번은 미국 10년물 금리 고점이 마지막 인상 전후 4개월 안에 나왔다. 다만 마지막 인상은 지나고 나서야 확인된다. 이번 회의에서 볼 것은 동결 여부보다 남은 긴축의 폭과 기간, 이어 11월 4일 QRA의 장기물 발행과 바이백.",
     "tags": [],
@@ -2163,7 +2163,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-19T16:52:45.843Z",
     "legacyImport": false,
     "title": "Stocks Are Tumbling. Will the BOK Still Hike?",
-    "seoTitle": "Stocks Are Tumbling. Will the BOK Still Hike? | Snowshagal Investment Insights No. 13",
+    "seoTitle": "Bank of Korea October Preview: Will the BOK Hike as Stocks Fall?",
     "subtitle": "",
     "description": "October 22 Bank of Korea Monetary Policy Board preview. Four brokerages explicitly forecasting the October vote all expect a hold at 3.00%; the disagreement is over dissenting votes and the subsequent hiking path. Examining the July equity rout, OIS forwards, bank NIMs and the stronger won.",
     "tags": [
@@ -2191,7 +2191,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-19T16:21:13.502Z",
     "legacyImport": false,
     "title": "주가가 무너져도 한은은 올리나",
-    "seoTitle": "주가가 무너져도 한은은 올리나 | Snowshagal 투자 인사이트 NO.13",
+    "seoTitle": "10월 금통위 전망: 주가가 무너져도 한국은행은 금리를 올리나",
     "subtitle": "",
     "description": "10월 22일 금통위 프리뷰. 10월 결정을 적은 증권사 프리뷰 네 건은 모두 3.00% 동결을 예상하지만 인상 소수의견과 그 뒤 경로에서 갈린다. 주가가 급락한 7월 16일에 올린 선례, 가까운 인상과 먼 경로를 따로 움직인 시장 가격, 3분기 은행 NIM, 원화 강세라는 반론을 정리한 투자 인사이트.",
     "tags": [
@@ -2490,7 +2490,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-15T16:39:13.353Z",
     "legacyImport": false,
     "title": "After the Selloff, Is the KOSPI Really Cheap?",
-    "seoTitle": "After the Selloff, Is the KOSPI Really Cheap? | Snowshagal Investment Insights No. 12",
+    "seoTitle": "Is the KOSPI Cheap at a Mid-4x P/E? The Earnings Cut Priced In",
     "subtitle": "",
     "description": "The KOSPI fell 20.7% in seven sessions. Is a forward P/E in the mid-4s genuinely cheap? A look at assumed earnings cuts, reference multiples, CXMT, AI financing pressures and forced selling—and the strongest counterarguments.",
     "tags": [
@@ -2518,7 +2518,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-15T15:52:21.257Z",
     "legacyImport": false,
     "title": "많이 빠진 코스피, 정말 싼 걸까",
-    "seoTitle": "많이 빠진 코스피, 정말 싼 걸까 | Snowshagal 투자 인사이트 NO.12",
+    "seoTitle": "코스피 PER 4배, 정말 저평가일까: 주가에 반영된 이익 삭감 폭",
     "subtitle": "",
     "description": "코스피가 10월 15일 5,554.22까지 빠지며 12개월 선행 PER은 4배 중반(자체 환산)으로 내려왔다. 낮은 PER이 저평가의 결론이 아닌 이유, 정상 배수 가정에 따라 달라지는 이익 삭감 폭, 예상 이익 삭감과 실적 감소의 차이, 가격을 낮춘 세 경로(CXMT·금리와 AI 자금 조달·강제 매도)와 반론을 정리한 투자 인사이트.",
     "tags": [
@@ -2602,7 +2602,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-14T15:12:34.047Z",
     "legacyImport": false,
     "title": "Diesel, Not Crude",
-    "seoTitle": "Diesel, Not Crude | Snowshagal Research No.10",
+    "seoTitle": "Why U.S. Diesel Prices Outpaced Crude: CPI and Korean Refiners",
     "subtitle": "The fuel-price bottleneck before the midterms",
     "description": "U.S. wholesale diesel rose twice as fast as crude over the past year. Snowshagal Research No.10 investigates the widening diesel–crude spread, pre-midterm policy measures, inflation and implications for Korean refiners, airlines and interest rates.",
     "summary": "In September, New York Harbor diesel spot prices were up 107% from a year earlier—roughly twice the 52% rise in crude. Crude prices alone no longer tell the fuel-cost story. We examine how the measures announced before the November 3 U.S. midterm elections could work, and what the numbers mean for inflation and Korean industries.",
@@ -2631,7 +2631,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-14T15:12:34.046Z",
     "legacyImport": false,
     "title": "원유보다 디젤",
-    "seoTitle": "원유보다 디젤 · Snowshagal 리서치 NO.10",
+    "seoTitle": "미국 디젤 가격 급등, 원유보다 두 배 빠른 이유와 CPI·정유주 영향",
     "subtitle": "선거 전 기름값의 병목",
     "description": "미국 디젤 도매가는 1년 새 원유의 두 배 속도로 올랐다. 제품과 원유의 가격차가 벌어진 배경, 11월 3일 중간선거 전 대책이 작용하는 경로, CPI와 한국 정유·항공·금리에 닿는 숫자를 점검한 Snowshagal 리서치 NO.10.",
     "summary": "9월 뉴욕항 디젤 현물값은 1년 새 107% 올라 원유(+52%)의 두 배 속도였다. 원유값만으로는 연료비를 읽기 어려운 국면이다. 11월 3일 미국 중간선거 전 대책이 어느 경로에 작용하는지, 그 숫자가 CPI와 한국 업종에 어떻게 닿는지 따져 봤다.",
@@ -2774,7 +2774,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-13T14:46:43.869Z",
     "legacyImport": false,
     "title": "KRW 107tn in Profit— Why the Selloff?",
-    "seoTitle": "INVESTMENT INSIGHTS NO.11 · KRW 107tn in Profit—Why the Selloff? · October 13, 2026",
+    "seoTitle": "Samsung's KRW 107tn Q3 Profit: Why Did the KOSPI Still Fall?",
     "subtitle": "",
     "description": "The KOSPI fell 6.2% in two sessions after Samsung Electronics reported KRW 107.4tn in Q3 operating profit. A close look at earnings size, growth rates and revisions—and what earnings alone cannot explain.",
     "tags": [
@@ -2804,7 +2804,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-13T14:43:54.934Z",
     "legacyImport": false,
     "title": "107조를 냈는데 왜 빠지나",
-    "seoTitle": "INVESTMENT INSIGHTS NO.11 · 107조를 냈는데 왜 빠지나 · 2026.10.13",
+    "seoTitle": "삼성전자 영업이익 107조 발표 뒤 코스피는 왜 빠졌나",
     "subtitle": "",
     "description": "삼성전자 3분기 영업이익 107.4조원 발표 뒤 두 거래일 코스피는 6.2% 내렸다. 이익의 크기·속도·방향으로 증가율 경로와 추정치 조정을 점검하고, 이익만으로 설명되지 않는 부분도 짚었다.",
     "tags": [
@@ -2890,7 +2890,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-11T11:26:10.354Z",
     "legacyImport": false,
     "title": "Where Did $690 Billion Go?",
-    "seoTitle": "Where Did $690 Billion Go? | Snowshagal Research No.09 | October 11, 2026",
+    "seoTitle": "Korea's Net International Investment Position Fell $690bn: An Outflow?",
     "subtitle": "",
     "description": "Korea's net international investment position fell by $689.5 billion in Q2 2026. That was not an equivalent capital outflow. A fact-check of transactions, equity valuation and external liabilities using Bank of Korea statistics.",
     "tags": [
@@ -2918,7 +2918,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-11T11:23:49.983Z",
     "legacyImport": false,
     "title": "6,900억달러는 어디로 갔나",
-    "seoTitle": "6,900억달러는 어디로 갔나 · Snowshagal Research NO.09 · 2026.10.11",
+    "seoTitle": "순대외금융자산(대외순자산) 6,900억달러 감소, 정말 자금이 빠져나갔나",
     "subtitle": "",
     "description": "2분기 순대외금융자산 6,895억달러 감소. 같은 규모의 자금이 해외로 유출됐다는 뜻은 아니다. 국내 주가 상승과 대외금융부채의 평가 증가가 만든 변화를 한국은행 통계로 검증했다.",
     "tags": [
@@ -3000,7 +3000,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-09T17:43:57.589Z",
     "legacyImport": false,
     "title": "The Cost of a Stronger Won",
-    "seoTitle": "The Cost of a Stronger Won · Snowshagal Investment Insights No.10 · 2026.10.09",
+    "seoTitle": "How a Stronger Won Hits Korean Exporters' Earnings: Hyundai and Q4",
     "subtitle": "",
     "description": "The won strengthened, yet earnings have held up. Hyundai Motor’s KRW 980bn FX contribution—our sum of two Daishin Securities estimates—is a year-on-year improvement, not translation profit earned this year. Why electronics forecasts diverged under the same currency move, and what to watch in Q4.",
     "tags": [
@@ -3026,7 +3026,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-09T17:41:30.243Z",
     "legacyImport": false,
     "title": "원화 강세의 청구서",
-    "seoTitle": "원화 강세의 청구서 · Snowshagal Investment Insights NO.10 · 2026.10.09",
+    "seoTitle": "원화 강세가 수출기업 이익에 미치는 영향: 현대차 환율 효과와 4분기 점검",
     "subtitle": "",
     "description": "환율은 내렸는데 이익은 왜 버틴다고 하나. 현대차 환율 몫 +9,800억(대신증권 추정 두 항목 합)은 올해 번 환산이익이 아니라 작년보다 좋아진 폭. 같은 환율에도 갈린 전기전자 전망과 4분기에 확인할 것.",
     "tags": [
@@ -3051,7 +3051,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-08T15:05:26.356Z",
     "legacyImport": false,
     "title": "When the Buyback Bid Steps Away",
-    "seoTitle": "INVESTMENT INSIGHTS NO.09 · When the Buyback Bid Steps Away · 2026.10.08",
+    "seoTitle": "After Samsung's KRW 15tn Buyback: Who Absorbs KOSPI Selling Now?",
     "subtitle": "",
     "description": "Samsung Electronics completed its KRW 15tn buyback on Oct. 6 while SK hynix still has about KRW 6.3tn left. From Aug. 24 to Oct. 2, the KRX 'other corporations' category bought a net KRW 43.4tn, with the two buybacks at the core of that demand. This note separates compensation shares from shares slated for cancellation, tests the historical post-buyback average against the median, filters the Oct. 8 options-expiry and ETF-rebalancing noise, and lays out three numbers to watch for the next source of demand.",
     "tags": [
@@ -3108,7 +3108,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-08T14:45:01.280Z",
     "legacyImport": false,
     "title": "받아주던 손이 빠진 자리",
-    "seoTitle": "INVESTMENT INSIGHTS NO.09 · 받아주던 손이 빠진 자리 · 2026.10.08",
+    "seoTitle": "삼성전자 자사주 매입 종료 뒤 코스피: 받아주던 손이 빠진 자리",
     "subtitle": "",
     "description": "삼성전자 15조원 자사주가 10월 6일 끝났고 SK하이닉스는 6.3조원이 남음 · 8/24~10/2 순매도를 받아낸 기타법인 +43.4조 매수의 핵심은 두 회사 자사주(삼성전자는 보상용, SK하이닉스는 소각용) · 과거 사례 평균은 +6.4%지만 중앙값은 그림상 0% 부근 · 영업이익 107.4조원(잠정)이 나온 10월 8일 코스피 −2.62%는 옵션 만기·ETF 리밸런싱이 겹쳐 종료 효과로 떼어 읽기 어려움 · 다음 손을 가늠할 세 숫자",
     "tags": [
@@ -3324,6 +3324,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-05T15:01:05.019Z",
     "legacyImport": false,
     "title": "The Election Calendar Matters Less Watch the Rate Calendar",
+    "seoTitle": "Do Stocks Rise After the Midterms? Watch the Rate Calendar in 2026",
     "subtitle": "",
     "description": "Can the familiar post-midterm rally pattern be trusted in 2026? The S&P 500 rose in 5 of 6 cases from end-September to year-end since 2002, but the sample is only six elections. 2018 (−14.0%) and 2022 (+7.1%) ended in opposite directions despite both being Fed hiking-cycle years. This year starts from an already elevated market; the next four weeks are better judged through rates and semiconductor earnings.",
     "tags": [
@@ -3351,6 +3352,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-05T14:58:35.282Z",
     "legacyImport": false,
     "title": "선거 달력보다 금리 달력",
+    "seoTitle": "미국 중간선거 뒤 주가는 오를까: 계절성보다 금리 달력",
     "subtitle": "",
     "description": "중간선거 뒤 오른다는 계절성을 2026년에도 그대로 믿어도 되나 · 9월 말~연말 S&P500은 6번 중 5번 상승이지만 표본은 여섯 번 · 같은 인상기였던 2018년(−14.0%)과 2022년(+7.1%)은 반대로 끝남 · 올해는 이미 크게 오른 채 출발 · 앞으로 네 주는 금리와 반도체 이익으로 판정",
     "tags": [
@@ -3428,6 +3430,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-03T14:22:06.476Z",
     "legacyImport": false,
     "title": "The Engine Is the Bottleneck",
+    "seoTitle": "Data Center Power Engines: Gas Turbine Bottleneck, HD Hyundai, Hanwha",
     "subtitle": "",
     "description": "As grid and gas-turbine queues lengthen, some data-center on-site power demand is shifting to four-stroke engines. Snowshagal Research NO.08 traces where shipboard generators and data-center power plants meet on parts of the same medium-speed manufacturing and test base—and how long that bottleneck can last.",
     "tags": [
@@ -3454,6 +3457,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-03T13:30:17.622Z",
     "legacyImport": false,
     "title": "엔진이 병목이다",
+    "seoTitle": "데이터센터 발전용 엔진 수요: 가스터빈 병목과 HD현대·한화엔진",
     "subtitle": "",
     "description": "가스터빈과 전력망 대기가 길어지며 데이터센터 현장 발전 수요 일부가 4행정 엔진으로 이동 · 선박 발전기와 데이터센터가 만나는 일부 4행정 중속 생산·시험 기반, 주문의 시차와 병목의 유통기한을 추적한 Snowshagal 리서치 NO.08",
     "tags": [
@@ -3479,6 +3483,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-02T18:32:32.751Z",
     "legacyImport": false,
     "title": "Record Exports, Depressed Multiples",
+    "seoTitle": "Record Korean Exports, Falling KOSPI: Why Valuations Hit a Low",
     "subtitle": "",
     "description": "September exports hit a record USD 120.94bn · KOSPI −19.3% in Q3 · one-year moves broadly tracked exports while most of the three-month divergence came in July (−22.2%) · 12.7% won appreciation narrowed the in USD terms decline to −7.6% · forward EPS +17%, forward P/E ~7.8x → low 4.74x → 5.55x · foreigners sold ~KRW 41.6tn net in Q3 alongside major buybacks · Q4 checklist",
     "tags": [
@@ -3506,6 +3511,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-10-02T18:30:57.671Z",
     "legacyImport": false,
     "title": "수출은 최대, 배수는 바닥권",
+    "seoTitle": "수출은 사상 최대인데 코스피는 왜 빠졌나: 선행 PER 바닥권 점검",
     "subtitle": "",
     "description": "9월 수출 1,209.4억달러 사상 최대 · 3분기 코스피 −19.3% · 1년 보폭은 수출과 비슷하고 석 달 괴리의 대부분은 7월 한 달(−22.2%) · 원화 12.7% 강세로 달러 환산 낙폭은 −7.6% · 선행 EPS +17%, 선행 PER 약 7.8배 → 저점 4.74배 → 5.55배 · 3분기 외국인 약 41.6조원 순매도와 자사주 · 4분기 점검표",
     "tags": [
@@ -3813,6 +3819,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-09-29T10:40:21.276Z",
     "legacyImport": false,
     "title": "Three Days of Rates One Session",
+    "seoTitle": "Korean Bond Yields After Chuseok: Three Days of U.S. Moves in One Session",
     "subtitle": "",
     "description": "Over Korea’s Chuseok market closure, the U.S. 10-year Treasury yield rose 21bp. On Sep 28, Korea’s 10-year government yield rose 14.7bp in one reopening session. Real yields drove the U.S. move while the breakeven proxy barely changed; historically, policy expectations have been the main transmission channel into Korean long rates.",
     "tags": [
@@ -3839,6 +3846,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-09-29T10:38:49.098Z",
     "legacyImport": false,
     "title": "사흘치 금리를 하루에",
+    "seoTitle": "추석 휴장 뒤 국고채 금리 급등: 사흘치 미국 금리를 하루에 반영",
     "subtitle": "",
     "description": "추석 휴장 사흘 동안 미국 10년 금리 +21bp · 9월 28일 국고 10년 +14.7bp · 공식 종가 기준 상승은 TIPS 실질금리가 주도, BEI(근사)는 거의 그대로 · 역사적으로 한국에 넘어온 통로는 정책기대 · 10월 휴장 두 번과 점검 달력",
     "tags": [
@@ -3975,6 +3983,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-09-27T14:12:36.663Z",
     "legacyImport": false,
     "title": "The cash is already there",
+    "seoTitle": "Korean Companies Turn Net Lenders: Where Will the Cash Go?",
     "subtitle": "",
     "description": "In Q1 2026, South Korean nonfinancial corporations swung from net borrowing to net lending. Snowshagal Research NO.07 traces where that cash is now and whether it moves into capex, overseas investment, shareholder returns, M&A, or remains unallocated.",
     "tags": [
@@ -4002,6 +4011,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-09-27T14:09:03.006Z",
     "legacyImport": false,
     "title": "돈은 이미 쌓여 있다",
+    "seoTitle": "한국 기업 자금잉여 전환, 쌓인 돈은 설비투자·주주환원 어디로 갈까",
     "subtitle": "",
     "description": "2026년 1분기 한국 비금융기업이 돈을 빌리는 쪽에서 남기는 쪽으로 돌아섬 · 그 돈이 지금 어디에 있고 설비투자·해외투자·주주환원·인수합병·대기 중 어디로 갈지를 원자료로 추적한 Snowshagal 리서치 NO.07",
     "tags": [
@@ -4028,6 +4038,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-09-24T12:05:45.116Z",
     "legacyImport": false,
     "title": "Inflation Gets a New Ruler",
+    "seoTitle": "U.S. PCE Methodology Change: How to Read the 2026 Annual Revision",
     "subtitle": "",
     "description": "September 30 release of U.S. August PCE and the BEA 2026 annual update · calculation methods change for three core PCE components · the main revision window is recalculated and released the same day · watch the size of the revision, not a break in the series, and the gap versus published benchmark estimates",
     "tags": [
@@ -4054,6 +4065,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-09-24T12:02:41.843Z",
     "legacyImport": false,
     "title": "물가를 재는 자가 바뀐다",
+    "seoTitle": "미국 PCE 계산 방식 변경과 연례 개정: 9월 30일 근원 PCE 읽는 법",
     "subtitle": "",
     "description": "9월 30일 미국 8월 PCE와 BEA 2026년 연례 개정 동시 공개 · 근원 PCE 세 항목 계산 방식 변경 · 주된 소급 개정창도 함께 다시 써서 같은 날 공개 · 볼 것은 끊김이 아니라 개정폭, 그리고 공개된 대표 기관 추정과의 차이",
     "tags": [
@@ -4300,6 +4312,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-09-19T15:11:32.554Z",
     "legacyImport": false,
     "title": "Are Humanoids Really Working?",
+    "seoTitle": "Are Humanoid Robots Really Working? Shipments vs. Real Work",
     "subtitle": "",
     "description": "The question after more than 20,000 humanoids shipped: separating units shipped from actual work, human intervention and economics, then locating Korea in the industry using public evidence. Snowshagal Research.",
     "tags": [
@@ -4324,6 +4337,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-09-19T15:08:03.153Z",
     "legacyImport": false,
     "title": "휴머노이드는 정말 일하고 있는가",
+    "seoTitle": "휴머노이드 로봇 2만 대 출하, 실제로 일하고 있나: 경제성과 한국의 위치",
     "subtitle": "",
     "description": "2만 대가 출하된 뒤에 남은 질문. 출하 대수와 실제 노동, 사람이 붙은 정도, 그래도 경제성이 남는지를 나눠 세고 한국의 위치까지 공개 증거로 확인한 Snowshagal Research.",
     "tags": [
@@ -4571,6 +4585,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-09-14T15:15:54.904Z",
     "legacyImport": false,
     "title": "Three Tests in Four Days",
+    "seoTitle": "September FOMC, BOJ and U.S. Funding Markets: Three Tests in Four Days",
     "subtitle": "",
     "description": "Sep. 15 U.S. funding markets, Sep. 16 FOMC, Sep. 17–18 Bank of Japan. Three different tests are compressed into four days, while short-term funding remains quiet and long-term yields have already repriced.",
     "tags": [
@@ -4625,6 +4640,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-09-14T15:11:59.998Z",
     "legacyImport": false,
     "title": "나흘에 몰린 세 개의 시험",
+    "seoTitle": "9월 FOMC·일본은행·미국 자금시장: 나흘에 몰린 세 개의 시험",
     "subtitle": "",
     "description": "9월 15일 미국 자금시장, 16일 FOMC, 17~18일 일본은행. 성격이 다른 세 이벤트가 나흘에 몰렸고 뒤의 두 통화정책 회의는 같은 방향을 가리킨다. 자금시장은 아직 조용하지만 장기금리는 이미 올라와 있는 구간을 점검하는 투자 인사이트.",
     "tags": [
@@ -5193,6 +5209,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-09-01T15:29:52.609Z",
     "legacyImport": false,
     "title": "WGBI, Three Tranches Left",
+    "seoTitle": "Korea's WGBI Inclusion: Foreign Bond Buying After 5 of 8 Tranches",
     "subtitle": "",
     "description": "The phase-in of South Korean government bonds into the WGBI has completed 5 of 8 tranches. Foreign holdings of Korean Treasury Bonds have risen less than expected, but the maturity profile of new purchases is getting longer. This piece examines the remaining September-November flows.",
     "tags": [
@@ -5216,6 +5233,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-09-01T15:28:35.359Z",
     "legacyImport": false,
     "title": "WGBI, 남은 세 번",
+    "seoTitle": "WGBI 편입 외국인 국채 매수: 8회 중 5회 진행, 남은 세 번",
     "subtitle": "",
     "description": "한국 국채의 WGBI 편입은 8회 중 5회가 진행됐다. 외국인 국고채 보유 증가는 기대 경로를 밑돌았지만 매입 만기는 길어지고 있다. 남은 9~11월의 자금 흐름을 점검하는 투자 인사이트.",
     "tags": [
@@ -5285,6 +5303,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-31T19:35:33.720Z",
     "legacyImport": false,
     "title": "September 15: A Check on U.S. Money Markets",
+    "seoTitle": "U.S. Money Markets on Sept. 15: Treasury Settlement Meets Tax Day",
     "subtitle": "",
     "description": "September 15 brings Treasury settlements and tax payments on the same day. There are no current signs of funding stress, but this note examines the shock-absorbing capacity of U.S. short-term funding markets in a high-rate environment.",
     "tags": [
@@ -5310,6 +5329,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-31T19:33:43.733Z",
     "legacyImport": false,
     "title": "9월 15일, 미국 자금시장 점검",
+    "seoTitle": "미국 단기자금시장 점검: 국채 결제와 세금 납부가 겹친 9월 15일",
     "subtitle": "",
     "description": "국채 결제와 세금 납부가 겹치는 9월 15일. 현재 경색 신호는 없지만, 높아진 금리 환경에서 미국 단기자금시장의 충격 흡수력을 점검하는 투자 인사이트.",
     "tags": [
@@ -5377,8 +5397,9 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-09-05T17:04:21.240Z",
     "legacyImport": false,
     "title": "How Does 1 Coin Become $1?",
+    "seoTitle": "What Is a Stablecoin? How USDC and Tether Hold $1",
     "subtitle": "",
-    "description": "",
+    "description": "From coins and exchanges to the structure that pins a stablecoin to $1. Why the issuer's redemption price and the exchange price can split, explained through USDC's 2023 depeg to $0.88.",
     "tags": [
       "stablecoins"
     ],
@@ -5400,8 +5421,9 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-09-05T16:50:53.736Z",
     "legacyImport": false,
     "title": "1코인은 어떻게 1달러가 되는가",
+    "seoTitle": "스테이블코인 뜻: USDC·테더는 어떻게 1달러를 지키나",
     "subtitle": "",
-    "description": "",
+    "description": "코인과 거래소의 기초부터 USDC·테더 같은 스테이블코인이 1달러에 묶이는 구조까지. 발행사 상환 창구와 거래소 화면 값이 갈리는 이유를 2023년 USDC 디페깅(0.88달러) 사례로 설명한다.",
     "tags": [
       "stablecoins"
     ],
@@ -5472,6 +5494,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-28T20:00:01.843Z",
     "legacyImport": false,
     "title": "Behind the Coin Are Treasuries",
+    "seoTitle": "Stablecoins and U.S. Treasuries: The GENIUS Act and T-Bill Demand",
     "subtitle": "",
     "description": "Stablecoins do not buy America’s 30-year debt. This research traces how, under the GENIUS Act framework, global dollar demand connects to U.S. Treasuries maturing in 93 days or less.",
     "tags": [
@@ -5497,6 +5520,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-28T19:57:57.475Z",
     "legacyImport": false,
     "title": "코인의 뒷면에는 국채가 있다",
+    "seoTitle": "스테이블코인과 미국 국채: 지니어스법 이후 단기국채 수요 구조",
     "subtitle": "",
     "description": "스테이블코인은 미국의 30년을 사지 않는다. 지니어스법 이후 세계의 달러 수요가 93일 이하 국채와 연결되는 구조를 추적한 리서치.",
     "tags": [
@@ -5774,6 +5798,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-25T15:44:42.398Z",
     "legacyImport": false,
     "title": "America’s Costlier 30-Year Money",
+    "seoTitle": "Why the U.S. 30-Year Yield Hit 5%: Real Rates vs. Inflation Expectations",
     "subtitle": "",
     "description": "RESEARCH NO.04 · America’s 30-Year Money. Breaking down what makes up a 30-year yield above 5%, and asking which prevails first if that price persists: America’s strength or its burden.",
     "href": "reports/en/비정기리서치_미국의비싸진30년_2026.08.23_커버통합_EN.html",
@@ -5799,6 +5824,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-25T14:40:56.666Z",
     "legacyImport": false,
     "title": "미국의 비싸진 30년",
+    "seoTitle": "미국 30년물 국채금리 5%, 왜 올랐나: 실질금리와 기대인플레이션으로 분해",
     "subtitle": "",
     "description": "리서치 NO.04 · 미국의 30년. 30년물 5%대의 성분을 갈라 보고, 이 가격이 오래 지속될 때 미국의 강함과 부담 중 어느 쪽이 먼저 이기는지를 묻는다.",
     "href": "reports/비정기리서치_미국의비싸진30년_2026.08.23_커버통합.html",
@@ -5873,8 +5899,9 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-28T20:03:42.497Z",
     "legacyImport": false,
     "title": "How a Selloff Feeds on Itself",
+    "seoTitle": "Margin Calls and Forced Selling: How a Selloff Feeds on Itself",
     "subtitle": "",
-    "description": "",
+    "description": "The stock fell 20%, so why did my equity fall 40%? Leverage thresholds in an account, the difference between margin calls and forced liquidation, and what circuit breakers do and do not stop.",
     "tags": [
       "flows",
       "futures"
@@ -5897,8 +5924,9 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-28T20:02:13.999Z",
     "legacyImport": false,
     "title": "급락은 어떻게 더 큰 급락을 만드는가",
+    "seoTitle": "반대매매·마진콜 뜻: 급락이 더 큰 급락을 부르는 이유",
     "subtitle": "",
-    "description": "",
+    "description": "주가가 20% 빠졌는데 내 몫은 왜 40% 줄었을까. 빚을 낸 계좌의 경계선, 마진콜·반대매매처럼 비슷해 보이는 말의 차이, 서킷브레이커가 멈추는 것과 멈추지 않는 것을 정리했다.",
     "tags": [
       "flows",
       "futures"
@@ -6122,6 +6150,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-23T17:27:37.020Z",
     "legacyImport": false,
     "title": "Interest on the Chip",
+    "seoTitle": "Can a GPU Become a Bond? NVIDIA's $500bn Compute-Financing Platform",
     "subtitle": "",
     "description": "Special Research · Can a GPU Become a Bond? Following how AI compute is turning into a financial asset after NVIDIA and six financial firms announced a $500bn compute-financing platform on August 10, 2026.",
     "href": "reports/en/2026-08-16_Can_a_GPU_Become_a_Bond_EN.html",
@@ -6147,6 +6176,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-23T17:19:08.100Z",
     "legacyImport": false,
     "title": "칩 위에 붙은 이자",
+    "seoTitle": "GPU는 채권이 될 수 있나: 엔비디아 5,000억달러 컴퓨트 금융",
     "subtitle": "",
     "description": "비정기 리서치 · GPU는 채권이 될 수 있는가. 2026년 8월 10일 엔비디아와 6개 금융사의 5,000억달러 컴퓨트 금융 플랫폼 발표를 계기로, AI 컴퓨트가 금융자산이 되는 과정을 따라간다.",
     "summary": "GPU는 채권이 될 수 있을까? 칩 위에 붙은 이자를 알아보자.",
@@ -6172,8 +6202,9 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-28T16:30:43.438Z",
     "legacyImport": false,
     "title": "A Good Company Isn’t Always a Good Stock",
+    "seoTitle": "Record Earnings, Falling Stock: Earnings, P/E and Expectations",
     "subtitle": "",
-    "description": "",
+    "description": "A company reported record quarterly results and its stock fell 9.61%. The simplest way to split a share price into earnings and the P/E multiple, which earnings to use, and what happens when the number is already expected.",
     "tags": [],
     "readingMinutes": 7,
     "href": "reports/en/Market_Language_Ep4_Why_a_Good_Company_Isnt_Always_a_Good_Stock.html",
@@ -6193,8 +6224,9 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-25T15:49:32.286Z",
     "legacyImport": false,
     "title": "좋은 회사가 왜 좋은 주식은 아닌가",
+    "seoTitle": "사상 최대 실적에도 주가가 내리는 이유: 이익·PER·컨센서스로 나눠 보기",
     "subtitle": "",
-    "description": "",
+    "description": "분기 사상 최대 실적을 발표한 날 주가는 9.61% 내렸다. 주가를 이익과 PER(배수)로 나누는 가장 단순한 방법, 어떤 이익을 쓰는지, 컨센서스가 이미 나와 있던 날 무슨 일이 생기는지 설명한다.",
     "href": "reports/시장을읽는말들_4편_좋은회사가왜좋은주식은아닌가.html",
     "coverImage": "covers/2026-08-15-basics-1cd8c9w.webp",
     "tags": [],
@@ -6263,8 +6295,9 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-25T15:51:11.804Z",
     "legacyImport": false,
     "title": "How U.S. Data Reaches Korea",
+    "seoTitle": "How U.S. CPI Moves the KOSPI and the Korean Won Overnight",
     "subtitle": "",
-    "description": "",
+    "description": "Follow the U.S. inflation release on the night of July 14, 2026 to the Seoul open the next morning, and see how one data point moves the won, foreign flows and chip stocks together.",
     "href": "reports/en/Market_Language_Ep3_How_US_Data_Reaches_Korea.html",
     "coverImage": "covers/2026-08-13-basics-1cmfur2.webp",
     "tags": [
@@ -6287,8 +6320,9 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-25T11:10:09.848Z",
     "legacyImport": false,
     "title": "미국의 숫자는 어떻게 한국에 도착하는가",
+    "seoTitle": "미국 물가 발표는 어떻게 코스피·원달러 환율을 움직이나",
     "subtitle": "",
-    "description": "",
+    "description": "2026년 7월 14일 밤 미국 소비자물가(CPI) 발표부터 다음 날 서울 개장까지를 시간 순서로 따라가며, 미국 지표 하나가 원달러 환율·외국인 수급·반도체 주가를 함께 움직이는 경로를 설명한다.",
     "href": "reports/시장을읽는말들_3편_미국의숫자는어떻게한국에도착하는가.html",
     "coverImage": "covers/2026-08-13-basics-1qofo4f.webp",
     "tags": [
@@ -6360,8 +6394,9 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-25T11:08:22.548Z",
     "legacyImport": false,
     "title": "현물과 선물이 엇갈릴 때",
+    "seoTitle": "현물 매도·선물 매수 뜻: 베이시스와 프로그램 매매 읽는 법",
     "subtitle": "",
-    "description": "",
+    "description": "기관이 현물은 팔고 코스피200 선물은 샀다면 시장을 떠난 걸까, 반등에 건 걸까. 현물과 선물 수급이 엇갈릴 때 두 시장을 함께 읽는 법과 베이시스·프로그램 매매의 뜻을 정리했다.",
     "href": "reports/시장을읽는말들_2편_현물과선물이엇갈릴때.html",
     "coverImage": "covers/2026-08-10-basics-1rhknmt.webp",
     "updatedAt": "2026-08-25T11:09:25.060Z",
@@ -6434,8 +6469,9 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-25T15:47:11.805Z",
     "legacyImport": false,
     "title": "When Cash and Futures Diverge",
+    "seoTitle": "Cash vs. Futures Flows in Korea: Basis and Program Trading Explained",
     "subtitle": "",
-    "description": "",
+    "description": "Institutions sold KOSPI stocks and bought KOSPI 200 futures. Did they leave the market or bet on a rebound? How to read both markets together, and what basis and program trading reveal.",
     "href": "reports/en/Market_Language_Ep2_When_Cash_and_Futures_Diverge.html",
     "coverImage": "covers/2026-08-11-basics-1bmtot3.webp",
     "tags": [
@@ -6481,8 +6517,9 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-11T17:01:07.192Z",
     "legacyImport": false,
     "title": "주가는 누가 움직이는가",
+    "seoTitle": "수급 뜻: 개인·외국인·기관 매매동향, 주가는 누가 움직이나",
     "subtitle": "",
-    "description": "",
+    "description": "개인이 수조 원을 샀는데 코스피는 왜 내렸을까. 한국거래소 투자자별 매매동향(수급)을 읽는 법과, 많이 산 쪽과 가격을 움직인 쪽이 다른 이유를 실제 사례로 설명한다.",
     "href": "reports/시장을읽는말들_1편_주가는누가움직이는가.html",
     "tags": [
       "flows"
@@ -6522,8 +6559,9 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-25T15:46:19.514Z",
     "legacyImport": false,
     "title": "Who Moves Stock Prices?",
+    "seoTitle": "Korean Stock Flows Explained: Who Really Moves Prices?",
     "subtitle": "",
-    "description": "",
+    "description": "Retail investors bought trillions of won, yet the KOSPI fell. How to read Korea Exchange data on retail, foreign and institutional trading, and why the biggest buyer is not always the one setting the price.",
     "href": "reports/en/Market_Language_Ep1_Who_Moves_Stock_Prices.html",
     "coverImage": "covers/2026-08-10-basics-f7gadj.webp",
     "tags": [
@@ -6642,6 +6680,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-23T17:13:42.753Z",
     "legacyImport": false,
     "title": "Who Holds the Keys?",
+    "seoTitle": "What Is Sovereign AI? Models, Compute, Data and Who Holds Control",
     "subtitle": "",
     "description": "A special research report on what sovereign AI is meant to protect, which layers—model, compute, data and operational control—make AI meaningfully ours, and how fifteen countries and regions have made different choices, including the NAVER–NVIDIA case.",
     "href": "reports/en/2026-08-09_Sovereign_AI_Who_Holds_the_Keys_EN.html",
@@ -6666,6 +6705,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": null,
     "legacyImport": true,
     "title": "누가 열쇠를 쥐는가",
+    "seoTitle": "소버린 AI란: 모델·컴퓨트·데이터 중 무엇을 가져야 '우리 AI'인가",
     "subtitle": "소버린 AI의 여러 얼굴",
     "description": "모델·컴퓨트·데이터·운영권 가운데 어느 층을 가져야 ‘우리 AI’가 되는지를 국가·기업 사례로 살펴본 비정기 리서치.",
     "href": "reports/비정기리서치_소버린AI_누가열쇠를쥐는가_2026.08.09_커버통합.html",
@@ -7032,8 +7072,9 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-23T15:47:04.685Z",
     "legacyImport": false,
     "title": "Two Illusions",
+    "seoTitle": "Foreign Selling, Rising Ownership: Two Illusions in Korean Stock Flows",
     "subtitle": "",
-    "description": "Independent research on foreign ownership, market concentration, and leveraged-product flows.",
+    "description": "Foreign investors sold more than KRW 150tn of KOSPI stocks this year, yet their ownership share rose to 41.58%. Separating flows from ownership, concentration in two chipmakers, and whether leverage really caused the selloff.",
     "href": "reports/en/2026-07-29_Special_Research_Two_Illusions_EN.html",
     "translationGroup": "2026-07-29-research-m2ef0m",
     "coverImage": "covers/2026-07-29-research-4eg0o9.webp",
@@ -7081,8 +7122,9 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-08-12T08:08:46.956Z",
     "legacyImport": false,
     "title": "두 개의 착시",
+    "seoTitle": "외국인 순매도에도 보유비중이 오른 이유: 레버리지는 급락의 범인일까",
     "subtitle": "",
-    "description": "",
+    "description": "올해 외국인은 코스피에서 150조원 넘게 순매도했는데 보유비중은 41.58%로 올랐다. 서로 다른 지표를 같은 숫자로 읽은 착시와, 원인과 증폭 장치를 혼동한 착시를 외국인 수급·대형주 쏠림·레버리지 리밸런싱으로 따라간다.",
     "summary": "외국인은 대규모로 팔았는데 보유비중은 오르고, 급락의 범인으로 지목된 레버리지는 단독 원인으로 보기 어렵다. 외국인 수급·대형주 쏠림·레버리지 리밸런싱을 따라가며 숫자 뒤에 숨은 시장 구조를 살펴본다.",
     "href": "reports/7월 29일 비정기 리서치_두 개의 착시.html",
     "tags": [
