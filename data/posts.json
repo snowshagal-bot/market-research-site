@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-07-weekly-1fje2ra",
+    "type": "weekly",
+    "typeLabel": "Weekly",
+    "lang": "en",
+    "date": "2026-11-07",
+    "reportDate": "2026-11-07",
+    "registeredDate": "2026-11-07",
+    "registeredAt": "2026-11-07T13:32:47.585Z",
+    "legacyImport": false,
+    "title": "A Padlock on the Site, Next Week Holds the Key",
+    "subtitle": "",
+    "description": "Snowshagal Weekly, Nov. 2–6, 2026: KOSPI −11.71%, KOSDAQ −11.06%. Semiconductor heavyweights sold off on post-election U.S. data-center regulatory fears; Friday saw a marketwide circuit breaker. Next: U.S. October CPI, CoreWeave earnings and foreign-equity flows.",
+    "summary": "Five semiconductor-related heavyweights account for an estimated 88% of the KOSPI weekly decline; KOSPI −11.71%, KOSDAQ −11.06%; telecoms, IT services and gaming held up.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 12,
+    "href": "reports/en/2026-11-07_Snowshagal_Weekly_EN.html",
+    "translationGroup": "2026-11-07-weekly-n6d7sx",
+    "coverImage": "covers/2026-11-07-weekly-1fje2ra.webp",
+    "shareCardImage": "covers/share/2026-11-07-weekly-1fje2ra.jpg",
+    "coverThumbnail": "covers/2026-11-07-weekly-1fje2ra-450.webp"
+  },
+  {
     "id": "2026-11-07-weekly-n6d7sx",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
