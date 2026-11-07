@@ -944,7 +944,7 @@
     "subtitle": "",
     "date": "2026-11-05",
     "registeredAt": "2026-11-05T12:06:57.829Z",
-    "summary": "미국 장은 선거 불확실성이 걷히며 올랐지만 AI 반도체⁠·⁠데이터센터 설비주는 규제 우려로 급락 · 반도체 비중이 큰 코스피는 그쪽을 따라 출발부터 밀렸고, 외국인 매도가 오후에 다시 커지며 -6.10%까지 · 지수 하락의 무게는 두 대형주에 쏠렸지만 코스피 종목 열에 여섯 가까이가 내려 매도는 넓게 번진 장.",
+    "summary": "미국 장은 선거 불확실성이 걷히며 올랐지만 AI 반도체·데이터센터 설비주는 규제 우려로 급락 · 반도체 비중이 큰 코스피는 그쪽을 따라 출발부터 밀렸고, 외국인 매도가 오후에 다시 커지며 -6.10%까지 · 지수 하락의 무게는 두 대형주에 쏠렸지만 코스피 종목 열에 여섯 가까이가 내려 매도는 넓게 번진 장.",
     "tags": [
       "kospi",
       "kosdaq",
@@ -8943,7 +8943,7 @@
     "subtitle": "",
     "date": "2026-08-29",
     "registeredAt": "2026-09-05T17:04:21.240Z",
-    "summary": "",
+    "summary": "From coins and exchanges to the structure that pins a stablecoin to $1. Why the issuer's redemption price and the exchange price can split, explained through USDC's 2023 depeg to $0.88.",
     "tags": [
       "stablecoins"
     ],
@@ -8991,7 +8991,7 @@
     "subtitle": "",
     "date": "2026-08-29",
     "registeredAt": "2026-09-05T16:50:53.736Z",
-    "summary": "",
+    "summary": "코인과 거래소의 기초부터 USDC·테더 같은 스테이블코인이 1달러에 묶이는 구조까지. 발행사 상환 창구와 거래소 화면 값이 갈리는 이유를 2023년 USDC 디페깅(0.88달러) 사례로 설명한다.",
     "tags": [
       "stablecoins"
     ],
@@ -10415,7 +10415,7 @@
     "subtitle": "",
     "date": "2026-08-20",
     "registeredAt": "2026-08-28T20:03:42.497Z",
-    "summary": "",
+    "summary": "The stock fell 20%, so why did my equity fall 40%? Leverage thresholds in an account, the difference between margin calls and forced liquidation, and what circuit breakers do and do not stop.",
     "tags": [
       "flows",
       "futures"
@@ -10488,7 +10488,7 @@
     "subtitle": "",
     "date": "2026-08-20",
     "registeredAt": "2026-08-28T20:02:13.999Z",
-    "summary": "",
+    "summary": "주가가 20% 빠졌는데 내 몫은 왜 40% 줄었을까. 빚을 낸 계좌의 경계선, 마진콜·반대매매처럼 비슷해 보이는 말의 차이, 서킷브레이커가 멈추는 것과 멈추지 않는 것을 정리했다.",
     "tags": [
       "flows",
       "futures"
@@ -11511,7 +11511,7 @@
     "subtitle": "",
     "date": "2026-08-15",
     "registeredAt": "2026-08-28T16:30:43.438Z",
-    "summary": "",
+    "summary": "A company reported record quarterly results and its stock fell 9.61%. The simplest way to split a share price into earnings and the P/E multiple, which earnings to use, and what happens when the number is already expected.",
     "tags": [],
     "readingMinutes": 7,
     "url": "/reports/en/Market_Language_Ep4_Why_a_Good_Company_Isnt_Always_a_Good_Stock",
@@ -11585,7 +11585,7 @@
     "subtitle": "",
     "date": "2026-08-15",
     "registeredAt": "2026-08-25T15:49:32.286Z",
-    "summary": "",
+    "summary": "분기 사상 최대 실적을 발표한 날 주가는 9.61% 내렸다. 주가를 이익과 PER(배수)로 나누는 가장 단순한 방법, 어떤 이익을 쓰는지, 컨센서스가 이미 나와 있던 날 무슨 일이 생기는지 설명한다.",
     "tags": [],
     "readingMinutes": 6,
     "url": "/reports/시장을읽는말들_4편_좋은회사가왜좋은주식은아닌가",
@@ -11951,7 +11951,7 @@
     "subtitle": "",
     "date": "2026-08-13",
     "registeredAt": "2026-08-25T15:51:11.804Z",
-    "summary": "",
+    "summary": "Follow the U.S. inflation release on the night of July 14, 2026 to the Seoul open the next morning, and see how one data point moves the won, foreign flows and chip stocks together.",
     "tags": [
       "flows",
       "semiconductors",
@@ -11989,7 +11989,7 @@
     "subtitle": "",
     "date": "2026-08-13",
     "registeredAt": "2026-08-25T11:10:09.848Z",
-    "summary": "",
+    "summary": "2026년 7월 14일 밤 미국 소비자물가(CPI) 발표부터 다음 날 서울 개장까지를 시간 순서로 따라가며, 미국 지표 하나가 원달러 환율·외국인 수급·반도체 주가를 함께 움직이는 경로를 설명한다.",
     "tags": [
       "rates",
       "fx",
@@ -12333,7 +12333,7 @@
     "subtitle": "",
     "date": "2026-08-12",
     "registeredAt": "2026-08-25T11:08:22.548Z",
-    "summary": "",
+    "summary": "기관이 현물은 팔고 코스피200 선물은 샀다면 시장을 떠난 걸까, 반등에 건 걸까. 현물과 선물 수급이 엇갈릴 때 두 시장을 함께 읽는 법과 베이시스·프로그램 매매의 뜻을 정리했다.",
     "tags": [
       "futures",
       "flows"
@@ -12668,7 +12668,7 @@
     "subtitle": "",
     "date": "2026-08-11",
     "registeredAt": "2026-08-25T15:47:11.805Z",
-    "summary": "",
+    "summary": "Institutions sold KOSPI stocks and bought KOSPI 200 futures. Did they leave the market or bet on a rebound? How to read both markets together, and what basis and program trading reveal.",
     "tags": [
       "flows",
       "semiconductors",
@@ -12862,7 +12862,7 @@
     "subtitle": "",
     "date": "2026-08-11",
     "registeredAt": "2026-08-11T17:01:07.192Z",
-    "summary": "",
+    "summary": "개인이 수조 원을 샀는데 코스피는 왜 내렸을까. 한국거래소 투자자별 매매동향(수급)을 읽는 법과, 많이 산 쪽과 가격을 움직인 쪽이 다른 이유를 실제 사례로 설명한다.",
     "tags": [
       "flows"
     ],
@@ -13038,7 +13038,7 @@
     "subtitle": "",
     "date": "2026-08-10",
     "registeredAt": "2026-08-25T15:46:19.514Z",
-    "summary": "",
+    "summary": "Retail investors bought trillions of won, yet the KOSPI fell. How to read Korea Exchange data on retail, foreign and institutional trading, and why the biggest buyer is not always the one setting the price.",
     "tags": [
       "flows",
       "semiconductors",
