@@ -274,5 +274,11 @@
     "en": "Market Basic",
     "group": "company-policy",
     "custom": true
+  },
+  "data-center": {
+    "ko": "데이터센터",
+    "en": "Data Center",
+    "group": "sector",
+    "custom": true
   }
 }

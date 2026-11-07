@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-07-note-psbecd",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-07",
+    "reportDate": "2026-11-07",
+    "registeredDate": "2026-11-07",
+    "registeredAt": "2026-11-07T14:17:09.219Z",
+    "legacyImport": false,
+    "title": "데이터센터 지도 위의 블루웨이브",
+    "seoTitle": "데이터센터 지도 위의 블루웨이브: 반도체는 왜 하루 12% 빠졌나 | Snowshagal 투자 인사이트 NO.27",
+    "subtitle": "",
+    "description": "미국 중간선거 뒤 이틀, 필라델피아 반도체 지수 −12.2%, 코스피 이틀 −10.98%. 주지사 소속 정당이 바뀐 5개 주에 착공·계획 데이터센터 전력의 41.2%(발표 기준)가 있다. 연방 금지는 문턱이 높지만 주·지방의 인허가 보류와 금지는 이미 현실이다. 어느 사업이 얼마나 늦어지고 누가 비용을 내느냐, 그리고 확인할 세 가지를 정리했다.",
+    "tags": [
+      "semiconductors",
+      "ai",
+      "policy",
+      "data-center",
+      "kospi"
+    ],
+    "readingMinutes": 28,
+    "href": "reports/20261107_Investment_Insight_Datacenter_Map_Blue_Wave.html",
+    "coverImage": "covers/2026-11-07-note-psbecd.webp",
+    "shareCardImage": "covers/share/2026-11-07-note-psbecd.jpg",
+    "coverThumbnail": "covers/2026-11-07-note-psbecd-450.webp"
+  },
+  {
     "id": "2026-11-07-weekly-1fje2ra",
     "type": "weekly",
     "typeLabel": "Weekly",
