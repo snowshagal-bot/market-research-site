@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-07-note-i5hhfe",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-07",
+    "reportDate": "2026-11-07",
+    "registeredDate": "2026-11-07",
+    "registeredAt": "2026-11-07T14:53:17.836Z",
+    "legacyImport": false,
+    "title": "THE BLUE WAVE ON THE DATA CENTER MAP",
+    "seoTitle": "The Blue Wave on the Data Center Map: Why the Chip Index Fell 12% in a Day | Snowshagal Investment Insight No. 27",
+    "subtitle": "",
+    "description": "After the U.S. midterms, the Philadelphia Semiconductor Index lost 12.2% in one session and the KOSPI fell 10.98% over two. Five states where the governorship flipped account for 41.2% of announced U.S. data center capacity under construction or planned—not capacity confirmed to be at risk. Federal constraints differ from state and local permitting holds. This report tracks costs, possible delays and three tests for investors.",
+    "tags": [
+      "semiconductors",
+      "ai",
+      "policy",
+      "data-center",
+      "kospi"
+    ],
+    "readingMinutes": 29,
+    "href": "reports/en/20261107_Snowshagal_Investment_Insight_No27_Data_Center_Blue_Wave_EN.html",
+    "translationGroup": "2026-11-07-note-psbecd",
+    "coverImage": "covers/2026-11-07-note-i5hhfe.webp",
+    "shareCardImage": "covers/share/2026-11-07-note-i5hhfe.jpg",
+    "coverThumbnail": "covers/2026-11-07-note-i5hhfe-450.webp"
+  },
+  {
     "id": "2026-11-07-note-psbecd",
     "type": "note",
     "typeLabel": "투자 인사이트",
