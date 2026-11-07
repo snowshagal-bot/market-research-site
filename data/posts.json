@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-07-weekly-n6d7sx",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-11-07",
+    "reportDate": "2026-11-07",
+    "registeredDate": "2026-11-07",
+    "registeredAt": "2026-11-07T13:14:13.411Z",
+    "legacyImport": false,
+    "title": "공사장에 걸린 자물쇠, 열쇠는 다음 주 숫자",
+    "subtitle": "",
+    "description": "2026년 11월 1주차(11월 2~6일) 한국 증시 주간 리포트. 코스피 -11.71% · 코스닥 -11.06%. 미국 중간선거 뒤 데이터센터 규제 우려에 반도체 대형주가 급락하고 금요일엔 서킷브레이커가 걸린 닷새. 다음 주 미국 10월 물가, 코어위브 실적, 외국인 매도 속도.",
+    "summary": "선거 뒤 데이터센터 규제 우려에 반도체 대형주가 코스피 하락의 열에 아홉 가까이를 차지한 한 주 · 코스피 -11.71%, 코스닥 -11.06% · 통신·IT 서비스·게임은 오름",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 8,
+    "href": "reports/2026-11-07_Snowshagal_Weekly.html",
+    "coverImage": "covers/2026-11-07-weekly-n6d7sx.webp",
+    "shareCardImage": "covers/share/2026-11-07-weekly-n6d7sx.jpg",
+    "coverThumbnail": "covers/2026-11-07-weekly-n6d7sx-450.webp"
+  },
+  {
     "id": "2026-11-07-basics-bzejsh",
     "type": "basics",
     "typeLabel": "Market Basics",
