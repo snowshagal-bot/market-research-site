@@ -39,6 +39,30 @@ If the site later introduces an actual SPA router, revise this policy together w
 - GA4's normal browser/cookie-based visitor and session measurement still applies; blocking, missing referrers and user/browser privacy settings can limit counts. Removing all URL queries intentionally prevents campaign-level UTM/click-ID reporting. Organic/referral domain measurement does not require forwarding those query values. Search keywords/impressions require Search Console; they are not sent from the visitor's URL.
 - This does not alter SEO titles/canonicals, data payloads, Core collection, Market APIs, publishing transactions, report interactions or the existing engagement tracker. It adds one small inline bootstrap and one asynchronously loaded third-party script; that script has a real network/CPU cost. No absolute zero-performance-impact claim is made.
 
+## Property settings changed on 2026-11-08 (owner-approved, GA UI only)
+
+The owner approved each item in chat. Each was saved in the GA Admin UI and appears in Admin → Property change history; saved comparisons are not logged there. No repository code, tag or collected field changed. The three settings above (Enhanced measurement, user-provided data, Google Signals) stay off.
+
+| Setting | Before | After |
+|---|---|---|
+| Data retention → Event data | 2 months | **14 months** (user data was already 14 months) |
+| Property details → Reporting time zone | Vietnam (GMT+07:00) | **South Korea (GMT+09:00)** |
+| Product links → Search Console | not linked | **`snowshagal.com` domain property ↔ web stream `Snowshagal Report`** |
+| Data display → Channel groups | default only | **`Snowshagal 채널(네이버 보정)`** added (see below) |
+| Data display → Comparisons | built-in only | **`봇 의심 제외 (싱가포르·중국 제외)`**: Country does not exactly match `Singapore`, `China` |
+
+- **Time zone.** Daily boundaries now match KST trading days and report dates. Data before the change keeps the old time zone, so 2026-11-08 (the switch day) is off by two hours. Do not compare that single day.
+- **Channel group.** A copy of the default channel group with two OR conditions added. The rules are needed because `page_referrer` is the origin only: Naver search arrives as `m.search.naver.com / referral`, and Naver Blog as `m.blog.naver.com / referral`.
+  - **Organic Social** adds Session source full-regex `(.*\.)?(blog|cafe|post)\.naver\.com|(.*\.)?tistory\.com`.
+  - **Organic Search** adds `(.*\.)?search\.naver\.com|(.*\.)?search\.daum\.net`.
+  - The group applies to historical data without altering it. It is **not** the primary channel group: choose it in the dimension picker of acquisition reports.
+- **Bot comparison.** In the 28 days to 2026-11-08, Singapore (171 users) and China (40 users) had 0 s engagement and 0 % engagement rate. GA4 data filters cannot exclude traffic by country, so apply this saved comparison when reading reports.
+- **Not changed.**
+  - No internal-traffic IP rule was defined, so the existing `Internal Traffic` data filter stays in *Testing* and owner visits are still counted.
+  - The Search Console report collection is not published in the Reports library yet.
+  - Display currency (USD) is unchanged; the site has no revenue events.
+- **Campaign tags.** UTM tags on promotional links still never reach GA, because `page_location` omits every query (see Data minimization). Campaign-level reporting needs an approved code change that forwards only `utm_*` keys.
+
 ## Repository and response checks
 
 `node --test tests/ga4.test.mjs` covers every current public shell and published report's actual middleware response HTML, future KO/EN publishing behavior, one async loader and one config, idempotency, existing-tag guards, URL/referrer sanitization, host/path exclusions and both response-transform integrations. These tests do not contact Google or create analytics visits. The HTMLRewriter integration test records the registered handlers; it is not a substitute for a Cloudflare browser/network check after approved deployment.
