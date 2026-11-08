@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-08-note-1nlfv8y",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-08",
+    "reportDate": "2026-11-08",
+    "registeredDate": "2026-11-08",
+    "registeredAt": "2026-11-08T06:33:34.607Z",
+    "legacyImport": false,
+    "title": "배터리 회사는 이제 ESS 회사다",
+    "seoTitle": "배터리 회사는 이제 ESS 회사다 | Snowshagal 투자 인사이트 NO.28",
+    "subtitle": "",
+    "description": "미국 전기차 판매가 꺾인 사이 한국 배터리 셀 회사의 이익 엔진이 미국 전력망용 ESS로 바뀌고 있다. 탈중국 규정이 만든 수요, 2027년 하반기 셀 부족 시나리오, 2028년 영업이익의 절반에서 80%로 추정되는 미국 생산 보조금(AMPC), 3분기 순손실까지 숫자로 짚었다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "batteries",
+      "earnings",
+      "valuation"
+    ],
+    "readingMinutes": 23,
+    "href": "reports/20261108_Investment_Insight_Battery_ESS.html",
+    "coverImage": "covers/2026-11-08-note-1nlfv8y.webp",
+    "shareCardImage": "covers/share/2026-11-08-note-1nlfv8y.jpg",
+    "coverThumbnail": "covers/2026-11-08-note-1nlfv8y-450.webp"
+  },
+  {
     "id": "2026-11-07-note-i5hhfe",
     "type": "note",
     "typeLabel": "Investment Insights",
