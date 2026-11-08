@@ -776,7 +776,13 @@
   function summaryText(value) {
     // A declared summary can still be written across lines in the attribute,
     // and it travels into a search result on one, so it is collapsed too.
-    return String(value || '').replace(/\s+/g, ' ').trim().slice(0, 500);
+    // The zero-width characters a cover keeps around its middle dots as break
+    // hints are dropped the same way the one-liner drops them.
+    return String(value || '')
+      .replace(/[\u200B-\u200D\uFEFF\u2060]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 500);
   }
 
   // A summary is the report's own short account of itself. `.cover-oneline`
