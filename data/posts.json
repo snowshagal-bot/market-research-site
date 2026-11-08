@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-08-note-1gaynue",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-08",
+    "reportDate": "2026-11-08",
+    "registeredDate": "2026-11-08",
+    "registeredAt": "2026-11-08T07:40:39.306Z",
+    "legacyImport": false,
+    "title": "BATTERY MAKERS ARE NOW ESS COMPANIES",
+    "seoTitle": "Battery Makers Are Becoming Grid-Storage Companies | Snowshagal Investment Insight No. 28",
+    "subtitle": "",
+    "description": "As U.S. EV sales weaken, grid-scale battery storage is becoming a new revenue engine for Korean cell makers. This investment insight examines China-related eligibility rules, a possible H2 2027 shortage, the role of Section 45X manufacturing credits in 2028 operating profit, and LG Energy Solution's Q3 net loss.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "batteries",
+      "earnings",
+      "valuation"
+    ],
+    "readingMinutes": 25,
+    "href": "reports/en/20261108_Snowshagal_Investment_Insight_No28_Battery_ESS_EN.html",
+    "translationGroup": "2026-11-08-note-1nlfv8y",
+    "coverImage": "covers/2026-11-08-note-1gaynue.webp",
+    "shareCardImage": "covers/share/2026-11-08-note-1gaynue.jpg",
+    "coverThumbnail": "covers/2026-11-08-note-1gaynue-450.webp"
+  },
+  {
     "id": "2026-11-08-note-1nlfv8y",
     "type": "note",
     "typeLabel": "투자 인사이트",
