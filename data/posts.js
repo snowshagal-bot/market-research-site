@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-09-note-1bk2xya",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-09",
+    "reportDate": "2026-11-09",
+    "registeredDate": "2026-11-09",
+    "registeredAt": "2026-11-09T14:34:40.383Z",
+    "legacyImport": false,
+    "title": "Record Earnings. So Why Has the KOSPI Nearly Halved?",
+    "seoTitle": "Record Earnings—So Why Has the KOSPI Nearly Halved? | Snowshagal Investment Insight No. 29",
+    "subtitle": "",
+    "description": "Since the June peak, KOSPI earnings forecasts have risen 33% while the index has fallen 44.5%. Investors are questioning not the level of profits but their durability and the financing behind AI investment. U.S. credit, foreign investor flows and 13 signals to watch for a return of confidence.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "foreign-investors",
+      "flows",
+      "earnings"
+    ],
+    "readingMinutes": 24,
+    "href": "reports/en/20261109_Snowshagal_Investment_Insight_No29_Earnings_Trust_Gap_EN.html",
+    "translationGroup": "2026-11-09-note-aytpws",
+    "coverImage": "covers/2026-11-09-note-1bk2xya.webp",
+    "shareCardImage": "covers/share/2026-11-09-note-1bk2xya.jpg",
+    "coverThumbnail": "covers/2026-11-09-note-1bk2xya-450.webp"
+  },
+  {
     "id": "2026-11-09-note-aytpws",
     "type": "note",
     "typeLabel": "투자 인사이트",
