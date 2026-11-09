@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-09-note-aytpws",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-09",
+    "reportDate": "2026-11-09",
+    "registeredDate": "2026-11-09",
+    "registeredAt": "2026-11-09T13:47:57.301Z",
+    "legacyImport": false,
+    "title": "이익은 사상 최대인데 코스피는 왜 반토막 났나",
+    "seoTitle": "이익은 사상 최대인데 코스피는 왜 반토막 났나 | Snowshagal 투자 인사이트 NO.29",
+    "subtitle": "",
+    "description": "6월 고점 뒤 코스피 이익 전망은 33% 늘었는데 지수는 44.5% 빠졌다. 시장이 의심하는 건 이익의 크기가 아니라 얼마나 갈지, 그리고 AI 투자를 받치는 돈줄이다. 외국인 매매와 함께 움직여 온 뉴욕 크레딧, 그리고 신뢰가 돌아오는지 확인할 신호를 표로 짚었다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "foreign-investors",
+      "flows",
+      "earnings"
+    ],
+    "readingMinutes": 24,
+    "href": "reports/20261109_Investment_Insight_Earnings_Trust_Gap.html",
+    "coverImage": "covers/2026-11-09-note-aytpws.webp",
+    "shareCardImage": "covers/share/2026-11-09-note-aytpws.jpg",
+    "coverThumbnail": "covers/2026-11-09-note-aytpws-450.webp"
+  },
+  {
     "id": "2026-11-09-daily-1p6ds7n",
     "type": "daily",
     "typeLabel": "Daily",
