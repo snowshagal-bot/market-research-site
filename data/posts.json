@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-09-daily-1bnz1ln",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-09",
+    "reportDate": "2026-11-09",
+    "registeredDate": "2026-11-09",
+    "registeredAt": "2026-11-09T13:13:51.111Z",
+    "legacyImport": false,
+    "title": "물때는 허리까지, 물은 발목 아래로",
+    "subtitle": "",
+    "description": "",
+    "summary": "미국발 반등의 지수 기여는 두 대형주에 몰렸고, 그마저 오후를 넘기지 못함 · 5,000은 지켰지만 사흘째 하락.",
+    "takeaway": "오전 강세 지우고 코스피 하락 마감",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 4,
+    "href": "reports/2026-11-09_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-09-daily-1bnz1ln.webp",
+    "shareCardImage": "covers/share/2026-11-09-daily-1bnz1ln.jpg",
+    "coverThumbnail": "covers/2026-11-09-daily-1bnz1ln-450.webp"
+  },
+  {
     "id": "2026-11-08-note-1gaynue",
     "type": "note",
     "typeLabel": "Investment Insights",
