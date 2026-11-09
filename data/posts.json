@@ -1,5 +1,34 @@
 [
   {
+    "id": "2026-11-09-daily-1p6ds7n",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-09",
+    "reportDate": "2026-11-09",
+    "registeredDate": "2026-11-09",
+    "registeredAt": "2026-11-09T13:30:53.553Z",
+    "legacyImport": false,
+    "title": "A Waist-High Tide Mark, Ankle-Deep Water",
+    "subtitle": "",
+    "description": "Snowshagal Daily, Nov. 9, 2026: The KOSPI surrendered an intraday 2% gain as Samsung Electronics and SK hynix reversed, batteries and defense weakened, and the market's breadth lagged the index.",
+    "summary": "KOSPI -0.81%; a semiconductor-led morning rally faded; foreign selling continued; U.S. Medicare drug-price rules and a patent dispute weighed on Alteogen.",
+    "takeaway": "The morning rally evaporated; the KOSPI closed lower",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 7,
+    "href": "reports/en/2026-11-09_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-09-daily-1bnz1ln",
+    "coverImage": "covers/2026-11-09-daily-1p6ds7n.webp",
+    "shareCardImage": "covers/share/2026-11-09-daily-1p6ds7n.jpg",
+    "coverThumbnail": "covers/2026-11-09-daily-1p6ds7n-450.webp"
+  },
+  {
     "id": "2026-11-09-daily-1bnz1ln",
     "type": "daily",
     "typeLabel": "주식 리포트",
