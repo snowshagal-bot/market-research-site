@@ -150,6 +150,8 @@ test('robots permits public crawling, excludes admin APIs, and advertises the ca
   assert.match(robots, /Disallow: \/api\//);
   assert.match(robots, /Sitemap: https:\/\/snowshagal\.com\/sitemap\.xml/);
   assert.doesNotMatch(robots, /pages\.dev/);
+  // Daum Webmaster Tool ownership key: Daum re-reads it from robots.txt on every sign-in, so it must stay.
+  assert.match(robots, /^#DaumWebMasterTool:[0-9a-f]{64}:\S+$/m);
 });
 
 test('SEO-producing code contains no legacy production-domain signals', async () => {
