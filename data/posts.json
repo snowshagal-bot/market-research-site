@@ -1,5 +1,34 @@
 [
   {
+    "id": "2026-11-10-daily-1nauyrt",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-10",
+    "reportDate": "2026-11-10",
+    "registeredDate": "2026-11-10",
+    "registeredAt": "2026-11-10T11:32:14.788Z",
+    "legacyImport": false,
+    "title": "Three Rows Down, One Stands Again",
+    "subtitle": "",
+    "description": "Korean stocks rebounded on November 10, 2026 as U.S. chip shares rallied and oil fell. Foreign investors returned, but turnover was thin and three chip names drove most of the KOSPI advance.",
+    "summary": "A broad rebound triggered buy-side sidecars in both markets. But turnover stayed thin, and foreign buying was confined to KOSPI cash equities.",
+    "takeaway": "U.S. chips and cheaper oil lift KOSPI",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-11-10_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-10-daily-bi8unj",
+    "coverImage": "covers/2026-11-10-daily-1nauyrt.webp",
+    "shareCardImage": "covers/share/2026-11-10-daily-1nauyrt.jpg",
+    "coverThumbnail": "covers/2026-11-10-daily-1nauyrt-450.webp"
+  },
+  {
     "id": "2026-11-10-daily-bi8unj",
     "type": "daily",
     "typeLabel": "주식 리포트",
