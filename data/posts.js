@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-11-note-181pw2e",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-11",
+    "reportDate": "2026-11-11",
+    "registeredDate": "2026-11-11",
+    "registeredAt": "2026-11-10T18:42:37.921Z",
+    "legacyImport": false,
+    "title": "산업용 전기요금은 내리려는데 한전채 한도는 줄어든다",
+    "seoTitle": "산업용 전기요금은 내리려는데, 한전채 한도는 줄어든다 · Snowshagal 투자 인사이트 NO.30",
+    "subtitle": "",
+    "description": "2028년 1월부터 한전채 발행한도가 자본금·적립금의 5배에서 2배로 돌아간다. 국회예산정책처는 2027년 말 사채잔액이 한도를 19.2조원 넘는다고 추산했다. 법 개정·자본 확충·사채 축소, 세 갈래 해법과 투자자가 볼 것.",
+    "tags": [
+      "kospi",
+      "utility",
+      "policy",
+      "valuation",
+      "earnings"
+    ],
+    "readingMinutes": 15,
+    "href": "reports/20261111_Investment_Insight_KEPCO_Bond_Ceiling.html",
+    "coverImage": "covers/2026-11-11-note-181pw2e.webp",
+    "shareCardImage": "covers/share/2026-11-11-note-181pw2e.jpg",
+    "coverThumbnail": "covers/2026-11-11-note-181pw2e-450.webp"
+  },
+  {
     "id": "2026-11-10-daily-1nauyrt",
     "type": "daily",
     "typeLabel": "Daily",
