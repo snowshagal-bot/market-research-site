@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-11-note-1gpx85k",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-11",
+    "reportDate": "2026-11-11",
+    "registeredDate": "2026-11-11",
+    "registeredAt": "2026-11-10T19:06:32.245Z",
+    "legacyImport": false,
+    "title": "Industrial power tariffs may fall. KEPCO's bond cap is set to shrink.",
+    "seoTitle": "Industrial Power Rates May Fall as KEPCO's Bond Ceiling Shrinks | Snowshagal Investment Insight No. 30",
+    "subtitle": "",
+    "description": "KEPCO’s statutory bond ceiling reverts from five to two times paid-in capital plus reserves in January 2028. NABO projects KRW 19.2 trillion in excess bonds outstanding. Why cheaper industrial power and a tighter borrowing cap leave Korea’s utility facing difficult funding choices.",
+    "tags": [
+      "kospi",
+      "utility",
+      "policy",
+      "valuation",
+      "earnings"
+    ],
+    "readingMinutes": 18,
+    "href": "reports/en/20261111_Snowshagal_Investment_Insight_No30_KEPCO_Bond_Ceiling_EN.html",
+    "translationGroup": "2026-11-11-note-181pw2e",
+    "coverImage": "covers/2026-11-11-note-1gpx85k.webp",
+    "shareCardImage": "covers/share/2026-11-11-note-1gpx85k.jpg",
+    "coverThumbnail": "covers/2026-11-11-note-1gpx85k-450.webp"
+  },
+  {
     "id": "2026-11-11-note-181pw2e",
     "type": "note",
     "typeLabel": "투자 인사이트",
