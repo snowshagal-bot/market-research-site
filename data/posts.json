@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-10-daily-bi8unj",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-10",
+    "reportDate": "2026-11-10",
+    "registeredDate": "2026-11-10",
+    "registeredAt": "2026-11-10T11:11:34.027Z",
+    "legacyImport": false,
+    "title": "누운 세 이랑 중, 한 이랑이 일어섬",
+    "subtitle": "",
+    "description": "",
+    "summary": "두 시장에 매수 사이드카가 걸린 넓은 반등 · 다만 거래는 늘지 않았고 외국인 매수는 코스피 현물에 그침.",
+    "takeaway": "미 반도체·유가 하락에 코스피 반등",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-11-10_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-10-daily-bi8unj.webp",
+    "shareCardImage": "covers/share/2026-11-10-daily-bi8unj.jpg",
+    "coverThumbnail": "covers/2026-11-10-daily-bi8unj-450.webp"
+  },
+  {
     "id": "2026-11-09-note-1bk2xya",
     "type": "note",
     "typeLabel": "Investment Insights",
