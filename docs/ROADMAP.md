@@ -137,6 +137,7 @@ Refine `/admin/` and `/admin/manage/` only when recurring operational pain point
 ### Repository Verification & CI Gate (2026-08)
 - **Repository Verification Automation & CI Safety Gate** (PR #72): Created official single verification entry point (`node scripts/verify.mjs`) running all Node test suites, comprehensive JS/MJS syntax validation via `node --check`, and repository invariant checks. Added `.github/workflows/verify.yml` for automated CI on pull requests and pushes without requiring branch protection that would interfere with direct admin publishing.
 - **Naver Search Advisor Verification** (PR #71): Integrated Naver Search Advisor site ownership verification file (`naver96f43741acd96bcdeb679f22cddc4a80.html`) at domain root.
+- **Daum Webmaster Tool Verification**: Added the Daum ownership key line (`#DaumWebMasterTool:…`) to the static `robots.txt`; after Production deploy, the owner signs in with the site URL + PIN and the sitemap is submitted.
 - **Google Structured Data / JSON-LD Foundation** (PR #70): Implemented SSR JSON-LD structured data following Google 2026 guidelines, providing `WebSite` and `Organization` on root homepage, `BreadcrumbList` on 10 category landings, and `Article` + `Organization` + `BreadcrumbList` on published reports.
 
 ### Category Landing & Public Navigation Redesign (2026-08)
