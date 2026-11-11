@@ -492,7 +492,11 @@ test('publishing Market Basics with a cover stores a binary blob and coverImage 
 test('publishing stores an optional trimmed homepage summary up to 500 characters', async () => {
   for (const [input, expected] of [
     ['  홈페이지 전용 요약  ', '홈페이지 전용 요약'],
-    ['요'.repeat(520), '요'.repeat(500)]
+    ['요'.repeat(520), '요'.repeat(500)],
+    ['  AI 반도체\u2060·\u2060데이터센터\r\n\t규제  ', 'AI 반도체·데이터센터 규제'],
+    ['\u2060' + '요'.repeat(500), '요'.repeat(500)],
+    ['요'.repeat(499) + ' \n다음', '요'.repeat(499)],
+    ['\u2060\r\n\t', undefined]
   ]) {
     const calls = githubMock();
     try {
@@ -501,6 +505,10 @@ test('publishing stores an optional trimmed homepage summary up to 500 character
       const tree = calls.find(call => call.path.endsWith('/git/trees')).body.tree;
       const post = JSON.parse(tree.find(entry => entry.path === 'data/posts.json').content).find(item => item.id === data.id);
       assert.equal(post.summary, expected);
+      const entry = JSON.parse(tree.find(item => item.path === 'data/search-index.json').content).find(item => item.id === data.id);
+      const meta = JSON.parse(tree.find(item => item.path === 'data/search-index-meta.js').content.replace(/^window\.SEARCH_INDEX_META = /, '').replace(/;\s*$/, '')).find(item => item.id === data.id);
+      assert.equal(entry.summary, expected || '테스트 설명');
+      assert.equal(meta.summary, expected || '테스트 설명');
     } finally { globalThis.fetch = originalFetch; }
   }
 });

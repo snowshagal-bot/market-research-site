@@ -699,7 +699,7 @@ function validateEditableFields(form) {
     subtitle: String(form.get("subtitle") || "").trim(),
     description: String(form.get("description") || "").trim(),
     summaryProvided: form.has("summary"),
-    summary: String(form.get("summary") || "").trim().slice(0, 500),
+    summary: globalThis.REPORT_METADATA.normalizeMetadataText(form.get("summary")).slice(0, 500).trim(),
     seoTitleProvided: form.has("seoTitle"),
     seoTitle: globalThis.REPORT_METADATA.seoTitleText(form.get("seoTitle")),
     tagsProvided,

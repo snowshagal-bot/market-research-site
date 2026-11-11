@@ -227,13 +227,27 @@ test('summary updates are capped at 500 characters and omitted fields preserve e
     assert.equal(updated.translationGroup, 'pair-1');
   } finally { globalThis.fetch = originalFetch; }
 
-  calls = githubMock([summarized]);
-  try {
-    const { response } = await run({ summary: '새'.repeat(520) });
-    assert.equal(response.status, 200);
-    const updated = postsFromTree(treeFrom(calls))[0];
-    assert.equal(updated.summary, '새'.repeat(500));
-  } finally { globalThis.fetch = originalFetch; }
+  for (const [summary, expected] of [
+    ['새'.repeat(520), '새'.repeat(500)],
+    ['  AI 반도체\u2060·\u2060데이터센터\r\n\t규제  ', 'AI 반도체·데이터센터 규제'],
+    ['\u2060' + '새'.repeat(500), '새'.repeat(500)],
+    ['새'.repeat(499) + ' \n다음', '새'.repeat(499)],
+    ['\u2060\r\n\t', undefined]
+  ]) {
+    calls = githubMock([summarized]);
+    try {
+      const { response } = await run({ summary });
+      assert.equal(response.status, 200);
+      const tree = treeFrom(calls);
+      const updated = postsFromTree(tree)[0];
+      assert.equal(updated.summary, expected);
+      const entry = JSON.parse(tree.find(item => item.path === 'data/search-index.json').content)[0];
+      const meta = JSON.parse(tree.find(item => item.path === 'data/search-index-meta.js').content.replace(/^window\.SEARCH_INDEX_META = /, '').replace(/;\s*$/, ''))[0];
+      assert.equal(entry.summary, expected || '수정한 설명');
+      assert.equal(meta.summary, expected || '수정한 설명');
+      assert.equal(tree.some(item => item.path === summarized.href), false, 'a summary edit must not rewrite report HTML');
+    } finally { globalThis.fetch = originalFetch; }
+  }
 });
 
 /* ------------------------------------------ description (PR B1 invariant) */

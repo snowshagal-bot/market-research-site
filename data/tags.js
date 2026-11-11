@@ -280,5 +280,11 @@ window.TAG_REGISTRY = {
     "en": "Data Center",
     "group": "sector",
     "custom": true
+  },
+  "utility": {
+    "ko": "유틸리티",
+    "en": "Utility",
+    "group": "sector",
+    "custom": true
   }
 };

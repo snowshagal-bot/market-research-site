@@ -3,10 +3,18 @@ import { requireAdminMutation } from '../_auth.js';
 
 const MAX_HTML_BYTES = 5 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
-const RENDER_TIMEOUT_MS = 25000;
+// A whole call measured 10–20 s on 2026-11-11 while the browser itself ran
+// 1–5 s (the rest is Cloudflare acquiring a browser and moving the HTML), so
+// 25 s left too little room and a slow acquisition ended as a timeout.
+const RENDER_TIMEOUT_MS = 40000;
 const DEFAULT_RATE_LIMIT_RETRY_MS = 10000;
 const MAX_RATE_LIMIT_RETRY_MS = 15000;
 const RENDER_VIEWPORT = { width: 480, height: 900 };
+// <meta name="report-cover-mode" content="first-screen">: a report with no
+// cover of its own (the Daily from 2026-11-11) uses the top of its first
+// screen, 480×720 (2:3) at twice the density, as the cover.
+const FIRST_SCREEN_MODE = 'first-screen';
+const FIRST_SCREEN_VIEWPORT = { width: 480, height: 720 };
 const SELECTOR_PRIORITY = ['.cover-frame', '.cover-page', '.mag-cover', '.cover-screen', '.report-cover', '.cover', '.opener', '.cv'];
 const SAFE_SELECTOR_TOKEN = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 const COVER_CLASS_TOKEN = /(?:^|[-_])cover(?:$|[-_])/i;
@@ -104,6 +112,34 @@ function selectCaptureSelector(html, preferredSelector = '') {
     if (classExists(html, selector)) return selector;
   }
   return standaloneImageCoverSelector(html) || safePreferredSelector(html, preferredSelector);
+}
+
+function declaredCoverMode(html) {
+  const meta = html.match(/<meta\b[^>]*name\s*=\s*["']report-cover-mode["'][^>]*>/i)?.[0]
+    || html.match(/<meta\b[^>]*content\s*=\s*["'][^"']+["'][^>]*name\s*=\s*["']report-cover-mode["'][^>]*>/i)?.[0];
+  const mode = meta?.match(/content\s*=\s*["']([^"']+)["']/i)?.[1]?.trim().toLowerCase() || '';
+  return mode === FIRST_SCREEN_MODE ? FIRST_SCREEN_MODE : '';
+}
+
+// report-cover-mode=first-screen > report-cover-selector > heuristics, the
+// same order assets/cover-generator.js follows on the publish screen.
+function selectCapture(html, preferredSelector = '') {
+  if (declaredCoverMode(html) === FIRST_SCREEN_MODE) return { mode: FIRST_SCREEN_MODE, selector: '' };
+  const selector = selectCaptureSelector(html, preferredSelector);
+  return selector ? { mode: 'selector', selector } : null;
+}
+
+function firstScreenCapturePayload(html) {
+  return {
+    html,
+    viewport: { ...FIRST_SCREEN_VIEWPORT, deviceScaleFactor: 2 },
+    waitForSelector: { selector: 'body', visible: true, timeout: 10000 },
+    waitForTimeout: 250,
+    screenshotOptions: {
+      type: 'png',
+      clip: { x: 0, y: 0, width: FIRST_SCREEN_VIEWPORT.width, height: FIRST_SCREEN_VIEWPORT.height, scale: 1 }
+    }
+  };
 }
 
 function sanitizedUpstreamError(status) {
@@ -274,60 +310,76 @@ export async function onRequestPost({ request, env }) {
     return json({ error: 'HTML_TOO_LARGE', message: 'HTML 파일은 5MB 이하여야 합니다.' }, 413);
   }
 
-  const selector = selectCaptureSelector(html, input?.preferredSelector);
-  if (!selector) return json({ error: 'COVER_TARGET_NOT_FOUND', message: '캡처할 커버 영역을 찾지 못했습니다.' }, 422);
+  const capture = selectCapture(html, input?.preferredSelector);
+  if (!capture) return json({ error: 'COVER_TARGET_NOT_FOUND', message: '캡처할 커버 영역을 찾지 못했습니다.' }, 422);
+  const { mode, selector } = capture;
 
+  const started = Date.now();
   try {
     const endpoint = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(env.CLOUDFLARE_ACCOUNT_ID)}/browser-rendering`;
     const headers = {
       'authorization': `Bearer ${env.CLOUDFLARE_BROWSER_RENDERING_TOKEN}`,
       'content-type': 'application/json'
     };
-    const framePlan = coverFrameCapturePlan(html, selector)
-      || newDailyCoverCapturePlan(html, selector)
-      || magazineCoverCapturePlan(html, selector)
-      || weeklyCoverCapturePlan(html, selector);
+    let payload;
+    if (mode === FIRST_SCREEN_MODE) {
+      payload = firstScreenCapturePayload(html);
+    } else {
+      const framePlan = coverFrameCapturePlan(html, selector)
+        || newDailyCoverCapturePlan(html, selector)
+        || magazineCoverCapturePlan(html, selector)
+        || weeklyCoverCapturePlan(html, selector);
+      payload = {
+        ...renderingPayload(html, selector),
+        viewport: { ...RENDER_VIEWPORT, deviceScaleFactor: 2 },
+        ...(framePlan || {
+          selector,
+          screenshotOptions: { type: 'png', captureBeyondViewport: true }
+        })
+      };
+    }
     const upstream = await fetchRenderingWithRetry(
       `${endpoint}/screenshot`,
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          ...renderingPayload(html, selector),
-          viewport: { ...RENDER_VIEWPORT, deviceScaleFactor: 2 },
-          ...(framePlan || {
-            selector,
-            screenshotOptions: { type: 'png', captureBeyondViewport: true }
-          })
-        })
-      }
+      { method: 'POST', headers, body: JSON.stringify(payload) }
     );
 
+    // Only the status number leaves the server: the upstream body can carry
+    // account details and is never echoed.
     if (!upstream.ok) {
-      return json({ error: 'BROWSER_RENDERING_FAILED', message: sanitizedUpstreamError(upstream.status) }, 502);
+      return json({
+        error: 'BROWSER_RENDERING_FAILED',
+        message: sanitizedUpstreamError(upstream.status),
+        upstreamStatus: upstream.status,
+        mode,
+        elapsedMs: Date.now() - started
+      }, 502);
     }
     const contentType = (upstream.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
     if (!['image/png', 'image/webp'].includes(contentType)) {
-      return json({ error: 'INVALID_RENDER_RESPONSE', message: '커버 이미지 응답 형식이 올바르지 않습니다.' }, 502);
+      return json({ error: 'INVALID_RENDER_RESPONSE', message: '커버 이미지 응답 형식이 올바르지 않습니다.', mode }, 502);
     }
     const bytes = await upstream.arrayBuffer();
     if (!bytes.byteLength || bytes.byteLength > MAX_IMAGE_BYTES) {
-      return json({ error: 'INVALID_RENDER_SIZE', message: '생성된 커버 이미지 크기가 올바르지 않습니다.' }, 502);
+      return json({ error: 'INVALID_RENDER_SIZE', message: '생성된 커버 이미지 크기가 올바르지 않습니다.', mode }, 502);
     }
-    return new Response(bytes, {
-      status: 200,
-      headers: {
-        'content-type': contentType,
-        'content-length': String(bytes.byteLength),
-        'cache-control': 'no-store',
-        'x-cover-selector': selector
-      }
-    });
+    const responseHeaders = {
+      'content-type': contentType,
+      'content-length': String(bytes.byteLength),
+      'cache-control': 'no-store',
+      'x-cover-mode': mode
+    };
+    if (selector) responseHeaders['x-cover-selector'] = selector;
+    return new Response(bytes, { status: 200, headers: responseHeaders });
   } catch (error) {
     const timeout = error?.name === 'AbortError';
     return json({
       error: timeout ? 'BROWSER_RENDERING_TIMEOUT' : 'BROWSER_RENDERING_FAILED',
-      message: timeout ? '커버 생성 확인이 지연되고 있습니다.' : '커버 생성 서비스에 연결하지 못했습니다.'
+      message: timeout
+        ? `커버 렌더링이 ${Math.round(RENDER_TIMEOUT_MS / 1000)}초 안에 끝나지 않았습니다.`
+        : '커버 생성 서비스에 연결하지 못했습니다.',
+      mode,
+      elapsedMs: Date.now() - started,
+      ...(timeout ? { timeoutMs: RENDER_TIMEOUT_MS } : {})
     }, timeout ? 504 : 502);
   }
 }
@@ -339,7 +391,12 @@ export const __test = {
   DEFAULT_RATE_LIMIT_RETRY_MS,
   MAX_RATE_LIMIT_RETRY_MS,
   RENDER_VIEWPORT,
+  FIRST_SCREEN_MODE,
+  FIRST_SCREEN_VIEWPORT,
   SELECTOR_PRIORITY,
+  declaredCoverMode,
+  selectCapture,
+  firstScreenCapturePayload,
   coverFrameCapturePlan,
   newDailyCoverCapturePlan,
   magazineCoverCapturePlan,
