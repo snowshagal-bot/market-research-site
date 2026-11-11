@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-11-daily-a26xqg",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-11",
+    "reportDate": "2026-11-11",
+    "registeredDate": "2026-11-12",
+    "registeredAt": "2026-11-11T15:13:00.937Z",
+    "legacyImport": false,
+    "title": "금리 경고를 넘은 반도체, 사흘 낙폭의 절반 회복",
+    "subtitle": "",
+    "description": "",
+    "takeaway": "코어위브 실적·수출 호조에 반도체 매수, 코스피 이틀째 반등",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-11-11_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-11-daily-a26xqg.webp",
+    "shareCardImage": "covers/share/2026-11-11-daily-a26xqg.jpg",
+    "coverThumbnail": "covers/2026-11-11-daily-a26xqg-450.webp"
+  },
+  {
     "id": "2026-11-11-note-1gpx85k",
     "type": "note",
     "typeLabel": "Investment Insights",
