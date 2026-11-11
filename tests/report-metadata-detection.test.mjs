@@ -274,7 +274,11 @@ test('across the corpus no description is a category sentence and no summary cro
     if (summary.source === 'daily-hero-quote') assert.equal(post.type, 'daily', `${post.id}: a hero quote is a Daily summary only`);
     summarySources[summary.source] = (summarySources[summary.source] || 0) + 1;
     if (post.type === 'daily' && doc.querySelector('section.hero .quote')) {
-      assert.equal(summary.source, 'daily-hero-quote', `${post.id}: a Daily hero quote is its summary`);
+      // A Daily that declares its summary in the head (the long-term standard)
+      // is read from that declaration; the hero quote is the fallback when it
+      // does not. 2026-11-09 EN is the first Daily to carry both.
+      const declared = doc.querySelector('meta[name="report-summary"]') ? 'report-summary' : 'daily-hero-quote';
+      assert.equal(summary.source, declared, `${post.id}: a Daily summary comes from its declaration, else its hero quote`);
     }
   }
   assert.ok(summarySources['daily-hero-quote'] >= 42);
