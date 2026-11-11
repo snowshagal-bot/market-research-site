@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-11-note-63zduk",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-11",
+    "reportDate": "2026-11-11",
+    "registeredDate": "2026-11-12",
+    "registeredAt": "2026-11-11T16:13:31.041Z",
+    "legacyImport": false,
+    "title": "Stocks Crash. Will the BOK Hike?",
+    "seoTitle": "Will the Bank of Korea Raise Rates Even as Stocks Crash? | Snowshagal Investment Insight No. 31",
+    "subtitle": "",
+    "description": "Even after a decline of more than 40% in the KOSPI, export and inflation data still favor tighter BOK policy, making a November hike the consensus. Broker terminal-rate forecasts diverge between 3.50% (iM, Daishin and SK) and 3.25% (KB), while bonds already price an approaching end to hikes. Why the six-month dot plot, terminal rate and three-year KTB yield must be read separately—and why a correct rate call need not translate into bond profits.",
+    "tags": [
+      "rates",
+      "fed",
+      "policy",
+      "korea",
+      "liquidity"
+    ],
+    "readingMinutes": 23,
+    "href": "reports/en/20261111_Snowshagal_Investment_Insight_No31_BOK_November_Path_EN_v2.html",
+    "translationGroup": "2026-11-11-note-fyktik",
+    "coverImage": "covers/2026-11-11-note-63zduk.webp",
+    "shareCardImage": "covers/share/2026-11-11-note-63zduk.jpg",
+    "coverThumbnail": "covers/2026-11-11-note-63zduk-450.webp"
+  },
+  {
     "id": "2026-11-11-note-fyktik",
     "type": "note",
     "typeLabel": "투자 인사이트",
