@@ -10,6 +10,11 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+- **IndexNow on publish (2026-11-12)**: `.github/workflows/indexnow.yml` announces added, changed and removed reports to Naver and Bing after each push that changes `data/posts.json` (see `docs/DEPLOYMENT.md` → IndexNow). Remaining manual steps after deployment:
+  - run the workflow once with `mode: sitemap` to announce the existing pages;
+  - check the first publish's run log for `200`/`202` from both engines;
+  - optionally register the site in Bing Webmaster Tools to see what Bing received.
+
 - **Calendar rollout finalization (2026-10-25)**: all 31 active tracked companies
   now have official English names. Bounded batches completed 8+8+8+7; the ordinary
   full workflow then passed (nine calendar sources and a zero-request name pass),
