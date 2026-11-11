@@ -766,6 +766,22 @@ export async function onRequestPost(context) {
       if (String(pairedPost.type || '') !== type) {
         return reply({ error: 'PAIR_TYPE_MISMATCH', message: `번역 짝은 같은 카테고리여야 합니다. 선택한 짝은 ${TYPE_LABELS[pairedPost.type] || pairedPost.type || '다른 카테고리'}입니다.` }, 400);
       }
+      // A pair holds one post per language (#126). A group that already has a
+      // post in this language means the wrong pair was chosen: on 2026-11-11
+      // the 11-11 EN Daily went into the 11-10 group because the list on the
+      // publish screen had been read before the 11-11 KO Daily went up.
+      const sameLanguagePost = posts.find(post => (
+        (post?.lang === 'en' ? 'en' : 'ko') === lang
+        && String(post?.translationGroup || post?.id || '') === translationGroup
+      ));
+      if (sameLanguagePost) {
+        const languageLabel = lang === 'en' ? 'English' : '한국어';
+        const takenDate = String(sameLanguagePost.reportDate || sameLanguagePost.date || '');
+        return reply({
+          error: 'PAIR_LANGUAGE_TAKEN',
+          message: `선택한 번역 짝에는 이미 ${languageLabel} 게시물이 있습니다: ${sameLanguagePost.title || sameLanguagePost.id}${takenDate ? ` · ${takenDate}` : ''}. 번역 짝을 다시 확인하세요.`
+        }, 400);
+      }
       const pairedDate = String(pairedPost.reportDate || pairedPost.date || '');
       if (pairedDate !== reportDate) {
         return reply({ error: 'PAIR_DATE_MISMATCH', message: `리포트 기준일은 번역 짝과 같은 ${pairedDate || '날짜'}이어야 합니다.` }, 400);
