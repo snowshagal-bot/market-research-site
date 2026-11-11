@@ -100,6 +100,11 @@ node scripts/stamp-daily-takeaway.mjs "reports/8월 27일 주식리포트_커버
 
 `.cover-oneline`은 옛 커버의 한 줄(takeaway)이므로 요약으로 읽지 않는다.
 
+요약은 `/api/publish`, `/api/manage`에서 저장 전에 공통 `normalizeMetadataText`로
+보이지 않는 서식 문자(U+200B–U+200D, U+FEFF, U+2060)를 제거하고 줄바꿈·공백을
+한 칸으로 정리한 뒤 500자로 제한한다. 검색 색인 재생성도 저장된 요약을 같은
+규칙으로 정리한다. 문구와 원본 리포트 HTML은 다시 쓰지 않는다.
+
 **장기 표준** — 커버 class는 레이아웃과 함께 바뀐다(2026-09에만 두 번 바뀌었다). 생성기는 head에 `report-summary`, `report-takeaway`, `description`을 명시하는 것이 기준이고, 커버 class는 fallback이다.
 
 ## 커버 — `report-cover-mode`와 `report-cover-selector`

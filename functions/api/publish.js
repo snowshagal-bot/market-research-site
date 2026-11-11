@@ -641,7 +641,7 @@ export async function onRequestPost(context) {
   // The editor's own description, or ''. A category sentence the publisher
   // once filled in by itself is never stored, whichever client sent it.
   const description = globalThis.REPORT_METADATA.editorialDescription(form.get('description')).slice(0, 700);
-  const summary = String(form.get('summary') || '').trim().slice(0, 500);
+  const summary = globalThis.REPORT_METADATA.normalizeMetadataText(form.get('summary')).slice(0, 500).trim();
   // The report's own search title, kept only for a category that takes one
   // (a Daily or a Weekly title is built from the session's close).
   const seoTitle = globalThis.REPORT_METADATA.acceptsSeoTitle(type)
