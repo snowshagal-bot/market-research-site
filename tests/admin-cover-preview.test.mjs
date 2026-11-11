@@ -1108,13 +1108,21 @@ test('the report’s own <title> fills the search title without the brand, and i
   assert.equal(submissions[0].entries.find(([name]) => name === 'seoTitle')?.[1], '공매도 잔고·대차잔고 뜻과 읽는 법: 하락 신호일까');
 });
 
-test('a <title> that only repeats the headline leaves the search title empty', async () => {
-  const { elements } = await loadAdmin();
-  elements['html-file'].files = [basicsReport('<title>공매도 잔고 읽는 법 | Snowshagal</title>')];
-  await elements['html-file'].emit('change');
-  assert.equal(elements['post-title'].value, '공매도 잔고 읽는 법');
-  assert.equal(elements['post-seo-title'].value, '');
-  assert.match(elements['seo-title-source'].textContent, /제목과 같아/);
+// Since 2026-11-12 a <title> that is the headline plus the brand or series
+// label is kept, so the page title reads "headline | Snowshagal" like the
+// titles already published, not the dated category rule.
+test('a <title> that is the headline plus the brand or series label keeps the headline as the search title', async () => {
+  for (const written of ['공매도 잔고 읽는 법 | Snowshagal', '공매도 잔고 읽는 법 | Snowshagal 시장 입문 NO.08', '공매도 잔고 읽는 법 · Snowshagal 시장 입문 NO.08 · 2026.10.11']) {
+    const { elements, submissions } = await loadAdmin({ confirmResult: true });
+    elements['admin-key'].value = 'test-key';
+    elements['html-file'].files = [basicsReport(`<title>${written}</title>`)];
+    await elements['html-file'].emit('change');
+    assert.equal(elements['post-title'].value, '공매도 잔고 읽는 법');
+    assert.equal(elements['post-seo-title'].value, '공매도 잔고 읽는 법', written);
+    assert.match(elements['seo-title-source'].textContent, /제목과 같습니다/);
+    await elements['publish-btn'].emit('click');
+    assert.equal(submissions[0].entries.find(([name]) => name === 'seoTitle')?.[1], '공매도 잔고 읽는 법', written);
+  }
 });
 
 test('a Daily switches the search title off and never sends one, in either language', async () => {

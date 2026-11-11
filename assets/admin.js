@@ -784,7 +784,10 @@
     const rules = window.REPORT_METADATA;
     const text = rules.seoTitleText(doc?.querySelector('title')?.textContent);
     if (!text) return { text: '', source: 'none' };
-    if (text === rules.normalizeMetadataText(editorialTitle)) return { text: '', source: 'same-as-title' };
+    // A <title> that is the headline plus the brand or series label is kept,
+    // so the page title reads "headline | Snowshagal" like every other one
+    // since 2026-11-12, not the dated category rule.
+    if (text === rules.normalizeMetadataText(editorialTitle)) return { text, source: 'same-as-title' };
     return { text, source: 'report-title' };
   }
 
@@ -900,7 +903,7 @@
   const SOURCE_LABELS = {
     seoTitle: {
       'report-title': '출처 · 리포트 <title> (끝의 브랜드 표기는 사이트가 붙입니다)',
-      'same-as-title': '리포트 <title>이 제목과 같아 비워 둡니다 · 사이트 규칙으로 만듭니다',
+      'same-as-title': '출처 · 리포트 <title> (제목과 같습니다 · 끝의 브랜드·시리즈 표기는 빼고 사이트가 "| Snowshagal"을 붙입니다)',
       none: '출처 없음 · 비워 두면 사이트 규칙으로 만듭니다',
       manual: '직접 입력'
     },
