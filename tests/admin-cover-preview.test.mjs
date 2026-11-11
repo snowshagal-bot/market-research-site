@@ -44,7 +44,9 @@ async function loadAdmin({
   immediateTimers = false,
   pendingReportFile = null,
   loadedScriptSrc = '',
-  deployedAdminHtml = null
+  deployedAdminHtml = null,
+  researchPosts = null,
+  pairListResponses = []
 } = {}) {
   const source = await read('assets/admin.js');
   // The admin page loads the shared report metadata rules before admin.js.
@@ -90,6 +92,7 @@ async function loadAdmin({
   const revokedUrls = [];
   const submissions = [];
   const confirmMessages = [];
+  const fetchUrls = [];
   const location = {
     href: '',
     hostname: 'snowshagal.com',
@@ -104,7 +107,7 @@ async function loadAdmin({
     MARKET_COVER_GENERATOR: {
       generate: generateCover || (async () => ({ file: validCover('generated-cover.webp'), method: 'template', selector: '' }))
     },
-    RESEARCH_POSTS: [
+    RESEARCH_POSTS: researchPosts || [
       { id: 'ko-source', type: 'weekly', title: '한국어 원문', reportDate: '2026-08-10', href: 'reports/source.html' },
       { id: 'ko-daily-source', type: 'daily', title: '한국어 데일리 원문', reportDate: '2026-08-10', href: 'reports/daily-source.html' },
       { id: 'en-source', type: 'weekly', lang: 'en', title: 'English source', reportDate: '2026-08-10', href: 'reports/en/source.html' }
@@ -118,12 +121,17 @@ async function loadAdmin({
     console,
     confirm: message => { confirmMessages.push(message); return confirmResult; },
     fetch: async (url, options = {}) => {
+      fetchUrls.push(String(url));
       if (url === '/api/publish') {
         submissions.push(options.body);
         return publishResponse || { ok: false, status: 500, json: async () => ({ message: 'test stop' }) };
       }
       if (url === '/admin/' && deployedAdminHtml !== null) {
         return { ok: true, status: 200, text: async () => deployedAdminHtml };
+      }
+      if (String(url).startsWith('/data/posts.json?pairs=')) {
+        const posts = pairListResponses.length > 0 ? pairListResponses.shift() : [];
+        return { ok: true, status: 200, json: async () => posts };
       }
       if (String(url).startsWith('/data/posts.json?deploycheck=')) {
         const posts = deploymentResponses.length > 0 ? deploymentResponses.shift() : [];
@@ -182,7 +190,7 @@ async function loadAdmin({
   vm.createContext(context);
   vm.runInContext(metadataSource, context);
   vm.runInContext(source, context);
-  return { elements, modeButtons, categoryOptions, languageOptions, createdUrls, revokedUrls, windowListeners, submissions, confirmMessages, location, windowState };
+  return { elements, modeButtons, categoryOptions, languageOptions, createdUrls, revokedUrls, windowListeners, submissions, confirmMessages, location, windowState, fetchUrls };
 }
 
 const validCover = (name = 'cover.webp') => ({ name, type: 'image/webp', size: 320 * 1024 });
@@ -568,6 +576,74 @@ test('language defaults to Korean and English selection submits an optional tran
   assert.equal(submissions.length, 1);
   assert.equal(submissions[0].entries.find(([name]) => name === 'lang')?.[1], 'en');
   assert.equal(submissions[0].entries.find(([name]) => name === 'translationGroup')?.[1], 'ko-source');
+});
+
+// The 2026-11-11 case: the page was opened before the 11-11 KO Daily went up,
+// so the EN edition was paired with the 11-10 KO Daily, which already had its
+// own EN edition, and took that Daily's date.
+const koDaily1110 = { id: 'ko-1110', type: 'daily', title: '누운 세 이랑 중, 한 이랑이 일어섬', reportDate: '2026-11-10', href: 'reports/2026-11-10.html' };
+const enDaily1110 = { id: 'en-1110', type: 'daily', lang: 'en', translationGroup: 'ko-1110', title: 'Three Rows Down, One Stands Again', reportDate: '2026-11-10', href: 'reports/en/2026-11-10.html' };
+const koDaily1111 = { id: 'ko-1111', type: 'daily', title: '금리 경고를 넘은 반도체, 사흘 낙폭의 절반 회복', reportDate: '2026-11-11', href: 'reports/2026-11-11.html' };
+const enDailyFile = {
+  name: '2026-11-11_Snowshagal_Daily_EN.html',
+  size: 100,
+  text: async () => '<!doctype html><html lang="en"><head><meta name="report-date" content="2026-11-11"><title>Chips Defy Rate Fears</title></head><body></body></html>'
+};
+
+test('a report that already has its partner in this language is listed but cannot be chosen', async () => {
+  const { elements, languageOptions } = await loadAdmin({ researchPosts: [koDaily1110, enDaily1110, koDaily1111] });
+  const english = languageOptions.find(option => option.value === 'en');
+  english.checked = true;
+  english.emit('change');
+  elements['html-file'].files = [enDailyFile];
+  await elements['html-file'].emit('change');
+
+  const options = elements['translation-source'].innerHTML;
+  assert.match(options, /<option value="ko-1110" disabled>누운 세 이랑 중, 한 이랑이 일어섬 · 2026-11-10 · 이미 English 짝 있음<\/option>/);
+  assert.match(options, /<option value="ko-1111">금리 경고를 넘은 반도체, 사흘 낙폭의 절반 회복 · 2026-11-11<\/option>/);
+  assert.match(elements['translation-source-status'].textContent, /2개 중 번역 짝을 선택할 수 있습니다\. 이미 English 짝이 있는 1개는 고를 수 없습니다\./);
+
+  // A pair chosen before the list said so is dropped, and the date stays the report's own.
+  elements['translation-source'].value = 'ko-1110';
+  languageOptions.find(option => option.value === 'en').emit('change');
+  assert.equal(elements['translation-source'].value, '');
+  assert.equal(elements['post-date'].value, '2026-11-11');
+});
+
+test('choosing a report reads the post list again, so a report published since the page opened can be paired', async () => {
+  const { elements, languageOptions, fetchUrls, windowState } = await loadAdmin({
+    researchPosts: [koDaily1110, enDaily1110],
+    pairListResponses: [[koDaily1111, koDaily1110, enDaily1110]]
+  });
+  const english = languageOptions.find(option => option.value === 'en');
+  english.checked = true;
+  english.emit('change');
+  assert.doesNotMatch(elements['translation-source'].innerHTML, /ko-1111/);
+
+  elements['html-file'].files = [enDailyFile];
+  await elements['html-file'].emit('change');
+  assert.ok(fetchUrls.some(url => url.startsWith('/data/posts.json?pairs=')));
+  assert.equal(windowState.RESEARCH_POSTS.length, 3);
+  assert.match(elements['translation-source'].innerHTML, /<option value="ko-1111">금리 경고를 넘은 반도체/);
+
+  // Pairing with it keeps the report's own date.
+  elements['translation-source'].value = 'ko-1111';
+  elements['translation-source'].emit('change');
+  assert.equal(elements['post-date'].value, '2026-11-11');
+});
+
+test('an empty or failed answer for the post list keeps the list the page has', async () => {
+  const { elements, languageOptions, windowState } = await loadAdmin({
+    researchPosts: [koDaily1110, enDaily1110, koDaily1111],
+    pairListResponses: [[]]
+  });
+  const english = languageOptions.find(option => option.value === 'en');
+  english.checked = true;
+  english.emit('change');
+  elements['html-file'].files = [enDailyFile];
+  await elements['html-file'].emit('change');
+  assert.equal(windowState.RESEARCH_POSTS.length, 3);
+  assert.match(elements['translation-source'].innerHTML, /value="ko-1111"/);
 });
 
 test('translation pairing blocks a manually changed date that differs from its counterpart', async () => {

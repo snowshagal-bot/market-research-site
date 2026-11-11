@@ -583,7 +583,13 @@ test('translation pairing rejects a missing counterpart, a mismatched report dat
     [[], { lang: 'en', translationGroup: 'missing-source' }, 'BAD_TRANSLATION_GROUP'],
     [[{ id: 'ko-source', type: 'daily', reportDate: '2026-08-04' }], { lang: 'en', type: 'daily', translationGroup: 'ko-source', reportDate: '2026-08-24' }, 'PAIR_DATE_MISMATCH'],
     // A Daily and a Weekly dated the same day are different reports (#126).
-    [[{ id: 'ko-daily', type: 'daily', reportDate: '2026-09-11' }], { lang: 'en', type: 'weekly', translationGroup: 'ko-daily', reportDate: '2026-09-11' }, 'PAIR_TYPE_MISMATCH']
+    [[{ id: 'ko-daily', type: 'daily', reportDate: '2026-09-11' }], { lang: 'en', type: 'weekly', translationGroup: 'ko-daily', reportDate: '2026-09-11' }, 'PAIR_TYPE_MISMATCH'],
+    // A pair holds one post per language (#126): the 2026-11-11 EN Daily went
+    // into the 11-10 group, which already had its EN edition.
+    [[
+      { id: 'ko-1110', type: 'daily', reportDate: '2026-11-10', title: '누운 세 이랑 중, 한 이랑이 일어섬' },
+      { id: 'en-1110', type: 'daily', lang: 'en', reportDate: '2026-11-10', translationGroup: 'ko-1110', title: 'Three Rows Down, One Stands Again' }
+    ], { lang: 'en', type: 'daily', translationGroup: 'ko-1110', reportDate: '2026-11-10' }, 'PAIR_LANGUAGE_TAKEN']
   ]) {
     const calls = githubMock(existingPosts);
     try {
@@ -593,6 +599,39 @@ test('translation pairing rejects a missing counterpart, a mismatched report dat
       assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
     } finally { globalThis.fetch = originalFetch; }
   }
+});
+
+test('a pair that already has a post in this language is refused by name, in either direction', async () => {
+  const ko = { id: 'ko-1110', type: 'daily', reportDate: '2026-11-10', title: '누운 세 이랑 중, 한 이랑이 일어섬', href: 'reports/ko-1110.html' };
+  const en = { id: 'en-1110', type: 'daily', lang: 'en', reportDate: '2026-11-10', translationGroup: 'ko-1110', title: 'Three Rows Down, One Stands Again', href: 'reports/en/en-1110.html' };
+
+  // A second EN post into the KO post's group: the EN post already there is named.
+  let calls = githubMock([ko, en]);
+  try {
+    const { response, data } = await runPublish({ lang: 'en', translationGroup: 'ko-1110', reportDate: '2026-11-10' });
+    assert.equal(response.status, 400);
+    assert.equal(data.error, 'PAIR_LANGUAGE_TAKEN');
+    assert.match(data.message, /이미 English 게시물이 있습니다: Three Rows Down, One Stands Again · 2026-11-10/);
+    assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
+  } finally { globalThis.fetch = originalFetch; }
+
+  // A second KO post into the same group, chosen through its EN post.
+  calls = githubMock([ko, en]);
+  try {
+    const { response, data } = await runPublish({ lang: 'ko', translationGroup: 'ko-1110', reportDate: '2026-11-10' });
+    assert.equal(response.status, 400);
+    assert.equal(data.error, 'PAIR_LANGUAGE_TAKEN');
+    assert.match(data.message, /이미 한국어 게시물이 있습니다: 누운 세 이랑 중, 한 이랑이 일어섬/);
+    assert.equal(calls.some(call => call.path.endsWith('/git/trees')), false);
+  } finally { globalThis.fetch = originalFetch; }
+
+  // The group with only the KO post still takes its first EN edition.
+  calls = githubMock([ko]);
+  try {
+    const { response, data } = await runPublish({ lang: 'en', translationGroup: 'ko-1110', reportDate: '2026-11-10' });
+    assert.equal(response.status, 200);
+    assert.equal(data.translationGroup, 'ko-1110');
+  } finally { globalThis.fetch = originalFetch; }
 });
 
 test('a translation takes its pair\'s tags in the pair\'s order, and a different set of tags is refused', async () => {

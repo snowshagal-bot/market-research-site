@@ -468,23 +468,52 @@
   // offers only posts of the other language AND the same category. A Daily
   // and a Weekly dated the same day are different reports; pairing them once
   // broke hreflang for four pages (#126), and the server now rejects it too.
+  //
+  // A pair also holds one post per language (#126). A report that already has
+  // its partner in this language is listed but cannot be chosen: on 2026-11-11
+  // the 11-11 EN Daily was paired with the 11-10 KO Daily, which already had
+  // its own EN edition, because the 11-11 KO Daily was not in the list yet.
   function populateTranslationSources() {
     if (!translationSource || !postLanguage) return;
-    const targetLanguage = postLanguage.value === 'en' ? 'ko' : 'en';
+    const ownLanguage = postLanguage.value === 'en' ? 'en' : 'ko';
+    const targetLanguage = ownLanguage === 'en' ? 'ko' : 'en';
     const category = type?.value || '';
-    const items = (window.RESEARCH_POSTS || []).filter(post => (
+    const posts = window.RESEARCH_POSTS || [];
+    const items = posts.filter(post => (
       normalizedLanguage(post) === targetLanguage && (!category || post?.type === category)
     ));
+    const taken = new Set(posts.filter(post => normalizedLanguage(post) === ownLanguage).map(translationKey));
+    const ownLabel = ownLanguage === 'en' ? 'English' : '한국어';
     const previous = translationSource.value;
-    translationSource.innerHTML = `<option value="">연결하지 않음</option>${items.map(post => `<option value="${escapeHtml(translationKey(post))}">${escapeHtml(post.title || post.id)} · ${escapeHtml(post.reportDate || post.date || '')}</option>`).join('')}`;
-    translationSource.value = items.some(post => translationKey(post) === previous) ? previous : '';
+    translationSource.innerHTML = `<option value="">연결하지 않음</option>${items.map(post => {
+      const paired = taken.has(translationKey(post));
+      return `<option value="${escapeHtml(translationKey(post))}"${paired ? ' disabled' : ''}>${escapeHtml(post.title || post.id)} · ${escapeHtml(post.reportDate || post.date || '')}${paired ? ` · 이미 ${ownLabel} 짝 있음` : ''}</option>`;
+    }).join('')}`;
+    translationSource.value = items.some(post => translationKey(post) === previous) && !taken.has(previous) ? previous : '';
     if (translationSourceStatus) {
       const targetLabel = targetLanguage === 'en' ? 'English' : '한국어';
       const categoryLabel = category ? `${labels[category] || category} ` : '';
+      const takenCount = items.filter(post => taken.has(translationKey(post))).length;
+      const takenNote = takenCount ? ` 이미 ${ownLabel} 짝이 있는 ${takenCount}개는 고를 수 없습니다.` : '';
       translationSourceStatus.textContent = items.length
-        ? `${targetLabel} ${categoryLabel}게시물 ${items.length}개 중 번역 짝을 선택할 수 있습니다.`
+        ? `${targetLabel} ${categoryLabel}게시물 ${items.length}개 중 번역 짝을 선택할 수 있습니다.${takenNote}`
         : `연결할 기존 ${targetLabel} ${categoryLabel}게시물이 없습니다. 연결 없이 게시할 수 있습니다.`;
     }
+  }
+
+  // The list above is read from /data/posts.js when the page opens. A report
+  // published since then, in this tab or another, is missing from it until
+  // the page is reloaded, so the list is read again whenever a report is
+  // chosen. An empty or failed answer never replaces the list the page has.
+  async function refreshResearchPosts() {
+    try {
+      const response = await fetch(`/data/posts.json?pairs=${Date.now()}`, { cache: 'no-store' });
+      if (!response.ok) return;
+      const posts = await response.json();
+      if (!Array.isArray(posts) || posts.length === 0) return;
+      window.RESEARCH_POSTS = posts;
+      populateTranslationSources();
+    } catch (_) {}
   }
 
   function setLanguage(value) {
@@ -1261,6 +1290,7 @@
       return;
     }
     const reportVersion = ++reportSelectionVersion;
+    const refreshingPosts = refreshResearchPosts();
     coverGenerationVersion += 1;
     generatingCover = false;
     generateCoverBtn.textContent = 'HTML에서 커버 자동 생성';
@@ -1331,6 +1361,8 @@
     status.textContent = !date.value
       ? '리포트 기준일을 자동으로 찾지 못했습니다. 날짜를 직접 확인해 주세요.'
       : detectedType ? '자동 분석 완료. 게시 전에 항목을 확인하세요.' : '분석 완료. 카테고리는 직접 선택하세요.';
+    await refreshingPosts;
+    if (reportVersion !== reportSelectionVersion) return;
     updatePublishState();
   }
 
