@@ -1,0 +1,71 @@
+name: IndexNow
+
+# Tells Naver and Bing (and, through them, the other IndexNow engines) which
+# report addresses a push to main added, changed or removed. Publishing and
+# managing a post always rewrite data/posts.json, so a push that leaves it
+# alone has nothing to announce. The script waits until Production answers
+# for each address before sending it. See docs/DEPLOYMENT.md.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - data/posts.json
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "sitemap: every address in the live sitemap · urls: the addresses below"
+        type: choice
+        options:
+          - sitemap
+          - urls
+        default: urls
+      urls:
+        description: "https://snowshagal.com/... addresses, separated by spaces (mode urls)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    name: Notify IndexNow (Naver, Bing)
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Fetch the commit this push replaced
+        if: github.event_name == 'push'
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            git fetch --no-tags --depth=1 origin "$BEFORE"
+          fi
+
+      - name: Notify
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+          MODE: ${{ inputs.mode }}
+          URLS: ${{ inputs.urls }}
+        run: |
+          if [ "$EVENT" = "push" ]; then
+            node scripts/indexnow.mjs --before "$BEFORE" --after "$AFTER"
+          elif [ "$MODE" = "sitemap" ]; then
+            node scripts/indexnow.mjs --sitemap
+          else
+            node scripts/indexnow.mjs --urls "$URLS"
+          fi

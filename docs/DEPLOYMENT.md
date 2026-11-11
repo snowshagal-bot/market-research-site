@@ -291,6 +291,25 @@ Search Console should use a Domain property for `snowshagal.com`, verified with 
 
 The root `404.html` is required for Cloudflare Pages to return an actual HTTP 404 instead of using `index.html` as an SPA fallback for unknown paths. Pages Functions middleware must leave redirect and error responses unchanged apart from the existing Preview `X-Robots-Tag` header, with one exception: an existing report's legacy `/reports/<path>.html` address, which Pages answers with its own 308, is upgraded to a single `301` to the extensionless canonical URL `/reports/<path>` with the query string preserved (a missing report keeps its direct 404). A report renamed after publishing is listed in `RENAMED_REPORTS`, and its old address answers one `301` to the new file. Root search-engine verification files are outside `/reports/` and are served with HTTP 200 through `_redirects` 200 rewrites (`yandex_9866f357776964b4.html`, `naver96f43741acd96bcdeb679f22cddc4a80.html`); without the rewrite Pages would 308 them to the extensionless path. Daum Webmaster Tool ownership is a `#DaumWebMasterTool:` comment line at the bottom of the static `robots.txt`; Daum re-reads it on every sign-in, so do not remove it (the PIN used to sign in is the owner's and is not stored in Git). After changing this behavior, verify both a random root path and a random `/reports/` path on Preview before Production deployment.
 
+### IndexNow (Naver, Bing)
+
+Since 2026-11-12 every push to `main` that changes `data/posts.json` (publish, manage, delete) runs `.github/workflows/indexnow.yml`. `scripts/indexnow.mjs` compares `data/posts.json` before and after the push and works out which addresses to announce:
+
+- added reports;
+- reports with a visible change (title, search title, description, summary, one-liner, date, tags, cover, pairing);
+- removed or moved reports.
+
+A new Daily also brings its `/market/<date>/` (or `/en/market/<date>/`) page, if that page answers. The script waits up to 10 minutes until Production answers for each address (200 for a live one, anything else for a removed one), then POSTs the list once to `https://searchadvisor.naver.com/indexnow` and `https://www.bing.com/indexnow`. Each engine shares what it receives with the other IndexNow engines. The log shows only addresses and status codes. 200 and 202 count as success; 403 means the key file is missing or wrong.
+
+The key is public by design, not a secret. Engines verify it by reading `https://snowshagal.com/<key>.txt`, which holds only the key. That file is at the repository root, and the same key is `INDEXNOW_KEY` in the script. If the key ever changes, change both in one commit and keep exactly one `<32 hex>.txt` at the root. No Cloudflare or GitHub secret is involved.
+
+Manual runs (Actions → IndexNow → Run workflow):
+
+- `mode: urls`: the given `https://snowshagal.com/...` addresses, separated by spaces;
+- `mode: sitemap`: every address in the live sitemap, once, for example after the first deployment.
+
+IndexNow asks engines to crawl; it does not guarantee indexing, and Google does not take part. Google still relies on the sitemap and Search Console.
+
 ## Comment dependencies
 
 For comments to work, production needs:
