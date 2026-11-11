@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-11-note-fyktik",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-11",
+    "reportDate": "2026-11-11",
+    "registeredDate": "2026-11-12",
+    "registeredAt": "2026-11-11T15:49:37.066Z",
+    "legacyImport": false,
+    "title": "폭락장에서도 한은은 올리나",
+    "seoTitle": "폭락장에서도 한은은 올리나 | Snowshagal 투자 인사이트 NO.31",
+    "subtitle": "",
+    "description": "코스피가 고점 대비 40% 넘게 빠진 뒤에도 한은이 보는 수출·물가는 긴축 쪽이라 11월 인상 전망이 우세하다. 종착역은 3.50%(iM·대신·SK)와 3.25%(KB)로 갈리고, 채권시장은 이미 '곧 끝'을 가격에 넣었다. 점도표·최종금리·국고 3년을 나눠 읽고, 종착역을 맞혀도 채권 수익은 별개인 이유를 짚었다.",
+    "tags": [
+      "rates",
+      "fed",
+      "policy",
+      "korea",
+      "liquidity"
+    ],
+    "readingMinutes": 21,
+    "href": "reports/20261111_Investment_Insight_BOK_November_Path.html",
+    "coverImage": "covers/2026-11-11-note-fyktik.webp",
+    "shareCardImage": "covers/share/2026-11-11-note-fyktik.jpg",
+    "coverThumbnail": "covers/2026-11-11-note-fyktik-450.webp"
+  },
+  {
     "id": "2026-11-11-daily-a26xqg",
     "type": "daily",
     "typeLabel": "주식 리포트",
