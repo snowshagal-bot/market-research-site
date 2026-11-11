@@ -116,7 +116,7 @@ test('desktop and mobile navigation use the approved category order across pages
   ]);
   assert.match(brandStyles, /\.main-nav\s*\{\s*font-size: 14px;/);
   assert.match(brandStyles, /@media \(max-width: 760px\)[\s\S]*?\.main-nav\s*\{\s*font-size: 13px;/);
-  assert.match(marketStyles, /@media\(max-width:1060px\)\{\.market-close-page \.main-nav\{gap:12px;font-size:13px\}/);
+  assert.match(marketStyles, /@media\(max-width:1060px\)\{\.market-close-page \.main-nav\{gap:8px;font-size:13px\}/);
   assert.match(reportShell, /a\{[\s\S]*?font-size:14px/);
   assert.match(reportShell, /@media\(max-width:680px\)[\s\S]*?font-size:12px/);
   assert.ok(reportShell.indexOf('<a href="${marketPath}">${copy.market}</a>') < reportShell.indexOf("categoryPath('daily')"));
@@ -361,4 +361,25 @@ test('homepage presents TODAY market summary strip between brand hero and latest
   assert.doesNotMatch(enHome, new RegExp(summary.takeaway.en.slice(0, 20)));
   assert.doesNotMatch(home, new RegExp(summary.dateDisplay.ko));
   assert.doesNotMatch(enHome, new RegExp(summary.dateDisplay.en));
+});
+
+// 2026-11-12: the English "Investment Insights" / "Market Basics" broke onto
+// two lines at every desktop width, and the Korean labels broke mid-word
+// between 961 and ~1090px. The rule lives in brand.css because it is the one
+// header stylesheet every public page loads.
+test('header navigation labels stay on one line, on every page with the header', async () => {
+  const brand = await read('assets/brand.css');
+  assert.match(brand, /\.header-row \.main-nav a \{\s*white-space: nowrap;\s*\}/);
+  // English tightens in steps; Korean tightens where it used to break.
+  const englishSteps = [...brand.matchAll(/@media \(max-width: (\d+px)\)[^{]*\{([\s\S]*?)\n\}/g)]
+    .filter(([, , block]) => block.includes(':lang(en) .header-row .main-nav {'))
+    .map(([, width]) => width);
+  assert.deepEqual(englishSteps, ['1180px', '1080px', '960px', '860px']);
+  assert.match(brand, /@media \(max-width: 1100px\) and \(min-width: 961px\) \{\s*\.header-row \.main-nav \{\s*gap: 6px;\s*font-size: 13px;/);
+  // Pages without ui-polish.css get its 761–960px header compaction from brand.css.
+  assert.match(brand, /:is\(\.calendar-page, \.disclosures-page, \.market-close-page\) \.brand-copy small \{\s*display: none;/);
+  for (const page of ['index.html', 'en/index.html', 'daily/index.html', 'calendar/index.html', 'en/calendar/index.html',
+    'disclosures/index.html', 'en/disclosures/index.html', 'market/index.html', 'en/market/index.html', 'about/index.html']) {
+    assert.match(await read(page), /<link rel="stylesheet" href="\/assets\/brand\.css\?v=[a-z0-9]+">/, page);
+  }
 });

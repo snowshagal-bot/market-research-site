@@ -37,6 +37,12 @@ Language navigation:
 - explicit homepage language switches preserve the current `?category=` value, and About switches between `/about/` and `/en/about/`;
 - the active locale is clear but visually secondary to report navigation.
 
+Header labels:
+
+- a header navigation label never breaks onto two lines or mid-word (`white-space: nowrap`); when nine labels do not fit, the spacing and size tighten instead (`assets/brand.css`, loaded on every public page). English labels are longer and tighten more, in steps at 1180, 1100, 1080, 960 and 860px;
+- the calendar, disclosures and market pages do not load `ui-polish.css`, so `brand.css` gives them the same 761–960px header compaction;
+- check KO and EN at 761, 860, 961, 1024, 1100, 1180 and 1280px+ after any header change: no label on two lines, no header or page overflow.
+
 Homepage public categories:
 
 - 데일리
