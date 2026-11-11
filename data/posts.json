@@ -27,6 +27,34 @@
     "coverThumbnail": "covers/2026-11-11-note-fyktik-450.webp"
   },
   {
+    "id": "2026-11-10-daily-5sy7gq",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-11",
+    "reportDate": "2026-11-11",
+    "registeredDate": "2026-11-12",
+    "registeredAt": "2026-11-11T15:47:41.173Z",
+    "legacyImport": false,
+    "title": "Chips Defy Rate Fears; KOSPI Cuts Three-Day Loss in Half",
+    "subtitle": "",
+    "description": "Korean markets, Nov. 11, 2026: chips overcome U.S. rate worries as KOSPI reclaims more than half of its three-day decline. Foreign flows, AI infrastructure earnings, and next-session tests.",
+    "takeaway": "CoreWeave earnings and exports lift chips; KOSPI rebounds for a second day",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-11-11_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-11-daily-a26xqg",
+    "coverImage": "covers/2026-11-10-daily-5sy7gq.webp",
+    "shareCardImage": "covers/share/2026-11-10-daily-5sy7gq.jpg",
+    "coverThumbnail": "covers/2026-11-10-daily-5sy7gq-450.webp"
+  },
+  {
     "id": "2026-11-11-daily-a26xqg",
     "type": "daily",
     "typeLabel": "주식 리포트",
@@ -107,34 +135,6 @@
     "coverImage": "covers/2026-11-11-note-181pw2e.webp",
     "shareCardImage": "covers/share/2026-11-11-note-181pw2e.jpg",
     "coverThumbnail": "covers/2026-11-11-note-181pw2e-450.webp"
-  },
-  {
-    "id": "2026-11-10-daily-5sy7gq",
-    "type": "daily",
-    "typeLabel": "Daily",
-    "lang": "en",
-    "date": "2026-11-10",
-    "reportDate": "2026-11-10",
-    "registeredDate": "2026-11-12",
-    "registeredAt": "2026-11-11T15:47:41.173Z",
-    "legacyImport": false,
-    "title": "Chips Defy Rate Fears; KOSPI Cuts Three-Day Loss in Half",
-    "subtitle": "",
-    "description": "Korean markets, Nov. 11, 2026: chips overcome U.S. rate worries as KOSPI reclaims more than half of its three-day decline. Foreign flows, AI infrastructure earnings, and next-session tests.",
-    "takeaway": "CoreWeave earnings and exports lift chips; KOSPI rebounds for a second day",
-    "tags": [
-      "kospi",
-      "kosdaq",
-      "flows",
-      "foreign-investors",
-      "semiconductors"
-    ],
-    "readingMinutes": 3,
-    "href": "reports/en/2026-11-11_Snowshagal_Daily_EN.html",
-    "translationGroup": "2026-11-10-daily-bi8unj",
-    "coverImage": "covers/2026-11-10-daily-5sy7gq.webp",
-    "shareCardImage": "covers/share/2026-11-10-daily-5sy7gq.jpg",
-    "coverThumbnail": "covers/2026-11-10-daily-5sy7gq-450.webp"
   },
   {
     "id": "2026-11-10-daily-1nauyrt",
