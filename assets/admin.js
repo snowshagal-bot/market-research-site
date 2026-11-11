@@ -1127,6 +1127,7 @@
     generatingCover = true;
     updatePublishState();
     generateCoverBtn.textContent = '커버 생성 중…';
+    coverGeneratorStatus.classList.remove('warn');
     coverGeneratorStatus.textContent = 'HTML 첫 화면을 분석하고 커버 이미지를 만들고 있습니다.';
     try {
       const result = await window.MARKET_COVER_GENERATOR.generate({
@@ -1145,9 +1146,16 @@
       coverInput.value = '';
       coverInfo.textContent = `${result.file.name} · ${(result.file.size / 1024).toFixed(1)} KB`;
       showCoverPreview(result.file, generationReportVersion);
+      // A template is never a quiet success: it says what was tried and why the
+      // capture did not happen, in the warning colour.
+      const attempted = result.attemptedMode === 'first-screen'
+        ? '첫 화면 480×720'
+        : result.attemptedSelector;
+      if (result.method === 'template') coverGeneratorStatus.classList.add('warn');
+      else coverGeneratorStatus.classList.remove('warn');
       coverGeneratorStatus.textContent = result.method === 'template'
-        ? `표준 템플릿 커버를 생성했습니다${result.attemptedSelector ? ` · ${result.attemptedSelector} 캡처 대체` : ''}${result.captureError ? ` · ${result.captureError}` : ''}. 수동 커버로 교체할 수도 있습니다.`
-        : `브라우저 렌더링으로 커버를 생성했습니다${result.selector ? ` · ${result.selector}` : ''}.`;
+        ? `표지 캡처 실패 · 표준 템플릿 커버로 대신 만들었습니다${attempted ? ` · 시도: ${attempted}` : ''}${result.captureError ? ` · 이유: ${result.captureError}` : ''}. 다시 시도하거나 수동 커버를 올려 주세요.`
+        : `브라우저 렌더링으로 커버를 생성했습니다${result.mode === 'first-screen' ? ' · 첫 화면 480×720' : (result.selector ? ` · ${result.selector}` : '')}.`;
       if (result.method === 'template' && result.captureError) console.warn('cover capture fallback:', result.captureError);
     } catch (error) {
       if (generationVersion !== coverGenerationVersion || generationReportVersion !== reportSelectionVersion) return;
@@ -1155,6 +1163,7 @@
       coverDecodePending = false;
       const reason = String(error?.message || '').trim();
       const detail = [error?.code, error?.status ? `HTTP ${error.status}` : ''].filter(Boolean).join(' · ');
+      coverGeneratorStatus.classList.add('warn');
       coverGeneratorStatus.textContent = `커버 자동 생성에 실패했습니다${reason ? ` · ${reason}` : ''}${detail ? ` (${detail})` : ''}. 수동 커버를 업로드하거나 다시 시도해 주세요.`;
     } finally {
       if (generationVersion !== coverGenerationVersion || generationReportVersion !== reportSelectionVersion) return;
@@ -1249,6 +1258,7 @@
     coverGenerationVersion += 1;
     generatingCover = false;
     generateCoverBtn.textContent = 'HTML에서 커버 자동 생성';
+    coverGeneratorStatus.classList.remove('warn');
     coverGeneratorStatus.textContent = defaultCoverGeneratorStatus;
     coverInput.value = '';
     coverInfo.textContent = defaultCoverInfo;

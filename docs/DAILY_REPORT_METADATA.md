@@ -107,6 +107,28 @@ node scripts/stamp-daily-takeaway.mjs "reports/8월 27일 주식리포트_커버
 
 **장기 표준** — 커버 class는 레이아웃과 함께 바뀐다(2026-09에만 두 번 바뀌었다). 생성기는 head에 `report-summary`, `report-takeaway`, `description`을 명시하는 것이 기준이고, 커버 class는 fallback이다.
 
+## 커버 — `report-cover-mode`와 `report-cover-selector`
+
+2026-11-11호부터 Daily에는 따로 표지가 없다. 첫 화면(브랜드 줄 · 제목 · 지수 · 장중 차트 · 시고저종)이 곧 커버이므로 head에 다음을 둔다.
+
+```html
+<meta name="report-cover-mode" content="first-screen">
+```
+
+게시 화면의 「HTML에서 커버 자동 생성」(`assets/cover-generator.js`)과 서버(`functions/api/generate-cover.js`)는 같은 순서로 정한다.
+
+| 순위 | 근거 | 캡처 |
+| --- | --- | --- |
+| 1 | `report-cover-mode` = `first-screen` | 페이지 맨 위 480×720(2:3) · 뷰포트 480×720 · deviceScaleFactor 2 → 960×1440 |
+| 2 | `report-cover-selector` | 그 요소. `.cv` · `.cover-frame` · `.mag-cover` 같은 완성 표지는 전용 계획(2:3 clip) |
+| 3 | 표지 구조 자동 감지(`.cv`, `.cover-frame`, `.mag-cover`, `.cover` …) | 위와 같음 |
+| 4 | 없음 | 표준 템플릿, 이유 표시 |
+
+- 첫 화면 결과는 900×1350에 **여백 없이 꽉 채운다**(가운데 기준, 여백 · 배경 띠 없음). 다른 표지는 이전처럼 2:3이면 꽉, 아니면 32px 여백을 둔다.
+- 값이 정확히 `first-screen`일 때만 켜진다. `report-cover-selector`를 함께 둬도 된다: 첫 화면 모드가 우선하고, 모드를 지우면 그 선택자로 돌아간다.
+- 공유 이미지(1200×630)는 지금처럼 이 커버로 구성한다.
+- **캡처가 실패했을 때만** 표준 템플릿으로 대신하고, 게시 화면에 시도한 대상과 이유(오류 코드 · HTTP · Cloudflare 상태 · 제한 시간)를 경고색으로 표시한다. 인증 · 설정 오류는 템플릿 없이 실패로 표시한다. 렌더링 제한 시간은 40초다.
+
 ## 홈페이지에서의 사용
 
 저장된 값은 post metadata의 `takeaway`가 되고, 홈 TODAY는 locale별로 이 순서로 해석한다:
