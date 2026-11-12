@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-12-note-ap4bj",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-12",
+    "reportDate": "2026-11-12",
+    "registeredDate": "2026-11-12",
+    "registeredAt": "2026-11-12T08:03:17.754Z",
+    "legacyImport": false,
+    "title": "WHO SOLD ₩214 TRILLION IN KOREA?",
+    "seoTitle": "Who Was Behind the ₩214 Trillion Foreign Selloff?",
+    "subtitle": "",
+    "description": "Foreign investors net sold ₩214 trillion of Korean equities in January–September 2026, but that does not mean they left Korea. U.S.-linked accounts sold into the rally, while U.K.-linked accounts led the downturn. Hedge funds trading through London are the leading explanation, not a verified identification. Sustained, broad-based buying will be the test of their return.",
+    "tags": [
+      "kospi",
+      "flows",
+      "foreign-investors",
+      "liquidity",
+      "kosdaq"
+    ],
+    "readingMinutes": 10,
+    "href": "reports/en/20261112_Snowshagal_Investment_Insight_No32_Who_Sold_UK_Account_EN.html",
+    "translationGroup": "2026-11-12-note-43vr2c",
+    "coverImage": "covers/2026-11-12-note-ap4bj.webp",
+    "shareCardImage": "covers/share/2026-11-12-note-ap4bj.jpg",
+    "coverThumbnail": "covers/2026-11-12-note-ap4bj-450.webp"
+  },
+  {
     "id": "2026-11-12-note-43vr2c",
     "type": "note",
     "typeLabel": "투자 인사이트",
