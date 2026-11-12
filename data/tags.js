@@ -286,5 +286,11 @@ window.TAG_REGISTRY = {
     "en": "Utility",
     "group": "sector",
     "custom": true
+  },
+  "msci": {
+    "ko": "MSCI",
+    "en": "MSCI",
+    "group": "market",
+    "custom": true
   }
 };

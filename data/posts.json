@@ -1,5 +1,31 @@
 [
   {
+    "id": "2026-11-12-basics-17io0go",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-11-12",
+    "reportDate": "2026-11-12",
+    "registeredDate": "2026-11-12",
+    "registeredAt": "2026-11-12T14:17:18.059Z",
+    "legacyImport": false,
+    "title": "지수는 무엇으로 만드나",
+    "seoTitle": "MSCI 정기변경·지수 편입 뜻: 지수는 무엇으로 만드나",
+    "subtitle": "",
+    "description": "MSCI 11월 정기변경에서 한국 지수에 새로 들어간 종목은 0개였지만, SK하이닉스에는 약 5,800억 원 매수가 추정된다. 지수는 무엇으로 만들까. 코스피 계산법, 시가총액 비중, 유동주식, 지수를 따라가는 패시브 펀드, 지수 편입·편출과 정기변경을 퀴즈와 시뮬레이터로 설명한다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "msci",
+      "market-basic"
+    ],
+    "readingMinutes": 8,
+    "href": "reports/basics-16-index.html",
+    "coverImage": "covers/2026-11-12-basics-17io0go.webp",
+    "shareCardImage": "covers/share/2026-11-12-basics-17io0go.jpg",
+    "coverThumbnail": "covers/2026-11-12-basics-17io0go-450.webp"
+  },
+  {
     "id": "2026-11-12-daily-18pa54q",
     "type": "daily",
     "typeLabel": "Daily",
