@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-12-daily-18pa54q",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-12",
+    "reportDate": "2026-11-12",
+    "registeredDate": "2026-11-12",
+    "registeredAt": "2026-11-12T14:14:02.693Z",
+    "legacyImport": false,
+    "title": "Nvidia CEO Ouster Reports, KOSPI Snaps Two-Day Rally",
+    "subtitle": "",
+    "description": "",
+    "takeaway": "Reported Nvidia CEO leadership questions, financials weakness and options-expiry flows pull KOSPI lower after a two-day rally",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-11-12_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-12-daily-16x5lhm",
+    "coverImage": "covers/2026-11-12-daily-18pa54q.webp",
+    "shareCardImage": "covers/share/2026-11-12-daily-18pa54q.jpg",
+    "coverThumbnail": "covers/2026-11-12-daily-18pa54q-450.webp"
+  },
+  {
     "id": "2026-11-12-daily-16x5lhm",
     "type": "daily",
     "typeLabel": "주식 리포트",
