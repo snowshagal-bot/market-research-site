@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-12-daily-1lyv0qt",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-12",
+    "reportDate": "2026-11-12",
+    "registeredDate": "2026-11-12",
+    "registeredAt": "2026-11-12T14:01:06.082Z",
+    "legacyImport": false,
+    "title": "엔비디아 CEO 해임설, 코스피 사흘 만에 하락",
+    "subtitle": "",
+    "description": "",
+    "takeaway": "엔비디아 CEO 해임설 속 금융주 약세, 코스피 사흘 만에 하락",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-11-12_Snowshagal_Daily.html",
+    "translationGroup": "2026-11-12-daily-16x5lhm",
+    "coverImage": "covers/2026-11-12-daily-1lyv0qt.webp",
+    "shareCardImage": "covers/share/2026-11-12-daily-1lyv0qt.jpg",
+    "coverThumbnail": "covers/2026-11-12-daily-1lyv0qt-450.webp"
+  },
+  {
     "id": "2026-11-12-daily-16x5lhm",
     "type": "daily",
     "typeLabel": "주식 리포트",
