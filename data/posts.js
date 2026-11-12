@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-12-basics-swc803",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-11-12",
+    "reportDate": "2026-11-12",
+    "registeredDate": "2026-11-13",
+    "registeredAt": "2026-11-12T15:04:15.634Z",
+    "legacyImport": false,
+    "title": "What Goes Into a Stock Index?",
+    "seoTitle": "MSCI Index Reviews and Constituent Changes: What Goes Into a Stock Index?",
+    "subtitle": "",
+    "description": "The November MSCI review added no stocks to MSCI Korea, yet SK hynix could see an estimated KRW 580 billion in passive buying. Learn how stock indices are built, how market-cap and free-float weighting work, and why index rebalancing triggers trades—through a quiz and interactive simulation.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "msci",
+      "market-basic"
+    ],
+    "readingMinutes": 10,
+    "href": "reports/en/Snowshagal_Market_Basics_16_What_Goes_Into_a_Stock_Index_EN.html",
+    "translationGroup": "2026-11-12-basics-17io0go",
+    "coverImage": "covers/2026-11-12-basics-swc803.webp",
+    "shareCardImage": "covers/share/2026-11-12-basics-swc803.jpg",
+    "coverThumbnail": "covers/2026-11-12-basics-swc803-450.webp"
+  },
+  {
     "id": "2026-11-12-basics-17io0go",
     "type": "basics",
     "typeLabel": "시장 입문",
