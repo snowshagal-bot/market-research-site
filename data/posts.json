@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-12-note-43vr2c",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-12",
+    "reportDate": "2026-11-12",
+    "registeredDate": "2026-11-12",
+    "registeredAt": "2026-11-12T07:41:45.201Z",
+    "legacyImport": false,
+    "title": "외국인 214조원, 누가 팔았나",
+    "seoTitle": "외국인 214조원, 누가 팔았나",
+    "subtitle": "",
+    "description": "외국인은 올해 한국 주식을 214조원 팔았지만 한국을 떠난 건 아니다. 주가가 오르는 동안엔 미국 계정이 덜어냈고, 꺾인 뒤엔 영국 계정이 던졌다. 영국 계정 뒤에는 런던을 거친 헤지펀드가 가장 유력하다. 돌아왔는지는 실제 매수로 판단한다.",
+    "tags": [
+      "kospi",
+      "flows",
+      "foreign-investors",
+      "liquidity",
+      "kosdaq"
+    ],
+    "readingMinutes": 9,
+    "href": "reports/20261112_Investment_Insight_Who_Sold_UK_Account.html",
+    "coverImage": "covers/2026-11-12-note-43vr2c.webp",
+    "shareCardImage": "covers/share/2026-11-12-note-43vr2c.jpg",
+    "coverThumbnail": "covers/2026-11-12-note-43vr2c-450.webp"
+  },
+  {
     "id": "2026-11-11-note-63zduk",
     "type": "note",
     "typeLabel": "Investment Insights",
