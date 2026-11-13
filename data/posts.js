@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-13-basics-1aldly1",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-11-13",
+    "reportDate": "2026-11-13",
+    "registeredDate": "2026-11-13",
+    "registeredAt": "2026-11-13T08:17:18.771Z",
+    "legacyImport": false,
+    "title": "Why Do Circuit Breakers Halt Trading?",
+    "seoTitle": "Circuit Breakers and Sidecars Explained",
+    "subtitle": "",
+    "description": "The KOSPI plunged more than 8% on November 6 and trading halted for 20 minutes. Learn how circuit breakers, sidecar trading curbs, volatility interruptions, call auctions and price limits differ in South Korea.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "liquidity",
+      "market-basic",
+      "flows"
+    ],
+    "readingMinutes": 9,
+    "href": "reports/en/Snowshagal_Market_Basics_17_Why_Do_Circuit_Breakers_Halt_Trading_EN.html",
+    "translationGroup": "2026-11-13-basics-1m6tqir",
+    "coverImage": "covers/2026-11-13-basics-1aldly1.webp",
+    "shareCardImage": "covers/share/2026-11-13-basics-1aldly1.jpg",
+    "coverThumbnail": "covers/2026-11-13-basics-1aldly1-450.webp"
+  },
+  {
     "id": "2026-11-13-basics-1m6tqir",
     "type": "basics",
     "typeLabel": "시장 입문",
