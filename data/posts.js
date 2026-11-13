@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-13-note-atzoiz",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-13",
+    "reportDate": "2026-11-13",
+    "registeredDate": "2026-11-13",
+    "registeredAt": "2026-11-13T08:35:31.128Z",
+    "legacyImport": false,
+    "title": "China's Cars Pour Overseas",
+    "seoTitle": "China's Cars Pour Overseas",
+    "subtitle": "",
+    "description": "Chinese passenger-car retail sales fell more than 20% for seven months even as exports surged. The EU agreed to a 350,000-unit quota for Chinese-built hybrids but opened a safeguard probe covering all origins. What production location, quota exposure and price competition mean for Korean automakers.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "china",
+      "autos",
+      "eco-friendly"
+    ],
+    "readingMinutes": 14,
+    "href": "reports/en/20261113_Investment_Insight_China_Car_Exports_EN.html",
+    "translationGroup": "2026-11-13-note-qo66ez",
+    "coverImage": "covers/2026-11-13-note-atzoiz.webp",
+    "shareCardImage": "covers/share/2026-11-13-note-atzoiz.jpg",
+    "coverThumbnail": "covers/2026-11-13-note-atzoiz-450.webp"
+  },
+  {
     "id": "2026-11-13-note-qo66ez",
     "type": "note",
     "typeLabel": "투자 인사이트",
