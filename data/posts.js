@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-13-note-qo66ez",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-13",
+    "reportDate": "2026-11-13",
+    "registeredDate": "2026-11-13",
+    "registeredAt": "2026-11-13T08:19:33.954Z",
+    "legacyImport": false,
+    "title": "중국차가 밖으로 쏟아진다",
+    "seoTitle": "중국차가 밖으로 쏟아진다",
+    "subtitle": "",
+    "description": "중국 승용차 소매판매가 일곱 달째 20% 넘게 줄고 수출은 68% 늘었다. 그러나 수출이 곧 해외 판매는 아니다. EU는 중국산 하이브리드를 연 35만대로 묶기로 했고, 조사 대상은 모든 원산지다. EU 안 공장 차와 한국에서 보내는 차가 어떻게 갈리는지, 가격 경쟁이 한국차 실적에 어떻게 나타났는지 짚었다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "china",
+      "autos",
+      "eco-friendly"
+    ],
+    "readingMinutes": 13,
+    "href": "reports/20261113_Investment_Insight_China_Car_Exports.html",
+    "coverImage": "covers/2026-11-13-note-qo66ez.webp",
+    "shareCardImage": "covers/share/2026-11-13-note-qo66ez.jpg",
+    "coverThumbnail": "covers/2026-11-13-note-qo66ez-450.webp"
+  },
+  {
     "id": "2026-11-13-basics-1aldly1",
     "type": "basics",
     "typeLabel": "Market Basics",
