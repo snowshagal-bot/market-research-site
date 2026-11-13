@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-13-daily-1q79b9q",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-13",
+    "reportDate": "2026-11-13",
+    "registeredDate": "2026-11-13",
+    "registeredAt": "2026-11-13T09:20:40.452Z",
+    "legacyImport": false,
+    "title": "장중 5,500 넘고 반락, 코스피 이틀째 하락",
+    "subtitle": "",
+    "description": "",
+    "takeaway": "장 초반 5,500 넘은 코스피, 외국인 매도 전환에 이틀째 하락",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-11-13_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-13-daily-1q79b9q.webp",
+    "shareCardImage": "covers/share/2026-11-13-daily-1q79b9q.jpg",
+    "coverThumbnail": "covers/2026-11-13-daily-1q79b9q-450.webp"
+  },
+  {
     "id": "2026-11-13-note-atzoiz",
     "type": "note",
     "typeLabel": "Investment Insights",
