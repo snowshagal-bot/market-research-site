@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-13-daily-1yvovb8",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-13",
+    "reportDate": "2026-11-13",
+    "registeredDate": "2026-11-13",
+    "registeredAt": "2026-11-13T09:39:39.434Z",
+    "legacyImport": false,
+    "title": "KOSPI Briefly Tops 5,500, Falls for a Second Straight Day",
+    "subtitle": "",
+    "description": "",
+    "takeaway": "KOSPI briefly surpassed 5,500 before foreign selling dragged the index down for a second day",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-11-13_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-13-daily-1q79b9q",
+    "coverImage": "covers/2026-11-13-daily-1yvovb8.webp",
+    "shareCardImage": "covers/share/2026-11-13-daily-1yvovb8.jpg",
+    "coverThumbnail": "covers/2026-11-13-daily-1yvovb8-450.webp"
+  },
+  {
     "id": "2026-11-13-daily-1q79b9q",
     "type": "daily",
     "typeLabel": "주식 리포트",
