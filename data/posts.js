@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-13-basics-1m6tqir",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-11-13",
+    "reportDate": "2026-11-13",
+    "registeredDate": "2026-11-13",
+    "registeredAt": "2026-11-13T08:13:48.557Z",
+    "legacyImport": false,
+    "title": "서킷브레이커는 왜 시장을 멈추나",
+    "seoTitle": "서킷브레이커·사이드카 뜻과 발동 조건: 서킷브레이커는 왜 시장을 멈추나",
+    "subtitle": "",
+    "description": "11월 6일 코스피가 8% 넘게 빠지자 코스피 시장 거래가 20분 멈췄다. 올해만 11번째 서킷브레이커였다. 상한가·하한가, VI, 사이드카, 서킷브레이커의 발동 조건과 차이, 거래가 멈춘 동안 일어나는 일을 퀴즈와 시뮬레이터로 설명한다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "liquidity",
+      "market-basic",
+      "flows"
+    ],
+    "readingMinutes": 6,
+    "href": "reports/basics-17-circuit-breaker.html",
+    "coverImage": "covers/2026-11-13-basics-1m6tqir.webp",
+    "shareCardImage": "covers/share/2026-11-13-basics-1m6tqir.jpg",
+    "coverThumbnail": "covers/2026-11-13-basics-1m6tqir-450.webp"
+  },
+  {
     "id": "2026-11-12-basics-swc803",
     "type": "basics",
     "typeLabel": "Market Basics",
