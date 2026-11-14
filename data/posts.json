@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-14-weekly-tv1j3y",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-11-14",
+    "reportDate": "2026-11-14",
+    "registeredDate": "2026-11-14",
+    "registeredAt": "2026-11-14T14:32:38.086Z",
+    "legacyImport": false,
+    "title": "돌아온 연주자들, 비어 있는 지휘대",
+    "subtitle": "",
+    "description": "2026년 11월 2주차(11월 9~13일) 한국 증시 주간 리포트. 코스피 +4.56% · 코스닥 +8.60%. 반도체가 반등을 이끌었지만 코스피는 지난주 급락분의 약 3분의 1만 되찾은 닷새. 금요일엔 엔비디아 CEO 사임과 미 10년물 5.15%가 부담. 다음 주 엔비디아 실적, 앤트로픽 상장, 미국 금리, 외국인 수급.",
+    "summary": "반도체 Top 15 +12.57%가 반등을 이끈 한 주 · 코스피 +4.56%로 지난주 낙폭의 약 3분의 1 회복 · 코스닥 +8.60% · 지난주 버틴 게임·전기가스·음식료는 밀림",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 5,
+    "href": "reports/2026-11-14_Snowshagal_Weekly.html",
+    "coverImage": "covers/2026-11-14-weekly-tv1j3y.webp",
+    "shareCardImage": "covers/share/2026-11-14-weekly-tv1j3y.jpg",
+    "coverThumbnail": "covers/2026-11-14-weekly-tv1j3y-450.webp"
+  },
+  {
     "id": "2026-11-14-note-u3kc4o",
     "type": "note",
     "typeLabel": "Investment Insights",
