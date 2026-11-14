@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-14-note-u3kc4o",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-14",
+    "reportDate": "2026-11-14",
+    "registeredDate": "2026-11-14",
+    "registeredAt": "2026-11-14T08:40:46.722Z",
+    "legacyImport": false,
+    "title": "New Memory Fabs 2027: First Wafers 2028: Capacity Wave",
+    "seoTitle": "Memory Fabs Begin Producing in 2027. The Capacity Wave Arrives in 2028",
+    "subtitle": "",
+    "description": "New memory fabs begin producing their first wafers in 2027, but the largest capacity additions arrive in 2028. More capacity does not automatically mean a glut: demand will determine whether chips go unsold, while the strength of long-term agreements will determine the impact on earnings. Key signals are orders, customer inventories, contract coverage and the pace of fab ramp-ups.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "semiconductors",
+      "ai",
+      "korea"
+    ],
+    "readingMinutes": 18,
+    "href": "reports/en/20261114_Snowshagal_Investment_Insight_No34_Memory_Fab_Timeline_EN.html",
+    "translationGroup": "2026-11-14-note-b79ehh",
+    "coverImage": "covers/2026-11-14-note-u3kc4o.webp",
+    "shareCardImage": "covers/share/2026-11-14-note-u3kc4o.jpg",
+    "coverThumbnail": "covers/2026-11-14-note-u3kc4o-450.webp"
+  },
+  {
     "id": "2026-11-14-note-b79ehh",
     "type": "note",
     "typeLabel": "투자 인사이트",
