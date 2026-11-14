@@ -15,6 +15,7 @@ import {
   postLanguage,
   normalizeSitePath,
   reportSeoTags,
+  reportReadingNavigation,
   siteFooter,
   footerCss,
   serializeTagRegistryBootstrap
@@ -402,6 +403,7 @@ export async function onRequest(context) {
   else if (/비정기|소버린|research/i.test(decodedPath)) active = 'research';
   else if (/투자\s*노트|끄적|note/i.test(decodedPath)) active = 'note';
   let seo = '';
+  let readingNavigation = '';
   let tags = null;
   try {
     const [postsRes, tagsRes] = await Promise.allSettled([
@@ -421,12 +423,13 @@ export async function onRequest(context) {
         // back to dated wording with no numbers.
         const facts = await loadReportFacts(context.env, post);
         seo = reportSeoTags(posts, post, { facts, tagRegistry: tags });
+        readingNavigation = reportReadingNavigation(posts, post);
       }
     }
   } catch (_) {}
 
   const tagBootstrap = serializeTagRegistryBootstrap(tags);
-  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=abf7ec9b73"></script><script src="/assets/report-shell.js?v=8bb990a4f2" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
+  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=abf7ec9b73"></script><script src="/assets/report-shell.js?v=5915db715f" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
   const footerStyle = `<style id="site-footer-css">${footerCss()}</style>`;
   const footerMarkup = siteFooter(lang);
   // One feed link per page, for the page's own language. Any Atom link the
@@ -455,7 +458,7 @@ export async function onRequest(context) {
       || attrs.rel === 'manifest'
     ));
     body = body.replace(/<\/head>/i, `${FAVICON_TAGS}${seo}${feedLink}${footerStyle}</head>`);
-    body = body.replace(/<\/body>/i, `${footerMarkup}${shell}</body>`);
+    body = body.replace(/<\/body>/i, `${readingNavigation}${footerMarkup}${shell}</body>`);
     body = setHtmlLang(body, lang);
     body = appendGa4ToHtml(body, ga4);
     const headers = new Headers(response.headers);
@@ -487,7 +490,7 @@ export async function onRequest(context) {
     .on('head', { element(element) { element.append(`${FAVICON_TAGS}${seo}${feedLink}${footerStyle}`, { html: true }); } })
     .on('body', {
       element(element) {
-        element.append(`${footerMarkup}${shell}`, { html: true });
+        element.append(`${readingNavigation}${footerMarkup}${shell}`, { html: true });
       }
     })
     .transform(response);

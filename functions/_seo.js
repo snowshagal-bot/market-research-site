@@ -272,6 +272,35 @@ export function findPostByPath(posts, pathname) {
   return posts.find((post) => normalizeSitePath(post?.href).replace(/\.html?$/i, '') === normalized) || null;
 }
 
+// Keep the chronological reading path available in the first HTTP response,
+// including when the browser cannot load posts.json or execute report-shell.js.
+// The richer Shadow DOM discovery UI replaces this only after it has rendered.
+export function reportReadingNavigation(posts, post) {
+  if (!post || !categoryLandingPath(post.type)) return '';
+  const lang = postLanguage(post);
+  const path = value => normalizeSitePath(value).replace(/\.html?$/i, '').toLowerCase();
+  const siblings = (Array.isArray(posts) ? posts : [])
+    .filter(candidate => candidate?.href && candidate.type === post.type && postLanguage(candidate) === lang)
+    .sort((a, b) => String(a.reportDate || a.date || '').localeCompare(String(b.reportDate || b.date || ''))
+      || String(a.registeredAt || '').localeCompare(String(b.registeredAt || '')));
+  const index = siblings.findIndex(candidate => path(candidate.href) === path(post.href));
+  if (index < 0) return '';
+  const links = [[siblings[index - 1], 'prev', lang === 'en' ? 'Previous' : '이전 글'],
+    [siblings[index + 1], 'next', lang === 'en' ? 'Next' : '다음 글']]
+    .filter(([candidate]) => candidate)
+    .map(([candidate, rel, label]) => `<a href="${escapeHtml(cleanReportHref(candidate.href))}" rel="${rel}"><span>${label}</span><strong>${escapeHtml(candidate.title)}</strong></a>`)
+    .join('');
+  if (!links) return '';
+  return `<nav id="mrs-reading-nav" aria-label="${lang === 'en' ? 'Previous and Next Reports' : '이전/다음 리포트'}">
+<style>
+#mrs-reading-nav{all:initial!important;box-sizing:border-box!important;display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))!important;gap:24px!important;width:100%!important;max-width:860px!important;clear:both!important;margin:32px auto!important;padding:24px 20px!important;border-top:1px solid #d8d0c2!important;font:15px/1.55 system-ui,sans-serif!important;background:#f7f3eb!important;color:#22241f!important}
+#mrs-reading-nav a{all:initial!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;gap:6px!important;min-width:0!important;font:inherit!important;color:inherit!important;text-decoration:none!important;cursor:pointer!important;overflow-wrap:anywhere!important}
+#mrs-reading-nav span{all:initial!important;display:block!important;font:12px/1.5 system-ui,sans-serif!important;color:#666b62!important}
+#mrs-reading-nav strong{all:initial!important;display:block!important;font:600 16px/1.5 system-ui,sans-serif!important;color:inherit!important;overflow-wrap:anywhere!important}
+#mrs-reading-nav a:hover strong{text-decoration:underline!important}#mrs-reading-nav a:focus-visible{outline:2px solid #344b40!important;outline-offset:4px!important}
+</style>${links}</nav>`;
+}
+
 export function findTranslationCounterpart(posts, post) {
   const groupKey = (candidate) => String(candidate?.translationGroup || candidate?.id || '').trim();
   const group = groupKey(post);

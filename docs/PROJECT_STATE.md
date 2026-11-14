@@ -8,6 +8,15 @@ Updated: 2026-09-29
 
 ## Current stack
 
+Report discovery (2026-11-14): report middleware emits visible previous/next
+anchors in the initial HTML, in the report's own category and language, ordered
+by reportDate then registeredAt. The existing Shadow DOM discovery component
+removes that fallback only after its richer navigation renders successfully.
+If JavaScript or the posts fetch fails, the initial reading links remain usable.
+Uploaded report HTML, canonicals, sitemap dates and ranking policy are unchanged.
+This improves initial-HTML link discovery; it does not guarantee Google indexing.
+See `INDEXING_AUDIT_2026-11-14.md` for the 56-report investigation.
+
 Calendar improvements (2026-10-25, owner-approved rollout in #180): the existing daily
 calendar sync fills blank `disclosure_watchlist.corp_name_en` from OpenDART's
 official company overview `corp_name_eng`. `functions/api/disclosures/_company-names.js`
