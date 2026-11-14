@@ -23,6 +23,11 @@ Read-only HTTP checks covered all 56 exact clean URLs on November 14:
   investment note say **URL is unknown to Google**, with no previous crawl.
   Both pass Google's live test: **URL is available to Google / page can be
   indexed**. A live-test pass is not proof of indexing.
+- Additional individual inspections of Research No.05 (stablecoins/Treasuries),
+  English Market Basics episode 2, and the October 15 earnings-cut investment
+  note also show no recorded crawl. The first two are known through the sitemap
+  (Research No.05 also lists a referring report); the earnings-cut note is unknown.
+  Only these five URLs were individually inspected; the 56-URL HTTP audit is separate.
 
 The audit snapshot, 56 URLs, per-response metadata and saved Google UI evidence
 are in the owner's local `outputs/indexing-audit-2026-11-14` directory. This
@@ -36,6 +41,10 @@ clean, same-category/same-language previous/next anchors in the initial HTML.
 The existing styled Shadow DOM discovery component removes the fallback only
 after successful rendering. A failed fetch leaves reading links intact.
 
+Across the full published corpus this supplies 109 initial-HTML links into the
+56 sampled reports; every sampled report has at least one neighboring report
+linking to it through this navigation.
+
 This provides another crawlable reading path from neighboring articles without
 altering article content or requesting mass recrawls. The 56-page audit found no
 confirmed robots/canonical/HTTP/sitemap blocker, so this is a discovery
@@ -44,7 +53,10 @@ improvement, not a proven explanation for Google's decision not to crawl.
 Validation includes corpus-wide parity with the existing browser navigation,
 failed-fetch fallback preservation, successful replacement without duplicates,
 escaped titles and clean hrefs, middleware output checks, and the full repository
-verification gate. Production deployment and viewport checks are recorded in the PR.
+verification gate (1,505 tests passed). Preview smoke passed 20/20. Desktop and
+mobile checks cover the unchanged rich discovery UI and the visible fallback
+with an intentionally failed browser posts.json fetch. Production deployment
+and final HTTP checks are recorded in PR #215.
 
 ## Follow-up
 

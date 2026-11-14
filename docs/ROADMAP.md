@@ -12,9 +12,11 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 - **Report indexing investigation (2026-11-14)**: all 56 sampled report URLs pass
   HTTP/canonical/robots/sitemap/category-link checks. Initial-HTML previous/next
-  anchors now supplement the JS discovery component. Deploy, verify desktop/mobile
-  and the failed-JS fallback, then compare a small important-URL sample's crawl/index
-  status after Google's next visits. Do not repeat daily requests as a speed tactic.
+  anchors now supplement the JS discovery component (109 links into the sample).
+  Verification: 1,505 tests, Preview smoke 20/20, desktop/mobile and failed-fetch
+  fallback checks. PR #215 records deployment and final HTTP checks. Remaining:
+  compare a small important-URL sample's crawl/index status after Google's next
+  visits. Do not repeat daily requests as a speed tactic.
   See `INDEXING_AUDIT_2026-11-14.md`; a discovery improvement is not an indexing guarantee.
 
 - **IndexNow on publish (2026-11-12)**: `.github/workflows/indexnow.yml` announces added, changed and removed reports to Naver and Bing after each push that changes `data/posts.json` (see `docs/DEPLOYMENT.md` → IndexNow). Remaining manual steps after deployment:
