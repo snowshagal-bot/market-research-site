@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-14-weekly-ajspee",
+    "type": "weekly",
+    "typeLabel": "Weekly",
+    "lang": "en",
+    "date": "2026-11-14",
+    "reportDate": "2026-11-14",
+    "registeredDate": "2026-11-15",
+    "registeredAt": "2026-11-14T15:02:19.509Z",
+    "legacyImport": false,
+    "title": "The Players Return; the Podium Stands Empty",
+    "subtitle": "",
+    "description": "South Korea equities, November 9–13, 2026: KOSPI +4.56%, KOSDAQ +8.60%. Chips led a partial rebound; Nvidia leadership, Treasury yields and foreign flows set next week’s tests.",
+    "summary": "Semiconductor Top 15 +12.57%; KOSPI +4.56%, recovering about one-third of the prior week’s loss; KOSDAQ +8.60%. The rally faces Nvidia earnings and 5% Treasury yields.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 8,
+    "href": "reports/en/2026-11-14_Snowshagal_Weekly_EN.html",
+    "translationGroup": "2026-11-14-weekly-tv1j3y",
+    "coverImage": "covers/2026-11-14-weekly-ajspee.webp",
+    "shareCardImage": "covers/share/2026-11-14-weekly-ajspee.jpg",
+    "coverThumbnail": "covers/2026-11-14-weekly-ajspee-450.webp"
+  },
+  {
     "id": "2026-11-14-weekly-tv1j3y",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
