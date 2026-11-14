@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-14-note-b79ehh",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-14",
+    "reportDate": "2026-11-14",
+    "registeredDate": "2026-11-14",
+    "registeredAt": "2026-11-14T07:24:23.553Z",
+    "legacyImport": false,
+    "title": "메모리 새 공장은 2027년에 켜지고 2028년에 몰린다",
+    "seoTitle": "메모리 새 공장은 2027년에 켜지고, 2028년에 몰린다",
+    "subtitle": "",
+    "description": "메모리 새 공장은 2027년부터 첫 생산에 들어가고, 공급 증가는 2028년에 몰린다. 다만 생산능력이 는다고 메모리가 남는 건 아니다. 과잉 여부는 수요가, 이익이 줄어드는 폭은 장기계약의 구속력이 가른다. 볼 것은 주문과 고객 재고, 계약 비중, 첫 생산 일정이다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "semiconductors",
+      "ai",
+      "korea"
+    ],
+    "readingMinutes": 17,
+    "href": "reports/20261114_Investment_Insight_Memory_2028_Fab_Timeline.html",
+    "coverImage": "covers/2026-11-14-note-b79ehh.webp",
+    "shareCardImage": "covers/share/2026-11-14-note-b79ehh.jpg",
+    "coverThumbnail": "covers/2026-11-14-note-b79ehh-450.webp"
+  },
+  {
     "id": "2026-11-13-daily-1yvovb8",
     "type": "daily",
     "typeLabel": "Daily",
