@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-15-note-5iobp",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-15",
+    "reportDate": "2026-11-15",
+    "registeredDate": "2026-11-15",
+    "registeredAt": "2026-11-15T07:20:42.875Z",
+    "legacyImport": false,
+    "title": "대주주가 거의 다 가진 회사, 상장 자격이 있나",
+    "seoTitle": "대주주가 거의 다 가진 회사, 상장 자격이 있나",
+    "subtitle": "",
+    "description": "11/13 자본시장 간담회에서 대주주 지분이 과도한 상장사의 퇴출과 적대적 M&A 활성화가 거론됐다. 기준선은 아직 없다. 기준이 정해지면 회사의 길은 지분 매각·신주·자진 상장폐지·강제 퇴출로 갈리고, 소액주주의 손익은 기준 %보다 어떻게 나가느냐의 규칙이 정한다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "policy",
+      "esg",
+      "governance"
+    ],
+    "readingMinutes": 17,
+    "href": "reports/20261115_Investment_Insight_Free_Float_Listing_Rules.html",
+    "coverImage": "covers/2026-11-15-note-5iobp.webp",
+    "shareCardImage": "covers/share/2026-11-15-note-5iobp.jpg",
+    "coverThumbnail": "covers/2026-11-15-note-5iobp-450.webp"
+  },
+  {
     "id": "2026-11-15-basics-jsdep",
     "type": "basics",
     "typeLabel": "Market Basics",

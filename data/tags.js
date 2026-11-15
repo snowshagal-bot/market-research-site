@@ -292,5 +292,11 @@ window.TAG_REGISTRY = {
     "en": "MSCI",
     "group": "market",
     "custom": true
+  },
+  "esg": {
+    "ko": "ESG",
+    "en": "ESG",
+    "group": "company-policy",
+    "custom": true
   }
 };
