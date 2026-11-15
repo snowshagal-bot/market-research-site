@@ -1,5 +1,30 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-15-basics-yi9jg1",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-11-15",
+    "reportDate": "2026-11-15",
+    "registeredDate": "2026-11-15",
+    "registeredAt": "2026-11-15T07:05:19.618Z",
+    "legacyImport": false,
+    "title": "주식시장의 하루는 몇 시간인가",
+    "seoTitle": "주식 거래시간·동시호가 뜻: 주식시장의 하루는 몇 시간인가",
+    "subtitle": "",
+    "description": "8월 6일 아침 8시, 넥스트레이드 프리마켓에서 SK하이닉스 11주가 하한가에 거래됐다. 주식시장의 하루는 몇 시간일까. 정규장·동시호가·시간외 종가·애프터마켓·프리마켓 시간표와 단일가 매매·접속매매의 차이, 11월 19일 수능날 바뀌는 시간을 퀴즈와 시뮬레이터로 정리했다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "market-basic"
+    ],
+    "readingMinutes": 7,
+    "href": "reports/basics-18-market-hours.html",
+    "coverImage": "covers/2026-11-15-basics-yi9jg1.webp",
+    "shareCardImage": "covers/share/2026-11-15-basics-yi9jg1.jpg",
+    "coverThumbnail": "covers/2026-11-15-basics-yi9jg1-450.webp"
+  },
+  {
     "id": "2026-11-14-weekly-ajspee",
     "type": "weekly",
     "typeLabel": "Weekly",
