@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-15-note-7ilc2l",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-15",
+    "reportDate": "2026-11-15",
+    "registeredDate": "2026-11-15",
+    "registeredAt": "2026-11-15T07:33:07.289Z",
+    "legacyImport": false,
+    "title": "When Insiders Hold Nearly Every Share, Should It Stay Listed?",
+    "seoTitle": "When Insiders Own Nearly Every Share, Should the Company Stay Listed?",
+    "subtitle": "",
+    "description": "At a Nov. 13 capital-markets roundtable, South Korea discussed possible delisting rules for companies with concentrated ownership and removing barriers to hostile takeovers. No free-float threshold has been adopted. If one emerges, companies could sell blocks, issue equity, delist voluntarily or face involuntary delisting. For minority investors, the rules governing how they can exit may matter more than the threshold itself.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "policy",
+      "esg",
+      "governance"
+    ],
+    "readingMinutes": 20,
+    "href": "reports/en/20261115_Snowshagal_Investment_Insight_No35_Free_Float_Listing_Rules_EN.html",
+    "translationGroup": "2026-11-15-note-5iobp",
+    "coverImage": "covers/2026-11-15-note-7ilc2l.webp",
+    "shareCardImage": "covers/share/2026-11-15-note-7ilc2l.jpg",
+    "coverThumbnail": "covers/2026-11-15-note-7ilc2l-450.webp"
+  },
+  {
     "id": "2026-11-15-note-5iobp",
     "type": "note",
     "typeLabel": "투자 인사이트",
