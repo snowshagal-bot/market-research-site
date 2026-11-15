@@ -1,5 +1,31 @@
 [
   {
+    "id": "2026-11-15-basics-jsdep",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-11-15",
+    "reportDate": "2026-11-15",
+    "registeredDate": "2026-11-15",
+    "registeredAt": "2026-11-15T07:17:21.982Z",
+    "legacyImport": false,
+    "title": "How Long Is a Stock Market Day?",
+    "seoTitle": "Stock Market Hours and Call Auctions: How Long Is the Trading Day?",
+    "subtitle": "",
+    "description": "At 8 a.m. on August 6, just 11 SK hynix shares traded at limit down on Nextrade. A guide to Korean stock-market hours, opening and closing call auctions, continuous trading, after-market sessions and the November 19 CSAT schedule.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "market-basic"
+    ],
+    "readingMinutes": 10,
+    "href": "reports/en/Snowshagal_Market_Basics_18_How_Long_Is_the_Trading_Day_EN.html",
+    "translationGroup": "2026-11-15-basics-yi9jg1",
+    "coverImage": "covers/2026-11-15-basics-jsdep.webp",
+    "shareCardImage": "covers/share/2026-11-15-basics-jsdep.jpg",
+    "coverThumbnail": "covers/2026-11-15-basics-jsdep-450.webp"
+  },
+  {
     "id": "2026-11-15-basics-yi9jg1",
     "type": "basics",
     "typeLabel": "시장 입문",
