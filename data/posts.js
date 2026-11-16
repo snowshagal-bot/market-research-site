@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-16-note-1qelik6",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-16",
+    "reportDate": "2026-11-16",
+    "registeredDate": "2026-11-16",
+    "registeredAt": "2026-11-16T13:39:33.935Z",
+    "legacyImport": false,
+    "title": "한국은 대만보다 AI에 덜 걸려 있다, 대신 메모리 값에 걸려 있다",
+    "seoTitle": "한국은 대만보다 AI에 덜 걸려 있다, 대신 메모리 값에 걸려 있다",
+    "subtitle": "",
+    "description": "2026년 10월 한국 수출 증가분의 82%가 반도체·컴퓨터에서 나왔다. 대만과 첨단 전자제품 수출 구조를 비교하고, 한국 메모리 수출의 값·물량 기여와 주가 괴리를 분석한다.",
+    "tags": [
+      "kospi",
+      "taiwan",
+      "korea",
+      "ai",
+      "semiconductors"
+    ],
+    "readingMinutes": 17,
+    "href": "reports/20261116_Investment_Insight_Korea_AI_Exposure.html",
+    "coverImage": "covers/2026-11-16-note-1qelik6.webp",
+    "shareCardImage": "covers/share/2026-11-16-note-1qelik6.jpg",
+    "coverThumbnail": "covers/2026-11-16-note-1qelik6-450.webp"
+  },
+  {
     "id": "2026-11-16-daily-3im1ce",
     "type": "daily",
     "typeLabel": "Daily",
