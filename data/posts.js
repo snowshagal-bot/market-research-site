@@ -1,5 +1,31 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-17-note-17s1oi7",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-17",
+    "reportDate": "2026-11-17",
+    "registeredDate": "2026-11-17",
+    "registeredAt": "2026-11-16T16:43:56.422Z",
+    "legacyImport": false,
+    "title": "Oil Builds at Sea. Diesel Runs Short on Land.",
+    "seoTitle": "Oil Builds at Sea While Diesel Runs Short on Land",
+    "subtitle": "",
+    "description": "The IEA now projects an oil surplus for Q4, but the inventory build is offshore while onshore stocks remain historically low. Why diesel is still scarce—and why Korean pump prices barely budge.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "oil"
+    ],
+    "readingMinutes": 15,
+    "href": "reports/en/20261117_Snowshagal_Investment_Insight_No37_IEA_Oil_Surplus_EN.html",
+    "translationGroup": "2026-11-17-note-150i6wr",
+    "coverImage": "covers/2026-11-17-note-17s1oi7.webp",
+    "shareCardImage": "covers/share/2026-11-17-note-17s1oi7.jpg",
+    "coverThumbnail": "covers/2026-11-17-note-17s1oi7-450.webp"
+  },
+  {
     "id": "2026-11-17-note-150i6wr",
     "type": "note",
     "typeLabel": "투자 인사이트",
