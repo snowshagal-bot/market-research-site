@@ -1,5 +1,30 @@
 [
   {
+    "id": "2026-11-17-note-150i6wr",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-17",
+    "reportDate": "2026-11-17",
+    "registeredDate": "2026-11-17",
+    "registeredAt": "2026-11-16T16:26:58.207Z",
+    "legacyImport": false,
+    "title": "석유는 바다 위에 쌓이고, 경유는 육지에서 모자란다",
+    "seoTitle": "석유는 바다 위에 쌓이고, 경유는 육지에서 모자란다",
+    "subtitle": "",
+    "description": "IEA가 전쟁 뒤 처음으로 이번 분기부터 석유 공급이 수요를 넘는다고 했다. 그런데 늘어난 재고는 배 위에 있고 육상 재고는 2016년 이후 가장 적다. 경유가 아직 귀한 이유와 국내 주유소 값이 덜 움직이는 이유를 풀었다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "oil"
+    ],
+    "readingMinutes": 15,
+    "href": "reports/20261117_Investment_Insight_IEA_Oil_Surplus.html",
+    "coverImage": "covers/2026-11-17-note-150i6wr.webp",
+    "shareCardImage": "covers/share/2026-11-17-note-150i6wr.jpg",
+    "coverThumbnail": "covers/2026-11-17-note-150i6wr-450.webp"
+  },
+  {
     "id": "2026-11-16-note-1idzag4",
     "type": "note",
     "typeLabel": "Investment Insights",
