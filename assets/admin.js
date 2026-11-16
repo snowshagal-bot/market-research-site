@@ -111,7 +111,7 @@
   const localeApi = window.MARKET_LOCALE;
 
   const defaultShareImageInfo = '고르지 않으면 대표 커버로 공유 카드를 자동으로 만듭니다.';
-  const defaultSeoTitleHint = '끝에 " | Snowshagal"이 자동으로 붙습니다. 홈페이지 카드와 리포트 제목은 위 「제목」을 씁니다.';
+  const defaultSeoTitleHint = '검색어(회사·지표·용어)를 앞에, 콜론 뒤에 제목: 예) 외국인 순매도 국적별 분석: 214조원, 누가 팔았나. 끝에 " | Snowshagal"이 자동으로 붙습니다. 홈페이지 카드와 리포트 제목은 위 「제목」을 씁니다.';
   const marketSeoTitleHint = '데일리·위클리는 그날 마감 수치로 검색 제목을 자동으로 만듭니다(한국어·영문 모두). 이 칸은 쓰지 않습니다.';
   const defaultCoverInfo = 'JPG, PNG, WebP · 최대 4MB · 원본 리포트 HTML과 별도로 저장됩니다.';
   const defaultCoverGeneratorStatus = '업로드한 리포트 HTML의 첫 화면을 기준으로 생성합니다. 결과는 게시 전에 미리보고 교체할 수 있습니다.';
