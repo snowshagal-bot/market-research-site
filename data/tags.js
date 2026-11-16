@@ -298,5 +298,11 @@ window.TAG_REGISTRY = {
     "en": "ESG",
     "group": "company-policy",
     "custom": true
+  },
+  "taiwan": {
+    "ko": "대만",
+    "en": "Taiwan",
+    "group": "market",
+    "custom": true
   }
 };

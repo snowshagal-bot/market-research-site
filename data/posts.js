@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-16-note-59si1t",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-16",
+    "reportDate": "2026-11-16",
+    "registeredDate": "2026-11-16",
+    "registeredAt": "2026-11-16T13:34:14.482Z",
+    "legacyImport": false,
+    "title": "Korea's Exports Are Less AI-Heavy. Yet Memory Prices Still Drive the Risk.",
+    "seoTitle": "Korea's Exports Are Less AI-Concentrated Than Taiwan's—But More Sensitive to Memory Prices",
+    "subtitle": "",
+    "description": "In October 2026, semiconductors and computers drove 82% of South Korea's export growth. Compare AI-linked exports with Taiwan, the price-versus-volume effects in memory, and the equity-market gap.",
+    "tags": [
+      "kospi",
+      "ai",
+      "semiconductors",
+      "korea",
+      "taiwan"
+    ],
+    "readingMinutes": 36,
+    "href": "reports/20261116_Snowshagal_Investment_Insight_No36_Korea_AI_Exposure_EN.html",
+    "coverImage": "covers/2026-11-16-note-59si1t.webp",
+    "shareCardImage": "covers/share/2026-11-16-note-59si1t.jpg",
+    "coverThumbnail": "covers/2026-11-16-note-59si1t-450.webp"
+  },
+  {
     "id": "2026-11-16-daily-3im1ce",
     "type": "daily",
     "typeLabel": "Daily",
