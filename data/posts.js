@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-16-daily-zyy450",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-16",
+    "reportDate": "2026-11-16",
+    "registeredDate": "2026-11-16",
+    "registeredAt": "2026-11-16T12:11:42.134Z",
+    "legacyImport": false,
+    "title": "외국인 반도체 매도, 코스피 5,100선 턱걸이",
+    "subtitle": "",
+    "description": "2026년 11월 16일 코스피 마감 · 미국 반도체 급락과 D램 소송·낸드 가격 악재 속 외국인이 삼성전자·SK하이닉스를 팔아 코스피 3.59% 하락, 5,100.50. 하락 이유, 수급, 다음 거래일 확인할 것.",
+    "takeaway": "미국 반도체 급락에 메모리 악재 겹쳐 외국인 삼성전자·SK하이닉스 매도",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "foreign-investors",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-11-16_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-16-daily-zyy450.webp",
+    "shareCardImage": "covers/share/2026-11-16-daily-zyy450.jpg",
+    "coverThumbnail": "covers/2026-11-16-daily-zyy450-450.webp"
+  },
+  {
     "id": "2026-11-15-note-7ilc2l",
     "type": "note",
     "typeLabel": "Investment Insights",
