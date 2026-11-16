@@ -10,7 +10,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-16T13:49:14.292Z",
     "legacyImport": false,
     "title": "Korea's Exports Are Less AI-Heavy. Yet Memory Prices Still Drive the Risk.",
-    "seoTitle": "Korea's Exports Are Less AI-Concentrated Than Taiwan's—But More Sensitive to Memory Prices",
+    "seoTitle": "Korea vs Taiwan AI Exports: Korea Is More Exposed to Memory Prices",
     "subtitle": "",
     "description": "In October 2026, semiconductors and computers drove 82% of South Korea's export growth. Compare AI-linked exports with Taiwan, the price-versus-volume effects in memory, and the equity-market gap.",
     "tags": [
@@ -38,7 +38,7 @@ window.RESEARCH_POSTS = [
     "registeredAt": "2026-11-16T13:39:33.935Z",
     "legacyImport": false,
     "title": "한국은 대만보다 AI에 덜 걸려 있다, 대신 메모리 값에 걸려 있다",
-    "seoTitle": "한국은 대만보다 AI에 덜 걸려 있다, 대신 메모리 값에 걸려 있다",
+    "seoTitle": "한국·대만 AI 수출 비교: 한국은 메모리 값에 걸려 있다",
     "subtitle": "",
     "description": "2026년 10월 한국 수출 증가분의 82%가 반도체·컴퓨터에서 나왔다. 대만과 첨단 전자제품 수출 구조를 비교하고, 한국 메모리 수출의 값·물량 기여와 주가 괴리를 분석한다.",
     "tags": [
