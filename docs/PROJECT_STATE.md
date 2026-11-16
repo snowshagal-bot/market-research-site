@@ -313,6 +313,13 @@ indexable, declare their own title, description, Open Graph and X metadata, and 
 the sitemap with reciprocal `hreflang`. Preview stays non-indexable through the shared
 middleware's `X-Robots-Tag` header rather than a meta tag.
 
+The concise KO/EN About copy (2026-11-16) identifies Snowshagal as a personal research
+archive about Korean markets, explains its use of public disclosures, statistics and
+brokerage research, and invites questions/error reports through the existing email.
+Source/date clarity and separating facts from forecasts/interpretation are stated as
+editorial aims, not a claim of formal review. No author credentials, affiliation,
+investment track record or unestablished correction policy is asserted.
+
 The homepage opens with the brand hero, then a TODAY strip summarising the latest market
 close. `/api/market/latest` is the source of truth for both the strip's numbers and its
 market date; `data/market-summary.js` is a fallback used only when that request fails, and

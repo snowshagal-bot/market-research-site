@@ -189,12 +189,12 @@ test('About is indexable and describes the archive in each language', async () =
   assert.match(ko, /<title>소개 \| Snowshagal Market Research<\/title>/);
   assert.match(ko, /rel="canonical" href="https:\/\/snowshagal\.com\/about\/"/);
   assert.match(ko, /<meta property="og:locale" content="ko_KR">/);
-  assert.match(ko, /독립 리서치 아카이브/);
+  assert.match(ko, /개인 리서치 아카이브/);
 
   assert.match(en, /<title>About \| Snowshagal Market Research<\/title>/);
   assert.match(en, /rel="canonical" href="https:\/\/snowshagal\.com\/en\/about\/"/);
   assert.match(en, /<meta property="og:locale" content="en_US">/);
-  assert.match(en, /independent research archive/);
+  assert.match(en, /personal research archive/);
 });
 
 /* ---------- report social metadata ---------- */
