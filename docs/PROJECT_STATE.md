@@ -231,6 +231,13 @@ date written after that label), and the editor confirms or edits it before publi
 suffix is kept as the headline (since 2026-11-12), so new posts read `{headline} | Snowshagal` like
 the 52 titles normalized that day, which had read `… | Snowshagal 투자 인사이트 NO.31 | Snowshagal`.
 Posts published before 2026-10-06 without a `seoTitle` keep the dated category rule.
+Writing rule (owner decision 2026-11-16, after GSC showed impressions but almost no clicks on
+hook-only titles): a search title leads with the words a reader would type (the company,
+indicator or term), then a colon and the headline, e.g. `외국인 순매도 국적별 분석: 214조원, 누가 팔았나`
+or `마진콜·반대매매 뜻: 급락은 어떻게 더 큰 급락을 만드는가`; no new claim or number that the report
+does not carry. The admin hint says so. That day 96 stored titles (every Research and Note post
+and Basics 1–6, KO and EN) were rewritten this way; Basics 7 onward already followed it, so every
+Research, Note and Basics post now has a `seoTitle`.
 The rule (`SEO_TITLE_TYPES`, `seoTitleText`) lives in `assets/report-metadata.js` and is applied
 by `/api/publish`, `/api/manage` and `postSeoTitle()` in `functions/_seo.js`. A Daily or a Weekly
 never takes one, in Korean or in English: an English Daily gets the English close-based title

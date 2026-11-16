@@ -101,6 +101,7 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Recently completed (Production)
 
+- **Keyword-first search titles (2026-11-16)**: 96 `seoTitle` values (all Research and Note posts, Basics 1–6, KO and EN) now lead with the searched company, indicator or term before the headline; report pages, cards and URLs are unchanged. The admin publish and manage hints state the rule. The IndexNow push run announces the changed URLs; check GSC CTR for these pages after 3–4 weeks.
 - **Report metadata correctness — B1 (#151), C (#154), B2 (#155), Production complete 2026-10-01**:
   - **B1 — forward metadata correctness**: a newly published report's description is its own `meta[name="description"]` or blank, never a category sentence (the closed list in `assets/report-metadata.js`, also enforced by `/api/publish` and `/api/manage`); the summary and the Daily one-liner are read from their marked places (hero `.quote`, `.dcv-one .oc` / `.dcv-ol`); cover title rows are no longer run together; the publish form shows where each value came from.
   - **C — historical stored metadata normalized**: the owner-approved manifest was applied by `scripts/backfill-report-metadata.mjs` (compare-and-swap, regenerated through the canonical build). As of deployment the Production corpus stores no category-boilerplate description; Daily hero-quote summaries and `.dcv-one .oc` takeaways were backfilled; 5 run-together titles were respaced; one stray Markdown `**` was removed. Later publishes are covered by B1.
