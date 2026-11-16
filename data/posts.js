@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-16-daily-3im1ce",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-16",
+    "reportDate": "2026-11-16",
+    "registeredDate": "2026-11-16",
+    "registeredAt": "2026-11-16T12:37:16.099Z",
+    "legacyImport": false,
+    "title": "Foreign Selling Hits Chips; KOSPI Barely Holds 5,100",
+    "subtitle": "",
+    "description": "Nov. 16, 2026 Korean market close: KOSPI -3.59% to 5,100.50 as foreign investors sold major chip stocks following a U.S. semiconductor rout, DRAM litigation news and a bearish NAND-price outlook. Key drivers, investor flows and levels to watch.",
+    "takeaway": "A U.S. semiconductor selloff, a DRAM lawsuit and a bearish NAND-price outlook drove foreign selling of Samsung Electronics and SK hynix.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "foreign-investors",
+      "flows",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-11-16_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-16-daily-zyy450",
+    "coverImage": "covers/2026-11-16-daily-3im1ce.webp",
+    "shareCardImage": "covers/share/2026-11-16-daily-3im1ce.jpg",
+    "coverThumbnail": "covers/2026-11-16-daily-3im1ce-450.webp"
+  },
+  {
     "id": "2026-11-16-daily-zyy450",
     "type": "daily",
     "typeLabel": "주식 리포트",
