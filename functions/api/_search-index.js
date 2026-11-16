@@ -52,6 +52,16 @@ function bodyScript(bodies) {
  * them into Git blobs, so all three writers stay in step.
  */
 export function searchIndexArtifacts(searchIndex) {
+  return searchIndexArtifactWriters(searchIndex).map(({ path, build }) => ({ path, content: build() }));
+}
+
+/**
+ * The same files, each with a build() that serializes it on demand. The search
+ * index is over ten megabytes; serialized all at once, its copies held side by
+ * side pushed a publish past the Worker memory limit (Cloudflare 1102, a 503).
+ * Built and written one at a time, only one of them is in memory.
+ */
+export function searchIndexArtifactWriters(searchIndex) {
   const entries = Array.isArray(searchIndex) ? searchIndex : [];
   const bodies = { ko: {}, en: {} };
   for (const item of entries) {
@@ -60,12 +70,12 @@ export function searchIndexArtifacts(searchIndex) {
   }
 
   return [
-    { path: SEARCH_INDEX_PATH, content: `${JSON.stringify(entries, null, 2)}\n` },
-    { path: SEARCH_META_PATH, content: `window.SEARCH_INDEX_META = ${JSON.stringify(entries.map(searchMetaEntry))};\n` },
-    { path: SEARCH_BODY_PATHS.ko, content: bodyScript(bodies.ko) },
-    { path: SEARCH_BODY_PATHS.en, content: bodyScript(bodies.en) },
+    { path: SEARCH_INDEX_PATH, build: () => `${JSON.stringify(entries, null, 2)}\n` },
+    { path: SEARCH_META_PATH, build: () => `window.SEARCH_INDEX_META = ${JSON.stringify(entries.map(searchMetaEntry))};\n` },
+    { path: SEARCH_BODY_PATHS.ko, build: () => bodyScript(bodies.ko) },
+    { path: SEARCH_BODY_PATHS.en, build: () => bodyScript(bodies.en) },
     // The glossary page reads each report's tooltip terms from here
     // (functions/_glossary.js); search-index.json stays their source.
-    { path: GLOSSARY_PATH, content: serializeGlossary(entries) }
+    { path: GLOSSARY_PATH, build: () => serializeGlossary(entries) }
   ];
 }
