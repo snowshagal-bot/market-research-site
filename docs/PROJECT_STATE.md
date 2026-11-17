@@ -327,6 +327,16 @@ Source/date clarity and separating facts from forecasts/interpretation are state
 editorial aims, not a claim of formal review. No author credentials, affiliation,
 investment track record or unestablished correction policy is asserted.
 
+2026-11-17 the About pages gained three sections between About and Contact, stating only
+what the site already does: **What we publish** (the five categories with links, the
+date-is-data-date rule, the English edition as an adaptation), **Data sources** (Market:
+KRX regular-session close, no close record when it cannot be confirmed, overseas quotes
+with their own as-of time, the same four sources the Market page lists; Disclosures:
+OpenDART; Calendar: Fed, BLS, BEA, Bank of Korea and company filings; Reports: filings,
+official statistics, brokerage research) and **Disclaimer**. The About section also says
+the site is written by a single editor under a pen name. Organization `sameAs` is not set
+yet; the owner will supply the LinkedIn/Threads profile URLs later.
+
 The homepage opens with the brand hero, then a TODAY strip summarising the latest market
 close. `/api/market/latest` is the source of truth for both the strip's numbers and its
 market date; `data/market-summary.js` is a fallback used only when that request fails, and
