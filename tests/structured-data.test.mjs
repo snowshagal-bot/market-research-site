@@ -23,7 +23,9 @@ import {
   reportStructuredData,
   reportSeoTags,
   reportDescription,
-  reportSiteUrl
+  reportSiteUrl,
+  reportPublishedTime,
+  reportModifiedTime
 } from '../functions/_seo.js';
 import { onRequest as middlewareOnRequest } from '../functions/_middleware.js';
 
@@ -93,8 +95,11 @@ test('5-14. Structured Data: Representative KO & EN reports have Article with co
     assert.doesNotMatch(article.url, /\.html?$/i);
     assert.equal(article.headline, post.title.trim());
     assert.equal(article.description, reportDescription(post));
-    assert.equal(article.datePublished, (post.reportDate || post.date).slice(0, 10));
-    assert.equal(article.dateModified, undefined, 'No fabricated dateModified');
+    assert.equal(article.datePublished, reportPublishedTime(post));
+    assert.ok(article.datePublished.startsWith((post.reportDate || post.date).slice(0, 10)) || article.datePublished.slice(0, 10) > (post.reportDate || post.date).slice(0, 10));
+    // The last real change: a manage edit when there was one, else the upload itself.
+    assert.equal(article.dateModified, reportModifiedTime(post));
+    assert.ok(article.dateModified >= article.datePublished);
     assert.equal(article.inLanguage, post.lang === 'en' ? 'en' : 'ko-KR');
     assert.deepEqual(article.publisher, { '@id': 'https://snowshagal.com/#organization' });
     assert.equal(article.author['@id'], 'https://snowshagal.com/#organization');

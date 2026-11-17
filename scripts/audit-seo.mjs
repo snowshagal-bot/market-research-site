@@ -220,6 +220,15 @@ function validDay(value) {
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
+// A report's publication time: the plain report date, or the upload time in
+// Korean time as functions/_seo.js kstIsoTime() writes it.
+function validPublishedTime(value) {
+  const text = String(value || '');
+  if (validDay(text)) return true;
+  const match = text.match(/^(\d{4}-\d{2}-\d{2})T([01]\d|2[0-3]):[0-5]\d:[0-5]\d\+09:00$/);
+  return Boolean(match && validDay(match[1]));
+}
+
 function checkStructuredData(report, page, doc, assets, tally) {
   const { nodes, errors } = doc.jsonLd;
   for (const error of errors) fail(report, 'jsonld.parse', page, error, 'valid JSON-LD');
@@ -271,12 +280,15 @@ function checkStructuredData(report, page, doc, assets, tally) {
     if (main !== page.canonical) problems.push(['mainEntityOfPage', main, page.canonical]);
     if (!String(article.headline || '').trim()) problems.push(['headline', article.headline, 'non-empty']);
     if (!String(article.description || '').trim()) problems.push(['description', article.description, 'non-empty']);
-    if (!validDay(article.datePublished)) problems.push(['datePublished', article.datePublished, 'valid YYYY-MM-DD']);
+    if (!validPublishedTime(article.datePublished)) problems.push(['datePublished', article.datePublished, 'valid YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS+09:00']);
     if (!String(article.inLanguage || '').toLowerCase().startsWith(expectLang)) problems.push(['inLanguage', article.inLanguage, expectLang]);
     if (article.publisher?.['@id'] !== ORGANIZATION_ID) problems.push(['publisher', article.publisher?.['@id'], ORGANIZATION_ID]);
     if (!article.author) problems.push(['author', article.author, 'present']);
     else if (article.author['@id'] && article.author['@id'] !== ORGANIZATION_ID) problems.push(['author.@id', article.author['@id'], ORGANIZATION_ID]);
-    if ('dateModified' in article) problems.push(['dateModified', article.dateModified, 'absent (no fabricated dateModified)']);
+    // dateModified is the last manage save or the upload itself: never before publication.
+    if (!validPublishedTime(article.dateModified) || String(article.dateModified) < String(article.datePublished)) {
+      problems.push(['dateModified', article.dateModified, 'valid time, not before datePublished']);
+    }
     if (article.image) {
       const image = typeof article.image === 'string' ? article.image : article.image?.url;
       if (!isProductionUrl(image)) problems.push(['image', image, 'absolute production URL']);

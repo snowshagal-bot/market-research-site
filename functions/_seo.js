@@ -475,7 +475,23 @@ export function postSeoTitle(post) {
   return rules.acceptsSeoTitle(post?.type) ? rules.seoTitleText(post?.seoTitle) : '';
 }
 
+// What the uploaded report says about itself in its <head>, read by the
+// middleware as the page streams: `report-seo-title`, `report-seo-description`
+// and `report-takeaway`. Absent on older uploads, which keep the generated text.
+function reportOwnMeta(options) {
+  const meta = options?.reportMeta || {};
+  return {
+    seoTitle: normalizeText(meta.seoTitle),
+    seoDescription: normalizeText(meta.seoDescription),
+    takeaway: normalizeText(meta.takeaway)
+  };
+}
+
 export function reportSeoTitle(post, options = {}) {
+  // The report's own search title, used exactly as written: it already ends
+  // in " | Snowshagal", so nothing is added to it.
+  const own = reportOwnMeta(options).seoTitle;
+  if (own) return own;
   const lang = postLanguage(post);
   const title = normalizeText(post?.title);
   const date = reportDateLabel(post, lang);
@@ -579,6 +595,13 @@ function factualDescription(post, lang) {
 export function reportDescription(post, options = {}) {
   const lang = postLanguage(post);
   const date = reportDateLabel(post, lang);
+  const own = reportOwnMeta(options);
+  // The report's own search description, used as written.
+  if (own.seoDescription) return own.seoDescription;
+  // A Daily or Weekly whose upload names its takeaway opens with it — the
+  // reason for the move — and the numbers follow. Older uploads keep the
+  // numbers first.
+  const lead = (post?.type === 'daily' || post?.type === 'weekly') ? sentence(own.takeaway) : '';
 
   if (post?.type === 'daily') {
     const facts = dailyFactsFor(post, options.facts);
@@ -590,6 +613,7 @@ export function reportDescription(post, options = {}) {
       const parts = lang === 'en'
         ? [`${date}: KOSPI closed at ${kospi}${kosdaq ? `, KOSDAQ ${kosdaq}` : ''}.`, flows.length ? `${flows.join('; ')}.` : '']
         : [`${date} 코스피 ${kospi}${kosdaq ? `, 코스닥 ${kosdaq}` : ''} 마감.`, flows.length ? `수급: ${flows.join(' · ')}.` : ''];
+      if (lead) return limitText([lead, ...parts].filter(Boolean).join(' '));
       return limitText([...parts, sentence(dailyTakeaway(post, facts, lang))].filter(Boolean).join(' '));
     }
   }
@@ -604,11 +628,16 @@ export function reportDescription(post, options = {}) {
       const parts = lang === 'en'
         ? [`${period}, ${year}: KOSPI ${formatSignedPct(facts.pct)} for the week (${move}).`, themes.length ? `Key variables ahead: ${themes.join(', ')}.` : '']
         : [`${year}년 ${period} 코스피 주간 ${formatSignedPct(facts.pct)} (${move}).`, themes.length ? `다음 주 변수: ${themes.join('·')}.` : ''];
+      if (lead) return limitText([lead, ...parts].filter(Boolean).join(' '));
       return limitText([...parts, sentence(post?.summary)].filter(Boolean).join(' '));
     }
   }
 
   const blurb = globalThis.MARKET_LOCALE.editorialBlurb(post);
+  if (lead) {
+    const rest = normalizeText(blurb) === normalizeText(own.takeaway) ? '' : (blurb || factualDescription(post, lang));
+    return limitText([lead, rest].filter(Boolean).join(' '));
+  }
   return limitText(blurb || factualDescription(post, lang));
 }
 
@@ -867,6 +896,51 @@ export function reportArticleImage(post) {
   return '';
 }
 
+// YYYY-MM-DD of the report date (reportDate before date), or '' when it is not one.
+export function reportPublishedDate(post) {
+  const value = String(post?.reportDate || post?.date || '').slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : '';
+}
+
+// An instant as Korean time, "2026-11-18T16:42:05+09:00", or '' when invalid.
+export function kstIsoTime(value) {
+  const ms = Date.parse(String(value || ''));
+  if (!Number.isFinite(ms)) return '';
+  return `${new Date(ms + 9 * 3600e3).toISOString().slice(0, 19)}+09:00`;
+}
+
+// How many days after its report date an upload still counts as the report's
+// publication. Most go up the same evening or the next morning; a weekend
+// Weekly can wait until Monday. Later uploads (backfills, imports and
+// re-publications weeks on) keep the plain report date.
+const PUBLISHED_WITHIN_DAYS = 3;
+
+/**
+ * When the report went up: the upload time in Korean time when it was
+ * uploaded within a few days of its report date, else the report date alone.
+ * The JSON-LD datePublished and article:published_time both use it.
+ */
+export function reportPublishedTime(post) {
+  const date = reportPublishedDate(post);
+  if (!date || post?.legacyImport) return date;
+  const at = kstIsoTime(post?.registeredAt);
+  if (!at) return date;
+  const days = Math.round((Date.parse(at.slice(0, 10)) - Date.parse(date)) / 864e5);
+  return days >= 0 && days <= PUBLISHED_WITHIN_DAYS ? at : date;
+}
+
+/**
+ * The last edit saved from /admin/manage/ (updatedAt) when it is later than
+ * the upload, else the publication time. A report uploaded again is a new
+ * upload, so its registeredAt, and with it both times, move to that upload.
+ */
+export function reportModifiedTime(post) {
+  const published = reportPublishedTime(post);
+  const updated = kstIsoTime(post?.updatedAt);
+  const after = Date.parse(post?.updatedAt) > (Date.parse(post?.registeredAt) || 0);
+  return updated && after && updated.slice(0, 10) >= published.slice(0, 10) ? updated : published;
+}
+
 export function reportArticleStructuredData(post, options = {}) {
   const canonical = reportSiteUrl(post.href);
   const lang = postLanguage(post);
@@ -874,7 +948,8 @@ export function reportArticleStructuredData(post, options = {}) {
   // description follows the search-intent wording of the meta tag.
   const title = String(post?.title || '').replace(/\s+/g, ' ').trim();
   const description = reportDescription(post, options);
-  const datePublished = String(post?.reportDate || post?.date || '').slice(0, 10);
+  const datePublished = reportPublishedTime(post);
+  const dateModified = reportModifiedTime(post);
   const section = CATEGORY_LANDINGS[post?.type]?.[lang]?.heading || post?.typeLabel || '';
   const image = reportArticleImage(post);
 
@@ -886,6 +961,7 @@ export function reportArticleStructuredData(post, options = {}) {
     'headline': title,
     'description': description,
     'datePublished': datePublished,
+    ...(dateModified ? { 'dateModified': dateModified } : {}),
     'inLanguage': lang === 'en' ? 'en' : 'ko-KR',
     'publisher': { '@id': ORGANIZATION_ID },
     'author': {
@@ -975,9 +1051,17 @@ export function reportSeoTags(posts, post, options = {}) {
     ? `<meta property="og:locale:alternate" content="${postLanguage(counterpart) === 'en' ? 'en_US' : 'ko_KR'}">`
     : '';
   const jsonLd = structuredDataScript(reportStructuredData(post, options));
+  // The same times as the JSON-LD datePublished/dateModified. Without them
+  // Daum dates a page from the first date-like text in the body (a cited
+  // 2006 Fed decision, a source's 2026.08.26), so its results showed years-old dates.
+  const published = reportPublishedTime(post);
+  const modified = reportModifiedTime(post);
+  const publishedTimeTag = (published ? `<meta property="article:published_time" content="${published}">` : '')
+    + (modified ? `<meta property="article:modified_time" content="${modified}">` : '');
 
   return `<title>${escapeHtml(title)}</title><link rel="canonical" href="${escapeHtml(canonical)}">${alternates}${descriptionTags}`
     + `<meta property="og:type" content="article">`
+    + publishedTimeTag
     + `<meta property="og:site_name" content="Snowshagal">`
     + `<meta property="og:locale" content="${lang === 'en' ? 'en_US' : 'ko_KR'}">${localeAlternate}`
     + `<meta property="og:title" content="${escapeHtml(post.title)}">`
