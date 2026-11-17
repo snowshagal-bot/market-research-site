@@ -1,5 +1,34 @@
 [
   {
+    "id": "2026-11-18-basics-15ij75z",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-11-18",
+    "reportDate": "2026-11-18",
+    "registeredDate": "2026-11-18",
+    "registeredAt": "2026-11-17T16:22:52.617Z",
+    "legacyImport": false,
+    "title": "What Did Foreign Investors Buy and Sell Today?",
+    "seoTitle": "How to Read KRX Net Buying by Investor (Screen 12010, MDCSTAT024)",
+    "subtitle": "",
+    "description": "See which stocks foreign investors and institutions bought and sold on Korea Exchange screen [12010] (MDCSTAT024): menu path, investor types, where the biggest sales hide, update times, common mistakes.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "market-basic"
+    ],
+    "readingMinutes": 6,
+    "href": "reports/en/basics-data-guide-01-krx-net-buying_EN.html",
+    "translationGroup": "2026-11-18-basics-143x6rj",
+    "coverImage": "covers/2026-11-18-basics-15ij75z.webp",
+    "shareCardImage": "covers/share/2026-11-18-basics-15ij75z.jpg",
+    "shareCardSource": "custom",
+    "coverThumbnail": "covers/2026-11-18-basics-15ij75z-450.webp"
+  },
+  {
     "id": "2026-11-18-basics-143x6rj",
     "type": "basics",
     "typeLabel": "시장 입문",
