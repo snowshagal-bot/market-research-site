@@ -334,8 +334,17 @@ KRX regular-session close, no close record when it cannot be confirmed, overseas
 with their own as-of time, the same four sources the Market page lists; Disclosures:
 OpenDART; Calendar: Fed, BLS, BEA, Bank of Korea and company filings; Reports: filings,
 official statistics, brokerage research) and **Disclaimer**. The About section also says
-the site is written by a single editor under a pen name. Organization `sameAs` is not set
-yet; the owner will supply the LinkedIn/Threads profile URLs later.
+the site is written by a single editor under a pen name.
+
+2026-11-17 (later): the Organization node carries `sameAs` with the editor's LinkedIn and
+Threads profiles (`SOCIAL_PROFILES` in `functions/_seo.js`). The static homepage JSON-LD
+repeats the same node, and both About pages link the same addresses in a Follow section
+(`rel="me"`); `tests/structured-data.test.mjs` keeps all three equal.
+
+The same change filled `description` for 21 early posts (Market Basics episodes 1–6 and
+the July–August weeklies, KO and EN) that had none and fell back to "date — category —
+title". Each line is written from the report's own lead and figures, within the
+180-character description limit, and the search index was rebuilt from them.
 
 The homepage opens with the brand hero, then a TODAY strip summarising the latest market
 close. `/api/market/latest` is the source of truth for both the strip's numbers and its
