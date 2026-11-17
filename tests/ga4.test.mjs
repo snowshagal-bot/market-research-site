@@ -155,7 +155,7 @@ test('string injection is idempotent and the streaming middleware uses the ident
     on(selector, handler) { this.handlers.push([selector, handler]); return this; }
     transform(response) {
       for (const [selector, handler] of this.handlers) {
-        if (selector === 'head') handler.element({ append: html => appended.push(html) });
+        if (selector === 'head') handler.element({ append: html => appended.push(html), onEndTag: fn => fn({ before: html => appended.push(html) }) });
         if (selector === 'script[data-snowshagal-ga4]') handler.element({ remove: () => removed.push(true) });
       }
       return response;

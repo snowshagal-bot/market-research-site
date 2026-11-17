@@ -100,6 +100,38 @@ export function removeTags(body, name, predicate) {
   return body.replace(pattern, (whole, source) => (predicate(tagAttributes(source)) ? '' : whole));
 }
 
+const REPORT_HEAD_META = {
+  'report-seo-title': 'seoTitle',
+  'report-seo-description': 'seoDescription',
+  'report-takeaway': 'takeaway'
+};
+
+/**
+ * The string-path equivalent of the HTMLRewriter meta readers: the first
+ * report-seo-title, report-seo-description and report-takeaway content in the
+ * uploaded file, whatever the attribute order. Entities are decoded as an
+ * HTML parser (and HTMLRewriter's getAttribute) would leave them.
+ */
+export function reportHeadMeta(body) {
+  const found = {};
+  const pattern = /<meta\b((?:[^>"']|"[^"]*"|'[^']*')*)>/gi;
+  for (const match of String(body || '').matchAll(pattern)) {
+    const attrs = tagAttributes(match[1]);
+    const key = REPORT_HEAD_META[String(attrs.name || '').toLowerCase()];
+    if (key && !(key in found)) found[key] = decodeHtmlEntities(String(attrs.content ?? ''));
+  }
+  return found;
+}
+
+function decodeHtmlEntities(value) {
+  return value
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(parseInt(code, 16)))
+    .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&');
+}
+
 /**
  * The string-path equivalent of HTMLRewriter's setAttribute('lang') on <html>:
  * replaces a double-, single- or un-quoted lang on the first <html> tag, or
@@ -402,7 +434,10 @@ export async function onRequest(context) {
   else if (/위클리|weekly/i.test(decodedPath)) active = 'weekly';
   else if (/비정기|소버린|research/i.test(decodedPath)) active = 'research';
   else if (/투자\s*노트|끄적|note/i.test(decodedPath)) active = 'note';
-  let seo = '';
+  // Builds the report's head tags once the uploaded file's own head metas
+  // (report-seo-title, report-seo-description, report-takeaway) are known.
+  // Null when no post matches: the page is then passed through untouched.
+  let seoFor = null;
   let readingNavigation = '';
   let tags = null;
   try {
@@ -422,7 +457,12 @@ export async function onRequest(context) {
         // numbers the <title> and description quote; without one they fall
         // back to dated wording with no numbers.
         const facts = await loadReportFacts(context.env, post);
-        seo = reportSeoTags(posts, post, { facts, tagRegistry: tags });
+        // Built once without the file's metas first, so a failure leaves the
+        // page untouched, and kept as the fallback should a later build fail.
+        const fallback = reportSeoTags(posts, post, { facts, tagRegistry: tags });
+        seoFor = (reportMeta) => {
+          try { return reportSeoTags(posts, post, { facts, tagRegistry: tags, reportMeta }); } catch (_) { return fallback; }
+        };
         readingNavigation = reportReadingNavigation(posts, post);
       }
     }
@@ -438,6 +478,7 @@ export async function onRequest(context) {
 
   if (typeof HTMLRewriter === 'undefined') {
     let body = await response.text();
+    const seo = seoFor ? seoFor(reportHeadMeta(body)) : '';
     // The same elements the HTMLRewriter selectors below remove, matched by
     // attribute rather than by attribute order.
     if (seo) {
@@ -447,6 +488,7 @@ export async function onRequest(context) {
         attrs.name === 'description'
         || String(attrs.property ?? '').startsWith('og:')
         || String(attrs.name ?? '').startsWith('twitter:')
+        || attrs.property === 'article:published_time'
       ));
     }
     body = removeTags(body, 'link', attrs => (
@@ -470,24 +512,37 @@ export async function onRequest(context) {
     });
   }
 
+  const ownMeta = {};
+  const readOwnMeta = (key) => ({ element(element) { if (!(key in ownMeta)) ownMeta[key] = decodeHtmlEntities(element.getAttribute('content') || ''); } });
   return applyGa4ToRewriter(new HTMLRewriter(), ga4)
+    .on('meta[name="report-seo-title"]', readOwnMeta('seoTitle'))
+    .on('meta[name="report-seo-description"]', readOwnMeta('seoDescription'))
+    .on('meta[name="report-takeaway"]', readOwnMeta('takeaway'))
     .on('html', { element(element) { element.setAttribute('lang', lang); } })
-    .on('title', { element(element) { if (seo) element.remove(); } })
+    .on('title', { element(element) { if (seoFor) element.remove(); } })
     .on('link[rel="canonical"]', { element(element) { element.remove(); } })
     .on('link[rel="alternate"][hreflang]', { element(element) { element.remove(); } })
     .on('link[type="application/atom+xml"]', { element(element) { element.remove(); } })
-    .on('meta[name="description"]', { element(element) { if (seo) element.remove(); } })
-    .on('meta[property^="og:"]', { element(element) { if (seo) element.remove(); } })
-    .on('meta[name^="twitter:"]', { element(element) { if (seo) element.remove(); } })
+    .on('meta[name="description"]', { element(element) { if (seoFor) element.remove(); } })
+    .on('meta[property^="og:"]', { element(element) { if (seoFor) element.remove(); } })
+    .on('meta[name^="twitter:"]', { element(element) { if (seoFor) element.remove(); } })
+    .on('meta[property="article:published_time"]', { element(element) { if (seoFor) element.remove(); } })
     // The site writes the page's Article and breadcrumb itself; one the
     // report carried would describe the same page a second time, with images
     // and dates the site does not serve.
-    .on('script[type="application/ld+json"]', { element(element) { if (seo) element.remove(); } })
+    .on('script[type="application/ld+json"]', { element(element) { if (seoFor) element.remove(); } })
     // Uploaded report HTML carries no icon of its own.
     .on('link[rel~="icon"]', { element(element) { element.remove(); } })
     .on('link[rel="apple-touch-icon"]', { element(element) { element.remove(); } })
     .on('link[rel="manifest"]', { element(element) { element.remove(); } })
-    .on('head', { element(element) { element.append(`${FAVICON_TAGS}${seo}${feedLink}${footerStyle}`, { html: true }); } })
+    // Written at </head>, after the file's own metas above have been read.
+    .on('head', {
+      element(element) {
+        element.onEndTag((end) => {
+          end.before(`${FAVICON_TAGS}${seoFor ? seoFor(ownMeta) : ''}${feedLink}${footerStyle}`, { html: true });
+        });
+      }
+    })
     .on('body', {
       element(element) {
         element.append(`${readingNavigation}${footerMarkup}${shell}`, { html: true });
