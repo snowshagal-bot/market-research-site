@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-17-daily-19yewo9",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-17",
+    "reportDate": "2026-11-17",
+    "registeredDate": "2026-11-17",
+    "registeredAt": "2026-11-17T10:23:23.293Z",
+    "legacyImport": false,
+    "title": "미국 AI 칩 규제 충격, 코스피 5,000선 아래로",
+    "subtitle": "",
+    "description": "2026년 11월 17일 코스피 마감 · 미국의 AI 칩 원격 이용 규제로 미국 반도체가 급락하자 외국인이 1조4,460억 순매도, 코스피 2.59% 내린 4,968.48. 하락 이유, 수급, 다음 거래일 확인할 것.",
+    "takeaway": "미국 AI 칩 규제와 AI 투자 전망 하향에 반도체 급락, 대형주 전반 약세로 코스피 5,000선 아래로",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-11-17_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-17-daily-19yewo9.webp",
+    "shareCardImage": "covers/share/2026-11-17-daily-19yewo9.jpg",
+    "coverThumbnail": "covers/2026-11-17-daily-19yewo9-450.webp"
+  },
+  {
     "id": "2026-11-17-note-17s1oi7",
     "type": "note",
     "typeLabel": "Investment Insights",
