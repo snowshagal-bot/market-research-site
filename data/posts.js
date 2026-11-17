@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-17-daily-1ri7fgx",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-17",
+    "reportDate": "2026-11-17",
+    "registeredDate": "2026-11-17",
+    "registeredAt": "2026-11-17T10:26:31.546Z",
+    "legacyImport": false,
+    "title": "US AI Chip Curbs Hit Stocks, KOSPI Slips Below 5,000",
+    "subtitle": "",
+    "description": "Korea stock market close, Nov 17, 2026: KOSPI fell 2.59% to 4,968.48 as foreign investors sold KRW 1.446tn amid tighter US AI chip rules and slower AI spending forecasts.",
+    "takeaway": "US AI chip controls and slower AI-spending growth forecasts pressure Korean large caps; KOSPI closes below 5,000",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-11-17_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-17-daily-19yewo9",
+    "coverImage": "covers/2026-11-17-daily-1ri7fgx.webp",
+    "shareCardImage": "covers/share/2026-11-17-daily-1ri7fgx.jpg",
+    "coverThumbnail": "covers/2026-11-17-daily-1ri7fgx-450.webp"
+  },
+  {
     "id": "2026-11-17-daily-19yewo9",
     "type": "daily",
     "typeLabel": "주식 리포트",
