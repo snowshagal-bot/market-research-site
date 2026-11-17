@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-17-note-1ln40ot",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-17",
+    "reportDate": "2026-11-17",
+    "registeredDate": "2026-11-17",
+    "registeredAt": "2026-11-17T10:59:15.577Z",
+    "legacyImport": false,
+    "title": "₩22tn in Chip Bonuses Department Stores First in Line",
+    "seoTitle": "₩22tn in Chip Bonuses: Department Stores First in Line",
+    "subtitle": "",
+    "description": "BOK estimates ₩21.9tn in readily spendable 2027 bonuses at Samsung Electronics and SK hynix. Which consumer sectors benefit first, how much reaches department-store profits and what does it mean for rates?",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "retail",
+      "valuation"
+    ],
+    "readingMinutes": 13,
+    "href": "reports/en/20261117_Snowshagal_Investment_Insight_No38_Chip_Bonuses_Consumer_Stocks_EN.html",
+    "translationGroup": "2026-11-17-note-4sp8vc",
+    "coverImage": "covers/2026-11-17-note-1ln40ot.webp",
+    "shareCardImage": "covers/share/2026-11-17-note-1ln40ot.jpg",
+    "coverThumbnail": "covers/2026-11-17-note-1ln40ot-450.webp"
+  },
+  {
     "id": "2026-11-17-note-4sp8vc",
     "type": "note",
     "typeLabel": "투자 인사이트",
