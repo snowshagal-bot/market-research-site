@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-18-basics-143x6rj",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-11-18",
+    "reportDate": "2026-11-18",
+    "registeredDate": "2026-11-18",
+    "registeredAt": "2026-11-17T16:20:32.734Z",
+    "legacyImport": false,
+    "title": "외국인은 오늘 무엇을 사고팔았나",
+    "seoTitle": "투자자별 순매수 상위종목 보는 법: KRX [12010] MDCSTAT024 화면 읽기",
+    "subtitle": "",
+    "description": "외국인·기관이 오늘 어떤 종목을 사고팔았는지 KRX Data Marketplace(옛 정보데이터시스템) [12010] MDCSTAT024 화면에서 확인하는 법. 메뉴 경로, 투자자 구분, 많이 판 종목 찾기, 반영 시각(15:45·20:00), 자주 하는 실수.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "market-basic"
+    ],
+    "readingMinutes": 5,
+    "href": "reports/basics-data-guide-01-krx-net-buying.html",
+    "coverImage": "covers/2026-11-18-basics-143x6rj.webp",
+    "shareCardImage": "covers/share/2026-11-18-basics-143x6rj.jpg",
+    "shareCardSource": "custom",
+    "coverThumbnail": "covers/2026-11-18-basics-143x6rj-450.webp"
+  },
+  {
     "id": "2026-11-17-note-1ln40ot",
     "type": "note",
     "typeLabel": "Investment Insights",
