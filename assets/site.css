@@ -545,6 +545,17 @@ html[data-theme="dark"] .site-footer-brand-owl {
   margin-bottom: 0;
 }
 
+.about-section p a {
+  color: var(--navy);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.about-section p a:hover {
+  color: var(--text);
+}
+
 .about-email-link {
   display: inline-block;
   font-size: 16px;
