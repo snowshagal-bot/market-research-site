@@ -304,5 +304,11 @@ window.TAG_REGISTRY = {
     "en": "Taiwan",
     "group": "market",
     "custom": true
+  },
+  "retail": {
+    "ko": "리테일",
+    "en": "Retail",
+    "group": "market",
+    "custom": true
   }
 };

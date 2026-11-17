@@ -1,5 +1,31 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-17-note-4sp8vc",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-17",
+    "reportDate": "2026-11-17",
+    "registeredDate": "2026-11-17",
+    "registeredAt": "2026-11-17T10:43:38.185Z",
+    "legacyImport": false,
+    "title": "성과급 22조원은 백화점에 먼저 내린다",
+    "seoTitle": "반도체 성과급 22조원은 백화점에 먼저 내린다",
+    "subtitle": "",
+    "description": "삼성전자·SK하이닉스가 2027년에 줄 성과급 중 바로 쓸 수 있는 돈은 21.9조원(한국은행 추정)이다. 이 돈이 백화점·자동차 등 어느 소비 업종에 먼저 닿는지, 백화점주 이익으로 이어지는지, 금리엔 어떤 압력이 되는지 풀었다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "retail",
+      "valuation"
+    ],
+    "readingMinutes": 13,
+    "href": "reports/20261117_Investment_Insight_Chip_Bonus_Consumer_Stocks.html",
+    "coverImage": "covers/2026-11-17-note-4sp8vc.webp",
+    "shareCardImage": "covers/share/2026-11-17-note-4sp8vc.jpg",
+    "coverThumbnail": "covers/2026-11-17-note-4sp8vc-450.webp"
+  },
+  {
     "id": "2026-11-17-daily-1ri7fgx",
     "type": "daily",
     "typeLabel": "Daily",
