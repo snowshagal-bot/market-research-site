@@ -783,6 +783,13 @@ export function structuredDataScript(data) {
   return `<script type="application/ld+json">${serializeJsonLd(data)}</script>`;
 }
 
+// The editor's public profiles, named as the same entity as the site. The
+// About pages link to the same addresses; tests keep the two in step.
+export const SOCIAL_PROFILES = Object.freeze([
+  'https://www.linkedin.com/in/sung-oh-choi-628a5b431/',
+  'https://www.threads.com/@snowshagal'
+]);
+
 export function organizationStructuredData(lang = 'ko') {
   return {
     '@type': 'Organization',
@@ -790,6 +797,7 @@ export function organizationStructuredData(lang = 'ko') {
     'name': 'Snowshagal',
     'url': `${PRODUCTION_ORIGIN}/`,
     'logo': BRAND_LOGO_URL,
+    'sameAs': [...SOCIAL_PROFILES],
     'description': lang === 'en'
       ? 'A market research publication offering daily market reviews, weekly outlooks, deep-dive research, and market explainers.'
       : '한국 시장의 데일리 복기와 위클리 전망, 주요 경제·시장 이슈와 투자에 참고할 만한 인사이트를 정리하는 시장 리서치 사이트입니다.'

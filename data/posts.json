@@ -6493,7 +6493,7 @@
     "title": "How Does 1 Coin Become $1?",
     "seoTitle": "How Stablecoins Hold $1, and Why They Depeg",
     "subtitle": "",
-    "description": "",
+    "description": "How does a stablecoin stay pegged to $1? From the issue-and-redeem desk to the March 2023 day USDC fell to $0.88, a plain guide to how the peg holds and when it slips.",
     "tags": [
       "stablecoins"
     ],
@@ -6517,7 +6517,7 @@
     "title": "1코인은 어떻게 1달러가 되는가",
     "seoTitle": "스테이블코인 1달러 유지 원리와 디페깅: 1코인은 어떻게 1달러가 되는가",
     "subtitle": "",
-    "description": "",
+    "description": "스테이블코인은 어떻게 1달러에 묶여 있을까. 코인과 거래소의 구조에서 출발해 발행·상환 창구가 값을 지키는 원리, 2023년 3월 USDC가 0.88달러까지 내려간 사례로 페그가 흔들리는 순간을 설명한다.",
     "tags": [
       "stablecoins"
     ],
@@ -6539,7 +6539,7 @@
     "legacyImport": false,
     "title": "While One Pillar Took a Breather",
     "subtitle": "",
-    "description": "",
+    "description": "Korea weekly, Aug. 24–28, 2026: KOSPI fell 1.79% while stocks outside the KOSPI 200 rose 4.93%. The drop sat in Samsung Electronics and SK hynix; the rest of the market rose.",
     "tags": [
       "semiconductors",
       "cloud-datacenter",
@@ -6564,7 +6564,7 @@
     "legacyImport": false,
     "title": "한 축이 쉬는 동안",
     "subtitle": "",
-    "description": "",
+    "description": "2026년 8월 24~28일 한국 증시 주간 분석. 코스피는 1.79% 내렸지만 코스피200 밖 종목은 4.93% 올랐다. 하락은 삼성전자·SK하이닉스 두 종목에 몰렸고 시장 안쪽은 확산됐다. 다음 주 변수는 엔비디아 실적과 금통위.",
     "tags": [
       "semiconductors",
       "cloud-datacenter",
@@ -6995,7 +6995,7 @@
     "title": "How a Selloff Feeds on Itself",
     "seoTitle": "Margin Calls and Forced Selling: How a Selloff Feeds on Itself",
     "subtitle": "",
-    "description": "",
+    "description": "How does a selloff feed on itself? Why equity in a leveraged account falls faster than prices, how margin calls spread losses market-wide, and four questions for the tape.",
     "tags": [
       "flows",
       "futures"
@@ -7020,7 +7020,7 @@
     "title": "급락은 어떻게 더 큰 급락을 만드는가",
     "seoTitle": "마진콜·반대매매 뜻: 급락은 어떻게 더 큰 급락을 만드는가",
     "subtitle": "",
-    "description": "",
+    "description": "급락은 어떻게 더 큰 급락을 만드는가. 빚을 낀 계좌에서 내 몫이 가격보다 더 빨리 줄어드는 이유, 마진콜과 반대매매가 한 계좌의 문제를 시장 전체로 번지게 하는 다섯 단계, 급락장을 읽는 네 가지 질문을 정리한다.",
     "tags": [
       "flows",
       "futures"
@@ -7171,7 +7171,7 @@
     "legacyImport": false,
     "title": "Same inputs, different answers",
     "subtitle": "",
-    "description": "",
+    "description": "Korea weekly, Aug. 18–21, 2026: record shareholder-return plans from SK hynix and Samsung drew different reactions. Foreigners and institutions sold; KOSPI fell 0.93%.",
     "href": "reports/en/2026-08-18_08-21_Korea_Weekly_Report_EN.html",
     "translationGroup": "2026-08-18-weekly-n6uraz",
     "coverImage": "covers/2026-08-18-weekly-11u1873.webp",
@@ -7196,7 +7196,7 @@
     "legacyImport": false,
     "title": "같은 재료, 다른 대답",
     "subtitle": "",
-    "description": "",
+    "description": "2026년 8월 18~21일 한국 증시 주간 분석. SK하이닉스 자사주 결의와 삼성전자 이사회, 사상 최대 주주환원 두 건에 주가 반응이 갈렸다. 외국인과 기관이 나흘 내내 팔았고 코스피는 0.93% 내린 채 마감했다.",
     "href": "reports/8월 3주차 위클리 분석.html",
     "coverImage": "covers/2026-08-18-weekly-n6uraz.webp",
     "tags": [
@@ -7298,7 +7298,7 @@
     "title": "A Good Company Isn’t Always a Good Stock",
     "seoTitle": "Why Stocks Fall After Record Earnings: Good Company vs. Good Stock",
     "subtitle": "",
-    "description": "",
+    "description": "Why isn’t a good company always a good stock? A firm posted record quarterly results on July 29, 2026, yet fell 9.61%. Earnings, the PER multiple and consensus explain why.",
     "tags": [],
     "readingMinutes": 7,
     "href": "reports/en/Market_Language_Ep4_Why_a_Good_Company_Isnt_Always_a_Good_Stock.html",
@@ -7320,7 +7320,7 @@
     "title": "좋은 회사가 왜 좋은 주식은 아닌가",
     "seoTitle": "실적이 좋은데 주가가 내리는 이유: 좋은 회사가 왜 좋은 주식은 아닌가",
     "subtitle": "",
-    "description": "",
+    "description": "좋은 회사가 왜 좋은 주식은 아닌가. 2026년 7월 29일 분기 사상 최대 실적을 낸 회사의 주가가 9.61% 내렸다. 이익과 그 이익에 붙는 배수(PER), 컨센서스로 회사와 주가가 따로 움직이는 이유를 설명한다.",
     "href": "reports/시장을읽는말들_4편_좋은회사가왜좋은주식은아닌가.html",
     "coverImage": "covers/2026-08-15-basics-1cd8c9w.webp",
     "tags": [],
@@ -7391,7 +7391,7 @@
     "title": "How U.S. Data Reaches Korea",
     "seoTitle": "Reading U.S. CPI and Jobs Data: How U.S. Numbers Reach Korea",
     "subtitle": "",
-    "description": "",
+    "description": "How does one U.S. data point move the won, foreign flows and Korean chips the next day? Follow the July 14, 2026 U.S. CPI release through FedWatch odds to the Seoul open.",
     "href": "reports/en/Market_Language_Ep3_How_US_Data_Reaches_Korea.html",
     "coverImage": "covers/2026-08-13-basics-1cmfur2.webp",
     "tags": [
@@ -7416,7 +7416,7 @@
     "title": "미국의 숫자는 어떻게 한국에 도착하는가",
     "seoTitle": "미국 CPI·고용지표 읽는 법: 미국의 숫자는 어떻게 한국에 도착하는가",
     "subtitle": "",
-    "description": "",
+    "description": "미국 경제지표 하나가 어떻게 다음 날 원화와 외국인 수급, 반도체 주가를 함께 움직일까. 2026년 7월 14일 밤 미국 CPI 발표에서 FedWatch 금리 확률을 거쳐 다음 날 아침 한국 증시 개장까지 순서대로 따라간다.",
     "href": "reports/시장을읽는말들_3편_미국의숫자는어떻게한국에도착하는가.html",
     "coverImage": "covers/2026-08-13-basics-1qofo4f.webp",
     "tags": [
@@ -7490,7 +7490,7 @@
     "title": "현물과 선물이 엇갈릴 때",
     "seoTitle": "베이시스·프로그램 매매 뜻: 현물과 선물이 엇갈릴 때",
     "subtitle": "",
-    "description": "",
+    "description": "현물과 선물 수급이 엇갈릴 때 읽는 법. 2026년 7월 6일 기관은 현물 1.47조원을 팔고 코스피200 선물 1.07조원을 샀다. 같은 '기관' 이름표 아래 헤지·차익거래가 섞이는 구조와 베이시스, 프로그램 매매를 함께 읽는 방법.",
     "href": "reports/시장을읽는말들_2편_현물과선물이엇갈릴때.html",
     "coverImage": "covers/2026-08-10-basics-1rhknmt.webp",
     "updatedAt": "2026-08-25T11:09:25.060Z",
@@ -7565,7 +7565,7 @@
     "title": "When Cash and Futures Diverge",
     "seoTitle": "Basis and Program Trading: When Cash and Futures Diverge",
     "subtitle": "",
-    "description": "",
+    "description": "When cash and futures diverge: on July 6, 2026 Korean institutions sold ₩1.47tn of stocks and bought ₩1.07tn of KOSPI 200 futures. Hedging, arbitrage and the basis explained.",
     "href": "reports/en/Market_Language_Ep2_When_Cash_and_Futures_Diverge.html",
     "coverImage": "covers/2026-08-11-basics-1bmtot3.webp",
     "tags": [
@@ -7613,7 +7613,7 @@
     "title": "주가는 누가 움직이는가",
     "seoTitle": "순매수 뜻과 읽는 법: 주가는 누가 움직이는가",
     "subtitle": "",
-    "description": "",
+    "description": "주가는 누가 움직이는가. 개인·외국인·기관 수급과 순매수의 뜻을 실제 사례로 설명한다. 개인이 조 단위로 순매수했는데도 지수가 내린 날, 가격을 정한 쪽은 누구였는지 호가와 체결의 구조로 따라간다.",
     "href": "reports/시장을읽는말들_1편_주가는누가움직이는가.html",
     "tags": [
       "flows"
@@ -7655,7 +7655,7 @@
     "title": "Who Moves Stock Prices?",
     "seoTitle": "Net Buying Explained: Who Really Moves Stock Prices?",
     "subtitle": "",
-    "description": "",
+    "description": "Who really moves stock prices? Korea reports daily retail, foreign and institutional flows. Retail bought trillions of won and the index still fell. Who set the price?",
     "href": "reports/en/Market_Language_Ep1_Who_Moves_Stock_Prices.html",
     "coverImage": "covers/2026-08-10-basics-f7gadj.webp",
     "tags": [
@@ -7704,7 +7704,7 @@
     "legacyImport": false,
     "title": "Semiconductors What Comes Next",
     "subtitle": "",
-    "description": "",
+    "description": "Korea weekly, Aug. 10–14, 2026: KOSPI rose 11.49% as foreigners bought ₩6.54tn, reversing the prior week. What comes after chips: equipment, autos, refining and defense.",
     "href": "reports/en/2026-08-10_08-14_Korea_Weekly_Report_EN.html",
     "translationGroup": "2026-08-10-weekly-1rva1f6",
     "coverImage": "covers/2026-08-10-weekly-hez6ok.webp",
@@ -7729,7 +7729,7 @@
     "legacyImport": false,
     "title": "반도체 다음의 자리",
     "subtitle": "",
-    "description": "",
+    "description": "2026년 8월 10~14일 한국 증시 주간 분석. 코스피가 11.49% 오르고 외국인이 6.54조원을 순매수해 지난주 매도를 되돌렸다. 반도체 다음 자리로 장비·자동차·정유·방산을 점검하고 8월 26일 엔비디아 실적과 미국 PCE를 짚는다.",
     "href": "reports/8월 2주차 위클리 분석.html",
     "coverImage": "covers/2026-08-10-weekly-1rva1f6.webp",
     "tags": [
@@ -8024,7 +8024,7 @@
     "legacyImport": false,
     "title": "What came down was the price, what remains are the conditions.",
     "subtitle": "",
-    "description": "",
+    "description": "Korea weekly, Aug. 3–7, 2026: KOSPI fell 5.10% while KOSDAQ rose 10.98%. Why sector rankings flip during deleveraging, and the four conditions that decide next week.",
     "href": "reports/en/2026-08-03_08-07_Korea_Weekly_Report_EN.html",
     "translationGroup": "2026-08-week1-weekly",
     "coverImage": "covers/2026-08-03-weekly-yqni0t.webp",
@@ -8094,7 +8094,7 @@
     "legacyImport": true,
     "title": "8월 1주차 위클리 분석",
     "subtitle": "2026.08.03–08.07",
-    "description": "",
+    "description": "2026년 8월 3~7일 한국 증시 주간 분석. 급락과 반등이 겹친 한 주, 코스피는 5.10% 내리고 코스닥은 10.98% 올랐다. 빚으로 산 포지션이 정리되는 구간에서 지난주 업종 순위가 뒤집히는 이유와 다음 주를 가를 네 가지 조건을 정리한다.",
     "href": "reports/8월 1주차 위클리 분석.html",
     "coverImage": "covers/2026-08-week1-weekly.webp",
     "tags": [
@@ -8338,7 +8338,7 @@
     "legacyImport": false,
     "title": "폭락과 급반등을 오간 나흘 — 진앙은 시장이 아니라 반도체 한 축",
     "subtitle": "",
-    "description": "",
+    "description": "2026년 7월 2주차 한국 증시 주간 분석. 월요일 −8.95%, 수요일 +6.24%, 목요일 −6.37%로 코스피가 주간 8.77% 내렸다. 진폭의 중심은 시장 전체가 아니라 삼성전자·SK하이닉스였고, 코스피200 밖 낙폭은 −2.83%에 그쳤다.",
     "href": "reports/7월 2주차 위클리 분석1.html",
     "coverImage": "covers/2026-07-13-weekly-um5mnf.png",
     "tags": [

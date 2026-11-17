@@ -12,6 +12,7 @@ import {
   serializeJsonLd,
   structuredDataScript,
   organizationStructuredData,
+  SOCIAL_PROFILES,
   websiteStructuredData,
   homepageStructuredData,
   categoryBreadcrumbStructuredData,
@@ -52,6 +53,13 @@ test('1-4. Structured Data: Homepage has WebSite and Organization nodes; /en/ ha
   assert.equal(org.url, 'https://snowshagal.com/');
   assert.equal(org.logo, 'https://snowshagal.com/assets/brand/snowshagal-owl.webp');
   assert.ok(typeof org.description === 'string' && org.description.length > 0);
+  // The static homepage node is the same one the middleware emits, sameAs included.
+  assert.deepEqual(org, organizationStructuredData('ko'));
+  assert.deepEqual(org.sameAs, [...SOCIAL_PROFILES]);
+  for (const aboutPath of ['about/index.html', 'en/about/index.html']) {
+    const about = fs.readFileSync(path.join(rootDir, aboutPath), 'utf8');
+    for (const profile of SOCIAL_PROFILES) assert.ok(about.includes(`href="${profile}" rel="me noopener"`), `${aboutPath} links ${profile}`);
+  }
 
   const site = siteNodes[0];
   assert.equal(site['@id'], 'https://snowshagal.com/#website');
