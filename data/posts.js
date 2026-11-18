@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-18-research-1l0zx61",
+    "type": "research",
+    "typeLabel": "Research",
+    "lang": "en",
+    "date": "2026-11-18",
+    "reportDate": "2026-11-18",
+    "registeredDate": "2026-11-18",
+    "registeredAt": "2026-11-18T10:36:21.038Z",
+    "legacyImport": false,
+    "title": "WHY IS KOREA'S STOCK MARKET SO VOLATILE?",
+    "seoTitle": "Why Is Korea's Stock Market So Volatile?",
+    "subtitle": "",
+    "description": "KOSPI volatility reached 60.7% in 2026, with 40 sessions moving over 5%. Two chip giants dominate the index. Domestic leverage, offshore swaps and systematic flows may magnify the swings, but their impact remains unproven.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "futures",
+      "volatility"
+    ],
+    "readingMinutes": 15,
+    "href": "reports/en/20261118_Snowshagal_Research_No14_Korea_Market_Volatility_EN.html",
+    "translationGroup": "2026-11-18-research-x18yyn",
+    "coverImage": "covers/2026-11-18-research-1l0zx61.webp",
+    "shareCardImage": "covers/share/2026-11-18-research-1l0zx61.jpg",
+    "coverThumbnail": "covers/2026-11-18-research-1l0zx61-450.webp"
+  },
+  {
     "id": "2026-11-18-basics-1sus4k3",
     "type": "basics",
     "typeLabel": "Market Basics",
