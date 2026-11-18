@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-18-daily-jocy39",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-18",
+    "reportDate": "2026-11-18",
+    "registeredDate": "2026-11-18",
+    "registeredAt": "2026-11-18T09:10:15.954Z",
+    "legacyImport": false,
+    "title": "Nvidia Beats Expectations, KOSPI Reclaims 5,000",
+    "subtitle": "",
+    "description": "Nvidia beat Q3 revenue estimates and guided above consensus, lifting Korean chip stocks. The KOSPI rose 1.99% to 5,067.44, while foreigners sold KRW 333.8bn. Institutions bought KRW 511.8bn. What drove the rebound, and what matters next?",
+    "takeaway": "Nvidia beat estimates and Korean chip stocks rebounded, lifting the KOSPI back above 5,000 with institutional buying.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "earnings",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-11-18_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-18-daily-b26iyw",
+    "coverImage": "covers/2026-11-18-daily-jocy39.webp",
+    "shareCardImage": "covers/share/2026-11-18-daily-jocy39.jpg",
+    "coverThumbnail": "covers/2026-11-18-daily-jocy39-450.webp"
+  },
+  {
     "id": "2026-11-18-daily-b26iyw",
     "type": "daily",
     "typeLabel": "주식 리포트",
