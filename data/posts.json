@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-18-daily-b26iyw",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-18",
+    "reportDate": "2026-11-18",
+    "registeredDate": "2026-11-18",
+    "registeredAt": "2026-11-18T08:50:39.764Z",
+    "legacyImport": false,
+    "title": "엔비디아 깜짝 실적, 코스피 하루 만에 5,000선 회복",
+    "subtitle": "",
+    "description": "엔비디아 매출과 다음 분기 전망이 모두 예상을 웃돌자 반도체가 반등, 11월 18일 코스피는 1.99% 오른 5,067.44로 5,000선 회복. 외국인 3,338억 순매도, 기관 매수. 상승 이유와 다음 거래일 확인할 것.",
+    "takeaway": "엔비디아가 예상을 웃돈 실적을 내자 반도체가 반등, 기관 매수에 코스피 하루 만에 5,000선 회복",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "earnings",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-11-18_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-18-daily-b26iyw.webp",
+    "shareCardImage": "covers/share/2026-11-18-daily-b26iyw.jpg",
+    "coverThumbnail": "covers/2026-11-18-daily-b26iyw-450.webp"
+  },
+  {
     "id": "2026-11-18-basics-15ij75z",
     "type": "basics",
     "typeLabel": "Market Basics",
