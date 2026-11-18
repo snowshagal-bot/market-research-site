@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-18-research-x18yyn",
+    "type": "research",
+    "typeLabel": "비정기 리서치",
+    "lang": "ko",
+    "date": "2026-11-18",
+    "reportDate": "2026-11-18",
+    "registeredDate": "2026-11-18",
+    "registeredAt": "2026-11-18T10:03:09.539Z",
+    "legacyImport": false,
+    "title": "한국 증시는 왜 이렇게 출렁이나",
+    "seoTitle": "한국 증시는 왜 이렇게 출렁이나",
+    "subtitle": "",
+    "description": "2026년 코스피는 연율 변동성 60.7%, 하루 5% 넘게 움직인 날이 40일이었다. 삼성전자·SK하이닉스에 쏠린 지수 위에 레버리지 ETF, 해외 레버리지, 규칙 매매가 겹친 구조를 공식 자료와 증권사·연구 기관 분석으로 풀었다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "futures",
+      "volatility"
+    ],
+    "readingMinutes": 14,
+    "href": "reports/20261118_Research_NO14_Korea_Market_Volatility_Cover.html",
+    "coverImage": "covers/2026-11-18-research-x18yyn.webp",
+    "shareCardImage": "covers/share/2026-11-18-research-x18yyn.jpg",
+    "coverThumbnail": "covers/2026-11-18-research-x18yyn-450.webp"
+  },
+  {
     "id": "2026-11-18-basics-gt1lmr",
     "type": "basics",
     "typeLabel": "시장 입문",
