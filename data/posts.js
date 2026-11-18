@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-18-basics-1sus4k3",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-11-18",
+    "reportDate": "2026-11-18",
+    "registeredDate": "2026-11-18",
+    "registeredAt": "2026-11-18T10:11:04.734Z",
+    "legacyImport": false,
+    "title": "Where Does My Stock Order Go?",
+    "seoTitle": "Smart Order Routing and Best Execution: Which Market Gets My Order?",
+    "subtitle": "",
+    "description": "From January through August 2026, brokers routed 59.9% of shares in SOR-directed orders to Nextrade. Why does an order you never assigned to a venue end up on NXT? A beginner's guide to smart order routing, best execution, maker and taker orders, and venue fees—with a quiz and interactive examples.",
+    "tags": [
+      "kospi",
+      "futures",
+      "market-basic",
+      "etf",
+      "kosdaq"
+    ],
+    "readingMinutes": 10,
+    "href": "reports/en/Snowshagal_Market_Basics_19_Where_Does_My_Stock_Order_Go_EN_Revised.html",
+    "translationGroup": "2026-11-18-basics-gt1lmr",
+    "coverImage": "covers/2026-11-18-basics-1sus4k3.webp",
+    "shareCardImage": "covers/share/2026-11-18-basics-1sus4k3.jpg",
+    "coverThumbnail": "covers/2026-11-18-basics-1sus4k3-450.webp"
+  },
+  {
     "id": "2026-11-18-research-x18yyn",
     "type": "research",
     "typeLabel": "비정기 리서치",
