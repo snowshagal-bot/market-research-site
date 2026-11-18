@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-18-basics-gt1lmr",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-11-18",
+    "reportDate": "2026-11-18",
+    "registeredDate": "2026-11-18",
+    "registeredAt": "2026-11-18T09:58:53.893Z",
+    "legacyImport": false,
+    "title": "내 주문은 어느 거래소로 가나",
+    "seoTitle": "SOR·최선집행 뜻: 내 주문은 어느 거래소로 가나",
+    "subtitle": "",
+    "description": "올해 1~8월 주요 증권사 10곳이 SOR로 나눠 보낸 주문 수량 가운데 59.9%가 넥스트레이드로 갔다. 비중은 증권사마다 크게 달랐다. 거래소를 고르지 않은 내 주문은 어디로 갈까. 최선집행의무, 바로 체결되는 주문과 걸어 두는 주문의 판단 기준, 두 거래소의 수수료 차이를 퀴즈와 시뮬레이터로 정리했다.",
+    "tags": [
+      "kospi",
+      "futures",
+      "market-basic",
+      "etf",
+      "kosdaq"
+    ],
+    "readingMinutes": 8,
+    "href": "reports/basics-19-order-routing.html",
+    "coverImage": "covers/2026-11-18-basics-gt1lmr.webp",
+    "shareCardImage": "covers/share/2026-11-18-basics-gt1lmr.jpg",
+    "coverThumbnail": "covers/2026-11-18-basics-gt1lmr-450.webp"
+  },
+  {
     "id": "2026-11-18-daily-jocy39",
     "type": "daily",
     "typeLabel": "Daily",
