@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-19-note-pzh4kr",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-19",
+    "reportDate": "2026-11-19",
+    "registeredDate": "2026-11-19",
+    "registeredAt": "2026-11-19T13:08:36.544Z",
+    "legacyImport": false,
+    "title": "한⁠·중 정상회담 성적표: 열린 건 '권리', 열쇠는 아직 중국에",
+    "seoTitle": "한·중 FTA 성적표: 열린 건 권리, 열쇠는 중국에",
+    "subtitle": "",
+    "description": "한·중 FTA 서비스·투자 후속협상이 8년 8개월 만에 실질 타결됐다. 중국이 콘텐츠 비차별을 통상협정에 처음 명문화했지만 아직 서명·발효 전이고 심사는 중국 몫이다. 업종별로 실적까지 남은 관문과 확인할 숫자를 짚었다.",
+    "tags": [
+      "china",
+      "korea",
+      "k-contents",
+      "enter-stocks",
+      "game"
+    ],
+    "readingMinutes": 15,
+    "href": "reports/20261119_Investment_Insight_Korea_China_Summit_FTA.html",
+    "coverImage": "covers/2026-11-19-note-pzh4kr.webp",
+    "shareCardImage": "covers/share/2026-11-19-note-pzh4kr.jpg",
+    "coverThumbnail": "covers/2026-11-19-note-pzh4kr-450.webp"
+  },
+  {
     "id": "2026-11-19-research-1u16rup",
     "type": "research",
     "typeLabel": "Research",
