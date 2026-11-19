@@ -291,6 +291,32 @@ Search Console should use a Domain property for `snowshagal.com`, verified with 
 
 The root `404.html` is required for Cloudflare Pages to return an actual HTTP 404 instead of using `index.html` as an SPA fallback for unknown paths. Pages Functions middleware must leave redirect and error responses unchanged apart from the existing Preview `X-Robots-Tag` header, with one exception: an existing report's legacy `/reports/<path>.html` address, which Pages answers with its own 308, is upgraded to a single `301` to the extensionless canonical URL `/reports/<path>` with the query string preserved (a missing report keeps its direct 404). A report renamed after publishing is listed in `RENAMED_REPORTS`, and its old address answers one `301` to the new file. Root search-engine verification files are outside `/reports/` and are served with HTTP 200 through `_redirects` 200 rewrites (`yandex_9866f357776964b4.html`, `naver96f43741acd96bcdeb679f22cddc4a80.html`); without the rewrite Pages would 308 them to the extensionless path. Daum Webmaster Tool ownership is a `#DaumWebMasterTool:` comment line at the bottom of the static `robots.txt`; Daum re-reads it on every sign-in, so do not remove it (the PIN used to sign in is the owner's and is not stored in Git). After changing this behavior, verify both a random root path and a random `/reports/` path on Preview before Production deployment.
 
+### Daum Webmaster collection seeds
+
+Authenticated registration for `https://snowshagal.com` was confirmed in Daum
+Webmaster on 2026-11-19. Its root-page diagnostics returned HTTP 200, allowed
+collection and readable title/description/link data. The partial-block notice
+refers to the intentional `/admin/` and `/api/` exclusions; do not unblock them.
+
+The Seed URL forms accepted these submissions, each with `수집요청이 완료되었습니다.`:
+
+- Atom feed (KO): `https://snowshagal.com/rss.xml`
+- Atom feed (EN): `https://snowshagal.com/en/rss.xml`
+- Sitemap: `https://snowshagal.com/sitemap.xml`
+
+Both feeds were valid XML with 50 current-language entries; the sitemap was valid
+XML with 464 URLs at this check. These are snapshot counts, not fixed invariants.
+The feeds and sitemap update through the existing publishing flow. Daum supports
+Atom and periodically visits registered seeds; acceptance does not prove that
+every linked page has been crawled or indexed. See its [Seed URL help](https://cs.daum.net/faq/service/15/category/4118/detail/38543).
+
+Daum document analysis successfully extracted HOME and `basics-data-guide-01-krx-net-buying`.
+The new Korean Research No15 returned an access/response error in that tool,
+while its public canonical URL answered 200 promptly, including a request using
+Daum's documented user-agent. The cause remains unconfirmed; this is neither
+evidence that all reports are blocked nor a claim that this report is indexed.
+No report source, robots policy, PIN or crawler-security configuration was changed.
+
 ### IndexNow (Naver, Bing)
 
 Since 2026-11-12 every push to `main` that changes `data/posts.json` (publish, manage, delete) runs `.github/workflows/indexnow.yml`. `scripts/indexnow.mjs` compares `data/posts.json` before and after the push and works out which addresses to announce:
