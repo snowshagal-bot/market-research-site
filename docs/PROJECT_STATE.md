@@ -197,11 +197,13 @@ check-run from Cloudflare's GitHub App to report success. Only then does it run 
 Production smoke. A missing or timed-out check fails closed, so an older Production cannot
 be inspected and reported as the new commit. There is no automatic rollback.
 
-Market verification additionally checks explicit 2026 KRX/NYSE calendars, the expected
+Market verification additionally checks explicit 2026–2027 KRX/NYSE calendars, the expected
 latest KRX trading date after 16:30 KST, and per-market source dates. The read-only
 `market-freshness-alert.yml` schedule runs at 17:00 KST on weekdays and maintains one GitHub
 Issue while Production MARKET remains stale or otherwise unverifiable. Calendar coverage
-must be extended before a new trading year; an unknown year fails closed.
+must be extended before a new trading year; an unknown year (now 2028) fails closed. KRX 2027
+(16 weekday closures and the 2027-01-04 10:00 delayed opening) is the publisher core's list,
+copied as is; the two lists change together.
 
 Market `meta.generated_at` is a collector refresh stamp and may carry the collector PC's
 offset (for example `+07:00`) with microseconds. Stored values, the API, and the schema are

@@ -45,9 +45,9 @@
       corporate_event: '기업 일정',
       derivatives_expiry: '파생 만기'
     },
-    krxPendingBanner: 'KRX(한국) 2027년 거래 일정은 한국거래소 공식 발표 후 순차 반영 예정입니다. (미국 NYSE 2027 일정 정상 제공)',
-    krxPendingOnlyBanner: 'KRX(한국) 2027년 연간 거래 일정은 한국거래소의 공식 공시 발표 후 업데이트됩니다.',
-    krxPendingStatus: 'KRX 2027 공식 일정 확정 대기'
+    krxPendingBanner: (y) => `KRX(한국) ${y}년 거래 일정은 한국거래소 공식 발표 후 순차 반영 예정입니다. (미국 NYSE ${y} 일정 정상 제공)`,
+    krxPendingOnlyBanner: (y) => `KRX(한국) ${y}년 연간 거래 일정은 한국거래소의 공식 공시 발표 후 업데이트됩니다.`,
+    krxPendingStatus: (y) => `KRX ${y} 공식 일정 확정 대기`
   } : {
     title: 'MARKET CALENDAR',
     subtitle: 'KRX · NYSE Trading Schedule',
@@ -93,9 +93,9 @@
       corporate_event: 'Corporate',
       derivatives_expiry: 'Derivatives Expiry'
     },
-    krxPendingBanner: 'KRX 2027 official schedule is pending publication by KRX. (NYSE 2027 schedule is officially confirmed & provided)',
-    krxPendingOnlyBanner: 'KRX 2027 full annual schedule will be updated once officially released by Korea Exchange.',
-    krxPendingStatus: 'KRX 2027 schedule pending official release'
+    krxPendingBanner: (y) => `KRX ${y} official schedule is pending publication by KRX. (NYSE ${y} schedule is officially confirmed & provided)`,
+    krxPendingOnlyBanner: (y) => `KRX ${y} full annual schedule will be updated once officially released by Korea Exchange.`,
+    krxPendingStatus: (y) => `KRX ${y} schedule pending official release`
   };
 
   function getDefaultKstYearMonth() {
@@ -382,8 +382,8 @@
     if (state.filter === 'KRX' && !krxSupported) {
       gridMount.innerHTML = `
         <div class="calendar-detail-card" style="text-align:center;padding:40px 20px;">
-          <h3>${copy.krxPendingStatus}</h3>
-          <p style="color:var(--muted);">${copy.krxPendingOnlyBanner}</p>
+          <h3>${copy.krxPendingStatus(data.year)}</h3>
+          <p style="color:var(--muted);">${copy.krxPendingOnlyBanner(data.year)}</p>
         </div>
       `;
       return;
@@ -452,7 +452,7 @@
     const pendingNoticeBanner = (!krxSupported && state.filter === 'ALL') ? `
       <div style="background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:8px;">
         <span style="font-size:14px;">ℹ️</span>
-        <span>${copy.krxPendingBanner}</span>
+        <span>${copy.krxPendingBanner(data.year)}</span>
       </div>
     ` : '';
 
@@ -509,7 +509,7 @@
     } else {
       // KRX
       if (!day.krx?.supported) {
-        itemsHtml += `<div class="detail-item-row"><span class="detail-market-badge" style="background:var(--panel-2);color:var(--muted);">KRX</span><span style="color:var(--muted);">${copy.krxPendingStatus}</span></div>`;
+        itemsHtml += `<div class="detail-item-row"><span class="detail-market-badge" style="background:var(--panel-2);color:var(--muted);">KRX</span><span style="color:var(--muted);">${copy.krxPendingStatus(day.date.slice(0, 4))}</span></div>`;
       } else if (day.krx.holiday) {
         const name = day.krx.name ? (ko ? day.krx.name.ko : day.krx.name.en) : (ko ? '휴장일' : 'Holiday');
         itemsHtml += `<div class="detail-item-row"><span class="detail-market-badge krx">KRX HOLIDAY</span><strong>${escapeHtml(name)}</strong></div>`;
@@ -610,11 +610,11 @@
     });
 
     if (!filtered.length) {
-      if (state.filter === 'KRX' && state.year >= 2027) {
+      if (state.filter === 'KRX' && state.calendarData?.marketSupport?.krx === false) {
         upcomingMount.innerHTML = `
           <section class="calendar-upcoming-section">
             <h2>${copy.upcomingHeading}</h2>
-            <p style="font-size:12px;color:var(--muted);">${copy.krxPendingOnlyBanner}</p>
+            <p style="font-size:12px;color:var(--muted);">${copy.krxPendingOnlyBanner(state.year)}</p>
           </section>
         `;
       } else {

@@ -177,15 +177,20 @@ rejects the observed `2026-08-31` snapshot with `2026-08-27` US data, while acce
 different dates caused by weekends or an exchange holiday.
 
 The exchange calendars are explicit and fail closed outside their configured coverage.
-`functions/api/market/_freshness.js` currently covers KRX and NYSE 2026 holidays. Review the
-official KRX/KASI and NYSE calendars and extend this file before the first trading day of a
-new calendar year. KRX closes on Korean public holidays, Labor Day and its year-end closing
-day; NYSE early-close sessions remain trading days.
+`functions/_trading-calendar.js` is the only calendar (`_freshness.js` imports it) and covers
+KRX 2026–2027 and NYSE 2026–2027 holidays plus special sessions. Review the official KRX/KASI
+and NYSE calendars and extend that file before the first trading day of a new calendar year
+(it must be live in Production before 01-01 KST). KRX closes on Korean public holidays, Labor
+Day and its year-end closing day; NYSE early-close sessions remain trading days. The KRX
+holidays and special sessions must stay identical to the publisher core
+(`snowshagal-market-publisher` `market_dashboard/source_date_policy.py`); change both in the
+same cycle and re-check them against KRX's year-end notice for the coming year.
 
 Calendar references:
 
 - KRX holiday rules: `https://global.krx.co.kr/contents/GLB/06/0602/0602010201/GLB0602010201T1.jsp`
 - KASI 2026 official almanac: `https://astro.kasi.re.kr/life/post/almanac?year=2026`
+- KASI 2027 official almanac: `https://astro.kasi.re.kr/life/post/almanac?year=2027`
 - NYSE holiday calendar: `https://www.nyse.com/trade/hours-calendars`
 
 Production deployment smoke now requires `/api/market/latest` to match the expected latest
