@@ -10,6 +10,14 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+- **Bing review (2026-11-19)**: Webmaster's seven short-description examples
+  motivated clearer copy for the corresponding routes and locale counterparts
+  (12 routes total). English HOME and the 2026-11-18 English Research No14 are
+  already reported indexed. Existing IndexNow deliveries succeed. After the
+  metadata deployment and a new crawl, recheck recommendations; request acceptance
+  and a clean technical audit do not guarantee indexing or ranking. Decorative
+  empty-ALT notices are retained as an intentional accessibility choice.
+
 - **Report indexing investigation (2026-11-14)**: all 56 sampled report URLs pass
   HTTP/canonical/robots/sitemap/category-link checks. Initial-HTML previous/next
   anchors now supplement the JS discovery component (109 links into the sample).
@@ -22,7 +30,8 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 - **IndexNow on publish (2026-11-12)**: `.github/workflows/indexnow.yml` announces added, changed and removed reports to Naver and Bing after each push that changes `data/posts.json` (see `docs/DEPLOYMENT.md` → IndexNow). Remaining manual steps after deployment:
   - run the workflow once with `mode: sitemap` to announce the existing pages;
   - check the first publish's run log for `200`/`202` from both engines;
-  - optionally register the site in Bing Webmaster Tools to see what Bing received.
+  - Bing Webmaster Tools registration and access confirmed on 2026-11-19; use
+    its IndexNow and URL Inspection views to observe processing.
 
 - **Calendar rollout finalization (2026-10-25)**: all 31 active tracked companies
   now have official English names. Bounded batches completed 8+8+8+7; the ordinary

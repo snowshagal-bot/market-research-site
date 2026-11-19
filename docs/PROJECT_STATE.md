@@ -313,6 +313,15 @@ Each category also has a landing route in both locales:
 
 Indexability follows current locale content in `data/posts.json`: an empty locale route returns `X-Robots-Tag: noindex, follow`, stays out of the sitemap and crawlable category navigation, and is not declared as an `hreflang` counterpart. Publishing the first post restores all four automatically. The existing homepage `?category=` filters remain supported for bookmarks and in-page archive controls. Primary homepage category links lead to the landing URLs, and both surfaces consume the same current post data.
 
+Bing metadata review (2026-11-19): Daily, Market Basics and Investment Insights
+landings, Calendar, Market and the date archive now describe their actual scope
+and reading/filtering features more explicitly in both locales (12 routes).
+Meta, Open Graph, X and JSON-LD use matching descriptions. The Market description
+does not promise a fixed 16:05 update on special-hours trading days. Uploaded
+report bodies and report metadata rules are unchanged. Bing's empty-ALT notices
+on decorative logos and covers with adjacent titles do not justify replacing
+valid `alt=""` with repetitive search text.
+
 The homepage supports category filtering and search. Its opening surface is now a fixed Snowshagal brand hero rather than a post carousel. The hero keeps the brand promise stable while three concise Daily / Weekly / Research entry points lead to their category landing pages. `basics` and `note` remain available in the shared navigation, filters, and archive, and legacy `?category=` URLs remain functional.
 
 `/about/` and `/en/about/` carry a written introduction and a contact section. They are

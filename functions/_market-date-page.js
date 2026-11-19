@@ -290,8 +290,8 @@ export function marketArchiveTitle(lang) {
 
 export function marketArchiveDescription(lang) {
   return lang === 'en'
-    ? 'Every published Korea market close by date: KOSPI and KOSDAQ closes, foreign investor flows and USD/KRW, each linking to the full session record.'
-    : '게시된 모든 거래일의 한국 증시 마감 기록. 날짜별 코스피·코스닥 종가와 등락률, 외국인 순매수, 원/달러 환율을 보고 그날의 전체 기록으로 이동합니다.';
+    ? 'Browse Korean market closes by month and trading day. Compare KOSPI, KOSDAQ, foreign net flows and USD/KRW, then open each session’s detailed market record.'
+    : '날짜별 한국 증시 마감 데이터를 월별로 모은 아카이브입니다. 코스피·코스닥 종가와 등락률, 외국인 순매수, 원/달러 환율을 함께 비교하고 각 거래일의 상세 기록에서 투자자 수급과 주요 시장 지표를 확인할 수 있습니다.';
 }
 
 function breadcrumbJsonLd(items) {

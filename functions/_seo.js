@@ -25,13 +25,13 @@ export const CATEGORY_LANDINGS = Object.freeze({
   daily: {
     ko: {
       title: '한국 주식시장 데일리 리포트 | Snowshagal',
-      description: '코스피·코스닥 마감 흐름과 투자자 수급, 주요 시장 변수를 정리한 Snowshagal 데일리 리포트입니다.',
+      description: '코스피·코스닥 마감과 외국인·기관 수급, 원/달러 환율과 주요 산업의 움직임을 거래일별로 정리합니다. 당일 시장을 움직인 요인과 다음 거래일에 살펴볼 변수를 Snowshagal 데일리 리포트에서 확인하세요.',
       heading: '한국 주식시장 데일리 리포트',
       lead: '오늘 시장의 흐름과 수급, 다음 거래일에 살펴볼 변수를 기록합니다.'
     },
     en: {
       title: 'Korean Market Daily Reports | Snowshagal',
-      description: 'Daily reviews of KOSPI and KOSDAQ moves, investor flows, and the market variables that matter next.',
+      description: 'Review Korean stocks by trading day: KOSPI and KOSDAQ moves, foreign and institutional flows, sector drivers, and signals to watch in the next session.',
       heading: 'Korean Market Daily Reports',
       lead: 'Daily reviews of market direction, investor flows, and the signals to watch next.'
     }
@@ -67,13 +67,13 @@ export const CATEGORY_LANDINGS = Object.freeze({
   basics: {
     ko: {
       title: '경제·주식시장 기초 설명 | Snowshagal 시장 입문',
-      description: '경제와 주식시장이 낯선 투자자를 위해 시장의 기본 개념과 투자에 필요한 배경을 쉽게 설명합니다.',
+      description: '주가지수와 거래시간, 주문 체결과 투자자 수급 등 한국 주식시장의 기본 개념을 설명합니다. 시장 입문 글과 용어 사전을 통해 경제지표와 시장 데이터를 읽는 데 필요한 배경을 주제별로 찾아볼 수 있습니다.',
       heading: '시장 입문',
       lead: '시장을 처음 읽는 독자를 위해 경제·주식시장의 기본 개념과 투자에 필요한 배경을 차근차근 설명합니다.'
     },
     en: {
       title: 'Market Basics | Snowshagal',
-      description: 'Clear introductions to economic, market, and investing fundamentals for readers learning how markets work.',
+      description: 'Learn how Korean stock markets work, from indices and trading hours to order execution and investor flows. Browse beginner guides and the market glossary.',
       heading: 'Market Basics',
       lead: 'A clear introduction to the concepts and background needed to start reading markets with confidence.'
     }
@@ -81,13 +81,13 @@ export const CATEGORY_LANDINGS = Object.freeze({
   note: {
     ko: {
       title: '시장·투자 아이디어와 관찰 | Snowshagal 투자 인사이트',
-      description: '데일리·위클리·리서치로 다루기엔 가볍지만 놓치기 아까운 시장 변수, 투자 아이디어와 주요 이벤트의 체크포인트를 기록합니다.',
+      description: '기업과 산업의 변화, 환율·금리와 자금 흐름을 주제로 한 Snowshagal의 투자 인사이트입니다. 공개 자료를 바탕으로 시장의 배경과 확인할 지표를 정리한 글을 주제별로 찾아 읽을 수 있습니다.',
       heading: '투자 인사이트',
       lead: '데일리·위클리·리서치에 담기 애매하지만 놓치기 아까운 시장 변수와 투자 아이디어를 기록합니다.'
     },
     en: {
       title: 'Investment Insights | Snowshagal',
-      description: 'Timely observations, market variables, and investment ideas that sit between daily coverage and full-length research.',
+      description: 'Explore Korean companies, industries, currencies and capital flows through focused investment notes, with public sources and indicators to follow.',
       heading: 'Investment Insights',
       lead: 'Timely observations, market variables, and investment ideas that sit between daily coverage and full-length research.'
     }
