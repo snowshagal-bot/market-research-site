@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-19-daily-16iaekk",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-19",
+    "reportDate": "2026-11-19",
+    "registeredDate": "2026-11-19",
+    "registeredAt": "2026-11-19T10:22:34.874Z",
+    "legacyImport": false,
+    "title": "China Talks, $1tn Exports; Chips Drive the KOSPI",
+    "subtitle": "",
+    "description": "South Korea's KOSPI reversed a 2.05% intraday loss to close up 1.39% at 5,137.89 on Nov. 19, 2026. A China FTA breakthrough and $1tn export milestone made headlines, but Samsung Electronics and SK hynix drove nearly three-quarters of the gain. Foreign investors remained net sellers.",
+    "takeaway": "The KOSPI reversed a 2.05% intraday loss and closed at the session high, up 1.39%; Samsung Electronics and SK hynix accounted for nearly three-quarters of the gain.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "china",
+      "korea",
+      "k-contents"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-11-19_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-19-daily-1e2266c",
+    "coverImage": "covers/2026-11-19-daily-16iaekk.webp",
+    "shareCardImage": "covers/share/2026-11-19-daily-16iaekk.jpg",
+    "coverThumbnail": "covers/2026-11-19-daily-16iaekk-450.webp"
+  },
+  {
     "id": "2026-11-19-research-jtonbq",
     "type": "research",
     "typeLabel": "비정기 리서치",
