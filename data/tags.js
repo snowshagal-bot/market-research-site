@@ -310,5 +310,11 @@ window.TAG_REGISTRY = {
     "en": "Retail",
     "group": "market",
     "custom": true
+  },
+  "k-contents": {
+    "ko": "K-컨텐츠",
+    "en": "K-Contents",
+    "group": "sector",
+    "custom": true
   }
 };

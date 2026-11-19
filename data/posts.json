@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-19-daily-1e2266c",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-19",
+    "reportDate": "2026-11-19",
+    "registeredDate": "2026-11-19",
+    "registeredAt": "2026-11-19T10:07:58.307Z",
+    "legacyImport": false,
+    "title": "화제는 한한령과 수출 1조달러, 코스피를 세운 건 반도체",
+    "subtitle": "",
+    "description": "11월 19일 코스피가 장중 -2.05%에서 1.39% 오른 5,137.89로 마감한 이유. 상승의 약 4분의 3은 삼성전자·SK하이닉스 몫, 한한령 기대에 급등한 중국 소비주의 지수 몫은 작음. 다음 거래일 확인할 것.",
+    "takeaway": "코스피가 장중 -2%를 딛고 1.39% 오른 하루 고가로 마감, 상승의 약 4분의 3은 삼성전자·SK하이닉스 몫",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "china",
+      "korea",
+      "k-contents"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-11-19_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-19-daily-1e2266c.webp",
+    "shareCardImage": "covers/share/2026-11-19-daily-1e2266c.jpg",
+    "coverThumbnail": "covers/2026-11-19-daily-1e2266c-450.webp"
+  },
+  {
     "id": "2026-11-18-research-1l0zx61",
     "type": "research",
     "typeLabel": "Research",
