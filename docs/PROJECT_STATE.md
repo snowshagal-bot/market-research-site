@@ -20,7 +20,11 @@ See `INDEXING_AUDIT_2026-11-14.md` for the 56-report investigation.
 Initial HTML string fallback (2026-11-19): generated latest/archive markup is
 inserted with a replacement callback, preserving literal dollar amounts such
 as `$1tn` in report titles instead of interpreting them as regex captures and
-duplicating container tags. The Cloudflare HTMLRewriter path is unchanged.
+duplicating container tags. The same applies to everything the fallback adds
+before `</head>` or `</body>` (report SEO tags and reading links, the home
+bootstrap with the notice, category hreflang links, the engagement script), so
+`$&`, `$'`, `` $` `` and `$$` in titles, notices or tags stay literal too. The
+Cloudflare HTMLRewriter path is unchanged.
 
 Calendar improvements (2026-10-25, owner-approved rollout in #180): the existing daily
 calendar sync fills blank `disclosure_watchlist.corp_name_en` from OpenDART's

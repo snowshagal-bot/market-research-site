@@ -70,6 +70,16 @@ function replaceElementContentsById(body, id, markup) {
   return body.replace(pattern, (_, open, close) => `${open}${markup}${close}`);
 }
 
+/**
+ * Inserts markup before the first closing </head> or </body>. A callback, not
+ * a replacement string: post titles, notices and tags in the markup may hold
+ * "$&", "$'", "$`" or "$$", which a string would expand into the matched tag,
+ * the rest of the page or a single "$".
+ */
+function insertBeforeClosingTag(body, tag, markup) {
+  return body.replace(new RegExp(`</${tag}>`, 'i'), (close) => `${markup}${close}`);
+}
+
 
 /**
  * Attributes of one start tag's source (everything between the tag name and
@@ -151,7 +161,7 @@ export function setHtmlLang(body, lang) {
 
 function replaceCategoryAlternates(body, markup) {
   const withoutAlternates = body.replace(/<link\b(?=[^>]*\brel=["']alternate["'])(?=[^>]*\bhreflang=["'][^"']+["'])[^>]*>/gi, '');
-  return markup ? withoutAlternates.replace(/<\/head>/i, `${markup}</head>`) : withoutAlternates;
+  return markup ? insertBeforeClosingTag(withoutAlternates, 'head', markup) : withoutAlternates;
 }
 
 // Repository files that ship with the Pages output but are not part of the
@@ -365,10 +375,10 @@ export async function onRequest(context) {
       if (home) {
         try {
           body = applyInitialHtmlToString(body, home);
-          if (home.head) body = body.replace(/<\/head>/i, `${home.head}</head>`);
+          if (home.head) body = insertBeforeClosingTag(body, 'head', home.head);
         } catch (error) { console.error('home initial html apply failed', error); }
       }
-      if (engagement) body = body.replace(/<\/body>/i, `${engagement}</body>`);
+      if (engagement) body = insertBeforeClosingTag(body, 'body', engagement);
       body = appendGa4ToHtml(body, ga4);
       const headers = new Headers(response.headers);
       headers.delete('content-length');
@@ -501,8 +511,8 @@ export async function onRequest(context) {
       || attrs.rel === 'apple-touch-icon'
       || attrs.rel === 'manifest'
     ));
-    body = body.replace(/<\/head>/i, `${FAVICON_TAGS}${seo}${feedLink}${footerStyle}</head>`);
-    body = body.replace(/<\/body>/i, `${readingNavigation}${footerMarkup}${shell}</body>`);
+    body = insertBeforeClosingTag(body, 'head', `${FAVICON_TAGS}${seo}${feedLink}${footerStyle}`);
+    body = insertBeforeClosingTag(body, 'body', `${readingNavigation}${footerMarkup}${shell}`);
     body = setHtmlLang(body, lang);
     body = appendGa4ToHtml(body, ga4);
     const headers = new Headers(response.headers);
