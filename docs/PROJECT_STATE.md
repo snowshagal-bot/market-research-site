@@ -17,6 +17,11 @@ Uploaded report HTML, canonicals, sitemap dates and ranking policy are unchanged
 This improves initial-HTML link discovery; it does not guarantee Google indexing.
 See `INDEXING_AUDIT_2026-11-14.md` for the 56-report investigation.
 
+Initial HTML string fallback (2026-11-19): generated latest/archive markup is
+inserted with a replacement callback, preserving literal dollar amounts such
+as `$1tn` in report titles instead of interpreting them as regex captures and
+duplicating container tags. The Cloudflare HTMLRewriter path is unchanged.
+
 Calendar improvements (2026-10-25, owner-approved rollout in #180): the existing daily
 calendar sync fills blank `disclosure_watchlist.corp_name_en` from OpenDART's
 official company overview `corp_name_eng`. `functions/api/disclosures/_company-names.js`

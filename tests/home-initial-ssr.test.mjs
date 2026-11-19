@@ -715,6 +715,23 @@ test('the middleware renders / and /en/ from the live handlers and keeps the exi
   }
 });
 
+test('string fallback preserves dollar amounts in report titles without duplicating containers', async () => {
+  const title = 'Exports reach $1tn; flows reach $2bn';
+  const posts = [researchPost('en'), { ...dailyPost('en', NORMAL_DATE), title }];
+  const response = await middleware({
+    request: new Request(`${ORIGIN}/en/`),
+    env: { ASSETS: assetsFor(posts), COMMENTS_DB: await database() },
+    next: async () => new Response(EN_SHELL, { headers: { 'content-type': 'text/html; charset=utf-8' } })
+  });
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  for (const id of ['latest-category-cards', 'report-list']) {
+    assert.equal((html.match(new RegExp(`id="${id}"`, 'g')) || []).length, 1);
+    assert.ok(decode(nodeById(html, id).inner).includes(title));
+  }
+  assert.equal(decode(nodeById(html, 'hero-featured-date').inner), '2026-09-19');
+});
+
 test('22. only / and /en/ are home pages; /disclosures/ and /calendar/ are untouched', async () => {
   assert.equal(homeInitialLang('/'), 'ko');
   assert.equal(homeInitialLang('/en/'), 'en');
