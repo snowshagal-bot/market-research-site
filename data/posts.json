@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-19-research-jtonbq",
+    "type": "research",
+    "typeLabel": "비정기 리서치",
+    "lang": "ko",
+    "date": "2026-11-19",
+    "reportDate": "2026-11-19",
+    "registeredDate": "2026-11-19",
+    "registeredAt": "2026-11-19T10:12:50.480Z",
+    "legacyImport": false,
+    "title": "K-콘텐츠는 이제 어떻게 돈을 버나",
+    "seoTitle": "K-콘텐츠는 이제 어떻게 돈을 버나",
+    "subtitle": "",
+    "description": "하이브·에스엠·JYP·YG는 역대 최대 매출을 냈지만 주가는 11월 중순 연초보다 36~53% 낮았다. 매출이 한 회사에 쏠린 구조, 공연·굿즈·신인으로 옮겨 가는 수익원, 한한령 기대와 방한객 2,000만 명의 소비처를 풀었다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "k-contents",
+      "beauty",
+      "china"
+    ],
+    "readingMinutes": 15,
+    "href": "reports/20261119_Research_NO15_K_Content_Business_Cover.html",
+    "coverImage": "covers/2026-11-19-research-jtonbq.webp",
+    "shareCardImage": "covers/share/2026-11-19-research-jtonbq.jpg",
+    "coverThumbnail": "covers/2026-11-19-research-jtonbq-450.webp"
+  },
+  {
     "id": "2026-11-19-daily-1e2266c",
     "type": "daily",
     "typeLabel": "주식 리포트",
