@@ -65,7 +65,9 @@ function withAdminHeaders(response, { html = false } = {}) {
 function replaceElementContentsById(body, id, markup) {
   const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const pattern = new RegExp(`(<[^>]+id=["']${escaped}["'][^>]*>)[\\s\\S]*?(<\\/[^>]+>)`, 'i');
-  return body.replace(pattern, `$1${markup}$2`);
+  // Post text can contain dollar amounts such as "$1tn". A replacement
+  // string interprets those as capture references instead of literal text.
+  return body.replace(pattern, (_, open, close) => `${open}${markup}${close}`);
 }
 
 
