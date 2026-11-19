@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-19-research-1u16rup",
+    "type": "research",
+    "typeLabel": "Research",
+    "lang": "en",
+    "date": "2026-11-19",
+    "reportDate": "2026-11-19",
+    "registeredDate": "2026-11-19",
+    "registeredAt": "2026-11-19T10:47:07.752Z",
+    "legacyImport": false,
+    "title": "How K-Content Makes Money Now",
+    "seoTitle": "How K-Content Makes Money Now",
+    "subtitle": "",
+    "description": "Combined revenue at HYBE, SM, JYP and YG hit a record, yet their shares had fallen 36–53% YTD by Nov. 17, 2026. This report examines HYBE's revenue concentration, the shift to concerts and merch, new acts, China reopening hopes, and where 20 million foreign visitors spend.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "k-contents",
+      "beauty",
+      "china"
+    ],
+    "readingMinutes": 19,
+    "href": "reports/en/20261119_Snowshagal_Research_No15_K_Content_Business_EN_Revised.html",
+    "translationGroup": "2026-11-19-research-jtonbq",
+    "coverImage": "covers/2026-11-19-research-1u16rup.webp",
+    "shareCardImage": "covers/share/2026-11-19-research-1u16rup.jpg",
+    "coverThumbnail": "covers/2026-11-19-research-1u16rup-450.webp"
+  },
+  {
     "id": "2026-11-19-daily-16iaekk",
     "type": "daily",
     "typeLabel": "Daily",
