@@ -202,5 +202,6 @@
 "2026-11-18-daily-b26iyw":[{"term":"기타법인","tip":"금융회사·연기금이 아닌 일반 법인. 회사가 자기 주식을 사는 자사주 매입도 이 분류로 잡힘."}],
 "2026-11-18-daily-jocy39":[{"term":"Other corporations","tip":"Non-financial companies rather than institutions or pension funds. Corporate share buybacks can also be classified here."}],
 "2026-11-19-daily-16iaekk":[{"term":"Other corporations","tip":"Nonfinancial corporate entities outside the institutional and pension-fund categories. Corporate share repurchases can also fall into this category; KRX totals do not identify the actual buyers."}],
-"2026-11-19-daily-1e2266c":[{"term":"기타법인","tip":"금융회사·연기금이 아닌 일반 법인. 회사가 자기 주식을 사는 자사주 매입도 이 분류로 잡힘."}]
+"2026-11-19-daily-1e2266c":[{"term":"기타법인","tip":"금융회사·연기금이 아닌 일반 법인. 회사가 자기 주식을 사는 자사주 매입도 이 분류로 잡힘."}],
+"2026-11-20-daily-7wv4d0":[{"term":"매도 사이드카","tip":"코스피200 선물이 5% 이상 떨어진 상태가 1분 이어지면 프로그램 매도 주문의 효력을 5분간 멈추는 조치. 주식 거래 전체가 멈추는 것은 아님."},{"term":"기타법인","tip":"금융회사·연기금이 아닌 일반 법인. 회사가 자기 주식을 사는 자사주 매입도 이 분류로 잡힘."}]
 }

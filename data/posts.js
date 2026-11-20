@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-20-daily-7wv4d0",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-20",
+    "reportDate": "2026-11-20",
+    "registeredDate": "2026-11-20",
+    "registeredAt": "2026-11-20T08:30:58.762Z",
+    "legacyImport": false,
+    "title": "앤트로픽 상장 뒤 AI주 투매, 코스피 5% 급락에 4,900 아래로",
+    "subtitle": "",
+    "description": "11월 20일 코스피가 5.21% 급락해 4,869.96으로 마감한 이유. 미국 AI·반도체 투매와 AMD 수출통제 의혹에 시가부터 -4.08%, 외국인·기관 2조원대 매도. 다음 거래일 확인할 것.",
+    "takeaway": "미국 AI·반도체 투매에 코스피가 5.21% 급락해 4,900선 아래로, 하락폭의 약 8할은 개장과 함께 반영",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-11-20_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-20-daily-7wv4d0.webp",
+    "shareCardImage": "covers/share/2026-11-20-daily-7wv4d0.jpg",
+    "coverThumbnail": "covers/2026-11-20-daily-7wv4d0-450.webp"
+  },
+  {
     "id": "2026-11-19-note-14zaxjm",
     "type": "note",
     "typeLabel": "Investment Insights",
