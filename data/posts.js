@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-20-note-1kci22o",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-20",
+    "reportDate": "2026-11-20",
+    "registeredDate": "2026-11-20",
+    "registeredAt": "2026-11-20T09:22:27.154Z",
+    "legacyImport": false,
+    "title": "Two stocks drove 85% of foreign net selling The 25% cap's clock has changed",
+    "seoTitle": "MSCI's 25% Cap Gets a New Timetable: EWY's Index Switch",
+    "subtitle": "",
+    "description": "Samsung Electronics and SK hynix accounted for 85% of roughly KRW 220tn in foreign net selling on the KOSPI this year. MSCI's 25% cap helps explain the timing, but theoretical cap-adjustment demand is only about 4% of net selling in the two stocks. EWY's benchmark switch changes the rebalance timetable.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "liquidity",
+      "msci"
+    ],
+    "readingMinutes": 16,
+    "href": "reports/en/20261120_Investment_Insight_MSCI_Cap_Foreign_Selling_EN.html",
+    "translationGroup": "2026-11-20-note-g01c86",
+    "coverImage": "covers/2026-11-20-note-1kci22o.webp",
+    "shareCardImage": "covers/share/2026-11-20-note-1kci22o.jpg",
+    "coverThumbnail": "covers/2026-11-20-note-1kci22o-450.webp"
+  },
+  {
     "id": "2026-11-20-note-g01c86",
     "type": "note",
     "typeLabel": "투자 인사이트",
