@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-20-daily-8p55v0",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-20",
+    "reportDate": "2026-11-20",
+    "registeredDate": "2026-11-20",
+    "registeredAt": "2026-11-20T08:52:12.176Z",
+    "legacyImport": false,
+    "title": "AI Selloff After Anthropic’s IPO, KOSPI Sinks 5% Below 4,900",
+    "subtitle": "",
+    "description": "South Korea’s KOSPI fell 5.21% to 4,869.96 on Nov. 20, 2026. A US AI and chip selloff drove a 4.08% opening gap, while foreign and institutional investors sold more than KRW 2tn combined. What to watch next.",
+    "takeaway": "Nearly 80% of the KOSPI’s 5.21% decline was priced in at the open as US AI and chip stocks sold off.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-11-20_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-20-daily-7wv4d0",
+    "coverImage": "covers/2026-11-20-daily-8p55v0.webp",
+    "shareCardImage": "covers/share/2026-11-20-daily-8p55v0.jpg",
+    "coverThumbnail": "covers/2026-11-20-daily-8p55v0-450.webp"
+  },
+  {
     "id": "2026-11-20-daily-7wv4d0",
     "type": "daily",
     "typeLabel": "주식 리포트",
