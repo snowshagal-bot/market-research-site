@@ -17,15 +17,24 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   `cd91`. Done:
   - migration `0003` applied to the Preview and Production D1;
   - website #234 (99eb126) and publisher #16 (a6fa9d1) merged;
-  - core `e5a79ca6` installed (the previous `c9e4c471` kept as `core.pre-domestic-rates-20261122.exe`);
+  - core `e5a79ca6` installed (the previous `c9e4c471` kept as `core.pre-domestic-rates-20261122.exe`),
+    then replaced the same day by `25d00e83` (publisher main c320192, which adds the 2026-07-17
+    KRX closure below; `e5a79ca6` kept as `core.pre-krx0717-20261122.exe`);
   - task `시장지표-국내금리` registered (weekdays 16:20–18:20 KST, every 15 minutes);
   - backfill 2026-01-02..2026-11-20 published: 217 days, KOFIA had no rows for 2026-07-17.
   Remaining:
   - Check the first scheduled run on 2026-11-23: KOFIA's afternoon values should appear shortly
     after 16:00 KST and the 16:20 run should publish that day (`logs\domestic_rates.log`).
   - Owner: submit the four pages (KO and EN) in GSC and Naver.
-  - Rollback: disable the task. If the core must go back, restore `core.pre-domestic-rates-20261122.exe`.
+  - Rollback: disable the task. If the core must go back, restore `core.pre-krx0717-20261122.exe`
+    (Domestic Rates without the 07-17 fix) or `core.pre-domestic-rates-20261122.exe` (before Domestic Rates).
     Stored days can stay; the pages read them only.
+
+- **KRX 2026-07-17 제헌절 closure (done 2026-11-22)**: 제헌절 became a public holiday again in
+  2026 and KRX closed that Friday, but both KRX 2026 lists missed it. Website #236 (8b827df) and
+  publisher #17 (c320192) add it: 17 holidays, 244 trading days. Production `/api/calendar`
+  shows 07-17 as a KRX holiday; core `25d00e83` is installed and its backfill skips 07-17.
+  A holiday added during a year goes into both lists together (`docs/DEPLOYMENT.md`).
 
 - **Seven more Market Close indicators (2026-11-21)**: copper (COMEX `HG=F`), Brent, silver,
   natural gas, CNY/KRW, EUR/KRW and USD/JPY as optional codes of contract 1.2.0. Website #233
