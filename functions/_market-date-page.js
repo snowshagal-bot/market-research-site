@@ -24,6 +24,7 @@ import {
   serializeJsonLd,
   websiteStructuredData
 } from './_seo.js';
+import '../assets/locale.js';
 import { TABLE_NAME, ensureMarketTable } from './api/market/_shared.js';
 import { aggregateKrxGroups } from './api/market/_aggregate.js';
 
@@ -365,6 +366,19 @@ function rankList(title, items, type, f, field = 'change_pct') {
 
 // Rows for a ranked sector or theme list. Themes carry no market, so the
 // market column is left out when no item has one.
+// KRX's sector and theme names, in English on the English pages (assets/locale.js).
+function localizedGroups(items, lang) {
+  if (!Array.isArray(items)) return items;
+  const name = globalThis.MARKET_LOCALE.krxGroupName;
+  return lang === 'en' ? items.map(item => ({ ...item, name: name(item, 'en') })) : items;
+}
+
+function localizedSectorsView(view, lang) {
+  if (lang !== 'en' || !view) return view;
+  const period = item => item && { ...item, sectors: localizedGroups(item.sectors, lang), themes: localizedGroups(item.themes, lang) };
+  return { ...view, sectors: localizedGroups(view.sectors, lang), themes: localizedGroups(view.themes, lang), week: period(view.week), month: period(view.month) };
+}
+
 function groupColumns(items, copy) {
   return items.some(item => item.market) ? copy.groupColumns : copy.groupColumns.filter((_, index) => index !== 2);
 }
@@ -421,7 +435,8 @@ export function renderMarketDateMain(payload, lang, context = {}) {
   const flows = payload.krx_investor_trading?.markets || {};
   const five = payload.recent_5d_flows || {};
   const breadth = payload.market_breadth || {};
-  const groups = payload.krx_groups || {};
+  const rawGroups = payload.krx_groups || {};
+  const groups = { ...rawGroups, sectors: localizedGroups(rawGroups.sectors, lang), themes: localizedGroups(rawGroups.themes, lang) };
   const caps = Array.isArray(payload.market_cap_top10) ? payload.market_cap_top10 : [];
   const shorts = payload.short_selling || {};
   const status = payload.meta?.schema_version === '1.2.0' ? payload.section_status || {} : {};
@@ -920,6 +935,7 @@ export function marketSectorsTitle(view, lang) {
 }
 
 export function marketSectorsDescription(view, lang) {
+  view = localizedSectorsView(view, lang);
   const parts = SECTORS_COPY[lang === 'en' ? 'en' : 'ko']
     .description(view.date, view.sectors[0], view.sectors.length > 1 ? view.sectors.at(-1) : null, view.themes[0])
     .filter(Boolean);
@@ -932,6 +948,7 @@ export function marketSectorsDescription(view, lang) {
 }
 
 export function renderMarketSectorsMain(view, lang) {
+  view = localizedSectorsView(view, lang);
   const copy = COPY[lang === 'en' ? 'en' : 'ko'];
   const sc = SECTORS_COPY[lang === 'en' ? 'en' : 'ko'];
   const f = makeFormat(lang);

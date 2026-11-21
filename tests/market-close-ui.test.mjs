@@ -1245,3 +1245,89 @@ test('Hydration failure fallback: /api/market/latest errors preserve static cont
     assert.doesNotMatch(renderedHtml, /id="market-fallback-notice"/);
   }
 });
+
+
+/* ------------------------------------------- readability pass (2026-11-21) */
+
+async function marketRuntimeWithLocale(lang = 'ko') {
+  const [locale, script] = await Promise.all([read('assets/locale.js'), read('assets/market-close.js')]);
+  const document = {
+    documentElement: { dataset: { siteLang: lang } },
+    body: { dataset: {} },
+    readyState: 'loading',
+    addEventListener() {},
+    getElementById() { return null; }
+  };
+  const window = {};
+  const context = vm.createContext({ window, document, location: { hostname: 'localhost' }, Intl, Date, Set, console });
+  vm.runInContext(locale, context);
+  vm.runInContext(script, context);
+  return window.MARKET_CLOSE;
+}
+
+function rangePayload() {
+  const item = (start, end) => ({ baseline_value: start, end_value: end, return_pct: (end / start - 1) * 100, period_high: end, period_low: start, observations: 5, complete: true });
+  const group = (code, name, market, pct) => ({ index_code: code, name, market, baseline_value: 100, end_value: 100 + pct, return_pct: pct, observations: 5, complete: true });
+  return {
+    aggregation_version: '1.0.0', period: '1w',
+    window: { start_date: '2026-11-16', end_date: '2026-11-20', dates: ['2026-11-16', '2026-11-17', '2026-11-18', '2026-11-19', '2026-11-20'], sessions_used: 5, required_sessions: 5, complete: true },
+    instruments: {
+      indices: { KOSPI: item(5290.53, 4869.96), KOSDAQ: item(699.66, 645.68), NASDAQ: item(25366.09, 23879.2), DOW: item(50100, 49097.06), SP500: item(7592.4, 7175.83) },
+      rates_fx_volatility: { SOX: item(10506.67, 9419.72), VIX: item(18.7, 28.44), DXY: item(103.41, 103.75) },
+      commodities_crypto: { GOLD: item(3886.3, 3561), BITCOIN: item(65305.06, 61865.44) }
+    },
+    flows: { unit: 'KRW billion', sessions_used: 5, markets: {} },
+    breadth: {},
+    krx_groups: {
+      sessions_with_data: 5, sessions_used: 5, coverage_complete: true,
+      sectors: [group('KGS20P', '전기·가스', 'KOSPI', 3.1), group('KGS09P', '전기전자', 'KOSPI', -8.2), group('QGS33P', '제약', 'KOSDAQ', 1.2)],
+      themes: [group('XGT17P', 'KRX 코리아 소버린 AI 지수', null, -9.4), group('KGD02P', '코스피 고배당 50', null, 0.4)]
+    }
+  };
+}
+
+test('1W/1M: Korean instrument names on the Korean page, and the Dow Jones row is there', async () => {
+  const runtime = await marketRuntimeWithLocale('ko');
+  const target = { innerHTML: '' };
+  runtime.renderRangeView(rangePayload(), '1w', target);
+  const names = [...target.innerHTML.matchAll(/<div class="range-item-name">\s*<strong>([^<]+)<\/strong>/g)].map(m => m[1]);
+  assert.deepEqual(names.slice(0, 6), ['코스피', '코스닥', '나스닥 종합', '다우존스', 'S&amp;P 500', '필라델피아 반도체']);
+  for (const code of ['SP500', 'DXY', 'BITCOIN', 'GOLD']) assert.ok(!names.includes(code), `raw code ${code}`);
+  assert.ok(names.includes('달러인덱스') && names.includes('비트코인') && names.includes('금 선물'));
+  const en = await marketRuntimeWithLocale('en');
+  const enTarget = { innerHTML: '' };
+  en.renderRangeView(rangePayload(), '1w', enTarget);
+  assert.match(enTarget.innerHTML, /<strong>Dow Jones<\/strong>/);
+});
+
+test('1W/1M: KRX sector and theme rankings use English names on the English page', async () => {
+  const en = await marketRuntimeWithLocale('en');
+  const target = { innerHTML: '' };
+  en.renderRangeView(rangePayload(), '1w', target);
+  const groups = target.innerHTML.slice(target.innerHTML.indexOf('range-groups-grid'));
+  for (const name of ['Electricity &amp; Gas', 'Electrical &amp; Electronics', 'Pharmaceuticals', 'KRX Korea Sovereign AI Index', 'KOSPI High Dividend 50']) {
+    assert.ok(groups.includes(name), name);
+  }
+  assert.doesNotMatch(groups, /[ㄱ-ㆎ가-힣]/);
+  const ko = await marketRuntimeWithLocale('ko');
+  const koTarget = { innerHTML: '' };
+  ko.renderRangeView(rangePayload(), '1w', koTarget);
+  assert.match(koTarget.innerHTML, /<b>전기·가스<\/b>/);
+});
+
+test('readability: no reader-facing market text is set below 10px', async () => {
+  const css = await read('assets/market-close.css');
+  const tiny = [...css.matchAll(/([^{}]+)\{[^{}]*?font-size:([0-9.]+)px/g)]
+    .filter(m => Number(m[2]) < 10).map(m => `${m[1].trim().slice(0, 60)} ${m[2]}px`);
+  assert.deepEqual(tiny, []);
+  // Phone history buttons are full-size targets.
+  assert.match(css, /@media\(max-width:430px\)\{[^@]*\.market-nav-step,\.market-calendar-toggle\{width:36px;height:36px\}/);
+  assert.match(css, /@media\(max-width:430px\)\{[^@]*\.market-mode-btn\{[^}]*min-height:36px/);
+});
+
+test('readability: ranked rows keep the name on one line and the market-cap names read left', async () => {
+  const css = await read('assets/market-close.css');
+  assert.match(css, /\.rank-list li span\{min-width:0;display:flex;align-items:baseline;gap:6px\}/);
+  assert.match(css, /\.rank-list b\{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap/);
+  assert.match(css, /\.market-cap-table td:nth-child\(2\)[^{]*\{text-align:left\}/);
+});

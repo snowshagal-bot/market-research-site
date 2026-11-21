@@ -148,6 +148,16 @@ Report contents themselves are not forcibly recolored by the site. Their origina
 - a holiday or event tag is cut inside its cell: one line with an ellipsis on desktop, at most two lines on screens up to 760px. The full name stays in the tag's `title` and the day detail card;
 - after a calendar change, check KO and EN at 360–430px and 1280px+ on months with long names (for example 2026-09, 2026-12, 2027-12): equal columns under the weekday row, no tag outside its cell, no page overflow.
 
+## Market pages (`/market/`, session and sectors pages)
+
+- no reader-facing text below 10px (`assets/market-close.css`; a test reads the stylesheet). Table cells are 11px (10.5px on phones), labels, states and notes 10px;
+- the TODAY/1W/1M/HISTORY buttons and the date arrows and calendar button are at least 32px tall, 36px on phones (up to 430px), where the date controls take their own row;
+- ranked rows (short-selling TOP5, sector and theme rankings) are one line: rank and name, the market as a small tag, the value on the right; a long name ends in an ellipsis. Their grid columns carry `min-width: 0` so a long name never widens the page;
+- in the market-cap and sector tables the name column is left-aligned and the rank centred; numbers stay right-aligned;
+- up to 860px the two investor-flow tables stack; up to 1060px rates and commodities stack; on phones the commodity cards are two per row with the third across;
+- the English pages name every KRX sector and theme in English (`krxGroupName` in `assets/locale.js`, keyed by index code). A new index code shows its Korean name until it is added there;
+- check KO and EN at 360, 390, 768, 1024 and 1280px on TODAY, 1W, 1M, a session page and the sectors page: no page overflow, nothing outside its card, no table scrolling at 360px.
+
 ## Things not to add without explicit request
 
 - view counts

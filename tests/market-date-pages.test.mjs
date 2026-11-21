@@ -365,7 +365,12 @@ test('the sectors page lists every index and the windows it has, with its own he
     assert.match(html, new RegExp(`<link rel="canonical" href="${self}">`));
     assert.match(html, /hreflang="en" href="https:\/\/snowshagal.com\/en\/market\/sectors\/"/);
     assert.match(html, lang === 'en' ? /<title>Korea Sector &amp; Theme Index Rankings, Oct 28, 2026 \| Snowshagal<\/title>/ : /<title>오늘 업종별 등락률·KRX 테마지수 순위 \(10월 28일\) \| Snowshagal<\/title>/);
-    for (const item of [...FIXTURE.krx_groups.sectors, ...FIXTURE.krx_groups.themes]) assert.ok(html.includes(item.name.replace(/&/g, '&amp;')), item.name);
+    for (const item of [...FIXTURE.krx_groups.sectors, ...FIXTURE.krx_groups.themes]) {
+      const name = globalThis.MARKET_LOCALE.krxGroupName(item, lang);
+      assert.ok(html.includes(name.replace(/&/g, '&amp;')), name);
+    }
+    // The English page names every KRX index in English (assets/locale.js), none in Korean.
+    if (lang === 'en') assert.doesNotMatch(html.slice(html.indexOf('<main'), html.indexOf('</main>')), /[ㄱ-ㆎ가-힣]/);
     const titles = [...html.matchAll(/<h2 id="market-section-\d+"><span>(\d+)\.<\/span> ([^<]+)<\/h2>/g)].map((m) => m[2]);
     assert.equal(titles.length, 4, titles.join(' | '));
     assert.match(html, new RegExp(`href="${lang === 'en' ? '/en' : ''}/market/2026-10-28/"`));

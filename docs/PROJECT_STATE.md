@@ -150,6 +150,7 @@ Preview hosts remain blocked, and all non-Market mutation APIs keep their existi
   - The page answers 404 when the newest session carries no sectors.
   - Linked from `/market/`, each session page and the archive; listed in the sitemap.
   - The figures are index price moves, not investor flows, and the page says so.
+  - English names for all 85 stored KRX sector/theme index codes live in `assets/locale.js` (`KRX_GROUP_NAMES`, `krxGroupName`), used by the English session, sectors and 1W/1M views. `tests/krx-group-names.test.mjs` checks the list.
 
 ## Atom feeds (Phase 2, Production — #105)
 
