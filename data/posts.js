@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-21-note-hb64be",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-21",
+    "reportDate": "2026-11-21",
+    "registeredDate": "2026-11-21",
+    "registeredAt": "2026-11-21T08:46:55.448Z",
+    "legacyImport": false,
+    "title": "CHINA REMOTE-ACCESS CURBS SALES MAY HOLD BUT UPSIDE AT RISK",
+    "seoTitle": "Nvidia's China Remote-Access Curbs Threaten Guidance Upside More Than Sales",
+    "subtitle": "",
+    "description": "The U.S. is extending AI-chip export licensing to overseas data centers serving Chinese companies. Nvidia raised guidance despite excluding direct China data-center compute revenue. Kiwoom Securities estimates unmet demand could exceed the potential loss—and examines who ultimately bears the burden.",
+    "tags": [
+      "china",
+      "u-s-a",
+      "korea",
+      "ai",
+      "semiconductors"
+    ],
+    "readingMinutes": 18,
+    "href": "reports/en/20261121_Investment_Insight_Nvidia_China_Remote_Access_EN.html",
+    "translationGroup": "2026-11-21-note-ueukqn",
+    "coverImage": "covers/2026-11-21-note-hb64be.webp",
+    "shareCardImage": "covers/share/2026-11-21-note-hb64be.jpg",
+    "coverThumbnail": "covers/2026-11-21-note-hb64be-450.webp"
+  },
+  {
     "id": "2026-11-21-note-ueukqn",
     "type": "note",
     "typeLabel": "투자 인사이트",
