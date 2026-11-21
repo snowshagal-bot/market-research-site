@@ -14,7 +14,7 @@ export {
 
 // Added 2026-11 and optional in 1.2.0: a payload recorded before them has no
 // such key and stays valid. When the key is there, every rule applies.
-export const OPTIONAL_GLOBAL_CODES = Object.freeze(['CNYKRW', 'EURKRW', 'USDJPY', 'BRENT', 'COMEX_COPPER', 'SILVER', 'NATGAS']);
+export const OPTIONAL_GLOBAL_CODES = Object.freeze(['CNYKRW', 'EURKRW', 'USDJPY', 'BRENT', 'COMEX_COPPER', 'SILVER', 'NATGAS', 'VKOSPI']);
 const OPTIONAL = new Set(OPTIONAL_GLOBAL_CODES);
 
 /** False only for an optional indicator the payload does not carry at all. */
@@ -26,7 +26,8 @@ export function carriesInstrument(payload, section, code) {
 
 const SAME_DAY_RULES = Object.freeze([
   ['indices', ['KOSPI', 'KOSDAQ']],
-  ['rates_fx_volatility', ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY']],
+  // VKOSPI: the KRX derivatives close (15:45 KST) of the session itself.
+  ['rates_fx_volatility', ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY', 'VKOSPI']],
   ['commodities_crypto', ['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER', 'BITCOIN']]
 ]);
 
@@ -39,7 +40,7 @@ const PREVIOUS_US_SESSION_RULES = Object.freeze([
 // are HARD and are never exempt from the freshness rules.
 export const GLOBAL_INDICATOR_SECTIONS = Object.freeze([
   ['indices', ['NASDAQ', 'DOW', 'SP500']],
-  ['rates_fx_volatility', ['SOX', 'VIX', 'US10Y', 'USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY']],
+  ['rates_fx_volatility', ['SOX', 'VIX', 'VKOSPI', 'US10Y', 'USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY']],
   ['commodities_crypto', ['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER', 'BITCOIN']]
 ]);
 

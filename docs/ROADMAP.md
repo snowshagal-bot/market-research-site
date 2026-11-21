@@ -36,6 +36,19 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   shows 07-17 as a KRX holiday; core `25d00e83` is installed and its backfill skips 07-17.
   A holiday added during a year goes into both lists together (`docs/DEPLOYMENT.md`).
 
+- **VKOSPI (2026-11-22, two Draft PRs)**: KRX's 코스피 200 변동성지수 beside VIX, as one more
+  optional code of contract 1.2.0 (`rates_fx_volatility.VKOSPI`, kind `krxvol`, page `/market/vkospi/`).
+  The collector reads it from KRX Index (`index.krx.co.kr`, 파생상품지수, the same OTP flow as the
+  업종·테마 collection) after 16:00 KST; the value is the 15:45 KST derivatives close of the session.
+  It is SOFT: a failure lists it in `global_indicators.unavailable` and never blocks the final.
+  Forward only: Market Close records are frozen, so days before the install have no VKOSPI.
+  Rollout order (owner approval):
+  1. merge the website PR first, so the receiver accepts the key;
+  2. merge the publisher PR, rebuild the core, and install it together with the new
+     `dist\config\markets.json` (the installed core reads that file, not the bundled one);
+  3. on the next trading day check `/market/`, that day's session page and `/market/vkospi/`,
+     then submit `/market/vkospi/` and `/en/market/vkospi/` in GSC and Naver.
+
 - **Seven more Market Close indicators (2026-11-21)**: copper (COMEX `HG=F`), Brent, silver,
   natural gas, CNY/KRW, EUR/KRW and USD/JPY as optional codes of contract 1.2.0. Website #233
   and publisher #14 are merged and the core is installed (2026-11-21); the first export carrying

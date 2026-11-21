@@ -135,7 +135,7 @@ Exporter는 원천 웹 페이지를 직접 파싱하지 않는다. UI와 TXT 저
 |---|---|
 | `meta` | 시장 기준일, 생성시각, 시간대, 상태, 계약 버전 |
 | `indices` | KOSPI, KOSDAQ, NASDAQ, DOW, SP500 |
-| `rates_fx_volatility` | SOX, VIX, US10Y, USDKRW, JPYKRW, DXY (+ 선택: CNYKRW, EURKRW, USDJPY) |
+| `rates_fx_volatility` | SOX, VIX, US10Y, USDKRW, JPYKRW, DXY (+ 선택: CNYKRW, EURKRW, USDJPY, VKOSPI) |
 | `commodities_crypto` | WTI, GOLD, BITCOIN (+ 선택: BRENT, COMEX_COPPER, SILVER, NATGAS) |
 | `krx_investor_trading` | 3개 시장 × 외국인·기관·개인의 매도/매수/순매수 |
 | `recent_5d_flows` | 최근 5거래일 누적 순매수 |
@@ -158,10 +158,12 @@ Exporter는 원천 웹 페이지를 직접 파싱하지 않는다. UI와 TXT 저
 | COMEX_COPPER | Yahoo `HG=F` (COMEX, $/lb) | `commodities_crypto` | 당일 |
 | SILVER | Yahoo `SI=F` | `commodities_crypto` | 당일 |
 | NATGAS | Yahoo `NG=F` | `commodities_crypto` | 당일 |
+| VKOSPI | 한국거래소 KRX Index 코스피 200 변동성지수(`index.krx.co.kr`, 파생상품지수) | `rates_fx_volatility` | 당일 |
 
 - schema 1.2.0 안에서 `properties`에만 있고 `required`에는 없다. 이 지표가 생기기 전 기록과 그 재구성(replay)은 키 자체가 없고, 그대로 유효하다.
 - 키가 있으면 다른 글로벌 지표와 같은 기준일·`section_status.global_indicators` 규칙을 따른다(수신 측 `functions/api/market/_freshness.js`의 `carriesInstrument`). partial/unavailable 개수는 payload가 실은 지표만 센다. 실지 않은 코드를 `unavailable`에 적으면 거부한다.
 - `COMEX_COPPER`는 LME 구리(`COPPER`, 수집기 데스크톱 전용)와 다른 시장이다. LME 값은 여전히 Market Close에 들어가지 않는다.
+- `VKOSPI`(2026-11-22 추가)는 코스피200 옵션으로 계산하는 KRX 지수다. 값은 그 거래일 파생상품 정규장 마감(15:45 KST) 종가이고, 수집기는 16:00 KST(수능일 17:00) 이후에만 그날 값으로 받는다. `source_date`는 그 거래일이다. 다른 선택 지표처럼 SOFT라서 실패해도 Market Close final을 막지 않고 `global_indicators.unavailable`에 적힌다.
 
 ## KRX 업종·테마
 

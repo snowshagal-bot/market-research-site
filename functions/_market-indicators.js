@@ -7,6 +7,8 @@
 //   fx       — the 15:30 KST reference rate (Hana Bank, via Naver Finance)
 //   snapshot — the quote when the record was made, shortly after the Korea close
 //   kofia    — the KOFIA final quote yield of the KRX session, 16:00 KST basis
+//   krxvol   — a KRX derivatives index close (15:45 KST, the KOSPI 200 options
+//              close), dated the KRX session: VKOSPI
 // The slug is the code in lower case, except COMEX_COPPER (copper);
 // assets/market-close.js links with the same rule.
 //
@@ -29,6 +31,7 @@ export const MARKET_INDICATORS = Object.freeze([
   { code: 'SP500', group: 'indices', kind: 'us' },
   { code: 'SOX', group: 'rates_fx_volatility', kind: 'us' },
   { code: 'VIX', group: 'rates_fx_volatility', kind: 'us' },
+  { code: 'VKOSPI', group: 'rates_fx_volatility', kind: 'krxvol', optional: true },
   { code: 'US10Y', group: 'rates_fx_volatility', kind: 'us' },
   { code: 'KTB3Y', group: 'domestic_rates', kind: 'kofia', optional: true, domestic: true },
   { code: 'KTB10Y', group: 'domestic_rates', kind: 'kofia', optional: true, domestic: true },
