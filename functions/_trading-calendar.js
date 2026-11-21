@@ -6,7 +6,9 @@
  *
  * Sources:
  * - KRX: Korea Exchange (KRX) annual market operational notice & KASI official calendar.
- *   2026: Fully finalized and verified (16 holidays).
+ *   2026: Fully finalized and verified (17 holidays). 2026-07-17 제헌절 was added
+ *         late: it became a public holiday again in 2026 and KRX closed every
+ *         market that day.
  *   2027: The weekday public and substitute holidays of the official 2027 월력요항
  *         (published 2026-06-29; 노동절 and 제헌절 are public holidays since 2026)
  *         plus the 12-31 year-end closing day (16 holidays), and the 2027-01-04
@@ -37,6 +39,7 @@ export const CALENDAR_HOLIDAYS = Object.freeze({
       '2026-03-02',
       '2026-05-01', '2026-05-05', '2026-05-25',
       '2026-06-03',
+      '2026-07-17',
       '2026-08-17',
       '2026-09-24', '2026-09-25',
       '2026-10-05', '2026-10-09',
@@ -98,6 +101,7 @@ export const HOLIDAY_NAMES = Object.freeze({
     '2026-05-05': { ko: '어린이날', en: "Children's Day" },
     '2026-05-25': { ko: '부처님오신날 대체공휴일', en: "Buddha's Birthday (Observed)" },
     '2026-06-03': { ko: '전국동시지방선거일', en: 'Local Election Day' },
+    '2026-07-17': { ko: '제헌절', en: 'Constitution Day' },
     '2026-08-17': { ko: '광복절 대체공휴일', en: 'Liberation Day (Observed)' },
     '2026-09-24': { ko: '추석 전날', en: 'Chuseok Eve' },
     '2026-09-25': { ko: '추석', en: 'Chuseok Day' },

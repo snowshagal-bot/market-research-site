@@ -184,7 +184,9 @@ and NYSE calendars and extend that file before the first trading day of a new ca
 Day and its year-end closing day; NYSE early-close sessions remain trading days. The KRX
 holidays and special sessions must stay identical to the publisher core
 (`snowshagal-market-publisher` `market_dashboard/source_date_policy.py`); change both in the
-same cycle and re-check them against KRX's year-end notice for the coming year.
+same cycle and re-check them against KRX's year-end notice for the coming year. A public
+holiday can also be added during the year: 2026-07-17 제헌절 became one again in 2026 and was
+missing from both lists until November. When KRX announces such a closure, add it to both lists.
 
 Calendar references:
 
