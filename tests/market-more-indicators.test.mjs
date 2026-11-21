@@ -178,7 +178,8 @@ test('1W/1M take the 15:30 fixing for the new KRW pairs and the quote for USD/JP
 
 /* ------------------------------------------------------------ server pages */
 
-const OPTIONAL = MARKET_INDICATORS.filter(item => item.optional);
+// The optional instruments the Market Close payload carries; the domestic rates are their own dataset.
+const OPTIONAL = MARKET_INDICATORS.filter(item => item.optional && !item.domestic);
 const closesFor = (codes) => JSON.stringify(OPTIONAL.map(item => (codes.includes(item.code) ? 1 : null)));
 
 test('the new history pages: /market/copper/ for COMEX copper, the code in lower case for the rest', () => {

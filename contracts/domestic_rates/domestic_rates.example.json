@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-11-20T16:31:05+09:00",
+  "days": [
+    {
+      "market_date": "2026-11-20",
+      "basis_time": "16:00",
+      "retrieved_at": "2026-11-20T16:31:04+09:00",
+      "source": "금융투자협회 최종호가수익률",
+      "items": [
+        { "code": "KTB3Y", "value": 3.642, "previous_value": 3.716, "change_bp": -7.4 },
+        { "code": "KTB10Y", "value": 3.857, "previous_value": 3.942, "change_bp": -8.5 },
+        { "code": "CORPAA3Y", "value": 4.329, "previous_value": 4.39, "change_bp": -6.1 },
+        { "code": "CD91", "value": 3.39, "previous_value": 3.38, "change_bp": 1 }
+      ]
+    }
+  ]
+}

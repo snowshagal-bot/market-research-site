@@ -447,7 +447,8 @@ test('retry click triggers init/load exactly once without duplicate calls', asyn
   const script = await read('assets/market-close.js');
   let fetchCount = 0;
   const mockFetch = async (url) => {
-    fetchCount++;
+    // The session's KOFIA yields are an optional read beside each load, not part of the init sequence.
+    if (!url.includes('/api/market/rates/')) fetchCount++;
     if (url.includes('/api/market/dates')) {
       return { ok: true, json: async () => ({ dates: ['2026-08-28'], latest: '2026-08-28', earliest: '2026-08-28' }) };
     }
@@ -524,7 +525,8 @@ test('repeated retries do not accumulate popstate listeners and popstate trigger
   const script = await read('assets/market-close.js');
   let fetchCount = 0;
   const mockFetch = async (url) => {
-    fetchCount++;
+    // The session's KOFIA yields are an optional read beside each load, not part of the init sequence.
+    if (!url.includes('/api/market/rates/')) fetchCount++;
     if (url.includes('/api/market/dates')) {
       return { ok: true, json: async () => ({ dates: ['2026-08-28'], latest: '2026-08-28', earliest: '2026-08-28' }) };
     }

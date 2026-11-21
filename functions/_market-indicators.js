@@ -6,6 +6,7 @@
 //   us       — the U.S. close the record carries, dated the U.S. session
 //   fx       — the 15:30 KST reference rate (Hana Bank, via Naver Finance)
 //   snapshot — the quote when the record was made, shortly after the Korea close
+//   kofia    — the KOFIA final quote yield of the KRX session, 16:00 KST basis
 // The slug is the code in lower case, except COMEX_COPPER (copper);
 // assets/market-close.js links with the same rule.
 //
@@ -13,6 +14,11 @@
 // before them have no such key. Their pages are listed (sitemap, archive,
 // related links) only once a final record has a value; until then the page
 // itself is a 404 like any address without data.
+//
+// `domestic`: not in the Market Close payload at all. KOFIA computes these
+// yields at 16:00 KST, after the record is final, so they are their own
+// dataset (D1 market_domestic_rates, contracts/domestic_rates/), joined to the
+// session by date. They are optional the same way: listed once a day is stored.
 const SLUG_EXCEPTIONS = Object.freeze({ COMEX_COPPER: 'copper' });
 
 export const MARKET_INDICATORS = Object.freeze([
@@ -24,6 +30,10 @@ export const MARKET_INDICATORS = Object.freeze([
   { code: 'SOX', group: 'rates_fx_volatility', kind: 'us' },
   { code: 'VIX', group: 'rates_fx_volatility', kind: 'us' },
   { code: 'US10Y', group: 'rates_fx_volatility', kind: 'us' },
+  { code: 'KTB3Y', group: 'domestic_rates', kind: 'kofia', optional: true, domestic: true },
+  { code: 'KTB10Y', group: 'domestic_rates', kind: 'kofia', optional: true, domestic: true },
+  { code: 'CORPAA3Y', group: 'domestic_rates', kind: 'kofia', optional: true, domestic: true },
+  { code: 'CD91', group: 'domestic_rates', kind: 'kofia', optional: true, domestic: true },
   { code: 'USDKRW', group: 'rates_fx_volatility', kind: 'fx' },
   { code: 'JPYKRW', group: 'rates_fx_volatility', kind: 'fx' },
   { code: 'CNYKRW', group: 'rates_fx_volatility', kind: 'fx', optional: true },
@@ -37,11 +47,13 @@ export const MARKET_INDICATORS = Object.freeze([
   { code: 'SILVER', group: 'commodities_crypto', kind: 'snapshot', optional: true },
   { code: 'COMEX_COPPER', group: 'commodities_crypto', kind: 'snapshot', optional: true },
   { code: 'BITCOIN', group: 'commodities_crypto', kind: 'snapshot' }
-].map(item => Object.freeze({ optional: false, ...item, slug: SLUG_EXCEPTIONS[item.code] || item.code.toLowerCase() })));
+].map(item => Object.freeze({ optional: false, domestic: false, ...item, slug: SLUG_EXCEPTIONS[item.code] || item.code.toLowerCase() })));
 
 const BY_SLUG = new Map(MARKET_INDICATORS.map(item => [item.slug, item]));
 const BY_CODE = new Map(MARKET_INDICATORS.map(item => [item.code, item]));
-const OPTIONAL_INDICATORS = MARKET_INDICATORS.filter(item => item.optional);
+// The optional instruments the Market Close payload carries (not the domestic rates).
+const OPTIONAL_INDICATORS = MARKET_INDICATORS.filter(item => item.optional && !item.domestic);
+export const DOMESTIC_RATE_INDICATORS = Object.freeze(MARKET_INDICATORS.filter(item => item.domestic));
 
 export function marketIndicatorBySlug(slug) {
   return BY_SLUG.get(String(slug || '')) || null;
@@ -56,6 +68,10 @@ export function isOptionalIndicator(code) {
   return Boolean(BY_CODE.get(code)?.optional);
 }
 
+export function isDomesticRateIndicator(code) {
+  return Boolean(BY_CODE.get(code)?.domestic);
+}
+
 // One SQL column holding the optional indicators' closes for a row, as a JSON
 // array in OPTIONAL_INDICATORS order (json_extract with several paths). Built
 // from the fixed list above, never from a request.
@@ -64,9 +80,12 @@ export const OPTIONAL_INDICATOR_CLOSES_SQL = `json_extract(payload_json, ${OPTIO
 /**
  * The codes that have a page, from rows carrying `optional_closes`: every
  * original indicator, and an optional one once some row has its value.
+ * `rateCodes`: the domestic rate codes some stored day has a value for
+ * (loadDomesticRateCodes), which Market Close rows cannot tell.
  */
-export function availableIndicatorCodes(rows) {
+export function availableIndicatorCodes(rows, rateCodes = []) {
   const codes = new Set(MARKET_INDICATORS.filter(item => !item.optional).map(item => item.code));
+  for (const code of rateCodes || []) if (isDomesticRateIndicator(code)) codes.add(code);
   for (const row of Array.isArray(rows) ? rows : []) {
     let closes = row?.optional_closes;
     if (typeof closes === 'string') {
