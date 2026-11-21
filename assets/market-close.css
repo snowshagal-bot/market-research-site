@@ -187,3 +187,6 @@ body.market-close-page:has(.market-loading)>.footer{visibility:hidden}
 @media(max-width:430px){.market-archive-table td>span{display:block;font-size:10px}.market-indicator-table.with-range th:nth-child(n+5),.market-indicator-table.with-range td:nth-child(n+5){display:none}.indicator-stats{grid-template-columns:1fr 1fr}.indicator-stat strong{font-size:17px}.indicator-stat strong.up,.indicator-stat strong.down{font-size:15px}.indicator-chart-plot{height:180px}.indicator-links a{min-height:36px}}
 /* Phones: the rates grid has 2 columns, so the rule above becomes "an odd last card". */
 @media(max-width:760px){.mini-instrument-grid:not(.commodity-grid) .instrument-card:last-child{grid-column:auto}.mini-instrument-grid:not(.commodity-grid) .instrument-card:last-child:nth-child(odd){grid-column:1/-1}}
+/* Domestic Rates (KOFIA yields): one full-width row of four; two by two on phones. */
+.rate-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.rate-grid .instrument-card{min-height:104px}.rate-grid .instrument-card:last-child:nth-child(3n+1){grid-column:auto}
+@media(max-width:760px){.rate-grid{grid-template-columns:1fr 1fr}.rate-grid .instrument-card:last-child:nth-child(odd){grid-column:auto}}

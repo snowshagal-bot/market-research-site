@@ -28,9 +28,16 @@ import '../assets/locale.js';
 import { TABLE_NAME, ensureMarketTable } from './api/market/_shared.js';
 import { aggregateKrxGroups } from './api/market/_aggregate.js';
 import {
+  domesticRateCodesIn,
+  loadDomesticRateCodes,
+  loadDomesticRatesDay,
+  loadDomesticRatesDays
+} from './api/market/rates/_shared.js';
+import {
   MARKET_INDICATORS,
   OPTIONAL_INDICATOR_CLOSES_SQL,
   availableIndicatorCodes,
+  isDomesticRateIndicator,
   isOptionalIndicator,
   listedIndicators,
   marketIndicatorBySlug,
@@ -44,6 +51,10 @@ const FIXING_CODES = new Set(['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW']);
 // Decimal places of a price and its change (Bitcoin prices are whole dollars).
 const digitsOf = (key) => (key === 'NATGAS' || key === 'COMEX_COPPER' ? 3 : 2);
 const USD_PRICED = new Set(['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER']);
+// Yields: values in percent, changes in basis points.
+const isYield = (key) => key === 'US10Y' || isDomesticRateIndicator(key);
+// KOFIA publishes bond yields with 3 decimals and the CD rate with 2.
+const rateDigits = (key) => (key === 'CD91' ? 2 : 3);
 
 export const MARKET_DATE_TIME_BUDGET_MS = 5000;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -151,6 +162,7 @@ function makeFormat(lang) {
   const valueUnit = (key, value) => {
     if (!valid(value)) return '--';
     if (key === 'US10Y') return `${number(value, 3)}%`;
+    if (isDomesticRateIndicator(key)) return `${number(value, rateDigits(key))}%`;
     if (FIXING_CODES.has(key)) return ko ? `${number(value, 2)}원` : `₩${number(value, 2)}`;
     if (key === 'USDJPY') return ko ? `${number(value, 2)}엔` : `¥${number(value, 2)}`;
     if (key === 'BITCOIN') return `$${number(value, 0)}`;
@@ -168,7 +180,7 @@ const COPY = {
     heading: date => `${longDate(date, 'ko')} 한국 증시 마감`,
     closeBasis: '15:30 KST 정규장 마감 기준',
     overseas: '* 해외 지수·원자재는 각 시장의 최신 거래일 종가',
-    sections: ['주요 지수', '투자자별 매매동향 (당일)', '최근 5거래일 누적 수급', '금리 · 환율 · 변동성', '원자재 · 가상자산', '시장 폭', 'KRX 업종 · 테마 등락률', '시가총액 상위 10종목', '공매도 현황'],
+    sections: ['주요 지수', '투자자별 매매동향 (당일)', '최근 5거래일 누적 수급', '금리 · 환율 · 변동성', '원자재 · 가상자산', '시장 폭', 'KRX 업종 · 테마 등락률', '시가총액 상위 10종목', '공매도 현황', '국내 금리'],
     open: '시가', high: '고가', low: '저가', previous: '전일', closeState: '종가', fixedClose: '15:30 확정',
     market: '시장', foreign: '외국인', institution: '기관', individual: '개인', futures: '선물',
     fiveDays: (start, end) => `${start} – ${end}`,
@@ -183,6 +195,7 @@ const COPY = {
     prev: '이전 거래일', next: '다음 거래일', archive: '전체 마감 기록', dashboard: '대시보드에서 보기', latest: '최신 마감',
     report: '이날의 데일리 리포트', noReport: '이날 발행된 데일리 리포트가 없습니다.',
     breadcrumbHome: '홈', breadcrumbMarket: '마켓',
+    rateState: '16:00 최종호가', ratesNote: '금융투자협회 최종호가수익률 · 16:00 KST 기준 · 대비는 금융투자협회 전일 값 대비(bp)',
     source: '데이터 출처: KRX 한국거래소, 네이버 금융, 야후 파이낸스',
     disclaimer: '투자 판단의 참고 자료이며, 매수·매도 권유가 아닙니다.',
     unit: '단위: 원 · 순매수는 매수-매도',
@@ -194,7 +207,7 @@ const COPY = {
     heading: date => `Korea Stock Market Close: ${longDate(date, 'en')}`,
     closeBasis: 'Regular session close, 15:30 KST',
     overseas: '* Overseas indices and commodities use each market’s latest close.',
-    sections: ['Major Indices', 'Investor Flows (Daily)', 'Cumulative Flows: Last 5 Sessions', 'Rates · FX · Volatility', 'Commodities · Crypto', 'Market Breadth', 'KRX Sectors & Themes', 'Top 10 by Market Cap', 'Short Selling'],
+    sections: ['Major Indices', 'Investor Flows (Daily)', 'Cumulative Flows: Last 5 Sessions', 'Rates · FX · Volatility', 'Commodities · Crypto', 'Market Breadth', 'KRX Sectors & Themes', 'Top 10 by Market Cap', 'Short Selling', 'Korean Bond Yields'],
     open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', closeState: 'Close', fixedClose: '15:30 fixing',
     market: 'Market', foreign: 'Foreign', institution: 'Institution', individual: 'Retail', futures: 'KOSPI 200 Futures',
     fiveDays: (start, end) => `${start} – ${end}`,
@@ -209,6 +222,7 @@ const COPY = {
     prev: 'Previous session', next: 'Next session', archive: 'All sessions', dashboard: 'Open in the dashboard', latest: 'Latest close',
     report: 'Daily report for this session', noReport: 'No Daily report was published for this session.',
     breadcrumbHome: 'Home', breadcrumbMarket: 'Market',
+    rateState: '16:00 KOFIA', ratesNote: 'KOFIA final quote yields, 16:00 KST · Change in bp against KOFIA’s previous-day value',
     source: 'Sources: KRX, Naver Finance, Yahoo Finance',
     disclaimer: 'For reference only; not a recommendation to buy or sell.',
     unit: 'Net buying = buys minus sells',
@@ -217,8 +231,8 @@ const COPY = {
   }
 };
 
-const INDEX_NAMES_EN = { KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones', SP500: 'S&P 500', SOX: 'Philadelphia Semiconductor', VIX: 'VIX', US10Y: 'US 10Y', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW (100)', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', BITCOIN: 'Bitcoin', CNYKRW: 'CNY/KRW', EURKRW: 'EUR/KRW', USDJPY: 'USD/JPY', BRENT: 'Brent Crude', NATGAS: 'Natural Gas', SILVER: 'Silver', COMEX_COPPER: 'Copper' };
-const INDEX_NAMES_KO = { KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥 종합', DOW: '다우존스', SP500: 'S&P 500', SOX: '필라델피아 반도체', VIX: 'VIX', US10Y: '미국 국채 10년', USDKRW: '원/달러', JPYKRW: '원/엔(100엔)', DXY: '달러 인덱스', WTI: 'WTI 원유', GOLD: '금', BITCOIN: '비트코인', CNYKRW: '원/위안', EURKRW: '원/유로', USDJPY: '엔/달러', BRENT: '브렌트유', NATGAS: '천연가스', SILVER: '은', COMEX_COPPER: '구리' };
+const INDEX_NAMES_EN = { KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones', SP500: 'S&P 500', SOX: 'Philadelphia Semiconductor', VIX: 'VIX', US10Y: 'US 10Y', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW (100)', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', BITCOIN: 'Bitcoin', CNYKRW: 'CNY/KRW', EURKRW: 'EUR/KRW', USDJPY: 'USD/JPY', BRENT: 'Brent Crude', NATGAS: 'Natural Gas', SILVER: 'Silver', COMEX_COPPER: 'Copper', KTB3Y: 'KTB 3Y', KTB10Y: 'KTB 10Y', CORPAA3Y: 'Corporate AA- 3Y', CD91: 'CD 91-day' };
+const INDEX_NAMES_KO = { KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥 종합', DOW: '다우존스', SP500: 'S&P 500', SOX: '필라델피아 반도체', VIX: 'VIX', US10Y: '미국 국채 10년', USDKRW: '원/달러', JPYKRW: '원/엔(100엔)', DXY: '달러 인덱스', WTI: 'WTI 원유', GOLD: '금', BITCOIN: '비트코인', CNYKRW: '원/위안', EURKRW: '원/유로', USDJPY: '엔/달러', BRENT: '브렌트유', NATGAS: '천연가스', SILVER: '은', COMEX_COPPER: '구리', KTB3Y: '국고채 3년', KTB10Y: '국고채 10년', CORPAA3Y: '회사채 AA- 3년', CD91: 'CD 91일' };
 const KRX_COMPANY_NAMES_EN = {
   '000660': 'SK hynix', '005380': 'Hyundai Motor', '005930': 'Samsung Electronics', '005935': 'Samsung Electronics Pref.',
   '009150': 'Samsung Electro-Mechanics', '012450': 'Hanwha Aerospace', '028260': 'Samsung C&T', '034020': 'Doosan Enerbility',
@@ -384,6 +398,32 @@ function breadthCard(key, item, f, copy) {
     </div><div class="breadth-bar" aria-label="${copy.riseRatio} ${f.ratioPct(item?.rise_ratio)}, ${copy.fallRatio} ${f.ratioPct(item?.fall_ratio)}"><span class="advance" style="width:${valid(item?.rise_ratio) ? item.rise_ratio * 100 : 0}%"></span><span class="decline" style="width:${valid(item?.fall_ratio) ? item.fall_ratio * 100 : 0}%"></span></div><div class="breadth-ratios"><span class="up">${copy.riseRatio} ${f.ratioPct(item?.rise_ratio)}</span><span class="down">${copy.fallRatio} ${f.ratioPct(item?.fall_ratio)}</span></div></article>`;
 }
 
+/**
+ * One KOFIA yield of the session (Domestic Rates, joined by date). The change
+ * is KOFIA's own: against its previous-day value, in basis points.
+ */
+function domesticRateCard(item, day, f, copy, lang) {
+  const movementClass = f.signClass(item.change_bp);
+  const arrow = movementClass === 'up' ? '▲' : movementClass === 'down' ? '▼' : '—';
+  const history = marketIndicatorPath(item.code, lang);
+  const name = html(instrumentName(item.code, lang));
+  return `<article class="instrument-card rate-card" data-rate-code="${html(item.code)}">
+      <div class="instrument-heading"><span>${history ? `<a class="instrument-history-link" href="${history}">${name}</a>` : name}</span></div>
+      <strong class="instrument-value">${f.valueUnit(item.code, item.value)}</strong>
+      <div class="instrument-change ${movementClass}">${arrow} ${valid(item.change_bp) ? `${f.number(Math.abs(item.change_bp), 1)}bp` : '--'}</div>
+      <div class="instrument-state">${dotDate(day.market_date, lang)} · ${html(day.basis_time === '16:00' ? copy.rateState : `${day.basis_time} ${copy.rateState.replace(/^16:00 /, '')}`)}</div>
+    </article>`;
+}
+
+/** The Domestic Rates section body for a session, or '' when that day has none. */
+export function domesticRatesBody(day, lang) {
+  const items = Array.isArray(day?.items) ? day.items.filter(item => isDomesticRateIndicator(item?.code) && valid(item.value)) : [];
+  if (!items.length) return '';
+  const copy = COPY[lang === 'en' ? 'en' : 'ko'];
+  const f = makeFormat(lang);
+  return `<div class="mini-instrument-grid rate-grid">${items.map(item => domesticRateCard(item, day, f, copy, lang)).join('')}</div><p class="unit-note">${html(copy.ratesNote)}</p>`;
+}
+
 function rankList(title, items, type, f, field = 'change_pct') {
   return `<div class="range-rank-block"><h4 class="range-rank-title ${type}">${html(title)}</h4><ul class="rank-list">${items.map(it => `<li><span><b>${html(it.name)}</b>${it.market ? `<small>${html(it.market)}</small>` : ''}</span><strong class="${f.signClass(it[field])}">${f.pct(it[field])}</strong></li>`).join('')}</ul></div>`;
 }
@@ -537,6 +577,7 @@ export function renderMarketDateMain(payload, lang, context = {}) {
   const fivePart = part(2, fiveBody);
   const ratesPart = part(3, rateCards && `<div class="mini-instrument-grid">${rateCards}</div>`);
   const commodityPart = part(4, commodityCards && `<div class="mini-instrument-grid commodity-grid">${commodityCards}</div>`);
+  const domesticPart = part(9, context.domesticRates?.market_date === date ? domesticRatesBody(context.domesticRates, lang) : '');
   const breadthPart = part(5, breadthBody);
   const groupsPart = part(6, groupsBody);
   const capsPart = part(7, capRows.length ? dataTable(copy.capColumns, capRows, 'market-cap-table') : '');
@@ -545,6 +586,7 @@ export function renderMarketDateMain(payload, lang, context = {}) {
     indicesPart,
     `<div class="market-pair market-pair-tables">${flowsPart}${fivePart}</div>`,
     `<div class="market-pair">${ratesPart}${commodityPart}</div>`,
+    domesticPart,
     breadthPart,
     groupsPart,
     `<div class="market-bottom-grid">${capsPart}${links}</div>`,
@@ -576,7 +618,7 @@ ${sections}
 }
 
 /** The <main> for the list of sessions, newest first, grouped by month. */
-export function renderMarketArchiveMain(rows, lang) {
+export function renderMarketArchiveMain(rows, lang, rateCodes = []) {
   const copy = COPY[lang === 'en' ? 'en' : 'ko'];
   const f = makeFormat(lang);
   const base = lang === 'en' ? '/en/market/' : '/market/';
@@ -621,7 +663,7 @@ export function renderMarketArchiveMain(rows, lang) {
   </section>
   <div class="market-wrap market-dashboard">
 ${blocks}
-    <nav class="indicator-links" id="indicators" aria-labelledby="indicators-heading"><h2 id="indicators-heading">${html(lang === 'en' ? 'Daily history by indicator' : '지표별 일별 기록')}</h2><div>${marketIndicatorLinks(lang, availableIndicatorCodes(rows)).map(link => `<a href="${link.href}">${html(link.name)}</a>`).join('')}</div></nav>
+    <nav class="indicator-links" id="indicators" aria-labelledby="indicators-heading"><h2 id="indicators-heading">${html(lang === 'en' ? 'Daily history by indicator' : '지표별 일별 기록')}</h2><div>${marketIndicatorLinks(lang, availableIndicatorCodes(rows, rateCodes)).map(link => `<a href="${link.href}">${html(link.name)}</a>`).join('')}</div></nav>
     <p class="market-archive-links"><a href="${marketSectorsPath(lang)}">${html(copy.sectorsLink)} →</a></p>
     <div class="market-data-note"><p>${html(copy.source)}</p><p>${html(copy.disclaimer)}</p></div>
   </div>
@@ -712,7 +754,7 @@ export function marketDatePageHtml(shell, payload, lang, context = {}) {
   });
 }
 
-export function marketArchivePageHtml(shell, rows, lang) {
+export function marketArchivePageHtml(shell, rows, lang, rateCodes = []) {
   const title = marketArchiveTitle(lang);
   const description = marketArchiveDescription(lang);
   const canonical = `${PRODUCTION_ORIGIN}${marketArchivePath(lang)}`;
@@ -734,7 +776,7 @@ export function marketArchivePageHtml(shell, rows, lang) {
         { name: copy.archive, url: canonical }
       ]
     }),
-    main: renderMarketArchiveMain(rows, lang)
+    main: renderMarketArchiveMain(rows, lang, rateCodes)
   });
 }
 
@@ -847,11 +889,17 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
   if (!route.canonical) return Response.redirect(`${url.origin}${url.pathname}/${url.search}`, 301);
 
   try {
+    if (route.indicator?.domestic) {
+      const [{ days, rows }, shell] = await Promise.all([loadDomesticRateIndicator(env, { budgetMs }), loadShell(env, url, route.lang)]);
+      const series = domesticRateSeries(days, route.indicator, new Set(rows.map(row => row.market_date)));
+      if (!series.length) return notFound(env, url);
+      return htmlResponse(marketIndicatorPageHtml(shell, route.indicator, series, route.lang, availableIndicatorCodes(rows, domesticRateCodesIn(days))));
+    }
     if (route.indicator) {
-      const [rows, shell] = await Promise.all([loadMarketIndicator(env, route.indicator, { budgetMs }), loadShell(env, url, route.lang)]);
+      const [rows, shell, rateCodes] = await Promise.all([loadMarketIndicator(env, route.indicator, { budgetMs }), loadShell(env, url, route.lang), rateCodesWithin(env, budgetMs)]);
       const series = marketIndicatorSeries(rows, route.indicator);
       if (!series.length) return notFound(env, url);
-      return htmlResponse(marketIndicatorPageHtml(shell, route.indicator, series, route.lang, availableIndicatorCodes(rows)));
+      return htmlResponse(marketIndicatorPageHtml(shell, route.indicator, series, route.lang, availableIndicatorCodes(rows, rateCodes)));
     }
     if (route.sectors) {
       const [rows, shell] = await Promise.all([loadMarketSectors(env, { budgetMs }), loadShell(env, url, route.lang)]);
@@ -860,18 +908,21 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
       return htmlResponse(marketSectorsPageHtml(shell, view, route.lang));
     }
     if (route.archive) {
-      const [rows, shell] = await Promise.all([loadMarketArchive(env, { budgetMs }), loadShell(env, url, route.lang)]);
+      const [rows, shell, rateCodes] = await Promise.all([loadMarketArchive(env, { budgetMs }), loadShell(env, url, route.lang), rateCodesWithin(env, budgetMs)]);
       if (!rows.length) return notFound(env, url);
-      return htmlResponse(marketArchivePageHtml(shell, rows, route.lang));
+      return htmlResponse(marketArchivePageHtml(shell, rows, route.lang, rateCodes));
     }
     const postsPromise = Promise.resolve().then(() => (loadPostsFn || loadPosts)(request, env)).catch(() => []);
-    const [data, shell, posts] = await Promise.all([loadMarketDate(env, route.date, { budgetMs }), loadShell(env, url, route.lang), postsPromise]);
+    // The session's KOFIA yields fail soft: without them the page is as before.
+    const ratesPromise = withinBudget(loadDomesticRatesDay(env, route.date), budgetMs).catch(() => null);
+    const [data, shell, posts, domesticRates] = await Promise.all([loadMarketDate(env, route.date, { budgetMs }), loadShell(env, url, route.lang), postsPromise, ratesPromise]);
     if (!data) return notFound(env, url);
     return htmlResponse(marketDatePageHtml(shell, data.payload, route.lang, {
       prev: data.prev,
       next: data.next,
       publishedAt: data.publishedAt,
-      report: dailyReportFor(posts, route.date, route.lang)
+      report: dailyReportFor(posts, route.date, route.lang),
+      domesticRates
     }));
   } catch (error) {
     console.error('market date page unavailable', error);
@@ -1098,14 +1149,17 @@ const INDICATOR_NAMES = {
     SOX: '필라델피아 반도체지수', VIX: 'VIX 변동성지수', US10Y: '미국 국채 10년물 금리', USDKRW: '원/달러 환율',
     JPYKRW: '원/엔 환율(100엔)', DXY: '달러인덱스', WTI: 'WTI 유가', GOLD: '금 선물 가격', BITCOIN: '비트코인 가격',
     CNYKRW: '원/위안 환율', EURKRW: '원/유로 환율', USDJPY: '엔/달러 환율', BRENT: '브렌트유 가격', NATGAS: '천연가스 선물 가격',
-    SILVER: '은 선물 가격', COMEX_COPPER: '구리 선물 가격'
+    SILVER: '은 선물 가격', COMEX_COPPER: '구리 선물 가격',
+    KTB3Y: '국고채 3년물 금리', KTB10Y: '국고채 10년물 금리', CORPAA3Y: '회사채 AA- 3년물 금리', CD91: 'CD 91일물 금리'
   },
   en: {
     KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones Industrial Average', SP500: 'S&P 500',
     SOX: 'PHLX Semiconductor Index (SOX)', VIX: 'VIX Volatility Index', US10Y: 'US 10-Year Treasury Yield', USDKRW: 'USD/KRW Exchange Rate',
     JPYKRW: 'JPY/KRW Exchange Rate (per 100 yen)', DXY: 'US Dollar Index (DXY)', WTI: 'WTI Crude Oil', GOLD: 'Gold Futures', BITCOIN: 'Bitcoin',
     CNYKRW: 'CNY/KRW Exchange Rate', EURKRW: 'EUR/KRW Exchange Rate', USDJPY: 'USD/JPY Exchange Rate', BRENT: 'Brent Crude Oil',
-    NATGAS: 'Natural Gas Futures', SILVER: 'Silver Futures', COMEX_COPPER: 'Copper Futures (COMEX)'
+    NATGAS: 'Natural Gas Futures', SILVER: 'Silver Futures', COMEX_COPPER: 'Copper Futures (COMEX)',
+    KTB3Y: 'Korea Treasury Bond 3-Year Yield', KTB10Y: 'Korea Treasury Bond 10-Year Yield',
+    CORPAA3Y: 'Korean Corporate Bond (AA-) 3-Year Yield', CD91: 'Korean CD 91-Day Rate'
   }
 };
 
@@ -1119,13 +1173,14 @@ const INDICATOR_COPY = {
   ko: {
     eyebrow: 'MARKET CLOSE · 지표별 기록',
     heading: name => `${name} 일별 기록`,
-    noun: { krx: '일별 종가', us: '일별 종가', fx: '일별 기록', snapshot: '일별 기록', rate: '일별 기록' },
-    valueLabel: { krx: '종가', us: '종가', fx: '15:30 환율', snapshot: '기록 시세', rate: '수익률' },
+    noun: { krx: '일별 종가', us: '일별 종가', fx: '일별 기록', snapshot: '일별 기록', rate: '일별 기록', kofia: '일별 기록' },
+    valueLabel: { krx: '종가', us: '종가', fx: '15:30 환율', snapshot: '기록 시세', rate: '수익률', kofia: '수익률' },
     basis: {
       krx: 'KRX 정규장 15:30 종가 기준 · 매 거래일 마감 후 갱신',
       us: '미국 정규장 종가 · 날짜는 미국 거래일 · 한국 증시 마감 기록에 담긴 값',
       fx: '15:30 KST 매매기준율(하나은행, 네이버 금융) · 매 거래일 갱신',
-      snapshot: '한국 증시 마감 직후(오후 4시 무렵 KST) 시세 · 변동은 직전 기록 대비'
+      snapshot: '한국 증시 마감 직후(오후 4시 무렵 KST) 시세 · 변동은 직전 기록 대비',
+      kofia: '금융투자협회 최종호가수익률 · 16:00 KST 기준 · 매 거래일 갱신 · 대비는 금융투자협회 전일 값 대비'
     },
     sections: ['요약', '추이'],
     latest: '최근', weekAgo: '1주 전 대비', monthAgo: '1개월 전 대비', since: date => `${date} 이후`, high: '기록 최고', low: '기록 최저',
@@ -1133,7 +1188,9 @@ const INDICATOR_COPY = {
     changeVsPrev: { snapshot: '직전 기록 대비' },
     usDates: '날짜는 미국 거래일입니다. 날짜를 누르면 그 값을 기록한 한국 증시 마감 기록이 열립니다.',
     krxDates: '날짜를 누르면 그날의 전체 마감 기록이 열립니다.',
+    kofiaDates: '날짜를 누르면 그날의 전체 마감 기록이 열립니다. 마감 기록이 없는 날은 날짜만 표시합니다.',
     gaps: '한국 증시 마감 기록이 게시된 날의 값만 담았습니다. 기록이 없는 날과, 한국 휴장일에 열린 해외 거래일은 빠질 수 있습니다.',
+    kofiaGaps: '금융투자협회가 공시한 한국 거래일의 값입니다. 데이터 출처: 금융투자협회 채권정보센터.',
     chartLabel: (name, first, last) => `${name} 추이, ${first}부터 ${last}까지`,
     chartNote: '거래일 순서로 그린 선입니다. 날짜별 값은 아래 표에 있습니다.',
     related: '다른 지표의 일별 기록', archive: '날짜별 전체 마감 기록', dashboard: '오늘의 마켓', breadcrumb: '지표별 기록',
@@ -1149,13 +1206,14 @@ const INDICATOR_COPY = {
   en: {
     eyebrow: 'MARKET CLOSE · INDICATOR HISTORY',
     heading: name => `${name}: Daily History`,
-    noun: { krx: 'Daily Close', us: 'Daily Close', fx: 'History', snapshot: 'History', rate: 'History' },
-    valueLabel: { krx: 'Close', us: 'Close', fx: '15:30 rate', snapshot: 'Recorded price', rate: 'Yield' },
+    noun: { krx: 'Daily Close', us: 'Daily Close', fx: 'History', snapshot: 'History', rate: 'History', kofia: 'History' },
+    valueLabel: { krx: 'Close', us: 'Close', fx: '15:30 rate', snapshot: 'Recorded price', rate: 'Yield', kofia: 'Yield' },
     basis: {
       krx: 'KRX regular-session close, 15:30 KST · Updated after every session',
       us: 'U.S. regular-session close · Dates are U.S. trading days · As carried by the Korea close record',
       fx: '15:30 KST reference rate (Hana Bank, via Naver Finance) · Updated every session',
-      snapshot: 'Quote shortly after the Korea close (around 16:00 KST) · Change against the previous record'
+      snapshot: 'Quote shortly after the Korea close (around 16:00 KST) · Change against the previous record',
+      kofia: 'KOFIA final quote yield, 16:00 KST · Updated every Korean trading day · Change against KOFIA’s previous-day value'
     },
     sections: ['Summary', 'Trend'],
     latest: 'Latest', weekAgo: 'vs. 1 week ago', monthAgo: 'vs. 1 month ago', since: date => `Since ${date}`, high: 'Record high', low: 'Record low',
@@ -1163,7 +1221,9 @@ const INDICATOR_COPY = {
     changeVsPrev: { snapshot: 'vs. previous record' },
     usDates: 'Dates are U.S. trading days. Each date opens the Korea close record that carried the value.',
     krxDates: 'Each date opens that session’s full close record.',
+    kofiaDates: 'Each linked date opens that session’s full close record; days without one are listed without a link.',
     gaps: 'Only days with a published Korea close record are listed. Days without one, and overseas sessions held on Korean market holidays, may be missing.',
+    kofiaGaps: 'Values for each Korean trading day KOFIA published. Source: KOFIA Bond Information Service.',
     chartLabel: (name, first, last) => `${name} from ${first} to ${last}`,
     chartNote: 'Plotted in trading-day order. Each day’s value is in the table below.',
     related: 'Daily history of other indicators', archive: 'All sessions by date', dashboard: 'Today’s market', breadcrumb: 'Indicator history',
@@ -1180,11 +1240,37 @@ const INDICATOR_COPY = {
 
 // Short names for titles ("원/달러 환율", "USD/KRW").
 const INDICATOR_SHORT_NAMES = {
-  ko: { ...INDICATOR_NAMES.ko, KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥', DOW: '다우존스', SP500: 'S&P 500', VIX: 'VIX', JPYKRW: '원/엔 환율', GOLD: '금 선물', BITCOIN: '비트코인', BRENT: '브렌트유', NATGAS: '천연가스', SILVER: '은 선물', COMEX_COPPER: '구리 선물' },
-  en: { ...INDICATOR_NAMES.en, NASDAQ: 'NASDAQ', DOW: 'Dow Jones', SOX: 'SOX', VIX: 'VIX', US10Y: 'US 10Y Yield', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', CNYKRW: 'CNY/KRW', EURKRW: 'EUR/KRW', USDJPY: 'USD/JPY', BRENT: 'Brent Crude', NATGAS: 'Natural Gas', SILVER: 'Silver', COMEX_COPPER: 'Copper' }
+  ko: { ...INDICATOR_NAMES.ko, KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥', DOW: '다우존스', SP500: 'S&P 500', VIX: 'VIX', JPYKRW: '원/엔 환율', GOLD: '금 선물', BITCOIN: '비트코인', BRENT: '브렌트유', NATGAS: '천연가스', SILVER: '은 선물', COMEX_COPPER: '구리 선물', KTB3Y: '국고채 3년 금리', KTB10Y: '국고채 10년 금리', CORPAA3Y: '회사채 AA- 3년 금리', CD91: 'CD 91일 금리' },
+  en: { ...INDICATOR_NAMES.en, NASDAQ: 'NASDAQ', DOW: 'Dow Jones', SOX: 'SOX', VIX: 'VIX', US10Y: 'US 10Y Yield', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', CNYKRW: 'CNY/KRW', EURKRW: 'EUR/KRW', USDJPY: 'USD/JPY', BRENT: 'Brent Crude', NATGAS: 'Natural Gas', SILVER: 'Silver', COMEX_COPPER: 'Copper', KTB3Y: 'KTB 3Y Yield', KTB10Y: 'KTB 10Y Yield', CORPAA3Y: 'Corporate AA- 3Y Yield', CD91: 'CD 91-Day Rate' }
 };
 
 const indicatorKind = (indicator) => (indicator.code === 'US10Y' ? 'rate' : indicator.kind);
+
+/**
+ * A domestic rate's series from the stored Domestic Rates days (DTOs), newest
+ * first, in the shape marketIndicatorSeries returns. `recordDates`: the dates
+ * with a final Market Close record, so a day links to its session page only
+ * when there is one (a backfilled day may predate the records).
+ */
+export function domesticRateSeries(days, indicator, recordDates = new Set()) {
+  const seen = new Map();
+  for (const day of Array.isArray(days) ? days : []) {
+    if (!ISO_DATE.test(String(day?.market_date || '')) || seen.has(day.market_date)) continue;
+    const item = (day.items || []).find(entry => entry?.code === indicator.code);
+    if (!item || !valid(item.value)) continue;
+    seen.set(day.market_date, {
+      date: day.market_date,
+      recordDate: recordDates.has(day.market_date) ? day.market_date : null,
+      publishedAt: day.published_at || '',
+      close: item.value,
+      change: valid(item.previous_value) ? item.value - item.previous_value : null,
+      changePct: null,
+      high: null,
+      low: null
+    });
+  }
+  return [...seen.values()].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+}
 
 /**
  * The stored series for one instrument, newest first: { date, recordDate,
@@ -1271,13 +1357,13 @@ function indicatorFormat(indicator, f) {
   const value = (number) => f.valueUnit(code, number);
   const change = (number) => {
     if (!valid(number)) return '--';
-    if (code === 'US10Y') return `${f.signed(number * 100, 1)}bp`;
+    if (isYield(code)) return `${f.signed(number * 100, 1)}bp`;
     return f.signed(number, digits);
   };
-  // The move from `from` to `to`: bp for the yield, % for everything else.
+  // The move from `from` to `to`: bp for a yield, % for everything else.
   const move = (to, from) => {
     if (!to || !from || !valid(to.close) || !valid(from.close) || from.close === 0) return null;
-    if (code === 'US10Y') return { text: `${f.signed((to.close - from.close) * 100, 1)}bp`, sign: to.close - from.close };
+    if (isYield(code)) return { text: `${f.signed((to.close - from.close) * 100, 1)}bp`, sign: to.close - from.close };
     const pct = (to.close / from.close - 1) * 100;
     return { text: f.pct(pct), sign: pct };
   };
@@ -1319,7 +1405,7 @@ function indicatorChart(series, indicator, fmt, copy, lang) {
   const ticks = [];
   for (let value = lo; value <= hi + step / 2; value += step) ticks.push(Number(value.toFixed(10)));
   const tickDigits = step >= 1 ? 0 : step >= 0.1 ? 1 : 2;
-  const tickText = (value) => (indicator.code === 'US10Y' ? `${value.toFixed(tickDigits)}%` : new Intl.NumberFormat(lang === 'en' ? 'en-US' : 'ko-KR', { minimumFractionDigits: tickDigits, maximumFractionDigits: tickDigits }).format(value));
+  const tickText = (value) => (isYield(indicator.code) ? `${value.toFixed(tickDigits)}%` : new Intl.NumberFormat(lang === 'en' ? 'en-US' : 'ko-KR', { minimumFractionDigits: tickDigits, maximumFractionDigits: tickDigits }).format(value));
   const band = W / points.length;
   const hover = points.map((point, index) => `<rect x="${Math.max(0, x(index) - band / 2).toFixed(1)}" y="0" width="${band.toFixed(1)}" height="${H}"><title>${html(dotDate(point.date, lang))} ${html(stripTags(fmt.value(point.close)))}</title></rect>`).join('');
   const last = points[points.length - 1];
@@ -1359,7 +1445,7 @@ export function marketIndicatorTitle(indicator, series, lang) {
   const latest = series[0];
   const { m, d } = dateParts(latest.date);
   const date = key === 'en' ? longDate(latest.date, 'en') : `${m}월 ${d}일`;
-  const move = indicator.code === 'US10Y'
+  const move = isYield(indicator.code)
     ? (valid(latest.change) ? `${f.signed(latest.change * 100, 1)}bp` : '')
     : (valid(latest.changePct) ? f.pct(latest.changePct) : '');
   return copy.title(INDICATOR_SHORT_NAMES[key][indicator.code], copy.noun[indicatorKind(indicator)], date, stripTags(fmt.value(latest.close)), move);
@@ -1372,7 +1458,7 @@ export function marketIndicatorDescription(indicator, series, lang) {
   const fmt = indicatorFormat(indicator, f);
   const stats = marketIndicatorStats(series);
   const latest = stats.latest;
-  const dayMove = indicator.code === 'US10Y'
+  const dayMove = isYield(indicator.code)
     ? (valid(latest.change) ? `${f.signed(latest.change * 100, 1)}bp` : '')
     : (valid(latest.changePct) ? f.pct(latest.changePct) : '');
   const parts = copy.description({
@@ -1404,7 +1490,7 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
   const name = INDICATOR_NAMES[key][indicator.code];
   const stats = marketIndicatorStats(series);
   const latest = stats.latest;
-  const dayChange = indicator.code === 'US10Y'
+  const dayChange = isYield(indicator.code)
     ? (valid(latest.change) ? `${f.signed(latest.change * 100, 1)}bp` : '')
     : (valid(latest.changePct) ? f.pct(latest.changePct) : '');
   const summary = `<span class="market-date-fact">${html(dotDate(latest.date, key))} <b>${fmt.value(latest.close)}</b>${dayChange ? ` <span class="${f.signClass(latest.change)}">(${dayChange})</span>` : ''}</span>`;
@@ -1435,14 +1521,14 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
     const [y, m] = month.split('-').map(Number);
     const title = key === 'en' ? `${EN_MONTHS[m - 1]} ${y}` : `${y}년 ${m}월`;
     const rows = points.map(point => [
-      `<a href="${marketDatePath(point.recordDate, key)}">${html(dayLabel(point.date, key))}</a>`,
+      point.recordDate ? `<a href="${marketDatePath(point.recordDate, key)}">${html(dayLabel(point.date, key))}</a>` : html(dayLabel(point.date, key)),
       fmt.value(point.close),
       `<span class="${f.signClass(point.change)}">${fmt.change(point.change)}</span>`,
-      indicator.code === 'US10Y' ? '' : `<span class="${f.signClass(point.changePct)}">${f.pct(point.changePct)}</span>`,
+      isYield(indicator.code) ? '' : `<span class="${f.signClass(point.changePct)}">${f.pct(point.changePct)}</span>`,
       ...(withRange ? [f.number(point.high, 2), f.number(point.low, 2)] : [])
     ]);
-    const shownHeadings = indicator.code === 'US10Y' ? headings.filter((_, index) => index !== 3) : headings;
-    const shownRows = indicator.code === 'US10Y' ? rows.map(row => row.filter((_, index) => index !== 3)) : rows;
+    const shownHeadings = isYield(indicator.code) ? headings.filter((_, index) => index !== 3) : headings;
+    const shownRows = isYield(indicator.code) ? rows.map(row => row.filter((_, index) => index !== 3)) : rows;
     return `<section class="market-section" aria-labelledby="indicator-${month}"><h2 id="indicator-${month}">${html(title)}</h2>${dataTable(shownHeadings, shownRows, `market-indicator-table${withRange ? ' with-range' : ''}`)}</section>`;
   }).join('\n');
 
@@ -1466,11 +1552,11 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
   <div class="market-wrap market-dashboard">
     ${section(1, copy.sections[0], `<div class="indicator-stats">${tiles}</div>`)}
     ${series.length > 1 ? section(2, copy.sections[1], indicatorChart(series, indicator, fmt, copy, key)) : ''}
-    <p class="unit-note indicator-table-note">${html(indicator.kind === 'us' ? copy.usDates : copy.krxDates)}</p>
+    <p class="unit-note indicator-table-note">${html(indicator.kind === 'us' ? copy.usDates : indicator.kind === 'kofia' ? copy.kofiaDates : copy.krxDates)}</p>
 ${monthBlocks}
     <nav class="indicator-links" aria-label="${html(copy.related)}"><h2>${html(copy.related)}</h2><div>${related}</div></nav>
     <p class="market-archive-links"><a href="${dashboardPath}">${html(copy.dashboard)} →</a><a href="${marketArchivePath(key)}">${html(copy.archive)} →</a></p>
-    <div class="market-data-note"><p>${html(base.source)} · ${html(copy.gaps)}</p><p>${html(base.disclaimer)}</p></div>
+    <div class="market-data-note"><p>${html(indicator.kind === 'kofia' ? copy.kofiaGaps : `${base.source} · ${copy.gaps}`)}</p><p>${html(base.disclaimer)}</p></div>
   </div>
 </main>`;
 }
@@ -1514,6 +1600,29 @@ export async function loadMarketIndicator(env, indicator, { budgetMs = MARKET_DA
       FROM ${TABLE_NAME} WHERE status = 'final' ORDER BY market_date DESC`).all();
     return (result?.results || []).filter(row => ISO_DATE.test(String(row?.market_date || '')));
   })(), budgetMs);
+}
+
+/**
+ * A domestic rate page's data: every stored Domestic Rates day, and the final
+ * Market Close rows (date and optional closes) for session links and the
+ * related-indicator list. Throws on a Market Close failure or timeout; the
+ * rates themselves fail soft (an empty list, so the page is a 404).
+ */
+export async function loadDomesticRateIndicator(env, { budgetMs = MARKET_DATE_TIME_BUDGET_MS } = {}) {
+  return withinBudget((async () => {
+    const db = await ensureMarketTable(env);
+    const [days, result] = await Promise.all([
+      loadDomesticRatesDays(env),
+      db.prepare(`SELECT market_date, ${OPTIONAL_INDICATOR_CLOSES_SQL} AS optional_closes FROM ${TABLE_NAME} WHERE status = 'final' ORDER BY market_date DESC`).all()
+    ]);
+    const rows = (result?.results || []).filter(row => ISO_DATE.test(String(row?.market_date || '')));
+    return { days, rows };
+  })(), budgetMs);
+}
+
+/** The domestic rate codes with a page; never throws (an empty set). */
+function rateCodesWithin(env, budgetMs) {
+  return withinBudget(loadDomesticRateCodes(env), budgetMs).catch(() => new Set());
 }
 
 /** The indicator links the archive lists under "지표별 기록": `available` from availableIndicatorCodes. */

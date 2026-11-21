@@ -272,7 +272,7 @@ const overlayCount = html => Number(/data-global-latest="(\d+)"/.exec(html)?.[1]
 test('11. MARKET TODAY: fresh Global Latest replaces the global cards, each with its own basis', async () => {
   const { runtime, target, requests } = await marketPage();
   await runtime.init();
-  assert.deepEqual(requests, ['/api/market/dates', '/api/market/global/latest', '/api/market/latest']);
+  assert.deepEqual(requests, ['/api/market/dates', '/api/market/global/latest', '/api/market/rates/date?date=latest', '/api/market/latest']);
   const html = target.innerHTML;
   assert.equal(overlayCount(html), 6);
 
@@ -405,10 +405,10 @@ test('16. TODAY → HISTORY → 1W → TODAY: overlay only on TODAY, one Global 
   assert.equal(overlayCount(target.innerHTML), 6);
   assert.deepEqual(requests.filter(url => url === '/api/market/global/latest').length, 2);
   assert.deepEqual(requests, [
-    '/api/market/dates', '/api/market/global/latest', '/api/market/latest',
-    '/api/market/date?date=2026-09-22',
+    '/api/market/dates', '/api/market/global/latest', '/api/market/rates/date?date=latest', '/api/market/latest',
+    '/api/market/rates/date?date=2026-09-22', '/api/market/date?date=2026-09-22',
     '/api/market/range?period=1w',
-    '/api/market/global/latest', '/api/market/latest'
+    '/api/market/global/latest', '/api/market/rates/date?date=latest', '/api/market/latest'
   ]);
 });
 
@@ -457,7 +457,7 @@ test('market-close.js reads the overlay only through the TODAY load, never from 
   const source = MARKET_JS;
   const rangeView = source.slice(source.indexOf('function renderRangeView'), source.indexOf('function bindEvents'));
   assert.doesNotMatch(rangeView, /globalLatest|GLOBAL_LATEST/);
-  assert.equal((source.match(/render\(data, rootEl, \{ globalLatest \}\)/g) || []).length, 1);
+  assert.equal((source.match(/render\(data, rootEl, \{ globalLatest, domesticRates \}\)/g) || []).length, 1);
   assert.match(source, /latestInput && state\.mode === 'today' && !isHistory/);
   assert.match(source, /latest: krx\(key\) \? null/);
 });
