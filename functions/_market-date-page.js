@@ -156,11 +156,11 @@ const COPY = {
     allSectors: n => `업종 전체 ${n}개 보기`, allThemes: n => `테마 전체 ${n}개 보기`,
     groupColumns: ['순위', '이름', '시장', '종가', '등락률'],
     capColumns: ['순위', '종목명', '종가', '등락률', '시가총액'],
-    shortAmount: '공매도 거래대금', valueRatio: '거래대금 비중', shortValue: '공매도 거래대금 TOP5', shortRatio: '공매도 비중 TOP5', regularUnavailable: '정규장 기준 값 없음',
+    shortAmount: '공매도 거래대금', valueRatio: '거래대금 비중', shortRatioScope: '거래대금 비중은 KRX+NXT 합산 정규시장 거래대금 대비입니다.', shortValue: '공매도 거래대금 TOP5', shortRatio: '공매도 비중 TOP5', regularUnavailable: '정규장 기준 값 없음',
     prev: '이전 거래일', next: '다음 거래일', archive: '전체 마감 기록', dashboard: '대시보드에서 보기', latest: '최신 마감',
     report: '이날의 데일리 리포트', noReport: '이날 발행된 데일리 리포트가 없습니다.',
     breadcrumbHome: '홈', breadcrumbMarket: '마켓',
-    source: '데이터 출처: KRX 한국거래소, 네이버 금융, 연합인포맥스, 야후 파이낸스',
+    source: '데이터 출처: KRX 한국거래소, 네이버 금융, 야후 파이낸스',
     disclaimer: '투자 판단의 참고 자료이며, 매수·매도 권유가 아닙니다.',
     unit: '단위: 원 · 순매수는 매수-매도',
     sectorsPage: '업종·테마 5일·20일 순위', sectorsLink: '업종·테마 등락률 순위',
@@ -182,11 +182,11 @@ const COPY = {
     allSectors: n => `All ${n} sectors`, allThemes: n => `All ${n} themes`,
     groupColumns: ['Rank', 'Name', 'Market', 'Close', 'Change'],
     capColumns: ['Rank', 'Company', 'Close', 'Change', 'Market cap'],
-    shortAmount: 'Short value', valueRatio: 'Value ratio', shortValue: 'Top 5 by Short Value', shortRatio: 'Top 5 by Short Ratio', regularUnavailable: 'No regular-session value',
+    shortAmount: 'Short value', valueRatio: 'Value ratio', shortRatioScope: 'Value ratio is against KRX+NXT combined regular-session turnover.', shortValue: 'Top 5 by Short Value', shortRatio: 'Top 5 by Short Ratio', regularUnavailable: 'No regular-session value',
     prev: 'Previous session', next: 'Next session', archive: 'All sessions', dashboard: 'Open in the dashboard', latest: 'Latest close',
     report: 'Daily report for this session', noReport: 'No Daily report was published for this session.',
     breadcrumbHome: 'Home', breadcrumbMarket: 'Market',
-    source: 'Sources: KRX, Naver Finance, Yonhap Infomax, Yahoo Finance',
+    source: 'Sources: KRX, Naver Finance, Yahoo Finance',
     disclaimer: 'For reference only; not a recommendation to buy or sell.',
     unit: 'Net buying = buys minus sells',
     sectorsPage: 'Sector & theme 5- and 20-session rankings', sectorsLink: 'Sector & theme rankings',
@@ -476,11 +476,13 @@ export function renderMarketDateMain(payload, lang, context = {}) {
   ]);
 
   const shortSummary = shorts.market_summary || {};
+  const shortScopeNote = ['KOSPI', 'KOSDAQ'].some(key => /NXT/.test(String(shortSummary[key]?.coverage_scope || '')))
+    ? `<p class="unit-note">${html(copy.shortRatioScope)}</p>` : '';
   const shortList = (items, isRatio) => !(items || []).length
     ? `<p class="unit-note">${html(copy.regularUnavailable)}</p>`
     : `<ol class="rank-list">${items.map((item, index) => `<li><span>${index + 1}. <b>${html(companyName(item, lang))}</b><small>${html(item?.market || '')}</small></span><strong>${isRatio ? f.ratioPct(item?.short_value_ratio) : f.won(item?.short_value_won)}</strong></li>`).join('')}</ol>`;
   const shortBody = shortSummary.KOSPI || shortSummary.KOSDAQ
-    ? `<div class="short-summary">${['KOSPI', 'KOSDAQ'].map(key => `<article><h3>${key}</h3>${metric(copy.shortAmount, f.won(shortSummary[key]?.short_value_won))}${metric(copy.valueRatio, f.ratioPct(shortSummary[key]?.short_value_ratio))}</article>`).join('')}</div><div class="short-ranks"><div><h3>${html(copy.shortValue)}</h3>${shortList(shorts.top5_by_value, false)}</div><div><h3>${html(copy.shortRatio)}</h3>${shortList(shorts.top5_by_ratio, true)}</div></div>`
+    ? `<div class="short-summary">${['KOSPI', 'KOSDAQ'].map(key => `<article><h3>${key}</h3>${metric(copy.shortAmount, f.won(shortSummary[key]?.short_value_won))}${metric(copy.valueRatio, f.ratioPct(shortSummary[key]?.short_value_ratio))}</article>`).join('')}</div><div class="short-ranks"><div><h3>${html(copy.shortValue)}</h3>${shortList(shorts.top5_by_value, false)}</div><div><h3>${html(copy.shortRatio)}</h3>${shortList(shorts.top5_by_ratio, true)}</div></div>${shortScopeNote}`
     : '';
 
   const report = context.report

@@ -13,7 +13,7 @@
     foreign: '외국인', institution: '기관', individual: '개인', market: '시장', fiveDays: '5거래일', billion: '억원',
     arbitrage: '차익', nonArbitrage: '비차익', total: '전체', netBuy: '순매수', spot: 'KOSPI200 현물', future: '선물', basis: '베이시스',
     turnover: '거래대금', previousTurnover: '전일 거래대금', average5: '5일 평균', ratio5: '5일 평균 대비', concentration: '수급 집중도 (상위 비중)', concentrationUnavailable: '정규장 기준 값 없음', regularUnavailable: '정규장 기준 값 없음', foreignBuy: '외국인 매수', foreignSell: '외국인 매도', institutionBuy: '기관 매수', institutionSell: '기관 매도', top1: 'TOP1', top5: 'TOP5',
-    shortSummary: '시장별 공매도', shortValue: '공매도 거래대금 TOP5', shortRatio: '공매도 비중 TOP5', valueRatio: '거래대금 비중', shortAmount: '공매도 거래대금',
+    shortSummary: '시장별 공매도', shortValue: '공매도 거래대금 TOP5', shortRatio: '공매도 비중 TOP5', valueRatio: '거래대금 비중', shortAmount: '공매도 거래대금', shortRatioScope: '거래대금 비중은 KRX+NXT 합산 정규시장 거래대금 대비입니다.',
     rank: '순위', stock: '종목명', price: '종가', change: '등락률', marketCap: '시가총액', source: '데이터 출처', generated: '데이터 갱신',
     sessionPage: '이 거래일 마감 기록', archivePage: '날짜별 마감 기록 전체', sectorsPage: '업종·테마 등락률 순위',
     latestReport: '오늘의 리포트 보기', historyReport: '이날의 데일리 리포트 보기', noDailyReport: '이날 발행된 데일리 리포트가 없습니다.',
@@ -48,7 +48,7 @@
     foreign: 'Foreign', institution: 'Institution', individual: 'Retail', market: 'Market', fiveDays: '5 sessions', billion: 'KRW 100m',
     arbitrage: 'Arbitrage', nonArbitrage: 'Non-arbitrage', total: 'Total', netBuy: 'Net buy', spot: 'KOSPI 200 spot', future: 'Futures', basis: 'Basis',
     turnover: 'Turnover', previousTurnover: 'Previous', average5: '5-session avg.', ratio5: 'vs. 5-session avg.', concentration: 'Flow Concentration (Top Share)', concentrationUnavailable: 'No regular-session value', regularUnavailable: 'No regular-session value', foreignBuy: 'Foreign buy', foreignSell: 'Foreign sell', institutionBuy: 'Institution buy', institutionSell: 'Institution sell', top1: 'TOP1', top5: 'TOP5',
-    shortSummary: 'Market Short Selling', shortValue: 'Top 5 by Short Value', shortRatio: 'Top 5 by Short Ratio', valueRatio: 'Value ratio', shortAmount: 'Short value',
+    shortSummary: 'Market Short Selling', shortValue: 'Top 5 by Short Value', shortRatio: 'Top 5 by Short Ratio', valueRatio: 'Value ratio', shortAmount: 'Short value', shortRatioScope: 'Value ratio is against KRX+NXT combined regular-session turnover.',
     rank: 'Rank', stock: 'Company', price: 'Close', change: 'Change', marketCap: 'Market cap', source: 'Sources', generated: 'Data updated',
     sessionPage: 'This session’s record', archivePage: 'All sessions by date', sectorsPage: 'Sector & theme rankings',
     latestReport: 'Read today’s report', historyReport: 'Read this day’s Daily report', noDailyReport: 'No Daily report was published for this date.',
@@ -89,14 +89,20 @@
     '005935': 'Samsung Electronics Pref.',
     '009150': 'Samsung Electro-Mechanics',
     '013890': 'Zinus',
+    '012450': 'Hanwha Aerospace',
     '028260': 'Samsung C&T',
+    '034020': 'Doosan Enerbility',
     '035420': 'NAVER',
+    '042660': 'Hanwha Ocean',
     '042700': 'Hanmi Semiconductor',
     '047810': 'Korea Aerospace Industries',
+    '055550': 'Shinhan Financial Group',
+    '068270': 'Celltrion',
     '095340': 'ISC',
     '095570': 'AJ Networks',
     '105560': 'KB Financial Group',
     '207940': 'Samsung Biologics',
+    '329180': 'HD Hyundai Heavy Industries',
     '373220': 'LG Energy Solution',
     '402340': 'SK Square'
   };
@@ -134,6 +140,38 @@
     if (abs >= 1e12) return `KRW ${number(value / 1e12, 2)}tn`;
     if (abs >= 1e9) return `KRW ${number(value / 1e9, 1)}bn`;
     return `KRW ${integer(value)}`;
+  };
+  // A net amount with an explicit sign, as in the investor flow tables (+ / U+2212).
+  const signedWon = value => {
+    if (!valid(value)) return '--';
+    const sign = value > 0 ? '+' : value < 0 ? '−' : '';
+    const text = won(Math.abs(value));
+    return ko ? `${sign}${text}` : text.replace(/^KRW /, `KRW ${sign}`);
+  };
+  // The collector's basis labels are Korean; EN shows its own words.
+  const BASIS_STATES_EN = { '콘탱고': 'Contango', '백워데이션': 'Backwardation', '중립': 'Flat' };
+  const futureLabel = name => {
+    const text = String(name || '').trim();
+    if (!text) return copy.future;
+    if (ko) return text;
+    const month = /\((\d{4})\)/.exec(text);
+    return month ? `${copy.future} (${month[1]})` : copy.future;
+  };
+  const basisState = value => (ko ? value : BASIS_STATES_EN[value]) || value || '--';
+  // The collector's source labels (Korean). EN shows English names; KRX is always a source.
+  const SOURCES_EN = {
+    'Npay 지수 실시간': 'Naver Pay index quotes',
+    '네이버 금융 지수 일봉': 'Naver Finance daily index',
+    '네이버 금융': 'Naver Finance',
+    '네이버 금융 하나은행 15:30 회차별 매매기준율 + Yahoo 현재가': 'Hana Bank 15:30 reference rate (Naver Finance) + Yahoo Finance latest'
+  };
+  const HANGUL = /[\u3131-\u318e\uac00-\ud7a3]/;
+  const sourceLine = labels => {
+    const unique = [ko ? 'KRX 한국거래소' : 'KRX', ...labels.map(item => item.split(' · ')[0])]
+      // An unknown Korean label never reaches the English page; it is at least Naver Finance.
+      .map(item => (ko ? item : SOURCES_EN[item] || (HANGUL.test(item) ? (/네이버|Npay/.test(item) ? 'Naver Finance' : '') : item)))
+      .filter((item, index, all) => item && all.indexOf(item) === index);
+    return unique.join(', ');
   };
   const flow = value => {
     if (!valid(value)) return '--';
@@ -565,7 +603,7 @@
 
     const programRows = ['차익', '비차익', '전체'].map(key => [
       localName(key),
-      valid(program.program_trading?.[key]?.net_buy_won) ? `${won(program.program_trading[key].net_buy_won)}` : '--'
+      valid(program.program_trading?.[key]?.net_buy_won) ? signedWon(program.program_trading[key].net_buy_won) : '--'
     ]);
 
     const concentration = internals.concentration || {};
@@ -576,6 +614,8 @@
       [copy.institutionSell, concentration['기관']?.sell]
     ].filter(entry => entry[1]);
 
+    const shortScopeNote = ['KOSPI', 'KOSDAQ'].some(key => /NXT/.test(String(shorts.market_summary?.[key]?.coverage_scope || '')))
+      ? `<p class="unit-note">${html(copy.shortRatioScope)}</p>` : '';
     const shortList = (items, isRatio = false) => !(items || []).length ? `<p class="unit-note">${copy.regularUnavailable}</p>` : `<ol class="rank-list">${(items || []).map((item, index) => `<li><span>${index + 1}. <b>${html(companyName(item))}</b><small>${html(item?.market || '')}</small></span><strong>${isRatio ? ratioPct(item?.short_value_ratio) : won(item?.short_value_won)}</strong></li>`).join('')}</ol>`;
 
     const marketCapRows = marketCap.map(item => [
@@ -630,15 +670,15 @@
           ${section(6, copy.sections[5], fiveDayBody || `${dataTable([copy.market, copy.foreign, copy.institution, copy.individual], fiveRows)}<p class="unit-note">${dateText(data.recent_5d_flows?.start_date)} – ${dateText(data.recent_5d_flows?.end_date)}</p>`)}
         </div>
         <div class="market-trio">
-          ${section(7, copy.sections[6], `<div class="program-grid"><div><h3>${ko ? '프로그램 매매' : 'Program trading'}</h3>${dataTable(['', copy.netBuy], programRows, 'compact')}</div><div class="basis-panel">${metric(copy.spot, number(program.basis?.kospi200_spot, 2))}${metric(program.basis?.future_name || copy.future, number(program.basis?.future, 2))}${metric(copy.basis, signed(program.basis?.basis, 2), signClass(program.basis?.basis))}<span class="state-chip">${html(program.basis?.market_state || '--')}</span></div></div>`)}
+          ${section(7, copy.sections[6], `<div class="program-grid"><div><h3>${ko ? '프로그램 매매' : 'Program trading'}</h3>${dataTable(['', copy.netBuy], programRows, 'compact')}</div><div class="basis-panel">${metric(copy.spot, number(program.basis?.kospi200_spot, 2))}${metric(futureLabel(program.basis?.future_name), number(program.basis?.future, 2))}${metric(copy.basis, signed(program.basis?.basis, 2), signClass(program.basis?.basis))}<span class="state-chip">${html(basisState(program.basis?.market_state))}</span></div></div>`)}
           ${section(8, copy.sections[7], `<div class="turnover-grid">${['KOSPI', 'KOSDAQ'].map(key => `<article><h3>${key}</h3>${metric(copy.turnover, won(internals.turnover?.[key]?.value_won))}${metric(copy.average5, won(internals.turnover?.[key]?.average5_value_won))}${metric(copy.ratio5, valid(internals.turnover?.[key]?.ratio5) ? `${number(internals.turnover[key].ratio5, 2)}×` : '--')}</article>`).join('')}</div><h3 class="subsection-title">${copy.concentration}</h3><div class="concentration-grid">${concentrationItems.length ? concentrationItems.map(([label, item]) => `<div><span>${label}</span><b>${copy.top1} ${ratioPct(item?.top1_ratio)} · ${copy.top5} ${ratioPct(item?.top5_ratio)}</b><small>${html(companyName(item))}</small></div>`).join('') : `<p class="unit-note">${copy.concentrationUnavailable}</p>`}</div>`)}
-          ${section(9, copy.sections[8], `<div class="short-summary">${['KOSPI', 'KOSDAQ'].map(key => `<article><h3>${key}</h3>${metric(copy.shortAmount, won(shorts.market_summary?.[key]?.short_value_won))}${metric(copy.valueRatio, ratioPct(shorts.market_summary?.[key]?.short_value_ratio))}</article>`).join('')}</div><div class="short-ranks"><div><h3>${copy.shortValue}</h3>${shortList(shorts.top5_by_value)}</div><div><h3>${copy.shortRatio}</h3>${shortList(shorts.top5_by_ratio, true)}</div></div>`)}
+          ${section(9, copy.sections[8], `<div class="short-summary">${['KOSPI', 'KOSDAQ'].map(key => `<article><h3>${key}</h3>${metric(copy.shortAmount, won(shorts.market_summary?.[key]?.short_value_won))}${metric(copy.valueRatio, ratioPct(shorts.market_summary?.[key]?.short_value_ratio))}</article>`).join('')}</div><div class="short-ranks"><div><h3>${copy.shortValue}</h3>${shortList(shorts.top5_by_value)}</div><div><h3>${copy.shortRatio}</h3>${shortList(shorts.top5_by_ratio, true)}</div></div>${shortScopeNote}`)}
         </div>
         <div class="market-bottom-grid">
           ${section(10, copy.sections[9], dataTable([copy.rank, copy.stock, copy.price, copy.change, copy.marketCap], marketCapRows, 'market-cap-table'))}
           <aside class="market-note"><span class="note-quote" aria-hidden="true">“</span><h2>${copy.noteTitle}</h2><p>${copy.noteBody}</p>${reportCtaHtml}</aside>
         </div>
-        <div class="market-data-note"><p>${copy.source}: ${html(Array.from(sourceSet).map(item => item.split(' · ')[0]).filter((item, index, all) => all.indexOf(item) === index).join(', '))}</p><p>${html(generatedAtText(data.meta?.generated_at))} · ${html(data.meta?.schema_version || '')}</p></div>
+        <div class="market-data-note"><p>${copy.source}: ${html(sourceLine(Array.from(sourceSet)))}</p><p>${html(generatedAtText(data.meta?.generated_at))} · ${html(data.meta?.schema_version || '')}</p></div>
         <p class="market-archive-links">${/^\d{4}-\d{2}-\d{2}$/.test(String(marketDate || '')) ?`<a href="${ko ? '/market/' : '/en/market/'}${html(marketDate)}/">${html(copy.sessionPage)} →</a>` : ''}<a href="${ko ? '/market/' : '/en/market/'}archive/">${html(copy.archivePage)} →</a><a href="${ko ? '/market/' : '/en/market/'}sectors/">${html(copy.sectorsPage)} →</a></p>
       </div>`;
     target.innerHTML = output;
