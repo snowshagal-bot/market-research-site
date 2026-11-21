@@ -35,6 +35,9 @@ test('2026 KRX holidays: all 17 designated holiday dates are non-trading days, 2
   assert.equal(trading, 244);
   // Verify 2026-06-03 is 9th Nationwide Local Election Day
   assert.equal(HOLIDAY_NAMES.KRX['2026-06-03'].ko, '전국동시지방선거일');
+  // 05-01 is 노동절 from 2026 (formerly 근로자의 날), the same name as 2027's substitute day.
+  assert.deepEqual(HOLIDAY_NAMES.KRX['2026-05-01'], { ko: '노동절', en: 'Labor Day' });
+  assert.equal(HOLIDAY_NAMES.KRX['2027-05-03'].ko, '노동절 대체공휴일');
   // 제헌절 became a public holiday again in 2026; KRX closed every market on Friday 07-17.
   assert.deepEqual(HOLIDAY_NAMES.KRX['2026-07-17'], { ko: '제헌절', en: 'Constitution Day' });
   assert.equal(isTradingDate('2026-07-16', 'KRX'), true);
