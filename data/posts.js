@@ -1,5 +1,30 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-22-basics-jeiu9r",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-11-22",
+    "reportDate": "2026-11-22",
+    "registeredDate": "2026-11-22",
+    "registeredAt": "2026-11-21T20:44:05.307Z",
+    "legacyImport": false,
+    "title": "When Will Your Broker Force-Sell Your Shares?",
+    "seoTitle": "Forced Liquidation and Collateral Ratios: When Will Your Broker Sell Your Shares?",
+    "subtitle": "",
+    "description": "A ₩2 million collateral shortfall led to ₩30 million in forced share sales. Learn the difference between a margin call and forced liquidation, how Korea calculates its 140% collateral coverage ratio, when a broker can sell, and why the sale can be far larger than the shortfall.",
+    "tags": [
+      "market-basic",
+      "liquidity"
+    ],
+    "readingMinutes": 13,
+    "href": "reports/en/Snowshagal_Market_Basics_20_When_Your_Broker_Force_Sells_EN.html",
+    "translationGroup": "2026-11-22-basics-1rhe030",
+    "coverImage": "covers/2026-11-22-basics-jeiu9r.webp",
+    "shareCardImage": "covers/share/2026-11-22-basics-jeiu9r.jpg",
+    "coverThumbnail": "covers/2026-11-22-basics-jeiu9r-450.webp"
+  },
+  {
     "id": "2026-11-22-basics-1rhe030",
     "type": "basics",
     "typeLabel": "시장 입문",
