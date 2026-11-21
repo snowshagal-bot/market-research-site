@@ -27,6 +27,9 @@ import {
 import '../assets/locale.js';
 import { TABLE_NAME, ensureMarketTable } from './api/market/_shared.js';
 import { aggregateKrxGroups } from './api/market/_aggregate.js';
+import { MARKET_INDICATORS, marketIndicatorBySlug, marketIndicatorPath } from './_market-indicators.js';
+
+export { MARKET_INDICATORS, marketIndicatorBySlug, marketIndicatorPath };
 
 export const MARKET_DATE_TIME_BUDGET_MS = 5000;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -46,16 +49,19 @@ export function marketArchivePath(lang = 'ko') {
 /**
  * { lang, date } for a session page, { lang, archive: true } for the list,
  * { lang, sectors: true } for the sector and theme rankings,
+ * { lang, indicator } for one instrument's daily history,
  * or null for any other path. `canonical` is false when the path lacks the
  * trailing slash the canonical address has.
  */
 export function parseMarketPagePath(pathname) {
-  const match = String(pathname || '').match(/^\/(en\/)?market\/(\d{4}-\d{2}-\d{2}|archive|sectors)(\/?)$/);
+  const match = String(pathname || '').match(/^\/(en\/)?market\/(\d{4}-\d{2}-\d{2}|archive|sectors|[a-z0-9]+)(\/?)$/);
   if (!match) return null;
   const lang = match[1] ? 'en' : 'ko';
   const canonical = match[3] === '/';
   if (match[2] === 'archive') return { lang, archive: true, canonical };
   if (match[2] === 'sectors') return { lang, sectors: true, canonical };
+  const indicator = marketIndicatorBySlug(match[2]);
+  if (indicator) return { lang, indicator, canonical };
   if (!isCalendarDate(match[2])) return null;
   return { lang, date: match[2], canonical };
 }
@@ -347,7 +353,7 @@ function instrumentCard(key, item, f, copy, lang, major) {
     : '';
   const state = isFx ? copy.fixedClose : copy.closeState;
   return `<article class="instrument-card${major ? ' major' : ''}">
-      <div class="instrument-heading"><span>${html(instrumentName(key, lang))}</span>${item?.ticker ? `<small>${html(item.ticker)}</small>` : ''}</div>
+      <div class="instrument-heading"><span>${marketIndicatorPath(key, lang) ? `<a class="instrument-history-link" href="${marketIndicatorPath(key, lang)}">${html(instrumentName(key, lang))}</a>` : html(instrumentName(key, lang))}</span>${item?.ticker ? `<small>${html(item.ticker)}</small>` : ''}</div>
       <strong class="instrument-value">${f.valueUnit(key, item?.close)}</strong>
       <div class="instrument-change ${movementClass}">${change}</div>
       ${detail}<div class="instrument-state">${dotDate(item?.source_date, lang)} · ${state}</div>
@@ -597,6 +603,7 @@ export function renderMarketArchiveMain(rows, lang) {
   </section>
   <div class="market-wrap market-dashboard">
 ${blocks}
+    <nav class="indicator-links" id="indicators" aria-labelledby="indicators-heading"><h2 id="indicators-heading">${html(lang === 'en' ? 'Daily history by indicator' : '지표별 일별 기록')}</h2><div>${marketIndicatorLinks(lang).map(link => `<a href="${link.href}">${html(link.name)}</a>`).join('')}</div></nav>
     <p class="market-archive-links"><a href="${marketSectorsPath(lang)}">${html(copy.sectorsLink)} →</a></p>
     <div class="market-data-note"><p>${html(copy.source)}</p><p>${html(copy.disclaimer)}</p></div>
   </div>
@@ -821,6 +828,12 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
   if (!route.canonical) return Response.redirect(`${url.origin}${url.pathname}/${url.search}`, 301);
 
   try {
+    if (route.indicator) {
+      const [rows, shell] = await Promise.all([loadMarketIndicator(env, route.indicator, { budgetMs }), loadShell(env, url, route.lang)]);
+      const series = marketIndicatorSeries(rows, route.indicator);
+      if (!series.length) return notFound(env, url);
+      return htmlResponse(marketIndicatorPageHtml(shell, route.indicator, series, route.lang));
+    }
     if (route.sectors) {
       const [rows, shell] = await Promise.all([loadMarketSectors(env, { budgetMs }), loadShell(env, url, route.lang)]);
       const view = marketSectorsView(rows);
@@ -1042,4 +1055,439 @@ export async function loadMarketSectors(env, { budgetMs = MARKET_DATE_TIME_BUDGE
         return { market_date: row.market_date, published_at: row.published_at || '', krx_groups: groups && typeof groups === 'object' ? groups : null };
       });
   })(), budgetMs);
+}
+
+/* ------------------------------------------------------ indicator history */
+
+// /market/{indicator}/ and /en/market/{indicator}/: one page per instrument the
+// Market Close records (KOSPI … BITCOIN), listing every value it has stored,
+// newest first, with the change, a chart, and the record's high and low.
+//
+// Nothing new is collected: each row is that instrument's item in a final
+// Market Close row (D1), as the session page shows it. What a value is depends
+// on the instrument and is said on the page:
+//   krx      — KRX regular-session close (dated the KRX session)
+//   us       — the U.S. close the record carries, dated the U.S. session
+//   fx       — the 15:30 KST reference rate (Hana Bank, via Naver Finance)
+//   snapshot — the quote when the record was made, shortly after the Korea
+//              close; its change is against the previous record, because the
+//              provider's previous close is a different series (a settlement)
+
+const INDICATOR_NAMES = {
+  ko: {
+    KOSPI: '코스피 지수', KOSDAQ: '코스닥 지수', NASDAQ: '나스닥 종합지수', DOW: '다우존스 지수', SP500: 'S&P 500 지수',
+    SOX: '필라델피아 반도체지수', VIX: 'VIX 변동성지수', US10Y: '미국 국채 10년물 금리', USDKRW: '원/달러 환율',
+    JPYKRW: '원/엔 환율(100엔)', DXY: '달러인덱스', WTI: 'WTI 유가', GOLD: '금 선물 가격', BITCOIN: '비트코인 가격'
+  },
+  en: {
+    KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones Industrial Average', SP500: 'S&P 500',
+    SOX: 'PHLX Semiconductor Index (SOX)', VIX: 'VIX Volatility Index', US10Y: 'US 10-Year Treasury Yield', USDKRW: 'USD/KRW Exchange Rate',
+    JPYKRW: 'JPY/KRW Exchange Rate (per 100 yen)', DXY: 'US Dollar Index (DXY)', WTI: 'WTI Crude Oil', GOLD: 'Gold Futures', BITCOIN: 'Bitcoin'
+  }
+};
+
+const INDICATOR_COPY = {
+  ko: {
+    eyebrow: 'MARKET CLOSE · 지표별 기록',
+    heading: name => `${name} 일별 기록`,
+    noun: { krx: '일별 종가', us: '일별 종가', fx: '일별 기록', snapshot: '일별 기록', rate: '일별 기록' },
+    valueLabel: { krx: '종가', us: '종가', fx: '15:30 환율', snapshot: '기록 시세', rate: '수익률' },
+    basis: {
+      krx: 'KRX 정규장 15:30 종가 기준 · 매 거래일 마감 후 갱신',
+      us: '미국 정규장 종가 · 날짜는 미국 거래일 · 한국 증시 마감 기록에 담긴 값',
+      fx: '15:30 KST 매매기준율(하나은행, 네이버 금융) · 매 거래일 갱신',
+      snapshot: '한국 증시 마감 직후(오후 4시 무렵 KST) 시세 · 변동은 직전 기록 대비'
+    },
+    sections: ['요약', '추이'],
+    latest: '최근', weekAgo: '1주 전 대비', monthAgo: '1개월 전 대비', since: date => `${date} 이후`, high: '기록 최고', low: '기록 최저',
+    columns: { date: '날짜', value: '값', change: '대비', pct: '등락률', high: '고가', low: '저가' },
+    changeVsPrev: { snapshot: '직전 기록 대비' },
+    usDates: '날짜는 미국 거래일입니다. 날짜를 누르면 그 값을 기록한 한국 증시 마감 기록이 열립니다.',
+    krxDates: '날짜를 누르면 그날의 전체 마감 기록이 열립니다.',
+    gaps: '한국 증시 마감 기록이 게시된 날의 값만 담았습니다. 기록이 없는 날과, 한국 휴장일에 열린 해외 거래일은 빠질 수 있습니다.',
+    chartLabel: (name, first, last) => `${name} 추이, ${first}부터 ${last}까지`,
+    chartNote: '거래일 순서로 그린 선입니다. 날짜별 값은 아래 표에 있습니다.',
+    related: '다른 지표의 일별 기록', archive: '날짜별 전체 마감 기록', dashboard: '오늘의 마켓', breadcrumb: '지표별 기록',
+    title: (short, noun, date, value, move) => `${short} ${noun} · ${date} ${value}${move ? `(${move})` : ''} | Snowshagal`,
+    description: ({ name, noun, date, value, pct, month, high, low, start }) => [
+      `${name}의 날짜별 기록과 추이.`,
+      `${date} ${value}${pct ? `(${pct})` : ''}.`,
+      month ? `1개월 전 대비 ${month}.` : '',
+      high && low ? `기록 기간 최고 ${high}, 최저 ${low}.` : '',
+      `${start}부터 매 거래일 갱신.`
+    ]
+  },
+  en: {
+    eyebrow: 'MARKET CLOSE · INDICATOR HISTORY',
+    heading: name => `${name}: Daily History`,
+    noun: { krx: 'Daily Close', us: 'Daily Close', fx: 'History', snapshot: 'History', rate: 'History' },
+    valueLabel: { krx: 'Close', us: 'Close', fx: '15:30 rate', snapshot: 'Recorded price', rate: 'Yield' },
+    basis: {
+      krx: 'KRX regular-session close, 15:30 KST · Updated after every session',
+      us: 'U.S. regular-session close · Dates are U.S. trading days · As carried by the Korea close record',
+      fx: '15:30 KST reference rate (Hana Bank, via Naver Finance) · Updated every session',
+      snapshot: 'Quote shortly after the Korea close (around 16:00 KST) · Change against the previous record'
+    },
+    sections: ['Summary', 'Trend'],
+    latest: 'Latest', weekAgo: 'vs. 1 week ago', monthAgo: 'vs. 1 month ago', since: date => `Since ${date}`, high: 'Record high', low: 'Record low',
+    columns: { date: 'Date', value: 'Value', change: 'Change', pct: 'Change %', high: 'High', low: 'Low' },
+    changeVsPrev: { snapshot: 'vs. previous record' },
+    usDates: 'Dates are U.S. trading days. Each date opens the Korea close record that carried the value.',
+    krxDates: 'Each date opens that session’s full close record.',
+    gaps: 'Only days with a published Korea close record are listed. Days without one, and overseas sessions held on Korean market holidays, may be missing.',
+    chartLabel: (name, first, last) => `${name} from ${first} to ${last}`,
+    chartNote: 'Plotted in trading-day order. Each day’s value is in the table below.',
+    related: 'Daily history of other indicators', archive: 'All sessions by date', dashboard: 'Today’s market', breadcrumb: 'Indicator history',
+    title: (short, noun, date, value, move) => `${short} ${noun}: ${value}${move ? ` (${move})` : ''} on ${date} | Snowshagal`,
+    description: ({ name, noun, date, value, pct, month, high, low, start }) => [
+      `${name} by date, with its trend.`,
+      `${date}: ${value}${pct ? ` (${pct})` : ''}.`,
+      month ? `1-month change ${month}.` : '',
+      high && low ? `Record high ${high}, low ${low}.` : '',
+      `Updated every session since ${start}.`
+    ]
+  }
+};
+
+// Short names for titles ("원/달러 환율", "USD/KRW").
+const INDICATOR_SHORT_NAMES = {
+  ko: { ...INDICATOR_NAMES.ko, KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥', DOW: '다우존스', SP500: 'S&P 500', VIX: 'VIX', JPYKRW: '원/엔 환율', GOLD: '금 선물', BITCOIN: '비트코인' },
+  en: { ...INDICATOR_NAMES.en, NASDAQ: 'NASDAQ', DOW: 'Dow Jones', SOX: 'SOX', VIX: 'VIX', US10Y: 'US 10Y Yield', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold' }
+};
+
+const indicatorKind = (indicator) => (indicator.code === 'US10Y' ? 'rate' : indicator.kind);
+
+/**
+ * The stored series for one instrument, newest first: { date, recordDate,
+ * close, change, changePct, high, low }. `date` is the instrument's own
+ * session (the U.S. session for U.S. instruments) and `recordDate` the Market
+ * Close row that carried it. A U.S. session carried by two records is listed
+ * once, under the first record.
+ */
+export function marketIndicatorSeries(rows, indicator) {
+  const seen = new Map();
+  const ordered = (Array.isArray(rows) ? rows : [])
+    .filter(row => ISO_DATE.test(String(row?.market_date || '')))
+    .slice()
+    .sort((a, b) => (a.market_date < b.market_date ? -1 : a.market_date > b.market_date ? 1 : 0));
+  for (const row of ordered) {
+    let item = row.item;
+    if (typeof item === 'string') {
+      try { item = JSON.parse(item); } catch (_) { item = null; }
+    }
+    if (!item || typeof item !== 'object' || item.data_state === 'unavailable' || !valid(item.close)) continue;
+    const date = indicator.kind === 'us' && ISO_DATE.test(String(item.source_date || '')) ? item.source_date : row.market_date;
+    if (seen.has(date)) continue;
+    const trueClose = indicator.kind !== 'snapshot' && valid(item.previous_close) && item.previous_close > 0;
+    seen.set(date, {
+      date,
+      recordDate: row.market_date,
+      publishedAt: row.published_at || '',
+      close: item.close,
+      change: trueClose ? item.close - item.previous_close : null,
+      changePct: trueClose ? (item.close / item.previous_close - 1) * 100 : null,
+      high: valid(item.high) ? item.high : null,
+      low: valid(item.low) ? item.low : null
+    });
+  }
+  const series = [...seen.values()].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  if (indicator.kind === 'snapshot') {
+    series.forEach((point, index) => {
+      const before = series[index + 1];
+      if (before && before.close > 0) {
+        point.change = point.close - before.close;
+        point.changePct = (point.close / before.close - 1) * 100;
+      }
+    });
+  }
+  return series;
+}
+
+function shiftIsoDate(value, { days = 0, months = 0 } = {}) {
+  const { y, m, d } = dateParts(value);
+  const date = new Date(Date.UTC(y, m - 1 + months, d + days));
+  // 31 March minus a month is the last day of February, not 3 March.
+  if (months && date.getUTCDate() !== d) date.setUTCDate(0);
+  return date.toISOString().slice(0, 10);
+}
+
+/** Latest point, the 1-week and 1-month references, the first point, high and low. */
+export function marketIndicatorStats(series) {
+  if (!series.length) return null;
+  const latest = series[0];
+  const onOrBefore = (date) => series.find(point => point.date <= date) || null;
+  const weekRef = onOrBefore(shiftIsoDate(latest.date, { days: -7 }));
+  const monthRef = onOrBefore(shiftIsoDate(latest.date, { months: -1 }));
+  const first = series[series.length - 1];
+  let high = latest;
+  let low = latest;
+  for (const point of series) {
+    if (point.close > high.close) high = point;
+    if (point.close < low.close) low = point;
+  }
+  return {
+    latest,
+    week: weekRef && weekRef !== latest ? weekRef : null,
+    month: monthRef && monthRef !== latest ? monthRef : null,
+    first: first !== latest ? first : null,
+    high,
+    low,
+    count: series.length
+  };
+}
+
+function indicatorFormat(indicator, f) {
+  const code = indicator.code;
+  const digits = code === 'BITCOIN' ? 0 : 2;
+  const value = (number) => f.valueUnit(code, number);
+  const change = (number) => {
+    if (!valid(number)) return '--';
+    if (code === 'US10Y') return `${f.signed(number * 100, 1)}bp`;
+    return f.signed(number, digits);
+  };
+  // The move from `from` to `to`: bp for the yield, % for everything else.
+  const move = (to, from) => {
+    if (!to || !from || !valid(to.close) || !valid(from.close) || from.close === 0) return null;
+    if (code === 'US10Y') return { text: `${f.signed((to.close - from.close) * 100, 1)}bp`, sign: to.close - from.close };
+    const pct = (to.close / from.close - 1) * 100;
+    return { text: f.pct(pct), sign: pct };
+  };
+  return { value, change, move };
+}
+
+function niceStep(range, targetTicks = 3) {
+  const raw = range / targetTicks;
+  if (!(raw > 0)) return 1;
+  const power = 10 ** Math.floor(Math.log10(raw));
+  const unit = raw / power;
+  const nice = unit <= 1 ? 1 : unit <= 2 ? 2 : unit <= 2.5 ? 2.5 : unit <= 5 ? 5 : 10;
+  return nice * power;
+}
+
+/**
+ * A server-rendered line chart: the plot is an SVG stretched to its box (the
+ * line keeps 2px), and every label is HTML, so text stays readable at any
+ * width. Each trading day has a hover band with its value; the table below is
+ * the full, accessible view.
+ */
+function indicatorChart(series, indicator, fmt, copy, lang) {
+  const points = series.slice().reverse();
+  if (points.length < 2) return '';
+  const closes = points.map(point => point.close);
+  let min = Math.min(...closes);
+  let max = Math.max(...closes);
+  if (min === max) { min -= 1; max += 1; }
+  const step = niceStep(max - min);
+  const lo = Math.floor(min / step) * step;
+  const hi = Math.ceil(max / step) * step;
+  const W = 1000;
+  const H = 300;
+  const x = (index) => (index / (points.length - 1)) * W;
+  const y = (value) => H - ((value - lo) / (hi - lo)) * H;
+  const pct = (value) => `${((y(value) / H) * 100).toFixed(2)}%`;
+  const path = points.map((point, index) => `${index ? 'L' : 'M'}${x(index).toFixed(1)},${y(point.close).toFixed(1)}`).join('');
+  const area = `${path}L${W},${H}L0,${H}Z`;
+  const ticks = [];
+  for (let value = lo; value <= hi + step / 2; value += step) ticks.push(Number(value.toFixed(10)));
+  const tickDigits = step >= 1 ? 0 : step >= 0.1 ? 1 : 2;
+  const tickText = (value) => (indicator.code === 'US10Y' ? `${value.toFixed(tickDigits)}%` : new Intl.NumberFormat(lang === 'en' ? 'en-US' : 'ko-KR', { minimumFractionDigits: tickDigits, maximumFractionDigits: tickDigits }).format(value));
+  const band = W / points.length;
+  const hover = points.map((point, index) => `<rect x="${Math.max(0, x(index) - band / 2).toFixed(1)}" y="0" width="${band.toFixed(1)}" height="${H}"><title>${html(dotDate(point.date, lang))} ${html(stripTags(fmt.value(point.close)))}</title></rect>`).join('');
+  const last = points[points.length - 1];
+  const first = points[0];
+  const label = copy.chartLabel(INDICATOR_NAMES[lang][indicator.code], dotDate(first.date, lang), dotDate(last.date, lang));
+  return `<figure class="indicator-chart">
+      <div class="indicator-chart-plot" role="img" aria-label="${html(label)}">
+        <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          ${ticks.map(value => `<line class="indicator-chart-grid" x1="0" x2="${W}" y1="${y(value).toFixed(1)}" y2="${y(value).toFixed(1)}"/>`).join('')}
+          <path class="indicator-chart-area" d="${area}"/>
+          <path class="indicator-chart-line" d="${path}"/>
+          <g class="indicator-chart-hover">${hover}</g>
+        </svg>
+        ${ticks.map(value => `<span class="indicator-chart-tick" style="top:${pct(value)}">${html(tickText(value))}</span>`).join('')}
+        <span class="indicator-chart-dot" style="top:${pct(last.close)}"></span>
+        <span class="indicator-chart-end" style="top:${pct(last.close)}">${fmt.value(last.close)}</span>
+      </div>
+      <div class="indicator-chart-axis"><span>${dotDate(first.date, lang)}</span><span>${dotDate(last.date, lang)}</span></div>
+      <figcaption class="unit-note">${html(copy.chartNote)}</figcaption>
+    </figure>`;
+}
+
+function stripTags(value) {
+  return String(value).replace(/<[^>]*>/g, '');
+}
+
+function indicatorStatTile(label, value, sub = '', signValue = null, f = null) {
+  const cls = f && signValue !== null ? f.signClass(signValue) : '';
+  return `<article class="indicator-stat"><span>${html(label)}</span><strong class="${cls}">${value}</strong>${sub ? `<small>${sub}</small>` : ''}</article>`;
+}
+
+export function marketIndicatorTitle(indicator, series, lang) {
+  const key = lang === 'en' ? 'en' : 'ko';
+  const copy = INDICATOR_COPY[key];
+  const f = makeFormat(key);
+  const fmt = indicatorFormat(indicator, f);
+  const latest = series[0];
+  const { m, d } = dateParts(latest.date);
+  const date = key === 'en' ? longDate(latest.date, 'en') : `${m}월 ${d}일`;
+  const move = indicator.code === 'US10Y'
+    ? (valid(latest.change) ? `${f.signed(latest.change * 100, 1)}bp` : '')
+    : (valid(latest.changePct) ? f.pct(latest.changePct) : '');
+  return copy.title(INDICATOR_SHORT_NAMES[key][indicator.code], copy.noun[indicatorKind(indicator)], date, stripTags(fmt.value(latest.close)), move);
+}
+
+export function marketIndicatorDescription(indicator, series, lang) {
+  const key = lang === 'en' ? 'en' : 'ko';
+  const copy = INDICATOR_COPY[key];
+  const f = makeFormat(key);
+  const fmt = indicatorFormat(indicator, f);
+  const stats = marketIndicatorStats(series);
+  const latest = stats.latest;
+  const dayMove = indicator.code === 'US10Y'
+    ? (valid(latest.change) ? `${f.signed(latest.change * 100, 1)}bp` : '')
+    : (valid(latest.changePct) ? f.pct(latest.changePct) : '');
+  const parts = copy.description({
+    name: INDICATOR_NAMES[key][indicator.code],
+    noun: copy.noun[indicatorKind(indicator)],
+    date: longDate(latest.date, key),
+    value: stripTags(fmt.value(latest.close)),
+    pct: dayMove,
+    month: stats.month ? fmt.move(latest, stats.month)?.text : '',
+    high: stats.count > 1 ? `${stripTags(fmt.value(stats.high.close))}(${dotDate(stats.high.date, key)})` : '',
+    low: stats.count > 1 ? `${stripTags(fmt.value(stats.low.close))}(${dotDate(stats.low.date, key)})` : '',
+    start: longDate(series[series.length - 1].date, key)
+  }).filter(Boolean);
+  let text = parts.join(' ');
+  while (text.length > 180 && parts.length > 2) {
+    parts.splice(parts.length - 2, 1);
+    text = parts.join(' ');
+  }
+  return text;
+}
+
+export function renderMarketIndicatorMain(indicator, series, lang) {
+  const key = lang === 'en' ? 'en' : 'ko';
+  const copy = INDICATOR_COPY[key];
+  const base = COPY[key];
+  const f = makeFormat(key);
+  const fmt = indicatorFormat(indicator, f);
+  const kind = indicatorKind(indicator);
+  const name = INDICATOR_NAMES[key][indicator.code];
+  const stats = marketIndicatorStats(series);
+  const latest = stats.latest;
+  const dayChange = indicator.code === 'US10Y'
+    ? (valid(latest.change) ? `${f.signed(latest.change * 100, 1)}bp` : '')
+    : (valid(latest.changePct) ? f.pct(latest.changePct) : '');
+  const summary = `<span class="market-date-fact">${html(dotDate(latest.date, key))} <b>${fmt.value(latest.close)}</b>${dayChange ? ` <span class="${f.signClass(latest.change)}">(${dayChange})</span>` : ''}</span>`;
+
+  const moveTile = (label, ref) => {
+    const move = fmt.move(latest, ref);
+    return move ? indicatorStatTile(label, move.text, `${dotDate(ref.date, key)} ${fmt.value(ref.close)}`, move.sign, f) : '';
+  };
+  const tiles = [
+    indicatorStatTile(`${copy.latest} ${copy.valueLabel[kind]}`, fmt.value(latest.close), html(dotDate(latest.date, key))),
+    stats.week ? moveTile(copy.weekAgo, stats.week) : '',
+    stats.month ? moveTile(copy.monthAgo, stats.month) : '',
+    stats.first ? moveTile(copy.since(dotDate(stats.first.date, key)), stats.first) : '',
+    stats.count > 1 ? indicatorStatTile(copy.high, fmt.value(stats.high.close), html(dotDate(stats.high.date, key))) : '',
+    stats.count > 1 ? indicatorStatTile(copy.low, fmt.value(stats.low.close), html(dotDate(stats.low.date, key))) : ''
+  ].filter(Boolean).join('');
+
+  const withRange = indicator.kind === 'krx';
+  const changeHeading = indicator.kind === 'snapshot' ? copy.changeVsPrev.snapshot : copy.columns.change;
+  const headings = [copy.columns.date, copy.valueLabel[kind], changeHeading, copy.columns.pct, ...(withRange ? [copy.columns.high, copy.columns.low] : [])];
+  const months = new Map();
+  for (const point of series) {
+    const month = point.date.slice(0, 7);
+    if (!months.has(month)) months.set(month, []);
+    months.get(month).push(point);
+  }
+  const monthBlocks = [...months].map(([month, points]) => {
+    const [y, m] = month.split('-').map(Number);
+    const title = key === 'en' ? `${EN_MONTHS[m - 1]} ${y}` : `${y}년 ${m}월`;
+    const rows = points.map(point => [
+      `<a href="${marketDatePath(point.recordDate, key)}">${html(dayLabel(point.date, key))}</a>`,
+      fmt.value(point.close),
+      `<span class="${f.signClass(point.change)}">${fmt.change(point.change)}</span>`,
+      indicator.code === 'US10Y' ? '' : `<span class="${f.signClass(point.changePct)}">${f.pct(point.changePct)}</span>`,
+      ...(withRange ? [f.number(point.high, 2), f.number(point.low, 2)] : [])
+    ]);
+    const shownHeadings = indicator.code === 'US10Y' ? headings.filter((_, index) => index !== 3) : headings;
+    const shownRows = indicator.code === 'US10Y' ? rows.map(row => row.filter((_, index) => index !== 3)) : rows;
+    return `<section class="market-section" aria-labelledby="indicator-${month}"><h2 id="indicator-${month}">${html(title)}</h2>${dataTable(shownHeadings, shownRows, `market-indicator-table${withRange ? ' with-range' : ''}`)}</section>`;
+  }).join('\n');
+
+  const related = MARKET_INDICATORS.filter(item => item.code !== indicator.code)
+    .map(item => `<a href="${marketIndicatorPath(item.code, key)}">${html(INDICATOR_SHORT_NAMES[key][item.code])}</a>`).join('');
+  const dashboardPath = key === 'en' ? '/en/market/' : '/market/';
+
+  return `<main id="market-date-root" class="market-date-page market-indicator-page" data-market-indicator="${indicator.slug}">
+  <section class="market-hero" aria-labelledby="market-indicator-heading">
+    <div class="market-wrap market-hero-inner">
+      <div class="market-hero-copy">
+        <p class="market-breadcrumb"><a href="${key === 'en' ? '/en/' : '/'}">${html(base.breadcrumbHome)}</a> › <a href="${dashboardPath}">${html(base.breadcrumbMarket)}</a> › <a href="${marketArchivePath(key)}#indicators">${html(copy.breadcrumb)}</a></p>
+        <p class="market-eyebrow">${html(copy.eyebrow)}</p>
+        <h1 id="market-indicator-heading">${html(copy.heading(name))}</h1>
+        <p class="market-date-summary">${summary}</p>
+        <p class="market-date">${html(copy.basis[indicator.kind])}</p>
+      </div>
+      <div class="market-mountain" aria-hidden="true"></div>
+    </div>
+  </section>
+  <div class="market-wrap market-dashboard">
+    ${section(1, copy.sections[0], `<div class="indicator-stats">${tiles}</div>`)}
+    ${series.length > 1 ? section(2, copy.sections[1], indicatorChart(series, indicator, fmt, copy, key)) : ''}
+    <p class="unit-note indicator-table-note">${html(indicator.kind === 'us' ? copy.usDates : copy.krxDates)}</p>
+${monthBlocks}
+    <nav class="indicator-links" aria-label="${html(copy.related)}"><h2>${html(copy.related)}</h2><div>${related}</div></nav>
+    <p class="market-archive-links"><a href="${dashboardPath}">${html(copy.dashboard)} →</a><a href="${marketArchivePath(key)}">${html(copy.archive)} →</a></p>
+    <div class="market-data-note"><p>${html(base.source)} · ${html(copy.gaps)}</p><p>${html(base.disclaimer)}</p></div>
+  </div>
+</main>`;
+}
+
+export function marketIndicatorPageHtml(shell, indicator, series, lang) {
+  const key = lang === 'en' ? 'en' : 'ko';
+  const title = marketIndicatorTitle(indicator, series, key);
+  const description = marketIndicatorDescription(indicator, series, key);
+  const canonical = `${PRODUCTION_ORIGIN}${marketIndicatorPath(indicator.code, key)}`;
+  const base = COPY[key];
+  return applyMarketShell(shell, {
+    lang: key,
+    title,
+    description,
+    canonical,
+    alternates: { ko: `${PRODUCTION_ORIGIN}${marketIndicatorPath(indicator.code, 'ko')}`, en: `${PRODUCTION_ORIGIN}${marketIndicatorPath(indicator.code, 'en')}` },
+    jsonLd: pageJsonLd({
+      lang: key,
+      title,
+      description,
+      canonical,
+      datePublished: String(series[0]?.publishedAt || '').slice(0, 10) || undefined,
+      breadcrumb: [
+        { name: base.breadcrumbHome, url: `${PRODUCTION_ORIGIN}${key === 'en' ? '/en/' : '/'}` },
+        { name: base.breadcrumbMarket, url: `${PRODUCTION_ORIGIN}${key === 'en' ? '/en/market/' : '/market/'}` },
+        { name: INDICATOR_NAMES[key][indicator.code], url: canonical }
+      ]
+    }),
+    main: renderMarketIndicatorMain(indicator, series, key)
+  });
+}
+
+/** Every final row's item for one instrument, newest first. Throws on a database failure or timeout. */
+export async function loadMarketIndicator(env, indicator, { budgetMs = MARKET_DATE_TIME_BUDGET_MS } = {}) {
+  return withinBudget((async () => {
+    const db = await ensureMarketTable(env);
+    // The path is built from the fixed instrument list, never from the request.
+    const path = `$.${indicator.group}.${indicator.code}`;
+    const result = await db.prepare(`SELECT market_date, published_at, json_extract(payload_json, '${path}') AS item
+      FROM ${TABLE_NAME} WHERE status = 'final' ORDER BY market_date DESC`).all();
+    return (result?.results || []).filter(row => ISO_DATE.test(String(row?.market_date || '')));
+  })(), budgetMs);
+}
+
+/** The indicator links the archive lists under "지표별 기록". */
+export function marketIndicatorLinks(lang) {
+  const key = lang === 'en' ? 'en' : 'ko';
+  return MARKET_INDICATORS.map(item => ({ href: marketIndicatorPath(item.code, key), name: INDICATOR_SHORT_NAMES[key][item.code] }));
 }

@@ -151,6 +151,11 @@ Preview hosts remain blocked, and all non-Market mutation APIs keep their existi
   - Linked from `/market/`, each session page and the archive; listed in the sitemap.
   - The figures are index price moves, not investor flows, and the page says so.
   - English names for all 85 stored KRX sector/theme index codes live in `assets/locale.js` (`KRX_GROUP_NAMES`, `krxGroupName`), used by the English session, sectors and 1W/1M views. `tests/krx-group-names.test.mjs` checks the list.
+- **Indicator daily histories**: `/market/{slug}/` and `/en/market/{slug}/` for the 14 instruments in `functions/_market-indicators.js` (slug = code in lower case: kospi, kosdaq, nasdaq, dow, sp500, sox, vix, us10y, usdkrw, jpykrw, dxy, wti, gold, bitcoin).
+  - Server-rendered in `functions/_market-date-page.js` from the same final D1 rows (one `json_extract` per page); nothing new is collected.
+  - Each page: the latest value, 1-week / 1-month / since-start changes, record high and low, a line chart (SVG plot, HTML labels, a native hover per day), and every value by month linking to the session record.
+  - What a value is depends on `kind`: `krx` KRX close; `us` the U.S. close dated by its U.S. session (`source_date`), listed once even when two records carry it; `fx` the 15:30 Hana Bank reference rate, changed against the previous fixing (not the payload's live-quote change); `snapshot` (DXY, WTI, gold, Bitcoin) the quote when the record was made, changed against the previous record because the provider's previous close is a settlement.
+  - Linked from every dashboard and session card name, the 1W/1M rows, and the archive's "지표별 일별 기록" list (`#indicators`); listed in the sitemap (28 URLs). D1 budget 5 s, then 503; no data 404.
 
 ## Atom feeds (Phase 2, Production — #105)
 
