@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-21-weekly-1mgtaq8",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-11-21",
+    "reportDate": "2026-11-21",
+    "registeredDate": "2026-11-21",
+    "registeredAt": "2026-11-21T10:40:33.996Z",
+    "legacyImport": false,
+    "title": "두 번 핀 꽃망울, 밤새 내린 된서리",
+    "subtitle": "",
+    "description": "2026년 11월 3주차(11월 16~20일) 한국 증시 주간 리포트. 코스피 -7.95% · 코스닥 -7.72%. 엔비디아 실적과 한중 FTA로 두 번 반등했지만 금요일 미국 AI주 반전에 1월 이후 최저 종가. 다음 주는 금요일 밤 미국 급락 반영, 25일 PCE, 26일 금통위, 외국인 매도 속도.",
+    "summary": "두 번의 반등을 사흘의 낙폭이 지운 한 주 · 코스피 -7.95%로 4,869.96 · 반도체 Top 15 -11.95% · 외국인 -4조6,950억 · 다음 주 세 질문은 월요일 충격 뒤 반도체, 5% 아래 미 10년물, 외국인 매도 2조원 안",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 6,
+    "href": "reports/2026-11-21_Snowshagal_Weekly.html",
+    "coverImage": "covers/2026-11-21-weekly-1mgtaq8.webp",
+    "shareCardImage": "covers/share/2026-11-21-weekly-1mgtaq8.jpg",
+    "coverThumbnail": "covers/2026-11-21-weekly-1mgtaq8-450.webp"
+  },
+  {
     "id": "2026-11-21-note-hb64be",
     "type": "note",
     "typeLabel": "Investment Insights",
@@ -9,23 +36,24 @@ window.RESEARCH_POSTS = [
     "registeredDate": "2026-11-21",
     "registeredAt": "2026-11-21T08:46:55.448Z",
     "legacyImport": false,
-    "title": "CHINA REMOTE-ACCESS CURBS SALES MAY HOLD BUT UPSIDE AT RISK",
+    "title": "China Remote-Access Curbs: Sales May Hold, but Upside at Risk",
     "seoTitle": "Nvidia's China Remote-Access Curbs Threaten Guidance Upside More Than Sales",
     "subtitle": "",
     "description": "The U.S. is extending AI-chip export licensing to overseas data centers serving Chinese companies. Nvidia raised guidance despite excluding direct China data-center compute revenue. Kiwoom Securities estimates unmet demand could exceed the potential loss—and examines who ultimately bears the burden.",
     "tags": [
+      "semiconductors",
+      "ai",
       "china",
       "u-s-a",
-      "korea",
-      "ai",
-      "semiconductors"
+      "korea"
     ],
     "readingMinutes": 18,
     "href": "reports/en/20261121_Investment_Insight_Nvidia_China_Remote_Access_EN.html",
     "translationGroup": "2026-11-21-note-ueukqn",
     "coverImage": "covers/2026-11-21-note-hb64be.webp",
     "shareCardImage": "covers/share/2026-11-21-note-hb64be.jpg",
-    "coverThumbnail": "covers/2026-11-21-note-hb64be-450.webp"
+    "coverThumbnail": "covers/2026-11-21-note-hb64be-450.webp",
+    "updatedAt": "2026-11-21T10:39:43.471Z"
   },
   {
     "id": "2026-11-21-note-ueukqn",
@@ -42,11 +70,11 @@ window.RESEARCH_POSTS = [
     "subtitle": "",
     "description": "미국이 해외 데이터센터를 통한 중국 기업의 AI 칩 사용에도 허가를 요구했다. 엔비디아는 중국 데이터센터 매출을 빼고도 전망을 올렸고, 키움증권은 줄어드는 수요보다 칩을 기다리는 수요가 크다고 계산했다. 부담이 어디로 가는지 풀었다.",
     "tags": [
+      "semiconductors",
+      "ai",
       "china",
       "u-s-a",
-      "korea",
-      "ai",
-      "semiconductors"
+      "korea"
     ],
     "readingMinutes": 18,
     "href": "reports/20261121_Investment_Insight_Nvidia_China_Remote_Access.html",
