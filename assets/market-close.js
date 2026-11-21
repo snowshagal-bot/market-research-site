@@ -79,6 +79,7 @@
 
   const names = {
     NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones', SP500: 'S&P 500', SOX: 'Philadelphia Semiconductor', VIX: 'VIX', US10Y: 'US 10Y', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW (100)', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', BITCOIN: 'Bitcoin',
+    CNYKRW: 'CNY/KRW', EURKRW: 'EUR/KRW', USDJPY: 'USD/JPY', BRENT: 'Brent Crude', NATGAS: 'Natural Gas', SILVER: 'Silver', COMEX_COPPER: 'Copper',
     KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', 'KOSPI200선물': 'KOSPI 200 Futures', '기관': 'Institution', '외국인': 'Foreign', '개인': 'Retail', '차익': 'Arbitrage', '비차익': 'Non-arbitrage', '전체': 'Total'
   };
 
@@ -198,14 +199,27 @@
   const namesKo = {
     KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥 종합', DOW: '다우존스', SP500: 'S&P 500', SOX: '필라델피아 반도체',
     VIX: 'VIX 변동성', US10Y: '미국 국채 10년', USDKRW: '원/달러', JPYKRW: '원/100엔', DXY: '달러인덱스',
-    WTI: 'WTI 원유', GOLD: '금 선물', BITCOIN: '비트코인'
+    WTI: 'WTI 원유', GOLD: '금 선물', BITCOIN: '비트코인',
+    CNYKRW: '원/위안', EURKRW: '원/유로', USDJPY: '엔/달러', BRENT: '브렌트유', NATGAS: '천연가스', SILVER: '은 선물', COMEX_COPPER: '구리 선물'
   };
-  // Each instrument has a daily history page at /market/{code in lower case}/.
-  const HISTORY_CODES = ['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500', 'SOX', 'VIX', 'US10Y', 'USDKRW', 'JPYKRW', 'DXY', 'WTI', 'GOLD', 'BITCOIN'];
-  const historyLink = (key, text) => HISTORY_CODES.includes(key)
-    ? `<a class="instrument-history-link" href="${ko ? '' : '/en'}/market/${key.toLowerCase()}/">${text}</a>`
+  // KRW pairs whose close is the 15:30 Hana Bank fixing; the others are quotes.
+  const FIXING_CODES = ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW'];
+  const isFixing = key => FIXING_CODES.includes(key);
+  // Added 2026-11: a record made before them has no such item.
+  const OPTIONAL_CODES = ['CNYKRW', 'EURKRW', 'USDJPY', 'BRENT', 'NATGAS', 'SILVER', 'COMEX_COPPER'];
+  // Decimal places of a price and its change (Bitcoin prices are whole dollars).
+  const digitsOf = key => (key === 'NATGAS' || key === 'COMEX_COPPER' ? 3 : 2);
+  // Each instrument has a daily history page at /market/{code in lower case}/
+  // (copper: /market/copper/), as functions/_market-indicators.js lists them.
+  // An optional one is linked only beside a value: until a record has one,
+  // its page does not exist.
+  const HISTORY_CODES = ['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500', 'SOX', 'VIX', 'US10Y', 'USDKRW', 'JPYKRW', 'DXY', 'WTI', 'GOLD', 'BITCOIN', ...OPTIONAL_CODES];
+  const historySlug = key => (key === 'COMEX_COPPER' ? 'copper' : key.toLowerCase());
+  const historyLink = (key, text, hasValue = true) => HISTORY_CODES.includes(key) && (hasValue || !OPTIONAL_CODES.includes(key))
+    ? `<a class="instrument-history-link" href="${ko ? '' : '/en'}/market/${historySlug(key)}/">${text}</a>`
     : text;
-  const instrumentName = (key, item) => ko ? (item?.name || namesKo[key] || key) : (names[key] || key);
+  // A failed instrument may carry its code as its name; the Korean page then uses its own word.
+  const instrumentName = (key, item) => ko ? ((item?.name && item.name !== key ? item.name : '') || namesKo[key] || key) : (names[key] || key);
   const groupName = item => {
     const locale = root.MARKET_LOCALE;
     return locale && typeof locale.krxGroupName === 'function' ? locale.krxGroupName(item, ko ? 'ko' : 'en') : String(item?.name || '');
@@ -213,14 +227,15 @@
   const valueUnit = (key, value) => {
     if (!valid(value)) return '--';
     if (key === 'US10Y') return `${number(value, 3)}%`;
-    if (key === 'USDKRW') return ko ? `${number(value, 2)}원` : `₩${number(value, 2)}`;
-    if (key === 'JPYKRW') return ko ? `${number(value, 2)}원` : `₩${number(value, 2)}`;
-    if (key === 'WTI' || key === 'GOLD' || key === 'BITCOIN') return `$${number(value, key === 'BITCOIN' ? 0 : 2)}`;
+    if (isFixing(key)) return ko ? `${number(value, 2)}원` : `₩${number(value, 2)}`;
+    if (key === 'USDJPY') return ko ? `${number(value, 2)}엔` : `¥${number(value, 2)}`;
+    if (key === 'BITCOIN') return `$${number(value, 0)}`;
+    if (['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER'].includes(key)) return `$${number(value, digitsOf(key))}`;
     return number(value, 2);
   };
   const displayValue = (key, item) => {
     if (!item || item.data_state === 'unavailable') return null;
-    if (key === 'USDKRW' || key === 'JPYKRW' || key === 'KOSPI' || key === 'KOSDAQ') return item.close;
+    if (isFixing(key) || key === 'KOSPI' || key === 'KOSDAQ') return item.close;
     return item.data_state === 'intraday' && valid(item.current) ? item.current : item.close;
   };
   const stateText = item => {
@@ -253,12 +268,12 @@
     const movementPct = latest ? latest.change_pct : item?.change_pct;
     const movementClass = signClass(movement);
     const movementArrow = movementClass === 'up' ? '▲' : movementClass === 'down' ? '▼' : '—';
-    const isFx = key === 'USDKRW' || key === 'JPYKRW';
+    const isFx = isFixing(key);
     const changeContent = key === 'US10Y'
       ? `${movementArrow} ${valid(movement) ? `${number(Math.abs(movement * 100), 1)}bp` : '--'}`
       : isFx
         ? `${movementArrow} ${valid(movement) ? number(Math.abs(movement), 2) : '--'} <span>(${pct(movementPct)})</span>`
-        : `${movementArrow} ${signed(movement, 2)} <span>(${pct(movementPct)})</span>`;
+        : `${movementArrow} ${signed(movement, digitsOf(key))} <span>(${pct(movementPct)})</span>`;
     const fxContext = isFx && !latest ? `<div class="instrument-close-label">${copy.fixedClose}</div><div class="instrument-current"><span>${copy.current}</span><strong>${valueUnit(key, item?.current)}</strong></div>` : '';
     const detail = !major ? '' : latest
       ? `<dl class="market-ohlc"><div><dt>${copy.previous}</dt><dd>${number(latest.previous_close, 2)}</dd></div></dl>`
@@ -269,7 +284,7 @@
     const stateHtml = latest ? latestStateHtml(latest) : `${dateText(item?.source_date)} · ${snapshotState}`;
     const basisAttr = latest ? ' data-basis="latest"' : view.mixed ? ' data-basis="snapshot"' : '';
     return `<article class="instrument-card ${major ? 'major' : ''}"${basisAttr}>
-      <div class="instrument-heading"><span>${historyLink(key, html(instrumentName(key, item)))}</span>${item?.ticker ? `<small>${html(item.ticker)}</small>` : ''}</div>
+      <div class="instrument-heading"><span>${historyLink(key, html(instrumentName(key, item)), valid(display))}</span>${item?.ticker ? `<small>${html(item.ticker)}</small>` : ''}</div>
       <strong class="instrument-value">${valueUnit(key, display)}</strong>
       ${fxContext}<div class="instrument-change ${movementClass}">${changeContent}</div>
       ${detail}<div class="instrument-state">${stateHtml}</div>
@@ -677,8 +692,8 @@
       <div id="market-dashboard-view" class="market-wrap market-dashboard" data-global-latest="${Object.keys(latestItems).length}">
         ${section(1, copy.sections[0], `<div class="major-index-grid">${['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500'].map(key => card(key, indices[key], true)).join('')}</div>`)}
         <div class="market-pair">
-          ${section(2, copy.sections[1], `<div class="mini-instrument-grid">${['SOX', 'VIX', 'US10Y', 'USDKRW', 'JPYKRW', 'DXY'].map(key => card(key, rates[key])).join('')}</div>`)}
-          ${section(3, copy.sections[2], `<div class="mini-instrument-grid commodity-grid">${['WTI', 'GOLD', 'BITCOIN'].map(key => card(key, commodities[key])).join('')}</div>`)}
+          ${section(2, copy.sections[1], `<div class="mini-instrument-grid">${['SOX', 'VIX', 'US10Y', 'USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY'].filter(key => rates[key] || !OPTIONAL_CODES.includes(key)).map(key => card(key, rates[key])).join('')}</div>`)}
+          ${section(3, copy.sections[2], `<div class="mini-instrument-grid commodity-grid">${['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER', 'BITCOIN'].filter(key => commodities[key] || !OPTIONAL_CODES.includes(key)).map(key => card(key, commodities[key])).join('')}</div>`)}
         </div>
         ${section(4, copy.sections[3], breadthBody)}
         <div class="market-pair market-pair-tables">
@@ -704,15 +719,19 @@
   /* ==========================================================================
      1W & 1M Range Aggregation Renderer
      ========================================================================== */
+  // An optional indicator is shown once the window starts with it, so a period never
+  // compares against a day it was not recorded.
+  const rangeShown = (key, item) => Boolean(item) && (!OPTIONAL_CODES.includes(key) || valid(item.baseline_value));
+
   function renderRangeInstrumentRow(key, item) {
-    if (!item) return '';
+    if (!rangeShown(key, item)) return '';
     const name = instrumentName(key, item);
-    const baseline = valid(item.baseline_value) ? number(item.baseline_value, 2) : '--';
-    const end = valid(item.end_value) ? number(item.end_value, 2) : '--';
+    const baseline = valid(item.baseline_value) ? number(item.baseline_value, digitsOf(key)) : '--';
+    const end = valid(item.end_value) ? number(item.end_value, digitsOf(key)) : '--';
     const returnStr = valid(item.return_pct) ? `${signed(item.return_pct, 2)}%` : '--';
     const returnCls = signClass(item.return_pct);
     const highLow = (valid(item.period_high) && valid(item.period_low))
-      ? `<span class="range-hl">H ${number(item.period_high, 2)} · L ${number(item.period_low, 2)}</span>`
+      ? `<span class="range-hl">H ${number(item.period_high, digitsOf(key))} · L ${number(item.period_low, digitsOf(key))}</span>`
       : '';
 
     return `
@@ -729,10 +748,10 @@
   }
 
   function renderRangeRatesFxRow(key, item) {
-    if (!item) return '';
+    if (!rangeShown(key, item)) return '';
     const name = instrumentName(key, item);
     const isUs10y = key === 'US10Y';
-    const isFx = key === 'USDKRW' || key === 'JPYKRW';
+    const isFx = isFixing(key);
 
     let baseline = valid(item.baseline_value) ? number(item.baseline_value, isUs10y ? 3 : 2) : '--';
     let end = valid(item.end_value) ? number(item.end_value, isUs10y ? 3 : 2) : '--';
@@ -926,11 +945,11 @@
         <div class="market-pair">
           ${section('02', ko ? '금리 · 환율 · 변동성' : 'Rates · FX · Volatility', `
             <div class="range-items-grid">
-              ${['US10Y', 'USDKRW', 'JPYKRW', 'DXY', 'VIX'].map(k => renderRangeRatesFxRow(k, rates[k])).join('')}
+              ${['US10Y', 'USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY', 'VIX'].map(k => renderRangeRatesFxRow(k, rates[k])).join('')}
             </div>`)}
           ${section('03', ko ? '자산별 성과' : 'Cross Asset Performance', `
             <div class="range-items-grid">
-              ${['WTI', 'GOLD', 'BITCOIN'].map(k => renderRangeInstrumentRow(k, commodities[k])).join('')}
+              ${['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER', 'BITCOIN'].map(k => renderRangeInstrumentRow(k, commodities[k])).join('')}
             </div>`)}
         </div>
         <div class="market-pair market-pair-tables">

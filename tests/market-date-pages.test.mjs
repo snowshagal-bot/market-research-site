@@ -431,14 +431,15 @@ function indicatorRow(marketDate, item) {
 }
 
 test('every instrument has a history path; anything else under /market/ is left alone', () => {
-  assert.equal(MARKET_INDICATORS.length, 14);
+  assert.equal(MARKET_INDICATORS.length, 21);
+  assert.equal(MARKET_INDICATORS.filter((item) => item.optional).length, 7);
   for (const item of MARKET_INDICATORS) {
-    assert.equal(item.slug, item.code.toLowerCase());
+    assert.equal(item.slug, item.code === 'COMEX_COPPER' ? 'copper' : item.code.toLowerCase());
     assert.deepEqual(parseMarketPagePath(`/market/${item.slug}/`), { lang: 'ko', indicator: item, canonical: true });
     assert.deepEqual(parseMarketPagePath(`/en/market/${item.slug}`), { lang: 'en', indicator: item, canonical: false });
     assert.equal(marketIndicatorPath(item.code, 'en'), `/en/market/${item.slug}/`);
   }
-  for (const other of ['/market/foo/', '/market/KOSPI/', '/market/kospi200/', '/market/index.html']) assert.equal(parseMarketPagePath(other), null, other);
+  for (const other of ['/market/foo/', '/market/KOSPI/', '/market/kospi200/', '/market/index.html', '/market/comex_copper/']) assert.equal(parseMarketPagePath(other), null, other);
 });
 
 test('a U.S. value is dated by its U.S. session and listed once; its change is against its own previous close', () => {
@@ -558,7 +559,9 @@ test('the history route serves the page, redirects to the slash form, 404s witho
 
 test('the sitemap lists every history page in both languages; the archive and session cards link to them', () => {
   const xml = sitemapXml([], { marketSessions: [{ market_date: '2026-10-28', published_at: '2026-10-28T07:10:35Z' }] });
-  for (const item of MARKET_INDICATORS) {
+  // The optional indicators (2026-11) appear once a record has their value; this one has none.
+  for (const item of MARKET_INDICATORS.filter((entry) => entry.optional)) assert.doesNotMatch(xml, new RegExp(`/market/${item.slug}/`));
+  for (const item of MARKET_INDICATORS.filter((entry) => !entry.optional)) {
     assert.match(xml, new RegExp(`<loc>https://snowshagal.com/market/${item.slug}/</loc><lastmod>2026-10-28</lastmod><xhtml:link rel="alternate" hreflang="ko" href="https://snowshagal.com/market/${item.slug}/"/><xhtml:link rel="alternate" hreflang="en" href="https://snowshagal.com/en/market/${item.slug}/"/>`));
     assert.match(xml, new RegExp(`<loc>https://snowshagal.com/en/market/${item.slug}/</loc>`));
   }

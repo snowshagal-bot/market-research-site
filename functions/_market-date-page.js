@@ -27,9 +27,23 @@ import {
 import '../assets/locale.js';
 import { TABLE_NAME, ensureMarketTable } from './api/market/_shared.js';
 import { aggregateKrxGroups } from './api/market/_aggregate.js';
-import { MARKET_INDICATORS, marketIndicatorBySlug, marketIndicatorPath } from './_market-indicators.js';
+import {
+  MARKET_INDICATORS,
+  OPTIONAL_INDICATOR_CLOSES_SQL,
+  availableIndicatorCodes,
+  isOptionalIndicator,
+  listedIndicators,
+  marketIndicatorBySlug,
+  marketIndicatorPath
+} from './_market-indicators.js';
 
-export { MARKET_INDICATORS, marketIndicatorBySlug, marketIndicatorPath };
+export { MARKET_INDICATORS, availableIndicatorCodes, listedIndicators, marketIndicatorBySlug, marketIndicatorPath };
+
+// KRW pairs whose close is the 15:30 Hana Bank fixing.
+const FIXING_CODES = new Set(['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW']);
+// Decimal places of a price and its change (Bitcoin prices are whole dollars).
+const digitsOf = (key) => (key === 'NATGAS' || key === 'COMEX_COPPER' ? 3 : 2);
+const USD_PRICED = new Set(['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER']);
 
 export const MARKET_DATE_TIME_BUDGET_MS = 5000;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -137,8 +151,10 @@ function makeFormat(lang) {
   const valueUnit = (key, value) => {
     if (!valid(value)) return '--';
     if (key === 'US10Y') return `${number(value, 3)}%`;
-    if (key === 'USDKRW' || key === 'JPYKRW') return ko ? `${number(value, 2)}원` : `₩${number(value, 2)}`;
-    if (key === 'WTI' || key === 'GOLD' || key === 'BITCOIN') return `$${number(value, key === 'BITCOIN' ? 0 : 2)}`;
+    if (FIXING_CODES.has(key)) return ko ? `${number(value, 2)}원` : `₩${number(value, 2)}`;
+    if (key === 'USDJPY') return ko ? `${number(value, 2)}엔` : `¥${number(value, 2)}`;
+    if (key === 'BITCOIN') return `$${number(value, 0)}`;
+    if (USD_PRICED.has(key)) return `$${number(value, digitsOf(key))}`;
     return number(value, 2);
   };
   return { ko, number, integer, signClass, signed, pct, ratioPct, won, flow, valueUnit };
@@ -201,8 +217,8 @@ const COPY = {
   }
 };
 
-const INDEX_NAMES_EN = { KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones', SP500: 'S&P 500', SOX: 'Philadelphia Semiconductor', VIX: 'VIX', US10Y: 'US 10Y', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW (100)', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', BITCOIN: 'Bitcoin' };
-const INDEX_NAMES_KO = { KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥 종합', DOW: '다우존스', SP500: 'S&P 500', SOX: '필라델피아 반도체', VIX: 'VIX', US10Y: '미국 국채 10년', USDKRW: '원/달러', JPYKRW: '원/엔(100엔)', DXY: '달러 인덱스', WTI: 'WTI 원유', GOLD: '금', BITCOIN: '비트코인' };
+const INDEX_NAMES_EN = { KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones', SP500: 'S&P 500', SOX: 'Philadelphia Semiconductor', VIX: 'VIX', US10Y: 'US 10Y', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW (100)', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', BITCOIN: 'Bitcoin', CNYKRW: 'CNY/KRW', EURKRW: 'EUR/KRW', USDJPY: 'USD/JPY', BRENT: 'Brent Crude', NATGAS: 'Natural Gas', SILVER: 'Silver', COMEX_COPPER: 'Copper' };
+const INDEX_NAMES_KO = { KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥 종합', DOW: '다우존스', SP500: 'S&P 500', SOX: '필라델피아 반도체', VIX: 'VIX', US10Y: '미국 국채 10년', USDKRW: '원/달러', JPYKRW: '원/엔(100엔)', DXY: '달러 인덱스', WTI: 'WTI 원유', GOLD: '금', BITCOIN: '비트코인', CNYKRW: '원/위안', EURKRW: '원/유로', USDJPY: '엔/달러', BRENT: '브렌트유', NATGAS: '천연가스', SILVER: '은', COMEX_COPPER: '구리' };
 const KRX_COMPANY_NAMES_EN = {
   '000660': 'SK hynix', '005380': 'Hyundai Motor', '005930': 'Samsung Electronics', '005935': 'Samsung Electronics Pref.',
   '009150': 'Samsung Electro-Mechanics', '012450': 'Hanwha Aerospace', '028260': 'Samsung C&T', '034020': 'Doosan Enerbility',
@@ -340,20 +356,22 @@ function metric(label, value, extra = '') {
 }
 
 function instrumentCard(key, item, f, copy, lang, major) {
-  const isFx = key === 'USDKRW' || key === 'JPYKRW';
+  const isFx = FIXING_CODES.has(key);
   const movementClass = f.signClass(item?.change);
   const arrow = movementClass === 'up' ? '▲' : movementClass === 'down' ? '▼' : '—';
   const change = key === 'US10Y'
     ? `${arrow} ${valid(item?.change) ? `${f.number(Math.abs(item.change * 100), 1)}bp` : '--'}`
     : isFx
       ? `${arrow} ${valid(item?.change) ? f.number(Math.abs(item.change), 2) : '--'} <span>(${f.pct(item?.change_pct)})</span>`
-      : `${arrow} ${f.signed(item?.change, 2)} <span>(${f.pct(item?.change_pct)})</span>`;
+      : `${arrow} ${f.signed(item?.change, digitsOf(key))} <span>(${f.pct(item?.change_pct)})</span>`;
   const detail = major
     ? `<dl class="market-ohlc"><div><dt>${copy.open}</dt><dd>${f.number(item?.open, 2)}</dd></div><div><dt>${copy.high}</dt><dd>${f.number(item?.high, 2)}</dd></div><div><dt>${copy.low}</dt><dd>${f.number(item?.low, 2)}</dd></div><div><dt>${copy.previous}</dt><dd>${f.number(item?.previous_close, 2)}</dd></div></dl>`
     : '';
   const state = isFx ? copy.fixedClose : copy.closeState;
+  // An optional indicator's page exists once a record has its value.
+  const history = marketIndicatorPath(key, lang) && (!isOptionalIndicator(key) || valid(item?.close)) ? marketIndicatorPath(key, lang) : null;
   return `<article class="instrument-card${major ? ' major' : ''}">
-      <div class="instrument-heading"><span>${marketIndicatorPath(key, lang) ? `<a class="instrument-history-link" href="${marketIndicatorPath(key, lang)}">${html(instrumentName(key, lang))}</a>` : html(instrumentName(key, lang))}</span>${item?.ticker ? `<small>${html(item.ticker)}</small>` : ''}</div>
+      <div class="instrument-heading"><span>${history ? `<a class="instrument-history-link" href="${history}">${html(instrumentName(key, lang))}</a>` : html(instrumentName(key, lang))}</span>${item?.ticker ? `<small>${html(item.ticker)}</small>` : ''}</div>
       <strong class="instrument-value">${f.valueUnit(key, item?.close)}</strong>
       <div class="instrument-change ${movementClass}">${change}</div>
       ${detail}<div class="instrument-state">${dotDate(item?.source_date, lang)} · ${state}</div>
@@ -467,8 +485,8 @@ export function renderMarketDateMain(payload, lang, context = {}) {
     </nav>`;
 
   const majorCards = ['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500'].filter(key => indices[key]).map(key => instrumentCard(key, indices[key], f, copy, lang, true)).join('');
-  const rateCards = ['USDKRW', 'JPYKRW', 'DXY', 'US10Y', 'VIX', 'SOX'].filter(key => rates[key]).map(key => instrumentCard(key, rates[key], f, copy, lang, false)).join('');
-  const commodityCards = ['WTI', 'GOLD', 'BITCOIN'].filter(key => commodities[key]).map(key => instrumentCard(key, commodities[key], f, copy, lang, false)).join('');
+  const rateCards = ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY', 'US10Y', 'VIX', 'SOX'].filter(key => rates[key]).map(key => instrumentCard(key, rates[key], f, copy, lang, false)).join('');
+  const commodityCards = ['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER', 'BITCOIN'].filter(key => commodities[key]).map(key => instrumentCard(key, commodities[key], f, copy, lang, false)).join('');
 
   const fiveStatus = status.five_day_flows;
   const fiveBody = fiveStatus && fiveStatus.status !== 'complete'
@@ -603,7 +621,7 @@ export function renderMarketArchiveMain(rows, lang) {
   </section>
   <div class="market-wrap market-dashboard">
 ${blocks}
-    <nav class="indicator-links" id="indicators" aria-labelledby="indicators-heading"><h2 id="indicators-heading">${html(lang === 'en' ? 'Daily history by indicator' : '지표별 일별 기록')}</h2><div>${marketIndicatorLinks(lang).map(link => `<a href="${link.href}">${html(link.name)}</a>`).join('')}</div></nav>
+    <nav class="indicator-links" id="indicators" aria-labelledby="indicators-heading"><h2 id="indicators-heading">${html(lang === 'en' ? 'Daily history by indicator' : '지표별 일별 기록')}</h2><div>${marketIndicatorLinks(lang, availableIndicatorCodes(rows)).map(link => `<a href="${link.href}">${html(link.name)}</a>`).join('')}</div></nav>
     <p class="market-archive-links"><a href="${marketSectorsPath(lang)}">${html(copy.sectorsLink)} →</a></p>
     <div class="market-data-note"><p>${html(copy.source)}</p><p>${html(copy.disclaimer)}</p></div>
   </div>
@@ -760,7 +778,8 @@ export async function loadMarketArchive(env, { budgetMs = MARKET_DATE_TIME_BUDGE
         json_extract(payload_json, '$.indices.KOSDAQ.close') AS kosdaq_close,
         json_extract(payload_json, '$.indices.KOSDAQ.change_pct') AS kosdaq_pct,
         json_extract(payload_json, '$.krx_investor_trading.markets.KOSPI.investors."외국인".net_buy') AS foreign_net,
-        json_extract(payload_json, '$.rates_fx_volatility.USDKRW.close') AS usdkrw
+        json_extract(payload_json, '$.rates_fx_volatility.USDKRW.close') AS usdkrw,
+        ${OPTIONAL_INDICATOR_CLOSES_SQL} AS optional_closes
       FROM ${TABLE_NAME} WHERE status = 'final' ORDER BY market_date DESC`).all();
     return (result?.results || []).filter(row => ISO_DATE.test(String(row?.market_date || '')));
   })(), budgetMs);
@@ -832,7 +851,7 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
       const [rows, shell] = await Promise.all([loadMarketIndicator(env, route.indicator, { budgetMs }), loadShell(env, url, route.lang)]);
       const series = marketIndicatorSeries(rows, route.indicator);
       if (!series.length) return notFound(env, url);
-      return htmlResponse(marketIndicatorPageHtml(shell, route.indicator, series, route.lang));
+      return htmlResponse(marketIndicatorPageHtml(shell, route.indicator, series, route.lang, availableIndicatorCodes(rows)));
     }
     if (route.sectors) {
       const [rows, shell] = await Promise.all([loadMarketSectors(env, { budgetMs }), loadShell(env, url, route.lang)]);
@@ -1077,13 +1096,23 @@ const INDICATOR_NAMES = {
   ko: {
     KOSPI: '코스피 지수', KOSDAQ: '코스닥 지수', NASDAQ: '나스닥 종합지수', DOW: '다우존스 지수', SP500: 'S&P 500 지수',
     SOX: '필라델피아 반도체지수', VIX: 'VIX 변동성지수', US10Y: '미국 국채 10년물 금리', USDKRW: '원/달러 환율',
-    JPYKRW: '원/엔 환율(100엔)', DXY: '달러인덱스', WTI: 'WTI 유가', GOLD: '금 선물 가격', BITCOIN: '비트코인 가격'
+    JPYKRW: '원/엔 환율(100엔)', DXY: '달러인덱스', WTI: 'WTI 유가', GOLD: '금 선물 가격', BITCOIN: '비트코인 가격',
+    CNYKRW: '원/위안 환율', EURKRW: '원/유로 환율', USDJPY: '엔/달러 환율', BRENT: '브렌트유 가격', NATGAS: '천연가스 선물 가격',
+    SILVER: '은 선물 가격', COMEX_COPPER: '구리 선물 가격'
   },
   en: {
     KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones Industrial Average', SP500: 'S&P 500',
     SOX: 'PHLX Semiconductor Index (SOX)', VIX: 'VIX Volatility Index', US10Y: 'US 10-Year Treasury Yield', USDKRW: 'USD/KRW Exchange Rate',
-    JPYKRW: 'JPY/KRW Exchange Rate (per 100 yen)', DXY: 'US Dollar Index (DXY)', WTI: 'WTI Crude Oil', GOLD: 'Gold Futures', BITCOIN: 'Bitcoin'
+    JPYKRW: 'JPY/KRW Exchange Rate (per 100 yen)', DXY: 'US Dollar Index (DXY)', WTI: 'WTI Crude Oil', GOLD: 'Gold Futures', BITCOIN: 'Bitcoin',
+    CNYKRW: 'CNY/KRW Exchange Rate', EURKRW: 'EUR/KRW Exchange Rate', USDJPY: 'USD/JPY Exchange Rate', BRENT: 'Brent Crude Oil',
+    NATGAS: 'Natural Gas Futures', SILVER: 'Silver Futures', COMEX_COPPER: 'Copper Futures (COMEX)'
   }
+};
+
+// What a commodity price is quoted per, after the basis line.
+const INDICATOR_UNITS = {
+  ko: { WTI: '달러/배럴', BRENT: '달러/배럴', NATGAS: '달러/MMBtu', GOLD: '달러/트로이온스', SILVER: '달러/트로이온스', COMEX_COPPER: '달러/파운드(COMEX)' },
+  en: { WTI: 'USD per barrel', BRENT: 'USD per barrel', NATGAS: 'USD per MMBtu', GOLD: 'USD per troy ounce', SILVER: 'USD per troy ounce', COMEX_COPPER: 'USD per pound (COMEX)' }
 };
 
 const INDICATOR_COPY = {
@@ -1151,8 +1180,8 @@ const INDICATOR_COPY = {
 
 // Short names for titles ("원/달러 환율", "USD/KRW").
 const INDICATOR_SHORT_NAMES = {
-  ko: { ...INDICATOR_NAMES.ko, KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥', DOW: '다우존스', SP500: 'S&P 500', VIX: 'VIX', JPYKRW: '원/엔 환율', GOLD: '금 선물', BITCOIN: '비트코인' },
-  en: { ...INDICATOR_NAMES.en, NASDAQ: 'NASDAQ', DOW: 'Dow Jones', SOX: 'SOX', VIX: 'VIX', US10Y: 'US 10Y Yield', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold' }
+  ko: { ...INDICATOR_NAMES.ko, KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥', DOW: '다우존스', SP500: 'S&P 500', VIX: 'VIX', JPYKRW: '원/엔 환율', GOLD: '금 선물', BITCOIN: '비트코인', BRENT: '브렌트유', NATGAS: '천연가스', SILVER: '은 선물', COMEX_COPPER: '구리 선물' },
+  en: { ...INDICATOR_NAMES.en, NASDAQ: 'NASDAQ', DOW: 'Dow Jones', SOX: 'SOX', VIX: 'VIX', US10Y: 'US 10Y Yield', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', CNYKRW: 'CNY/KRW', EURKRW: 'EUR/KRW', USDJPY: 'USD/JPY', BRENT: 'Brent Crude', NATGAS: 'Natural Gas', SILVER: 'Silver', COMEX_COPPER: 'Copper' }
 };
 
 const indicatorKind = (indicator) => (indicator.code === 'US10Y' ? 'rate' : indicator.kind);
@@ -1238,7 +1267,7 @@ export function marketIndicatorStats(series) {
 
 function indicatorFormat(indicator, f) {
   const code = indicator.code;
-  const digits = code === 'BITCOIN' ? 0 : 2;
+  const digits = code === 'BITCOIN' ? 0 : digitsOf(code);
   const value = (number) => f.valueUnit(code, number);
   const change = (number) => {
     if (!valid(number)) return '--';
@@ -1365,7 +1394,7 @@ export function marketIndicatorDescription(indicator, series, lang) {
   return text;
 }
 
-export function renderMarketIndicatorMain(indicator, series, lang) {
+export function renderMarketIndicatorMain(indicator, series, lang, available = availableIndicatorCodes([])) {
   const key = lang === 'en' ? 'en' : 'ko';
   const copy = INDICATOR_COPY[key];
   const base = COPY[key];
@@ -1417,7 +1446,7 @@ export function renderMarketIndicatorMain(indicator, series, lang) {
     return `<section class="market-section" aria-labelledby="indicator-${month}"><h2 id="indicator-${month}">${html(title)}</h2>${dataTable(shownHeadings, shownRows, `market-indicator-table${withRange ? ' with-range' : ''}`)}</section>`;
   }).join('\n');
 
-  const related = MARKET_INDICATORS.filter(item => item.code !== indicator.code)
+  const related = listedIndicators(available).filter(item => item.code !== indicator.code)
     .map(item => `<a href="${marketIndicatorPath(item.code, key)}">${html(INDICATOR_SHORT_NAMES[key][item.code])}</a>`).join('');
   const dashboardPath = key === 'en' ? '/en/market/' : '/market/';
 
@@ -1429,7 +1458,7 @@ export function renderMarketIndicatorMain(indicator, series, lang) {
         <p class="market-eyebrow">${html(copy.eyebrow)}</p>
         <h1 id="market-indicator-heading">${html(copy.heading(name))}</h1>
         <p class="market-date-summary">${summary}</p>
-        <p class="market-date">${html(copy.basis[indicator.kind])}</p>
+        <p class="market-date">${html(copy.basis[indicator.kind])}${INDICATOR_UNITS[key][indicator.code] ? ` · ${html(INDICATOR_UNITS[key][indicator.code])}` : ''}</p>
       </div>
       <div class="market-mountain" aria-hidden="true"></div>
     </div>
@@ -1446,7 +1475,7 @@ ${monthBlocks}
 </main>`;
 }
 
-export function marketIndicatorPageHtml(shell, indicator, series, lang) {
+export function marketIndicatorPageHtml(shell, indicator, series, lang, available = availableIndicatorCodes([])) {
   const key = lang === 'en' ? 'en' : 'ko';
   const title = marketIndicatorTitle(indicator, series, key);
   const description = marketIndicatorDescription(indicator, series, key);
@@ -1470,7 +1499,7 @@ export function marketIndicatorPageHtml(shell, indicator, series, lang) {
         { name: INDICATOR_NAMES[key][indicator.code], url: canonical }
       ]
     }),
-    main: renderMarketIndicatorMain(indicator, series, key)
+    main: renderMarketIndicatorMain(indicator, series, key, available)
   });
 }
 
@@ -1480,14 +1509,15 @@ export async function loadMarketIndicator(env, indicator, { budgetMs = MARKET_DA
     const db = await ensureMarketTable(env);
     // The path is built from the fixed instrument list, never from the request.
     const path = `$.${indicator.group}.${indicator.code}`;
-    const result = await db.prepare(`SELECT market_date, published_at, json_extract(payload_json, '${path}') AS item
+    const result = await db.prepare(`SELECT market_date, published_at, json_extract(payload_json, '${path}') AS item,
+        ${OPTIONAL_INDICATOR_CLOSES_SQL} AS optional_closes
       FROM ${TABLE_NAME} WHERE status = 'final' ORDER BY market_date DESC`).all();
     return (result?.results || []).filter(row => ISO_DATE.test(String(row?.market_date || '')));
   })(), budgetMs);
 }
 
-/** The indicator links the archive lists under "지표별 기록". */
-export function marketIndicatorLinks(lang) {
+/** The indicator links the archive lists under "지표별 기록": `available` from availableIndicatorCodes. */
+export function marketIndicatorLinks(lang, available = availableIndicatorCodes([])) {
   const key = lang === 'en' ? 'en' : 'ko';
-  return MARKET_INDICATORS.map(item => ({ href: marketIndicatorPath(item.code, key), name: INDICATOR_SHORT_NAMES[key][item.code] }));
+  return listedIndicators(available).map(item => ({ href: marketIndicatorPath(item.code, key), name: INDICATOR_SHORT_NAMES[key][item.code] }));
 }

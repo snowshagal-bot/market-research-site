@@ -3,7 +3,7 @@ export const SUPPORTED_SCHEMA_VERSIONS = Object.freeze(['1.0.1', '1.1.0', '1.2.0
 export const MAX_PAYLOAD_BYTES = 512 * 1024;
 import { isAdminHost, isPreviewHost, isPublicHost, validateHumanAdminMutation } from '../../_host-policy.js';
 import { requireAdminMutation } from '../../_auth.js';
-import { GLOBAL_INDICATOR_SECTIONS, validateSourceFreshness } from './_freshness.js';
+import { GLOBAL_INDICATOR_SECTIONS, carriesInstrument, validateSourceFreshness } from './_freshness.js';
 
 export const TABLE_NAME = 'market_close_snapshots';
 export const SCHEMA_PATH = '/contracts/market_close/market_close.schema.json';
@@ -379,7 +379,11 @@ export function validateSectionStatus(payload) {
 
   const global = status.global_indicators || {};
   const listed = Array.isArray(global.unavailable) ? global.unavailable : [];
-  const allCodes = GLOBAL_INDICATOR_SECTIONS.flatMap(([, codes]) => codes);
+  // An optional indicator the payload does not carry (a record made before it) is not counted.
+  const allCodes = GLOBAL_INDICATOR_SECTIONS.flatMap(([section, codes]) => codes.filter(code => carriesInstrument(payload, section, code)));
+  for (const code of listed) {
+    if (!allCodes.includes(code)) errors.push(`$.section_status.global_indicators.unavailable: ${code}는 payload에 없는 지표입니다.`);
+  }
   if (new Set(listed).size !== listed.length) errors.push('$.section_status.global_indicators.unavailable: 중복 코드가 있습니다.');
   if (global.status === 'complete' && (listed.length !== 0 || global.reason !== null)) {
     errors.push('$.section_status.global_indicators: complete에는 unavailable 코드와 사유가 없어야 합니다.');
@@ -393,6 +397,7 @@ export function validateSectionStatus(payload) {
   if (global.status !== 'complete' && global.reason === null) errors.push('$.section_status.global_indicators.reason: partial/unavailable에는 사유가 필요합니다.');
   for (const [section, codes] of GLOBAL_INDICATOR_SECTIONS) {
     for (const code of codes) {
+      if (!carriesInstrument(payload, section, code)) continue;
       const item = payload?.[section]?.[code];
       const path = `$.${section}.${code}`;
       if (listed.includes(code)) {

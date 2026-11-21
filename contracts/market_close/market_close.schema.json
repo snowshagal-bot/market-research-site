@@ -46,7 +46,10 @@
         "US10Y": {"$ref": "#/$defs/nullableInstrument"},
         "USDKRW": {"$ref": "#/$defs/nullableInstrument"},
         "JPYKRW": {"$ref": "#/$defs/nullableInstrument"},
-        "DXY": {"$ref": "#/$defs/nullableInstrument"}
+        "DXY": {"$ref": "#/$defs/nullableInstrument"},
+        "CNYKRW": {"$ref": "#/$defs/nullableInstrument"},
+        "EURKRW": {"$ref": "#/$defs/nullableInstrument"},
+        "USDJPY": {"$ref": "#/$defs/nullableInstrument"}
       }
     },
     "commodities_crypto": {
@@ -56,7 +59,11 @@
       "properties": {
         "WTI": {"$ref": "#/$defs/nullableInstrument"},
         "GOLD": {"$ref": "#/$defs/nullableInstrument"},
-        "BITCOIN": {"$ref": "#/$defs/nullableInstrument"}
+        "BITCOIN": {"$ref": "#/$defs/nullableInstrument"},
+        "BRENT": {"$ref": "#/$defs/nullableInstrument"},
+        "COMEX_COPPER": {"$ref": "#/$defs/nullableInstrument"},
+        "SILVER": {"$ref": "#/$defs/nullableInstrument"},
+        "NATGAS": {"$ref": "#/$defs/nullableInstrument"}
       }
     },
     "krx_investor_trading": {
@@ -658,11 +665,12 @@
             "reason": {"$ref": "#/$defs/sectionReason"},
             "unavailable": {
               "type": "array",
-              "maxItems": 12,
+              "maxItems": 19,
               "items": {
                 "enum": [
                   "NASDAQ", "DOW", "SP500", "SOX", "VIX", "US10Y",
-                  "USDKRW", "JPYKRW", "DXY", "WTI", "GOLD", "BITCOIN"
+                  "USDKRW", "JPYKRW", "DXY", "WTI", "GOLD", "BITCOIN",
+                  "CNYKRW", "EURKRW", "USDJPY", "BRENT", "COMEX_COPPER", "SILVER", "NATGAS"
                 ]
               }
             }

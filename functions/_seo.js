@@ -1,7 +1,7 @@
 // The site's shared labels and the editorial blurb rule, the same file the
 // pages load (MARKET_LOCALE), so a card reads the same before and after the
 // browser re-renders it.
-import { MARKET_INDICATORS } from './_market-indicators.js';
+import { availableIndicatorCodes, listedIndicators } from './_market-indicators.js';
 import '../assets/locale.js';
 // The search-title rule the admin publisher applies before it stores one.
 import '../assets/report-metadata.js';
@@ -1170,7 +1170,8 @@ function marketSessionEntries(sessions, urlEntry) {
   const sectors = pair('/market/sectors/');
   entries.push(urlEntry(archive[0].href, dates[0].published_at, archive), urlEntry(archive[1].href, dates[0].published_at, archive));
   entries.push(urlEntry(sectors[0].href, dates[0].published_at, sectors), urlEntry(sectors[1].href, dates[0].published_at, sectors));
-  for (const indicator of MARKET_INDICATORS) {
+  // An optional indicator is listed once a record has its value (availableIndicatorCodes).
+  for (const indicator of listedIndicators(availableIndicatorCodes(sessions))) {
     const history = pair(`/market/${indicator.slug}/`);
     entries.push(urlEntry(history[0].href, dates[0].published_at, history), urlEntry(history[1].href, dates[0].published_at, history));
   }

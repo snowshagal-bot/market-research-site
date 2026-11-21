@@ -6,7 +6,15 @@
 //   us       — the U.S. close the record carries, dated the U.S. session
 //   fx       — the 15:30 KST reference rate (Hana Bank, via Naver Finance)
 //   snapshot — the quote when the record was made, shortly after the Korea close
-// The slug is always the code in lower case, so the dashboard can link to it.
+// The slug is the code in lower case, except COMEX_COPPER (copper);
+// assets/market-close.js links with the same rule.
+//
+// `optional`: added in 2026-11 and optional in contract 1.2.0, so records made
+// before them have no such key. Their pages are listed (sitemap, archive,
+// related links) only once a final record has a value; until then the page
+// itself is a 404 like any address without data.
+const SLUG_EXCEPTIONS = Object.freeze({ COMEX_COPPER: 'copper' });
+
 export const MARKET_INDICATORS = Object.freeze([
   { code: 'KOSPI', group: 'indices', kind: 'krx' },
   { code: 'KOSDAQ', group: 'indices', kind: 'krx' },
@@ -18,14 +26,22 @@ export const MARKET_INDICATORS = Object.freeze([
   { code: 'US10Y', group: 'rates_fx_volatility', kind: 'us' },
   { code: 'USDKRW', group: 'rates_fx_volatility', kind: 'fx' },
   { code: 'JPYKRW', group: 'rates_fx_volatility', kind: 'fx' },
+  { code: 'CNYKRW', group: 'rates_fx_volatility', kind: 'fx', optional: true },
+  { code: 'EURKRW', group: 'rates_fx_volatility', kind: 'fx', optional: true },
   { code: 'DXY', group: 'rates_fx_volatility', kind: 'snapshot' },
+  { code: 'USDJPY', group: 'rates_fx_volatility', kind: 'snapshot', optional: true },
   { code: 'WTI', group: 'commodities_crypto', kind: 'snapshot' },
+  { code: 'BRENT', group: 'commodities_crypto', kind: 'snapshot', optional: true },
+  { code: 'NATGAS', group: 'commodities_crypto', kind: 'snapshot', optional: true },
   { code: 'GOLD', group: 'commodities_crypto', kind: 'snapshot' },
+  { code: 'SILVER', group: 'commodities_crypto', kind: 'snapshot', optional: true },
+  { code: 'COMEX_COPPER', group: 'commodities_crypto', kind: 'snapshot', optional: true },
   { code: 'BITCOIN', group: 'commodities_crypto', kind: 'snapshot' }
-].map(item => Object.freeze({ ...item, slug: item.code.toLowerCase() })));
+].map(item => Object.freeze({ optional: false, ...item, slug: SLUG_EXCEPTIONS[item.code] || item.code.toLowerCase() })));
 
 const BY_SLUG = new Map(MARKET_INDICATORS.map(item => [item.slug, item]));
 const BY_CODE = new Map(MARKET_INDICATORS.map(item => [item.code, item]));
+const OPTIONAL_INDICATORS = MARKET_INDICATORS.filter(item => item.optional);
 
 export function marketIndicatorBySlug(slug) {
   return BY_SLUG.get(String(slug || '')) || null;
@@ -34,4 +50,38 @@ export function marketIndicatorBySlug(slug) {
 export function marketIndicatorPath(codeOrSlug, lang = 'ko') {
   const item = BY_CODE.get(codeOrSlug) || BY_SLUG.get(codeOrSlug);
   return item ? `${lang === 'en' ? '/en' : ''}/market/${item.slug}/` : null;
+}
+
+export function isOptionalIndicator(code) {
+  return Boolean(BY_CODE.get(code)?.optional);
+}
+
+// One SQL column holding the optional indicators' closes for a row, as a JSON
+// array in OPTIONAL_INDICATORS order (json_extract with several paths). Built
+// from the fixed list above, never from a request.
+export const OPTIONAL_INDICATOR_CLOSES_SQL = `json_extract(payload_json, ${OPTIONAL_INDICATORS.map(item => `'$.${item.group}.${item.code}.close'`).join(', ')})`;
+
+/**
+ * The codes that have a page, from rows carrying `optional_closes`: every
+ * original indicator, and an optional one once some row has its value.
+ */
+export function availableIndicatorCodes(rows) {
+  const codes = new Set(MARKET_INDICATORS.filter(item => !item.optional).map(item => item.code));
+  for (const row of Array.isArray(rows) ? rows : []) {
+    let closes = row?.optional_closes;
+    if (typeof closes === 'string') {
+      try { closes = JSON.parse(closes); } catch (_) { closes = null; }
+    }
+    if (!Array.isArray(closes)) continue;
+    OPTIONAL_INDICATORS.forEach((item, index) => {
+      if (typeof closes[index] === 'number' && Number.isFinite(closes[index])) codes.add(item.code);
+    });
+    if (codes.size === MARKET_INDICATORS.length) break;
+  }
+  return codes;
+}
+
+/** MARKET_INDICATORS without the optional ones that have no page yet. */
+export function listedIndicators(available) {
+  return MARKET_INDICATORS.filter(item => !item.optional || Boolean(available?.has(item.code)));
 }

@@ -46,11 +46,13 @@ html[data-theme="dark"] .market-mountain{opacity:.42;filter:saturate(.56) contra
 .market-ohlc div{display:flex;justify-content:space-between;gap:8px;font-size:10px}.market-ohlc dt{color:var(--text-2)}.market-ohlc dd{margin:0;font-variant-numeric:tabular-nums}
 .instrument-state{margin-top:auto;padding-top:8px;font-size:10px;color:var(--muted);text-align:right;white-space:nowrap}
 .instrument-asof{display:block;margin-top:2px}
-.market-pair{display:grid;grid-template-columns:1.25fr .75fr;gap:10px}
+.market-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 .mini-instrument-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
 .report-links-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
 .mini-instrument-grid .instrument-card,.report-links-grid .instrument-card{min-height:118px;display:flex;flex-direction:column}
 .commodity-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+/* A last card alone in its row takes the row (9 rates in 3 columns end even; 7 commodities leave one). */
+.mini-instrument-grid .instrument-card:last-child:nth-child(3n+1){grid-column:1/-1}
 .breadth-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .breadth-card{border:1px solid color-mix(in srgb,var(--line) 74%,transparent);border-radius:9px;padding:12px;background:color-mix(in srgb,var(--panel) 68%,transparent)}
 .breadth-card h3,.program-grid h3,.turnover-grid h3,.short-summary h3,.short-ranks h3{font-size:11px;margin:0 0 9px}
@@ -183,3 +185,5 @@ body.market-close-page:has(.market-loading)>.footer{visibility:hidden}
 .indicator-table-note{text-align:left;margin:2px 4px 0}.market-indicator-table th:first-child,.market-indicator-table td:first-child{text-align:left}
 .indicator-links{border:1px solid var(--line);border-radius:10px;background:var(--market-card);padding:14px}.indicator-links h2{margin:0 0 10px;font-size:14px;line-height:1.3;color:var(--market-ink)}.indicator-links div{display:flex;flex-wrap:wrap;gap:6px}.indicator-links a{display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--market-ink);text-decoration:none}.indicator-links a:hover,.indicator-links a:focus-visible{border-color:var(--market-blue);color:var(--market-blue)}
 @media(max-width:430px){.market-archive-table td>span{display:block;font-size:10px}.market-indicator-table.with-range th:nth-child(n+5),.market-indicator-table.with-range td:nth-child(n+5){display:none}.indicator-stats{grid-template-columns:1fr 1fr}.indicator-stat strong{font-size:17px}.indicator-stat strong.up,.indicator-stat strong.down{font-size:15px}.indicator-chart-plot{height:180px}.indicator-links a{min-height:36px}}
+/* Phones: the rates grid has 2 columns, so the rule above becomes "an odd last card". */
+@media(max-width:760px){.mini-instrument-grid:not(.commodity-grid) .instrument-card:last-child{grid-column:auto}.mini-instrument-grid:not(.commodity-grid) .instrument-card:last-child:nth-child(odd){grid-column:1/-1}}
