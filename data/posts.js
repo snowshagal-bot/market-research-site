@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-22-note-104q2uf",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-22",
+    "reportDate": "2026-11-22",
+    "registeredDate": "2026-11-22",
+    "registeredAt": "2026-11-21T16:54:53.998Z",
+    "legacyImport": false,
+    "title": "Why Isn't the NPS Buying? Not required but discretionary",
+    "seoTitle": "Why Isn't the NPS Buying the KOSPI Dip? A Choice, Not an Obligation",
+    "subtitle": "",
+    "description": "Korea's pension fund has a 20.8% domestic-equity target, yet estimates of its buying capacity range from KRW 16tn to KRW 101tn. Here is why upper limits are not buy orders—and why KRX pension-fund flows are not NPS-only data.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "volatility",
+      "national-pension-service"
+    ],
+    "readingMinutes": 13,
+    "href": "reports/en/20261122_Investment_Insight_NPS_KOSPI_Buying_Power_EN.html",
+    "translationGroup": "2026-11-22-note-1xks8h1",
+    "coverImage": "covers/2026-11-22-note-104q2uf.webp",
+    "shareCardImage": "covers/share/2026-11-22-note-104q2uf.jpg",
+    "coverThumbnail": "covers/2026-11-22-note-104q2uf-450.webp"
+  },
+  {
     "id": "2026-11-22-note-1xks8h1",
     "type": "note",
     "typeLabel": "투자 인사이트",
