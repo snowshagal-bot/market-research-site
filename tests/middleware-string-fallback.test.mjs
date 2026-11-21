@@ -114,6 +114,35 @@ test('the replacement metadata is present exactly once after the originals are r
   assert.equal(count(/application\/ld\+json/g), 1);
 });
 
+// A replacement *string* would read these as patterns: "$&" is the match
+// ("</head>"), "$'" and "$`" the rest of the page after and before it, "$$" one
+// "$". Post text is inserted with callbacks, so all of them stay literal.
+const DOLLAR_TEXT = "$1 $2 $& $' $` $$ $1tn";
+const decodeText = text => String(text)
+  .replace(/&quot;/g, '"').replace(/&#39;|&#x27;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+  .replace(/&amp;/g, '&');
+const countOf = (html, needle) => html.split(needle).length - 1;
+
+test('$-patterns in report titles stay literal in the head, structured data and reading links', async () => {
+  const series = ['2026-09-01', '2026-09-02', '2026-09-03'].map((date, index) => ({
+    ...POST, id: `dollar-${index}`, lang: 'en', reportDate: date, date,
+    title: `Report ${index} ${DOLLAR_TEXT}`, href: `reports/en/dollar-${index}.html`
+  }));
+  const source = withHead('');
+  const html = await render(series[1], source, series);
+  for (const tag of ['<head>', '</head>', '<body>', '</body>', '</html>', '<p>body</p>']) {
+    assert.equal(countOf(html, tag), countOf(source, tag), tag);
+  }
+  const head = headOf(html);
+  assert.ok(decodeText(/<title>([\s\S]*?)<\/title>/.exec(head)[1]).includes(`Report 1 ${DOLLAR_TEXT}`));
+  assert.ok(decodeText(/<meta property="og:title" content="([^"]*)"/.exec(head)[1]).includes(`Report 1 ${DOLLAR_TEXT}`));
+  const structured = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(head)[1];
+  assert.ok(JSON.stringify(JSON.parse(structured)).includes(`Report 1 ${DOLLAR_TEXT}`));
+  const nav = decodeText(html.match(/<nav id="mrs-reading-nav"[\s\S]*?<\/nav>/)[0]);
+  assert.ok(nav.includes(`<strong>Report 0 ${DOLLAR_TEXT}</strong>`));
+  assert.ok(nav.includes(`<strong>Report 2 ${DOLLAR_TEXT}</strong>`));
+});
+
 test('tagAttributes: quoting, case of names, bare attributes, ">" inside values', () => {
   assert.deepEqual(tagAttributes(' content="a > b" NAME=\'description\' data-x rel=icon /'), {
     content: 'a > b', name: 'description', 'data-x': '', rel: 'icon'
