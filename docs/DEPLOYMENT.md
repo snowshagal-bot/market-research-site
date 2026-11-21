@@ -271,7 +271,7 @@ Only after approval, and before the Production merge, apply the same file to Pro
 npx wrangler d1 execute market-research-comments --remote --file=migrations/comments/0003_market_domestic_rates.sql
 ```
 
-Request handlers never create the table: without it both endpoints answer `503 DOMESTIC_RATES_SCHEMA_NOT_READY`, and the pages (dashboard, session pages, history pages, archive, sitemap) behave exactly as without rates. A Preview acceptance test may publish a real KOFIA day to the Preview endpoint and delete it afterwards, on Preview only: `DELETE FROM market_domestic_rates WHERE market_date = 'YYYY-MM-DD';`.
+Request handlers never create the table: without it both endpoints answer `503 DOMESTIC_RATES_SCHEMA_NOT_READY`, and the pages (dashboard, session pages, history pages, archive, sitemap) behave exactly as without rates. A Preview acceptance test may publish a real KOFIA day to the Preview endpoint and delete it afterwards, on Preview only: `DELETE FROM market_domestic_rates WHERE market_date = 'YYYY-MM-DD';`. The Preview deployment's `MARKET_PUBLISH_KEY` is not the collector's, so the collector's own key answers 401 there. Status: migration `0003` applied to Preview and Production on 2026-11-22; Production holds the 2026 backfill and the daily task's days.
 
 Public `GET /api/announcements` returns only `publish_state = published`, `audience = all` rows whose UTC exposure window contains the current server time. Admin create/update/delete require an authenticated administrator session, exact Preview or Production admin Origin, and the session CSRF token. No new Secret or environment variable is required.
 
