@@ -1290,14 +1290,15 @@ test('1W/1M: Korean instrument names on the Korean page, and the Dow Jones row i
   const runtime = await marketRuntimeWithLocale('ko');
   const target = { innerHTML: '' };
   runtime.renderRangeView(rangePayload(), '1w', target);
-  const names = [...target.innerHTML.matchAll(/<div class="range-item-name">\s*<strong>([^<]+)<\/strong>/g)].map(m => m[1]);
+  const names = [...target.innerHTML.matchAll(/<div class="range-item-name">\s*<strong>(.*?)<\/strong>/g)].map(m => m[1].replace(/<[^>]+>/g, ''));
+  assert.match(target.innerHTML, /<strong><a class="instrument-history-link" href="\/market\/dow\/">다우존스<\/a><\/strong>/);
   assert.deepEqual(names.slice(0, 6), ['코스피', '코스닥', '나스닥 종합', '다우존스', 'S&amp;P 500', '필라델피아 반도체']);
   for (const code of ['SP500', 'DXY', 'BITCOIN', 'GOLD']) assert.ok(!names.includes(code), `raw code ${code}`);
   assert.ok(names.includes('달러인덱스') && names.includes('비트코인') && names.includes('금 선물'));
   const en = await marketRuntimeWithLocale('en');
   const enTarget = { innerHTML: '' };
   en.renderRangeView(rangePayload(), '1w', enTarget);
-  assert.match(enTarget.innerHTML, /<strong>Dow Jones<\/strong>/);
+  assert.match(enTarget.innerHTML, /<strong><a class="instrument-history-link" href="\/en\/market\/dow\/">Dow Jones<\/a><\/strong>/);
 });
 
 test('1W/1M: KRX sector and theme rankings use English names on the English page', async () => {
@@ -1313,6 +1314,19 @@ test('1W/1M: KRX sector and theme rankings use English names on the English page
   const koTarget = { innerHTML: '' };
   ko.renderRangeView(rangePayload(), '1w', koTarget);
   assert.match(koTarget.innerHTML, /<b>전기·가스<\/b>/);
+});
+
+test('TODAY cards link each instrument to its daily history page', async () => {
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+  for (const [lang, prefix] of [['ko', ''], ['en', '/en']]) {
+    const runtime = await marketRuntimeWithLocale(lang);
+    const target = { innerHTML: '' };
+    runtime.render(data, target);
+    for (const slug of ['kospi', 'kosdaq', 'nasdaq', 'dow', 'sp500', 'sox', 'vix', 'us10y', 'usdkrw', 'jpykrw', 'dxy', 'wti', 'gold', 'bitcoin']) {
+      assert.match(target.innerHTML, new RegExp(`<a class="instrument-history-link" href="${prefix}/market/${slug}/">`), `${lang} ${slug}`);
+    }
+    assert.match(target.innerHTML, new RegExp(`href="${prefix}/market/archive/#indicators"`));
+  }
 });
 
 test('readability: no reader-facing market text is set below 10px', async () => {

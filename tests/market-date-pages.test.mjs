@@ -4,7 +4,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  MARKET_INDICATORS,
   dailyReportFor,
+  marketIndicatorPageHtml,
+  marketIndicatorPath,
+  marketIndicatorSeries,
+  marketIndicatorStats,
+  marketIndicatorTitle,
   marketArchivePageHtml,
   marketDateDescription,
   marketDatePageHtml,
@@ -209,6 +215,13 @@ function marketDb(rows, { hang = false } = {}) {
         },
         async all() {
           if (hang) return new Promise(() => {});
+          const indicatorPath = sql.match(/'\$\.(indices|rates_fx_volatility|commodities_crypto)\.([A-Z0-9]+)'\) AS item/);
+          if (indicatorPath) {
+            return {
+              results: rows.filter((item) => item.status === 'final').sort((a, b) => b.market_date.localeCompare(a.market_date))
+                .map((item) => ({ market_date: item.market_date, published_at: item.published_at, item: JSON.stringify(JSON.parse(item.payload_json)[indicatorPath[1]]?.[indicatorPath[2]] ?? null) }))
+            };
+          }
           if (/'\$\.krx_groups'/.test(sql)) {
             return {
               results: rows.filter((item) => item.status === 'final').sort((a, b) => b.market_date.localeCompare(a.market_date)).slice(0, 20)
@@ -405,4 +418,153 @@ test('session pages and the archive link to the sectors page, and the sitemap li
   const xml = sitemapXml([], { marketSessions: [{ market_date: '2026-10-28', published_at: '2026-10-28T07:10:35Z' }] });
   assert.match(xml, /<loc>https:\/\/snowshagal.com\/market\/sectors\/<\/loc>/);
   assert.match(xml, /<loc>https:\/\/snowshagal.com\/en\/market\/sectors\/<\/loc>/);
+});
+
+
+/* --------------------------------------------------- indicator histories */
+
+const indicator = (code) => MARKET_INDICATORS.find((item) => item.code === code);
+
+// One stored row per session: the item for one instrument, as D1 returns it.
+function indicatorRow(marketDate, item) {
+  return { market_date: marketDate, published_at: `${marketDate}T07:10:00Z`, item: JSON.stringify(item) };
+}
+
+test('every instrument has a history path; anything else under /market/ is left alone', () => {
+  assert.equal(MARKET_INDICATORS.length, 14);
+  for (const item of MARKET_INDICATORS) {
+    assert.equal(item.slug, item.code.toLowerCase());
+    assert.deepEqual(parseMarketPagePath(`/market/${item.slug}/`), { lang: 'ko', indicator: item, canonical: true });
+    assert.deepEqual(parseMarketPagePath(`/en/market/${item.slug}`), { lang: 'en', indicator: item, canonical: false });
+    assert.equal(marketIndicatorPath(item.code, 'en'), `/en/market/${item.slug}/`);
+  }
+  for (const other of ['/market/foo/', '/market/KOSPI/', '/market/kospi200/', '/market/index.html']) assert.equal(parseMarketPagePath(other), null, other);
+});
+
+test('a U.S. value is dated by its U.S. session and listed once; its change is against its own previous close', () => {
+  const vix = indicator('VIX');
+  const series = marketIndicatorSeries([
+    indicatorRow('2026-11-20', { close: 28.44, previous_close: 24.56, source_date: '2026-11-19', data_state: 'final_close' }),
+    // A KRX session after a U.S. holiday carries the same U.S. close again.
+    indicatorRow('2026-11-19', { close: 24.56, previous_close: 25.46, source_date: '2026-11-18', data_state: 'final_close' }),
+    indicatorRow('2026-11-18', { close: 24.56, previous_close: 25.46, source_date: '2026-11-18', data_state: 'final_close' }),
+    indicatorRow('2026-11-17', { close: null, data_state: 'unavailable' })
+  ], vix);
+  assert.deepEqual(series.map((point) => [point.date, point.recordDate]), [['2026-11-19', '2026-11-20'], ['2026-11-18', '2026-11-18']]);
+  assert.ok(Math.abs(series[0].change - 3.88) < 1e-9);
+  assert.ok(Math.abs(series[0].changePct - (28.44 / 24.56 - 1) * 100) < 1e-9);
+});
+
+test('the 15:30 rate changes against the previous fixing, a snapshot against the previous record', () => {
+  const fx = marketIndicatorSeries([
+    // The payload's own change is against the live quote (1,335.89); the page uses the fixing.
+    indicatorRow('2026-11-20', { close: 1336, current: 1335.89, previous_close: 1330.2, change: 5.69, source_date: '2026-11-20' }),
+    indicatorRow('2026-11-19', { close: 1330.2, previous_close: 1333.2, source_date: '2026-11-19' })
+  ], indicator('USDKRW'));
+  assert.ok(Math.abs(fx[0].change - 5.8) < 1e-9);
+  const gold = marketIndicatorSeries([
+    indicatorRow('2026-11-20', { close: 3561, previous_close: 3685.5, source_date: '2026-11-20' }),
+    indicatorRow('2026-11-19', { close: 3735.3, previous_close: 3741.9, source_date: '2026-11-19' })
+  ], indicator('GOLD'));
+  assert.ok(Math.abs(gold[0].change - (3561 - 3735.3)) < 1e-9, 'against the previous record, not the settlement');
+  assert.equal(gold[1].change, null, 'the oldest record has nothing to compare with');
+});
+
+test('the summary picks the 1-week and 1-month references and the record high and low', () => {
+  const dates = ['2026-11-20', '2026-11-19', '2026-11-13', '2026-11-12', '2026-10-20', '2026-10-19', '2026-08-25'];
+  const closes = [100, 99, 98, 120, 90, 80, 85];
+  const series = marketIndicatorSeries(dates.map((date, i) => indicatorRow(date, { close: closes[i], previous_close: closes[i] - 1, source_date: date })), indicator('KOSPI'));
+  const stats = marketIndicatorStats(series);
+  assert.equal(stats.latest.date, '2026-11-20');
+  assert.equal(stats.week.date, '2026-11-13');
+  assert.equal(stats.month.date, '2026-10-20');
+  assert.equal(stats.first.date, '2026-08-25');
+  assert.deepEqual([stats.high.date, stats.low.date], ['2026-11-12', '2026-10-19']);
+});
+
+function fixtureRows(code, count = 25) {
+  const item = indicator(code);
+  const base = FIXTURE[item.group][code];
+  const rows = [];
+  const day = new Date(Date.UTC(2026, 9, 28));
+  for (let i = 0; rows.length < count; i += 1) {
+    if (day.getUTCDay() % 6 !== 0) {
+      const date = day.toISOString().slice(0, 10);
+      const close = base.close * (1 + (rows.length % 5) / 100);
+      rows.push(indicatorRow(date, { ...base, close, previous_close: close * 0.99, source_date: date, high: close + 1, low: close - 1 }));
+    }
+    day.setUTCDate(day.getUTCDate() - 1);
+  }
+  return rows;
+}
+
+test('a history page has its own head, a summary, a chart, a table by month and links to the sessions', () => {
+  for (const lang of ['ko', 'en']) {
+    const usdkrw = indicator('USDKRW');
+    const series = marketIndicatorSeries(fixtureRows('USDKRW'), usdkrw);
+    const html = marketIndicatorPageHtml(SHELLS[lang], usdkrw, series, lang);
+    const self = `https://snowshagal.com${lang === 'en' ? '/en' : ''}/market/usdkrw/`;
+    const head = html.slice(0, html.indexOf('</head>'));
+    assert.equal((head.match(/<title>/g) || []).length, 1);
+    assert.ok(head.includes(`<title>${marketIndicatorTitle(usdkrw, series, lang).replace(/&/g, '&amp;')}</title>`));
+    assert.match(html, new RegExp(`<link rel="canonical" href="${self}">`));
+    assert.match(html, /hreflang="ko" href="https:\/\/snowshagal.com\/market\/usdkrw\/"/);
+    assert.match(html, /hreflang="en" href="https:\/\/snowshagal.com\/en\/market\/usdkrw\/"/);
+    assert.match(html, /"@type":"BreadcrumbList"/);
+    assert.doesNotMatch(html, /market-close\.js/);
+    const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'));
+    assert.equal((main.match(/class="indicator-stat"/g) || []).length, 6);
+    assert.match(main, /<figure class="indicator-chart">/);
+    assert.ok((main.match(/class="indicator-chart-tick"/g) || []).length >= 2);
+    assert.equal((main.match(/<rect /g) || []).length, series.length, 'one hover band per value');
+    assert.equal((main.match(/<tr>/g) || []).length - (main.match(/<thead>/g) || []).length, series.length);
+    assert.match(main, new RegExp(`href="${lang === 'en' ? '/en' : ''}/market/2026-10-28/"`));
+    assert.equal((main.match(/class="indicator-links"/g) || []).length, 1);
+    assert.equal((main.match(/<a href="(?:\/en)?\/market\/[a-z0-9]+\/">/g) || []).length >= 13, true);
+    assert.doesNotMatch(main, /href="(?:\/en)?\/market\/usdkrw\/"/, 'no link to itself');
+    if (lang === 'en') assert.doesNotMatch(main, /[ㄱ-ㆎ가-힣]/);
+  }
+});
+
+test('KRX indices list their high and low; the 10-year yield moves in basis points', () => {
+  const kospi = marketIndicatorPageHtml(SHELLS.ko, indicator('KOSPI'), marketIndicatorSeries(fixtureRows('KOSPI'), indicator('KOSPI')), 'ko');
+  assert.match(kospi, /<table class="market-table market-indicator-table with-range">/);
+  assert.match(kospi, /<th scope="col">고가<\/th><th scope="col">저가<\/th>/);
+  const us10y = marketIndicatorPageHtml(SHELLS.en, indicator('US10Y'), marketIndicatorSeries(fixtureRows('US10Y'), indicator('US10Y')), 'en');
+  assert.match(us10y, /[+−]\d+\.\dbp/);
+  assert.doesNotMatch(us10y, /<th scope="col">Change %<\/th>/);
+  assert.match(us10y, /Dates are U\.S\. trading days/);
+});
+
+test('the history route serves the page, redirects to the slash form, 404s without data and 503s when D1 hangs', async () => {
+  const rows = [row('2026-08-27'), row('2026-08-28'), row('2026-08-31', { status: 'incomplete' })];
+  let { response, passed } = await call('https://snowshagal.com/market/usdkrw/', marketDb(rows));
+  assert.equal(response.status, 200);
+  assert.equal(passed, false);
+  const html = await response.text();
+  assert.match(html, /<h1 id="market-indicator-heading">원\/달러 환율 일별 기록<\/h1>/);
+  assert.match(html, /href="\/market\/2026-08-28\/"/);
+  assert.doesNotMatch(html, /href="\/market\/2026-08-31\/"/, 'an incomplete row is not listed');
+  ({ response } = await call('https://snowshagal.com/en/market/kospi', marketDb(rows)));
+  assert.equal(response.status, 301);
+  assert.equal(response.headers.get('location'), 'https://snowshagal.com/en/market/kospi/');
+  ({ response } = await call('https://snowshagal.com/market/kospi/', marketDb([])));
+  assert.equal(response.status, 404);
+  ({ response, passed } = await call('https://snowshagal.com/market/unknown/', marketDb(rows)));
+  assert.equal(passed, true);
+  ({ response } = await call('https://snowshagal.com/market/kospi/', marketDb(rows, { hang: true }), { budgetMs: 20 }));
+  assert.equal(response.status, 503);
+});
+
+test('the sitemap lists every history page in both languages; the archive and session cards link to them', () => {
+  const xml = sitemapXml([], { marketSessions: [{ market_date: '2026-10-28', published_at: '2026-10-28T07:10:35Z' }] });
+  for (const item of MARKET_INDICATORS) {
+    assert.match(xml, new RegExp(`<loc>https://snowshagal.com/market/${item.slug}/</loc><lastmod>2026-10-28</lastmod><xhtml:link rel="alternate" hreflang="ko" href="https://snowshagal.com/market/${item.slug}/"/><xhtml:link rel="alternate" hreflang="en" href="https://snowshagal.com/en/market/${item.slug}/"/>`));
+    assert.match(xml, new RegExp(`<loc>https://snowshagal.com/en/market/${item.slug}/</loc>`));
+  }
+  const archive = marketArchivePageHtml(SHELLS.ko, [{ market_date: '2026-10-28', kospi_close: 1, kospi_pct: 0, kosdaq_close: 1, kosdaq_pct: 0, foreign_net: 0, usdkrw: 1 }], 'ko');
+  const nav = archive.slice(archive.indexOf('id="indicators"'), archive.indexOf('</nav>', archive.indexOf('id="indicators"')));
+  assert.equal((nav.match(/<a href="\/market\/[a-z0-9]+\/">/g) || []).length, 14);
+  const session = page('en');
+  for (const slug of ['kospi', 'nasdaq', 'usdkrw', 'bitcoin']) assert.match(session, new RegExp(`<a class="instrument-history-link" href="/en/market/${slug}/">`));
 });
