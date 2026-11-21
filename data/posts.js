@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-21-note-ueukqn",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-21",
+    "reportDate": "2026-11-21",
+    "registeredDate": "2026-11-21",
+    "registeredAt": "2026-11-21T08:38:28.525Z",
+    "legacyImport": false,
+    "title": "中 원격접근 규제, 엔비디아에서 줄어드는 건 매출보다 '여력'",
+    "seoTitle": "엔비디아 중국 원격접근 규제, 줄어드는 건 매출보다 여력",
+    "subtitle": "",
+    "description": "미국이 해외 데이터센터를 통한 중국 기업의 AI 칩 사용에도 허가를 요구했다. 엔비디아는 중국 데이터센터 매출을 빼고도 전망을 올렸고, 키움증권은 줄어드는 수요보다 칩을 기다리는 수요가 크다고 계산했다. 부담이 어디로 가는지 풀었다.",
+    "tags": [
+      "china",
+      "u-s-a",
+      "korea",
+      "ai",
+      "semiconductors"
+    ],
+    "readingMinutes": 18,
+    "href": "reports/20261121_Investment_Insight_Nvidia_China_Remote_Access.html",
+    "coverImage": "covers/2026-11-21-note-ueukqn.webp",
+    "shareCardImage": "covers/share/2026-11-21-note-ueukqn.jpg",
+    "coverThumbnail": "covers/2026-11-21-note-ueukqn-450.webp"
+  },
+  {
     "id": "2026-11-20-note-1kci22o",
     "type": "note",
     "typeLabel": "Investment Insights",
