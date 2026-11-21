@@ -7,7 +7,14 @@
  * Sources:
  * - KRX: Korea Exchange (KRX) annual market operational notice & KASI official calendar.
  *   2026: Fully finalized and verified (16 holidays).
- *   2027: Pending official annual publication by KRX (fail-closed / pending).
+ *   2027: The weekday public and substitute holidays of the official 2027 월력요항
+ *         (published 2026-06-29; 노동절 and 제헌절 are public holidays since 2026)
+ *         plus the 12-31 year-end closing day (16 holidays), and the 2027-01-04
+ *         10:00 delayed opening. Re-check both against KRX's year-end notice.
+ *   2028 and later: not configured, so every KRX date fails closed.
+ *   The KRX holidays and special sessions must stay identical to the publisher
+ *   core (snowshagal-market-publisher `market_dashboard/source_date_policy.py`
+ *   CALENDAR_HOLIDAYS["KRX"] and KRX_SPECIAL_SESSIONS); change both together.
  * - NYSE: New York Stock Exchange Official Holidays and Trading Hours
  *   (https://www.nyse.com/markets/hours-calendars)
  *   2026: Official schedule (10 holidays, 2 early-close sessions).
@@ -15,7 +22,7 @@
  */
 
 export const CALENDAR_SUPPORTED_YEARS = Object.freeze({
-  KRX: Object.freeze([2026]),
+  KRX: Object.freeze([2026, 2027]),
   NYSE: Object.freeze([2026, 2027])
 });
 
@@ -34,6 +41,25 @@ export const CALENDAR_HOLIDAYS = Object.freeze({
       '2026-09-24', '2026-09-25',
       '2026-10-05', '2026-10-09',
       '2026-12-25', '2026-12-31'
+    ]),
+    // KRX 2027: identical to the publisher core's list (PR #9).
+    2027: Object.freeze([
+      '2027-01-01', // 신정
+      '2027-02-08', // 설날 연휴
+      '2027-02-09', // 설날 대체공휴일
+      '2027-03-01', // 삼일절
+      '2027-05-03', // 노동절(5/1 토) 대체공휴일
+      '2027-05-05', // 어린이날
+      '2027-05-13', // 부처님오신날
+      '2027-07-19', // 제헌절(7/17 토) 대체공휴일
+      '2027-08-16', // 광복절(8/15 일) 대체공휴일
+      '2027-09-14', // 추석 연휴
+      '2027-09-15', // 추석
+      '2027-09-16', // 추석 연휴
+      '2027-10-04', // 개천절(10/3 일) 대체공휴일
+      '2027-10-11', // 한글날(10/9 토) 대체공휴일
+      '2027-12-27', // 기독탄신일(12/25 토) 대체공휴일
+      '2027-12-31'  // 연말 휴장일
     ])
   }),
   NYSE: Object.freeze({
@@ -78,7 +104,24 @@ export const HOLIDAY_NAMES = Object.freeze({
     '2026-10-05': { ko: '개천절 대체공휴일', en: 'National Foundation Day (Observed)' },
     '2026-10-09': { ko: '한글날', en: 'Hangul Day' },
     '2026-12-25': { ko: '기독탄신일 (성탄절)', en: 'Christmas Day' },
-    '2026-12-31': { ko: '연말 폐장일', en: 'Year-End Market Closing Day' }
+    '2026-12-31': { ko: '연말 폐장일', en: 'Year-End Market Closing Day' },
+    // 2027
+    '2027-01-01': { ko: '신정 (새해 첫날)', en: "New Year's Day" },
+    '2027-02-08': { ko: '설날 다음날', en: 'Lunar New Year Holiday' },
+    '2027-02-09': { ko: '설날 대체공휴일', en: 'Lunar New Year (Observed)' },
+    '2027-03-01': { ko: '삼일절', en: 'Independence Movement Day' },
+    '2027-05-03': { ko: '노동절 대체공휴일', en: 'Labor Day (Observed)' },
+    '2027-05-05': { ko: '어린이날', en: "Children's Day" },
+    '2027-05-13': { ko: '부처님오신날', en: "Buddha's Birthday" },
+    '2027-07-19': { ko: '제헌절 대체공휴일', en: 'Constitution Day (Observed)' },
+    '2027-08-16': { ko: '광복절 대체공휴일', en: 'Liberation Day (Observed)' },
+    '2027-09-14': { ko: '추석 전날', en: 'Chuseok Eve' },
+    '2027-09-15': { ko: '추석', en: 'Chuseok Day' },
+    '2027-09-16': { ko: '추석 다음날', en: 'Chuseok Holiday' },
+    '2027-10-04': { ko: '개천절 대체공휴일', en: 'National Foundation Day (Observed)' },
+    '2027-10-11': { ko: '한글날 대체공휴일', en: 'Hangul Day (Observed)' },
+    '2027-12-27': { ko: '기독탄신일 대체공휴일', en: 'Christmas Day (Observed)' },
+    '2027-12-31': { ko: '연말 폐장일', en: 'Year-End Market Closing Day' }
   }),
   NYSE: Object.freeze({
     // 2026
@@ -119,6 +162,14 @@ export const SPECIAL_SESSIONS = Object.freeze({
       session: '10:00 - 16:30',
       nameKo: '대학수학능력시험일 (1시간 순연)',
       nameEn: 'CSAT Exam Day (1h Delay: 10:00 - 16:30)'
+    },
+    // Provisional in the publisher core (KRX_PROVISIONAL_SESSIONS) until
+    // KRX's year-end notice confirms the opening time.
+    '2027-01-04': {
+      type: 'delayed_open',
+      session: '10:00 - 15:30',
+      nameKo: '증시 개장식 (개장 1시간 지연)',
+      nameEn: 'Opening Bell Ceremony (1h Delayed Open: 10:00 - 15:30)'
     }
   }),
   NYSE: Object.freeze({
@@ -383,17 +434,17 @@ export function getMonthlyTradingCalendar(year, month) {
       krx: krxSupported,
       nyse: nyseSupported
     },
-    krxPendingMessage: krxSupported ? null : 'KRX 2027 calendar pending official KRX release',
+    krxPendingMessage: krxSupported ? null : `KRX ${yearNum} calendar pending official KRX release`,
     days
   };
 }
 
 export function getUpcomingTradingEvents(fromDateStr = '2026-01-01', limit = 12) {
   const events = [];
+  // Every configured year of both markets, so a new year needs no change here.
   const allDates = new Set([
-    ...(CALENDAR_HOLIDAYS.KRX[2026] || []),
-    ...(CALENDAR_HOLIDAYS.NYSE[2026] || []),
-    ...(CALENDAR_HOLIDAYS.NYSE[2027] || []),
+    ...Object.values(CALENDAR_HOLIDAYS.KRX).flat(),
+    ...Object.values(CALENDAR_HOLIDAYS.NYSE).flat(),
     ...Object.keys(SPECIAL_SESSIONS.KRX),
     ...Object.keys(SPECIAL_SESSIONS.NYSE)
   ]);

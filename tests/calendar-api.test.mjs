@@ -49,7 +49,7 @@ test('GET /api/calendar: 2026-10 and 2026-12 queries return matching months', as
   assert.equal(dataDec.days.length, 31);
 });
 
-test('GET /api/calendar: 2027 partial market support (NYSE supported, KRX pending)', async () => {
+test('GET /api/calendar: 2027 supports both markets (KRX 2027 configured)', async () => {
   const request = new Request('https://snowshagal.com/api/calendar?year=2027&month=1');
   const response = await onRequestGet({ request, now: new Date('2026-09-01T00:00:00Z') });
   assert.equal(response.status, 200);
@@ -59,17 +59,23 @@ test('GET /api/calendar: 2027 partial market support (NYSE supported, KRX pendin
   assert.equal(data.supported, true);
   assert.equal(data.year, 2027);
   assert.equal(data.month, 1);
-  assert.equal(data.marketSupport.krx, false);
+  assert.equal(data.marketSupport.krx, true);
   assert.equal(data.marketSupport.nyse, true);
-  assert.ok(data.krxPendingMessage);
+  assert.equal(data.krxPendingMessage, null);
   assert.equal(data.days.length, 31);
 
-  // Check 2027-01-01: NYSE New Year holiday, KRX pending
+  // 2027-01-01: New Year's Day on both markets
   const jan1 = data.days.find(d => d.date === '2027-01-01');
   assert.ok(jan1);
   assert.equal(jan1.nyse.supported, true);
   assert.equal(jan1.nyse.holiday, true);
-  assert.equal(jan1.krx.supported, false);
+  assert.equal(jan1.krx.supported, true);
+  assert.equal(jan1.krx.holiday, true);
+  assert.equal(jan1.isJointClosure, true);
+  // 2027-01-04: the delayed opening
+  const jan4 = data.days.find(d => d.date === '2027-01-04');
+  assert.equal(jan4.krx.trading, true);
+  assert.equal(jan4.krx.specialSession.session, '10:00 - 15:30');
 });
 
 test('GET /api/calendar: unsupported year 2028 returns fail-closed state', async () => {

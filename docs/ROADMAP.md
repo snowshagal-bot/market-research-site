@@ -10,6 +10,15 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+- **KRX 2027 calendar (website, Draft PR, 2026-11-19)**: `functions/_trading-calendar.js`
+  now carries the publisher core's KRX 2027 list (publisher #9: 16 weekday closures, 245
+  trading days) and the 2027-01-04 10:00 delayed opening (publisher #11, provisional there).
+  Without it every 2027 KRX date throws `calendar is not configured`, so `/api/market/latest`
+  sends no expected date, the calendar shows KRX 2027 as pending and Market Close freshness
+  cannot run. Owner steps: re-check the list and the 01-04 opening time against KRX's
+  year-end notice, keep the website and core lists identical, and merge so Production has it
+  before 2027-01-01 KST (with the core's #9/#11 build installed by 12-30).
+
 - **Bing review (2026-11-19)**: Webmaster's seven short-description examples
   motivated clearer copy for the corresponding routes and locale counterparts
   (12 routes total). English HOME and the 2026-11-18 English Research No14 are

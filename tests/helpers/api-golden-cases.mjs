@@ -2,6 +2,8 @@
 // calendar logic moves into shared server helpers. The golden file
 // tests/fixtures/initial-html-api-golden.json was written by running these
 // exact cases against the handlers as they were before the refactor.
+// Its calendar section was regenerated once when KRX 2027 was configured
+// (the 2027 days and the twelfth upcoming entry changed; status and cache did not).
 export const GOLDEN_NOW = '2026-09-17T15:40:00.000Z'; // 2026-09-18 00:40 KST
 
 export const FEED_CASES = [

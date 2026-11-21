@@ -151,8 +151,12 @@ test('Weekly title states the week move, tag themes and the Monday–Friday peri
   const chuseok = extractWeeklyFacts([row('2026-09-18', 7000), row('2026-09-23', 7070)], weeklyPeriod('2026-09-25'));
   assert.equal(chuseok.closeDate, '2026-09-23');
   assert.ok(Math.abs(chuseok.pct - 1) < 1e-9);
-  // No KRX calendar for 2027 yet: no number rather than a guessed session.
-  assert.equal(extractWeeklyFacts([row('2026-12-24', 7000), row('2026-12-30', 7100)], weeklyPeriod('2027-01-01')), null);
+  // The year-end week (12-31 and 01-01 closed) ends on Wednesday 12-30; 12-25 is closed too.
+  const yearEnd = extractWeeklyFacts([row('2026-12-24', 7000), row('2026-12-30', 7100)], weeklyPeriod('2027-01-01'));
+  assert.equal(yearEnd.previousDate, '2026-12-24');
+  assert.equal(yearEnd.closeDate, '2026-12-30');
+  // No KRX calendar for 2028 yet: no number rather than a guessed session.
+  assert.equal(extractWeeklyFacts([row('2027-12-30', 7000), row('2028-01-07', 7100)], weeklyPeriod('2028-01-07')), null);
 
   const koWeekly = { type: 'weekly', lang: 'ko', reportDate: '2026-09-05', title: '받침보다 센 바람', href: 'reports/위클리_2026년 9월 1주차 위클리.html', tags: ['semiconductors', 'rates', 'policy'] };
   const enWeekly = { ...koWeekly, lang: 'en', title: 'Winds Stronger Than the Support', href: 'reports/en/2026-09-06_Korea_Weekly_Report_EN.html' };

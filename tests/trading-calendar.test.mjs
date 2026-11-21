@@ -46,9 +46,52 @@ test('2027 NYSE official holidays: all 10 designated holiday dates are non-tradi
   assert.equal(isTradingDate('2027-11-26', 'NYSE'), true);
 });
 
-test('2027 KRX holidays: fail-closed / pending while official schedule is unfinalized', () => {
-  assert.equal(isMarketYearSupported('KRX', 2027), false);
-  assert.throws(() => isTradingDate('2027-01-04', 'KRX'), /KRX trading calendar is not configured for 2027/);
+test('2027 KRX holidays: the 16 weekday closures of the publisher core, named, 245 trading days', () => {
+  assert.equal(isMarketYearSupported('KRX', 2027), true);
+  // Identical to snowshagal-market-publisher market_dashboard/source_date_policy.py
+  // CALENDAR_HOLIDAYS["KRX"][2027]; the two lists change together.
+  assert.deepEqual([...CALENDAR_HOLIDAYS.KRX[2027]], [
+    '2027-01-01', '2027-02-08', '2027-02-09', '2027-03-01',
+    '2027-05-03', '2027-05-05', '2027-05-13', '2027-07-19',
+    '2027-08-16', '2027-09-14', '2027-09-15', '2027-09-16',
+    '2027-10-04', '2027-10-11', '2027-12-27', '2027-12-31'
+  ]);
+  for (const date of CALENDAR_HOLIDAYS.KRX[2027]) {
+    const day = new Date(`${date}T00:00:00Z`).getUTCDay();
+    assert.ok(day !== 0 && day !== 6, `${date} is a weekday closure`);
+    assert.equal(isTradingDate(date, 'KRX'), false, `${date} should be non-trading for KRX`);
+    assert.ok(HOLIDAY_NAMES.KRX[date]?.ko && HOLIDAY_NAMES.KRX[date]?.en, `${date} should have KO/EN names`);
+  }
+  let trading = 0;
+  for (let date = '2027-01-01'; date <= '2027-12-31'; date = new Date(Date.parse(`${date}T00:00:00Z`) + 86400000).toISOString().slice(0, 10)) {
+    if (isTradingDate(date, 'KRX')) trading += 1;
+  }
+  assert.equal(trading, 245);
+  // Across the year end: 12-31 and 01-01 are closed, 01-04 is the first session.
+  assert.equal(isTradingDate('2027-01-04', 'KRX'), true);
+  assert.equal(previousTradingDate('2027-01-04', 'KRX'), '2026-12-30');
+  assert.equal(previousTradingDate('2027-01-01', 'KRX'), '2026-12-30');
+  // 2028 is not configured and still fails closed.
+  assert.equal(isMarketYearSupported('KRX', 2028), false);
+  assert.throws(() => isTradingDate('2028-01-03', 'KRX'), /KRX trading calendar is not configured for 2028/);
+});
+
+test('2027-01-04 delayed opening: 10:00 open, the usual close, publish and freshness boundaries', () => {
+  assert.deepEqual(SPECIAL_SESSIONS.KRX['2027-01-04'], {
+    type: 'delayed_open',
+    session: '10:00 - 15:30',
+    nameKo: '증시 개장식 (개장 1시간 지연)',
+    nameEn: 'Opening Bell Ceremony (1h Delayed Open: 10:00 - 15:30)'
+  });
+  const times = getKrxSessionTimes('2027-01-04');
+  assert.equal(times.openMinutes, 10 * 60);
+  assert.deepEqual(times, getKrxSessionTimes('2026-01-02'), 'same shape as the 2026 opening ceremony');
+  const ordinary = getKrxSessionTimes('2027-01-05');
+  assert.equal(times.closeMinutes, ordinary.closeMinutes);
+  assert.equal(times.publishEligibleMinutes, ordinary.publishEligibleMinutes);
+  assert.equal(times.freshnessGraceMinutes, ordinary.freshnessGraceMinutes);
+  assert.equal(expectedLatestKrxTradingDate(new Date('2027-01-04T07:29:00Z')), '2026-12-30'); // 16:29 KST
+  assert.equal(expectedLatestKrxTradingDate(new Date('2027-01-04T07:30:00Z')), '2027-01-04'); // 16:30 KST
 });
 
 test('Weekends are always non-trading days for both markets', () => {
@@ -128,7 +171,7 @@ test('getKrxSessionTimes and expectedLatestKrxTradingDate: CSAT day 2026-11-19 s
   assert.equal(expectedLatestKrxTradingDate(csatPostGrace), '2026-11-19');
 });
 
-test('getMonthlyTradingCalendar handles 2026 fully and 2027 per-market partial support', () => {
+test('getMonthlyTradingCalendar handles 2026 and 2027 fully and defers 2028', () => {
   // 2026: Both supported
   const cal2026 = getMonthlyTradingCalendar(2026, 9);
   assert.equal(cal2026.supported, true);
@@ -136,21 +179,28 @@ test('getMonthlyTradingCalendar handles 2026 fully and 2027 per-market partial s
   assert.equal(cal2026.marketSupport.nyse, true);
   assert.equal(cal2026.days.length, 30);
 
-  // 2027: KRX pending, NYSE supported
+  // 2027: both supported
   const cal2027 = getMonthlyTradingCalendar(2027, 1);
   assert.equal(cal2027.supported, true);
-  assert.equal(cal2027.marketSupport.krx, false);
+  assert.equal(cal2027.marketSupport.krx, true);
   assert.equal(cal2027.marketSupport.nyse, true);
-  assert.ok(cal2027.krxPendingMessage);
+  assert.equal(cal2027.krxPendingMessage, null);
   assert.equal(cal2027.days.length, 31);
 
-  // Check 2027-01-01 (NYSE New Year Holiday, KRX pending)
+  // 2027-01-01: New Year's Day on both markets
   const jan1 = cal2027.days.find(d => d.date === '2027-01-01');
   assert.ok(jan1);
   assert.equal(jan1.nyse.supported, true);
   assert.equal(jan1.nyse.holiday, true);
-  assert.equal(jan1.krx.supported, false);
-  assert.equal(jan1.krx.status, 'pending');
+  assert.equal(jan1.krx.supported, true);
+  assert.equal(jan1.krx.holiday, true);
+  assert.deepEqual(jan1.krx.name, { ko: '신정 (새해 첫날)', en: "New Year's Day" });
+  assert.equal(jan1.isJointClosure, true);
+
+  // 2027-01-04: KRX trading day with the delayed opening
+  const jan4 = cal2027.days.find(d => d.date === '2027-01-04');
+  assert.equal(jan4.krx.trading, true);
+  assert.equal(jan4.krx.specialSession.type, 'delayed_open');
 
   // 2028: Neither supported -> supported: false
   const cal2028 = getMonthlyTradingCalendar(2028, 1);
@@ -167,4 +217,13 @@ test('getUpcomingTradingEvents returns ordered upcoming closures and sessions ac
   // Events in Dec 2026 / Jan 2027
   assert.ok(events.some(e => e.date.startsWith('2026-12')));
   assert.ok(events.some(e => e.date === '2027-01-01'));
+
+  // KRX 2027 closures and sessions are listed like 2026's.
+  const january = getUpcomingTradingEvents('2027-01-01', 3);
+  assert.deepEqual(january.map(e => e.date), ['2027-01-01', '2027-01-04', '2027-01-18']);
+  assert.equal(january[0].isJointClosure, true);
+  assert.equal(january[1].krx.specialSession.type, 'delayed_open');
+  assert.ok(getUpcomingTradingEvents('2027-02-01', 12).some(e => e.date === '2027-02-08' && e.krx.holiday));
+  // Nothing is configured after 2027.
+  assert.deepEqual(getUpcomingTradingEvents('2027-12-28', 12).map(e => e.date), ['2027-12-31']);
 });

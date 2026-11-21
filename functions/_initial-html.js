@@ -1,5 +1,6 @@
 import { feedQuery, loadDisclosureFeed } from './api/disclosures/_feed-data.js';
 import { currentKstYearMonth, loadCalendarMonth } from './_calendar-data.js';
+import { isMarketYearSupported } from './_trading-calendar.js';
 import '../assets/calendar-view.js';
 const calendarView = globalThis.CALENDAR_VIEW;
 
@@ -241,9 +242,9 @@ const CALENDAR_COPY = {
     deferredNotice: '해당 연도 일정은 공식 확정 후 순차 업데이트됩니다.',
     eventsUnavailable: '시장 이벤트 일정을 일시적으로 불러오지 못했습니다.',
     eventMore: (n) => `+${n}건 더`,
-    krxPendingBanner: 'KRX(한국) 2027년 거래 일정은 한국거래소 공식 발표 후 순차 반영 예정입니다. (미국 NYSE 2027 일정 정상 제공)',
-    krxPendingOnlyBanner: 'KRX(한국) 2027년 연간 거래 일정은 한국거래소의 공식 공시 발표 후 업데이트됩니다.',
-    krxPendingStatus: 'KRX 2027 공식 일정 확정 대기'
+    krxPendingBanner: (y) => `KRX(한국) ${y}년 거래 일정은 한국거래소 공식 발표 후 순차 반영 예정입니다. (미국 NYSE ${y} 일정 정상 제공)`,
+    krxPendingOnlyBanner: (y) => `KRX(한국) ${y}년 연간 거래 일정은 한국거래소의 공식 공시 발표 후 업데이트됩니다.`,
+    krxPendingStatus: (y) => `KRX ${y} 공식 일정 확정 대기`
   },
   en: {
     weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -257,9 +258,9 @@ const CALENDAR_COPY = {
     deferredNotice: 'Schedules for this year will be updated once officially confirmed.',
     eventsUnavailable: 'Market events are temporarily unavailable.',
     eventMore: (n) => `+${n} more`,
-    krxPendingBanner: 'KRX 2027 official schedule is pending publication by KRX. (NYSE 2027 schedule is officially confirmed & provided)',
-    krxPendingOnlyBanner: 'KRX 2027 full annual schedule will be updated once officially released by Korea Exchange.',
-    krxPendingStatus: 'KRX 2027 schedule pending official release'
+    krxPendingBanner: (y) => `KRX ${y} official schedule is pending publication by KRX. (NYSE ${y} schedule is officially confirmed & provided)`,
+    krxPendingOnlyBanner: (y) => `KRX ${y} full annual schedule will be updated once officially released by Korea Exchange.`,
+    krxPendingStatus: (y) => `KRX ${y} schedule pending official release`
   }
 };
 
@@ -313,8 +314,8 @@ export function renderCalendarGrid(data, { lang, filter, eventKind = 'all' }) {
   if (filter === 'KRX' && !krxSupported) {
     return `
         <div class="calendar-detail-card" style="text-align:center;padding:40px 20px;">
-          <h3>${copy.krxPendingStatus}</h3>
-          <p style="color:var(--muted);">${copy.krxPendingOnlyBanner}</p>
+          <h3>${copy.krxPendingStatus(data.year)}</h3>
+          <p style="color:var(--muted);">${copy.krxPendingOnlyBanner(data.year)}</p>
         </div>
       `;
   }
@@ -398,7 +399,7 @@ export function renderCalendarGrid(data, { lang, filter, eventKind = 'all' }) {
   const pendingNoticeBanner = (!krxSupported && filter === 'ALL') ? `
       <div style="background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:8px;">
         <span style="font-size:14px;">ℹ️</span>
-        <span>${copy.krxPendingBanner}</span>
+        <span>${copy.krxPendingBanner(data.year)}</span>
       </div>
     ` : '';
 
@@ -434,11 +435,11 @@ export function renderUpcomingEvents(events, { lang, filter, year }) {
   });
 
   if (!filtered.length) {
-    if (filter === 'KRX' && year >= 2027) {
+    if (filter === 'KRX' && !isMarketYearSupported('KRX', year)) {
       return `
           <section class="calendar-upcoming-section">
             <h2>${copy.upcomingHeading}</h2>
-            <p style="font-size:12px;color:var(--muted);">${copy.krxPendingOnlyBanner}</p>
+            <p style="font-size:12px;color:var(--muted);">${copy.krxPendingOnlyBanner(year)}</p>
           </section>
         `;
     }

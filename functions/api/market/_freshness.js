@@ -1,5 +1,5 @@
 import {
-  CALENDAR_HOLIDAYS,
+  CALENDAR_SUPPORTED_YEARS,
   expectedLatestKrxTradingDate,
   isTradingDate,
   parseDate,
@@ -88,4 +88,5 @@ export function validateProductionFreshness(payload, now = new Date()) {
   return { passed: true, expected, actual, message: 'Production market_date is current.' };
 }
 
-export const MARKET_CALENDAR_COVERAGE = Object.freeze({ KRX: [2026], NYSE: [2026] });
+// The years functions/_trading-calendar.js configures; other years fail closed.
+export const MARKET_CALENDAR_COVERAGE = CALENDAR_SUPPORTED_YEARS;

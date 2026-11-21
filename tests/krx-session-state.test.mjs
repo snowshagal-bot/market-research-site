@@ -55,7 +55,13 @@ test('krxSessionStatus: trading, holiday and weekend around Chuseok 2026', () =>
 test('krxSessionStatus: special sessions are trading days; an unconfigured year gives no status', () => {
   assert.equal(krxSessionStatus(kst('2026-11-19')).state, 'trading'); // CSAT delayed open/close
   assert.equal(krxSessionStatus(kst('2026-01-02')).state, 'trading'); // delayed opening ceremony
-  assert.equal(krxSessionStatus(kst('2027-01-04')), null);
+  assert.deepEqual(krxSessionStatus(kst('2027-01-04')), {
+    calendarDate: '2027-01-04', state: 'trading', holidayName: null, lastTradingDate: '2027-01-04'
+  }); // 2027 opening ceremony
+  assert.deepEqual(krxSessionStatus(kst('2027-01-01')), {
+    calendarDate: '2027-01-01', state: 'holiday', holidayName: { ko: '신정 (새해 첫날)', en: "New Year's Day" }, lastTradingDate: '2026-12-30'
+  });
+  assert.equal(krxSessionStatus(kst('2028-01-04')), null);
   assert.equal(krxSessionStatus(new Date('invalid')), null);
   // New Year's Day: still a holiday, but its previous session lies in an unconfigured year.
   assert.deepEqual(krxSessionStatus(kst('2026-01-01')), {
