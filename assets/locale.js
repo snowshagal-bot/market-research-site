@@ -491,7 +491,7 @@
      - as_of is not in the future;
      - it is fresh by as_of, never retrieved_at: intraday within the
        instrument's window; final_close only for instruments the collector
-       finalises (VIX never is) and for at most four days;
+       finalises (US indices, SOX, VIX, US10Y) and for at most four days;
      - it is newer than the snapshot's own figure (as_of after the snapshot
        item's retrieved_at), so an old close never covers a newer snapshot.
      Anything else keeps the snapshot figure; one bad item affects only itself.
@@ -501,7 +501,7 @@
     DOW: { group: 'indices', intradayMinutes: 60, finalClose: true },
     SP500: { group: 'indices', intradayMinutes: 60, finalClose: true },
     SOX: { group: 'rates_fx_volatility', intradayMinutes: 60, finalClose: true },
-    VIX: { group: 'rates_fx_volatility', intradayMinutes: 60, finalClose: false },
+    VIX: { group: 'rates_fx_volatility', intradayMinutes: 60, finalClose: true },
     US10Y: { group: 'rates_fx_volatility', intradayMinutes: 60, finalClose: true },
     USDKRW: { group: 'rates_fx_volatility', intradayMinutes: 90, finalClose: false },
     JPYKRW: { group: 'rates_fx_volatility', intradayMinutes: 90, finalClose: false },

@@ -150,6 +150,64 @@ test('FX close/current and US10Y basis-point changes render without mixing value
   }
 });
 
+test('program net buys carry an explicit sign like the investor flow tables', async () => {
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+  data.program_basis.program_trading['차익'].net_buy_won = 27664238323;
+  data.program_basis.program_trading['비차익'].net_buy_won = -1186100200573;
+  data.program_basis.program_trading['전체'].net_buy_won = 0;
+  for (const [lang, rows] of [
+    ['ko', ['>차익</th><td>+277억원<', '>비차익</th><td>−1.19조원<', '>전체</th><td>0원<']],
+    ['en', ['>Arbitrage</th><td>KRW +27.7bn<', '>Non-arbitrage</th><td>KRW −1.19tn<', '>Total</th><td>KRW 0<']]
+  ]) {
+    const runtime = await marketRuntime(lang);
+    const target = { innerHTML: '' };
+    runtime.render(data, target);
+    const program = target.innerHTML.slice(target.innerHTML.indexOf('program-grid'), target.innerHTML.indexOf('basis-panel'));
+    for (const row of rows) assert.ok(program.includes(row), `${lang}: ${row}`);
+    assert.doesNotMatch(program, /-\d/, `${lang}: no ASCII hyphen as a minus sign`);
+  }
+});
+
+test('the English page shows the basis, sources and short-ratio scope in English', async () => {
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+  data.program_basis.basis.future_name = '선물(2612)';
+  data.indices.KOSPI.source = 'Npay 지수 실시간 · 정규장 스냅샷 15:31~15:39 · 최신 2개 동일';
+  data.rates_fx_volatility.USDKRW.source = '네이버 금융 하나은행 15:30 회차별 매매기준율 + Yahoo 현재가 · KRW=X';
+  for (const [state, label] of [['백워데이션', 'Backwardation'], ['콘탱고', 'Contango'], ['중립', 'Flat']]) {
+    data.program_basis.basis.market_state = state;
+    const en = await marketRuntime('en');
+    const target = { innerHTML: '' };
+    en.render(data, target);
+    const html = target.innerHTML;
+    assert.match(html, new RegExp(`<span class="state-chip">${label}</span>`));
+    assert.match(html, /<span>Futures \(2612\)<\/span>/);
+    assert.match(html, /Sources: KRX, Naver Pay index quotes, Naver Finance daily index, .*Hana Bank 15:30 reference rate \(Naver Finance\) \+ Yahoo Finance latest/);
+    assert.match(html, /Value ratio is against KRX\+NXT combined regular-session turnover\./);
+    assert.doesNotMatch(html.slice(html.indexOf('basis-panel'), html.indexOf('</section>', html.indexOf('basis-panel'))), /[ㄱ-ㆎ가-힣]/);
+    assert.doesNotMatch(html.slice(html.indexOf('market-data-note')), /[ㄱ-ㆎ가-힣]/);
+  }
+  const ko = await marketRuntime('ko');
+  const target = { innerHTML: '' };
+  ko.render(data, target);
+  assert.match(target.innerHTML, /<span>선물\(2612\)<\/span>/);
+  assert.match(target.innerHTML, /<span class="state-chip">중립<\/span>/);
+  assert.match(target.innerHTML, /데이터 출처: KRX 한국거래소, Npay 지수 실시간/);
+  assert.match(target.innerHTML, /거래대금 비중은 KRX\+NXT 합산 정규시장 거래대금 대비입니다\./);
+  // No scope note when the summary does not say it includes NXT.
+  for (const key of ['KOSPI', 'KOSDAQ']) delete data.short_selling.market_summary[key].coverage_scope;
+  const plain = { innerHTML: '' };
+  ko.render(data, plain);
+  assert.doesNotMatch(plain.innerHTML, /KRX\+NXT 합산 정규시장 거래대금 대비/);
+});
+
+test('the English company list matches the date pages for every name they share', async () => {
+  const en = await marketRuntime('en');
+  for (const [ticker, name] of [['068270', 'Celltrion'], ['012450', 'Hanwha Aerospace'], ['034020', 'Doosan Enerbility'],
+    ['042660', 'Hanwha Ocean'], ['055550', 'Shinhan Financial Group'], ['329180', 'HD Hyundai Heavy Industries']]) {
+    assert.equal(en.companyName({ ticker, name: '한글이름' }), name);
+  }
+});
+
 test('flow concentration renders TOP1 and TOP5 together', async () => {
   const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
   const runtime = await marketRuntime('en');

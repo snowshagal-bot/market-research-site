@@ -125,6 +125,21 @@ test('sections without data are left out and numbered in order; a 1.2.0 incomple
   assert.doesNotMatch(html, /class="breadth-card"/);
 });
 
+test('the source line names only the real sources, and the short ratio says it includes NXT', () => {
+  for (const [lang, source, scope] of [
+    ['ko', '데이터 출처: KRX 한국거래소, 네이버 금융, 야후 파이낸스', '거래대금 비중은 KRX+NXT 합산 정규시장 거래대금 대비입니다.'],
+    ['en', 'Sources: KRX, Naver Finance, Yahoo Finance', 'Value ratio is against KRX+NXT combined regular-session turnover.']
+  ]) {
+    const html = page(lang);
+    assert.ok(html.includes(source), lang);
+    assert.ok(html.includes(scope), lang);
+    assert.doesNotMatch(html, /Infomax|인포맥스/);
+  }
+  const data = payload();
+  for (const key of ['KOSPI', 'KOSDAQ']) delete data.short_selling.market_summary[key].coverage_scope;
+  assert.doesNotMatch(page('ko', data), /KRX\+NXT 합산 정규시장 거래대금 대비/);
+});
+
 test('every sector and theme is listed in the page, not only the top and bottom five', () => {
   const html = page('ko');
   for (const item of [...FIXTURE.krx_groups.sectors, ...FIXTURE.krx_groups.themes]) {

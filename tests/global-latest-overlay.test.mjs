@@ -90,14 +90,30 @@ test('malformed items are rejected one by one', () => {
   assert.equal(LOCALE.globalLatestItemStatus(base, 'not a time').reason, 'no_clock');
 });
 
-test('final_close: respected for up to four days, only for instruments the collector finalises; VIX never', () => {
+test('final_close: respected for up to four days, only for instruments the collector finalises', () => {
   const close = latestItem('NASDAQ', 27068.72, 26939.37, { source_date: '2026-09-25', as_of: '2026-09-25T20:00:00Z', retrieved_at: '2026-09-25T20:40:00Z', data_state: 'final_close' });
   // Friday's close through the weekend and Monday's pre-open.
   assert.equal(reasonOf(close, Date.parse('2026-09-28T13:00:00Z')), 'fresh');
   assert.equal(reasonOf(close, Date.parse('2026-09-30T00:00:00Z')), 'stale');
-  for (const code of ['VIX', 'USDKRW', 'GOLD', 'BITCOIN']) {
+  for (const code of ['USDKRW', 'GOLD', 'BITCOIN']) {
     assert.equal(reasonOf({ ...close, code }, Date.parse('2026-09-25T21:00:00Z')), 'unexpected_final_close', code);
   }
+});
+
+test('VIX: its official close (collector rule since 2026-11) replaces an older Market Close VIX', () => {
+  // 2026-11-20 as observed: Market Close carried the 11-19 VIX (retrieved 11-20 07:10Z); the
+  // collector's 11-20 close is stamped 21:15:01Z, after its 15:15 CT session end.
+  const close = latestItem('VIX', 35.89, 28.440001, { source_date: '2026-11-20', as_of: '2026-11-20T21:15:01Z', retrieved_at: '2026-11-20T21:30:03Z', data_state: 'final_close' });
+  const snapshot = { rates_fx_volatility: { VIX: { close: 28.44, source_date: '2026-11-19', retrieved_at: '2026-11-20T14:10:03.931737+07:00' } } };
+  for (const now of ['2026-11-21T10:30:00Z', '2026-11-23T06:00:00Z']) {
+    const overlay = LOCALE.globalLatestOverlay([close], snapshot, Date.parse(now));
+    assert.equal(overlay.reasons.VIX, 'fresh', now);
+    assert.equal(overlay.items.VIX.value, 35.89);
+  }
+  // The next Market Close (11-23, retrieved after the close was stamped) wins again.
+  const next = { rates_fx_volatility: { VIX: { close: 35.89, source_date: '2026-11-20', retrieved_at: '2026-11-23T14:10:03+07:00' } } };
+  assert.equal(LOCALE.globalLatestOverlay([close], next, Date.parse('2026-11-23T09:30:00Z')).reasons.VIX, 'older_than_snapshot');
+  assert.equal(reasonOf(close, Date.parse('2026-11-25T00:00:00Z')), 'stale');
 });
 
 test('an observation older than the snapshot figure never covers it', () => {
