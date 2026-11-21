@@ -13,15 +13,33 @@ import {
   previousTradingDate
 } from '../functions/_trading-calendar.js';
 
-test('2026 KRX holidays: all 16 designated holiday dates are non-trading days', () => {
+test('2026 KRX holidays: all 17 designated holiday dates are non-trading days, 244 trading days', () => {
   const krx2026 = CALENDAR_HOLIDAYS.KRX[2026];
-  assert.equal(krx2026.length, 16);
+  // Identical to snowshagal-market-publisher market_dashboard/source_date_policy.py
+  // CALENDAR_HOLIDAYS["KRX"][2026]; the two lists change together.
+  assert.deepEqual([...krx2026], [
+    '2026-01-01', '2026-02-16', '2026-02-17', '2026-02-18',
+    '2026-03-02', '2026-05-01', '2026-05-05', '2026-05-25',
+    '2026-06-03', '2026-07-17', '2026-08-17', '2026-09-24',
+    '2026-09-25', '2026-10-05', '2026-10-09', '2026-12-25',
+    '2026-12-31'
+  ]);
   for (const date of krx2026) {
     assert.equal(isTradingDate(date, 'KRX'), false, `${date} should be non-trading for KRX`);
     assert.ok(HOLIDAY_NAMES.KRX[date], `${date} should have descriptive name in HOLIDAY_NAMES.KRX`);
   }
+  let trading = 0;
+  for (let date = '2026-01-01'; date <= '2026-12-31'; date = new Date(Date.parse(`${date}T00:00:00Z`) + 86400000).toISOString().slice(0, 10)) {
+    if (isTradingDate(date, 'KRX')) trading += 1;
+  }
+  assert.equal(trading, 244);
   // Verify 2026-06-03 is 9th Nationwide Local Election Day
   assert.equal(HOLIDAY_NAMES.KRX['2026-06-03'].ko, '전국동시지방선거일');
+  // 제헌절 became a public holiday again in 2026; KRX closed every market on Friday 07-17.
+  assert.deepEqual(HOLIDAY_NAMES.KRX['2026-07-17'], { ko: '제헌절', en: 'Constitution Day' });
+  assert.equal(isTradingDate('2026-07-16', 'KRX'), true);
+  assert.equal(previousTradingDate('2026-07-20', 'KRX'), '2026-07-16');
+  assert.equal(previousTradingDate('2026-07-17', 'KRX'), '2026-07-16');
 });
 
 test('2026 NYSE holidays: all 10 designated holiday dates are non-trading days', () => {
