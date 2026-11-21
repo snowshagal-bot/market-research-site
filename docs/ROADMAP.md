@@ -10,27 +10,22 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
-- **Domestic Rates: KOFIA yields (2026-11-22, two Draft PRs)**: KTB 3Y and 10Y, corporate AA-
-  3Y and CD 91-day, the KOFIA final quote yields of the 16:00 KST basis. KOFIA computes them
-  after the Market Close record is final (16:05 KST), so they are a separate dataset
-  (`contracts/domestic_rates/`, table `market_domestic_rates`, `POST /api/market/rates/publish`,
-  `GET /api/market/rates/date`), joined to the session by date on `/market/`, the session pages
-  and four new history pages (`/market/ktb3y/`, `ktb10y`, `corpaa3y`, `cd91`). Market Close
-  records are never changed. Owner steps, in order:
-  1. Apply `migrations/comments/0003_market_domestic_rates.sql` to the Preview D1, then, on
-     approval, to Production (`docs/DEPLOYMENT.md`, "Domestic Rates on the existing D1 binding").
-     Until then both endpoints answer 503 and every page looks as before.
-  2. Merge this website PR, then the publisher PR (`snowshagal-market-publisher` #16).
-  3. Rebuild and install `시장지표 대시보드.core.exe` (back up the current core), then register
-     the task with `register_domestic_rates_task.ps1` (`시장지표-국내금리`, weekdays from
-     16:20 KST, every 15 minutes for 2 hours; each run publishes the missing days of the last
-     five KRX trading days).
-  4. Backfill: `--domestic-rates-backfill 2026-01-02 <yesterday>` as a dry run, then with
-     `--domestic-rates-publish`. The site calendar covers 2026 and 2027 only.
-  5. Check `/market/ktb3y/` and the others answer 200 and are in the sitemap, then submit them in
-     GSC and Naver.
-  Open check: on the first trading day after install, confirm when KOFIA's afternoon values
-  appear (expected shortly after 16:00 KST) and that the 16:20 run publishes that day.
+- **Domestic Rates: KOFIA yields (live in Production since 2026-11-22)**: KTB 3Y and 10Y,
+  corporate AA- 3Y and CD 91-day, the KOFIA final quote yields of the 16:00 KST basis, as a
+  dataset of their own (`contracts/domestic_rates/`, table `market_domestic_rates`), joined to the
+  session by date on `/market/`, the session pages and `/market/ktb3y/`, `ktb10y`, `corpaa3y`,
+  `cd91`. Done:
+  - migration `0003` applied to the Preview and Production D1;
+  - website #234 (99eb126) and publisher #16 (a6fa9d1) merged;
+  - core `e5a79ca6` installed (the previous `c9e4c471` kept as `core.pre-domestic-rates-20261122.exe`);
+  - task `시장지표-국내금리` registered (weekdays 16:20–18:20 KST, every 15 minutes);
+  - backfill 2026-01-02..2026-11-20 published: 217 days, KOFIA had no rows for 2026-07-17.
+  Remaining:
+  - Check the first scheduled run on 2026-11-23: KOFIA's afternoon values should appear shortly
+    after 16:00 KST and the 16:20 run should publish that day (`logs\domestic_rates.log`).
+  - Owner: submit the four pages (KO and EN) in GSC and Naver.
+  - Rollback: disable the task. If the core must go back, restore `core.pre-domestic-rates-20261122.exe`.
+    Stored days can stay; the pages read them only.
 
 - **Seven more Market Close indicators (2026-11-21)**: copper (COMEX `HG=F`), Brent, silver,
   natural gas, CNY/KRW, EUR/KRW and USD/JPY as optional codes of contract 1.2.0. Website #233
