@@ -18,6 +18,13 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   cannot run. Owner steps: re-check the list and the 01-04 opening time against KRX's
   year-end notice, keep the website and core lists identical, and merge so Production has it
   before 2027-01-01 KST (with the core's #9/#11 build installed by 12-30).
+  Calendar overhaul (2026-11-21): the 2027 list is marked provisional
+  (`CALENDAR_PROVISIONAL_YEARS.KRX` in `functions/_trading-calendar.js`), so `/api/calendar`
+  sends `marketProvisional.krx` and every KRX 2027 calendar view carries a KO/EN note that the
+  holidays follow the government calendar and that the year-end closing day and the first
+  session's opening time wait for KRX's notice. Owner step after that notice: fix the list if
+  it differs, then remove 2027 from `CALENDAR_PROVISIONAL_YEARS.KRX` (the note disappears).
+  An option expiry without a clock now reads `종일` / `All day` instead of `시간 미정`.
 
 - **Bing review (2026-11-19)**: Webmaster's seven short-description examples
   motivated clearer copy for the corresponding routes and locale counterparts
