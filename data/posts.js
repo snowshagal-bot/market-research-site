@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-21-weekly-16t22dw",
+    "type": "weekly",
+    "typeLabel": "Weekly",
+    "lang": "en",
+    "date": "2026-11-21",
+    "reportDate": "2026-11-21",
+    "registeredDate": "2026-11-21",
+    "registeredAt": "2026-11-21T11:01:08.081Z",
+    "legacyImport": false,
+    "title": "Two Rallies, Then the Deep Freeze",
+    "subtitle": "",
+    "description": "KOSPI fell 7.95% to 4,869.96 in the Nov. 16–20 week. Two rallies faded as U.S. AI stocks sold off. Next: Monday’s U.S. shock, Nov. 25 PCE, the Nov. 26 Bank of Korea decision and foreign flows.",
+    "summary": "Two rallies erased by three losing sessions · KOSPI −7.95% at 4,869.96 · Semiconductor Top 15 −11.95% · Foreign net selling KRW 4.695tn · Three questions for next week: chips, U.S. yields and foreign flows.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 8,
+    "href": "reports/en/2026-11-21_Snowshagal_Weekly_EN.html",
+    "translationGroup": "2026-11-21-weekly-1mgtaq8",
+    "coverImage": "covers/2026-11-21-weekly-16t22dw.webp",
+    "shareCardImage": "covers/share/2026-11-21-weekly-16t22dw.jpg",
+    "coverThumbnail": "covers/2026-11-21-weekly-16t22dw-450.webp"
+  },
+  {
     "id": "2026-11-21-weekly-1mgtaq8",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
