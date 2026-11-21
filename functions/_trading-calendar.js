@@ -207,6 +207,19 @@ export function shiftDate(dateString, days) {
   return date.toISOString().slice(0, 10);
 }
 
+// Years whose list is complete enough to use but not yet checked against the exchange's own
+// notice. KRX 2027: the holidays are the government's 월력요항; the 12-31 closing day and the
+// 01-04 10:00 opening follow KRX's practice and wait for its year-end notice. Remove the year
+// here once that notice has been checked (the publisher core has the same provisional mark).
+export const CALENDAR_PROVISIONAL_YEARS = Object.freeze({
+  KRX: Object.freeze([2027]),
+  NYSE: Object.freeze([])
+});
+
+export function isMarketYearProvisional(market, year) {
+  return isMarketYearSupported(market, year) && CALENDAR_PROVISIONAL_YEARS[market]?.includes(Number(year)) === true;
+}
+
 export function isMarketYearSupported(market, year) {
   const y = Number(year);
   return Array.isArray(CALENDAR_SUPPORTED_YEARS[market]) && CALENDAR_SUPPORTED_YEARS[market].includes(y);
@@ -435,6 +448,10 @@ export function getMonthlyTradingCalendar(year, month) {
       nyse: nyseSupported
     },
     krxPendingMessage: krxSupported ? null : `KRX ${yearNum} calendar pending official KRX release`,
+    marketProvisional: {
+      krx: isMarketYearProvisional('KRX', yearNum),
+      nyse: isMarketYearProvisional('NYSE', yearNum)
+    },
     days
   };
 }

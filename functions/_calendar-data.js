@@ -81,6 +81,7 @@ export async function loadCalendarMonth(env, { year, month, now = new Date() }) 
     serverDate: currentKst.date,
     marketSupport: calendarData.marketSupport,
     krxPendingMessage: calendarData.krxPendingMessage || null,
+    marketProvisional: calendarData.marketProvisional || { krx: false, nyse: false },
     days: calendarData.days,
     upcoming,
     // Events belong to the month a Seoul reader sees them in, which is not

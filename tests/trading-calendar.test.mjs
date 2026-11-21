@@ -185,6 +185,9 @@ test('getMonthlyTradingCalendar handles 2026 and 2027 fully and defers 2028', ()
   assert.equal(cal2027.marketSupport.krx, true);
   assert.equal(cal2027.marketSupport.nyse, true);
   assert.equal(cal2027.krxPendingMessage, null);
+  // Usable, but still waiting for KRX's year-end notice; 2026 and NYSE are confirmed.
+  assert.deepEqual(cal2027.marketProvisional, { krx: true, nyse: false });
+  assert.deepEqual(cal2026.marketProvisional, { krx: false, nyse: false });
   assert.equal(cal2027.days.length, 31);
 
   // 2027-01-01: New Year's Day on both markets

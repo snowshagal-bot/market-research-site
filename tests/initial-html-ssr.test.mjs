@@ -245,6 +245,14 @@ test('KRX 2027 renders its holidays and the 01-04 opening; a deferred year rende
   const enGrid = innerById(krxOnly.html, 'calendar-grid-mount');
   assert.doesNotMatch(enGrid, /schedule pending official release/);
   assert.match(enGrid, /KRX New Year&#39;s Day|KRX New Year's Day/);
+  // 2027 comes from the government calendar before KRX's own notice: the page says so, in both
+  // languages, on every view that shows KRX; 2026 (confirmed) and the NYSE-only view do not.
+  assert.match(koGrid, /class="calendar-provisional-note"[\s\S]*KRX\(한국\) 2027년 휴장일은 정부 월력요항 기준 잠정 일정입니다\./);
+  assert.match(enGrid, /KRX 2027 holidays follow the government’s official 2027 calendar and are provisional\./);
+  const nyse2027 = await page('/calendar/?year=2027&month=1&market=NYSE');
+  assert.doesNotMatch(innerById(nyse2027.html, 'calendar-grid-mount'), /calendar-provisional-note/);
+  const ko2026 = await page('/calendar/?year=2026&month=12');
+  assert.doesNotMatch(innerById(ko2026.html, 'calendar-grid-mount'), /calendar-provisional-note/);
   const feb = await page('/en/calendar/?year=2027&month=2&market=KRX');
   assert.match(innerById(feb.html, 'calendar-grid-mount'), /KRX Lunar New Year \(Observed\)/);
 

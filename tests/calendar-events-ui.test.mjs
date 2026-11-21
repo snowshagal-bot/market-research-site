@@ -336,9 +336,20 @@ test('a Korean event shows one clock, because there is only one', async () => {
 });
 
 test('an event with no time says so rather than inventing one', async () => {
-  const { get } = await render({ payload: payloadFor([expiry]) });
+  // A scheduled release whose hour is not published yet (the Fed lists next year's meetings by date only).
+  const undated = { ...fomc, id: 'official:fomc:2026-09-10', source: { date: '2026-09-10', time: null, timezone: 'America/New_York' },
+    display: { date: '2026-09-10', time: null, timezone: 'Asia/Seoul', shifted: false } };
+  const { get } = await render({ payload: payloadFor([undated]) });
   await get('calendar-grid-mount').fire('click', { target: { closest: () => ({ dataset: { date: '2026-09-10' } }) } });
   assert.match(get('calendar-day-detail-mount').innerHTML, /시간 미정/);
+});
+
+test('an option expiry is a dated event: all day, not a time still to be confirmed', async () => {
+  const { get } = await render({ payload: payloadFor([expiry]) });
+  await get('calendar-grid-mount').fire('click', { target: { closest: () => ({ dataset: { date: '2026-09-10' } }) } });
+  const detail = get('calendar-day-detail-mount').innerHTML;
+  assert.match(detail, /<span class="cal-event-time">종일<\/span>/);
+  assert.doesNotMatch(detail, /시간 미정/);
 });
 
 test('a withdrawn event is shown in the detail, marked as withdrawn', async () => {

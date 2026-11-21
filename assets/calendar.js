@@ -34,6 +34,7 @@
     eventsNone: '등록된 시장 이벤트가 없습니다.',
     eventMore: (n) => `+${n}건 더`,
     eventAllDay: '시간 미정',
+    eventDated: '종일',
     eventLocalTime: (value) => `현지 ${value}`,
     eventCancelled: '취소됨',
     eventChanged: '일정 변경',
@@ -47,7 +48,8 @@
     },
     krxPendingBanner: (y) => `KRX(한국) ${y}년 거래 일정은 한국거래소 공식 발표 후 순차 반영 예정입니다. (미국 NYSE ${y} 일정 정상 제공)`,
     krxPendingOnlyBanner: (y) => `KRX(한국) ${y}년 연간 거래 일정은 한국거래소의 공식 공시 발표 후 업데이트됩니다.`,
-    krxPendingStatus: (y) => `KRX ${y} 공식 일정 확정 대기`
+    krxPendingStatus: (y) => `KRX ${y} 공식 일정 확정 대기`,
+    krxProvisionalBanner: (y) => `KRX(한국) ${y}년 휴장일은 정부 월력요항 기준 잠정 일정입니다. 연말 폐장일과 첫 거래일 개장 시각은 한국거래소 공지 후 확정됩니다.`
   } : {
     title: 'MARKET CALENDAR',
     subtitle: 'KRX · NYSE Trading Schedule',
@@ -82,6 +84,7 @@
     eventsNone: 'No market events scheduled.',
     eventMore: (n) => `+${n} more`,
     eventAllDay: 'Time TBC',
+    eventDated: 'All day',
     eventLocalTime: (value) => value,
     eventCancelled: 'Cancelled',
     eventChanged: 'Rescheduled',
@@ -95,7 +98,8 @@
     },
     krxPendingBanner: (y) => `KRX ${y} official schedule is pending publication by KRX. (NYSE ${y} schedule is officially confirmed & provided)`,
     krxPendingOnlyBanner: (y) => `KRX ${y} full annual schedule will be updated once officially released by Korea Exchange.`,
-    krxPendingStatus: (y) => `KRX ${y} schedule pending official release`
+    krxPendingStatus: (y) => `KRX ${y} schedule pending official release`,
+    krxProvisionalBanner: (y) => `KRX ${y} holidays follow the government’s official ${y} calendar and are provisional. The year-end closing day and the first session’s opening time will be confirmed by the Korea Exchange notice.`
   };
 
   function getDefaultKstYearMonth() {
@@ -311,7 +315,8 @@
 
   function eventTimeLabel(event) {
     const shown = event.display?.time;
-    if (!shown) return copy.eventAllDay;
+    // An option expiry is a date with no clock of its own; anything else is still to be confirmed.
+    if (!shown) return event.category === 'derivatives_expiry' ? copy.eventDated : copy.eventAllDay;
     return `${shown} ${zoneLabel(event.display?.timezone)}`;
   }
 
@@ -449,6 +454,14 @@
       `;
     }
 
+    // A KRX year taken from the government calendar before the exchange's own notice says so.
+    const provisionalNoticeBanner = (data.marketProvisional?.krx && state.filter !== 'NYSE') ? `
+        <div class="calendar-provisional-note" role="note" style="background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:8px;">
+        <span style="font-size:14px;">ℹ️</span>
+        <span>${copy.krxProvisionalBanner(data.year)}</span>
+      </div>
+      ` : '';
+
     const pendingNoticeBanner = (!krxSupported && state.filter === 'ALL') ? `
       <div style="background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:8px;">
         <span style="font-size:14px;">ℹ️</span>
@@ -458,6 +471,7 @@
 
     gridMount.innerHTML = `
       ${pendingNoticeBanner}
+      ${provisionalNoticeBanner}
       <div class="calendar-card">
         <div class="calendar-weekdays-row">
           ${weekdaysHtml}
