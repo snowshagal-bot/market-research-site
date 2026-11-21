@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-22-note-1xks8h1",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-22",
+    "reportDate": "2026-11-22",
+    "registeredDate": "2026-11-22",
+    "registeredAt": "2026-11-21T16:27:30.594Z",
+    "legacyImport": false,
+    "title": "국민연금은 왜 안 사나: 매수는 '의무'가 아니라 '재량'이다",
+    "seoTitle": "국민연금은 왜 코스피를 안 사나: 매수는 재량이다",
+    "subtitle": "",
+    "description": "코스피 급락에 국민연금 매수 기대가 커졌지만 연기금은 11월 16일 5년 2개월 만에 가장 많이 팔았다. 국내주식 목표 비중 20.8%와 비공개 허용범위, '실탄' 추정이 16조~101조원으로 갈리는 이유를 규칙과 숫자로 풀었다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "volatility",
+      "national-pension-service"
+    ],
+    "readingMinutes": 11,
+    "href": "reports/20261122_Investment_Insight_NPS_KOSPI_Buying_Power.html",
+    "coverImage": "covers/2026-11-22-note-1xks8h1.webp",
+    "shareCardImage": "covers/share/2026-11-22-note-1xks8h1.jpg",
+    "coverThumbnail": "covers/2026-11-22-note-1xks8h1-450.webp"
+  },
+  {
     "id": "2026-11-21-weekly-16t22dw",
     "type": "weekly",
     "typeLabel": "Weekly",

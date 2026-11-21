@@ -328,5 +328,11 @@ window.TAG_REGISTRY = {
     "en": "Game",
     "group": "sector",
     "custom": true
+  },
+  "national-pension-service": {
+    "ko": "국민연금",
+    "en": "National Pension Service",
+    "group": "macro",
+    "custom": true
   }
 };
