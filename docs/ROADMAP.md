@@ -10,6 +10,16 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+- **Seven more Market Close indicators (2026-11-21, two Draft PRs)**: copper (COMEX `HG=F`),
+  Brent, silver, natural gas, CNY/KRW and EUR/KRW (Hana Bank 15:30 fixing) and USD/JPY, as
+  optional codes of contract 1.2.0. Rollout order matters: merge the website PR first (its
+  receiver accepts the new keys; until then a payload carrying them is rejected as unknown
+  fields), then the publisher PR, then rebuild and install `시장지표 대시보드.core.exe`
+  (back up the current core first). The first export after that install carries the seven;
+  check that day's `/market/`, `/market/{date}/`, and that `/market/copper/` and the others
+  answer 200 and appear in the sitemap. Then submit the new indicator URLs in GSC and Naver
+  (Naver needs manual crawl requests). Days before the install stay without the seven, by design.
+
 - **KRX 2027 calendar (website, Draft PR, 2026-11-19)**: `functions/_trading-calendar.js`
   now carries the publisher core's KRX 2027 list (publisher #9: 16 weekday closures, 245
   trading days) and the 2027-01-04 10:00 delayed opening (publisher #11, provisional there).

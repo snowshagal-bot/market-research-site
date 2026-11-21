@@ -122,7 +122,7 @@ test('Market renderer covers every contract section without inventing an intrada
   assert.match(script, /ratioPct/);
   assert.match(script, /value \* 1e9/);
   assert.match(script, /data_state === 'intraday'/);
-  assert.match(script, /key === 'USDKRW' \|\| key === 'JPYKRW'/);
+  assert.match(script, /const FIXING_CODES = \['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW'\]/);
   assert.doesNotMatch(script, /LME|canvas|getContext|chart\.js|highcharts|plotly/i);
 });
 
