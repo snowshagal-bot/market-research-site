@@ -1,5 +1,29 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-22-basics-1rhe030",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-11-22",
+    "reportDate": "2026-11-22",
+    "registeredDate": "2026-11-22",
+    "registeredAt": "2026-11-21T20:17:35.216Z",
+    "legacyImport": false,
+    "title": "반대매매는 언제, 얼마에 나가나",
+    "seoTitle": "반대매매·담보유지비율 뜻: 반대매매는 언제, 얼마에 나가나",
+    "subtitle": "",
+    "description": "담보가 200만 원 모자랐는데 3,000만 원어치 주식이 팔렸다. 신용으로 산 주식은 장 마감 담보비율이 기준 아래로 내려가고 기한까지 못 채우면 이틀 뒤 아침 동시호가에 팔린다. 담보비율 계산, 반대매매 수량이 모자란 돈보다 커지는 이유, 140% 규정이 잠시 풀린 지금 확인할 것을 퀴즈와 계산기로 정리했다.",
+    "tags": [
+      "market-basic",
+      "liquidity"
+    ],
+    "readingMinutes": 9,
+    "href": "reports/basics-20-margin-call.html",
+    "coverImage": "covers/2026-11-22-basics-1rhe030.webp",
+    "shareCardImage": "covers/share/2026-11-22-basics-1rhe030.jpg",
+    "coverThumbnail": "covers/2026-11-22-basics-1rhe030-450.webp"
+  },
+  {
     "id": "2026-11-22-note-104q2uf",
     "type": "note",
     "typeLabel": "Investment Insights",
