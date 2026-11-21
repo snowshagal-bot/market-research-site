@@ -193,7 +193,18 @@
     if (rawName && !/[\u3131-\u318e\uac00-\ud7a3]/i.test(rawName)) return rawName;
     return ticker || '--';
   };
-  const instrumentName = (key, item) => ko ? (item?.name || key) : (names[key] || key);
+  // The 1W/1M aggregate carries no display name, so the Korean page needs its own (the TODAY
+  // payload's names, the same words).
+  const namesKo = {
+    KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥 종합', DOW: '다우존스', SP500: 'S&P 500', SOX: '필라델피아 반도체',
+    VIX: 'VIX 변동성', US10Y: '미국 국채 10년', USDKRW: '원/달러', JPYKRW: '원/100엔', DXY: '달러인덱스',
+    WTI: 'WTI 원유', GOLD: '금 선물', BITCOIN: '비트코인'
+  };
+  const instrumentName = (key, item) => ko ? (item?.name || namesKo[key] || key) : (names[key] || key);
+  const groupName = item => {
+    const locale = root.MARKET_LOCALE;
+    return locale && typeof locale.krxGroupName === 'function' ? locale.krxGroupName(item, ko ? 'ko' : 'en') : String(item?.name || '');
+  };
   const valueUnit = (key, value) => {
     if (!valid(value)) return '--';
     if (key === 'US10Y') return `${number(value, 3)}%`;
@@ -834,7 +845,7 @@
             ${items.map(it => `
               <li>
                 <span>
-                  <b>${html(it.name)}</b>
+                  <b>${html(groupName(it))}</b>
                   ${it.market ? `<small>${html(it.market)}</small>` : ''}
                 </span>
                 <strong class="${signClass(it.return_pct)}">${signed(it.return_pct, 2)}%</strong>
@@ -905,7 +916,7 @@
       <div id="market-dashboard-view" class="market-wrap market-dashboard market-range-dashboard">
         ${section('01', ko ? '주요 지수' : 'Major Indices', `
           <div class="range-items-grid">
-            ${['KOSPI', 'KOSDAQ', 'NASDAQ', 'SP500', 'SOX'].map(k => k === 'SOX' ? renderRangeInstrumentRow(k, rates[k]) : renderRangeInstrumentRow(k, indices[k])).join('')}
+            ${['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500', 'SOX'].map(k => k === 'SOX' ? renderRangeInstrumentRow(k, rates[k]) : renderRangeInstrumentRow(k, indices[k])).join('')}
           </div>`)}
         <div class="market-pair">
           ${section('02', ko ? '금리 · 환율 · 변동성' : 'Rates · FX · Volatility', `
