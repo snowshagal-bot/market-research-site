@@ -99,20 +99,19 @@ test('adjustment walks back over a run of closed days, never forward', () => {
 /* ------------------------------------------- a year we cannot vouch for */
 
 test('an unconfigured year produces nothing rather than a guess', () => {
-  // KRX holidays are only checked in for 2026; 2027 is not published yet.
-  assert.equal(krxMonthlyExpiry(2027, 1), null);
+  // KRX and NYSE holidays are checked in for 2026 and 2027, not beyond.
+  assert.equal(krxMonthlyExpiry(2028, 1), null);
   assert.equal(krxMonthlyExpiry(2030, 5), null);
-  // NYSE is configured through 2027 but not beyond.
   assert.ok(usMonthlyExpiry(2027, 1));
   assert.equal(usMonthlyExpiry(2028, 1), null);
 });
 
-test('a month in an unconfigured year yields only the market that is known', () => {
-  const events2027 = monthlyExpiryEvents(2027, 9);
-  assert.deepEqual(events2027.map(e => e.market), ['US'], 'KRX 2027 is unknown, so it is absent');
-
-  const events2028 = monthlyExpiryEvents(2028, 9);
-  assert.deepEqual(events2028, [], 'neither market is configured that far out');
+test('KRX 2027 expiries follow the 2027 calendar', () => {
+  assert.deepEqual(krxMonthlyExpiry(2027, 1), { date: '2027-01-14', scheduledDate: '2027-01-14', adjusted: false, market: 'KRX' });
+  // The second Thursday of May 2027 is Buddha's Birthday, so expiry moves to Wednesday.
+  assert.deepEqual(krxMonthlyExpiry(2027, 5), { date: '2027-05-12', scheduledDate: '2027-05-13', adjusted: true, market: 'KRX' });
+  assert.deepEqual(monthlyExpiryEvents(2027, 9).map(e => e.market), ['KR', 'US']);
+  assert.deepEqual(monthlyExpiryEvents(2028, 9), [], 'neither market is configured that far out');
 });
 
 /* ------------------------------------------------------- the event shape */

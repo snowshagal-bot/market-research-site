@@ -210,9 +210,13 @@ html[data-theme="dark"] {
   overflow: hidden;
 }
 
+/* Both rows use minmax(0, 1fr), not 1fr. A bare 1fr track has an automatic
+   minimum, so a long holiday name widened its day column and the days stopped
+   lining up under the weekday row. Long names are cut inside the cell instead;
+   the full name stays in the tag's title and the day detail card. */
 .calendar-weekdays-row {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   border-bottom: 1px solid var(--line);
   background: var(--panel-2);
   text-align: center;
@@ -233,10 +237,11 @@ html[data-theme="dark"] {
 
 .calendar-days-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
 .calendar-day-cell {
+  min-width: 0;
   min-height: 105px;
   border-right: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
   border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
@@ -303,6 +308,7 @@ html[data-theme="dark"] {
   flex-direction: column;
   gap: 3px;
   flex: 1;
+  min-width: 0;
 }
 
 .cal-tag {
@@ -454,9 +460,18 @@ html[data-theme="dark"] {
   .day-number {
     font-size: 11px;
   }
+  /* A phone-width cell is about 45px, so one line shows little past the
+     KRX/NYSE prefix. Let the name take a second line, then cut it. */
   .cal-tag {
     font-size: 8px;
     padding: 1px 3px;
+    white-space: normal;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
 }
 

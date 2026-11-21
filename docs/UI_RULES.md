@@ -142,6 +142,12 @@ The homepage supports light/dark theme state. New site-level surfaces should con
 
 Report contents themselves are not forcibly recolored by the site. Their original visual design should remain intact. Shared report navigation and comments can use a consistent site-controlled surface.
 
+## Market calendar grid
+
+- the weekday row and the day grid both use `repeat(7, minmax(0, 1fr))` (`assets/calendar.css`). A bare `1fr` lets a long holiday name widen its column, so the days stop lining up under the weekday row;
+- a holiday or event tag is cut inside its cell: one line with an ellipsis on desktop, at most two lines on screens up to 760px. The full name stays in the tag's `title` and the day detail card;
+- after a calendar change, check KO and EN at 360–430px and 1280px+ on months with long names (for example 2026-09, 2026-12, 2027-12): equal columns under the weekday row, no tag outside its cell, no page overflow.
+
 ## Things not to add without explicit request
 
 - view counts

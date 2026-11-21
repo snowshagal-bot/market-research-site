@@ -81,8 +81,14 @@ test('/api/market/latest sends x-market-expected-date without changing the paylo
   assert.equal(revalidated.status, 304);
   assert.equal(revalidated.headers.get('x-market-expected-date'), '2026-09-17');
 
+  // The 2027-01-04 delayed opening keeps the usual 16:05 publish boundary.
+  const openingBefore = await latestRequest({ request: new Request('https://snowshagal.com/api/market/latest'), env, now: kst('2027-01-04T16:04') });
+  assert.equal(openingBefore.headers.get('x-market-expected-date'), '2026-12-30');
+  const openingAfter = await latestRequest({ request: new Request('https://snowshagal.com/api/market/latest'), env, now: kst('2027-01-04T16:05') });
+  assert.equal(openingAfter.headers.get('x-market-expected-date'), '2027-01-04');
+
   // A year outside the configured KRX calendar sends no expectation at all.
-  const unsupported = await latestRequest({ request: new Request('https://snowshagal.com/api/market/latest'), env, now: kst('2027-01-05T17:00') });
+  const unsupported = await latestRequest({ request: new Request('https://snowshagal.com/api/market/latest'), env, now: kst('2028-01-05T17:00') });
   assert.equal(unsupported.status, 200);
   assert.equal(unsupported.headers.get('x-market-expected-date'), null);
 
