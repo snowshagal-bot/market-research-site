@@ -685,7 +685,8 @@ function calculateReadingMinutes(html, lang = 'ko', type = 'daily') {
 function validateEditableFields(form) {
   const type = String(form.get("type") || "");
   const reportDate = String(form.get("reportDate") || "");
-  const title = String(form.get("title") || "").trim();
+  // No invisible formatting characters in a stored title (as at publish).
+  const title = String(form.get("title") || "").replace(/[\u200B-\u200D\uFEFF\u2060]/g, "").trim();
   if (!TYPE_LABELS[type]) return { error: "지원하지 않는 카테고리입니다." };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(reportDate)) return { error: "리포트 날짜를 확인해 주세요." };
   if (!title) return { error: "제목을 입력해 주세요." };
@@ -709,7 +710,7 @@ function validateEditableFields(form) {
     type,
     reportDate,
     title,
-    subtitle: String(form.get("subtitle") || "").trim(),
+    subtitle: String(form.get("subtitle") || "").replace(/[\u200B-\u200D\uFEFF\u2060]/g, "").trim(),
     description: String(form.get("description") || "").trim(),
     summaryProvided: form.has("summary"),
     summary: globalThis.REPORT_METADATA.normalizeMetadataText(form.get("summary")).slice(0, 500).trim(),
