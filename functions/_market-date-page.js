@@ -231,8 +231,8 @@ const COPY = {
   }
 };
 
-const INDEX_NAMES_EN = { KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones', SP500: 'S&P 500', SOX: 'Philadelphia Semiconductor', VIX: 'VIX', US10Y: 'US 10Y', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW (100)', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', BITCOIN: 'Bitcoin', CNYKRW: 'CNY/KRW', EURKRW: 'EUR/KRW', USDJPY: 'USD/JPY', BRENT: 'Brent Crude', NATGAS: 'Natural Gas', SILVER: 'Silver', COMEX_COPPER: 'Copper', KTB3Y: 'KTB 3Y', KTB10Y: 'KTB 10Y', CORPAA3Y: 'Corporate AA- 3Y', CD91: 'CD 91-day' };
-const INDEX_NAMES_KO = { KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥 종합', DOW: '다우존스', SP500: 'S&P 500', SOX: '필라델피아 반도체', VIX: 'VIX', US10Y: '미국 국채 10년', USDKRW: '원/달러', JPYKRW: '원/엔(100엔)', DXY: '달러 인덱스', WTI: 'WTI 원유', GOLD: '금', BITCOIN: '비트코인', CNYKRW: '원/위안', EURKRW: '원/유로', USDJPY: '엔/달러', BRENT: '브렌트유', NATGAS: '천연가스', SILVER: '은', COMEX_COPPER: '구리', KTB3Y: '국고채 3년', KTB10Y: '국고채 10년', CORPAA3Y: '회사채 AA- 3년', CD91: 'CD 91일' };
+const INDEX_NAMES_EN = { KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones', SP500: 'S&P 500', SOX: 'Philadelphia Semiconductor', VIX: 'VIX', VKOSPI: 'VKOSPI', US10Y: 'US 10Y', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW (100)', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', BITCOIN: 'Bitcoin', CNYKRW: 'CNY/KRW', EURKRW: 'EUR/KRW', USDJPY: 'USD/JPY', BRENT: 'Brent Crude', NATGAS: 'Natural Gas', SILVER: 'Silver', COMEX_COPPER: 'Copper', KTB3Y: 'KTB 3Y', KTB10Y: 'KTB 10Y', CORPAA3Y: 'Corporate AA- 3Y', CD91: 'CD 91-day' };
+const INDEX_NAMES_KO = { KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥 종합', DOW: '다우존스', SP500: 'S&P 500', SOX: '필라델피아 반도체', VIX: 'VIX', VKOSPI: 'VKOSPI', US10Y: '미국 국채 10년', USDKRW: '원/달러', JPYKRW: '원/엔(100엔)', DXY: '달러 인덱스', WTI: 'WTI 원유', GOLD: '금', BITCOIN: '비트코인', CNYKRW: '원/위안', EURKRW: '원/유로', USDJPY: '엔/달러', BRENT: '브렌트유', NATGAS: '천연가스', SILVER: '은', COMEX_COPPER: '구리', KTB3Y: '국고채 3년', KTB10Y: '국고채 10년', CORPAA3Y: '회사채 AA- 3년', CD91: 'CD 91일' };
 const KRX_COMPANY_NAMES_EN = {
   '000660': 'SK hynix', '005380': 'Hyundai Motor', '005930': 'Samsung Electronics', '005935': 'Samsung Electronics Pref.',
   '009150': 'Samsung Electro-Mechanics', '012450': 'Hanwha Aerospace', '028260': 'Samsung C&T', '034020': 'Doosan Enerbility',
@@ -525,7 +525,7 @@ export function renderMarketDateMain(payload, lang, context = {}) {
     </nav>`;
 
   const majorCards = ['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500'].filter(key => indices[key]).map(key => instrumentCard(key, indices[key], f, copy, lang, true)).join('');
-  const rateCards = ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY', 'US10Y', 'VIX', 'SOX'].filter(key => rates[key]).map(key => instrumentCard(key, rates[key], f, copy, lang, false)).join('');
+  const rateCards = ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY', 'US10Y', 'VIX', 'VKOSPI', 'SOX'].filter(key => rates[key]).map(key => instrumentCard(key, rates[key], f, copy, lang, false)).join('');
   const commodityCards = ['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER', 'BITCOIN'].filter(key => commodities[key]).map(key => instrumentCard(key, commodities[key], f, copy, lang, false)).join('');
 
   const fiveStatus = status.five_day_flows;
@@ -1146,7 +1146,7 @@ export async function loadMarketSectors(env, { budgetMs = MARKET_DATE_TIME_BUDGE
 const INDICATOR_NAMES = {
   ko: {
     KOSPI: '코스피 지수', KOSDAQ: '코스닥 지수', NASDAQ: '나스닥 종합지수', DOW: '다우존스 지수', SP500: 'S&P 500 지수',
-    SOX: '필라델피아 반도체지수', VIX: 'VIX 변동성지수', US10Y: '미국 국채 10년물 금리', USDKRW: '원/달러 환율',
+    SOX: '필라델피아 반도체지수', VIX: 'VIX 변동성지수', VKOSPI: 'VKOSPI(코스피200 변동성지수)', US10Y: '미국 국채 10년물 금리', USDKRW: '원/달러 환율',
     JPYKRW: '원/엔 환율(100엔)', DXY: '달러인덱스', WTI: 'WTI 유가', GOLD: '금 선물 가격', BITCOIN: '비트코인 가격',
     CNYKRW: '원/위안 환율', EURKRW: '원/유로 환율', USDJPY: '엔/달러 환율', BRENT: '브렌트유 가격', NATGAS: '천연가스 선물 가격',
     SILVER: '은 선물 가격', COMEX_COPPER: '구리 선물 가격',
@@ -1154,7 +1154,7 @@ const INDICATOR_NAMES = {
   },
   en: {
     KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones Industrial Average', SP500: 'S&P 500',
-    SOX: 'PHLX Semiconductor Index (SOX)', VIX: 'VIX Volatility Index', US10Y: 'US 10-Year Treasury Yield', USDKRW: 'USD/KRW Exchange Rate',
+    SOX: 'PHLX Semiconductor Index (SOX)', VIX: 'VIX Volatility Index', VKOSPI: 'VKOSPI (KOSPI 200 Volatility Index)', US10Y: 'US 10-Year Treasury Yield', USDKRW: 'USD/KRW Exchange Rate',
     JPYKRW: 'JPY/KRW Exchange Rate (per 100 yen)', DXY: 'US Dollar Index (DXY)', WTI: 'WTI Crude Oil', GOLD: 'Gold Futures', BITCOIN: 'Bitcoin',
     CNYKRW: 'CNY/KRW Exchange Rate', EURKRW: 'EUR/KRW Exchange Rate', USDJPY: 'USD/JPY Exchange Rate', BRENT: 'Brent Crude Oil',
     NATGAS: 'Natural Gas Futures', SILVER: 'Silver Futures', COMEX_COPPER: 'Copper Futures (COMEX)',
@@ -1173,10 +1173,11 @@ const INDICATOR_COPY = {
   ko: {
     eyebrow: 'MARKET CLOSE · 지표별 기록',
     heading: name => `${name} 일별 기록`,
-    noun: { krx: '일별 종가', us: '일별 종가', fx: '일별 기록', snapshot: '일별 기록', rate: '일별 기록', kofia: '일별 기록' },
-    valueLabel: { krx: '종가', us: '종가', fx: '15:30 환율', snapshot: '기록 시세', rate: '수익률', kofia: '수익률' },
+    noun: { krx: '일별 종가', krxvol: '일별 종가', us: '일별 종가', fx: '일별 기록', snapshot: '일별 기록', rate: '일별 기록', kofia: '일별 기록' },
+    valueLabel: { krx: '종가', krxvol: '종가', us: '종가', fx: '15:30 환율', snapshot: '기록 시세', rate: '수익률', kofia: '수익률' },
     basis: {
       krx: 'KRX 정규장 15:30 종가 기준 · 매 거래일 마감 후 갱신',
+      krxvol: 'KRX 파생상품 정규장 15:45 마감 종가(코스피200 옵션 기준) · 매 거래일 마감 후 갱신',
       us: '미국 정규장 종가 · 날짜는 미국 거래일 · 한국 증시 마감 기록에 담긴 값',
       fx: '15:30 KST 매매기준율(하나은행, 네이버 금융) · 매 거래일 갱신',
       snapshot: '한국 증시 마감 직후(오후 4시 무렵 KST) 시세 · 변동은 직전 기록 대비',
@@ -1206,10 +1207,11 @@ const INDICATOR_COPY = {
   en: {
     eyebrow: 'MARKET CLOSE · INDICATOR HISTORY',
     heading: name => `${name}: Daily History`,
-    noun: { krx: 'Daily Close', us: 'Daily Close', fx: 'History', snapshot: 'History', rate: 'History', kofia: 'History' },
-    valueLabel: { krx: 'Close', us: 'Close', fx: '15:30 rate', snapshot: 'Recorded price', rate: 'Yield', kofia: 'Yield' },
+    noun: { krx: 'Daily Close', krxvol: 'Daily Close', us: 'Daily Close', fx: 'History', snapshot: 'History', rate: 'History', kofia: 'History' },
+    valueLabel: { krx: 'Close', krxvol: 'Close', us: 'Close', fx: '15:30 rate', snapshot: 'Recorded price', rate: 'Yield', kofia: 'Yield' },
     basis: {
       krx: 'KRX regular-session close, 15:30 KST · Updated after every session',
+      krxvol: 'KRX derivatives-session close, 15:45 KST (from KOSPI 200 options) · Updated after every session',
       us: 'U.S. regular-session close · Dates are U.S. trading days · As carried by the Korea close record',
       fx: '15:30 KST reference rate (Hana Bank, via Naver Finance) · Updated every session',
       snapshot: 'Quote shortly after the Korea close (around 16:00 KST) · Change against the previous record',
@@ -1240,8 +1242,8 @@ const INDICATOR_COPY = {
 
 // Short names for titles ("원/달러 환율", "USD/KRW").
 const INDICATOR_SHORT_NAMES = {
-  ko: { ...INDICATOR_NAMES.ko, KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥', DOW: '다우존스', SP500: 'S&P 500', VIX: 'VIX', JPYKRW: '원/엔 환율', GOLD: '금 선물', BITCOIN: '비트코인', BRENT: '브렌트유', NATGAS: '천연가스', SILVER: '은 선물', COMEX_COPPER: '구리 선물', KTB3Y: '국고채 3년 금리', KTB10Y: '국고채 10년 금리', CORPAA3Y: '회사채 AA- 3년 금리', CD91: 'CD 91일 금리' },
-  en: { ...INDICATOR_NAMES.en, NASDAQ: 'NASDAQ', DOW: 'Dow Jones', SOX: 'SOX', VIX: 'VIX', US10Y: 'US 10Y Yield', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', CNYKRW: 'CNY/KRW', EURKRW: 'EUR/KRW', USDJPY: 'USD/JPY', BRENT: 'Brent Crude', NATGAS: 'Natural Gas', SILVER: 'Silver', COMEX_COPPER: 'Copper', KTB3Y: 'KTB 3Y Yield', KTB10Y: 'KTB 10Y Yield', CORPAA3Y: 'Corporate AA- 3Y Yield', CD91: 'CD 91-Day Rate' }
+  ko: { ...INDICATOR_NAMES.ko, KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥', DOW: '다우존스', SP500: 'S&P 500', VIX: 'VIX', VKOSPI: 'VKOSPI', JPYKRW: '원/엔 환율', GOLD: '금 선물', BITCOIN: '비트코인', BRENT: '브렌트유', NATGAS: '천연가스', SILVER: '은 선물', COMEX_COPPER: '구리 선물', KTB3Y: '국고채 3년 금리', KTB10Y: '국고채 10년 금리', CORPAA3Y: '회사채 AA- 3년 금리', CD91: 'CD 91일 금리' },
+  en: { ...INDICATOR_NAMES.en, NASDAQ: 'NASDAQ', DOW: 'Dow Jones', SOX: 'SOX', VIX: 'VIX', VKOSPI: 'VKOSPI', US10Y: 'US 10Y Yield', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', CNYKRW: 'CNY/KRW', EURKRW: 'EUR/KRW', USDJPY: 'USD/JPY', BRENT: 'Brent Crude', NATGAS: 'Natural Gas', SILVER: 'Silver', COMEX_COPPER: 'Copper', KTB3Y: 'KTB 3Y Yield', KTB10Y: 'KTB 10Y Yield', CORPAA3Y: 'Corporate AA- 3Y Yield', CD91: 'CD 91-Day Rate' }
 };
 
 const indicatorKind = (indicator) => (indicator.code === 'US10Y' ? 'rate' : indicator.kind);
@@ -1508,7 +1510,7 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
     stats.count > 1 ? indicatorStatTile(copy.low, fmt.value(stats.low.close), html(dotDate(stats.low.date, key))) : ''
   ].filter(Boolean).join('');
 
-  const withRange = indicator.kind === 'krx';
+  const withRange = indicator.kind === 'krx' || indicator.kind === 'krxvol';
   const changeHeading = indicator.kind === 'snapshot' ? copy.changeVsPrev.snapshot : copy.columns.change;
   const headings = [copy.columns.date, copy.valueLabel[kind], changeHeading, copy.columns.pct, ...(withRange ? [copy.columns.high, copy.columns.low] : [])];
   const months = new Map();

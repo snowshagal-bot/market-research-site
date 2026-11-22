@@ -112,7 +112,8 @@ function unavailable(item) {
 /* ---------------------------------------------------------------- receiver */
 
 test('contract 1.2.0 takes the seven new indicators and still takes a record without them', () => {
-  assert.deepEqual(OPTIONAL_GLOBAL_CODES, ['CNYKRW', 'EURKRW', 'USDJPY', 'BRENT', 'COMEX_COPPER', 'SILVER', 'NATGAS']);
+  // VKOSPI (2026-11-22) is optional the same way; tests/market-vkospi.test.mjs covers it.
+  assert.deepEqual(OPTIONAL_GLOBAL_CODES, ['CNYKRW', 'EURKRW', 'USDJPY', 'BRENT', 'COMEX_COPPER', 'SILVER', 'NATGAS', 'VKOSPI']);
   assert.deepEqual(verdict(complete12()), { passed: true, errors: [] });
   assert.deepEqual(verdict(withNew(complete12())), { passed: true, errors: [] });
   for (const [section, code] of NEW_GLOBAL) {
@@ -183,7 +184,7 @@ const OPTIONAL = MARKET_INDICATORS.filter(item => item.optional && !item.domesti
 const closesFor = (codes) => JSON.stringify(OPTIONAL.map(item => (codes.includes(item.code) ? 1 : null)));
 
 test('the new history pages: /market/copper/ for COMEX copper, the code in lower case for the rest', () => {
-  assert.deepEqual(OPTIONAL.map(item => item.slug), ['cnykrw', 'eurkrw', 'usdjpy', 'brent', 'natgas', 'silver', 'copper']);
+  assert.deepEqual(OPTIONAL.map(item => item.slug), ['vkospi', 'cnykrw', 'eurkrw', 'usdjpy', 'brent', 'natgas', 'silver', 'copper']);
   assert.equal(parseMarketPagePath('/market/copper/').indicator.code, 'COMEX_COPPER');
   assert.equal(parseMarketPagePath('/en/market/natgas/').indicator.code, 'NATGAS');
   assert.equal(parseMarketPagePath('/market/comex_copper/'), null);
@@ -199,7 +200,7 @@ test('a new indicator has a page once some final record has its value', () => {
   assert.ok(some.has('CNYKRW') && some.has('COMEX_COPPER'));
   assert.ok(!some.has('EURKRW'));
   assert.equal(some.size, 16);
-  assert.equal(availableIndicatorCodes([{ optional_closes: JSON.parse(closesFor(OPTIONAL.map(item => item.code))) }]).size, 21);
+  assert.equal(availableIndicatorCodes([{ optional_closes: JSON.parse(closesFor(OPTIONAL.map(item => item.code))) }]).size, 22);
   assert.equal(availableIndicatorCodes([{ optional_closes: 'not json' }, { optional_closes: null }]).size, 14);
 });
 
@@ -220,7 +221,7 @@ test('the sitemap and the archive list a new indicator only once it has a value'
   const old = nav(marketArchivePageHtml(SHELLS.ko, [row], 'ko'));
   assert.equal((old.match(/<a href="\/market\/[a-z0-9]+\/">/g) || []).length, 14);
   const all = nav(marketArchivePageHtml(SHELLS.ko, [{ ...row, optional_closes: closesFor(OPTIONAL.map(item => item.code)) }], 'ko'));
-  assert.equal((all.match(/<a href="\/market\/[a-z0-9]+\/">/g) || []).length, 21);
+  assert.equal((all.match(/<a href="\/market\/[a-z0-9]+\/">/g) || []).length, 22);
   assert.match(all, /<a href="\/market\/copper\/">구리 선물<\/a>/);
   assert.match(nav(marketArchivePageHtml(SHELLS.en, [{ ...row, optional_closes: closesFor(['USDJPY']) }], 'en')), /<a href="\/en\/market\/usdjpy\/">USD\/JPY<\/a>/);
 });

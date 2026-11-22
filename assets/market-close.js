@@ -80,7 +80,7 @@
   };
 
   const names = {
-    NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones', SP500: 'S&P 500', SOX: 'Philadelphia Semiconductor', VIX: 'VIX', US10Y: 'US 10Y', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW (100)', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', BITCOIN: 'Bitcoin',
+    NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones', SP500: 'S&P 500', SOX: 'Philadelphia Semiconductor', VIX: 'VIX', VKOSPI: 'VKOSPI', US10Y: 'US 10Y', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW (100)', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', BITCOIN: 'Bitcoin',
     CNYKRW: 'CNY/KRW', EURKRW: 'EUR/KRW', USDJPY: 'USD/JPY', BRENT: 'Brent Crude', NATGAS: 'Natural Gas', SILVER: 'Silver', COMEX_COPPER: 'Copper',
     KTB3Y: 'KTB 3Y', KTB10Y: 'KTB 10Y', CORPAA3Y: 'Corporate AA- 3Y', CD91: 'CD 91-day',
     KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', 'KOSPI200선물': 'KOSPI 200 Futures', '기관': 'Institution', '외국인': 'Foreign', '개인': 'Retail', '차익': 'Arbitrage', '비차익': 'Non-arbitrage', '전체': 'Total'
@@ -201,7 +201,7 @@
   // payload's names, the same words).
   const namesKo = {
     KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥 종합', DOW: '다우존스', SP500: 'S&P 500', SOX: '필라델피아 반도체',
-    VIX: 'VIX 변동성', US10Y: '미국 국채 10년', USDKRW: '원/달러', JPYKRW: '원/100엔', DXY: '달러인덱스',
+    VIX: 'VIX 변동성', VKOSPI: 'VKOSPI', US10Y: '미국 국채 10년', USDKRW: '원/달러', JPYKRW: '원/100엔', DXY: '달러인덱스',
     WTI: 'WTI 원유', GOLD: '금 선물', BITCOIN: '비트코인',
     CNYKRW: '원/위안', EURKRW: '원/유로', USDJPY: '엔/달러', BRENT: '브렌트유', NATGAS: '천연가스', SILVER: '은 선물', COMEX_COPPER: '구리 선물',
     KTB3Y: '국고채 3년', KTB10Y: '국고채 10년', CORPAA3Y: '회사채 AA- 3년', CD91: 'CD 91일'
@@ -210,7 +210,7 @@
   const FIXING_CODES = ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW'];
   const isFixing = key => FIXING_CODES.includes(key);
   // Added 2026-11: a record made before them has no such item.
-  const OPTIONAL_CODES = ['CNYKRW', 'EURKRW', 'USDJPY', 'BRENT', 'NATGAS', 'SILVER', 'COMEX_COPPER'];
+  const OPTIONAL_CODES = ['CNYKRW', 'EURKRW', 'USDJPY', 'BRENT', 'NATGAS', 'SILVER', 'COMEX_COPPER', 'VKOSPI'];
   // Decimal places of a price and its change (Bitcoin prices are whole dollars).
   const digitsOf = key => (key === 'NATGAS' || key === 'COMEX_COPPER' ? 3 : 2);
   // Each instrument has a daily history page at /market/{code in lower case}/
@@ -749,7 +749,7 @@
       <div id="market-dashboard-view" class="market-wrap market-dashboard" data-global-latest="${Object.keys(latestItems).length}">
         ${section(1, copy.sections[0], `<div class="major-index-grid">${['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500'].map(key => card(key, indices[key], true)).join('')}</div>`)}
         <div class="market-pair">
-          ${section(2, copy.sections[1], `<div class="mini-instrument-grid">${['SOX', 'VIX', 'US10Y', 'USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY'].filter(key => rates[key] || !OPTIONAL_CODES.includes(key)).map(key => card(key, rates[key])).join('')}</div>`)}
+          ${section(2, copy.sections[1], `<div class="mini-instrument-grid">${['SOX', 'VIX', 'VKOSPI', 'US10Y', 'USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY'].filter(key => rates[key] || !OPTIONAL_CODES.includes(key)).map(key => card(key, rates[key])).join('')}</div>`)}
           ${section(3, copy.sections[2], `<div class="mini-instrument-grid commodity-grid">${['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER', 'BITCOIN'].filter(key => commodities[key] || !OPTIONAL_CODES.includes(key)).map(key => card(key, commodities[key])).join('')}</div>`)}
         </div>
         ${ratesBody ? section(4, copy.ratesTitle, ratesBody, 'market-rates-section') : ''}
@@ -1003,7 +1003,7 @@
         <div class="market-pair">
           ${section('02', ko ? '금리 · 환율 · 변동성' : 'Rates · FX · Volatility', `
             <div class="range-items-grid">
-              ${['US10Y', 'USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY', 'VIX'].map(k => renderRangeRatesFxRow(k, rates[k])).join('')}
+              ${['US10Y', 'USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY', 'VIX', 'VKOSPI'].map(k => renderRangeRatesFxRow(k, rates[k])).join('')}
             </div>`)}
           ${section('03', ko ? '자산별 성과' : 'Cross Asset Performance', `
             <div class="range-items-grid">

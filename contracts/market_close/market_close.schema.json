@@ -49,7 +49,8 @@
         "DXY": {"$ref": "#/$defs/nullableInstrument"},
         "CNYKRW": {"$ref": "#/$defs/nullableInstrument"},
         "EURKRW": {"$ref": "#/$defs/nullableInstrument"},
-        "USDJPY": {"$ref": "#/$defs/nullableInstrument"}
+        "USDJPY": {"$ref": "#/$defs/nullableInstrument"},
+        "VKOSPI": {"$ref": "#/$defs/nullableInstrument"}
       }
     },
     "commodities_crypto": {
@@ -665,12 +666,12 @@
             "reason": {"$ref": "#/$defs/sectionReason"},
             "unavailable": {
               "type": "array",
-              "maxItems": 19,
+              "maxItems": 20,
               "items": {
                 "enum": [
                   "NASDAQ", "DOW", "SP500", "SOX", "VIX", "US10Y",
                   "USDKRW", "JPYKRW", "DXY", "WTI", "GOLD", "BITCOIN",
-                  "CNYKRW", "EURKRW", "USDJPY", "BRENT", "COMEX_COPPER", "SILVER", "NATGAS"
+                  "CNYKRW", "EURKRW", "USDJPY", "BRENT", "COMEX_COPPER", "SILVER", "NATGAS", "VKOSPI"
                 ]
               }
             }
