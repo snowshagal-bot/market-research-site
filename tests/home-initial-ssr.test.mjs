@@ -99,7 +99,7 @@ async function serverHome({ lang = 'ko', db, posts = REAL_POSTS, now, ...options
   let html = shellFor(lang);
   if (home) {
     html = applyInitialHtmlToString(html, home);
-    if (home.head) html = html.replace(/<\/head>/i, `${home.head}</head>`);
+    if (home.head) html = html.replace(/<\/head>/i, close => `${home.head}${close}`);
   }
   return { html, home };
 }
@@ -731,6 +731,46 @@ test('string fallback preserves dollar amounts in report titles without duplicat
   }
   assert.equal(decode(nodeById(html, 'hero-featured-date').inner), '2026-09-19');
 });
+
+test('string fallback keeps $-patterns in titles and the notice literal on the home pages and category landings', async () => {
+  // As replacement strings, "$&" is the match, "$'" / "$`" the rest of the page
+  // after / before it and "$$" one "$"; inserted with callbacks they stay text.
+  const text = "$1 $2 $& $' $` $$ $1tn";
+  const db = await database({ notices: [{ title: `Notice ${text}`, content: `Body ${text}`, start: '2026-09-20T00:00:00.000Z' }] });
+  const posts = ['ko', 'en'].flatMap(lang => [
+    researchPost(lang, { title: `Research ${text}` }),
+    ...['2026-09-21', '2026-09-22', NORMAL_DATE].map((date, index) => ({ ...dailyPost(lang, date), title: `Daily ${index} ${text}` }))
+  ]);
+  const count = (html, needle) => html.split(needle).length - 1;
+  const pages = [['/', 'index.html'], ['/en/', 'en/index.html'], ['/daily/', 'daily/index.html'], ['/en/daily/', 'en/daily/index.html']];
+  for (const [path, file] of pages) {
+    const shell = await read(file);
+    const response = await middleware({
+      request: new Request(`${ORIGIN}${path}`),
+      env: { ASSETS: assetsFor(posts), COMMENTS_DB: db },
+      next: async () => new Response(shell, { headers: { 'content-type': 'text/html; charset=utf-8' } })
+    });
+    assert.equal(response.status, 200, path);
+    const html = await response.text();
+    for (const tag of ['<head>', '</head>', '<body', '</body>', '</html>']) assert.equal(count(html, tag), count(shell, tag), `${path} ${tag}`);
+    const containers = path.endsWith('/daily/') ? ['category-featured-cards', 'category-report-list'] : ['latest-category-cards', 'report-list'];
+    for (const id of containers) {
+      assert.equal(count(html, `id="${id}"`), 1, `${path} #${id}`);
+      assert.match(decode(nodeById(html, id).inner), /Daily \d \$1 \$2 \$& \$' \$` \$\$ \$1tn/, `${path} #${id}`);
+    }
+    if (path.endsWith('/daily/')) {
+      assert.equal(count(headOfPage(html), 'hreflang='), 3, path);
+    } else {
+      const boot = JSON.parse(nodeById(html, 'home-initial-data').inner);
+      assert.equal(boot.announcement.title, `Notice ${text}`, path);
+      assert.equal(boot.announcement.content, `Body ${text}`, path);
+    }
+  }
+});
+
+function headOfPage(html) {
+  return html.slice(0, html.search(/<\/head>/i));
+}
 
 test('22. only / and /en/ are home pages; /disclosures/ and /calendar/ are untouched', async () => {
   assert.equal(homeInitialLang('/'), 'ko');
