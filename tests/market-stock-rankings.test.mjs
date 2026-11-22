@@ -164,8 +164,8 @@ const sectionHeadings = page => [...page.matchAll(/<h2 id="market-section-\d+"><
 test('session pages show the rankings right after the market breadth', () => {
   const context = { prev: null, next: null, report: null };
   const cases = [
-    ['ko', '등락률 · 거래대금 상위 종목', '시장 폭', 'KRX 업종 · 테마 등락률', ['한진칼우', '상한가', '하한가', '52주 신고가 <b>5</b>종목', '52주 신저가 <b>170</b>종목', '3.43조원', '99,700원 · 거래대금 435억원', '1,997원 · 거래대금 25억원', '7,810원 · 거래대금 4.7억원', '810원 · 거래대금 10억원']],
-    ['en', 'Top Movers &amp; Most Traded', 'Market Breadth', 'KRX Sectors &amp; Themes', ['18064K', 'Limit up', 'Limit down', 'SK hynix', '52-week highs <b>5</b>', '52-week lows <b>170</b>', 'KRW 3.43tn', '7,810 · Value KRW 469M']]
+    ['ko', '등락률 · 거래대금 상위 종목', '시장 폭', 'KRX 업종 · 테마 등락률', ['한진칼우', '상한가', '하한가', '52주 신고가 <b>5</b>종목', '52주 신저가 <b>170</b>종목</span><span class="ranking-52w-basis">장중 기준 · 네이버 금융 집계</span>', '3.43조원', '99,700원 · 거래대금 435억원', '1,997원 · 거래대금 25억원', '7,810원 · 거래대금 4.7억원', '810원 · 거래대금 10억원']],
+    ['en', 'Top Movers &amp; Most Traded', 'Market Breadth', 'KRX Sectors &amp; Themes', ['18064K', 'Limit up', 'Limit down', 'SK hynix', '52-week highs <b>5</b>', '52-week lows <b>170</b></span><span class="ranking-52w-basis">intraday · Naver Finance count</span>', 'KRW 3.43tn', '7,810 · Value KRW 469M']]
   ];
   for (const [lang, title, before, after, texts] of cases) {
     const page = marketDatePageHtml(SHELLS[lang], withRankings(complete12()), lang, context);
@@ -201,8 +201,8 @@ async function dashboard(lang) {
 
 test('TODAY shows the rankings after the market breadth and numbers the rest after them', async () => {
   for (const [lang, title, breadth, flows, texts] of [
-    ['ko', '등락률 · 거래대금 상위 종목', '시장 폭', 'KRX 투자자 매매동향 (당일)', ['한진칼우', '상한가', '52주 신고가 <b>5</b>종목']],
-    ['en', 'Top Movers &amp; Most Traded', 'Market Breadth', 'KRX Investor Flows (Daily)', ['18064K', 'Limit up', 'SK hynix', '52-week lows <b>293</b>']]
+    ['ko', '등락률 · 거래대금 상위 종목', '시장 폭', 'KRX 투자자 매매동향 (당일)', ['한진칼우', '상한가', '52주 신고가 <b>5</b>종목', '장중 기준 · 네이버 금융 집계']],
+    ['en', 'Top Movers &amp; Most Traded', 'Market Breadth', 'KRX Investor Flows (Daily)', ['18064K', 'Limit up', 'SK hynix', '52-week lows <b>293</b>', 'intraday · Naver Finance count']]
   ]) {
     const runtime = await dashboard(lang);
     const target = { innerHTML: '' };

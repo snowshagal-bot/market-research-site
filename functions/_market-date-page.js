@@ -195,7 +195,7 @@ const COPY = {
     allSectors: n => `업종 전체 ${n}개 보기`, allThemes: n => `테마 전체 ${n}개 보기`,
     groupColumns: ['순위', '이름', '시장', '종가', '등락률'],
     capColumns: ['순위', '종목명', '종가', '등락률', '시가총액'],
-    rankGainers: '상승률 상위', rankLosers: '하락률 상위', rankTurnover: '거래대금 상위', high52: '52주 신고가', low52: '52주 신저가', stocksUnit: '종목', limitUp: '상한가', limitDown: '하한가', tradingValue: '거래대금', rankingsNone: '해당 종목 없음', rankingsUnavailable: '이날 종목 순위 데이터 없음', rankingsNote: '주식 종목만(ETF·ETN 제외) · 15:30 정규장 종가 · 등락률은 KRX 전일 종가 대비 · 52주 신고가·신저가는 장중 기준 · 네이버 금융 순위를 장 마감 직후(15:31~15:39) 저장',
+    rankGainers: '상승률 상위', rankLosers: '하락률 상위', rankTurnover: '거래대금 상위', high52: '52주 신고가', high52Basis: '장중 기준 · 네이버 금융 집계', low52: '52주 신저가', stocksUnit: '종목', limitUp: '상한가', limitDown: '하한가', tradingValue: '거래대금', rankingsNone: '해당 종목 없음', rankingsUnavailable: '이날 종목 순위 데이터 없음', rankingsNote: '주식 종목만(ETF·ETN 제외) · 15:30 정규장 종가 · 등락률은 KRX 전일 종가 대비 · 네이버 금융 순위를 장 마감 직후(15:31~15:39) 저장',
     shortAmount: '공매도 거래대금', valueRatio: '거래대금 비중', shortRatioScope: '거래대금 비중은 KRX+NXT 합산 정규시장 거래대금 대비입니다.', shortValue: '공매도 거래대금 TOP5', shortRatio: '공매도 비중 TOP5', regularUnavailable: '정규장 기준 값 없음',
     prev: '이전 거래일', next: '다음 거래일', archive: '전체 마감 기록', dashboard: '대시보드에서 보기', latest: '최신 마감',
     report: '이날의 데일리 리포트', noReport: '이날 발행된 데일리 리포트가 없습니다.',
@@ -224,7 +224,7 @@ const COPY = {
     allSectors: n => `All ${n} sectors`, allThemes: n => `All ${n} themes`,
     groupColumns: ['Rank', 'Name', 'Market', 'Close', 'Change'],
     capColumns: ['Rank', 'Company', 'Close', 'Change', 'Market cap'],
-    rankGainers: 'Top gainers', rankLosers: 'Top losers', rankTurnover: 'Most traded by value', high52: '52-week highs', low52: '52-week lows', stocksUnit: '', limitUp: 'Limit up', limitDown: 'Limit down', tradingValue: 'Value', rankingsNone: 'None', rankingsUnavailable: 'Stock rankings unavailable for this session', rankingsNote: 'Stocks only (ETFs and ETNs excluded) · regular-session close at 15:30 KST · change against the previous KRX close · 52-week highs and lows are intraday · Naver Finance rankings saved just after the close (15:31–15:39 KST)',
+    rankGainers: 'Top gainers', rankLosers: 'Top losers', rankTurnover: 'Most traded by value', high52: '52-week highs', high52Basis: 'intraday · Naver Finance count', low52: '52-week lows', stocksUnit: '', limitUp: 'Limit up', limitDown: 'Limit down', tradingValue: 'Value', rankingsNone: 'None', rankingsUnavailable: 'Stock rankings unavailable for this session', rankingsNote: 'Stocks only (ETFs and ETNs excluded) · regular-session close at 15:30 KST · change against the previous KRX close · Naver Finance rankings saved just after the close (15:31–15:39 KST)',
     shortAmount: 'Short value', valueRatio: 'Value ratio', shortRatioScope: 'Value ratio is against KRX+NXT combined regular-session turnover.', shortValue: 'Top 5 by Short Value', shortRatio: 'Top 5 by Short Ratio', regularUnavailable: 'No regular-session value',
     prev: 'Previous session', next: 'Next session', archive: 'All sessions', dashboard: 'Open in the dashboard', latest: 'Latest close',
     report: 'Daily report for this session', noReport: 'No Daily report was published for this session.',
@@ -445,7 +445,7 @@ export function stockRankingsBody(payload, status, f, copy, lang) {
   const count = value => `<b>${f.integer(value)}</b>${copy.stocksUnit ? html(copy.stocksUnit) : ''}`;
   const cards = ['KOSPI', 'KOSDAQ'].filter(key => markets[key]).map(key => {
     const item = markets[key];
-    return `<article class="ranking-market"><div class="ranking-market-head"><h3>${key}</h3><p class="ranking-52w"><span>${html(copy.high52)} ${count(item.new_high_52w)}</span><span>${html(copy.low52)} ${count(item.new_low_52w)}</span></p></div><div class="ranking-lists">${block(copy.rankGainers, item.top_gainers, 'top_gainers')}${block(copy.rankLosers, item.top_losers, 'top_losers')}${block(copy.rankTurnover, item.top_turnover, 'top_turnover')}</div></article>`;
+    return `<article class="ranking-market"><div class="ranking-market-head"><h3>${key}</h3><p class="ranking-52w"><span>${html(copy.high52)} ${count(item.new_high_52w)}</span><span>${html(copy.low52)} ${count(item.new_low_52w)}</span><span class="ranking-52w-basis">${html(copy.high52Basis)}</span></p></div><div class="ranking-lists">${block(copy.rankGainers, item.top_gainers, 'top_gainers')}${block(copy.rankLosers, item.top_losers, 'top_losers')}${block(copy.rankTurnover, item.top_turnover, 'top_turnover')}</div></article>`;
   }).join('');
   return `<div class="ranking-markets">${cards}</div><p class="unit-note">${html(copy.rankingsNote)}</p>`;
 }
