@@ -266,6 +266,18 @@ test('events reuse the existing palette rather than adding one', async () => {
   assert.doesNotMatch(eventBlock, /#[0-9a-f]{6}/i, 'no literal colours outside the token set');
 });
 
+test('a long holiday name cannot widen its day column', async () => {
+  // A bare 1fr track has an automatic minimum, so a long tag used to widen its
+  // column and pull the days out of line with the weekday row.
+  const columnsOf = selector => new RegExp(`${selector}\\s*\\{[^}]*grid-template-columns:\\s*([^;]+);`).exec(STYLES)?.[1].trim();
+  assert.equal(columnsOf('\\.calendar-weekdays-row'), 'repeat(7, minmax(0, 1fr))');
+  assert.equal(columnsOf('\\.calendar-days-grid'), 'repeat(7, minmax(0, 1fr))', 'the days use the same tracks as the weekday row');
+  assert.doesNotMatch(STYLES, /repeat\(7,\s*1fr\)/);
+  // The tag is cut inside its cell rather than pushing the cell wider.
+  assert.match(STYLES, /\.calendar-day-cell\s*\{[^}]*min-width:\s*0/);
+  assert.match(STYLES, /\.cal-tag\s*\{[^}]*overflow:\s*hidden/);
+});
+
 test('the narrow breakpoints the rest of the calendar uses are covered', async () => {
   const eventBlock = STYLES.slice(STYLES.indexOf('.cal-event-chip'));
   assert.match(eventBlock, /@media \(max-width: 480px\)/);
@@ -324,9 +336,20 @@ test('a Korean event shows one clock, because there is only one', async () => {
 });
 
 test('an event with no time says so rather than inventing one', async () => {
-  const { get } = await render({ payload: payloadFor([expiry]) });
+  // A scheduled release whose hour is not published yet (the Fed lists next year's meetings by date only).
+  const undated = { ...fomc, id: 'official:fomc:2026-09-10', source: { date: '2026-09-10', time: null, timezone: 'America/New_York' },
+    display: { date: '2026-09-10', time: null, timezone: 'Asia/Seoul', shifted: false } };
+  const { get } = await render({ payload: payloadFor([undated]) });
   await get('calendar-grid-mount').fire('click', { target: { closest: () => ({ dataset: { date: '2026-09-10' } }) } });
   assert.match(get('calendar-day-detail-mount').innerHTML, /시간 미정/);
+});
+
+test('an option expiry is a dated event: all day, not a time still to be confirmed', async () => {
+  const { get } = await render({ payload: payloadFor([expiry]) });
+  await get('calendar-grid-mount').fire('click', { target: { closest: () => ({ dataset: { date: '2026-09-10' } }) } });
+  const detail = get('calendar-day-detail-mount').innerHTML;
+  assert.match(detail, /<span class="cal-event-time">종일<\/span>/);
+  assert.doesNotMatch(detail, /시간 미정/);
 });
 
 test('a withdrawn event is shown in the detail, marked as withdrawn', async () => {

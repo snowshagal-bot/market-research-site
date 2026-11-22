@@ -257,6 +257,17 @@ test('summary updates are capped at 500 characters and omitted fields preserve e
   }
 });
 
+test('an edited title and subtitle are stored without invisible characters', async () => {
+  const calls = githubMock([basePost]);
+  try {
+    const { response } = await run({ title: '한⁠·중 정상회담​', subtitle: '﻿열린 건 권리' });
+    assert.equal(response.status, 200);
+    const updated = postsFromTree(treeFrom(calls))[0];
+    assert.equal(updated.title, '한·중 정상회담');
+    assert.equal(updated.subtitle, '열린 건 권리');
+  } finally { globalThis.fetch = originalFetch; }
+});
+
 /* ------------------------------------------ description (PR B1 invariant) */
 
 const DAILY_SENTENCE = '당일 시장의 핵심 흐름과 수급, 업종, 매크로 변수를 정리한 데일리 리포트.';

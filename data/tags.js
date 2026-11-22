@@ -316,5 +316,23 @@ window.TAG_REGISTRY = {
     "en": "K-Contents",
     "group": "sector",
     "custom": true
+  },
+  "enter-stocks": {
+    "ko": "엔터테인먼트",
+    "en": "Enter stocks",
+    "group": "sector",
+    "custom": true
+  },
+  "game": {
+    "ko": "게임",
+    "en": "Game",
+    "group": "sector",
+    "custom": true
+  },
+  "national-pension-service": {
+    "ko": "국민연금",
+    "en": "National Pension Service",
+    "group": "macro",
+    "custom": true
   }
 };

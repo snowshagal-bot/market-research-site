@@ -142,6 +142,24 @@ The homepage supports light/dark theme state. New site-level surfaces should con
 
 Report contents themselves are not forcibly recolored by the site. Their original visual design should remain intact. Shared report navigation and comments can use a consistent site-controlled surface.
 
+## Market calendar grid
+
+- the weekday row and the day grid both use `repeat(7, minmax(0, 1fr))` (`assets/calendar.css`). A bare `1fr` lets a long holiday name widen its column, so the days stop lining up under the weekday row;
+- a holiday or event tag is cut inside its cell: one line with an ellipsis on desktop, at most two lines on screens up to 760px. The full name stays in the tag's `title` and the day detail card;
+- after a calendar change, check KO and EN at 360–430px and 1280px+ on months with long names (for example 2026-09, 2026-12, 2027-12): equal columns under the weekday row, no tag outside its cell, no page overflow.
+
+## Market pages (`/market/`, session and sectors pages)
+
+- no reader-facing text below 10px (`assets/market-close.css`; a test reads the stylesheet). Table cells are 11px (10.5px on phones), labels, states and notes 10px;
+- the TODAY/1W/1M/HISTORY buttons and the date arrows and calendar button are at least 32px tall, 36px on phones (up to 430px), where the date controls take their own row;
+- ranked rows (short-selling TOP5, sector and theme rankings) are one line: rank and name, the market as a small tag, the value on the right; a long name ends in an ellipsis. Their grid columns carry `min-width: 0` so a long name never widens the page;
+- in the market-cap and sector tables the name column is left-aligned and the rank centred; numbers stay right-aligned;
+- up to 860px the two investor-flow tables stack; up to 1060px rates and commodities stack. On desktop the two take equal columns (up to 10 rate and 7 commodity cards, three per row; VKOSPI follows VIX). The Asian indices are a row of three small cards under the major indices, titled 아시아 증시 / Asian Markets (two plus one full-width card on phones), shown only when the record carries them. A last card alone in its row takes the whole row: in three columns (`:nth-child(3n+1)`), and in the rates' two phone columns (an odd last card). On phones the commodity cards are two per row;
+- the Domestic Rates section (KOFIA yields, `rate-grid`) is one full-width row of four cards on tablet and desktop and two by two on phones; a card shows the yield in percent (bonds 3 decimals, CD 2), the change in bp and `date · 16:00 최종호가`. It appears only for the session's own day, and the sections after it are numbered one higher;
+- the English pages name every KRX sector and theme in English (`krxGroupName` in `assets/locale.js`, keyed by index code). A new index code shows its Korean name until it is added there;
+- indicator history charts: one series, a 2px line in `--market-blue` with a light area wash, hairline gridlines, an end dot and the latest value as the only direct label. The SVG plot stretches to its box (`preserveAspectRatio="none"`, `vector-effect: non-scaling-stroke`) and every label is HTML, so chart text is never scaled below 10px on a phone. The monthly table under the chart is the full, accessible view;
+- check KO and EN at 360, 390, 768, 1024 and 1280px on TODAY, 1W, 1M, a session page and the sectors page: no page overflow, nothing outside its card, no table scrolling at 360px.
+
 ## Things not to add without explicit request
 
 - view counts

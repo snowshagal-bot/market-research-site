@@ -177,15 +177,22 @@ rejects the observed `2026-08-31` snapshot with `2026-08-27` US data, while acce
 different dates caused by weekends or an exchange holiday.
 
 The exchange calendars are explicit and fail closed outside their configured coverage.
-`functions/api/market/_freshness.js` currently covers KRX and NYSE 2026 holidays. Review the
-official KRX/KASI and NYSE calendars and extend this file before the first trading day of a
-new calendar year. KRX closes on Korean public holidays, Labor Day and its year-end closing
-day; NYSE early-close sessions remain trading days.
+`functions/_trading-calendar.js` is the only calendar (`_freshness.js` imports it) and covers
+KRX 2026–2027 and NYSE 2026–2027 holidays plus special sessions. Review the official KRX/KASI
+and NYSE calendars and extend that file before the first trading day of a new calendar year
+(it must be live in Production before 01-01 KST). KRX closes on Korean public holidays, Labor
+Day and its year-end closing day; NYSE early-close sessions remain trading days. The KRX
+holidays and special sessions must stay identical to the publisher core
+(`snowshagal-market-publisher` `market_dashboard/source_date_policy.py`); change both in the
+same cycle and re-check them against KRX's year-end notice for the coming year. A public
+holiday can also be added during the year: 2026-07-17 제헌절 became one again in 2026 and was
+missing from both lists until November. When KRX announces such a closure, add it to both lists.
 
 Calendar references:
 
 - KRX holiday rules: `https://global.krx.co.kr/contents/GLB/06/0602/0602010201/GLB0602010201T1.jsp`
 - KASI 2026 official almanac: `https://astro.kasi.re.kr/life/post/almanac?year=2026`
+- KASI 2027 official almanac: `https://astro.kasi.re.kr/life/post/almanac?year=2027`
 - NYSE holiday calendar: `https://www.nyse.com/trade/hours-calendars`
 
 Production deployment smoke now requires `/api/market/latest` to match the expected latest
@@ -249,6 +256,24 @@ npx wrangler d1 execute market-research-comments --remote --file=migrations/comm
 ```
 
 Request handlers never create the table: without it both endpoints answer `503 GLOBAL_LATEST_SCHEMA_NOT_READY`; with an empty table `GET` answers `200` with `items: []`. Preview acceptance uses synthetic items whose `source` is `preview-global-latest-fixture` and deletes them afterwards, on Preview only: `DELETE FROM market_global_latest WHERE json_extract(payload_json, '$.source') = 'preview-global-latest-fixture';`. Status: receiver live (B1), collector publishing to Production every 30 minutes (B2), TODAY overlay on HOME and `/market/` (B3, see `docs/PROJECT_STATE.md`). The overlay needs no Secret, binding or migration beyond B1.
+
+### Domestic Rates on the existing D1 binding
+
+Domestic Rates (`contracts/domestic_rates/`) are the KOFIA final quote yields of each KRX trading day (KTB 3Y, KTB 10Y, corporate AA- 3Y, CD 91-day; afternoon basis 16:00 KST). KOFIA computes them after the day's Market Close record is final, so they are not part of it: own contract (1.0.0), table (`market_domestic_rates`, one row per `market_date`) and endpoints (`POST /api/market/rates/publish`, `GET /api/market/rates/date?date=YYYY-MM-DD|latest`). They never read or write `market_close_snapshots`; pages join the two by date. They reuse `COMMENTS_DB`, the Market Close write-host policy and `MARKET_PUBLISH_KEY`; no new Secret or binding is required.
+
+Apply the checked-in idempotent migration to the isolated Preview database first:
+
+```bash
+npx wrangler d1 execute market-research-comments-preview --remote --file=migrations/comments/0003_market_domestic_rates.sql
+```
+
+Only after approval, and before the Production merge, apply the same file to Production:
+
+```bash
+npx wrangler d1 execute market-research-comments --remote --file=migrations/comments/0003_market_domestic_rates.sql
+```
+
+Request handlers never create the table: without it both endpoints answer `503 DOMESTIC_RATES_SCHEMA_NOT_READY`, and the pages (dashboard, session pages, history pages, archive, sitemap) behave exactly as without rates. A Preview acceptance test may publish a real KOFIA day to the Preview endpoint and delete it afterwards, on Preview only: `DELETE FROM market_domestic_rates WHERE market_date = 'YYYY-MM-DD';`. The Preview deployment's `MARKET_PUBLISH_KEY` is not the collector's, so the collector's own key answers 401 there. Status: migration `0003` applied to Preview and Production on 2026-11-22; Production holds the 2026 backfill and the daily task's days.
 
 Public `GET /api/announcements` returns only `publish_state = published`, `audience = all` rows whose UTC exposure window contains the current server time. Admin create/update/delete require an authenticated administrator session, exact Preview or Production admin Origin, and the session CSRF token. No new Secret or environment variable is required.
 

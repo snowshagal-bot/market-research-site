@@ -1,6 +1,7 @@
 // The site's shared labels and the editorial blurb rule, the same file the
 // pages load (MARKET_LOCALE), so a card reads the same before and after the
 // browser re-renders it.
+import { availableIndicatorCodes, listedIndicators } from './_market-indicators.js';
 import '../assets/locale.js';
 // The search-title rule the admin publisher applies before it stores one.
 import '../assets/report-metadata.js';
@@ -1078,7 +1079,7 @@ export function reportSeoTags(posts, post, options = {}) {
 // `marketSessions`: [{ market_date, published_at }] for every final Market
 // Close, newest first. Each becomes a KO and an EN session page
 // (/market/YYYY-MM-DD/), and the archive is listed once there is one.
-export function sitemapXml(posts, { marketSessions = [] } = {}) {
+export function sitemapXml(posts, { marketSessions = [], rateCodes = [] } = {}) {
   const validPosts = posts.filter((post) => (
     post && typeof post.href === 'string' && /^reports\/.+\.html?$/i.test(normalizeSitePath(post.href))
   ));
@@ -1145,7 +1146,7 @@ export function sitemapXml(posts, { marketSessions = [] } = {}) {
     urlEntry(`${PRODUCTION_ORIGIN}/basics/glossary/`, '', glossaryAlternates),
     urlEntry(`${PRODUCTION_ORIGIN}/en/basics/glossary/`, '', glossaryAlternates),
     ...categoryEntries,
-    ...marketSessionEntries(marketSessions, urlEntry),
+    ...marketSessionEntries(marketSessions, urlEntry, rateCodes),
     ...validPosts.map((post) => urlEntry(
       reportSiteUrl(post.href),
       post.updatedAt || post.registeredAt || post.reportDate || post.date,
@@ -1155,7 +1156,7 @@ export function sitemapXml(posts, { marketSessions = [] } = {}) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${entries.join('')}</urlset>\n`;
 }
 
-function marketSessionEntries(sessions, urlEntry) {
+function marketSessionEntries(sessions, urlEntry, rateCodes = []) {
   const dates = (Array.isArray(sessions) ? sessions : [])
     .filter((session) => /^\d{4}-\d{2}-\d{2}$/.test(String(session?.market_date || '')));
   if (!dates.length) return [];
@@ -1169,6 +1170,12 @@ function marketSessionEntries(sessions, urlEntry) {
   const sectors = pair('/market/sectors/');
   entries.push(urlEntry(archive[0].href, dates[0].published_at, archive), urlEntry(archive[1].href, dates[0].published_at, archive));
   entries.push(urlEntry(sectors[0].href, dates[0].published_at, sectors), urlEntry(sectors[1].href, dates[0].published_at, sectors));
+  // An optional indicator is listed once a record has its value, a domestic
+  // rate once a day of it is stored (availableIndicatorCodes).
+  for (const indicator of listedIndicators(availableIndicatorCodes(sessions, rateCodes))) {
+    const history = pair(`/market/${indicator.slug}/`);
+    entries.push(urlEntry(history[0].href, dates[0].published_at, history), urlEntry(history[1].href, dates[0].published_at, history));
+  }
   for (const session of dates) {
     const alternates = pair(`/market/${session.market_date}/`);
     const lastmod = session.published_at || session.market_date;

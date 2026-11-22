@@ -352,8 +352,8 @@ test('the computed expiries need no network at all', async () => {
 
   assert.equal(runOf(outcome.results, 'krx-expiry-rule').status, 'ok');
   assert.equal(runOf(outcome.results, 'us-expiry-rule').status, 'ok');
-  // KRX holidays are only checked in for 2026, so only that year is computed.
-  assert.equal(runOf(outcome.results, 'krx-expiry-rule').events, 12);
+  // KRX and NYSE holidays are checked in for 2026 and 2027, so both years are computed.
+  assert.equal(runOf(outcome.results, 'krx-expiry-rule').events, 24);
   assert.equal(runOf(outcome.results, 'us-expiry-rule').events, 24);
   db.close();
 });

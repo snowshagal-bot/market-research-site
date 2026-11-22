@@ -647,8 +647,10 @@ export async function onRequestPost(context) {
   const lang = String(form.get('lang') || '').trim();
   const translationGroup = String(form.get('translationGroup') || '').trim();
   const reportDate = String(form.get('reportDate') || '').trim();
-  const title = String(form.get('title') || '').trim().slice(0, 180);
-  const subtitle = String(form.get('subtitle') || '').trim().slice(0, 240);
+  // Report HTML keeps "A·B" together with U+2060; a stored title or subtitle must not carry it
+  // (a typed "한·중" would no longer match it in search), exactly like summaries.
+  const title = String(form.get('title') || '').replace(/[\u200B-\u200D\uFEFF\u2060]/g, '').trim().slice(0, 180);
+  const subtitle = String(form.get('subtitle') || '').replace(/[\u200B-\u200D\uFEFF\u2060]/g, '').trim().slice(0, 240);
   // The editor's own description, or ''. A category sentence the publisher
   // once filled in by itself is never stored, whichever client sent it.
   const description = globalThis.REPORT_METADATA.editorialDescription(form.get('description')).slice(0, 700);

@@ -212,13 +212,13 @@ async function getAuthEnv() {
   return sharedAuthEnv;
 }
 
-function publishRequest({ type = 'daily', cover = null, shareCard = null, shareCardSource, seoTitle, coverThumbnail = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, takeaway, tags = null, html = null, description = '테스트 설명' } = {}, url = 'https://admin.snowshagal.com/api/publish', session = sharedAuthEnv?._authSession) {
+function publishRequest({ type = 'daily', cover = null, shareCard = null, shareCardSource, seoTitle, coverThumbnail = null, lang = 'ko', translationGroup = '', reportDate = '2026-08-10', summary, takeaway, tags = null, html = null, description = '테스트 설명', title, subtitle } = {}, url = 'https://admin.snowshagal.com/api/publish', session = sharedAuthEnv?._authSession) {
   const form = new FormData();
   form.append('file', new File([html || '<!doctype html><html><body>report content with some words</body></html>'], 'report.html', { type: 'text/html' }));
   form.append('type', type);
   form.append('reportDate', reportDate);
-  form.append('title', type === 'basics' ? '시장을 읽는 기본' : '테스트 리포트');
-  form.append('subtitle', '테스트 부제');
+  form.append('title', title ?? (type === 'basics' ? '시장을 읽는 기본' : '테스트 리포트'));
+  form.append('subtitle', subtitle ?? '테스트 부제');
   form.append('description', description);
   if (summary !== undefined) form.append('summary', summary);
   if (takeaway !== undefined) form.append('takeaway', takeaway);
@@ -518,6 +518,19 @@ test('publishing stores an optional trimmed homepage summary up to 500 character
       assert.equal(meta.summary, expected || '테스트 설명');
     } finally { globalThis.fetch = originalFetch; }
   }
+});
+
+test('publishing stores the title and subtitle without word joiners or other invisible characters', async () => {
+  // 2026-11-19: "한⁠·중 정상회담 …" was stored as extracted, so a typed "한·중" missed it in search.
+  const calls = githubMock();
+  try {
+    const { response, data } = await runPublish({ title: '한⁠·중 정상회담​ 성적표﻿', subtitle: '열린 건 ⁠권리' });
+    assert.equal(response.status, 200);
+    const { post, entry } = publishedFromCalls(calls, data.id);
+    assert.equal(post.title, '한·중 정상회담 성적표');
+    assert.equal(post.subtitle, '열린 건 권리');
+    assert.equal(entry.title, '한·중 정상회담 성적표');
+  } finally { globalThis.fetch = originalFetch; }
 });
 
 /* ------------------------------------------ description (PR B1 invariant) */

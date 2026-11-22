@@ -10,7 +10,7 @@ import { onRequestGet as feedGet } from '../functions/api/disclosures/feed.js';
 import { onRequestGet as calendarGet } from '../functions/api/calendar.js';
 import { loadDisclosureFeed } from '../functions/api/disclosures/_feed-data.js';
 import { currentKstYearMonth, loadCalendarMonth } from '../functions/_calendar-data.js';
-import { buildInitialHtml } from '../functions/_initial-html.js';
+import { buildInitialHtml, renderCalendarGrid, renderUpcomingEvents } from '../functions/_initial-html.js';
 import { HOLIDAY_NAMES } from '../functions/_trading-calendar.js';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
@@ -235,12 +235,34 @@ test('an event-store failure keeps the exchange calendar and shows the unavailab
   assert.match(innerById(noDb.html, 'calendar-grid-mount'), /Market events are temporarily unavailable\./);
 });
 
-test('KRX-pending and deferred years render their existing notices', async () => {
-  const pending = await page('/calendar/?year=2027&month=1');
-  assert.match(innerById(pending.html, 'calendar-grid-mount'), /KRX\(한국\) 2027년 거래 일정은 한국거래소 공식 발표 후 순차 반영 예정입니다/);
-  assert.match(innerById(pending.html, 'calendar-grid-mount'), /data-date="2027-01-04"/);
+test('KRX 2027 renders its holidays and the 01-04 opening; a deferred year renders its notice', async () => {
+  const ko2027 = await page('/calendar/?year=2027&month=1');
+  const koGrid = innerById(ko2027.html, 'calendar-grid-mount');
+  assert.doesNotMatch(koGrid, /한국거래소 공식 발표 후 순차 반영 예정/);
+  assert.match(koGrid, /<span class="cal-tag joint">동시 휴장<\/span>/, '01-01 is closed on both markets');
+  assert.match(koGrid, /title="증시 개장식 \(개장 1시간 지연\)">KRX 10:00 - 15:30<\/span>/);
   const krxOnly = await page('/en/calendar/?year=2027&month=1&market=KRX');
-  assert.match(innerById(krxOnly.html, 'calendar-grid-mount'), /<h3>KRX 2027 schedule pending official release<\/h3>/);
+  const enGrid = innerById(krxOnly.html, 'calendar-grid-mount');
+  assert.doesNotMatch(enGrid, /schedule pending official release/);
+  assert.match(enGrid, /KRX New Year&#39;s Day|KRX New Year's Day/);
+  // 2027 comes from the government calendar before KRX's own notice: the page says so, in both
+  // languages, on every view that shows KRX; 2026 (confirmed) and the NYSE-only view do not.
+  assert.match(koGrid, /class="calendar-provisional-note"[\s\S]*KRX\(한국\) 2027년 휴장일은 정부 월력요항 기준 잠정 일정입니다\./);
+  assert.match(enGrid, /KRX 2027 holidays follow the government’s official 2027 calendar and are provisional\./);
+  const nyse2027 = await page('/calendar/?year=2027&month=1&market=NYSE');
+  assert.doesNotMatch(innerById(nyse2027.html, 'calendar-grid-mount'), /calendar-provisional-note/);
+  const ko2026 = await page('/calendar/?year=2026&month=12');
+  assert.doesNotMatch(innerById(ko2026.html, 'calendar-grid-mount'), /calendar-provisional-note/);
+  const feb = await page('/en/calendar/?year=2027&month=2&market=KRX');
+  assert.match(innerById(feb.html, 'calendar-grid-mount'), /KRX Lunar New Year \(Observed\)/);
+
+  // A year whose NYSE calendar exists before KRX's names that year in its notices.
+  const nyseOnly = { supported: true, year: 2031, marketSupport: { krx: false, nyse: true }, days: [{ date: '2031-01-01', day: 1, dayOfWeek: 3, isWeekend: false, krx: { supported: false }, nyse: { supported: true } }] };
+  assert.match(renderCalendarGrid(nyseOnly, { lang: 'ko', filter: 'ALL' }), /KRX\(한국\) 2031년 거래 일정은 한국거래소 공식 발표 후 순차 반영 예정입니다\. \(미국 NYSE 2031 일정 정상 제공\)/);
+  assert.match(renderCalendarGrid(nyseOnly, { lang: 'en', filter: 'KRX' }), /<h3>KRX 2031 schedule pending official release<\/h3>/);
+  const nyseEvent = { date: '2031-01-20', krx: { supported: false }, nyse: { supported: true, holiday: true } };
+  assert.match(renderUpcomingEvents([nyseEvent], { lang: 'en', filter: 'KRX', year: 2031 }), /KRX 2031 full annual schedule will be updated/);
+  assert.equal(renderUpcomingEvents([nyseEvent], { lang: 'en', filter: 'KRX', year: 2027 }), '');
   const deferred = await page('/calendar/?year=2028&month=1');
   assert.match(innerById(deferred.html, 'calendar-grid-mount'), /<h3>2028 calendar deferred — official schedule incomplete<\/h3>/);
   assert.match(innerById(deferred.html, 'calendar-grid-mount'), /해당 연도 일정은 공식 확정 후 순차 업데이트됩니다\./);

@@ -7,6 +7,7 @@ export const SUPPORTED_PERIODS = Object.freeze({
 
 const INSTRUMENT_GROUPS = Object.freeze(['indices', 'rates_fx_volatility', 'commodities_crypto']);
 const FLOW_MARKETS = Object.freeze(['KOSPI', 'KOSDAQ', 'KOSPI200선물']);
+const CLOSE_ONLY_KEYS = new Set(['KOSPI', 'KOSDAQ', 'USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'VKOSPI']);
 const FLOW_INVESTORS = Object.freeze(['외국인', '기관', '개인']);
 const BREADTH_MARKETS = Object.freeze(['KOSPI', 'KOSDAQ']);
 
@@ -17,7 +18,8 @@ function isFiniteNumber(val) {
 /**
  * Period value rule:
  * - data_state === 'unavailable' -> null (unconditionally)
- * - KOSPI, KOSDAQ, USDKRW, JPYKRW: use close (fixed 15:30 close)
+ * - KOSPI, KOSDAQ and the KRW pairs (USDKRW, JPYKRW, CNYKRW, EURKRW): use close (fixed 15:30 close)
+ * - VKOSPI: use close (the KRX derivatives close, 15:45 KST)
  * - data_state === 'intraday': use finite current, else null
  * - data_state === 'final_close': use finite close, else null (never fallback to current)
  * - other states: finite close, then finite current, else null
@@ -26,7 +28,7 @@ export function getPeriodValue(key, item) {
   if (!item || typeof item !== 'object') return null;
   if (item.data_state === 'unavailable') return null;
 
-  if (key === 'KOSPI' || key === 'KOSDAQ' || key === 'USDKRW' || key === 'JPYKRW') {
+  if (CLOSE_ONLY_KEYS.has(key)) {
     return isFiniteNumber(item.close) ? item.close : null;
   }
   if (item.data_state === 'intraday') {
