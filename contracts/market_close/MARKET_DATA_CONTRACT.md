@@ -186,6 +186,8 @@ Exporter는 원천 웹 페이지를 직접 파싱하지 않는다. UI와 TXT 저
 - 종목 객체: `rank`(1부터), `ticker`(6자), `name`, `close`(원), `change_pct`(KRX 전일 종가 대비 %), `trading_value_won`, `price_limit`(`upper`·`lower`·`null`).
 - 대상은 주식 종목(네이버 `stockEndType=stock`)뿐이다. ETF·ETN은 빼고 우선주는 포함한다. 그날 오른 종목이 5개보다 적으면 목록도 짧다(0~5개).
 - 원천: 네이버 금융 국내주식 순위 목록(상승·하락·거래대금 상위·52주 신고가·신저가). 수집기는 정규장 스냅샷 구간(15:31~15:39 KST, 특수일은 그날 구간)에만 저장한다. 15:40부터는 NXT 애프터마켓 체결이 목록 가격과 등락률을 바꾸기 때문이다. 이 구간의 목록 값은 KRX 15:30 종가·거래량·공식 등락률과 같다(2026-11-20 저장 스냅샷으로 대조).
+- 목록에 실은 종목(시장별 최대 15개)은 모두 KRX 15:30 분봉(네이버 KRX 분봉, `stockExchangeType=KRX`)의 종가·누적 거래량과 같아야 한다. 거래량이 같다는 것은 거래대금이 KRX 정규장 값(NXT 미포함)이라는 뜻이다. 하나라도 다르거나 분봉을 받지 못하면 섹션 전체를 `unavailable`(`source_validation_failed`)로 둔다.
+- `new_high_52w`·`new_low_52w`는 네이버 금융 52주 신고가·신저가 목록의 주식 종목 수(장중 기준)다. 종목별 분봉 대조는 하지 않고, 같은 구간의 두 캡처가 같을 때만 싣는다. 화면에 "장중 기준 · 네이버 금융"으로 밝힌다.
 - 16:05 export는 마지막 두 캡처에서 만든 섹션이 같을 때만 `complete`로 싣는다. 캡처가 둘보다 적으면 `missing_session`, 서로 다르거나 검증에 실패하면 `source_validation_failed`로 `unavailable`이다. 다른 날짜 값으로 채우지 않는다.
 - `source_date`는 `meta.market_date`와 같고 `as_of`(마지막 캡처 시각)는 그날(KST)이어야 한다. 수신 측은 순위가 1부터 차례인지, 목록 안 중복 종목, 정렬 방향, 상승/하락 부호를 다시 검사한다(`functions/api/market/_shared.js`의 `validateStockRankings`).
 - 화면: 오늘 화면과 날짜별 기록에서 "시장 폭" 바로 다음 섹션 "등락률 · 거래대금 상위 종목"(EN "Top Movers & Most Traded"). 영문 페이지는 영문명이 없는 종목을 종목코드로 표시한다.
