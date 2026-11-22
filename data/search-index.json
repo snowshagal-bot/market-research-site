@@ -14211,9 +14211,9 @@
     "registeredAt": "2026-08-25T15:51:11.804Z",
     "summary": "How does one U.S. data point move the won, foreign flows and Korean chips the next day? Follow the July 14, 2026 U.S. CPI release through FedWatch odds to the Seoul open.",
     "tags": [
-      "flows",
-      "semiconductors",
-      "rates"
+      "rates",
+      "fx",
+      "fed"
     ],
     "readingMinutes": 8,
     "url": "/reports/en/Market_Language_Ep3_How_US_Data_Reaches_Korea",
@@ -14924,13 +14924,12 @@
     "typeLabel": "Market Basics",
     "title": "When Cash and Futures Diverge",
     "subtitle": "",
-    "date": "2026-08-11",
+    "date": "2026-08-12",
     "registeredAt": "2026-08-25T15:47:11.805Z",
     "summary": "When cash and futures diverge: on July 6, 2026 Korean institutions sold ₩1.47tn of stocks and bought ₩1.07tn of KOSPI 200 futures. Hedging, arbitrage and the basis explained.",
     "tags": [
-      "flows",
-      "semiconductors",
-      "rates"
+      "futures",
+      "flows"
     ],
     "readingMinutes": 6,
     "url": "/reports/en/Market_Language_Ep2_When_Cash_and_Futures_Diverge",
@@ -15294,13 +15293,11 @@
     "typeLabel": "Market Basics",
     "title": "Who Moves Stock Prices?",
     "subtitle": "",
-    "date": "2026-08-10",
+    "date": "2026-08-11",
     "registeredAt": "2026-08-25T15:46:19.514Z",
     "summary": "Who really moves stock prices? Korea reports daily retail, foreign and institutional flows. Retail bought trillions of won and the index still fell. Who set the price?",
     "tags": [
-      "flows",
-      "semiconductors",
-      "rates"
+      "flows"
     ],
     "readingMinutes": 3,
     "url": "/reports/en/Market_Language_Ep1_Who_Moves_Stock_Prices",

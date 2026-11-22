@@ -6,7 +6,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 import { onRequest as middleware, removeTags, tagAttributes } from '../functions/_middleware.js';
-import { FAVICON_TAGS, findTranslationCounterpart, postLanguage } from '../functions/_seo.js';
+import { FAVICON_TAGS, findTranslationCounterpart, postLanguage, reportSiteUrl } from '../functions/_seo.js';
 
 const ROOT = new URL('../', import.meta.url);
 const read = path => readFile(new URL(path, ROOT), 'utf8');
@@ -55,6 +55,27 @@ test('report response includes visible clean reading links before any shell scri
     assert.doesNotMatch(nav, /\.html["?]|\shidden\b/);
     assert.ok(html.indexOf(nav) < html.indexOf('<script src="/assets/report-shell.js'));
   }
+});
+
+test('paired Market Basics reports link to each other in the initial footer and head', async () => {
+  const lessons = REAL_POSTS.filter(post => /\/Market_Language_Ep[123]_/.test(post.href));
+  assert.equal(lessons.length, 3);
+  for (const english of lessons) {
+    const korean = findTranslationCounterpart(REAL_POSTS, english);
+    assert.ok(korean, english.href);
+    for (const [source, target] of [[english, korean], [korean, english]]) {
+      const html = await render(source, withHead(''), REAL_POSTS);
+      const footer = html.match(/<footer id="site-footer"[\s\S]*?<\/footer>/)?.[0] || '';
+      const url = new URL(reportSiteUrl(target.href));
+      const language = postLanguage(target);
+      assert.ok(footer.includes(`href="${url.pathname}" hreflang="${language}" lang="${language}"`), source.href);
+      assert.ok(headOf(html).includes(`hreflang="${language}" href="${url.href}"`), source.href);
+    }
+  }
+
+  const unpaired = await render(POST, withHead(''));
+  assert.ok(unpaired.includes('<a href="/en/">English</a>'));
+  assert.doesNotMatch(unpaired, /English version/);
 });
 
 // Each case: an uploaded tag and whether Production (HTMLRewriter) removes it.
