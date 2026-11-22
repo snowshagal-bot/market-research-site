@@ -142,6 +142,15 @@ second migration system for Preview. Market Close first reads `sqlite_master` on
 and skips those statements when the table, its takeaway columns and its index are already there,
 so a cold start right after a deploy sends no DDL writes.
 
+Only publishing requires that init to succeed. Every Market Close read (the `/api/market/*`
+GET endpoints, `/market/` session, archive, sectors and history pages, report facts) logs a
+failed init and reads anyway, and a missing table then fails the read itself. On 2026-11-23,
+about one Production read in ten answered `DB_INIT_FAILED` (API 500, page 503) while the same
+database served comments, rates and Global Latest without error. The failure log is one line:
+`market close schema init failed[, reading anyway]: <statement> failed: <D1 error> (cause: …)
+[<what the sqlite_master probe saw>]`. Look for it in the Pages Functions logs when a market
+read fails.
+
 As of 2026-08-29, Preview D1 parity is complete. Preview `COMMENTS_DB` points to
 `market-research-comments-preview`, while Production `COMMENTS_DB` continues to point to
 `market-research-comments`; the databases are isolated and no Production data was copied.

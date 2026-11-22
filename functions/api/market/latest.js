@@ -21,7 +21,7 @@ function expectedDateHeaders(now) {
 
 export async function onRequestGet({ request, env, now = new Date() }) {
   try {
-    const db = await ensureMarketTable(env);
+    const db = await ensureMarketTable(env, { readOnly: true });
     const row = await db.prepare(`SELECT market_date, generated_at, published_at, payload_json, takeaway_ko, takeaway_en FROM ${TABLE_NAME} ORDER BY market_date DESC LIMIT 1`).first();
     if (!row) return json({ error: 'NO_MARKET_DATA', message: '아직 게시된 Market Close 데이터가 없습니다.' }, 404, 'public, max-age=30, s-maxage=60');
     return formatMarketResponse(row, request, expectedDateHeaders(now));

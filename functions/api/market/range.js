@@ -19,7 +19,7 @@ export async function onRequestGet({ request, env }) {
       }
     }
 
-    const db = await ensureMarketTable(env);
+    const db = await ensureMarketTable(env, { readOnly: true });
     let rows = [];
 
     if (end) {

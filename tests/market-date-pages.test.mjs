@@ -191,15 +191,22 @@ function row(date, overrides = {}) {
   return { market_date: date, status: 'final', published_at: `${date}T07:10:00Z`, payload_json: JSON.stringify(data), takeaway_ko: '', takeaway_en: '', prev_date: null, next_date: null, ...overrides };
 }
 
-function marketDb(rows, { hang = false } = {}) {
+// schemaFails: the sqlite_master probe and the DDL throw, as D1 did for about
+// one Production read in ten on 2026-11-23; ordinary reads still answer.
+function marketDb(rows, { hang = false, schemaFails = false } = {}) {
+  const schemaStatement = sql => /FROM sqlite_master|^\s*(CREATE|ALTER)\b/i.test(sql);
   return {
     prepare(sql) {
       let args = [];
       return {
         bind(...values) { args = values; return this; },
-        async run() { return { success: true }; },
+        async run() {
+          if (schemaFails && schemaStatement(sql)) throw new Error('D1_ERROR: Network connection lost.');
+          return { success: true };
+        },
         async first() {
           if (hang) return new Promise(() => {});
+          if (schemaFails && schemaStatement(sql)) throw new Error('D1_ERROR: Network connection lost.');
           if (/FROM sqlite_master/.test(sql)) return null;
           if (/WHERE market_date = \?1/.test(sql)) {
             const found = rows.find((item) => item.market_date === args[0]);
@@ -308,6 +315,25 @@ test('a database that does not answer gets a quick 503, not a hung page', async 
   assert.equal(response.headers.get('retry-after'), '60');
   assert.equal(response.headers.get('x-robots-tag'), 'noindex');
   assert.ok(Date.now() - started < 2000);
+});
+
+test('session, archive and history pages still answer when the schema init fails', async () => {
+  const rows = [row('2026-08-27'), row('2026-08-28')];
+  const logs = [];
+  const originalError = console.error;
+  console.error = (...args) => logs.push(args.join(' '));
+  try {
+    for (const url of ['https://snowshagal.com/market/2026-08-28/', 'https://snowshagal.com/en/market/archive/', 'https://snowshagal.com/market/usdkrw/', 'https://snowshagal.com/en/market/kospi/']) {
+      const { response } = await call(url, marketDb(rows, { schemaFails: true }));
+      assert.equal(response.status, 200, url);
+    }
+  } finally {
+    console.error = originalError;
+  }
+  // The session page's KOFIA lookup fails soft and logs on its own; the market
+  // table lines all say the read went ahead.
+  const marketLines = logs.filter(line => /^market close schema/.test(line));
+  assert.ok(marketLines.length > 0 && marketLines.every(line => /^market close schema init failed, reading anyway: CREATE TABLE failed: D1_ERROR/.test(line)), logs.join('\n'));
 });
 
 /* ---------------------------------------------------------------- sitemap */

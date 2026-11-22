@@ -2,7 +2,7 @@ import { TABLE_NAME, MarketDbError, ensureMarketTable, fingerprint, json } from 
 
 export async function onRequestGet({ request, env }) {
   try {
-    const db = await ensureMarketTable(env);
+    const db = await ensureMarketTable(env, { readOnly: true });
     const result = await db.prepare(`SELECT market_date FROM ${TABLE_NAME} ORDER BY market_date DESC`).all();
     const rows = Array.isArray(result?.results) ? result.results : [];
     const dates = rows.map(r => r.market_date).filter(Boolean);
