@@ -4,7 +4,9 @@ import test from 'node:test';
 import vm from 'node:vm';
 import {
   homepageLatestLinks,
-  categoryReportLinks
+  categoryReportLinks,
+  reportReadingNavigation,
+  cleanReportHref
 } from '../functions/_seo.js';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
@@ -53,9 +55,9 @@ function makeShadowRoot() {
   return root;
 }
 
-async function loadReportShell() {
+async function loadReportShell({ serverNav = null, postData = [], currentPath = '/reports/8월 27일 주식리포트_커버통합.html' } = {}) {
   const code = await read('assets/report-shell.js');
-  const windowObj = { MARKET_LOCALE: undefined, addEventListener() {} };
+  const windowObj = { MARKET_LOCALE: undefined, RESEARCH_POSTS: postData, addEventListener() {} };
   const documentObj = {
     currentScript: { dataset: { category: 'daily', lang: 'ko' } },
     documentElement: makeElement('html'),
@@ -64,7 +66,7 @@ async function loadReportShell() {
     readyState: 'complete',
     addEventListener() {},
     createElement: tag => makeElement(tag),
-    getElementById: id => (id === 'mrs-comments-host' ? makeElement('section') : null),
+    getElementById: id => id === 'mrs-reading-nav' ? serverNav : (id === 'mrs-comments-host' ? makeElement('section') : null),
     querySelector: () => null,
     querySelectorAll: () => []
   };
@@ -72,7 +74,7 @@ async function loadReportShell() {
   const sandbox = {
     window: windowObj,
     document: documentObj,
-    location: { pathname: '/reports/8월 27일 주식리포트_커버통합.html', href: 'https://snowshagal.com/reports/report', search: '' },
+    location: { pathname: currentPath, href: 'https://snowshagal.com/reports/report', search: '' },
     localStorage: { getItem: () => null, setItem() {} },
     matchMedia: () => ({ matches: false, addEventListener() {} }),
     navigator: { share: undefined, clipboard: undefined },
@@ -86,6 +88,7 @@ async function loadReportShell() {
 
   vm.createContext(sandbox);
   vm.runInContext(code, sandbox);
+  await new Promise(resolve => setImmediate(resolve));
   return {
     shell: sandbox.window.REPORT_SHELL,
     discovery: sandbox.window.REPORT_DISCOVERY
@@ -125,6 +128,43 @@ test('Previous / Next: stays within the same category and same locale in reportD
   assert.equal(en.current?.id, 'en-daily-2');
   assert.equal(en.prev, null, 'No older EN daily post in mock');
   assert.equal(en.next, null, 'No newer EN daily post in mock');
+});
+
+test('initial HTML navigation agrees with the reader UI for every real report', async () => {
+  const posts = JSON.parse(await read('data/posts.json'));
+  const { discovery } = await loadReportShell();
+  for (const post of posts) {
+    const { prev, next } = discovery.findAdjacentReports(posts, post.href, post.lang || 'ko');
+    const html = reportReadingNavigation(posts, post);
+    const expected = [prev, next].filter(Boolean).map(item => cleanReportHref(item.href));
+    const actual = [...html.matchAll(/<a href="([^"]+)"/g)].map(match => match[1].replace(/&amp;/g, '&'));
+    assert.deepEqual(actual, expected, post.href);
+    assert.doesNotMatch(html, /\shidden\b|nofollow/);
+  }
+});
+
+test('initial reading links survive failed discovery loading and are replaced only after successful rendering', async () => {
+  let removed = false;
+  const serverNav = { remove() { removed = true; } };
+  await loadReportShell({ serverNav });
+  assert.equal(removed, false, 'failed posts fetch must preserve server links');
+  const postData = [
+    { id: 'first', type: 'basics', href: 'reports/first.html', title: 'First', reportDate: '2026-08-01' },
+    { id: 'second', type: 'basics', href: 'reports/second.html', title: 'Second', reportDate: '2026-08-02' }
+  ];
+  await loadReportShell({ serverNav, postData, currentPath: '/reports/first' });
+  assert.equal(removed, true, 'successful discovery must avoid duplicate navigation');
+});
+
+test('initial reading links escape editorial titles and keep canonical clean hrefs', () => {
+  const posts = [
+    { id: 'a', type: 'note', href: 'reports/first.html', title: 'A', date: '2026-01-01' },
+    { id: 'b', type: 'note', href: 'reports/다음.html', title: '<img src=x onerror="bad"> & title', date: '2026-01-02' }
+  ];
+  const html = reportReadingNavigation(posts, posts[0]);
+  assert.match(html, /href="\/reports\/다음" rel="next"/);
+  assert.match(html, /&lt;img src=x onerror=&quot;bad&quot;&gt; &amp; title/);
+  assert.doesNotMatch(html, /<img/);
 });
 
 test('Previous / Next: real posts data traversal across all categories', async () => {

@@ -4,3 +4,5 @@ Disallow: /admin/
 Disallow: /api/
 
 Sitemap: https://snowshagal.com/sitemap.xml
+
+#DaumWebMasterTool:3f7d626b8969f4fd3bb7c3e3191e94c6779c1b6f7366a9821bf1843e45b59d88:Zle7beqbjbws6dh5S5OBww==

@@ -8,6 +8,20 @@ Updated: 2026-09-29
 
 ## Current stack
 
+Report discovery (2026-11-14): report middleware emits visible previous/next
+anchors in the initial HTML, in the report's own category and language, ordered
+by reportDate then registeredAt. The existing Shadow DOM discovery component
+removes that fallback only after its richer navigation renders successfully.
+If JavaScript or the posts fetch fails, the initial reading links remain usable.
+Uploaded report HTML, canonicals, sitemap dates and ranking policy are unchanged.
+This improves initial-HTML link discovery; it does not guarantee Google indexing.
+See `INDEXING_AUDIT_2026-11-14.md` for the 56-report investigation.
+
+Initial HTML string fallback (2026-11-19): generated latest/archive markup is
+inserted with a replacement callback, preserving literal dollar amounts such
+as `$1tn` in report titles instead of interpreting them as regex captures and
+duplicating container tags. The Cloudflare HTMLRewriter path is unchanged.
+
 Calendar improvements (2026-10-25, owner-approved rollout in #180): the existing daily
 calendar sync fills blank `disclosure_watchlist.corp_name_en` from OpenDART's
 official company overview `corp_name_eng`. `functions/api/disclosures/_company-names.js`
@@ -101,9 +115,11 @@ Whether the KRX trades today is kept apart from Market Close freshness. `krxSess
 
 Global Latest is a second, separate market data channel: the current observation of twelve global instruments (NASDAQ, DOW, SP500, SOX, VIX, US10Y, USDKRW, JPYKRW, DXY, WTI, GOLD, BITCOIN), independent of the KRX calendar, where Market Close stays the KRX trading-session historical snapshot. `functions/api/market/global/` holds the only instrument list, the 1.0.0 contract validation (`contracts/global_latest/`), and `POST /api/market/global/publish` / `GET /api/market/global/latest` over the `market_global_latest` table (migration `0002`, no runtime DDL). Each instrument's stored observation only moves forward in `as_of`; a valid publish updates the newer items and skips older ones; an invalid one writes nothing. GET returns the stored rows with their own timestamps (plus `x-global-latest-served-at`, the instant the body was read) and does not judge freshness. **Status: B1 receiver merged (#144, Production table live); B2 collector live in Production since 2026-09-26** (core task `시장지표-GlobalLatest`, every 30 minutes, Yahoo only, `final_close` for the US indices and US10Y only, never VIX).
 
+**Domestic Rates (KOFIA yields). Status: merged (#234, 99eb126) and live in Production since 2026-11-22.** Migration `0003` is applied to Preview and Production. Publisher #16 is merged; the installed core (`21b5b4c8` since 2026-11-22, publisher main 8df33e4 with the 2026-07-17 KRX closure, VKOSPI and the Asian indices) publishes through the task `시장지표-국내금리` (weekdays 16:20–18:20 KST, every 15 minutes). The backfill 2026-01-02..2026-11-20 stored 217 days. The KOFIA final quote yields (금융투자협회 최종호가수익률) of each KRX trading day — KTB 3Y and 10Y, corporate AA- 3Y, CD 91-day — are a third market data channel. KOFIA's afternoon basis is 16:00 KST, after the Market Close record is final (16:05 KST) and frozen, so they cannot be part of it. `functions/api/market/rates/` holds the only instrument list, the 1.0.0 contract validation (`contracts/domestic_rates/`: KRX trading day, not after today, read after `market_date` + `basis_time` KST, `change_bp` = (value − previous) × 100) and `POST /api/market/rates/publish` / `GET /api/market/rates/date` over `market_domestic_rates` (one row per date, migration `0003`, no runtime DDL). A day is created, unchanged for the same figures, or updated only by figures read later (a KOFIA correction). The pages join it by date: `/market/` TODAY requests `?date=latest` beside the Market Close and HISTORY requests that date (each at most 2.5 s, failure leaves it out), and shows the record's own day as section 4 "국내 금리" (later sections move down one); session pages render it as their own numbered section; four history pages (see below). Without the table or the day, every page is as before.
+
 **Global Latest overlay (B3). Status: merged (#145, 43b1eb7), Production.** Market Close stays the base of every market view; on TODAY views only — the homepage strip (`/`, `/en/`) and `/market/` TODAY (KO/EN) — a global instrument's displayed figures may come from Global Latest as a view projection. No payload is rewritten and nothing is stored. HISTORY, 1W and 1M never read or apply it.
 
-- Policy: `assets/locale.js` `globalLatestOverlay(items, payload, now)` (pure; shared by the server and both page scripts). An item is used only when it is well formed (finite positive value/previous close, change and change_pct consistent with them, strict ISO timestamps, `as_of ≤ retrieved_at`, `source_date` within a day of `as_of`), `as_of` is not in the future (5-minute skew), it is fresh **by `as_of`** (intraday: US indices/VIX/US10Y and BITCOIN 60 min, FX/DXY/WTI/GOLD 90 min; `final_close`: only NASDAQ/DOW/SP500/SOX/US10Y, up to 4 days), and it is newer than the snapshot's own figure (`as_of` after that item's `retrieved_at`). Anything else keeps the snapshot figure, per item. KOSPI and KOSDAQ are not Global Latest codes and can never be overlaid.
+- Policy: `assets/locale.js` `globalLatestOverlay(items, payload, now)` (pure; shared by the server and both page scripts). An item is used only when it is well formed (finite positive value/previous close, change and change_pct consistent with them, strict ISO timestamps, `as_of ≤ retrieved_at`, `source_date` within a day of `as_of`), `as_of` is not in the future (5-minute skew), it is fresh **by `as_of`** (intraday: US indices/VIX/US10Y and BITCOIN 60 min, FX/DXY/WTI/GOLD 90 min; `final_close`: only NASDAQ/DOW/SP500/SOX/VIX/US10Y, up to 4 days; VIX since 2026-11, when the collector began publishing its official close stamped after its own 15:15 CT session end), and it is newer than the snapshot's own figure (`as_of` after that item's `retrieved_at`). Anything else keeps the snapshot figure, per item. KOSPI and KOSDAQ are not Global Latest codes and can never be overlaid.
 - Clock: the homepage is judged once at the request's time in `functions/_home-initial.js`; the bootstrap (`globalLatest: { items, judgedAt }`, strip codes only) lets `site.js` reach the same figures with no request. `/market/` TODAY judges at `max(browser clock, x-global-latest-served-at)`, so a browser clock running behind cannot make an old value look current.
 - HOME: USD/KRW, US 10Y and GOLD may be overlaid. Every valid card carries a small basis line — KRX `9/23 · 종가`, Global Latest `9/25 · 장중` / `9/25 · 종가`, a snapshot figure kept `9/23 · 마감 시점` (captured with the KRX close) or `9/22 · 종가` (a completed close). The editorial refresh keeps these basis lines visible even without an overlay. The heading date stays the KRX close.
 - MARKET TODAY: Market Close and Global Latest are requested together (Global Latest at most once per TODAY load, never on a direct HISTORY/1W/1M entry, never waited for more than 2.5 s). An overlaid card shows the observation's value, change, previous close and `source_date · 장중/종가` (intraday adds `as_of` in KST); the snapshot's 15:30 fixing and open/high/low are omitted there. KRX cards and every KRX section are the snapshot, unchanged. `render()` applies the overlay only when passed by the TODAY load and only while the mode is TODAY; each load takes a token so a slow TODAY response can never paint over HISTORY.
@@ -136,6 +152,16 @@ Preview hosts remain blocked, and all non-Market mutation APIs keep their existi
   - The page answers 404 when the newest session carries no sectors.
   - Linked from `/market/`, each session page and the archive; listed in the sitemap.
   - The figures are index price moves, not investor flows, and the page says so.
+  - English names for all 85 stored KRX sector/theme index codes live in `assets/locale.js` (`KRX_GROUP_NAMES`, `krxGroupName`), used by the English session, sectors and 1W/1M views. `tests/krx-group-names.test.mjs` checks the list.
+- **Indicator daily histories**: `/market/{slug}/` and `/en/market/{slug}/` for the 29 instruments in `functions/_market-indicators.js` (slug = code in lower case: kospi, kosdaq, nasdaq, dow, sp500, nikkei225, shanghai, taiex, sox, vix, vkospi, us10y, ktb3y, ktb10y, corpaa3y, cd91, usdkrw, jpykrw, cnykrw, eurkrw, dxy, usdjpy, wti, brent, natgas, gold, silver, bitcoin; COMEX_COPPER is `copper`).
+  - The four `domestic` ones (KTB3Y, KTB10Y, CORPAA3Y, CD91, kind `kofia`) read Domestic Rates, not Market Close rows: the KOFIA yield of every stored KRX trading day (a backfill may predate the records), changes in bp against KOFIA's previous-day value, and a date links to its session page only when a final record exists. They are listed (sitemap, archive, related links) once a day is stored (`loadDomesticRateCodes`).
+  - The seven added on 2026-11-21 (CNYKRW, EURKRW, USDJPY, BRENT, NATGAS, SILVER, COMEX_COPPER) are `optional`: contract 1.2.0 lists them in `properties` but not `required`, so records made before them lack the keys. A page, its sitemap entry, its archive and related links appear only once a final record has its value (`availableIndicatorCodes`, from one `json_extract` column of their closes); dashboard and session cards link them only beside a value.
+  - VKOSPI (website #239 and publisher #18, live since 2026-11-22; first value 2026-11-23; kind `krxvol`, beside VIX in `rates_fx_volatility`) is optional the same way. It is KRX's 코스피 200 변동성지수: the derivatives-session close (15:45 KST, from KOSPI 200 options) of the session itself, read by the collector from KRX Index after 16:00 KST. Its page shows the KRX close with the day's high and low, changed against KRX's previous close.
+  - The Asian indices (website #241 and publisher #19, live since 2026-11-22; first values 2026-11-23; kind `asia`, after SP500 in `indices`: NIKKEI225 `^N225`, SHANGHAI `000001.SS`, TAIEX `^TWII`) are optional the same way. Each value is the local regular-session close (Tokyo 15:30, Shanghai 15:00 = 16:00 KST, Taipei 13:30 = 14:30 KST) of the latest local session that ended on or before the KRX date, dated that session. No local calendars are kept: a local holiday carries the previous close with its own date (cards add 현지 휴장 / Local holiday), and the receiver accepts a `source_date` from 14 days before the KRX date up to it (`LOCAL_SESSION_MAX_LAG_DAYS` in `_freshness.js`). History pages list each local session once, like the U.S. ones.
+  - Server-rendered in `functions/_market-date-page.js` from the same final D1 rows (one `json_extract` per page); nothing new is collected.
+  - Each page: the latest value, 1-week / 1-month / since-start changes, record high and low, a line chart (SVG plot, HTML labels, a native hover per day), and every value by month linking to the session record.
+  - What a value is depends on `kind`: `krx` KRX close; `krxvol` the KRX derivatives close (VKOSPI); `asia` an Asian index's local close dated by its local session, listed once; `us` the U.S. close dated by its U.S. session (`source_date`), listed once even when two records carry it; `fx` (USD, JPY, CNY, EUR against KRW) the 15:30 Hana Bank reference rate, changed against the previous fixing (not the payload's live-quote change); `snapshot` (DXY, USD/JPY, WTI, Brent, natural gas, gold, silver, copper, Bitcoin) the quote when the record was made, changed against the previous record because the provider's previous close is a settlement. Commodity pages name their unit (per barrel, MMBtu, troy ounce, pound).
+  - Linked from every dashboard and session card name, the 1W/1M rows, and the archive's "지표별 일별 기록" list (`#indicators`); listed in the sitemap (28 URLs, up to 58 once the eleven optional ones have values and Domestic Rates are stored). D1 budget 5 s, then 503; no data 404.
 
 ## Atom feeds (Phase 2, Production — #105)
 
@@ -188,11 +214,13 @@ check-run from Cloudflare's GitHub App to report success. Only then does it run 
 Production smoke. A missing or timed-out check fails closed, so an older Production cannot
 be inspected and reported as the new commit. There is no automatic rollback.
 
-Market verification additionally checks explicit 2026 KRX/NYSE calendars, the expected
+Market verification additionally checks explicit 2026–2027 KRX/NYSE calendars, the expected
 latest KRX trading date after 16:30 KST, and per-market source dates. The read-only
 `market-freshness-alert.yml` schedule runs at 17:00 KST on weekdays and maintains one GitHub
 Issue while Production MARKET remains stale or otherwise unverifiable. Calendar coverage
-must be extended before a new trading year; an unknown year fails closed.
+must be extended before a new trading year; an unknown year (now 2028) fails closed. KRX 2027
+(16 weekday closures and the 2027-01-04 10:00 delayed opening) is the publisher core's list,
+copied as is; the two lists change together.
 
 Market `meta.generated_at` is a collector refresh stamp and may carry the collector PC's
 offset (for example `+07:00`) with microseconds. Stored values, the API, and the schema are
@@ -215,8 +243,20 @@ description labels the flow sentence `수급:`), Weekly titles as
 `코스피 주간 {pct} · {tag labels} | {Mon–Fri period} | Snowshagal`, and Research titles
 topic-first (`{title} | {tag labels} 리서치 | Snowshagal`). A Research, Note or Basics post may
 carry its own search title (`seoTitle` in `data/posts.json`, owner decision 2026-10-06): the
-admin publisher fills it from the report's `<title>`, without a trailing `| Snowshagal`, and the
-editor confirms or edits it before publishing; the page `<title>` is then `{seoTitle} | Snowshagal`.
+admin publisher fills it from the report's `<title>`, without what follows the headline about
+Snowshagal (a bare `| Snowshagal`, a series label such as `| Snowshagal 투자 인사이트 NO.31`, and a
+date written after that label), and the editor confirms or edits it before publishing; the page
+`<title>` is then `{seoTitle} | Snowshagal`. A `<title>` that is only the headline plus that
+suffix is kept as the headline (since 2026-11-12), so new posts read `{headline} | Snowshagal` like
+the 52 titles normalized that day, which had read `… | Snowshagal 투자 인사이트 NO.31 | Snowshagal`.
+Posts published before 2026-10-06 without a `seoTitle` keep the dated category rule.
+Writing rule (owner decision 2026-11-16, after GSC showed impressions but almost no clicks on
+hook-only titles): a search title leads with the words a reader would type (the company,
+indicator or term), then a colon and the headline, e.g. `외국인 순매도 국적별 분석: 214조원, 누가 팔았나`
+or `마진콜·반대매매 뜻: 급락은 어떻게 더 큰 급락을 만드는가`; no new claim or number that the report
+does not carry. The admin hint says so. That day 96 stored titles (every Research and Note post
+and Basics 1–6, KO and EN) were rewritten this way; Basics 7 onward already followed it, so every
+Research, Note and Basics post now has a `seoTitle`.
 The rule (`SEO_TITLE_TYPES`, `seoTitleText`) lives in `assets/report-metadata.js` and is applied
 by `/api/publish`, `/api/manage` and `postSeoTitle()` in `functions/_seo.js`. A Daily or a Weekly
 never takes one, in Korean or in English: an English Daily gets the English close-based title
@@ -292,12 +332,47 @@ Each category also has a landing route in both locales:
 
 Indexability follows current locale content in `data/posts.json`: an empty locale route returns `X-Robots-Tag: noindex, follow`, stays out of the sitemap and crawlable category navigation, and is not declared as an `hreflang` counterpart. Publishing the first post restores all four automatically. The existing homepage `?category=` filters remain supported for bookmarks and in-page archive controls. Primary homepage category links lead to the landing URLs, and both surfaces consume the same current post data.
 
+Bing metadata review (2026-11-19): Daily, Market Basics and Investment Insights
+landings, Calendar, Market and the date archive now describe their actual scope
+and reading/filtering features more explicitly in both locales (12 routes).
+Meta, Open Graph, X and JSON-LD use matching descriptions. The Market description
+does not promise a fixed 16:05 update on special-hours trading days. Uploaded
+report bodies and report metadata rules are unchanged. Bing's empty-ALT notices
+on decorative logos and covers with adjacent titles do not justify replacing
+valid `alt=""` with repetitive search text.
+
 The homepage supports category filtering and search. Its opening surface is now a fixed Snowshagal brand hero rather than a post carousel. The hero keeps the brand promise stable while three concise Daily / Weekly / Research entry points lead to their category landing pages. `basics` and `note` remain available in the shared navigation, filters, and archive, and legacy `?category=` URLs remain functional.
 
 `/about/` and `/en/about/` carry a written introduction and a contact section. They are
 indexable, declare their own title, description, Open Graph and X metadata, and appear in
 the sitemap with reciprocal `hreflang`. Preview stays non-indexable through the shared
 middleware's `X-Robots-Tag` header rather than a meta tag.
+
+The concise KO/EN About copy (2026-11-16) identifies Snowshagal as a personal research
+archive about Korean markets, explains its use of public disclosures, statistics and
+brokerage research, and invites questions/error reports through the existing email.
+Source/date clarity and separating facts from forecasts/interpretation are stated as
+editorial aims, not a claim of formal review. No author credentials, affiliation,
+investment track record or unestablished correction policy is asserted.
+
+2026-11-17 the About pages gained three sections between About and Contact, stating only
+what the site already does: **What we publish** (the five categories with links, the
+date-is-data-date rule, the English edition as an adaptation), **Data sources** (Market:
+KRX regular-session close, no close record when it cannot be confirmed, overseas quotes
+with their own as-of time, the same four sources the Market page lists; Disclosures:
+OpenDART; Calendar: Fed, BLS, BEA, Bank of Korea and company filings; Reports: filings,
+official statistics, brokerage research) and **Disclaimer**. The About section also says
+the site is written by a single editor under a pen name.
+
+2026-11-17 (later): the Organization node carries `sameAs` with the editor's LinkedIn and
+Threads profiles (`SOCIAL_PROFILES` in `functions/_seo.js`). The static homepage JSON-LD
+repeats the same node, and both About pages link the same addresses in a Follow section
+(`rel="me"`); `tests/structured-data.test.mjs` keeps all three equal.
+
+The same change filled `description` for 21 early posts (Market Basics episodes 1–6 and
+the July–August weeklies, KO and EN) that had none and fell back to "date — category —
+title". Each line is written from the report's own lead and figures, within the
+180-character description limit, and the search index was rebuilt from them.
 
 The homepage opens with the brand hero, then a TODAY strip summarising the latest market
 close. `/api/market/latest` is the source of truth for both the strip's numbers and its
@@ -394,10 +469,10 @@ Admin page: `/admin/`
 2. `assets/admin.js` reads the file locally and attempts to infer category, report date, title, subtitle, description, summary and (Daily only) the TODAY one-liner, each only from a place the report marks as that field and each shown with its source beside the field (`docs/DAILY_REPORT_METADATA.md`). The description is the report's own `meta[name="description"]` or blank — never a category sentence: those are listed once in `assets/report-metadata.js`, which the admin page loads and `/api/publish` / `/api/manage` import, so the server refuses to store one whichever client sent it. Report-date detection accepts explicit metadata, year-first numeric dates, and natural English dates such as `August 4, 2026`; an unrecognized date remains blank for manual confirmation instead of defaulting silently to the current day. The five report categories remain visible as keyboard-accessible radio chips; automatic detection selects an initial value and the administrator can override it before publishing.
    The report date is read in this order: `meta[name="report-date"]`, `article:published_time` / JSON-LD `datePublished`, a date in the file name (`20261104_…` or `2026-11-04_…`), a byline (`발행 2026.11.04`, `Published Nov. 4, 2026`), then the first date in the title or the opening HTML. A date later than tomorrow is never taken (NO.25 was once read as 2027-01-03, a date its description quotes); with nothing else the field stays empty for the administrator.
    Before publishing, the page fetches `/admin/` and compares its `admin.js?v=` stamp with the one this tab loaded; if they differ the publish stops and asks for a reload, because a tab left open across a deploy reads titles and dates with its old code (the 11-03 K-beauty title was published that way, rows run together). A page that cannot be read or names no stamp does not block.
-3. The administrator chooses Korean (default) or English and may optionally connect an opposite-language post as its translation pair. Selecting a pair copies its `reportDate` into the form. Both the browser and `/api/publish` reject a paired submission whose date differs from its counterpart. A pair also carries one tag list in one order (the Verification Gate compares them exactly): `/api/publish` stores the pair's tags in the pair's order when the submitted set matches and rejects a different set (`PAIR_TAG_MISMATCH`), and a tag edit in `/api/manage` is applied to the other-language post in the same commit (`translationPartners`, `pairAlignedTags` in `functions/_tags.js`).
+3. The administrator chooses Korean (default) or English and may optionally connect an opposite-language post as its translation pair. The list comes from `/data/posts.js` when the page opens and is read again from `/data/posts.json` whenever a report is chosen, so a report published since (in this tab or another) can be paired; an empty or failed answer keeps the list the page has. A pair holds one post per language (#126): a report that already has its partner in the language being published is listed as `이미 English 짝 있음` (or `한국어`) and cannot be chosen, and `/api/publish` rejects such a pair (`PAIR_LANGUAGE_TAKEN`, naming the post already there). On 2026-11-11 the 11-11 EN Daily was paired with the 11-10 KO Daily that way and took its date (fixed in #209). Selecting a pair copies its `reportDate` into the form. Both the browser and `/api/publish` reject a paired submission whose date differs from its counterpart. A pair also carries one tag list in one order (the Verification Gate compares them exactly): `/api/publish` stores the pair's tags in the pair's order when the submitted set matches and rejects a different set (`PAIR_TAG_MISMATCH`), and a tag edit in `/api/manage` is applied to the other-language post in the same commit (`translationPartners`, `pairAlignedTags` in `functions/_tags.js`).
 4. Title extraction prefers report metadata/HTML content such as `meta[name="report-title"]`, the cover title (`.cv-h1`, the Daily cover's `.dcv-h1`, `.cv-title`, `.cover-title`), `h1`, generic title class, and finally document title/file name. A cover that sets its title on two rows (a `<br>`, or a child its stylesheet makes a block: the `COVER_ROWS` list) is read with the rows apart; styling inside a word is left as it reads.
-5. An optional cover can be reviewed locally with the homepage's actual `cover` / `center top` crop at PC 1280, mobile 430, and mobile 360 before publishing. The preview uses a temporary browser object URL and does not upload the image. The admin can also generate a 900×1350 cover once at publish time from the uploaded HTML: `report-cover-selector` metadata wins, conservative first-page heuristics follow, and failed or ambiguous capture uses a restrained Canvas template. The generated file enters the same preview/upload path as a manual cover, which remains available.
-6. User can review/edit the extracted publishing metadata before publishing (the one-liner is read-only there; `/admin/manage/` edits it after publishing). The search title (Research / Note / Basics only) is read from the report's `<title>` minus the brand, left empty when it only repeats the headline, and switched off for Daily and Weekly. An optional share image (1200×630) can be chosen instead of the card composed from the cover: `SHARE_CARD.prepareShareImage` keeps a 1200×630 JPEG byte for byte and draws anything else to fill the card, and the form names the file the report's own `og:image` points to so the editor can pick the same one. `summary` is an optional homepage hero teaser, separate from `description`; 2–3 sentences or about 90–140 characters is recommended.
+5. An optional cover can be reviewed locally with the homepage's actual `cover` / `center top` crop at PC 1280, mobile 430, and mobile 360 before publishing. The preview uses a temporary browser object URL and does not upload the image. The admin can also generate a 900×1350 cover once at publish time from the uploaded HTML. The publish screen (`assets/cover-generator.js`) and `/api/generate-cover` decide in the same order: `<meta name="report-cover-mode" content="first-screen">` (a report without a cover of its own, e.g. the Daily from 2026-11-11) captures the top 480×720 of the page at deviceScaleFactor 2 and fills 900×1350 edge to edge with no padding band; then `report-cover-selector` metadata; then conservative first-page heuristics. A restrained Canvas template stands in only when nothing can be captured or the capture fails, and the publish screen then says, in the warning colour, what was tried and why (error code, HTTP status, Cloudflare status, time limit); authentication and configuration errors still fail without a template. Browser Rendering calls time out at 40 s. See `docs/DAILY_REPORT_METADATA.md`. The generated file enters the same preview/upload path as a manual cover, which remains available.
+6. User can review/edit the extracted publishing metadata before publishing (the one-liner is read-only there; `/admin/manage/` edits it after publishing). The search title (Research / Note / Basics only) is read from the report's `<title>` minus the brand, series label and any date after them (kept even when that leaves just the headline), and switched off for Daily and Weekly. An optional share image (1200×630) can be chosen instead of the card composed from the cover: `SHARE_CARD.prepareShareImage` keeps a 1200×630 JPEG byte for byte and draws anything else to fill the card, and the form names the file the report's own `og:image` points to so the editor can pick the same one. `summary` is an optional homepage hero teaser, separate from `description`; 2–3 sentences or about 90–140 characters is recommended.
 7. `/api/publish` authenticates with `ADMIN_KEY` and uses `GITHUB_TOKEN` server-side. It accepts only `ko` or `en`; Korean reports keep `reports/`, while English reports are written under `reports/en/`.
 8. An optional JPG/PNG/WebP cover image can be uploaded separately from the report HTML.
 9. A single Git commit updates the report HTML, optional `covers/` asset, `data/posts.json`, and `data/posts.js`.
@@ -405,7 +480,7 @@ Admin page: `/admin/`
 10. Cloudflare Pages automatically deploys the new Git commit.
 11. Admin UI polls `data/posts.json` until the new post appears, then stays on `/admin/` with a completion overlay. `다음 리포트 등록` reloads the current Admin URL so the latest post and translation-pair candidates are loaded into a fully reset form; the report and locale/category confirmation links open in new tabs. A polling timeout remains a successful publish state with the same actions and never redirects automatically.
 
-The publisher and post manager read repository JSON through the Git blob API when a file is too large for the GitHub Contents API to return inline. This keeps the growing full-text search index publishable beyond the Contents API's 1MB inline-content limit.
+The publisher and post manager read repository JSON through the Git blob API when a file is too large for the GitHub Contents API to return inline. This keeps the growing full-text search index publishable beyond the Contents API's 1MB inline-content limit. The blob is read raw (`Accept: application/vnd.github.raw+json`), and each search index file is serialized only when it is written (`searchIndexArtifactWriters` in `functions/api/_search-index.js`), so one copy is in memory at a time: on 2026-11-16, with the index at 10.9MB, base64 reads and all files serialized at once took a publish past the Worker memory limit (Cloudflare 1102, shown as "게시 실패 (503)"). The change roughly halved the publish's memory floor in a local run with Production data, and the written files are byte-identical.
 
 They write the same way. Every file in a publish or an edit — the report HTML, `data/posts.json`, `data/posts.js` and the four search index artifacts — is created as its own Git blob first, and the tree names it by hash. A tree that inlined the contents instead grew with the archive: by 2026-09 a single publish request carried over 6MB before the report itself, and an edge between Cloudflare and GitHub refused it with an opaque `error code: 520` that reached the admin with no indication of which call had failed. Requests that Git addresses by content hash — blobs, trees, commits — are retried on such a failure; a branch reference update is not, because moving it twice is not the same as moving it once. A GitHub error now records the endpoint and status alongside whatever the upstream said.
 
@@ -482,6 +557,14 @@ Files under `reports/` are standalone HTML documents that may contain their own 
 `functions/_middleware.js` intercepts HTML responses under `/reports/` and injects `/assets/report-shell.js`.
 
 The same middleware injects canonical `snowshagal.com` metadata into published report responses and marks non-Production hosts `noindex, nofollow` by response header. It generates the report `<title>` from the real report date, category, and editorial title, or from the post's stored search title (see above). The report's own `<title>`, description, Open Graph, X and `application/ld+json` blocks are removed so each appears exactly once: the site's JSON-LD (Article + BreadcrumbList) is the only structured data on a report page. The description is `reportDescription()` (see the report `<title>` / description rules above): Market Close facts for a Daily or Weekly that has them, otherwise the editorial blurb as written, otherwise the factual date · category · title line; meta, Open Graph, X and JSON-LD all carry that one text, and whatever pieces exist are used so it is never empty. It adds `hreflang` only when both sides of an explicit `translationGroup` exist, so untranslated reports never point to invented English pages.
+
+Since 2026-11-17 the middleware also reads three metas from the uploaded file's own `<head>` as it streams (HTMLRewriter handlers; `reportHeadMeta()` on the string path), and writes the site's head tags at `</head>`, after them:
+- `report-seo-title` becomes the `<title>` exactly as written (it already ends in ` | Snowshagal`; nothing is added). Any category.
+- `report-seo-description` becomes the meta, Open Graph, X and JSON-LD description, as written.
+- `report-takeaway`, when there is no `report-seo-description`, opens a Daily or Weekly description, with the Market Close numbers after it.
+- og:title, twitter:title and the JSON-LD headline stay the H1. Uploads without these metas (every report before the 11-18 Daily) render as before.
+
+JSON-LD `datePublished` is the upload time in Korean time (`2026-11-18T16:42:05+09:00`) when `registeredAt` falls within three days of the report date and the post is not a legacy import; otherwise it stays the plain report date. `dateModified` is the last `/admin/manage/` save (`updatedAt`) when later, else the same as `datePublished`. A report uploaded again is a new upload, so both move with it. The head repeats them as `article:published_time` / `article:modified_time` (any `article:published_time` the upload carried is dropped), because Daum otherwise dated pages from the first date-like text in the body, such as a 2006 Fed decision quoted in a note.
 
 For the homepage and category landings, the middleware reads the current `data/posts.json` asset and places real report `<a href>` elements in the HTML response before client JavaScript runs. `assets/site.js` and `assets/category-landing.js` then render the interactive views from `data/posts.js`, preserving search, filters, list/calendar modes, and category browsing without duplicating post data. Static KO/EN category shells keep self-canonicals, while locale alternates, navigation exposure and sitemap inclusion are generated only for populated locale categories. The data-driven `/sitemap.xml` lists eligible locale/category pages and current published reports. `/robots.txt` allows public crawling and excludes administrator/API routes.
 
@@ -606,6 +689,9 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `migrations/comments/0001_admin_announcements.sql` — idempotent `COMMENTS_DB` announcement migration
 - `migrations/comments/0002_market_global_latest.sql` — idempotent Global Latest table (`market_global_latest`)
 - `functions/api/market/global/` — Global Latest contract validation, publish and read endpoints
+- `migrations/comments/0003_market_domestic_rates.sql` — idempotent Domestic Rates table (`market_domestic_rates`)
+- `functions/api/market/rates/` — Domestic Rates (KOFIA yields) contract validation, publish and read endpoints, page loaders
+- `contracts/domestic_rates/` — Domestic Rates JSON Schema, example and contract
 - `data/market-summary.js` — fallback data and editorial one-liner for the homepage TODAY strip
 - `data/tags.json` / `data/tags.js` — canonical topic tag registry
 - `scripts/build-search-index.mjs` — builds the search index and syncs reading time

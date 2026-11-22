@@ -18,9 +18,19 @@
   ];
   const SAFE_SELECTOR_TOKEN = /^[A-Za-z_][A-Za-z0-9_-]*$/;
   const COVER_CLASS_TOKEN = /(?:^|[-_])cover(?:$|[-_])/i;
+  // A report without a cover (the Daily since 2026-11-11) declares
+  // <meta name="report-cover-mode" content="first-screen">: the top 480×720 of
+  // the page is the cover. It outranks report-cover-selector, which outranks
+  // the heuristics, exactly as /api/generate-cover decides.
+  const FIRST_SCREEN_MODE = 'first-screen';
 
   function selectorMeta(doc) {
     return (doc.querySelector('meta[name="report-cover-selector"]')?.content || '').trim();
+  }
+
+  function coverModeMeta(doc) {
+    const mode = (doc.querySelector?.('meta[name="report-cover-mode"]')?.content || '').trim().toLowerCase();
+    return mode === FIRST_SCREEN_MODE ? FIRST_SCREEN_MODE : '';
   }
 
   function usableCandidate(node, allowPlainText = true) {
@@ -74,6 +84,9 @@
   }
 
   function findCaptureTarget(doc) {
+    if (coverModeMeta(doc) === FIRST_SCREEN_MODE) {
+      return { target: doc.body || null, selector: '', source: 'meta', mode: FIRST_SCREEN_MODE };
+    }
     const declared = selectorMeta(doc);
     if (declared) {
       try {
@@ -223,16 +236,38 @@
     };
   }
 
-  function preferredSelector(html) {
+  // The first screen is already 2:3, and is meant to be the whole cover: it
+  // fills 900×1350 edge to edge, cropping centrally if the capture is off by a
+  // pixel, rather than sitting in a padded band of background.
+  function fillPlacement(sourceWidth, sourceHeight) {
+    const scale = Math.max(OUTPUT_WIDTH / sourceWidth, OUTPUT_HEIGHT / sourceHeight);
+    const drawWidth = sourceWidth * scale;
+    const drawHeight = sourceHeight * scale;
+    return {
+      scale,
+      drawWidth,
+      drawHeight,
+      x: (OUTPUT_WIDTH - drawWidth) / 2,
+      y: (OUTPUT_HEIGHT - drawHeight) / 2
+    };
+  }
+
+  function capturePlan(html) {
     try {
       const doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
-      return findCaptureTarget(doc).selector;
+      const target = findCaptureTarget(doc);
+      if (target.mode === FIRST_SCREEN_MODE) return { mode: FIRST_SCREEN_MODE, selector: '' };
+      return target.selector ? { mode: 'selector', selector: target.selector } : { mode: 'template', selector: '' };
     } catch (_) {
-      return '';
+      return { mode: 'template', selector: '' };
     }
   }
 
-  async function resizeServerCapture(blob) {
+  function preferredSelector(html) {
+    return capturePlan(html).selector;
+  }
+
+  async function resizeServerCapture(blob, { fill = false } = {}) {
     const objectUrl = URL.createObjectURL(blob);
     try {
       const image = await imageFromUrl(objectUrl);
@@ -242,7 +277,9 @@
       const context = canvas.getContext('2d');
       context.fillStyle = DEFAULT_CAPTURE_BACKGROUND;
       context.fillRect(0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
-      const placement = containPlacement(image.naturalWidth || image.width, image.naturalHeight || image.height);
+      const width = image.naturalWidth || image.width;
+      const height = image.naturalHeight || image.height;
+      const placement = fill ? fillPlacement(width, height) : containPlacement(width, height);
       context.drawImage(image, placement.x, placement.y, placement.drawWidth, placement.drawHeight);
       return canvasBlob(canvas);
     } finally {
@@ -250,30 +287,47 @@
     }
   }
 
-  async function serverCapture(html, selector, csrfToken) {
+  async function serverCapture(html, selector, csrfToken, { mode = 'selector' } = {}) {
     const headers = { 'content-type': 'application/json' };
     if (csrfToken) headers['x-csrf-token'] = String(csrfToken || '');
     const response = await fetch('/api/generate-cover', {
       method: 'POST',
       headers,
-      body: JSON.stringify({ html: String(html || ''), preferredSelector: selector })
+      body: JSON.stringify({ html: String(html || ''), preferredSelector: selector, preferredMode: mode })
     });
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
       const error = new Error(data.message || 'Browser Rendering 커버 생성에 실패했습니다.');
       error.code = String(data.error || 'COVER_GENERATION_FAILED');
       error.status = response.status;
+      if (Number.isInteger(data.upstreamStatus)) error.upstreamStatus = data.upstreamStatus;
+      if (Number.isInteger(data.timeoutMs)) error.timeoutMs = data.timeoutMs;
       throw error;
     }
     const type = (response.headers.get('content-type') || '').split(';')[0].toLowerCase();
     if (!['image/png', 'image/webp'].includes(type)) throw new Error('커버 이미지 응답 형식이 올바르지 않습니다.');
+    const capturedMode = response.headers.get('x-cover-mode') || mode;
     const captured = await response.blob();
-    const { blob, extension } = await resizeServerCapture(captured);
+    const { blob, extension } = await resizeServerCapture(captured, { fill: capturedMode === FIRST_SCREEN_MODE });
     return {
       file: new File([blob], `generated-cover.${extension}`, { type: blob.type || `image/${extension}` }),
       method: 'browser-rendering',
-      selector: response.headers.get('x-cover-selector') || selector
+      mode: capturedMode,
+      selector: capturedMode === FIRST_SCREEN_MODE ? '' : (response.headers.get('x-cover-selector') || selector)
     };
+  }
+
+  // Why a capture did not happen, in words the editor can act on, with the
+  // code and statuses that tell one failure from another.
+  function describeCaptureError(error) {
+    const message = String(error?.message || 'Browser Rendering 실패').trim();
+    const detail = [
+      error?.code,
+      error?.status ? `HTTP ${error.status}` : '',
+      error?.upstreamStatus ? `Cloudflare ${error.upstreamStatus}` : '',
+      error?.timeoutMs ? `제한 ${Math.round(error.timeoutMs / 1000)}초` : ''
+    ].filter(Boolean).join(' · ');
+    return detail ? `${message} (${detail})` : message;
   }
 
   function canUseTemplateFallback(error) {
@@ -288,26 +342,45 @@
     ].includes(code);
   }
 
+  // The template is only ever a stand-in for a capture that did not happen,
+  // and it always says why: the target that was tried and the reason it failed.
   async function generate({ html, template, csrfToken, adminKey }) {
-    const selector = preferredSelector(html);
+    const plan = capturePlan(html);
     const token = csrfToken || adminKey;
-    if (selector) {
-      try { return await serverCapture(html, selector, token); }
+    if (plan.mode !== 'template') {
+      try { return await serverCapture(html, plan.selector, token, { mode: plan.mode }); }
       catch (error) {
         if (!canUseTemplateFallback(error)) throw error;
         const fallback = await createTemplateCover(template);
-        return { ...fallback, attemptedSelector: selector, captureError: error?.message || 'Browser Rendering 실패' };
+        return {
+          ...fallback,
+          attemptedMode: plan.mode,
+          attemptedSelector: plan.selector,
+          captureError: describeCaptureError(error),
+          captureErrorCode: String(error?.code || '')
+        };
       }
     }
     const fallback = await createTemplateCover(template);
-    return { ...fallback, attemptedSelector: '', captureError: '' };
+    return {
+      ...fallback,
+      attemptedMode: '',
+      attemptedSelector: '',
+      captureError: '캡처할 표지를 찾지 못했습니다 · head에 report-cover-mode 또는 report-cover-selector 메타가 없고 표지 구조도 감지되지 않았습니다',
+      captureErrorCode: 'COVER_TARGET_NOT_FOUND'
+    };
   }
 
   window.MARKET_COVER_GENERATOR = {
     OUTPUT_WIDTH,
     OUTPUT_HEIGHT,
     HEURISTIC_SELECTORS,
+    FIRST_SCREEN_MODE,
     selectorMeta,
+    coverModeMeta,
+    capturePlan,
+    fillPlacement,
+    describeCaptureError,
     normalizeCaptureTarget,
     standaloneCoverSelector,
     findStandaloneImageCover,

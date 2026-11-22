@@ -24,7 +24,8 @@ async function generatorApi() {
         body: node(html),
         querySelector(selector) {
           if (selector.startsWith('meta[')) {
-            const match = html.match(/<meta\b[^>]*name\s*=\s*["']report-cover-selector["'][^>]*content\s*=\s*["']([^"']+)["']/i);
+            const name = selector.match(/name="([^"]+)"/)?.[1] || 'report-cover-selector';
+            const match = html.match(new RegExp(`<meta\\b[^>]*name\\s*=\\s*["']${name}["'][^>]*content\\s*=\\s*["']([^"']+)["']`, 'i'));
             return match ? { content: match[1] } : null;
           }
           if (selector === '.cvwrap > .cv' || selector === '.cvwrap .cv' || selector === '.cv') {
@@ -322,10 +323,10 @@ test('HTML targets use the same-origin server capture endpoint and preserve the 
   const source = await read('assets/cover-generator.js');
   assert.match(source, /fetch\('\/api\/generate-cover'/);
   assert.match(source, /headers\['x-csrf-token'\] = String\(csrfToken \|\| ''\)/);
-  assert.match(source, /body: JSON\.stringify\(\{ html: String\(html \|\| ''\), preferredSelector: selector \}\)/);
+  assert.match(source, /body: JSON\.stringify\(\{ html: String\(html \|\| ''\), preferredSelector: selector, preferredMode: mode \}\)/);
   assert.match(source, /method: 'browser-rendering'/);
   assert.match(source, /const fallback = await createTemplateCover\(template\)/);
-  assert.match(source, /try \{ return await serverCapture\(html, selector, token\); \}[\s\S]*createTemplateCover\(template\)/);
+  assert.match(source, /try \{ return await serverCapture\(html, plan\.selector, token, \{ mode: plan\.mode \}\); \}[\s\S]*createTemplateCover\(template\)/);
 });
 
 test('configuration and authentication errors are never hidden while missing target uses template fallback', async () => {
@@ -393,6 +394,140 @@ test('Daily, Weekly, and Research formal covers retain browser capture selectors
   // Research report with .report-cover
   const researchHtml = `<html><body><div class="report-cover"><img src="research.png"><h1>Deep Research</h1></div></body></html>`;
   assert.equal(api.preferredSelector(researchHtml), '.report-cover');
+});
+
+// ---------------------------------------------------------------------------
+// report-cover-mode=first-screen and failures that say why (2026-11-11)
+// ---------------------------------------------------------------------------
+
+/** The generator with a fake fetch, image and canvas, recording what is drawn where. */
+async function generatorRuntime({ respond, imageSize = { width: 960, height: 1440 } }) {
+  const source = await read('assets/cover-generator.js');
+  const window = {};
+  const requests = [];
+  const draws = [];
+  const fills = [];
+  const context = {
+    font: '', fillStyle: '', strokeStyle: '', lineWidth: 1, textAlign: 'left',
+    fillRect(...args) { fills.push(args); },
+    strokeRect() {}, beginPath() {}, moveTo() {}, lineTo() {}, stroke() {}, fillText() {},
+    measureText(text) { return { width: String(text).length * 10 }; },
+    drawImage(image, x, y, w, h) { draws.push({ x, y, w, h }); }
+  };
+  class TestDOMParser { parseFromString(html) { return parserFor(html); } }
+  function parserFor(html) {
+    const metaContent = name => html.match(new RegExp(`<meta\\b[^>]*name\\s*=\\s*["']${name}["'][^>]*content\\s*=\\s*["']([^"']+)["']`, 'i'))?.[1];
+    return {
+      body: node(html),
+      querySelector(selector) {
+        if (selector.startsWith('meta[')) {
+          const content = metaContent(selector.match(/name="([^"]+)"/)[1]);
+          return content ? { content } : null;
+        }
+        if ((selector === '.cv' || selector === '.cvwrap .cv' || selector === '.cvwrap > .cv') && /class=["'][^"']*\bcv\b/.test(html)) {
+          const el = node('cv content', { visual: true, children: 3 });
+          el.matches = s => s === '.cv';
+          return el;
+        }
+        return null;
+      },
+      querySelectorAll() { return []; }
+    };
+  }
+  vm.runInNewContext(source, {
+    window,
+    Blob,
+    DOMParser: TestDOMParser,
+    File: class TestFile extends Blob { constructor(parts, name, options) { super(parts, options); this.name = name; } },
+    URL: { createObjectURL: () => 'blob:test', revokeObjectURL() {} },
+    Image: class TestImage {
+      set src(_value) { this.naturalWidth = imageSize.width; this.naturalHeight = imageSize.height; queueMicrotask(() => this.onload()); }
+    },
+    document: {
+      createElement: () => ({ width: 0, height: 0, getContext: () => context, toBlob: (done, type) => done(new Blob(['x'], { type: type || 'image/png' })) })
+    },
+    fetch: async (url, init) => { requests.push({ url, body: JSON.parse(init.body), headers: init.headers }); return respond(); }
+  });
+  return { api: window.MARKET_COVER_GENERATOR, requests, draws, fills };
+}
+
+const FIRST_SCREEN_DAILY = '<html><head><meta name="report-cover-mode" content="first-screen"><meta name="report-cover-selector" content=".nc-cover"></head><body><section class="hero nc"><div class="nc-cover"><h1>금리 경고를 넘은 반도체,<br><em>사흘 낙폭의 절반 회복</em></h1></div></section></body></html>';
+const TEMPLATE_INPUT = { category: '데일리', date: '2026-11-11', title: '금리 경고를 넘은 반도체, 사흘 낙폭의 절반 회복' };
+const pngResponse = (headers = {}) => new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'content-type': 'image/png', ...headers } });
+
+test('first-screen mode outranks report-cover-selector, which outranks the heuristics, then the template', async () => {
+  const api = await generatorApi();
+  assert.deepEqual({ ...api.capturePlan(FIRST_SCREEN_DAILY) }, { mode: 'first-screen', selector: '' });
+  assert.deepEqual({ ...api.capturePlan('<head><meta name="report-cover-selector" content=".cv"></head><div class="cv"><img></div>') }, { mode: 'selector', selector: '.cv' });
+  assert.deepEqual({ ...api.capturePlan('<div class="cvwrap"><div class="cv"><img></div></div>') }, { mode: 'selector', selector: '.cv' });
+  assert.deepEqual({ ...api.capturePlan('<main class="page"><h1>무표지</h1></main>') }, { mode: 'template', selector: '' });
+  // Only the exact value turns the mode on.
+  assert.deepEqual({ ...api.capturePlan('<head><meta name="report-cover-mode" content="whole-page"></head><main><h1>x</h1></main>') }, { mode: 'template', selector: '' });
+});
+
+test('a first-screen capture fills 900×1350 edge to edge, with no padding band', async () => {
+  const api = await generatorApi();
+  assert.deepEqual({ ...api.fillPlacement(960, 1440) }, { scale: 900 / 960, drawWidth: 900, drawHeight: 1350, x: 0, y: 0 });
+  // A capture off by a pixel is cropped centrally, never letterboxed.
+  const off = api.fillPlacement(960, 1442);
+  assert.ok(off.drawWidth >= 900 && off.drawHeight >= 1350 && off.x <= 0 && off.y <= 0);
+  // The padded contain placement stays for other ratios (unchanged behaviour).
+  assert.ok(api.containPlacement(1600, 900).x === 32);
+});
+
+test('first-screen generation asks the server for the first screen and draws it without margins', async () => {
+  const { api, requests, draws } = await generatorRuntime({ respond: () => pngResponse({ 'x-cover-mode': 'first-screen' }) });
+  const result = await api.generate({ html: FIRST_SCREEN_DAILY, template: TEMPLATE_INPUT, csrfToken: 'csrf' });
+  assert.equal(requests.length, 1);
+  assert.equal(requests[0].url, '/api/generate-cover');
+  assert.equal(requests[0].body.preferredMode, 'first-screen');
+  assert.equal(requests[0].body.preferredSelector, '');
+  assert.equal(requests[0].headers['x-csrf-token'], 'csrf');
+  assert.equal(result.method, 'browser-rendering');
+  assert.equal(result.mode, 'first-screen');
+  assert.equal(result.selector, '');
+  assert.deepEqual(draws, [{ x: 0, y: 0, w: 900, h: 1350 }]);
+
+  // A first screen that comes back taller than 2:3 still covers the whole
+  // canvas: no 32px band, no background showing.
+  const tall = await generatorRuntime({ respond: () => pngResponse({ 'x-cover-mode': 'first-screen' }), imageSize: { width: 960, height: 1500 } });
+  await tall.api.generate({ html: FIRST_SCREEN_DAILY, template: TEMPLATE_INPUT });
+  const [draw] = tall.draws;
+  assert.ok(draw.x <= 0 && draw.y <= 0 && draw.x + draw.w >= 900 && draw.y + draw.h >= 1350, JSON.stringify(draw));
+});
+
+test('a failed capture falls back to the template only with the attempt and the reason spelled out', async () => {
+  const { api } = await generatorRuntime({
+    respond: () => new Response(JSON.stringify({ error: 'BROWSER_RENDERING_TIMEOUT', message: '커버 렌더링이 40초 안에 끝나지 않았습니다.', timeoutMs: 40000 }), { status: 504, headers: { 'content-type': 'application/json' } })
+  });
+  const result = await api.generate({ html: FIRST_SCREEN_DAILY, template: TEMPLATE_INPUT, csrfToken: 'csrf' });
+  assert.equal(result.method, 'template');
+  assert.equal(result.attemptedMode, 'first-screen');
+  assert.equal(result.captureErrorCode, 'BROWSER_RENDERING_TIMEOUT');
+  assert.equal(result.captureError, '커버 렌더링이 40초 안에 끝나지 않았습니다. (BROWSER_RENDERING_TIMEOUT · HTTP 504 · 제한 40초)');
+
+  const upstream = await generatorRuntime({
+    respond: () => new Response(JSON.stringify({ error: 'BROWSER_RENDERING_FAILED', message: '커버 생성 요청이 많습니다. 잠시 후 다시 시도해 주세요.', upstreamStatus: 429 }), { status: 502 })
+  });
+  const limited = await upstream.api.generate({ html: '<head><meta name="report-cover-selector" content=".cv"></head><div class="cv"><img></div>', template: TEMPLATE_INPUT });
+  assert.equal(limited.attemptedSelector, '.cv');
+  assert.match(limited.captureError, /BROWSER_RENDERING_FAILED · HTTP 502 · Cloudflare 429/);
+});
+
+test('a report with nothing to capture gets the template with the reason, not a silent success', async () => {
+  const { api, requests } = await generatorRuntime({ respond: () => pngResponse() });
+  const result = await api.generate({ html: '<main class="page"><h1>무표지</h1></main>', template: TEMPLATE_INPUT });
+  assert.equal(requests.length, 0);
+  assert.equal(result.method, 'template');
+  assert.equal(result.captureErrorCode, 'COVER_TARGET_NOT_FOUND');
+  assert.match(result.captureError, /report-cover-mode 또는 report-cover-selector/);
+});
+
+test('authentication and configuration errors still stop generation instead of becoming a template', async () => {
+  const { api } = await generatorRuntime({
+    respond: () => new Response(JSON.stringify({ error: 'UNAUTHORIZED', message: '관리자 인증이 필요합니다.' }), { status: 401 })
+  });
+  await assert.rejects(api.generate({ html: FIRST_SCREEN_DAILY, template: TEMPLATE_INPUT }), error => error.code === 'UNAUTHORIZED' && error.status === 401);
 });
 
 test('the broken foreignObject rasterization path is no longer used', async () => {

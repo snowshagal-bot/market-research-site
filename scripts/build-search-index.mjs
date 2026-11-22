@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { searchIndexArtifacts } from '../functions/api/_search-index.js';
 import { extractGlossaryTerms } from '../functions/_glossary.js';
+import '../assets/report-metadata.js';
 
 function cleanInlineText(str) {
   return String(str || '')
@@ -363,6 +364,9 @@ export function buildSearchIndex(targetRootDir) {
 
     return {
       ...post,
+      ...(typeof post.summary === 'string'
+        ? { summary: globalThis.REPORT_METADATA.normalizeMetadataText(post.summary) }
+        : {}),
       readingMinutes
     };
   });

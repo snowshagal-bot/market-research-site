@@ -10,7 +10,7 @@ import {
   currentFiles,
   fullFieldMeta
 } from './helpers/search-harness.mjs';
-import { SEARCH_META_FIELDS, searchIndexArtifacts } from '../functions/api/_search-index.js';
+import { SEARCH_META_FIELDS, searchIndexArtifacts, searchIndexArtifactWriters } from '../functions/api/_search-index.js';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 const files = await currentFiles();
@@ -211,6 +211,11 @@ test('every writer emits the same five artifacts and the body shards match the i
   for (const artifact of artifacts) {
     assert.equal(artifact.content, await read(artifact.path), `${artifact.path} is exactly what the writers produce`);
   }
+  // The on-demand writers the Worker functions use produce the very same files.
+  const writers = searchIndexArtifactWriters(index);
+  assert.deepEqual(writers.map(w => w.path), artifacts.map(a => a.path));
+  writers.forEach((writer, i) => assert.equal(writer.build(), artifacts[i].content, writer.path));
   const [publish, manage, build] = await Promise.all([read('functions/api/publish.js'), read('functions/api/manage.js'), read('scripts/build-search-index.mjs')]);
-  for (const source of [publish, manage, build]) assert.match(source, /searchIndexArtifacts\(searchIndex\)/);
+  for (const source of [publish, manage]) assert.match(source, /searchIndexArtifactWriters\(searchIndex\)/);
+  assert.match(build, /searchIndexArtifacts\(searchIndex\)/);
 });

@@ -751,6 +751,7 @@
 
       if (prev || next || (related && related.length)) {
         wrap.hidden = false;
+        document.getElementById('mrs-reading-nav')?.remove();
       }
     });
   }

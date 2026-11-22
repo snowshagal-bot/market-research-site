@@ -111,7 +111,7 @@
   const localeApi = window.MARKET_LOCALE;
 
   const defaultShareImageInfo = '고르지 않으면 대표 커버로 공유 카드를 자동으로 만듭니다.';
-  const defaultSeoTitleHint = '끝에 " | Snowshagal"이 자동으로 붙습니다. 홈페이지 카드와 리포트 제목은 위 「제목」을 씁니다.';
+  const defaultSeoTitleHint = '검색어(회사·지표·용어)를 앞에, 콜론 뒤에 제목: 예) 외국인 순매도 국적별 분석: 214조원, 누가 팔았나. 끝에 " | Snowshagal"이 자동으로 붙습니다. 홈페이지 카드와 리포트 제목은 위 「제목」을 씁니다.';
   const marketSeoTitleHint = '데일리·위클리는 그날 마감 수치로 검색 제목을 자동으로 만듭니다(한국어·영문 모두). 이 칸은 쓰지 않습니다.';
   const defaultCoverInfo = 'JPG, PNG, WebP · 최대 4MB · 원본 리포트 HTML과 별도로 저장됩니다.';
   const defaultCoverGeneratorStatus = '업로드한 리포트 HTML의 첫 화면을 기준으로 생성합니다. 결과는 게시 전에 미리보고 교체할 수 있습니다.';
@@ -468,23 +468,52 @@
   // offers only posts of the other language AND the same category. A Daily
   // and a Weekly dated the same day are different reports; pairing them once
   // broke hreflang for four pages (#126), and the server now rejects it too.
+  //
+  // A pair also holds one post per language (#126). A report that already has
+  // its partner in this language is listed but cannot be chosen: on 2026-11-11
+  // the 11-11 EN Daily was paired with the 11-10 KO Daily, which already had
+  // its own EN edition, because the 11-11 KO Daily was not in the list yet.
   function populateTranslationSources() {
     if (!translationSource || !postLanguage) return;
-    const targetLanguage = postLanguage.value === 'en' ? 'ko' : 'en';
+    const ownLanguage = postLanguage.value === 'en' ? 'en' : 'ko';
+    const targetLanguage = ownLanguage === 'en' ? 'ko' : 'en';
     const category = type?.value || '';
-    const items = (window.RESEARCH_POSTS || []).filter(post => (
+    const posts = window.RESEARCH_POSTS || [];
+    const items = posts.filter(post => (
       normalizedLanguage(post) === targetLanguage && (!category || post?.type === category)
     ));
+    const taken = new Set(posts.filter(post => normalizedLanguage(post) === ownLanguage).map(translationKey));
+    const ownLabel = ownLanguage === 'en' ? 'English' : '한국어';
     const previous = translationSource.value;
-    translationSource.innerHTML = `<option value="">연결하지 않음</option>${items.map(post => `<option value="${escapeHtml(translationKey(post))}">${escapeHtml(post.title || post.id)} · ${escapeHtml(post.reportDate || post.date || '')}</option>`).join('')}`;
-    translationSource.value = items.some(post => translationKey(post) === previous) ? previous : '';
+    translationSource.innerHTML = `<option value="">연결하지 않음</option>${items.map(post => {
+      const paired = taken.has(translationKey(post));
+      return `<option value="${escapeHtml(translationKey(post))}"${paired ? ' disabled' : ''}>${escapeHtml(post.title || post.id)} · ${escapeHtml(post.reportDate || post.date || '')}${paired ? ` · 이미 ${ownLabel} 짝 있음` : ''}</option>`;
+    }).join('')}`;
+    translationSource.value = items.some(post => translationKey(post) === previous) && !taken.has(previous) ? previous : '';
     if (translationSourceStatus) {
       const targetLabel = targetLanguage === 'en' ? 'English' : '한국어';
       const categoryLabel = category ? `${labels[category] || category} ` : '';
+      const takenCount = items.filter(post => taken.has(translationKey(post))).length;
+      const takenNote = takenCount ? ` 이미 ${ownLabel} 짝이 있는 ${takenCount}개는 고를 수 없습니다.` : '';
       translationSourceStatus.textContent = items.length
-        ? `${targetLabel} ${categoryLabel}게시물 ${items.length}개 중 번역 짝을 선택할 수 있습니다.`
+        ? `${targetLabel} ${categoryLabel}게시물 ${items.length}개 중 번역 짝을 선택할 수 있습니다.${takenNote}`
         : `연결할 기존 ${targetLabel} ${categoryLabel}게시물이 없습니다. 연결 없이 게시할 수 있습니다.`;
     }
+  }
+
+  // The list above is read from /data/posts.js when the page opens. A report
+  // published since then, in this tab or another, is missing from it until
+  // the page is reloaded, so the list is read again whenever a report is
+  // chosen. An empty or failed answer never replaces the list the page has.
+  async function refreshResearchPosts() {
+    try {
+      const response = await fetch(`/data/posts.json?pairs=${Date.now()}`, { cache: 'no-store' });
+      if (!response.ok) return;
+      const posts = await response.json();
+      if (!Array.isArray(posts) || posts.length === 0) return;
+      window.RESEARCH_POSTS = posts;
+      populateTranslationSources();
+    } catch (_) {}
   }
 
   function setLanguage(value) {
@@ -755,7 +784,10 @@
     const rules = window.REPORT_METADATA;
     const text = rules.seoTitleText(doc?.querySelector('title')?.textContent);
     if (!text) return { text: '', source: 'none' };
-    if (text === rules.normalizeMetadataText(editorialTitle)) return { text: '', source: 'same-as-title' };
+    // A <title> that is the headline plus the brand or series label is kept,
+    // so the page title reads "headline | Snowshagal" like every other one
+    // since 2026-11-12, not the dated category rule.
+    if (text === rules.normalizeMetadataText(editorialTitle)) return { text, source: 'same-as-title' };
     return { text, source: 'report-title' };
   }
 
@@ -776,7 +808,13 @@
   function summaryText(value) {
     // A declared summary can still be written across lines in the attribute,
     // and it travels into a search result on one, so it is collapsed too.
-    return String(value || '').replace(/\s+/g, ' ').trim().slice(0, 500);
+    // The zero-width characters a cover keeps around its middle dots as break
+    // hints are dropped the same way the one-liner drops them.
+    return String(value || '')
+      .replace(/[\u200B-\u200D\uFEFF\u2060]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 500);
   }
 
   // A summary is the report's own short account of itself. `.cover-oneline`
@@ -865,7 +903,7 @@
   const SOURCE_LABELS = {
     seoTitle: {
       'report-title': '출처 · 리포트 <title> (끝의 브랜드 표기는 사이트가 붙입니다)',
-      'same-as-title': '리포트 <title>이 제목과 같아 비워 둡니다 · 사이트 규칙으로 만듭니다',
+      'same-as-title': '출처 · 리포트 <title> (제목과 같습니다 · 끝의 브랜드·시리즈 표기는 빼고 사이트가 "| Snowshagal"을 붙입니다)',
       none: '출처 없음 · 비워 두면 사이트 규칙으로 만듭니다',
       manual: '직접 입력'
     },
@@ -1127,6 +1165,7 @@
     generatingCover = true;
     updatePublishState();
     generateCoverBtn.textContent = '커버 생성 중…';
+    coverGeneratorStatus.classList.remove('warn');
     coverGeneratorStatus.textContent = 'HTML 첫 화면을 분석하고 커버 이미지를 만들고 있습니다.';
     try {
       const result = await window.MARKET_COVER_GENERATOR.generate({
@@ -1145,9 +1184,16 @@
       coverInput.value = '';
       coverInfo.textContent = `${result.file.name} · ${(result.file.size / 1024).toFixed(1)} KB`;
       showCoverPreview(result.file, generationReportVersion);
+      // A template is never a quiet success: it says what was tried and why the
+      // capture did not happen, in the warning colour.
+      const attempted = result.attemptedMode === 'first-screen'
+        ? '첫 화면 480×720'
+        : result.attemptedSelector;
+      if (result.method === 'template') coverGeneratorStatus.classList.add('warn');
+      else coverGeneratorStatus.classList.remove('warn');
       coverGeneratorStatus.textContent = result.method === 'template'
-        ? `표준 템플릿 커버를 생성했습니다${result.attemptedSelector ? ` · ${result.attemptedSelector} 캡처 대체` : ''}${result.captureError ? ` · ${result.captureError}` : ''}. 수동 커버로 교체할 수도 있습니다.`
-        : `브라우저 렌더링으로 커버를 생성했습니다${result.selector ? ` · ${result.selector}` : ''}.`;
+        ? `표지 캡처 실패 · 표준 템플릿 커버로 대신 만들었습니다${attempted ? ` · 시도: ${attempted}` : ''}${result.captureError ? ` · 이유: ${result.captureError}` : ''}. 다시 시도하거나 수동 커버를 올려 주세요.`
+        : `브라우저 렌더링으로 커버를 생성했습니다${result.mode === 'first-screen' ? ' · 첫 화면 480×720' : (result.selector ? ` · ${result.selector}` : '')}.`;
       if (result.method === 'template' && result.captureError) console.warn('cover capture fallback:', result.captureError);
     } catch (error) {
       if (generationVersion !== coverGenerationVersion || generationReportVersion !== reportSelectionVersion) return;
@@ -1155,6 +1201,7 @@
       coverDecodePending = false;
       const reason = String(error?.message || '').trim();
       const detail = [error?.code, error?.status ? `HTTP ${error.status}` : ''].filter(Boolean).join(' · ');
+      coverGeneratorStatus.classList.add('warn');
       coverGeneratorStatus.textContent = `커버 자동 생성에 실패했습니다${reason ? ` · ${reason}` : ''}${detail ? ` (${detail})` : ''}. 수동 커버를 업로드하거나 다시 시도해 주세요.`;
     } finally {
       if (generationVersion !== coverGenerationVersion || generationReportVersion !== reportSelectionVersion) return;
@@ -1246,9 +1293,11 @@
       return;
     }
     const reportVersion = ++reportSelectionVersion;
+    const refreshingPosts = refreshResearchPosts();
     coverGenerationVersion += 1;
     generatingCover = false;
     generateCoverBtn.textContent = 'HTML에서 커버 자동 생성';
+    coverGeneratorStatus.classList.remove('warn');
     coverGeneratorStatus.textContent = defaultCoverGeneratorStatus;
     coverInput.value = '';
     coverInfo.textContent = defaultCoverInfo;
@@ -1315,6 +1364,8 @@
     status.textContent = !date.value
       ? '리포트 기준일을 자동으로 찾지 못했습니다. 날짜를 직접 확인해 주세요.'
       : detectedType ? '자동 분석 완료. 게시 전에 항목을 확인하세요.' : '분석 완료. 카테고리는 직접 선택하세요.';
+    await refreshingPosts;
+    if (reportVersion !== reportSelectionVersion) return;
     updatePublishState();
   }
 

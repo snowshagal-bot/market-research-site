@@ -43,6 +43,20 @@ const POST = {
 const headOf = html => html.slice(0, html.search(/<\/head>/i));
 const withHead = head => `<!doctype html><html lang="ko"><head><title>old</title>${head}</head><body><p>body</p></body></html>`;
 
+test('report response includes visible clean reading links before any shell script executes', async () => {
+  for (const lang of ['ko', 'en']) {
+    const posts = REAL_POSTS.filter(post => post.type === 'basics' && postLanguage(post) === lang);
+    const post = posts[Math.floor(posts.length / 2)];
+    const html = await render(post, withHead(''), REAL_POSTS);
+    const nav = html.match(/<nav id="mrs-reading-nav"[\s\S]*?<\/nav>/)?.[0];
+    assert.ok(nav, lang);
+    assert.match(nav, /<a href="\/reports\/[^"?]+" rel="prev">/);
+    assert.match(nav, /<a href="\/reports\/[^"?]+" rel="next">/);
+    assert.doesNotMatch(nav, /\.html["?]|\shidden\b/);
+    assert.ok(html.indexOf(nav) < html.indexOf('<script src="/assets/report-shell.js'));
+  }
+});
+
 // Each case: an uploaded tag and whether Production (HTMLRewriter) removes it.
 const CASES = [
   ['A', '<meta name="description" content="old-a">', true],

@@ -491,7 +491,7 @@
      - as_of is not in the future;
      - it is fresh by as_of, never retrieved_at: intraday within the
        instrument's window; final_close only for instruments the collector
-       finalises (VIX never is) and for at most four days;
+       finalises (US indices, SOX, VIX, US10Y) and for at most four days;
      - it is newer than the snapshot's own figure (as_of after the snapshot
        item's retrieved_at), so an old close never covers a newer snapshot.
      Anything else keeps the snapshot figure; one bad item affects only itself.
@@ -501,7 +501,7 @@
     DOW: { group: 'indices', intradayMinutes: 60, finalClose: true },
     SP500: { group: 'indices', intradayMinutes: 60, finalClose: true },
     SOX: { group: 'rates_fx_volatility', intradayMinutes: 60, finalClose: true },
-    VIX: { group: 'rates_fx_volatility', intradayMinutes: 60, finalClose: false },
+    VIX: { group: 'rates_fx_volatility', intradayMinutes: 60, finalClose: true },
     US10Y: { group: 'rates_fx_volatility', intradayMinutes: 60, finalClose: true },
     USDKRW: { group: 'rates_fx_volatility', intradayMinutes: 90, finalClose: false },
     JPYKRW: { group: 'rates_fx_volatility', intradayMinutes: 90, finalClose: false },
@@ -657,6 +657,109 @@
     return state ? `${date} · ${state}` : '';
   }
 
+  /* --------------------------------------------------------------------------
+     KRX sector and theme index names in English, keyed by KRX's own index code
+     (the Korean name is the second column, for an item that carries no code).
+     The English pages show these; a code not listed yet keeps its Korean name.
+  -------------------------------------------------------------------------- */
+  const KRX_GROUP_NAMES = Object.freeze([
+    ['KGS01P', '음식료·담배', 'Food, Beverage & Tobacco'],
+    ['KGS02P', '섬유·의류', 'Textiles & Apparel'],
+    ['KGS03P', '종이·목재', 'Paper & Wood'],
+    ['KGS04P', '화학', 'Chemicals'],
+    ['KGS05P', '제약', 'Pharmaceuticals'],
+    ['KGS06P', '비금속', 'Non-metallic Minerals'],
+    ['KGS07P', '금속', 'Metals'],
+    ['KGS08P', '기계·장비', 'Machinery & Equipment'],
+    ['KGS09P', '전기전자', 'Electrical & Electronics'],
+    ['KGS10P', '운송장비·부품', 'Transport Equipment & Parts'],
+    ['KGS11P', '유통', 'Distribution'],
+    ['KGS12P', '건설', 'Construction'],
+    ['KGS13P', '운송·창고', 'Transportation & Warehousing'],
+    ['KGS14P', '금융', 'Finance'],
+    ['KGS16P', '증권', 'Securities'],
+    ['KGS17P', '보험', 'Insurance'],
+    ['KGS18P', '제조', 'Manufacturing'],
+    ['KGS19P', '의료·정밀기기', 'Medical & Precision Instruments'],
+    ['KGS20P', '전기·가스', 'Electricity & Gas'],
+    ['KGS21P', '통신', 'Telecommunications'],
+    ['KGS22P', '일반서비스', 'General Services'],
+    ['KGS25P', '부동산', 'Real Estate'],
+    ['KGS26P', 'IT 서비스', 'IT Services'],
+    ['KGS27P', '오락·문화', 'Entertainment & Culture'],
+    ['QGS01P', '일반서비스', 'General Services'],
+    ['QGS02P', '제조', 'Manufacturing'],
+    ['QGS03P', '건설', 'Construction'],
+    ['QGS04P', '유통', 'Distribution'],
+    ['QGS05P', '금융', 'Finance'],
+    ['QGS09P', '음식료·담배', 'Food, Beverage & Tobacco'],
+    ['QGS10P', '섬유·의류', 'Textiles & Apparel'],
+    ['QGS11P', '종이·목재', 'Paper & Wood'],
+    ['QGS12P', '출판·매체복제', 'Publishing & Media Reproduction'],
+    ['QGS13P', '화학', 'Chemicals'],
+    ['QGS14P', '비금속', 'Non-metallic Minerals'],
+    ['QGS15P', '금속', 'Metals'],
+    ['QGS16P', '기계·장비', 'Machinery & Equipment'],
+    ['QGS17P', '전기전자', 'Electrical & Electronics'],
+    ['QGS18P', '의료·정밀기기', 'Medical & Precision Instruments'],
+    ['QGS19P', '운송장비·부품', 'Transport Equipment & Parts'],
+    ['QGS20P', '기타제조', 'Other Manufacturing'],
+    ['QGS31P', '운송·창고', 'Transportation & Warehousing'],
+    ['QGS33P', '제약', 'Pharmaceuticals'],
+    ['QGS34P', '오락·문화', 'Entertainment & Culture'],
+    ['QGS95P', '통신', 'Telecommunications'],
+    ['QGS96P', 'IT 서비스', 'IT Services'],
+    ['G2T01P', 'KRX/S&P ESG 고배당지수', 'KRX/S&P ESG High Dividend Index'],
+    ['GGE01P', 'KRX/S&P 탄소효율 그린뉴딜지수', 'KRX/S&P Carbon Efficient Green New Deal Index'],
+    ['K2D04P', '코스피 200 금융 고배당 TOP 10 지수', 'KOSPI 200 Financials High Dividend TOP 10 Index'],
+    ['K2E01P', '코스피 200 ESG 지수', 'KOSPI 200 ESG Index'],
+    ['K2E02P', '코스피 200 기후변화지수', 'KOSPI 200 Climate Change Index'],
+    ['KGD01P', '코스피 우선주 지수', 'KOSPI Preferred Stock Index'],
+    ['KGD02P', '코스피 고배당 50', 'KOSPI High Dividend 50'],
+    ['KGD03P', '코스피 배당성장 50', 'KOSPI Dividend Growth 50'],
+    ['KGD06P', 'KRX-Akros 고배당주 20 지수', 'KRX-Akros High Dividend 20 Index'],
+    ['KGT02P', 'KRX 프라임 오피스 리츠 지수', 'KRX Prime Office REITs Index'],
+    ['KGT03P', 'KRX-Akros 금융 & 지주 고배당 지수', 'KRX-Akros Financials & Holdings High Dividend Index'],
+    ['Q5E01P', '코스닥 150 거버넌스 지수', 'KOSDAQ 150 Governance Index'],
+    ['QGG12P', '코스닥 TOP 10 지수', 'KOSDAQ TOP 10 Index'],
+    ['QGG13P', '코스닥 TOP 15 지수', 'KOSDAQ TOP 15 Index'],
+    ['X3E01P', 'KRX 300 기후변화지수', 'KRX 300 Climate Change Index'],
+    ['XGD02P', 'KRX 부동산리츠인프라 지수', 'KRX Real Estate, REITs & Infrastructure Index'],
+    ['XGE01P', 'KRX ESG Leaders 150', 'KRX ESG Leaders 150'],
+    ['XGE02P', 'KRX Eco Leaders 100', 'KRX Eco Leaders 100'],
+    ['XGE03P', 'KRX Governance Leaders 100', 'KRX Governance Leaders 100'],
+    ['XGE04P', 'KRX ESG 사회책임경영지수(S)', 'KRX ESG Social Responsibility Index (S)'],
+    ['XGE05P', 'KRX 기후변화 솔루션지수', 'KRX Climate Change Solutions Index'],
+    ['XGT01P', 'KRX BBIG 지수', 'KRX BBIG Index'],
+    ['XGT02P', 'KRX 2차전지 TOP 10 지수', 'KRX Secondary Battery TOP 10 Index'],
+    ['XGT03P', 'KRX 바이오 TOP 10 지수', 'KRX Bio TOP 10 Index'],
+    ['XGT04P', 'KRX 인터넷 TOP 10 지수', 'KRX Internet TOP 10 Index'],
+    ['XGT05P', 'KRX 게임 TOP 10 지수', 'KRX Game TOP 10 Index'],
+    ['XGT06P', 'KRX 블루칩 25', 'KRX Blue Chip 25'],
+    ['XGT08P', 'KRX 전기차 Top 15', 'KRX Electric Vehicle Top 15'],
+    ['XGT10P', 'KRX 반도체 Top 15', 'KRX Semiconductor Top 15'],
+    ['XGT16P', 'KRX-Akros AI 전력인프라 지수', 'KRX-Akros AI Power Infrastructure Index'],
+    ['XGT17P', 'KRX 코리아 소버린 AI 지수', 'KRX Korea Sovereign AI Index'],
+    ['XGT18P', 'KRX AI 반도체 지수', 'KRX AI Semiconductor Index'],
+    ['XGT19P', 'KRX 조선 TOP10 지수', 'KRX Shipbuilding TOP 10 Index'],
+    ['XGT20P', 'KRX 기술이전 바이오 지수', 'KRX Technology Transfer Bio Index'],
+    ['XGT21P', 'KRX K-AI 반도체TOP2+ 지수', 'KRX K-AI Semiconductor TOP2+ Index'],
+    ['XGT22P', 'KRX K-AI 2차전지 지수', 'KRX K-AI Secondary Battery Index'],
+    ['XGT23P', 'KRX K-AI 바이오테크코스닥 지수', 'KRX K-AI Biotech KOSDAQ Index'],
+    ['XGT24P', 'KRX K-AI 방산TOP5+ 지수', 'KRX K-AI Defense TOP5+ Index'],
+    ['XGW02T', 'KRX 삼성전자 SK하이닉스 미국채 혼합지수', 'KRX Samsung Electronics, SK hynix & US Treasury Balanced Index']
+  ].map(row => Object.freeze(row)));
+  const KRX_GROUP_NAMES_EN_BY_CODE = Object.freeze(Object.fromEntries(KRX_GROUP_NAMES.map(([code, , en]) => [code, en])));
+  const KRX_GROUP_NAMES_EN_BY_KO = Object.freeze(Object.fromEntries(KRX_GROUP_NAMES.map(([, ko, en]) => [ko, en])));
+
+  /** A KRX sector or theme name for `lang`: KRX's Korean name, or its English name. */
+  function krxGroupName(item, lang) {
+    const name = String(item?.name ?? '').trim();
+    if (lang !== 'en') return name;
+    const code = String(item?.index_code ?? '').trim();
+    return KRX_GROUP_NAMES_EN_BY_CODE[code] || KRX_GROUP_NAMES_EN_BY_KO[name] || name;
+  }
+
   root.MARKET_LOCALE = {
     validLanguages,
     copy,
@@ -691,6 +794,8 @@
     globalLatestItemStatus,
     globalLatestOverlay,
     globalLatestNow,
-    todayStripBasis
+    todayStripBasis,
+    KRX_GROUP_NAMES,
+    krxGroupName
   };
 })(typeof window !== 'undefined' ? window : globalThis);

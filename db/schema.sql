@@ -226,3 +226,16 @@ CREATE TABLE IF NOT EXISTS market_global_latest (
   published_at TEXT NOT NULL,
   auth_source TEXT NOT NULL
 );
+
+-- Domestic Rates (migrations/comments/0003_market_domestic_rates.sql): one row
+-- per KRX trading day, the KOFIA 16:00 final quote yields, separate from
+-- Market Close and joined to it by market_date on the pages.
+CREATE TABLE IF NOT EXISTS market_domestic_rates (
+  market_date TEXT PRIMARY KEY,
+  schema_version TEXT NOT NULL,
+  basis_time TEXT NOT NULL,
+  retrieved_at TEXT NOT NULL,
+  payload_json TEXT NOT NULL,
+  published_at TEXT NOT NULL,
+  auth_source TEXT NOT NULL
+);

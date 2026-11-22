@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta name="color-scheme" content="only light"/>
+<title>투자자별 순매수 상위종목 보는 법: KRX [12010] MDCSTAT024 화면 읽기 | Snowshagal</title>
+<meta name="report-seo-title" content="투자자별 순매수 상위종목 보는 법: KRX [12010] MDCSTAT024 화면 읽기 | Snowshagal"/>
+<meta name="report-seo-description" content="외국인·기관이 오늘 어떤 종목을 사고팔았는지 KRX Data Marketplace(옛 정보데이터시스템) [12010] MDCSTAT024 화면에서 확인하는 법. 메뉴 경로, 투자자 구분, 많이 판 종목 찾기, 반영 시각(15:45·20:00), 자주 하는 실수."/>
+<meta name="description" content="외국인·기관이 오늘 어떤 종목을 사고팔았는지 KRX Data Marketplace(옛 정보데이터시스템) [12010] MDCSTAT024 화면에서 확인하는 법. 메뉴 경로, 투자자 구분, 많이 판 종목 찾기, 반영 시각(15:45·20:00), 자주 하는 실수."/>
+<link rel="canonical" href="https://snowshagal.com/reports/basics-data-guide-01-krx-net-buying"/>
+<meta name="robots" content="index,follow,max-image-preview:large"/>
+<meta property="og:type" content="article"/>
+<meta property="og:site_name" content="Snowshagal"/>
+<meta property="og:locale" content="ko_KR"/>
+<meta property="og:title" content="외국인은 오늘 무엇을 사고팔았나 · 투자자별 순매수 상위종목 [12010] 읽는 법"/>
+<meta property="og:description" content="11월 16일 외국인 순매수 1위는 SK스퀘어 274억 원. 그런데 표 맨 아래에는 삼성전자 −6,210억 원이 있었다. 한국거래소 [12010] 화면의 경로, 조건, 반영 시각, 자주 하는 실수. 데이터 길잡이 1편."/>
+<meta property="og:url" content="https://snowshagal.com/reports/basics-data-guide-01-krx-net-buying"/>
+<meta property="og:image" content="https://snowshagal.com/assets/social/basics-data-guide-01-krx-net-buying.jpg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:alt" content="한국거래소 [12010] 투자자별 순매수상위종목 화면 읽는 법. 11월 16일 외국인 순매수 1위 SK스퀘어 274억 원, 맨 아래 삼성전자 −6,210억 원"/>
+<meta property="article:published_time" content="2026-11-18"/>
+<meta property="article:section" content="시장 입문"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="외국인은 오늘 무엇을 사고팔았나 · 투자자별 순매수 상위종목 [12010] 읽는 법"/>
+<meta name="twitter:description" content="11월 16일 외국인 순매수 1위는 SK스퀘어 274억 원. 그런데 표 맨 아래에는 삼성전자 −6,210억 원이 있었다. 한국거래소 [12010] 화면의 경로, 조건, 반영 시각, 자주 하는 실수. 데이터 길잡이 1편."/>
+<meta name="twitter:image" content="https://snowshagal.com/assets/social/basics-data-guide-01-krx-net-buying.jpg"/>
+<meta name="twitter:image:alt" content="한국거래소 [12010] 투자자별 순매수상위종목 화면 읽는 법. 11월 16일 외국인 순매수 1위 SK스퀘어 274억 원, 맨 아래 삼성전자 −6,210억 원"/>
+<meta name="theme-color" content="#2A362E"/>
+<script type="application/ld+json">
+[
+ {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "외국인은 오늘 무엇을 사고팔았나",
+  "alternativeHeadline": "투자자별 순매수 상위종목 보는 법, KRX [12010] MDCSTAT024 화면 읽기",
+  "description": "외국인·기관이 오늘 어떤 종목을 사고팔았는지 KRX Data Marketplace(옛 정보데이터시스템) [12010] MDCSTAT024 화면에서 확인하는 법. 메뉴 경로, 투자자 구분, 많이 판 종목 찾기, 반영 시각(15:45·20:00), 자주 하는 실수.",
+  "inLanguage": "ko-KR",
+  "articleSection": "시장 입문",
+  "datePublished": "2026-11-18",
+  "dateModified": "2026-11-18",
+  "image": [
+   "https://snowshagal.com/assets/social/basics-data-guide-01-krx-net-buying-16x9.jpg",
+   "https://snowshagal.com/assets/social/basics-data-guide-01-krx-net-buying-4x3.jpg",
+   "https://snowshagal.com/assets/social/basics-data-guide-01-krx-net-buying-1x1.jpg"
+  ],
+  "mainEntityOfPage": "https://snowshagal.com/reports/basics-data-guide-01-krx-net-buying",
+  "author": {
+   "@type": "Organization",
+   "name": "Snowshagal",
+   "url": "https://snowshagal.com/"
+  },
+  "publisher": {
+   "@type": "Organization",
+   "name": "Snowshagal",
+   "url": "https://snowshagal.com/"
+  },
+  "isPartOf": {
+   "@type": "CreativeWorkSeries",
+   "name": "데이터 길잡이",
+   "url": "https://snowshagal.com/basics/"
+  },
+  "keywords": "투자자별 순매수상위종목, MDCSTAT024, MDCSTAT02401, KRX 12010, 외국인 순매수 상위 종목 보는 법, 기관 순매수 상위, 외국인 순매도 종목, KRX Data Marketplace, 한국거래소 정보데이터시스템, 투자자별 거래실적, 금융투자 기관합계 차이, 수급 반영 시각"
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+   {
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Snowshagal",
+    "item": "https://snowshagal.com/"
+   },
+   {
+    "@type": "ListItem",
+    "position": 2,
+    "name": "시장 입문",
+    "item": "https://snowshagal.com/basics/"
+   },
+   {
+    "@type": "ListItem",
+    "position": 3,
+    "name": "외국인은 오늘 무엇을 사고팔았나",
+    "item": "https://snowshagal.com/reports/basics-data-guide-01-krx-net-buying"
+   }
+  ]
+ }
+]
+</script>
+<style>
+/* 손글씨 글꼴: Gaegu Bold (SIL Open Font License 1.1, Copyright 2018 The Gaegu Project Authors), 쓰인 글자만 포함 */
+@font-face{font-family:'SnowHand';src:url(data:font/woff2;base64,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) format('woff2');font-weight:400 800;font-display:swap}
+
+:root{
+  --surface-page:#ECEAE5;
+  --surface-band:#E3E0D9;
+  --surface-inner:#F1EFEA;
+  --surface-detail:#E8E5DF;
+  --surface-muted:#DAD6CE;
+  --ink:#2E2E2C;
+  --ink2:#43423E;
+  --body:#53514C;
+  --sub:#5A5751;
+  --muted:#65625B;
+  --line:#CEC9BF;
+  --line2:#DCD7CE;
+  --green:#46584D;
+  --green-dark:#2F3C34;
+  --green-soft:#DCE3DD;
+  --green-line:#AAB6AC;
+  --green-pale:#A8C6B4;
+  --stk:#3A3632;
+  --l2:#A9784A;
+  --l2-dark:#7A5A34;
+  --l2-soft:#EFE2CF;
+  --l2-line:#D2B48C;
+  --i2:#7A3F44;
+  --i2-soft:#EBDCDD;
+  --rec:#7A3F44;
+  --rec-soft:#F1E3E4;
+  --rec-line:#C29A9E;
+  --up:#B23A47;
+  --down:#3D6595;
+  --board:#2F3C34;
+  --chalk:#ECEAE3;
+  --chalk2:#B9C9BE;
+  --chalk-mark:#E6C98F;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:58px;overflow-x:hidden}
+html,body{max-width:100%}
+body{
+  margin:0;background:var(--surface-page);color:var(--ink);
+  font-family:"Pretendard Variable","Pretendard","SUIT","Noto Sans KR","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  line-height:1.58;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;
+  word-break:keep-all;line-break:strict;
+}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(38px + env(safe-area-inset-bottom,0px));width:100%;position:relative}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.up{color:var(--up)}.down{color:var(--down)}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;letter-spacing:inherit}
+.nw{white-space:nowrap}
+
+/* ── 상단바 ── */
+.topbar{position:sticky;top:0;z-index:50;margin:0 -16px;
+  background:rgba(236,234,229,.92);-webkit-backdrop-filter:saturate(150%) blur(12px);backdrop-filter:saturate(150%) blur(12px);
+  border-bottom:1px solid rgba(90,84,74,.13)}
+.tbin{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0)) 18px 9px}
+.tbin .brand{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.tbin .brand i{font-style:normal;color:var(--green)}
+.tbin .ep{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.prog{height:2px;background:rgba(90,84,74,.10)}
+.prog i{display:block;height:100%;width:0;background:var(--green);transition:width .1s linear}
+
+/* ── 표지 ── */
+.cover{margin:0 -16px;padding:18px 22px 15px;
+  background:linear-gradient(158deg,#36443B 0%,#2A362E 52%,#1F2721 100%);color:#EFEDE7}
+.cvkick{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.06em;
+  color:#BFD2C6;border:1px solid rgba(168,198,180,.34);border-radius:999px;padding:5px 12px}
+.cvkick b{color:#EFEDE7;font-weight:800}
+.cvdate{display:inline-block;margin-left:8px;font-size:11.5px;font-weight:700;color:#9FB2A6;letter-spacing:.02em;vertical-align:middle}
+.cvtitle{margin:11px 0 0;font-size:30px;line-height:1.22;font-weight:800;letter-spacing:-.05em;color:#F4F2ED}
+.cvtitle span{display:block;color:var(--green-pale)}
+.cvsub{margin:11px 0 0;font-size:14px;line-height:1.58;font-weight:600;color:#C6D2CA}
+.cvmotif{margin:12px 0 0}
+.cvmotif svg{display:block;width:100%;height:auto;max-width:460px}
+.cvidx{display:flex;gap:6px;margin:12px 0 0;flex-wrap:wrap}
+.cvidx a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;font-size:11.5px;font-weight:800;color:#D3DED7;background:rgba(255,255,255,.07);
+  border:1px solid rgba(168,198,180,.22);border-radius:999px}
+.cvidx a b{color:var(--green-pale);font-weight:800;margin-right:5px}
+.cvstat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:14px 0 0}
+.cvstat div{border:1px dashed rgba(236,234,227,.32);border-radius:10px;padding:8px 9px 9px;background:rgba(255,255,255,.04);min-width:0}
+.cvstat span{display:block;font-size:11px;line-height:1.35;font-weight:700;color:#9FB2A6;word-break:keep-all}
+.cvstat b{display:block;margin-top:3px;font-size:22px;line-height:1.1;font-weight:800;letter-spacing:-.04em;color:#F4F2ED;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cvstat .hot b{color:#E6C98F}
+.cvstat em{display:block;margin-top:2px;font-style:normal;font-size:11.5px;font-weight:800;color:#E6C98F;word-break:keep-all}
+.cvtime{margin:10px 0 0;font-size:11.5px;font-weight:700;color:#9FB2A6}
+
+/* ── 요약 ── */
+.tldr{margin:18px 0 0;background:#FFFDF7;border:2px solid var(--ink);border-radius:14px;box-shadow:4px 4px 0 rgba(46,46,44,.85);padding:13px 16px 15px}
+.tlh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.tlh b{font-size:21px;color:#B23A47;letter-spacing:0}
+.tlh span{font-size:12px;font-weight:800;color:var(--sub)}
+.pts{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
+.pts li{position:relative;padding-left:18px;font-size:15px;line-height:1.62;font-weight:600;color:var(--body);text-wrap:pretty}
+.pts li::before{content:"";position:absolute;left:4px;top:.74em;width:6px;height:6px;border-radius:50%;background:var(--green)}
+.pts li b{color:var(--ink);font-weight:800}
+.pts.sm{gap:6px;margin-top:10px}
+.pts.sm li{font-size:14px;line-height:1.6;padding-left:15px}
+.pts.sm li::before{left:3px;width:5px;height:5px}
+.tiphint{margin:10px 2px 0;font-size:12px;font-weight:700;color:var(--sub)}
+.tiphint::before{content:"";display:inline-block;width:22px;margin-right:6px;vertical-align:3px;border-bottom:1.5px dashed #8B867E}
+
+/* ── 챕터 ── */
+.ch{margin:22px 0 8px}
+.chtop{display:flex;align-items:center;gap:9px;margin-bottom:7px;flex-wrap:wrap}
+.chn{font-size:12px;font-weight:800;color:#EFEDE7;background:var(--ink);border-radius:4px;padding:3px 8px;letter-spacing:.04em}
+.chk{font-size:11.5px;font-weight:800;letter-spacing:.11em;color:var(--sub)}
+.cht{margin:0;font-size:24px;line-height:1.3;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.chrule{display:flex;height:3px;margin-top:11px;gap:2px}
+.chrule i{display:block;height:100%;flex:1}
+.chrule .r1{background:var(--stk)}.chrule .r2{background:var(--l2)}.chrule .r3{background:var(--i2)}.chrule .r4{background:var(--green)}
+
+/* ── 본문 ── */
+.p{margin:9px 0 0;font-size:15px;line-height:1.7;color:var(--body);font-weight:500;text-wrap:pretty}
+.p b{color:var(--ink);font-weight:800}
+.p.lead{font-size:16px;color:var(--ink2);font-weight:600}
+.hd{margin:20px 0 0;font-size:17px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.44;text-wrap:balance}
+.hd small{display:block;font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin-bottom:3px}
+.q{margin:14px 0 0;font-size:19px;line-height:1.45;font-weight:800;letter-spacing:-.04em;color:var(--ink);text-wrap:balance}
+.mk{background:linear-gradient(transparent 58%,rgba(230,201,143,.72) 58%);padding:0 1px}
+.ilink{color:var(--ink);font-weight:700;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px;text-decoration-color:#A9784A;padding:4px 0}
+.ul{font-weight:800;color:var(--ink);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='8' viewBox='0 0 60 8'%3E%3Cpath d='M0 4.6 Q15 2.6 30 4.4 T60 4.2' fill='none' stroke='%23B23A47' stroke-opacity='.72' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:repeat-x;background-position:0 100%;background-size:60px 8px;padding-bottom:3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.note{position:relative;margin:8px 2px 0;padding-left:16px;font-size:13px;line-height:1.6;font-weight:600;color:var(--sub);text-wrap:pretty}
+.note::before{content:"※";position:absolute;left:0;top:0;color:var(--muted)}
+.mix{margin:14px 0 0;background:#F6E9EA;border:1px solid #E1C4C7;border-left:4px solid #B23A47;border-radius:10px;padding:11px 14px 12px}
+.mxh{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}
+.mxh b{font-size:19px;color:#B23A47;letter-spacing:0}
+.mxh span{font-size:12.5px;font-weight:800;color:var(--ink2)}
+.mix p{margin:6px 0 0;font-size:14px;line-height:1.62;font-weight:600;color:var(--body);text-wrap:pretty}
+.mix p b{color:var(--ink);font-weight:800}
+
+/* ── 배지 ── */
+.vb{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;letter-spacing:.03em;
+  color:#4A4438;background:var(--l2-soft);border:1px solid var(--l2-line);border-radius:999px;padding:3px 9px;white-space:nowrap}
+
+/* ── 한 문장 답 ── */
+.ans{margin:14px -16px 0;padding:14px 22px;background:var(--green);color:#EFEDE7;position:relative;overflow:hidden}
+.ans:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green-pale)}
+.ans .ak{font-size:12px;font-weight:800;letter-spacing:.14em;color:#C2D2C7;margin-bottom:8px}
+.ans .av{font-size:19px;line-height:1.46;font-weight:800;letter-spacing:-.04em;color:#F4F2ED;text-wrap:balance}
+.ans .aw{margin:9px 0 0;padding-top:9px;border-top:1px solid rgba(168,198,180,.24);font-size:13.5px;line-height:1.62;font-weight:600;color:#CBD8CF;text-wrap:pretty}
+
+/* ── 문제 카드 ── */
+.pop{margin:14px 0 0;background:var(--surface-inner);border:1.5px solid var(--ink);border-radius:14px;overflow:hidden}
+.poph{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;background:var(--ink);color:#EDEAE4}
+.poph b{font-size:12px;font-weight:800;letter-spacing:.06em}
+.poph .vb{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#D9D4CA}
+.popb{padding:13px 14px 14px}
+.popq{margin:0;font-size:15.5px;line-height:1.52;font-weight:800;letter-spacing:-.03em;color:var(--ink);text-wrap:balance}
+.opts{display:grid;gap:6px;margin:12px 0 0;grid-template-columns:1fr}
+.opt{appearance:none;-webkit-appearance:none;border:1.5px solid var(--line);background:#F7F6F2;border-radius:10px;
+  font-weight:800;color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums;transition:background .15s,border-color .15s;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  white-space:normal;text-align:left;padding:10px 13px;font-size:14.5px;line-height:1.35;letter-spacing:-.02em;word-break:keep-all}
+.opt:hover{border-color:var(--sub)}
+.opt.ok{background:var(--green);border-color:var(--green);color:#F4F2ED}
+.opt.no{background:#E3E0D9;border-color:#E3E0D9;color:var(--muted);text-decoration:line-through}
+.opt.ok::before{content:"✓ "}
+.opt.no::before{content:"✗ "}
+.opt[aria-disabled="true"]{cursor:default}
+.popans{margin:12px 0 0;padding-top:11px;border-top:1px dashed var(--line)}
+.popans[hidden]{display:none}
+.verdict{display:inline-block;font-size:12px;font-weight:800;color:#F4F2ED;background:var(--green);border-radius:6px;padding:3px 9px;margin-bottom:8px;white-space:pre-line}
+.verdict:focus{outline:none}
+.verdict:focus-visible{outline:2px solid #2E2E2C;outline-offset:2px}
+.popnote{margin:9px 0 0;font-size:13.5px;line-height:1.6;font-weight:600;color:var(--body);text-wrap:pretty}
+.popnote b{color:var(--ink);font-weight:800}
+.qshare{appearance:none;-webkit-appearance:none;margin:10px 0 0;width:100%;min-height:44px;border:1.5px dashed var(--line);background:transparent;border-radius:10px;padding:9px 10px;
+  font-size:13px;font-weight:800;color:var(--ink2);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.qshare:hover{border-color:var(--sub)}
+
+/* ── 타임라인 ── */
+.tline{list-style:none;margin:12px 0 0;padding:0}
+.tline li{display:grid;grid-template-columns:44px 1fr;gap:10px}
+.tline time{padding-top:2px;font-size:14px;font-weight:800;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tline p{position:relative;margin:0;padding:0 0 13px 16px;border-left:2px solid #CFC9BE;font-size:15px;line-height:1.6;font-weight:600;color:var(--body)}
+.tline li:last-child p{border-left-color:transparent;padding-bottom:0}
+.tline p::before{content:"";position:absolute;left:-7px;top:.42em;width:12px;height:12px;border-radius:50%;background:#FBF8F1;border:2px solid var(--green);box-sizing:border-box}
+.tline li.hot time{color:#B23A47}
+.tline li.hot p{font-weight:800;color:var(--ink)}
+.tline li.hot p::before{background:#B23A47;border-color:#B23A47}
+.tline.wide li{grid-template-columns:58px 1fr}
+
+/* ── 판서 ── */
+.board{margin:14px -16px 0;padding:15px 22px 16px;background:var(--board);color:var(--chalk);position:relative;overflow:hidden}
+.board:after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 20% 0%,rgba(255,255,255,.06),transparent 55%),radial-gradient(ellipse at 90% 100%,rgba(255,255,255,.04),transparent 50%)}
+.bdk{position:relative;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--chalk2);margin-bottom:9px}
+.bdk:before{content:"";width:18px;height:2px;background:var(--chalk-mark);border-radius:2px}
+.bdt{position:relative;margin:0;font-size:20px;line-height:1.42;font-weight:800;letter-spacing:-.04em;color:#F6F4EE;text-wrap:balance}
+.board .bdt.hand{font-family:'SnowHand','Gaegu','Nanum Pen Script',cursive;font-size:26px;line-height:1.34;letter-spacing:0;font-weight:700}
+.btab{position:relative;display:grid;margin:12px 0 0;border:1px solid rgba(236,234,227,.22);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums}
+.btab span{padding:8px 8px;font-size:12.5px;font-weight:800;text-align:left;border-bottom:1px solid rgba(236,234,227,.12);color:#EDEBE4;word-break:keep-all;line-height:1.45}
+.btab span.h{font-size:10.5px;color:var(--chalk2);background:rgba(255,255,255,.05);letter-spacing:.02em}
+.btab span.l{font-size:12.3px}
+.btab span.e{border-bottom:0}
+.btab .hi{color:var(--chalk-mark)}
+.btab .term{padding:6px 3px;border-bottom:0;font-size:inherit;font-weight:inherit;color:inherit}
+.btab .term .tip{padding:9px 11px;border-bottom:0;font-size:12px;font-weight:600;line-height:1.52;color:#F2F0EB;text-align:left}
+
+/* ── 표 ── */
+.dcmp{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:11px 12px 12px}
+.figh{display:flex;align-items:baseline;justify-content:space-between;gap:3px 10px;flex-wrap:wrap;margin-bottom:9px}
+.figh b{font-size:13.5px;font-weight:800;color:var(--ink)}
+.figh span{font-size:12px;font-weight:700;color:var(--sub)}
+.calc{display:grid;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums}
+.calc span{padding:7px 9px;font-size:13px;font-weight:700;color:var(--body);background:#F7F6F2;border-bottom:1px solid var(--line2);text-align:right;word-break:keep-all;line-height:1.4}
+.calc span.h{font-size:12px;font-weight:800;color:var(--muted);background:var(--surface-detail)}
+.calc span.l{text-align:left;font-weight:800;color:var(--ink);font-size:12.5px}
+.calc span.e{border-bottom:0}
+.calc span.hot{color:#B23A47;font-weight:800}
+.calc span small{display:block;margin-top:1px;font-size:11px;font-weight:700;color:var(--sub);white-space:normal}
+
+/* ── 시뮬레이터 ── */
+.sim{margin:14px -16px 0;padding:14px 16px 15px;background:var(--surface-band);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)}
+.simhd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:0 4px}
+.simhd b{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.simhd span{font-size:11.5px;font-weight:800;color:var(--sub)}
+.simp{margin:5px 4px 0;font-size:13.5px;line-height:1.6;font-weight:600;color:var(--body);text-wrap:pretty}
+.simp b{color:var(--ink);font-weight:800}
+.chip{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:var(--surface-inner);border-radius:999px;padding:6px 11px;
+  font-size:12px;font-weight:800;color:var(--ink2);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#F4F2ED}
+.ddlb{margin:12px 4px 0;font-size:12px;font-weight:800;color:var(--sub)}
+.dgrp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:6px 0 0}
+.dgrp .chip{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:52px;border-radius:10px;padding:6px 4px;
+  font-size:13.5px;line-height:1.25;font-variant-numeric:tabular-nums;color:var(--ink);word-break:keep-all;text-align:center}
+.dgrp .chip small{display:block;margin-top:2px;font-size:11.5px;font-weight:700;color:var(--sub)}
+.dgrp .chip.on{color:#F4F2ED}
+.dgrp .chip.on small{color:#CFCAC0}
+.iflow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:12px 0 0}
+.df{background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;padding:7px 4px 8px;text-align:center;transition:background .15s,border-color .15s;min-width:0}
+.df i{display:block;font-style:normal;font-size:11px;font-weight:800;color:var(--sub);word-break:keep-all}
+.df b{display:block;margin-top:3px;font-size:15px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;white-space:normal;word-break:keep-all;line-height:1.25}
+.df b small{display:block;margin-top:2px;font-size:11px;font-weight:800;color:var(--sub);word-break:keep-all}
+.df.ok{background:var(--green-soft);border-color:var(--green-line)}.df.ok b{color:var(--green-dark)}
+.df.no{background:var(--rec-soft);border-color:var(--rec-line)}.df.no b{color:var(--rec)}
+.df.ok b small,.df.no b small{color:inherit;opacity:.9}
+.omsgw{display:grid;grid-template-columns:52px 1fr;gap:8px;align-items:center;margin:8px 0 0}
+.oface{width:52px;height:52px;display:block}
+.oface .f-ok,.oface .f-meh,.oface .f-no{display:none}
+.oface.ok .f-ok,.oface.meh .f-meh,.oface.no .f-no{display:inline}
+.simmsg{margin:0;padding:10px 12px;background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;font-size:13.5px;line-height:1.6;font-weight:700;color:var(--ink);min-height:6.4em;text-wrap:pretty}
+.simfoot{margin:8px 4px 0;font-size:12px;line-height:1.5;font-weight:600;color:var(--muted)}
+
+/* ── 접힘 ── */
+.foldwrap{margin:14px 0 0}
+details.fold{border:1px solid var(--line);border-radius:12px;background:var(--surface-detail);margin:0 0 8px;overflow:hidden}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px;
+  padding:11px 15px;font-size:13px;font-weight:800;color:var(--ink)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary:after{content:"+";font-size:18px;font-weight:800;color:var(--green);line-height:.9}
+details.fold[open]>summary:after{content:"−"}
+details.fold .fb{padding:0 15px 14px}
+.foldwrap.more{margin-top:16px}
+.foldwrap.more summary em{font-style:normal;display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.06em;color:var(--green);border:1px solid var(--green-line);border-radius:999px;padding:1px 7px;margin-right:7px;vertical-align:1px}
+.fb p{margin:0 0 8px;font-size:13.5px;line-height:1.62;color:var(--body);font-weight:600}
+.fb p:last-child{margin-bottom:0}
+.fb p b{color:var(--ink);font-weight:800}
+.gloss{display:grid;grid-template-columns:100px 1fr;gap:7px 11px;margin:2px 0 0;font-size:12.5px}
+.gloss dt{font-weight:800;color:#4B4740}
+.gloss dd{margin:0;color:var(--body);line-height:1.52}
+.case{margin:0 0 9px;padding:9px 11px;background:var(--surface-inner);border:1px solid var(--line2);border-radius:9px}
+.case b{display:block;font-size:12.5px;font-weight:800;color:var(--ink);line-height:1.45}
+.case p{margin:4px 0 0;font-size:12.5px;line-height:1.55;font-weight:600;color:var(--body)}
+.src{margin:0;padding-left:26px;display:grid;gap:5px}
+.src li{font-size:12px;line-height:1.52;color:var(--body);font-weight:600}
+.src li b{color:var(--ink)}
+.src a{color:var(--ink2);font-weight:700;text-decoration:underline;text-decoration-color:#A9A49B;text-underline-offset:3px;padding:2px 0;word-break:keep-all}
+.disc{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;padding:12px 8px 0;font-weight:500}
+.foot{text-align:center;font-size:11.5px;color:var(--sub);padding:9px 0 4px;font-weight:800;letter-spacing:-.01em}
+
+/* ── 툴팁 ── */
+.term{display:inline;padding:6px 3px;margin:0 -3px;border-bottom:0;line-height:inherit;white-space:nowrap;cursor:pointer;position:relative;
+  -webkit-tap-highlight-color:transparent;font-weight:800;color:var(--ink);
+  text-decoration:underline dashed #8B867E;text-decoration-thickness:1.5px;text-underline-offset:4px;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;-webkit-user-select:text;user-select:text;
+  touch-action:manipulation;-webkit-touch-callout:none}
+.term .tip{position:fixed;left:12px;top:0;min-width:160px;max-width:min(248px,calc(100vw - 28px));
+  background:#33322F;color:#F2F0EB;font-size:12px;font-weight:600;line-height:1.52;padding:9px 11px;border-radius:9px;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);z-index:60;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease;white-space:normal;text-align:left;text-decoration:none}
+.term .tip:after{content:"";position:absolute;top:100%;left:var(--ax,50%);transform:translateX(-50%);border:6px solid transparent;border-top-color:#33322F}
+.term .tip.below:after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#33322F}
+.term.open .tip{opacity:1;visibility:visible;pointer-events:auto}
+.board .term,.ans .term{color:inherit;text-decoration-color:rgba(236,234,227,.55)}
+@media(hover:hover) and (pointer:fine){.term{cursor:help}.term:hover{text-decoration-color:var(--ink)}.board .term:hover{text-decoration-color:#F4F2ED}}
+
+/* ── 손그림 ── */
+.sdefs{position:absolute;width:0;height:0;overflow:hidden}
+.hand{font-family:'SnowHand','Gaegu','Nanum Pen Script',cursive;font-weight:700;letter-spacing:-.02em}
+.doodle{margin:14px 0 0;padding:8px 6px 4px;background:var(--surface-inner);border:1px solid var(--line);border-radius:14px}
+.doodle svg{display:block;width:100%;height:auto;max-width:460px;margin:0 auto}
+.doodle figcaption{margin:2px 8px 6px;font-size:12px;line-height:1.5;font-weight:700;color:var(--muted);text-align:center}
+
+/* ── 포스트잇 ── */
+.chk4{margin:12px 0 0;display:grid;gap:18px}
+.ck{position:relative;padding:14px 14px 12px;background:#FBF3D5;border-radius:4px;box-shadow:0 9px 14px -11px rgba(46,46,44,.45),0 1px 0 rgba(46,46,44,.05);transform:rotate(-.5deg)}
+.ck:nth-child(even){background:#EAF1EA;transform:rotate(.45deg)}
+.ck::before{content:"";position:absolute;top:-8px;left:50%;width:62px;height:16px;background:rgba(201,186,150,.5);transform:translateX(-50%) rotate(-2.5deg);border-radius:2px}
+.ck .ct{margin:1px 0 0;font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.03em;line-height:1.4;text-wrap:balance}
+.ck .ct i{font-family:'SnowHand','Gaegu','Nanum Pen Script',cursive;font-style:normal;font-size:18px;font-weight:700;color:#B23A47;letter-spacing:0;margin-right:8px;vertical-align:-1px}
+.ck .cd{margin:5px 0 0;font-size:13.5px;line-height:1.52;font-weight:700;color:var(--ink2);text-wrap:pretty}
+.ck .cd b{color:var(--ink)}
+
+/* ── 오답노트 ── */
+.trapwrap{margin:16px 0 0;border:1.5px solid var(--i2);border-radius:12px;overflow:hidden}
+.traphd{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;background:var(--i2);color:#F6EEEF}
+.traphd b{font-size:12px;font-weight:800;letter-spacing:.06em}
+.traphd i{font-style:normal;font-size:11px;font-weight:700;color:#E5C9CC}
+.trap{display:grid;gap:1.5px;background:var(--line)}
+.trap .ti{padding:10px 13px;background:var(--surface-inner)}
+.trap .tk{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.trap .tx{margin-top:3px;font-size:14px;font-weight:800;color:var(--i2);line-height:1.48;letter-spacing:-.02em}
+.trap .tx span{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='9' viewBox='0 0 48 9'%3E%3Cpath d='M0 5.2 Q6 2.4 12 4.8 T24 4.6 T36 5.4 T48 4.6' fill='none' stroke='%23B23A47' stroke-opacity='.6' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:repeat-x;background-position:0 60%;background-size:48px 9px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.trap .to{margin-top:5px;font-size:13.5px;font-weight:600;color:var(--body);line-height:1.56;text-wrap:pretty}
+.trap .to b{color:var(--ink);font-weight:800}
+
+/* ── 엔딩 ── */
+.final{margin:16px -16px 0;padding:18px 22px;background:linear-gradient(155deg,#36443B 0%,#232C26 100%);color:#EFEDE7;position:relative;overflow:hidden}
+.final:before{content:"";position:absolute;right:-46px;bottom:-58px;width:160px;height:160px;border-radius:50%;border:1px solid rgba(168,198,180,.18)}
+.final .fk{position:relative;font-size:12px;font-weight:800;letter-spacing:.13em;color:#A0B4A6;margin-bottom:10px}
+.final p{position:relative;margin:0;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.final .f1{font-size:19px;line-height:1.5;text-wrap:balance}
+.final .f1 b{color:var(--green-pale);background:linear-gradient(transparent 58%,rgba(230,201,143,.36) 58%,rgba(230,201,143,.36) 94%,transparent 94%);padding:0 2px}
+.final .f2{margin-top:11px;padding-top:10px;border-top:1px solid rgba(168,198,180,.22);font-size:15px;line-height:1.58;color:#DCE6DE;text-wrap:pretty}
+
+/* ── 공유 ── */
+.sharebox{margin:16px 0 0;padding:14px 14px 13px;background:var(--surface-inner);border:1px solid var(--line);border-radius:14px;text-align:center}
+.shq{margin:0;font-size:14.5px;line-height:1.5;font-weight:800;color:var(--ink);letter-spacing:-.03em;text-wrap:balance}
+.shbtns{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px;margin:11px 0 0}
+.shb{appearance:none;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#F7F6F2;border-radius:10px;
+  padding:10px 4px;min-height:48px;font-size:13px;font-weight:800;color:var(--ink);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;text-align:center;white-space:nowrap}
+.shb.main{background:var(--green);border-color:var(--green);color:#F4F2ED}
+.shmsg{margin:7px 0 0;min-height:1em;font-size:12px;font-weight:700;color:var(--green)}
+
+/* ── 이어 읽기 ── */
+.more7{margin:12px 0 0;display:grid;gap:6px}
+.m7h{font-size:12px;font-weight:800;letter-spacing:.12em;color:var(--muted);margin:2px 2px 2px}
+.m7{display:block;background:var(--surface-inner);border:1px solid var(--line);border-radius:11px;padding:10px 36px 10px 13px;position:relative}
+.m7:after{content:"→";position:absolute;right:13px;top:50%;transform:translateY(-50%);font-weight:800;color:var(--muted)}
+.m7 i{font-style:normal;display:inline-block;font-size:12px;font-weight:800;color:var(--green);margin-right:6px}
+.m7 b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.m7 span{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--sub)}
+.m7.all{background:var(--surface-detail)}
+.m7.cta{background:var(--green);border-color:var(--green)}
+.m7.cta b{color:#F4F2ED}.m7.cta span{color:#C6D2CA}.m7.cta:after{color:#C6D2CA}
+
+/* ── 다음 편 ── */
+.next{margin:16px -16px 0;padding:20px 22px;background:linear-gradient(150deg,#454F5C 0%,#2B323C 100%);color:#E9EBEE;position:relative;overflow:hidden}
+.next:before{content:"";position:absolute;right:-40px;bottom:-52px;width:150px;height:150px;border-radius:50%;border:1px solid rgba(180,190,202,.18)}
+.next .nh{position:relative;font-size:12px;font-weight:800;letter-spacing:.12em;color:#C3CAD3;margin-bottom:10px}
+.next p{position:relative;margin:0;font-size:16px;line-height:1.56;font-weight:800;letter-spacing:-.03em;color:#EDEFF2;text-wrap:pretty}
+.next .nt{position:relative;margin-top:14px;padding-top:12px;border-top:1px solid rgba(180,190,202,.22);font-size:12.5px;font-weight:800;color:#B9C1CB}
+.next .nt b{color:#EDEFF2;font-weight:800;margin-right:6px}
+.next.nlink{display:block;text-decoration:none;color:inherit}
+.next.nlink .nt::after{content:" →"}
+
+:focus-visible{outline:2px solid #2E2E2C;outline-offset:2px}
+.cover :focus-visible,.shb.main:focus-visible,.m7.cta:focus-visible{outline-color:#F4F2ED}
+
+
+@media(max-width:360px){
+  .cvtitle{font-size:27px}
+  .cvstat b{font-size:19px}
+  .cvstat div{padding:7px 6px 8px}
+  .q{font-size:17px}
+  .ans .av{font-size:17.5px}
+  .final .f1{font-size:17px}
+  .cht{font-size:21px}
+  .btab span{padding:7px 6px;font-size:11.8px}
+  .gloss{grid-template-columns:86px 1fr}
+}
+
+/* ── 데스크톱 ── */
+@media(min-width:768px){
+  .app{max-width:770px;padding-left:28px;padding-right:28px}
+  .topbar{margin:0 -28px}
+  .cover{margin:0 -28px;padding:44px 40px 34px}
+  .cvtitle{font-size:44px}
+  .cvsub{font-size:15px;max-width:30em}
+  .cvstat b{font-size:30px}.cvstat span{font-size:12px}
+  .ch{margin-top:48px}
+  .cht{font-size:29px}
+  .q{font-size:24px}
+  .p{font-size:16px}
+  .pts li{font-size:16px}
+  .tline p{font-size:16px}
+  .ans,.board,.sim,.final,.next{margin-left:-28px;margin-right:-28px}
+  .ans{padding:26px 40px}
+  .ans .av{font-size:23px}
+  .board{padding:26px 40px}
+  .bdt{font-size:24px}
+  .board .bdt.hand{font-size:30px}
+  .sim{padding:24px 34px}
+  .final{padding:32px 40px}
+  .final .f1{font-size:25px}
+  .final .f2{font-size:18px}
+  .next{padding:28px 40px}
+  .chk4{grid-template-columns:1fr 1fr;gap:14px 20px}
+  .trap{grid-template-columns:1fr 1fr 1fr}
+  .more7{grid-template-columns:1fr 1fr 1fr}
+  .m7.all{grid-column:span 1}
+  .m7.cta{grid-column:span 2}
+  .dgrp{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+
+/* 18편 읽기 개선: 줄 카드 */
+.rows{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:2px 14px}
+.rows .rw{display:grid;grid-template-columns:92px 1fr;gap:12px;padding:11px 0;border-top:1px dashed var(--line);align-items:baseline}
+.rows .rw:first-child{border-top:0}
+.rows .rk{font-size:14px;font-weight:800;color:var(--ink);line-height:1.4;font-variant-numeric:tabular-nums;word-break:keep-all}
+.rows .rk small{display:block;margin-top:1px;font-size:12px;font-weight:700;color:var(--sub)}
+.rows .rk .term{white-space:normal}
+.rows .rv{font-size:14.5px;line-height:1.62;font-weight:600;color:var(--body);text-wrap:pretty}
+.rows .rv b{color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums}
+.rows .rw.hot .rk{color:#B23A47}
+.rows .rw.hot .rk .term{color:#B23A47}
+.rows.sm{margin:9px 0 2px;padding:0 12px}
+.rows.sm .rw{padding:7px 0;grid-template-columns:96px 1fr}
+.rows.sm .rk,.rows.sm .rv{font-size:13.5px}
+@media(min-width:768px){.rows{padding:4px 18px}.rows .rw{grid-template-columns:118px 1fr;gap:16px}.rows .rv{font-size:15.5px}.rows .rk{font-size:15px}}
+@media(max-width:360px){.rows{padding:2px 11px}.rows .rw{grid-template-columns:80px 1fr;gap:9px}.rows .rv{font-size:14px}.rows.sm .rw{grid-template-columns:88px 1fr}}
+
+/* ═════ 20편 추가 ═════ */
+/* 표지 글씨 */
+.cvstat span{font-size:11.5px}
+.cvstat em{font-size:12px}
+/* 심화 접기 안 타임라인 */
+.fb .tline{margin:4px 0 4px}
+.fb .tline p{margin:0;font-size:13.5px;line-height:1.58}
+.fb .tline li:last-child p{padding-bottom:0}
+.fb .tline.wide li{grid-template-columns:68px 1fr}
+.fb .tline time{font-size:13px}
+/* 계산기 */
+.seg{display:grid;gap:6px;margin:6px 0 0}
+.seg.s2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.seg.s3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.seg.s4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.seg .chip{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:46px;border-radius:10px;padding:5px 3px;
+  font-size:13.5px;line-height:1.25;font-variant-numeric:tabular-nums;color:var(--ink);word-break:keep-all;text-align:center}
+.seg .chip small{display:block;margin-top:2px;font-size:11px;font-weight:700;color:var(--sub)}
+.seg .chip.on{color:#F4F2ED}
+.seg .chip.on small{color:#CFCAC0}
+#msim .ddlb{margin-top:11px}
+.gauge{position:relative;height:14px;margin:16px 2px 20px;background:#F7F6F2;border:1px solid var(--line);border-radius:999px}
+.gauge i{display:block;height:100%;width:0;border-radius:999px;background:var(--green-pale);transition:width .2s}
+.gauge.no i{background:#E2B3B8}
+.gauge em{position:absolute;left:70%;top:-4px;bottom:-4px;width:0;border-left:2px dashed #B23A47}
+.gauge span{position:absolute;top:16px;font-size:11px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums;transform:translateX(-50%)}
+.gauge .g0{left:0;transform:none}
+.gauge .g1{left:70%;color:#B23A47}
+.gauge .g2{right:0;left:auto;transform:none}
+#msim .iflow{margin-top:8px}
+#msim .df b{font-size:15px}
+#msim .simmsg{min-height:8.2em}
+@media(max-width:360px){
+  .seg .chip{font-size:12.5px;padding:5px 2px}
+  .seg .chip small{font-size:10.5px}
+  #msim .df b{font-size:14px}
+}
+
+.rows .rv b.up{color:var(--up)}.rows .rv b.down{color:var(--down)}
+</style>
+</head>
+<body>
+<div class="app">
+<span id="top"></span>
+<svg class="sdefs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="rough" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="chalk" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="11" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1 L8 5 L1 9" fill="none" stroke="#2E2E2C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="ahw" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1 L8 5 L1 9" fill="none" stroke="#ECEAE3" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>
+</svg>
+<header class="topbar">
+  <div class="tbin">
+    <span class="brand"><i>데이터 길잡이</i> · 제1편</span>
+    <span class="ep" aria-hidden="true">01</span>
+  </div>
+  <div class="prog"><i id="pg"></i></div>
+</header>
+
+<main>
+<!-- ══════ 표지 ══════ -->
+<div class="cover">
+  <span class="cvkick">시장 데이터 보는 법 <b>01</b></span>
+  <time class="cvdate" datetime="2026-11-18">2026.11.18 · 시장 입문</time>
+  <h1 class="cvtitle">외국인은 오늘 <span>무엇을 사고팔았나</span></h1>
+  <p class="cvsub">11월 16일 외국인 순매수 1위는 SK스퀘어, 274억 원이었다.<br/>그런데 같은 표를 끝까지 더하면<br/>1조 5천억 원이 넘는 순매도다.<br/>코스피·코스닥·코넥스 합계, 시간외까지 넣은 최종값이다.</p>
+  <div class="cvstat">
+    <div><span>화면번호</span><b>12010</b><em>내부 코드 MDCSTAT024</em></div>
+    <div class="hot"><span>투자자 구분</span><b>13개</b><em>처음 열면 &#39;금융투자&#39;</em></div>
+    <div><span>최종값</span><b>8시</b><em>오후 3시 45분에 먼저 반영</em></div>
+  </div>
+  <div class="cvmotif">
+    <svg viewBox="0 0 320 150" role="img" aria-label="칠판 그림. 길게 늘어선 종목 목록이 있다. 맨 위에는 짧은 빨간 막대 세 개(순매수 274억, 163억, 148억 원), 맨 아래에는 긴 파란 막대 세 개(순매도 1,087억, 2,042억, 6,210억 원)가 있다. 가운데는 점점점. 오른쪽 위 말풍선에 「맨 아래까지 봤어?」라고 적혀 있다">
+      <text class="hand" x="6" y="15" font-size="11.5" fill="rgba(236,234,227,.72)">11월 16일 · 외국인 · 시장 전체</text>
+      <g filter="url(#chalk)" stroke-linejoin="round">
+        <rect x="8" y="24" width="200" height="120" rx="6" fill="rgba(236,234,227,.06)" stroke="rgba(236,234,227,.8)" stroke-width="1.4"/>
+        <path d="M8 44 H208 M8 60 H208 M8 76 H208 M8 98 H208 M8 114 H208 M8 130 H208" fill="none" stroke="rgba(236,234,227,.28)" stroke-width="1"/>
+        <rect x="96" y="30" width="4.4" height="10" rx="1.2" fill="#E9A9AE"/>
+        <rect x="96" y="47" width="2.6" height="10" rx="1.2" fill="#E9A9AE"/>
+        <rect x="96" y="63" width="2.4" height="10" rx="1.2" fill="#E9A9AE"/>
+        <rect x="96" y="101" width="17.5" height="10" rx="1.2" fill="#A9C2E2"/>
+        <rect x="96" y="117" width="32.9" height="10" rx="1.2" fill="#A9C2E2"/>
+        <rect x="96" y="133" width="100" height="9" rx="1.2" fill="#A9C2E2"/>
+      </g>
+      <path d="M96 27 V143" stroke="rgba(236,234,227,.55)" stroke-width="1" stroke-dasharray="2 3"/>
+      <g class="hand" font-size="10.5">
+        <text x="14" y="39" fill="rgba(236,234,227,.9)">1 SK스퀘어</text>
+        <text x="14" y="55" fill="rgba(236,234,227,.9)">2 삼양식품</text>
+        <text x="14" y="71" fill="rgba(236,234,227,.9)">3 에이피알</text>
+        <text x="106" y="39" fill="#F4D5D8">+274억</text>
+        <text x="104" y="55" fill="#F4D5D8">+163억</text>
+        <text x="104" y="71" fill="#F4D5D8">+148억</text>
+        <text x="14" y="110" fill="rgba(236,234,227,.9)">삼성전자우</text>
+        <text x="14" y="126" fill="rgba(236,234,227,.9)">SK하이닉스</text>
+        <text x="14" y="141" fill="rgba(236,234,227,.9)">삼성전자</text>
+        <text x="118" y="110" fill="#CFDDEF">−1,087억</text>
+        <text x="133" y="126" fill="#CFDDEF">−2,042억</text>
+        <text x="150" y="141" fill="#1F2721" text-anchor="middle">−6,210억</text>
+      </g>
+      <text class="hand" x="108" y="90" font-size="12.5" fill="rgba(236,234,227,.7)" text-anchor="middle">⋮ 2,623종목 ⋮</text>
+      <g filter="url(#chalk)"><path d="M222 18 H306 Q312 18 312 24 V54 Q312 60 306 60 H244 L232 74 L236 60 H228 Q222 60 222 54 V24 Q222 18 228 18 Z" fill="rgba(236,234,227,.10)" stroke="rgba(236,234,227,.85)" stroke-width="1.5" stroke-linejoin="round"/></g>
+      <text class="hand" x="267" y="36" font-size="12.5" fill="rgba(236,234,227,.95)" text-anchor="middle">맨 아래까지</text>
+      <text class="hand" x="267" y="52" font-size="12.5" fill="#F2E3C4" text-anchor="middle">봤어?</text>
+      <path d="M232 92 C 236 112, 236 124, 222 134" fill="none" stroke="#F2E3C4" stroke-width="1.6" stroke-linecap="round" marker-end="url(#ahw)" filter="url(#chalk)"/>
+      <text class="hand" x="276" y="104" font-size="11" fill="rgba(236,234,227,.85)" text-anchor="middle">크게 판 종목은</text>
+      <text class="hand" x="276" y="119" font-size="11" fill="rgba(236,234,227,.85)" text-anchor="middle">여기</text>
+    </svg>
+  </div>
+  <div class="cvidx">
+    <a href="#p1"><b>01</b>찾아가는 길</a>
+    <a href="#p2"><b>02</b>조건과 표</a>
+    <a href="#p3"><b>03</b>시각과 실수</a>
+  </div>
+  <p class="cvtime">읽는 시간 약 6분 · 퀴즈 1개</p>
+</div>
+
+<div class="tldr">
+  <div class="tlh"><b class="hand">바쁘면 이것만!</b><span>세 줄 요약</span></div>
+  <ul class="pts">
+    <li>한국거래소 KRX Data Marketplace(data.krx.co.kr)에 로그인한 뒤 통계 → 기본 통계 → 주식 → 거래실적 → 투자자별 순매수상위종목 [12010]으로 들어간다. 투자자 구분은 처음에 &#39;금융투자&#39;로 잡혀 있다.</li>
+    <li>이름은 &#39;순매수 상위&#39;지만 표에는 그 투자자가 거래한 종목이 전부, 순매수 금액이 큰 순서로 나온다. <span class="ul">크게 판 종목은 맨 아래에 있다.</span></li>
+    <li>장 마감 뒤 오후 3시 45분께 먼저 반영되고, 시간외 거래까지 넣은 최종값은 오후 8시께 나온다. 같은 날이라도 언제 보느냐에 따라 숫자가 다르다.</li>
+  </ul>
+  <p class="tiphint">점선 밑줄 친 말은 마우스를 올리거나 누르면 뜻이 나온다.</p>
+</div>
+
+<!-- ══════ 1장 ══════ -->
+<div class="ch" id="p1">
+  <div class="chtop"><span class="chn">01</span><span class="chk">경로</span></div>
+  <h2 class="cht">찾아가는 길</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">&#34;외국인이 오늘 뭘 샀지?&#34; 기사보다 먼저 볼 수 있는 곳이 한국거래소 통계 화면이다. 거래소가 직접 집계한 공식 숫자다.</p>
+<div class="rows">
+  <div class="rw"><span class="rk">화면 이름</span><span class="rv">투자자별 순매수상위종목</span></div>
+  <div class="rw"><span class="rk">화면번호</span><span class="rv"><b>[12010]</b></span></div>
+  <div class="rw"><span class="rk">내부 코드</span><span class="rv"><b>MDCSTAT024</b>. 데이터를 부르는 이름은 MDCSTAT02401이다. 증권 기사나 리포트 출처에 이 코드로 적힌 경우가 많다.</span></div>
+</div>
+
+<h3 class="hd">네 번만 누르면 된다</h3>
+<figure class="doodle">
+  <svg viewBox="0 0 300 236" role="img" aria-label="경로 그림. 1 data.krx.co.kr 접속 후 로그인, 2 위쪽 메뉴 통계, 3 왼쪽 메뉴 기본 통계, 주식, 거래실적, 4 투자자별 순매수상위종목 화면번호 12010. 오른쪽 아래에 지름길로 화면번호 검색 칸에 12010을 넣으면 바로 열린다고 적혀 있다">
+    <text class="hand" x="150" y="18" font-size="14.5" fill="#2E2E2C" text-anchor="middle">[12010]까지 가는 길</text>
+    <g filter="url(#rough)" stroke="#2E2E2C" stroke-width="1.2" stroke-linejoin="round">
+      <rect x="20" y="32" width="200" height="34" rx="7" fill="#FBF8F1"/>
+      <rect x="20" y="80" width="200" height="34" rx="7" fill="#FBF8F1"/>
+      <rect x="20" y="128" width="200" height="34" rx="7" fill="#FBF8F1"/>
+      <rect x="20" y="176" width="200" height="40" rx="7" fill="#DCE3DD" stroke="#46584D" stroke-width="1.6"/>
+    </g>
+    <g class="hand" font-size="15" fill="#B23A47">
+      <text x="31" y="55">1</text><text x="31" y="103">2</text><text x="31" y="151">3</text><text x="31" y="202">4</text>
+    </g>
+    <g font-size="12.5" font-weight="700" fill="#2E2E2C">
+      <text x="48" y="54">data.krx.co.kr · 로그인</text>
+      <text x="48" y="102">위쪽 메뉴 「통계」</text>
+      <text x="48" y="150">기본 통계 › 주식 › 거래실적</text>
+      <text x="48" y="194">투자자별 순매수상위종목</text>
+    </g>
+    <text x="48" y="209" font-size="11.5" font-weight="800" fill="#46584D">화면번호 12010</text>
+    <path d="M120 66 V78 M120 114 V126 M120 162 V174" stroke="#5A5751" stroke-width="1.4" stroke-linecap="round" marker-end="url(#ah)"/>
+    <g filter="url(#rough)"><rect x="232" y="104" width="62" height="74" rx="8" fill="#EFE2CF" stroke="#A9784A" stroke-width="1.3"/></g>
+    <g class="hand" text-anchor="middle">
+      <text x="263" y="124" font-size="12.5" fill="#7A5A34">지름길</text>
+      <text x="263" y="142" font-size="11" fill="#7A5A34">화면번호</text>
+      <text x="263" y="156" font-size="11" fill="#7A5A34">검색 칸에</text>
+      <text x="263" y="172" font-size="13" fill="#B23A47">12010</text>
+    </g>
+  </svg>
+  <figcaption>2026년 11월 17일 화면 기준. 메뉴 이름과 위치는 거래소가 바꿀 수 있다.</figcaption>
+</figure>
+<p class="p">왼쪽 위 &#39;화면번호/화면명 검색&#39; 칸에 12010을 넣어도 바로 열린다. 같은 &#39;거래실적&#39; 메뉴 안에는 시장 전체 합계를 보는 &#39;투자자별 거래실적&#39;, 한 종목을 날짜별로 보는 &#39;투자자별 거래실적(개별종목)&#39;도 나란히 있다.</p>
+<p class="note">2026년 11월 현재 통계 화면은 회원 가입 뒤 로그인해야 열린다. 사이트 이름도 예전 &#39;KRX 정보데이터시스템&#39;에서 &#39;KRX Data Marketplace&#39;로 바뀌었다. 주소는 그대로 data.krx.co.kr이다.</p>
+
+<!-- ══════ 2장 ══════ -->
+<div class="ch" id="p2">
+  <div class="chtop"><span class="chn">02</span><span class="chk">읽는 법</span></div>
+  <h2 class="cht">조건 네 개,<br/>그리고 맨 아래</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">화면 위쪽에서 조건을 고르고 &#39;조회&#39;를 누르면 아래에 표가 뜬다. 조건은 네 개다.</p>
+<div class="rows">
+  <div class="rw"><span class="rk">시장구분</span><span class="rv">전체 · KOSPI · KOSDAQ(전체/KOSDAQ GLOBAL) · KONEX. 기사 속 &#39;코스피 외국인&#39;과 맞추려면 KOSPI를 고른다.</span></div>
+  <div class="rw hot"><span class="rk">투자자구분</span><span class="rv"><span class="term">금융투자<span class="tip">증권사 같은 금융투자회사가 자기 돈으로 하는 매매. 기관을 이루는 일곱 구분 가운데 하나다.</span></span> · 보험 · 투신 · 사모 · 은행 · 기타금융 · 연기금 등 · <span class="term">기관합계<span class="tip">금융투자, 보험, 투신, 사모, 은행, 기타금융, 연기금 등 일곱 구분을 더한 값. 기사에서 &#39;기관&#39;이라고 하면 보통 이 값이다.</span></span> · 기타법인 · 개인 · 외국인 · 기타외국인 · 전체, 모두 13개. <b>처음 열면 &#39;금융투자&#39;로 잡혀 있다.</b> 외국인을 보려면 반드시 바꾼다.</span></div>
+  <div class="rw"><span class="rk">조회기간</span><span class="rv">시작일~종료일. 1일·1개월·6개월·1년 단추가 있다. 기간을 넓히면 하루치가 아니라 그 기간 <b>합계</b>가 나온다.</span></div>
+  <div class="rw"><span class="rk">단위</span><span class="rv">수량은 주·천주·백만주, 금액은 원·천원·백만원·십억원. &#39;억 원&#39;은 없다. 백만원으로 받아 100으로 나누면 억 원이다.</span></div>
+</div>
+
+<h3 class="hd">표는 이렇게 읽는다</h3>
+<p class="p">열은 종목코드와 종목명, 그리고 <span class="term">거래량<span class="tip">사고판 주식 수. 표에서는 그 투자자가 판 수량, 산 수량, 그 차이를 따로 보여 준다.</span></span> 세 칸(매도·매수·순매수)과 <span class="term">거래대금<span class="tip">사고판 금액. 순위는 이 금액의 순매수로 매긴다.</span></span> 세 칸(매도·매수·순매수)이다. <span class="term">순매수<span class="tip">산 것에서 판 것을 뺀 값. 마이너스면 판 쪽이 더 많았다는 뜻이고, 순매도라고 부른다. 「시장을 읽는 말들」 1편에서 다뤘다.</span></span>는 매수에서 매도를 뺀 값이고, 줄은 <b>거래대금 순매수가 큰 순서</b>로 늘어선다.</p>
+<div class="rows sm">
+  <div class="rw"><span class="rk">예시 조건</span><span class="rv">11월 9~16일 · 금융투자 · 시장 전체</span></div>
+  <div class="rw"><span class="rk">1위</span><span class="rv">SK하이닉스, 순매수 <b class="up">7,486억 원</b></span></div>
+  <div class="rw"><span class="rk">2위</span><span class="rv">삼성SDI, 순매수 <b class="up">735억 원</b></span></div>
+  <div class="rw"><span class="rk">맨 끝</span><span class="rv">삼성전자, 순매수 <b class="down">−3,954억 원</b></span></div>
+</div>
+<p class="p">맨 끝 줄이 마이너스다. 이 화면이 &#39;순매수 상위&#39;라는 이름과 달리 무엇을 보여 주는지가 여기서 드러난다.</p>
+
+<div class="pop" id="quiz1">
+  <div class="poph"><b>워밍업</b><span class="vb">실제 조회</span></div>
+  <div class="popb">
+    <p class="popq">11월 16일, 투자자 구분을 &#39;외국인&#39;으로 바꿔 시장 전체를 조회했다. 맨 위 1위는 SK스퀘어, 순매수 274억 원이다. 그날 외국인은 시장 전체로 어땠을까?</p>
+    <div class="opts">
+      <button class="opt" type="button" data-ok="0">① 1위가 수백억 원 순매수니 전체로도 순매수였다</button>
+      <button class="opt" type="button" data-ok="1">② 전체로는 1조 원 넘게 순매도였다</button>
+      <button class="opt" type="button" data-ok="0">③ 이 화면으로는 알 수 없다</button>
+    </div>
+    <div class="popans" hidden>
+      <span class="verdict" tabindex="-1">정답은 ②</span>
+      <p class="popnote">표를 끝까지 내리면 맨 아래 세 줄이 삼성전자우 <b>−1,087억 원</b>, SK하이닉스 <b>−2,042억 원</b>, 삼성전자 <b>−6,210억 원</b>이다. 2,629종목 가운데 순매수는 803종목뿐이었고, 순매수 금액을 모두 더하면 약 −1조 5,360억 원(코스피·코스닥·코넥스 합계, 시간외 포함 최종값)이 나온다. 같은 화면 안에 답이 있다.</p>
+      <button class="qshare" type="button" data-share="quiz">이 문제, 주변에도 내 보기</button>
+    </div>
+  </div>
+</div>
+
+<figure class="doodle">
+  <svg viewBox="0 0 300 250" role="img" aria-label="막대 그림. 11월 16일 외국인, 시장 전체 조회 결과. 맨 위 세 줄은 SK스퀘어 274억, 삼양식품 163억, 에이피알 148억 원 순매수로 막대가 아주 짧다. 가운데 2,623종목을 건너뛰고, 맨 아래 세 줄은 2,627위 삼성전자우 1,087억, 2,628위 SK하이닉스 2,042억, 2,629위 삼성전자 6,210억 원 순매도로 막대가 길다">
+    <text class="hand" x="150" y="17" font-size="14.5" fill="#2E2E2C" text-anchor="middle">위쪽만 보면 놓치는 것</text>
+    <text class="hand" x="150" y="33" font-size="11.5" fill="#8B867E" text-anchor="middle">11월 16일 · 외국인 · 시장 전체 · 2,629종목</text>
+    <path d="M100 42 V236" stroke="#5A5751" stroke-width="1.2" stroke-dasharray="3 3"/>
+    <g font-size="11.5" font-weight="700" fill="#2E2E2C" text-anchor="end">
+      <text x="94" y="58">1 SK스퀘어</text>
+      <text x="94" y="80">2 삼양식품</text>
+      <text x="94" y="102">3 에이피알</text>
+      <text x="94" y="186">2,627 삼성전자우</text>
+      <text x="94" y="208">2,628 SK하이닉스</text>
+      <text x="94" y="230">2,629 삼성전자</text>
+    </g>
+    <g filter="url(#rough)" stroke="#2E2E2C" stroke-width="1" stroke-linejoin="round">
+      <rect x="100" y="48" width="8.5" height="14" rx="2" fill="#F2DDE0"/>
+      <rect x="100" y="70" width="5.1" height="14" rx="2" fill="#F2DDE0"/>
+      <rect x="100" y="92" width="4.6" height="14" rx="2" fill="#F2DDE0"/>
+      <rect x="100" y="176" width="33.7" height="14" rx="2" fill="#D9E3EF"/>
+      <rect x="100" y="198" width="63.3" height="14" rx="2" fill="#D9E3EF"/>
+      <rect x="100" y="220" width="192" height="14" rx="2" fill="#D9E3EF"/>
+    </g>
+    <g class="hand" font-size="12">
+      <text x="114" y="60" fill="#B23A47">+274억</text>
+      <text x="110" y="82" fill="#B23A47">+163억</text>
+      <text x="110" y="104" fill="#B23A47">+148억</text>
+      <text x="139" y="188" fill="#3D6595">−1,087억</text>
+      <text x="169" y="210" fill="#3D6595">−2,042억</text>
+      <text x="236" y="232" fill="#3D6595">−6,210억</text>
+    </g>
+    <text class="hand" x="150" y="134" font-size="13" fill="#8B867E" text-anchor="middle">⋮</text>
+    <text class="hand" x="150" y="150" font-size="12" fill="#8B867E" text-anchor="middle">2,623종목 건너뜀</text>
+    <text class="hand" x="150" y="166" font-size="13" fill="#8B867E" text-anchor="middle">⋮</text>
+  </svg>
+  <figcaption>막대 길이는 금액에 비례한다. 순매수 803종목, 순매도 1,804종목, 0원 22종목.</figcaption>
+</figure>
+<p class="note">Snowshagal 데일리와 마감 기록에 나온 11월 16일 외국인 순매도 약 1조 3,800억 원은 코스피 정규장만 센 값이다. 시장 범위와 시각이 달라 금액이 다르다.</p>
+
+<h3 class="q">많이 판 종목은<br/>어디서 보나?</h3>
+<div class="ans">
+  <div class="ak">한 문장 답</div>
+  <div class="av">같은 표 맨 아래다. 거래대금 순매수 칸 머리의 정렬 화살표를 눌러 작은 값부터 늘어놓으면, 순매도가 큰 종목이 맨 위로 올라온다.</div>
+  <div class="aw">한 종목을 날짜별로 따라가려면 같은 메뉴의 &#39;투자자별 거래실적(개별종목)&#39;을 쓴다.</div>
+</div>
+
+<!-- ══════ 3장 ══════ -->
+<div class="ch" id="p3">
+  <div class="chtop"><span class="chn">03</span><span class="chk">주의</span></div>
+  <h2 class="cht">숫자가 바뀌는 시각,<br/>자주 하는 실수</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">같은 날 같은 조건으로 조회해도, 오후 4시에 본 숫자와 밤 9시에 본 숫자가 다를 수 있다. 화면 아래 안내문에 이유가 적혀 있다.</p>
+<ol class="tline">
+  <li><time>15:30</time><p>정규장 마감. 그날 종가가 이때 정해진다.</p></li>
+  <li><time>15:40</time><p>4시까지 <span class="term">시간외 종가<span class="tip">그날 종가 한 값으로만 사고파는 거래. 한국거래소는 오후 3시 40분~4시에 연다.</span></span> 거래가 열린다.</p></li>
+  <li><time>15:45</time><p>정규장 매매내역이 화면에 먼저 반영된다(안내문 &#39;오후 3시45분 예정&#39;).</p></li>
+  <li><time>16:00</time><p>8시까지 한국거래소 <span class="term">애프터마켓<span class="tip">정규장이 끝난 뒤 여는 거래 시간. 한국거래소는 2026년 9월 14일부터 오후 4시~8시에 연다. 「시장을 읽는 말들」 18편에서 다뤘다.</span></span>이 열린다.</p></li>
+  <li class="hot"><time>20:00</time><p>시간외 거래까지 넣은 최종 매매내역이 나온다(안내문 &#39;오후 8시 예정&#39;).</p></li>
+</ol>
+<p class="p">실제로 얼마나 달라질까. 11월 16일 외국인 칸을 장 마감 직후와 다음 날 다시 본 값이다.</p>
+<div class="rows sm">
+  <div class="rw"><span class="rk">SK스퀘어</span><span class="rv">오후 3시 51분 <b class="up">+259.9억</b> → 최종 <b class="up">+274.1억</b></span></div>
+  <div class="rw"><span class="rk">SK하이닉스</span><span class="rv">오후 3시 51분 <b class="down">−2,241.8억</b> → 최종 <b class="down">−2,041.9억</b></span></div>
+  <div class="rw"><span class="rk">삼성전자</span><span class="rv">오후 3시 51분 <b class="down">−6,193.6억</b> → 최종 <b class="down">−6,210.0억</b></span></div>
+</div>
+<p class="note">장 마감 직후 기사와 다음 날 아침 기사의 수급 숫자가 어긋나는 이유 가운데 하나다. 그날의 공식 종가는 그대로 오후 3시 30분 값이다.</p>
+
+<div class="trapwrap">
+  <div class="traphd"><b>오답노트</b><i>자주 하는 실수 넷</i></div>
+  <div class="trap">
+    <div class="ti">
+      <div class="tk">실수 01</div>
+      <div class="tx"><span>"처음 뜬 표가 외국인 순매수 상위다"</span></div>
+      <div class="to">처음 열면 투자자 구분이 <b>금융투자</b>다. 외국인, 기관합계, 개인은 직접 골라야 한다.</div>
+    </div>
+    <div class="ti">
+      <div class="tk">실수 02</div>
+      <div class="tx"><span>"1위 종목을 보니 외국인이 오늘 샀다"</span></div>
+      <div class="to">1위는 그날 가장 많이 산 종목일 뿐이다. 전체로 샀는지 팔았는지는 <b>맨 아래까지</b> 봐야 안다. 11월 16일 외국인은 1위가 +274억 원이었지만 세 시장 합계로는 1조 원 넘게 순매도였다.</div>
+    </div>
+    <div class="ti">
+      <div class="tk">실수 03</div>
+      <div class="tx"><span>"1개월로 조회한 숫자를 하루치로 읽는다"</span></div>
+      <div class="to">기간을 넓히면 그 기간 <b>합계</b>다. 하루치를 보려면 시작일과 종료일을 같은 날로 맞춘다.</div>
+    </div>
+    <div class="ti">
+      <div class="tk">실수 04</div>
+      <div class="tx"><span>"금융투자 숫자가 곧 기관 숫자다"</span></div>
+      <div class="to">금융투자는 기관의 <b>일부</b>다. 기사 속 &#39;기관&#39;과 맞추려면 기관합계를 고른다.</div>
+    </div>
+  </div>
+</div>
+
+<h3 class="hd">Snowshagal 리포트에서는</h3>
+<div class="rows">
+  <div class="rw"><span class="rk">데일리</span><span class="rv">외국인·기관이 어떤 종목을 사고팔았는지는 이 화면 자료를 바탕으로 쓴다. 장 마감 직후 받은 값이라, 밤 8시 이후 최종값과는 조금 다를 수 있다.</span></div>
+  <div class="rw"><span class="rk">마감 기록</span><span class="rv">날짜별 <a class="ilink" href="https://snowshagal.com/market/">마감 기록</a>은 오후 3시 30분 정규장 마감 기준으로 그날 투자자별 합계를 보여 준다.</span></div>
+</div>
+
+<div class="final">
+  <div class="fk">제1편의 한 문장</div>
+  <p class="f1">&#39;순매수 상위&#39;라는 이름의 표에는 <b>판 종목도 다 있다.</b></p>
+  <p class="f2">맨 위 1위보다 맨 아래 세 줄이 그날 이야기를 더 많이 하는 날도 있다.</p>
+</div>
+
+<div class="sharebox">
+  <p class="shq">「외국인이 오늘 뭘 샀는지 직접 보고 싶은데」<br/>거래소 화면이 어려웠던 사람, 주변에 한 명쯤 있다.</p>
+  <div class="shbtns">
+    <button class="shb main" type="button" data-share="page">공유하기</button>
+    <button class="shb" type="button" data-share="copy">링크 복사</button>
+    <a class="shb" id="shX" href="https://twitter.com/intent/tweet?text=%EC%99%B8%EA%B5%AD%EC%9D%B8%EC%9D%80%20%EC%98%A4%EB%8A%98%20%EB%AC%B4%EC%97%87%EC%9D%84%20%EC%82%AC%EA%B3%A0%ED%8C%94%EC%95%98%EB%82%98%20%C2%B7%20%ED%88%AC%EC%9E%90%EC%9E%90%EB%B3%84%20%EC%88%9C%EB%A7%A4%EC%88%98%20%EC%83%81%EC%9C%84%EC%A2%85%EB%AA%A9%20%5B12010%5D%20%EC%9D%BD%EB%8A%94%20%EB%B2%95&amp;url=https%3A%2F%2Fsnowshagal.com%2Freports%2Fbasics-data-guide-01-krx-net-buying" target="_blank" rel="noopener">X에 올리기</a>
+  </div>
+  <p class="shmsg" id="shmsg" aria-live="polite"></p>
+</div>
+
+<div class="more7">
+  <div class="m7h">이어 읽기</div>
+  <a class="m7" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_1%ED%8E%B8_%EC%A3%BC%EA%B0%80%EB%8A%94%EB%88%84%EA%B0%80%EC%9B%80%EC%A7%81%EC%9D%B4%EB%8A%94%EA%B0%80"><i>시장을 읽는 말들 1</i><b>주가는 누가 움직이는가</b><span>순매수가 무엇을 말해 주나</span></a>
+  <a class="m7" href="https://snowshagal.com/reports/basics-18-market-hours"><i>시장을 읽는 말들 18</i><b>주식시장의 하루는 몇 시간인가</b><span>시간외 종가와 애프터마켓 시간표</span></a>
+  <a class="m7" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_2%ED%8E%B8_%ED%98%84%EB%AC%BC%EA%B3%BC%EC%84%A0%EB%AC%BC%EC%9D%B4%EC%97%87%EA%B0%88%EB%A6%B4%EB%95%8C"><i>시장을 읽는 말들 2</i><b>현물과 선물이 엇갈릴 때</b><span>베이시스와 프로그램 매매</span></a>
+  <a class="m7 all" href="https://snowshagal.com/basics/"><b>시장 입문 전체 보기</b><span>용어부터 데이터 보는 법까지</span></a>
+  <a class="m7 cta" href="https://snowshagal.com/market/"><b>오늘 투자자별 수급은?</b><span>Snowshagal 마감 기록 · 매 거래일 정규장 마감 기준</span></a>
+</div>
+
+<a class="next nlink" href="https://snowshagal.com/basics/">
+  <div class="nh">다음 편</div>
+  <p>원·달러 시장이 7월부터 평일 24시간 열린다. 그럼 기사 속 &#39;오늘 환율&#39;은 몇 시 값일까.</p>
+  <div class="nt"><b>데이터 길잡이 2</b>원·달러 환율 종가는 어디서 보나 (가제)</div>
+</a>
+
+<div class="foldwrap">
+<details class="fold">
+  <summary>함께 나오는 말 한 줄 사전</summary>
+  <div class="fb">
+    <dl class="gloss">
+      <dt>순매수</dt><dd>산 것에서 판 것을 뺀 값. 마이너스면 순매도</dd>
+      <dt>거래량 · 거래대금</dt><dd>사고판 주식 수와 금액. 이 화면의 순위는 거래대금 순매수로 매긴다</dd>
+      <dt>금융투자</dt><dd>증권사 같은 금융투자회사가 자기 돈으로 하는 매매</dd>
+      <dt>투신 · 사모</dt><dd>자산운용사 펀드(투자신탁)와 사모펀드의 매매</dd>
+      <dt>연기금 등</dt><dd>국민연금 같은 연금·기금 등의 매매</dd>
+      <dt>기관합계</dt><dd>금융투자, 보험, 투신, 사모, 은행, 기타금융, 연기금 등 일곱 구분의 합</dd>
+      <dt>기타법인</dt><dd>금융회사가 아닌 일반 법인의 매매</dd>
+      <dt>시간외 종가</dt><dd>그날 종가 한 값으로만 사고파는 거래. 오후 3시 40분~4시</dd>
+      <dt>애프터마켓</dt><dd>정규장 뒤 오후 4시~8시 거래. 한국거래소는 2026년 9월 14일부터</dd>
+      <dt>MDCSTAT024</dt><dd>[12010] 화면의 내부 코드. 기사·리포트 출처에 자주 쓰인다</dd>
+    </dl>
+  </div>
+</details>
+
+<details class="fold">
+  <summary>출처 및 데이터 기준</summary>
+  <div class="fb">
+    <ol class="src">
+      <li><b>메뉴 경로, 화면번호 [12010], 투자자 구분 13개와 기본값 금융투자, 단위 선택지, 열 구성, 정렬 화살표, 반영 시각 안내문(&#39;당일 매매내역은 당일 정규시장 마감 이후(오후 3시45분 예정) 반영&#39;, &#39;최종 매매내역은 당일자 마감 이후(오후 8시 예정) 제공&#39;)</b> · <a href="https://data.krx.co.kr/" target="_blank" rel="noopener">한국거래소 KRX Data Marketplace</a> [12010] 투자자별 순매수상위종목 화면, 2026.11.17 확인</li>
+      <li><b>11월 16일 외국인·시장 전체 조회 결과(2,629종목, 순매수 803·순매도 1,804·0원 22종목, 1위 SK스퀘어 +274.1억 원, 맨 아래 삼성전자우 −1,087.3억·SK하이닉스 −2,041.9억·삼성전자 −6,210.0억 원, 순매수 합계 약 −1조 5,360억 원), 11월 9~16일 금융투자·시장 전체 조회 결과(SK하이닉스 +7,486.1억, 삼성SDI +735.2억, 삼성전자 −3,954.4억 원)</b> · 같은 화면, 2026.11.17 밤 조회(최종값). 0.1억 원 단위로 반올림</li>
+      <li><b>11월 16일 외국인 코스피 정규장 순매도 1조 3,769억 원</b> · <a href="https://snowshagal.com/reports/2026-11-16_Snowshagal_Daily" target="_blank" rel="noopener">Snowshagal 데일리 11월 16일</a>(한국거래소 정규시장 집계)</li>
+      <li><b>11월 16일 오후 3시 51분 값(SK스퀘어 +259.9억, SK하이닉스 −2,241.8억, 삼성전자 −6,193.6억 원)</b> · Snowshagal이 같은 화면 자료를 그 시각에 받아 둔 기록</li>
+      <li><b>시간외 종가 오후 3시 40분~4시, 한국거래소 애프터마켓 오후 4시~8시(2026.9.14부터), 공식 종가는 오후 3시 30분 값</b> · <a href="https://snowshagal.com/reports/basics-18-market-hours" target="_blank" rel="noopener">시장을 읽는 말들 제18편</a></li>
+      <li>경로 그림은 화면을 단순하게 옮긴 것이고, 막대 그림은 위 조회 값을 그대로 썼다. 화면번호·메뉴 이름·안내문은 거래소가 바꿀 수 있다.</li>
+      <li>손글씨 글꼴 · Gaegu(The Gaegu Project Authors, <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL Open Font License 1.1</a>), 쓰인 글자만 잘라 넣었다.</li>
+    </ol>
+  </div>
+</details>
+</div>
+</main>
+
+<p class="disc">이 글은 시장 데이터를 찾고 읽는 방법을 설명하는 교양 자료입니다. 특정 종목의 매매를 권유하지 않으며, 투자 판단과 그 결과는 투자자 본인에게 있습니다.</p>
+<p class="foot">데이터 길잡이 · 01</p>
+
+</div>
+
+<script>
+(function(){
+  if(window.__dataGuide01) return; window.__dataGuide01 = true;
+
+  /* 진행 막대 */
+  var pg=document.getElementById('pg');
+  function updateProg(){
+    if(!pg) return;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var y=window.scrollY||window.pageYOffset||0;
+    pg.style.width=(h>0?Math.min(100,Math.max(0,y/h*100)):0)+'%';
+  }
+  window.addEventListener('scroll',updateProg,{passive:true});
+  window.addEventListener('resize',updateProg);
+  updateProg();
+
+  /* 툴팁 */
+  var openedAt=0;
+  function resetTip(el){ var tp=el.querySelector('.tip'); if(tp){ tp.classList.remove('below'); tp.removeAttribute('style'); } }
+  function clampTip(t){
+    var tip=t.querySelector('.tip'); if(!tip) return;
+    var vw=window.innerWidth, pad=12;
+    var w=Math.min(248, vw-2*pad);
+    tip.style.position='fixed'; tip.style.bottom='auto'; tip.style.transform='none';
+    tip.style.width=w+'px'; tip.style.left='0px'; tip.style.top='0px';
+    var tr=t.getBoundingClientRect();
+    var th=tip.getBoundingClientRect().height;
+    var left=tr.left+tr.width/2-w/2;
+    if(left<pad) left=pad;
+    if(left+w>vw-pad) left=vw-pad-w;
+    var top=tr.top-th-9, below=false;
+    if(top<pad+50){ top=tr.bottom+9; below=true; }
+    var vh=window.innerHeight;
+    if(top+th>vh-pad){ top=vh-pad-th; }
+    if(top<pad){ top=pad; }
+    tip.style.left=Math.round(left)+'px';
+    tip.style.top=Math.round(top)+'px';
+    var tb=tip.getBoundingClientRect();
+    var dx=tb.left-left, dy=tb.top-top;
+    if(dx||dy){ tip.style.left=Math.round(left-dx)+'px'; tip.style.top=Math.round(top-dy)+'px'; }
+    tip.classList.toggle('below', below);
+    var ax=tr.left+tr.width/2-left;
+    ax=Math.max(12, Math.min(w-12, ax));
+    tip.style.setProperty('--ax', Math.round(ax)+'px');
+  }
+  var canHover=!!(window.matchMedia&&window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+  function closeTerms(except){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++){ if(open[i]!==except){ open[i].classList.remove('open'); open[i].setAttribute('aria-expanded','false'); resetTip(open[i]); } }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.term'), function(t){
+    t.setAttribute('tabindex','0'); t.setAttribute('role','button');
+    t.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); t.click(); } if(e.key==='Escape'){ closeTerms(null); } });
+    t.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var willOpen=canHover?true:!t.classList.contains('open');
+      closeTerms(t);
+      t.classList.toggle('open', willOpen);
+      t.setAttribute('aria-expanded', willOpen?'true':'false');
+      if(willOpen){ openedAt=Date.now(); clampTip(t); }
+    });
+    t.setAttribute('aria-expanded','false');
+    if(canHover){
+      t.addEventListener('mouseenter', function(){ closeTerms(t); t.classList.add('open'); t.setAttribute('aria-expanded','true'); openedAt=Date.now(); clampTip(t); });
+      t.addEventListener('mouseleave', function(){ t.classList.remove('open'); t.setAttribute('aria-expanded','false'); resetTip(t); });
+    }
+    t.addEventListener('focusout', function(){ if(t.classList.contains('open')){ t.classList.remove('open'); t.setAttribute('aria-expanded','false'); resetTip(t); } });
+  });
+  document.addEventListener('click', function(){ closeTerms(null); });
+  window.addEventListener('scroll', function(){ if(Date.now()-openedAt>700) closeTerms(null); }, {passive:true});
+  window.addEventListener('resize', function(){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++) clampTip(open[i]);
+  });
+
+  /* 문제 카드 */
+  Array.prototype.forEach.call(document.querySelectorAll('.pop'), function(card){
+    var opts=card.querySelectorAll('.opt'), ans=card.querySelector('.popans');
+    var done=false;
+    Array.prototype.forEach.call(opts, function(b){
+      b.addEventListener('click', function(){
+        if(done) return; done=true;
+        Array.prototype.forEach.call(opts, function(o){
+          o.setAttribute('aria-disabled','true');
+          if(o.getAttribute('data-ok')==='1') o.classList.add('ok');
+          else if(o===b) o.classList.add('no');
+        });
+        b.setAttribute('aria-pressed','true');
+        if(ans){
+          ans.hidden=false;
+          var v=ans.querySelector('.verdict');
+          if(v){ v.textContent=(b.getAttribute('data-ok')==='1'?'맞았다 · ':'아쉽다 · ')+v.textContent; try{ v.focus({preventScroll:true}); }catch(e){ v.focus(); } }
+        }
+      });
+    });
+  });
+
+
+  /* 다음 편: 올라와 있으면 그 글로, 아니면 시장 입문 목록으로 */
+  var nx=document.querySelector('a.next[data-next]');
+  if(nx && window.fetch && /^https?:$/.test(location.protocol)){
+    var nxGo=function(){
+      var u=nx.getAttribute('data-next'), mk=nx.getAttribute('data-mark');
+      fetch(u,{credentials:'same-origin',cache:'no-cache'})
+        .then(function(r){ return r.ok?r.text():''; })
+        .then(function(t){ if(t && mk && t.indexOf(mk)>-1) nx.setAttribute('href',u); })
+        .catch(function(){});
+    };
+    if('IntersectionObserver' in window){
+      var nxIo=new IntersectionObserver(function(es){
+        for(var k=0;k<es.length;k++){ if(es[k].isIntersecting){ nxIo.disconnect(); nxGo(); break; } }
+      },{rootMargin:'800px 0px'});
+      nxIo.observe(nx);
+    }else nxGo();
+  }
+
+  /* 공유 */
+  var CANON="https://snowshagal.com/reports/basics-data-guide-01-krx-net-buying";
+  function pageUrl(){ var h=location.href.split('#')[0]; return /^https?:/.test(h)?h:CANON; }
+  var smsg=document.getElementById('shmsg');
+  function say(t){ if(smsg){ smsg.textContent=t; setTimeout(function(){ smsg.textContent=''; },2500); } }
+  function legacy(text){
+    var ta=document.createElement('textarea'); ta.value=text; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); var ok=false;
+    try{ ok=document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+    say(ok?'링크를 복사했다':'복사가 막혀 있다. 주소창의 링크를 복사하면 된다');
+  }
+  function copy(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(function(){ say('링크를 복사했다'); },function(){ legacy(text); }); }
+    else legacy(text);
+  }
+  var TXT={ page:"외국인은 오늘 무엇을 사고팔았나 · KRX [12010] 투자자별 순매수 상위종목 읽는 법", quiz:"문제. 11월 16일 KRX [12010] 화면에서 투자자를 외국인으로 바꿔 조회하니 1위가 SK스퀘어, 순매수 274억 원이었다. 그날 외국인은 시장 전체로 어땠을까? ① 1위가 순매수니 전체로도 순매수 ② 전체로는 1조 원 넘게 순매도 ③ 이 화면으로는 알 수 없다" };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-share]'),function(b){
+    b.addEventListener('click',function(){
+      var k=b.getAttribute('data-share'), url=pageUrl();
+      if(k==='copy'){ copy(url); return; }
+      if(k==='quiz') url=url+'#quiz1';
+      var data={title:"외국인은 오늘 무엇을 사고팔았나",text:TXT[k]||TXT.page,url:url};
+      if(navigator.share){ navigator.share(data).catch(function(){}); }
+      else{ copy(data.text+' '+url); }
+    });
+  });
+})();
+</script>
+</body>
+</html>

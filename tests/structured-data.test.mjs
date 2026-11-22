@@ -12,6 +12,7 @@ import {
   serializeJsonLd,
   structuredDataScript,
   organizationStructuredData,
+  SOCIAL_PROFILES,
   websiteStructuredData,
   homepageStructuredData,
   categoryBreadcrumbStructuredData,
@@ -22,7 +23,9 @@ import {
   reportStructuredData,
   reportSeoTags,
   reportDescription,
-  reportSiteUrl
+  reportSiteUrl,
+  reportPublishedTime,
+  reportModifiedTime
 } from '../functions/_seo.js';
 import { onRequest as middlewareOnRequest } from '../functions/_middleware.js';
 
@@ -52,6 +55,13 @@ test('1-4. Structured Data: Homepage has WebSite and Organization nodes; /en/ ha
   assert.equal(org.url, 'https://snowshagal.com/');
   assert.equal(org.logo, 'https://snowshagal.com/assets/brand/snowshagal-owl.webp');
   assert.ok(typeof org.description === 'string' && org.description.length > 0);
+  // The static homepage node is the same one the middleware emits, sameAs included.
+  assert.deepEqual(org, organizationStructuredData('ko'));
+  assert.deepEqual(org.sameAs, [...SOCIAL_PROFILES]);
+  for (const aboutPath of ['about/index.html', 'en/about/index.html']) {
+    const about = fs.readFileSync(path.join(rootDir, aboutPath), 'utf8');
+    for (const profile of SOCIAL_PROFILES) assert.ok(about.includes(`href="${profile}" rel="me noopener"`), `${aboutPath} links ${profile}`);
+  }
 
   const site = siteNodes[0];
   assert.equal(site['@id'], 'https://snowshagal.com/#website');
@@ -85,8 +95,11 @@ test('5-14. Structured Data: Representative KO & EN reports have Article with co
     assert.doesNotMatch(article.url, /\.html?$/i);
     assert.equal(article.headline, post.title.trim());
     assert.equal(article.description, reportDescription(post));
-    assert.equal(article.datePublished, (post.reportDate || post.date).slice(0, 10));
-    assert.equal(article.dateModified, undefined, 'No fabricated dateModified');
+    assert.equal(article.datePublished, reportPublishedTime(post));
+    assert.ok(article.datePublished.startsWith((post.reportDate || post.date).slice(0, 10)) || article.datePublished.slice(0, 10) > (post.reportDate || post.date).slice(0, 10));
+    // The last real change: a manage edit when there was one, else the upload itself.
+    assert.equal(article.dateModified, reportModifiedTime(post));
+    assert.ok(article.dateModified >= article.datePublished);
     assert.equal(article.inLanguage, post.lang === 'en' ? 'en' : 'ko-KR');
     assert.deepEqual(article.publisher, { '@id': 'https://snowshagal.com/#organization' });
     assert.equal(article.author['@id'], 'https://snowshagal.com/#organization');

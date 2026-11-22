@@ -134,9 +134,9 @@ Exporter는 원천 웹 페이지를 직접 파싱하지 않는다. UI와 TXT 저
 | 필드 | 의미 |
 |---|---|
 | `meta` | 시장 기준일, 생성시각, 시간대, 상태, 계약 버전 |
-| `indices` | KOSPI, KOSDAQ, NASDAQ, DOW, SP500 |
-| `rates_fx_volatility` | SOX, VIX, US10Y, USDKRW, JPYKRW, DXY |
-| `commodities_crypto` | WTI, GOLD, BITCOIN |
+| `indices` | KOSPI, KOSDAQ, NASDAQ, DOW, SP500 (+ 선택: NIKKEI225, SHANGHAI, TAIEX) |
+| `rates_fx_volatility` | SOX, VIX, US10Y, USDKRW, JPYKRW, DXY (+ 선택: CNYKRW, EURKRW, USDJPY, VKOSPI) |
+| `commodities_crypto` | WTI, GOLD, BITCOIN (+ 선택: BRENT, COMEX_COPPER, SILVER, NATGAS) |
 | `krx_investor_trading` | 3개 시장 × 외국인·기관·개인의 매도/매수/순매수 |
 | `recent_5d_flows` | 최근 5거래일 누적 순매수 |
 | `market_breadth` | 상한가·상승·보합·하락·하한가와 상승/하락 비율 |
@@ -146,6 +146,28 @@ Exporter는 원천 웹 페이지를 직접 파싱하지 않는다. UI와 TXT 저
 | `market_cap_top10` | KOSPI·KOSDAQ 통합 시가총액 상위 10 |
 | `krx_groups` | KRX 공식 업종 전체와 공식 테마 전체. v1.1.0부터 필수 |
 | `validation` | 최종 승격 여부와 실패 사유 |
+
+### 2026-11 추가 지표 (선택 항목)
+
+| 코드 | 원천 | 섹션 | 기준일 |
+|---|---|---|---|
+| CNYKRW | 하나은행 15:30 매매기준율(네이버) + Yahoo `CNYKRW=X` | `rates_fx_volatility` | 당일 |
+| EURKRW | 하나은행 15:30 매매기준율(네이버) + Yahoo `EURKRW=X` | `rates_fx_volatility` | 당일 |
+| USDJPY | Yahoo `JPY=X` | `rates_fx_volatility` | 당일 |
+| BRENT | Yahoo `BZ=F` | `commodities_crypto` | 당일 |
+| COMEX_COPPER | Yahoo `HG=F` (COMEX, $/lb) | `commodities_crypto` | 당일 |
+| SILVER | Yahoo `SI=F` | `commodities_crypto` | 당일 |
+| NATGAS | Yahoo `NG=F` | `commodities_crypto` | 당일 |
+| VKOSPI | 한국거래소 KRX Index 코스피 200 변동성지수(`index.krx.co.kr`, 파생상품지수) | `rates_fx_volatility` | 당일 |
+| NIKKEI225 | Yahoo `^N225` (도쿄, 15:30 JST = 15:30 KST 마감) | `indices` | 현지 최근 거래일 |
+| SHANGHAI | Yahoo `000001.SS` (상해종합, 15:00 CST = 16:00 KST 마감) | `indices` | 현지 최근 거래일 |
+| TAIEX | Yahoo `^TWII` (대만 가권, 13:30 CST = 14:30 KST 마감) | `indices` | 현지 최근 거래일 |
+
+- schema 1.2.0 안에서 `properties`에만 있고 `required`에는 없다. 이 지표가 생기기 전 기록과 그 재구성(replay)은 키 자체가 없고, 그대로 유효하다.
+- 키가 있으면 다른 글로벌 지표와 같은 기준일·`section_status.global_indicators` 규칙을 따른다(수신 측 `functions/api/market/_freshness.js`의 `carriesInstrument`). partial/unavailable 개수는 payload가 실은 지표만 센다. 실지 않은 코드를 `unavailable`에 적으면 거부한다.
+- `COMEX_COPPER`는 LME 구리(`COPPER`, 수집기 데스크톱 전용)와 다른 시장이다. LME 값은 여전히 Market Close에 들어가지 않는다.
+- `VKOSPI`(2026-11-22 추가)는 코스피200 옵션으로 계산하는 KRX 지수다. 값은 그 거래일 파생상품 정규장 마감(15:45 KST) 종가이고, 수집기는 16:00 KST(수능일 17:00) 이후에만 그날 값으로 받는다. `source_date`는 그 거래일이다. 다른 선택 지표처럼 SOFT라서 실패해도 Market Close final을 막지 않고 `global_indicators.unavailable`에 적힌다.
+- `NIKKEI225`·`SHANGHAI`·`TAIEX`(2026-11-22 추가)는 아시아 주요 지수의 현지 정규장 종가다. `source_date`는 **KRX 기준일 당일 또는 그 이전의 가장 최근에 끝난 현지 거래일**이다. 현지 휴장일(예: 2026-11-23 일본 근로감사의 날)에는 직전 현지 거래일 종가를 그 날짜로 싣는다. 현지 달력은 두지 않으므로 수신 측은 `source_date`가 기준일보다 늦지 않고 14일 넘게 이르지 않은지만 검사한다. 그날 현지 장이 열렸는데 아직 끝나지 않았으면(현지 마감 시각 전이거나 Yahoo 최종값 시각이 마감 전) 직전 종가로 대신하지 않고 unavailable로 둔다. `previous_close`는 직전 현지 거래일 종가이고 `change`·`change_pct`는 그 대비다. SOFT이며 `global_indicators.unavailable`에 적힐 수 있다.
 
 ## KRX 업종·테마
 

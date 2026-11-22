@@ -98,6 +98,15 @@ test('a Daily\'s summary is the one sentence in its hero, as div.quote or p.quot
   }
 });
 
+test('a Daily hero quote with word joiners around its middle dots comes back without them', () => {
+  // The 11-05 Daily set U+2060 on both sides of a · inside its hero sentence.
+  const doc = parseHtml('<section class="hero"><div class="quote">AI 반도체\u2060·\u2060데이터센터 설비주는 규제 우려로 급락&nbsp;· 반도체 비중이<br>큰 코스피</div></section>');
+  assert.deepEqual(api.readSummary(doc, 'daily'), {
+    text: 'AI 반도체·데이터센터 설비주는 규제 우려로 급락 · 반도체 비중이 큰 코스피',
+    source: 'daily-hero-quote'
+  });
+});
+
 test('a quotation in a Research, Basics or Weekly body is never a summary, even if the report were read as a Daily (H)', async () => {
   for (const name of ['h-research-quote', 'h-basics-quote', 'h-weekly-quote']) {
     const html = await read(`tests/fixtures/report-metadata/${name}.html`);
@@ -274,7 +283,11 @@ test('across the corpus no description is a category sentence and no summary cro
     if (summary.source === 'daily-hero-quote') assert.equal(post.type, 'daily', `${post.id}: a hero quote is a Daily summary only`);
     summarySources[summary.source] = (summarySources[summary.source] || 0) + 1;
     if (post.type === 'daily' && doc.querySelector('section.hero .quote')) {
-      assert.equal(summary.source, 'daily-hero-quote', `${post.id}: a Daily hero quote is its summary`);
+      // A Daily that declares its summary in the head (the long-term standard)
+      // is read from that declaration; the hero quote is the fallback when it
+      // does not. 2026-11-09 EN is the first Daily to carry both.
+      const declared = doc.querySelector('meta[name="report-summary"]') ? 'report-summary' : 'daily-hero-quote';
+      assert.equal(summary.source, declared, `${post.id}: a Daily summary comes from its declaration, else its hero quote`);
     }
   }
   assert.ok(summarySources['daily-hero-quote'] >= 42);

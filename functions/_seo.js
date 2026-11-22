@@ -1,6 +1,7 @@
 // The site's shared labels and the editorial blurb rule, the same file the
 // pages load (MARKET_LOCALE), so a card reads the same before and after the
 // browser re-renders it.
+import { availableIndicatorCodes, listedIndicators } from './_market-indicators.js';
 import '../assets/locale.js';
 // The search-title rule the admin publisher applies before it stores one.
 import '../assets/report-metadata.js';
@@ -25,13 +26,13 @@ export const CATEGORY_LANDINGS = Object.freeze({
   daily: {
     ko: {
       title: '한국 주식시장 데일리 리포트 | Snowshagal',
-      description: '코스피·코스닥 마감 흐름과 투자자 수급, 주요 시장 변수를 정리한 Snowshagal 데일리 리포트입니다.',
+      description: '코스피·코스닥 마감과 외국인·기관 수급, 원/달러 환율과 주요 산업의 움직임을 거래일별로 정리합니다. 당일 시장을 움직인 요인과 다음 거래일에 살펴볼 변수를 Snowshagal 데일리 리포트에서 확인하세요.',
       heading: '한국 주식시장 데일리 리포트',
       lead: '오늘 시장의 흐름과 수급, 다음 거래일에 살펴볼 변수를 기록합니다.'
     },
     en: {
       title: 'Korean Market Daily Reports | Snowshagal',
-      description: 'Daily reviews of KOSPI and KOSDAQ moves, investor flows, and the market variables that matter next.',
+      description: 'Review Korean stocks by trading day: KOSPI and KOSDAQ moves, foreign and institutional flows, sector drivers, and signals to watch in the next session.',
       heading: 'Korean Market Daily Reports',
       lead: 'Daily reviews of market direction, investor flows, and the signals to watch next.'
     }
@@ -67,13 +68,13 @@ export const CATEGORY_LANDINGS = Object.freeze({
   basics: {
     ko: {
       title: '경제·주식시장 기초 설명 | Snowshagal 시장 입문',
-      description: '경제와 주식시장이 낯선 투자자를 위해 시장의 기본 개념과 투자에 필요한 배경을 쉽게 설명합니다.',
+      description: '주가지수와 거래시간, 주문 체결과 투자자 수급 등 한국 주식시장의 기본 개념을 설명합니다. 시장 입문 글과 용어 사전을 통해 경제지표와 시장 데이터를 읽는 데 필요한 배경을 주제별로 찾아볼 수 있습니다.',
       heading: '시장 입문',
       lead: '시장을 처음 읽는 독자를 위해 경제·주식시장의 기본 개념과 투자에 필요한 배경을 차근차근 설명합니다.'
     },
     en: {
       title: 'Market Basics | Snowshagal',
-      description: 'Clear introductions to economic, market, and investing fundamentals for readers learning how markets work.',
+      description: 'Learn how Korean stock markets work, from indices and trading hours to order execution and investor flows. Browse beginner guides and the market glossary.',
       heading: 'Market Basics',
       lead: 'A clear introduction to the concepts and background needed to start reading markets with confidence.'
     }
@@ -81,13 +82,13 @@ export const CATEGORY_LANDINGS = Object.freeze({
   note: {
     ko: {
       title: '시장·투자 아이디어와 관찰 | Snowshagal 투자 인사이트',
-      description: '데일리·위클리·리서치로 다루기엔 가볍지만 놓치기 아까운 시장 변수, 투자 아이디어와 주요 이벤트의 체크포인트를 기록합니다.',
+      description: '기업과 산업의 변화, 환율·금리와 자금 흐름을 주제로 한 Snowshagal의 투자 인사이트입니다. 공개 자료를 바탕으로 시장의 배경과 확인할 지표를 정리한 글을 주제별로 찾아 읽을 수 있습니다.',
       heading: '투자 인사이트',
       lead: '데일리·위클리·리서치에 담기 애매하지만 놓치기 아까운 시장 변수와 투자 아이디어를 기록합니다.'
     },
     en: {
       title: 'Investment Insights | Snowshagal',
-      description: 'Timely observations, market variables, and investment ideas that sit between daily coverage and full-length research.',
+      description: 'Explore Korean companies, industries, currencies and capital flows through focused investment notes, with public sources and indicators to follow.',
       heading: 'Investment Insights',
       lead: 'Timely observations, market variables, and investment ideas that sit between daily coverage and full-length research.'
     }
@@ -272,6 +273,35 @@ export function findPostByPath(posts, pathname) {
   return posts.find((post) => normalizeSitePath(post?.href).replace(/\.html?$/i, '') === normalized) || null;
 }
 
+// Keep the chronological reading path available in the first HTTP response,
+// including when the browser cannot load posts.json or execute report-shell.js.
+// The richer Shadow DOM discovery UI replaces this only after it has rendered.
+export function reportReadingNavigation(posts, post) {
+  if (!post || !categoryLandingPath(post.type)) return '';
+  const lang = postLanguage(post);
+  const path = value => normalizeSitePath(value).replace(/\.html?$/i, '').toLowerCase();
+  const siblings = (Array.isArray(posts) ? posts : [])
+    .filter(candidate => candidate?.href && candidate.type === post.type && postLanguage(candidate) === lang)
+    .sort((a, b) => String(a.reportDate || a.date || '').localeCompare(String(b.reportDate || b.date || ''))
+      || String(a.registeredAt || '').localeCompare(String(b.registeredAt || '')));
+  const index = siblings.findIndex(candidate => path(candidate.href) === path(post.href));
+  if (index < 0) return '';
+  const links = [[siblings[index - 1], 'prev', lang === 'en' ? 'Previous' : '이전 글'],
+    [siblings[index + 1], 'next', lang === 'en' ? 'Next' : '다음 글']]
+    .filter(([candidate]) => candidate)
+    .map(([candidate, rel, label]) => `<a href="${escapeHtml(cleanReportHref(candidate.href))}" rel="${rel}"><span>${label}</span><strong>${escapeHtml(candidate.title)}</strong></a>`)
+    .join('');
+  if (!links) return '';
+  return `<nav id="mrs-reading-nav" aria-label="${lang === 'en' ? 'Previous and Next Reports' : '이전/다음 리포트'}">
+<style>
+#mrs-reading-nav{all:initial!important;box-sizing:border-box!important;display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))!important;gap:24px!important;width:100%!important;max-width:860px!important;clear:both!important;margin:32px auto!important;padding:24px 20px!important;border-top:1px solid #d8d0c2!important;font:15px/1.55 system-ui,sans-serif!important;background:#f7f3eb!important;color:#22241f!important}
+#mrs-reading-nav a{all:initial!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;gap:6px!important;min-width:0!important;font:inherit!important;color:inherit!important;text-decoration:none!important;cursor:pointer!important;overflow-wrap:anywhere!important}
+#mrs-reading-nav span{all:initial!important;display:block!important;font:12px/1.5 system-ui,sans-serif!important;color:#666b62!important}
+#mrs-reading-nav strong{all:initial!important;display:block!important;font:600 16px/1.5 system-ui,sans-serif!important;color:inherit!important;overflow-wrap:anywhere!important}
+#mrs-reading-nav a:hover strong{text-decoration:underline!important}#mrs-reading-nav a:focus-visible{outline:2px solid #344b40!important;outline-offset:4px!important}
+</style>${links}</nav>`;
+}
+
 export function findTranslationCounterpart(posts, post) {
   const groupKey = (candidate) => String(candidate?.translationGroup || candidate?.id || '').trim();
   const group = groupKey(post);
@@ -446,7 +476,23 @@ export function postSeoTitle(post) {
   return rules.acceptsSeoTitle(post?.type) ? rules.seoTitleText(post?.seoTitle) : '';
 }
 
+// What the uploaded report says about itself in its <head>, read by the
+// middleware as the page streams: `report-seo-title`, `report-seo-description`
+// and `report-takeaway`. Absent on older uploads, which keep the generated text.
+function reportOwnMeta(options) {
+  const meta = options?.reportMeta || {};
+  return {
+    seoTitle: normalizeText(meta.seoTitle),
+    seoDescription: normalizeText(meta.seoDescription),
+    takeaway: normalizeText(meta.takeaway)
+  };
+}
+
 export function reportSeoTitle(post, options = {}) {
+  // The report's own search title, used exactly as written: it already ends
+  // in " | Snowshagal", so nothing is added to it.
+  const own = reportOwnMeta(options).seoTitle;
+  if (own) return own;
   const lang = postLanguage(post);
   const title = normalizeText(post?.title);
   const date = reportDateLabel(post, lang);
@@ -550,6 +596,13 @@ function factualDescription(post, lang) {
 export function reportDescription(post, options = {}) {
   const lang = postLanguage(post);
   const date = reportDateLabel(post, lang);
+  const own = reportOwnMeta(options);
+  // The report's own search description, used as written.
+  if (own.seoDescription) return own.seoDescription;
+  // A Daily or Weekly whose upload names its takeaway opens with it — the
+  // reason for the move — and the numbers follow. Older uploads keep the
+  // numbers first.
+  const lead = (post?.type === 'daily' || post?.type === 'weekly') ? sentence(own.takeaway) : '';
 
   if (post?.type === 'daily') {
     const facts = dailyFactsFor(post, options.facts);
@@ -561,6 +614,7 @@ export function reportDescription(post, options = {}) {
       const parts = lang === 'en'
         ? [`${date}: KOSPI closed at ${kospi}${kosdaq ? `, KOSDAQ ${kosdaq}` : ''}.`, flows.length ? `${flows.join('; ')}.` : '']
         : [`${date} 코스피 ${kospi}${kosdaq ? `, 코스닥 ${kosdaq}` : ''} 마감.`, flows.length ? `수급: ${flows.join(' · ')}.` : ''];
+      if (lead) return limitText([lead, ...parts].filter(Boolean).join(' '));
       return limitText([...parts, sentence(dailyTakeaway(post, facts, lang))].filter(Boolean).join(' '));
     }
   }
@@ -575,11 +629,16 @@ export function reportDescription(post, options = {}) {
       const parts = lang === 'en'
         ? [`${period}, ${year}: KOSPI ${formatSignedPct(facts.pct)} for the week (${move}).`, themes.length ? `Key variables ahead: ${themes.join(', ')}.` : '']
         : [`${year}년 ${period} 코스피 주간 ${formatSignedPct(facts.pct)} (${move}).`, themes.length ? `다음 주 변수: ${themes.join('·')}.` : ''];
+      if (lead) return limitText([lead, ...parts].filter(Boolean).join(' '));
       return limitText([...parts, sentence(post?.summary)].filter(Boolean).join(' '));
     }
   }
 
   const blurb = globalThis.MARKET_LOCALE.editorialBlurb(post);
+  if (lead) {
+    const rest = normalizeText(blurb) === normalizeText(own.takeaway) ? '' : (blurb || factualDescription(post, lang));
+    return limitText([lead, rest].filter(Boolean).join(' '));
+  }
   return limitText(blurb || factualDescription(post, lang));
 }
 
@@ -754,6 +813,13 @@ export function structuredDataScript(data) {
   return `<script type="application/ld+json">${serializeJsonLd(data)}</script>`;
 }
 
+// The editor's public profiles, named as the same entity as the site. The
+// About pages link to the same addresses; tests keep the two in step.
+export const SOCIAL_PROFILES = Object.freeze([
+  'https://www.linkedin.com/in/sung-oh-choi-628a5b431/',
+  'https://www.threads.com/@snowshagal'
+]);
+
 export function organizationStructuredData(lang = 'ko') {
   return {
     '@type': 'Organization',
@@ -761,6 +827,7 @@ export function organizationStructuredData(lang = 'ko') {
     'name': 'Snowshagal',
     'url': `${PRODUCTION_ORIGIN}/`,
     'logo': BRAND_LOGO_URL,
+    'sameAs': [...SOCIAL_PROFILES],
     'description': lang === 'en'
       ? 'A market research publication offering daily market reviews, weekly outlooks, deep-dive research, and market explainers.'
       : '한국 시장의 데일리 복기와 위클리 전망, 주요 경제·시장 이슈와 투자에 참고할 만한 인사이트를 정리하는 시장 리서치 사이트입니다.'
@@ -830,6 +897,51 @@ export function reportArticleImage(post) {
   return '';
 }
 
+// YYYY-MM-DD of the report date (reportDate before date), or '' when it is not one.
+export function reportPublishedDate(post) {
+  const value = String(post?.reportDate || post?.date || '').slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : '';
+}
+
+// An instant as Korean time, "2026-11-18T16:42:05+09:00", or '' when invalid.
+export function kstIsoTime(value) {
+  const ms = Date.parse(String(value || ''));
+  if (!Number.isFinite(ms)) return '';
+  return `${new Date(ms + 9 * 3600e3).toISOString().slice(0, 19)}+09:00`;
+}
+
+// How many days after its report date an upload still counts as the report's
+// publication. Most go up the same evening or the next morning; a weekend
+// Weekly can wait until Monday. Later uploads (backfills, imports and
+// re-publications weeks on) keep the plain report date.
+const PUBLISHED_WITHIN_DAYS = 3;
+
+/**
+ * When the report went up: the upload time in Korean time when it was
+ * uploaded within a few days of its report date, else the report date alone.
+ * The JSON-LD datePublished and article:published_time both use it.
+ */
+export function reportPublishedTime(post) {
+  const date = reportPublishedDate(post);
+  if (!date || post?.legacyImport) return date;
+  const at = kstIsoTime(post?.registeredAt);
+  if (!at) return date;
+  const days = Math.round((Date.parse(at.slice(0, 10)) - Date.parse(date)) / 864e5);
+  return days >= 0 && days <= PUBLISHED_WITHIN_DAYS ? at : date;
+}
+
+/**
+ * The last edit saved from /admin/manage/ (updatedAt) when it is later than
+ * the upload, else the publication time. A report uploaded again is a new
+ * upload, so its registeredAt, and with it both times, move to that upload.
+ */
+export function reportModifiedTime(post) {
+  const published = reportPublishedTime(post);
+  const updated = kstIsoTime(post?.updatedAt);
+  const after = Date.parse(post?.updatedAt) > (Date.parse(post?.registeredAt) || 0);
+  return updated && after && updated.slice(0, 10) >= published.slice(0, 10) ? updated : published;
+}
+
 export function reportArticleStructuredData(post, options = {}) {
   const canonical = reportSiteUrl(post.href);
   const lang = postLanguage(post);
@@ -837,7 +949,8 @@ export function reportArticleStructuredData(post, options = {}) {
   // description follows the search-intent wording of the meta tag.
   const title = String(post?.title || '').replace(/\s+/g, ' ').trim();
   const description = reportDescription(post, options);
-  const datePublished = String(post?.reportDate || post?.date || '').slice(0, 10);
+  const datePublished = reportPublishedTime(post);
+  const dateModified = reportModifiedTime(post);
   const section = CATEGORY_LANDINGS[post?.type]?.[lang]?.heading || post?.typeLabel || '';
   const image = reportArticleImage(post);
 
@@ -849,6 +962,7 @@ export function reportArticleStructuredData(post, options = {}) {
     'headline': title,
     'description': description,
     'datePublished': datePublished,
+    ...(dateModified ? { 'dateModified': dateModified } : {}),
     'inLanguage': lang === 'en' ? 'en' : 'ko-KR',
     'publisher': { '@id': ORGANIZATION_ID },
     'author': {
@@ -938,9 +1052,17 @@ export function reportSeoTags(posts, post, options = {}) {
     ? `<meta property="og:locale:alternate" content="${postLanguage(counterpart) === 'en' ? 'en_US' : 'ko_KR'}">`
     : '';
   const jsonLd = structuredDataScript(reportStructuredData(post, options));
+  // The same times as the JSON-LD datePublished/dateModified. Without them
+  // Daum dates a page from the first date-like text in the body (a cited
+  // 2006 Fed decision, a source's 2026.08.26), so its results showed years-old dates.
+  const published = reportPublishedTime(post);
+  const modified = reportModifiedTime(post);
+  const publishedTimeTag = (published ? `<meta property="article:published_time" content="${published}">` : '')
+    + (modified ? `<meta property="article:modified_time" content="${modified}">` : '');
 
   return `<title>${escapeHtml(title)}</title><link rel="canonical" href="${escapeHtml(canonical)}">${alternates}${descriptionTags}`
     + `<meta property="og:type" content="article">`
+    + publishedTimeTag
     + `<meta property="og:site_name" content="Snowshagal">`
     + `<meta property="og:locale" content="${lang === 'en' ? 'en_US' : 'ko_KR'}">${localeAlternate}`
     + `<meta property="og:title" content="${escapeHtml(post.title)}">`
@@ -957,7 +1079,7 @@ export function reportSeoTags(posts, post, options = {}) {
 // `marketSessions`: [{ market_date, published_at }] for every final Market
 // Close, newest first. Each becomes a KO and an EN session page
 // (/market/YYYY-MM-DD/), and the archive is listed once there is one.
-export function sitemapXml(posts, { marketSessions = [] } = {}) {
+export function sitemapXml(posts, { marketSessions = [], rateCodes = [] } = {}) {
   const validPosts = posts.filter((post) => (
     post && typeof post.href === 'string' && /^reports\/.+\.html?$/i.test(normalizeSitePath(post.href))
   ));
@@ -1024,7 +1146,7 @@ export function sitemapXml(posts, { marketSessions = [] } = {}) {
     urlEntry(`${PRODUCTION_ORIGIN}/basics/glossary/`, '', glossaryAlternates),
     urlEntry(`${PRODUCTION_ORIGIN}/en/basics/glossary/`, '', glossaryAlternates),
     ...categoryEntries,
-    ...marketSessionEntries(marketSessions, urlEntry),
+    ...marketSessionEntries(marketSessions, urlEntry, rateCodes),
     ...validPosts.map((post) => urlEntry(
       reportSiteUrl(post.href),
       post.updatedAt || post.registeredAt || post.reportDate || post.date,
@@ -1034,7 +1156,7 @@ export function sitemapXml(posts, { marketSessions = [] } = {}) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${entries.join('')}</urlset>\n`;
 }
 
-function marketSessionEntries(sessions, urlEntry) {
+function marketSessionEntries(sessions, urlEntry, rateCodes = []) {
   const dates = (Array.isArray(sessions) ? sessions : [])
     .filter((session) => /^\d{4}-\d{2}-\d{2}$/.test(String(session?.market_date || '')));
   if (!dates.length) return [];
@@ -1048,6 +1170,12 @@ function marketSessionEntries(sessions, urlEntry) {
   const sectors = pair('/market/sectors/');
   entries.push(urlEntry(archive[0].href, dates[0].published_at, archive), urlEntry(archive[1].href, dates[0].published_at, archive));
   entries.push(urlEntry(sectors[0].href, dates[0].published_at, sectors), urlEntry(sectors[1].href, dates[0].published_at, sectors));
+  // An optional indicator is listed once a record has its value, a domestic
+  // rate once a day of it is stored (availableIndicatorCodes).
+  for (const indicator of listedIndicators(availableIndicatorCodes(sessions, rateCodes))) {
+    const history = pair(`/market/${indicator.slug}/`);
+    entries.push(urlEntry(history[0].href, dates[0].published_at, history), urlEntry(history[1].href, dates[0].published_at, history));
+  }
   for (const session of dates) {
     const alternates = pair(`/market/${session.market_date}/`);
     const lastmod = session.published_at || session.market_date;

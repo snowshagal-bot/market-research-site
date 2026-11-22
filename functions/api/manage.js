@@ -1,4 +1,4 @@
-import { searchIndexArtifacts } from "./_search-index.js";
+import { searchIndexArtifactWriters } from "./_search-index.js";
 import { extractGlossaryTerms } from "../_glossary.js";
 import { findLateCoverStyle, lateCoverStyleMessage } from "../_cover-style.js";
 import { SOCIAL_REPORT_CARD_DIR } from "../_seo.js";
@@ -127,11 +127,12 @@ async function gh(token, path, options = {}) {
 
   for (let attempt = 1; attempt <= attempts; attempt++) {
     if (attempt > 1) await new Promise(resolve => setTimeout(resolve, 500 * (attempt - 1)));
+    const { raw, ...fetchOptions } = options;
 
     let response;
     try {
       response = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}${path}`, {
-        ...options,
+        ...fetchOptions,
         headers: {
           ...githubHeaders(token),
           ...(options.headers || {}),
@@ -145,6 +146,8 @@ async function gh(token, path, options = {}) {
     }
 
     const text = await response.text();
+    // A raw read is the file itself, not JSON about it.
+    if (raw && response.ok) return text;
     let body = null;
     try {
       body = text ? JSON.parse(text) : null;
@@ -174,11 +177,20 @@ async function readRepoText(token, path, ref) {
   }
   if (!file?.sha) throw new Error(`${path} 파일 내용을 찾을 수 없습니다.`);
 
-  const blob = await gh(token, `/git/blobs/${encodeURIComponent(file.sha)}`);
-  if (blob?.encoding !== "base64" || typeof blob.content !== "string" || !blob.content.trim()) {
+  // A file over 1 MB (the search index) comes back without its content. Its
+  // blob is read raw: as base64 inside JSON it would be held three times over
+  // (the response, the base64 text, the decoded bytes) on the way to a string,
+  // and that is what pushed a publish past the Worker memory limit.
+  const text = await gh(token, `/git/blobs/${encodeURIComponent(file.sha)}`, {
+    raw: true,
+    // Same spelling as githubHeaders, so this replaces its Accept instead of
+    // joining it ("…github+json, …raw+json" would get the JSON form back).
+    headers: { Accept: "application/vnd.github.raw+json" }
+  });
+  if (typeof text !== "string" || !text.trim()) {
     throw new Error(`${path} Git blob 내용을 읽을 수 없습니다.`);
   }
-  return decodeBase64Utf8(blob.content);
+  return text;
 }
 
 /**
@@ -288,11 +300,11 @@ function metadataEntries(posts, searchIndex = null) {
   ];
 
   if (Array.isArray(searchIndex)) {
-    entries.push(...searchIndexArtifacts(searchIndex).map((artifact) => ({
+    entries.push(...searchIndexArtifactWriters(searchIndex).map((artifact) => ({
       path: artifact.path,
       mode: "100644",
       type: "blob",
-      content: artifact.content,
+      build: artifact.build,
     })));
   }
 
@@ -340,16 +352,17 @@ async function currentRef(token) {
 async function toBlobEntries(token, entries) {
   const resolved = [];
   for (const entry of entries) {
-    if (typeof entry?.content !== "string") {
+    const built = typeof entry?.build === "function";
+    if (typeof entry?.content !== "string" && !built) {
       resolved.push(entry);
       continue;
     }
     const blob = await gh(token, "/git/blobs", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ content: entry.content, encoding: "utf-8" }),
+      body: JSON.stringify({ content: built ? entry.build() : entry.content, encoding: "utf-8" }),
     });
-    const { content, ...rest } = entry;
+    const { content, build, ...rest } = entry;
     resolved.push({ ...rest, sha: blob.sha });
   }
   return resolved;
@@ -672,7 +685,8 @@ function calculateReadingMinutes(html, lang = 'ko', type = 'daily') {
 function validateEditableFields(form) {
   const type = String(form.get("type") || "");
   const reportDate = String(form.get("reportDate") || "");
-  const title = String(form.get("title") || "").trim();
+  // No invisible formatting characters in a stored title (as at publish).
+  const title = String(form.get("title") || "").replace(/[\u200B-\u200D\uFEFF\u2060]/g, "").trim();
   if (!TYPE_LABELS[type]) return { error: "지원하지 않는 카테고리입니다." };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(reportDate)) return { error: "리포트 날짜를 확인해 주세요." };
   if (!title) return { error: "제목을 입력해 주세요." };
@@ -696,10 +710,10 @@ function validateEditableFields(form) {
     type,
     reportDate,
     title,
-    subtitle: String(form.get("subtitle") || "").trim(),
+    subtitle: String(form.get("subtitle") || "").replace(/[\u200B-\u200D\uFEFF\u2060]/g, "").trim(),
     description: String(form.get("description") || "").trim(),
     summaryProvided: form.has("summary"),
-    summary: String(form.get("summary") || "").trim().slice(0, 500),
+    summary: globalThis.REPORT_METADATA.normalizeMetadataText(form.get("summary")).slice(0, 500).trim(),
     seoTitleProvided: form.has("seoTitle"),
     seoTitle: globalThis.REPORT_METADATA.seoTitleText(form.get("seoTitle")),
     tagsProvided,

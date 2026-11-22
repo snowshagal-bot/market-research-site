@@ -280,5 +280,59 @@
     "en": "Data Center",
     "group": "sector",
     "custom": true
+  },
+  "utility": {
+    "ko": "유틸리티",
+    "en": "Utility",
+    "group": "sector",
+    "custom": true
+  },
+  "msci": {
+    "ko": "MSCI",
+    "en": "MSCI",
+    "group": "market",
+    "custom": true
+  },
+  "esg": {
+    "ko": "ESG",
+    "en": "ESG",
+    "group": "company-policy",
+    "custom": true
+  },
+  "taiwan": {
+    "ko": "대만",
+    "en": "Taiwan",
+    "group": "market",
+    "custom": true
+  },
+  "retail": {
+    "ko": "리테일",
+    "en": "Retail",
+    "group": "market",
+    "custom": true
+  },
+  "k-contents": {
+    "ko": "K-컨텐츠",
+    "en": "K-Contents",
+    "group": "sector",
+    "custom": true
+  },
+  "enter-stocks": {
+    "ko": "엔터테인먼트",
+    "en": "Enter stocks",
+    "group": "sector",
+    "custom": true
+  },
+  "game": {
+    "ko": "게임",
+    "en": "Game",
+    "group": "sector",
+    "custom": true
+  },
+  "national-pension-service": {
+    "ko": "국민연금",
+    "en": "National Pension Service",
+    "group": "macro",
+    "custom": true
   }
 }

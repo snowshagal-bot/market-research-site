@@ -177,15 +177,22 @@ rejects the observed `2026-08-31` snapshot with `2026-08-27` US data, while acce
 different dates caused by weekends or an exchange holiday.
 
 The exchange calendars are explicit and fail closed outside their configured coverage.
-`functions/api/market/_freshness.js` currently covers KRX and NYSE 2026 holidays. Review the
-official KRX/KASI and NYSE calendars and extend this file before the first trading day of a
-new calendar year. KRX closes on Korean public holidays, Labor Day and its year-end closing
-day; NYSE early-close sessions remain trading days.
+`functions/_trading-calendar.js` is the only calendar (`_freshness.js` imports it) and covers
+KRX 2026–2027 and NYSE 2026–2027 holidays plus special sessions. Review the official KRX/KASI
+and NYSE calendars and extend that file before the first trading day of a new calendar year
+(it must be live in Production before 01-01 KST). KRX closes on Korean public holidays, Labor
+Day and its year-end closing day; NYSE early-close sessions remain trading days. The KRX
+holidays and special sessions must stay identical to the publisher core
+(`snowshagal-market-publisher` `market_dashboard/source_date_policy.py`); change both in the
+same cycle and re-check them against KRX's year-end notice for the coming year. A public
+holiday can also be added during the year: 2026-07-17 제헌절 became one again in 2026 and was
+missing from both lists until November. When KRX announces such a closure, add it to both lists.
 
 Calendar references:
 
 - KRX holiday rules: `https://global.krx.co.kr/contents/GLB/06/0602/0602010201/GLB0602010201T1.jsp`
 - KASI 2026 official almanac: `https://astro.kasi.re.kr/life/post/almanac?year=2026`
+- KASI 2027 official almanac: `https://astro.kasi.re.kr/life/post/almanac?year=2027`
 - NYSE holiday calendar: `https://www.nyse.com/trade/hours-calendars`
 
 Production deployment smoke now requires `/api/market/latest` to match the expected latest
@@ -250,6 +257,24 @@ npx wrangler d1 execute market-research-comments --remote --file=migrations/comm
 
 Request handlers never create the table: without it both endpoints answer `503 GLOBAL_LATEST_SCHEMA_NOT_READY`; with an empty table `GET` answers `200` with `items: []`. Preview acceptance uses synthetic items whose `source` is `preview-global-latest-fixture` and deletes them afterwards, on Preview only: `DELETE FROM market_global_latest WHERE json_extract(payload_json, '$.source') = 'preview-global-latest-fixture';`. Status: receiver live (B1), collector publishing to Production every 30 minutes (B2), TODAY overlay on HOME and `/market/` (B3, see `docs/PROJECT_STATE.md`). The overlay needs no Secret, binding or migration beyond B1.
 
+### Domestic Rates on the existing D1 binding
+
+Domestic Rates (`contracts/domestic_rates/`) are the KOFIA final quote yields of each KRX trading day (KTB 3Y, KTB 10Y, corporate AA- 3Y, CD 91-day; afternoon basis 16:00 KST). KOFIA computes them after the day's Market Close record is final, so they are not part of it: own contract (1.0.0), table (`market_domestic_rates`, one row per `market_date`) and endpoints (`POST /api/market/rates/publish`, `GET /api/market/rates/date?date=YYYY-MM-DD|latest`). They never read or write `market_close_snapshots`; pages join the two by date. They reuse `COMMENTS_DB`, the Market Close write-host policy and `MARKET_PUBLISH_KEY`; no new Secret or binding is required.
+
+Apply the checked-in idempotent migration to the isolated Preview database first:
+
+```bash
+npx wrangler d1 execute market-research-comments-preview --remote --file=migrations/comments/0003_market_domestic_rates.sql
+```
+
+Only after approval, and before the Production merge, apply the same file to Production:
+
+```bash
+npx wrangler d1 execute market-research-comments --remote --file=migrations/comments/0003_market_domestic_rates.sql
+```
+
+Request handlers never create the table: without it both endpoints answer `503 DOMESTIC_RATES_SCHEMA_NOT_READY`, and the pages (dashboard, session pages, history pages, archive, sitemap) behave exactly as without rates. A Preview acceptance test may publish a real KOFIA day to the Preview endpoint and delete it afterwards, on Preview only: `DELETE FROM market_domestic_rates WHERE market_date = 'YYYY-MM-DD';`. The Preview deployment's `MARKET_PUBLISH_KEY` is not the collector's, so the collector's own key answers 401 there. Status: migration `0003` applied to Preview and Production on 2026-11-22; Production holds the 2026 backfill and the daily task's days.
+
 Public `GET /api/announcements` returns only `publish_state = published`, `audience = all` rows whose UTC exposure window contains the current server time. Admin create/update/delete require an authenticated administrator session, exact Preview or Production admin Origin, and the session CSRF token. No new Secret or environment variable is required.
 
 ### Automated OpenDART Daily Sync (`DISCLOSURE_SYNC_KEY`)
@@ -289,7 +314,52 @@ Cloudflare Preview validation must not perform real `/api/manage` mutations. The
 
 Search Console should use a Domain property for `snowshagal.com`, verified with its Google-provided DNS TXT record. After verification, submit `sitemap.xml` and inspect the apex homepage. Do not commit a verification token or add it to application secrets.
 
-The root `404.html` is required for Cloudflare Pages to return an actual HTTP 404 instead of using `index.html` as an SPA fallback for unknown paths. Pages Functions middleware must leave redirect and error responses unchanged apart from the existing Preview `X-Robots-Tag` header, with one exception: an existing report's legacy `/reports/<path>.html` address, which Pages answers with its own 308, is upgraded to a single `301` to the extensionless canonical URL `/reports/<path>` with the query string preserved (a missing report keeps its direct 404). A report renamed after publishing is listed in `RENAMED_REPORTS`, and its old address answers one `301` to the new file. Root search-engine verification files are outside `/reports/` and are served with HTTP 200 through `_redirects` 200 rewrites (`yandex_9866f357776964b4.html`, `naver96f43741acd96bcdeb679f22cddc4a80.html`); without the rewrite Pages would 308 them to the extensionless path. After changing this behavior, verify both a random root path and a random `/reports/` path on Preview before Production deployment.
+The root `404.html` is required for Cloudflare Pages to return an actual HTTP 404 instead of using `index.html` as an SPA fallback for unknown paths. Pages Functions middleware must leave redirect and error responses unchanged apart from the existing Preview `X-Robots-Tag` header, with one exception: an existing report's legacy `/reports/<path>.html` address, which Pages answers with its own 308, is upgraded to a single `301` to the extensionless canonical URL `/reports/<path>` with the query string preserved (a missing report keeps its direct 404). A report renamed after publishing is listed in `RENAMED_REPORTS`, and its old address answers one `301` to the new file. Root search-engine verification files are outside `/reports/` and are served with HTTP 200 through `_redirects` 200 rewrites (`yandex_9866f357776964b4.html`, `naver96f43741acd96bcdeb679f22cddc4a80.html`); without the rewrite Pages would 308 them to the extensionless path. Daum Webmaster Tool ownership is a `#DaumWebMasterTool:` comment line at the bottom of the static `robots.txt`; Daum re-reads it on every sign-in, so do not remove it (the PIN used to sign in is the owner's and is not stored in Git). After changing this behavior, verify both a random root path and a random `/reports/` path on Preview before Production deployment.
+
+### Daum Webmaster collection seeds
+
+Authenticated registration for `https://snowshagal.com` was confirmed in Daum
+Webmaster on 2026-11-19. Its root-page diagnostics returned HTTP 200, allowed
+collection and readable title/description/link data. The partial-block notice
+refers to the intentional `/admin/` and `/api/` exclusions; do not unblock them.
+
+The Seed URL forms accepted these submissions, each with `수집요청이 완료되었습니다.`:
+
+- Atom feed (KO): `https://snowshagal.com/rss.xml`
+- Atom feed (EN): `https://snowshagal.com/en/rss.xml`
+- Sitemap: `https://snowshagal.com/sitemap.xml`
+
+Both feeds were valid XML with 50 current-language entries; the sitemap was valid
+XML with 464 URLs at this check. These are snapshot counts, not fixed invariants.
+The feeds and sitemap update through the existing publishing flow. Daum supports
+Atom and periodically visits registered seeds; acceptance does not prove that
+every linked page has been crawled or indexed. See its [Seed URL help](https://cs.daum.net/faq/service/15/category/4118/detail/38543).
+
+Daum document analysis successfully extracted HOME and `basics-data-guide-01-krx-net-buying`.
+The new Korean Research No15 returned an access/response error in that tool,
+while its public canonical URL answered 200 promptly, including a request using
+Daum's documented user-agent. The cause remains unconfirmed; this is neither
+evidence that all reports are blocked nor a claim that this report is indexed.
+No report source, robots policy, PIN or crawler-security configuration was changed.
+
+### IndexNow (Naver, Bing)
+
+Since 2026-11-12 every push to `main` that changes `data/posts.json` (publish, manage, delete) runs `.github/workflows/indexnow.yml`. `scripts/indexnow.mjs` compares `data/posts.json` before and after the push and works out which addresses to announce:
+
+- added reports;
+- reports with a visible change (title, search title, description, summary, one-liner, date, tags, cover, pairing);
+- removed or moved reports.
+
+A new Daily also brings its `/market/<date>/` (or `/en/market/<date>/`) page, if that page answers. The script waits up to 10 minutes until Production answers for each address (200 for a live one, anything else for a removed one), then POSTs the list once to `https://searchadvisor.naver.com/indexnow` and `https://www.bing.com/indexnow`. Each engine shares what it receives with the other IndexNow engines. The log shows only addresses and status codes. 200 and 202 count as success; 403 means the key file is missing or wrong.
+
+The key is public by design, not a secret. Engines verify it by reading `https://snowshagal.com/<key>.txt`, which holds only the key. That file is at the repository root, and the same key is `INDEXNOW_KEY` in the script. If the key ever changes, change both in one commit and keep exactly one `<32 hex>.txt` at the root. No Cloudflare or GitHub secret is involved.
+
+Manual runs (Actions → IndexNow → Run workflow):
+
+- `mode: urls`: the given `https://snowshagal.com/...` addresses, separated by spaces;
+- `mode: sitemap`: every address in the live sitemap, once, for example after the first deployment.
+
+IndexNow asks engines to crawl; it does not guarantee indexing, and Google does not take part. Google still relies on the sitemap and Search Console.
 
 ## Comment dependencies
 

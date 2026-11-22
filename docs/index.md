@@ -4,6 +4,8 @@
 
 ## 문서 지도
 
+- [`INDEXING_AUDIT_2026-11-14.md`](./INDEXING_AUDIT_2026-11-14.md) — GSC 미수집 리포트 56개 점검과 초기 HTML 읽기 링크 보완
+
 - [`PROJECT_STATE.md`](./PROJECT_STATE.md) — 현재 구현 상태, 주요 파일, 데이터 흐름
 - [`UI_RULES.md`](./UI_RULES.md) — 디자인, 반응형, 모바일/데스크탑 검수 원칙
 - [`DEPLOYMENT.md`](./DEPLOYMENT.md) — GitHub, Cloudflare Pages, D1, Secret/Binding 구성

@@ -333,3 +333,101 @@ test('missing configuration and oversized HTML fail before Browser Rendering', a
   const response = await onRequestPost({ request: request({ html: oversized }), env: authEnv });
   assert.equal(response.status, 413);
 });
+
+// ---------------------------------------------------------------------------
+// report-cover-mode=first-screen and failures that say why (2026-11-11)
+// ---------------------------------------------------------------------------
+
+const FIRST_SCREEN_DAILY = '<html><head><meta name="report-date" content="2026-11-11"><meta name="report-cover-mode" content="first-screen"><meta name="report-cover-selector" content=".nc-cover"></head><body><header class="masthead">SNOWSHAGAL · DAILY</header><main><section class="hero nc"><div class="nc-cover"><h1>금리 경고를 넘은 반도체,<br><em>사흘 낙폭의 절반 회복</em></h1></div></section></main></body></html>';
+
+test('report-cover-mode is read in either attribute order and only for the exact value', () => {
+  assert.equal(__test.declaredCoverMode('<meta name="report-cover-mode" content="first-screen">'), 'first-screen');
+  assert.equal(__test.declaredCoverMode('<meta content="First-Screen" name="report-cover-mode"/>'), 'first-screen');
+  assert.equal(__test.declaredCoverMode('<meta name="report-cover-mode" content="whole-page">'), '');
+  assert.equal(__test.declaredCoverMode('<meta name="report-cover-selector" content=".cv">'), '');
+});
+
+test('capture priority: first-screen mode > report-cover-selector > heuristics > nothing', () => {
+  assert.deepEqual(__test.selectCapture(FIRST_SCREEN_DAILY), { mode: 'first-screen', selector: '' });
+  assert.deepEqual(__test.selectCapture('<meta name="report-cover-selector" content=".cover-img"><div class="cv">x</div>'), { mode: 'selector', selector: '.cover-img' });
+  assert.deepEqual(__test.selectCapture('<div class="cvwrap"><div class="cv">x</div></div>'), { mode: 'selector', selector: '.cv' });
+  assert.equal(__test.selectCapture('<main class="page"><h1>무표지</h1></main>'), null);
+});
+
+test('first-screen mode captures the top 480×720 of the page at twice the density, with no selector or restyling', { concurrency: false }, async () => {
+  const originalFetch = globalThis.fetch;
+  let payload;
+  globalThis.fetch = async (_url, options) => {
+    payload = JSON.parse(options.body);
+    return new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'content-type': 'image/png' } });
+  };
+  const env = await getAuthEnv();
+  try {
+    const response = await onRequestPost({ request: request({ html: FIRST_SCREEN_DAILY, preferredMode: 'first-screen' }), env });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('x-cover-mode'), 'first-screen');
+    assert.equal(response.headers.get('x-cover-selector'), null);
+    assert.deepEqual(payload.viewport, { width: 480, height: 720, deviceScaleFactor: 2 });
+    assert.deepEqual(payload.screenshotOptions, { type: 'png', clip: { x: 0, y: 0, width: 480, height: 720, scale: 1 } });
+    assert.equal('selector' in payload, false);
+    assert.equal('addStyleTag' in payload, false);
+    assert.equal(payload.html, FIRST_SCREEN_DAILY);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('selector captures still answer with their mode and selector', { concurrency: false }, async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(new Uint8Array([137, 80, 78, 71]), { headers: { 'content-type': 'image/png' } });
+  const env = await getAuthEnv();
+  try {
+    const html = '<head><meta name="report-cover-selector" content=".cv"></head><style>.cv{aspect-ratio:2/3}</style><header class="cvwrap"><div class="cvin"><div class="cv"><div class="cv-h1">제목</div></div></div></header>';
+    const response = await onRequestPost({ request: request({ html }), env });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('x-cover-mode'), 'selector');
+    assert.equal(response.headers.get('x-cover-selector'), '.cv');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('a failed render reports the upstream status number, never the upstream body', { concurrency: false }, async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response('account details that must stay server-side', { status: 403 });
+  const env = await getAuthEnv();
+  try {
+    const response = await onRequestPost({ request: request({ html: FIRST_SCREEN_DAILY }), env });
+    assert.equal(response.status, 502);
+    const data = await response.json();
+    assert.equal(data.error, 'BROWSER_RENDERING_FAILED');
+    assert.equal(data.upstreamStatus, 403);
+    assert.equal(data.mode, 'first-screen');
+    assert.ok(Number.isInteger(data.elapsedMs));
+    assert.doesNotMatch(JSON.stringify(data), /account details|server-secret-token/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('a render that outlasts the limit is a timeout that names the limit', { concurrency: false }, async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => { throw Object.assign(new Error('aborted'), { name: 'AbortError' }); };
+  const env = await getAuthEnv();
+  try {
+    const response = await onRequestPost({ request: request({ html: FIRST_SCREEN_DAILY }), env });
+    assert.equal(response.status, 504);
+    const data = await response.json();
+    assert.equal(data.error, 'BROWSER_RENDERING_TIMEOUT');
+    assert.equal(data.timeoutMs, __test.RENDER_TIMEOUT_MS);
+    assert.match(data.message, /40초/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('the render limit leaves room for the 10–20 s whole calls measured on 2026-11-11', () => {
+  assert.equal(__test.RENDER_TIMEOUT_MS, 40000);
+  assert.deepEqual(__test.FIRST_SCREEN_VIEWPORT, { width: 480, height: 720 });
+  assert.equal(__test.FIRST_SCREEN_VIEWPORT.width / __test.FIRST_SCREEN_VIEWPORT.height, 900 / 1350, 'the first screen is the cover ratio');
+});

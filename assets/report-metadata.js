@@ -54,11 +54,17 @@
   // confirmed it at publish time. Only the categories whose <title> is not
   // built from Market Close numbers take one — a Daily or a Weekly keeps the
   // dated title with the day's close, in Korean and in English alike. The
-  // site appends the brand itself, so a "| Snowshagal" the author already
-  // wrote is dropped rather than doubled.
+  // site appends the brand itself, so whatever the author already wrote after
+  // the headline about Snowshagal is dropped rather than doubled: a bare
+  // "| Snowshagal", a series label ("| Snowshagal 투자 인사이트 NO.31",
+  // "· Snowshagal Research No. 13", cut short or not), and a date written
+  // after that label ("· 2026.10.11", "| October 11, 2026"). Until 2026-11-12
+  // only the bare brand went, and 52 titles read "… | Snowshagal 투자
+  // 인사이트 NO.31 | Snowshagal".
   const SEO_TITLE_TYPES = Object.freeze(['research', 'note', 'basics']);
   const SEO_TITLE_MAX = 150;
-  const BRAND_SUFFIX = /\s*[|\-–—·:]\s*Snowshagal\s*$/i;
+  const SUFFIX_DATE = String.raw`(?:\d{4}\.\s?\d{1,2}\.\s?\d{1,2}\.?|\d{4}-\d{2}-\d{2}|[A-Z][a-z]{2,8}\.? \d{1,2}, \d{4})`;
+  const BRAND_SUFFIX = new RegExp(String.raw`\s*[|\-–—·:]\s*Snowshagal\b[^|·—–]*?(?:\s*[|·—–]\s*${SUFFIX_DATE})?\s*$`, 'i');
 
   function acceptsSeoTitle(type) {
     return SEO_TITLE_TYPES.includes(type);

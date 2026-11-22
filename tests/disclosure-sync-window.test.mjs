@@ -94,8 +94,9 @@ test('every run reads the previous KRX trading day again', () => {
   assert.equal(catchUpDate('2026-10-05'), '2026-10-02', '10-05 is a KRX holiday; the run still covers Friday');
   assert.equal(catchUpDate('2026-10-06'), '2026-10-02', 'across the 10-05 holiday and the weekend');
   assert.equal(catchUpDate('2026-09-28'), '2026-09-23', 'across Chuseok');
+  assert.equal(catchUpDate('2027-01-04'), '2026-12-30', 'across the 12-31 closing day and New Year');
   // A year the KRX calendar does not cover yet falls back to the previous weekday.
-  assert.equal(catchUpDate('2027-01-04'), '2027-01-01');
+  assert.equal(catchUpDate('2028-01-04'), '2028-01-03');
   assert.equal(catchUpDate('2026-01-02'), '2026-01-01');
 });
 

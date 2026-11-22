@@ -26,7 +26,7 @@
       && (!wanted || e.market === wanted) && matches(e, eventKind)).map(e => {
       const company = e.company && ((!ko && e.company.nameEn) || e.company.name || e.company.stockCode);
       const title = (ko ? e.title?.ko : e.title?.en) || e.title?.ko || e.title?.en || '';
-      return { date: e.display.date, time: e.display.time || null, market: e.market === 'KR' ? 'KRX' : 'NYSE',
+      return { date: e.display.date, time: e.display.time || null, dated: e.category === 'derivatives_expiry', market: e.market === 'KR' ? 'KRX' : 'NYSE',
         title: company ? `${company} · ${title}` : title, changed: e.status === 'changed',
         high: e.importance === 'high', id: e.id || title };
     });
@@ -53,7 +53,7 @@
     const text = copy[lang];
     const items = agendaItems(data, options);
     const unavailable = data.eventsStatus === 'unavailable' && options.eventKind !== 'trading';
-    const row = item => `<li><button type="button" class="calendar-agenda-item" data-agenda-date="${escape(item.date)}"><span class="calendar-agenda-date">${escape(item.date.slice(5).replace('-', '/'))}<small>${escape(item.trading ? (item.session ? text.session : text.allDay) : item.time ? `${item.time} KST` : text.tbc)}</small></span><span class="detail-market-badge ${item.market === 'KRX' ? 'krx' : 'nyse'}">${item.market}</span><span class="calendar-agenda-title">${escape(item.title)}${item.session ? `<small>${escape(item.session)}</small>` : ''}${item.changed ? `<small>${text.changed}</small>` : ''}</span></button></li>`;
+    const row = item => `<li><button type="button" class="calendar-agenda-item" data-agenda-date="${escape(item.date)}"><span class="calendar-agenda-date">${escape(item.date.slice(5).replace('-', '/'))}<small>${escape(item.trading ? (item.session ? text.session : text.allDay) : item.time ? `${item.time} KST` : item.dated ? text.allDay : text.tbc)}</small></span><span class="detail-market-badge ${item.market === 'KRX' ? 'krx' : 'nyse'}">${item.market}</span><span class="calendar-agenda-title">${escape(item.title)}${item.session ? `<small>${escape(item.session)}</small>` : ''}${item.changed ? `<small>${text.changed}</small>` : ''}</span></button></li>`;
     const list = rows => `<ul class="calendar-agenda-list">${rows.map(row).join('')}</ul>`;
     const content = items.length ? list(items.slice(0, 8)) + (items.length > 8 ? `<details class="calendar-agenda-more"><summary>${text.more(items.length - 8)}</summary>${list(items.slice(8))}</details>` : '') : (unavailable ? '' : `<p class="calendar-agenda-empty">${text.empty}</p>`);
     const notice = unavailable

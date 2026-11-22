@@ -15,6 +15,7 @@ import {
   postLanguage,
   normalizeSitePath,
   reportSeoTags,
+  reportReadingNavigation,
   siteFooter,
   footerCss,
   serializeTagRegistryBootstrap
@@ -64,7 +65,9 @@ function withAdminHeaders(response, { html = false } = {}) {
 function replaceElementContentsById(body, id, markup) {
   const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const pattern = new RegExp(`(<[^>]+id=["']${escaped}["'][^>]*>)[\\s\\S]*?(<\\/[^>]+>)`, 'i');
-  return body.replace(pattern, `$1${markup}$2`);
+  // Post text can contain dollar amounts such as "$1tn". A replacement
+  // string interprets those as capture references instead of literal text.
+  return body.replace(pattern, (_, open, close) => `${open}${markup}${close}`);
 }
 
 
@@ -97,6 +100,38 @@ export function relTokens(attrs) {
 export function removeTags(body, name, predicate) {
   const pattern = new RegExp(`<${name}\\b((?:[^>"']|"[^"]*"|'[^']*')*)>`, 'gi');
   return body.replace(pattern, (whole, source) => (predicate(tagAttributes(source)) ? '' : whole));
+}
+
+const REPORT_HEAD_META = {
+  'report-seo-title': 'seoTitle',
+  'report-seo-description': 'seoDescription',
+  'report-takeaway': 'takeaway'
+};
+
+/**
+ * The string-path equivalent of the HTMLRewriter meta readers: the first
+ * report-seo-title, report-seo-description and report-takeaway content in the
+ * uploaded file, whatever the attribute order. Entities are decoded as an
+ * HTML parser (and HTMLRewriter's getAttribute) would leave them.
+ */
+export function reportHeadMeta(body) {
+  const found = {};
+  const pattern = /<meta\b((?:[^>"']|"[^"]*"|'[^']*')*)>/gi;
+  for (const match of String(body || '').matchAll(pattern)) {
+    const attrs = tagAttributes(match[1]);
+    const key = REPORT_HEAD_META[String(attrs.name || '').toLowerCase()];
+    if (key && !(key in found)) found[key] = decodeHtmlEntities(String(attrs.content ?? ''));
+  }
+  return found;
+}
+
+function decodeHtmlEntities(value) {
+  return value
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(parseInt(code, 16)))
+    .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&');
 }
 
 /**
@@ -170,6 +205,9 @@ export function legacyReportHtmlRedirect(request, url, response) {
 // without .html. The old address, with or without .html, moves to the new one
 // so links already shared keep working.
 export const RENAMED_REPORTS = Object.freeze({
+  // Published 2026-10-27 under its Korean file name, deleted and published
+  // again as basics-13-deposits; 시장 입문 14편 still links the old name.
+  '/reports/시장을읽는말들_13편_증시대기자금은어디로갔나': '/reports/basics-13-deposits',
   '/reports/시장을읽는말들_14편_자회사가상장하면모회사주주는손해일까': '/reports/basics-14-subsidiary-ipo'
 });
 
@@ -398,7 +436,11 @@ export async function onRequest(context) {
   else if (/위클리|weekly/i.test(decodedPath)) active = 'weekly';
   else if (/비정기|소버린|research/i.test(decodedPath)) active = 'research';
   else if (/투자\s*노트|끄적|note/i.test(decodedPath)) active = 'note';
-  let seo = '';
+  // Builds the report's head tags once the uploaded file's own head metas
+  // (report-seo-title, report-seo-description, report-takeaway) are known.
+  // Null when no post matches: the page is then passed through untouched.
+  let seoFor = null;
+  let readingNavigation = '';
   let tags = null;
   try {
     const [postsRes, tagsRes] = await Promise.allSettled([
@@ -417,13 +459,19 @@ export async function onRequest(context) {
         // numbers the <title> and description quote; without one they fall
         // back to dated wording with no numbers.
         const facts = await loadReportFacts(context.env, post);
-        seo = reportSeoTags(posts, post, { facts, tagRegistry: tags });
+        // Built once without the file's metas first, so a failure leaves the
+        // page untouched, and kept as the fallback should a later build fail.
+        const fallback = reportSeoTags(posts, post, { facts, tagRegistry: tags });
+        seoFor = (reportMeta) => {
+          try { return reportSeoTags(posts, post, { facts, tagRegistry: tags, reportMeta }); } catch (_) { return fallback; }
+        };
+        readingNavigation = reportReadingNavigation(posts, post);
       }
     }
   } catch (_) {}
 
   const tagBootstrap = serializeTagRegistryBootstrap(tags);
-  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=abf7ec9b73"></script><script src="/assets/report-shell.js?v=8bb990a4f2" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
+  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=2af8dce9f2"></script><script src="/assets/report-shell.js?v=5915db715f" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
   const footerStyle = `<style id="site-footer-css">${footerCss()}</style>`;
   const footerMarkup = siteFooter(lang);
   // One feed link per page, for the page's own language. Any Atom link the
@@ -432,6 +480,7 @@ export async function onRequest(context) {
 
   if (typeof HTMLRewriter === 'undefined') {
     let body = await response.text();
+    const seo = seoFor ? seoFor(reportHeadMeta(body)) : '';
     // The same elements the HTMLRewriter selectors below remove, matched by
     // attribute rather than by attribute order.
     if (seo) {
@@ -441,6 +490,7 @@ export async function onRequest(context) {
         attrs.name === 'description'
         || String(attrs.property ?? '').startsWith('og:')
         || String(attrs.name ?? '').startsWith('twitter:')
+        || attrs.property === 'article:published_time'
       ));
     }
     body = removeTags(body, 'link', attrs => (
@@ -452,7 +502,7 @@ export async function onRequest(context) {
       || attrs.rel === 'manifest'
     ));
     body = body.replace(/<\/head>/i, `${FAVICON_TAGS}${seo}${feedLink}${footerStyle}</head>`);
-    body = body.replace(/<\/body>/i, `${footerMarkup}${shell}</body>`);
+    body = body.replace(/<\/body>/i, `${readingNavigation}${footerMarkup}${shell}</body>`);
     body = setHtmlLang(body, lang);
     body = appendGa4ToHtml(body, ga4);
     const headers = new Headers(response.headers);
@@ -464,27 +514,40 @@ export async function onRequest(context) {
     });
   }
 
+  const ownMeta = {};
+  const readOwnMeta = (key) => ({ element(element) { if (!(key in ownMeta)) ownMeta[key] = decodeHtmlEntities(element.getAttribute('content') || ''); } });
   return applyGa4ToRewriter(new HTMLRewriter(), ga4)
+    .on('meta[name="report-seo-title"]', readOwnMeta('seoTitle'))
+    .on('meta[name="report-seo-description"]', readOwnMeta('seoDescription'))
+    .on('meta[name="report-takeaway"]', readOwnMeta('takeaway'))
     .on('html', { element(element) { element.setAttribute('lang', lang); } })
-    .on('title', { element(element) { if (seo) element.remove(); } })
+    .on('title', { element(element) { if (seoFor) element.remove(); } })
     .on('link[rel="canonical"]', { element(element) { element.remove(); } })
     .on('link[rel="alternate"][hreflang]', { element(element) { element.remove(); } })
     .on('link[type="application/atom+xml"]', { element(element) { element.remove(); } })
-    .on('meta[name="description"]', { element(element) { if (seo) element.remove(); } })
-    .on('meta[property^="og:"]', { element(element) { if (seo) element.remove(); } })
-    .on('meta[name^="twitter:"]', { element(element) { if (seo) element.remove(); } })
+    .on('meta[name="description"]', { element(element) { if (seoFor) element.remove(); } })
+    .on('meta[property^="og:"]', { element(element) { if (seoFor) element.remove(); } })
+    .on('meta[name^="twitter:"]', { element(element) { if (seoFor) element.remove(); } })
+    .on('meta[property="article:published_time"]', { element(element) { if (seoFor) element.remove(); } })
     // The site writes the page's Article and breadcrumb itself; one the
     // report carried would describe the same page a second time, with images
     // and dates the site does not serve.
-    .on('script[type="application/ld+json"]', { element(element) { if (seo) element.remove(); } })
+    .on('script[type="application/ld+json"]', { element(element) { if (seoFor) element.remove(); } })
     // Uploaded report HTML carries no icon of its own.
     .on('link[rel~="icon"]', { element(element) { element.remove(); } })
     .on('link[rel="apple-touch-icon"]', { element(element) { element.remove(); } })
     .on('link[rel="manifest"]', { element(element) { element.remove(); } })
-    .on('head', { element(element) { element.append(`${FAVICON_TAGS}${seo}${feedLink}${footerStyle}`, { html: true }); } })
+    // Written at </head>, after the file's own metas above have been read.
+    .on('head', {
+      element(element) {
+        element.onEndTag((end) => {
+          end.before(`${FAVICON_TAGS}${seoFor ? seoFor(ownMeta) : ''}${feedLink}${footerStyle}`, { html: true });
+        });
+      }
+    })
     .on('body', {
       element(element) {
-        element.append(`${footerMarkup}${shell}`, { html: true });
+        element.append(`${readingNavigation}${footerMarkup}${shell}`, { html: true });
       }
     })
     .transform(response);

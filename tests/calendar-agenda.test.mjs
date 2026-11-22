@@ -72,6 +72,15 @@ test('company names and rescheduled states are localized and all data is escaped
   assert.match(view.renderAgenda(data, { lang: 'ko' }), /삼성전자/);
 });
 
+test('an option expiry reads All day in the agenda; other undated events stay Time TBC', () => {
+  const undated = { display: { date: '2026-10-29', time: null } };
+  const expiry = view.renderAgenda(payload([event('x', '2026-10-29', { ...undated, category: 'derivatives_expiry' })]), { lang: 'en' });
+  assert.match(expiry, /<small>All day<\/small>/);
+  assert.doesNotMatch(expiry, /Time TBC/);
+  assert.match(view.renderAgenda(payload([event('x', '2026-10-29', { ...undated, category: 'derivatives_expiry' })]), { lang: 'ko' }), /<small>종일<\/small>/);
+  assert.match(view.renderAgenda(payload([event('x', '2026-10-29', { ...undated, category: 'monetary_policy' })]), { lang: 'en' }), /<small>Time TBC<\/small>/);
+});
+
 test('an outage is distinguishable from an empty month and does not claim missing events are absent', () => {
   const html = view.renderAgenda({ ...payload([]), eventsStatus: 'unavailable' }, { lang: 'en' });
   assert.match(html, /Market events are unavailable/);

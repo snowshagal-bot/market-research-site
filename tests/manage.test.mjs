@@ -92,7 +92,14 @@ function githubMock(existingPosts = [basePost], { conflict = false, searchIndex 
       refReads += 1;
       payload = { object: { sha: conflict && refReads > 1 ? 'new-main-sha' : 'base-sha' } };
     } else if (path.endsWith('/git/commits/base-sha')) payload = { tree: { sha: 'base-tree' } };
-    else if (path.endsWith('/git/blobs/search-index-sha')) payload = { content: base64(`${JSON.stringify(defaultIndex)}\n`), encoding: 'base64', sha: 'search-index-sha' };
+    else if (path.endsWith('/git/blobs/search-index-sha')) {
+      // GitHub answers a blob read for application/vnd.github.raw+json with the
+      // file itself, and with base64 inside JSON otherwise.
+      const accept = new Headers(options.headers || {}).get('accept') || '';
+      calls[calls.length - 1].accept = accept;
+      if (accept.includes('vnd.github.raw')) return new Response(`${JSON.stringify(defaultIndex)}\n`, { status: 200 });
+      payload = { content: base64(`${JSON.stringify(defaultIndex)}\n`), encoding: 'base64', sha: 'search-index-sha' };
+    }
     else if (path.endsWith('/git/blobs') && body?.encoding === 'utf-8') {
       const sha = `text-blob-${++textBlobs}`;
       blobContents.set(sha, body.content);
@@ -227,12 +234,37 @@ test('summary updates are capped at 500 characters and omitted fields preserve e
     assert.equal(updated.translationGroup, 'pair-1');
   } finally { globalThis.fetch = originalFetch; }
 
-  calls = githubMock([summarized]);
+  for (const [summary, expected] of [
+    ['새'.repeat(520), '새'.repeat(500)],
+    ['  AI 반도체\u2060·\u2060데이터센터\r\n\t규제  ', 'AI 반도체·데이터센터 규제'],
+    ['\u2060' + '새'.repeat(500), '새'.repeat(500)],
+    ['새'.repeat(499) + ' \n다음', '새'.repeat(499)],
+    ['\u2060\r\n\t', undefined]
+  ]) {
+    calls = githubMock([summarized]);
+    try {
+      const { response } = await run({ summary });
+      assert.equal(response.status, 200);
+      const tree = treeFrom(calls);
+      const updated = postsFromTree(tree)[0];
+      assert.equal(updated.summary, expected);
+      const entry = JSON.parse(tree.find(item => item.path === 'data/search-index.json').content)[0];
+      const meta = JSON.parse(tree.find(item => item.path === 'data/search-index-meta.js').content.replace(/^window\.SEARCH_INDEX_META = /, '').replace(/;\s*$/, ''))[0];
+      assert.equal(entry.summary, expected || '수정한 설명');
+      assert.equal(meta.summary, expected || '수정한 설명');
+      assert.equal(tree.some(item => item.path === summarized.href), false, 'a summary edit must not rewrite report HTML');
+    } finally { globalThis.fetch = originalFetch; }
+  }
+});
+
+test('an edited title and subtitle are stored without invisible characters', async () => {
+  const calls = githubMock([basePost]);
   try {
-    const { response } = await run({ summary: '새'.repeat(520) });
+    const { response } = await run({ title: '한⁠·중 정상회담​', subtitle: '﻿열린 건 권리' });
     assert.equal(response.status, 200);
     const updated = postsFromTree(treeFrom(calls))[0];
-    assert.equal(updated.summary, '새'.repeat(500));
+    assert.equal(updated.title, '한·중 정상회담');
+    assert.equal(updated.subtitle, '열린 건 권리');
   } finally { globalThis.fetch = originalFetch; }
 });
 
@@ -520,13 +552,17 @@ test('manage fails closed when search-index fetch fails (no commit created)', as
   }
 });
 
-test('manage reads an oversized search index through the Git blob fallback', async () => {
+test('manage reads an oversized search index as its raw Git blob', async () => {
   const calls = githubMock([basePost], { searchIndexViaBlob: true });
   try {
     const { response, data } = await run();
     assert.equal(response.status, 200);
     assert.equal(data.ok, true);
-    assert.equal(calls.some(call => call.path.endsWith('/git/blobs/search-index-sha')), true);
+    // Raw, never base64 inside JSON: those copies pushed a publish past the
+    // Worker memory limit (Cloudflare 1102) once the index passed 10 MB.
+    const blobRead = calls.find(call => call.path.endsWith('/git/blobs/search-index-sha'));
+    assert.ok(blobRead);
+    assert.equal(blobRead.accept, 'application/vnd.github.raw+json');
     assert.equal(calls.some(call => call.path.endsWith('/git/trees')), true);
   } finally {
     globalThis.fetch = originalFetch;

@@ -186,11 +186,13 @@ test('the publisher and the post manager emit the same artifact set', async () =
   ]);
 
   for (const source of [publish, manage]) {
-    assert.match(source, /import \{ searchIndexArtifacts \} from ["']\.\/_search-index\.js["'];/);
+    // The writers build each file on demand (searchIndexArtifactWriters), so
+    // only one serialized file is in Worker memory at a time.
+    assert.match(source, /import \{ searchIndexArtifactWriters \} from ["']\.\/_search-index\.js["'];/);
     // No writer may hand-roll the index paths any more.
     assert.doesNotMatch(source, /window\.SEARCH_INDEX = /);
     assert.doesNotMatch(source, /'data\/search-index\.js'|"data\/search-index\.js"/);
   }
-  assert.match(publish, /searchIndexArtifacts\(searchIndex\)/);
-  assert.match(manage, /searchIndexArtifacts\(searchIndex\)/);
+  assert.match(publish, /searchIndexArtifactWriters\(searchIndex\)/);
+  assert.match(manage, /searchIndexArtifactWriters\(searchIndex\)/);
 });

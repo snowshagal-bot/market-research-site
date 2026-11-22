@@ -122,7 +122,7 @@ test('Market renderer covers every contract section without inventing an intrada
   assert.match(script, /ratioPct/);
   assert.match(script, /value \* 1e9/);
   assert.match(script, /data_state === 'intraday'/);
-  assert.match(script, /key === 'USDKRW' \|\| key === 'JPYKRW'/);
+  assert.match(script, /const FIXING_CODES = \['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW'\]/);
   assert.doesNotMatch(script, /LME|canvas|getContext|chart\.js|highcharts|plotly/i);
 });
 
@@ -147,6 +147,64 @@ test('FX close/current and US10Y basis-point changes render without mixing value
     assert.match(target.innerHTML, lang === 'ko' ? /860\.64원[\s\S]*15:30 확정[\s\S]*현재[\s\S]*858\.40원[\s\S]*▼ 7\.99/ : /₩860\.64[\s\S]*15:30 close[\s\S]*Latest[\s\S]*₩858\.40[\s\S]*▼ 7\.99/);
     assert.match(target.innerHTML, /4\.672%[\s\S]*▲ 0\.8bp/);
     assert.doesNotMatch(target.innerHTML, /4\.6bp[\s\S]{0,40}\(-0\.97%\)/);
+  }
+});
+
+test('program net buys carry an explicit sign like the investor flow tables', async () => {
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+  data.program_basis.program_trading['차익'].net_buy_won = 27664238323;
+  data.program_basis.program_trading['비차익'].net_buy_won = -1186100200573;
+  data.program_basis.program_trading['전체'].net_buy_won = 0;
+  for (const [lang, rows] of [
+    ['ko', ['>차익</th><td>+277억원<', '>비차익</th><td>−1.19조원<', '>전체</th><td>0원<']],
+    ['en', ['>Arbitrage</th><td>KRW +27.7bn<', '>Non-arbitrage</th><td>KRW −1.19tn<', '>Total</th><td>KRW 0<']]
+  ]) {
+    const runtime = await marketRuntime(lang);
+    const target = { innerHTML: '' };
+    runtime.render(data, target);
+    const program = target.innerHTML.slice(target.innerHTML.indexOf('program-grid'), target.innerHTML.indexOf('basis-panel'));
+    for (const row of rows) assert.ok(program.includes(row), `${lang}: ${row}`);
+    assert.doesNotMatch(program, /-\d/, `${lang}: no ASCII hyphen as a minus sign`);
+  }
+});
+
+test('the English page shows the basis, sources and short-ratio scope in English', async () => {
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+  data.program_basis.basis.future_name = '선물(2612)';
+  data.indices.KOSPI.source = 'Npay 지수 실시간 · 정규장 스냅샷 15:31~15:39 · 최신 2개 동일';
+  data.rates_fx_volatility.USDKRW.source = '네이버 금융 하나은행 15:30 회차별 매매기준율 + Yahoo 현재가 · KRW=X';
+  for (const [state, label] of [['백워데이션', 'Backwardation'], ['콘탱고', 'Contango'], ['중립', 'Flat']]) {
+    data.program_basis.basis.market_state = state;
+    const en = await marketRuntime('en');
+    const target = { innerHTML: '' };
+    en.render(data, target);
+    const html = target.innerHTML;
+    assert.match(html, new RegExp(`<span class="state-chip">${label}</span>`));
+    assert.match(html, /<span>Futures \(2612\)<\/span>/);
+    assert.match(html, /Sources: KRX, Naver Pay index quotes, Naver Finance daily index, .*Hana Bank 15:30 reference rate \(Naver Finance\) \+ Yahoo Finance latest/);
+    assert.match(html, /Value ratio is against KRX\+NXT combined regular-session turnover\./);
+    assert.doesNotMatch(html.slice(html.indexOf('basis-panel'), html.indexOf('</section>', html.indexOf('basis-panel'))), /[ㄱ-ㆎ가-힣]/);
+    assert.doesNotMatch(html.slice(html.indexOf('market-data-note')), /[ㄱ-ㆎ가-힣]/);
+  }
+  const ko = await marketRuntime('ko');
+  const target = { innerHTML: '' };
+  ko.render(data, target);
+  assert.match(target.innerHTML, /<span>선물\(2612\)<\/span>/);
+  assert.match(target.innerHTML, /<span class="state-chip">중립<\/span>/);
+  assert.match(target.innerHTML, /데이터 출처: KRX 한국거래소, Npay 지수 실시간/);
+  assert.match(target.innerHTML, /거래대금 비중은 KRX\+NXT 합산 정규시장 거래대금 대비입니다\./);
+  // No scope note when the summary does not say it includes NXT.
+  for (const key of ['KOSPI', 'KOSDAQ']) delete data.short_selling.market_summary[key].coverage_scope;
+  const plain = { innerHTML: '' };
+  ko.render(data, plain);
+  assert.doesNotMatch(plain.innerHTML, /KRX\+NXT 합산 정규시장 거래대금 대비/);
+});
+
+test('the English company list matches the date pages for every name they share', async () => {
+  const en = await marketRuntime('en');
+  for (const [ticker, name] of [['068270', 'Celltrion'], ['012450', 'Hanwha Aerospace'], ['034020', 'Doosan Enerbility'],
+    ['042660', 'Hanwha Ocean'], ['055550', 'Shinhan Financial Group'], ['329180', 'HD Hyundai Heavy Industries']]) {
+    assert.equal(en.companyName({ ticker, name: '한글이름' }), name);
   }
 });
 
@@ -389,7 +447,8 @@ test('retry click triggers init/load exactly once without duplicate calls', asyn
   const script = await read('assets/market-close.js');
   let fetchCount = 0;
   const mockFetch = async (url) => {
-    fetchCount++;
+    // The session's KOFIA yields are an optional read beside each load, not part of the init sequence.
+    if (!url.includes('/api/market/rates/')) fetchCount++;
     if (url.includes('/api/market/dates')) {
       return { ok: true, json: async () => ({ dates: ['2026-08-28'], latest: '2026-08-28', earliest: '2026-08-28' }) };
     }
@@ -466,7 +525,8 @@ test('repeated retries do not accumulate popstate listeners and popstate trigger
   const script = await read('assets/market-close.js');
   let fetchCount = 0;
   const mockFetch = async (url) => {
-    fetchCount++;
+    // The session's KOFIA yields are an optional read beside each load, not part of the init sequence.
+    if (!url.includes('/api/market/rates/')) fetchCount++;
     if (url.includes('/api/market/dates')) {
       return { ok: true, json: async () => ({ dates: ['2026-08-28'], latest: '2026-08-28', earliest: '2026-08-28' }) };
     }
@@ -1186,4 +1246,104 @@ test('Hydration failure fallback: /api/market/latest errors preserve static cont
     // Fallback notice should NOT be present on success
     assert.doesNotMatch(renderedHtml, /id="market-fallback-notice"/);
   }
+});
+
+
+/* ------------------------------------------- readability pass (2026-11-21) */
+
+async function marketRuntimeWithLocale(lang = 'ko') {
+  const [locale, script] = await Promise.all([read('assets/locale.js'), read('assets/market-close.js')]);
+  const document = {
+    documentElement: { dataset: { siteLang: lang } },
+    body: { dataset: {} },
+    readyState: 'loading',
+    addEventListener() {},
+    getElementById() { return null; }
+  };
+  const window = {};
+  const context = vm.createContext({ window, document, location: { hostname: 'localhost' }, Intl, Date, Set, console });
+  vm.runInContext(locale, context);
+  vm.runInContext(script, context);
+  return window.MARKET_CLOSE;
+}
+
+function rangePayload() {
+  const item = (start, end) => ({ baseline_value: start, end_value: end, return_pct: (end / start - 1) * 100, period_high: end, period_low: start, observations: 5, complete: true });
+  const group = (code, name, market, pct) => ({ index_code: code, name, market, baseline_value: 100, end_value: 100 + pct, return_pct: pct, observations: 5, complete: true });
+  return {
+    aggregation_version: '1.0.0', period: '1w',
+    window: { start_date: '2026-11-16', end_date: '2026-11-20', dates: ['2026-11-16', '2026-11-17', '2026-11-18', '2026-11-19', '2026-11-20'], sessions_used: 5, required_sessions: 5, complete: true },
+    instruments: {
+      indices: { KOSPI: item(5290.53, 4869.96), KOSDAQ: item(699.66, 645.68), NASDAQ: item(25366.09, 23879.2), DOW: item(50100, 49097.06), SP500: item(7592.4, 7175.83) },
+      rates_fx_volatility: { SOX: item(10506.67, 9419.72), VIX: item(18.7, 28.44), DXY: item(103.41, 103.75) },
+      commodities_crypto: { GOLD: item(3886.3, 3561), BITCOIN: item(65305.06, 61865.44) }
+    },
+    flows: { unit: 'KRW billion', sessions_used: 5, markets: {} },
+    breadth: {},
+    krx_groups: {
+      sessions_with_data: 5, sessions_used: 5, coverage_complete: true,
+      sectors: [group('KGS20P', '전기·가스', 'KOSPI', 3.1), group('KGS09P', '전기전자', 'KOSPI', -8.2), group('QGS33P', '제약', 'KOSDAQ', 1.2)],
+      themes: [group('XGT17P', 'KRX 코리아 소버린 AI 지수', null, -9.4), group('KGD02P', '코스피 고배당 50', null, 0.4)]
+    }
+  };
+}
+
+test('1W/1M: Korean instrument names on the Korean page, and the Dow Jones row is there', async () => {
+  const runtime = await marketRuntimeWithLocale('ko');
+  const target = { innerHTML: '' };
+  runtime.renderRangeView(rangePayload(), '1w', target);
+  const names = [...target.innerHTML.matchAll(/<div class="range-item-name">\s*<strong>(.*?)<\/strong>/g)].map(m => m[1].replace(/<[^>]+>/g, ''));
+  assert.match(target.innerHTML, /<strong><a class="instrument-history-link" href="\/market\/dow\/">다우존스<\/a><\/strong>/);
+  assert.deepEqual(names.slice(0, 6), ['코스피', '코스닥', '나스닥 종합', '다우존스', 'S&amp;P 500', '필라델피아 반도체']);
+  for (const code of ['SP500', 'DXY', 'BITCOIN', 'GOLD']) assert.ok(!names.includes(code), `raw code ${code}`);
+  assert.ok(names.includes('달러인덱스') && names.includes('비트코인') && names.includes('금 선물'));
+  const en = await marketRuntimeWithLocale('en');
+  const enTarget = { innerHTML: '' };
+  en.renderRangeView(rangePayload(), '1w', enTarget);
+  assert.match(enTarget.innerHTML, /<strong><a class="instrument-history-link" href="\/en\/market\/dow\/">Dow Jones<\/a><\/strong>/);
+});
+
+test('1W/1M: KRX sector and theme rankings use English names on the English page', async () => {
+  const en = await marketRuntimeWithLocale('en');
+  const target = { innerHTML: '' };
+  en.renderRangeView(rangePayload(), '1w', target);
+  const groups = target.innerHTML.slice(target.innerHTML.indexOf('range-groups-grid'));
+  for (const name of ['Electricity &amp; Gas', 'Electrical &amp; Electronics', 'Pharmaceuticals', 'KRX Korea Sovereign AI Index', 'KOSPI High Dividend 50']) {
+    assert.ok(groups.includes(name), name);
+  }
+  assert.doesNotMatch(groups, /[ㄱ-ㆎ가-힣]/);
+  const ko = await marketRuntimeWithLocale('ko');
+  const koTarget = { innerHTML: '' };
+  ko.renderRangeView(rangePayload(), '1w', koTarget);
+  assert.match(koTarget.innerHTML, /<b>전기·가스<\/b>/);
+});
+
+test('TODAY cards link each instrument to its daily history page', async () => {
+  const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+  for (const [lang, prefix] of [['ko', ''], ['en', '/en']]) {
+    const runtime = await marketRuntimeWithLocale(lang);
+    const target = { innerHTML: '' };
+    runtime.render(data, target);
+    for (const slug of ['kospi', 'kosdaq', 'nasdaq', 'dow', 'sp500', 'sox', 'vix', 'us10y', 'usdkrw', 'jpykrw', 'dxy', 'wti', 'gold', 'bitcoin']) {
+      assert.match(target.innerHTML, new RegExp(`<a class="instrument-history-link" href="${prefix}/market/${slug}/">`), `${lang} ${slug}`);
+    }
+    assert.match(target.innerHTML, new RegExp(`href="${prefix}/market/archive/#indicators"`));
+  }
+});
+
+test('readability: no reader-facing market text is set below 10px', async () => {
+  const css = await read('assets/market-close.css');
+  const tiny = [...css.matchAll(/([^{}]+)\{[^{}]*?font-size:([0-9.]+)px/g)]
+    .filter(m => Number(m[2]) < 10).map(m => `${m[1].trim().slice(0, 60)} ${m[2]}px`);
+  assert.deepEqual(tiny, []);
+  // Phone history buttons are full-size targets.
+  assert.match(css, /@media\(max-width:430px\)\{[^@]*\.market-nav-step,\.market-calendar-toggle\{width:36px;height:36px\}/);
+  assert.match(css, /@media\(max-width:430px\)\{[^@]*\.market-mode-btn\{[^}]*min-height:36px/);
+});
+
+test('readability: ranked rows keep the name on one line and the market-cap names read left', async () => {
+  const css = await read('assets/market-close.css');
+  assert.match(css, /\.rank-list li span\{min-width:0;display:flex;align-items:baseline;gap:6px\}/);
+  assert.match(css, /\.rank-list b\{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap/);
+  assert.match(css, /\.market-cap-table td:nth-child\(2\)[^{]*\{text-align:left\}/);
 });

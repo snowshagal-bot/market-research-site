@@ -151,8 +151,12 @@ test('Weekly title states the week move, tag themes and the Monday–Friday peri
   const chuseok = extractWeeklyFacts([row('2026-09-18', 7000), row('2026-09-23', 7070)], weeklyPeriod('2026-09-25'));
   assert.equal(chuseok.closeDate, '2026-09-23');
   assert.ok(Math.abs(chuseok.pct - 1) < 1e-9);
-  // No KRX calendar for 2027 yet: no number rather than a guessed session.
-  assert.equal(extractWeeklyFacts([row('2026-12-24', 7000), row('2026-12-30', 7100)], weeklyPeriod('2027-01-01')), null);
+  // The year-end week (12-31 and 01-01 closed) ends on Wednesday 12-30; 12-25 is closed too.
+  const yearEnd = extractWeeklyFacts([row('2026-12-24', 7000), row('2026-12-30', 7100)], weeklyPeriod('2027-01-01'));
+  assert.equal(yearEnd.previousDate, '2026-12-24');
+  assert.equal(yearEnd.closeDate, '2026-12-30');
+  // No KRX calendar for 2028 yet: no number rather than a guessed session.
+  assert.equal(extractWeeklyFacts([row('2027-12-30', 7000), row('2028-01-07', 7100)], weeklyPeriod('2028-01-07')), null);
 
   const koWeekly = { type: 'weekly', lang: 'ko', reportDate: '2026-09-05', title: '받침보다 센 바람', href: 'reports/위클리_2026년 9월 1주차 위클리.html', tags: ['semiconductors', 'rates', 'policy'] };
   const enWeekly = { ...koWeekly, lang: 'en', title: 'Winds Stronger Than the Support', href: 'reports/en/2026-09-06_Korea_Weekly_Report_EN.html' };
@@ -304,9 +308,42 @@ test('Research, Note and Basics use their own search title with the brand added 
     assert.equal(reportSeoTitle({ ...basics07, seoTitle: written }), '레버리지 ETF 음의 복리: 왜 2배가 아닌가 | Snowshagal', written);
   }
   assert.equal(reportSeoTitle({ ...basics07, seoTitle: 'Snowshagal' }), reportSeoTitle(basics07), 'a brand alone is no title');
+  // A series label after the headline goes with the brand, as does a date
+  // written after it, and one cut short at 150 characters (2026-11-12: 52
+  // titles read "… | Snowshagal 투자 인사이트 NO.31 | Snowshagal").
+  const note = { ...basics07, type: 'note', title: '폭락장에서도 한은은 올리나' };
+  for (const [written, expected] of [
+    ['폭락장에서도 한은은 올리나 | Snowshagal 투자 인사이트 NO.31', '폭락장에서도 한은은 올리나'],
+    ['산업용 전기요금은 내리려는데, 한전채 한도는 줄어든다 · Snowshagal 투자 인사이트 NO.30', '산업용 전기요금은 내리려는데, 한전채 한도는 줄어든다'],
+    ["K-Beauty's Export Boom Is Not a Stock-Market Boom | Snowshagal Investment Insight No. 23", "K-Beauty's Export Boom Is Not a Stock-Market Boom"],
+    ['Where Did $690 Billion Go? | Snowshagal Research No.09 | October 11, 2026', 'Where Did $690 Billion Go?'],
+    ['6,900억달러는 어디로 갔나 · Snowshagal Research NO.09 · 2026.10.11', '6,900억달러는 어디로 갔나'],
+    ['Samsung Electronics: Up to KRW 110 Trillion in Shareholder Returns | Snowshagal Investment Insight N', 'Samsung Electronics: Up to KRW 110 Trillion in Shareholder Returns']
+  ]) {
+    assert.equal(reportSeoTitle({ ...note, seoTitle: written }), `${expected} | Snowshagal`, written);
+  }
+  // Only what follows a separator and starts with the brand goes.
+  assert.equal(reportSeoTitle({ ...note, seoTitle: 'Snowshagal Weekly: the tide turns' }), 'Snowshagal Weekly: the tide turns | Snowshagal');
+  assert.equal(reportSeoTitle({ ...note, seoTitle: 'Reading the Market: 2026.10.11 in review' }), 'Reading the Market: 2026.10.11 in review | Snowshagal');
   const research = { id: 'r1', type: 'research', lang: 'en', reportDate: '2026-10-03', title: 'The Engine Is the Bottleneck', href: 'reports/en/r1.html', tags: ['semiconductors'] };
   assert.equal(reportSeoTitle({ ...research, seoTitle: 'HBM Supply: Why the Engine Is the Bottleneck' }, { tagRegistry }), 'HBM Supply: Why the Engine Is the Bottleneck | Snowshagal');
   assert.equal(reportSeoTitle({ ...basics07, type: 'note', seoTitle: '선거 달력보다 금리 달력' }), '선거 달력보다 금리 달력 | Snowshagal');
+});
+
+test('no stored search title carries the brand, and no page title says it twice', async () => {
+  const posts = JSON.parse(await read('data/posts.json'));
+  const registry = JSON.parse(await read('data/tags.json'));
+  const rules = globalThis.REPORT_METADATA;
+  const stored = posts.filter(post => post.seoTitle);
+  assert.ok(stored.length >= 74);
+  for (const post of stored) {
+    assert.equal(rules.seoTitleText(post.seoTitle), post.seoTitle, `${post.id} is stored as the rule reads it`);
+    assert.doesNotMatch(post.seoTitle, /snowshagal/i, post.id);
+  }
+  for (const post of posts) {
+    const title = reportSeoTitle(post, { tagRegistry: registry });
+    assert.equal((title.match(/snowshagal/gi) || []).length, 1, title);
+  }
 });
 
 test('a Daily or a Weekly keeps its close-based title in Korean and in English, whatever seoTitle says', () => {
