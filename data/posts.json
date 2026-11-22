@@ -7869,13 +7869,14 @@
     "href": "reports/en/2026-08-20_KOSPI_Daily_Report_EN_Benchmark (1).html",
     "coverImage": "covers/2026-08-20-daily-1ctu7fr.webp",
     "tags": [
-      "flows",
       "semiconductors",
-      "rates"
+      "flows",
+      "treasuries"
     ],
     "readingMinutes": 6,
     "shareCardImage": "covers/share/2026-08-20-daily-1ctu7fr.jpg",
-    "coverThumbnail": "covers/2026-08-20-daily-1ctu7fr-450.webp"
+    "coverThumbnail": "covers/2026-08-20-daily-1ctu7fr-450.webp",
+    "translationGroup": "2026-08-20-daily-c6eow2"
   },
   {
     "id": "2026-08-20-daily-c6eow2",
@@ -8216,13 +8217,14 @@
     "href": "reports/en/Market_Language_Ep3_How_US_Data_Reaches_Korea.html",
     "coverImage": "covers/2026-08-13-basics-1cmfur2.webp",
     "tags": [
-      "flows",
-      "semiconductors",
-      "rates"
+      "rates",
+      "fx",
+      "fed"
     ],
     "readingMinutes": 8,
     "shareCardImage": "covers/share/2026-08-13-basics-1cmfur2.jpg",
-    "coverThumbnail": "covers/2026-08-13-basics-1cmfur2-450.webp"
+    "coverThumbnail": "covers/2026-08-13-basics-1cmfur2-450.webp",
+    "translationGroup": "2026-08-13-basics-1qofo4f"
   },
   {
     "id": "2026-08-13-basics-1qofo4f",
@@ -8378,8 +8380,8 @@
     "type": "basics",
     "typeLabel": "Market Basics",
     "lang": "en",
-    "date": "2026-08-11",
-    "reportDate": "2026-08-11",
+    "date": "2026-08-12",
+    "reportDate": "2026-08-12",
     "registeredDate": "2026-08-26",
     "registeredAt": "2026-08-25T15:47:11.805Z",
     "legacyImport": false,
@@ -8390,13 +8392,13 @@
     "href": "reports/en/Market_Language_Ep2_When_Cash_and_Futures_Diverge.html",
     "coverImage": "covers/2026-08-11-basics-1bmtot3.webp",
     "tags": [
-      "flows",
-      "semiconductors",
-      "rates"
+      "futures",
+      "flows"
     ],
     "readingMinutes": 6,
     "shareCardImage": "covers/share/2026-08-11-basics-1bmtot3.jpg",
-    "coverThumbnail": "covers/2026-08-11-basics-1bmtot3-450.webp"
+    "coverThumbnail": "covers/2026-08-11-basics-1bmtot3-450.webp",
+    "translationGroup": "2026-08-10-basics-1rhknmt"
   },
   {
     "id": "2026-08-11-daily-yxlmio",
@@ -8468,8 +8470,8 @@
     "type": "basics",
     "typeLabel": "Market Basics",
     "lang": "en",
-    "date": "2026-08-10",
-    "reportDate": "2026-08-10",
+    "date": "2026-08-11",
+    "reportDate": "2026-08-11",
     "registeredDate": "2026-08-26",
     "registeredAt": "2026-08-25T15:46:19.514Z",
     "legacyImport": false,
@@ -8480,13 +8482,12 @@
     "href": "reports/en/Market_Language_Ep1_Who_Moves_Stock_Prices.html",
     "coverImage": "covers/2026-08-10-basics-f7gadj.webp",
     "tags": [
-      "flows",
-      "semiconductors",
-      "rates"
+      "flows"
     ],
     "readingMinutes": 3,
     "shareCardImage": "covers/share/2026-08-10-basics-f7gadj.jpg",
-    "coverThumbnail": "covers/2026-08-10-basics-f7gadj-450.webp"
+    "coverThumbnail": "covers/2026-08-10-basics-f7gadj-450.webp",
+    "translationGroup": "2026-08-11-basics-1e0xeuz"
   },
   {
     "id": "2026-08-10-daily-1bb8z4p",

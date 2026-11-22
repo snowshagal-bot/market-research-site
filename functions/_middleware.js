@@ -8,6 +8,7 @@ import {
   categoryArchiveLinks,
   categoryReportLinks,
   findPostByPath,
+  findTranslationCounterpart,
   homepageLatestLinks,
   homepageReportLinks,
   loadPosts,
@@ -16,6 +17,7 @@ import {
   normalizeSitePath,
   reportSeoTags,
   reportReadingNavigation,
+  reportSiteUrl,
   siteFooter,
   footerCss,
   serializeTagRegistryBootstrap
@@ -451,6 +453,7 @@ export async function onRequest(context) {
   // Null when no post matches: the page is then passed through untouched.
   let seoFor = null;
   let readingNavigation = '';
+  let reportTranslationHref = '';
   let tags = null;
   try {
     const [postsRes, tagsRes] = await Promise.allSettled([
@@ -476,6 +479,8 @@ export async function onRequest(context) {
           try { return reportSeoTags(posts, post, { facts, tagRegistry: tags, reportMeta }); } catch (_) { return fallback; }
         };
         readingNavigation = reportReadingNavigation(posts, post);
+        const counterpart = findTranslationCounterpart(posts, post);
+        if (counterpart?.href) reportTranslationHref = new URL(reportSiteUrl(counterpart.href)).pathname;
       }
     }
   } catch (_) {}
@@ -483,7 +488,7 @@ export async function onRequest(context) {
   const tagBootstrap = serializeTagRegistryBootstrap(tags);
   const shell = `${tagBootstrap}<script src="/assets/locale.js?v=2af8dce9f2"></script><script src="/assets/report-shell.js?v=5915db715f" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
   const footerStyle = `<style id="site-footer-css">${footerCss()}</style>`;
-  const footerMarkup = siteFooter(lang);
+  const footerMarkup = siteFooter(lang, { reportTranslationHref });
   // One feed link per page, for the page's own language. Any Atom link the
   // uploaded report happened to carry is dropped first, so there is exactly one.
   const feedLink = feedDiscoveryTag(lang);

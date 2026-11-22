@@ -1,4 +1,4 @@
-export function siteFooter(lang = 'ko') {
+export function siteFooter(lang = 'ko', { reportTranslationHref = '' } = {}) {
   const isEn = lang === 'en';
   const prefix = isEn ? '/en' : '';
   const homePath = isEn ? '/en/' : '/';
@@ -48,6 +48,10 @@ export function siteFooter(lang = 'ko') {
   const disclaimer = isEn
     ? 'Snowshagal provides research and commentary for informational purposes only and does not offer personalized investment advice or recommendations to buy or sell financial products.'
     : '본 사이트의 리서치와 해설은 정보 제공을 목적으로 하며, 특정 금융투자상품에 대한 투자자문 또는 매수·매도 권유를 제공하지 않습니다.';
+  const translationLanguage = isEn ? 'ko' : 'en';
+  const languageLink = reportTranslationHref
+    ? `<a href="${reportTranslationHref.replaceAll('&', '&amp;').replaceAll('"', '&quot;')}" hreflang="${translationLanguage}" lang="${translationLanguage}">${isEn ? '한국어판' : 'English version'}</a>`
+    : `<a href="${labels.langSwitchHref}">${labels.langSwitch}</a>`;
 
   return `<footer id="site-footer" class="footer site-footer">
   <div class="site-wrap">
@@ -89,7 +93,7 @@ export function siteFooter(lang = 'ko') {
           <nav class="site-footer-nav" aria-label="${siteNavAria}">
             <a href="${prefix}/about/">${labels.about}</a>
             <a href="mailto:contact@snowshagal.com">${labels.contact}</a>
-            <a href="${labels.langSwitchHref}">${labels.langSwitch}</a>
+            ${languageLink}
           </nav>
         </div>
       </div>

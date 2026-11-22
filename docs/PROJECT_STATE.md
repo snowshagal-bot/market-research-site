@@ -17,6 +17,11 @@ Uploaded report HTML, canonicals, sitemap dates and ranking policy are unchanged
 This improves initial-HTML link discovery; it does not guarantee Google indexing.
 See `INDEXING_AUDIT_2026-11-14.md` for the 56-report investigation.
 
+For a report with a confirmed translation, the initial HTML footer links
+directly to the other language's report. The footer and the head use the same
+translation group, including the three Market Language lessons and the August 20
+Daily paired on 2026-11-23.
+
 Initial HTML string fallback (2026-11-19): generated latest/archive markup is
 inserted with a replacement callback, preserving literal dollar amounts such
 as `$1tn` in report titles instead of interpreting them as regex captures and
