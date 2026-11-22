@@ -97,7 +97,7 @@ export const HOLIDAY_NAMES = Object.freeze({
     '2026-02-17': { ko: '설날', en: 'Lunar New Year Day' },
     '2026-02-18': { ko: '설날 다음날', en: 'Lunar New Year Holiday' },
     '2026-03-02': { ko: '삼일절 대체공휴일', en: 'Independence Movement Day (Observed)' },
-    '2026-05-01': { ko: '근로자의 날', en: "Labor Day" },
+    '2026-05-01': { ko: '노동절', en: 'Labor Day' },
     '2026-05-05': { ko: '어린이날', en: "Children's Day" },
     '2026-05-25': { ko: '부처님오신날 대체공휴일', en: "Buddha's Birthday (Observed)" },
     '2026-06-03': { ko: '전국동시지방선거일', en: 'Local Election Day' },
