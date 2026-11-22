@@ -19,35 +19,47 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   - website #234 (99eb126) and publisher #16 (a6fa9d1) merged;
   - core `e5a79ca6` installed (the previous `c9e4c471` kept as `core.pre-domestic-rates-20261122.exe`),
     then replaced the same day by `25d00e83` (publisher main c320192, which adds the 2026-07-17
-    KRX closure below; `e5a79ca6` kept as `core.pre-krx0717-20261122.exe`);
+    KRX closure below; `e5a79ca6` kept as `core.pre-krx0717-20261122.exe`), and that afternoon by
+    `5467ba4a` (publisher main dd028db, which adds VKOSPI below; `25d00e83` kept as
+    `core.pre-vkospi-20261122.exe`);
   - task `시장지표-국내금리` registered (weekdays 16:20–18:20 KST, every 15 minutes);
   - backfill 2026-01-02..2026-11-20 published: 217 days, KOFIA had no rows for 2026-07-17.
   Remaining:
   - Check the first scheduled run on 2026-11-23: KOFIA's afternoon values should appear shortly
     after 16:00 KST and the 16:20 run should publish that day (`logs\domestic_rates.log`).
   - Owner: submit the four pages (KO and EN) in GSC and Naver.
-  - Rollback: disable the task. If the core must go back, restore `core.pre-krx0717-20261122.exe`
-    (Domestic Rates without the 07-17 fix) or `core.pre-domestic-rates-20261122.exe` (before Domestic Rates).
+  - Rollback: disable the task. If the core must go back, restore `core.pre-vkospi-20261122.exe`
+    together with `config\markets.pre-vkospi-20261122.json` (everything except VKOSPI),
+    `core.pre-krx0717-20261122.exe` (Domestic Rates without the 07-17 fix; same older config) or
+    `core.pre-domestic-rates-20261122.exe` (before Domestic Rates).
     Stored days can stay; the pages read them only.
 
 - **KRX 2026-07-17 제헌절 closure (done 2026-11-22)**: 제헌절 became a public holiday again in
   2026 and KRX closed that Friday, but both KRX 2026 lists missed it. Website #236 (8b827df) and
   publisher #17 (c320192) add it: 17 holidays, 244 trading days. Production `/api/calendar`
-  shows 07-17 as a KRX holiday; core `25d00e83` is installed and its backfill skips 07-17.
+  shows 07-17 as a KRX holiday; core `25d00e83` was installed with it (its backfill skips 07-17),
+  and the current `5467ba4a` keeps it.
   A holiday added during a year goes into both lists together (`docs/DEPLOYMENT.md`).
 
-- **VKOSPI (2026-11-22, two Draft PRs)**: KRX's 코스피 200 변동성지수 beside VIX, as one more
+- **VKOSPI (installed 2026-11-22; first value 2026-11-23)**: KRX's 코스피 200 변동성지수 beside VIX, as one more
   optional code of contract 1.2.0 (`rates_fx_volatility.VKOSPI`, kind `krxvol`, page `/market/vkospi/`).
   The collector reads it from KRX Index (`index.krx.co.kr`, 파생상품지수, the same OTP flow as the
   업종·테마 collection) after 16:00 KST; the value is the 15:45 KST derivatives close of the session.
   It is SOFT: a failure lists it in `global_indicators.unavailable` and never blocks the final.
   Forward only: Market Close records are frozen, so days before the install have no VKOSPI.
-  Rollout order (owner approval):
-  1. merge the website PR first, so the receiver accepts the key;
-  2. merge the publisher PR, rebuild the core, and install it together with the new
-     `dist\config\markets.json` (the installed core reads that file, not the bundled one);
-  3. on the next trading day check `/market/`, that day's session page and `/market/vkospi/`,
-     then submit `/market/vkospi/` and `/en/market/vkospi/` in GSC and Naver.
+  Done (in this order, because the receiver rejects unknown keys):
+  - website #239 merged (a539e97); main gate and deployment smoke passed (f4a2593);
+  - publisher #18 merged (dd028db); 572 tests pass;
+  - core `5467ba4a` installed 2026-11-22 14:39 ICT together with `dist\config\markets.json`
+    `bf75fcc8` (the installed core reads that file, not the bundled one). Backups:
+    `core.pre-vkospi-20261122.exe` (`25d00e83`) and `config\markets.pre-vkospi-20261122.json`.
+    Task Scheduler was not changed.
+  Remaining:
+  - 2026-11-23, the first trading day: check that KRX Index had the final row when the same-day
+    export ran (around 16:05 KST), then `/market/`, that day's session page and `/market/vkospi/`;
+  - owner: submit `/market/vkospi/` and `/en/market/vkospi/` in GSC and Naver.
+  Rollback: restore both backups together (core and config); the website can stay, since
+  VKOSPI is optional.
 
 - **Seven more Market Close indicators (2026-11-21)**: copper (COMEX `HG=F`), Brent, silver,
   natural gas, CNY/KRW, EUR/KRW and USD/JPY as optional codes of contract 1.2.0. Website #233
