@@ -3,7 +3,8 @@ import {
   expectedLatestKrxTradingDate,
   isTradingDate,
   parseDate,
-  previousTradingDate
+  previousTradingDate,
+  shiftDate
 } from '../../_trading-calendar.js';
 
 export {
@@ -14,7 +15,7 @@ export {
 
 // Added 2026-11 and optional in 1.2.0: a payload recorded before them has no
 // such key and stays valid. When the key is there, every rule applies.
-export const OPTIONAL_GLOBAL_CODES = Object.freeze(['CNYKRW', 'EURKRW', 'USDJPY', 'BRENT', 'COMEX_COPPER', 'SILVER', 'NATGAS', 'VKOSPI']);
+export const OPTIONAL_GLOBAL_CODES = Object.freeze(['CNYKRW', 'EURKRW', 'USDJPY', 'BRENT', 'COMEX_COPPER', 'SILVER', 'NATGAS', 'VKOSPI', 'NIKKEI225', 'SHANGHAI', 'TAIEX']);
 const OPTIONAL = new Set(OPTIONAL_GLOBAL_CODES);
 
 /** False only for an optional indicator the payload does not carry at all. */
@@ -36,10 +37,19 @@ const PREVIOUS_US_SESSION_RULES = Object.freeze([
   ['rates_fx_volatility', ['SOX', 'VIX', 'US10Y']]
 ]);
 
+// Asian indices: the latest local session that ended on or before the KRX
+// date (Tokyo, Shanghai, Taipei). No local calendars are kept, so the date is
+// not fixed: a local holiday carries the previous close with its own date,
+// accepted when it is at most this many days before the KRX date.
+const LOCAL_SESSION_RULES = Object.freeze([
+  ['indices', ['NIKKEI225', 'SHANGHAI', 'TAIEX']]
+]);
+export const LOCAL_SESSION_MAX_LAG_DAYS = 14;
+
 // Global / 24h indicators: a SOFT section in schema 1.2.0. KOSPI and KOSDAQ
 // are HARD and are never exempt from the freshness rules.
 export const GLOBAL_INDICATOR_SECTIONS = Object.freeze([
-  ['indices', ['NASDAQ', 'DOW', 'SP500']],
+  ['indices', ['NASDAQ', 'DOW', 'SP500', 'NIKKEI225', 'SHANGHAI', 'TAIEX']],
   ['rates_fx_volatility', ['SOX', 'VIX', 'VKOSPI', 'US10Y', 'USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY']],
   ['commodities_crypto', ['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER', 'BITCOIN']]
 ]);
@@ -68,6 +78,22 @@ function validateInstrument(payload, section, code, expectedDate, errors) {
   }
 }
 
+function validateLocalSession(payload, section, code, marketDate, errors) {
+  if (!carriesInstrument(payload, section, code)) return;
+  const item = payload?.[section]?.[code];
+  const path = `$.${section}.${code}`;
+  if (!item || typeof item !== 'object') {
+    errors.push(`${path}: required freshness instrument is missing.`);
+    return;
+  }
+  if (item.data_state === 'unavailable') errors.push(`${path}.data_state: unavailable data cannot be published as final.`);
+  const sourceDate = typeof item.source_date === 'string' ? item.source_date : '';
+  const earliest = shiftDate(marketDate, -LOCAL_SESSION_MAX_LAG_DAYS);
+  if (!parseDate(sourceDate) || sourceDate > marketDate || sourceDate < earliest) {
+    errors.push(`${path}.source_date: expected a local session from ${earliest} to ${marketDate}, received ${sourceDate || '(missing)'}.`);
+  }
+}
+
 export function validateSourceFreshness(payload) {
   const errors = [];
   const marketDate = payload?.meta?.market_date;
@@ -81,6 +107,9 @@ export function validateSourceFreshness(payload) {
     }
     for (const [section, codes] of PREVIOUS_US_SESSION_RULES) {
       for (const code of codes) if (!exempt.has(code)) validateInstrument(payload, section, code, previousUsSession, errors);
+    }
+    for (const [section, codes] of LOCAL_SESSION_RULES) {
+      for (const code of codes) if (!exempt.has(code)) validateLocalSession(payload, section, code, marketDate, errors);
     }
   } catch (error) {
     errors.push(`$.meta.market_date: ${error instanceof Error ? error.message : String(error)}.`);

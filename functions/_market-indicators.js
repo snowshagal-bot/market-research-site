@@ -9,6 +9,10 @@
 //   kofia    — the KOFIA final quote yield of the KRX session, 16:00 KST basis
 //   krxvol   — a KRX derivatives index close (15:45 KST, the KOSPI 200 options
 //              close), dated the KRX session: VKOSPI
+//   asia     — an Asian index's local regular-session close (Tokyo, Shanghai,
+//              Taipei), dated the local session: the latest one that ended on
+//              or before the KRX date, so a local holiday carries the previous
+//              close with its own date
 // The slug is the code in lower case, except COMEX_COPPER (copper);
 // assets/market-close.js links with the same rule.
 //
@@ -29,6 +33,9 @@ export const MARKET_INDICATORS = Object.freeze([
   { code: 'NASDAQ', group: 'indices', kind: 'us' },
   { code: 'DOW', group: 'indices', kind: 'us' },
   { code: 'SP500', group: 'indices', kind: 'us' },
+  { code: 'NIKKEI225', group: 'indices', kind: 'asia', optional: true },
+  { code: 'SHANGHAI', group: 'indices', kind: 'asia', optional: true },
+  { code: 'TAIEX', group: 'indices', kind: 'asia', optional: true },
   { code: 'SOX', group: 'rates_fx_volatility', kind: 'us' },
   { code: 'VIX', group: 'rates_fx_volatility', kind: 'us' },
   { code: 'VKOSPI', group: 'rates_fx_volatility', kind: 'krxvol', optional: true },
