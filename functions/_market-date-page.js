@@ -183,7 +183,7 @@ const COPY = {
     heading: date => `${longDate(date, 'ko')} 한국 증시 마감`,
     closeBasis: '15:30 KST 정규장 마감 기준',
     overseas: '* 해외 지수·원자재는 각 시장의 최신 거래일 종가',
-    sections: ['주요 지수', '투자자별 매매동향 (당일)', '최근 5거래일 누적 수급', '금리 · 환율 · 변동성', '원자재 · 가상자산', '시장 폭', 'KRX 업종 · 테마 등락률', '시가총액 상위 10종목', '공매도 현황', '국내 금리'],
+    sections: ['주요 지수', '투자자별 매매동향 (당일)', '최근 5거래일 누적 수급', '금리 · 환율 · 변동성', '원자재 · 가상자산', '시장 폭', 'KRX 업종 · 테마 등락률', '시가총액 상위 10종목', '공매도 현황', '국내 금리', '등락률 · 거래대금 상위 종목'],
     asiaTitle: '아시아 증시', localHoliday: '현지 휴장',
     open: '시가', high: '고가', low: '저가', previous: '전일', closeState: '종가', fixedClose: '15:30 확정',
     market: '시장', foreign: '외국인', institution: '기관', individual: '개인', futures: '선물',
@@ -195,6 +195,7 @@ const COPY = {
     allSectors: n => `업종 전체 ${n}개 보기`, allThemes: n => `테마 전체 ${n}개 보기`,
     groupColumns: ['순위', '이름', '시장', '종가', '등락률'],
     capColumns: ['순위', '종목명', '종가', '등락률', '시가총액'],
+    rankGainers: '상승률 상위', rankLosers: '하락률 상위', rankTurnover: '거래대금 상위', high52: '52주 신고가', low52: '52주 신저가', stocksUnit: '종목', limitUp: '상한가', limitDown: '하한가', tradingValue: '거래대금', rankingsNone: '해당 종목 없음', rankingsUnavailable: '이날 종목 순위 데이터 없음', rankingsNote: '주식 종목만(ETF·ETN 제외) · 15:30 정규장 종가 · 등락률은 KRX 전일 종가 대비 · 52주 신고가·신저가는 장중 기준 · 네이버 금융 순위를 장 마감 직후(15:31~15:39) 저장',
     shortAmount: '공매도 거래대금', valueRatio: '거래대금 비중', shortRatioScope: '거래대금 비중은 KRX+NXT 합산 정규시장 거래대금 대비입니다.', shortValue: '공매도 거래대금 TOP5', shortRatio: '공매도 비중 TOP5', regularUnavailable: '정규장 기준 값 없음',
     prev: '이전 거래일', next: '다음 거래일', archive: '전체 마감 기록', dashboard: '대시보드에서 보기', latest: '최신 마감',
     report: '이날의 데일리 리포트', noReport: '이날 발행된 데일리 리포트가 없습니다.',
@@ -211,7 +212,7 @@ const COPY = {
     heading: date => `Korea Stock Market Close: ${longDate(date, 'en')}`,
     closeBasis: 'Regular session close, 15:30 KST',
     overseas: '* Overseas indices and commodities use each market’s latest close.',
-    sections: ['Major Indices', 'Investor Flows (Daily)', 'Cumulative Flows: Last 5 Sessions', 'Rates · FX · Volatility', 'Commodities · Crypto', 'Market Breadth', 'KRX Sectors & Themes', 'Top 10 by Market Cap', 'Short Selling', 'Korean Bond Yields'],
+    sections: ['Major Indices', 'Investor Flows (Daily)', 'Cumulative Flows: Last 5 Sessions', 'Rates · FX · Volatility', 'Commodities · Crypto', 'Market Breadth', 'KRX Sectors & Themes', 'Top 10 by Market Cap', 'Short Selling', 'Korean Bond Yields', 'Top Movers & Most Traded'],
     asiaTitle: 'Asian Markets', localHoliday: 'Local holiday',
     open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', closeState: 'Close', fixedClose: '15:30 fixing',
     market: 'Market', foreign: 'Foreign', institution: 'Institution', individual: 'Retail', futures: 'KOSPI 200 Futures',
@@ -223,6 +224,7 @@ const COPY = {
     allSectors: n => `All ${n} sectors`, allThemes: n => `All ${n} themes`,
     groupColumns: ['Rank', 'Name', 'Market', 'Close', 'Change'],
     capColumns: ['Rank', 'Company', 'Close', 'Change', 'Market cap'],
+    rankGainers: 'Top gainers', rankLosers: 'Top losers', rankTurnover: 'Most traded by value', high52: '52-week highs', low52: '52-week lows', stocksUnit: '', limitUp: 'Limit up', limitDown: 'Limit down', tradingValue: 'Value', rankingsNone: 'None', rankingsUnavailable: 'Stock rankings unavailable for this session', rankingsNote: 'Stocks only (ETFs and ETNs excluded) · regular-session close at 15:30 KST · change against the previous KRX close · 52-week highs and lows are intraday · Naver Finance rankings saved just after the close (15:31–15:39 KST)',
     shortAmount: 'Short value', valueRatio: 'Value ratio', shortRatioScope: 'Value ratio is against KRX+NXT combined regular-session turnover.', shortValue: 'Top 5 by Short Value', shortRatio: 'Top 5 by Short Ratio', regularUnavailable: 'No regular-session value',
     prev: 'Previous session', next: 'Next session', archive: 'All sessions', dashboard: 'Open in the dashboard', latest: 'Latest close',
     report: 'Daily report for this session', noReport: 'No Daily report was published for this session.',
@@ -403,6 +405,49 @@ function breadthCard(key, item, f, copy) {
   return `<article class="breadth-card"><h3>${key}</h3><div class="breadth-counts">
       ${metric(copy.rise, f.integer(item?.rise), 'up')}${metric(copy.fall, f.integer(item?.fall), 'down')}${metric(copy.flat, f.integer(item?.flat))}${metric(copy.upper, f.integer(item?.upper_limit), 'up')}${metric(copy.lower, f.integer(item?.lower_limit), 'down')}
     </div><div class="breadth-bar" aria-label="${copy.riseRatio} ${f.ratioPct(item?.rise_ratio)}, ${copy.fallRatio} ${f.ratioPct(item?.fall_ratio)}"><span class="advance" style="width:${valid(item?.rise_ratio) ? item.rise_ratio * 100 : 0}%"></span><span class="decline" style="width:${valid(item?.fall_ratio) ? item.fall_ratio * 100 : 0}%"></span></div><div class="breadth-ratios"><span class="up">${copy.riseRatio} ${f.ratioPct(item?.rise_ratio)}</span><span class="down">${copy.fallRatio} ${f.ratioPct(item?.fall_ratio)}</span></div></article>`;
+}
+
+/**
+ * Stock rankings of the session (SOFT, optional): per market the top five
+ * gainers, losers and stocks by trading value, and how many stocks set a
+ * 52-week high or low. A record made before 2026-11-23 has no status and shows
+ * nothing; an unavailable one says so and never shows another day's lists.
+ */
+// Trading value in a ranking row: short, so a small stock's value fits one line.
+function rankingWon(value, f) {
+  if (!valid(value)) return '--';
+  const abs = Math.abs(value);
+  if (abs >= 1e9) return f.won(value);
+  if (f.ko) return abs >= 1e8 ? `${f.number(value / 1e8, 1)}억원` : `${f.number(value / 1e4, 0)}만원`;
+  return `KRW ${f.number(value / 1e6, 0)}M`;
+}
+
+function rankingRow(item, index, kind, f, copy, lang) {
+  const limit = item?.price_limit === 'upper' ? `<em class="ranking-limit up">${html(copy.limitUp)}</em>`
+    : item?.price_limit === 'lower' ? `<em class="ranking-limit down">${html(copy.limitDown)}</em>` : '';
+  const close = valid(item?.close) ? `${f.number(item.close, 0)}${f.ko ? '원' : ''}` : '--';
+  const turnover = kind === 'top_turnover';
+  const detail = turnover
+    ? `${close} · <span class="${f.signClass(item?.change_pct)}">${f.pct(item?.change_pct)}</span>`
+    : `${close} · ${html(copy.tradingValue)} ${rankingWon(item?.trading_value_won, f)}`;
+  const main = turnover ? rankingWon(item?.trading_value_won, f) : f.pct(item?.change_pct);
+  return `<li><span class="ranking-rank">${index + 1}</span><span class="ranking-stock"><span class="ranking-name"><b>${html(companyName(item, lang))}</b>${limit}</span><small>${detail}</small></span><strong class="${turnover ? 'neutral' : f.signClass(item?.change_pct)}">${main}</strong></li>`;
+}
+
+export function stockRankingsBody(payload, status, f, copy, lang) {
+  const state = status?.stock_rankings?.status;
+  if (!state) return '';
+  const markets = payload?.stock_rankings?.markets;
+  if (state !== 'complete' || !markets) return `<p class="unit-note">${html(copy.rankingsUnavailable)}</p>`;
+  const block = (title, rows, kind) => `<div class="ranking-block"><h4>${html(title)}</h4>${(rows || []).length
+    ? `<ol class="ranking-list">${rows.map((item, index) => rankingRow(item, index, kind, f, copy, lang)).join('')}</ol>`
+    : `<p class="unit-note">${html(copy.rankingsNone)}</p>`}</div>`;
+  const count = value => `<b>${f.integer(value)}</b>${copy.stocksUnit ? html(copy.stocksUnit) : ''}`;
+  const cards = ['KOSPI', 'KOSDAQ'].filter(key => markets[key]).map(key => {
+    const item = markets[key];
+    return `<article class="ranking-market"><div class="ranking-market-head"><h3>${key}</h3><p class="ranking-52w"><span>${html(copy.high52)} ${count(item.new_high_52w)}</span><span>${html(copy.low52)} ${count(item.new_low_52w)}</span></p></div><div class="ranking-lists">${block(copy.rankGainers, item.top_gainers, 'top_gainers')}${block(copy.rankLosers, item.top_losers, 'top_losers')}${block(copy.rankTurnover, item.top_turnover, 'top_turnover')}</div></article>`;
+  }).join('');
+  return `<div class="ranking-markets">${cards}</div><p class="unit-note">${html(copy.rankingsNote)}</p>`;
 }
 
 /**
@@ -588,6 +633,7 @@ export function renderMarketDateMain(payload, lang, context = {}) {
   const commodityPart = part(4, commodityCards && `<div class="mini-instrument-grid commodity-grid">${commodityCards}</div>`);
   const domesticPart = part(9, context.domesticRates?.market_date === date ? domesticRatesBody(context.domesticRates, lang) : '');
   const breadthPart = part(5, breadthBody);
+  const rankingsPart = part(10, stockRankingsBody(payload, status, f, copy, lang));
   const groupsPart = part(6, groupsBody);
   const capsPart = part(7, capRows.length ? dataTable(copy.capColumns, capRows, 'market-cap-table') : '');
   const shortPart = part(8, shortBody);
@@ -597,6 +643,7 @@ export function renderMarketDateMain(payload, lang, context = {}) {
     `<div class="market-pair">${ratesPart}${commodityPart}</div>`,
     domesticPart,
     breadthPart,
+    rankingsPart,
     groupsPart,
     `<div class="market-bottom-grid">${capsPart}${links}</div>`,
     shortPart

@@ -14,6 +14,8 @@
     rise: '상승종목', fall: '하락종목', flat: '보합종목', upper: '상한가', lower: '하한가', riseRatio: '상승비율', fallRatio: '하락비율',
     foreign: '외국인', institution: '기관', individual: '개인', market: '시장', fiveDays: '5거래일', billion: '억원',
     arbitrage: '차익', nonArbitrage: '비차익', total: '전체', netBuy: '순매수', spot: 'KOSPI200 현물', future: '선물', basis: '베이시스',
+    rankingsTitle: '등락률 · 거래대금 상위 종목',
+    rankGainers: '상승률 상위', rankLosers: '하락률 상위', rankTurnover: '거래대금 상위', high52: '52주 신고가', low52: '52주 신저가', stocksUnit: '종목', limitUp: '상한가', limitDown: '하한가', tradingValue: '거래대금', rankingsNone: '해당 종목 없음', rankingsUnavailable: '이날 종목 순위 데이터 없음', rankingsNote: '주식 종목만(ETF·ETN 제외) · 15:30 정규장 종가 · 등락률은 KRX 전일 종가 대비 · 52주 신고가·신저가는 장중 기준 · 네이버 금융 순위를 장 마감 직후(15:31~15:39) 저장',
     turnover: '거래대금', previousTurnover: '전일 거래대금', average5: '5일 평균', ratio5: '5일 평균 대비', concentration: '수급 집중도 (상위 비중)', concentrationUnavailable: '정규장 기준 값 없음', regularUnavailable: '정규장 기준 값 없음', foreignBuy: '외국인 매수', foreignSell: '외국인 매도', institutionBuy: '기관 매수', institutionSell: '기관 매도', top1: 'TOP1', top5: 'TOP5',
     shortSummary: '시장별 공매도', shortValue: '공매도 거래대금 TOP5', shortRatio: '공매도 비중 TOP5', valueRatio: '거래대금 비중', shortAmount: '공매도 거래대금', shortRatioScope: '거래대금 비중은 KRX+NXT 합산 정규시장 거래대금 대비입니다.',
     rank: '순위', stock: '종목명', price: '종가', change: '등락률', marketCap: '시가총액', source: '데이터 출처', generated: '데이터 갱신',
@@ -51,6 +53,8 @@
     rise: 'Advancers', fall: 'Decliners', flat: 'Unchanged', upper: 'Limit up', lower: 'Limit down', riseRatio: 'Advance ratio', fallRatio: 'Decline ratio',
     foreign: 'Foreign', institution: 'Institution', individual: 'Retail', market: 'Market', fiveDays: '5 sessions', billion: 'KRW 100m',
     arbitrage: 'Arbitrage', nonArbitrage: 'Non-arbitrage', total: 'Total', netBuy: 'Net buy', spot: 'KOSPI 200 spot', future: 'Futures', basis: 'Basis',
+    rankingsTitle: 'Top Movers & Most Traded',
+    rankGainers: 'Top gainers', rankLosers: 'Top losers', rankTurnover: 'Most traded by value', high52: '52-week highs', low52: '52-week lows', stocksUnit: '', limitUp: 'Limit up', limitDown: 'Limit down', tradingValue: 'Value', rankingsNone: 'None', rankingsUnavailable: 'Stock rankings unavailable for this session', rankingsNote: 'Stocks only (ETFs and ETNs excluded) · regular-session close at 15:30 KST · change against the previous KRX close · 52-week highs and lows are intraday · Naver Finance rankings saved just after the close (15:31–15:39 KST)',
     turnover: 'Turnover', previousTurnover: 'Previous', average5: '5-session avg.', ratio5: 'vs. 5-session avg.', concentration: 'Flow Concentration (Top Share)', concentrationUnavailable: 'No regular-session value', regularUnavailable: 'No regular-session value', foreignBuy: 'Foreign buy', foreignSell: 'Foreign sell', institutionBuy: 'Institution buy', institutionSell: 'Institution sell', top1: 'TOP1', top5: 'TOP5',
     shortSummary: 'Market Short Selling', shortValue: 'Top 5 by Short Value', shortRatio: 'Top 5 by Short Ratio', valueRatio: 'Value ratio', shortAmount: 'Short value', shortRatioScope: 'Value ratio is against KRX+NXT combined regular-session turnover.',
     rank: 'Rank', stock: 'Company', price: 'Close', change: 'Change', marketCap: 'Market cap', source: 'Sources', generated: 'Data updated',
@@ -655,7 +659,6 @@
     // KOFIA yields of this session, after the rates and commodities; the
     // sections after it move down one number.
     const ratesBody = domesticRatesBody(options.domesticRates, marketDate);
-    const num = n => (ratesBody && n >= 4 ? n + 1 : n);
 
     const sourceSet = new Set();
     const collect = obj => {
@@ -691,6 +694,41 @@
     const breadthBody = breadthUnavailable
       ? `<div class="market-group-empty market-breadth-status" role="note"><p class="group-empty-title">${html(copy.breadthUnavailable)}</p><p class="group-empty-desc">${html(copy.breadthUnavailableDesc)}</p></div>`
       : `<div class="breadth-grid">${['KOSPI', 'KOSDAQ'].map(key => breadthCard(key, breadth[key])).join('')}</div>`;
+
+    // Stock rankings (SOFT, optional): a record made before 2026-11-23 has no
+    // status and shows nothing; an unavailable one says so.
+    const rankingState = data.meta?.schema_version === '1.2.0' ? data.section_status?.stock_rankings?.status : undefined;
+    const rankingMarkets = data.stock_rankings?.markets;
+    // Trading value in a ranking row: short, so a small stock's value fits one line.
+    const rankingWon = value => {
+      if (!valid(value)) return '--';
+      const abs = Math.abs(value);
+      if (abs >= 1e9) return won(value);
+      if (ko) return abs >= 1e8 ? `${number(value / 1e8, 1)}억원` : `${number(value / 1e4, 0)}만원`;
+      return `KRW ${number(value / 1e6, 0)}M`;
+    };
+    const rankingRow = (item, index, kind) => {
+      const limit = item?.price_limit === 'upper' ? `<em class="ranking-limit up">${html(copy.limitUp)}</em>`
+        : item?.price_limit === 'lower' ? `<em class="ranking-limit down">${html(copy.limitDown)}</em>` : '';
+      const close = valid(item?.close) ? `${number(item.close, 0)}${ko ? '원' : ''}` : '--';
+      const turnover = kind === 'top_turnover';
+      const detail = turnover
+        ? `${close} · <span class="${signClass(item?.change_pct)}">${pct(item?.change_pct)}</span>`
+        : `${close} · ${html(copy.tradingValue)} ${rankingWon(item?.trading_value_won)}`;
+      return `<li><span class="ranking-rank">${index + 1}</span><span class="ranking-stock"><span class="ranking-name"><b>${html(companyName(item))}</b>${limit}</span><small>${detail}</small></span><strong class="${turnover ? 'neutral' : signClass(item?.change_pct)}">${turnover ? rankingWon(item?.trading_value_won) : pct(item?.change_pct)}</strong></li>`;
+    };
+    const rankingBlock = (title, rows, kind) => `<div class="ranking-block"><h4>${html(title)}</h4>${(rows || []).length
+      ? `<ol class="ranking-list">${rows.map((item, index) => rankingRow(item, index, kind)).join('')}</ol>`
+      : `<p class="unit-note">${html(copy.rankingsNone)}</p>`}</div>`;
+    const rankingCount = value => `<b>${integer(value)}</b>${copy.stocksUnit ? html(copy.stocksUnit) : ''}`;
+    const rankingsBody = !rankingState ? ''
+      : rankingState !== 'complete' || !rankingMarkets ? `<p class="unit-note">${html(copy.rankingsUnavailable)}</p>`
+        : `<div class="ranking-markets">${['KOSPI', 'KOSDAQ'].filter(key => rankingMarkets[key]).map(key => {
+          const item = rankingMarkets[key];
+          return `<article class="ranking-market"><div class="ranking-market-head"><h3>${key}</h3><p class="ranking-52w"><span>${html(copy.high52)} ${rankingCount(item.new_high_52w)}</span><span>${html(copy.low52)} ${rankingCount(item.new_low_52w)}</span></p></div><div class="ranking-lists">${rankingBlock(copy.rankGainers, item.top_gainers, 'top_gainers')}${rankingBlock(copy.rankLosers, item.top_losers, 'top_losers')}${rankingBlock(copy.rankTurnover, item.top_turnover, 'top_turnover')}</div></article>`;
+        }).join('')}</div><p class="unit-note">${html(copy.rankingsNote)}</p>`;
+    // The rankings follow the market breadth; the sections after them move down one number.
+    const num = n => n + (ratesBody && n >= 4 ? 1 : 0) + (rankingsBody && n >= 5 ? 1 : 0);
 
     const fiveRows = ['KOSPI', 'KOSDAQ', 'KOSPI200선물'].map(marketKey => {
       const marketName = marketKey === 'KOSPI200선물' ? (ko ? '선물' : 'KOSPI 200 Futures') : marketKey;
@@ -763,6 +801,7 @@
         </div>
         ${ratesBody ? section(4, copy.ratesTitle, ratesBody, 'market-rates-section') : ''}
         ${section(num(4), copy.sections[3], breadthBody)}
+        ${rankingsBody ? section(num(4) + 1, copy.rankingsTitle, rankingsBody, 'market-rankings-section') : ''}
         <div class="market-pair market-pair-tables">
           ${section(num(5), copy.sections[4], dataTable([copy.market, copy.foreign, copy.institution, copy.individual], investorRows))}
           ${section(num(6), copy.sections[5], fiveDayBody || `${dataTable([copy.market, copy.foreign, copy.institution, copy.individual], fiveRows)}<p class="unit-note">${dateText(data.recent_5d_flows?.start_date)} – ${dateText(data.recent_5d_flows?.end_date)}</p>`)}

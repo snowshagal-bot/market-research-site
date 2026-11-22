@@ -180,6 +180,10 @@
     "krx_groups": {
       "anyOf": [{"$ref": "#/$defs/krxGroups"}, {"type": "null"}]
     },
+    "stock_rankings": {
+      "$comment": "SOFT, optional (added 2026-11-23 within 1.2.0; records before it lack the key). Captured from Naver's ranking lists in the 15:31~15:39 KST regular snapshot window; null when section_status.stock_rankings is unavailable.",
+      "anyOf": [{"$ref": "#/$defs/stockRankings"}, {"type": "null"}]
+    },
     "section_status": {"$ref": "#/$defs/sectionStatus"},
     "validation": {
       "type": "object",
@@ -660,6 +664,15 @@
             "reason": {"$ref": "#/$defs/sectionReason"}
           }
         },
+        "stock_rankings": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "reason"],
+          "properties": {
+            "status": {"enum": ["complete", "unavailable"]},
+            "reason": {"$ref": "#/$defs/sectionReason"}
+          }
+        },
         "global_indicators": {
           "type": "object",
           "additionalProperties": false,
@@ -681,6 +694,51 @@
             }
           }
         }
+      }
+    },
+    "stockRankings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_date", "as_of", "source", "markets"],
+      "properties": {
+        "source_date": {"$ref": "#/$defs/date"},
+        "as_of": {"$ref": "#/$defs/dateTime"},
+        "source": {"type": "string", "minLength": 1},
+        "markets": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["KOSPI", "KOSDAQ"],
+          "properties": {
+            "KOSPI": {"$ref": "#/$defs/rankingMarket"},
+            "KOSDAQ": {"$ref": "#/$defs/rankingMarket"}
+          }
+        }
+      }
+    },
+    "rankingMarket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["top_gainers", "top_losers", "top_turnover", "new_high_52w", "new_low_52w"],
+      "properties": {
+        "top_gainers": {"type": "array", "maxItems": 5, "items": {"$ref": "#/$defs/rankingStock"}},
+        "top_losers": {"type": "array", "maxItems": 5, "items": {"$ref": "#/$defs/rankingStock"}},
+        "top_turnover": {"type": "array", "maxItems": 5, "items": {"$ref": "#/$defs/rankingStock"}},
+        "new_high_52w": {"type": "integer", "minimum": 0},
+        "new_low_52w": {"type": "integer", "minimum": 0}
+      }
+    },
+    "rankingStock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rank", "ticker", "name", "close", "change_pct", "trading_value_won", "price_limit"],
+      "properties": {
+        "rank": {"type": "integer", "minimum": 1, "maximum": 5},
+        "ticker": {"type": "string", "minLength": 6, "maxLength": 6},
+        "name": {"type": "string", "minLength": 1},
+        "close": {"type": "integer", "minimum": 1},
+        "change_pct": {"type": "number"},
+        "trading_value_won": {"type": "integer", "minimum": 0},
+        "price_limit": {"enum": ["upper", "lower", null]}
       }
     },
     "krxGroups": {
