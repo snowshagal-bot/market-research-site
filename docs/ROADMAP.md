@@ -21,15 +21,18 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
     then replaced the same day by `25d00e83` (publisher main c320192, which adds the 2026-07-17
     KRX closure below; `e5a79ca6` kept as `core.pre-krx0717-20261122.exe`), and that afternoon by
     `5467ba4a` (publisher main dd028db, which adds VKOSPI below; `25d00e83` kept as
-    `core.pre-vkospi-20261122.exe`);
+    `core.pre-vkospi-20261122.exe`), and that night by `21b5b4c8` (publisher main 8df33e4,
+    which adds the Asian indices below; `5467ba4a` kept as `core.pre-asia-20261122.exe`);
   - task `시장지표-국내금리` registered (weekdays 16:20–18:20 KST, every 15 minutes);
   - backfill 2026-01-02..2026-11-20 published: 217 days, KOFIA had no rows for 2026-07-17.
   Remaining:
   - Check the first scheduled run on 2026-11-23: KOFIA's afternoon values should appear shortly
     after 16:00 KST and the 16:20 run should publish that day (`logs\domestic_rates.log`).
   - Owner: submit the four pages (KO and EN) in GSC and Naver.
-  - Rollback: disable the task. If the core must go back, restore `core.pre-vkospi-20261122.exe`
-    together with `config\markets.pre-vkospi-20261122.json` (everything except VKOSPI),
+  - Rollback: disable the task. If the core must go back, restore `core.pre-asia-20261122.exe`
+    together with `config\markets.pre-asia-20261122.json` (everything except the Asian indices),
+    `core.pre-vkospi-20261122.exe` together with `config\markets.pre-vkospi-20261122.json`
+    (also without VKOSPI),
     `core.pre-krx0717-20261122.exe` (Domestic Rates without the 07-17 fix; same older config) or
     `core.pre-domestic-rates-20261122.exe` (before Domestic Rates).
     Stored days can stay; the pages read them only.
@@ -38,7 +41,7 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   2026 and KRX closed that Friday, but both KRX 2026 lists missed it. Website #236 (8b827df) and
   publisher #17 (c320192) add it: 17 holidays, 244 trading days. Production `/api/calendar`
   shows 07-17 as a KRX holiday; core `25d00e83` was installed with it (its backfill skips 07-17),
-  and the current `5467ba4a` keeps it.
+  and the current `21b5b4c8` keeps it.
   A holiday added during a year goes into both lists together (`docs/DEPLOYMENT.md`).
 
 - **VKOSPI (installed 2026-11-22; first value 2026-11-23)**: KRX's 코스피 200 변동성지수 beside VIX, as one more
@@ -58,10 +61,10 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   - 2026-11-23, the first trading day: check that KRX Index had the final row when the same-day
     export ran (around 16:05 KST), then `/market/`, that day's session page and `/market/vkospi/`;
   - owner: submit `/market/vkospi/` and `/en/market/vkospi/` in GSC and Naver.
-  Rollback: restore both backups together (core and config); the website can stay, since
-  VKOSPI is optional.
+  Rollback: restore both pre-vkospi backups together (core and config; this also removes the
+  Asian indices, installed later); the website can stay, since VKOSPI is optional.
 
-- **Asian indices (2026-11-22, two Draft PRs)**: 닛케이225 (`^N225`), 상해종합 (`000001.SS`) and 대만 가권
+- **Asian indices (installed 2026-11-22; first values 2026-11-23)**: 닛케이225 (`^N225`), 상해종합 (`000001.SS`) and 대만 가권
   (`^TWII`) as optional `indices` codes of contract 1.2.0 (NIKKEI225, SHANGHAI, TAIEX; kind `asia`;
   pages `/market/nikkei225/`, `/market/shanghai/`, `/market/taiex/`), a row under the major indices.
   Each value is the latest local regular-session close on or before the KRX date. Yahoo has every
@@ -69,9 +72,22 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   print seen at 16:00:29). The collector accepts the day's close only after Yahoo's last trade time
   passes the local close, else unavailable (never the older close). A local holiday carries the
   previous close with its date; the receiver accepts up to 14 days back. SOFT, forward only.
-  Rollout order (owner approval): merge the website PR first (the receiver rejects unknown keys),
-  then the publisher PR; rebuild the core and install it with the new `dist\config\markets.json`;
-  on the next trading day check `/market/` and the three pages, then submit them in GSC and Naver.
+  No JPX/SSE/TWSE holiday calendars are kept.
+  Done (in this order, because the receiver rejects unknown keys):
+  - website #241 merged (0a147eb); main gate and deployment smoke passed; 1582 tests;
+  - publisher #19 merged (8df33e4); 612 tests pass;
+  - core `21b5b4c8` installed 2026-11-22 23:27 ICT together with `dist\config\markets.json`
+    `591e1db9` (the `bf75fcc8` config plus three `market_close_only` lines). Backups:
+    `core.pre-asia-20261122.exe` (`5467ba4a`) and `config\markets.pre-asia-20261122.json`
+    (`bf75fcc8`). Task Scheduler was not changed. The new core's first scheduled run (GlobalLatest,
+    23:30 ICT) returned 0 and published 7 items.
+  Remaining:
+  - 2026-11-23, the first trading day: check that SHANGHAI made the same-day export (its final
+    print reaches Yahoo around 16:00:30 KST); NIKKEI225 should carry the 11-20 close (Japanese
+    holiday) with 현지 휴장; then `/market/`, that day's session page and the three pages;
+  - owner: submit the six pages (KO and EN) in GSC and Naver.
+  Rollback: restore both pre-asia backups together (core and config); the website can stay,
+  since the three are optional.
 
 - **Seven more Market Close indicators (2026-11-21)**: copper (COMEX `HG=F`), Brent, silver,
   natural gas, CNY/KRW, EUR/KRW and USD/JPY as optional codes of contract 1.2.0. Website #233
