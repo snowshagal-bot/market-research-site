@@ -57,10 +57,12 @@ test('report response includes visible clean reading links before any shell scri
   }
 });
 
-test('paired Market Basics reports link to each other in the initial footer and head', async () => {
+test('paired archived reports link to each other in the initial footer and head', async () => {
   const lessons = REAL_POSTS.filter(post => /\/Market_Language_Ep[123]_/.test(post.href));
   assert.equal(lessons.length, 3);
-  for (const english of lessons) {
+  const daily = REAL_POSTS.find(post => post.id === '2026-08-20-daily-1ctu7fr');
+  assert.equal(findTranslationCounterpart(REAL_POSTS, daily)?.id, '2026-08-20-daily-c6eow2');
+  for (const english of [...lessons, daily]) {
     const korean = findTranslationCounterpart(REAL_POSTS, english);
     assert.ok(korean, english.href);
     for (const [source, target] of [[english, korean], [korean, english]]) {

@@ -7869,13 +7869,14 @@
     "href": "reports/en/2026-08-20_KOSPI_Daily_Report_EN_Benchmark (1).html",
     "coverImage": "covers/2026-08-20-daily-1ctu7fr.webp",
     "tags": [
-      "flows",
       "semiconductors",
-      "rates"
+      "flows",
+      "treasuries"
     ],
     "readingMinutes": 6,
     "shareCardImage": "covers/share/2026-08-20-daily-1ctu7fr.jpg",
-    "coverThumbnail": "covers/2026-08-20-daily-1ctu7fr-450.webp"
+    "coverThumbnail": "covers/2026-08-20-daily-1ctu7fr-450.webp",
+    "translationGroup": "2026-08-20-daily-c6eow2"
   },
   {
     "id": "2026-08-20-daily-c6eow2",
