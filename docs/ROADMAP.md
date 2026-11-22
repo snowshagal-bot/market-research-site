@@ -61,6 +61,18 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   Rollback: restore both backups together (core and config); the website can stay, since
   VKOSPI is optional.
 
+- **Asian indices (2026-11-22, two Draft PRs)**: 닛케이225 (`^N225`), 상해종합 (`000001.SS`) and 대만 가권
+  (`^TWII`) as optional `indices` codes of contract 1.2.0 (NIKKEI225, SHANGHAI, TAIEX; kind `asia`;
+  pages `/market/nikkei225/`, `/market/shanghai/`, `/market/taiex/`), a row under the major indices.
+  Each value is the latest local regular-session close on or before the KRX date. Yahoo has every
+  close before the 16:05 KST export (Tokyo 15:30, Taipei 14:30 KST; Shanghai 16:00 KST, its final
+  print seen at 16:00:29). The collector accepts the day's close only after Yahoo's last trade time
+  passes the local close, else unavailable (never the older close). A local holiday carries the
+  previous close with its date; the receiver accepts up to 14 days back. SOFT, forward only.
+  Rollout order (owner approval): merge the website PR first (the receiver rejects unknown keys),
+  then the publisher PR; rebuild the core and install it with the new `dist\config\markets.json`;
+  on the next trading day check `/market/` and the three pages, then submit them in GSC and Naver.
+
 - **Seven more Market Close indicators (2026-11-21)**: copper (COMEX `HG=F`), Brent, silver,
   natural gas, CNY/KRW, EUR/KRW and USD/JPY as optional codes of contract 1.2.0. Website #233
   and publisher #14 are merged and the core is installed (2026-11-21); the first export carrying

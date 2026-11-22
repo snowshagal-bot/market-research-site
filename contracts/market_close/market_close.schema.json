@@ -33,7 +33,10 @@
         "KOSDAQ": {"$ref": "#/$defs/nullableInstrument"},
         "NASDAQ": {"$ref": "#/$defs/nullableInstrument"},
         "DOW": {"$ref": "#/$defs/nullableInstrument"},
-        "SP500": {"$ref": "#/$defs/nullableInstrument"}
+        "SP500": {"$ref": "#/$defs/nullableInstrument"},
+        "NIKKEI225": {"$ref": "#/$defs/nullableInstrument"},
+        "SHANGHAI": {"$ref": "#/$defs/nullableInstrument"},
+        "TAIEX": {"$ref": "#/$defs/nullableInstrument"}
       }
     },
     "rates_fx_volatility": {
@@ -666,12 +669,13 @@
             "reason": {"$ref": "#/$defs/sectionReason"},
             "unavailable": {
               "type": "array",
-              "maxItems": 20,
+              "maxItems": 23,
               "items": {
                 "enum": [
                   "NASDAQ", "DOW", "SP500", "SOX", "VIX", "US10Y",
                   "USDKRW", "JPYKRW", "DXY", "WTI", "GOLD", "BITCOIN",
-                  "CNYKRW", "EURKRW", "USDJPY", "BRENT", "COMEX_COPPER", "SILVER", "NATGAS", "VKOSPI"
+                  "CNYKRW", "EURKRW", "USDJPY", "BRENT", "COMEX_COPPER", "SILVER", "NATGAS", "VKOSPI",
+                  "NIKKEI225", "SHANGHAI", "TAIEX"
                 ]
               }
             }

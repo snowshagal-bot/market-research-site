@@ -48,6 +48,9 @@ export { MARKET_INDICATORS, availableIndicatorCodes, listedIndicators, marketInd
 
 // KRW pairs whose close is the 15:30 Hana Bank fixing.
 const FIXING_CODES = new Set(['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW']);
+// Asian indices (kind `asia`): dated the local session; on a local holiday the
+// record carries the previous close with its own, earlier date.
+const ASIA_CODES = Object.freeze(['NIKKEI225', 'SHANGHAI', 'TAIEX']);
 // Decimal places of a price and its change (Bitcoin prices are whole dollars).
 const digitsOf = (key) => (key === 'NATGAS' || key === 'COMEX_COPPER' ? 3 : 2);
 const USD_PRICED = new Set(['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER']);
@@ -181,6 +184,7 @@ const COPY = {
     closeBasis: '15:30 KST 정규장 마감 기준',
     overseas: '* 해외 지수·원자재는 각 시장의 최신 거래일 종가',
     sections: ['주요 지수', '투자자별 매매동향 (당일)', '최근 5거래일 누적 수급', '금리 · 환율 · 변동성', '원자재 · 가상자산', '시장 폭', 'KRX 업종 · 테마 등락률', '시가총액 상위 10종목', '공매도 현황', '국내 금리'],
+    asiaTitle: '아시아 증시', localHoliday: '현지 휴장',
     open: '시가', high: '고가', low: '저가', previous: '전일', closeState: '종가', fixedClose: '15:30 확정',
     market: '시장', foreign: '외국인', institution: '기관', individual: '개인', futures: '선물',
     fiveDays: (start, end) => `${start} – ${end}`,
@@ -208,6 +212,7 @@ const COPY = {
     closeBasis: 'Regular session close, 15:30 KST',
     overseas: '* Overseas indices and commodities use each market’s latest close.',
     sections: ['Major Indices', 'Investor Flows (Daily)', 'Cumulative Flows: Last 5 Sessions', 'Rates · FX · Volatility', 'Commodities · Crypto', 'Market Breadth', 'KRX Sectors & Themes', 'Top 10 by Market Cap', 'Short Selling', 'Korean Bond Yields'],
+    asiaTitle: 'Asian Markets', localHoliday: 'Local holiday',
     open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', closeState: 'Close', fixedClose: '15:30 fixing',
     market: 'Market', foreign: 'Foreign', institution: 'Institution', individual: 'Retail', futures: 'KOSPI 200 Futures',
     fiveDays: (start, end) => `${start} – ${end}`,
@@ -231,8 +236,8 @@ const COPY = {
   }
 };
 
-const INDEX_NAMES_EN = { KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones', SP500: 'S&P 500', SOX: 'Philadelphia Semiconductor', VIX: 'VIX', VKOSPI: 'VKOSPI', US10Y: 'US 10Y', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW (100)', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', BITCOIN: 'Bitcoin', CNYKRW: 'CNY/KRW', EURKRW: 'EUR/KRW', USDJPY: 'USD/JPY', BRENT: 'Brent Crude', NATGAS: 'Natural Gas', SILVER: 'Silver', COMEX_COPPER: 'Copper', KTB3Y: 'KTB 3Y', KTB10Y: 'KTB 10Y', CORPAA3Y: 'Corporate AA- 3Y', CD91: 'CD 91-day' };
-const INDEX_NAMES_KO = { KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥 종합', DOW: '다우존스', SP500: 'S&P 500', SOX: '필라델피아 반도체', VIX: 'VIX', VKOSPI: 'VKOSPI', US10Y: '미국 국채 10년', USDKRW: '원/달러', JPYKRW: '원/엔(100엔)', DXY: '달러 인덱스', WTI: 'WTI 원유', GOLD: '금', BITCOIN: '비트코인', CNYKRW: '원/위안', EURKRW: '원/유로', USDJPY: '엔/달러', BRENT: '브렌트유', NATGAS: '천연가스', SILVER: '은', COMEX_COPPER: '구리', KTB3Y: '국고채 3년', KTB10Y: '국고채 10년', CORPAA3Y: '회사채 AA- 3년', CD91: 'CD 91일' };
+const INDEX_NAMES_EN = { KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones', SP500: 'S&P 500', NIKKEI225: 'Nikkei 225', SHANGHAI: 'Shanghai Composite', TAIEX: 'TAIEX', SOX: 'Philadelphia Semiconductor', VIX: 'VIX', VKOSPI: 'VKOSPI', US10Y: 'US 10Y', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW (100)', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', BITCOIN: 'Bitcoin', CNYKRW: 'CNY/KRW', EURKRW: 'EUR/KRW', USDJPY: 'USD/JPY', BRENT: 'Brent Crude', NATGAS: 'Natural Gas', SILVER: 'Silver', COMEX_COPPER: 'Copper', KTB3Y: 'KTB 3Y', KTB10Y: 'KTB 10Y', CORPAA3Y: 'Corporate AA- 3Y', CD91: 'CD 91-day' };
+const INDEX_NAMES_KO = { KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥 종합', DOW: '다우존스', SP500: 'S&P 500', NIKKEI225: '닛케이225', SHANGHAI: '상해종합', TAIEX: '대만 가권', SOX: '필라델피아 반도체', VIX: 'VIX', VKOSPI: 'VKOSPI', US10Y: '미국 국채 10년', USDKRW: '원/달러', JPYKRW: '원/엔(100엔)', DXY: '달러 인덱스', WTI: 'WTI 원유', GOLD: '금', BITCOIN: '비트코인', CNYKRW: '원/위안', EURKRW: '원/유로', USDJPY: '엔/달러', BRENT: '브렌트유', NATGAS: '천연가스', SILVER: '은', COMEX_COPPER: '구리', KTB3Y: '국고채 3년', KTB10Y: '국고채 10년', CORPAA3Y: '회사채 AA- 3년', CD91: 'CD 91일' };
 const KRX_COMPANY_NAMES_EN = {
   '000660': 'SK hynix', '005380': 'Hyundai Motor', '005930': 'Samsung Electronics', '005935': 'Samsung Electronics Pref.',
   '009150': 'Samsung Electro-Mechanics', '012450': 'Hanwha Aerospace', '028260': 'Samsung C&T', '034020': 'Doosan Enerbility',
@@ -369,7 +374,7 @@ function metric(label, value, extra = '') {
   return `<div class="market-metric"><span>${html(label)}</span><strong class="${extra}">${value}</strong></div>`;
 }
 
-function instrumentCard(key, item, f, copy, lang, major) {
+function instrumentCard(key, item, f, copy, lang, major, marketDate = '') {
   const isFx = FIXING_CODES.has(key);
   const movementClass = f.signClass(item?.change);
   const arrow = movementClass === 'up' ? '▲' : movementClass === 'down' ? '▼' : '—';
@@ -381,7 +386,9 @@ function instrumentCard(key, item, f, copy, lang, major) {
   const detail = major
     ? `<dl class="market-ohlc"><div><dt>${copy.open}</dt><dd>${f.number(item?.open, 2)}</dd></div><div><dt>${copy.high}</dt><dd>${f.number(item?.high, 2)}</dd></div><div><dt>${copy.low}</dt><dd>${f.number(item?.low, 2)}</dd></div><div><dt>${copy.previous}</dt><dd>${f.number(item?.previous_close, 2)}</dd></div></dl>`
     : '';
-  const state = isFx ? copy.fixedClose : copy.closeState;
+  // An Asian index dated before the session: its market was closed that day.
+  const localHoliday = ASIA_CODES.includes(key) && ISO_DATE.test(String(item?.source_date || '')) && ISO_DATE.test(String(marketDate)) && item.source_date < marketDate;
+  const state = `${isFx ? copy.fixedClose : copy.closeState}${localHoliday ? ` · ${copy.localHoliday}` : ''}`;
   // An optional indicator's page exists once a record has its value.
   const history = marketIndicatorPath(key, lang) && (!isOptionalIndicator(key) || valid(item?.close)) ? marketIndicatorPath(key, lang) : null;
   return `<article class="instrument-card${major ? ' major' : ''}">
@@ -525,6 +532,7 @@ export function renderMarketDateMain(payload, lang, context = {}) {
     </nav>`;
 
   const majorCards = ['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500'].filter(key => indices[key]).map(key => instrumentCard(key, indices[key], f, copy, lang, true)).join('');
+  const asiaCards = ASIA_CODES.filter(key => indices[key]).map(key => instrumentCard(key, indices[key], f, copy, lang, false, date)).join('');
   const rateCards = ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY', 'US10Y', 'VIX', 'VKOSPI', 'SOX'].filter(key => rates[key]).map(key => instrumentCard(key, rates[key], f, copy, lang, false)).join('');
   const commodityCards = ['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER', 'BITCOIN'].filter(key => commodities[key]).map(key => instrumentCard(key, commodities[key], f, copy, lang, false)).join('');
 
@@ -572,7 +580,8 @@ export function renderMarketDateMain(payload, lang, context = {}) {
   // Numbered in order of appearance; a section with no data is left out.
   let n = 0;
   const part = (index, body) => body ? section(++n, copy.sections[index], body) : '';
-  const indicesPart = part(0, `<div class="major-index-grid">${majorCards}</div>`);
+  const asiaBlock = asiaCards ? `<h3 class="group-category-title market-asia-title">${html(copy.asiaTitle)}</h3><div class="mini-instrument-grid market-asia-grid">${asiaCards}</div>` : '';
+  const indicesPart = part(0, `<div class="major-index-grid">${majorCards}</div>${asiaBlock}`);
   const flowsPart = part(1, flowsBody);
   const fivePart = part(2, fiveBody);
   const ratesPart = part(3, rateCards && `<div class="mini-instrument-grid">${rateCards}</div>`);
@@ -1146,6 +1155,7 @@ export async function loadMarketSectors(env, { budgetMs = MARKET_DATE_TIME_BUDGE
 const INDICATOR_NAMES = {
   ko: {
     KOSPI: '코스피 지수', KOSDAQ: '코스닥 지수', NASDAQ: '나스닥 종합지수', DOW: '다우존스 지수', SP500: 'S&P 500 지수',
+    NIKKEI225: '닛케이225 지수', SHANGHAI: '상해종합지수', TAIEX: '대만 가권지수',
     SOX: '필라델피아 반도체지수', VIX: 'VIX 변동성지수', VKOSPI: 'VKOSPI(코스피200 변동성지수)', US10Y: '미국 국채 10년물 금리', USDKRW: '원/달러 환율',
     JPYKRW: '원/엔 환율(100엔)', DXY: '달러인덱스', WTI: 'WTI 유가', GOLD: '금 선물 가격', BITCOIN: '비트코인 가격',
     CNYKRW: '원/위안 환율', EURKRW: '원/유로 환율', USDJPY: '엔/달러 환율', BRENT: '브렌트유 가격', NATGAS: '천연가스 선물 가격',
@@ -1154,6 +1164,7 @@ const INDICATOR_NAMES = {
   },
   en: {
     KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones Industrial Average', SP500: 'S&P 500',
+    NIKKEI225: 'Nikkei 225', SHANGHAI: 'Shanghai Composite Index', TAIEX: 'TAIEX (Taiwan Weighted Index)',
     SOX: 'PHLX Semiconductor Index (SOX)', VIX: 'VIX Volatility Index', VKOSPI: 'VKOSPI (KOSPI 200 Volatility Index)', US10Y: 'US 10-Year Treasury Yield', USDKRW: 'USD/KRW Exchange Rate',
     JPYKRW: 'JPY/KRW Exchange Rate (per 100 yen)', DXY: 'US Dollar Index (DXY)', WTI: 'WTI Crude Oil', GOLD: 'Gold Futures', BITCOIN: 'Bitcoin',
     CNYKRW: 'CNY/KRW Exchange Rate', EURKRW: 'EUR/KRW Exchange Rate', USDJPY: 'USD/JPY Exchange Rate', BRENT: 'Brent Crude Oil',
@@ -1173,12 +1184,16 @@ const INDICATOR_COPY = {
   ko: {
     eyebrow: 'MARKET CLOSE · 지표별 기록',
     heading: name => `${name} 일별 기록`,
-    noun: { krx: '일별 종가', krxvol: '일별 종가', us: '일별 종가', fx: '일별 기록', snapshot: '일별 기록', rate: '일별 기록', kofia: '일별 기록' },
-    valueLabel: { krx: '종가', krxvol: '종가', us: '종가', fx: '15:30 환율', snapshot: '기록 시세', rate: '수익률', kofia: '수익률' },
+    noun: { krx: '일별 종가', krxvol: '일별 종가', us: '일별 종가', asia: '일별 종가', fx: '일별 기록', snapshot: '일별 기록', rate: '일별 기록', kofia: '일별 기록' },
+    valueLabel: { krx: '종가', krxvol: '종가', us: '종가', asia: '종가', fx: '15:30 환율', snapshot: '기록 시세', rate: '수익률', kofia: '수익률' },
     basis: {
       krx: 'KRX 정규장 15:30 종가 기준 · 매 거래일 마감 후 갱신',
       krxvol: 'KRX 파생상품 정규장 15:45 마감 종가(코스피200 옵션 기준) · 매 거래일 마감 후 갱신',
       us: '미국 정규장 종가 · 날짜는 미국 거래일 · 한국 증시 마감 기록에 담긴 값',
+      asia: '현지 정규장 종가 · 날짜는 현지 거래일 · 한국 증시 마감 기록에 담긴 값',
+      NIKKEI225: '도쿄 정규장 15:30 종가(한국 시각 15:30) · 날짜는 일본 거래일 · 한국 증시 마감 기록에 담긴 값',
+      SHANGHAI: '상하이 정규장 15:00 종가(한국 시각 16:00) · 날짜는 중국 거래일 · 한국 증시 마감 기록에 담긴 값',
+      TAIEX: '타이베이 정규장 13:30 종가(한국 시각 14:30) · 날짜는 대만 거래일 · 한국 증시 마감 기록에 담긴 값',
       fx: '15:30 KST 매매기준율(하나은행, 네이버 금융) · 매 거래일 갱신',
       snapshot: '한국 증시 마감 직후(오후 4시 무렵 KST) 시세 · 변동은 직전 기록 대비',
       kofia: '금융투자협회 최종호가수익률 · 16:00 KST 기준 · 매 거래일 갱신 · 대비는 금융투자협회 전일 값 대비'
@@ -1188,6 +1203,7 @@ const INDICATOR_COPY = {
     columns: { date: '날짜', value: '값', change: '대비', pct: '등락률', high: '고가', low: '저가' },
     changeVsPrev: { snapshot: '직전 기록 대비' },
     usDates: '날짜는 미국 거래일입니다. 날짜를 누르면 그 값을 기록한 한국 증시 마감 기록이 열립니다.',
+    localDates: '날짜는 현지 거래일입니다. 현지 휴장일에는 직전 종가가 이어지므로 한 번만 적습니다. 날짜를 누르면 그 값을 처음 기록한 한국 증시 마감 기록이 열립니다.',
     krxDates: '날짜를 누르면 그날의 전체 마감 기록이 열립니다.',
     kofiaDates: '날짜를 누르면 그날의 전체 마감 기록이 열립니다. 마감 기록이 없는 날은 날짜만 표시합니다.',
     gaps: '한국 증시 마감 기록이 게시된 날의 값만 담았습니다. 기록이 없는 날과, 한국 휴장일에 열린 해외 거래일은 빠질 수 있습니다.',
@@ -1207,12 +1223,16 @@ const INDICATOR_COPY = {
   en: {
     eyebrow: 'MARKET CLOSE · INDICATOR HISTORY',
     heading: name => `${name}: Daily History`,
-    noun: { krx: 'Daily Close', krxvol: 'Daily Close', us: 'Daily Close', fx: 'History', snapshot: 'History', rate: 'History', kofia: 'History' },
-    valueLabel: { krx: 'Close', krxvol: 'Close', us: 'Close', fx: '15:30 rate', snapshot: 'Recorded price', rate: 'Yield', kofia: 'Yield' },
+    noun: { krx: 'Daily Close', krxvol: 'Daily Close', us: 'Daily Close', asia: 'Daily Close', fx: 'History', snapshot: 'History', rate: 'History', kofia: 'History' },
+    valueLabel: { krx: 'Close', krxvol: 'Close', us: 'Close', asia: 'Close', fx: '15:30 rate', snapshot: 'Recorded price', rate: 'Yield', kofia: 'Yield' },
     basis: {
       krx: 'KRX regular-session close, 15:30 KST · Updated after every session',
       krxvol: 'KRX derivatives-session close, 15:45 KST (from KOSPI 200 options) · Updated after every session',
       us: 'U.S. regular-session close · Dates are U.S. trading days · As carried by the Korea close record',
+      asia: 'Local regular-session close · Dates are local trading days · As carried by the Korea close record',
+      NIKKEI225: 'Tokyo regular-session close, 15:30 JST (15:30 KST) · Dates are Japanese trading days · As carried by the Korea close record',
+      SHANGHAI: 'Shanghai regular-session close, 15:00 CST (16:00 KST) · Dates are Chinese trading days · As carried by the Korea close record',
+      TAIEX: 'Taipei regular-session close, 13:30 (14:30 KST) · Dates are Taiwanese trading days · As carried by the Korea close record',
       fx: '15:30 KST reference rate (Hana Bank, via Naver Finance) · Updated every session',
       snapshot: 'Quote shortly after the Korea close (around 16:00 KST) · Change against the previous record',
       kofia: 'KOFIA final quote yield, 16:00 KST · Updated every Korean trading day · Change against KOFIA’s previous-day value'
@@ -1222,6 +1242,7 @@ const INDICATOR_COPY = {
     columns: { date: 'Date', value: 'Value', change: 'Change', pct: 'Change %', high: 'High', low: 'Low' },
     changeVsPrev: { snapshot: 'vs. previous record' },
     usDates: 'Dates are U.S. trading days. Each date opens the Korea close record that carried the value.',
+    localDates: 'Dates are local trading days. On a local holiday the record carries the previous close, listed once. Each date opens the first Korea close record that carried the value.',
     krxDates: 'Each date opens that session’s full close record.',
     kofiaDates: 'Each linked date opens that session’s full close record; days without one are listed without a link.',
     gaps: 'Only days with a published Korea close record are listed. Days without one, and overseas sessions held on Korean market holidays, may be missing.',
@@ -1243,7 +1264,7 @@ const INDICATOR_COPY = {
 // Short names for titles ("원/달러 환율", "USD/KRW").
 const INDICATOR_SHORT_NAMES = {
   ko: { ...INDICATOR_NAMES.ko, KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥', DOW: '다우존스', SP500: 'S&P 500', VIX: 'VIX', VKOSPI: 'VKOSPI', JPYKRW: '원/엔 환율', GOLD: '금 선물', BITCOIN: '비트코인', BRENT: '브렌트유', NATGAS: '천연가스', SILVER: '은 선물', COMEX_COPPER: '구리 선물', KTB3Y: '국고채 3년 금리', KTB10Y: '국고채 10년 금리', CORPAA3Y: '회사채 AA- 3년 금리', CD91: 'CD 91일 금리' },
-  en: { ...INDICATOR_NAMES.en, NASDAQ: 'NASDAQ', DOW: 'Dow Jones', SOX: 'SOX', VIX: 'VIX', VKOSPI: 'VKOSPI', US10Y: 'US 10Y Yield', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', CNYKRW: 'CNY/KRW', EURKRW: 'EUR/KRW', USDJPY: 'USD/JPY', BRENT: 'Brent Crude', NATGAS: 'Natural Gas', SILVER: 'Silver', COMEX_COPPER: 'Copper', KTB3Y: 'KTB 3Y Yield', KTB10Y: 'KTB 10Y Yield', CORPAA3Y: 'Corporate AA- 3Y Yield', CD91: 'CD 91-Day Rate' }
+  en: { ...INDICATOR_NAMES.en, NASDAQ: 'NASDAQ', DOW: 'Dow Jones', SHANGHAI: 'Shanghai Composite', TAIEX: 'TAIEX', SOX: 'SOX', VIX: 'VIX', VKOSPI: 'VKOSPI', US10Y: 'US 10Y Yield', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', CNYKRW: 'CNY/KRW', EURKRW: 'EUR/KRW', USDJPY: 'USD/JPY', BRENT: 'Brent Crude', NATGAS: 'Natural Gas', SILVER: 'Silver', COMEX_COPPER: 'Copper', KTB3Y: 'KTB 3Y Yield', KTB10Y: 'KTB 10Y Yield', CORPAA3Y: 'Corporate AA- 3Y Yield', CD91: 'CD 91-Day Rate' }
 };
 
 const indicatorKind = (indicator) => (indicator.code === 'US10Y' ? 'rate' : indicator.kind);
@@ -1293,7 +1314,7 @@ export function marketIndicatorSeries(rows, indicator) {
       try { item = JSON.parse(item); } catch (_) { item = null; }
     }
     if (!item || typeof item !== 'object' || item.data_state === 'unavailable' || !valid(item.close)) continue;
-    const date = indicator.kind === 'us' && ISO_DATE.test(String(item.source_date || '')) ? item.source_date : row.market_date;
+    const date = (indicator.kind === 'us' || indicator.kind === 'asia') && ISO_DATE.test(String(item.source_date || '')) ? item.source_date : row.market_date;
     if (seen.has(date)) continue;
     const trueClose = indicator.kind !== 'snapshot' && valid(item.previous_close) && item.previous_close > 0;
     seen.set(date, {
@@ -1546,7 +1567,7 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
         <p class="market-eyebrow">${html(copy.eyebrow)}</p>
         <h1 id="market-indicator-heading">${html(copy.heading(name))}</h1>
         <p class="market-date-summary">${summary}</p>
-        <p class="market-date">${html(copy.basis[indicator.kind])}${INDICATOR_UNITS[key][indicator.code] ? ` · ${html(INDICATOR_UNITS[key][indicator.code])}` : ''}</p>
+        <p class="market-date">${html(copy.basis[indicator.code] || copy.basis[indicator.kind])}${INDICATOR_UNITS[key][indicator.code] ? ` · ${html(INDICATOR_UNITS[key][indicator.code])}` : ''}</p>
       </div>
       <div class="market-mountain" aria-hidden="true"></div>
     </div>
@@ -1554,7 +1575,7 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
   <div class="market-wrap market-dashboard">
     ${section(1, copy.sections[0], `<div class="indicator-stats">${tiles}</div>`)}
     ${series.length > 1 ? section(2, copy.sections[1], indicatorChart(series, indicator, fmt, copy, key)) : ''}
-    <p class="unit-note indicator-table-note">${html(indicator.kind === 'us' ? copy.usDates : indicator.kind === 'kofia' ? copy.kofiaDates : copy.krxDates)}</p>
+    <p class="unit-note indicator-table-note">${html(indicator.kind === 'us' ? copy.usDates : indicator.kind === 'asia' ? copy.localDates : indicator.kind === 'kofia' ? copy.kofiaDates : copy.krxDates)}</p>
 ${monthBlocks}
     <nav class="indicator-links" aria-label="${html(copy.related)}"><h2>${html(copy.related)}</h2><div>${related}</div></nav>
     <p class="market-archive-links"><a href="${dashboardPath}">${html(copy.dashboard)} →</a><a href="${marketArchivePath(key)}">${html(copy.archive)} →</a></p>

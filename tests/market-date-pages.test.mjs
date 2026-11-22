@@ -431,8 +431,8 @@ function indicatorRow(marketDate, item) {
 }
 
 test('every instrument has a history path; anything else under /market/ is left alone', () => {
-  assert.equal(MARKET_INDICATORS.length, 26);
-  assert.equal(MARKET_INDICATORS.filter((item) => item.optional).length, 12);
+  assert.equal(MARKET_INDICATORS.length, 29);
+  assert.equal(MARKET_INDICATORS.filter((item) => item.optional).length, 15);
   assert.equal(MARKET_INDICATORS.filter((item) => item.domestic).length, 4);
   for (const item of MARKET_INDICATORS) {
     assert.equal(item.slug, item.code === 'COMEX_COPPER' ? 'copper' : item.code.toLowerCase());

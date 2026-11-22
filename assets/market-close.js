@@ -9,6 +9,7 @@
     sections: ['주요 지수', '금리 · 환율 · 변동성', '원자재 · 가상자산', '시장 폭', 'KRX 투자자 매매동향 (당일)', '최근 5거래일 누적 수급', '프로그램 & 베이시스', '시장 내부 지표', '공매도 현황', '시가총액 상위 10종목'],
     ratesTitle: '국내 금리', rateState: '16:00 최종호가', ratesNote: '금융투자협회 최종호가수익률 · 16:00 KST 기준 · 대비는 금융투자협회 전일 값 대비(bp)',
     open: '시가', high: '고가', low: '저가', previous: '전일', close: '종가', current: '현재', fixedClose: '15:30 확정', intraday: '장중', recentClose: '최근 종가', unavailable: '데이터 없음',
+    asiaTitle: '아시아 증시', localHoliday: '현지 휴장',
     latestClose: '종가', snapshotBasis: '마감 시점', asOf: stamp => `${stamp} 기준`,
     rise: '상승종목', fall: '하락종목', flat: '보합종목', upper: '상한가', lower: '하한가', riseRatio: '상승비율', fallRatio: '하락비율',
     foreign: '외국인', institution: '기관', individual: '개인', market: '시장', fiveDays: '5거래일', billion: '억원',
@@ -45,6 +46,7 @@
     sections: ['Major Indices', 'Rates · FX · Volatility', 'Commodities · Crypto', 'Market Breadth', 'KRX Investor Flows (Daily)', 'Cumulative Flows: Last 5 Sessions', 'Program Trading & Basis', 'Market Internals', 'Short Selling', 'Top 10 by Market Cap'],
     ratesTitle: 'Korean Bond Yields', rateState: '16:00 KOFIA', ratesNote: 'KOFIA final quote yields, 16:00 KST · Change in bp against KOFIA’s previous-day value',
     open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', close: 'Close', current: 'Latest', fixedClose: '15:30 close', intraday: 'Intraday', recentClose: 'Recent close', unavailable: 'Unavailable',
+    asiaTitle: 'Asian Markets', localHoliday: 'Local holiday',
     latestClose: 'Close', snapshotBasis: 'At KRX close', asOf: stamp => `As of ${stamp}`,
     rise: 'Advancers', fall: 'Decliners', flat: 'Unchanged', upper: 'Limit up', lower: 'Limit down', riseRatio: 'Advance ratio', fallRatio: 'Decline ratio',
     foreign: 'Foreign', institution: 'Institution', individual: 'Retail', market: 'Market', fiveDays: '5 sessions', billion: 'KRW 100m',
@@ -80,7 +82,7 @@
   };
 
   const names = {
-    NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones', SP500: 'S&P 500', SOX: 'Philadelphia Semiconductor', VIX: 'VIX', VKOSPI: 'VKOSPI', US10Y: 'US 10Y', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW (100)', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', BITCOIN: 'Bitcoin',
+    NASDAQ: 'NASDAQ Composite', DOW: 'Dow Jones', SP500: 'S&P 500', NIKKEI225: 'Nikkei 225', SHANGHAI: 'Shanghai Composite', TAIEX: 'TAIEX', SOX: 'Philadelphia Semiconductor', VIX: 'VIX', VKOSPI: 'VKOSPI', US10Y: 'US 10Y', USDKRW: 'USD/KRW', JPYKRW: 'JPY/KRW (100)', DXY: 'Dollar Index', WTI: 'WTI Crude', GOLD: 'Gold', BITCOIN: 'Bitcoin',
     CNYKRW: 'CNY/KRW', EURKRW: 'EUR/KRW', USDJPY: 'USD/JPY', BRENT: 'Brent Crude', NATGAS: 'Natural Gas', SILVER: 'Silver', COMEX_COPPER: 'Copper',
     KTB3Y: 'KTB 3Y', KTB10Y: 'KTB 10Y', CORPAA3Y: 'Corporate AA- 3Y', CD91: 'CD 91-day',
     KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', 'KOSPI200선물': 'KOSPI 200 Futures', '기관': 'Institution', '외국인': 'Foreign', '개인': 'Retail', '차익': 'Arbitrage', '비차익': 'Non-arbitrage', '전체': 'Total'
@@ -200,7 +202,7 @@
   // The 1W/1M aggregate carries no display name, so the Korean page needs its own (the TODAY
   // payload's names, the same words).
   const namesKo = {
-    KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥 종합', DOW: '다우존스', SP500: 'S&P 500', SOX: '필라델피아 반도체',
+    KOSPI: '코스피', KOSDAQ: '코스닥', NASDAQ: '나스닥 종합', DOW: '다우존스', SP500: 'S&P 500', NIKKEI225: '닛케이225', SHANGHAI: '상해종합', TAIEX: '대만 가권', SOX: '필라델피아 반도체',
     VIX: 'VIX 변동성', VKOSPI: 'VKOSPI', US10Y: '미국 국채 10년', USDKRW: '원/달러', JPYKRW: '원/100엔', DXY: '달러인덱스',
     WTI: 'WTI 원유', GOLD: '금 선물', BITCOIN: '비트코인',
     CNYKRW: '원/위안', EURKRW: '원/유로', USDJPY: '엔/달러', BRENT: '브렌트유', NATGAS: '천연가스', SILVER: '은 선물', COMEX_COPPER: '구리 선물',
@@ -210,7 +212,9 @@
   const FIXING_CODES = ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW'];
   const isFixing = key => FIXING_CODES.includes(key);
   // Added 2026-11: a record made before them has no such item.
-  const OPTIONAL_CODES = ['CNYKRW', 'EURKRW', 'USDJPY', 'BRENT', 'NATGAS', 'SILVER', 'COMEX_COPPER', 'VKOSPI'];
+  const OPTIONAL_CODES = ['CNYKRW', 'EURKRW', 'USDJPY', 'BRENT', 'NATGAS', 'SILVER', 'COMEX_COPPER', 'VKOSPI', 'NIKKEI225', 'SHANGHAI', 'TAIEX'];
+  // Asian indices: dated the local session; a local holiday carries the previous close.
+  const ASIA_CODES = ['NIKKEI225', 'SHANGHAI', 'TAIEX'];
   // Decimal places of a price and its change (Bitcoin prices are whole dollars).
   const digitsOf = key => (key === 'NATGAS' || key === 'COMEX_COPPER' ? 3 : 2);
   // Each instrument has a daily history page at /market/{code in lower case}/
@@ -289,7 +293,9 @@
       <div><dt>${copy.open}</dt><dd>${number(item?.open, 2)}</dd></div><div><dt>${copy.high}</dt><dd>${number(item?.high, 2)}</dd></div><div><dt>${copy.low}</dt><dd>${number(item?.low, 2)}</dd></div><div><dt>${copy.previous}</dt><dd>${number(item?.previous_close, 2)}</dd></div>
     </dl>`;
     const snapshotState = view.mixed && item?.data_state === 'intraday' ? copy.snapshotBasis : stateText(item);
-    const stateHtml = latest ? latestStateHtml(latest) : `${dateText(item?.source_date)} · ${snapshotState}`;
+    // An Asian index dated before the session: its market was closed that day.
+    const localHoliday = ASIA_CODES.includes(key) && /^\d{4}-\d{2}-\d{2}$/.test(String(item?.source_date || '')) && /^\d{4}-\d{2}-\d{2}$/.test(String(view.marketDate || '')) && item.source_date < view.marketDate;
+    const stateHtml = latest ? latestStateHtml(latest) : `${dateText(item?.source_date)} · ${snapshotState}${localHoliday ? ` · ${copy.localHoliday}` : ''}`;
     const basisAttr = latest ? ' data-basis="latest"' : view.mixed ? ' data-basis="snapshot"' : '';
     return `<article class="instrument-card ${major ? 'major' : ''}"${basisAttr}>
       <div class="instrument-heading"><span>${historyLink(key, html(instrumentName(key, item)), valid(display))}</span>${item?.ticker ? `<small>${html(item.ticker)}</small>` : ''}</div>
@@ -630,7 +636,8 @@
     const krx = key => key === 'KOSPI' || key === 'KOSDAQ';
     const card = (key, item, major = false) => instrumentCard(key, item, major, {
       latest: krx(key) ? null : latestItems[key] || null,
-      mixed: !krx(key) && mixed
+      mixed: !krx(key) && mixed,
+      marketDate
     });
 
     const indices = data.indices || {};
@@ -643,6 +650,8 @@
     const internals = data.market_internals || {};
     const shorts = data.short_selling || {};
     const marketCap = data.market_cap_top10 || [];
+    // Asian indices: their own row under the major indices, once the record carries them.
+    const asiaCards = ASIA_CODES.filter(key => indices[key]).map(key => card(key, indices[key])).join('');
     // KOFIA yields of this session, after the rates and commodities; the
     // sections after it move down one number.
     const ratesBody = domesticRatesBody(options.domesticRates, marketDate);
@@ -747,7 +756,7 @@
         ${renderHistoryStrip()}
       </div>
       <div id="market-dashboard-view" class="market-wrap market-dashboard" data-global-latest="${Object.keys(latestItems).length}">
-        ${section(1, copy.sections[0], `<div class="major-index-grid">${['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500'].map(key => card(key, indices[key], true)).join('')}</div>`)}
+        ${section(1, copy.sections[0], `<div class="major-index-grid">${['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500'].map(key => card(key, indices[key], true)).join('')}</div>${asiaCards ? `<h3 class="group-category-title market-asia-title">${html(copy.asiaTitle)}</h3><div class="mini-instrument-grid market-asia-grid">${asiaCards}</div>` : ''}`)}
         <div class="market-pair">
           ${section(2, copy.sections[1], `<div class="mini-instrument-grid">${['SOX', 'VIX', 'VKOSPI', 'US10Y', 'USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY'].filter(key => rates[key] || !OPTIONAL_CODES.includes(key)).map(key => card(key, rates[key])).join('')}</div>`)}
           ${section(3, copy.sections[2], `<div class="mini-instrument-grid commodity-grid">${['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER', 'BITCOIN'].filter(key => commodities[key] || !OPTIONAL_CODES.includes(key)).map(key => card(key, commodities[key])).join('')}</div>`)}
@@ -998,7 +1007,7 @@
       <div id="market-dashboard-view" class="market-wrap market-dashboard market-range-dashboard">
         ${section('01', ko ? '주요 지수' : 'Major Indices', `
           <div class="range-items-grid">
-            ${['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500', 'SOX'].map(k => k === 'SOX' ? renderRangeInstrumentRow(k, rates[k]) : renderRangeInstrumentRow(k, indices[k])).join('')}
+            ${['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500', 'SOX', ...ASIA_CODES].map(k => k === 'SOX' ? renderRangeInstrumentRow(k, rates[k]) : renderRangeInstrumentRow(k, indices[k])).join('')}
           </div>`)}
         <div class="market-pair">
           ${section('02', ko ? '금리 · 환율 · 변동성' : 'Rates · FX · Volatility', `
