@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-23-daily-10imeo7",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-23",
+    "reportDate": "2026-11-23",
+    "registeredDate": "2026-11-23",
+    "registeredAt": "2026-11-23T08:40:09.670Z",
+    "legacyImport": false,
+    "title": "Nvidia Probe Reports Deepen Chip Rout; KOSPI Reclaims 4,700 After 5.8% Intraday Plunge",
+    "subtitle": "",
+    "description": "South Korea's KOSPI closed down 3.31% at 4,708.54 after a 5.81% intraday plunge. Reports of an SEC accounting inquiry into Nvidia deepened the U.S. chip rout; foreign investors sold KRW 247.1bn net.",
+    "takeaway": "Reported Nvidia accounting inquiry amplified a U.S. semiconductor selloff; a sell-side trading curb was triggered before the KOSPI pared losses in the afternoon.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-11-23_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-23-daily-1kkclkq",
+    "coverImage": "covers/2026-11-23-daily-10imeo7.webp",
+    "shareCardImage": "covers/share/2026-11-23-daily-10imeo7.jpg",
+    "coverThumbnail": "covers/2026-11-23-daily-10imeo7-450.webp"
+  },
+  {
     "id": "2026-11-23-daily-1kkclkq",
     "type": "daily",
     "typeLabel": "주식 리포트",
