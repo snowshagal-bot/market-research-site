@@ -61,6 +61,8 @@ const isYield = (key) => key === 'US10Y' || isDomesticRateIndicator(key);
 const rateDigits = (key) => (key === 'CD91' ? 2 : 3);
 
 export const MARKET_DATE_TIME_BUDGET_MS = 5000;
+// The trend lines decorate a session page; it never waits longer than this for them.
+export const MARKET_TREND_BUDGET_MS = 1500;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const html = escapeHtml;
 const valid = (value) => typeof value === 'number' && Number.isFinite(value);
@@ -390,7 +392,7 @@ const PAGE_COPY = {
     boards: { world: '해외 증시 · 변동성', rates: '금리', fx: '환율', commodities: '원자재 · 가상자산' },
     boardNotes: { world: '미국 지수 · 아시아 각 시장 최근 마감', rates: '국내 금융투자협회 16:00 최종호가', fx: '원화는 15:30 매매기준율', commodities: '달러 기준' },
     columns: ['지표', '값', '전일 대비', '추이'], marketNames: { KOSPI: '코스피', KOSDAQ: '코스닥', 'KOSPI200선물': '선물' },
-    dateLabel: '거래일', pageEyebrow: '한국 증시 마감 기록', stock: '종목', price: '종가', change: '등락률', marketCap: '시가총액'
+    dateLabel: '거래일', pageEyebrow: '한국 증시 마감 기록', stock: '종목명', future: '선물', price: '종가', change: '등락률', marketCap: '시가총액'
   },
   en: {
     regularClose: 'Regular close', trendLabel: 'Last 20 sessions', closeOf: md => `Close of ${md}`, regularBasis: 'Regular session, 15:30 KST',
@@ -405,7 +407,7 @@ const PAGE_COPY = {
     boards: { world: 'Overseas Markets · Volatility', rates: 'Rates', fx: 'FX', commodities: 'Commodities · Crypto' },
     boardNotes: { world: 'US indices · each Asian market’s latest close', rates: 'Korean yields: KOFIA 16:00 final quotes', fx: 'KRW pairs: 15:30 reference rate', commodities: 'In US dollars' },
     columns: ['Indicator', 'Value', 'Change', 'Trend'], marketNames: { KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', 'KOSPI200선물': 'KOSPI 200 Futures' },
-    dateLabel: 'Trading day', pageEyebrow: 'Korea market close archive', stock: 'Company', price: 'Close', change: 'Change', marketCap: 'Market cap'
+    dateLabel: 'Trading day', pageEyebrow: 'Korea market close archive', stock: 'Company', future: 'Futures', price: 'Close', change: 'Change', marketCap: 'Market cap'
   }
 };
 
@@ -438,12 +440,18 @@ function pageHead({ id, breadcrumb, eyebrow, title, summary = '', lead = '', met
 
 // A trend line of finite values, oldest first: { line, area, cx, cy } in a w×h box, or null.
 function sparkGeometry(values, w, h, pad) {
-  const points = (Array.isArray(values) ? values : []).filter(valid);
+  const series = Array.isArray(values) ? values : [];
+  // The series ends on the session shown: without that day's value there is
+  // no line, or its last point would be an earlier session's.
+  if (!valid(series[series.length - 1])) return null;
+  const points = series.filter(valid);
   if (points.length < 2) return null;
   const min = Math.min(...points);
   const max = Math.max(...points);
-  const span = max - min || 1;
-  const xy = points.map((value, index) => [pad + index * (w - 2 * pad) / (points.length - 1), pad + (max - value) / span * (h - 2 * pad)]);
+  const span = max - min;
+  // A series that never moved is a level line through the middle of the box.
+  const y = value => (span ? pad + (max - value) / span * (h - 2 * pad) : h / 2);
+  const xy = points.map((value, index) => [pad + index * (w - 2 * pad) / (points.length - 1), y(value)]);
   const line = xy.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
   const [cx, cy] = xy[xy.length - 1];
   return { line, area: `${pad},${h} ${line} ${w - pad},${h}`, cx: cx.toFixed(1), cy: cy.toFixed(1) };
@@ -556,8 +564,10 @@ function breadthBlock(key, item, f, copy, pc) {
   const total = [rise, flat, fall].every(valid) ? rise + flat + fall : null;
   const share = value => (valid(total) && total > 0 && valid(value) ? value / total * 100 : 0);
   const limit = (label, value) => (valid(value) && value > 0 ? ` (${label} ${f.integer(value)})` : '');
+  // The head names the larger side: the advance ratio on a day more stocks rose than fell.
+  const advancing = valid(item?.rise_ratio) && valid(item?.fall_ratio) && item.rise_ratio > item.fall_ratio;
   return `<div class="mk-breadth" data-market="${key}">
-      <div class="mk-breadth-head"><span>${html(pc.marketNames[key])}</span><b class="down">${copy.fallRatio} ${f.ratioPct(item?.fall_ratio)}</b></div>
+      <div class="mk-breadth-head"><span>${html(pc.marketNames[key])}</span>${advancing ? `<b class="up">${copy.riseRatio} ${f.ratioPct(item.rise_ratio)}</b>` : `<b class="down">${copy.fallRatio} ${f.ratioPct(item?.fall_ratio)}</b>`}</div>
       <div class="mk-breadth-bar" role="img" aria-label="${copy.riseRatio} ${f.ratioPct(item?.rise_ratio)}, ${copy.fallRatio} ${f.ratioPct(item?.fall_ratio)}"><span class="advance" style="width:${share(rise).toFixed(2)}%"></span><span class="flat" style="width:${share(flat).toFixed(2)}%"></span><span class="decline" style="width:${share(fall).toFixed(2)}%"></span></div>
       <div class="mk-breadth-counts"><span class="up">${pc.breadthShort.rise} ${f.integer(item?.rise)}${limit(pc.breadthShort.upper, item?.upper_limit)}</span><span>${pc.breadthShort.flat} ${f.integer(flat)}</span><span class="down">${pc.breadthShort.fall} ${f.integer(item?.fall)}${limit(pc.breadthShort.lower, item?.lower_limit)}</span></div>
     </div>`;
@@ -679,7 +689,7 @@ export function renderMarketDateMain(payload, lang, context = {}) {
       ${breadthPart || foreignPart ? `<p class="mk-summary-sub">${[breadthPart, foreignPart].filter(Boolean).map(html).join(' · ')}</p>` : ''}
       <div class="mk-summary-stats">
         <div><span>${html(pc.fxSummary)}</span><strong>${f.valueUnit('USDKRW', fx?.data_state === 'unavailable' ? null : fx?.close)}</strong><small>${html(pc.fixingNote(shortDate(fx?.source_date || date)))}</small></div>
-        <div><span>${html(pc.vixSummary)}</span><strong>${f.valueUnit('VIX', vix?.data_state === 'unavailable' ? null : vix?.close)}${valid(vix?.change_pct) ? ` <em class="${f.signClass(vix.change_pct)}">${f.pct(vix.change_pct)}</em>` : ''}</strong><small>${html(pc.usCloseNote(shortDate(vix?.source_date)))}</small></div>
+        <div><span>${html(pc.vixSummary)}</span><strong>${f.valueUnit('VIX', vix?.data_state === 'unavailable' ? null : vix?.close)}${valid(vix?.change_pct) ? ` <em class="${f.signClass(vix.change_pct)}">${f.pct(vix.change_pct)}</em>` : ''}</strong><small>${shortDate(vix?.source_date) ? html(pc.usCloseNote(shortDate(vix.source_date))) : ''}</small></div>
       </div>
     </article>`;
 
@@ -712,12 +722,20 @@ export function renderMarketDateMain(payload, lang, context = {}) {
     return f.ko ? `${sign}${text}` : text.replace(/^KRW /, `KRW ${sign}`);
   };
   const basisState = value => (f.ko ? value : { 콘탱고: 'Contango', 백워데이션: 'Backwardation', 중립: 'Flat' }[value]) || value || '--';
+  // The futures contract behind the basis, as TODAY names it: "선물(2612)" / "Futures (2612)".
+  const futureLabel = name => {
+    const text = String(name || '').trim();
+    if (!text) return pc.future;
+    if (f.ko) return text;
+    const month = /\((\d{4})\)/.exec(text);
+    return month ? `${pc.future} (${month[1]})` : pc.future;
+  };
   const stat = (label, value, sub = '', cls = '') => `<div class="mk-stat"><span>${html(label)}</span><strong class="${cls}">${value}</strong>${sub ? `<small>${sub}</small>` : ''}</div>`;
   const shortSummary = shorts.market_summary || {};
   const stats = [
     ...['KOSPI', 'KOSDAQ'].filter(m => internals.turnover?.[m]).map(m => stat(pc.turnoverOf(pc.marketNames[m]), f.won(internals.turnover[m].value_won), valid(internals.turnover[m].ratio5) ? html(pc.ratio5Text(f.number(internals.turnover[m].ratio5, 2))) : '')),
     program.program_trading ? stat(pc.programTotal, signedWon(programItem('전체')), `${html(pc.arbitrage)} ${signedWon(programItem('차익'))} · ${html(pc.nonArbitrage)} ${signedWon(programItem('비차익'))}`, f.signClass(programItem('전체'))) : '',
-    program.basis ? stat(pc.basis, f.signed(program.basis.basis, 2), `<span class="state-chip">${html(basisState(program.basis.market_state))}</span> ${html(pc.spot)} ${f.number(program.basis.kospi200_spot, 2)}`, f.signClass(program.basis.basis)) : '',
+    program.basis ? stat(pc.basis, f.signed(program.basis.basis, 2), `<span class="state-chip">${html(basisState(program.basis.market_state))}</span> ${html(pc.spot)} ${f.number(program.basis.kospi200_spot, 2)}${valid(program.basis.future) ? ` · <span>${html(futureLabel(program.basis.future_name))}</span> ${f.number(program.basis.future, 2)}` : ''}`, f.signClass(program.basis.basis)) : '',
     ...['KOSPI', 'KOSDAQ'].filter(m => shortSummary[m]).map(m => stat(pc.shortRatioOf(pc.marketNames[m]), f.ratioPct(shortSummary[m].short_value_ratio), `${html(copy.shortAmount)} ${f.won(shortSummary[m].short_value_won)}`))
   ].filter(Boolean).join('');
   const shortScopeNote = ['KOSPI', 'KOSDAQ'].some(m => /NXT/.test(String(shortSummary[m]?.coverage_scope || '')))
@@ -1068,7 +1086,7 @@ async function loadShell(env, url, lang) {
  * that is not a session or the archive goes on to the static site, so
  * /market/ itself is untouched.
  */
-export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MARKET_DATE_TIME_BUDGET_MS } = {}) {
+export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MARKET_DATE_TIME_BUDGET_MS, trendBudgetMs = MARKET_TREND_BUDGET_MS } = {}) {
   const { request, env } = context;
   const url = new URL(request.url);
   const route = parseMarketPagePath(url.pathname);
@@ -1102,8 +1120,9 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
     const postsPromise = Promise.resolve().then(() => (loadPostsFn || loadPosts)(request, env)).catch(() => []);
     // The session's KOFIA yields fail soft: without them the page is as before.
     const ratesPromise = withinBudget(loadDomesticRatesDay(env, route.date), budgetMs).catch(() => null);
-    // The trend lines fail soft too: without them the cards and rows have none.
-    const trendPromise = withinBudget(loadSessionTrend(env, route.date), budgetMs).catch(() => null);
+    // The trend lines fail soft too, on a shorter budget of their own: a slow
+    // read leaves the cards and rows without lines instead of holding the page.
+    const trendPromise = withinBudget(loadSessionTrend(env, route.date), Math.min(budgetMs, trendBudgetMs)).catch(() => null);
     const [data, shell, posts, domesticRates, trend] = await Promise.all([loadMarketDate(env, route.date, { budgetMs }), loadShell(env, url, route.lang), postsPromise, ratesPromise, trendPromise]);
     if (!data) return notFound(env, url);
     return htmlResponse(marketDatePageHtml(shell, data.payload, route.lang, {
