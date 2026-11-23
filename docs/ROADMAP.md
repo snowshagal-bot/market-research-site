@@ -67,11 +67,12 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 - **Stock rankings (proposal 6, 2026-11-23, two Draft PRs)**: `stock_rankings`, an optional SOFT
   section of contract 1.2.0: per KRX market the top five gainers, losers and stocks by trading
   value, and the count of stocks at a new 52-week high/low (stocks only, no ETF/ETN). Source:
-  Naver's ranking lists saved by the regular snapshot task in 15:31~15:39 KST (from 15:40 NXT
-  after-market trades change them); the 16:05 export carries the section only when the last two
-  captures agree, else `unavailable`. Pages: a section right after the market breadth on TODAY and
-  session pages. Forward only. Before rollout, confirm on a live trading day that the in-window
-  lists match the regular session (the stock count of `up` against the breadth rise count).
+  Naver's ranking lists saved by the regular snapshot task in 15:35~15:39 KST (from 15:40 NXT
+  after-market trades change them; the 2026-11-23 live check found them still settling at
+  15:31~15:34, so the 15:32 and 15:34 runs skip them). The 16:05 export carries the section only
+  when the last two captures agree and every listed stock matches its KRX 15:30 bar close and
+  volume, else `unavailable`. Pages: a section right after the market breadth on TODAY and session
+  pages, the 52-week counts labelled as Naver's intraday count (owner). Forward only.
   Rollout order (owner approval): website PR first (the receiver rejects unknown keys), then the
   publisher PR; rebuild the core and install it (markets.json is unchanged).
 

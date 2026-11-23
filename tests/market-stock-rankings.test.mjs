@@ -9,7 +9,7 @@ import { marketDatePageHtml } from '../functions/_market-date-page.js';
 
 // Stock rankings (proposal 6, 2026-11-23): per KRX market the top five gainers,
 // losers and stocks by trading value, and how many stocks set a 52-week high
-// or low. The collector saves Naver's ranking lists in the 15:31~15:39 KST
+// or low. The collector saves Naver's ranking lists in the 15:35~15:39 KST
 // regular snapshot window (from 15:40 NXT after-market trades move them) and
 // exports the section only when its last two captures agree. SOFT and
 // optional within contract 1.2.0: records before it carry neither the section
@@ -57,7 +57,7 @@ function rankings(date) {
   return {
     source_date: date,
     as_of: `${date}T15:38:19+09:00`,
-    source: '네이버 금융 국내주식 순위 · 정규장 마감 직후(15:31~15:39) 캡처',
+    source: '네이버 금융 국내주식 순위 · 정규장 마감 후 15:35~15:39 캡처',
     markets: {
       KOSPI: {
         top_gainers: [
