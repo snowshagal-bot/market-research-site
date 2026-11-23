@@ -56,11 +56,14 @@ rules at the end of the CSS). The mountain hero is gone from every page, and the
 Redesign follow-ups (2026-11-23): TODAY (`assets/market-close.js`) and the session
 page (`functions/_market-date-page.js`) draw the same record with two renderers.
 `tests/market-render-parity.test.mjs` renders one payload through both and
-compares the boards (row order, values, changes, trend lines), the index cards,
-flows, breadth, stats, the day in brief, the top 10 and the `mk-` classes; the
-differences that are on purpose (four Korean instrument names, the state line,
-TODAY's date bar and toggles, the session page's sectors card) are listed in
-that file, so a change to one side that does not reach the other fails. Rules
+compares the boards (row order, names, values, changes, trend lines), the index
+cards, flows, breadth, stats, the day in brief, the top 10 and the `mk-` classes;
+the differences that are on purpose (the state line, TODAY's date bar and
+toggles, the session page's sectors card) are listed in that file, so a change
+to one side that does not reach the other fails. Board names are the site's own
+on both pages (VIX 변동성, 원/100엔, 달러인덱스, 금 선물, 은 선물, 구리 선물 …):
+TODAY no longer prefers the record's `name`, which for GOLD was "국제 금" in the
+collector's earlier records. Rules
 both sides share: a trend line is drawn only when the series has that session's
 own value (a series that never moved is a level line at mid height); the breadth
 head names the larger side (상승비율 on a day more stocks rose than fell); the

@@ -17,8 +17,27 @@ const read = (file) => fs.readFileSync(path.join(rootDir, file), 'utf8');
 const LOCALE_JS = read('assets/locale.js');
 const MARKET_JS = read('assets/market-close.js');
 const CSS = read('assets/market-close.css');
-const FIXTURE = JSON.parse(read('contracts/market_close/market_close.example.json'));
-const DATE = FIXTURE.meta.market_date;
+const EXAMPLE = JSON.parse(read('contracts/market_close/market_close.example.json'));
+const DATE = EXAMPLE.meta.market_date;
+
+// The contract example plus every optional instrument the boards can show
+// (Asian indices, VKOSPI, the newer FX pairs and commodities), each copied from
+// a sibling and given a collector name unlike the site's, so the names test
+// covers every code and shows that the site's own name wins on both pages.
+const FIXTURE = (() => {
+  const payload = structuredClone(EXAMPLE);
+  const extra = {
+    indices: { NIKKEI225: 'NASDAQ', SHANGHAI: 'NASDAQ', TAIEX: 'NASDAQ' },
+    rates_fx_volatility: { VKOSPI: 'VIX', CNYKRW: 'JPYKRW', EURKRW: 'JPYKRW', USDJPY: 'DXY' },
+    commodities_crypto: { BRENT: 'WTI', NATGAS: 'WTI', SILVER: 'GOLD', COMEX_COPPER: 'GOLD' }
+  };
+  for (const [group, codes] of Object.entries(extra)) {
+    for (const [code, from] of Object.entries(codes)) {
+      payload[group][code] = { ...structuredClone(payload[group][from]), symbol: code, name: `${code} 수집기 표기` };
+    }
+  }
+  return payload;
+})();
 
 // That day's KOFIA yields and a trend that ends on the session, for every code of the record.
 const RATES = {
@@ -81,9 +100,15 @@ function rows(html) {
   }));
 }
 
-// The Korean instrument names the two renderers have always worded differently
-// (client → server). English names are identical. Not a licence for more.
-const KO_NAME_DIFFERENCES = { 'VIX 변동성': 'VIX', '원/100엔': '원/엔(100엔)', 달러인덱스: '달러 인덱스', '국제 금': '금' };
+// TODAY's Korean board names, which the session page uses too (2026-11-23).
+// The record's own name is used for neither: GOLD was "국제 금" in the
+// collector's earlier records and "금 선물" later.
+const KO_BOARD_NAMES = {
+  NASDAQ: '나스닥 종합', DOW: '다우존스', SP500: 'S&P 500', SOX: '필라델피아 반도체', NIKKEI225: '닛케이225', SHANGHAI: '상해종합', TAIEX: '대만 가권',
+  VIX: 'VIX 변동성', VKOSPI: 'VKOSPI', US10Y: '미국 국채 10년', KTB3Y: '국고채 3년', KTB10Y: '국고채 10년', CORPAA3Y: '회사채 AA- 3년', CD91: 'CD 91일',
+  USDKRW: '원/달러', JPYKRW: '원/100엔', CNYKRW: '원/위안', EURKRW: '원/유로', DXY: '달러인덱스', USDJPY: '엔/달러',
+  WTI: 'WTI 원유', BRENT: '브렌트유', NATGAS: '천연가스', GOLD: '금 선물', SILVER: '은 선물', COMEX_COPPER: '구리 선물', BITCOIN: '비트코인'
+};
 
 for (const lang of ['ko', 'en']) {
   test(`${lang}: the quote boards hold the same rows, values, changes and trend lines on TODAY and on the session page`, () => {
@@ -95,15 +120,17 @@ for (const lang of ['ko', 'en']) {
 
     const a = rows(client);
     const b = rows(server);
-    assert.ok(a.length >= 16, `rows on TODAY: ${a.length}`);
+    // Every instrument the boards can show is in this payload.
+    assert.deepEqual(a.map(row => row.code).sort(), Object.keys(KO_BOARD_NAMES).sort(), 'rows on TODAY');
     assert.deepEqual(b.map(row => row.code), a.map(row => row.code), 'row order');
     for (const [index, row] of a.entries()) {
       assert.equal(b[index].value, row.value, `${row.code} value`);
       assert.equal(b[index].change, row.change, `${row.code} change`);
       assert.equal(b[index].line, row.line, `${row.code} trend line`);
       assert.equal(row.line, true, `${row.code} has a trend line in this fixture`);
-      const expectedName = lang === 'ko' ? KO_NAME_DIFFERENCES[row.name] || row.name : row.name;
-      assert.equal(b[index].name, expectedName, `${row.code} name`);
+      assert.equal(b[index].name, row.name, `${row.code} name`);
+      if (lang === 'ko') assert.equal(row.name, KO_BOARD_NAMES[row.code], `${row.code} Korean name`);
+      assert.doesNotMatch(row.name, /수집기 표기|국제 금/, `${row.code} uses the site's name, not the record's`);
     }
   });
 
