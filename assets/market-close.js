@@ -262,7 +262,9 @@
     ? `<a class="instrument-history-link" href="${ko ? '' : '/en'}/market/${historySlug(key)}/">${text}</a>`
     : text;
   // A failed instrument may carry its code as its name; the Korean page then uses its own word.
-  const instrumentName = (key, item) => ko ? ((item?.name && item.name !== key ? item.name : '') || namesKo[key] || key) : (names[key] || key);
+  // The site's own name first, so a code reads the same on every date and on
+  // the dated pages; the record's name only for a code the site has no name for.
+  const instrumentName = (key, item) => ko ? (namesKo[key] || (item?.name && item.name !== key ? item.name : '') || key) : (names[key] || key);
   const groupName = item => {
     const locale = root.MARKET_LOCALE;
     return locale && typeof locale.krxGroupName === 'function' ? locale.krxGroupName(item, ko ? 'ko' : 'en') : String(item?.name || '');

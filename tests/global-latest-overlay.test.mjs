@@ -322,7 +322,7 @@ test('6-8. MARKET TODAY: stale, future and malformed items keep their snapshot f
   const html = target.innerHTML;
   for (const [name, value, state] of [
     ['S&P 500', '7,764.64', '2026.09.22 · 최근 종가'], // stale intraday
-    ['국제 금', '$4,356.40', '2026.09.23 · 마감 시점'], // stale intraday
+    ['금 선물', '$4,356.40', '2026.09.23 · 마감 시점'], // stale intraday
     ['달러인덱스', '100.76', '2026.09.23 · 마감 시점'], // future as_of
     ['WTI 원유', '$90.29', '2026.09.23 · 마감 시점'], // change contradicts value
     ['비트코인', '$86,073', '2026.09.23 · 마감 시점'], // no previous close
@@ -466,7 +466,7 @@ test('a wrong browser clock cannot make a stale observation current: the server 
   });
   await runtime.init();
   // GOLD (as_of 17:40Z) would look fresh by the browser clock alone.
-  assert.equal(byName(target.innerHTML, '국제 금').basis, 'snapshot');
+  assert.equal(byName(target.innerHTML, '금 선물').basis, 'snapshot');
   assert.equal(overlayCount(target.innerHTML), 6);
 });
 

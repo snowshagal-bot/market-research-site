@@ -238,14 +238,14 @@ test('session pages show the seven rows with their own units and link those with
   assert.deepEqual(order, ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY']);
   assert.match(ko, /href="\/market\/cnykrw\/">원\/위안<\/a>[\s\S]*?200\.26원[\s\S]*?15:30 확정/);
   assert.match(ko, /href="\/market\/usdjpy\/">엔\/달러<\/a>[\s\S]*?158\.51엔/);
-  assert.match(ko, /href="\/market\/copper\/">구리<\/a>[\s\S]*?\$5\.477[\s\S]*?▼ −0\.148/);
+  assert.match(ko, /href="\/market\/copper\/">구리 선물<\/a>[\s\S]*?\$5\.477[\s\S]*?▼ −0\.148/);
   assert.match(ko, /href="\/market\/natgas\/">천연가스<\/a>[\s\S]*?\$3\.748/);
   assert.match(en, /href="\/en\/market\/eurkrw\/">EUR\/KRW<\/a>[\s\S]*?₩1,467\.46/);
   assert.match(en, /href="\/en\/market\/usdjpy\/">USD\/JPY<\/a>[\s\S]*?¥158\.51/);
   assert.match(en, /href="\/en\/market\/brent\/">Brent Crude<\/a>[\s\S]*?\$89\.95/);
   // Silver failed that day: its row stays, not a link (its page may not exist yet).
   assert.doesNotMatch(ko, /\/market\/silver\//);
-  assert.match(ko, /<span class="mk-row-name">은<\/span>/);
+  assert.match(ko, /<span class="mk-row-name">은 선물<\/span>/);
   // A record from before the new indicators shows the rows it always had.
   const old = marketDatePageHtml(SHELLS.ko, complete12(), 'ko', context);
   assert.doesNotMatch(old, /cnykrw|copper|brent|JPY=X/);
