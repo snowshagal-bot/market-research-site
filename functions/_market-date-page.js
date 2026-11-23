@@ -189,7 +189,7 @@ const COPY = {
     overseas: '* 해외 지수·원자재는 각 시장의 최신 거래일 종가',
     sections: ['주요 지수', '투자자별 매매동향 (당일)', '최근 5거래일 누적 수급', '금리 · 환율 · 변동성', '원자재 · 가상자산', '시장 폭', 'KRX 업종 · 테마 등락률', '시가총액 상위 10종목', '공매도 현황', '국내 금리'],
     asiaTitle: '아시아 증시', localHoliday: '현지 휴장',
-    open: '시가', high: '고가', low: '저가', previous: '전일', closeState: '종가', fixedClose: '15:30 확정',
+    open: '시가', high: '고가', low: '저가', previous: '전일', closeState: '종가', fixedClose: '15:30 확정', intraday: '장중', unavailable: '데이터 없음',
     market: '시장', foreign: '외국인', institution: '기관', individual: '개인', futures: '선물',
     fiveDays: (start, end) => `${start} – ${end}`,
     fiveDayIncomplete: (used, total) => `데이터 불완전 · ${used}/${total} 거래일 확보`,
@@ -217,7 +217,7 @@ const COPY = {
     overseas: '* Overseas indices and commodities use each market’s latest close.',
     sections: ['Major Indices', 'Investor Flows (Daily)', 'Cumulative Flows: Last 5 Sessions', 'Rates · FX · Volatility', 'Commodities · Crypto', 'Market Breadth', 'KRX Sectors & Themes', 'Top 10 by Market Cap', 'Short Selling', 'Korean Bond Yields'],
     asiaTitle: 'Asian Markets', localHoliday: 'Local holiday',
-    open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', closeState: 'Close', fixedClose: '15:30 fixing',
+    open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', closeState: 'Close', fixedClose: '15:30 fixing', intraday: 'Intraday', unavailable: 'Unavailable',
     market: 'Market', foreign: 'Foreign', institution: 'Institution', individual: 'Retail', futures: 'KOSPI 200 Futures',
     fiveDays: (start, end) => `${start} – ${end}`,
     fiveDayIncomplete: (used, total) => `Incomplete data · ${used}/${total} sessions available`,
@@ -480,11 +480,20 @@ function instrumentParts(key, item, f, copy, lang, marketDate) {
       : `${arrow} ${f.signed(item?.change, digitsOf(key))} <span>(${f.pct(item?.change_pct)})</span>`;
   // An Asian index dated before the session: its market was closed that day.
   const localHoliday = ASIA_CODES.includes(key) && ISO_DATE.test(String(item?.source_date || '')) && ISO_DATE.test(String(marketDate)) && item.source_date < marketDate;
-  const state = `${dotDate(item?.source_date, lang)} · ${isFx ? copy.fixedClose : copy.closeState}${localHoliday ? ` · ${copy.localHoliday}` : ''}`;
+  // The same basis as TODAY (assets/market-close.js stateText): a KRW pair is
+  // its 15:30 fixing; a figure still trading when the record was made says so,
+  // with its capture time ("장중 · 16:10 KST"), and is never called a close.
+  const intraday = !isFx && item?.data_state === 'intraday';
+  const captured = intraday ? globalThis.MARKET_LOCALE.intradayCaptureTime(item) : '';
+  const basis = !item || item.data_state === 'unavailable'
+    ? copy.unavailable
+    : isFx ? copy.fixedClose : intraday ? (captured ? `${copy.intraday} · ${captured}` : copy.intraday) : copy.closeState;
+  const state = `${dotDate(item?.source_date, lang)} · ${basis}${localHoliday ? ` · ${copy.localHoliday}` : ''}`;
   // An optional indicator's page exists once a record has its value.
   const history = marketIndicatorPath(key, lang) && (!isOptionalIndicator(key) || valid(item?.close)) ? marketIndicatorPath(key, lang) : null;
   const name = history ? `<a class="instrument-history-link" href="${history}">${html(instrumentName(key, lang))}</a>` : html(instrumentName(key, lang));
-  return { movementClass, change, state, name, value: f.valueUnit(key, item?.close) };
+  // The figure TODAY shows (displayValue): the record's own reading for one still trading.
+  return { movementClass, change, state, name, value: f.valueUnit(key, intraday && valid(item?.current) ? item.current : item?.close) };
 }
 
 function indexCard(key, item, f, copy, pc, lang, marketDate, trend) {

@@ -455,3 +455,9 @@ html[data-theme="dark"] .mk-summary{border:1px solid var(--line)}
 .mk-flow-table tbody td{padding-left:6px}
 .mk-flow-value{font-size:12px}
 }
+/* Date bar: "전체 기록" and "지표별 기록" side by side; under 1024px the two links take their own row below the view buttons, so neither the buttons nor the links are squeezed. */
+.mk-datebar-links{display:inline-flex;align-items:center;gap:16px;flex-wrap:wrap}
+@media(max-width:1023px){
+.mk-datebar-modes{flex-wrap:wrap;row-gap:2px}
+.mk-datebar-links{flex-basis:100%;justify-content:flex-start;gap:20px}
+}

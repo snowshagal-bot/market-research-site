@@ -341,8 +341,9 @@ test('TODAY shows six FX and seven commodity rows, and keeps the old three and t
     // Natural gas failed: the card stays, without a link to a page that may not exist yet.
     assert.doesNotMatch(html, /\/market\/natgas\//);
     assert.match(html, lang === 'ko' ? /천연가스[\s\S]*?데이터 없음/ : /Natural Gas[\s\S]*?Unavailable/);
-    // KRW pairs: the 15:30 fixing, then the live quote.
-    assert.match(html, lang === 'ko' ? /200\.26원[\s\S]*?15:30 확정[\s\S]*?현재[\s\S]*?201\.68원/ : /₩200\.26[\s\S]*?15:30 close[\s\S]*?Latest[\s\S]*?₩201\.68/);
+    // KRW pairs: the 15:30 fixing only. The record's other reading has no time of its own and is not shown.
+    assert.match(html, lang === 'ko' ? /15:30 확정[\s\S]*?200\.26원/ : /15:30 fixing[\s\S]*?₩200\.26/);
+    assert.doesNotMatch(html, /201\.68/);
     assert.match(html, lang === 'ko' ? /158\.51엔/ : /¥158\.51/);
     assert.match(html, /\$5\.477[\s\S]*?▼ −0\.148/);
   }

@@ -487,7 +487,7 @@ export async function onRequest(context) {
   } catch (_) {}
 
   const tagBootstrap = serializeTagRegistryBootstrap(tags);
-  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=2af8dce9f2"></script><script src="/assets/report-shell.js?v=b59a7b24a9" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
+  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=b9ee9a3e99"></script><script src="/assets/report-shell.js?v=b59a7b24a9" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
   const footerStyle = `<style id="site-footer-css">${footerCss()}</style>`;
   const footerMarkup = siteFooter(lang, { reportTranslationHref });
   // One feed link per page, for the page's own language. Any Atom link the

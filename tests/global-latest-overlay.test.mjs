@@ -322,10 +322,11 @@ test('6-8. MARKET TODAY: stale, future and malformed items keep their snapshot f
   const html = target.innerHTML;
   for (const [name, value, state] of [
     ['S&P 500', '7,764.64', '2026.09.22 · 최근 종가'], // stale intraday
-    ['금 선물', '$4,356.40', '2026.09.23 · 마감 시점'], // stale intraday
-    ['달러인덱스', '100.76', '2026.09.23 · 마감 시점'], // future as_of
-    ['WTI 원유', '$90.29', '2026.09.23 · 마감 시점'], // change contradicts value
-    ['비트코인', '$86,073', '2026.09.23 · 마감 시점'], // no previous close
+    // A record figure that was trading at capture carries the record's capture time (retrieved_at, KST).
+    ['금 선물', '$4,356.40', '2026.09.23 · 마감 시점 · 17:46 KST'], // stale intraday
+    ['달러인덱스', '100.76', '2026.09.23 · 마감 시점 · 17:46 KST'], // future as_of
+    ['WTI 원유', '$90.29', '2026.09.23 · 마감 시점 · 17:46 KST'], // change contradicts value
+    ['비트코인', '$86,073', '2026.09.23 · 마감 시점 · 17:46 KST'], // no previous close
     ['다우존스', '51,863.70', '2026.09.22 · 최근 종가'] // absent
   ]) {
     const card = byName(html, name);
@@ -454,7 +455,7 @@ test('17. MARKET EN shows the same overlay with English basis', async () => {
   assert.deepEqual(enCards.map(card => card.basis), koCards.map(card => card.basis));
   assert.equal(byName(en.target.innerHTML, 'NASDAQ Composite').state, 'Sep 25, 2026 · Intraday As of Sep 26, 04:15 KST');
   assert.equal(byName(en.target.innerHTML, 'US 10Y').state, 'Sep 25, 2026 · Close');
-  assert.equal(byName(en.target.innerHTML, 'Gold').state, 'Sep 23, 2026 · At KRX close');
+  assert.equal(byName(en.target.innerHTML, 'Gold').state, 'Sep 23, 2026 · At KRX close · 17:46 KST');
   assert.equal(byName(en.target.innerHTML, 'USD/KRW').value, '₩1,354.40');
 });
 
