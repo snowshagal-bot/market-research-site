@@ -318,7 +318,14 @@ async function dashboard(lang) {
   return window.MARKET_CLOSE;
 }
 
-test('TODAY shows nine rate and seven commodity cards, and keeps the old six and three for older records', async () => {
+// The rows of one quote board ('world', 'rates', 'fx', 'commodities'), by instrument code.
+const boardCodes = (html, id) => {
+  const start = html.indexOf(`data-board="${id}"`);
+  const board = html.slice(start, html.indexOf('</section>', start));
+  return [...board.matchAll(/<tr class="mk-row"[^>]* data-code="([A-Z0-9_]+)"/g)].map(m => m[1]);
+};
+
+test('TODAY shows six FX and seven commodity rows, and keeps the old three and three for older records', async () => {
   const data = withNew(complete12());
   data.commodities_crypto.NATGAS = unavailable(data.commodities_crypto.NATGAS);
   for (const [lang, prefix] of [['ko', ''], ['en', '/en']]) {
@@ -326,10 +333,8 @@ test('TODAY shows nine rate and seven commodity cards, and keeps the old six and
     const target = { innerHTML: '' };
     runtime.render(data, target);
     const html = target.innerHTML;
-    const rates = html.slice(html.indexOf('<div class="mini-instrument-grid">'), html.indexOf('commodity-grid'));
-    const commodities = html.slice(html.indexOf('commodity-grid'), html.indexOf('market-section-4'));
-    assert.equal((rates.match(/<article class="instrument-card/g) || []).length, 9, lang);
-    assert.equal((commodities.match(/<article class="instrument-card/g) || []).length, 7, lang);
+    assert.deepEqual(boardCodes(html, 'fx'), ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY'], lang);
+    assert.deepEqual(boardCodes(html, 'commodities'), ['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER', 'BITCOIN'], lang);
     for (const slug of ['cnykrw', 'eurkrw', 'usdjpy', 'brent', 'silver', 'copper']) {
       assert.match(html, new RegExp(`<a class="instrument-history-link" href="${prefix}/market/${slug}/">`), `${lang} ${slug}`);
     }
@@ -344,8 +349,8 @@ test('TODAY shows nine rate and seven commodity cards, and keeps the old six and
   const runtime = await dashboard('ko');
   const target = { innerHTML: '' };
   runtime.render(complete12(), target);
-  const rates = target.innerHTML.slice(target.innerHTML.indexOf('<div class="mini-instrument-grid">'), target.innerHTML.indexOf('commodity-grid'));
-  assert.equal((rates.match(/<article class="instrument-card/g) || []).length, 6);
+  assert.deepEqual(boardCodes(target.innerHTML, 'fx'), ['USDKRW', 'JPYKRW', 'DXY']);
+  assert.deepEqual(boardCodes(target.innerHTML, 'commodities'), ['WTI', 'GOLD', 'BITCOIN']);
   assert.doesNotMatch(target.innerHTML, /cnykrw|copper|brent|usdjpy/);
 });
 

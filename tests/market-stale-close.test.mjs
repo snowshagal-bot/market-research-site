@@ -309,7 +309,8 @@ test('MARKET KO/EN show the availability notice only on a stale TODAY view', asy
   }
 
   const koHtml = renderMarket(ko, { latest: '2026-09-15', expected: '2026-09-16' });
-  assert.match(koHtml, /<p class="market-date">2026\.09\.15 · 15:30 KST 마감 기준<\/p>\s*<div class="market-availability" role="status"><p class="market-availability-badge">마지막 검증 완료 · 9월 15일<\/p><p class="market-availability-note">9월 16일 Market Close 데이터셋은 검증 미완료로 제공하지 않습니다\.<\/p><\/div>/);
+  // The notice sits in the page head, right under its title and meta line.
+  assert.match(koHtml, /<h1 id="market-close-heading">9월 15일 한국 증시 마감<\/h1>[\s\S]*?<div class="mk-notices"><div class="market-availability" role="status"><p class="market-availability-badge">마지막 검증 완료 · 9월 15일<\/p><p class="market-availability-note">9월 16일 Market Close 데이터셋은 검증 미완료로 제공하지 않습니다\.<\/p><\/div>/);
   assert.doesNotMatch(koHtml, /market-transparency-card/);
 
   const enHtml = renderMarket(en, { latest: '2026-09-15', expected: '2026-09-18' });

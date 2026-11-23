@@ -34,7 +34,7 @@
 <link rel="stylesheet" href="/assets/brand.css?v=e9db46679f">
 <link rel="stylesheet" href="/assets/language.css?v=0c4ca7f4fc">
 <link rel="stylesheet" href="/assets/home-v2.css?v=6def21ee7c">
-<link rel="stylesheet" href="/assets/market-close.css?v=c9d3d19ff6">
+<link rel="stylesheet" href="/assets/market-close.css?v=7402a8d7ad">
 <link rel="preload" as="image" href="/assets/market-close-mountain.webp" media="(min-width: 761px)">
 <link rel="preload" as="image" href="/assets/market-close-mountain-mobile.webp" media="(max-width: 760px)">
 <script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
@@ -67,31 +67,24 @@
   </div>
 </header>
 <main id="market-close-root">
-  <section class="market-hero" aria-labelledby="market-close-heading">
-    <div class="market-wrap market-hero-inner">
-      <div class="market-hero-copy">
-        <p class="market-eyebrow">SNOWSHAGAL</p>
-        <h1 id="market-close-heading">MARKET CLOSE</h1>
-        <p class="market-subtitle">How did the Korean market close today?</p>
-        <p class="market-date">Comprehensive South Korean market close across indices, flows, FX, and breadth · 15:30 KST official close</p>
-        <p class="market-update">Data updates · Every trading day at 16:05 KST</p>
-        <p class="market-overseas">* Overseas markets use each market’s latest trading session.</p>
-      </div>
-      <div class="market-mountain" aria-hidden="true"></div>
+  <section class="mk-head" aria-labelledby="market-close-heading">
+    <div class="market-wrap">
+      <p class="mk-eyebrow">Korea market close archive</p>
+      <h1 id="market-close-heading">Korea Market Close Today</h1>
+      <p class="mk-lead">KOSPI and KOSDAQ closes, investor flows, rates, FX and commodities as of the 15:30 KST official close. Data updates every trading day at 16:05 KST; overseas markets use each market’s latest trading session.</p>
     </div>
   </section>
   <div class="market-wrap">
-    <div class="market-history-strip">
-      <div class="market-history-modes" role="tablist" aria-label="View mode">
-        <button class="market-mode-btn active" type="button" data-market-action="today" role="tab" aria-selected="true">TODAY</button>
-        <button class="market-mode-btn" type="button" data-market-action="view-1w" role="tab" aria-selected="false">1W</button>
-        <button class="market-mode-btn" type="button" data-market-action="view-1m" role="tab" aria-selected="false">1M</button>
-        <span class="market-mode-divider" aria-hidden="true"></span>
-        <button class="market-mode-btn" type="button" data-market-action="toggle-calendar" role="tab" aria-selected="false" aria-expanded="false">HISTORY</button>
-      </div>
-      <div class="market-history-nav">
-        <span class="market-current-date">Latest Trading Session</span>
-        <button class="market-calendar-toggle" type="button" data-market-action="toggle-calendar" aria-label="Select date from calendar" aria-expanded="false">📅</button>
+    <div class="mk-datebar market-history-strip" role="toolbar" aria-label="Market navigation">
+      <span class="mk-datebar-label">Trading day</span>
+      <div class="mk-datebar-nav market-history-nav"><span class="market-current-date">Latest Trading Session</span></div>
+      <div class="mk-datebar-modes">
+        <div class="market-history-modes" role="group" aria-label="View">
+          <button class="market-mode-btn active" type="button" data-market-action="today" aria-current="page">Latest close</button>
+          <button class="market-mode-btn" type="button" data-market-action="view-1w">1W</button>
+          <button class="market-mode-btn" type="button" data-market-action="view-1m">1M</button>
+        </div>
+        <a class="mk-archive-link" href="/en/market/archive/">All sessions <span aria-hidden="true">↗</span></a>
       </div>
     </div>
     <div id="market-calendar-drawer" class="market-calendar-drawer" hidden></div>
@@ -383,6 +376,6 @@
 <script src="/data/posts.js"></script>
 <script src="/assets/locale.js?v=2af8dce9f2"></script>
 <script src="/assets/site.js?v=53fc86e7b4"></script>
-<script src="/assets/market-close.js?v=31b07cfaec"></script>
+<script src="/assets/market-close.js?v=7651623cc7"></script>
 </body>
 </html>

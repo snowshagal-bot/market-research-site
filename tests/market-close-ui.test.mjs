@@ -56,10 +56,10 @@ test('KO and EN Market pages use only the public latest API at runtime', async (
 test('Market renderer distinguishes loading, empty, and retryable error states', async () => {
   const [ko, en, script] = await Promise.all([read('market/index.html'), read('en/market/index.html'), read('assets/market-close.js')]);
   assert.match(ko, /id="market-close-root"/);
-  assert.match(ko, /class="market-hero"/);
+  assert.match(ko, /class="mk-head"/);
   assert.match(ko, /id="market-dashboard-view"/);
   assert.match(en, /id="market-close-root"/);
-  assert.match(en, /class="market-hero"/);
+  assert.match(en, /class="mk-head"/);
   assert.match(en, /id="market-dashboard-view"/);
   assert.match(script, /response\.status === 404/);
   assert.match(script, /function renderEmpty/);
@@ -75,9 +75,9 @@ test('Market pages deliver substantive initial HTML for search engines and avoid
   const [ko, en] = await Promise.all([read('market/index.html'), read('en/market/index.html')]);
 
   // KO Substantive Content Checks
-  assert.match(ko, /<h1[^>]*>MARKET CLOSE<\/h1>/);
-  assert.match(ko, /오늘 한국 시장은 어떻게 마감했나/);
-  assert.match(ko, /코스피·코스닥 마감 지표와 투자자 수급/);
+  assert.match(ko, /<h1[^>]*>오늘 한국 증시 마감<\/h1>/);
+  assert.match(ko, /한국 증시 마감 기록/);
+  assert.match(ko, /코스피·코스닥 종가와 투자자 수급/);
   assert.match(ko, /15:30 KST 마감 기준/);
   assert.match(ko, /<span>01<\/span>\s*주요 지수/);
   assert.match(ko, /<span>02<\/span>\s*금리 · 환율 · 변동성/);
@@ -89,9 +89,9 @@ test('Market pages deliver substantive initial HTML for search engines and avoid
   assert.match(ko, /숫자 너머의 의미를 해석합니다\./);
 
   // EN Substantive Content Checks
-  assert.match(en, /<h1[^>]*>MARKET CLOSE<\/h1>/);
-  assert.match(en, /How did the Korean market close today\?/);
-  assert.match(en, /Comprehensive South Korean market close across indices/);
+  assert.match(en, /<h1[^>]*>Korea Market Close Today<\/h1>/);
+  assert.match(en, /Korea market close archive/);
+  assert.match(en, /KOSPI and KOSDAQ closes, investor flows/);
   assert.match(en, /15:30 KST official close/);
   assert.match(en, /<span>01<\/span>\s*Major Indices/);
   assert.match(en, /<span>02<\/span>\s*Rates · FX · Volatility/);
@@ -155,14 +155,15 @@ test('program net buys carry an explicit sign like the investor flow tables', as
   data.program_basis.program_trading['차익'].net_buy_won = 27664238323;
   data.program_basis.program_trading['비차익'].net_buy_won = -1186100200573;
   data.program_basis.program_trading['전체'].net_buy_won = 0;
+  // The total is the stat's value; arbitrage and non-arbitrage are its sub-line.
   for (const [lang, rows] of [
-    ['ko', ['>차익</th><td>+277억원<', '>비차익</th><td>−1.19조원<', '>전체</th><td>0원<']],
-    ['en', ['>Arbitrage</th><td>KRW +27.7bn<', '>Non-arbitrage</th><td>KRW −1.19tn<', '>Total</th><td>KRW 0<']]
+    ['ko', ['<span>프로그램 순매수</span><strong class="neutral">0원</strong>', '<small>차익 +277억원 · 비차익 −1.19조원</small>']],
+    ['en', ['<span>Program net buy</span><strong class="neutral">KRW 0</strong>', '<small>Arbitrage KRW +27.7bn · Non-arbitrage KRW −1.19tn</small>']]
   ]) {
     const runtime = await marketRuntime(lang);
     const target = { innerHTML: '' };
     runtime.render(data, target);
-    const program = target.innerHTML.slice(target.innerHTML.indexOf('program-grid'), target.innerHTML.indexOf('basis-panel'));
+    const program = target.innerHTML.slice(target.innerHTML.indexOf('class="mk-stats"'), target.innerHTML.indexOf('class="mk-details"'));
     for (const row of rows) assert.ok(program.includes(row), `${lang}: ${row}`);
     assert.doesNotMatch(program, /-\d/, `${lang}: no ASCII hyphen as a minus sign`);
   }
@@ -183,7 +184,9 @@ test('the English page shows the basis, sources and short-ratio scope in English
     assert.match(html, /<span>Futures \(2612\)<\/span>/);
     assert.match(html, /Sources: KRX, Naver Pay index quotes, Naver Finance daily index, .*Hana Bank 15:30 reference rate \(Naver Finance\) \+ Yahoo Finance latest/);
     assert.match(html, /Value ratio is against KRX\+NXT combined regular-session turnover\./);
-    assert.doesNotMatch(html.slice(html.indexOf('basis-panel'), html.indexOf('</section>', html.indexOf('basis-panel'))), /[ㄱ-ㆎ가-힣]/);
+    const stats = html.slice(html.indexOf('class="mk-stats"'), html.indexOf('class="mk-details"'));
+    assert.ok(stats.includes('Basis'), 'the basis stat is in the stats card');
+    assert.doesNotMatch(stats, /[ㄱ-ㆎ가-힣]/);
     assert.doesNotMatch(html.slice(html.indexOf('market-data-note')), /[ㄱ-ㆎ가-힣]/);
   }
   const ko = await marketRuntime('ko');
@@ -242,7 +245,9 @@ test('unavailable regular-session short-selling and investor subfields never ren
     const runtime = await marketRuntime(lang);
     const target = { innerHTML: '' };
     runtime.render(data, target);
-    const shortSection = target.innerHTML.slice(target.innerHTML.indexOf('short-summary'), target.innerHTML.indexOf('market-bottom-grid'));
+    // The short-selling stats and their top-5 lists sit in the stats card, before the top-10 card.
+    const shortSection = target.innerHTML.slice(target.innerHTML.indexOf('class="mk-stats"'), target.innerHTML.indexOf('mk-top-card'));
+    assert.ok(shortSection.length > 0);
     assert.match(shortSection, note);
     assert.doesNotMatch(shortSection, /(^|[^\d.])0(\.0)?%/);
     assert.match(shortSection, /--/);
@@ -329,7 +334,7 @@ test('Market History UI renders navigation strip, previous/next trading days, an
   const target = { innerHTML: '', addEventListener() {} };
   runtime.render(data, target);
 
-  assert.match(target.innerHTML, /class="market-history-strip"/);
+  assert.match(target.innerHTML, /class="mk-datebar market-history-strip"/);
   assert.match(target.innerHTML, /data-market-action="today"/);
   assert.match(target.innerHTML, /data-market-action="toggle-calendar"/);
   assert.match(target.innerHTML, /class="market-calendar-drawer"/);
@@ -447,8 +452,8 @@ test('retry click triggers init/load exactly once without duplicate calls', asyn
   const script = await read('assets/market-close.js');
   let fetchCount = 0;
   const mockFetch = async (url) => {
-    // The session's KOFIA yields are an optional read beside each load, not part of the init sequence.
-    if (!url.includes('/api/market/rates/')) fetchCount++;
+    // The session's KOFIA yields and the trend lines are optional reads beside each load, not part of the init sequence.
+    if (!url.includes('/api/market/rates/') && !url.includes('/api/market/trend')) fetchCount++;
     if (url.includes('/api/market/dates')) {
       return { ok: true, json: async () => ({ dates: ['2026-08-28'], latest: '2026-08-28', earliest: '2026-08-28' }) };
     }
@@ -525,8 +530,8 @@ test('repeated retries do not accumulate popstate listeners and popstate trigger
   const script = await read('assets/market-close.js');
   let fetchCount = 0;
   const mockFetch = async (url) => {
-    // The session's KOFIA yields are an optional read beside each load, not part of the init sequence.
-    if (!url.includes('/api/market/rates/')) fetchCount++;
+    // The session's KOFIA yields and the trend lines are optional reads beside each load, not part of the init sequence.
+    if (!url.includes('/api/market/rates/') && !url.includes('/api/market/trend')) fetchCount++;
     if (url.includes('/api/market/dates')) {
       return { ok: true, json: async () => ({ dates: ['2026-08-28'], latest: '2026-08-28', earliest: '2026-08-28' }) };
     }
@@ -818,21 +823,23 @@ test('history strip active states and aria-current reflect calendar open and his
   assert.match(target1.innerHTML, /class="market-mode-btn active" type="button" data-market-action="view-1w" aria-current="page">1W/);
   assert.doesNotMatch(target1.innerHTML, /class="market-mode-btn active" type="button" data-market-action="toggle-calendar"/);
 
-  // 2. In 1W mode, calendar OPEN -> 1W inactive, HISTORY active
+  // 2. In 1W mode, calendar OPEN -> 1W inactive, the calendar button active and expanded
   runtime.state.mode = '1w';
   runtime.state.calendarOpen = true;
   const target2 = { innerHTML: '', addEventListener() {} };
   runtime.renderRangeView({ aggregation_version: '1.0.0', period: '1w', window: { sessions_used: 4, required_sessions: 5 }, instruments: { indices: {}, rates_fx_volatility: {}, commodities_crypto: {} }, flows: { markets: {} }, breadth: {}, krx_groups: { coverage_complete: false } }, '1w', target2);
   assert.doesNotMatch(target2.innerHTML, /class="market-mode-btn active" type="button" data-market-action="view-1w"/);
-  assert.match(target2.innerHTML, /class="market-mode-btn active" type="button" data-market-action="toggle-calendar" aria-expanded="true"/);
+  assert.match(target2.innerHTML, /class="market-calendar-toggle mk-date-btn mk-date-btn-quiet active" type="button" data-market-action="toggle-calendar" aria-label="[^"]+" aria-expanded="true"/);
 
-  // 3. In HISTORY mode (date selected) -> HISTORY has aria-current="page"
+  // 3. A selected date (HISTORY) -> no view button is current; the date button names the day
   runtime.state.mode = 'history';
   runtime.state.currentDate = '2026-08-27';
   runtime.state.calendarOpen = false;
   const target3 = { innerHTML: '', addEventListener() {} };
   runtime.render(data, target3);
-  assert.match(target3.innerHTML, /class="market-mode-btn active" type="button" data-market-action="toggle-calendar" aria-expanded="false" aria-current="page"/);
+  assert.doesNotMatch(target3.innerHTML, /class="market-mode-btn active"/);
+  assert.doesNotMatch(target3.innerHTML, /data-market-action="(?:today|view-1w|view-1m)" aria-current="page"/);
+  assert.match(target3.innerHTML, /data-market-action="toggle-calendar" aria-label="[^"]+" aria-expanded="false"><svg[\s\S]*?<span class="market-current-date">2026년 8월 27일 목<\/span>/);
 });
 
 test('renderRangeView with complete coverage renders strongest and weakest sector/theme rankings', async () => {
@@ -981,14 +988,14 @@ test('toggle-calendar click dynamically switches active state from 1W to HISTORY
   // Check state & classes after open
   assert.equal(runtime.state.calendarOpen, true, 'calendar must be open');
   assert.equal(modeButtons[1].classList.contains('active'), false, '1W must be inactive when calendar is open');
-  assert.equal(modeButtons[3].classList.contains('active'), true, 'HISTORY must be active when calendar is open');
+  assert.equal(toggleBtn.classList.contains('active'), true, 'the date button must be active when calendar is open');
 
   // 2. Click toggle-calendar again to close
   await rootClickListener(clickToggleEvent);
 
   assert.equal(runtime.state.calendarOpen, false, 'calendar must be closed');
   assert.equal(modeButtons[1].classList.contains('active'), true, '1W must be restored to active when calendar is closed');
-  assert.equal(modeButtons[3].classList.contains('active'), false, 'HISTORY must be inactive when calendar is closed in 1W mode');
+  assert.equal(toggleBtn.classList.contains('active'), false, 'the date button must be inactive when calendar is closed');
 });
 
 test('Market hero renders the update timestamp notice across TODAY, 1W, 1M, and HISTORY in KO and EN', async () => {
@@ -1004,16 +1011,20 @@ test('Market hero renders the update timestamp notice across TODAY, 1W, 1M, and 
   koRuntime.render(data, koTodayTarget);
   assert.match(
     koTodayTarget.innerHTML,
-    /<p class="market-date">2026\.08\.28 · 15:30 KST 마감 기준<\/p>\s*<p class="market-update">데이터 업데이트 · 매 거래일 16:05 KST<\/p>\s*<p class="market-overseas">\* 해외 시장은 각 시장의 최신 거래일 기준<\/p>/
+    /<p class="mk-meta"><span class="market-update">데이터 업데이트 · 매 거래일 16:05 KST<\/span><span class="market-overseas">해외 시장은 각 시장의 최신 거래일 기준<\/span><\/p>/
   );
+  assert.match(koTodayTarget.innerHTML, /<h1 id="market-close-heading">8월 28일 한국 증시 마감<\/h1>/);
+  assert.match(koTodayTarget.innerHTML, /<p><b>8월 28일 마감<\/b> <span>정규장 15:30 KST 기준<\/span><\/p>/);
 
   // 2. EN TODAY
   const enTodayTarget = { innerHTML: '', addEventListener() {} };
   enRuntime.render(data, enTodayTarget);
   assert.match(
     enTodayTarget.innerHTML,
-    /<p class="market-date">Aug 28, 2026 · Korea close as of 15:30 KST<\/p>\s*<p class="market-update">Data updates · Every trading day at 16:05 KST<\/p>\s*<p class="market-overseas">\* Overseas markets use each market’s latest trading session\.<\/p>/
+    /<p class="mk-meta"><span class="market-update">Data updates · Every trading day at 16:05 KST<\/span><span class="market-overseas">Overseas markets use each market’s latest trading session\.<\/span><\/p>/
   );
+  assert.match(enTodayTarget.innerHTML, /<h1 id="market-close-heading">Korea Market Close · Aug 28<\/h1>/);
+  assert.match(enTodayTarget.innerHTML, /<p><b>Close of Aug 28<\/b> <span>Regular session, 15:30 KST<\/span><\/p>/);
 
   // 3. KO & EN HISTORY
   koRuntime.state.mode = 'history';
@@ -1021,14 +1032,14 @@ test('Market hero renders the update timestamp notice across TODAY, 1W, 1M, and 
   koRuntime.state.currentDate = '2026-08-27';
   const koHistoryTarget = { innerHTML: '', addEventListener() {} };
   koRuntime.render(data, koHistoryTarget);
-  assert.match(koHistoryTarget.innerHTML, /<p class="market-update">데이터 업데이트 · 매 거래일 16:05 KST<\/p>/);
+  assert.match(koHistoryTarget.innerHTML, /<span class="market-update">데이터 업데이트 · 매 거래일 16:05 KST<\/span>/);
 
   enRuntime.state.mode = 'history';
   enRuntime.state.latestDate = '2026-08-28';
   enRuntime.state.currentDate = '2026-08-27';
   const enHistoryTarget = { innerHTML: '', addEventListener() {} };
   enRuntime.render(data, enHistoryTarget);
-  assert.match(enHistoryTarget.innerHTML, /<p class="market-update">Data updates · Every trading day at 16:05 KST<\/p>/);
+  assert.match(enHistoryTarget.innerHTML, /<span class="market-update">Data updates · Every trading day at 16:05 KST<\/span>/);
 
   // 4. KO & EN 1W
   const rangePayload1w = {
@@ -1044,14 +1055,14 @@ test('Market hero renders the update timestamp notice across TODAY, 1W, 1M, and 
   koRuntime.renderRangeView(rangePayload1w, '1w', ko1wTarget);
   assert.match(
     ko1wTarget.innerHTML,
-    /<p class="market-date">현재 누적 · 4 \/ 5 거래일<\/p>\s*<p class="market-update">데이터 업데이트 · 매 거래일 16:05 KST<\/p>/
+    /<p class="mk-lead">2026\.08\.25 — 2026\.08\.28 · 현재 누적 · 4 \/ 5 거래일<\/p>\s*<p class="mk-meta"><span class="market-update">데이터 업데이트 · 매 거래일 16:05 KST<\/span>/
   );
 
   const en1wTarget = { innerHTML: '', addEventListener() {} };
   enRuntime.renderRangeView(rangePayload1w, '1w', en1wTarget);
   assert.match(
     en1wTarget.innerHTML,
-    /<p class="market-date">Partial · 4 \/ 5 sessions<\/p>\s*<p class="market-update">Data updates · Every trading day at 16:05 KST<\/p>/
+    /<p class="mk-lead">Aug 25, 2026 — Aug 28, 2026 · Partial · 4 \/ 5 sessions<\/p>\s*<p class="mk-meta"><span class="market-update">Data updates · Every trading day at 16:05 KST<\/span>/
   );
 
   // 5. KO & EN 1M
@@ -1068,20 +1079,20 @@ test('Market hero renders the update timestamp notice across TODAY, 1W, 1M, and 
   koRuntime.renderRangeView(rangePayload1m, '1m', ko1mTarget);
   assert.match(
     ko1mTarget.innerHTML,
-    /<p class="market-date">20거래일 기준<\/p>\s*<p class="market-update">데이터 업데이트 · 매 거래일 16:05 KST<\/p>/
+    /<p class="mk-lead">2026\.08\.01 — 2026\.08\.28 · 20거래일 기준<\/p>\s*<p class="mk-meta"><span class="market-update">데이터 업데이트 · 매 거래일 16:05 KST<\/span>/
   );
 
   const en1mTarget = { innerHTML: '', addEventListener() {} };
   enRuntime.renderRangeView(rangePayload1m, '1m', en1mTarget);
   assert.match(
     en1mTarget.innerHTML,
-    /<p class="market-date">20-session window<\/p>\s*<p class="market-update">Data updates · Every trading day at 16:05 KST<\/p>/
+    /<p class="mk-lead">Aug 01, 2026 — Aug 28, 2026 · 20-session window<\/p>\s*<p class="mk-meta"><span class="market-update">Data updates · Every trading day at 16:05 KST<\/span>/
   );
 
-  // 6. CSS invariants
+  // 6. CSS invariants: the date pages keep their hero lines; the dashboard's meta line has its own rule.
   assert.match(css, /\.market-date,\s*\.market-update,\s*\.market-overseas/);
   assert.match(css, /\.market-update\{margin-top:2px;font-size:11px;line-height:1\.4\}/);
-  assert.match(css, /@media\(max-width:760px\)[\s\S]*?\.market-update\{font-size:11px;line-height:1\.4\}/);
+  assert.match(css, /\.mk-meta span\{margin:0;font-size:12px;line-height:1\.5;color:var\(--muted\)\}/);
 });
 
 test('Hydration failure fallback: /api/market/latest errors preserve static content, H1, links, and show non-blocking notice', async () => {
@@ -1199,13 +1210,15 @@ test('Hydration failure fallback: /api/market/latest errors preserve static cont
       const { runtime, rootEl } = createMockEnv(htmlContent, lang, scenario.mock);
 
       await runtime.loadAndRender('today');
+      // The script's own init() also loads TODAY and may supersede this call; let it finish.
+      await new Promise(resolve => setTimeout(resolve, 0));
 
       const renderedHtml = rootEl.innerHTML;
       const textOnly = stripTags(renderedHtml);
 
       // Regression checks required by user:
-      // A. MARKET CLOSE H1 is strictly preserved
-      assert.match(renderedHtml, /<h1 id="market-close-heading">MARKET CLOSE<\/h1>/, `[${lang}|${scenario.name}] MARKET CLOSE H1 must be preserved`);
+      // A. The static page H1 is strictly preserved
+      assert.match(renderedHtml, lang === 'ko' ? /<h1 id="market-close-heading">오늘 한국 증시 마감<\/h1>/ : /<h1 id="market-close-heading">Korea Market Close Today<\/h1>/, `[${lang}|${scenario.name}] the static H1 must be preserved`);
       // B. "Could not load the market close" must NEVER be rendered as H1
       assert.doesNotMatch(renderedHtml, /<h1[^>]*>[\s\S]*?Could not load[\s\S]*?<\/h1>/i, `[${lang}|${scenario.name}] Could not load must not be H1`);
       assert.doesNotMatch(renderedHtml, /<h1[^>]*>[\s\S]*?불러오지 못했습니다[\s\S]*?<\/h1>/i, `[${lang}|${scenario.name}] 불러오지 못했습니다 must not be H1`);
@@ -1238,11 +1251,14 @@ test('Hydration failure fallback: /api/market/latest errors preserve static cont
     }));
 
     await runtime.loadAndRender('today');
+    // The script's own init() also loads TODAY and may supersede this call; let it finish.
+    await new Promise(resolve => setTimeout(resolve, 0));
     const renderedHtml = rootEl.innerHTML;
 
-    assert.match(renderedHtml, /<h1 id="market-close-heading">MARKET CLOSE<\/h1>/);
-    assert.match(renderedHtml, /class="major-index-grid"/);
-    assert.match(renderedHtml, /class="instrument-card major"/);
+    // The session's own heading, its index cards and quote boards replace the static overview.
+    assert.match(renderedHtml, lang === 'ko' ? /<h1 id="market-close-heading">8월 28일 한국 증시 마감<\/h1>/ : /<h1 id="market-close-heading">Korea Market Close · Aug 28<\/h1>/);
+    assert.match(renderedHtml, /class="mk-card mk-index" data-code="KOSPI"/);
+    assert.match(renderedHtml, /class="mk-boards" data-active-board="world"/);
     // Fallback notice should NOT be present on success
     assert.doesNotMatch(renderedHtml, /id="market-fallback-notice"/);
   }

@@ -182,12 +182,13 @@ test('TODAY shows VKOSPI after VIX, and nothing for a record without it', async 
     const target = { innerHTML: '' };
     runtime.render(withVkospi(complete12()), target);
     const html = target.innerHTML;
-    const rates = html.slice(html.indexOf('<div class="mini-instrument-grid">'), html.indexOf('commodity-grid'));
-    assert.equal((rates.match(/<article class="instrument-card/g) || []).length, 7, lang);
-    const tickers = [...rates.matchAll(/<small>([^<]+)<\/small>/g)].map(m => m[1]);
-    assert.deepEqual(tickers.slice(0, 3).slice(1), ['^VIX', 'KRX:1-300'], lang);
+    // The overseas board ends with the two volatility indices: VIX, then VKOSPI.
+    const board = html.slice(html.indexOf('data-board="world"'), html.indexOf('data-board="rates"'));
+    const codes = [...board.matchAll(/<tr class="mk-row"[^>]* data-code="([A-Z0-9_]+)"/g)].map(m => m[1]);
+    assert.deepEqual(codes.slice(-2), ['VIX', 'VKOSPI'], lang);
     assert.match(html, new RegExp(`<a class="instrument-history-link" href="${prefix}/market/vkospi/">VKOSPI</a>`), lang);
-    assert.match(rates, /53\.18[\s\S]*?▼ −0\.75/);
+    const row = board.slice(board.indexOf('data-code="VKOSPI"'));
+    assert.match(row, /53\.18[\s\S]*?▼ −0\.75/);
   }
   const runtime = await dashboard('ko');
   const target = { innerHTML: '' };
