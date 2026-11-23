@@ -225,3 +225,16 @@ test('when the data cannot be read the static page goes out with its own note', 
     console.error = originalError;
   }
 });
+
+test('a link to a term lands on it at once: the site-wide smooth scrolling is off for that jump only', () => {
+  // site.css sets html{scroll-behavior:smooth}. A cross-page link to an entry
+  // would animate down a page of several hundred entries (and stalls in a tab
+  // opened in the background), so the glossary turns it off while an entry is
+  // the target. The letter index (a section target) keeps the smooth scroll.
+  assert.match(read('assets/site.css'), /html\{scroll-behavior:smooth/);
+  for (const [lang, page] of Object.entries(PAGES)) {
+    assert.match(page, /html:has\(\.glossary-entry:target\)\{scroll-behavior:auto\}/, lang);
+    assert.match(page, /\.glossary-entry\{[^}]*scroll-margin-top:96px/, lang);
+    assert.doesNotMatch(page, /html\{scroll-behavior:auto\}/, lang);
+  }
+});
