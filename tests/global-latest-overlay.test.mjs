@@ -251,20 +251,37 @@ async function marketPage({ lang = 'ko', global = globalLatest0925(), now = NOW,
   return { runtime: window.MARKET_CLOSE, target, requests };
 }
 
-/** Each instrument card of the rendered page: { name, value, change, state, basis }. */
+/**
+ * Each instrument of the rendered page: { name, value, change, state, basis }.
+ * KOSPI and KOSDAQ are index cards; every other instrument is a quote-board row.
+ */
 function cards(html) {
-  return [...html.matchAll(/<article class="instrument-card[^"]*"( data-basis="(\w+)")?>([\s\S]*?)<\/article>/g)].map(match => {
-    const body = match[3];
-    const text = pattern => (pattern.exec(body)?.[1] || '').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+  const clean = value => (value || '').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+  const indexCards = [...html.matchAll(/<article class="mk-card mk-index" data-code="\w+">([\s\S]*?)<\/article>/g)].map(match => {
+    const body = match[1];
+    const text = pattern => clean(pattern.exec(body)?.[1]);
     return {
-      name: text(/<div class="instrument-heading"><span>([\s\S]*?)<\/span>/),
-      value: text(/<strong class="instrument-value">([\s\S]*?)<\/strong>/),
-      change: text(/<div class="instrument-change [^"]*">([\s\S]*?)<\/div>/),
-      state: text(/<div class="instrument-state">([\s\S]*?)<\/div>\s*$/),
+      name: text(/<span class="mk-index-name">([\s\S]*?)<\/span>/),
+      value: text(/<strong class="mk-index-value">([\s\S]*?)<\/strong>/),
+      change: text(/<div class="mk-index-change [^"]*">([\s\S]*?)<\/div>/),
+      state: text(/<div class="mk-index-state">([\s\S]*?)<\/div>/),
+      basis: null,
+      body
+    };
+  });
+  const rows = [...html.matchAll(/<tr class="mk-row"( data-basis="(\w+)")? data-code="\w+">([\s\S]*?)<\/tr>/g)].map(match => {
+    const body = match[3];
+    const text = pattern => clean(pattern.exec(body)?.[1]);
+    return {
+      name: text(/<span class="mk-row-name">([\s\S]*?)<\/span><span class="mk-row-state">/),
+      value: text(/<td class="mk-row-value"><strong>([\s\S]*?)<\/strong>/),
+      change: text(/<td class="mk-row-change [^"]*">([\s\S]*?)<\/td>/),
+      state: text(/<span class="mk-row-state">([\s\S]*?)<\/span><\/th>/),
       basis: match[2] || null,
       body
     };
   });
+  return [...indexCards, ...rows];
 }
 const byName = (html, name) => cards(html).find(card => card.name === name);
 const overlayCount = html => Number(/data-global-latest="(\d+)"/.exec(html)?.[1] ?? -1);
@@ -272,7 +289,7 @@ const overlayCount = html => Number(/data-global-latest="(\d+)"/.exec(html)?.[1]
 test('11. MARKET TODAY: fresh Global Latest replaces the global cards, each with its own basis', async () => {
   const { runtime, target, requests } = await marketPage();
   await runtime.init();
-  assert.deepEqual(requests, ['/api/market/dates', '/api/market/global/latest', '/api/market/rates/date?date=latest', '/api/market/latest']);
+  assert.deepEqual(requests, ['/api/market/dates', '/api/market/global/latest', '/api/market/rates/date?date=latest', '/api/market/trend', '/api/market/latest']);
   const html = target.innerHTML;
   assert.equal(overlayCount(html), 6);
 
@@ -281,9 +298,8 @@ test('11. MARKET TODAY: fresh Global Latest replaces the global cards, each with
   assert.equal(nasdaq.value, '27,068.72');
   assert.match(nasdaq.change, /▲ \+129\.35 \(\+0\.48%\)/);
   assert.match(nasdaq.state, /^2026\.09\.25 · 장중 9월 26일 04:15 KST 기준$/);
-  // The snapshot's open/high/low belong to 09-22: only the previous close of this observation is shown.
+  // The snapshot's open/high/low belong to 09-22: none of them sits beside the live figure.
   assert.doesNotMatch(nasdaq.body, /시가|고가|저가/);
-  assert.match(nasdaq.body, /<dt>전일<\/dt><dd>26,939\.37<\/dd>/);
 
   const us10y = byName(html, '미국 국채 10년');
   assert.equal(us10y.value, '5.184%');
@@ -296,7 +312,7 @@ test('11. MARKET TODAY: fresh Global Latest replaces the global cards, each with
   const usdkrw = byName(html, '원/달러');
   assert.equal(usdkrw.value, '1,354.40원');
   // The 15:30 fixing context is the snapshot's; it is not shown next to a live figure.
-  assert.doesNotMatch(usdkrw.body, /15:30 확정|instrument-current/);
+  assert.doesNotMatch(usdkrw.body, /15:30 확정|mk-fixing/);
   assert.match(usdkrw.state, /^2026\.09\.25 · 장중/);
 });
 
@@ -331,11 +347,12 @@ test('12. MARKET TODAY: KRX figures and sections are the snapshot, untouched', a
     assert.equal(card.basis, null);
     assert.deepEqual(card, byName(base, name));
   }
-  // Everything below the global sections (breadth, flows, program/basis,
-  // internals, short selling, market cap) is byte-identical.
-  const tail = html => html.slice(html.indexOf('id="market-section-4"'));
-  assert.equal(tail(overlaid), tail(base));
-  assert.match(overlaid, /<p class="market-date">2026\.09\.23 · 15:30 KST 마감 기준<\/p>/);
+  // The Korean market section (flows, breadth, program/basis, internals,
+  // short selling, market cap) is byte-identical.
+  const korea = html => html.slice(html.indexOf('id="mk-kr-title"'), html.indexOf('id="mk-global-title"'));
+  assert.ok(korea(base).length > 1000);
+  assert.equal(korea(overlaid), korea(base));
+  assert.match(overlaid, /<p><b>9월 23일 마감<\/b> <span>정규장 15:30 KST 기준<\/span><\/p>/);
 });
 
 test('9-10. MARKET TODAY: API failure, empty, malformed or late Global Latest leaves the Market Close page as it is', async () => {
@@ -395,7 +412,7 @@ test('16. TODAY → HISTORY → 1W → TODAY: overlay only on TODAY, one Global 
 
   await runtime.navigateToMode('history', '2026-09-22');
   assert.equal(overlayCount(target.innerHTML), 0);
-  assert.match(target.innerHTML, /<p class="market-date">2026\.09\.22 · 15:30 KST 마감 기준<\/p>/);
+  assert.match(target.innerHTML, /<p><b>9월 22일 마감<\/b> <span>정규장 15:30 KST 기준<\/span><\/p>/);
   assert.doesNotMatch(target.innerHTML, /data-basis/);
 
   await runtime.navigateToMode('1w');
@@ -405,10 +422,10 @@ test('16. TODAY → HISTORY → 1W → TODAY: overlay only on TODAY, one Global 
   assert.equal(overlayCount(target.innerHTML), 6);
   assert.deepEqual(requests.filter(url => url === '/api/market/global/latest').length, 2);
   assert.deepEqual(requests, [
-    '/api/market/dates', '/api/market/global/latest', '/api/market/rates/date?date=latest', '/api/market/latest',
-    '/api/market/rates/date?date=2026-09-22', '/api/market/date?date=2026-09-22',
+    '/api/market/dates', '/api/market/global/latest', '/api/market/rates/date?date=latest', '/api/market/trend', '/api/market/latest',
+    '/api/market/rates/date?date=2026-09-22', '/api/market/trend?end=2026-09-22', '/api/market/date?date=2026-09-22',
     '/api/market/range?period=1w',
-    '/api/market/global/latest', '/api/market/rates/date?date=latest', '/api/market/latest'
+    '/api/market/global/latest', '/api/market/rates/date?date=latest', '/api/market/trend', '/api/market/latest'
   ]);
 });
 
@@ -424,7 +441,7 @@ test('a slow TODAY response never paints over the HISTORY view the reader moved 
   release();
   await today;
   assert.equal(runtime.state.mode, 'history');
-  assert.match(target.innerHTML, /2026\.09\.22 · 15:30 KST 마감 기준/);
+  assert.match(target.innerHTML, /9월 22일 마감/);
   assert.equal(overlayCount(target.innerHTML), 0);
 });
 
@@ -457,7 +474,7 @@ test('market-close.js reads the overlay only through the TODAY load, never from 
   const source = MARKET_JS;
   const rangeView = source.slice(source.indexOf('function renderRangeView'), source.indexOf('function bindEvents'));
   assert.doesNotMatch(rangeView, /globalLatest|GLOBAL_LATEST/);
-  assert.equal((source.match(/render\(data, rootEl, \{ globalLatest, domesticRates \}\)/g) || []).length, 1);
+  assert.equal((source.match(/render\(data, rootEl, \{ globalLatest, domesticRates, trend \}\)/g) || []).length, 1);
   assert.match(source, /latestInput && state\.mode === 'today' && !isHistory/);
   assert.match(source, /latest: krx\(key\) \? null/);
 });
@@ -466,7 +483,10 @@ test('market date and Global Latest dates are shown as they are, never aligned',
   const { runtime, target } = await marketPage();
   await runtime.init();
   const html = target.innerHTML;
-  assert.match(html, new RegExp(`${MARKET_DATE.replace(/-/g, '\\.')} · 15:30 KST`));
+  // The session's own date: its close line and the KOSPI card's basis.
+  const [, month, dayOfMonth] = MARKET_DATE.split('-').map(Number);
+  assert.match(html, new RegExp(`<p><b>${month}월 ${dayOfMonth}일 마감</b> <span>정규장 15:30 KST 기준</span></p>`));
+  assert.equal(byName(html, '코스피').state.slice(0, 10), MARKET_DATE.replace(/-/g, '.'));
   const states = cards(html).filter(card => card.basis === 'latest').map(card => card.state.slice(0, 10));
   assert.deepEqual([...new Set(states)].sort(), ['2026.09.24', '2026.09.25']);
 });

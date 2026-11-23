@@ -336,23 +336,23 @@ async function dashboard(lang) {
   return window.MARKET_CLOSE;
 }
 
-test('TODAY shows the record’s own day of yields as section 4 and moves the rest down; another day is not shown', async () => {
-  for (const [lang, title, prefix] of [['ko', '국내 금리', ''], ['en', 'Korean Bond Yields', '/en']]) {
+test('TODAY lists the record’s own day of yields in the rates board after US 10Y; another day is not shown', async () => {
+  for (const [lang, note, prefix] of [['ko', '금융투자협회 최종호가수익률', ''], ['en', 'KOFIA final quote yields', '/en']]) {
     const runtime = await dashboard(lang);
     const payload = JSON.parse(MC_EXAMPLE);
     const target = { innerHTML: '' };
     runtime.render(payload, target, { domesticRates: { ...day(DATE), published_at: '' } });
     const html = target.innerHTML;
-    const numbers = [...html.matchAll(/<h2 id="market-section-(\d+)"><span>(\d+)\.<\/span> ([^<]+)<\/h2>/g)].map(match => [Number(match[2]), match[3]]);
-    assert.deepEqual(numbers.map(([n]) => n), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], lang);
-    assert.equal(numbers[3][1], title);
-    assert.equal((html.match(/rate-card/g) || []).length, 4);
-    assert.match(html, new RegExp(`href="${prefix}/market/ktb3y/"`));
-    assert.match(html, /3\.642%[\s\S]*?▼ 7\.4bp/);
+    const start = html.indexOf('data-board="rates"');
+    const board = html.slice(start, html.indexOf('</section>', start));
+    assert.deepEqual([...board.matchAll(/<tr class="mk-row[^"]*"[^>]* data-(?:code|rate-code)="([A-Z0-9_]+)"/g)].map(m => m[1]), ['US10Y', 'KTB3Y', 'KTB10Y', 'CORPAA3Y', 'CD91'], lang);
+    assert.equal((board.match(/class="mk-row rate-row"/g) || []).length, 4);
+    assert.ok(board.includes(note), lang);
+    assert.match(board, new RegExp(`href="${prefix}/market/ktb3y/"`));
+    assert.match(board, /3\.642%[\s\S]*?▼ 7\.4bp/);
 
     const before = { innerHTML: '' };
     runtime.render(payload, before, { domesticRates: day('2026-08-27') });
-    assert.doesNotMatch(before.innerHTML, /rate-card/);
-    assert.deepEqual([...before.innerHTML.matchAll(/<h2 id="market-section-(\d+)">/g)].map(match => Number(match[1])), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    assert.doesNotMatch(before.innerHTML, /rate-row/);
   }
 });

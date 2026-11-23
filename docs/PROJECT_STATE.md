@@ -22,6 +22,23 @@ directly to the other language's report. The footer and the head use the same
 translation group, including the three Market Language lessons and the August 20
 Daily paired on 2026-11-23.
 
+MARKET redesign, phase 1 (2026-11-23): `/market/` TODAY and HISTORY (a date
+from the calendar) follow the owner's mockup. Page head "11월 23일 한국 증시
+마감" with one meta line; a date bar (previous / the date, which opens the
+calendar / next, then 최근 마감 · 1W · 1M and 전체 기록); KOSPI and KOSDAQ cards
+with the 20-session trend and the day's range; "그날의 요약" (KOSPI move,
+breadth, foreign flow, the USD/KRW 15:30 fixing, VIX); 한국 시장 (investor flows
+with bars and a 당일 / 최근 5거래일 toggle, breadth, turnover · program · basis ·
+short selling with the top-5 lists in a disclosure, top 10); and one quote board
+per group (해외 증시 · 변동성, 금리 with the KOFIA yields, 환율, 원자재 · 가상자산;
+tabs at phone width). Every row keeps its basis, the Global Latest overlay, the
+local-holiday and unavailable states. The trend lines come from
+`GET /api/market/trend[?end=]` (`functions/api/market/trend.js`: the last 20 final
+sessions' closes by json_extract plus the KOFIA yields of those dates; a line is
+drawn only when it ends on the session shown). New styles are prefixed `mk-` in
+`assets/market-close.css`; the session, archive, sectors and indicator pages and
+the 1W / 1M bodies still use the earlier classes (phase 2).
+
 Market Close reads (2026-11-23): a failed schema init (the `sqlite_master`
 probe or the guarded DDL) no longer turns a read into an error. API reads and
 `/market/` pages log it and query the table anyway; publishing still refuses

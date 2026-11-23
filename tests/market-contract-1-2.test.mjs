@@ -295,8 +295,10 @@ async function marketRuntime(lang) {
   return window.MARKET_CLOSE;
 }
 
+// The flows card's last-5-sessions panel (shown by its toggle).
 function fiveDaySection(markup) {
-  const start = markup.indexOf('id="market-section-6"');
+  const start = markup.indexOf('data-flow-panel="five"');
+  assert.ok(start > 0, 'the five-session panel exists');
   return markup.slice(start, markup.indexOf('</section>', start));
 }
 
@@ -334,10 +336,10 @@ test('MARKET shows unavailable global indicators as unavailable, not as a stale 
     const runtime = await marketRuntime(lang);
     const target = { innerHTML: '' };
     runtime.render(payload, target);
-    const at = target.innerHTML.indexOf('<small>KRW=X</small>');
-    const card = target.innerHTML.slice(at, target.innerHTML.indexOf('</article>', at));
+    const at = target.innerHTML.indexOf('data-code="USDKRW"');
+    const card = target.innerHTML.slice(at, target.innerHTML.indexOf('</tr>', at));
     assert.ok(at > 0);
-    assert.match(card, /instrument-value">--</);
+    assert.match(card, /mk-row-value"><strong>--</);
     assert.ok(card.includes(word), `${lang}`);
   }
 });
@@ -382,9 +384,9 @@ test('MARKET shows unavailable breadth as a state, never as counts (KO/EN)', asy
     const runtime = await marketRuntime(lang);
     const target = { innerHTML: '' };
     runtime.render(payload, target);
-    const start = target.innerHTML.indexOf('id="market-section-4"');
+    const start = target.innerHTML.indexOf('class="mk-card mk-breadth-card"');
     const section = target.innerHTML.slice(start, target.innerHTML.indexOf('</section>', start));
-    assert.ok(section.includes(text), lang);
-    assert.doesNotMatch(section, /breadth-card|breadth-bar/);
+    assert.ok(start > 0 && section.includes(text), lang);
+    assert.doesNotMatch(section, /class="mk-breadth"|mk-breadth-bar/);
   }
 });
