@@ -461,3 +461,15 @@ html[data-theme="dark"] .mk-summary{border:1px solid var(--line)}
 .mk-datebar-modes{flex-wrap:wrap;row-gap:2px}
 .mk-datebar-links{flex-basis:100%;justify-content:flex-start;gap:20px}
 }
+/* 5/20-session views: each row carries the period's line just before its figures. */
+.range-item-trend{flex:0 1 160px;display:flex;justify-content:flex-end;min-width:56px;margin:0 16px 0 auto;color:var(--market-ink)}
+.range-item-trend .mk-spark{width:100%;height:30px}
+/* From 761px: the name and the figures keep their width (the line gives way), and the figures keep one width, so the lines of a section stand in one column. */
+@media(min-width:761px){
+.market-range-dashboard .range-item-name{flex-shrink:0}
+.market-range-dashboard .range-item-values{min-width:236px;justify-content:flex-end}
+.market-range-dashboard .range-item-values:has(.range-change-wrap){min-width:252px}
+.market-range-dashboard .market-pair .range-item-trend{flex-basis:100px}
+}
+/* Up to 760px a row wraps its figures under its name; the line is left out there, as on the phone quote boards. */
+@media(max-width:760px){.range-item-trend{display:none}}

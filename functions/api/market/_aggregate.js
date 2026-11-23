@@ -88,12 +88,19 @@ function aggregateInstrumentCategory(categoryKey, snapshots, sessionsUsed, requi
     let observations = 0;
     let periodHigh = null;
     let periodLow = null;
+    // The value of each session of the window, in window.dates order (null
+    // where the record has none): with baseline_value first, the period's line.
+    const series = [];
 
     for (const snapshot of snapshots) {
       const item = snapshot?.[categoryKey]?.[key];
-      if (!item || typeof item !== 'object') continue;
+      if (!item || typeof item !== 'object') {
+        series.push(null);
+        continue;
+      }
 
       const pVal = getPeriodValue(key, item);
+      series.push(pVal);
       if (pVal !== null) {
         observations++;
       }
@@ -136,7 +143,8 @@ function aggregateInstrumentCategory(categoryKey, snapshots, sessionsUsed, requi
       start_market_date: startMarketDate,
       end_market_date: endMarketDate,
       start_source_date: firstItem?.source_date || null,
-      end_source_date: lastItem?.source_date || null
+      end_source_date: lastItem?.source_date || null,
+      series
     };
 
     if (key === 'US10Y') {

@@ -546,6 +546,25 @@ test('Multi-session return prevents off-by-one errors using first session previo
   assert.equal(kospi.complete, true);
 });
 
+test('each instrument carries its value per session of the window, for the period line', () => {
+  const day = (date, items) => ({ meta: { market_date: date, schema_version: '1.2.0' }, ...items });
+  const snapshots = [
+    day('2026-11-17', { indices: { KOSPI: { close: 4968.48, previous_close: 5100.5, source_date: '2026-11-17', data_state: 'final_close' } }, commodities_crypto: { GOLD: { close: 3600, current: 3612.5, previous_close: 3590, data_state: 'intraday' } } }),
+    day('2026-11-18', { indices: { KOSPI: { close: 5067.44, previous_close: 4968.48, data_state: 'final_close' } }, commodities_crypto: { GOLD: { data_state: 'unavailable' } } }),
+    day('2026-11-19', { indices: { KOSPI: { close: 5137.89, previous_close: 5067.44, data_state: 'final_close' } } }),
+    day('2026-11-20', { indices: { KOSPI: { close: 4869.96, previous_close: 5137.89, data_state: 'final_close' } }, commodities_crypto: { GOLD: { close: 3561, current: 3561, data_state: 'intraday' } } })
+  ];
+  const res = computeMarketRange(snapshots, '1w', 5);
+  // window.dates order; the session value is what the period return uses (getPeriodValue).
+  assert.deepEqual(res.window.dates, ['2026-11-17', '2026-11-18', '2026-11-19', '2026-11-20']);
+  assert.deepEqual(res.instruments.indices.KOSPI.series, [4968.48, 5067.44, 5137.89, 4869.96]);
+  assert.equal(res.instruments.indices.KOSPI.baseline_value, 5100.5);
+  assert.equal(res.instruments.indices.KOSPI.end_value, 4869.96);
+  // An intraday reading uses `current`; an unavailable or absent session is null, never a carried value.
+  assert.deepEqual(res.instruments.commodities_crypto.GOLD.series, [3612.5, null, null, 3561]);
+  assert.equal(res.instruments.commodities_crypto.GOLD.series.length, res.window.dates.length);
+});
+
 test('Investor flows sum daily raw net_buy and are strictly decoupled from recent_5d_flows', () => {
   // 5 daily foreign KOSPI net_buy: +100, -200, +300, -50, +25 -> sum = +175
   const netBuys = [100, -200, 300, -50, 25];
