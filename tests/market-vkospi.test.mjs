@@ -125,9 +125,9 @@ test('session pages show VKOSPI after VIX, linked once it has a value', () => {
   const context = { prev: null, next: null, report: null };
   for (const [lang, prefix] of [['ko', ''], ['en', '/en']]) {
     const page = marketDatePageHtml(SHELLS[lang], withVkospi(complete12()), lang, context);
-    const rates = page.slice(page.indexOf('<div class="mini-instrument-grid">'), page.indexOf('commodity-grid'));
-    const tickers = [...rates.matchAll(/<small>([^<]+)<\/small>/g)].map(m => m[1]);
-    assert.equal(tickers.indexOf('KRX:1-300'), tickers.indexOf('^VIX') + 1, lang);
+    const board = page.slice(page.indexOf('data-board="world"'), page.indexOf('data-board="rates"'));
+    const codes = [...board.matchAll(/<tr class="mk-row" data-code="([A-Z0-9_]+)"/g)].map(m => m[1]);
+    assert.equal(codes.indexOf('VKOSPI'), codes.indexOf('VIX') + 1, lang);
     assert.match(page, new RegExp(`href="${prefix}/market/vkospi/">VKOSPI</a>[\\s\\S]*?53\\.18[\\s\\S]*?▼ −0\\.75`), lang);
   }
   const failed = withVkospi(complete12());

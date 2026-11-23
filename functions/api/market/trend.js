@@ -49,6 +49,23 @@ async function domesticRateSeries(db, dates) {
   return series;
 }
 
+/**
+ * The trend body for the sessions up to `end` (or the newest): also used by
+ * the server-rendered session pages. Throws on a database failure.
+ */
+export async function loadTrend(db, end = null) {
+  const where = end ? `status = 'final' AND market_date <= ?` : `status = 'final'`;
+  const statement = db.prepare(`SELECT market_date, ${COLUMNS} FROM ${TABLE_NAME} WHERE ${where} ORDER BY market_date DESC LIMIT ${TREND_SESSIONS}`);
+  const result = await (end ? statement.bind(end) : statement).all();
+  const rows = (Array.isArray(result?.results) ? result.results : [])
+    .filter(row => isValidMarketDate(String(row?.market_date || '')))
+    .reverse();
+  const dates = rows.map(row => row.market_date);
+  const series = Object.fromEntries(TREND_CODES.map(code => [code, rows.map(row => finite(row[code]))]));
+  Object.assign(series, await domesticRateSeries(db, dates));
+  return { sessions: TREND_SESSIONS, end_date: dates[dates.length - 1] || null, dates, series };
+}
+
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const end = url.searchParams.get('end');
@@ -57,16 +74,7 @@ export async function onRequestGet({ request, env }) {
   }
   try {
     const db = await ensureMarketTable(env, { readOnly: true });
-    const where = end ? `status = 'final' AND market_date <= ?` : `status = 'final'`;
-    const statement = db.prepare(`SELECT market_date, ${COLUMNS} FROM ${TABLE_NAME} WHERE ${where} ORDER BY market_date DESC LIMIT ${TREND_SESSIONS}`);
-    const result = await (end ? statement.bind(end) : statement).all();
-    const rows = (Array.isArray(result?.results) ? result.results : [])
-      .filter(row => isValidMarketDate(String(row?.market_date || '')))
-      .reverse();
-    const dates = rows.map(row => row.market_date);
-    const series = Object.fromEntries(TREND_CODES.map(code => [code, rows.map(row => finite(row[code]))]));
-    Object.assign(series, await domesticRateSeries(db, dates));
-    const body = { sessions: TREND_SESSIONS, end_date: dates[dates.length - 1] || null, dates, series };
+    const body = await loadTrend(db, end);
     const etag = `W/"market-trend-${fingerprint(JSON.stringify(body))}"`;
     const cacheControl = 'public, max-age=60, s-maxage=300, stale-while-revalidate=600';
     if (request.headers.get('if-none-match') === etag) {
