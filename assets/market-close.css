@@ -441,3 +441,14 @@ html[data-theme="dark"] .mk-summary{border:1px solid var(--line)}
 .market-date-page .market-table,.market-range-dashboard .market-table{font-size:11px}
 .market-date-page .market-table th,.market-date-page .market-table td,.market-range-dashboard .market-table th,.market-range-dashboard .market-table td{padding-inline:3px}
 }
+/* Redesign follow-ups: a taller tap area for the links inside quote-board rows and date tables, kept within the row (the text does not move), the English flow table at 360px, and the next-session link of the date bar on phones (label and arrow on one line, the date under them). */
+.mk-row-name .instrument-history-link,.mk-index-name .instrument-history-link,.market-archive-table th a{display:inline-block;padding:10px 0;margin:-10px 0}
+.market-indicator-table th a{display:inline-block;padding:8px 0;margin:-8px 0}
+@media(max-width:760px){
+.market-date-nav.mk-datebar .market-date-nav-link.next{justify-content:flex-end}
+.market-date-nav.mk-datebar .market-date-nav-link.next small{order:2}
+}
+@media(max-width:380px){
+.mk-flow-table tbody td{padding-left:6px}
+.mk-flow-value{font-size:12px}
+}

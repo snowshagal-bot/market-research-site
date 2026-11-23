@@ -4,7 +4,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  MARKET_DATE_TIME_BUDGET_MS,
   MARKET_INDICATORS,
+  MARKET_TREND_BUDGET_MS,
   dailyReportFor,
   marketIndicatorPageHtml,
   marketIndicatorPath,
@@ -195,6 +197,42 @@ test('the session page draws the 20-session trend only when it ends on that sess
   }
 });
 
+test('a row without that session’s value gets no trend line, and a series that never moved is a level line', () => {
+  const dates = ['2026-08-26', '2026-08-27', DATE];
+  // VIX has earlier values but none for this session: a line would end on an earlier day.
+  const trend = { sessions: 20, end_date: DATE, dates, series: { VIX: [18.2, 19.1, null], NASDAQ: [21000, 21000, 21000] } };
+  const data = payload();
+  data.rates_fx_volatility.VIX = { ...data.rates_fx_volatility.VIX, close: null, change: null, change_pct: null, source_date: '' };
+  const html = page('ko', data, { trend });
+  const vixRow = html.slice(html.indexOf('<tr class="mk-row" data-code="VIX">'), html.indexOf('</tr>', html.indexOf('<tr class="mk-row" data-code="VIX">')));
+  assert.doesNotMatch(vixRow, /mk-spark/);
+  assert.match(vixRow, /mk-trend-empty/);
+  // The summary tile does not print "미국장 마감" with no date in front of it.
+  const summary = html.slice(html.indexOf('class="mk-summary-stats"'), html.indexOf('</article>', html.indexOf('class="mk-summary-stats"')));
+  assert.doesNotMatch(summary, /미국장 마감/);
+  assert.match(page('ko', FIXTURE, { trend }), /\d+\/\d+ 미국장 마감/);
+  // 21000 three times: one level line at mid height (h 26 → y 13.0), not on the top edge.
+  const nasdaqRow = html.slice(html.indexOf('<tr class="mk-row" data-code="NASDAQ">'), html.indexOf('</tr>', html.indexOf('<tr class="mk-row" data-code="NASDAQ">')));
+  assert.match(nasdaqRow, /<polyline class="mk-spark-line" points="3\.0,13\.0 44\.0,13\.0 85\.0,13\.0"/);
+});
+
+test('the breadth head names the larger side: advance ratio on an up day, decline ratio otherwise', () => {
+  const up = payload();
+  up.market_breadth.KOSPI = { ...up.market_breadth.KOSPI, rise: 700, fall: 180, flat: 40, rise_ratio: 0.761, fall_ratio: 0.196 };
+  up.market_breadth.KOSDAQ = { ...up.market_breadth.KOSDAQ, rise: 500, fall: 1100, flat: 60, rise_ratio: 0.301, fall_ratio: 0.663 };
+  const html = page('ko', up);
+  const block = market => html.slice(html.indexOf(`class="mk-breadth" data-market="${market}"`), html.indexOf('mk-breadth-bar', html.indexOf(`class="mk-breadth" data-market="${market}"`)));
+  assert.match(block('KOSPI'), /<b class="up">상승비율 76\.1%<\/b>/);
+  assert.doesNotMatch(block('KOSPI'), /하락비율/);
+  assert.match(block('KOSDAQ'), /<b class="down">하락비율 66\.3%<\/b>/);
+  const en = page('en', up);
+  assert.match(en, /<b class="up">Advance ratio 76\.1%<\/b>/);
+  // Equal or missing ratios keep the decline ratio, as before.
+  const even = payload();
+  even.market_breadth.KOSPI = { ...even.market_breadth.KOSPI, rise_ratio: 0.48, fall_ratio: 0.48 };
+  assert.match(page('ko', even), /data-market="KOSPI">\s*<div class="mk-breadth-head"><span>코스피<\/span><b class="down">하락비율 48\.0%<\/b>/);
+});
+
 test('a shell that lost a replaced piece fails loudly instead of shipping the dashboard head', () => {
   const broken = SHELLS.ko.replace(/<link rel="canonical" href="[^"]*">/, '');
   assert.throws(() => marketDatePageHtml(broken, FIXTURE, 'ko'), /missing canonical/);
@@ -209,7 +247,8 @@ function row(date, overrides = {}) {
 
 // schemaFails: the sqlite_master probe and the DDL throw, as D1 did for about
 // one Production read in ten on 2026-11-23; ordinary reads still answer.
-function marketDb(rows, { hang = false, schemaFails = false } = {}) {
+// trendHangs: the 20-session trend read never answers; every other read does.
+function marketDb(rows, { hang = false, schemaFails = false, trendHangs = false } = {}) {
   const schemaStatement = sql => /FROM sqlite_master|^\s*(CREATE|ALTER)\b/i.test(sql);
   return {
     prepare(sql) {
@@ -238,6 +277,7 @@ function marketDb(rows, { hang = false, schemaFails = false } = {}) {
         },
         async all() {
           if (hang) return new Promise(() => {});
+          if (trendHangs && /market_date <= \?/.test(sql)) return new Promise(() => {});
           const indicatorPath = sql.match(/'\$\.(indices|rates_fx_volatility|commodities_crypto)\.([A-Z0-9]+)'\) AS item/);
           if (indicatorPath) {
             return {
@@ -331,6 +371,18 @@ test('a database that does not answer gets a quick 503, not a hung page', async 
   assert.equal(response.headers.get('retry-after'), '60');
   assert.equal(response.headers.get('x-robots-tag'), 'noindex');
   assert.ok(Date.now() - started < 2000);
+});
+
+test('a trend read that does not answer leaves the session page without lines, not waiting', async () => {
+  const rows = [row('2026-08-27'), row('2026-08-28')];
+  const started = Date.now();
+  const { response } = await call('https://snowshagal.com/market/2026-08-28/', marketDb(rows, { trendHangs: true }), { trendBudgetMs: 30 });
+  assert.equal(response.status, 200);
+  assert.ok(Date.now() - started < 2000, 'the page budget (5 s) is not spent on the trend');
+  const html = await response.text();
+  assert.match(html, /<h1 id="market-date-heading">2026년 8월 28일 한국 증시 마감<\/h1>/);
+  assert.doesNotMatch(html, /class="mk-spark/);
+  assert.ok(MARKET_TREND_BUDGET_MS < MARKET_DATE_TIME_BUDGET_MS);
 });
 
 test('session, archive and history pages still answer when the schema init fails', async () => {

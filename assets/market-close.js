@@ -331,12 +331,18 @@
 
   // A trend line of finite values, oldest first: { line, area, cx, cy } in a w×h box, or null.
   function sparkGeometry(values, w, h, pad) {
-    const points = (Array.isArray(values) ? values : []).filter(valid);
+    const series = Array.isArray(values) ? values : [];
+    // The series ends on the session shown: without that day's value there is
+    // no line, or its last point would be an earlier session's.
+    if (!valid(series[series.length - 1])) return null;
+    const points = series.filter(valid);
     if (points.length < 2) return null;
     const min = Math.min(...points);
     const max = Math.max(...points);
-    const span = max - min || 1;
-    const xy = points.map((value, index) => [pad + index * (w - 2 * pad) / (points.length - 1), pad + (max - value) / span * (h - 2 * pad)]);
+    const span = max - min;
+    // A series that never moved is a level line through the middle of the box.
+    const y = value => (span ? pad + (max - value) / span * (h - 2 * pad) : h / 2);
+    const xy = points.map((value, index) => [pad + index * (w - 2 * pad) / (points.length - 1), y(value)]);
     const line = xy.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
     const [cx, cy] = xy[xy.length - 1];
     return { line, area: `${pad},${h} ${line} ${w - pad},${h}`, cx: cx.toFixed(1), cy: cy.toFixed(1) };
@@ -415,8 +421,10 @@
     const total = [rise, flat, fall].every(valid) ? rise + flat + fall : null;
     const share = value => (valid(total) && total > 0 && valid(value) ? value / total * 100 : 0);
     const limit = (label, value) => (valid(value) && value > 0 ? ` (${label} ${integer(value)})` : '');
+    // The head names the larger side: the advance ratio on a day more stocks rose than fell.
+    const advancing = valid(item?.rise_ratio) && valid(item?.fall_ratio) && item.rise_ratio > item.fall_ratio;
     return `<div class="mk-breadth" data-market="${html(key)}">
-      <div class="mk-breadth-head"><span>${html(name)}</span><b class="down">${copy.fallRatio} ${ratioPct(item?.fall_ratio)}</b></div>
+      <div class="mk-breadth-head"><span>${html(name)}</span>${advancing ? `<b class="up">${copy.riseRatio} ${ratioPct(item.rise_ratio)}</b>` : `<b class="down">${copy.fallRatio} ${ratioPct(item?.fall_ratio)}</b>`}</div>
       <div class="mk-breadth-bar" role="img" aria-label="${copy.riseRatio} ${ratioPct(item?.rise_ratio)}, ${copy.fallRatio} ${ratioPct(item?.fall_ratio)}"><span class="advance" style="width:${share(rise).toFixed(2)}%"></span><span class="flat" style="width:${share(flat).toFixed(2)}%"></span><span class="decline" style="width:${share(fall).toFixed(2)}%"></span></div>
       <div class="mk-breadth-counts"><span class="up">${copy.breadthShort.rise} ${integer(item?.rise)}${limit(copy.breadthShort.upper, item?.upper_limit)}</span><span>${copy.breadthShort.flat} ${integer(flat)}</span><span class="down">${copy.breadthShort.fall} ${integer(item?.fall)}${limit(copy.breadthShort.lower, item?.lower_limit)}</span></div>
     </div>`;
@@ -839,7 +847,7 @@
       ${breadthPart || foreignPart ? `<p class="mk-summary-sub">${[breadthPart, foreignPart].filter(Boolean).map(html).join(' · ')}</p>` : ''}
       <div class="mk-summary-stats">
         <div><span>${copy.fxSummary}</span><strong>${valueUnit('USDKRW', usdkrw?.data_state === 'unavailable' ? null : usdkrw?.close)}</strong><small>${copy.fixingNote(shortDate(usdkrw?.source_date || marketDate))}</small></div>
-        <div><span>${copy.vixSummary}</span><strong>${valueUnit('VIX', vix.display)}${valid(vixPct) ? ` <em class="${signClass(vixPct)}">${pct(vixPct)}</em>` : ''}</strong><small>${vix.latest ? latestStateHtml(vix.latest) : copy.usCloseNote(shortDate(rates.VIX?.source_date))}</small></div>
+        <div><span>${copy.vixSummary}</span><strong>${valueUnit('VIX', vix.display)}${valid(vixPct) ? ` <em class="${signClass(vixPct)}">${pct(vixPct)}</em>` : ''}</strong><small>${vix.latest ? latestStateHtml(vix.latest) : shortDate(rates.VIX?.source_date) ? copy.usCloseNote(shortDate(rates.VIX.source_date)) : ''}</small></div>
       </div>
     </article>`;
 
