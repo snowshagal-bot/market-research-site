@@ -22,6 +22,12 @@ directly to the other language's report. The footer and the head use the same
 translation group, including the three Market Language lessons and the August 20
 Daily paired on 2026-11-23.
 
+Market Close reads (2026-11-23): a failed schema init (the `sqlite_master`
+probe or the guarded DDL) no longer turns a read into an error. API reads and
+`/market/` pages log it and query the table anyway; publishing still refuses
+until the schema is confirmed. Before this, about one Production read in ten
+answered `DB_INIT_FAILED` / 503. See `DEPLOYMENT.md` for the log line.
+
 Initial HTML string fallback (2026-11-19): generated latest/archive markup is
 inserted with a replacement callback, preserving literal dollar amounts such
 as `$1tn` in report titles instead of interpreting them as regex captures and

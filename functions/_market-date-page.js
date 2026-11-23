@@ -805,7 +805,7 @@ function withinBudget(promise, ms) {
  */
 export async function loadMarketDate(env, date, { budgetMs = MARKET_DATE_TIME_BUDGET_MS } = {}) {
   return withinBudget((async () => {
-    const db = await ensureMarketTable(env);
+    const db = await ensureMarketTable(env, { readOnly: true });
     const row = await db.prepare(`SELECT market_date, status, published_at, payload_json, takeaway_ko, takeaway_en,
         (SELECT MAX(market_date) FROM ${TABLE_NAME} WHERE market_date < ?1 AND status = 'final') AS prev_date,
         (SELECT MIN(market_date) FROM ${TABLE_NAME} WHERE market_date > ?1 AND status = 'final') AS next_date
@@ -822,7 +822,7 @@ export async function loadMarketDate(env, date, { budgetMs = MARKET_DATE_TIME_BU
 /** Every final session, newest first, with the figures the archive lists. */
 export async function loadMarketArchive(env, { budgetMs = MARKET_DATE_TIME_BUDGET_MS } = {}) {
   return withinBudget((async () => {
-    const db = await ensureMarketTable(env);
+    const db = await ensureMarketTable(env, { readOnly: true });
     const result = await db.prepare(`SELECT market_date, published_at,
         json_extract(payload_json, '$.indices.KOSPI.close') AS kospi_close,
         json_extract(payload_json, '$.indices.KOSPI.change_pct') AS kospi_pct,
@@ -1121,7 +1121,7 @@ export function marketSectorsPageHtml(shell, view, lang) {
 /** The newest 20 final sessions' KRX groups, newest first. */
 export async function loadMarketSectors(env, { budgetMs = MARKET_DATE_TIME_BUDGET_MS } = {}) {
   return withinBudget((async () => {
-    const db = await ensureMarketTable(env);
+    const db = await ensureMarketTable(env, { readOnly: true });
     const result = await db.prepare(`SELECT market_date, published_at, json_extract(payload_json, '$.krx_groups') AS krx_groups
       FROM ${TABLE_NAME} WHERE status = 'final' ORDER BY market_date DESC LIMIT 20`).all();
     return (result?.results || [])
@@ -1615,7 +1615,7 @@ export function marketIndicatorPageHtml(shell, indicator, series, lang, availabl
 /** Every final row's item for one instrument, newest first. Throws on a database failure or timeout. */
 export async function loadMarketIndicator(env, indicator, { budgetMs = MARKET_DATE_TIME_BUDGET_MS } = {}) {
   return withinBudget((async () => {
-    const db = await ensureMarketTable(env);
+    const db = await ensureMarketTable(env, { readOnly: true });
     // The path is built from the fixed instrument list, never from the request.
     const path = `$.${indicator.group}.${indicator.code}`;
     const result = await db.prepare(`SELECT market_date, published_at, json_extract(payload_json, '${path}') AS item,
@@ -1633,7 +1633,7 @@ export async function loadMarketIndicator(env, indicator, { budgetMs = MARKET_DA
  */
 export async function loadDomesticRateIndicator(env, { budgetMs = MARKET_DATE_TIME_BUDGET_MS } = {}) {
   return withinBudget((async () => {
-    const db = await ensureMarketTable(env);
+    const db = await ensureMarketTable(env, { readOnly: true });
     const [days, result] = await Promise.all([
       loadDomesticRatesDays(env),
       db.prepare(`SELECT market_date, ${OPTIONAL_INDICATOR_CLOSES_SQL} AS optional_closes FROM ${TABLE_NAME} WHERE status = 'final' ORDER BY market_date DESC`).all()

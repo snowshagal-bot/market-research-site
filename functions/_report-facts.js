@@ -134,7 +134,7 @@ export function extractWeeklyFacts(rows, period) {
 
 async function marketDb(env) {
   if (!env?.COMMENTS_DB) return null;
-  return ensureMarketTable(env);
+  return ensureMarketTable(env, { readOnly: true });
 }
 
 export async function loadDailyFacts(env, reportDate) {
