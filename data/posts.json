@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-23-basics-1qey993",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-11-23",
+    "reportDate": "2026-11-23",
+    "registeredDate": "2026-11-23",
+    "registeredAt": "2026-11-23T08:11:57.611Z",
+    "legacyImport": false,
+    "title": "Expiration Day: Why Stocks Swing at the Close",
+    "seoTitle": "Futures Expiration Day: Why Stocks Can Swing in the Final 10 Minutes",
+    "subtitle": "",
+    "description": "Why does Korea's market swing near the close on futures expiration day? Expiring KOSPI 200 futures stop at 3:20 p.m., but the 3:30 p.m. stock-market close sets their final settlement price. A beginner-friendly explanation of the closing call auction, arbitrage unwinds and index rebalancing, with an interactive example.",
+    "tags": [
+      "market-basic",
+      "flows",
+      "futures",
+      "quadruple-witching-day",
+      "volatility"
+    ],
+    "readingMinutes": 11,
+    "href": "reports/en/Snowshagal_Market_Basics_21_Expiration_Day_EN.html",
+    "translationGroup": "2026-11-23-basics-a5lumg",
+    "coverImage": "covers/2026-11-23-basics-1qey993.webp",
+    "shareCardImage": "covers/share/2026-11-23-basics-1qey993.jpg",
+    "coverThumbnail": "covers/2026-11-23-basics-1qey993-450.webp"
+  },
+  {
     "id": "2026-11-23-basics-a5lumg",
     "type": "basics",
     "typeLabel": "시장 입문",
