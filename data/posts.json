@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-23-note-o36yak",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-23",
+    "reportDate": "2026-11-23",
+    "registeredDate": "2026-11-23",
+    "registeredAt": "2026-11-23T13:23:24.076Z",
+    "legacyImport": false,
+    "title": "Where Is the KOSPI Bottom? Five Estimates 4,050–4,600 Shared Assumptions",
+    "seoTitle": "Where Is the KOSPI Bottom? How Brokerages Calculate Downside Targets",
+    "subtitle": "",
+    "description": "The KOSPI has nearly halved from its June peak. Five brokerages put downside levels between 4,050 and 4,600, drawing on overlapping assumptions about the peak, earnings and past crises. Two risks could invalidate them: earnings downgrades and further valuation compression.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "korea",
+      "volatility"
+    ],
+    "readingMinutes": 15,
+    "href": "reports/en/20261123_Investment_Insight_KOSPI_Bottom_Math_EN.html",
+    "translationGroup": "2026-11-23-note-10sfxcg",
+    "coverImage": "covers/2026-11-23-note-o36yak.webp",
+    "shareCardImage": "covers/share/2026-11-23-note-o36yak.jpg",
+    "coverThumbnail": "covers/2026-11-23-note-o36yak-450.webp"
+  },
+  {
     "id": "2026-11-23-note-10sfxcg",
     "type": "note",
     "typeLabel": "투자 인사이트",
