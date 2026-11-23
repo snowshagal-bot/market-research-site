@@ -227,15 +227,15 @@ test('the sitemap and the archive list a new indicator only once it has a value'
   assert.match(nav(marketArchivePageHtml(SHELLS.en, [{ ...row, optional_closes: closesFor(['USDJPY']) }], 'en')), /<a href="\/en\/market\/usdjpy\/">USD\/JPY<\/a>/);
 });
 
-test('session pages show the seven cards with their own units and link those with a value', () => {
+test('session pages show the seven rows with their own units and link those with a value', () => {
   const data = withNew(complete12());
   data.commodities_crypto.SILVER = unavailable(data.commodities_crypto.SILVER);
   const context = { prev: null, next: null, report: null };
   const ko = marketDatePageHtml(SHELLS.ko, data, 'ko', context);
   const en = marketDatePageHtml(SHELLS.en, data, 'en', context);
-  const rates = ko.slice(ko.indexOf('<div class="mini-instrument-grid">'), ko.indexOf('commodity-grid'));
-  const order = [...rates.matchAll(/<small>([^<]+)<\/small>/g)].map(m => m[1]);
-  assert.deepEqual(order.slice(0, 6), ['KRW=X', 'JPYKRW=X', 'CNYKRW=X', 'EURKRW=X', 'DX-Y.NYB', 'JPY=X']);
+  const fxBoard = ko.slice(ko.indexOf('data-board="fx"'), ko.indexOf('</section>', ko.indexOf('data-board="fx"')));
+  const order = [...fxBoard.matchAll(/<tr class="mk-row" data-code="([A-Z0-9_]+)"/g)].map(m => m[1]);
+  assert.deepEqual(order, ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY']);
   assert.match(ko, /href="\/market\/cnykrw\/">원\/위안<\/a>[\s\S]*?200\.26원[\s\S]*?15:30 확정/);
   assert.match(ko, /href="\/market\/usdjpy\/">엔\/달러<\/a>[\s\S]*?158\.51엔/);
   assert.match(ko, /href="\/market\/copper\/">구리<\/a>[\s\S]*?\$5\.477[\s\S]*?▼ −0\.148/);
@@ -243,10 +243,10 @@ test('session pages show the seven cards with their own units and link those wit
   assert.match(en, /href="\/en\/market\/eurkrw\/">EUR\/KRW<\/a>[\s\S]*?₩1,467\.46/);
   assert.match(en, /href="\/en\/market\/usdjpy\/">USD\/JPY<\/a>[\s\S]*?¥158\.51/);
   assert.match(en, /href="\/en\/market\/brent\/">Brent Crude<\/a>[\s\S]*?\$89\.95/);
-  // Silver failed that day: its card says so and is not a link (its page may not exist yet).
+  // Silver failed that day: its row stays, not a link (its page may not exist yet).
   assert.doesNotMatch(ko, /\/market\/silver\//);
-  assert.match(ko, /<span>은<\/span>/);
-  // A record from before the new indicators shows the six and three cards it always had.
+  assert.match(ko, /<span class="mk-row-name">은<\/span>/);
+  // A record from before the new indicators shows the rows it always had.
   const old = marketDatePageHtml(SHELLS.ko, complete12(), 'ko', context);
   assert.doesNotMatch(old, /cnykrw|copper|brent|JPY=X/);
 });

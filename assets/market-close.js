@@ -687,7 +687,7 @@
     return `
       <div class="mk-datebar market-history-strip" role="toolbar" aria-label="Market navigation">
         <span class="mk-datebar-label">${copy.dateLabel}</span>
-        <div class="mk-datebar-nav market-history-nav">${navHtml}</div>
+        <div class="mk-datebar-nav market-history-nav${isRange ? ' mk-datebar-range' : ''}">${navHtml}</div>
         <div class="mk-datebar-modes">
           <div class="market-history-modes" role="group" aria-label="${ko ? '보기' : 'View'}">
             <button class="market-mode-btn ${isTodayActive ? 'active' : ''}" type="button" data-market-action="today" ${isTodayActive ? 'aria-current="page"' : ''}>${copy.latestMode}</button>

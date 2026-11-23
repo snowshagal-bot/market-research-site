@@ -36,8 +36,22 @@ local-holiday and unavailable states. The trend lines come from
 `GET /api/market/trend[?end=]` (`functions/api/market/trend.js`: the last 20 final
 sessions' closes by json_extract plus the KOFIA yields of those dates; a line is
 drawn only when it ends on the session shown). New styles are prefixed `mk-` in
-`assets/market-close.css`; the session, archive, sectors and indicator pages and
-the 1W / 1M bodies still use the earlier classes (phase 2).
+`assets/market-close.css`.
+
+MARKET redesign, phase 2 (2026-11-23): the server-rendered pages share the
+phase-1 look. `/market/YYYY-MM-DD/` is built like TODAY from the same helpers in
+`functions/_market-date-page.js` (`pageHead`, `indexCard`, `boardRow`,
+`flowTable`, `breadthBlock`, `boardCard`): the head, a date bar (previous ·
+전체 마감 기록 · next), KOSPI / KOSDAQ cards with the 20-session trend ending on
+that session (`loadTrend(db, date)` from `functions/api/market/trend.js`, read
+inside the page budget and dropped on failure), 그날의 요약, 한국 시장 (당일 and
+최근 5거래일 flows both shown, breadth, turnover · program · basis · short
+selling, top 10, KRX sectors and themes) and the four quote boards; the KOFIA
+yields are rows of the 금리 board after US 10Y. The archive, sectors and
+indicator pages use the same head, and their cards, tables and the 1W / 1M
+bodies take the `mk-` card look (`.market-date-page` / `.market-range-dashboard`
+rules at the end of the CSS). The mountain hero is gone from every page, and the
+`/market/` shells no longer preload its images (the files stay in `assets/`).
 
 Market Close reads (2026-11-23): a failed schema init (the `sqlite_master`
 probe or the guarded DDL) no longer turns a read into an error. API reads and

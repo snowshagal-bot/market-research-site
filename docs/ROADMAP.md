@@ -204,9 +204,6 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Open follow-ups
 
-- **MARKET redesign, phase 2**: give the 1W / 1M bodies and the server-rendered pages
-  (`/market/YYYY-MM-DD/`, archive, sectors, indicator history) the phase-1 look (`mk-` styles in
-  `assets/market-close.css`), then drop the mountain hero and its image preloads from the shell.
 - **D — SEO `<title>` format**: observation pending (Next action 2).
 - **#150** — discoverability of horizontally scrolling UI on mobile (one common rule, not shorter labels).
 - **#152** — authenticated Preview Admin environment (Preview `AUTH_PEPPER` and admin account).

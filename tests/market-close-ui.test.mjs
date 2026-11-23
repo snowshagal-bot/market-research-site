@@ -292,8 +292,8 @@ test('Market layout explicitly supports dark mode, compact mobile widths, and re
   assert.match(css, /@media\(max-width:760px\)[\s\S]*?market-close-mountain-mobile\.webp/);
   assert.doesNotMatch(css, /market-close-mountain\.png/);
   for (const page of [koPage, enPage]) {
-    assert.match(page, /rel="preload" as="image" href="\/assets\/market-close-mountain\.webp" media="\(min-width: 761px\)"/);
-    assert.match(page, /rel="preload" as="image" href="\/assets\/market-close-mountain-mobile\.webp" media="\(max-width: 760px\)"/);
+    // No page draws the mountain hero since the redesign, so the shell must not spend a request preloading it.
+    assert.doesNotMatch(page, /market-close-mountain/);
   }
   const [desktopHero, mobileHero] = await Promise.all([
     stat(new URL('../assets/market-close-mountain.webp', import.meta.url)),

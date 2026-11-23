@@ -27,6 +27,7 @@ import {
 import '../assets/locale.js';
 import { TABLE_NAME, ensureMarketTable } from './api/market/_shared.js';
 import { aggregateKrxGroups } from './api/market/_aggregate.js';
+import { loadTrend } from './api/market/trend.js';
 import {
   domesticRateCodesIn,
   loadDomesticRateCodes,
@@ -179,7 +180,7 @@ function makeFormat(lang) {
 
 const COPY = {
   ko: {
-    eyebrow: 'MARKET CLOSE · 일별 마감 기록',
+    eyebrow: '일별 마감 기록',
     heading: date => `${longDate(date, 'ko')} 한국 증시 마감`,
     closeBasis: '15:30 KST 정규장 마감 기준',
     overseas: '* 해외 지수·원자재는 각 시장의 최신 거래일 종가',
@@ -207,7 +208,7 @@ const COPY = {
     noteTitle: '숫자 너머의 의미를 해석합니다.', noteBody: '이날 시장의 흐름과 배경은 Snowshagal 데일리 리포트에서 이어서 읽을 수 있습니다.'
   },
   en: {
-    eyebrow: 'MARKET CLOSE · DAILY RECORD',
+    eyebrow: 'Daily close record',
     heading: date => `Korea Stock Market Close: ${longDate(date, 'en')}`,
     closeBasis: 'Regular session close, 15:30 KST',
     overseas: '* Overseas indices and commodities use each market’s latest close.',
@@ -370,65 +371,196 @@ function dataTable(headings, rows, className = '') {
   return `<div class="market-table-wrap"><table class="market-table ${className}"><thead><tr>${headings.map(item => `<th scope="col">${html(item)}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${row.map((cell, index) => index === 0 ? `<th scope="row">${cell}</th>` : `<td>${cell}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
 
-function metric(label, value, extra = '') {
-  return `<div class="market-metric"><span>${html(label)}</span><strong class="${extra}">${value}</strong></div>`;
+/* --------------------------------------------- the redesigned page parts */
+
+// The same page as /market/ TODAY (assets/market-close.js), server-rendered for
+// one session and without the parts that need a script: both flow tables are
+// shown, and every quote board at every width.
+const PAGE_COPY = {
+  ko: {
+    regularClose: '정규장 종가', trendLabel: '최근 20거래일 종가', closeOf: md => `${md} 마감`, regularBasis: '정규장 15:30 KST 기준',
+    summaryTitle: '그날의 요약', summaryHead: (pctText, word) => `코스피 ${pctText}% ${word}`, up: '상승', down: '하락', flat: '보합',
+    breadthPhrase: (count, ratio, word) => `코스피 ${count}종목 ${word}(${ratio})`, foreignPhrase: (amount, word) => `외국인 ${amount} ${word}`, netBuy: '순매수', netSell: '순매도',
+    fxSummary: '원/달러', fixingNote: md => `${md} 15:30 매매기준율`, vixSummary: '미국 변동성 VIX', usCloseNote: md => `${md} 미국장 마감`,
+    krTitle: '한국 시장', krCaption: '수급, 등락 종목, 주요 종목 종가', flowsTitle: '투자자별 순매수', flowDay: '당일', flowFive: '최근 5거래일', flowNote: '양수는 순매수, 음수는 순매도',
+    breadthTitle: '시장 폭', breadthCaption: '상승 · 보합 · 하락', breadthShort: { rise: '상승', flat: '보합', fall: '하락', upper: '상한', lower: '하한' },
+    statsTitle: '거래 · 프로그램 · 공매도', turnoverOf: name => `${name} 거래대금`, ratio5Text: value => `5일 평균의 ${value}배`, programTotal: '프로그램 순매수', arbitrage: '차익', nonArbitrage: '비차익',
+    basis: '베이시스', spot: 'KOSPI200 현물', shortRatioOf: name => `공매도 비중 · ${name}`, detailsMore: '공매도 상위 5',
+    topTitle: '시가총액 상위 10', groupsTitle: 'KRX 업종 · 테마 등락률', globalTitle: '해외 · 금리 · 환율 · 원자재', globalCaption: '추이는 최근 20거래일 · 지표를 누르면 일별 기록',
+    boards: { world: '해외 증시 · 변동성', rates: '금리', fx: '환율', commodities: '원자재 · 가상자산' },
+    boardNotes: { world: '미국 지수 · 아시아 각 시장 최근 마감', rates: '국내 금융투자협회 16:00 최종호가', fx: '원화는 15:30 매매기준율', commodities: '달러 기준' },
+    columns: ['지표', '값', '전일 대비', '추이'], marketNames: { KOSPI: '코스피', KOSDAQ: '코스닥', 'KOSPI200선물': '선물' },
+    dateLabel: '거래일', pageEyebrow: '한국 증시 마감 기록', stock: '종목', price: '종가', change: '등락률', marketCap: '시가총액'
+  },
+  en: {
+    regularClose: 'Regular close', trendLabel: 'Last 20 sessions', closeOf: md => `Close of ${md}`, regularBasis: 'Regular session, 15:30 KST',
+    summaryTitle: 'The day in brief', summaryHead: (pctText, word) => `KOSPI ${word} ${pctText}%`, up: 'up', down: 'down', flat: 'flat',
+    breadthPhrase: (count, ratio, word) => `${count} KOSPI stocks ${word} (${ratio})`, foreignPhrase: (amount, word) => `foreign investors ${word} ${amount}`, netBuy: 'net bought', netSell: 'net sold',
+    fxSummary: 'USD/KRW', fixingNote: md => `${md} · 15:30 reference rate`, vixSummary: 'US volatility · VIX', usCloseNote: md => `${md} · US close`,
+    krTitle: 'Korean Market', krCaption: 'Flows, advancers and decliners, top stocks', flowsTitle: 'Net Buying by Investor', flowDay: 'Today', flowFive: 'Last 5 sessions', flowNote: 'Positive is net buying, negative net selling',
+    breadthTitle: 'Market Breadth', breadthCaption: 'Advancers · unchanged · decliners', breadthShort: { rise: 'Up', flat: 'Flat', fall: 'Down', upper: 'limit', lower: 'limit' },
+    statsTitle: 'Turnover · Program · Short Selling', turnoverOf: name => `${name} turnover`, ratio5Text: value => `${value}× the 5-session avg.`, programTotal: 'Program net buy', arbitrage: 'Arbitrage', nonArbitrage: 'Non-arbitrage',
+    basis: 'Basis', spot: 'KOSPI 200 spot', shortRatioOf: name => `Short ratio · ${name}`, detailsMore: 'Top 5 short selling',
+    topTitle: 'Top 10 by Market Cap', groupsTitle: 'KRX Sectors & Themes', globalTitle: 'Overseas · Rates · FX · Commodities', globalCaption: 'Trend over the last 20 sessions · Select an indicator for its daily history',
+    boards: { world: 'Overseas Markets · Volatility', rates: 'Rates', fx: 'FX', commodities: 'Commodities · Crypto' },
+    boardNotes: { world: 'US indices · each Asian market’s latest close', rates: 'Korean yields: KOFIA 16:00 final quotes', fx: 'KRW pairs: 15:30 reference rate', commodities: 'In US dollars' },
+    columns: ['Indicator', 'Value', 'Change', 'Trend'], marketNames: { KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', 'KOSPI200선물': 'KOSPI 200 Futures' },
+    dateLabel: 'Trading day', pageEyebrow: 'Korea market close archive', stock: 'Company', price: 'Close', change: 'Change', marketCap: 'Market cap'
+  }
+};
+
+const shortDate = (value) => {
+  if (!ISO_DATE.test(String(value || ''))) return '';
+  const [, m, d] = value.split('-').map(Number);
+  return `${m}/${d}`;
+};
+
+function monthDayText(value, lang) {
+  if (!ISO_DATE.test(String(value || ''))) return html(value || '--');
+  const [, m, d] = value.split('-').map(Number);
+  return lang === 'en' ? `${EN_MONTHS[m - 1].slice(0, 3)} ${d}` : `${m}월 ${d}일`;
 }
 
-function instrumentCard(key, item, f, copy, lang, major, marketDate = '') {
+/**
+ * The page head every market page shares: breadcrumb, eyebrow, title, the
+ * summary or lead, and one meta line. `summary` is markup; the rest is text.
+ */
+function pageHead({ id, breadcrumb, eyebrow, title, summary = '', lead = '', meta = [] }) {
+  return `<section class="mk-head" aria-labelledby="${id}"><div class="market-wrap">
+      <p class="market-breadcrumb">${breadcrumb}</p>
+      <p class="mk-eyebrow">${html(eyebrow)}</p>
+      <h1 id="${id}">${html(title)}</h1>
+      ${summary ? `<p class="market-date-summary">${summary}</p>` : ''}
+      ${lead ? `<p class="mk-lead">${html(lead)}</p>` : ''}
+      ${meta.length ? `<p class="mk-meta">${meta.map(item => `<span>${html(item)}</span>`).join('')}</p>` : ''}
+    </div></section>`;
+}
+
+// A trend line of finite values, oldest first: { line, area, cx, cy } in a w×h box, or null.
+function sparkGeometry(values, w, h, pad) {
+  const points = (Array.isArray(values) ? values : []).filter(valid);
+  if (points.length < 2) return null;
+  const min = Math.min(...points);
+  const max = Math.max(...points);
+  const span = max - min || 1;
+  const xy = points.map((value, index) => [pad + index * (w - 2 * pad) / (points.length - 1), pad + (max - value) / span * (h - 2 * pad)]);
+  const line = xy.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+  const [cx, cy] = xy[xy.length - 1];
+  return { line, area: `${pad},${h} ${line} ${w - pad},${h}`, cx: cx.toFixed(1), cy: cy.toFixed(1) };
+}
+
+function trendSvg(values, { w = 88, h = 26, pad = 3, stretch = false } = {}) {
+  const g = sparkGeometry(values, w, h, pad);
+  if (!g) return '';
+  return `<svg class="mk-spark${stretch ? ' mk-spark-wide' : ''}" viewBox="0 0 ${w} ${h}" width="${stretch ? '100%' : w}" height="${h}"${stretch ? ' preserveAspectRatio="none"' : ''} aria-hidden="true" focusable="false"><polygon class="mk-spark-area" points="${g.area}"></polygon><polyline class="mk-spark-line" points="${g.line}"${stretch ? ' vector-effect="non-scaling-stroke"' : ''}></polyline>${stretch ? '' : `<circle class="mk-spark-dot" cx="${g.cx}" cy="${g.cy}" r="2.2"></circle>`}</svg>`;
+}
+
+const trendOf = (trend, key) => (trend && trend.series && Array.isArray(trend.series[key]) ? trend.series[key] : null);
+
+// Value, change and basis of one instrument of the record, as on its card before.
+function instrumentParts(key, item, f, copy, lang, marketDate) {
   const isFx = FIXING_CODES.has(key);
   const movementClass = f.signClass(item?.change);
   const arrow = movementClass === 'up' ? '▲' : movementClass === 'down' ? '▼' : '—';
   const change = key === 'US10Y'
     ? `${arrow} ${valid(item?.change) ? `${f.number(Math.abs(item.change * 100), 1)}bp` : '--'}`
-    : isFx
+    : isFx || key === 'KOSPI' || key === 'KOSDAQ'
       ? `${arrow} ${valid(item?.change) ? f.number(Math.abs(item.change), 2) : '--'} <span>(${f.pct(item?.change_pct)})</span>`
       : `${arrow} ${f.signed(item?.change, digitsOf(key))} <span>(${f.pct(item?.change_pct)})</span>`;
-  const detail = major
-    ? `<dl class="market-ohlc"><div><dt>${copy.open}</dt><dd>${f.number(item?.open, 2)}</dd></div><div><dt>${copy.high}</dt><dd>${f.number(item?.high, 2)}</dd></div><div><dt>${copy.low}</dt><dd>${f.number(item?.low, 2)}</dd></div><div><dt>${copy.previous}</dt><dd>${f.number(item?.previous_close, 2)}</dd></div></dl>`
-    : '';
   // An Asian index dated before the session: its market was closed that day.
   const localHoliday = ASIA_CODES.includes(key) && ISO_DATE.test(String(item?.source_date || '')) && ISO_DATE.test(String(marketDate)) && item.source_date < marketDate;
-  const state = `${isFx ? copy.fixedClose : copy.closeState}${localHoliday ? ` · ${copy.localHoliday}` : ''}`;
+  const state = `${dotDate(item?.source_date, lang)} · ${isFx ? copy.fixedClose : copy.closeState}${localHoliday ? ` · ${copy.localHoliday}` : ''}`;
   // An optional indicator's page exists once a record has its value.
   const history = marketIndicatorPath(key, lang) && (!isOptionalIndicator(key) || valid(item?.close)) ? marketIndicatorPath(key, lang) : null;
-  return `<article class="instrument-card${major ? ' major' : ''}">
-      <div class="instrument-heading"><span>${history ? `<a class="instrument-history-link" href="${history}">${html(instrumentName(key, lang))}</a>` : html(instrumentName(key, lang))}</span>${item?.ticker ? `<small>${html(item.ticker)}</small>` : ''}</div>
-      <strong class="instrument-value">${f.valueUnit(key, item?.close)}</strong>
-      <div class="instrument-change ${movementClass}">${change}</div>
-      ${detail}<div class="instrument-state">${dotDate(item?.source_date, lang)} · ${state}</div>
+  const name = history ? `<a class="instrument-history-link" href="${history}">${html(instrumentName(key, lang))}</a>` : html(instrumentName(key, lang));
+  return { movementClass, change, state, name, value: f.valueUnit(key, item?.close) };
+}
+
+function indexCard(key, item, f, copy, pc, lang, marketDate, trend) {
+  const v = instrumentParts(key, item, f, copy, lang, marketDate);
+  const series = trendOf(trend, key);
+  const dates = trend && Array.isArray(trend.dates) ? trend.dates : [];
+  const first = Array.isArray(series) ? series.findIndex(valid) : -1;
+  const line = trendSvg(series, { w: 340, h: 64, pad: 3, stretch: true });
+  return `<article class="mk-card mk-index" data-code="${key}">
+      <div class="mk-index-head"><span class="mk-index-name">${v.name}</span><span class="mk-index-label">${html(pc.regularClose)}</span></div>
+      <strong class="mk-index-value">${v.value}</strong>
+      <div class="mk-index-change ${v.movementClass}">${v.change}</div>
+      ${line ? `<div class="mk-index-trend">${line}<div class="mk-index-axis"><span>${shortDate(dates[first])}</span><span>${html(pc.trendLabel)}</span><span>${shortDate(dates[dates.length - 1])}</span></div></div>` : ''}
+      <dl class="mk-ohlc"><div><dt>${copy.open}</dt><dd>${f.number(item?.open, 2)}</dd></div><div><dt>${copy.high}</dt><dd>${f.number(item?.high, 2)}</dd></div><div><dt>${copy.low}</dt><dd>${f.number(item?.low, 2)}</dd></div><div><dt>${copy.previous}</dt><dd>${f.number(item?.previous_close, 2)}</dd></div></dl>
+      <div class="mk-index-state">${v.state}</div>
     </article>`;
 }
 
-function breadthCard(key, item, f, copy) {
-  return `<article class="breadth-card"><h3>${key}</h3><div class="breadth-counts">
-      ${metric(copy.rise, f.integer(item?.rise), 'up')}${metric(copy.fall, f.integer(item?.fall), 'down')}${metric(copy.flat, f.integer(item?.flat))}${metric(copy.upper, f.integer(item?.upper_limit), 'up')}${metric(copy.lower, f.integer(item?.lower_limit), 'down')}
-    </div><div class="breadth-bar" aria-label="${copy.riseRatio} ${f.ratioPct(item?.rise_ratio)}, ${copy.fallRatio} ${f.ratioPct(item?.fall_ratio)}"><span class="advance" style="width:${valid(item?.rise_ratio) ? item.rise_ratio * 100 : 0}%"></span><span class="decline" style="width:${valid(item?.fall_ratio) ? item.fall_ratio * 100 : 0}%"></span></div><div class="breadth-ratios"><span class="up">${copy.riseRatio} ${f.ratioPct(item?.rise_ratio)}</span><span class="down">${copy.fallRatio} ${f.ratioPct(item?.fall_ratio)}</span></div></article>`;
+function boardRow(key, item, f, copy, lang, marketDate, trend) {
+  const v = instrumentParts(key, item, f, copy, lang, marketDate);
+  const line = trendSvg(trendOf(trend, key));
+  return `<tr class="mk-row" data-code="${key}">
+      <th scope="row"><span class="mk-row-name">${v.name}</span><span class="mk-row-state">${v.state}</span></th>
+      <td class="mk-row-value"><strong>${v.value}</strong></td>
+      <td class="mk-row-change ${v.movementClass}">${v.change}</td>
+      <td class="mk-row-trend">${line || '<span class="mk-trend-empty">—</span>'}</td>
+    </tr>`;
 }
 
-/**
- * One KOFIA yield of the session (Domestic Rates, joined by date). The change
- * is KOFIA's own: against its previous-day value, in basis points.
- */
-function domesticRateCard(item, day, f, copy, lang) {
+// One KOFIA yield of the session (Domestic Rates, joined by date). The change
+// is KOFIA's own: against its previous-day value, in basis points.
+function domesticRateRow(item, day, f, copy, lang, trend) {
   const movementClass = f.signClass(item.change_bp);
   const arrow = movementClass === 'up' ? '▲' : movementClass === 'down' ? '▼' : '—';
   const history = marketIndicatorPath(item.code, lang);
   const name = html(instrumentName(item.code, lang));
-  return `<article class="instrument-card rate-card" data-rate-code="${html(item.code)}">
-      <div class="instrument-heading"><span>${history ? `<a class="instrument-history-link" href="${history}">${name}</a>` : name}</span></div>
-      <strong class="instrument-value">${f.valueUnit(item.code, item.value)}</strong>
-      <div class="instrument-change ${movementClass}">${arrow} ${valid(item.change_bp) ? `${f.number(Math.abs(item.change_bp), 1)}bp` : '--'}</div>
-      <div class="instrument-state">${dotDate(day.market_date, lang)} · ${html(day.basis_time === '16:00' ? copy.rateState : `${day.basis_time} ${copy.rateState.replace(/^16:00 /, '')}`)}</div>
-    </article>`;
+  const line = trendSvg(trendOf(trend, item.code));
+  return `<tr class="mk-row rate-row" data-rate-code="${html(item.code)}">
+      <th scope="row"><span class="mk-row-name">${history ? `<a class="instrument-history-link" href="${history}">${name}</a>` : name}</span><span class="mk-row-state">${dotDate(day.market_date, lang)} · ${html(day.basis_time === '16:00' ? copy.rateState : `${day.basis_time} ${copy.rateState.replace(/^16:00 /, '')}`)}</span></th>
+      <td class="mk-row-value"><strong>${f.valueUnit(item.code, item.value)}</strong></td>
+      <td class="mk-row-change ${movementClass}">${arrow} ${valid(item.change_bp) ? `${f.number(Math.abs(item.change_bp), 1)}bp` : '--'}</td>
+      <td class="mk-row-trend">${line || '<span class="mk-trend-empty">—</span>'}</td>
+    </tr>`;
 }
 
-/** The Domestic Rates section body for a session, or '' when that day has none. */
-export function domesticRatesBody(day, lang) {
+/** The session's KOFIA yields as quote-board rows, or '' when that day has none. */
+export function domesticRatesBody(day, lang, trend = null) {
   const items = Array.isArray(day?.items) ? day.items.filter(item => isDomesticRateIndicator(item?.code) && valid(item.value)) : [];
   if (!items.length) return '';
   const copy = COPY[lang === 'en' ? 'en' : 'ko'];
   const f = makeFormat(lang);
-  return `<div class="mini-instrument-grid rate-grid">${items.map(item => domesticRateCard(item, day, f, copy, lang)).join('')}</div><p class="unit-note">${html(copy.ratesNote)}</p>`;
+  return items.map(item => domesticRateRow(item, day, f, copy, lang, trend)).join('');
+}
+
+function boardCard(id, title, note, rows, pc, extra = '') {
+  return `<section class="mk-card mk-board" data-board="${id}" aria-labelledby="mk-board-${id}">
+      <div class="mk-card-head"><h3 id="mk-board-${id}">${html(title)}</h3><span class="mk-card-note">${html(note)}</span></div>
+      <div class="mk-table-wrap"><table class="mk-table mk-board-table"><thead><tr>${pc.columns.map((label, index) => `<th scope="col"${index === 3 ? ' class="mk-col-trend"' : ''}>${html(label)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>${extra}
+    </section>`;
+}
+
+function flowBar(value, max) {
+  if (!valid(value) || !valid(max) || max <= 0) return '';
+  const width = Math.max(Math.abs(value) / max * 50, 1.5);
+  const x = value >= 0 ? 50 : 50 - width;
+  return `<svg class="mk-flow-bar" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="mk-flow-track" x="0" y="0" width="100" height="8"></rect><rect class="mk-flow-fill ${value >= 0 ? 'up' : 'down'}" x="${x.toFixed(2)}" y="0" width="${width.toFixed(2)}" height="8"></rect><rect class="mk-flow-mid" x="49.6" y="0" width="0.8" height="8"></rect></svg>`;
+}
+
+// Net flows of the three markets (KRW billion per the contract), as a table with bars.
+function flowTable(rowsByMarket, f, copy) {
+  const values = rowsByMarket.flatMap(row => row.values).filter(valid);
+  const max = values.length ? Math.max(...values.map(Math.abs)) : 0;
+  return `<div class="mk-table-wrap"><table class="mk-table mk-flow-table"><thead><tr><th scope="col">${html(copy.market)}</th><th scope="col">${html(copy.foreign)}</th><th scope="col">${html(copy.institution)}</th><th scope="col">${html(copy.individual)}</th></tr></thead><tbody>${rowsByMarket.map(row => `<tr><th scope="row">${html(row.name)}</th>${row.values.map(value => `<td><span class="mk-flow-value ${f.signClass(value)}">${f.flow(value)}</span>${flowBar(value, max)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+
+function breadthBlock(key, item, f, copy, pc) {
+  const rise = item?.rise_count ?? item?.rise;
+  const fall = item?.fall_count ?? item?.fall;
+  const flat = item?.flat;
+  const total = [rise, flat, fall].every(valid) ? rise + flat + fall : null;
+  const share = value => (valid(total) && total > 0 && valid(value) ? value / total * 100 : 0);
+  const limit = (label, value) => (valid(value) && value > 0 ? ` (${label} ${f.integer(value)})` : '');
+  return `<div class="mk-breadth" data-market="${key}">
+      <div class="mk-breadth-head"><span>${html(pc.marketNames[key])}</span><b class="down">${copy.fallRatio} ${f.ratioPct(item?.fall_ratio)}</b></div>
+      <div class="mk-breadth-bar" role="img" aria-label="${copy.riseRatio} ${f.ratioPct(item?.rise_ratio)}, ${copy.fallRatio} ${f.ratioPct(item?.fall_ratio)}"><span class="advance" style="width:${share(rise).toFixed(2)}%"></span><span class="flat" style="width:${share(flat).toFixed(2)}%"></span><span class="decline" style="width:${share(fall).toFixed(2)}%"></span></div>
+      <div class="mk-breadth-counts"><span class="up">${pc.breadthShort.rise} ${f.integer(item?.rise)}${limit(pc.breadthShort.upper, item?.upper_limit)}</span><span>${pc.breadthShort.flat} ${f.integer(flat)}</span><span class="down">${pc.breadthShort.fall} ${f.integer(item?.fall)}${limit(pc.breadthShort.lower, item?.lower_limit)}</span></div>
+    </div>`;
 }
 
 function rankList(title, items, type, f, field = 'change_pct') {
@@ -479,16 +611,6 @@ function groupBlock(title, allLabel, items, f, copy, field = 'change_pct') {
     </div>`;
 }
 
-function flowsTable(markets, pick, f, copy) {
-  return dataTable([copy.market, copy.foreign, copy.institution, copy.individual], ['KOSPI', 'KOSDAQ', 'KOSPI200선물'].map(key => {
-    const name = key === 'KOSPI200선물' ? copy.futures : key;
-    return [name, ...['외국인', '기관', '개인'].map(investor => {
-      const value = pick(markets?.[key], investor);
-      return `<span class="${f.signClass(value)}">${f.flow(value)}</span>`;
-    })];
-  }));
-}
-
 /* --------------------------------------------------------------- the page */
 
 /**
@@ -497,7 +619,9 @@ function flowsTable(markets, pick, f, copy) {
  * Daily report post for this date in this language (or null).
  */
 export function renderMarketDateMain(payload, lang, context = {}) {
-  const copy = COPY[lang === 'en' ? 'en' : 'ko'];
+  const key = lang === 'en' ? 'en' : 'ko';
+  const copy = COPY[key];
+  const pc = PAGE_COPY[key];
   const f = makeFormat(lang);
   const date = payload.meta.market_date;
   const indices = payload.indices || {};
@@ -506,120 +630,178 @@ export function renderMarketDateMain(payload, lang, context = {}) {
   const flows = payload.krx_investor_trading?.markets || {};
   const five = payload.recent_5d_flows || {};
   const breadth = payload.market_breadth || {};
+  const program = payload.program_basis || {};
+  const internals = payload.market_internals || {};
   const rawGroups = payload.krx_groups || {};
   const groups = { ...rawGroups, sectors: localizedGroups(rawGroups.sectors, lang), themes: localizedGroups(rawGroups.themes, lang) };
   const caps = Array.isArray(payload.market_cap_top10) ? payload.market_cap_top10 : [];
   const shorts = payload.short_selling || {};
   const status = payload.meta?.schema_version === '1.2.0' ? payload.section_status || {} : {};
+  // Trend lines only when they end on this session.
+  const trend = context.trend && Array.isArray(context.trend.dates) && context.trend.end_date === date ? context.trend : null;
 
   const k = kospi(payload);
   const q = kosdaq(payload);
   const fx = rates.USDKRW;
   const inv = kospiFlows(payload);
   const summary = [
-    valid(k?.close) ? `${lang === 'en' ? 'KOSPI' : '코스피'} <b>${f.number(k.close, 2)}</b> <span class="${f.signClass(k.change_pct)}">(${f.pct(k.change_pct)})</span>` : '',
-    valid(q?.close) ? `${lang === 'en' ? 'KOSDAQ' : '코스닥'} <b>${f.number(q.close, 2)}</b> <span class="${f.signClass(q.change_pct)}">(${f.pct(q.change_pct)})</span>` : '',
+    valid(k?.close) ? `${key === 'en' ? 'KOSPI' : '코스피'} <b>${f.number(k.close, 2)}</b> <span class="${f.signClass(k.change_pct)}">(${f.pct(k.change_pct)})</span>` : '',
+    valid(q?.close) ? `${key === 'en' ? 'KOSDAQ' : '코스닥'} <b>${f.number(q.close, 2)}</b> <span class="${f.signClass(q.change_pct)}">(${f.pct(q.change_pct)})</span>` : '',
     valid(inv['외국인']?.net_buy) ? `${copy.foreign} <b class="${f.signClass(inv['외국인'].net_buy)}">${f.flow(inv['외국인'].net_buy)}</b>` : '',
-    valid(fx?.close) ? `${lang === 'en' ? 'USD/KRW' : '원/달러'} <b>${f.valueUnit('USDKRW', fx.close)}</b>` : ''
+    valid(fx?.close) ? `${key === 'en' ? 'USD/KRW' : '원/달러'} <b>${f.valueUnit('USDKRW', fx.close)}</b>` : ''
   ].filter(Boolean).map(item => `<span class="market-date-fact">${item}</span>`).join('<span class="market-date-sep" aria-hidden="true"> · </span>');
-  const takeaway = String(payload.takeaway?.[lang === 'en' ? 'en' : 'ko'] || '').trim();
+  const takeaway = String(payload.takeaway?.[key] || '').trim();
 
-  const base = lang === 'en' ? '/en/market/' : '/market/';
-  const nav = `<nav class="market-date-nav" aria-label="${html(copy.archive)}">
-      ${context.prev ? `<a class="market-date-nav-link prev" href="${marketDatePath(context.prev, lang)}" rel="prev"><span aria-hidden="true">←</span> ${html(copy.prev)} <small>${html(dayLabel(context.prev, lang))}</small></a>` : '<span class="market-date-nav-link prev" aria-hidden="true"></span>'}
+  const base = key === 'en' ? '/en/market/' : '/market/';
+  const nav = `<nav class="market-date-nav mk-datebar" aria-label="${html(copy.archive)}">
+      ${context.prev ? `<a class="market-date-nav-link prev" href="${marketDatePath(context.prev, lang)}" rel="prev"><span aria-hidden="true">‹</span> ${html(copy.prev)} <small>${html(dayLabel(context.prev, lang))}</small></a>` : '<span class="market-date-nav-link prev" aria-hidden="true"></span>'}
       <a class="market-date-nav-link archive" href="${marketArchivePath(lang)}">${html(copy.archive)}</a>
-      ${context.next ? `<a class="market-date-nav-link next" href="${marketDatePath(context.next, lang)}" rel="next">${html(copy.next)} <small>${html(dayLabel(context.next, lang))}</small> <span aria-hidden="true">→</span></a>` : `<a class="market-date-nav-link next" href="${base}">${html(copy.latest)} <span aria-hidden="true">→</span></a>`}
+      ${context.next ? `<a class="market-date-nav-link next" href="${marketDatePath(context.next, lang)}" rel="next">${html(copy.next)} <small>${html(dayLabel(context.next, lang))}</small> <span aria-hidden="true">›</span></a>` : `<a class="market-date-nav-link next" href="${base}">${html(copy.latest)} <span aria-hidden="true">›</span></a>`}
     </nav>`;
 
-  const majorCards = ['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500'].filter(key => indices[key]).map(key => instrumentCard(key, indices[key], f, copy, lang, true)).join('');
-  const asiaCards = ASIA_CODES.filter(key => indices[key]).map(key => instrumentCard(key, indices[key], f, copy, lang, false, date)).join('');
-  const rateCards = ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY', 'US10Y', 'VIX', 'VKOSPI', 'SOX'].filter(key => rates[key]).map(key => instrumentCard(key, rates[key], f, copy, lang, false)).join('');
-  const commodityCards = ['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER', 'BITCOIN'].filter(key => commodities[key]).map(key => instrumentCard(key, commodities[key], f, copy, lang, false)).join('');
+  /* ---- the day in brief ---- */
+  const kospiPct = k?.change_pct;
+  const word = !valid(kospiPct) || kospiPct === 0 ? pc.flat : kospiPct > 0 ? pc.up : pc.down;
+  const headline = valid(kospiPct) ? pc.summaryHead(f.number(Math.abs(kospiPct), 2), word) : instrumentName('KOSPI', lang);
+  const breadthUnavailable = status.market_breadth?.status === 'unavailable';
+  const kb = breadth.KOSPI;
+  const breadthPart = !breadthUnavailable && kb && valid(kospiPct) && kospiPct !== 0
+    ? (kospiPct < 0
+      ? pc.breadthPhrase(f.integer(kb.fall_count ?? kb.fall), f.ratioPct(kb.fall_ratio), pc.down)
+      : pc.breadthPhrase(f.integer(kb.rise_count ?? kb.rise), f.ratioPct(kb.rise_ratio), pc.up))
+    : '';
+  const foreignNet = inv['외국인']?.net_buy;
+  const foreignPart = valid(foreignNet) && foreignNet !== 0 ? pc.foreignPhrase(f.flow(Math.abs(foreignNet)).replace('+', ''), foreignNet > 0 ? pc.netBuy : pc.netSell) : '';
+  const vix = rates.VIX;
+  const summaryCard = `<article class="mk-summary" aria-labelledby="mk-summary-title">
+      <p class="mk-summary-eyebrow" id="mk-summary-title">${html(pc.summaryTitle)}</p>
+      <p class="mk-summary-head">${html(headline)}</p>
+      ${breadthPart || foreignPart ? `<p class="mk-summary-sub">${[breadthPart, foreignPart].filter(Boolean).map(html).join(' · ')}</p>` : ''}
+      <div class="mk-summary-stats">
+        <div><span>${html(pc.fxSummary)}</span><strong>${f.valueUnit('USDKRW', fx?.data_state === 'unavailable' ? null : fx?.close)}</strong><small>${html(pc.fixingNote(shortDate(fx?.source_date || date)))}</small></div>
+        <div><span>${html(pc.vixSummary)}</span><strong>${f.valueUnit('VIX', vix?.data_state === 'unavailable' ? null : vix?.close)}${valid(vix?.change_pct) ? ` <em class="${f.signClass(vix.change_pct)}">${f.pct(vix.change_pct)}</em>` : ''}</strong><small>${html(pc.usCloseNote(shortDate(vix?.source_date)))}</small></div>
+      </div>
+    </article>`;
 
+  /* ---- Korean market ---- */
+  const order = ['KOSPI', 'KOSDAQ', 'KOSPI200선물'];
+  const dayRows = order.map(m => ({ name: pc.marketNames[m], values: ['외국인', '기관', '개인'].map(investor => flows[m]?.investors?.[investor]?.net_buy) }));
   const fiveStatus = status.five_day_flows;
   const fiveBody = fiveStatus && fiveStatus.status !== 'complete'
     ? `<div class="market-group-empty market-five-day-status" role="note"><p class="group-empty-title">${html(copy.fiveDayIncomplete(fiveStatus.available_sessions ?? 0, fiveStatus.expected_sessions ?? 5))}</p></div>`
     : five.markets
-      ? `${flowsTable(five.markets, (market, investor) => market?.[investor], f, copy)}<p class="unit-note">${html(copy.fiveDays(dotDate(five.start_date, lang), dotDate(five.end_date, lang)))}</p>`
+      ? `${flowTable(order.map(m => ({ name: pc.marketNames[m], values: ['외국인', '기관', '개인'].map(investor => five.markets?.[m]?.[investor]) })), f, copy)}<p class="mk-unit">${html(copy.fiveDays(dotDate(five.start_date, lang), dotDate(five.end_date, lang)))}</p>`
       : '';
-  const flowsBody = `${flowsTable(flows, (market, investor) => market?.investors?.[investor]?.net_buy, f, copy)}<p class="unit-note">${html(copy.unit)}</p>`;
+  const flowsCard = `<section class="mk-card mk-flows" aria-labelledby="mk-flows-title">
+      <div class="mk-card-head"><h3 id="mk-flows-title">${html(pc.flowsTitle)}</h3></div>
+      <h4 class="mk-subhead">${html(pc.flowDay)}</h4>${flowTable(dayRows, f, copy)}
+      ${fiveBody ? `<h4 class="mk-subhead">${html(pc.flowFive)}</h4>${fiveBody}` : ''}
+      <p class="mk-unit">${html(pc.flowNote)}</p>
+    </section>`;
+  const breadthCardHtml = `<section class="mk-card mk-breadth-card" aria-labelledby="mk-breadth-title">
+      <div class="mk-card-head"><h3 id="mk-breadth-title">${html(pc.breadthTitle)}</h3><span class="mk-card-note">${html(pc.breadthCaption)}</span></div>
+      ${breadthUnavailable ? `<p class="unit-note">${html(copy.breadthUnavailable)}</p>` : ['KOSPI', 'KOSDAQ'].filter(m => breadth[m]).map(m => breadthBlock(m, breadth[m], f, copy, pc)).join('')}
+    </section>`;
 
-  const breadthBody = status.market_breadth?.status === 'unavailable'
-    ? `<p class="unit-note">${html(copy.breadthUnavailable)}</p>`
-    : `<div class="breadth-grid">${['KOSPI', 'KOSDAQ'].filter(key => breadth[key]).map(key => breadthCard(key, breadth[key], f, copy)).join('')}</div>`;
-
-  const sectorBlock = groupBlock(copy.sectors, copy.allSectors, groups.sectors, f, copy);
-  const themeBlock = groupBlock(copy.themes, copy.allThemes, groups.themes, f, copy);
-  const groupsBody = sectorBlock || themeBlock
-    ? `<div class="range-groups-grid">${sectorBlock}${themeBlock}</div><p class="market-archive-links"><a href="${marketSectorsPath(lang)}">${html(copy.sectorsPage)} →</a></p>`
-    : '';
-
-  const capRows = caps.map(item => [
-    html(item?.rank ?? '--'),
-    `<span class="stock-name"><b>${html(companyName(item, lang))}</b><small>${html(item?.market || '')} · ${html(item?.ticker || '')}</small></span>`,
-    valid(item?.close) ? `${f.number(item.close, 0)}${f.ko ? '원' : ''}` : '--',
-    `<span class="${f.signClass(item?.change_pct)}">${f.pct(item?.change_pct)}</span>`,
-    f.won(item?.market_cap_won)
-  ]);
-
+  const programItem = name => program.program_trading?.[name]?.net_buy_won;
+  // A net amount with an explicit sign (+ / U+2212), as in the flow tables.
+  const signedWon = value => {
+    if (!valid(value)) return '--';
+    const sign = value > 0 ? '+' : value < 0 ? '−' : '';
+    const text = f.won(Math.abs(value));
+    return f.ko ? `${sign}${text}` : text.replace(/^KRW /, `KRW ${sign}`);
+  };
+  const basisState = value => (f.ko ? value : { 콘탱고: 'Contango', 백워데이션: 'Backwardation', 중립: 'Flat' }[value]) || value || '--';
+  const stat = (label, value, sub = '', cls = '') => `<div class="mk-stat"><span>${html(label)}</span><strong class="${cls}">${value}</strong>${sub ? `<small>${sub}</small>` : ''}</div>`;
   const shortSummary = shorts.market_summary || {};
-  const shortScopeNote = ['KOSPI', 'KOSDAQ'].some(key => /NXT/.test(String(shortSummary[key]?.coverage_scope || '')))
+  const stats = [
+    ...['KOSPI', 'KOSDAQ'].filter(m => internals.turnover?.[m]).map(m => stat(pc.turnoverOf(pc.marketNames[m]), f.won(internals.turnover[m].value_won), valid(internals.turnover[m].ratio5) ? html(pc.ratio5Text(f.number(internals.turnover[m].ratio5, 2))) : '')),
+    program.program_trading ? stat(pc.programTotal, signedWon(programItem('전체')), `${html(pc.arbitrage)} ${signedWon(programItem('차익'))} · ${html(pc.nonArbitrage)} ${signedWon(programItem('비차익'))}`, f.signClass(programItem('전체'))) : '',
+    program.basis ? stat(pc.basis, f.signed(program.basis.basis, 2), `<span class="state-chip">${html(basisState(program.basis.market_state))}</span> ${html(pc.spot)} ${f.number(program.basis.kospi200_spot, 2)}`, f.signClass(program.basis.basis)) : '',
+    ...['KOSPI', 'KOSDAQ'].filter(m => shortSummary[m]).map(m => stat(pc.shortRatioOf(pc.marketNames[m]), f.ratioPct(shortSummary[m].short_value_ratio), `${html(copy.shortAmount)} ${f.won(shortSummary[m].short_value_won)}`))
+  ].filter(Boolean).join('');
+  const shortScopeNote = ['KOSPI', 'KOSDAQ'].some(m => /NXT/.test(String(shortSummary[m]?.coverage_scope || '')))
     ? `<p class="unit-note">${html(copy.shortRatioScope)}</p>` : '';
   const shortList = (items, isRatio) => !(items || []).length
     ? `<p class="unit-note">${html(copy.regularUnavailable)}</p>`
     : `<ol class="rank-list">${items.map((item, index) => `<li><span>${index + 1}. <b>${html(companyName(item, lang))}</b><small>${html(item?.market || '')}</small></span><strong>${isRatio ? f.ratioPct(item?.short_value_ratio) : f.won(item?.short_value_won)}</strong></li>`).join('')}</ol>`;
-  const shortBody = shortSummary.KOSPI || shortSummary.KOSDAQ
-    ? `<div class="short-summary">${['KOSPI', 'KOSDAQ'].map(key => `<article><h3>${key}</h3>${metric(copy.shortAmount, f.won(shortSummary[key]?.short_value_won))}${metric(copy.valueRatio, f.ratioPct(shortSummary[key]?.short_value_ratio))}</article>`).join('')}</div><div class="short-ranks"><div><h3>${html(copy.shortValue)}</h3>${shortList(shorts.top5_by_value, false)}</div><div><h3>${html(copy.shortRatio)}</h3>${shortList(shorts.top5_by_ratio, true)}</div></div>${shortScopeNote}`
+  const shortRanks = shortSummary.KOSPI || shortSummary.KOSDAQ
+    ? `<details class="mk-details"><summary>${html(pc.detailsMore)}</summary><div class="short-ranks"><div><h4>${html(copy.shortValue)}</h4>${shortList(shorts.top5_by_value, false)}</div><div><h4>${html(copy.shortRatio)}</h4>${shortList(shorts.top5_by_ratio, true)}</div></div>${shortScopeNote}</details>`
+    : '';
+  const statsCard = stats ? `<section class="mk-card mk-stats-card" aria-labelledby="mk-stats-title">
+      <div class="mk-card-head"><h3 id="mk-stats-title">${html(pc.statsTitle)}</h3></div>
+      <div class="mk-stats">${stats}</div>${shortRanks}
+    </section>` : '';
+  const topCard = caps.length ? `<section class="mk-card mk-top-card" aria-labelledby="mk-top-title">
+      <div class="mk-card-head"><h3 id="mk-top-title">${html(pc.topTitle)}</h3><span class="mk-card-note">${html(pc.regularClose)}</span></div>
+      <div class="mk-table-wrap"><table class="mk-table mk-cap-table"><thead><tr><th scope="col">${html(pc.stock)}</th><th scope="col">${html(pc.price)}</th><th scope="col">${html(pc.change)}</th><th scope="col" class="mk-col-cap">${html(pc.marketCap)}</th></tr></thead><tbody>${caps.map(item => `<tr><th scope="row"><span class="mk-rank">${html(item?.rank ?? '--')}</span><span class="stock-name"><b>${html(companyName(item, lang))}</b><small>${html(item?.market || '')} · ${html(item?.ticker || '')}</small></span></th><td>${valid(item?.close) ? `${f.number(item.close, 0)}${f.ko ? '원' : ''}` : '--'}</td><td><span class="${f.signClass(item?.change_pct)}">${f.pct(item?.change_pct)}</span></td><td class="mk-col-cap">${f.won(item?.market_cap_won)}</td></tr>`).join('')}</tbody></table></div>
+    </section>` : '';
+  const sectorBlock = groupBlock(copy.sectors, copy.allSectors, groups.sectors, f, copy);
+  const themeBlock = groupBlock(copy.themes, copy.allThemes, groups.themes, f, copy);
+  const groupsCard = sectorBlock || themeBlock
+    ? `<section class="mk-card mk-groups-card" aria-labelledby="mk-groups-title">
+      <div class="mk-card-head"><h3 id="mk-groups-title">${html(pc.groupsTitle)}</h3><a class="mk-card-link" href="${marketSectorsPath(lang)}">${html(copy.sectorsPage)} →</a></div>
+      <div class="range-groups-grid">${sectorBlock}${themeBlock}</div>
+    </section>`
     : '';
 
-  const report = context.report
-    ? `<a class="market-report-cta" href="${html(context.report.url)}"><span>${html(copy.report)}</span><span class="cta-date-badge" aria-hidden="true">${dotDate(date, lang)}</span><span aria-hidden="true">→</span></a>`
-    : `<p class="market-report-unavailable">${html(copy.noReport)}</p>`;
+  /* ---- overseas, rates, FX, commodities ---- */
+  const row = (group, code) => boardRow(code, group[code], f, copy, lang, date, trend);
+  const worldRows = [
+    ...['NASDAQ', 'DOW', 'SP500'].filter(code => indices[code]).map(code => row(indices, code)),
+    ...(rates.SOX ? [row(rates, 'SOX')] : []),
+    ...ASIA_CODES.filter(code => indices[code]).map(code => row(indices, code)),
+    ...['VIX', 'VKOSPI'].filter(code => rates[code]).map(code => row(rates, code))
+  ].join('');
+  const kofiaRows = context.domesticRates?.market_date === date ? domesticRatesBody(context.domesticRates, lang, trend) : '';
+  const ratesRows = `${rates.US10Y ? row(rates, 'US10Y') : ''}${kofiaRows}`;
+  const fxRows = ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY'].filter(code => rates[code]).map(code => row(rates, code)).join('');
+  const commodityRows = ['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER', 'BITCOIN'].filter(code => commodities[code]).map(code => row(commodities, code)).join('');
+  const boards = `<div class="mk-boards mk-boards-static">
+      <div class="mk-board-col">
+        ${worldRows ? boardCard('world', pc.boards.world, pc.boardNotes.world, worldRows, pc) : ''}
+        ${ratesRows ? boardCard('rates', pc.boards.rates, pc.boardNotes.rates, ratesRows, pc, kofiaRows ? `<p class="mk-unit">${html(copy.ratesNote)}</p>` : '') : ''}
+      </div>
+      <div class="mk-board-col">
+        ${fxRows ? boardCard('fx', pc.boards.fx, pc.boardNotes.fx, fxRows, pc) : ''}
+        ${commodityRows ? boardCard('commodities', pc.boards.commodities, pc.boardNotes.commodities, commodityRows, pc) : ''}
+      </div>
+    </div>`;
 
-  const links = `<aside class="market-note market-date-links"><span class="note-quote" aria-hidden="true">“</span><h2>${html(copy.noteTitle)}</h2><p>${html(copy.noteBody)}</p>${report}<a class="market-date-dashboard" href="${base}?date=${html(date)}">${html(copy.dashboard)} <span aria-hidden="true">→</span></a></aside>`;
-  // Numbered in order of appearance; a section with no data is left out.
-  let n = 0;
-  const part = (index, body) => body ? section(++n, copy.sections[index], body) : '';
-  const asiaBlock = asiaCards ? `<h3 class="group-category-title market-asia-title">${html(copy.asiaTitle)}</h3><div class="mini-instrument-grid market-asia-grid">${asiaCards}</div>` : '';
-  const indicesPart = part(0, `<div class="major-index-grid">${majorCards}</div>${asiaBlock}`);
-  const flowsPart = part(1, flowsBody);
-  const fivePart = part(2, fiveBody);
-  const ratesPart = part(3, rateCards && `<div class="mini-instrument-grid">${rateCards}</div>`);
-  const commodityPart = part(4, commodityCards && `<div class="mini-instrument-grid commodity-grid">${commodityCards}</div>`);
-  const domesticPart = part(9, context.domesticRates?.market_date === date ? domesticRatesBody(context.domesticRates, lang) : '');
-  const breadthPart = part(5, breadthBody);
-  const groupsPart = part(6, groupsBody);
-  const capsPart = part(7, capRows.length ? dataTable(copy.capColumns, capRows, 'market-cap-table') : '');
-  const shortPart = part(8, shortBody);
-  const sections = [
-    indicesPart,
-    `<div class="market-pair market-pair-tables">${flowsPart}${fivePart}</div>`,
-    `<div class="market-pair">${ratesPart}${commodityPart}</div>`,
-    domesticPart,
-    breadthPart,
-    groupsPart,
-    `<div class="market-bottom-grid">${capsPart}${links}</div>`,
-    shortPart
-  ].filter(Boolean).join('\n');
+  const report = context.report
+    ? `<a class="market-report-cta" href="${html(context.report.url)}">${html(copy.report)} <span aria-hidden="true">↗</span></a>`
+    : `<p class="market-report-unavailable">${html(copy.noReport)}</p>`;
+  const meta = [copy.closeBasis, copy.overseas.replace(/^\*\s*/, '')];
 
   return `<main id="market-date-root" class="market-date-page" data-market-date="${html(date)}">
-  <section class="market-hero" aria-labelledby="market-date-heading">
-    <div class="market-wrap market-hero-inner">
-      <div class="market-hero-copy">
-        <p class="market-breadcrumb"><a href="${lang === 'en' ? '/en/' : '/'}">${html(copy.breadcrumbHome)}</a> › <a href="${base}">${html(copy.breadcrumbMarket)}</a> › <a href="${marketArchivePath(lang)}">${html(copy.archive)}</a></p>
-        <p class="market-eyebrow">${html(copy.eyebrow)}</p>
-        <h1 id="market-date-heading">${html(copy.heading(date))}</h1>
-        <p class="market-date-summary">${summary}</p>
-        ${takeaway ? `<p class="market-subtitle">${html(takeaway)}</p>` : ''}
-        <p class="market-date">${dotDate(date, lang)} · ${html(copy.closeBasis)}</p>
-        <p class="market-overseas">${html(copy.overseas)}</p>
-      </div>
-      <div class="market-mountain" aria-hidden="true"></div>
-    </div>
-  </section>
+  ${pageHead({
+    id: 'market-date-heading',
+    breadcrumb: `<a href="${key === 'en' ? '/en/' : '/'}">${html(copy.breadcrumbHome)}</a> › <a href="${base}">${html(copy.breadcrumbMarket)}</a> › <a href="${marketArchivePath(lang)}">${html(copy.archive)}</a>`,
+    eyebrow: pc.pageEyebrow,
+    title: copy.heading(date),
+    summary,
+    lead: takeaway,
+    meta
+  })}
   <div class="market-wrap">${nav}</div>
-  <div class="market-wrap market-dashboard">
-${sections}
+  <div class="market-wrap mk-dashboard market-dashboard">
+    <div class="mk-close-line"><p><b>${html(pc.closeOf(monthDayText(date, lang)))}</b> <span>${html(pc.regularBasis)}</span></p>${report}</div>
+    <div class="mk-top">
+      ${k ? indexCard('KOSPI', k, f, copy, pc, lang, date, trend) : ''}
+      ${q ? indexCard('KOSDAQ', q, f, copy, pc, lang, date, trend) : ''}
+      ${summaryCard}
+    </div>
+    <section class="mk-section" aria-labelledby="mk-kr-title">
+      <div class="mk-section-head"><h2 id="mk-kr-title">${html(pc.krTitle)}</h2><span>${html(pc.krCaption)}</span></div>
+      <div class="mk-grid mk-grid-kr">${flowsCard}${breadthCardHtml}</div>
+      ${statsCard || topCard ? `<div class="mk-grid mk-grid-kr2">${statsCard}${topCard}</div>` : ''}
+      ${groupsCard ? `<div class="mk-grid-full">${groupsCard}</div>` : ''}
+    </section>
+    <section class="mk-section" aria-labelledby="mk-global-title">
+      <div class="mk-section-head"><h2 id="mk-global-title">${html(pc.globalTitle)}</h2><span>${html(pc.globalCaption)}</span></div>
+      ${boards}
+    </section>
+    <p class="market-archive-links"><a class="market-date-dashboard" href="${base}?date=${html(date)}">${html(copy.dashboard)} →</a><a href="${marketArchivePath(lang)}">${html(copy.archive)} →</a><a href="${marketSectorsPath(lang)}">${html(copy.sectorsLink)} →</a></p>
     <div class="market-data-note"><p>${html(copy.source)}</p><p>${html(copy.disclaimer)}</p></div>
   </div>
   <div class="market-wrap">${nav}</div>
@@ -658,18 +840,14 @@ export function renderMarketArchiveMain(rows, lang, rateCodes = []) {
     ? 'Every published session, newest first. Each date opens that session’s full record.'
     : '게시된 모든 거래일을 최신순으로 정리했습니다. 날짜를 누르면 그날의 전체 마감 기록이 열립니다.';
   return `<main id="market-date-root" class="market-date-page market-archive-page">
-  <section class="market-hero" aria-labelledby="market-archive-heading">
-    <div class="market-wrap market-hero-inner">
-      <div class="market-hero-copy">
-        <p class="market-breadcrumb"><a href="${lang === 'en' ? '/en/' : '/'}">${html(copy.breadcrumbHome)}</a> › <a href="${base}">${html(copy.breadcrumbMarket)}</a></p>
-        <p class="market-eyebrow">MARKET CLOSE · ARCHIVE</p>
-        <h1 id="market-archive-heading">${html(heading)}</h1>
-        <p class="market-subtitle">${html(lead)}</p>
-        <p class="market-date">${html(copy.closeBasis)}</p>
-      </div>
-      <div class="market-mountain" aria-hidden="true"></div>
-    </div>
-  </section>
+  ${pageHead({
+    id: 'market-archive-heading',
+    breadcrumb: `<a href="${lang === 'en' ? '/en/' : '/'}">${html(copy.breadcrumbHome)}</a> › <a href="${base}">${html(copy.breadcrumbMarket)}</a>`,
+    eyebrow: PAGE_COPY[lang === 'en' ? 'en' : 'ko'].pageEyebrow,
+    title: heading,
+    lead,
+    meta: [copy.closeBasis]
+  })}
   <div class="market-wrap market-dashboard">
 ${blocks}
     <nav class="indicator-links" id="indicators" aria-labelledby="indicators-heading"><h2 id="indicators-heading">${html(lang === 'en' ? 'Daily history by indicator' : '지표별 일별 기록')}</h2><div>${marketIndicatorLinks(lang, availableIndicatorCodes(rows, rateCodes)).map(link => `<a href="${link.href}">${html(link.name)}</a>`).join('')}</div></nav>
@@ -924,14 +1102,17 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
     const postsPromise = Promise.resolve().then(() => (loadPostsFn || loadPosts)(request, env)).catch(() => []);
     // The session's KOFIA yields fail soft: without them the page is as before.
     const ratesPromise = withinBudget(loadDomesticRatesDay(env, route.date), budgetMs).catch(() => null);
-    const [data, shell, posts, domesticRates] = await Promise.all([loadMarketDate(env, route.date, { budgetMs }), loadShell(env, url, route.lang), postsPromise, ratesPromise]);
+    // The trend lines fail soft too: without them the cards and rows have none.
+    const trendPromise = withinBudget(loadSessionTrend(env, route.date), budgetMs).catch(() => null);
+    const [data, shell, posts, domesticRates, trend] = await Promise.all([loadMarketDate(env, route.date, { budgetMs }), loadShell(env, url, route.lang), postsPromise, ratesPromise, trendPromise]);
     if (!data) return notFound(env, url);
     return htmlResponse(marketDatePageHtml(shell, data.payload, route.lang, {
       prev: data.prev,
       next: data.next,
       publishedAt: data.publishedAt,
       report: dailyReportFor(posts, route.date, route.lang),
-      domesticRates
+      domesticRates,
+      trend
     }));
   } catch (error) {
     console.error('market date page unavailable', error);
@@ -952,7 +1133,7 @@ export function marketSectorsPath(lang = 'ko') {
 
 const SECTORS_COPY = {
   ko: {
-    eyebrow: 'KRX SECTORS & THEMES',
+    eyebrow: 'KRX 업종·테마 지수',
     heading: '업종 · 테마 등락률 순위',
     breadcrumb: '업종 · 테마',
     lead: date => `${longDate(date, 'ko')} 마감 기준으로 KRX 업종지수와 테마지수를 등락률 순으로 정리했습니다. 최근 5거래일·20거래일 누적 순위도 함께 봅니다.`,
@@ -972,7 +1153,7 @@ const SECTORS_COPY = {
     ]
   },
   en: {
-    eyebrow: 'KRX SECTORS & THEMES',
+    eyebrow: 'KRX sector & theme indices',
     heading: 'Korea Sector & Theme Rankings',
     breadcrumb: 'Sectors & Themes',
     lead: date => `KRX sector and theme indices ranked by their move at the ${longDate(date, 'en')} close, with cumulative rankings over the last 5 and 20 sessions.`,
@@ -1067,19 +1248,14 @@ export function renderMarketSectorsMain(view, lang) {
   const links = `<p class="market-archive-links"><a href="${marketDatePath(view.date, lang)}">${html(sc.session)} →</a><a href="${marketArchivePath(lang)}">${html(sc.archive)} →</a></p>`;
 
   return `<main id="market-date-root" class="market-date-page market-sectors-page" data-market-date="${html(view.date)}">
-  <section class="market-hero" aria-labelledby="market-sectors-heading">
-    <div class="market-wrap market-hero-inner">
-      <div class="market-hero-copy">
-        <p class="market-breadcrumb"><a href="${lang === 'en' ? '/en/' : '/'}">${html(copy.breadcrumbHome)}</a> › <a href="${base}">${html(copy.breadcrumbMarket)}</a> › ${html(sc.breadcrumb)}</p>
-        <p class="market-eyebrow">${html(sc.eyebrow)}</p>
-        <h1 id="market-sectors-heading">${html(sc.heading)}</h1>
-        <p class="market-date-summary">${summary}</p>
-        <p class="market-date">${dotDate(view.date, lang)} · ${html(sc.basis)}</p>
-        <p class="market-overseas">${html(sc.note)}</p>
-      </div>
-      <div class="market-mountain" aria-hidden="true"></div>
-    </div>
-  </section>
+  ${pageHead({
+    id: 'market-sectors-heading',
+    breadcrumb: `<a href="${lang === 'en' ? '/en/' : '/'}">${html(copy.breadcrumbHome)}</a> › <a href="${base}">${html(copy.breadcrumbMarket)}</a> › ${html(sc.breadcrumb)}`,
+    eyebrow: sc.eyebrow,
+    title: sc.heading,
+    summary,
+    meta: [`${dotDate(view.date, lang)} · ${sc.basis}`, sc.note.replace(/^\*\s*/, '')]
+  })}
   <div class="market-wrap market-dashboard">
     <p class="market-sectors-lead">${html(sc.lead(view.date))}</p>
     <div class="market-pair market-pair-tables">${sectorsPart}${themesPart}</div>
@@ -1182,7 +1358,7 @@ const INDICATOR_UNITS = {
 
 const INDICATOR_COPY = {
   ko: {
-    eyebrow: 'MARKET CLOSE · 지표별 기록',
+    eyebrow: '지표별 일별 기록',
     heading: name => `${name} 일별 기록`,
     noun: { krx: '일별 종가', krxvol: '일별 종가', us: '일별 종가', asia: '일별 종가', fx: '일별 기록', snapshot: '일별 기록', rate: '일별 기록', kofia: '일별 기록' },
     valueLabel: { krx: '종가', krxvol: '종가', us: '종가', asia: '종가', fx: '15:30 환율', snapshot: '기록 시세', rate: '수익률', kofia: '수익률' },
@@ -1221,7 +1397,7 @@ const INDICATOR_COPY = {
     ]
   },
   en: {
-    eyebrow: 'MARKET CLOSE · INDICATOR HISTORY',
+    eyebrow: 'Indicator history',
     heading: name => `${name}: Daily History`,
     noun: { krx: 'Daily Close', krxvol: 'Daily Close', us: 'Daily Close', asia: 'Daily Close', fx: 'History', snapshot: 'History', rate: 'History', kofia: 'History' },
     valueLabel: { krx: 'Close', krxvol: 'Close', us: 'Close', asia: 'Close', fx: '15:30 rate', snapshot: 'Recorded price', rate: 'Yield', kofia: 'Yield' },
@@ -1560,18 +1736,14 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
   const dashboardPath = key === 'en' ? '/en/market/' : '/market/';
 
   return `<main id="market-date-root" class="market-date-page market-indicator-page" data-market-indicator="${indicator.slug}">
-  <section class="market-hero" aria-labelledby="market-indicator-heading">
-    <div class="market-wrap market-hero-inner">
-      <div class="market-hero-copy">
-        <p class="market-breadcrumb"><a href="${key === 'en' ? '/en/' : '/'}">${html(base.breadcrumbHome)}</a> › <a href="${dashboardPath}">${html(base.breadcrumbMarket)}</a> › <a href="${marketArchivePath(key)}#indicators">${html(copy.breadcrumb)}</a></p>
-        <p class="market-eyebrow">${html(copy.eyebrow)}</p>
-        <h1 id="market-indicator-heading">${html(copy.heading(name))}</h1>
-        <p class="market-date-summary">${summary}</p>
-        <p class="market-date">${html(copy.basis[indicator.code] || copy.basis[indicator.kind])}${INDICATOR_UNITS[key][indicator.code] ? ` · ${html(INDICATOR_UNITS[key][indicator.code])}` : ''}</p>
-      </div>
-      <div class="market-mountain" aria-hidden="true"></div>
-    </div>
-  </section>
+  ${pageHead({
+    id: 'market-indicator-heading',
+    breadcrumb: `<a href="${key === 'en' ? '/en/' : '/'}">${html(base.breadcrumbHome)}</a> › <a href="${dashboardPath}">${html(base.breadcrumbMarket)}</a> › <a href="${marketArchivePath(key)}#indicators">${html(copy.breadcrumb)}</a>`,
+    eyebrow: copy.eyebrow,
+    title: copy.heading(name),
+    summary,
+    meta: [`${copy.basis[indicator.code] || copy.basis[indicator.kind]}${INDICATOR_UNITS[key][indicator.code] ? ` · ${INDICATOR_UNITS[key][indicator.code]}` : ''}`]
+  })}
   <div class="market-wrap market-dashboard">
     ${section(1, copy.sections[0], `<div class="indicator-stats">${tiles}</div>`)}
     ${series.length > 1 ? section(2, copy.sections[1], indicatorChart(series, indicator, fmt, copy, key)) : ''}
@@ -1610,6 +1782,13 @@ export function marketIndicatorPageHtml(shell, indicator, series, lang, availabl
     }),
     main: renderMarketIndicatorMain(indicator, series, key, available)
   });
+}
+
+/** The last 20 sessions' closes up to `date` (functions/api/market/trend.js), or null. */
+async function loadSessionTrend(env, date) {
+  if (!env?.COMMENTS_DB) return null;
+  const db = await ensureMarketTable(env, { readOnly: true });
+  return loadTrend(db, date);
 }
 
 /** Every final row's item for one instrument, newest first. Throws on a database failure or timeout. */

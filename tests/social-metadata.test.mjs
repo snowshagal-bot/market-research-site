@@ -168,9 +168,9 @@ test('the homepages share the brand card and the Market pages share the market c
     const html = await read(page);
     assert.match(html, new RegExp(`property="og:image" content="${PRODUCTION_ORIGIN}${MARKET_CARD}"`), page);
     assert.match(html, new RegExp(`name="twitter:image" content="${PRODUCTION_ORIGIN}${MARKET_CARD}"`), page);
-    // The heavy PNG stays as on-screen artwork but must never be the share image.
+    // The mountain artwork is no longer drawn or preloaded, and must never be the share image.
     assert.doesNotMatch(html, /(?:og|twitter):image" content="[^"]*market-close-mountain\.png"/, page);
-    assert.match(html, /preload" as="image" href="\/assets\/market-close-mountain\.webp"/, page);
+    assert.doesNotMatch(html, /preload" as="image" href="\/assets\/market-close-mountain/, page);
   }
 });
 

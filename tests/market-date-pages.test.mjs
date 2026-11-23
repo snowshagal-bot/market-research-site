@@ -111,15 +111,16 @@ test('the /market/ shell gets the session head, a server-rendered <main> and no 
   }
 });
 
-test('sections without data are left out and numbered in order; a 1.2.0 incomplete window says so', () => {
-  const sectionTitles = (html) => [...html.matchAll(/<h2 id="market-section-\d+"><span>(\d+)\.<\/span> ([^<]+)<\/h2>/g)].map((m) => `${m[1]} ${m[2]}`);
-  const full = sectionTitles(page('ko'));
-  assert.ok(full.includes('07 KRX 업종 · 테마 등락률'), full.join(' | '));
+test('cards without data are left out; a 1.2.0 incomplete window says so', () => {
+  const cardTitles = (html) => [...html.matchAll(/<h3 id="mk-[a-z-]+-title">([^<]+)<\/h3>/g)].map((m) => m[1]);
+  const full = cardTitles(page('ko'));
+  assert.ok(full.includes('KRX 업종 · 테마 등락률'), full.join(' | '));
+  assert.ok(full.includes('시가총액 상위 10'), full.join(' | '));
 
   const bare = payload({ krx_groups: undefined, short_selling: undefined, market_cap_top10: [] });
-  const titles = sectionTitles(page('ko', bare));
-  assert.ok(!titles.some((title) => /업종|공매도|시가총액/.test(title)), titles.join(' | '));
-  assert.deepEqual(titles.map((title) => title.slice(0, 2)), titles.map((_, index) => String(index + 1).padStart(2, '0')));
+  const titles = cardTitles(page('ko', bare));
+  assert.ok(!titles.some((title) => /업종|시가총액/.test(title)), titles.join(' | '));
+  assert.doesNotMatch(page('ko', bare), /공매도 비중/);
 
   const incomplete = payload({
     meta: { ...FIXTURE.meta, schema_version: '1.2.0' },
@@ -128,7 +129,7 @@ test('sections without data are left out and numbered in order; a 1.2.0 incomple
   const html = page('ko', incomplete);
   assert.match(html, /데이터 불완전 · 3\/5 거래일 확보/);
   assert.match(html, /이날 시장 폭 데이터 없음/);
-  assert.doesNotMatch(html, /class="breadth-card"/);
+  assert.doesNotMatch(html, /class="mk-breadth"/);
 });
 
 test('the source line names only the real sources, and the short ratio says it includes NXT', () => {
@@ -177,6 +178,21 @@ test('the archive lists every session by month, newest first, each linking to it
   const en = marketArchivePageHtml(SHELLS.en, rows, 'en');
   assert.match(en, /href="\/en\/market\/2026-09-01\/">Tue, Sep 1<\/a>/);
   assert.match(en, /data-language-choice="ko" href="\/market\/archive\/"/);
+});
+
+test('the session page draws the 20-session trend only when it ends on that session', () => {
+  const dates = ['2026-08-26', '2026-08-27', DATE];
+  const trend = { sessions: 20, end_date: DATE, dates, series: { KOSPI: [6800, 6900, 6788.88], NASDAQ: [21000, 21100, 21050], KTB3Y: [null, null, null] } };
+  const html = page('ko', FIXTURE, { prev: '2026-08-27', trend });
+  const kospiCard = html.slice(html.indexOf('data-code="KOSPI"'), html.indexOf('data-code="KOSDAQ"'));
+  assert.match(kospiCard, /<svg class="mk-spark mk-spark-wide"/);
+  assert.match(html, /<tr class="mk-row" data-code="NASDAQ">[\s\S]*?<svg class="mk-spark"/);
+  // A code without values in the window gets the placeholder, not an empty line.
+  assert.match(html, /<tr class="mk-row" data-code="DOW">[\s\S]*?mk-trend-empty/);
+  // A trend that ends on another session, or none, draws nothing.
+  for (const other of [{ ...trend, end_date: '2026-08-27' }, null]) {
+    assert.doesNotMatch(page('ko', FIXTURE, { trend: other }), /class="mk-spark/);
+  }
 });
 
 test('a shell that lost a replaced piece fails loudly instead of shipping the dashboard head', () => {
