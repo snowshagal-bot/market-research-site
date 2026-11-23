@@ -444,6 +444,9 @@ html[data-theme="dark"] .mk-summary{border:1px solid var(--line)}
 /* Redesign follow-ups: a taller tap area for the links inside quote-board rows and date tables, kept within the row (the text does not move), the English flow table at 360px, and the next-session link of the date bar on phones (label and arrow on one line, the date under them). */
 .mk-row-name .instrument-history-link,.mk-index-name .instrument-history-link,.market-archive-table th a{display:inline-block;padding:10px 0;margin:-10px 0}
 .market-indicator-table th a{display:inline-block;padding:8px 0;margin:-8px 0}
+/* A label that links to its glossary entry: dotted underline, as the terms inside reports. */
+.mk-term{color:inherit;text-decoration:underline dotted;text-decoration-color:color-mix(in srgb,currentColor 55%,transparent);text-underline-offset:3px}
+.mk-term:hover{text-decoration-style:solid;text-decoration-color:currentColor}
 @media(max-width:760px){
 .market-date-nav.mk-datebar .market-date-nav-link.next{justify-content:flex-end}
 .market-date-nav.mk-datebar .market-date-nav-link.next small{order:2}

@@ -28,6 +28,7 @@ import '../assets/locale.js';
 import { TABLE_NAME, ensureMarketTable } from './api/market/_shared.js';
 import { aggregateKrxGroups } from './api/market/_aggregate.js';
 import { loadTrend } from './api/market/trend.js';
+import { glossaryTermHref } from './_glossary.js';
 import {
   domesticRateCodesIn,
   loadDomesticRateCodes,
@@ -394,7 +395,7 @@ const PAGE_COPY = {
     boards: { world: '해외 증시 · 변동성', rates: '금리', fx: '환율', commodities: '원자재 · 가상자산' },
     boardNotes: { world: '미국 지수 · 아시아 각 시장 최근 마감', rates: '국내 금융투자협회 16:00 최종호가', fx: '원화는 15:30 매매기준율', commodities: '달러 기준' },
     columns: ['지표', '값', '전일 대비', '추이'], marketNames: { KOSPI: '코스피', KOSDAQ: '코스닥', 'KOSPI200선물': '선물' },
-    dateLabel: '거래일', pageEyebrow: '한국 증시 마감 기록', stock: '종목명', future: '선물', price: '종가', change: '등락률', marketCap: '시가총액'
+    dateLabel: '거래일', pageEyebrow: '한국 증시 마감 기록', stock: '종목명', future: '선물', terms: { breadth: '시장 폭', program: '프로그램 매매', basis: '베이시스', short: '공매도' }, price: '종가', change: '등락률', marketCap: '시가총액'
   },
   en: {
     regularClose: 'Regular close', trendLabel: 'Last 20 sessions', closeOf: md => `Close of ${md}`, regularBasis: 'Regular session, 15:30 KST',
@@ -409,7 +410,7 @@ const PAGE_COPY = {
     boards: { world: 'Overseas Markets · Volatility', rates: 'Rates', fx: 'FX', commodities: 'Commodities · Crypto' },
     boardNotes: { world: 'US indices · each Asian market’s latest close', rates: 'Korean yields: KOFIA 16:00 final quotes', fx: 'KRW pairs: 15:30 reference rate', commodities: 'In US dollars' },
     columns: ['Indicator', 'Value', 'Change', 'Trend'], marketNames: { KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', 'KOSPI200선물': 'KOSPI 200 Futures' },
-    dateLabel: 'Trading day', pageEyebrow: 'Korea market close archive', stock: 'Company', future: 'Futures', price: 'Close', change: 'Change', marketCap: 'Market cap'
+    dateLabel: 'Trading day', pageEyebrow: 'Korea market close archive', stock: 'Company', future: 'Futures', terms: { breadth: 'Market Breadth', program: 'Program Trading', basis: 'Basis', short: 'Short Selling' }, price: 'Close', change: 'Change', marketCap: 'Market cap'
   }
 };
 
@@ -652,6 +653,9 @@ export function renderMarketDateMain(payload, lang, context = {}) {
   // Trend lines only when they end on this session.
   const trend = context.trend && Array.isArray(context.trend.dates) && context.trend.end_date === date ? context.trend : null;
 
+  // A label that names a glossary term links to its entry (/basics/glossary/#term-…), as on TODAY.
+  const termLink = (text, term) => (term ? `<a class="mk-term" href="${html(glossaryTermHref(term, lang))}">${html(text)}</a>` : html(text));
+
   const k = kospi(payload);
   const q = kosdaq(payload);
   const fx = rates.USDKRW;
@@ -711,7 +715,7 @@ export function renderMarketDateMain(payload, lang, context = {}) {
       <p class="mk-unit">${html(pc.flowNote)}</p>
     </section>`;
   const breadthCardHtml = `<section class="mk-card mk-breadth-card" aria-labelledby="mk-breadth-title">
-      <div class="mk-card-head"><h3 id="mk-breadth-title">${html(pc.breadthTitle)}</h3><span class="mk-card-note">${html(pc.breadthCaption)}</span></div>
+      <div class="mk-card-head"><h3 id="mk-breadth-title">${termLink(pc.breadthTitle, pc.terms.breadth)}</h3><span class="mk-card-note">${html(pc.breadthCaption)}</span></div>
       ${breadthUnavailable ? `<p class="unit-note">${html(copy.breadthUnavailable)}</p>` : ['KOSPI', 'KOSDAQ'].filter(m => breadth[m]).map(m => breadthBlock(m, breadth[m], f, copy, pc)).join('')}
     </section>`;
 
@@ -732,13 +736,13 @@ export function renderMarketDateMain(payload, lang, context = {}) {
     const month = /\((\d{4})\)/.exec(text);
     return month ? `${pc.future} (${month[1]})` : pc.future;
   };
-  const stat = (label, value, sub = '', cls = '') => `<div class="mk-stat"><span>${html(label)}</span><strong class="${cls}">${value}</strong>${sub ? `<small>${sub}</small>` : ''}</div>`;
+  const stat = (label, value, sub = '', cls = '', term = '') => `<div class="mk-stat"><span>${termLink(label, term)}</span><strong class="${cls}">${value}</strong>${sub ? `<small>${sub}</small>` : ''}</div>`;
   const shortSummary = shorts.market_summary || {};
   const stats = [
     ...['KOSPI', 'KOSDAQ'].filter(m => internals.turnover?.[m]).map(m => stat(pc.turnoverOf(pc.marketNames[m]), f.won(internals.turnover[m].value_won), valid(internals.turnover[m].ratio5) ? html(pc.ratio5Text(f.number(internals.turnover[m].ratio5, 2))) : '')),
-    program.program_trading ? stat(pc.programTotal, signedWon(programItem('전체')), `${html(pc.arbitrage)} ${signedWon(programItem('차익'))} · ${html(pc.nonArbitrage)} ${signedWon(programItem('비차익'))}`, f.signClass(programItem('전체'))) : '',
-    program.basis ? stat(pc.basis, f.signed(program.basis.basis, 2), `<span class="state-chip">${html(basisState(program.basis.market_state))}</span> ${html(pc.spot)} ${f.number(program.basis.kospi200_spot, 2)}${valid(program.basis.future) ? ` · <span>${html(futureLabel(program.basis.future_name))}</span> ${f.number(program.basis.future, 2)}` : ''}`, f.signClass(program.basis.basis)) : '',
-    ...['KOSPI', 'KOSDAQ'].filter(m => shortSummary[m]).map(m => stat(pc.shortRatioOf(pc.marketNames[m]), f.ratioPct(shortSummary[m].short_value_ratio), `${html(copy.shortAmount)} ${f.won(shortSummary[m].short_value_won)}`))
+    program.program_trading ? stat(pc.programTotal, signedWon(programItem('전체')), `${html(pc.arbitrage)} ${signedWon(programItem('차익'))} · ${html(pc.nonArbitrage)} ${signedWon(programItem('비차익'))}`, f.signClass(programItem('전체')), pc.terms.program) : '',
+    program.basis ? stat(pc.basis, f.signed(program.basis.basis, 2), `<span class="state-chip">${html(basisState(program.basis.market_state))}</span> ${html(pc.spot)} ${f.number(program.basis.kospi200_spot, 2)}${valid(program.basis.future) ? ` · <span>${html(futureLabel(program.basis.future_name))}</span> ${f.number(program.basis.future, 2)}` : ''}`, f.signClass(program.basis.basis), pc.terms.basis) : '',
+    ...['KOSPI', 'KOSDAQ'].filter(m => shortSummary[m]).map(m => stat(pc.shortRatioOf(pc.marketNames[m]), f.ratioPct(shortSummary[m].short_value_ratio), `${html(copy.shortAmount)} ${f.won(shortSummary[m].short_value_won)}`, '', pc.terms.short))
   ].filter(Boolean).join('');
   const shortScopeNote = ['KOSPI', 'KOSDAQ'].some(m => /NXT/.test(String(shortSummary[m]?.coverage_scope || '')))
     ? `<p class="unit-note">${html(copy.shortRatioScope)}</p>` : '';

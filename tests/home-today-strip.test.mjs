@@ -158,7 +158,7 @@ async function bootHomepage({ lang = 'ko', respond, summary = STATIC_SUMMARY, po
   elements.get('today-strip-notice').hidden = true;
   elements.get('today-strip-date').textContent = DASH;
   elements.get('today-market-grid').innerHTML = Array.from({ length: 5 }, () => (
-    `<div class="today-item" role="listitem"><span class="today-label">X</span><span class="today-value">${DASH}</span><span class="today-change pending">${DASH}</span></div>`
+    `<div class="today-item" role="listitem"><a class="today-item-link" href="${marketPath}x/"><span class="today-label">X</span><span class="today-value">${DASH}</span><span class="today-change pending">${DASH}</span></a></div>`
   )).join('');
   elements.get('today-market-grid').setAttribute('aria-busy', 'true');
   elements.get('today-takeaway-label').textContent = lang === 'en' ? "Today's takeaway" : '오늘의 한 줄';

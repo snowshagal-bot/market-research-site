@@ -58,6 +58,19 @@ test('siteFooter("en") generates canonical English footer markup with correct na
   assert.match(footer, /<p class="footer-copy site-footer-copy">© 2026 SNOWSHAGAL<\/p>/);
 });
 
+test('the footer links every page to the close archive, the sector rankings and the glossary', () => {
+  // The archive lists every session page and every indicator page, so one
+  // footer link puts them two steps from any page of the site.
+  const ko = siteFooter('ko');
+  assert.match(ko, /<a href="\/market\/">마켓<\/a>\s*<a href="\/market\/archive\/">날짜별 마감 기록<\/a>\s*<a href="\/market\/sectors\/">업종·테마<\/a>\s*<a href="\/disclosures\/">공시<\/a>/);
+  assert.match(ko, /<a href="\/basics\/">시장 입문<\/a>\s*<a href="\/basics\/glossary\/">용어 사전<\/a>/);
+  const en = siteFooter('en');
+  assert.match(en, /<a href="\/en\/market\/">Market<\/a>\s*<a href="\/en\/market\/archive\/">Close Archive<\/a>\s*<a href="\/en\/market\/sectors\/">Sectors &amp; Themes<\/a>/);
+  assert.match(en, /<a href="\/en\/basics\/">Market Basics<\/a>\s*<a href="\/en\/basics\/glossary\/">Glossary<\/a>/);
+  // A report page's footer carries them too.
+  assert.match(siteFooter('ko', { reportTranslationHref: '/reports/en/x' }), /href="\/market\/archive\/"/);
+});
+
 test('footerCss() exports scoped CSS containing required custom properties, light/dark themes, and responsive rules', () => {
   const css = footerCss();
   assert.match(css, /#site-footer/);

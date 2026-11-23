@@ -15,6 +15,7 @@ import { SqliteD1 } from './helpers/initial-html-fixtures.mjs';
 import { onRequest as middleware } from '../functions/_middleware.js';
 import { buildHomeInitial, homeInitialLang, latestResearchPost, serializeHomeBootstrap } from '../functions/_home-initial.js';
 import { applyInitialHtmlToString } from '../functions/_initial-html.js';
+import { marketIndicatorPath } from '../functions/_market-indicators.js';
 import { onRequestGet as marketLatestGet } from '../functions/api/market/latest.js';
 import { onRequestGet as announcementsGet } from '../functions/api/announcements.js';
 import { onRequestGet as globalLatestGet } from '../functions/api/market/global/latest.js';
@@ -482,6 +483,21 @@ test('8. notice ordering is the API\'s: major first, then newest exposure start,
   assert.equal(rendered['hero-notice-title'].text, api.items[0].title);
 });
 
+test('9a. each strip figure links to its daily history page: first HTML, reader script and shipped placeholder', async () => {
+  const db = await database({ market: [{ payload: payloadFor(NORMAL_DATE) }] });
+  const codes = ['KOSPI', 'KOSDAQ', 'USDKRW', 'US10Y', 'GOLD'];
+  for (const lang of ['ko', 'en']) {
+    const expected = codes.map(code => marketIndicatorPath(code, lang));
+    assert.ok(expected.every(Boolean), lang);
+    // assertParity: the server's first HTML and site.js paint the same grid.
+    const { rendered } = await assertParity({ lang, db, now: NORMAL_NOW });
+    assert.deepEqual(stripCells(rendered['today-market-grid'].html).map(cell => cell.href), expected, lang);
+    // The neutral placeholder the static page ships with carries the same links.
+    const page = await readFile(new URL(`../${lang === 'en' ? 'en/' : ''}index.html`, import.meta.url), 'utf8');
+    assert.deepEqual([...page.matchAll(/<a class="today-item-link" href="([^"]+)">/g)].map(match => match[1]), expected, `${lang} placeholder`);
+  }
+});
+
 test('9. normal Market Close: TODAY, the session date and five real values in the first HTML', async () => {
   const db = await database({ market: [{ payload: payloadFor(NORMAL_DATE) }] });
   assert.equal(expectedPublishedKrxTradingDate(NORMAL_NOW), NORMAL_DATE);
@@ -848,8 +864,8 @@ test('a closed day whose close is also behind shows both: closed, and the stale 
 
 // Market Close 09-23 on screen, Global Latest 09-24/25 in mixed states, at
 // Friday 19:30Z (tests/helpers/global-latest-fixtures.mjs).
-const stripCells = html => [...String(html).matchAll(/<div class="today-item" role="listitem"><span class="today-label">([^<]*)<\/span><span class="today-value">([^<]*)<\/span><span class="today-change (\w+)">([^<]*)<\/span>(?:<span class="today-basis">([^<]*)<\/span>)?<\/div>/g)]
-  .map(([, label, value, direction, change, basis]) => ({ label: decode(label), value: decode(value), change: decode(change), direction, basis: basis === undefined ? null : decode(basis) }));
+const stripCells = html => [...String(html).matchAll(/<div class="today-item" role="listitem"><a class="today-item-link" href="([^"]*)"><span class="today-label">([^<]*)<\/span><span class="today-value">([^<]*)<\/span><span class="today-change (\w+)">([^<]*)<\/span>(?:<span class="today-basis">([^<]*)<\/span>)?<\/a><\/div>/g)]
+  .map(([, href, label, value, direction, change, basis]) => ({ href, label: decode(label), value: decode(value), change: decode(change), direction, basis: basis === undefined ? null : decode(basis) }));
 const cellOf = (rendered, label) => stripCells(rendered['today-market-grid'].html).find(cell => cell.label === label);
 
 async function b3Database(global = globalLatest0925()) {

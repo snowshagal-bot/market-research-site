@@ -1029,6 +1029,8 @@
     }
     return { value, change, direction: movement < 0 ? 'down' : 'up' };
   }
+  // Each strip figure links to its daily history page (functions/_market-indicators.js: the slug is the code in lower case).
+  function stripItemPath(key){ return `${locale === 'en' ? '/en' : ''}/market/${String(key).toLowerCase()}/`; }
   function publishedStripItems(payload, overlay){
     const soft = declaredUnavailable(payload);
     const latest = overlay?.items || {};
@@ -1040,14 +1042,15 @@
       const quote = payload?.[spec.group]?.[spec.key];
       const snapshot = stripFigures(spec, quote);
       if (!snapshot && !soft.has(spec.key)) return null;
+      const historyPath = stripItemPath(spec.key);
       const item = overlaid(spec);
       if (item) {
         const figures = stripFigures(spec, { close: item.value, change: item.change, change_pct: item.change_pct });
-        if (figures) return { label: spec.label, ...figures, basis: basis('latest', item) };
+        if (figures) return { label: spec.label, historyPath, ...figures, basis: basis('latest', item) };
       }
-      if (!snapshot) return { label: spec.label, value: '--', change: '', direction: 'flat', basis: '' };
+      if (!snapshot) return { label: spec.label, historyPath, value: '--', change: '', direction: 'flat', basis: '' };
       const kind = localeApi?.isGlobalLatestCode?.(spec.key) ? 'snapshot' : 'krx';
-      return { label: spec.label, ...snapshot, basis: basis(kind, kind === 'krx' ? { source_date: marketDate } : quote) };
+      return { label: spec.label, historyPath, ...snapshot, basis: basis(kind, kind === 'krx' ? { source_date: marketDate } : quote) };
     }).filter(Boolean);
     return items.length === TODAY_STRIP_ITEMS.length ? items : null;
   }
@@ -1177,7 +1180,7 @@
     }
     if (gridEl) {
       gridEl.innerHTML = session.items.map(item => (
-        `<div class="today-item" role="listitem"><span class="today-label">${esc(item.label)}</span><span class="today-value">${esc(item.value)}</span><span class="today-change ${item.direction}">${esc(item.change)}</span>${item.basis ? `<span class="today-basis">${esc(item.basis)}</span>` : ''}</div>`
+        `<div class="today-item" role="listitem"><a class="today-item-link" href="${esc(item.historyPath)}"><span class="today-label">${esc(item.label)}</span><span class="today-value">${esc(item.value)}</span><span class="today-change ${item.direction}">${esc(item.change)}</span>${item.basis ? `<span class="today-basis">${esc(item.basis)}</span>` : ''}</a></div>`
       )).join('');
       gridEl.removeAttribute('aria-busy');
     }

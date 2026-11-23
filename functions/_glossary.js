@@ -163,6 +163,21 @@ export function glossaryLetter(term) {
   return '0–9';
 }
 
+/**
+ * The fragment id of a term's entry, so other pages can link straight to it
+ * (/basics/glossary/#term-베이시스, /en/basics/glossary/#term-program-trading):
+ * the term in lower case with every run of spaces or punctuation as one hyphen.
+ */
+export function glossaryTermId(term) {
+  const slug = String(term || '').normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '');
+  return slug ? `term-${slug}` : '';
+}
+
+/** The glossary address of a term, for the pages that link to it. */
+export function glossaryTermHref(term, lang) {
+  return `${lang === 'en' ? '/en' : ''}/basics/glossary/#${glossaryTermId(term)}`;
+}
+
 /* ------------------------------------------------------------------ render */
 
 function escapeHtml(value) {
@@ -202,12 +217,20 @@ export function renderGlossaryList(entries, lang) {
   }
   const reports = new Set(entries.flatMap(entry => entry.sources.map(source => source.url))).size;
   const ids = new Map([...letters.keys()].map((letter, index) => [letter, `glossary-${index + 1}`]));
+  // Two spellings of one term ("Short Selling", "short-selling") share a slug: the first keeps the id.
+  const usedIds = new Set();
+  const entryId = term => {
+    const id = glossaryTermId(term);
+    if (!id || usedIds.has(id)) return '';
+    usedIds.add(id);
+    return ` id="${escapeHtml(id)}"`;
+  };
   const index = `<nav class="glossary-index" aria-label="${escapeHtml(copy.index)}">${[...letters.keys()].map(letter => `<a href="#${ids.get(letter)}">${escapeHtml(letter)}</a>`).join('')}</nav>`;
   const sections = [...letters].map(([letter, items]) => `<section class="glossary-letter" id="${ids.get(letter)}" aria-labelledby="${ids.get(letter)}-h"><h2 id="${ids.get(letter)}-h">${escapeHtml(letter)}</h2><dl class="glossary-terms">${items.map(entry => {
     const shown = entry.sources.slice(0, SOURCES_SHOWN);
     const rest = entry.sources.length - shown.length;
     const sources = `<p class="glossary-sources"><span>${escapeHtml(copy.sources)}</span> ${shown.map(source => `<a href="${escapeHtml(source.url)}">${escapeHtml(source.title)}</a>`).join('<span aria-hidden="true"> · </span>')}${rest > 0 ? ` <small>${escapeHtml(copy.more(rest))}</small>` : ''}</p>`;
-    return `<div class="glossary-entry"><dt>${escapeHtml(entry.term)}</dt><dd><p>${escapeHtml(entry.definition)}</p>${sources}</dd></div>`;
+    return `<div class="glossary-entry"${entryId(entry.term)}><dt>${escapeHtml(entry.term)}</dt><dd><p>${escapeHtml(entry.definition)}</p>${sources}</dd></div>`;
   }).join('')}</dl></section>`).join('');
   return `<p class="glossary-count">${escapeHtml(copy.count(entries.length, reports))}</p>${index}${sections}`;
 }

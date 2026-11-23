@@ -200,3 +200,18 @@ test('a session without that day’s VIX draws no VIX line on either page', () =
   // The other rows keep theirs.
   assert.equal(rows(client).find(row => row.code === 'NASDAQ').line, true);
 });
+
+test('the same four labels link to their glossary entries on TODAY and on the session page', async () => {
+  const { glossaryTermHref } = await import('../functions/_glossary.js');
+  const termLinks = html => [...html.matchAll(/<a class="mk-term" href="([^"]+)">([^<]+)<\/a>/g)].map(([, href, label]) => ({ href, label }));
+  const expected = {
+    ko: [['시장 폭', '시장 폭'], ['프로그램 순매수', '프로그램 매매'], ['베이시스', '베이시스'], ['공매도 비중 · 코스피', '공매도'], ['공매도 비중 · 코스닥', '공매도']],
+    en: [['Market Breadth', 'Market Breadth'], ['Program net buy', 'Program Trading'], ['Basis', 'Basis'], ['Short ratio · KOSPI', 'Short Selling'], ['Short ratio · KOSDAQ', 'Short Selling']]
+  };
+  for (const lang of ['ko', 'en']) {
+    const client = termLinks(clientHtml(lang));
+    // The browser builds the address itself; it must be the glossary's own id for that term.
+    assert.deepEqual(client, expected[lang].map(([label, term]) => ({ href: glossaryTermHref(term, lang), label })), lang);
+    assert.deepEqual(termLinks(serverHtml(lang)), client, `${lang} session page`);
+  }
+});

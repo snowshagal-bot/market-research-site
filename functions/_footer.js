@@ -22,7 +22,10 @@ export function siteFooter(lang = 'ko', { reportTranslationHref = '' } = {}) {
         research: 'Research',
         note: 'Investment Insights',
         basics: 'Market Basics',
+        glossary: 'Glossary',
         market: 'Market',
+        marketArchive: 'Close Archive',
+        marketSectors: 'Sectors &amp; Themes',
         disclosures: 'Disclosure',
         calendar: 'Calendar',
         about: 'About',
@@ -36,7 +39,10 @@ export function siteFooter(lang = 'ko', { reportTranslationHref = '' } = {}) {
         research: '리서치',
         note: '투자 인사이트',
         basics: '시장 입문',
+        glossary: '용어 사전',
         market: '마켓',
+        marketArchive: '날짜별 마감 기록',
+        marketSectors: '업종·테마',
         disclosures: '공시',
         calendar: '캘린더',
         about: '소개',
@@ -72,12 +78,15 @@ export function siteFooter(lang = 'ko', { reportTranslationHref = '' } = {}) {
             <a href="${prefix}/research/">${labels.research}</a>
             <a href="${prefix}/notes/">${labels.note}</a>
             <a href="${prefix}/basics/">${labels.basics}</a>
+            <a href="${prefix}/basics/glossary/">${labels.glossary}</a>
           </nav>
         </div>
         <div class="site-footer-group">
           <p class="site-footer-heading" aria-hidden="true">${marketHeading}</p>
           <nav class="site-footer-nav" aria-label="${marketNavAria}">
             <a href="${prefix}/market/">${labels.market}</a>
+            <a href="${prefix}/market/archive/">${labels.marketArchive}</a>
+            <a href="${prefix}/market/sectors/">${labels.marketSectors}</a>
             <a href="${prefix}/disclosures/">${labels.disclosures}</a>
             <a href="${prefix}/calendar/">${labels.calendar}</a>
           </nav>
