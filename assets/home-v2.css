@@ -1015,6 +1015,26 @@ html[data-theme="dark"] .hero-art img {
   padding-left: 0;
 }
 
+/* Each figure is a link to its daily history page; it keeps the item's column layout. */
+.today-item-link {
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+}
+
+.today-item-link:hover .today-label {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.today-item-link:focus-visible {
+  outline: 2px solid var(--text-2);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
 .today-item:not(:last-child) {
   border-right: 1px solid color-mix(in srgb, var(--line) 45%, transparent);
 }

@@ -6,6 +6,7 @@ import { onRequestGet as announcementsGet } from './api/announcements.js';
 import { EXPECTED_MARKET_DATE_HEADER, KRX_SESSION_HEADER } from './api/market/_shared.js';
 import { escapeHtml } from './_initial-html.js';
 import { cleanReportHref } from './_seo.js';
+import { marketIndicatorPath } from './_market-indicators.js';
 
 /**
  * Initial HTML for the two homepages (/ and /en/): the four-report slide,
@@ -228,14 +229,16 @@ export function publishedStripItems(payload, lang, overlay = null) {
     const quote = payload?.[spec.group]?.[spec.key];
     const snapshot = stripFigures(spec, quote, lang);
     if (!snapshot && !soft.has(spec.key)) return null;
+    // Each figure links to its daily history page (/market/kospi/ …).
+    const historyPath = marketIndicatorPath(spec.key, lang) || '';
     const item = overlaid(spec);
     if (item) {
       const figures = stripFigures(spec, { close: item.value, change: item.change, change_pct: item.change_pct }, lang);
-      if (figures) return { label: spec.label, ...figures, basis: basis('latest', item) };
+      if (figures) return { label: spec.label, historyPath, ...figures, basis: basis('latest', item) };
     }
-    if (!snapshot) return { label: spec.label, value: '--', change: '', direction: 'flat', basis: '' };
+    if (!snapshot) return { label: spec.label, historyPath, value: '--', change: '', direction: 'flat', basis: '' };
     const kind = api.isGlobalLatestCode(spec.key) ? 'snapshot' : 'krx';
-    return { label: spec.label, ...snapshot, basis: basis(kind, kind === 'krx' ? { source_date: marketDate } : quote) };
+    return { label: spec.label, historyPath, ...snapshot, basis: basis(kind, kind === 'krx' ? { source_date: marketDate } : quote) };
   }).filter(Boolean);
   return items.length === STRIP_ITEMS.length ? items : null;
 }
@@ -267,7 +270,7 @@ function stripEdits(session, lang) {
   const notice = availability.stale ? availability.notice : '';
   const transparency = availability.transparencyNotice;
   const grid = session.items.map(item => (
-    `<div class="today-item" role="listitem"><span class="today-label">${escapeHtml(item.label)}</span><span class="today-value">${escapeHtml(item.value)}</span><span class="today-change ${item.direction}">${escapeHtml(item.change)}</span>${item.basis ? `<span class="today-basis">${escapeHtml(item.basis)}</span>` : ''}</div>`
+    `<div class="today-item" role="listitem"><a class="today-item-link" href="${escapeHtml(item.historyPath)}"><span class="today-label">${escapeHtml(item.label)}</span><span class="today-value">${escapeHtml(item.value)}</span><span class="today-change ${item.direction}">${escapeHtml(item.change)}</span>${item.basis ? `<span class="today-basis">${escapeHtml(item.basis)}</span>` : ''}</a></div>`
   )).join('');
   const edits = [
     ...(session.krx

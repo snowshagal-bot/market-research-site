@@ -44,6 +44,7 @@
     regularClose: '정규장 종가', trendLabel: '최근 20거래일 종가',
     summaryTitle: '그날의 요약', summaryHead: (pctText, word) => `코스피 ${pctText}% ${word}`, upWord: '상승', downWord: '하락', flatWord: '보합',
     breadthPhrase: (count, ratio, word) => `코스피 ${count}종목 ${word}(${ratio})`, foreignPhrase: (amount, word) => `외국인 ${amount} ${word}`, netBuyWord: '순매수', netSellWord: '순매도',
+    terms: { breadth: '시장 폭', program: '프로그램 매매', basis: '베이시스', short: '공매도' },
     fxSummary: '원/달러', fixingNote: md => `${md} 15:30 매매기준율`, vixSummary: '미국 변동성 VIX', usCloseNote: md => `${md} 미국장 마감`,
     krTitle: '한국 시장', krCaption: '수급, 등락 종목, 주요 종목 종가', flowsTitle: '투자자별 순매수', flowDay: '당일', flowFive: '최근 5거래일', flowNote: '양수는 순매수, 음수는 순매도',
     breadthCaption: '상승 · 보합 · 하락', statsTitle: '거래 · 프로그램 · 공매도', programTotal: '프로그램 순매수', turnoverOf: name => `${name} 거래대금`, ratio5Text: value => `5일 평균의 ${value}배`,
@@ -100,6 +101,7 @@
     regularClose: 'Regular close', trendLabel: 'Last 20 sessions',
     summaryTitle: 'The day in brief', summaryHead: (pctText, word) => `KOSPI ${word} ${pctText}%`, upWord: 'up', downWord: 'down', flatWord: 'flat',
     breadthPhrase: (count, ratio, word) => `${count} KOSPI stocks ${word} (${ratio})`, foreignPhrase: (amount, word) => `foreign investors ${word} ${amount}`, netBuyWord: 'net bought', netSellWord: 'net sold',
+    terms: { breadth: 'Market Breadth', program: 'Program Trading', basis: 'Basis', short: 'Short Selling' },
     fxSummary: 'USD/KRW', fixingNote: md => `${md} · 15:30 reference rate`, vixSummary: 'US volatility · VIX', usCloseNote: md => `${md} · US close`,
     krTitle: 'Korean Market', krCaption: 'Flows, advancers and decliners, top stocks', flowsTitle: 'Net Buying by Investor', flowDay: 'Today', flowFive: 'Last 5 sessions', flowNote: 'Positive is net buying, negative net selling',
     breadthCaption: 'Advancers · unchanged · decliners', statsTitle: 'Turnover · Program · Short Selling', programTotal: 'Program net buy', turnoverOf: name => `${name} turnover`, ratio5Text: value => `${value}× the 5-session avg.`,
@@ -330,6 +332,11 @@
     const basisAttr = latest ? ' data-basis="latest"' : view.mixed ? ' data-basis="snapshot"' : '';
     return { latest, display, movementClass, changeContent, fxContext, stateHtml, basisAttr, name: historyLink(key, html(instrumentName(key, item)), valid(display)) };
   }
+
+  // A label that names a glossary term links to its entry. The id is functions/_glossary.js glossaryTermId:
+  // the term in lower case, every run of spaces or punctuation as one hyphen.
+  const glossaryHref = term => `${ko ? '' : '/en'}/basics/glossary/#term-${String(term).normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '')}`;
+  const termLink = (text, term) => (term ? `<a class="mk-term" href="${html(glossaryHref(term))}">${html(text)}</a>` : html(text));
 
   // A trend line of finite values, oldest first: { line, area, cx, cy } in a w×h box, or null.
   function sparkGeometry(values, w, h, pad) {
@@ -885,19 +892,19 @@
     </section>`;
 
     const breadthCardHtml = `<section class="mk-card mk-breadth-card" aria-labelledby="mk-breadth-title">
-      <div class="mk-card-head"><h3 id="mk-breadth-title">${copy.sections[3]}</h3><span class="mk-card-note">${copy.breadthCaption}</span></div>
+      <div class="mk-card-head"><h3 id="mk-breadth-title">${termLink(copy.sections[3], copy.terms.breadth)}</h3><span class="mk-card-note">${copy.breadthCaption}</span></div>
       ${breadthUnavailable
         ? `<div class="market-group-empty market-breadth-status" role="note"><p class="group-empty-title">${html(copy.breadthUnavailable)}</p><p class="group-empty-desc">${html(copy.breadthUnavailableDesc)}</p></div>`
         : ['KOSPI', 'KOSDAQ'].map(key => breadthBlock(key, breadth[key])).join('')}
     </section>`;
 
     const programItem = key => program.program_trading?.[key]?.net_buy_won;
-    const stat = (label, value, sub = '', cls = '') => `<div class="mk-stat"><span>${html(label)}</span><strong class="${cls}">${value}</strong>${sub ? `<small>${sub}</small>` : ''}</div>`;
+    const stat = (label, value, sub = '', cls = '', term = '') => `<div class="mk-stat"><span>${termLink(label, term)}</span><strong class="${cls}">${value}</strong>${sub ? `<small>${sub}</small>` : ''}</div>`;
     const stats = [
       ...['KOSPI', 'KOSDAQ'].map(key => stat(copy.turnoverOf(copy.marketNames[key]), won(internals.turnover?.[key]?.value_won), valid(internals.turnover?.[key]?.ratio5) ? html(copy.ratio5Text(number(internals.turnover[key].ratio5, 2))) : '')),
-      stat(copy.programTotal, valid(programItem('전체')) ? signedWon(programItem('전체')) : '--', `${localName('차익')} ${valid(programItem('차익')) ? signedWon(programItem('차익')) : '--'} · ${localName('비차익')} ${valid(programItem('비차익')) ? signedWon(programItem('비차익')) : '--'}`, signClass(programItem('전체'))),
-      stat(copy.basis, signed(program.basis?.basis, 2), `<span class="state-chip">${html(basisState(program.basis?.market_state))}</span> ${html(copy.spot)} ${number(program.basis?.kospi200_spot, 2)} · <span>${html(futureLabel(program.basis?.future_name))}</span> ${number(program.basis?.future, 2)}`, signClass(program.basis?.basis)),
-      ...['KOSPI', 'KOSDAQ'].map(key => stat(copy.shortRatioOf(copy.marketNames[key]), ratioPct(shorts.market_summary?.[key]?.short_value_ratio), `${copy.shortAmount} ${won(shorts.market_summary?.[key]?.short_value_won)}`))
+      stat(copy.programTotal, valid(programItem('전체')) ? signedWon(programItem('전체')) : '--', `${localName('차익')} ${valid(programItem('차익')) ? signedWon(programItem('차익')) : '--'} · ${localName('비차익')} ${valid(programItem('비차익')) ? signedWon(programItem('비차익')) : '--'}`, signClass(programItem('전체')), copy.terms.program),
+      stat(copy.basis, signed(program.basis?.basis, 2), `<span class="state-chip">${html(basisState(program.basis?.market_state))}</span> ${html(copy.spot)} ${number(program.basis?.kospi200_spot, 2)} · <span>${html(futureLabel(program.basis?.future_name))}</span> ${number(program.basis?.future, 2)}`, signClass(program.basis?.basis), copy.terms.basis),
+      ...['KOSPI', 'KOSDAQ'].map(key => stat(copy.shortRatioOf(copy.marketNames[key]), ratioPct(shorts.market_summary?.[key]?.short_value_ratio), `${copy.shortAmount} ${won(shorts.market_summary?.[key]?.short_value_won)}`, '', copy.terms.short))
     ].join('');
 
     const concentration = internals.concentration || {};

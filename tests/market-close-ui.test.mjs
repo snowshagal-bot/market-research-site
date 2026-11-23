@@ -157,8 +157,8 @@ test('program net buys carry an explicit sign like the investor flow tables', as
   data.program_basis.program_trading['전체'].net_buy_won = 0;
   // The total is the stat's value; arbitrage and non-arbitrage are its sub-line.
   for (const [lang, rows] of [
-    ['ko', ['<span>프로그램 순매수</span><strong class="neutral">0원</strong>', '<small>차익 +277억원 · 비차익 −1.19조원</small>']],
-    ['en', ['<span>Program net buy</span><strong class="neutral">KRW 0</strong>', '<small>Arbitrage KRW +27.7bn · Non-arbitrage KRW −1.19tn</small>']]
+    ['ko', ['<span><a class="mk-term" href="/basics/glossary/#term-프로그램-매매">프로그램 순매수</a></span><strong class="neutral">0원</strong>', '<small>차익 +277억원 · 비차익 −1.19조원</small>']],
+    ['en', ['<span><a class="mk-term" href="/en/basics/glossary/#term-program-trading">Program net buy</a></span><strong class="neutral">KRW 0</strong>', '<small>Arbitrage KRW +27.7bn · Non-arbitrage KRW −1.19tn</small>']]
   ]) {
     const runtime = await marketRuntime(lang);
     const target = { innerHTML: '' };

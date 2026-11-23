@@ -276,7 +276,28 @@ export function findPostByPath(posts, pathname) {
 // Keep the chronological reading path available in the first HTTP response,
 // including when the browser cannot load posts.json or execute report-shell.js.
 // The richer Shadow DOM discovery UI replaces this only after it has rendered.
-export function reportReadingNavigation(posts, post) {
+/**
+ * The Daily report's link to that session's own market page
+ * (/market/YYYY-MM-DD/), or ''. `marketDate` is the date of the published
+ * final Market Close the report's facts came from: the page exists exactly
+ * when that record does, so a Daily without one gets no link.
+ */
+export function reportMarketSessionLink(post, marketDate) {
+  const date = String(marketDate || '');
+  if (post?.type !== 'daily' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return '';
+  if (String(post.reportDate || post.date || '').slice(0, 10) !== date) return '';
+  const lang = postLanguage(post);
+  const [year, month, day] = date.split('-').map(Number);
+  const en = lang === 'en';
+  const href = `${en ? '/en' : ''}/market/${date}/`;
+  const label = en ? 'Market data for this session' : '이날의 시장 수치';
+  const title = en
+    ? `Korea Market Close, ${new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(year, month - 1, day)))}: closes, investor flows, FX and rates`
+    : `${month}월 ${day}일 한국 증시 마감: 종가·수급·환율·금리 한눈에`;
+  return `<a href="${href}" data-market-session="${date}"><span>${label}</span><strong>${escapeHtml(title)}</strong></a>`;
+}
+
+export function reportReadingNavigation(posts, post, { marketDate = '' } = {}) {
   if (!post || !categoryLandingPath(post.type)) return '';
   const lang = postLanguage(post);
   const path = value => normalizeSitePath(value).replace(/\.html?$/i, '').toLowerCase();
@@ -291,7 +312,8 @@ export function reportReadingNavigation(posts, post) {
     .filter(([candidate]) => candidate)
     .map(([candidate, rel, label]) => `<a href="${escapeHtml(cleanReportHref(candidate.href))}" rel="${rel}"><span>${label}</span><strong>${escapeHtml(candidate.title)}</strong></a>`)
     .join('');
-  if (!links) return '';
+  const marketLink = reportMarketSessionLink(post, marketDate);
+  if (!links && !marketLink) return '';
   return `<nav id="mrs-reading-nav" aria-label="${lang === 'en' ? 'Previous and Next Reports' : '이전/다음 리포트'}">
 <style>
 #mrs-reading-nav{all:initial!important;box-sizing:border-box!important;display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))!important;gap:24px!important;width:100%!important;max-width:860px!important;clear:both!important;margin:32px auto!important;padding:24px 20px!important;border-top:1px solid #d8d0c2!important;font:15px/1.55 system-ui,sans-serif!important;background:#f7f3eb!important;color:#22241f!important}
@@ -299,7 +321,7 @@ export function reportReadingNavigation(posts, post) {
 #mrs-reading-nav span{all:initial!important;display:block!important;font:12px/1.5 system-ui,sans-serif!important;color:#666b62!important}
 #mrs-reading-nav strong{all:initial!important;display:block!important;font:600 16px/1.5 system-ui,sans-serif!important;color:inherit!important;overflow-wrap:anywhere!important}
 #mrs-reading-nav a:hover strong{text-decoration:underline!important}#mrs-reading-nav a:focus-visible{outline:2px solid #344b40!important;outline-offset:4px!important}
-</style>${links}</nav>`;
+${marketLink ? '#mrs-reading-nav a[data-market-session]{grid-column:1/-1!important}' : ''}</style>${marketLink}${links}</nav>`;
 }
 
 export function findTranslationCounterpart(posts, post) {

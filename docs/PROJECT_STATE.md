@@ -70,6 +70,27 @@ head names the larger side (상승비율 on a day more stocks rose than fell); t
 basis tile names the futures contract and its price. The session page waits for
 its trend read at most `MARKET_TREND_BUDGET_MS` (1.5 s), not the 5 s page budget.
 
+Internal links (2026-11-23): four sets of links tie the market pages, the
+reports and the glossary together. All are in the first HTML; none edits a
+report file.
+- **Footer** (`functions/_footer.js`, on every page): 날짜별 마감 기록
+  (`/market/archive/`, which lists every session page and every indicator page),
+  업종·테마 (`/market/sectors/`) and 용어 사전 (`/basics/glossary/`). After changing
+  the footer run `node scripts/sync-static-footers.mjs`.
+- **Home strip**: each of the five figures links to its history page
+  (`/market/kospi/`, `kosdaq`, `usdkrw`, `us10y`, `gold`), in the shipped
+  placeholder, the server's first HTML (`_home-initial.js`) and `site.js`.
+- **Daily report → its session page**: when the final Market Close of the
+  report's date is published, the server's reading nav (`reportMarketSessionLink`
+  in `functions/_seo.js`) carries a link to `/market/YYYY-MM-DD/`;
+  `assets/report-shell.js` reads it from that nav and shows it at the top of the
+  "previous / next / related" block that replaces the nav. No close, no link.
+- **Glossary terms**: every glossary entry has an id (`glossaryTermId`:
+  `#term-베이시스`, `#term-program-trading`). On TODAY and the session pages the
+  labels 시장 폭, 프로그램 순매수, 베이시스 and 공매도 비중 link to their entries
+  (`.mk-term`, dotted underline). The glossary is built from the reports, so a
+  term can disappear with its reports; the link then opens the glossary at the top.
+
 Market Close reads (2026-11-23): a failed schema init (the `sqlite_master`
 probe or the guarded DDL) no longer turns a read into an error. API reads and
 `/market/` pages log it and query the table anyway; publishing still refuses

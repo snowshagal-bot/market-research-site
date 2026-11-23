@@ -8,6 +8,8 @@ import {
   extractGlossaryTerms,
   glossaryEntries,
   glossaryLetter,
+  glossaryTermHref,
+  glossaryTermId,
   onGlossaryRequest,
   parseGlossaryPath,
   renderGlossaryList,
@@ -168,6 +170,22 @@ function context(url, { assetsFail = false } = {}) {
     }
   };
 }
+
+test('every entry has an id other pages can link to; two spellings of one term share the first', () => {
+  assert.equal(glossaryTermId('베이시스'), 'term-베이시스');
+  assert.equal(glossaryTermId('프로그램 매매'), 'term-프로그램-매매');
+  assert.equal(glossaryTermId('Program Trading'), 'term-program-trading');
+  assert.equal(glossaryTermId('  S&P 500 (지수) '), 'term-s-p-500-지수');
+  assert.equal(glossaryTermId(''), '');
+  assert.equal(glossaryTermHref('시장 폭', 'ko'), '/basics/glossary/#term-시장-폭');
+  assert.equal(glossaryTermHref('Market Breadth', 'en'), '/en/basics/glossary/#term-market-breadth');
+
+  const source = [{ url: '/reports/x', title: 'X' }];
+  const entries = ['Short Selling', 'short-selling', '공매도', '"quoted"'].map(term => ({ term, definition: 'A definition long enough.', sources: source }));
+  const list = renderGlossaryList(entries, 'en');
+  assert.deepEqual([...list.matchAll(/<div class="glossary-entry"(?: id="([^"]*)")?>/g)].map(match => match[1] || null),
+    ['term-short-selling', null, 'term-공매도', 'term-quoted']);
+});
 
 test('the route fills the glossary page, redirects to the slash form and leaves /basics/ alone', async () => {
   assert.deepEqual(parseGlossaryPath('/basics/glossary/'), { lang: 'ko', canonical: true });

@@ -217,3 +217,51 @@ test('the Research/Note reports whose descriptions come content-first render one
   }
   assert.ok(contentFirst.length > 0, 'the corpus still contains content-first descriptions to guard');
 });
+
+test('a Daily report links to its session’s market page only when that close is published', async () => {
+  const payload = JSON.parse(await read('contracts/market_close/market_close.example.json'));
+  const date = payload.meta.market_date;
+  // A D1 that holds one final Market Close, for `date`.
+  const db = {
+    prepare(sql) {
+      let args = [];
+      return {
+        bind(...values) { args = values; return this; },
+        async first() {
+          if (/FROM sqlite_master/.test(sql)) return { table_sql: 'CREATE TABLE market_close_snapshots (takeaway_ko TEXT, takeaway_en TEXT)', has_index: 1 };
+          if (/WHERE market_date = \?/.test(sql)) return args[0] === date ? { market_date: date, payload_json: JSON.stringify(payload), takeaway_ko: '', takeaway_en: '' } : null;
+          return null;
+        },
+        async all() { return { results: [] }; },
+        async run() { return { success: true }; }
+      };
+    }
+  };
+  const daily = { id: 'daily-x', type: 'daily', lang: 'ko', title: '데일리', reportDate: date, date, registeredAt: `${date}T09:00:00.000Z`, description: '설명', href: 'reports/daily-x.html' };
+  const english = { ...daily, id: 'daily-x-en', lang: 'en', title: 'Daily', href: 'reports/en/daily-x.html' };
+  const unpublished = { ...daily, id: 'daily-y', reportDate: '2026-08-31', date: '2026-08-31', href: 'reports/daily-y.html' };
+  const note = { ...daily, id: 'note-x', type: 'note', href: 'reports/note-x.html' };
+  const posts = [daily, english, unpublished, note];
+  const page = async (post, withDb = true) => {
+    const request = new Request(new URL(`/${post.href.replace(/\.html$/i, '')}`, 'https://snowshagal.com'));
+    const response = await middleware({
+      request,
+      env: { ...env(posts), ...(withDb ? { COMMENTS_DB: db } : {}) },
+      next: async () => new Response(withHead(''), { headers: { 'content-type': 'text/html; charset=utf-8' } })
+    });
+    return response.text();
+  };
+
+  const ko = await page(daily);
+  const nav = ko.match(/<nav id="mrs-reading-nav"[\s\S]*?<\/nav>/)?.[0];
+  assert.ok(nav, 'reading nav');
+  assert.match(nav, new RegExp(`<a href="/market/${date}/" data-market-session="${date}">`));
+  // In the raw HTML, before the shell script that replaces the nav.
+  assert.ok(ko.indexOf('data-market-session=') < ko.indexOf('<script src="/assets/report-shell.js'));
+  assert.match(await page(english), new RegExp(`<a href="/en/market/${date}/" data-market-session="${date}">`));
+
+  // No record for that date, no database, or not a Daily: no session link.
+  assert.doesNotMatch(await page(unpublished), /data-market-session=/);
+  assert.doesNotMatch(await page(daily, false), /data-market-session=/);
+  assert.doesNotMatch(await page(note), /data-market-session=/);
+});
