@@ -60,13 +60,19 @@ const TREND = (() => {
   return { sessions: 20, end_date: DATE, dates: ['2026-08-26', '2026-08-27', DATE], series };
 })();
 
-function clientHtml(lang, payload = FIXTURE, trend = TREND) {
+// `history`: render as a past date opened from the calendar (/market/?date=…),
+// the view that must read like that date's own page.
+function clientHtml(lang, payload = FIXTURE, trend = TREND, { history = false } = {}) {
   const document = { documentElement: { dataset: { siteLang: lang } }, body: { dataset: {} }, readyState: 'loading', addEventListener() {}, getElementById() { return null; } };
   const window = {};
   const context = vm.createContext({ window, document, location: { hostname: 'localhost' }, Intl, Date, Set, console });
   vm.runInContext(LOCALE_JS, context);
   vm.runInContext(MARKET_JS, context);
   const target = { innerHTML: '' };
+  if (history) {
+    // As /market/?date=… sets it: a past date while a later close exists.
+    Object.assign(window.MARKET_CLOSE.state, { mode: 'history', isLatest: false, latestDate: '2026-11-23' });
+  }
   window.MARKET_CLOSE.render(structuredClone(payload), target, { domesticRates: RATES, trend });
   return target.innerHTML;
 }
@@ -96,6 +102,7 @@ function rows(html) {
     name: inner(row, /<span class="mk-row-name">([\s\S]*?)<\/span>/),
     value: inner(row, /<td class="mk-row-value"><strong>([\s\S]*?)<\/strong>/),
     change: inner(row, /<td class="mk-row-change[^"]*">([\s\S]*?)<\/td>/),
+    state: inner(row, /<span class="mk-row-state">([\s\S]*?)<\/span><\/th>/),
     line: /<svg class="mk-spark"/.test(row)
   }));
 }
@@ -176,13 +183,13 @@ test('both renderers use the same mk- classes, and every one of them is styled',
   // buttons, the flow toggle, the phone board tabs and the fixing-versus-latest
   // line on TODAY; the static boards, sub-headings and the sectors card on a
   // session page.
-  const CLIENT_ONLY = ['mk-archive-link', 'mk-board-tab', 'mk-board-tabs', 'mk-caret', 'mk-date-btn', 'mk-datebar-label', 'mk-datebar-modes', 'mk-datebar-nav', 'mk-fixing', 'mk-flow-panel', 'mk-lead', 'mk-step', 'mk-step-text', 'mk-toggle', 'mk-toggle-btn'];
+  const CLIENT_ONLY = ['mk-archive-link', 'mk-board-tab', 'mk-board-tabs', 'mk-caret', 'mk-date-btn', 'mk-datebar-label', 'mk-datebar-links', 'mk-datebar-modes', 'mk-datebar-nav', 'mk-flow-panel', 'mk-indicator-link', 'mk-lead', 'mk-step', 'mk-step-text', 'mk-toggle', 'mk-toggle-btn'];
   const SERVER_ONLY = ['mk-boards-static', 'mk-card-link', 'mk-grid-full', 'mk-groups-card', 'mk-subhead'];
   assert.deepEqual([...client].filter(name => !server.has(name)).sort(), CLIENT_ONLY);
   assert.deepEqual([...server].filter(name => !client.has(name)).sort(), SERVER_ONLY);
 
   // Hooks that carry no rule of their own (their parts are styled through other classes).
-  const UNSTYLED_HOOKS = new Set(['mk-breadth-card', 'mk-cap-table', 'mk-datebar-nav', 'mk-flow-panel', 'mk-groups-card', 'mk-index', 'mk-row', 'mk-stats-card']);
+  const UNSTYLED_HOOKS = new Set(['mk-breadth-card', 'mk-cap-table', 'mk-datebar-nav', 'mk-flow-panel', 'mk-groups-card', 'mk-index', 'mk-indicator-link', 'mk-row', 'mk-stats-card']);
   for (const name of new Set([...client, ...server])) {
     const styled = new RegExp(`\\.${name}(?![\\w-])`).test(CSS);
     assert.ok(styled || UNSTYLED_HOOKS.has(name), `${name} has no rule in market-close.css`);
@@ -213,5 +220,46 @@ test('the same four labels link to their glossary entries on TODAY and on the se
     // The browser builds the address itself; it must be the glossary's own id for that term.
     assert.deepEqual(client, expected[lang].map(([label, term]) => ({ href: glossaryTermHref(term, lang), label })), lang);
     assert.deepEqual(termLinks(serverHtml(lang)), client, `${lang} session page`);
+  }
+});
+
+test('a past date reads like its own page: the same figure and the same basis on every row', () => {
+  // Reproduces /market/?date=2026-11-20 against /market/2026-11-20/ (2026-11-23
+  // review): a KRW pair showed "15:30 확정 · 현재 1,335.89원" on the first and
+  // the fixing alone on the second, and a figure still trading when the record
+  // was made read "장중" on one and "종가" on the other.
+  for (const lang of ['ko', 'en']) {
+    const history = rows(clientHtml(lang, FIXTURE, TREND, { history: true }));
+    const page = rows(serverHtml(lang));
+    assert.deepEqual(page.map(row => [row.code, row.value, row.state]), history.map(row => [row.code, row.value, row.state]), lang);
+    const state = code => history.find(row => row.code === code).state;
+    // The fixing is the figure; no second "current" reading, no "장중" on it.
+    assert.equal(state('USDKRW'), lang === 'ko' ? '2026.08.28 · 15:30 확정' : 'Aug 28, 2026 · 15:30 fixing');
+    // A figure still trading at capture carries the record's capture time (14:05:03 ICT = 16:05 KST), never "종가".
+    assert.equal(state('GOLD'), lang === 'ko' ? '2026.08.28 · 장중 · 16:05 KST' : 'Aug 28, 2026 · Intraday · 16:05 KST');
+    // A close is a close of its own date.
+    assert.equal(state('NASDAQ'), lang === 'ko' ? '2026.08.27 · 종가' : 'Aug 27, 2026 · Close');
+    assert.doesNotMatch(clientHtml(lang, FIXTURE, TREND, { history: true }), lang === 'ko' ? /현재 <b>|mk-fixing/ : /Latest <b>|mk-fixing/);
+  }
+});
+
+test('TODAY uses the same basis, except that a close is the most recent one', () => {
+  for (const lang of ['ko', 'en']) {
+    const today = rows(clientHtml(lang));
+    const page = rows(serverHtml(lang));
+    const recent = lang === 'ko' ? [' · 최근 종가', ' · 종가'] : [' · Recent close', ' · Close'];
+    assert.deepEqual(today.map(row => [row.code, row.value, row.state.replace(recent[0], recent[1])]), page.map(row => [row.code, row.value, row.state]), lang);
+  }
+});
+
+test('without a capture time an intraday figure says "장중" and nothing more; no time is guessed', () => {
+  const payload = structuredClone(FIXTURE);
+  delete payload.commodities_crypto.GOLD.retrieved_at;
+  for (const lang of ['ko', 'en']) {
+    const word = lang === 'ko' ? '장중' : 'Intraday';
+    const history = rows(clientHtml(lang, payload, TREND, { history: true })).find(row => row.code === 'GOLD');
+    const page = rows(serverHtml(lang, payload)).find(row => row.code === 'GOLD');
+    assert.equal(history.state, lang === 'ko' ? `2026.08.28 · ${word}` : `Aug 28, 2026 · ${word}`);
+    assert.equal(page.state, history.state);
   }
 });

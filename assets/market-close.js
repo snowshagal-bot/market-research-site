@@ -40,7 +40,7 @@
     weekdays: ['월', '화', '수', '목', '금', '토', '일'],
     monthFormat: (y, m) => `${y}년 ${m}월`,
     pageEyebrow: '한국 증시 마감 기록', pageTitle: md => `${md} 한국 증시 마감`, pageTitleToday: '오늘 한국 증시 마감', pageLead: '거래일을 골라 그날의 종가와 수급, 주요 지표를 확인하세요.',
-    dateLabel: '조회할 거래일', latestMode: '최근 마감', archiveLink: '전체 기록', closeOf: md => `${md} 마감`, regularBasis: '정규장 15:30 KST 기준',
+    dateLabel: '조회할 거래일', latestMode: '최근 마감', weekMode: '5거래일', monthMode: '20거래일', archiveLink: '전체 기록', indicatorLink: '지표별 기록', closeOf: md => `${md} 마감`, regularBasis: '정규장 15:30 KST 기준',
     regularClose: '정규장 종가', trendLabel: '최근 20거래일 종가',
     summaryTitle: '그날의 요약', summaryHead: (pctText, word) => `코스피 ${pctText}% ${word}`, upWord: '상승', downWord: '하락', flatWord: '보합',
     breadthPhrase: (count, ratio, word) => `코스피 ${count}종목 ${word}(${ratio})`, foreignPhrase: (amount, word) => `외국인 ${amount} ${word}`, netBuyWord: '순매수', netSellWord: '순매도',
@@ -62,7 +62,7 @@
     calendarToggle: 'Select date from calendar', selectDate: 'Select date', closeCalendar: 'Close calendar',
     sections: ['Major Indices', 'Rates · FX · Volatility', 'Commodities · Crypto', 'Market Breadth', 'KRX Investor Flows (Daily)', 'Cumulative Flows: Last 5 Sessions', 'Program Trading & Basis', 'Market Internals', 'Short Selling', 'Top 10 by Market Cap'],
     ratesTitle: 'Korean Bond Yields', rateState: '16:00 KOFIA', ratesNote: 'KOFIA final quote yields, 16:00 KST · Change in bp against KOFIA’s previous-day value',
-    open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', close: 'Close', current: 'Latest', fixedClose: '15:30 close', intraday: 'Intraday', recentClose: 'Recent close', unavailable: 'Unavailable',
+    open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', close: 'Close', current: 'Latest', fixedClose: '15:30 fixing', intraday: 'Intraday', recentClose: 'Recent close', unavailable: 'Unavailable',
     asiaTitle: 'Asian Markets', localHoliday: 'Local holiday',
     latestClose: 'Close', snapshotBasis: 'At KRX close', asOf: stamp => `As of ${stamp}`,
     rise: 'Advancers', fall: 'Decliners', flat: 'Unchanged', upper: 'Limit up', lower: 'Limit down', riseRatio: 'Advance ratio', fallRatio: 'Decline ratio',
@@ -97,7 +97,7 @@
       return `${names[m - 1]} ${y}`;
     },
     pageEyebrow: 'Korea market close archive', pageTitle: md => `Korea Market Close · ${md}`, pageTitleToday: 'Korea Market Close Today', pageLead: 'Pick a trading day to see its closes, investor flows and key indicators.',
-    dateLabel: 'Trading day', latestMode: 'Latest close', archiveLink: 'All sessions', closeOf: md => `Close of ${md}`, regularBasis: 'Regular session, 15:30 KST',
+    dateLabel: 'Trading day', latestMode: 'Latest close', weekMode: '5 sessions', monthMode: '20 sessions', archiveLink: 'All sessions', indicatorLink: 'Indicator history', closeOf: md => `Close of ${md}`, regularBasis: 'Regular session, 15:30 KST',
     regularClose: 'Regular close', trendLabel: 'Last 20 sessions',
     summaryTitle: 'The day in brief', summaryHead: (pctText, word) => `KOSPI ${word} ${pctText}%`, upWord: 'up', downWord: 'down', flatWord: 'flat',
     breadthPhrase: (count, ratio, word) => `${count} KOSPI stocks ${word} (${ratio})`, foreignPhrase: (amount, word) => `foreign investors ${word} ${amount}`, netBuyWord: 'net bought', netSellWord: 'net sold',
@@ -286,10 +286,19 @@
     if (isFixing(key) || key === 'KOSPI' || key === 'KOSDAQ') return item.close;
     return item.data_state === 'intraday' && valid(item.current) ? item.current : item.close;
   };
-  const stateText = item => {
+  // The basis of a record figure (no Global Latest overlay). A KRW reference
+  // rate is the 15:30 fixing, whatever the record calls it. A figure still
+  // trading at capture says when it was read ("장중 · 16:10 KST"; just "장중"
+  // when the record has no capture time). A close is "최근 종가" on TODAY and
+  // "종가" on a past date, as on that date's own page.
+  const stateText = (key, item, history = false) => {
     if (!item || item.data_state === 'unavailable') return copy.unavailable;
-    if (item.data_state === 'intraday') return copy.intraday;
-    return copy.recentClose;
+    if (isFixing(key)) return copy.fixedClose;
+    if (item.data_state === 'intraday') {
+      const time = root.MARKET_LOCALE?.intradayCaptureTime?.(item) || '';
+      return time ? `${copy.intraday} · ${time}` : copy.intraday;
+    }
+    return history ? copy.close : copy.recentClose;
   };
   const metric = (label, value, extra = '') => `<div class="market-metric"><span>${html(label)}</span><strong class="${extra}">${value}</strong></div>`;
   const section = (numberValue, title, body, extra = '') => `<section class="market-section ${extra}" aria-labelledby="market-section-${numberValue}"><h2 id="market-section-${numberValue}"><span>${numberValue}.</span> ${html(title)}</h2>${body}</section>`;
@@ -322,10 +331,16 @@
       : isFx || key === 'KOSPI' || key === 'KOSDAQ'
         ? `${movementArrow} ${valid(movement) ? number(Math.abs(movement), 2) : '--'} <span>(${pct(movementPct)})</span>`
         : `${movementArrow} ${signed(movement, digitsOf(key))} <span>(${pct(movementPct)})</span>`;
-    const fxContext = isFx && !latest
-      ? `<span class="mk-fixing">${copy.fixedClose} · ${copy.current} <b>${valueUnit(key, item?.current)}</b></span>`
-      : '';
-    const snapshotState = view.mixed && item?.data_state === 'intraday' ? copy.snapshotBasis : stateText(item);
+    // A KRW pair shows its 15:30 fixing only. The record's other figure for it
+    // (`current`) was read when the record was made and carries no time of its
+    // own, so it is not shown as "현재" (2026-11-23 review).
+    const fxContext = '';
+    // On TODAY with a Global Latest overlay, a record figure that was trading
+    // at capture reads "마감 시점" (with its capture time) next to the newer rows.
+    const captured = !isFx && item?.data_state === 'intraday' ? root.MARKET_LOCALE?.intradayCaptureTime?.(item) || '' : '';
+    const snapshotState = view.mixed && !isFx && item?.data_state === 'intraday'
+      ? (captured ? `${copy.snapshotBasis} · ${captured}` : copy.snapshotBasis)
+      : stateText(key, item, view.history === true);
     // An Asian index dated before the session: its market was closed that day.
     const localHoliday = ASIA_CODES.includes(key) && /^\d{4}-\d{2}-\d{2}$/.test(String(item?.source_date || '')) && /^\d{4}-\d{2}-\d{2}$/.test(String(view.marketDate || '')) && item.source_date < view.marketDate;
     const stateHtml = latest ? latestStateHtml(latest) : `${dateText(item?.source_date)} · ${snapshotState}${localHoliday ? ` · ${copy.localHoliday}` : ''}`;
@@ -708,10 +723,13 @@
         <div class="mk-datebar-modes">
           <div class="market-history-modes" role="group" aria-label="${ko ? '보기' : 'View'}">
             <button class="market-mode-btn ${isTodayActive ? 'active' : ''}" type="button" data-market-action="today" ${isTodayActive ? 'aria-current="page"' : ''}>${copy.latestMode}</button>
-            <button class="market-mode-btn ${is1wActive ? 'active' : ''}" type="button" data-market-action="view-1w" ${is1wActive ? 'aria-current="page"' : ''}>1W</button>
-            <button class="market-mode-btn ${is1mActive ? 'active' : ''}" type="button" data-market-action="view-1m" ${is1mActive ? 'aria-current="page"' : ''}>1M</button>
+            <button class="market-mode-btn ${is1wActive ? 'active' : ''}" type="button" data-market-action="view-1w" ${is1wActive ? 'aria-current="page"' : ''}>${copy.weekMode}</button>
+            <button class="market-mode-btn ${is1mActive ? 'active' : ''}" type="button" data-market-action="view-1m" ${is1mActive ? 'aria-current="page"' : ''}>${copy.monthMode}</button>
           </div>
-          <a class="mk-archive-link" href="${ko ? '/market/' : '/en/market/'}archive/">${copy.archiveLink} <span aria-hidden="true">↗</span></a>
+          <span class="mk-datebar-links">
+            <a class="mk-archive-link" href="${ko ? '/market/' : '/en/market/'}archive/">${copy.archiveLink} <span aria-hidden="true">↗</span></a>
+            <a class="mk-archive-link mk-indicator-link" href="${ko ? '/market/' : '/en/market/'}archive/#indicators">${copy.indicatorLink} <span aria-hidden="true">↗</span></a>
+          </span>
         </div>
       </div>
       <div id="market-calendar-drawer" class="market-calendar-drawer" ${state.calendarOpen ? '' : 'hidden'}>
@@ -808,7 +826,7 @@
     // KOSPI and KOSDAQ are never Global Latest instruments: their figures are
     // the Market Close exactly as without an overlay.
     const krx = key => key === 'KOSPI' || key === 'KOSDAQ';
-    const viewOf = key => ({ latest: krx(key) ? null : latestItems[key] || null, mixed: !krx(key) && mixed, marketDate, trend });
+    const viewOf = key => ({ latest: krx(key) ? null : latestItems[key] || null, mixed: !krx(key) && mixed, marketDate, trend, history: isHistory });
 
     const indices = data.indices || {};
     const rates = data.rates_fx_volatility || {};

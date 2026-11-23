@@ -58,8 +58,8 @@ page (`functions/_market-date-page.js`) draw the same record with two renderers.
 `tests/market-render-parity.test.mjs` renders one payload through both and
 compares the boards (row order, names, values, changes, trend lines), the index
 cards, flows, breadth, stats, the day in brief, the top 10 and the `mk-` classes;
-the differences that are on purpose (the state line, TODAY's date bar and
-toggles, the session page's sectors card) are listed in that file, so a change
+the differences that are on purpose (TODAY's "최근 종가" for a close, TODAY's date
+bar and toggles, the session page's sectors card) are listed in that file, so a change
 to one side that does not reach the other fails. Board names are the site's own
 on both pages (VIX 변동성, 원/100엔, 달러인덱스, 금 선물, 은 선물, 구리 선물 …):
 TODAY no longer prefers the record's `name`, which for GOLD was "국제 금" in the
@@ -69,6 +69,24 @@ own value (a series that never moved is a level line at mid height); the breadth
 head names the larger side (상승비율 on a day more stocks rose than fell); the
 basis tile names the futures contract and its price. The session page waits for
 its trend read at most `MARKET_TREND_BUDGET_MS` (1.5 s), not the 5 s page budget.
+
+Price basis (2026-11-23, after a Codex review): a past date opened on TODAY
+(`/market/?date=…`) reads exactly like that date's own page, row by row (value and
+basis line), and the parity test checks it. The basis of a record figure is the
+same on both:
+- **KRW pairs** (USD/KRW, JPY/KRW, CNY/KRW, EUR/KRW): the 15:30 fixing only, labeled
+  15:30 확정 / 15:30 fixing. The record's other reading (`current`, read when the
+  record was made, with no time of its own) is no longer shown as "현재 ○○원".
+- **A figure still trading at capture** (`data_state` intraday: dollar index,
+  commodities, crypto): 장중 · 16:10 KST / Intraday · 16:10 KST, the record's own
+  capture time (`retrieved_at`, `intradayCaptureTime` in `assets/locale.js`), with
+  the date when it differs. Without `retrieved_at` it says 장중 alone; no time is
+  guessed. The session page used to call these "종가".
+- **A close**: 종가 / Close of its own date; TODAY says 최근 종가 / Recent close.
+- **Global Latest rows on TODAY** keep their own basis (장중 and the observation time).
+The date bar's period buttons read 5거래일 / 20거래일 (EN 5 sessions / 20 sessions; the
+URLs stay `?view=1w|1m`), and 지표별 기록 / Indicator history beside 전체 기록 opens
+`/market/archive/#indicators`. Below 1024px the two links take their own row.
 
 Internal links (2026-11-23): four sets of links tie the market pages, the
 reports and the glossary together. All are in the first HTML; none edits a

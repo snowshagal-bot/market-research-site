@@ -137,14 +137,21 @@ test('KRX flow values keep the Contract KRW billion unit', async () => {
   assert.equal(en.format.flow(25), 'KRW +25bn');
 });
 
-test('FX close/current and US10Y basis-point changes render without mixing value bases', async () => {
+test('FX shows its 15:30 fixing only, and US10Y basis-point changes render without mixing value bases', async () => {
   const data = JSON.parse(await read('contracts/market_close/market_close.example.json'));
   for (const lang of ['ko', 'en']) {
     const runtime = await marketRuntime(lang);
     const target = { innerHTML: '' };
     runtime.render(data, target);
-    assert.match(target.innerHTML, lang === 'ko' ? /1,372\.50원[\s\S]*15:30 확정[\s\S]*현재[\s\S]*1,372\.65원[\s\S]*▼ 7\.95/ : /₩1,372\.50[\s\S]*15:30 close[\s\S]*Latest[\s\S]*₩1,372\.65[\s\S]*▼ 7\.95/);
-    assert.match(target.innerHTML, lang === 'ko' ? /860\.64원[\s\S]*15:30 확정[\s\S]*현재[\s\S]*858\.40원[\s\S]*▼ 7\.99/ : /₩860\.64[\s\S]*15:30 close[\s\S]*Latest[\s\S]*₩858\.40[\s\S]*▼ 7\.99/);
+    const row = code => target.innerHTML.slice(target.innerHTML.indexOf(`data-code="${code}"`), target.innerHTML.indexOf('</tr>', target.innerHTML.indexOf(`data-code="${code}"`)));
+    // The fixing is the figure and its basis; the record's other reading
+    // (`current`, read at capture without a time of its own) is not shown as "현재".
+    assert.match(row('USDKRW'), lang === 'ko' ? /15:30 확정[\s\S]*1,372\.50원[\s\S]*▼ 7\.95/ : /15:30 fixing[\s\S]*₩1,372\.50[\s\S]*▼ 7\.95/);
+    assert.match(row('JPYKRW'), lang === 'ko' ? /15:30 확정[\s\S]*860\.64원[\s\S]*▼ 7\.99/ : /15:30 fixing[\s\S]*₩860\.64[\s\S]*▼ 7\.99/);
+    for (const code of ['USDKRW', 'JPYKRW']) {
+      assert.doesNotMatch(row(code), lang === 'ko' ? /현재|장중|mk-fixing/ : /Latest|Intraday|mk-fixing/, `${lang} ${code}`);
+    }
+    assert.doesNotMatch(target.innerHTML, /1,372\.65|858\.40/);
     assert.match(target.innerHTML, /4\.672%[\s\S]*▲ 0\.8bp/);
     assert.doesNotMatch(target.innerHTML, /4\.6bp[\s\S]{0,40}\(-0\.97%\)/);
   }
@@ -820,7 +827,11 @@ test('history strip active states and aria-current reflect calendar open and his
   runtime.state.calendarOpen = false;
   const target1 = { innerHTML: '', addEventListener() {} };
   runtime.renderRangeView({ aggregation_version: '1.0.0', period: '1w', window: { sessions_used: 4, required_sessions: 5 }, instruments: { indices: {}, rates_fx_volatility: {}, commodities_crypto: {} }, flows: { markets: {} }, breadth: {}, krx_groups: { coverage_complete: false } }, '1w', target1);
-  assert.match(target1.innerHTML, /class="market-mode-btn active" type="button" data-market-action="view-1w" aria-current="page">1W/);
+  // The period buttons name their real length: 5 and 20 trading sessions.
+  assert.match(target1.innerHTML, /class="market-mode-btn active" type="button" data-market-action="view-1w" aria-current="page">5거래일</);
+  assert.match(target1.innerHTML, /data-market-action="view-1m" >20거래일</);
+  // Beside "전체 기록", the indicator list of the archive.
+  assert.match(target1.innerHTML, /<a class="mk-archive-link" href="\/market\/archive\/">전체 기록 [\s\S]*?<a class="mk-archive-link mk-indicator-link" href="\/market\/archive\/#indicators">지표별 기록 /);
   assert.doesNotMatch(target1.innerHTML, /class="market-mode-btn active" type="button" data-market-action="toggle-calendar"/);
 
   // 2. In 1W mode, calendar OPEN -> 1W inactive, the calendar button active and expanded
