@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-23-daily-1kkclkq",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-23",
+    "reportDate": "2026-11-23",
+    "registeredDate": "2026-11-23",
+    "registeredAt": "2026-11-23T08:16:08.952Z",
+    "legacyImport": false,
+    "title": "엔비디아 회계 조사로 커진 반도체 투매, 코스피 장중 5% 급락 뒤 4,700선 회복",
+    "subtitle": "",
+    "description": "이미 밀리던 미국 반도체가 엔비디아 회계 조사 보도로 10% 넘게 급락, 코스피 장중 매도 사이드카 · 11월 23일 코스피 4,708.54(-3.31%), 외국인 2,471억 순매도 · 하락 이유와 다음 거래일 확인할 것",
+    "takeaway": "엔비디아 회계 조사로 커진 미국 반도체 투매에 장중 매도 사이드카, 오후엔 낙폭 일부 회복",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-11-23_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-23-daily-1kkclkq.webp",
+    "shareCardImage": "covers/share/2026-11-23-daily-1kkclkq.jpg",
+    "coverThumbnail": "covers/2026-11-23-daily-1kkclkq-450.webp"
+  },
+  {
     "id": "2026-11-23-basics-1qey993",
     "type": "basics",
     "typeLabel": "Market Basics",
