@@ -116,6 +116,8 @@ Uploaded reports are standalone documents and can contain global CSS rules. Do n
 
 Shared report UI should therefore be isolated from original report styles. The current implementation uses Shadow DOM in `assets/report-shell.js` for the top navigation and comments.
 
+Space that shared UI takes in the page flow must exist in the first HTML, not be inserted by a script after the report has painted: the 52 px top bar spacer is written by the middleware for that reason. A fixed or Shadow DOM element that does not push content can still arrive by script.
+
 Do not replace the current model by directly merging report markup into the homepage DOM unless there is a strong architectural reason and regression testing is available.
 
 ## Comments UI

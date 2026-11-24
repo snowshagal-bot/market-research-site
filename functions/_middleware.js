@@ -82,6 +82,20 @@ function insertBeforeClosingTag(body, tag, markup) {
   return body.replace(new RegExp(`</${tag}>`, 'i'), (close) => `${markup}${close}`);
 }
 
+/** Inserts markup right after the first <tag …> start tag, whatever its attributes. */
+function insertAfterOpeningTag(body, tag, markup) {
+  return body.replace(new RegExp(`<${tag}\\b(?:[^>"']|"[^"]*"|'[^']*')*>`, 'i'), (open) => `${open}${markup}`);
+}
+
+/**
+ * The 52 px space under the report top bar, in the first HTML. report-shell.js
+ * used to insert it when it ran at the end of the body, so a visitor without
+ * the script cached saw the report paint and then drop 52 px: the layout shift
+ * Web Analytics recorded on report pages. The shell now reuses this node.
+ * Keep the height equal to BAR_H in assets/report-shell.js.
+ */
+export const REPORT_NAV_SPACER = '<div id="mrs-nav-spacer" aria-hidden="true" style="display:block!important;width:100%!important;height:52px!important;min-height:52px!important;max-height:52px!important;margin:0!important;padding:0!important;border:0!important;flex:0 0 52px!important"></div>';
+
 
 /**
  * Attributes of one start tag's source (everything between the tag name and
@@ -487,7 +501,7 @@ export async function onRequest(context) {
   } catch (_) {}
 
   const tagBootstrap = serializeTagRegistryBootstrap(tags);
-  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=b9ee9a3e99"></script><script src="/assets/report-shell.js?v=b59a7b24a9" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
+  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=b9ee9a3e99"></script><script src="/assets/report-shell.js?v=0e81e3d23c" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
   const footerStyle = `<style id="site-footer-css">${footerCss()}</style>`;
   const footerMarkup = siteFooter(lang, { reportTranslationHref });
   // One feed link per page, for the page's own language. Any Atom link the
@@ -518,6 +532,7 @@ export async function onRequest(context) {
       || attrs.rel === 'manifest'
     ));
     body = insertBeforeClosingTag(body, 'head', `${FAVICON_TAGS}${seo}${feedLink}${footerStyle}`);
+    body = insertAfterOpeningTag(body, 'body', REPORT_NAV_SPACER);
     body = insertBeforeClosingTag(body, 'body', `${readingNavigation}${footerMarkup}${shell}`);
     body = setHtmlLang(body, lang);
     body = appendGa4ToHtml(body, ga4);
@@ -563,6 +578,7 @@ export async function onRequest(context) {
     })
     .on('body', {
       element(element) {
+        element.prepend(REPORT_NAV_SPACER, { html: true });
         element.append(`${readingNavigation}${footerMarkup}${shell}`, { html: true });
       }
     })
