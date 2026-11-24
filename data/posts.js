@@ -1,5 +1,30 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-25-basics-1p95odb",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-11-25",
+    "reportDate": "2026-11-25",
+    "registeredDate": "2026-11-25",
+    "registeredAt": "2026-11-24T17:25:33.740Z",
+    "legacyImport": false,
+    "title": "What Is My Broker's Forced-Sale Line, and When Does It Hit?",
+    "seoTitle": "Korean Brokers' Margin Maintenance Ratios and Forced-Sale Timing: 130% vs. 140%",
+    "subtitle": "",
+    "description": "How Kiwoom, Mirae Asset, Samsung, Korea Investment, NH, KB and Shinhan set margin maintenance ratios (usually 140%), which brokers cut the line or postpone forced sales and on what conditions, per-stock ratios, top-up deadlines, sale dates and morning cutoffs, where to check your own ratio, and what changes after Jan. 31, 2027.",
+    "tags": [
+      "market-basic",
+      "futures"
+    ],
+    "readingMinutes": 13,
+    "href": "reports/en/basics-data-guide-02-margin-call-by-broker_EN.html",
+    "translationGroup": "2026-11-25-basics-vdzvvf",
+    "coverImage": "covers/2026-11-25-basics-1p95odb.webp",
+    "shareCardImage": "covers/share/2026-11-25-basics-1p95odb.jpg",
+    "coverThumbnail": "covers/2026-11-25-basics-1p95odb-450.webp"
+  },
+  {
     "id": "2026-11-25-basics-vdzvvf",
     "type": "basics",
     "typeLabel": "시장 입문",

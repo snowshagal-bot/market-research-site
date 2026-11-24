@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta name="color-scheme" content="only light"/>
+<title>Korean Brokers&#x27; Margin Maintenance Ratios and Forced-Sale Timing: 130% vs. 140% | Snowshagal</title>
+<meta name="report-seo-title" content="Korean Brokers&#x27; Margin Maintenance Ratios and Forced-Sale Timing: 130% vs. 140% | Snowshagal"/>
+<meta name="report-seo-description" content="How Kiwoom, Mirae Asset, Samsung, Korea Investment, NH, KB and Shinhan set margin maintenance ratios (usually 140%), which brokers cut the line or postpone forced sales and on what conditions, per-stock ratios, top-up deadlines, sale dates and morning cutoffs, where to check your own ratio, and what changes after Jan. 31, 2027."/>
+<meta name="description" content="How Kiwoom, Mirae Asset, Samsung, Korea Investment, NH, KB and Shinhan set margin maintenance ratios (usually 140%), which brokers cut the line or postpone forced sales and on what conditions, per-stock ratios, top-up deadlines, sale dates and morning cutoffs, where to check your own ratio, and what changes after Jan. 31, 2027."/>
+<link rel="canonical" href="https://snowshagal.com/reports/en/basics-data-guide-02-margin-call-by-broker_EN"/>
+<meta name="robots" content="index,follow,max-image-preview:large"/>
+<meta property="og:type" content="article"/>
+<meta property="og:site_name" content="Snowshagal"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:locale:alternate" content="ko_KR"/>
+<meta property="og:title" content="What Is My Broker&#x27;s Forced-Sale Line, and When Does It Hit? Korean Brokers Compared"/>
+<meta property="og:description" content="Two accounts with the same 135% collateral ratio can end up in different places. Maintenance ratios, top-up deadlines, forced-sale timing and account screens at seven Korean brokers. Data Guide, Part 2."/>
+<meta property="og:url" content="https://snowshagal.com/reports/en/basics-data-guide-02-margin-call-by-broker_EN"/>
+<meta property="og:image" content="https://snowshagal.com/assets/social/basics-data-guide-02-margin-call-by-broker_EN.jpg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:alt" content="Korean brokers&#x27; margin maintenance ratios and forced-sale timing. Usual line 140%, up to 160% for some stocks. The morning cutoff varies by broker."/>
+<meta property="article:published_time" content="2026-11-25"/>
+<meta property="article:section" content="Market Basics"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="What Is My Broker&#x27;s Forced-Sale Line, and When Does It Hit? Korean Brokers Compared"/>
+<meta name="twitter:description" content="Two accounts with the same 135% collateral ratio can end up in different places. Maintenance ratios, top-up deadlines, forced-sale timing and account screens at seven Korean brokers. Data Guide, Part 2."/>
+<meta name="twitter:image" content="https://snowshagal.com/assets/social/basics-data-guide-02-margin-call-by-broker_EN.jpg"/>
+<meta name="twitter:image:alt" content="Korean brokers&#x27; margin maintenance ratios and forced-sale timing. Usual line 140%, up to 160% for some stocks. The morning cutoff varies by broker."/>
+<meta name="theme-color" content="#2A362E"/>
+<script type="application/ld+json">
+[
+ {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "What Is My Broker's Forced-Sale Line, and When Does It Hit?",
+  "alternativeHeadline": "Korean brokers' margin maintenance ratios and forced-sale timing, 130% vs. 140%",
+  "description": "How Kiwoom, Mirae Asset, Samsung, Korea Investment, NH, KB and Shinhan set margin maintenance ratios (usually 140%), which brokers cut the line or postpone forced sales and on what conditions, per-stock ratios, top-up deadlines, sale dates and morning cutoffs, where to check your own ratio, and what changes after Jan. 31, 2027.",
+  "inLanguage": "en",
+  "articleSection": "Market Basics",
+  "datePublished": "2026-11-25",
+  "dateModified": "2026-11-25",
+  "image": [
+   "https://snowshagal.com/assets/social/basics-data-guide-02-margin-call-by-broker_EN.jpg"
+  ],
+  "mainEntityOfPage": "https://snowshagal.com/reports/en/basics-data-guide-02-margin-call-by-broker_EN",
+  "author": {
+   "@type": "Organization",
+   "name": "Snowshagal",
+   "url": "https://snowshagal.com/"
+  },
+  "publisher": {
+   "@type": "Organization",
+   "name": "Snowshagal",
+   "url": "https://snowshagal.com/"
+  },
+  "isPartOf": {
+   "@type": "CreativeWorkSeries",
+   "name": "Data Guide",
+   "url": "https://snowshagal.com/en/basics/"
+  },
+  "keywords": "Korea margin call, forced liquidation Korea, margin maintenance ratio Korea, 140% rule waiver, 130% maintenance ratio, Kiwoom margin ratio, Mirae Asset margin, Samsung Securities margin, Korea Investment margin, NH Investment margin, KB Securities margin, Shinhan margin, misu forced sale, Korea Securities Finance"
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+   {
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Snowshagal",
+    "item": "https://snowshagal.com/en/"
+   },
+   {
+    "@type": "ListItem",
+    "position": 2,
+    "name": "Market Basics",
+    "item": "https://snowshagal.com/en/basics/"
+   },
+   {
+    "@type": "ListItem",
+    "position": 3,
+    "name": "What Is My Broker's Forced-Sale Line, and When Does It Hit?",
+    "item": "https://snowshagal.com/reports/en/basics-data-guide-02-margin-call-by-broker_EN"
+   }
+  ]
+ }
+]
+</script>
+<style>
+
+:root{
+  --surface-page:#ECEAE5;
+  --surface-band:#E3E0D9;
+  --surface-inner:#F1EFEA;
+  --surface-detail:#E8E5DF;
+  --surface-muted:#DAD6CE;
+  --ink:#2E2E2C;
+  --ink2:#43423E;
+  --body:#53514C;
+  --sub:#5A5751;
+  --muted:#65625B;
+  --line:#CEC9BF;
+  --line2:#DCD7CE;
+  --green:#46584D;
+  --green-dark:#2F3C34;
+  --green-soft:#DCE3DD;
+  --green-line:#AAB6AC;
+  --green-pale:#A8C6B4;
+  --stk:#3A3632;
+  --l2:#A9784A;
+  --l2-dark:#7A5A34;
+  --l2-soft:#EFE2CF;
+  --l2-line:#D2B48C;
+  --i2:#7A3F44;
+  --i2-soft:#EBDCDD;
+  --rec:#7A3F44;
+  --rec-soft:#F1E3E4;
+  --rec-line:#C29A9E;
+  --up:#B23A47;
+  --down:#3D6595;
+  --board:#2F3C34;
+  --chalk:#ECEAE3;
+  --chalk2:#B9C9BE;
+  --chalk-mark:#E6C98F;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:58px;overflow-x:hidden}
+html,body{max-width:100%}
+body{
+  margin:0;background:var(--surface-page);color:var(--ink);
+  font-family:"Pretendard Variable","Pretendard","SUIT","Noto Sans KR","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  line-height:1.58;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;
+  word-break:keep-all;line-break:strict;
+}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(38px + env(safe-area-inset-bottom,0px));width:100%;position:relative}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;letter-spacing:inherit}
+
+/* ── 상단바 ── */
+.topbar{position:sticky;top:0;z-index:50;margin:0 -16px;
+  background:rgba(236,234,229,.92);-webkit-backdrop-filter:saturate(150%) blur(12px);backdrop-filter:saturate(150%) blur(12px);
+  border-bottom:1px solid rgba(90,84,74,.13)}
+.tbin{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0)) 18px 9px}
+.tbin .brand{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.tbin .brand i{font-style:normal;color:var(--green)}
+.tbin .ep{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.prog{height:2px;background:rgba(90,84,74,.10)}
+.prog i{display:block;height:100%;width:0;background:var(--green);transition:width .1s linear}
+
+/* ── 표지 ── */
+.cover{margin:0 -16px;padding:18px 22px 15px;
+  background:linear-gradient(158deg,#36443B 0%,#2A362E 52%,#1F2721 100%);color:#EFEDE7}
+.cvkick{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.06em;
+  color:#BFD2C6;border:1px solid rgba(168,198,180,.34);border-radius:999px;padding:5px 12px}
+.cvkick b{color:#EFEDE7;font-weight:800}
+.cvdate{display:inline-block;margin-left:8px;font-size:11.5px;font-weight:700;color:#9FB2A6;letter-spacing:.02em;vertical-align:middle}
+.cvtitle{margin:11px 0 0;font-size:30px;line-height:1.22;font-weight:800;letter-spacing:-.05em;color:#F4F2ED}
+.cvtitle span{display:block;color:var(--green-pale)}
+.cvsub{margin:11px 0 0;font-size:14px;line-height:1.58;font-weight:600;color:#C6D2CA}
+.cvmotif{margin:12px 0 0}
+.cvmotif svg{display:block;width:100%;height:auto;max-width:460px}
+.cvidx{display:flex;gap:6px;margin:12px 0 0;flex-wrap:wrap}
+.cvidx a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;font-size:11.5px;font-weight:800;color:#D3DED7;background:rgba(255,255,255,.07);
+  border:1px solid rgba(168,198,180,.22);border-radius:999px}
+.cvidx a b{color:var(--green-pale);font-weight:800;margin-right:5px}
+.cvstat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:14px 0 0}
+.cvstat div{border:1px dashed rgba(236,234,227,.32);border-radius:10px;padding:8px 9px 9px;background:rgba(255,255,255,.04);min-width:0}
+.cvstat span{display:block;font-size:11px;line-height:1.35;font-weight:700;color:#9FB2A6;word-break:keep-all}
+.cvstat b{display:block;margin-top:3px;font-size:22px;line-height:1.1;font-weight:800;letter-spacing:-.04em;color:#F4F2ED;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cvstat .hot b{color:#E6C98F}
+.cvstat em{display:block;margin-top:2px;font-style:normal;font-size:11.5px;font-weight:800;color:#E6C98F;word-break:keep-all}
+.cvtime{margin:10px 0 0;font-size:11.5px;font-weight:700;color:#9FB2A6}
+
+/* ── 요약 ── */
+.tldr{margin:18px 0 0;background:#FFFDF7;border:2px solid var(--ink);border-radius:14px;box-shadow:4px 4px 0 rgba(46,46,44,.85);padding:13px 16px 15px}
+.tlh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.tlh b{font-size:21px;color:#B23A47;letter-spacing:0}
+.tlh span{font-size:12px;font-weight:800;color:var(--sub)}
+.pts{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
+.pts li{position:relative;padding-left:18px;font-size:15px;line-height:1.62;font-weight:600;color:var(--body);text-wrap:pretty}
+.pts li::before{content:"";position:absolute;left:4px;top:.74em;width:6px;height:6px;border-radius:50%;background:var(--green)}
+.pts li b{color:var(--ink);font-weight:800}
+.pts.sm{gap:6px;margin-top:10px}
+.pts.sm li{font-size:14px;line-height:1.6;padding-left:15px}
+.pts.sm li::before{left:3px;width:5px;height:5px}
+.tiphint{margin:10px 2px 0;font-size:12px;font-weight:700;color:var(--sub)}
+.tiphint::before{content:"";display:inline-block;width:22px;margin-right:6px;vertical-align:3px;border-bottom:1.5px dashed #8B867E}
+
+/* ── 챕터 ── */
+.ch{margin:22px 0 8px}
+.chtop{display:flex;align-items:center;gap:9px;margin-bottom:7px;flex-wrap:wrap}
+.chn{font-size:12px;font-weight:800;color:#EFEDE7;background:var(--ink);border-radius:4px;padding:3px 8px;letter-spacing:.04em}
+.chk{font-size:11.5px;font-weight:800;letter-spacing:.11em;color:var(--sub)}
+.cht{margin:0;font-size:24px;line-height:1.3;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.chrule{display:flex;height:3px;margin-top:11px;gap:2px}
+.chrule i{display:block;height:100%;flex:1}
+.chrule .r1{background:var(--stk)}
+.chrule .r2{background:var(--l2)}
+.chrule .r3{background:var(--i2)}
+.chrule .r4{background:var(--green)}
+
+/* ── 본문 ── */
+.p{margin:9px 0 0;font-size:15px;line-height:1.7;color:var(--body);font-weight:500;text-wrap:pretty}
+.p b{color:var(--ink);font-weight:800}
+.p.lead{font-size:16px;color:var(--ink2);font-weight:600}
+.hd{margin:20px 0 0;font-size:17px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.44;text-wrap:balance}
+.hd small{display:block;font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin-bottom:3px}
+.q{margin:14px 0 0;font-size:19px;line-height:1.45;font-weight:800;letter-spacing:-.04em;color:var(--ink);text-wrap:balance}
+.ilink{color:var(--ink);font-weight:700;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px;text-decoration-color:#A9784A;padding:4px 0}
+.ul{font-weight:800;color:var(--ink);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='8' viewBox='0 0 60 8'%3E%3Cpath d='M0 4.6 Q15 2.6 30 4.4 T60 4.2' fill='none' stroke='%23B23A47' stroke-opacity='.72' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:repeat-x;background-position:0 100%;background-size:60px 8px;padding-bottom:3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.note{position:relative;margin:8px 2px 0;padding-left:16px;font-size:13px;line-height:1.6;font-weight:600;color:var(--sub);text-wrap:pretty}
+.note::before{content:"※";position:absolute;left:0;top:0;color:var(--muted)}
+
+/* ── 배지 ── */
+.vb{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;letter-spacing:.03em;
+  color:#4A4438;background:var(--l2-soft);border:1px solid var(--l2-line);border-radius:999px;padding:3px 9px;white-space:nowrap}
+
+/* ── 한 문장 답 ── */
+.ans{margin:14px -16px 0;padding:14px 22px;background:var(--green);color:#EFEDE7;position:relative;overflow:hidden}
+.ans:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green-pale)}
+.ans .ak{font-size:12px;font-weight:800;letter-spacing:.14em;color:#C2D2C7;margin-bottom:8px}
+.ans .av{font-size:19px;line-height:1.46;font-weight:800;letter-spacing:-.04em;color:#F4F2ED;text-wrap:balance}
+.ans .aw{margin:9px 0 0;padding-top:9px;border-top:1px solid rgba(168,198,180,.24);font-size:13.5px;line-height:1.62;font-weight:600;color:#CBD8CF;text-wrap:pretty}
+
+/* ── 문제 카드 ── */
+.pop{margin:14px 0 0;background:var(--surface-inner);border:1.5px solid var(--ink);border-radius:14px;overflow:hidden}
+.poph{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;background:var(--ink);color:#EDEAE4}
+.poph b{font-size:12px;font-weight:800;letter-spacing:.06em}
+.poph .vb{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#D9D4CA}
+.popb{padding:13px 14px 14px}
+.popq{margin:0;font-size:15.5px;line-height:1.52;font-weight:800;letter-spacing:-.03em;color:var(--ink);text-wrap:balance}
+.opts{display:grid;gap:6px;margin:12px 0 0;grid-template-columns:1fr}
+.opt{appearance:none;-webkit-appearance:none;border:1.5px solid var(--line);background:#F7F6F2;border-radius:10px;
+  font-weight:800;color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums;transition:background .15s,border-color .15s;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  white-space:normal;text-align:left;padding:10px 13px;font-size:14.5px;line-height:1.35;letter-spacing:-.02em;word-break:keep-all}
+.opt:hover{border-color:var(--sub)}
+.opt.ok{background:var(--green);border-color:var(--green);color:#F4F2ED}
+.opt.no{background:#E3E0D9;border-color:#E3E0D9;color:var(--muted);text-decoration:line-through}
+.opt.ok::before{content:"✓ "}
+.opt.no::before{content:"✗ "}
+.opt[aria-disabled="true"]{cursor:default}
+.popans{margin:12px 0 0;padding-top:11px;border-top:1px dashed var(--line)}
+.popans[hidden]{display:none}
+.verdict{display:inline-block;font-size:12px;font-weight:800;color:#F4F2ED;background:var(--green);border-radius:6px;padding:3px 9px;margin-bottom:8px;white-space:pre-line}
+.verdict:focus{outline:none}
+.verdict:focus-visible{outline:2px solid #2E2E2C;outline-offset:2px}
+.popnote{margin:9px 0 0;font-size:13.5px;line-height:1.6;font-weight:600;color:var(--body);text-wrap:pretty}
+.popnote b{color:var(--ink);font-weight:800}
+.qshare{appearance:none;-webkit-appearance:none;margin:10px 0 0;width:100%;min-height:44px;border:1.5px dashed var(--line);background:transparent;border-radius:10px;padding:9px 10px;
+  font-size:13px;font-weight:800;color:var(--ink2);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.qshare:hover{border-color:var(--sub)}
+
+/* ── 타임라인 ── */
+.tline{list-style:none;margin:12px 0 0;padding:0}
+.tline li{display:grid;grid-template-columns:44px 1fr;gap:10px}
+.tline time{padding-top:2px;font-size:14px;font-weight:800;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tline p{position:relative;margin:0;padding:0 0 13px 16px;border-left:2px solid #CFC9BE;font-size:15px;line-height:1.6;font-weight:600;color:var(--body)}
+.tline li:last-child p{border-left-color:transparent;padding-bottom:0}
+.tline p::before{content:"";position:absolute;left:-7px;top:.42em;width:12px;height:12px;border-radius:50%;background:#FBF8F1;border:2px solid var(--green);box-sizing:border-box}
+.tline li.hot time{color:#B23A47}
+.tline li.hot p{font-weight:800;color:var(--ink)}
+.tline li.hot p::before{background:#B23A47;border-color:#B23A47}
+.tline.wide li{grid-template-columns:58px 1fr}
+
+/* ── 판서 ── */
+.board{margin:14px -16px 0;padding:15px 22px 16px;background:var(--board);color:var(--chalk);position:relative;overflow:hidden}
+.board:after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 20% 0%,rgba(255,255,255,.06),transparent 55%),radial-gradient(ellipse at 90% 100%,rgba(255,255,255,.04),transparent 50%)}
+.bdk{position:relative;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--chalk2);margin-bottom:9px}
+.bdk:before{content:"";width:18px;height:2px;background:var(--chalk-mark);border-radius:2px}
+.bdt{position:relative;margin:0;font-size:20px;line-height:1.42;font-weight:800;letter-spacing:-.04em;color:#F6F4EE;text-wrap:balance}
+.board .bdt.hand{font-family:'SnowHand','Gaegu','Nanum Pen Script',cursive;font-size:26px;line-height:1.34;letter-spacing:0;font-weight:700}
+.btab{position:relative;display:grid;margin:12px 0 0;border:1px solid rgba(236,234,227,.22);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums}
+.btab span{padding:8px 8px;font-size:12.5px;font-weight:800;text-align:left;border-bottom:1px solid rgba(236,234,227,.12);color:#EDEBE4;word-break:keep-all;line-height:1.45}
+.btab span.h{font-size:10.5px;color:var(--chalk2);background:rgba(255,255,255,.05);letter-spacing:.02em}
+.btab span.l{font-size:12.3px}
+.btab span.e{border-bottom:0}
+.btab .hi{color:var(--chalk-mark)}
+.btab .term{padding:6px 3px;border-bottom:0;font-size:inherit;font-weight:inherit;color:inherit}
+.btab .term .tip{padding:9px 11px;border-bottom:0;font-size:12px;font-weight:600;line-height:1.52;color:#F2F0EB;text-align:left}
+
+/* ── 표 ── */
+.dcmp{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:11px 12px 12px}
+.figh{display:flex;align-items:baseline;justify-content:space-between;gap:3px 10px;flex-wrap:wrap;margin-bottom:9px}
+.figh b{font-size:13.5px;font-weight:800;color:var(--ink)}
+.figh span{font-size:12px;font-weight:700;color:var(--sub)}
+.calc{display:grid;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums}
+.calc span{padding:7px 9px;font-size:13px;font-weight:700;color:var(--body);background:#F7F6F2;border-bottom:1px solid var(--line2);text-align:right;word-break:keep-all;line-height:1.4}
+.calc span.h{font-size:12px;font-weight:800;color:var(--muted);background:var(--surface-detail)}
+.calc span.l{text-align:left;font-weight:800;color:var(--ink);font-size:12.5px}
+.calc span.e{border-bottom:0}
+.calc span.hot{color:#B23A47;font-weight:800}
+.calc span small{display:block;margin-top:1px;font-size:11px;font-weight:700;color:var(--sub);white-space:normal}
+
+/* ── 시뮬레이터 ── */
+.sim{margin:14px -16px 0;padding:14px 16px 15px;background:var(--surface-band);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)}
+.simhd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:0 4px}
+.simhd b{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.simhd span{font-size:11.5px;font-weight:800;color:var(--sub)}
+.simp{margin:5px 4px 0;font-size:13.5px;line-height:1.6;font-weight:600;color:var(--body);text-wrap:pretty}
+.simp b{color:var(--ink);font-weight:800}
+.chip{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:var(--surface-inner);border-radius:999px;padding:6px 11px;
+  font-size:12px;font-weight:800;color:var(--ink2);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#F4F2ED}
+.ddlb{margin:12px 4px 0;font-size:12px;font-weight:800;color:var(--sub)}
+.iflow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:12px 0 0}
+.df{background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;padding:7px 4px 8px;text-align:center;transition:background .15s,border-color .15s;min-width:0}
+.df i{display:block;font-style:normal;font-size:11px;font-weight:800;color:var(--sub);word-break:keep-all}
+.df b{display:block;margin-top:3px;font-size:15px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;white-space:normal;word-break:keep-all;line-height:1.25}
+.df b small{display:block;margin-top:2px;font-size:11px;font-weight:800;color:var(--sub);word-break:keep-all}
+.df.ok{background:var(--green-soft);border-color:var(--green-line)}
+.df.ok b{color:var(--green-dark)}
+.df.no{background:var(--rec-soft);border-color:var(--rec-line)}
+.df.no b{color:var(--rec)}
+.df.ok b small,.df.no b small{color:inherit;opacity:.9}
+.simmsg{margin:0;padding:10px 12px;background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;font-size:13.5px;line-height:1.6;font-weight:700;color:var(--ink);min-height:6.4em;text-wrap:pretty}
+.simfoot{margin:8px 4px 0;font-size:12px;line-height:1.5;font-weight:600;color:var(--muted)}
+
+/* ── 접힘 ── */
+.foldwrap{margin:14px 0 0}
+details.fold{border:1px solid var(--line);border-radius:12px;background:var(--surface-detail);margin:0 0 8px;overflow:hidden}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px;
+  padding:11px 15px;font-size:13px;font-weight:800;color:var(--ink)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary:after{content:"+";font-size:18px;font-weight:800;color:var(--green);line-height:.9}
+details.fold[open]>summary:after{content:"−"}
+details.fold .fb{padding:0 15px 14px}
+.foldwrap.more{margin-top:16px}
+.foldwrap.more summary em{font-style:normal;display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.06em;color:var(--green);border:1px solid var(--green-line);border-radius:999px;padding:1px 7px;margin-right:7px;vertical-align:1px}
+.fb p{margin:0 0 8px;font-size:13.5px;line-height:1.62;color:var(--body);font-weight:600}
+.fb p:last-child{margin-bottom:0}
+.fb p b{color:var(--ink);font-weight:800}
+.gloss{display:grid;grid-template-columns:100px 1fr;gap:7px 11px;margin:2px 0 0;font-size:12.5px}
+.gloss dt{font-weight:800;color:#4B4740}
+.gloss dd{margin:0;color:var(--body);line-height:1.52}
+.src{margin:0;padding-left:26px;display:grid;gap:5px}
+.src li{font-size:12px;line-height:1.52;color:var(--body);font-weight:600}
+.src li b{color:var(--ink)}
+.src a{color:var(--ink2);font-weight:700;text-decoration:underline;text-decoration-color:#A9A49B;text-underline-offset:3px;padding:2px 0;word-break:keep-all}
+.disc{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;padding:12px 8px 0;font-weight:500}
+.foot{text-align:center;font-size:11.5px;color:var(--sub);padding:9px 0 4px;font-weight:800;letter-spacing:-.01em}
+
+/* ── 툴팁 ── */
+.term{display:inline;padding:6px 3px;margin:0 -3px;border-bottom:0;line-height:inherit;white-space:nowrap;cursor:pointer;position:relative;
+  -webkit-tap-highlight-color:transparent;font-weight:800;color:var(--ink);
+  text-decoration:underline dashed #8B867E;text-decoration-thickness:1.5px;text-underline-offset:4px;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;-webkit-user-select:text;user-select:text;
+  touch-action:manipulation;-webkit-touch-callout:none}
+.term .tip{position:fixed;left:12px;top:0;min-width:160px;max-width:min(248px,calc(100vw - 28px));
+  background:#33322F;color:#F2F0EB;font-size:12px;font-weight:600;line-height:1.52;padding:9px 11px;border-radius:9px;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);z-index:60;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease;white-space:normal;text-align:left;text-decoration:none}
+.term .tip:after{content:"";position:absolute;top:100%;left:var(--ax,50%);transform:translateX(-50%);border:6px solid transparent;border-top-color:#33322F}
+.term .tip.below:after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#33322F}
+.term.open .tip{opacity:1;visibility:visible;pointer-events:auto}
+.board .term,.ans .term{color:inherit;text-decoration-color:rgba(236,234,227,.55)}
+@media(hover:hover) and (pointer:fine){
+.term{cursor:help}
+.term:hover{text-decoration-color:var(--ink)}
+.board .term:hover{text-decoration-color:#F4F2ED}}
+
+/* ── 손그림 ── */
+.sdefs{position:absolute;width:0;height:0;overflow:hidden}
+.hand{font-family:'SnowHand','Gaegu','Nanum Pen Script',cursive;font-weight:700;letter-spacing:-.02em}
+.doodle{margin:14px 0 0;padding:8px 6px 4px;background:var(--surface-inner);border:1px solid var(--line);border-radius:14px}
+.doodle svg{display:block;width:100%;height:auto;max-width:460px;margin:0 auto}
+.doodle figcaption{margin:2px 8px 6px;font-size:12px;line-height:1.5;font-weight:700;color:var(--muted);text-align:center}
+
+/* ── 오답노트 ── */
+.trapwrap{margin:16px 0 0;border:1.5px solid var(--i2);border-radius:12px;overflow:hidden}
+.traphd{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;background:var(--i2);color:#F6EEEF}
+.traphd b{font-size:12px;font-weight:800;letter-spacing:.06em}
+.traphd i{font-style:normal;font-size:11px;font-weight:700;color:#E5C9CC}
+.trap{display:grid;gap:1.5px;background:var(--line)}
+.trap .ti{padding:10px 13px;background:var(--surface-inner)}
+.trap .tk{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.trap .tx{margin-top:3px;font-size:14px;font-weight:800;color:var(--i2);line-height:1.48;letter-spacing:-.02em}
+.trap .tx span{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='9' viewBox='0 0 48 9'%3E%3Cpath d='M0 5.2 Q6 2.4 12 4.8 T24 4.6 T36 5.4 T48 4.6' fill='none' stroke='%23B23A47' stroke-opacity='.6' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:repeat-x;background-position:0 60%;background-size:48px 9px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.trap .to{margin-top:5px;font-size:13.5px;font-weight:600;color:var(--body);line-height:1.56;text-wrap:pretty}
+.trap .to b{color:var(--ink);font-weight:800}
+
+/* ── 엔딩 ── */
+.final{margin:16px -16px 0;padding:18px 22px;background:linear-gradient(155deg,#36443B 0%,#232C26 100%);color:#EFEDE7;position:relative;overflow:hidden}
+.final:before{content:"";position:absolute;right:-46px;bottom:-58px;width:160px;height:160px;border-radius:50%;border:1px solid rgba(168,198,180,.18)}
+.final .fk{position:relative;font-size:12px;font-weight:800;letter-spacing:.13em;color:#A0B4A6;margin-bottom:10px}
+.final p{position:relative;margin:0;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.final .f1{font-size:19px;line-height:1.5;text-wrap:balance}
+.final .f1 b{color:var(--green-pale);background:linear-gradient(transparent 58%,rgba(230,201,143,.36) 58%,rgba(230,201,143,.36) 94%,transparent 94%);padding:0 2px}
+.final .f2{margin-top:11px;padding-top:10px;border-top:1px solid rgba(168,198,180,.22);font-size:15px;line-height:1.58;color:#DCE6DE;text-wrap:pretty}
+
+/* ── 공유 ── */
+.sharebox{margin:16px 0 0;padding:14px 14px 13px;background:var(--surface-inner);border:1px solid var(--line);border-radius:14px;text-align:center}
+.shq{margin:0;font-size:14.5px;line-height:1.5;font-weight:800;color:var(--ink);letter-spacing:-.03em;text-wrap:balance}
+.shbtns{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px;margin:11px 0 0}
+.shb{appearance:none;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#F7F6F2;border-radius:10px;
+  padding:10px 4px;min-height:48px;font-size:13px;font-weight:800;color:var(--ink);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;text-align:center;white-space:nowrap}
+.shb.main{background:var(--green);border-color:var(--green);color:#F4F2ED}
+.shmsg{margin:7px 0 0;min-height:1em;font-size:12px;font-weight:700;color:var(--green)}
+
+/* ── 이어 읽기 ── */
+.more7{margin:12px 0 0;display:grid;gap:6px}
+.m7h{font-size:12px;font-weight:800;letter-spacing:.12em;color:var(--muted);margin:2px 2px 2px}
+.m7{display:block;background:var(--surface-inner);border:1px solid var(--line);border-radius:11px;padding:10px 36px 10px 13px;position:relative}
+.m7:after{content:"→";position:absolute;right:13px;top:50%;transform:translateY(-50%);font-weight:800;color:var(--muted)}
+.m7 i{font-style:normal;display:inline-block;font-size:12px;font-weight:800;color:var(--green);margin-right:6px}
+.m7 b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.m7 span{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--sub)}
+.m7.all{background:var(--surface-detail)}
+.m7.cta{background:var(--green);border-color:var(--green)}
+.m7.cta b{color:#F4F2ED}
+.m7.cta span{color:#C6D2CA}
+.m7.cta:after{color:#C6D2CA}
+
+/* ── 다음 편 ── */
+.next{margin:16px -16px 0;padding:20px 22px;background:linear-gradient(150deg,#454F5C 0%,#2B323C 100%);color:#E9EBEE;position:relative;overflow:hidden}
+.next:before{content:"";position:absolute;right:-40px;bottom:-52px;width:150px;height:150px;border-radius:50%;border:1px solid rgba(180,190,202,.18)}
+.next .nh{position:relative;font-size:12px;font-weight:800;letter-spacing:.12em;color:#C3CAD3;margin-bottom:10px}
+.next p{position:relative;margin:0;font-size:16px;line-height:1.56;font-weight:800;letter-spacing:-.03em;color:#EDEFF2;text-wrap:pretty}
+.next .nt{position:relative;margin-top:14px;padding-top:12px;border-top:1px solid rgba(180,190,202,.22);font-size:12.5px;font-weight:800;color:#B9C1CB}
+.next .nt b{color:#EDEFF2;font-weight:800;margin-right:6px}
+.next.nlink{display:block;text-decoration:none;color:inherit}
+.next.nlink .nt::after{content:" →"}
+:focus-visible{outline:2px solid #2E2E2C;outline-offset:2px}
+.cover :focus-visible,.shb.main:focus-visible,.m7.cta:focus-visible{outline-color:#F4F2ED}
+@media(max-width:360px){
+.cvtitle{font-size:27px}
+.cvstat b{font-size:19px}
+.cvstat div{padding:7px 6px 8px}
+.q{font-size:17px}
+.ans .av{font-size:17.5px}
+.final .f1{font-size:17px}
+.cht{font-size:21px}
+.btab span{padding:7px 6px;font-size:11.8px}
+.gloss{grid-template-columns:86px 1fr}
+}
+
+/* ── 데스크톱 ── */
+@media(min-width:768px){
+.app{max-width:770px;padding-left:28px;padding-right:28px}
+.topbar{margin:0 -28px}
+.cover{margin:0 -28px;padding:44px 40px 34px}
+.cvtitle{font-size:44px}
+.cvsub{font-size:15px;max-width:30em}
+.cvstat b{font-size:30px}
+.cvstat span{font-size:12px}
+.ch{margin-top:48px}
+.cht{font-size:29px}
+.q{font-size:24px}
+.p{font-size:16px}
+.pts li{font-size:16px}
+.tline p{font-size:16px}
+.ans,.board,.sim,.final,.next{margin-left:-28px;margin-right:-28px}
+.ans{padding:26px 40px}
+.ans .av{font-size:23px}
+.board{padding:26px 40px}
+.bdt{font-size:24px}
+.board .bdt.hand{font-size:30px}
+.sim{padding:24px 34px}
+.final{padding:32px 40px}
+.final .f1{font-size:25px}
+.final .f2{font-size:18px}
+.next{padding:28px 40px}
+.trap{grid-template-columns:1fr 1fr 1fr}
+.more7{grid-template-columns:1fr 1fr 1fr}
+.m7.all{grid-column:span 1}
+.m7.cta{grid-column:span 2}
+}
+@media(prefers-reduced-motion:reduce){
+html{scroll-behavior:auto}
+*{transition:none!important;animation:none!important}}
+
+/* 18편 읽기 개선: 줄 카드 */
+.rows{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:2px 14px}
+.rows .rw{display:grid;grid-template-columns:92px 1fr;gap:12px;padding:11px 0;border-top:1px dashed var(--line);align-items:baseline}
+.rows .rw:first-child{border-top:0}
+.rows .rk{font-size:14px;font-weight:800;color:var(--ink);line-height:1.4;font-variant-numeric:tabular-nums;word-break:keep-all}
+.rows .rk small{display:block;margin-top:1px;font-size:12px;font-weight:700;color:var(--sub)}
+.rows .rk .term{white-space:normal}
+.rows .rv{font-size:14.5px;line-height:1.62;font-weight:600;color:var(--body);text-wrap:pretty}
+.rows .rv b{color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums}
+.rows .rw.hot .rk{color:#B23A47}
+.rows .rw.hot .rk .term{color:#B23A47}
+.rows.sm{margin:9px 0 2px;padding:0 12px}
+.rows.sm .rw{padding:7px 0;grid-template-columns:96px 1fr}
+.rows.sm .rk,.rows.sm .rv{font-size:13.5px}
+@media(min-width:768px){
+.rows{padding:4px 18px}
+.rows .rw{grid-template-columns:118px 1fr;gap:16px}
+.rows .rv{font-size:15.5px}
+.rows .rk{font-size:15px}}
+@media(max-width:360px){
+.rows{padding:2px 11px}
+.rows .rw{grid-template-columns:80px 1fr;gap:9px}
+.rows .rv{font-size:14px}
+.rows.sm .rw{grid-template-columns:88px 1fr}}
+
+/* ═════ 20편 추가 ═════ */
+/* 표지 글씨 */
+.cvstat span{font-size:11.5px}
+.cvstat em{font-size:12px}
+/* 심화 접기 안 타임라인 */
+.fb .tline{margin:4px 0 4px}
+.fb .tline p{margin:0;font-size:13.5px;line-height:1.58}
+.fb .tline li:last-child p{padding-bottom:0}
+.fb .tline.wide li{grid-template-columns:68px 1fr}
+.fb .tline time{font-size:13px}
+/* 계산기 */
+.seg{display:grid;gap:6px;margin:6px 0 0}
+.seg.s3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.seg.s4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.seg .chip{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:46px;border-radius:10px;padding:5px 3px;
+  font-size:13.5px;line-height:1.25;font-variant-numeric:tabular-nums;color:var(--ink);word-break:keep-all;text-align:center}
+.seg .chip small{display:block;margin-top:2px;font-size:11px;font-weight:700;color:var(--sub)}
+.seg .chip.on{color:#F4F2ED}
+.seg .chip.on small{color:#CFCAC0}
+@media(max-width:360px){
+.seg .chip{font-size:12.5px;padding:5px 2px}
+.seg .chip small{font-size:10.5px}
+}
+
+/* ═════ 데이터 길잡이 2편 추가 ═════ */
+.dcmp{margin-top:14px}
+@media(min-width:768px){
+.trap{grid-template-columns:1fr 1fr}}
+.rlab{margin:16px 2px 0;font-size:12.5px;font-weight:800;letter-spacing:.02em;color:var(--green)}
+.rlab + .rows{margin-top:6px}
+.hand{font-family:'SnowHand','Gaegu','Nanum Pen Script',cursive}
+
+/* 붙임 쪽지 */
+.memo{position:relative;margin:16px 6px 0;padding:13px 14px 12px;background:#FBF3D5;border-radius:4px;box-shadow:0 9px 14px -11px rgba(46,46,44,.45),0 1px 0 rgba(46,46,44,.05);transform:rotate(-.4deg)}
+.memo::before{content:"";position:absolute;top:-8px;left:50%;width:62px;height:16px;background:rgba(201,186,150,.5);transform:translateX(-50%) rotate(-2.5deg);border-radius:2px}
+.memo b{display:block;font-family:'SnowHand','Gaegu','Nanum Pen Script',cursive;font-size:18px;font-weight:700;color:#B23A47;line-height:1.3}
+.memo p{margin:3px 0 0;font-size:13.5px;line-height:1.55;font-weight:700;color:var(--ink2);text-wrap:pretty}
+
+/* 지금만의 규칙 */
+.tmpbox{position:relative;margin:22px 0 0;padding:16px 13px 13px;border:1.5px dashed #B23A47;border-radius:14px;background:#FAF2F2}
+.tmpbox > .tmk{position:absolute;top:-11px;left:12px;padding:2px 9px;border-radius:999px;background:#B23A47;color:#FBF3F3;font-size:11.5px;font-weight:800;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.tmpbox > .tmt{margin:2px 0 0;font-size:17px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.42;text-wrap:balance}
+.tmpbox .p{margin-top:8px}
+.tmpbox .rows{background:#FFFBFA;border-color:#E1C4C7}
+.tmpbox .rows .rw{border-top-color:#E1C4C7}
+.tmpbox .doodle{background:#FFFBFA;border-color:#E1C4C7}
+
+/* 같은 담보비율, 다른 결과 */
+#ksim .kg{position:relative;height:30px;margin:14px 4px 22px;background:#F7F6F2;border:1px solid var(--line);border-radius:8px}
+#ksim .kg i{display:block;height:100%;width:0;border-radius:7px 0 0 7px;background:var(--green-pale);transition:width .22s}
+#ksim .kg.no i{background:#E2B3B8}
+#ksim .kg em{position:absolute;top:-6px;bottom:-6px;width:0;border-left:2.5px dashed #B23A47;transition:left .22s}
+#ksim .kg em::after{content:attr(data-l);position:absolute;top:100%;left:0;transform:translateX(-50%);margin-top:1px;font-style:normal;font-size:11px;font-weight:800;color:#B23A47;white-space:nowrap;font-variant-numeric:tabular-nums}
+#ksim .kg span{position:absolute;top:50%;right:8px;transform:translateY(-50%);font-size:12.5px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+#ksim .simmsg{min-height:5.6em;margin-top:8px}
+#ksim .df b{font-size:14.5px}
+@media(max-width:360px){
+#ksim .df b{font-size:13.5px}}
+
+/* 내 증권사 카드 */
+.pick{margin:12px 0 0}
+.pchips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.pchips .chip{min-height:40px;border-radius:10px;padding:5px 2px;font-size:13px;line-height:1.2;word-break:keep-all;text-align:center}
+.pchips .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#F4F2ED}
+.pick:not(.js) .pchips{display:none}
+.pick.js:not(.all) .bcard{display:none}
+.pick.js:not(.all) .bcard.on{display:block}
+.bcards{display:grid;gap:12px;margin-top:10px}
+.bcard{background:var(--surface-inner);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.bhd{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 13px;background:var(--green);color:#F4F2ED}
+.bhd b{font-size:16px;font-weight:800;letter-spacing:-.03em}
+.bhd span{flex:none;padding:2px 8px;border-radius:999px;border:1px solid rgba(236,234,227,.45);font-size:11px;font-weight:800;color:#DCE6DF;white-space:nowrap}
+.bdl{margin:0;padding:2px 13px}
+.bdl > div{display:grid;grid-template-columns:86px 1fr;gap:10px;padding:9px 0;border-top:1px dashed var(--line);align-items:baseline}
+.bdl > div:first-child{border-top:0}
+.bdl dt{font-size:13px;font-weight:800;color:var(--ink);line-height:1.4;word-break:keep-all}
+.bdl dd{margin:0;font-size:14px;line-height:1.58;font-weight:600;color:var(--body);text-wrap:pretty}
+.bdl dd b{color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums}
+.bdl dd.na{color:var(--muted)}
+.bnow{margin:2px 10px 0;padding:9px 11px 10px;border:1.5px dashed #B23A47;border-radius:10px;background:#FAF2F2}
+.bnow i{display:inline-block;padding:1px 8px;border-radius:999px;background:#B23A47;color:#FBF3F3;font-style:normal;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums}
+.bnow p{margin:6px 0 0;font-size:13.8px;line-height:1.58;font-weight:600;color:var(--body);text-wrap:pretty}
+.bnow p b{color:var(--ink);font-weight:800}
+.bsrc{margin:0;padding:9px 13px 11px;font-size:12px;line-height:1.6;font-weight:700;color:var(--muted)}
+.bsrc a{color:var(--green);text-decoration:underline;text-underline-offset:2px}
+@media(min-width:768px){
+.pchips{grid-template-columns:repeat(8,minmax(0,1fr))}
+.pick.all .bcards,.pick:not(.js) .bcards{grid-template-columns:1fr 1fr;align-items:start}
+.bdl > div{grid-template-columns:104px 1fr}
+.bdl dd{font-size:14.5px}
+}
+
+/* 체크리스트 */
+.cklist{margin:24px 4px 0;background:#FBF3D5;border-radius:6px;padding:13px 12px 10px;box-shadow:0 9px 14px -11px rgba(46,46,44,.45),0 1px 0 rgba(46,46,44,.05);position:relative}
+.cklist::before{content:"";position:absolute;top:-8px;left:50%;width:72px;height:16px;background:rgba(201,186,150,.5);transform:translateX(-50%) rotate(-2deg);border-radius:2px}
+.ckh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0 2px 6px}
+.ckh b{font-family:'SnowHand','Gaegu','Nanum Pen Script',cursive;font-size:20px;font-weight:700;color:var(--ink);line-height:1.2}
+.ckh span{font-size:13px;font-weight:800;color:#B23A47;font-variant-numeric:tabular-nums}
+.ckb{appearance:none;-webkit-appearance:none;display:grid;grid-template-columns:22px 1fr;gap:9px;align-items:start;width:100%;margin:0;padding:8px 4px;border:0;border-top:1px dashed rgba(122,90,52,.35);background:none;text-align:left;font:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.ckb::before{content:"";width:18px;height:18px;margin-top:2px;border:2px solid var(--ink2);border-radius:4px;background:#FFFDF4;box-sizing:border-box}
+.ckb[aria-pressed="true"]::before{background:var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.2 8.4l3 3 6.4-6.6' fill='none' stroke='%23F4F2ED' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat;border-color:var(--green)}
+.ckb span{font-size:14px;line-height:1.5;font-weight:700;color:var(--ink2);text-wrap:pretty}
+.ckb span b{color:var(--ink);font-weight:800}
+.ckb[aria-pressed="true"] span{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(70,88,77,.5)}
+.ckdone{margin:4px 2px 0;min-height:1.5em;font-size:12.5px;font-weight:800;color:var(--green)}
+.rows .rk b.hand{display:inline-block;min-width:16px;margin-right:3px;font-size:18px;font-weight:700;color:#B23A47;line-height:1;vertical-align:-1px}
+.cvjump{display:block;margin:10px 0 0;padding:10px 12px;border:1px dashed rgba(236,234,227,.55);border-radius:10px;color:#F2E3C4;font-size:13.5px;font-weight:800;text-align:center;text-decoration:none;letter-spacing:-.01em}
+.cvjump:hover{background:rgba(236,234,227,.08)}
+#cards{scroll-margin-top:64px}
+
+/* English-only typographic adjustments; original illustrations, panels, and geometry preserved. */
+html[lang="en"] body{font-family:Inter,"Segoe UI",Arial,"Liberation Sans",sans-serif;letter-spacing:0;word-break:normal;line-break:auto}
+html[lang="en"] .hand,html[lang="en"] .board .bdt.hand{font-family:"Comic Sans MS","Comic Neue","Segoe Print","Liberation Sans",cursive;letter-spacing:0}
+html[lang="en"] .cvtitle,html[lang="en"] .cht,html[lang="en"] .q{letter-spacing:-.028em}
+html[lang="en"] .cvstat b{font-size:clamp(15px,4vw,22px);letter-spacing:-.028em;white-space:normal;overflow-wrap:normal}
+html[lang="en"] .cvstat span{font-size:10.5px}
+html[lang="en"] .cvstat em{font-size:10.5px}
+html[lang="en"] .rows .rk,html[lang="en"] .rows .rv{overflow-wrap:break-word}
+html[lang="en"] .tline time{font-size:12.5px}
+html[lang="en"] .tline li{grid-template-columns:58px 1fr}
+html[lang="en"] .opt{overflow-wrap:break-word}
+@media(max-width:360px){
+html[lang="en"] .cvstat div{padding:7px 5px}
+html[lang="en"] .cvstat b{font-size:15px}
+html[lang="en"] .cvstat span{font-size:9.5px}
+html[lang="en"] .cvstat em{font-size:9.5px}
+html[lang="en"] .shb{font-size:12px}}
+@media(min-width:768px){
+html[lang="en"] .cvstat b{font-size:28px}
+html[lang="en"] .cvstat span{font-size:12px}}
+html[lang="en"] [lang="ko"]{word-break:keep-all}
+html[lang="en"] .tline.wide li{grid-template-columns:76px 1fr}
+html[lang="en"] .tline.wide time{font-size:12px;white-space:nowrap}
+html[lang="en"] .rows .rw{grid-template-columns:96px 1fr}
+@media(min-width:768px){
+html[lang="en"] .rows .rw{grid-template-columns:128px 1fr}}
+@media(max-width:360px){
+html[lang="en"] .rows .rw{grid-template-columns:84px 1fr}}
+html[lang="en"] .memo b,html[lang="en"] .ckh b{font-family:"Comic Sans MS","Comic Neue","Segoe Print","Liberation Sans",cursive;font-size:16px}
+html[lang="en"] .pchips .chip{font-size:12px}
+html[lang="en"] .bhd{flex-wrap:wrap;gap:4px 8px}
+html[lang="en"] .bhd b{font-size:15px}
+html[lang="en"] .bdl > div{grid-template-columns:82px 1fr}
+html[lang="en"] .bdl dt,html[lang="en"] .bdl dd,html[lang="en"] .bnow p{word-break:normal;overflow-wrap:break-word}
+html[lang="en"] .board .bdt.hand{font-size:21px}
+html[lang="en"] .seg .chip{font-size:12px}
+html[lang="en"] .seg .chip small{font-size:10px}
+html[lang="en"] #ksim .df b{font-size:13.5px}
+html[lang="en"] #ksim .kg em::after{font-size:10.5px}
+html[lang="en"] .tmpbox > .tmt{font-size:16px}
+html[lang="en"] .rows .rk b.hand{font-size:15px}
+@media(min-width:768px){
+html[lang="en"] .bdl > div{grid-template-columns:110px 1fr}
+html[lang="en"] .board .bdt.hand{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="app">
+<span id="top"></span>
+<svg class="sdefs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="rough" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="chalk" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="11" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1 L8 5 L1 9" fill="none" stroke="#B23A47" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>
+</svg>
+<header class="topbar">
+  <div class="tbin">
+    <span class="brand"><i>Data Guide</i> · Part 2</span>
+    <span class="ep" aria-hidden="true">02</span>
+  </div>
+  <div class="prog"><i id="pg"></i></div>
+</header>
+
+<main>
+<!-- ══════ Cover ══════ -->
+<div class="cover">
+  <span class="cvkick">Finding Market Data <b>02</b></span>
+  <time class="cvdate" datetime="2026-11-25">Nov.&nbsp;25, 2026 · Market Basics</time>
+  <h1 class="cvtitle">What Is My Broker&#39;s Forced-Sale Line, <span>and When Does It Hit?</span></h1>
+  <p class="cvsub">Three accounts close with the same 135% collateral ratio.<br/>One carries on as usual.<br/>Two get a notice to add collateral.<br/>The number is the same. The line is not.</p>
+  <div class="cvstat">
+    <div><span>Usual line</span><b>140%</b><em>up to 160% by stock</em></div>
+    <div class="hot"><span>Usual sale day</span><b>2 days on</b><em>business days, at the open</em></div>
+    <div><span>Morning cutoff</span><b>Varies</b><em>check the day before</em></div>
+  </div>
+  <div class="cvmotif">
+    <svg viewBox="0 0 320 150" role="img" aria-label="Chalkboard sketch. Three accounts stand as bars, each closing at a 135% collateral ratio. The first has a 130% line and passes. The second has a 140% line and falls short. The third holds a stock with a 160% line and falls short. A character on the right asks: the same 135%?">
+      <text class="hand" x="6" y="15" font-size="11" fill="rgba(236,234,227,.72)">All three close at 135%</text>
+      <g filter="url(#chalk)" stroke-linejoin="round">
+        <rect x="22" y="82.5" width="48" height="45.5" rx="3" fill="rgba(168,198,180,.30)" stroke="rgba(236,234,227,.85)" stroke-width="1.4"/>
+        <rect x="98" y="82.5" width="48" height="45.5" rx="3" fill="rgba(233,169,174,.20)" stroke="rgba(236,234,227,.85)" stroke-width="1.4"/>
+        <rect x="174" y="82.5" width="48" height="45.5" rx="3" fill="rgba(233,169,174,.20)" stroke="rgba(236,234,227,.85)" stroke-width="1.4"/>
+        <path d="M12 128 H232" fill="none" stroke="rgba(236,234,227,.6)" stroke-width="1.3"/>
+      </g>
+      <path d="M16 89 H76 M92 76 H152 M168 50 H228" fill="none" stroke="#E9A9AE" stroke-width="1.7" stroke-dasharray="4 3"/>
+      <g class="hand" text-anchor="middle">
+        <text x="46" y="113" font-size="13" fill="#F2E3C4">135%</text>
+        <text x="122" y="113" font-size="13" fill="#F2E3C4">135%</text>
+        <text x="198" y="113" font-size="13" fill="#F2E3C4">135%</text>
+        <text x="46" y="74" font-size="13" fill="#CFE0D5">pass</text>
+        <text x="122" y="68" font-size="13" fill="#F4D5D8">short</text>
+        <text x="198" y="42" font-size="13" fill="#F4D5D8">short</text>
+        <text x="46" y="144" font-size="11" fill="rgba(236,234,227,.85)">line 130%</text>
+        <text x="122" y="144" font-size="11" fill="rgba(236,234,227,.85)">line 140%</text>
+        <text x="198" y="144" font-size="11" fill="rgba(236,234,227,.85)">stock 160%</text>
+      </g>
+      <g filter="url(#chalk)"><path d="M240 22 H308 Q314 22 314 28 V54 Q314 60 308 60 H290 L282 72 L280 60 H240 Q234 60 234 54 V28 Q234 22 240 22 Z" fill="rgba(236,234,227,.10)" stroke="rgba(236,234,227,.85)" stroke-width="1.5" stroke-linejoin="round"/></g>
+      <text class="hand" x="274" y="38" font-size="12.5" fill="rgba(236,234,227,.95)" text-anchor="middle">the same</text>
+      <text class="hand" x="274" y="53" font-size="12.5" fill="#F2E3C4" text-anchor="middle">135%?</text>
+      <g transform="translate(262 78) scale(0.82)"><g filter="url(#rough)"><path d="M8 30 Q20 24 32 30 L35 54 Q20 60 5 54 Z" fill="#CFE0D5" stroke="#2E2E2C" stroke-width="1.8" stroke-linejoin="round"/><path d="M13 56 L12 63 M27 56 L28 63" stroke="#2E2E2C" stroke-width="1.8" stroke-linecap="round"/><circle cx="20" cy="16" r="12.5" fill="#FBF8F1" stroke="#2E2E2C" stroke-width="1.8"/></g><ellipse cx="12.5" cy="19.5" rx="2.6" ry="1.6" fill="#E9A9AE" opacity=".75"/><ellipse cx="27.5" cy="19.5" rx="2.6" ry="1.6" fill="#E9A9AE" opacity=".75"/><circle cx="16" cy="14.5" r="1.7" fill="#2E2E2C"/><circle cx="24" cy="14.5" r="1.7" fill="#2E2E2C"/><path d="M17 22 Q20 20.5 23 22" fill="none" stroke="#2E2E2C" stroke-width="1.4" stroke-linecap="round"/></g>
+    </svg>
+  </div>
+  <div class="cvidx">
+    <a href="#p1"><b>01</b>Your numbers</a>
+    <a href="#p2"><b>02</b>Road to a sale</a>
+    <a href="#p3"><b>03</b>Broker cards</a>
+  </div>
+  <a class="cvjump" href="#cards">Jump straight to the broker cards <span aria-hidden="true">→</span></a>
+  <p class="cvtime">All times KST (UTC+9) · About 7 minutes · 1 quiz · 2 things to try</p>
+</div>
+
+<div class="tldr">
+  <div class="tlh"><b class="hand">Short on time?</b><span>Three key takeaways</span></div>
+  <ul class="pts">
+    <li>Look for three numbers in your broker&#39;s app: your collateral ratio, the line applied to your account, and the shortfall. They sit on the collateral-ratio screen.</li>
+    <li>If the account closes below the line, the shares are usually sold two business days later, in the opening <span class="term">call auction<span class="tip">The period before the open when orders are collected and then matched at a single price at 9&nbsp;a.m. On the Korea Exchange it runs from 8:30 to 9&nbsp;a.m.</span></span>. How late you can still stop it that morning differs by broker.</li>
+    <li>The line is usually 140%. Since Nov.&nbsp;9, 2026, some brokers have cut it to 130% while others only postpone a sale if you apply. <span class="ul">The same ratio can lead to different outcomes at different brokers.</span></li>
+  </ul>
+  <p class="tiphint">Hover over or tap an underlined term to see its definition.</p>
+</div>
+
+<!-- ══════ Chapter 1 ══════ -->
+<div class="ch" id="p1">
+  <div class="chtop"><span class="chn">01</span><span class="chk">The route</span></div>
+  <h2 class="cht">Finding Your Numbers</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">Friday evening, a text arrives from your broker: &#8220;Your collateral is short. Please add more.&#8221; That is a margin call. There is a screen to open at that point, and only three numbers to read on it. <a class="ilink" href="https://snowshagal.com/reports/en/Snowshagal_Market_Basics_20_When_Your_Broker_Force_Sells_EN">Part 20 of Market Basics</a> explains what a <span class="term">forced sale<span class="tip">When shares bought with borrowed money no longer cover the loan, or a payment is missed, the broker sells them without asking the investor. Called <span lang="ko">반대매매</span> in Korean.</span></span> is.</p>
+
+<figure class="doodle">
+  <svg viewBox="0 0 320 196" role="img" aria-label="Sketch of a phone screen. A margin collateral screen shows a collateral ratio of 135%, an applied line of 140% and a shortfall of 500,000 won. Handwritten notes beside it read: 1, your number now; 2, your account's line; 3, if this is not zero, a notice is coming">
+    <g filter="url(#rough)" stroke-linejoin="round">
+      <rect x="8" y="8" width="176" height="180" rx="18" fill="#3A3632" stroke="#2E2E2C" stroke-width="1.6"/>
+      <rect x="16" y="24" width="160" height="150" rx="6" fill="#FBF8F1" stroke="#2E2E2C" stroke-width="1.2"/>
+    </g>
+    <path d="M24 52 H168 M24 92 H168 M24 132 H168" fill="none" stroke="#CEC9BF" stroke-width="1.1"/>
+    <rect x="79" y="13" width="34" height="5" rx="2.5" fill="#65625B"/>
+    <text x="24" y="43" font-size="11" font-weight="800" fill="#46584D">Margin collateral</text>
+    <g font-size="11" font-weight="700" fill="#53514C">
+      <text x="24" y="77">Ratio</text><text x="24" y="117">Applied line</text><text x="24" y="157">Shortfall</text>
+    </g>
+    <g font-size="16.5" font-weight="800" text-anchor="end">
+      <text x="168" y="78" fill="#2E2E2C">135%</text>
+      <text x="168" y="118" fill="#2E2E2C">140%</text>
+      <text x="168" y="158" fill="#B23A47">500,000</text>
+    </g>
+    <path d="M212 72 H190 M212 112 H190 M212 152 H190" fill="none" stroke="#B23A47" stroke-width="1.5" stroke-linecap="round" marker-end="url(#ah)"/>
+    <g filter="url(#rough)"><circle cx="224" cy="72" r="9.5" fill="#F6E9EA" stroke="#B23A47" stroke-width="1.4"/><circle cx="224" cy="112" r="9.5" fill="#F6E9EA" stroke="#B23A47" stroke-width="1.4"/><circle cx="224" cy="152" r="9.5" fill="#F6E9EA" stroke="#B23A47" stroke-width="1.4"/></g>
+    <g class="hand" font-size="13" fill="#B23A47" text-anchor="middle"><text x="224" y="76.5">1</text><text x="224" y="116.5">2</text><text x="224" y="156.5">3</text></g>
+    <g class="hand" font-size="11.5" fill="#2E2E2C">
+      <text x="238" y="69">your number</text><text x="238" y="83">right now</text>
+      <text x="238" y="109">your account&#39;s</text><text x="238" y="123">line</text>
+      <text x="238" y="149">if not zero,</text><text x="238" y="163">a notice comes</text>
+    </g>
+  </svg>
+  <figcaption>A made-up account. Screen layouts and field names differ by broker.</figcaption>
+</figure>
+
+<div class="board">
+  <div class="bdk">On the board · Where 135% comes from</div>
+  <p class="bdt hand">₩13.5M ÷ ₩10M = 135%</p>
+  <div class="btab" style="grid-template-columns:1.25fr 1fr">
+    <span class="h">Item</span><span class="h">Made-up account</span>
+    <span class="l">Borrowed from the broker</span><span>₩10&nbsp;million</span>
+    <span class="l">Stocks and cash counted as collateral</span><span>₩13.5&nbsp;million</span>
+    <span class="l hi">Collateral ratio</span><span class="hi">135%</span>
+    <span class="l e">Your share after repaying the loan</span><span class="e">₩3.5&nbsp;million</span>
+  </div>
+</div>
+<p class="p">The ₩13.5&nbsp;million is not all yours. Take away the loan and your share is ₩3.5&nbsp;million. When prices fall, that is the part that shrinks first.</p>
+
+<div class="rows">
+  <div class="rw"><span class="rk"><b class="hand">1</b> Collateral ratio</span><span class="rv">The amount counted as collateral ÷ the amount borrowed. It is set at <b>the closing price</b>. What you see during the session is a passing value.</span></div>
+  <div class="rw hot"><span class="rk"><b class="hand">2</b> Your line</span><span class="rv">The <span class="term">maintenance ratio<span class="tip">The line below which the broker demands more collateral. It differs by broker, stock and loan type. <span lang="ko">담보유지비율</span> in Korean.</span></span>. Fall below it and the text arrives. Kiwoom&#39;s screen labels it <span lang="ko">적용담보비율</span> (applied collateral ratio).</span></div>
+  <div class="rw"><span class="rk"><b class="hand">3</b> Shortfall</span><span class="rv">How far you are below the line. The account above needs ₩14&nbsp;million, so it is ₩500,000 short. That is the <span class="term">top-up<span class="tip">Restoring collateral by a deadline: deposit cash, pay down the loan, or pledge other securities. The demand for it is a margin call.</span></span> you have to make.</span></div>
+</div>
+<p class="note">If you do the division yourself, it may not match the screen. Other shares pledged as collateral count at only part of their market value, and some stocks are left out altogether. The screen figure is the one that counts.</p>
+
+<h3 class="hd">Which screen shows it</h3>
+<p class="rlab">Your account&#39;s collateral ratio</p>
+<div class="rows sm">
+  <div class="rw"><span class="rk">Kiwoom</span><span class="rv">Screen <b>[0874]</b> <span lang="ko">신용/대출 담보비율조회</span></span></div>
+  <div class="rw"><span class="rk">Shinhan</span><span class="rv">App: Banking › Margin/Loans › <b><span lang="ko">담보현황/담보비율</span></b></span></div>
+  <div class="rw"><span class="rk">KB</span><span class="rv">H-able <b>[0362]</b> <span lang="ko">예수금상세</span>, margin loan section</span></div>
+  <div class="rw"><span class="rk">Samsung</span><span class="rv">Stock-order screen, <b><span lang="ko">담보</span></b> (collateral) tab at the bottom</span></div>
+</div>
+<p class="rlab">The line for each stock</p>
+<div class="rows sm">
+  <div class="rw"><span class="rk">KB</span><span class="rv">H-able <b>[0942]</b> <span lang="ko">신용/대출/차입가능종목조회</span></span></div>
+  <div class="rw"><span class="rk">Mirae Asset</span><span class="rv">Kairos <b>[0917]</b> <span lang="ko">신용가능종목조회</span></span></div>
+</div>
+<p class="rlab">Whether a sale is due tomorrow</p>
+<div class="rows sm">
+  <div class="rw"><span class="rk">Kiwoom</span><span class="rv">Screen <b>[0379]</b> <span lang="ko">익일추정 신용담보부족/미상환 반대매매</span></span></div>
+</div>
+<div class="memo">
+  <b class="hand">Don&#39;t know the screen number?</b>
+  <p>Type <span lang="ko">담보비율</span> (collateral ratio) into the app&#39;s menu search. Most numbers above belong to the desktop trading program (HTS). For Mirae Asset, Korea Investment and NH, we could not find the account screen&#39;s name in public material.</p>
+</div>
+
+<!-- ══════ Chapter 2 ══════ -->
+<div class="ch" id="p2">
+  <div class="chtop"><span class="chn">02</span><span class="chk">How to read it</span></div>
+  <h2 class="cht">From the Text Message<br/>to the Sale</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">A text does not mean an immediate sale. It does not mean plenty of time, either. Take a guess first.</p>
+
+<div class="pop" id="quiz1">
+  <div class="poph"><b>Warm-up</b><span class="vb">Think it through</span></div>
+  <div class="popb">
+    <p class="popq">Your account closes below its line on Friday, and a margin call arrives that evening. If you do nothing, when are the shares usually sold?</p>
+    <div class="opts">
+      <button class="opt" type="button" data-ok="0">① Monday morning</button>
+      <button class="opt" type="button" data-ok="1">② Tuesday morning</button>
+      <button class="opt" type="button" data-ok="0">③ The following Friday</button>
+    </div>
+    <div class="popans" hidden>
+      <span class="verdict" tabindex="-1">The answer is ②</span>
+      <p class="popnote">Call the day of the shortfall <b>D</b>. You have until the next business day (<b>D+1</b>) to top up, and the shares are sold on the morning of the business day after that (<b>D+2</b>). Weekends and holidays are not counted. In effect, Monday is the only day left to act.</p>
+      <button class="qshare" type="button" data-share="quiz">Share this quiz</button>
+    </div>
+  </div>
+</div>
+
+<figure class="doodle">
+  <svg viewBox="0 0 320 160" role="img" aria-label="Calendar sketch. On Friday, Nov. 27, the account closes short of collateral (day D). Saturday and Sunday are days off and are not counted. Monday, Nov. 30, is the top-up deadline (D+1). On Tuesday, Dec. 1, the forced sale goes out in the morning (D+2)">
+    <text class="hand" x="160" y="18" font-size="12.5" fill="#2E2E2C" text-anchor="middle">If Friday closes below the line</text>
+    <g filter="url(#rough)" stroke-linejoin="round" stroke-width="1.4">
+      <rect x="12" y="30" width="54" height="58" rx="7" fill="#F6E9EA" stroke="#B23A47"/>
+      <rect x="72" y="30" width="54" height="58" rx="7" fill="#E8E5DF" stroke="#8B867E" stroke-dasharray="4 3"/>
+      <rect x="132" y="30" width="54" height="58" rx="7" fill="#E8E5DF" stroke="#8B867E" stroke-dasharray="4 3"/>
+      <rect x="192" y="30" width="54" height="58" rx="7" fill="#DCE3DD" stroke="#46584D"/>
+      <rect x="252" y="30" width="54" height="58" rx="7" fill="#B23A47" stroke="#7A3F44"/>
+    </g>
+    <g font-size="11" font-weight="800" text-anchor="middle">
+      <text x="39" y="48" fill="#B23A47">Fri</text><text x="99" y="48" fill="#65625B">Sat</text><text x="159" y="48" fill="#65625B">Sun</text><text x="219" y="48" fill="#46584D">Mon</text><text x="279" y="48" fill="#FBF3F3">Tue</text>
+    </g>
+    <g font-size="12.5" font-weight="800" text-anchor="middle">
+      <text x="39" y="72" fill="#2E2E2C">Nov 27</text><text x="99" y="72" fill="#8B867E">Nov 28</text><text x="159" y="72" fill="#8B867E">Nov 29</text><text x="219" y="72" fill="#2E2E2C">Nov 30</text><text x="279" y="72" fill="#FFFFFF">Dec 1</text>
+    </g>
+    <g class="hand" font-size="10.5" text-anchor="middle">
+      <text x="39" y="108" fill="#B23A47">shortfall</text>
+      <text x="129" y="108" fill="#65625B">days off</text>
+      <text x="219" y="108" fill="#2F3C34">deadline</text>
+      <text x="279" y="108" fill="#B23A47">forced sale</text>
+    </g>
+    <g font-size="12" font-weight="800" text-anchor="middle">
+      <text x="39" y="128" fill="#B23A47">D</text><text x="219" y="128" fill="#46584D">D+1</text><text x="279" y="128" fill="#B23A47">D+2</text>
+    </g>
+    <path d="M52 140 H266" fill="none" stroke="#B23A47" stroke-width="1.4" stroke-dasharray="3 4" stroke-linecap="round" marker-end="url(#ah)"/>
+    <text x="160" y="155" font-size="11" font-weight="700" fill="#65625B" text-anchor="middle">two business days</text>
+  </svg>
+  <figcaption>A made-up case. Most brokers follow this order.</figcaption>
+</figure>
+<p class="note">We say &#8220;usually&#8221; for a reason. At Kiwoom the deadline is a day longer for some account types. Some disclosures also say that in a sharp price move a broker may sell without a top-up demand (Korea Investment, Shinhan).</p>
+
+<h3 class="hd">How late is too late that morning?</h3>
+<ol class="tline wide">
+  <li><time>8:30&nbsp;a.m.</time><p>The Korea Exchange call auction begins. Forced-sale orders usually go in at this point.</p></li>
+  <li class="hot"><time>9:00&nbsp;a.m.</time><p>The collected orders are filled at the <span class="term">opening price<span class="tip">The first price of the day. On the Korea Exchange it is set by matching the call-auction orders at 9&nbsp;a.m.</span></span>. If there are too few buy orders, not everything may be sold that day.</p></li>
+</ol>
+<p class="p">Some brokers still leave a way out that morning: repay in full before the order goes out, or apply for one of the temporary postponements. The cutoffs differ.</p>
+<div class="rows sm">
+  <div class="rw"><span class="rk">Mirae Asset</span><span class="rv">Repay in full by <b>8:50&nbsp;a.m.</b> and the order is cancelled automatically</span></div>
+  <div class="rw"><span class="rk">Kiwoom</span><span class="rv">For now, postponement requests <b>8 to 8:50&nbsp;a.m.</b></span></div>
+  <div class="rw"><span class="rk">Korea Investment</span><span class="rv">For now, postponement requests <b>8 to 8:30&nbsp;a.m.</b></span></div>
+  <div class="rw"><span class="rk">NH</span><span class="rv">For now, apply for the lowered line by <b>8:30&nbsp;a.m.</b></span></div>
+</div>
+<p class="note">These times come from news reports of broker notices in October and November 2026. The cutoff for a deposit is not the cutoff for a postponement request. For a broker not listed, ask the day before, and after a deposit check that the order was cancelled.</p>
+
+<h3 class="q">Does a forced sale<br/>take everything?</h3>
+<div class="ans">
+  <div class="ak">In one sentence</div>
+  <div class="av">The broker sells enough to bring the account back to the line, not just enough to cover the shortfall, so far more goes and it can be everything.</div>
+  <div class="aw">Selling shares cuts the loan, but it also cuts the collateral. Selling ₩200,000 of stock does not close a ₩200,000 gap.</div>
+</div>
+<div class="dcmp">
+  <div class="figh"><b>₩200,000 short, ₩930,000 sold</b><span>Example from Korea Investment&#39;s disclosure</span></div>
+  <div class="calc" style="grid-template-columns:1.2fr 1fr">
+    <span class="h l">Step</span><span class="h">Value</span>
+    <span class="l">Shortfall</span><span>₩200,000</span>
+    <span class="l">Sizing price<small>15% below the prior close of ₩6,800</small></span><span>₩5,780</span>
+    <span class="l">Shares to sell</span><span>155</span>
+    <span class="l">Actual sale price<small>morning open, assumed</small></span><span>₩6,000</span>
+    <span class="l e">Amount sold</span><span class="e hot">About ₩930,000<small>4.7 times the shortfall</small></span>
+  </div>
+</div>
+<p class="note">The 15%, the 20% and the <span class="term">daily limit-down<span class="tip">The lowest price a stock can reach in one day: 30% below the prior close.</span></span> price are used only to work out how many shares to sell. They are not the sale price. The example leaves out fees, tax and interest. KB Securities&#39; key-facts sheet says that in most cases the whole margin and loan position is sold, whatever the shortfall. A calculator is in <a class="ilink" href="https://snowshagal.com/reports/en/Snowshagal_Market_Basics_20_When_Your_Broker_Force_Sells_EN">Part 20</a>.</p>
+
+<!-- ══════ Chapter 3 ══════ -->
+<div class="ch" id="p3">
+  <div class="chtop"><span class="chn">03</span><span class="chk">What to watch</span></div>
+  <h2 class="cht">Broker Cards<br/>and the Temporary Rules</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">From here on, the details are as checked on Nov.&nbsp;24, 2026. A broker can change its line with a single notice.</p>
+
+<!-- Temporary measure: remove this box and the "for now" box inside each card once it ends -->
+<div class="tmpbox">
+  <span class="tmk">Nov.&nbsp;9, 2026 – Jan.&nbsp;31, 2027</span>
+  <h3 class="tmt">For now, one more layer sits on top of the usual rules</h3>
+  <p class="p">A broker must demand more collateral as soon as an account falls below its line. After the market plunged in early November, the Financial Supervisory Service temporarily lifted that duty. It does not mean every account&#39;s line is now 130%. Each broker chose its own method.</p>
+  <figure class="doodle">
+    <svg viewBox="0 0 320 178" role="img" aria-label="Sketch of two methods. Left: lowering the line. The line drops from 140% to 130%, so an account at 135% passes. Right: delaying the sale. The line stays at 140%, so the 135% account is still short, but an application pushes the sale back a day">
+      <g class="hand" font-size="12.5" text-anchor="middle" fill="#2E2E2C"><text x="82" y="18">Lower the line</text><text x="238" y="18">Delay the sale</text></g>
+      <path d="M160 8 V170" fill="none" stroke="#CEC9BF" stroke-width="1.2" stroke-dasharray="3 4"/>
+      <g filter="url(#rough)" stroke-linejoin="round">
+        <rect x="30" y="80" width="46" height="62" rx="3" fill="#DCE3DD" stroke="#46584D" stroke-width="1.5"/>
+        <rect x="186" y="80" width="46" height="62" rx="3" fill="#F6E9EA" stroke="#B23A47" stroke-width="1.5"/>
+        <rect x="254" y="88" width="48" height="36" rx="5" fill="#FBF8F1" stroke="#2E2E2C" stroke-width="1.3"/>
+        <path d="M254 98 H302" fill="none" stroke="#2E2E2C" stroke-width="1.2"/>
+      </g>
+      <path d="M18 142 H146 M174 142 H302" fill="none" stroke="#2E2E2C" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M22 70 H112" fill="none" stroke="#8B867E" stroke-width="1.6" stroke-dasharray="4 3"/>
+      <path d="M22 90 H112" fill="none" stroke="#B23A47" stroke-width="1.8" stroke-dasharray="4 3"/>
+      <path d="M100 73 V85" fill="none" stroke="#B23A47" stroke-width="1.5" stroke-linecap="round" marker-end="url(#ah)"/>
+      <path d="M114 69 H146" fill="none" stroke="#8B867E" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M178 70 H246" fill="none" stroke="#B23A47" stroke-width="1.8" stroke-dasharray="4 3"/>
+      <g font-size="11.5" font-weight="800">
+        <text x="116" y="73" fill="#8B867E">140%</text>
+        <text x="116" y="94" fill="#B23A47">130%</text>
+        <text x="212" y="64" fill="#B23A47" text-anchor="middle">140% stays</text>
+      </g>
+      <g font-size="13" font-weight="800" text-anchor="middle"><text x="53" y="116" fill="#2F3C34">135%</text><text x="209" y="116" fill="#7A3F44">135%</text></g>
+      <text class="hand" x="278" y="116" font-size="10.5" fill="#B23A47" text-anchor="middle">+1 day</text>
+      <g class="hand" font-size="11" text-anchor="middle">
+        <text x="82" y="162" fill="#2F3C34">135% is no shortfall</text>
+        <text x="238" y="158" fill="#B23A47">still short; apply</text>
+        <text x="238" y="172" fill="#B23A47">to delay a day</text>
+      </g>
+    </svg>
+  </figure>
+  <div class="rows sm">
+    <div class="rw"><span class="rk">Lowered the line</span><span class="rv"><b>Mirae Asset, KB</b>. 130% with no application</span></div>
+    <div class="rw"><span class="rk">Lowers it only with consent</span><span class="rv"><b>NH</b>. 130% only for deciding who faces a sale</span></div>
+    <div class="rw hot"><span class="rk">Postpones on request</span><span class="rv"><b>Kiwoom, Korea Investment, Samsung, Shinhan</b>. The line stays put; you apply one day at a time</span></div>
+  </div>
+</div>
+
+<div class="sim" id="ksim">
+  <div class="simhd"><b>Same ratio, different outcome</b><span>Made-up example</span></div>
+  <p class="simp">The same account as above, with ₩10&nbsp;million borrowed. Tap a different ratio or broker method.</p>
+  <p class="ddlb">Collateral ratio at the close</p>
+  <div class="seg s4" role="group" aria-label="Collateral ratio at the close">
+    <button class="chip" type="button" data-k="r" data-v="145" aria-pressed="false">145%</button>
+    <button class="chip on" type="button" data-k="r" data-v="135" aria-pressed="true">135%</button>
+    <button class="chip" type="button" data-k="r" data-v="125" aria-pressed="false">125%</button>
+    <button class="chip" type="button" data-k="r" data-v="115" aria-pressed="false">115%</button>
+  </div>
+  <p class="ddlb">The broker&#39;s method</p>
+  <div class="seg s3" role="group" aria-label="The broker's method">
+    <button class="chip" type="button" data-k="m" data-v="base" aria-pressed="false">Usual<small>line 140%</small></button>
+    <button class="chip on" type="button" data-k="m" data-v="cut" aria-pressed="true">Line lowered<small>Mirae, KB</small></button>
+    <button class="chip" type="button" data-k="m" data-v="defer" aria-pressed="false">Sale delayed<small>Kiwoom, Korea Inv. etc.</small></button>
+  </div>
+  <div class="kg" id="kg" aria-hidden="true"><i id="kgbar"></i><em id="kgline" data-l="line 130%"></em><span id="kgval">135%</span></div>
+  <div class="iflow">
+    <div class="df" id="k1"><i>Your ratio</i><b>135%</b></div>
+    <div class="df" id="k2"><i>Applied line</i><b>130%</b></div>
+    <div class="df ok" id="k3"><i>Result</i><b>No shortfall</b></div>
+  </div>
+  <p class="simmsg" id="kmsg" aria-live="polite">Above the lowered 130% line, so there is no shortfall. At the usual 140% this account would be ₩500,000 short.</p>
+  <p class="simfoot">A made-up account holding only domestic stocks with a 140% line. Real outcomes depend on the stock, the loan type and the conditions for applying.</p>
+</div>
+
+<h3 class="hd">Above 130%, so why did a text arrive?</h3>
+<p class="p">The news says 130%, yet your account at 135% got a text. The reason is usually one of three.</p>
+<div class="rows sm">
+  <div class="rw"><span class="rk">A different stock</span><span class="rv"><span class="term">Administrative issues<span class="tip">Stocks the exchange flags as close to meeting delisting criteria.</span></span> carry <b>160%</b>. At Samsung, stocks with a 50% initial margin rate carry <b>150%</b>, so even a 10-point cut leaves them at 140%.</span></div>
+  <div class="rw"><span class="rk">Mixed loans</span><span class="rv">Mirae Asset averages by loan size when an account also has a loan against overseas stocks (140%). With ₩4&nbsp;million domestic and ₩6&nbsp;million overseas, the line is <b>136%</b>.</span></div>
+  <div class="rw"><span class="rk">The line hasn&#39;t moved</span><span class="rv">At brokers that postpone, the line stays at <b>140%</b> whether or not you apply, so the text still comes; only the sale day moves. NH also keeps 140% for accounts that did not consent in advance.</span></div>
+</div>
+
+<h3 class="hd" id="cards">Broker cards</h3>
+<p class="p">Tap a broker to see only its card. D is the day collateral falls short.</p>
+<div class="pick" id="pick">
+  <div class="pchips" role="group" aria-label="Choose a broker">
+    <button class="chip" type="button" data-b="kiwoom" aria-pressed="true">Kiwoom</button>
+    <button class="chip" type="button" data-b="mirae" aria-pressed="false">Mirae</button>
+    <button class="chip" type="button" data-b="samsung" aria-pressed="false">Samsung</button>
+    <button class="chip" type="button" data-b="kis" aria-pressed="false">Korea Inv.</button>
+    <button class="chip" type="button" data-b="nh" aria-pressed="false">NH</button>
+    <button class="chip" type="button" data-b="kb" aria-pressed="false">KB</button>
+    <button class="chip" type="button" data-b="shinhan" aria-pressed="false">Shinhan</button>
+    <button class="chip" type="button" data-b="all" aria-pressed="false">All</button>
+  </div>
+  <div class="bcards">
+
+    <section class="bcard on" data-b="kiwoom" aria-label="Kiwoom Securities">
+      <div class="bhd"><b>Kiwoom Securities</b><span>Postpones on request</span></div>
+      <dl class="bdl">
+        <div><dt>Usual line</dt><dd><b>140%</b></dd></div>
+        <div><dt>Top-up by</dt><dd><b>D+1</b>. D+2 for some account types</dd></div>
+        <div><dt>Sale day</dt><dd>The morning of the business day after the deadline. Usually <b>D+2</b></dd></div>
+        <div><dt>Sizing price</dt><dd>A marked-down price such as the daily limit-down. The disclosure&#39;s example uses 15% below the prior close</dd></div>
+        <div><dt>Your screen</dt><dd>Screen [0874] for the ratio, [0379] for tomorrow&#39;s sale list</dd></div>
+      </dl>
+      <div class="bnow"><i>For now · since Nov.&nbsp;9, 2026</i><p>The line stays at 140%. An account that is due for a forced sale and closed at <b>130% or above but below 140%</b> can apply to postpone it by one day, but not two days running. Requests are taken through the app or desktop program from 5 to 10&nbsp;p.m. the day before, and by phone or chat from 8 to 8:50&nbsp;a.m. on the day.</p></div>
+      <p class="bsrc">Sources · <a href="https://download.kiwoom.com/web/manual02.pdf" target="_blank" rel="noopener">margin trading disclosure</a> (revised Jan.&nbsp;24, 2025) · <a href="https://download.kiwoom.com/hero4_help_new/0874.htm" target="_blank" rel="noopener">help 0874</a> · &#8220;for now&#8221; box per news reports (<a href="https://www.smarttoday.co.kr/ko-kr/articles/113534" target="_blank" rel="noopener">Smart Today, Nov.&nbsp;8</a>) · checked Nov.&nbsp;24, 2026</p>
+    </section>
+
+    <section class="bcard" data-b="mirae" aria-label="Mirae Asset Securities">
+      <div class="bhd"><b>Mirae Asset Securities</b><span>Lowered the line</span></div>
+      <dl class="bdl">
+        <div><dt>Usual line</dt><dd><b>140%</b>. 160% for administrative issues and stocks in <span class="term">delisting-period trading<span class="tip">The final trading window for a stock whose delisting is confirmed. There are no daily price limits.</span></span>. Higher when borrowing exceeds ₩3&nbsp;billion</dd></div>
+        <div><dt>Top-up by</dt><dd><b>D+1</b></dd></div>
+        <div><dt>Sale day</dt><dd><b>D+2</b></dd></div>
+        <div><dt>Sizing price</dt><dd>15% or 20% below the prior close, depending on the stock&#39;s grade</dd></div>
+        <div><dt>Morning cutoff</dt><dd>Repay in full by 8:50&nbsp;a.m. and the order is cancelled automatically</dd></div>
+        <div><dt>Your screen</dt><dd>Line by stock: Kairos [0917]</dd></div>
+      </dl>
+      <div class="bnow"><i>For now · since Nov.&nbsp;9, 2026</i><p>The line for domestic stocks is <b>130%</b>, with no application. The 160% stocks and loans against overseas stocks (140%) are unchanged, and a mixed account gets an average in between. It runs through Jan.&nbsp;31, 2027, and the broker says it may change with market conditions.</p></div>
+      <p class="bsrc">Sources · <a href="https://securities.miraeasset.com/hki/hki3035/n01.do" target="_blank" rel="noopener">margin trading disclosure</a> · morning cutoff per news reports (<a href="https://biz.sbs.co.kr/amp/article/20000340443" target="_blank" rel="noopener">SBS Biz, Oct.&nbsp;16</a>) · &#8220;for now&#8221; box per news reports (<a href="https://www.mt.co.kr/stock/2026/11/08/2026110619030119159" target="_blank" rel="noopener">Money Today, Nov.&nbsp;8</a>) · checked Nov.&nbsp;24, 2026</p>
+    </section>
+
+    <section class="bcard" data-b="samsung" aria-label="Samsung Securities">
+      <div class="bhd"><b>Samsung Securities</b><span>Postpones on request</span></div>
+      <dl class="bdl">
+        <div><dt>Usual line</dt><dd><b>140%</b> for stocks with a 45% <span class="term">initial margin rate<span class="tip">The share of a margin purchase you must cover with your own cash or collateral. It differs by stock, and since autumn 2026 brokers have been raising the minimum to 50% one after another.</span></span>, <b>150%</b> at 50%, <b>160%</b> at 60%</dd></div>
+        <div><dt>Top-up by</dt><dd><b>D+1</b></dd></div>
+        <div><dt>Sale day</dt><dd><b>D+2</b>, in the morning</dd></div>
+        <div><dt>Sizing price</dt><dd>15% or 20% below the prior close, depending on the stock&#39;s grade</dd></div>
+        <div><dt>Your screen</dt><dd>Stock-order screen, <span lang="ko">담보</span> (collateral) tab at the bottom</dd></div>
+      </dl>
+      <div class="bnow"><i>For now · since Nov.&nbsp;9, 2026</i><p>For clients who apply, the line is lowered by <b>10 percentage points</b>. For a stock with a 140% line, that means 130% or above. You apply one day at a time, through the app from 5&nbsp;p.m. the day before.</p></div>
+      <p class="bsrc">Sources · <a href="https://www.samsungpop.com/download/pdf/KeyFacts.pdf" target="_blank" rel="noopener">margin loan key-facts sheet</a> · <a href="https://www.samsungpop.com/help/td023.html" target="_blank" rel="noopener">stock-order help page</a> · &#8220;for now&#8221; box per news reports (<a href="https://www.consumuch.com/news/articleView.html?idxno=79524" target="_blank" rel="noopener">Consumuch, Nov.&nbsp;10</a>) · checked Nov.&nbsp;24, 2026</p>
+    </section>
+
+    <section class="bcard" data-b="kis" aria-label="Korea Investment &amp; Securities">
+      <div class="bhd"><b>Korea Investment &amp; Securities</b><span>Postpones on request</span></div>
+      <dl class="bdl">
+        <div><dt>Usual line</dt><dd><b>140%</b>. The key-facts sheet says 140–160%</dd></div>
+        <div><dt>Top-up by</dt><dd><b>D+1</b></dd></div>
+        <div><dt>Sale day</dt><dd><b>D+2</b>, on the Korea Exchange</dd></div>
+        <div><dt>Sizing price</dt><dd>15% below the prior Korea Exchange close</dd></div>
+      </dl>
+      <div class="bnow"><i>For now · since Nov.&nbsp;9, 2026</i><p>The line is unchanged. An account due for a forced sale can apply to postpone it. At <b>130% or above but below 140%</b>, you can reapply every day. At <b>120% or above but below 130%</b>, only once. Below 120%, not at all. At first requests were taken by phone only (4 to 5&nbsp;p.m. the day before, 8 to 8:30&nbsp;a.m. on the day); the broker later said it would also take them online.</p></div>
+      <p class="bsrc">Sources · <a href="https://file.koreainvestment.com/updata/namo/06085548%EC%8B%A0%EC%9A%A9%EA%B1%B0%EB%9E%98%EC%84%A4%EB%AA%85%EC%84%9C_%EC%A0%84%EB%AC%B8.pdf" target="_blank" rel="noopener">margin trading disclosure</a> (revised Nov.&nbsp;9, 2026) · &#8220;for now&#8221; box per the <a href="https://www.truefriend.com/main/customer/notice/Notice.jsp" target="_blank" rel="noopener">Nov.&nbsp;10 notice</a> and news reports (<a href="https://m.sedaily.com/article/20111489" target="_blank" rel="noopener">Seoul Economic Daily, Nov.&nbsp;8</a>) · checked Nov.&nbsp;24, 2026</p>
+    </section>
+
+    <section class="bcard" data-b="nh" aria-label="NH Investment &amp; Securities">
+      <div class="bhd"><b>NH Investment &amp; Securities</b><span>Lowers it only with consent</span></div>
+      <dl class="bdl">
+        <div><dt>Usual line</dt><dd><b>140%</b>. 170% for overseas-stock loans</dd></div>
+        <div><dt>Deadline and dates</dt><dd class="na">Top-up deadline, sale day and sizing price: not confirmed in public material</dd></div>
+      </dl>
+      <div class="bnow"><i>For now · since Nov.&nbsp;9, 2026</i><p>Only for accounts that consented in advance, the line that decides who faces a forced sale drops to <b>130%</b>. Once an account is in scope, the quantity sold is still sized to restore <b>140%</b>. Consent given before 3:30&nbsp;p.m. applies from that day&#39;s valuation. If you apply by 8:30&nbsp;a.m. on the sale day and meet the lowered line, the sale is cancelled.</p></div>
+      <p class="bsrc">Sources · news reports (<a href="https://www.mt.co.kr/stock/2026/11/08/2026110619030119159" target="_blank" rel="noopener">Money Today, Nov.&nbsp;8</a> · <a href="https://www.hankooki.com/news/articleView.html?idxno=348110" target="_blank" rel="noopener">Hankooki, Nov.&nbsp;9</a> · <a href="http://www.the-biz.co.kr/news/articleView.html?idxno=731103" target="_blank" rel="noopener">The Biz, Nov.&nbsp;10</a>) · checked Nov.&nbsp;24, 2026</p>
+    </section>
+
+    <section class="bcard" data-b="kb" aria-label="KB Securities">
+      <div class="bhd"><b>KB Securities</b><span>Lowered the line</span></div>
+      <dl class="bdl">
+        <div><dt>Usual line</dt><dd>Base <b>140%</b>. It differs by stock and loan type, and a mixed account gets a <span class="term">weighted average<span class="tip">An average of different lines, weighted by the size of each loan. In KB&#39;s disclosure, an account that borrowed ₩1&nbsp;million at 140% and ₩800,000 at 150% has a line of 144%.</span></span></dd></div>
+        <div><dt>Top-up by</dt><dd><b>D+1</b>. The disclosure puts it as &#8220;two business days including the demand day&#8221;</dd></div>
+        <div><dt>Sale day</dt><dd><b>D+2</b></dd></div>
+        <div><dt>Sizing price</dt><dd>The limit-down price (30% below the prior close). In most cases the whole margin and loan position is in scope</dd></div>
+        <div><dt>Your screen</dt><dd>H-able [0362] account detail (margin loan section), [0942] line by stock</dd></div>
+      </dl>
+      <div class="bnow"><i>For now · since Nov.&nbsp;9, 2026</i><p>The line is <b>130%</b>, with no application. Overseas-stock loans and CMA-backed loans are excluded. The end date is given only as &#8220;until further notice.&#8221;</p></div>
+      <p class="bsrc">Sources · <a href="https://fdata.kbsec.com/agree/trust.pdf" target="_blank" rel="noopener">margin trading disclosure</a> (reviewed Oct.&nbsp;27, 2026) · <a href="https://www.kbsec.com/common/agree/trust2.pdf" target="_blank" rel="noopener">key-facts sheet</a> · <a href="https://help2.kbsec.com/0362.html" target="_blank" rel="noopener">help 0362</a> · &#8220;for now&#8221; box per news reports (<a href="https://www.sisajournal-e.com/news/articleView.html?idxno=424873" target="_blank" rel="noopener">Sisa Journal e, Nov.&nbsp;8</a>) · checked Nov.&nbsp;24, 2026</p>
+    </section>
+
+    <section class="bcard" data-b="shinhan" aria-label="Shinhan Securities">
+      <div class="bhd"><b>Shinhan Securities</b><span>Postpones on request</span></div>
+      <dl class="bdl">
+        <div><dt>Usual line</dt><dd><b>140%</b>. 170% when overseas stocks are part of the collateral</dd></div>
+        <div><dt>Top-up by</dt><dd><b>D+1</b></dd></div>
+        <div><dt>Sale day</dt><dd>The morning of <b>D+2</b>, in the Korea Exchange call auction</dd></div>
+        <div><dt>Sizing price</dt><dd>15% or 20% below the prior close, depending on the stock&#39;s grade</dd></div>
+        <div><dt>Your screen</dt><dd>App: Banking › Margin/Loans › <span lang="ko">담보현황/담보비율</span></dd></div>
+      </dl>
+      <div class="bnow"><i>For now · since Nov.&nbsp;9, 2026</i><p>The line is unchanged. At <b>130% or above</b>, you can apply to postpone. Requests are taken by automated phone line, website, app and desktop program.</p></div>
+      <p class="bsrc">Sources · <a href="http://file.shinhansec.com/filedoc/clause/k_2.pdf" target="_blank" rel="noopener">margin trading disclosure</a> (reviewed July&nbsp;29, 2026) · <a href="https://open.shinhansec.com/mobilena/html/ma/nama000300.html" target="_blank" rel="noopener">margin guide</a> · &#8220;for now&#8221; box per news reports (<a href="https://www.asiatoday.co.kr/kn/view.php?key=20261111010004401" target="_blank" rel="noopener">Asia Today, Nov.&nbsp;11</a>) · checked Nov.&nbsp;24, 2026</p>
+    </section>
+
+  </div>
+</div>
+<p class="note">The &#8220;for now&#8221; boxes reflect notices issued Nov.&nbsp;6–12. They may have changed since, so check the app&#39;s notices before trading. Source pages are in Korean.</p>
+
+<h3 class="hd">How long do these rules last?</h3>
+<ol class="tline wide">
+  <li class="hot"><time>Jan.&nbsp;31</time><p>Last day of the regulator&#39;s waiver. It is a Sunday.</p></li>
+  <li><time>Feb.&nbsp;1</time><p>Monday. It could be the first business day on which lowered lines go back up.</p></li>
+</ol>
+<p class="p">We have not found a broker that says when it will restore its line. KB says only &#8220;until further notice.&#8221; If the line returns to 140%, the 135% account above is ₩500,000 short again, even with prices unchanged.</p>
+
+<div class="trapwrap">
+  <div class="traphd"><b>Common Mistakes</b><i>Four to avoid</i></div>
+  <div class="trap">
+    <div class="ti">
+      <div class="tk">Mistake 01</div>
+      <div class="tx"><span>&#8220;The news said 130%, so my account is at 130% too.&#8221;</span></div>
+      <div class="to">Even within one broker it differs by stock, loan type and whether you applied. Read <b>the line shown for your account</b>.</div>
+    </div>
+    <div class="ti">
+      <div class="tk">Mistake 02</div>
+      <div class="tx"><span>&#8220;It went above 140% during the day, so I&#39;m fine today.&#8221;</span></div>
+      <div class="to">The judgment uses <b>the closing price</b>. A level touched briefly during the session does not count.</div>
+    </div>
+    <div class="ti">
+      <div class="tk">Mistake 03</div>
+      <div class="tx"><span>&#8220;I just need to deposit by 8:50 in the morning.&#8221;</span></div>
+      <div class="to">Some brokers stop taking requests at <b>8:30&nbsp;a.m.</b>, and the cutoff for a deposit is not the cutoff for a postponement request.</div>
+    </div>
+    <div class="ti">
+      <div class="tk">Mistake 04</div>
+      <div class="tx"><span>&#8220;I&#39;m ₩500,000 short, so ₩500,000 of stock gets sold.&#8221;</span></div>
+      <div class="to">The broker sells enough to regain the line. That can be several times the shortfall, or <b>everything</b>.</div>
+    </div>
+  </div>
+</div>
+
+<div class="cklist" id="cklist">
+  <div class="ckh"><b class="hand">Five blanks to fill in from your account</b><span id="ckn">0/5</span></div>
+  <button class="ckb" type="button" aria-pressed="false"><span>Your account&#39;s <b>collateral ratio</b> right now</span></button>
+  <button class="ckb" type="button" aria-pressed="false"><span>The <b>maintenance ratio</b> applied to your account</span></button>
+  <button class="ckb" type="button" aria-pressed="false"><span>The <b>shortfall</b> and the top-up deadline</span></button>
+  <button class="ckb" type="button" aria-pressed="false"><span>The scheduled sale day and <b>the morning cutoff</b></span></button>
+  <button class="ckb" type="button" aria-pressed="false"><span>Whether the temporary rules <b>apply to your account</b>, and when they end</span></button>
+  <p class="ckdone" id="ckdone" aria-live="polite"></p>
+</div>
+
+<div class="foldwrap more">
+<details class="fold">
+  <summary><span><em>More</em>Finding notices, restoring collateral, unsettled purchases, KSFC</span></summary>
+  <div class="fb">
+    <p><b>Finding notices</b> · Search the notices in the broker&#39;s app or website for <span lang="ko">담보유지비율</span> (maintenance ratio) or <span lang="ko">반대매매</span> (forced sale). Kiwoom&#39;s November 2026 notice was titled <span lang="ko">「신용/대출 담보부족 반대매매 임시 유예 안내」</span>.</p>
+    <p><b>Ways to restore collateral</b> · There are three. Deposit cash to cover the shortfall. Sell part of the margined shares yourself to cut the loan. Pledge other shares as collateral. Proceeds from your own sale come off the loan at settlement, two business days later, so check the screen again to see that the shortfall has cleared. Pledged shares count at only part of their market value.</p>
+    <p><b>Unsettled purchases run on a different clock</b> · A margin loan is counted from the day collateral falls short. An unsettled purchase (<span lang="ko">미수</span>, misu) is a balance left unpaid at settlement after buying with partial payment, so it is counted from the purchase date. If it is not paid by settlement, two business days later, the shares are sold the day after settlement (Mirae Asset disclosure). The collateral-ratio waiver does not change this.</p>
+    <p><b>Korea Securities Finance</b> · A KSFC-funded loan is a margin loan a broker funds with money borrowed from Korea Securities Finance (KSFC). Whichever money is used, the maintenance ratio and sale dates follow your broker&#39;s disclosure.</p>
+  </div>
+</details>
+</div>
+
+<h3 class="hd">Related Snowshagal reports</h3>
+<div class="rows sm">
+  <div class="rw"><span class="rk">The math</span><span class="rv"><a class="ilink" href="https://snowshagal.com/reports/en/Snowshagal_Market_Basics_20_When_Your_Broker_Force_Sells_EN">Part 20, When Will Your Broker Force-Sell Your Shares?</a></span></div>
+  <div class="rw"><span class="rk">Sell-offs</span><span class="rv"><a class="ilink" href="https://snowshagal.com/reports/en/Market_Language_Ep5_How_a_Selloff_Feeds_on_Itself">Part 5, How a Selloff Feeds on Itself</a></span></div>
+  <div class="rw"><span class="rk">Trading hours</span><span class="rv"><a class="ilink" href="https://snowshagal.com/reports/en/Snowshagal_Market_Basics_18_How_Long_Is_the_Trading_Day_EN">Part 18, How Long Is a Stock Market Day?</a></span></div>
+</div>
+
+<div class="final">
+  <div class="fk">Part 2 · In one sentence</div>
+  <p class="f1">Your forced-sale line is not in the news. It is on <b>your broker&#39;s screen and in its disclosure.</b></p>
+  <p class="f2">What percentage, how many days, what time. You can look these up before prices start to move.</p>
+</div>
+
+<div class="sharebox">
+  <p class="shq">&#8220;At what collateral ratio does our broker sell?&#8221;<br/>You probably know someone who trades on margin.</p>
+  <div class="shbtns">
+    <button class="shb main" type="button" data-share="page">Share this article</button>
+    <button class="shb" type="button" data-share="copy">Copy link</button>
+    <a class="shb" id="shX" href="https://twitter.com/intent/tweet?text=What%20is%20my%20broker%27s%20forced-sale%20line%2C%20and%20when%20does%20it%20hit%3F%20Korean%20brokers%20compared&amp;url=https%3A%2F%2Fsnowshagal.com%2Freports%2Fen%2Fbasics-data-guide-02-margin-call-by-broker_EN" target="_blank" rel="noopener">Post on X</a>
+  </div>
+  <p class="shmsg" id="shmsg" aria-live="polite"></p>
+</div>
+
+<div class="more7">
+  <div class="m7h">Continue reading</div>
+  <a class="m7" href="https://snowshagal.com/reports/en/basics-data-guide-01-krx-net-buying_EN"><i>Data Guide 1</i><b>What Did Foreign Investors Buy and Sell Today?</b><span>Reading Korea Exchange screen [12010]</span></a>
+  <a class="m7" href="https://snowshagal.com/reports/en/Snowshagal_Market_Basics_19_Where_Does_My_Stock_Order_Go_EN_Revised"><i>Part 19</i><b>Where Does My Stock Order Go?</b><span>The Korea Exchange and Nextrade, two venues</span></a>
+  <a class="m7" href="https://snowshagal.com/reports/en/Snowshagal_Market_Basics_17_Why_Do_Circuit_Breakers_Halt_Trading_EN"><i>Part 17</i><b>Why Do Circuit Breakers Halt Trading?</b><span>What stops in a sell-off, and what doesn&#39;t</span></a>
+  <a class="m7 all" href="https://snowshagal.com/en/basics/"><b>Explore all Market Basics articles</b><span>From terms to finding the data</span></a>
+  <a class="m7 cta" href="https://snowshagal.com/en/daily/"><b>What Moved the Market Today?</b><span>Snowshagal Daily · Reports after each market close</span></a>
+</div>
+
+<a class="next nlink" href="https://snowshagal.com/en/basics/">
+  <div class="nh">Up next</div>
+  <p>Since July this year, the won-dollar market has been open around the clock on weekdays. So which hour does &#8220;today&#39;s exchange rate&#8221; in the news refer to?</p>
+  <div class="nt"><b>Data Guide 3</b>Where to Find the Won-Dollar Closing Rate (working title)</div>
+</a>
+
+<div class="foldwrap">
+<details class="fold">
+  <summary>Quick Glossary</summary>
+  <div class="fb">
+    <dl class="gloss">
+      <dt>Collateral ratio</dt><dd>The amount the broker counts as collateral ÷ the amount borrowed, measured at the closing price</dd>
+      <dt>Maintenance ratio</dt><dd>The line below which the broker demands more collateral (<span lang="ko">담보유지비율</span>)</dd>
+      <dt>Top-up</dt><dd>Restoring collateral by a deadline. The demand for it is a margin call</dd>
+      <dt>D, D+1, D+2</dt><dd>The day collateral falls short and the business days after it. Weekends and holidays are not counted</dd>
+      <dt>Stock grade</dt><dd>A broker&#39;s risk tier for a stock, also called a stock group. Margin rates and lines differ by grade</dd>
+      <dt>Initial margin rate</dt><dd>The share of a margin purchase you must cover yourself (<span lang="ko">보증금률</span>)</dd>
+      <dt>Weighted average</dt><dd>An average of different lines, weighted by the size of each loan</dd>
+      <dt>Pledged securities</dt><dd>Shares that stand in for cash as collateral at a fraction of market value (<span lang="ko">대용증권</span>)</dd>
+      <dt>Unsettled purchase</dt><dd>A balance left unpaid at settlement after buying with partial payment (<span lang="ko">미수</span>)</dd>
+      <dt>Frozen account</dt><dd>After an unsettled purchase above ₩100,000, 30 days of cash-only buying at every broker</dd>
+      <dt>KSFC-funded loan</dt><dd>A margin loan funded with money the broker borrows from Korea Securities Finance (<span lang="ko">유통융자</span>)</dd>
+      <dt>Broker credit</dt><dd>Money or shares a broker lends to customers (<span lang="ko">신용공여</span>)</dd>
+    </dl>
+  </div>
+</details>
+
+<details class="fold">
+  <summary>Notes on the Numbers</summary>
+  <div class="fb">
+    <p><b>Date checked</b> · The cards and screen names were checked on Nov.&nbsp;24, 2026, against each broker&#39;s public disclosures, help pages and guide pages. For the &#8220;for now&#8221; boxes we could not open every broker&#39;s original notice, so we also relied on news reports of notices issued Nov.&nbsp;6–12.</p>
+    <p><b>The duty that was lifted</b> · The 140% in the regulation is the collateral a broker must secure when it makes a margin loan. The line to be kept afterward, the maintenance ratio, is set by each broker, and the broker must demand more collateral as soon as an account falls below it. The Financial Supervisory Service lifted that duty from Nov.&nbsp;9, 2026, to Jan.&nbsp;31, 2027. Forced sales for unsettled purchases not paid by settlement are unchanged.</p>
+    <p><b>Morning cutoffs</b> · Most disclosures do not say how late on the sale morning a deposit still cancels the order. One October 2026 report said most large brokers cancel automatically until 8:50&nbsp;a.m., but we could not confirm that broker by broker. Kiwoom&#39;s help page says that, for unsettled-purchase sales only, deposits received by 8:55&nbsp;a.m. are reflected. Samsung&#39;s disclosure for loans against securities (reviewed February 2025) says cash repayments on the sale day are processed at about 6:30, 8:15, 8:40 and 8:50&nbsp;a.m.; we could not confirm that the same holds for margin loans today.</p>
+    <p><b>Kiwoom</b> · The downloadable disclosure is the Jan.&nbsp;24, 2025, revision. It gives the deadline as within the next business day after the first demand for Kiwoom-type accounts, and within the second business day for basic-type accounts.</p>
+    <p><b>Mirae Asset</b> · When borrowing exceeds ₩3&nbsp;billion, 10 percentage points are added to the line, and 20 points above ₩5&nbsp;billion. The sizing price is 15% below the prior close for stock groups A–C and 20% below for groups D–F. Under the lowered line, news reports say a forced sale is sized to restore 130%.</p>
+    <p><b>Samsung</b> · The key-facts sheet, the app guide and the website&#39;s margin and loan guide all give 150% for stocks with a 50% initial margin rate. When an account borrows against several stocks, its line is an average weighted by loan size. The sizing price is 85% of the prior close for grades S and A, and 80% for grade B and below. News reports say the line was lowered by 10 points without application on Nov.&nbsp;9 only, and by application after that.</p>
+    <p><b>Korea Investment</b> · The Nov.&nbsp;9, 2026, disclosure states only 140%, while the key-facts sheet on its website says 140–160%. It values collateral at about 3:40&nbsp;p.m. and 8:10&nbsp;p.m. and uses the Korea Exchange close even when Nextrade prices differ. In another example in the same disclosure, all 1,000 shares of an account that borrowed ₩5&nbsp;million are sold and ₩500,000 of debt still remains. News reports say online requests were not opened to accounts set up at a branch.</p>
+    <p><b>NH</b> · We could not open the margin trading disclosure. Consent is not accepted from 3:30 to 4:30&nbsp;p.m. For overseas-stock loans, accounts that consented get 160%.</p>
+    <p><b>KB</b> · The first report, on Nov.&nbsp;6, said the lowered line would run until Dec.&nbsp;11. Every later report says until further notice. The loan disclosure gives the sizing price as the prior close × 70%.</p>
+    <p><b>Shinhan</b> · The sizing price is 15% below the prior close for grades A, B and C, and 20% below for grades D, E and Z. News reports say it extended relief to overseas stocks, but we could not confirm what line it uses for overseas-stock collateral (usually 170%). Its guide says rollover terms can differ between loans funded by the broker itself and KSFC-funded loans.</p>
+    <p><b>Initial margin rate</b> · In September 2026 the Korea Financial Investment Association proposed raising the minimum from 45% to 50%, and the start date differs by broker: Nov.&nbsp;2 at KB, Nov.&nbsp;9 at Korea Investment, Nov.&nbsp;20 at Kiwoom and Dec.&nbsp;1 at Hanwha, according to news reports.</p>
+    <p><b>Korea Securities Finance</b> · Kiwoom shows KSFC-funded balances on screen [0901]. KSFC also lends directly to individuals against stocks, bonds and funds; those terms are in the agreement with KSFC, not with a broker.</p>
+    <p><b>Unsettled purchases</b> · An unsettled purchase above ₩100,000 means 30 days of cash-only buying at every broker.</p>
+    <p><b>Other brokers</b> · Daishin used 140%, 150% or 160% by stock group and cut each by 10 points; Hana cut by grade. Meritz postpones by one day for accounts at 120% or above, according to news reports.</p>
+    <p><b>Made-up numbers</b> · The 135% account that borrowed ₩10&nbsp;million and the Nov.&nbsp;27 calendar are examples created for explanation. We assumed the shares count as collateral at full market value and left out costs.</p>
+  </div>
+</details>
+
+<details class="fold">
+  <summary>Sources and Data Notes</summary>
+  <div class="fb">
+    <ol class="src">
+      <li><b>Waiver of the collateral-ratio duty on broker credit (Nov.&nbsp;9, 2026–Jan.&nbsp;31, 2027), FSS no-action letter, brokers may set maintenance ratios flexibly</b> · <a href="https://eiec.kdi.re.kr/policy/materialView.do?num=289219&amp;topic=L" target="_blank" rel="noopener">Financial Services Commission and Financial Supervisory Service press release</a> (Nov.&nbsp;9, 2026, as posted by the KDI Economic Information and Education Center; in Korean) · <b>The regulatory 140% is the collateral secured when a margin loan is made; brokers set their own maintenance ratios</b> · <a href="https://view.asiae.co.kr/article/2026110619382233602" target="_blank" rel="noopener">Asia Economy</a>, Nov.&nbsp;8, 2026 · <b>NH, Samsung and Kiwoom notices</b> · <a href="https://www.mt.co.kr/stock/2026/11/08/2026110619030119159" target="_blank" rel="noopener">Money Today</a>, Nov.&nbsp;8, 2026</li>
+      <li><b>Kiwoom Securities · 140% maintenance ratio, top-up deadlines (next business day for Kiwoom-type, second business day for basic-type), valuation at the day&#39;s close, sizing at &#8220;the limit-down price of the prior close, etc.&#8221; (example at −15%)</b> · <a href="https://download.kiwoom.com/web/manual02.pdf" target="_blank" rel="noopener">margin trading disclosure</a> (revised Jan.&nbsp;24, 2025), <a href="https://bbn.kiwoom.com/bbs/VBbsFaqGUIDCRDDFlexibleView" target="_blank" rel="noopener">margin FAQ</a> · <b>Screens [0874], [0379], [0369] (8:55&nbsp;a.m. for unsettled-purchase sales) and [0901]</b> · <a href="https://download.kiwoom.com/hero4_help_new/0874.htm" target="_blank" rel="noopener">HTS help 0874</a>, <a href="https://download.kiwoom.com/hero4_help_new/0379.htm" target="_blank" rel="noopener">0379</a>, <a href="https://download.kiwoom.com/hero4_help_new/0369.htm" target="_blank" rel="noopener">0369</a>, <a href="https://www.kiwoom.com/h/banking/credit/VCreditLoanInfoView" target="_blank" rel="noopener">margin guide</a> · checked Nov.&nbsp;24, 2026</li>
+      <li><b>Mirae Asset Securities · 140% for groups A–F, 160% for administrative-issue and delisting-period stocks, add-ons of 10 points above ₩3&nbsp;billion and 20 points above ₩5&nbsp;billion, top-up period from 4&nbsp;p.m. on day D through D+1, sale on D+2, sizing at 15% (groups A–C) or 20% (groups D–F) below the prior close, Kairos [0917], unsettled purchases sold the day after settlement</b> · <a href="https://securities.miraeasset.com/hki/hki3035/n01.do" target="_blank" rel="noopener">margin trading disclosure</a>, <a href="https://securities.miraeasset.com/hki/hki3031/n05.do" target="_blank" rel="noopener">margin trading terms</a> · checked Nov.&nbsp;24, 2026 · <b>Repayment cutoff moved from 8:30 to 8:50&nbsp;a.m.</b> · <a href="https://biz.sbs.co.kr/amp/article/20000340443" target="_blank" rel="noopener">SBS Biz</a>, Oct.&nbsp;16, 2026 · <b>Sale day unchanged; margin-rate start dates by broker</b> · <a href="https://kpenews.com/View.aspx?No=4308886" target="_blank" rel="noopener">KPE News</a>, Nov.&nbsp;12, 2026</li>
+      <li><b>Samsung Securities · maintenance ratio by initial margin rate (45%: 140%; 50%: 150%; 60%: 160%), top-up within one business day of the demand, sizing at 85% of the prior close for grades S and A and 80% for grade B and below</b> · <a href="https://www.samsungpop.com/download/pdf/KeyFacts.pdf" target="_blank" rel="noopener">margin loan key-facts sheet</a>, <a href="https://www.samsungpop.com/mbw/bankingLoan/common.do?cmd=creditGuide&amp;isWeb=N" target="_blank" rel="noopener">margin trading guide</a>, <a href="https://samsungpop.com/ux/kor/banking/loan/info/info1.do" target="_blank" rel="noopener">margin and loan guide</a> · <b>Collateral tab on the stock-order screen</b> · <a href="https://www.samsungpop.com/help/td023.html" target="_blank" rel="noopener">help page</a> · checked Nov.&nbsp;24, 2026 · <b>Cash repayment times on the sale day</b> · <a href="https://samsungpop.com/common.do?cmd=down&amp;contentType=application%2Fpdf&amp;fileName=sfn250224_smtcrvs.pdf&amp;inlineYn=Y&amp;saveKey=todayinvest.file" target="_blank" rel="noopener">disclosure for loans against securities</a> (reviewed Feb.&nbsp;24, 2025) · <b>10-point cut for applicants, request hours</b> · <a href="https://www.consumuch.com/news/articleView.html?idxno=79524" target="_blank" rel="noopener">Consumuch</a>, Nov.&nbsp;10, 2026</li>
+      <li><b>Korea Investment &amp; Securities · 140% maintenance ratio, top-up by the business day after the demand, sale two days after the shortfall, sizing at 15% below the prior Korea Exchange close, the example (₩200,000 shortfall, 155 shares, about ₩930,000), sale without a top-up demand in certain cases, valuations at about 3:40&nbsp;p.m. and 8:10&nbsp;p.m., Korea Exchange close used even when Nextrade prices differ</b> · <a href="https://file.koreainvestment.com/updata/namo/06085548%EC%8B%A0%EC%9A%A9%EA%B1%B0%EB%9E%98%EC%84%A4%EB%AA%85%EC%84%9C_%EC%A0%84%EB%AC%B8.pdf" target="_blank" rel="noopener">margin trading disclosure</a> (revised Nov.&nbsp;9, 2026), <a href="https://m.koreainvestment.com/main/customer/tradetransfer/_static/TF04dc010000.jsp" target="_blank" rel="noopener">margin trading guide</a>, <a href="https://file.truefriend.com/Storage/customer/guide/regards/core_instructions.html" target="_blank" rel="noopener">key-facts sheet</a> (states 140–160%) · checked Nov.&nbsp;24, 2026 · <b>Postponement bands (130–140% daily, 120–130% once, none below 120%)</b> · <a href="https://m.sedaily.com/article/20111489" target="_blank" rel="noopener">Seoul Economic Daily</a>, Nov.&nbsp;8, 2026 · <b>Notice of temporary postponement (Nov.&nbsp;10, 2026), online requests</b> · <a href="https://www.truefriend.com/main/customer/notice/Notice.jsp" target="_blank" rel="noopener">Korea Investment notices</a>, <a href="https://www.asiatoday.co.kr/kn/view.php?key=20261111010004401" target="_blank" rel="noopener">Asia Today</a>, Nov.&nbsp;11, 2026</li>
+      <li><b>NH Investment &amp; Securities · domestic 140% to 130% and overseas-stock loans 170% to 160% with prior consent; consent before 3:30&nbsp;p.m. applies from that day&#39;s valuation</b> · <a href="https://www.mt.co.kr/stock/2026/11/08/2026110619030119159" target="_blank" rel="noopener">Money Today</a>, Nov.&nbsp;8, 2026 · <b>Requests until 8:30&nbsp;a.m. on the sale day; none from 3:30 to 4:30&nbsp;p.m.</b> · <a href="https://www.hankooki.com/news/articleView.html?idxno=348110" target="_blank" rel="noopener">Hankooki</a>, Nov.&nbsp;9, 2026 · <b>Sale sized on 140%; warning of new shortfalls when relief ends</b> · <a href="http://www.the-biz.co.kr/news/articleView.html?idxno=731103" target="_blank" rel="noopener">The Biz</a>, Nov.&nbsp;10, 2026, <a href="https://www.ddaily.co.kr/page/view/2026110910230902581" target="_blank" rel="noopener">Digital Daily</a>, Nov.&nbsp;9, 2026</li>
+      <li><b>KB Securities · base 140%, weighted average across stock groups (144% example), top-up period of two business days including the demand day, sale the business day after, sizing at the limit-down price, H-able [0942]</b> · <a href="https://fdata.kbsec.com/agree/trust.pdf" target="_blank" rel="noopener">margin trading disclosure</a> (reviewed Oct.&nbsp;27, 2026) · <b>In most cases the whole margin and loan position is sold regardless of the shortfall</b> · <a href="https://www.kbsec.com/common/agree/trust2.pdf" target="_blank" rel="noopener">margin loan key-facts sheet</a> · <b>[0362] account detail (margin loans, collateral ratio)</b> · <a href="https://help2.kbsec.com/0362.html" target="_blank" rel="noopener">H-able help</a> · <b>Sizing price of prior close × 70%</b> · <a href="https://fdata.kbsec.com/agree/goods46.pdf" target="_blank" rel="noopener">loan disclosure</a> · <b>Temporary 130%, until further notice, overseas-stock and CMA-backed loans excluded</b> · <a href="https://www.sisajournal-e.com/news/articleView.html?idxno=424873" target="_blank" rel="noopener">Sisa Journal e</a>, Nov.&nbsp;8, 2026, <a href="https://www.fnnews.com/news/202611101813224608" target="_blank" rel="noopener">Financial News</a>, Nov.&nbsp;10, 2026 · <b>Until Dec.&nbsp;11 (first report)</b> · <a href="https://www.ajunews.com/view/20261106175912405" target="_blank" rel="noopener">Aju Business Daily</a>, Nov.&nbsp;6, 2026</li>
+      <li><b>Shinhan Securities · minimum 140% (170% with overseas securities as collateral), top-up by the day after the demand, sale two business days after the demand, disposal in the Korea Exchange opening call auction, sizing at −15% for grades A, B, C and −20% for grades D, E, Z, sale without a top-up demand in certain cases</b> · <a href="http://file.shinhansec.com/filedoc/clause/k_2.pdf" target="_blank" rel="noopener">margin trading disclosure</a> (reviewed July&nbsp;29, 2026) · <b>Collateral-ratio menu, self-funded and KSFC-funded loans, cash deposits</b> · <a href="https://open.shinhansec.com/mobilena/html/ma/nama000300.html" target="_blank" rel="noopener">margin guide</a>, <a href="https://open.shinhansec.com/mobilena/html/sc/nasc901037.html" target="_blank" rel="noopener">FAQ</a> · checked Nov.&nbsp;24, 2026 · <b>Postponement at 130% or above, request channels</b> · <a href="https://www.asiatoday.co.kr/kn/view.php?key=20261111010004401" target="_blank" rel="noopener">Asia Today</a>, Nov.&nbsp;11, 2026 · <b>Relief extended to overseas stocks</b> · <a href="https://www.sportalkorea.com/news/articleView.html?idxno=2025052909553688038" target="_blank" rel="noopener">Sportal Korea</a>, Nov.&nbsp;10, 2026</li>
+      <li><b>How brokers run the temporary rules (Kiwoom and Korea Investment conditions and hours, Mirae Asset weighted average, Samsung, Daishin, Hana, Meritz)</b> · <a href="https://www.smarttoday.co.kr/ko-kr/articles/113534" target="_blank" rel="noopener">Smart Today</a>, Nov.&nbsp;8, 2026 · <a href="https://newstomato.com/ReadNews.aspx?no=1319764" target="_blank" rel="noopener">News Tomato</a>, Nov.&nbsp;9, 2026 · <a href="https://www.fnnews.com/news/202611101813224608" target="_blank" rel="noopener">Financial News</a>, Nov.&nbsp;10, 2026 · <a href="https://news.bizwatch.co.kr/article/market/2026/11/12/0026" target="_blank" rel="noopener">Business Watch</a>, Nov.&nbsp;12, 2026</li>
+      <li><b>Plan for a 50% minimum initial margin rate and start dates by broker</b> · <a href="https://view.asiae.co.kr/article/2026092315180934192" target="_blank" rel="noopener">Asia Economy</a>, Sept.&nbsp;23, 2026, <a href="https://kpenews.com/View.aspx?No=4308886" target="_blank" rel="noopener">KPE News</a>, Nov.&nbsp;12, 2026, <a href="https://www.ngetnews.com/news/articleView.html?idxno=556030" target="_blank" rel="noopener">News Journalism</a>, Nov.&nbsp;18, 2026</li>
+      <li><b>The waiver ends on a Sunday; the 2020 and 2022 waivers were extended</b> · <a href="https://newstomato.com/ReadNews.aspx?no=1320012" target="_blank" rel="noopener">IB Tomato</a>, Nov.&nbsp;11, 2026</li>
+      <li><b>Role of Korea Securities Finance (funding for margin loans, securities-backed loans to individuals and companies)</b> · <a href="https://www.ksfc.co.kr:4443/finance/introduce/summary.do" target="_blank" rel="noopener">Korea Securities Finance, company overview</a></li>
+      <li><b>Frozen account: 30 days, ₩100,000 or less exempt</b> · <a href="https://download.kiwoom.com/hero4_help_new/1001.htm" target="_blank" rel="noopener">Kiwoom help 1001</a></li>
+      <li><b>Round-the-clock won-dollar trading (from July&nbsp;6, 2026)</b> · <a href="https://www.kita.net/board/totalTradeNews/totalTradeNewsDetail.do?no=101967" target="_blank" rel="noopener">Yonhap News</a>, May&nbsp;31, 2026 (as posted by the Korea International Trade Association)</li>
+      <li>The cover sketch, the phone-screen sketch and the calendar sketch simplify the content. Screen names, numbers and menus can change. All sources are in Korean.</li>
+    </ol>
+  </div>
+</details>
+</div>
+</main>
+
+<p class="disc">This article explains how to find and read market data. Brokers change their terms often; check your own broker&#39;s notices and disclosures before trading. It does not recommend margin trading or any broker or security, and investment decisions and their results are the investor&#39;s own.</p>
+<p class="foot">Data Guide · 02</p>
+
+</div>
+
+<script>
+(function(){
+  if(window.__dataGuide02) return; window.__dataGuide02 = true;
+
+  /* 진행 막대 */
+  var pg=document.getElementById('pg');
+  function updateProg(){
+    if(!pg) return;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var y=window.scrollY||window.pageYOffset||0;
+    pg.style.width=(h>0?Math.min(100,Math.max(0,y/h*100)):0)+'%';
+  }
+  window.addEventListener('scroll',updateProg,{passive:true});
+  window.addEventListener('resize',updateProg);
+  updateProg();
+
+  /* 툴팁 */
+  var openedAt=0;
+  function resetTip(el){ var tp=el.querySelector('.tip'); if(tp){ tp.classList.remove('below'); tp.removeAttribute('style'); } }
+  function clampTip(t){
+    var tip=t.querySelector('.tip'); if(!tip) return;
+    var vw=window.innerWidth, pad=12;
+    var w=Math.min(248, vw-2*pad);
+    tip.style.position='fixed'; tip.style.bottom='auto'; tip.style.transform='none';
+    tip.style.width=w+'px'; tip.style.left='0px'; tip.style.top='0px';
+    var tr=t.getBoundingClientRect();
+    var th=tip.getBoundingClientRect().height;
+    var left=tr.left+tr.width/2-w/2;
+    if(left<pad) left=pad;
+    if(left+w>vw-pad) left=vw-pad-w;
+    var top=tr.top-th-9, below=false;
+    if(top<pad+50){ top=tr.bottom+9; below=true; }
+    var vh=window.innerHeight;
+    if(top+th>vh-pad){ top=vh-pad-th; }
+    if(top<pad){ top=pad; }
+    tip.style.left=Math.round(left)+'px';
+    tip.style.top=Math.round(top)+'px';
+    var tb=tip.getBoundingClientRect();
+    var dx=tb.left-left, dy=tb.top-top;
+    if(dx||dy){ tip.style.left=Math.round(left-dx)+'px'; tip.style.top=Math.round(top-dy)+'px'; }
+    tip.classList.toggle('below', below);
+    var ax=tr.left+tr.width/2-left;
+    ax=Math.max(12, Math.min(w-12, ax));
+    tip.style.setProperty('--ax', Math.round(ax)+'px');
+  }
+  var tipSeq=0;
+  var canHover=!!(window.matchMedia&&window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+  function closeTerms(except){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++){ if(open[i]!==except){ open[i].classList.remove('open'); open[i].setAttribute('aria-expanded','false'); resetTip(open[i]); } }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.term'), function(t){
+    t.setAttribute('tabindex','0'); t.setAttribute('role','button');
+    var tp0=t.querySelector('.tip');
+    if(tp0){
+      var nm=''; for(var c=t.firstChild;c;c=c.nextSibling){ if(c!==tp0) nm+=c.textContent; }
+      tipSeq++; tp0.id='tip'+tipSeq; tp0.setAttribute('role','tooltip');
+      t.setAttribute('aria-label',nm.replace(/\s+/g,' ').trim()); t.setAttribute('aria-describedby',tp0.id);
+    }
+    t.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); t.click(); } if(e.key==='Escape'){ closeTerms(null); } });
+    t.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var willOpen=canHover?true:!t.classList.contains('open');
+      closeTerms(t);
+      t.classList.toggle('open', willOpen);
+      t.setAttribute('aria-expanded', willOpen?'true':'false');
+      if(willOpen){ openedAt=Date.now(); clampTip(t); }
+    });
+    t.setAttribute('aria-expanded','false');
+    if(canHover){
+      t.addEventListener('mouseenter', function(){ closeTerms(t); t.classList.add('open'); t.setAttribute('aria-expanded','true'); openedAt=Date.now(); clampTip(t); });
+      t.addEventListener('mouseleave', function(){ t.classList.remove('open'); t.setAttribute('aria-expanded','false'); resetTip(t); });
+    }
+    t.addEventListener('focusout', function(){ if(t.classList.contains('open')){ t.classList.remove('open'); t.setAttribute('aria-expanded','false'); resetTip(t); } });
+  });
+  document.addEventListener('click', function(){ closeTerms(null); });
+  window.addEventListener('scroll', function(){ if(Date.now()-openedAt>700) closeTerms(null); }, {passive:true});
+  window.addEventListener('resize', function(){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++) clampTip(open[i]);
+  });
+
+  /* 문제 카드 */
+  Array.prototype.forEach.call(document.querySelectorAll('.pop'), function(card){
+    var opts=card.querySelectorAll('.opt'), ans=card.querySelector('.popans');
+    var done=false;
+    Array.prototype.forEach.call(opts, function(b){
+      b.addEventListener('click', function(){
+        if(done) return; done=true;
+        Array.prototype.forEach.call(opts, function(o){
+          o.setAttribute('aria-disabled','true');
+          if(o.getAttribute('data-ok')==='1') o.classList.add('ok');
+          else if(o===b) o.classList.add('no');
+        });
+        b.setAttribute('aria-pressed','true');
+        if(ans){
+          ans.hidden=false;
+          var v=ans.querySelector('.verdict');
+          if(v){ v.textContent=(b.getAttribute('data-ok')==='1'?'Correct · ':'Not quite · ')+v.textContent; try{ v.focus({preventScroll:true}); }catch(e){ v.focus(); } }
+        }
+      });
+    });
+  });
+
+
+
+  /* 같은 담보비율, 다른 결과 */
+  var ks=document.getElementById('ksim');
+  if(ks){
+    var KS={r:135,m:'cut'};
+    var kbar=document.getElementById('kgbar'), kline=document.getElementById('kgline'), kval=document.getElementById('kgval'), kg=document.getElementById('kg');
+    var k1=document.getElementById('k1'), k2=document.getElementById('k2'), k3=document.getElementById('k3'), kmsg=document.getElementById('kmsg');
+    var KT={"fine": "Above the line. Nothing happens.", "base": "₩{n} short of the 140% line. A top-up notice goes out, and if the gap is not filled by the deadline the shares are sold two business days later at the open.", "cutok": "Above the lowered 130% line, so there is no shortfall. At the usual 140% this account would be ₩{n} short.", "cutno": "₩{n} short even at the lowered 130% line. The usual sequence applies.", "d1": "₩{n} short. The margin call still arrives. If the account becomes due for a sale, you can apply to postpone it: one day only at Kiwoom, a fresh application every day at Korea Investment.", "d2": "₩{n} short. Of the brokers in the cards, only Korea Investment allows a single postponement here.", "d3": "₩{n} short. None of the brokers in the cards postpones at this level. The usual sequence applies.", "unit": 10000, "std": "line {n}%", "none": "No shortfall", "shortlbl": "₩{n} short", "deferlbl": "can apply to postpone", "deferlbl2": "Korea Inv. only, once"};
+    function won(n){ return (n*(KT.unit||1)).toLocaleString('en-US'); }
+    function kdraw(){
+      var r=KS.r, m=KS.m, std=(m==='cut')?130:140;
+      var short=Math.max(0,(std-r)*10), s140=Math.max(0,(140-r)*10);
+      var ok=short===0, defer=false, msg;
+      if(r>=140){ msg=KT.fine; }
+      else if(m==='base'){ msg=KT.base.replace('{n}',won(short)); }
+      else if(m==='cut'){ msg=(r>=130)?KT.cutok.replace('{n}',won(s140)):KT.cutno.replace('{n}',won(short)); }
+      else{
+        if(r>=130){ msg=KT.d1.replace('{n}',won(short)); defer=true; }
+        else if(r>=120){ msg=KT.d2.replace('{n}',won(short)); defer=2; }
+        else{ msg=KT.d3.replace('{n}',won(short)); }
+      }
+      var pct=function(v){ return Math.max(0,Math.min(100,(v-100)/60*100)); };
+      kbar.style.width=pct(r)+'%'; kline.style.left=pct(std)+'%'; kline.setAttribute('data-l',KT.std.replace('{n}',std));
+      kval.textContent=r+'%'; kg.classList.toggle('no',!ok);
+      k1.querySelector('b').textContent=r+'%'; k2.querySelector('b').textContent=std+'%';
+      k3.className='df '+(ok?'ok':'no');
+      k3.querySelector('b').innerHTML=ok?KT.none:(KT.shortlbl.replace('{n}',won(short))+(defer?'<small>'+(defer===2?KT.deferlbl2:KT.deferlbl)+'</small>':''));
+      kmsg.textContent=msg;
+    }
+    Array.prototype.forEach.call(ks.querySelectorAll('.chip'),function(b){
+      b.addEventListener('click',function(){
+        var k=b.getAttribute('data-k'), v=b.getAttribute('data-v');
+        KS[k]=(k==='r')?parseInt(v,10):v;
+        Array.prototype.forEach.call(ks.querySelectorAll('.chip[data-k="'+k+'"]'),function(o){ var on=(o===b); o.classList.toggle('on',on); o.setAttribute('aria-pressed',on?'true':'false'); });
+        kdraw();
+      });
+    });
+    kdraw();
+  }
+
+  /* 내 증권사 카드 */
+  var pk=document.getElementById('pick');
+  if(pk){
+    pk.classList.add('js');
+    var pchips=pk.querySelectorAll('.pchips .chip'), pcards=pk.querySelectorAll('.bcard');
+    Array.prototype.forEach.call(pchips,function(b){
+      b.addEventListener('click',function(){
+        var id=b.getAttribute('data-b');
+        Array.prototype.forEach.call(pchips,function(o){ var on=(o===b); o.classList.toggle('on',on); o.setAttribute('aria-pressed',on?'true':'false'); });
+        pk.classList.toggle('all',id==='all');
+        Array.prototype.forEach.call(pcards,function(c){ c.classList.toggle('on',c.getAttribute('data-b')===id); });
+      });
+    });
+    Array.prototype.forEach.call(pchips,function(o){ if(o.getAttribute('aria-pressed')==='true') o.classList.add('on'); });
+  }
+
+  /* 체크리스트 */
+  var ckl=document.getElementById('cklist');
+  if(ckl){
+    var ckbs=ckl.querySelectorAll('.ckb'), ckn=document.getElementById('ckn'), ckd=document.getElementById('ckdone');
+    Array.prototype.forEach.call(ckbs,function(b){
+      b.addEventListener('click',function(){
+        b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true');
+        var n=ckl.querySelectorAll('.ckb[aria-pressed="true"]').length;
+        ckn.textContent=n+'/'+ckbs.length;
+        ckd.textContent=(n===ckbs.length)?"All five filled in. You know where to look when prices swing.":'';
+      });
+    });
+  }
+
+  /* 공유 */
+  var CANON="https://snowshagal.com/reports/en/basics-data-guide-02-margin-call-by-broker_EN";
+  function pageUrl(){ var h=location.href.split('#')[0]; return /^https?:/.test(h)?h:CANON; }
+  var smsg=document.getElementById('shmsg');
+  function say(t){ if(smsg){ smsg.textContent=t; setTimeout(function(){ smsg.textContent=''; },2500); } }
+  function legacy(text){
+    var ta=document.createElement('textarea'); ta.value=text; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); var ok=false;
+    try{ ok=document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+    say(ok?'Link copied':'Copying is blocked. Copy the link from the address bar instead.');
+  }
+  function copy(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(function(){ say('Link copied'); },function(){ legacy(text); }); }
+    else legacy(text);
+  }
+  var TXT={ page:"What is my broker's forced-sale line, and when does it hit? Korean brokers' margin maintenance ratios compared", quiz:"Quiz. Your margin account at a Korean broker closes below its maintenance line on Friday, and a margin call arrives that evening. If you do nothing, when are the shares usually sold? (1) Monday morning (2) Tuesday morning (3) The following Friday" };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-share]'),function(b){
+    b.addEventListener('click',function(){
+      var k=b.getAttribute('data-share'), url=pageUrl();
+      if(k==='copy'){ copy(url); return; }
+      if(k==='quiz') url=url+'#quiz1';
+      var data={title:"What Is My Broker's Forced-Sale Line, and When Does It Hit?",text:TXT[k]||TXT.page,url:url};
+      if(navigator.share){ navigator.share(data).catch(function(){}); }
+      else{ copy(data.text+' '+url); }
+    });
+  });
+})();
+</script>
+</body>
+</html>
