@@ -1,5 +1,6 @@
 import { MAX_PAYLOAD_BYTES, MAX_TAKEAWAY_LENGTH, TABLE_NAME, MarketDbError, authorizePublish, ensureMarketTable, humanAdminPublishPolicy, isMarketWriteRequest, json, loadMarketSchema, validateMarketPayload } from './_shared.js';
 import { getKrxSessionTimes, kstParts } from '../../_trading-calendar.js';
+import { ensureMarketCards } from '../../_market-card.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -94,6 +95,13 @@ export async function onRequestPost(context) {
         takeaway_en = excluded.takeaway_en`)
       .bind(payload.meta.market_date, payload.meta.schema_version, payload.meta.generated_at, payload.meta.status, payloadText, publishedAt, authSource, stored.ko, stored.en).run();
     const isLatest = !latestBefore?.market_date || payload.meta.market_date >= latestBefore.market_date;
+    // The session's share card (/market/YYYY-MM-DD/card.jpg), drawn after the
+    // answer has gone out. It never affects the publish: ensureMarketCards
+    // does not throw, and a missing table or renderer leaves the page on the
+    // standard image.
+    if (payload.meta.status === 'final' && typeof context.waitUntil === 'function') {
+      context.waitUntil(ensureMarketCards(env, payload.meta.market_date));
+    }
     return json({ ok: true, market_date: payload.meta.market_date, schema_version: payload.meta.schema_version, action: existing ? 'updated' : 'created', is_latest: isLatest, takeaway: { ko: Boolean(stored.ko), en: Boolean(stored.en) } }, existing ? 200 : 201);
   } catch (error) {
     if (error instanceof MarketDbError) return json({ error: error.code, message: error.message }, error.status);

@@ -286,6 +286,22 @@ npx wrangler d1 execute market-research-comments --remote --file=migrations/comm
 
 Request handlers never create the table: without it both endpoints answer `503 DOMESTIC_RATES_SCHEMA_NOT_READY`, and the pages (dashboard, session pages, history pages, archive, sitemap) behave exactly as without rates. A Preview acceptance test may publish a real KOFIA day to the Preview endpoint and delete it afterwards, on Preview only: `DELETE FROM market_domestic_rates WHERE market_date = 'YYYY-MM-DD';`. The Preview deployment's `MARKET_PUBLISH_KEY` is not the collector's, so the collector's own key answers 401 there. Status: migration `0003` applied to Preview and Production on 2026-11-22; Production holds the 2026 backfill and the daily task's days.
 
+Market Close cards (`functions/_market-card.js`) keep one 1200×630 JPEG per published session and language in `market_close_cards` and serve it at `/market/YYYY-MM-DD/card.jpg` (the session page's share image). They reuse `COMMENTS_DB`, `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_BROWSER_RENDERING_TOKEN`; no new Secret or binding is required. Each card is one Browser Rendering screenshot (about two per trading day).
+
+Apply the checked-in idempotent migration to the isolated Preview database first:
+
+```bash
+npx wrangler d1 execute market-research-comments-preview --remote --file=migrations/comments/0004_market_close_cards.sql
+```
+
+Only after approval, apply the same file to Production:
+
+```bash
+npx wrangler d1 execute market-research-comments --remote --file=migrations/comments/0004_market_close_cards.sql
+```
+
+Request handlers never create the table: without it the card address answers 302 to the standard Market Close image, a publish skips the card, and session pages keep the standard share image. The same holds where the Browser Rendering Secrets are missing (for example a Preview without them). Status: migration `0004` not applied yet.
+
 Public `GET /api/announcements` returns only `publish_state = published`, `audience = all` rows whose UTC exposure window contains the current server time. Admin create/update/delete require an authenticated administrator session, exact Preview or Production admin Origin, and the session CSRF token. No new Secret or environment variable is required.
 
 ### Automated OpenDART Daily Sync (`DISCLOSURE_SYNC_KEY`)
