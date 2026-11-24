@@ -1330,6 +1330,28 @@ test('1W/1M: Korean instrument names on the Korean page, and the Dow Jones row i
   assert.match(enTarget.innerHTML, /<strong><a class="instrument-history-link" href="\/en\/market\/dow\/">Dow Jones<\/a><\/strong>/);
 });
 
+test('1W/1M: each row draws the period line from the value before the window, and only when it ends on a value', async () => {
+  const runtime = await marketRuntimeWithLocale('ko');
+  const row = (code, extra = {}) => ({ baseline_value: 100, end_value: 103, return_pct: 3, change: 3, observations: 3, complete: true, series: [101, 99, 103], ...extra });
+  const payload = rangePayload();
+  payload.instruments.indices.KOSPI = row('KOSPI');
+  payload.instruments.indices.KOSDAQ = row('KOSDAQ', { series: [101, 99, null], end_value: null });
+  payload.instruments.indices.NASDAQ = row('NASDAQ', { series: undefined });
+  const target = { innerHTML: '' };
+  runtime.renderRangeView(payload, '1w', target);
+  const rowOf = name => {
+    const start = target.innerHTML.indexOf(`href="/market/${name}/"`);
+    return target.innerHTML.slice(start, target.innerHTML.indexOf('class="range-item-row"', start + 1));
+  };
+  // baseline 100, then 101, 99, 103: four points; the line ends on the last session.
+  const kospi = rowOf('kospi');
+  assert.match(kospi, /<div class="range-item-trend"><svg class="mk-spark"/);
+  assert.equal((kospi.match(/<polyline class="mk-spark-line" points="([^"]+)"/)[1].split(' ')).length, 4);
+  // No value for the last session, or no series (an older cached answer): no line.
+  assert.doesNotMatch(rowOf('kosdaq'), /range-item-trend/);
+  assert.doesNotMatch(rowOf('nasdaq'), /range-item-trend/);
+});
+
 test('1W/1M: KRX sector and theme rankings use English names on the English page', async () => {
   const en = await marketRuntimeWithLocale('en');
   const target = { innerHTML: '' };

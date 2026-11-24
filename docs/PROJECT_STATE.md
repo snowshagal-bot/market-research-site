@@ -88,6 +88,16 @@ The date bar's period buttons read 5거래일 / 20거래일 (EN 5 sessions / 20 
 URLs stay `?view=1w|1m`), and 지표별 기록 / Indicator history beside 전체 기록 opens
 `/market/archive/#indicators`. Below 1024px the two links take their own row.
 
+Period lines (2026-11-24): in the 5/20-session views each instrument row draws the
+period's line just before its figures. `/api/market/range` gives every instrument a
+`series`: its value for each session of `window.dates` (`getPeriodValue`, null where
+the record has none, never carried forward). The line starts at `baseline_value`,
+where the period return starts, and is drawn only when the window ends with a value.
+From 761px the names and figures keep their width, so a section's lines stand in one
+column; up to 760px, where a row wraps its figures under its name, the line is left
+out, as on the phone quote boards. An older cached range answer without `series`
+simply has no lines.
+
 Internal links (2026-11-23): four sets of links tie the market pages, the
 reports and the glossary together. All are in the first HTML; none edits a
 report file.

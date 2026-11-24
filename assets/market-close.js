@@ -1022,6 +1022,15 @@
   // compares against a day it was not recorded.
   const rangeShown = (key, item) => Boolean(item) && (!OPTIONAL_CODES.includes(key) || valid(item.baseline_value));
 
+  // The period's line: the value before the window (baseline_value, where the
+  // period return starts) and each session's value after it. Drawn only when the
+  // window ends with a value (trendSvg), so it always ends on the figure shown.
+  function rangeTrend(item) {
+    if (!valid(item?.baseline_value) || !Array.isArray(item?.series) || !item.series.length) return '';
+    const line = trendSvg([item.baseline_value, ...item.series], { w: 160, h: 30, pad: 3 });
+    return line ? `<div class="range-item-trend">${line}</div>` : '';
+  }
+
   function renderRangeInstrumentRow(key, item) {
     if (!rangeShown(key, item)) return '';
     const name = instrumentName(key, item);
@@ -1039,6 +1048,7 @@
           <strong>${historyLink(key, html(name))}</strong>
           ${highLow}
         </div>
+        ${rangeTrend(item)}
         <div class="range-item-values">
           <span class="range-path">${baseline} <span class="range-arrow">→</span> ${end}</span>
           <strong class="range-return ${returnCls}">${returnStr}</strong>
@@ -1079,6 +1089,7 @@
         <div class="range-item-name">
           <strong>${historyLink(key, html(name))}</strong>
         </div>
+        ${rangeTrend(item)}
         <div class="range-item-values">
           <span class="range-path">${baseline} <span class="range-arrow">→</span> ${end}</span>
           <div class="range-change-wrap">
