@@ -6,8 +6,10 @@ import {
   homepageLatestLinks,
   categoryReportLinks,
   reportReadingNavigation,
+  reportMarketSessionLink,
   cleanReportHref
 } from '../functions/_seo.js';
+import { marketDatePath } from '../functions/_market-date-page.js';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
@@ -57,6 +59,7 @@ function makeShadowRoot() {
 
 async function loadReportShell({ serverNav = null, postData = [], currentPath = '/reports/8월 27일 주식리포트_커버통합.html' } = {}) {
   const code = await read('assets/report-shell.js');
+  const created = [];
   const windowObj = { MARKET_LOCALE: undefined, RESEARCH_POSTS: postData, addEventListener() {} };
   const documentObj = {
     currentScript: { dataset: { category: 'daily', lang: 'ko' } },
@@ -65,7 +68,7 @@ async function loadReportShell({ serverNav = null, postData = [], currentPath = 
     title: '',
     readyState: 'complete',
     addEventListener() {},
-    createElement: tag => makeElement(tag),
+    createElement: tag => { const element = makeElement(tag); created.push(element); return element; },
     getElementById: id => id === 'mrs-reading-nav' ? serverNav : (id === 'mrs-comments-host' ? makeElement('section') : null),
     querySelector: () => null,
     querySelectorAll: () => []
@@ -91,7 +94,9 @@ async function loadReportShell({ serverNav = null, postData = [], currentPath = 
   await new Promise(resolve => setImmediate(resolve));
   return {
     shell: sandbox.window.REPORT_SHELL,
-    discovery: sandbox.window.REPORT_DISCOVERY
+    discovery: sandbox.window.REPORT_DISCOVERY,
+    // The shadow root of the "previous / next / related" block, once mounted.
+    discoveryRoot: created.find(element => element.id === 'mrs-discovery-host')?.shadowRoot || null
   };
 }
 
@@ -154,6 +159,60 @@ test('initial reading links survive failed discovery loading and are replaced on
   ];
   await loadReportShell({ serverNav, postData, currentPath: '/reports/first' });
   assert.equal(removed, true, 'successful discovery must avoid duplicate navigation');
+});
+
+test('a Daily with a published close links to that session’s market page, first in the reading nav', () => {
+  const posts = [
+    { id: 'd1', type: 'daily', href: 'reports/d1.html', title: 'Day 1', reportDate: '2026-11-20' },
+    { id: 'd2', type: 'daily', href: 'reports/d2.html', title: 'Day 2', reportDate: '2026-11-23' },
+    { id: 'e2', type: 'daily', lang: 'en', href: 'reports/en/d2.html', title: 'Day 2 EN', reportDate: '2026-11-23' },
+    { id: 'n1', type: 'note', href: 'reports/n1.html', title: 'Note', reportDate: '2026-11-23' }
+  ];
+  const hrefs = html => [...html.matchAll(/<a href="([^"]+)"/g)].map(match => match[1]);
+  const ko = reportReadingNavigation(posts, posts[1], { marketDate: '2026-11-23' });
+  assert.deepEqual(hrefs(ko), [marketDatePath('2026-11-23', 'ko'), '/reports/d1']);
+  assert.match(ko, /<a href="\/market\/2026-11-23\/" data-market-session="2026-11-23"><span>이날의 시장 수치<\/span><strong>11월 23일 한국 증시 마감: 종가·수급·환율·금리 한눈에<\/strong><\/a>/);
+  assert.doesNotMatch(ko, /nofollow|\shidden/);
+
+  // The only English Daily has no neighbour: the nav still carries the session link.
+  const en = reportReadingNavigation(posts, posts[2], { marketDate: '2026-11-23' });
+  assert.deepEqual(hrefs(en), [marketDatePath('2026-11-23', 'en')]);
+  assert.match(en, /<span>Market data for this session<\/span><strong>Korea Market Close, Nov 23, 2026: closes, investor flows, FX and rates<\/strong>/);
+
+  // No published close, another session's close, or another kind of report: no link.
+  assert.doesNotMatch(reportReadingNavigation(posts, posts[1]), /data-market-session/);
+  assert.doesNotMatch(reportReadingNavigation(posts, posts[1], { marketDate: '2026-11-20' }), /data-market-session/);
+  assert.equal(reportMarketSessionLink(posts[3], '2026-11-23'), '');
+  assert.equal(reportMarketSessionLink(posts[1], '2026-11-2'), '');
+  assert.equal(reportReadingNavigation(posts, posts[2]), '');
+});
+
+test('the reader UI carries the session link over from the server nav it replaces', async () => {
+  const posts = [
+    { id: 'd1', type: 'daily', href: 'reports/d1.html', title: 'Day 1', reportDate: '2026-11-20' },
+    { id: 'd2', type: 'daily', href: 'reports/d2.html', title: 'Day 2', reportDate: '2026-11-23' }
+  ];
+  const navWith = href => {
+    const link = {
+      getAttribute: name => (name === 'href' ? href : null),
+      querySelector: selector => ({ textContent: selector === 'strong' ? '11월 23일 한국 증시 마감: 종가·수급·환율·금리 한눈에' : '이날의 시장 수치' })
+    };
+    return { remove() {}, querySelector: selector => (selector === 'a[data-market-session]' ? link : null) };
+  };
+  const shown = await loadReportShell({ serverNav: navWith('/market/2026-11-23/'), postData: posts, currentPath: '/reports/d2' });
+  const link = shown.discoveryRoot.getElementById('market-session-link');
+  assert.equal(link.getAttribute('href'), '/market/2026-11-23/');
+  assert.equal(link.hidden, false);
+  assert.match(link.innerHTML, /<span class="nav-dir">이날의 시장 수치<\/span><strong class="nav-title">11월 23일 한국 증시 마감: 종가·수급·환율·금리 한눈에 →<\/strong>/);
+
+  // A link that is not this site's /market/YYYY-MM-DD/ path is not taken.
+  for (const href of ['https://example.com/market/2026-11-23/', '/market/', 'javascript:alert(1)']) {
+    const other = await loadReportShell({ serverNav: navWith(href), postData: posts, currentPath: '/reports/d2' });
+    assert.equal(other.discoveryRoot.getElementById('market-session-link').getAttribute('href'), null, href);
+  }
+  // No server nav link (no published close): nothing is shown.
+  const none = await loadReportShell({ serverNav: { remove() {} }, postData: posts, currentPath: '/reports/d2' });
+  assert.equal(none.discoveryRoot.getElementById('market-session-link').getAttribute('href'), null);
 });
 
 test('initial reading links escape editorial titles and keep canonical clean hrefs', () => {

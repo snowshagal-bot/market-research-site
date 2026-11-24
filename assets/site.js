@@ -1029,6 +1029,8 @@
     }
     return { value, change, direction: movement < 0 ? 'down' : 'up' };
   }
+  // Each strip figure links to its daily history page (functions/_market-indicators.js: the slug is the code in lower case).
+  function stripItemPath(key){ return `${locale === 'en' ? '/en' : ''}/market/${String(key).toLowerCase()}/`; }
   function publishedStripItems(payload, overlay){
     const soft = declaredUnavailable(payload);
     const latest = overlay?.items || {};
@@ -1040,14 +1042,15 @@
       const quote = payload?.[spec.group]?.[spec.key];
       const snapshot = stripFigures(spec, quote);
       if (!snapshot && !soft.has(spec.key)) return null;
+      const historyPath = stripItemPath(spec.key);
       const item = overlaid(spec);
       if (item) {
         const figures = stripFigures(spec, { close: item.value, change: item.change, change_pct: item.change_pct });
-        if (figures) return { label: spec.label, ...figures, basis: basis('latest', item) };
+        if (figures) return { label: spec.label, historyPath, ...figures, basis: basis('latest', item) };
       }
-      if (!snapshot) return { label: spec.label, value: '--', change: '', direction: 'flat', basis: '' };
+      if (!snapshot) return { label: spec.label, historyPath, value: '--', change: '', direction: 'flat', basis: '' };
       const kind = localeApi?.isGlobalLatestCode?.(spec.key) ? 'snapshot' : 'krx';
-      return { label: spec.label, ...snapshot, basis: basis(kind, kind === 'krx' ? { source_date: marketDate } : quote) };
+      return { label: spec.label, historyPath, ...snapshot, basis: basis(kind, kind === 'krx' ? { source_date: marketDate } : quote) };
     }).filter(Boolean);
     return items.length === TODAY_STRIP_ITEMS.length ? items : null;
   }
@@ -1177,7 +1180,7 @@
     }
     if (gridEl) {
       gridEl.innerHTML = session.items.map(item => (
-        `<div class="today-item" role="listitem"><span class="today-label">${esc(item.label)}</span><span class="today-value">${esc(item.value)}</span><span class="today-change ${item.direction}">${esc(item.change)}</span>${item.basis ? `<span class="today-basis">${esc(item.basis)}</span>` : ''}</div>`
+        `<div class="today-item" role="listitem"><a class="today-item-link" href="${esc(item.historyPath)}"><span class="today-label">${esc(item.label)}</span><span class="today-value">${esc(item.value)}</span><span class="today-change ${item.direction}">${esc(item.change)}</span>${item.basis ? `<span class="today-basis">${esc(item.basis)}</span>` : ''}</a></div>`
       )).join('');
       gridEl.removeAttribute('aria-busy');
     }
@@ -1348,9 +1351,11 @@
     }
 
     const isEn = locale === 'en';
+    const slidesWrap = document.getElementById('hero-slides');
 
     // Track active slide elements
     let activeSlides = [slide1];
+    let activeIndex = 0;
 
     // Find the latest research for this locale
     const latestResearch = posts.find(p => p.type === 'research');
@@ -1454,7 +1459,11 @@
         updateCounterAndControls();
         return;
       }
-      activeIndex = Math.max(0, Math.min(activeSlides.length - 1, index));
+      const nextIndex = Math.max(0, Math.min(activeSlides.length - 1, index));
+      // From the first real move on, a newly shown slide fades in. The first
+      // paint never fades (see .hero-slides[data-hero-moved] in home-v2.css).
+      if (nextIndex !== activeIndex) slidesWrap?.setAttribute('data-hero-moved', '');
+      activeIndex = nextIndex;
       activeSlides.forEach((slide, idx) => {
         const isActive = idx === activeIndex;
         slide.classList.toggle('active', isActive);

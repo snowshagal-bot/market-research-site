@@ -74,15 +74,20 @@
   function mountReportNav() {
     if (document.getElementById('mrs-nav-host')) return;
 
-    const spacer = document.createElement('div');
-    spacer.id = 'mrs-nav-spacer';
-    spacer.setAttribute('aria-hidden', 'true');
+    // The middleware writes this spacer into the first HTML, so the report
+    // never moves when the bar arrives. Create it only when it is missing.
+    let spacer = document.getElementById('mrs-nav-spacer');
+    if (!spacer) {
+      spacer = document.createElement('div');
+      spacer.id = 'mrs-nav-spacer';
+      spacer.setAttribute('aria-hidden', 'true');
+      if (document.body.firstChild) document.body.insertBefore(spacer, document.body.firstChild);
+      else document.body.appendChild(spacer);
+    }
     for (const [key, value] of Object.entries({
       display: 'block', width: '100%', height: BAR_H + 'px', minHeight: BAR_H + 'px',
       maxHeight: BAR_H + 'px', margin: '0', padding: '0', border: '0', flex: '0 0 ' + BAR_H + 'px'
     })) spacer.style.setProperty(key, value, 'important');
-    if (document.body.firstChild) document.body.insertBefore(spacer, document.body.firstChild);
-    else document.body.appendChild(spacer);
 
     const host = document.createElement('div');
     host.id = 'mrs-nav-host';
@@ -591,6 +596,11 @@
     for (const [key, value] of Object.entries(hostStyles)) host.style.setProperty(key, value, 'important');
     appendBeforeGlobalFooter(host);
 
+    // A Daily report's link to its session's market page. The server writes it
+    // into #mrs-reading-nav only when that close is published; it is read here
+    // because this block replaces that nav.
+    const marketSession = readMarketSessionLink();
+
     const root = host.attachShadow({ mode: 'open' });
     root.innerHTML = `
       <style>
@@ -611,6 +621,11 @@
         .nav-dir{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7d7d75}
         .nav-title{font-family:Georgia,'Noto Serif KR',serif;font-size:17px;font-weight:600;line-height:1.35;color:#22241f;word-break:keep-all;overflow-wrap:anywhere}
         .nav-meta{font-size:12px;color:#7d7d75}
+
+        /* This session's market page */
+        .market-session{display:flex;flex-direction:column;gap:6px;padding-bottom:28px;margin-bottom:32px;border-bottom:1px solid #d8d0c2;text-decoration:none;color:inherit}
+        .market-session[hidden]{display:none}
+        .market-session:hover .nav-title{color:#000;text-decoration:underline;text-underline-offset:3px}
 
         /* Related Reading */
         .related{padding-top:40px}
@@ -635,6 +650,7 @@
           .nav-link.col-next{text-align:left;align-items:flex-start}
           .nav-col.empty-slot{display:none}
           .nav-title{font-size:15.5px}
+          .market-session{padding-bottom:22px;margin-bottom:24px}
           .related{padding-top:30px}
           .related-item{grid-template-columns:28px 1fr;gap:12px;padding:16px 0}
           .related-title{font-size:15.5px}
@@ -644,19 +660,20 @@
         :host{--disc-bg:#f7f3eb;--disc-text:#22241f;--disc-text-2:#535850;--disc-muted:#7d7d75;--disc-line:#d8d0c2;--disc-border:#e0d9ce;--disc-focus:#344b40}
         :host([data-theme="dark"]){--disc-bg:#1c1f1c;--disc-text:#edf0ec;--disc-text-2:#b9c0ba;--disc-muted:#8f968f;--disc-line:#3b423c;--disc-border:#2e342f;--disc-focus:#a8c1b1}
         .wrap{background:var(--disc-bg);color:var(--disc-text);border-top-color:var(--disc-line)}
-        .prevnext{border-bottom-color:var(--disc-line)}
+        .prevnext,.market-session{border-bottom-color:var(--disc-line)}
         .nav-col.col-prev-wrap{border-right-color:var(--disc-border)}
         .nav-title{color:var(--disc-text)}
         .nav-dir,.nav-meta,.related-heading,.related-num{color:var(--disc-muted)}
         .related-item{border-bottom-color:var(--disc-border)}
         .related-title{color:var(--disc-text)}
         .related-summary,.related-tags{color:var(--disc-text-2)}
-        :host([data-theme="dark"]) .nav-link:hover .nav-title,:host([data-theme="dark"]) .related-item:hover .related-title{color:#fff}
+        :host([data-theme="dark"]) .nav-link:hover .nav-title,:host([data-theme="dark"]) .market-session:hover .nav-title,:host([data-theme="dark"]) .related-item:hover .related-title{color:#fff}
         @media(max-width:680px){.nav-col.col-prev-wrap{border-bottom-color:var(--disc-border)}}
-        .nav-link:focus-visible,.related-item:focus-visible{outline:2px solid var(--disc-focus);outline-offset:3px}
+        .nav-link:focus-visible,.market-session:focus-visible,.related-item:focus-visible{outline:2px solid var(--disc-focus);outline-offset:3px}
       </style>
       <div class="wrap" id="discovery-wrap" hidden>
         <div class="inner">
+          <a class="market-session" id="market-session-link" hidden></a>
           <nav class="prevnext" id="prevnext-container" aria-label="${locale === 'en' ? 'Previous and Next Reports' : '이전/다음 리포트'}"></nav>
           <section class="related" id="related-container" aria-labelledby="related-heading"></section>
         </div>
@@ -749,11 +766,29 @@
         relatedContainer.hidden = true;
       }
 
-      if (prev || next || (related && related.length)) {
+      if (marketSession) {
+        const marketLink = root.getElementById('market-session-link');
+        marketLink.setAttribute('href', marketSession.href);
+        marketLink.innerHTML = `<span class="nav-dir">${escapeHtml(marketSession.label)}</span><strong class="nav-title">${escapeHtml(marketSession.title)} →</strong>`;
+        marketLink.hidden = false;
+      }
+
+      if (prev || next || (related && related.length) || marketSession) {
         wrap.hidden = false;
         document.getElementById('mrs-reading-nav')?.remove();
       }
     });
+  }
+
+  // { href, label, title } of the server-written session link, or null. Only a
+  // same-site /market/YYYY-MM-DD/ path is taken.
+  function readMarketSessionLink() {
+    const link = document.getElementById('mrs-reading-nav')?.querySelector?.('a[data-market-session]');
+    const href = String(link?.getAttribute?.('href') || '');
+    if (!/^(?:\/en)?\/market\/\d{4}-\d{2}-\d{2}\/$/.test(href)) return null;
+    const text = selector => String(link.querySelector?.(selector)?.textContent || '').trim();
+    const title = text('strong');
+    return title ? { href, label: text('span'), title } : null;
   }
 
   function escapeHtml(str) {

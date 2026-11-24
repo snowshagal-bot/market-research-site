@@ -40,14 +40,31 @@
     sessionCount: n => `${n}일`,
     avgCounts: (r, f) => `평균 상승 ${r}개 · 하락 ${f}개`,
     weekdays: ['월', '화', '수', '목', '금', '토', '일'],
-    monthFormat: (y, m) => `${y}년 ${m}월`
+    monthFormat: (y, m) => `${y}년 ${m}월`,
+    pageEyebrow: '한국 증시 마감 기록', pageTitle: md => `${md} 한국 증시 마감`, pageTitleToday: '오늘 한국 증시 마감', pageLead: '거래일을 골라 그날의 종가와 수급, 주요 지표를 확인하세요.',
+    dateLabel: '조회할 거래일', latestMode: '최근 마감', weekMode: '5거래일', monthMode: '20거래일', archiveLink: '전체 기록', indicatorLink: '지표별 기록', closeOf: md => `${md} 마감`, regularBasis: '정규장 15:30 KST 기준',
+    regularClose: '정규장 종가', trendLabel: '최근 20거래일 종가',
+    summaryTitle: '그날의 요약', summaryHead: (pctText, word) => `코스피 ${pctText}% ${word}`, upWord: '상승', downWord: '하락', flatWord: '보합',
+    breadthPhrase: (count, ratio, word) => `코스피 ${count}종목 ${word}(${ratio})`, foreignPhrase: (amount, word) => `외국인 ${amount} ${word}`, netBuyWord: '순매수', netSellWord: '순매도',
+    terms: { breadth: '시장 폭', program: '프로그램 매매', basis: '베이시스', short: '공매도' },
+    fxSummary: '원/달러', fixingNote: md => `${md} 15:30 매매기준율`, vixSummary: '미국 변동성 VIX', usCloseNote: md => `${md} 미국장 마감`,
+    krTitle: '한국 시장', krCaption: '수급, 등락 종목, 주요 종목 종가', flowsTitle: '투자자별 순매수', flowDay: '당일', flowFive: '최근 5거래일', flowNote: '양수는 순매수, 음수는 순매도',
+    breadthCaption: '상승 · 보합 · 하락', statsTitle: '거래 · 프로그램 · 공매도', programTotal: '프로그램 순매수', turnoverOf: name => `${name} 거래대금`, ratio5Text: value => `5일 평균의 ${value}배`,
+    shortRatioOf: name => `공매도 비중 · ${name}`, detailsMore: '공매도 상위 · 수급 집중도', topTitle: '시가총액 상위 10',
+    globalTitle: '해외 · 금리 · 환율 · 원자재', globalCaption: '추이는 최근 20거래일 · 지표를 누르면 일별 기록',
+    boards: { world: '해외 증시 · 변동성', rates: '금리', fx: '환율', commodities: '원자재 · 가상자산' },
+    boardNotes: { world: '미국 지수 · 아시아 각 시장 최근 마감', rates: '국내 금융투자협회 16:00 최종호가', fx: '원화는 15:30 매매기준율', commodities: '달러 기준' },
+    tabs: { world: '해외 증시', rates: '금리', fx: '환율', commodities: '원자재' },
+    colIndicator: '지표', colValue: '값', colChange: '전일 대비', colTrend: '추이', ratesPending: '국내 금리는 16:00 KST 이후 게시됩니다.',
+    marketNames: { KOSPI: '코스피', KOSDAQ: '코스닥', 'KOSPI200선물': '선물' },
+    breadthShort: { rise: '상승', flat: '보합', fall: '하락', upper: '상한', lower: '하한' }
   } : {
     title: 'MARKET CLOSE', subtitle: 'How did the Korean market close today?', closeBasis: 'Korea close as of 15:30 KST', updateNotice: 'Data updates · Every trading day at 16:05 KST', overseas: '* Overseas markets use each market’s latest trading session.',
     todayMode: 'TODAY', historyMode: 'HISTORY', prevDay: 'Previous session', nextDay: 'Next session',
     calendarToggle: 'Select date from calendar', selectDate: 'Select date', closeCalendar: 'Close calendar',
     sections: ['Major Indices', 'Rates · FX · Volatility', 'Commodities · Crypto', 'Market Breadth', 'KRX Investor Flows (Daily)', 'Cumulative Flows: Last 5 Sessions', 'Program Trading & Basis', 'Market Internals', 'Short Selling', 'Top 10 by Market Cap'],
     ratesTitle: 'Korean Bond Yields', rateState: '16:00 KOFIA', ratesNote: 'KOFIA final quote yields, 16:00 KST · Change in bp against KOFIA’s previous-day value',
-    open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', close: 'Close', current: 'Latest', fixedClose: '15:30 close', intraday: 'Intraday', recentClose: 'Recent close', unavailable: 'Unavailable',
+    open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', close: 'Close', current: 'Latest', fixedClose: '15:30 fixing', intraday: 'Intraday', recentClose: 'Recent close', unavailable: 'Unavailable',
     asiaTitle: 'Asian Markets', localHoliday: 'Local holiday',
     latestClose: 'Close', snapshotBasis: 'At KRX close', asOf: stamp => `As of ${stamp}`,
     rise: 'Advancers', fall: 'Decliners', flat: 'Unchanged', upper: 'Limit up', lower: 'Limit down', riseRatio: 'Advance ratio', fallRatio: 'Decline ratio',
@@ -82,7 +99,24 @@
     monthFormat: (y, m) => {
       const names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
       return `${names[m - 1]} ${y}`;
-    }
+    },
+    pageEyebrow: 'Korea market close archive', pageTitle: md => `Korea Market Close · ${md}`, pageTitleToday: 'Korea Market Close Today', pageLead: 'Pick a trading day to see its closes, investor flows and key indicators.',
+    dateLabel: 'Trading day', latestMode: 'Latest close', weekMode: '5 sessions', monthMode: '20 sessions', archiveLink: 'All sessions', indicatorLink: 'Indicator history', closeOf: md => `Close of ${md}`, regularBasis: 'Regular session, 15:30 KST',
+    regularClose: 'Regular close', trendLabel: 'Last 20 sessions',
+    summaryTitle: 'The day in brief', summaryHead: (pctText, word) => `KOSPI ${word} ${pctText}%`, upWord: 'up', downWord: 'down', flatWord: 'flat',
+    breadthPhrase: (count, ratio, word) => `${count} KOSPI stocks ${word} (${ratio})`, foreignPhrase: (amount, word) => `foreign investors ${word} ${amount}`, netBuyWord: 'net bought', netSellWord: 'net sold',
+    terms: { breadth: 'Market Breadth', program: 'Program Trading', basis: 'Basis', short: 'Short Selling' },
+    fxSummary: 'USD/KRW', fixingNote: md => `${md} · 15:30 reference rate`, vixSummary: 'US volatility · VIX', usCloseNote: md => `${md} · US close`,
+    krTitle: 'Korean Market', krCaption: 'Flows, advancers and decliners, top stocks', flowsTitle: 'Net Buying by Investor', flowDay: 'Today', flowFive: 'Last 5 sessions', flowNote: 'Positive is net buying, negative net selling',
+    breadthCaption: 'Advancers · unchanged · decliners', statsTitle: 'Turnover · Program · Short Selling', programTotal: 'Program net buy', turnoverOf: name => `${name} turnover`, ratio5Text: value => `${value}× the 5-session avg.`,
+    shortRatioOf: name => `Short ratio · ${name}`, detailsMore: 'Top short selling · flow concentration', topTitle: 'Top 10 by Market Cap',
+    globalTitle: 'Overseas · Rates · FX · Commodities', globalCaption: 'Trend over the last 20 sessions · Select an indicator for its daily history',
+    boards: { world: 'Overseas Markets · Volatility', rates: 'Rates', fx: 'FX', commodities: 'Commodities · Crypto' },
+    boardNotes: { world: 'US indices · each Asian market’s latest close', rates: 'Korean yields: KOFIA 16:00 final quotes', fx: 'KRW pairs: 15:30 reference rate', commodities: 'In US dollars' },
+    tabs: { world: 'Markets', rates: 'Rates', fx: 'FX', commodities: 'Commodities' },
+    colIndicator: 'Indicator', colValue: 'Value', colChange: 'Change', colTrend: 'Trend', ratesPending: 'Korean yields are published after 16:00 KST.',
+    marketNames: { KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', 'KOSPI200선물': 'KOSPI 200 Futures' },
+    breadthShort: { rise: 'Up', flat: 'Flat', fall: 'Down', upper: 'limit', lower: 'limit' }
   };
 
   const names = {
@@ -234,7 +268,9 @@
     ? `<a class="instrument-history-link" href="${ko ? '' : '/en'}/market/${historySlug(key)}/">${text}</a>`
     : text;
   // A failed instrument may carry its code as its name; the Korean page then uses its own word.
-  const instrumentName = (key, item) => ko ? ((item?.name && item.name !== key ? item.name : '') || namesKo[key] || key) : (names[key] || key);
+  // The site's own name first, so a code reads the same on every date and on
+  // the dated pages; the record's name only for a code the site has no name for.
+  const instrumentName = (key, item) => ko ? (namesKo[key] || (item?.name && item.name !== key ? item.name : '') || key) : (names[key] || key);
   const groupName = item => {
     const locale = root.MARKET_LOCALE;
     return locale && typeof locale.krxGroupName === 'function' ? locale.krxGroupName(item, ko ? 'ko' : 'en') : String(item?.name || '');
@@ -254,10 +290,19 @@
     if (isFixing(key) || key === 'KOSPI' || key === 'KOSDAQ') return item.close;
     return item.data_state === 'intraday' && valid(item.current) ? item.current : item.close;
   };
-  const stateText = item => {
+  // The basis of a record figure (no Global Latest overlay). A KRW reference
+  // rate is the 15:30 fixing, whatever the record calls it. A figure still
+  // trading at capture says when it was read ("장중 · 16:10 KST"; just "장중"
+  // when the record has no capture time). A close is "최근 종가" on TODAY and
+  // "종가" on a past date, as on that date's own page.
+  const stateText = (key, item, history = false) => {
     if (!item || item.data_state === 'unavailable') return copy.unavailable;
-    if (item.data_state === 'intraday') return copy.intraday;
-    return copy.recentClose;
+    if (isFixing(key)) return copy.fixedClose;
+    if (item.data_state === 'intraday') {
+      const time = root.MARKET_LOCALE?.intradayCaptureTime?.(item) || '';
+      return time ? `${copy.intraday} · ${time}` : copy.intraday;
+    }
+    return history ? copy.close : copy.recentClose;
   };
   const metric = (label, value, extra = '') => `<div class="market-metric"><span>${html(label)}</span><strong class="${extra}">${value}</strong></div>`;
   const section = (numberValue, title, body, extra = '') => `<section class="market-section ${extra}" aria-labelledby="market-section-${numberValue}"><h2 id="market-section-${numberValue}"><span>${numberValue}.</span> ${html(title)}</h2>${body}</section>`;
@@ -274,10 +319,10 @@
   // `view.latest`: a Global Latest item shown in place of the snapshot figure
   // (TODAY only). Only its own value, change, previous close and basis are
   // shown; the snapshot's 15:30 fixing and open/high/low belong to another
-  // moment and are left out. `view.mixed`: some card on the page is
+  // moment and are left out. `view.mixed`: some row on the page is
   // overlaid, so a snapshot figure that was intraday when the Market Close
   // was captured says so ("마감 시점") instead of "장중".
-  function instrumentCard(key, item, major = false, view = {}) {
+  function instrumentView(key, item, view = {}) {
     const latest = view.latest || null;
     const display = latest ? latest.value : displayValue(key, item);
     const movement = latest ? latest.change : item?.change;
@@ -287,58 +332,153 @@
     const isFx = isFixing(key);
     const changeContent = key === 'US10Y'
       ? `${movementArrow} ${valid(movement) ? `${number(Math.abs(movement * 100), 1)}bp` : '--'}`
-      : isFx
+      : isFx || key === 'KOSPI' || key === 'KOSDAQ'
         ? `${movementArrow} ${valid(movement) ? number(Math.abs(movement), 2) : '--'} <span>(${pct(movementPct)})</span>`
         : `${movementArrow} ${signed(movement, digitsOf(key))} <span>(${pct(movementPct)})</span>`;
-    const fxContext = isFx && !latest ? `<div class="instrument-close-label">${copy.fixedClose}</div><div class="instrument-current"><span>${copy.current}</span><strong>${valueUnit(key, item?.current)}</strong></div>` : '';
-    const detail = !major ? '' : latest
-      ? `<dl class="market-ohlc"><div><dt>${copy.previous}</dt><dd>${number(latest.previous_close, 2)}</dd></div></dl>`
-      : `<dl class="market-ohlc">
-      <div><dt>${copy.open}</dt><dd>${number(item?.open, 2)}</dd></div><div><dt>${copy.high}</dt><dd>${number(item?.high, 2)}</dd></div><div><dt>${copy.low}</dt><dd>${number(item?.low, 2)}</dd></div><div><dt>${copy.previous}</dt><dd>${number(item?.previous_close, 2)}</dd></div>
-    </dl>`;
-    const snapshotState = view.mixed && item?.data_state === 'intraday' ? copy.snapshotBasis : stateText(item);
+    // A KRW pair shows its 15:30 fixing only. The record's other figure for it
+    // (`current`) was read when the record was made and carries no time of its
+    // own, so it is not shown as "현재" (2026-11-23 review).
+    const fxContext = '';
+    // On TODAY with a Global Latest overlay, a record figure that was trading
+    // at capture reads "마감 시점" (with its capture time) next to the newer rows.
+    const captured = !isFx && item?.data_state === 'intraday' ? root.MARKET_LOCALE?.intradayCaptureTime?.(item) || '' : '';
+    const snapshotState = view.mixed && !isFx && item?.data_state === 'intraday'
+      ? (captured ? `${copy.snapshotBasis} · ${captured}` : copy.snapshotBasis)
+      : stateText(key, item, view.history === true);
     // An Asian index dated before the session: its market was closed that day.
     const localHoliday = ASIA_CODES.includes(key) && /^\d{4}-\d{2}-\d{2}$/.test(String(item?.source_date || '')) && /^\d{4}-\d{2}-\d{2}$/.test(String(view.marketDate || '')) && item.source_date < view.marketDate;
     const stateHtml = latest ? latestStateHtml(latest) : `${dateText(item?.source_date)} · ${snapshotState}${localHoliday ? ` · ${copy.localHoliday}` : ''}`;
     const basisAttr = latest ? ' data-basis="latest"' : view.mixed ? ' data-basis="snapshot"' : '';
-    return `<article class="instrument-card ${major ? 'major' : ''}"${basisAttr}>
-      <div class="instrument-heading"><span>${historyLink(key, html(instrumentName(key, item)), valid(display))}</span>${item?.ticker ? `<small>${html(item.ticker)}</small>` : ''}</div>
-      <strong class="instrument-value">${valueUnit(key, display)}</strong>
-      ${fxContext}<div class="instrument-change ${movementClass}">${changeContent}</div>
-      ${detail}<div class="instrument-state">${stateHtml}</div>
-    </article>`;
+    return { latest, display, movementClass, changeContent, fxContext, stateHtml, basisAttr, name: historyLink(key, html(instrumentName(key, item)), valid(display)) };
+  }
+
+  // A label that names a glossary term links to its entry. The id is functions/_glossary.js glossaryTermId:
+  // the term in lower case, every run of spaces or punctuation as one hyphen.
+  const glossaryHref = term => `${ko ? '' : '/en'}/basics/glossary/#term-${String(term).normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '')}`;
+  const termLink = (text, term) => (term ? `<a class="mk-term" href="${html(glossaryHref(term))}">${html(text)}</a>` : html(text));
+
+  // A trend line of finite values, oldest first: { line, area, cx, cy } in a w×h box, or null.
+  function sparkGeometry(values, w, h, pad) {
+    const series = Array.isArray(values) ? values : [];
+    // The series ends on the session shown: without that day's value there is
+    // no line, or its last point would be an earlier session's.
+    if (!valid(series[series.length - 1])) return null;
+    const points = series.filter(valid);
+    if (points.length < 2) return null;
+    const min = Math.min(...points);
+    const max = Math.max(...points);
+    const span = max - min;
+    // A series that never moved is a level line through the middle of the box.
+    const y = value => (span ? pad + (max - value) / span * (h - 2 * pad) : h / 2);
+    const xy = points.map((value, index) => [pad + index * (w - 2 * pad) / (points.length - 1), y(value)]);
+    const line = xy.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+    const [cx, cy] = xy[xy.length - 1];
+    return { line, area: `${pad},${h} ${line} ${w - pad},${h}`, cx: cx.toFixed(1), cy: cy.toFixed(1) };
+  }
+
+  // `stretch`: fills its box's width (the index cards); otherwise a fixed small line with an end dot.
+  function trendSvg(values, { w = 88, h = 26, pad = 3, stretch = false } = {}) {
+    const g = sparkGeometry(values, w, h, pad);
+    if (!g) return '';
+    return `<svg class="mk-spark${stretch ? ' mk-spark-wide' : ''}" viewBox="0 0 ${w} ${h}" width="${stretch ? '100%' : w}" height="${h}"${stretch ? ' preserveAspectRatio="none"' : ''} aria-hidden="true" focusable="false"><polygon class="mk-spark-area" points="${g.area}"></polygon><polyline class="mk-spark-line" points="${g.line}"${stretch ? ' vector-effect="non-scaling-stroke"' : ''}></polyline>${stretch ? '' : `<circle class="mk-spark-dot" cx="${g.cx}" cy="${g.cy}" r="2.2"></circle>`}</svg>`;
+  }
+
+  const trendOf = (trend, key) => (trend && trend.series && Array.isArray(trend.series[key]) ? trend.series[key] : null);
+
+  // One row of the quote board: name and basis, value, change, trend.
+  function boardRow(key, item, view = {}) {
+    const v = instrumentView(key, item, view);
+    const line = trendSvg(trendOf(view.trend, key));
+    return `<tr class="mk-row"${v.basisAttr} data-code="${html(key)}">
+      <th scope="row"><span class="mk-row-name">${v.name}</span><span class="mk-row-state">${v.stateHtml}</span></th>
+      <td class="mk-row-value"><strong>${valueUnit(key, v.display)}</strong>${v.fxContext}</td>
+      <td class="mk-row-change ${v.movementClass}">${v.changeContent}</td>
+      <td class="mk-row-trend">${line || '<span class="mk-trend-empty">—</span>'}</td>
+    </tr>`;
   }
 
   // One KOFIA yield of the session: the afternoon (16:00 KST) value and
   // KOFIA's own change against its previous-day value, in basis points.
-  function domesticRateCard(item, day) {
+  function domesticRateRow(item, day, trend) {
     const movementClass = signClass(item.change_bp);
     const arrow = movementClass === 'up' ? '▲' : movementClass === 'down' ? '▼' : '—';
-    const state = day.basis_time === '16:00' ? copy.rateState : `${html(day.basis_time)} ${copy.rateState.replace(/^16:00 /, '')}`;
-    return `<article class="instrument-card rate-card" data-rate-code="${html(item.code)}">
-      <div class="instrument-heading"><span>${historyLink(item.code, html(instrumentName(item.code, null)))}</span></div>
-      <strong class="instrument-value">${valueUnit(item.code, item.value)}</strong>
-      <div class="instrument-change ${movementClass}">${arrow} ${valid(item.change_bp) ? `${number(Math.abs(item.change_bp), 1)}bp` : '--'}</div>
-      <div class="instrument-state">${dateText(day.market_date)} · ${state}</div>
-    </article>`;
+    const basis = day.basis_time === '16:00' ? copy.rateState : `${html(day.basis_time)} ${copy.rateState.replace(/^16:00 /, '')}`;
+    const line = trendSvg(trendOf(trend, item.code));
+    return `<tr class="mk-row rate-row" data-rate-code="${html(item.code)}">
+      <th scope="row"><span class="mk-row-name">${historyLink(item.code, html(instrumentName(item.code, null)))}</span><span class="mk-row-state">${dateText(day.market_date)} · ${basis}</span></th>
+      <td class="mk-row-value"><strong>${valueUnit(item.code, item.value)}</strong></td>
+      <td class="mk-row-change ${movementClass}">${arrow} ${valid(item.change_bp) ? `${number(Math.abs(item.change_bp), 1)}bp` : '--'}</td>
+      <td class="mk-row-trend">${line || '<span class="mk-trend-empty">—</span>'}</td>
+    </tr>`;
   }
 
-  // The Domestic Rates section body for the shown session, or '' when its day is not stored (yet).
-  function domesticRatesBody(day, marketDate) {
+  // The session's KOFIA yields (rows), or '' when its day is not stored (yet).
+  function domesticRateRows(day, marketDate, trend) {
     if (!day || day.market_date !== marketDate || !Array.isArray(day.items)) return '';
-    const items = day.items.filter(item => RATE_CODES.includes(item?.code) && valid(item.value));
-    if (!items.length) return '';
-    return `<div class="mini-instrument-grid rate-grid">${items.map(item => domesticRateCard(item, day)).join('')}</div><p class="unit-note">${html(copy.ratesNote)}</p>`;
+    return day.items.filter(item => RATE_CODES.includes(item?.code) && valid(item.value)).map(item => domesticRateRow(item, day, trend)).join('');
   }
 
-  function dataTable(headings, rows, className = '') {
-    return `<div class="market-table-wrap"><table class="market-table ${className}"><thead><tr>${headings.map(item => `<th scope="col">${html(item)}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${row.map((cell, index) => index === 0 ? `<th scope="row">${cell}</th>` : `<td>${cell}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  function boardCard(id, title, note, rows, extra = '') {
+    return `<section class="mk-card mk-board" data-board="${id}" aria-labelledby="mk-board-${id}">
+      <div class="mk-card-head"><h3 id="mk-board-${id}">${html(title)}</h3><span class="mk-card-note">${html(note)}</span></div>
+      <div class="mk-table-wrap"><table class="mk-table mk-board-table"><thead><tr><th scope="col">${copy.colIndicator}</th><th scope="col">${copy.colValue}</th><th scope="col">${copy.colChange}</th><th scope="col" class="mk-col-trend">${copy.colTrend}</th></tr></thead><tbody>${rows}</tbody></table></div>${extra}
+    </section>`;
   }
 
-  function breadthCard(key, item) {
-    return `<article class="breadth-card"><h3>${key}</h3><div class="breadth-counts">
-      ${metric(copy.rise, integer(item?.rise), 'up')}${metric(copy.fall, integer(item?.fall), 'down')}${metric(copy.flat, integer(item?.flat))}${metric(copy.upper, integer(item?.upper_limit), 'up')}${metric(copy.lower, integer(item?.lower_limit), 'down')}
-    </div><div class="breadth-bar" aria-label="${copy.riseRatio} ${ratioPct(item?.rise_ratio)}, ${copy.fallRatio} ${ratioPct(item?.fall_ratio)}"><span class="advance" style="width:${valid(item?.rise_ratio) ? item.rise_ratio * 100 : 0}%"></span><span class="decline" style="width:${valid(item?.fall_ratio) ? item.fall_ratio * 100 : 0}%"></span></div><div class="breadth-ratios"><span class="up">${copy.riseRatio} ${ratioPct(item?.rise_ratio)}</span><span class="down">${copy.fallRatio} ${ratioPct(item?.fall_ratio)}</span></div></article>`;
+  // A net flow's small bar: right of the middle for net buying, left for net selling,
+  // scaled to the largest absolute value in its table.
+  function flowBar(value, max) {
+    if (!valid(value) || !valid(max) || max <= 0) return '';
+    const width = Math.max(Math.abs(value) / max * 50, 1.5);
+    const x = value >= 0 ? 50 : 50 - width;
+    return `<svg class="mk-flow-bar" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" focusable="false"><rect class="mk-flow-track" x="0" y="0" width="100" height="8"></rect><rect class="mk-flow-fill ${value >= 0 ? 'up' : 'down'}" x="${x.toFixed(2)}" y="0" width="${width.toFixed(2)}" height="8"></rect><rect class="mk-flow-mid" x="49.6" y="0" width="0.8" height="8"></rect></svg>`;
+  }
+
+  // Net flows of the three markets (KRW billion per the contract), as a table with bars.
+  function flowTable(rowsByMarket) {
+    const values = rowsByMarket.flatMap(row => row.values).filter(valid);
+    const max = values.length ? Math.max(...values.map(Math.abs)) : 0;
+    return `<div class="mk-table-wrap"><table class="mk-table mk-flow-table"><thead><tr><th scope="col">${copy.market}</th><th scope="col">${copy.foreign}</th><th scope="col">${copy.institution}</th><th scope="col">${copy.individual}</th></tr></thead><tbody>${rowsByMarket.map(row => `<tr><th scope="row">${html(row.name)}</th>${row.values.map(value => `<td><span class="mk-flow-value ${signClass(value)}">${flow(value)}</span>${flowBar(value, max)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  }
+
+  function breadthBlock(key, item) {
+    const name = copy.marketNames[key] || key;
+    const rise = item?.rise_count ?? item?.rise;
+    const fall = item?.fall_count ?? item?.fall;
+    const flat = item?.flat;
+    const total = [rise, flat, fall].every(valid) ? rise + flat + fall : null;
+    const share = value => (valid(total) && total > 0 && valid(value) ? value / total * 100 : 0);
+    const limit = (label, value) => (valid(value) && value > 0 ? ` (${label} ${integer(value)})` : '');
+    // The head names the larger side: the advance ratio on a day more stocks rose than fell.
+    const advancing = valid(item?.rise_ratio) && valid(item?.fall_ratio) && item.rise_ratio > item.fall_ratio;
+    return `<div class="mk-breadth" data-market="${html(key)}">
+      <div class="mk-breadth-head"><span>${html(name)}</span>${advancing ? `<b class="up">${copy.riseRatio} ${ratioPct(item.rise_ratio)}</b>` : `<b class="down">${copy.fallRatio} ${ratioPct(item?.fall_ratio)}</b>`}</div>
+      <div class="mk-breadth-bar" role="img" aria-label="${copy.riseRatio} ${ratioPct(item?.rise_ratio)}, ${copy.fallRatio} ${ratioPct(item?.fall_ratio)}"><span class="advance" style="width:${share(rise).toFixed(2)}%"></span><span class="flat" style="width:${share(flat).toFixed(2)}%"></span><span class="decline" style="width:${share(fall).toFixed(2)}%"></span></div>
+      <div class="mk-breadth-counts"><span class="up">${copy.breadthShort.rise} ${integer(item?.rise)}${limit(copy.breadthShort.upper, item?.upper_limit)}</span><span>${copy.breadthShort.flat} ${integer(flat)}</span><span class="down">${copy.breadthShort.fall} ${integer(item?.fall)}${limit(copy.breadthShort.lower, item?.lower_limit)}</span></div>
+    </div>`;
+  }
+
+  const shortDate = value => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return '';
+    const [, m, d] = value.split('-').map(Number);
+    return `${m}/${d}`;
+  };
+
+  // KOSPI or KOSDAQ: the regular close, its change, the 20-session trend and the day's range.
+  function indexCard(key, item, view = {}) {
+    const v = instrumentView(key, item, view);
+    const trend = trendOf(view.trend, key);
+    const dates = view.trend && Array.isArray(view.trend.dates) ? view.trend.dates : [];
+    const firstIndex = Array.isArray(trend) ? trend.findIndex(valid) : -1;
+    const line = trendSvg(trend, { w: 340, h: 64, pad: 3, stretch: true });
+    return `<article class="mk-card mk-index" data-code="${html(key)}">
+      <div class="mk-index-head"><span class="mk-index-name">${v.name}</span><span class="mk-index-label">${copy.regularClose}</span></div>
+      <strong class="mk-index-value">${valueUnit(key, v.display)}</strong>
+      <div class="mk-index-change ${v.movementClass}">${v.changeContent}</div>
+      ${line ? `<div class="mk-index-trend">${line}<div class="mk-index-axis"><span>${shortDate(dates[firstIndex])}</span><span>${copy.trendLabel}</span><span>${shortDate(dates[dates.length - 1])}</span></div></div>` : ''}
+      <dl class="mk-ohlc"><div><dt>${copy.open}</dt><dd>${number(item?.open, 2)}</dd></div><div><dt>${copy.high}</dt><dd>${number(item?.high, 2)}</dd></div><div><dt>${copy.low}</dt><dd>${number(item?.low, 2)}</dd></div><div><dt>${copy.previous}</dt><dd>${number(item?.previous_close, 2)}</dd></div></dl>
+      <div class="mk-index-state">${v.stateHtml}</div>
+    </article>`;
   }
 
   /* ==========================================================================
@@ -424,6 +564,29 @@
       return result;
     });
   }
+  const TREND_ENDPOINT = '/api/market/trend';
+  // The last 20 sessions' closes up to `date` (or the newest), for the small
+  // trend lines: the body, or null on any failure or a late answer. The page
+  // never waits on it longer than on Global Latest, and draws no line without it.
+  function fetchTrend(date) {
+    if (typeof fetch !== 'function') return Promise.resolve(null);
+    let timer = null;
+    let pending;
+    try {
+      pending = fetch(date ? `${TREND_ENDPOINT}?end=${encodeURIComponent(date)}` : TREND_ENDPOINT, { headers: { Accept: 'application/json' } });
+    } catch (_) {
+      return Promise.resolve(null);
+    }
+    const request = Promise.resolve(pending)
+      .then(response => (response && response.ok ? response.json() : null))
+      .catch(() => null);
+    if (typeof setTimeout !== 'function') return request;
+    const deadline = new Promise(resolve => { timer = setTimeout(() => resolve(null), GLOBAL_LATEST_WAIT_MS); });
+    return Promise.race([request, deadline]).then(result => {
+      clearTimeout(timer);
+      return result;
+    });
+  }
   const EXPECTED_MARKET_DATE_HEADER = 'x-market-expected-date';
   const KRX_SESSION_HEADER = 'x-krx-session';
 
@@ -500,6 +663,33 @@
     });
   }
 
+  // The selected day, written out: "2026년 11월 23일 월" / "Mon, Nov 23, 2026".
+  function fullDateText(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return html(value || '--');
+    const [y, m, d] = value.split('-').map(Number);
+    const date = new Date(Date.UTC(y, m - 1, d));
+    if (ko) return `${y}년 ${m}월 ${d}일 ${copy.weekdays[(date.getUTCDay() + 6) % 7]}`;
+    return new Intl.DateTimeFormat('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' }).format(date);
+  }
+
+  // Heading of the day: "11월 23일" / "Nov 23".
+  function monthDayText(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return html(value || '--');
+    const [, m, d] = value.split('-').map(Number);
+    return ko ? `${m}월 ${d}일` : new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(2000, m - 1, d)));
+  }
+
+  // The page heading every view shares: what this is, the day or period, and its notices.
+  function pageHead(title, lead, notices = '', headingId = 'market-close-heading') {
+    return `<section class="mk-head" aria-labelledby="${headingId}"><div class="market-wrap">
+      <p class="mk-eyebrow">${html(copy.pageEyebrow)}</p>
+      <h1 id="${headingId}">${title}</h1>
+      ${lead ? `<p class="mk-lead">${lead}</p>` : ''}
+      <p class="mk-meta"><span class="market-update">${copy.updateNotice}</span><span class="market-overseas">${copy.overseas.replace(/^\*\s*/, '')}</span></p>
+      ${notices}
+    </div></section>`;
+  }
+
   function renderHistoryStrip() {
     const currentIndex = state.dates.indexOf(state.currentDate);
     const hasDates = state.dates.length > 0;
@@ -512,38 +702,38 @@
     const isTodayActive = state.mode === 'today' && !state.calendarOpen;
     const is1wActive = state.mode === '1w' && !state.calendarOpen;
     const is1mActive = state.mode === '1m' && !state.calendarOpen;
-    const isHistoryActive = state.mode === 'history' || state.calendarOpen;
+    const isRange = state.mode === '1w' || state.mode === '1m';
+    const calendarIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>';
 
-    let rightNavHtml = '';
-    if (state.mode === '1w' || state.mode === '1m') {
+    let navHtml;
+    if (isRange) {
       const w = state.rangeWindow;
       const badgeText = w?.start_date && w?.end_date
         ? `${dateText(w.start_date)} — ${dateText(w.end_date)} · ${w.sessions_used || 0}/${w.required_sessions || (state.mode === '1w' ? 5 : 20)}`
         : '';
-      rightNavHtml = `<span class="market-range-badge">${badgeText}</span>`;
+      navHtml = `<span class="market-range-badge">${badgeText}</span>
+        <button class="market-calendar-toggle mk-date-btn mk-date-btn-quiet ${state.calendarOpen ? 'active' : ''}" type="button" data-market-action="toggle-calendar" aria-label="${copy.calendarToggle}" aria-expanded="${state.calendarOpen}">${calendarIcon}</button>`;
     } else {
-      rightNavHtml = `
-        <button class="market-nav-step" type="button" data-market-action="nav-date" data-target-date="${prevDate}" ${!canGoPrev ? 'disabled' : ''} aria-label="${copy.prevDay}">‹</button>
-        <span class="market-current-date">${dateText(state.currentDate)}</span>
-        <button class="market-nav-step" type="button" data-market-action="nav-date" data-target-date="${nextDate}" ${!canGoNext ? 'disabled' : ''} aria-label="${copy.nextDay}">›</button>
-        <button class="market-calendar-toggle ${state.calendarOpen ? 'active' : ''}" type="button" data-market-action="toggle-calendar" aria-label="${copy.calendarToggle}" aria-expanded="${state.calendarOpen}">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        </button>`;
+      navHtml = `
+        <button class="market-nav-step mk-step" type="button" data-market-action="nav-date" data-target-date="${prevDate}" ${!canGoPrev ? 'disabled' : ''} aria-label="${copy.prevDay}">‹<span class="mk-step-text"> ${copy.prevDay}</span></button>
+        <button class="market-calendar-toggle mk-date-btn ${state.calendarOpen ? 'active' : ''}" type="button" data-market-action="toggle-calendar" aria-label="${copy.calendarToggle}" aria-expanded="${state.calendarOpen}">${calendarIcon}<span class="market-current-date">${fullDateText(state.currentDate)}</span><span class="mk-caret" aria-hidden="true">▾</span></button>
+        <button class="market-nav-step mk-step" type="button" data-market-action="nav-date" data-target-date="${nextDate}" ${!canGoNext ? 'disabled' : ''} aria-label="${copy.nextDay}"><span class="mk-step-text">${copy.nextDay} </span>›</button>`;
     }
 
     return `
-      <div class="market-history-strip" role="toolbar" aria-label="Market navigation">
-        <div class="market-history-modes">
-          <button class="market-mode-btn ${isTodayActive ? 'active' : ''}" type="button" data-market-action="today" ${isTodayActive ? 'aria-current="page"' : ''}>${copy.todayMode}</button>
-          <span class="market-mode-divider" aria-hidden="true"></span>
-          <button class="market-mode-btn ${is1wActive ? 'active' : ''}" type="button" data-market-action="view-1w" ${is1wActive ? 'aria-current="page"' : ''}>1W</button>
-          <span class="market-mode-divider" aria-hidden="true"></span>
-          <button class="market-mode-btn ${is1mActive ? 'active' : ''}" type="button" data-market-action="view-1m" ${is1mActive ? 'aria-current="page"' : ''}>1M</button>
-          <span class="market-mode-divider" aria-hidden="true"></span>
-          <button class="market-mode-btn ${isHistoryActive ? 'active' : ''}" type="button" data-market-action="toggle-calendar" aria-expanded="${state.calendarOpen}" ${state.mode === 'history' ? 'aria-current="page"' : ''}>${copy.historyMode}</button>
-        </div>
-        <div class="market-history-nav">
-          ${rightNavHtml}
+      <div class="mk-datebar market-history-strip" role="toolbar" aria-label="Market navigation">
+        <span class="mk-datebar-label">${copy.dateLabel}</span>
+        <div class="mk-datebar-nav market-history-nav${isRange ? ' mk-datebar-range' : ''}">${navHtml}</div>
+        <div class="mk-datebar-modes">
+          <div class="market-history-modes" role="group" aria-label="${ko ? '보기' : 'View'}">
+            <button class="market-mode-btn ${isTodayActive ? 'active' : ''}" type="button" data-market-action="today" ${isTodayActive ? 'aria-current="page"' : ''}>${copy.latestMode}</button>
+            <button class="market-mode-btn ${is1wActive ? 'active' : ''}" type="button" data-market-action="view-1w" ${is1wActive ? 'aria-current="page"' : ''}>${copy.weekMode}</button>
+            <button class="market-mode-btn ${is1mActive ? 'active' : ''}" type="button" data-market-action="view-1m" ${is1mActive ? 'aria-current="page"' : ''}>${copy.monthMode}</button>
+          </div>
+          <span class="mk-datebar-links">
+            <a class="mk-archive-link" href="${ko ? '/market/' : '/en/market/'}archive/">${copy.archiveLink} <span aria-hidden="true">↗</span></a>
+            <a class="mk-archive-link mk-indicator-link" href="${ko ? '/market/' : '/en/market/'}archive/#indicators">${copy.indicatorLink} <span aria-hidden="true">↗</span></a>
+          </span>
         </div>
       </div>
       <div id="market-calendar-drawer" class="market-calendar-drawer" ${state.calendarOpen ? '' : 'hidden'}>
@@ -635,14 +825,12 @@
       : null;
     const latestItems = overlay?.items || {};
     const mixed = Object.keys(latestItems).length > 0;
-    // KOSPI and KOSDAQ are never Global Latest instruments: their cards are
+    // Trend lines only when they end on the session shown: never a line that stops earlier or later.
+    const trend = options.trend && Array.isArray(options.trend.dates) && options.trend.end_date === marketDate ? options.trend : null;
+    // KOSPI and KOSDAQ are never Global Latest instruments: their figures are
     // the Market Close exactly as without an overlay.
     const krx = key => key === 'KOSPI' || key === 'KOSDAQ';
-    const card = (key, item, major = false) => instrumentCard(key, item, major, {
-      latest: krx(key) ? null : latestItems[key] || null,
-      mixed: !krx(key) && mixed,
-      marketDate
-    });
+    const viewOf = key => ({ latest: krx(key) ? null : latestItems[key] || null, mixed: !krx(key) && mixed, marketDate, trend, history: isHistory });
 
     const indices = data.indices || {};
     const rates = data.rates_fx_volatility || {};
@@ -654,11 +842,7 @@
     const internals = data.market_internals || {};
     const shorts = data.short_selling || {};
     const marketCap = data.market_cap_top10 || [];
-    // Asian indices: their own row under the major indices, once the record carries them.
-    const asiaCards = ASIA_CODES.filter(key => indices[key]).map(key => card(key, indices[key])).join('');
-    // KOFIA yields of this session, after the rates and commodities; the
-    // sections after it move down one number.
-    const ratesBody = domesticRatesBody(options.domesticRates, marketDate);
+    const shown = (group, key) => group[key] || !OPTIONAL_CODES.includes(key);
 
     const sourceSet = new Set();
     const collect = obj => {
@@ -668,35 +852,109 @@
     };
     collect(indices); collect(rates); collect(commodities);
 
-    const investorRows = ['KOSPI', 'KOSDAQ', 'KOSPI200선물'].map(marketKey => {
-      const marketName = marketKey === 'KOSPI200선물' ? (ko ? '선물' : 'KOSPI 200 Futures') : marketKey;
-      const inv = flows.markets?.[marketKey]?.investors || {};
-      return [marketName, flow(inv['외국인']?.net_buy), flow(inv['기관']?.net_buy), flow(inv['개인']?.net_buy)];
-    });
+    // Contract 1.2.0 SOFT: unavailable breadth shows its state, never old counts.
+    const breadthUnavailable = data.meta?.schema_version === '1.2.0' && data.section_status?.market_breadth?.status === 'unavailable';
 
+    /* ---- the day in brief ---- */
+    const kospiPct = indices.KOSPI?.change_pct;
+    const kospiWord = !valid(kospiPct) || kospiPct === 0 ? copy.flatWord : kospiPct > 0 ? copy.upWord : copy.downWord;
+    const headline = valid(kospiPct) ? copy.summaryHead(number(Math.abs(kospiPct), 2), kospiWord) : html(instrumentName('KOSPI', indices.KOSPI));
+    const kospiBreadth = breadth.KOSPI;
+    const breadthPart = !breadthUnavailable && kospiBreadth && valid(kospiPct) && kospiPct !== 0
+      ? (kospiPct < 0
+        ? copy.breadthPhrase(integer(kospiBreadth.fall_count ?? kospiBreadth.fall), ratioPct(kospiBreadth.fall_ratio), copy.downWord)
+        : copy.breadthPhrase(integer(kospiBreadth.rise_count ?? kospiBreadth.rise), ratioPct(kospiBreadth.rise_ratio), copy.upWord))
+      : '';
+    const foreignNet = flows.markets?.KOSPI?.investors?.['외국인']?.net_buy;
+    const foreignPart = valid(foreignNet) && foreignNet !== 0
+      ? copy.foreignPhrase(flow(Math.abs(foreignNet)).replace('+', ''), foreignNet > 0 ? copy.netBuyWord : copy.netSellWord)
+      : '';
+    const usdkrw = rates.USDKRW;
+    const vix = instrumentView('VIX', rates.VIX, viewOf('VIX'));
+    const vixPct = vix.latest ? vix.latest.change_pct : rates.VIX?.change_pct;
+    const summary = `<article class="mk-summary" aria-labelledby="mk-summary-title">
+      <p class="mk-summary-eyebrow" id="mk-summary-title">${copy.summaryTitle}</p>
+      <p class="mk-summary-head">${headline}</p>
+      ${breadthPart || foreignPart ? `<p class="mk-summary-sub">${[breadthPart, foreignPart].filter(Boolean).map(html).join(' · ')}</p>` : ''}
+      <div class="mk-summary-stats">
+        <div><span>${copy.fxSummary}</span><strong>${valueUnit('USDKRW', usdkrw?.data_state === 'unavailable' ? null : usdkrw?.close)}</strong><small>${copy.fixingNote(shortDate(usdkrw?.source_date || marketDate))}</small></div>
+        <div><span>${copy.vixSummary}</span><strong>${valueUnit('VIX', vix.display)}${valid(vixPct) ? ` <em class="${signClass(vixPct)}">${pct(vixPct)}</em>` : ''}</strong><small>${vix.latest ? latestStateHtml(vix.latest) : shortDate(rates.VIX?.source_date) ? copy.usCloseNote(shortDate(rates.VIX.source_date)) : ''}</small></div>
+      </div>
+    </article>`;
+
+    /* ---- Korean market ---- */
+    const marketOrder = ['KOSPI', 'KOSDAQ', 'KOSPI200선물'];
+    const dayRows = marketOrder.map(key => {
+      const inv = flows.markets?.[key]?.investors || {};
+      return { name: copy.marketNames[key], values: [inv['외국인']?.net_buy, inv['기관']?.net_buy, inv['개인']?.net_buy] };
+    });
+    const fiveRows = marketOrder.map(key => {
+      const inv = recentFlows.markets?.[key] || {};
+      return { name: copy.marketNames[key], values: [inv['외국인'], inv['기관'], inv['개인']] };
+    });
     // Contract 1.2.0: a last-5-session window missing a session carries no
     // cumulative numbers, only its availability. Never sum fewer sessions
     // into the five-session slot.
     const fiveDayStatus = data.meta?.schema_version === '1.2.0' ? data.section_status?.five_day_flows : null;
     const fiveDayIncomplete = !!fiveDayStatus && fiveDayStatus.status !== 'complete';
-    const monthDay = value => {
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return html(value || '--');
-      const [, m, d] = value.split('-').map(Number);
-      return ko ? `${m}월 ${d}일` : new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(2000, m - 1, d)));
-    };
     const fiveDayBody = fiveDayIncomplete
       ? `<div class="market-group-empty market-five-day-status" role="note"><p class="group-empty-title">${html(copy.fiveDayIncomplete(fiveDayStatus.available_sessions ?? 0, fiveDayStatus.expected_sessions ?? 5))}</p>${
-        (fiveDayStatus.missing_sessions || []).length ? `<p class="group-empty-desc">${html(copy.fiveDayMissing(fiveDayStatus.missing_sessions.map(monthDay).join(', ')))}</p>` : ''}</div>`
-      : null;
+        (fiveDayStatus.missing_sessions || []).length ? `<p class="group-empty-desc">${html(copy.fiveDayMissing(fiveDayStatus.missing_sessions.map(monthDayText).join(', ')))}</p>` : ''}</div>`
+      : `${flowTable(fiveRows)}<p class="mk-unit">${dateText(recentFlows.start_date)} – ${dateText(recentFlows.end_date)}</p>`;
+    const flowsCard = `<section class="mk-card mk-flows" aria-labelledby="mk-flows-title">
+      <div class="mk-card-head"><h3 id="mk-flows-title">${copy.flowsTitle}</h3>
+        <div class="mk-toggle" role="group" aria-label="${html(copy.flowsTitle)}">
+          <button type="button" class="mk-toggle-btn" data-market-action="flow-period" data-period="day" aria-pressed="true">${copy.flowDay}</button>
+          <button type="button" class="mk-toggle-btn" data-market-action="flow-period" data-period="five" aria-pressed="false">${copy.flowFive}</button>
+        </div>
+      </div>
+      <div class="mk-flow-panel" data-flow-panel="day">${flowTable(dayRows)}</div>
+      <div class="mk-flow-panel" data-flow-panel="five" hidden>${fiveDayBody}</div>
+      <p class="mk-unit">${copy.flowNote}</p>
+    </section>`;
 
-    // Contract 1.2.0 SOFT: unavailable breadth shows its state, never old counts.
-    const breadthUnavailable = data.meta?.schema_version === '1.2.0' && data.section_status?.market_breadth?.status === 'unavailable';
-    const breadthBody = breadthUnavailable
-      ? `<div class="market-group-empty market-breadth-status" role="note"><p class="group-empty-title">${html(copy.breadthUnavailable)}</p><p class="group-empty-desc">${html(copy.breadthUnavailableDesc)}</p></div>`
-      : `<div class="breadth-grid">${['KOSPI', 'KOSDAQ'].map(key => breadthCard(key, breadth[key])).join('')}</div>`;
+    const breadthCardHtml = `<section class="mk-card mk-breadth-card" aria-labelledby="mk-breadth-title">
+      <div class="mk-card-head"><h3 id="mk-breadth-title">${termLink(copy.sections[3], copy.terms.breadth)}</h3><span class="mk-card-note">${copy.breadthCaption}</span></div>
+      ${breadthUnavailable
+        ? `<div class="market-group-empty market-breadth-status" role="note"><p class="group-empty-title">${html(copy.breadthUnavailable)}</p><p class="group-empty-desc">${html(copy.breadthUnavailableDesc)}</p></div>`
+        : ['KOSPI', 'KOSDAQ'].map(key => breadthBlock(key, breadth[key])).join('')}
+    </section>`;
+
+    const programItem = key => program.program_trading?.[key]?.net_buy_won;
+    const stat = (label, value, sub = '', cls = '', term = '') => `<div class="mk-stat"><span>${termLink(label, term)}</span><strong class="${cls}">${value}</strong>${sub ? `<small>${sub}</small>` : ''}</div>`;
+    const stats = [
+      ...['KOSPI', 'KOSDAQ'].map(key => stat(copy.turnoverOf(copy.marketNames[key]), won(internals.turnover?.[key]?.value_won), valid(internals.turnover?.[key]?.ratio5) ? html(copy.ratio5Text(number(internals.turnover[key].ratio5, 2))) : '')),
+      stat(copy.programTotal, valid(programItem('전체')) ? signedWon(programItem('전체')) : '--', `${localName('차익')} ${valid(programItem('차익')) ? signedWon(programItem('차익')) : '--'} · ${localName('비차익')} ${valid(programItem('비차익')) ? signedWon(programItem('비차익')) : '--'}`, signClass(programItem('전체')), copy.terms.program),
+      stat(copy.basis, signed(program.basis?.basis, 2), `<span class="state-chip">${html(basisState(program.basis?.market_state))}</span> ${html(copy.spot)} ${number(program.basis?.kospi200_spot, 2)} · <span>${html(futureLabel(program.basis?.future_name))}</span> ${number(program.basis?.future, 2)}`, signClass(program.basis?.basis), copy.terms.basis),
+      ...['KOSPI', 'KOSDAQ'].map(key => stat(copy.shortRatioOf(copy.marketNames[key]), ratioPct(shorts.market_summary?.[key]?.short_value_ratio), `${copy.shortAmount} ${won(shorts.market_summary?.[key]?.short_value_won)}`, '', copy.terms.short))
+    ].join('');
+
+    const concentration = internals.concentration || {};
+    const concentrationItems = [
+      [copy.foreignBuy, concentration['외국인']?.buy],
+      [copy.foreignSell, concentration['외국인']?.sell],
+      [copy.institutionBuy, concentration['기관']?.buy],
+      [copy.institutionSell, concentration['기관']?.sell]
+    ].filter(entry => entry[1]);
+    const shortScopeNote = ['KOSPI', 'KOSDAQ'].some(key => /NXT/.test(String(shorts.market_summary?.[key]?.coverage_scope || '')))
+      ? `<p class="unit-note">${html(copy.shortRatioScope)}</p>` : '';
+    const shortList = (items, isRatio = false) => !(items || []).length ? `<p class="unit-note">${copy.regularUnavailable}</p>` : `<ol class="rank-list">${(items || []).map((item, index) => `<li><span>${index + 1}. <b>${html(companyName(item))}</b><small>${html(item?.market || '')}</small></span><strong>${isRatio ? ratioPct(item?.short_value_ratio) : won(item?.short_value_won)}</strong></li>`).join('')}</ol>`;
+    const statsCard = `<section class="mk-card mk-stats-card" aria-labelledby="mk-stats-title">
+      <div class="mk-card-head"><h3 id="mk-stats-title">${copy.statsTitle}</h3></div>
+      <div class="mk-stats">${stats}</div>
+      <details class="mk-details"><summary>${copy.detailsMore}</summary>
+        <div class="short-ranks"><div><h4>${copy.shortValue}</h4>${shortList(shorts.top5_by_value)}</div><div><h4>${copy.shortRatio}</h4>${shortList(shorts.top5_by_ratio, true)}</div></div>${shortScopeNote}
+        <h4 class="subsection-title">${copy.concentration}</h4><div class="concentration-grid">${concentrationItems.length ? concentrationItems.map(([label, item]) => `<div><span>${label}</span><b>${copy.top1} ${ratioPct(item?.top1_ratio)} · ${copy.top5} ${ratioPct(item?.top5_ratio)}</b><small>${html(companyName(item))}</small></div>`).join('') : `<p class="unit-note">${copy.concentrationUnavailable}</p>`}</div>
+      </details>
+    </section>`;
+
+    const topCard = `<section class="mk-card mk-top-card" aria-labelledby="mk-top-title">
+      <div class="mk-card-head"><h3 id="mk-top-title">${copy.topTitle}</h3><span class="mk-card-note">${copy.regularClose}</span></div>
+      <div class="mk-table-wrap"><table class="mk-table mk-cap-table"><thead><tr><th scope="col">${copy.stock}</th><th scope="col">${copy.price}</th><th scope="col">${copy.change}</th><th scope="col" class="mk-col-cap">${copy.marketCap}</th></tr></thead><tbody>${marketCap.map(item => `<tr><th scope="row"><span class="mk-rank">${html(item?.rank ?? '--')}</span><span class="stock-name"><b>${html(companyName(item))}</b><small>${html(item?.market || '')} · ${html(item?.ticker || '')}</small></span></th><td>${valid(item?.close) ? `${number(item.close, 0)}${ko ? '원' : ''}` : '--'}</td><td><span class="${signClass(item?.change_pct)}">${pct(item?.change_pct)}</span></td><td class="mk-col-cap">${won(item?.market_cap_won)}</td></tr>`).join('')}</tbody></table></div>
+    </section>`;
 
     // Stock rankings (SOFT, optional): a record made before 2026-11-23 has no
-    // status and shows nothing; an unavailable one says so.
+    // status and shows no card; an unavailable one says so.
     const rankingState = data.meta?.schema_version === '1.2.0' ? data.section_status?.stock_rankings?.status : undefined;
     const rankingMarkets = data.stock_rankings?.markets;
     // Trading value in a ranking row: short, so a small stock's value fits one line.
@@ -725,98 +983,75 @@
       : rankingState !== 'complete' || !rankingMarkets ? `<p class="unit-note">${html(copy.rankingsUnavailable)}</p>`
         : `<div class="ranking-markets">${['KOSPI', 'KOSDAQ'].filter(key => rankingMarkets[key]).map(key => {
           const item = rankingMarkets[key];
-          return `<article class="ranking-market"><div class="ranking-market-head"><h3>${key}</h3><p class="ranking-52w"><span>${html(copy.high52)} ${rankingCount(item.new_high_52w)}</span><span>${html(copy.low52)} ${rankingCount(item.new_low_52w)}</span><span class="ranking-52w-basis">${html(copy.high52Basis)}</span></p></div><div class="ranking-lists">${rankingBlock(copy.rankGainers, item.top_gainers, 'top_gainers')}${rankingBlock(copy.rankLosers, item.top_losers, 'top_losers')}${rankingBlock(copy.rankTurnover, item.top_turnover, 'top_turnover')}</div></article>`;
-        }).join('')}</div><p class="unit-note">${html(copy.rankingsNote)}</p>`;
-    // The rankings follow the market breadth; the sections after them move down one number.
-    const num = n => n + (ratesBody && n >= 4 ? 1 : 0) + (rankingsBody && n >= 5 ? 1 : 0);
+          return `<article class="ranking-market"><div class="ranking-market-head"><h4>${key}</h4><p class="ranking-52w"><span>${html(copy.high52)} ${rankingCount(item.new_high_52w)}</span><span>${html(copy.low52)} ${rankingCount(item.new_low_52w)}</span><span class="ranking-52w-basis">${html(copy.high52Basis)}</span></p></div><div class="ranking-lists">${rankingBlock(copy.rankGainers, item.top_gainers, 'top_gainers')}${rankingBlock(copy.rankLosers, item.top_losers, 'top_losers')}${rankingBlock(copy.rankTurnover, item.top_turnover, 'top_turnover')}</div></article>`;
+        }).join('')}</div><p class="mk-unit">${html(copy.rankingsNote)}</p>`;
+    const rankingsCard = rankingsBody ? `<section class="mk-card mk-rankings-card" aria-labelledby="mk-rankings-title">
+      <div class="mk-card-head"><h3 id="mk-rankings-title">${html(copy.rankingsTitle)}</h3><span class="mk-card-note">${copy.regularClose}</span></div>
+      ${rankingsBody}
+    </section>` : '';
 
-    const fiveRows = ['KOSPI', 'KOSDAQ', 'KOSPI200선물'].map(marketKey => {
-      const marketName = marketKey === 'KOSPI200선물' ? (ko ? '선물' : 'KOSPI 200 Futures') : marketKey;
-      const inv = recentFlows.markets?.[marketKey] || {};
-      return [marketName, flow(inv['외국인']), flow(inv['기관']), flow(inv['개인'])];
-    });
+    /* ---- overseas, rates, FX, commodities ---- */
+    const row = (group, key) => boardRow(key, group[key], viewOf(key));
+    const worldRows = [
+      ...['NASDAQ', 'DOW', 'SP500'].map(key => row(indices, key)),
+      row(rates, 'SOX'),
+      ...ASIA_CODES.filter(key => indices[key]).map(key => row(indices, key)),
+      ...['VIX', 'VKOSPI'].filter(key => shown(rates, key)).map(key => row(rates, key))
+    ].join('');
+    const kofiaRows = domesticRateRows(options.domesticRates, marketDate, trend);
+    const ratesRows = `${row(rates, 'US10Y')}${kofiaRows}`;
+    const fxRows = ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY'].filter(key => shown(rates, key)).map(key => row(rates, key)).join('');
+    const commodityRows = ['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER', 'BITCOIN'].filter(key => shown(commodities, key)).map(key => row(commodities, key)).join('');
+    const boardIds = ['world', 'rates', 'fx', 'commodities'];
+    const boards = `<div class="mk-board-tabs" role="group" aria-label="${html(copy.globalTitle)}">${boardIds.map((id, index) => `<button type="button" class="mk-board-tab" data-market-action="board-tab" data-board-tab="${id}" aria-pressed="${index === 0}">${copy.tabs[id]}</button>`).join('')}</div>
+      <div class="mk-boards" data-active-board="world">
+        <div class="mk-board-col">
+          ${boardCard('world', copy.boards.world, copy.boardNotes.world, worldRows)}
+          ${boardCard('rates', copy.boards.rates, copy.boardNotes.rates, ratesRows, kofiaRows ? `<p class="mk-unit">${html(copy.ratesNote)}</p>` : (isHistory ? '' : `<p class="mk-unit">${html(copy.ratesPending)}</p>`))}
+        </div>
+        <div class="mk-board-col">
+          ${boardCard('fx', copy.boards.fx, copy.boardNotes.fx, fxRows)}
+          ${boardCard('commodities', copy.boards.commodities, copy.boardNotes.commodities, commodityRows)}
+        </div>
+      </div>`;
 
-    const programRows = ['차익', '비차익', '전체'].map(key => [
-      localName(key),
-      valid(program.program_trading?.[key]?.net_buy_won) ? signedWon(program.program_trading[key].net_buy_won) : '--'
-    ]);
-
-    const concentration = internals.concentration || {};
-    const concentrationItems = [
-      [copy.foreignBuy, concentration['외국인']?.buy],
-      [copy.foreignSell, concentration['외국인']?.sell],
-      [copy.institutionBuy, concentration['기관']?.buy],
-      [copy.institutionSell, concentration['기관']?.sell]
-    ].filter(entry => entry[1]);
-
-    const shortScopeNote = ['KOSPI', 'KOSDAQ'].some(key => /NXT/.test(String(shorts.market_summary?.[key]?.coverage_scope || '')))
-      ? `<p class="unit-note">${html(copy.shortRatioScope)}</p>` : '';
-    const shortList = (items, isRatio = false) => !(items || []).length ? `<p class="unit-note">${copy.regularUnavailable}</p>` : `<ol class="rank-list">${(items || []).map((item, index) => `<li><span>${index + 1}. <b>${html(companyName(item))}</b><small>${html(item?.market || '')}</small></span><strong>${isRatio ? ratioPct(item?.short_value_ratio) : won(item?.short_value_won)}</strong></li>`).join('')}</ol>`;
-
-    const marketCapRows = marketCap.map(item => [
-      item?.rank ?? '--',
-      `<span class="stock-name"><b>${html(companyName(item))}</b><small>${html(item?.market || '')} · ${html(item?.ticker || '')}</small></span>`,
-      valid(item?.close) ? `${number(item.close, 0)}${ko ? '원' : ''}` : '--',
-      `<span class="${signClass(item?.change_pct)}">${pct(item?.change_pct)}</span>`,
-      won(item?.market_cap_won)
-    ]);
-
-    // Exact Daily Report CTA matching
-    let reportCtaHtml = '';
+    // Exact Daily Report link for the shown session.
     const exactDaily = findExactDaily(marketDate);
-
+    let reportCtaHtml = '';
     if (exactDaily) {
-      const ctaLabel = isHistory ? copy.historyReport : copy.latestReport;
       const cleanHref = exactDaily.href
         ? `https://snowshagal.com/${String(exactDaily.href).replace(/^\/+/, '').replace(/\.html?$/i, '')}`
         : '#';
-      reportCtaHtml = `
-        <a class="market-report-cta" href="${html(cleanHref)}">
-          <span>${html(ctaLabel)}</span>
-          <span class="cta-date-badge" aria-hidden="true">${dateText(exactDaily.reportDate || exactDaily.date)}</span>
-          <span aria-hidden="true">→</span>
-        </a>`;
+      reportCtaHtml = `<a class="market-report-cta" href="${html(cleanHref)}">${html(isHistory ? copy.historyReport : copy.latestReport)} <span aria-hidden="true">↗</span></a>`;
     } else if (isHistory) {
       reportCtaHtml = `<p class="market-report-unavailable">${copy.noDailyReport}</p>`;
     }
 
+    const notices = `${sessionNotice(marketDate, isHistory)}${availabilityNotice(marketDate, isHistory)}${integrityNotice(marketDate)}`;
     const output = `
-      <section class="market-hero" aria-labelledby="market-close-heading"><div class="market-wrap market-hero-inner"><div class="market-hero-copy">
-        <p class="market-eyebrow">SNOWSHAGAL</p><h1 id="market-close-heading">${copy.title}</h1><p class="market-subtitle">${copy.subtitle}</p>
-        <p class="market-date">${dateText(data.meta?.market_date)} · ${copy.closeBasis}</p>
-        ${sessionNotice(marketDate, isHistory)}
-        ${availabilityNotice(marketDate, isHistory)}
-        ${integrityNotice(marketDate)}
-        <p class="market-update">${copy.updateNotice}</p>
-        <p class="market-overseas">${copy.overseas}</p>
-      </div><div class="market-mountain" aria-hidden="true"></div></div></section>
+      ${pageHead(/^\d{4}-\d{2}-\d{2}$/.test(String(marketDate || '')) ? html(copy.pageTitle(monthDayText(marketDate))) : copy.pageTitleToday, html(copy.pageLead), notices ? `<div class="mk-notices">${notices}</div>` : '')}
       <div class="market-wrap">
         ${renderHistoryStrip()}
       </div>
-      <div id="market-dashboard-view" class="market-wrap market-dashboard" data-global-latest="${Object.keys(latestItems).length}">
-        ${section(1, copy.sections[0], `<div class="major-index-grid">${['KOSPI', 'KOSDAQ', 'NASDAQ', 'DOW', 'SP500'].map(key => card(key, indices[key], true)).join('')}</div>${asiaCards ? `<h3 class="group-category-title market-asia-title">${html(copy.asiaTitle)}</h3><div class="mini-instrument-grid market-asia-grid">${asiaCards}</div>` : ''}`)}
-        <div class="market-pair">
-          ${section(2, copy.sections[1], `<div class="mini-instrument-grid">${['SOX', 'VIX', 'VKOSPI', 'US10Y', 'USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY'].filter(key => rates[key] || !OPTIONAL_CODES.includes(key)).map(key => card(key, rates[key])).join('')}</div>`)}
-          ${section(3, copy.sections[2], `<div class="mini-instrument-grid commodity-grid">${['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER', 'BITCOIN'].filter(key => commodities[key] || !OPTIONAL_CODES.includes(key)).map(key => card(key, commodities[key])).join('')}</div>`)}
+      <div id="market-dashboard-view" class="market-wrap market-dashboard mk-dashboard" data-global-latest="${Object.keys(latestItems).length}">
+        <div class="mk-close-line"><p><b>${html(copy.closeOf(monthDayText(marketDate)))}</b> <span>${copy.regularBasis}</span></p>${reportCtaHtml}</div>
+        <div class="mk-top">
+          ${indexCard('KOSPI', indices.KOSPI, viewOf('KOSPI'))}
+          ${indexCard('KOSDAQ', indices.KOSDAQ, viewOf('KOSDAQ'))}
+          ${summary}
         </div>
-        ${ratesBody ? section(4, copy.ratesTitle, ratesBody, 'market-rates-section') : ''}
-        ${section(num(4), copy.sections[3], breadthBody)}
-        ${rankingsBody ? section(num(4) + 1, copy.rankingsTitle, rankingsBody, 'market-rankings-section') : ''}
-        <div class="market-pair market-pair-tables">
-          ${section(num(5), copy.sections[4], dataTable([copy.market, copy.foreign, copy.institution, copy.individual], investorRows))}
-          ${section(num(6), copy.sections[5], fiveDayBody || `${dataTable([copy.market, copy.foreign, copy.institution, copy.individual], fiveRows)}<p class="unit-note">${dateText(data.recent_5d_flows?.start_date)} – ${dateText(data.recent_5d_flows?.end_date)}</p>`)}
-        </div>
-        <div class="market-trio">
-          ${section(num(7), copy.sections[6], `<div class="program-grid"><div><h3>${ko ? '프로그램 매매' : 'Program trading'}</h3>${dataTable(['', copy.netBuy], programRows, 'compact')}</div><div class="basis-panel">${metric(copy.spot, number(program.basis?.kospi200_spot, 2))}${metric(futureLabel(program.basis?.future_name), number(program.basis?.future, 2))}${metric(copy.basis, signed(program.basis?.basis, 2), signClass(program.basis?.basis))}<span class="state-chip">${html(basisState(program.basis?.market_state))}</span></div></div>`)}
-          ${section(num(8), copy.sections[7], `<div class="turnover-grid">${['KOSPI', 'KOSDAQ'].map(key => `<article><h3>${key}</h3>${metric(copy.turnover, won(internals.turnover?.[key]?.value_won))}${metric(copy.average5, won(internals.turnover?.[key]?.average5_value_won))}${metric(copy.ratio5, valid(internals.turnover?.[key]?.ratio5) ? `${number(internals.turnover[key].ratio5, 2)}×` : '--')}</article>`).join('')}</div><h3 class="subsection-title">${copy.concentration}</h3><div class="concentration-grid">${concentrationItems.length ? concentrationItems.map(([label, item]) => `<div><span>${label}</span><b>${copy.top1} ${ratioPct(item?.top1_ratio)} · ${copy.top5} ${ratioPct(item?.top5_ratio)}</b><small>${html(companyName(item))}</small></div>`).join('') : `<p class="unit-note">${copy.concentrationUnavailable}</p>`}</div>`)}
-          ${section(num(9), copy.sections[8], `<div class="short-summary">${['KOSPI', 'KOSDAQ'].map(key => `<article><h3>${key}</h3>${metric(copy.shortAmount, won(shorts.market_summary?.[key]?.short_value_won))}${metric(copy.valueRatio, ratioPct(shorts.market_summary?.[key]?.short_value_ratio))}</article>`).join('')}</div><div class="short-ranks"><div><h3>${copy.shortValue}</h3>${shortList(shorts.top5_by_value)}</div><div><h3>${copy.shortRatio}</h3>${shortList(shorts.top5_by_ratio, true)}</div></div>${shortScopeNote}`)}
-        </div>
-        <div class="market-bottom-grid">
-          ${section(num(10), copy.sections[9], dataTable([copy.rank, copy.stock, copy.price, copy.change, copy.marketCap], marketCapRows, 'market-cap-table'))}
-          <aside class="market-note"><span class="note-quote" aria-hidden="true">“</span><h2>${copy.noteTitle}</h2><p>${copy.noteBody}</p>${reportCtaHtml}</aside>
-        </div>
+        <section class="mk-section" aria-labelledby="mk-kr-title">
+          <div class="mk-section-head"><h2 id="mk-kr-title">${copy.krTitle}</h2><span>${copy.krCaption}</span></div>
+          <div class="mk-grid mk-grid-kr">${flowsCard}${breadthCardHtml}</div>
+          <div class="mk-grid mk-grid-kr2">${statsCard}${topCard}</div>
+          ${rankingsCard ? `<div class="mk-grid-full">${rankingsCard}</div>` : ''}
+        </section>
+        <section class="mk-section" aria-labelledby="mk-global-title">
+          <div class="mk-section-head"><h2 id="mk-global-title">${copy.globalTitle}</h2><span>${copy.globalCaption}</span></div>
+          ${boards}
+        </section>
         <div class="market-data-note"><p>${copy.source}: ${html(sourceLine(Array.from(sourceSet)))}</p><p>${html(generatedAtText(data.meta?.generated_at))} · ${html(data.meta?.schema_version || '')}</p></div>
-        <p class="market-archive-links">${/^\d{4}-\d{2}-\d{2}$/.test(String(marketDate || '')) ?`<a href="${ko ? '/market/' : '/en/market/'}${html(marketDate)}/">${html(copy.sessionPage)} →</a>` : ''}<a href="${ko ? '/market/' : '/en/market/'}archive/">${html(copy.archivePage)} →</a><a href="${ko ? '/market/' : '/en/market/'}sectors/">${html(copy.sectorsPage)} →</a><a href="${ko ? '/market/' : '/en/market/'}archive/#indicators">${html(copy.indicatorsPage)} →</a></p>
+        <p class="market-archive-links">${/^\d{4}-\d{2}-\d{2}$/.test(String(marketDate || '')) ? `<a href="${ko ? '/market/' : '/en/market/'}${html(marketDate)}/">${html(copy.sessionPage)} →</a>` : ''}<a href="${ko ? '/market/' : '/en/market/'}archive/">${html(copy.archivePage)} →</a><a href="${ko ? '/market/' : '/en/market/'}sectors/">${html(copy.sectorsPage)} →</a><a href="${ko ? '/market/' : '/en/market/'}archive/#indicators">${html(copy.indicatorsPage)} →</a></p>
       </div>`;
     target.innerHTML = output;
     bindEvents(target);
@@ -828,6 +1063,15 @@
   // An optional indicator is shown once the window starts with it, so a period never
   // compares against a day it was not recorded.
   const rangeShown = (key, item) => Boolean(item) && (!OPTIONAL_CODES.includes(key) || valid(item.baseline_value));
+
+  // The period's line: the value before the window (baseline_value, where the
+  // period return starts) and each session's value after it. Drawn only when the
+  // window ends with a value (trendSvg), so it always ends on the figure shown.
+  function rangeTrend(item) {
+    if (!valid(item?.baseline_value) || !Array.isArray(item?.series) || !item.series.length) return '';
+    const line = trendSvg([item.baseline_value, ...item.series], { w: 160, h: 30, pad: 3 });
+    return line ? `<div class="range-item-trend">${line}</div>` : '';
+  }
 
   function renderRangeInstrumentRow(key, item) {
     if (!rangeShown(key, item)) return '';
@@ -846,6 +1090,7 @@
           <strong>${historyLink(key, html(name))}</strong>
           ${highLow}
         </div>
+        ${rangeTrend(item)}
         <div class="range-item-values">
           <span class="range-path">${baseline} <span class="range-arrow">→</span> ${end}</span>
           <strong class="range-return ${returnCls}">${returnStr}</strong>
@@ -886,6 +1131,7 @@
         <div class="range-item-name">
           <strong>${historyLink(key, html(name))}</strong>
         </div>
+        ${rangeTrend(item)}
         <div class="range-item-values">
           <span class="range-path">${baseline} <span class="range-arrow">→</span> ${end}</span>
           <div class="range-change-wrap">
@@ -1035,11 +1281,7 @@
     const commodities = data.instruments?.commodities_crypto || {};
 
     const output = `
-      <section class="market-hero" aria-labelledby="market-range-heading"><div class="market-wrap market-hero-inner"><div class="market-hero-copy">
-        <p class="market-eyebrow">SNOWSHAGAL</p><h1 id="market-range-heading">${html(pTitle)}</h1><p class="market-subtitle">${dateRangeStr}</p>
-        <p class="market-date">${html(statusNote)}</p>
-        <p class="market-update">${copy.updateNotice}</p>
-      </div><div class="market-mountain" aria-hidden="true"></div></div></section>
+      ${pageHead(html(pTitle), [dateRangeStr, html(statusNote)].filter(Boolean).join(' · '), '', 'market-range-heading')}
       <div class="market-wrap">
         ${renderHistoryStrip()}
       </div>
@@ -1105,10 +1347,6 @@
       if (modes[0]) modes[0].classList.toggle('active', state.mode === 'today' && !state.calendarOpen);
       if (modes[1]) modes[1].classList.toggle('active', state.mode === '1w' && !state.calendarOpen);
       if (modes[2]) modes[2].classList.toggle('active', state.mode === '1m' && !state.calendarOpen);
-      if (modes[3]) {
-        modes[3].classList.toggle('active', state.mode === 'history' || state.calendarOpen);
-        modes[3].setAttribute('aria-expanded', String(state.calendarOpen));
-      }
       const toggleBtn = document.querySelector('.market-calendar-toggle');
       if (toggleBtn) {
         toggleBtn.classList.toggle('active', state.calendarOpen);
@@ -1138,6 +1376,19 @@
         state.calendarOpen = false;
         navigateToMode('history', targetDate);
       }
+    } else if (action === 'flow-period') {
+      // Today's flows or the last five sessions': one table shown at a time.
+      const card = button.closest('.mk-flows');
+      const period = button.dataset.period;
+      card?.querySelectorAll('[data-market-action="flow-period"]').forEach(item => item.setAttribute('aria-pressed', String(item.dataset.period === period)));
+      card?.querySelectorAll('[data-flow-panel]').forEach(panel => { panel.hidden = panel.dataset.flowPanel !== period; });
+    } else if (action === 'board-tab') {
+      // Phone width: one board at a time (the CSS reads data-active-board); wider screens show all four.
+      const tab = button.dataset.boardTab;
+      const section = button.closest('.mk-section');
+      const boards = section?.querySelector('.mk-boards');
+      if (boards) boards.dataset.activeBoard = tab;
+      section?.querySelectorAll('[data-market-action="board-tab"]').forEach(item => item.setAttribute('aria-pressed', String(item.dataset.boardTab === tab)));
     } else if (action === 'retry') {
       init();
     }
@@ -1194,6 +1445,7 @@
       } else if (mode === 'history' && targetDate) {
         const dateEndpoint = `/api/market/date?date=${encodeURIComponent(targetDate)}`;
         const ratesRequest = fetchDomesticRates(targetDate);
+        const trendRequest = fetchTrend(targetDate);
         const response = await fetch(dateEndpoint, { headers: { Accept: 'application/json' } });
         if (!response.ok) {
           if (response.status === 404) {
@@ -1202,15 +1454,16 @@
           throw new Error(`HTTP ${response.status}`);
         }
         const data = await response.json();
-        const domesticRates = await ratesRequest;
+        const [domesticRates, trend] = await Promise.all([ratesRequest, trendRequest]);
         if (superseded()) return;
-        render(data, rootEl, { domesticRates });
+        render(data, rootEl, { domesticRates, trend });
       } else {
         // Today: the Market Close, and Global Latest for the global cards,
         // requested together; a Global Latest failure only leaves it out.
         const latestRequest = fetchGlobalLatest();
         // The newest stored KOFIA day; shown only when it is the record's own date.
         const ratesRequest = fetchDomesticRates('latest');
+        const trendRequest = fetchTrend(null);
         const source = document.body.dataset.marketSource || '/api/market/latest';
         const response = await fetch(source, { headers: { Accept: 'application/json' } });
         if (!response.ok) {
@@ -1223,7 +1476,7 @@
           throw new Error(`HTTP ${response.status}`);
         }
         const data = await response.json();
-        const [latest, domesticRates] = await Promise.all([latestRequest, ratesRequest]);
+        const [latest, domesticRates, trend] = await Promise.all([latestRequest, ratesRequest, trendRequest]);
         if (superseded()) return;
         state.currentDate = data.meta?.market_date || null;
         state.expectedDate = response.headers?.get?.(EXPECTED_MARKET_DATE_HEADER) || null;
@@ -1231,7 +1484,7 @@
         const globalLatest = latest
           ? { items: latest.items, now: root.MARKET_LOCALE.globalLatestNow(latest.servedAt, Date.now()) }
           : null;
-        render(data, rootEl, { globalLatest, domesticRates });
+        render(data, rootEl, { globalLatest, domesticRates, trend });
       }
     } catch (error) {
       console.error('Failed to load market close data', error);
@@ -1271,11 +1524,7 @@
   function renderDateNotFound(dateStr, target = document.getElementById('market-close-root')) {
     if (!target) return;
     target.innerHTML = `
-      <section class="market-hero" aria-labelledby="market-close-heading"><div class="market-wrap market-hero-inner"><div class="market-hero-copy">
-        <p class="market-eyebrow">SNOWSHAGAL</p><h1 id="market-close-heading">${copy.title}</h1><p class="market-subtitle">${copy.subtitle}</p>
-        <p class="market-date">${dateText(dateStr)} · ${copy.closeBasis}</p>
-        <p class="market-update">${copy.updateNotice}</p>
-      </div><div class="market-mountain" aria-hidden="true"></div></div></section>
+      ${pageHead(html(copy.pageTitle(monthDayText(dateStr))), html(copy.pageLead))}
       <div class="market-wrap">
         ${renderHistoryStrip()}
       </div>
@@ -1294,9 +1543,7 @@
     if (!target) return;
     const pTitle = period === '1w' ? copy.recent5Days : copy.recent20Days;
     target.innerHTML = `
-      <section class="market-hero" aria-labelledby="market-range-heading"><div class="market-wrap market-hero-inner"><div class="market-hero-copy">
-        <p class="market-eyebrow">SNOWSHAGAL</p><h1 id="market-range-heading">${html(pTitle)}</h1><p class="market-subtitle">—</p>
-      </div><div class="market-mountain" aria-hidden="true"></div></div></section>
+      ${pageHead(html(pTitle), '', '', 'market-range-heading')}
       <div class="market-wrap">
         ${renderHistoryStrip()}
       </div>
@@ -1318,9 +1565,7 @@
       return;
     }
     target.innerHTML = `
-      <section class="market-hero" aria-labelledby="market-close-heading"><div class="market-wrap market-hero-inner"><div class="market-hero-copy">
-        <p class="market-eyebrow">SNOWSHAGAL</p><h1 id="market-close-heading">${copy.title}</h1><p class="market-subtitle">${copy.subtitle}</p>
-      </div><div class="market-mountain" aria-hidden="true"></div></div></section>
+      ${pageHead(copy.pageTitleToday, html(copy.pageLead))}
       <div class="market-wrap">
         ${renderHistoryStrip()}
       </div>
@@ -1342,9 +1587,7 @@
       return;
     }
     target.innerHTML = `
-      <section class="market-hero" aria-labelledby="market-close-heading"><div class="market-wrap market-hero-inner"><div class="market-hero-copy">
-        <p class="market-eyebrow">SNOWSHAGAL</p><h1 id="market-close-heading">${copy.title}</h1><p class="market-subtitle">${copy.subtitle}</p>
-      </div><div class="market-mountain" aria-hidden="true"></div></div></section>
+      ${pageHead(copy.pageTitleToday, html(copy.pageLead))}
       <div class="market-wrap">
         ${renderHistoryStrip()}
       </div>

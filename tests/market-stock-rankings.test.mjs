@@ -159,34 +159,34 @@ test('the receiver rejects another session’s rankings and re-sorted lists', ()
   }).length > 0);
 });
 
-const sectionHeadings = page => [...page.matchAll(/<h2 id="market-section-\d+"><span>(\d+)\.<\/span> ([^<]+)<\/h2>/g)].map(m => [Number(m[1]), m[2]]);
+// The rankings card of a rendered page: its <section>, or '' when there is none.
+const rankingsCard = page => page.match(/<section class="mk-card mk-rankings-card"[\s\S]*?<\/section>/)?.[0] || '';
+const cardTitle = card => card.match(/<h3 id="mk-rankings-title">([^<]+)<\/h3>/)?.[1];
 
-test('session pages show the rankings right after the market breadth', () => {
+const CASES = [
+  ['ko', '등락률 · 거래대금 상위 종목', ['한진칼우', '상한가', '하한가', '52주 신고가 <b>5</b>종목', '52주 신저가 <b>170</b>종목</span><span class="ranking-52w-basis">장중 기준 · 네이버 금융 집계</span>', '3.43조원', '99,700원 · 거래대금 435억원', '1,997원 · 거래대금 25억원', '7,810원 · 거래대금 4.7억원', '810원 · 거래대금 10억원', '15:35~15:39에 저장']],
+  ['en', 'Top Movers &amp; Most Traded', ['18064K', 'Limit up', 'Limit down', 'SK hynix', '52-week highs <b>5</b>', '52-week lows <b>170</b></span><span class="ranking-52w-basis">intraday · Naver Finance count</span>', 'KRW 3.43tn', '7,810 · Value KRW 469M', '15:35–15:39 KST']]
+];
+
+test('session pages show the rankings card after the cap table and before the sectors', () => {
   const context = { prev: null, next: null, report: null };
-  const cases = [
-    ['ko', '등락률 · 거래대금 상위 종목', '시장 폭', 'KRX 업종 · 테마 등락률', ['한진칼우', '상한가', '하한가', '52주 신고가 <b>5</b>종목', '52주 신저가 <b>170</b>종목</span><span class="ranking-52w-basis">장중 기준 · 네이버 금융 집계</span>', '3.43조원', '99,700원 · 거래대금 435억원', '1,997원 · 거래대금 25억원', '7,810원 · 거래대금 4.7억원', '810원 · 거래대금 10억원']],
-    ['en', 'Top Movers &amp; Most Traded', 'Market Breadth', 'KRX Sectors &amp; Themes', ['18064K', 'Limit up', 'Limit down', 'SK hynix', '52-week highs <b>5</b>', '52-week lows <b>170</b></span><span class="ranking-52w-basis">intraday · Naver Finance count</span>', 'KRW 3.43tn', '7,810 · Value KRW 469M']]
-  ];
-  for (const [lang, title, before, after, texts] of cases) {
+  for (const [lang, title, texts] of CASES) {
     const page = marketDatePageHtml(SHELLS[lang], withRankings(complete12()), lang, context);
-    const headings = sectionHeadings(page);
-    const at = headings.findIndex(([, name]) => name === title);
-    assert.ok(at > 0, lang);
-    assert.equal(headings[at - 1][1], before, lang);
-    assert.equal(headings[at + 1][1], after, lang);
-    assert.deepEqual(headings.map(([number]) => number), headings.map((_, index) => index + 1), `${lang}: numbered in order`);
-    const start = page.indexOf('<div class="ranking-markets">');
-    const body = page.slice(start, page.indexOf('</section>', start));
-    assert.equal((body.match(/<article class="ranking-market">/g) || []).length, 2, lang);
-    assert.equal((body.match(/<li>/g) || []).length, 10, lang);
-    for (const text of texts) assert.ok(body.includes(text), `${lang}: ${text}`);
-    if (lang === 'en') assert.doesNotMatch(body, HANGUL, 'no Korean names on the English page');
+    const card = rankingsCard(page);
+    assert.equal(cardTitle(card), title, lang);
+    assert.ok(page.indexOf('id="mk-top-title"') < page.indexOf('id="mk-rankings-title"'), `${lang}: after the cap table`);
+    assert.ok(page.indexOf('id="mk-rankings-title"') < page.indexOf('id="mk-groups-title"'), `${lang}: before the sectors`);
+    assert.ok(page.indexOf('id="mk-rankings-title"') < page.indexOf('id="mk-global-title"'), `${lang}: inside the Korean market section`);
+    assert.equal((card.match(/<article class="ranking-market">/g) || []).length, 2, lang);
+    assert.equal((card.match(/<li>/g) || []).length, 10, lang);
+    for (const text of texts) assert.ok(card.includes(text), `${lang}: ${text}`);
+    if (lang === 'en') assert.doesNotMatch(card, HANGUL, 'no Korean names on the English page');
   }
-  const unavailable = marketDatePageHtml(SHELLS.ko, withRankings(complete12(), 'unavailable'), 'ko', context);
-  assert.match(unavailable, /등락률 · 거래대금 상위 종목<\/h2><p class="unit-note">이날 종목 순위 데이터 없음<\/p>/);
+  const unavailable = rankingsCard(marketDatePageHtml(SHELLS.ko, withRankings(complete12(), 'unavailable'), 'ko', context));
+  assert.match(unavailable, /등락률 · 거래대금 상위 종목<\/h3>[\s\S]*<p class="unit-note">이날 종목 순위 데이터 없음<\/p>/);
   assert.doesNotMatch(unavailable, /ranking-markets/);
   const before = marketDatePageHtml(SHELLS.ko, complete12(), 'ko', context);
-  assert.doesNotMatch(before, /등락률 · 거래대금 상위 종목|ranking-/);
+  assert.doesNotMatch(before, /등락률 · 거래대금 상위 종목|ranking-|mk-rankings/);
 });
 
 async function dashboard(lang) {
@@ -199,31 +199,29 @@ async function dashboard(lang) {
   return window.MARKET_CLOSE;
 }
 
-test('TODAY shows the rankings after the market breadth and numbers the rest after them', async () => {
-  for (const [lang, title, breadth, flows, texts] of [
-    ['ko', '등락률 · 거래대금 상위 종목', '시장 폭', 'KRX 투자자 매매동향 (당일)', ['한진칼우', '상한가', '52주 신고가 <b>5</b>종목', '장중 기준 · 네이버 금융 집계']],
-    ['en', 'Top Movers &amp; Most Traded', 'Market Breadth', 'KRX Investor Flows (Daily)', ['18064K', 'Limit up', 'SK hynix', '52-week lows <b>293</b>', 'intraday · Naver Finance count']]
-  ]) {
+test('TODAY shows the same rankings card as the session page', async () => {
+  const context = { prev: null, next: null, report: null };
+  for (const [lang, title, texts] of CASES) {
     const runtime = await dashboard(lang);
     const target = { innerHTML: '' };
     runtime.render(withRankings(complete12()), target);
-    const headings = sectionHeadings(target.innerHTML);
-    const at = headings.findIndex(([, name]) => name === title);
-    assert.ok(at > 0, lang);
-    assert.deepEqual(headings.slice(at - 1, at + 2), [[4, breadth], [5, title], [6, flows]], lang);
-    assert.deepEqual(headings.map(([number]) => number), headings.map((_, index) => index + 1), `${lang}: numbered in order`);
-    const start = target.innerHTML.indexOf('<div class="ranking-markets">');
-    const body = target.innerHTML.slice(start, target.innerHTML.indexOf('</section>', start));
-    assert.equal((body.match(/<li>/g) || []).length, 10, lang);
-    for (const text of texts) assert.ok(body.includes(text), `${lang}: ${text}`);
-    if (lang === 'en') assert.doesNotMatch(body, HANGUL);
+    const card = rankingsCard(target.innerHTML);
+    assert.equal(cardTitle(card), title, lang);
+    assert.ok(target.innerHTML.indexOf('id="mk-top-title"') < target.innerHTML.indexOf('id="mk-rankings-title"'), lang);
+    assert.ok(target.innerHTML.indexOf('id="mk-rankings-title"') < target.innerHTML.indexOf('id="mk-global-title"'), lang);
+    for (const text of texts) assert.ok(card.includes(text), `${lang}: ${text}`);
+    if (lang === 'en') assert.doesNotMatch(card, HANGUL);
+    // One record, two renderers: the lists, counts and note are the same markup.
+    const lists = html => html.slice(html.indexOf('<div class="ranking-markets">'));
+    const server = rankingsCard(marketDatePageHtml(SHELLS[lang], withRankings(complete12()), lang, context));
+    assert.equal(lists(card).replace(/\s+/g, ' '), lists(server).replace(/\s+/g, ' '), `${lang}: same body as the session page`);
   }
   const runtime = await dashboard('ko');
   const target = { innerHTML: '' };
   runtime.render(complete12(), target);
-  const headings = sectionHeadings(target.innerHTML);
-  assert.deepEqual(headings.slice(3, 5).map(([number, name]) => [number, name]), [[4, '시장 폭'], [5, 'KRX 투자자 매매동향 (당일)']]);
-  assert.doesNotMatch(target.innerHTML, /ranking-/);
+  assert.doesNotMatch(target.innerHTML, /ranking-|mk-rankings/);
   runtime.render(withRankings(complete12(), 'unavailable'), target);
-  assert.match(target.innerHTML, /등락률 · 거래대금 상위 종목<\/h2><p class="unit-note">이날 종목 순위 데이터 없음<\/p>/);
+  const unavailable = rankingsCard(target.innerHTML);
+  assert.match(unavailable, /등락률 · 거래대금 상위 종목<\/h3>[\s\S]*<p class="unit-note">이날 종목 순위 데이터 없음<\/p>/);
+  assert.doesNotMatch(unavailable, /ranking-markets/);
 });

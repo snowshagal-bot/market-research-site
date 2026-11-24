@@ -229,25 +229,23 @@ test('publish then read: created, unchanged, corrected; the read is canonical an
 
 const DATE = JSON.parse(MC_EXAMPLE).meta.market_date;
 
-test('the session page shows that day’s yields as their own section, numbered in order, and never another day’s', () => {
+test('the session page lists that day’s yields in the rates board after US 10Y, and never another day’s', () => {
   const payload = JSON.parse(MC_EXAMPLE);
   const ko = marketDatePageHtml(SHELLS.ko, payload, 'ko', { domesticRates: { ...day(DATE), published_at: '' } });
-  const headings = [...ko.matchAll(/<h2 id="market-section-(\d+)"><span>(\d+)\.<\/span> ([^<]+)<\/h2>/g)].map(match => [match[2], match[3]]);
-  const rates = headings.find(([, title]) => title === '국내 금리');
-  assert.ok(rates, 'a 국내 금리 section');
-  assert.deepEqual(headings.map(([n]) => n), headings.map((_, index) => String(index + 1).padStart(2, '0')));
-  const section = ko.slice(ko.indexOf('국내 금리</h2>'), ko.indexOf('</section>', ko.indexOf('국내 금리</h2>')));
-  assert.equal((section.match(/<article class="instrument-card rate-card"/g) || []).length, 4);
-  assert.match(section, /<a class="instrument-history-link" href="\/market\/ktb3y\/">국고채 3년<\/a>[\s\S]*?3\.642%[\s\S]*?▼ 7\.4bp[\s\S]*?16:00 최종호가/);
+  const start = ko.indexOf('data-board="rates"');
+  assert.ok(start > 0, 'a rates board');
+  const section = ko.slice(start, ko.indexOf('</section>', start));
+  assert.deepEqual([...section.matchAll(/<tr class="mk-row[^"]*" data-(?:code|rate-code)="([A-Z0-9_]+)"/g)].map(m => m[1]), ['US10Y', 'KTB3Y', 'KTB10Y', 'CORPAA3Y', 'CD91']);
+  assert.equal((section.match(/<tr class="mk-row rate-row"/g) || []).length, 4);
+  assert.match(section, /<a class="instrument-history-link" href="\/market\/ktb3y\/">국고채 3년<\/a>[\s\S]*?16:00 최종호가[\s\S]*?3\.642%[\s\S]*?▼ 7\.4bp/);
   assert.match(section, /CD 91일[\s\S]*?3\.39%[\s\S]*?▲ 1\.0bp/);
   assert.match(section, /금융투자협회 최종호가수익률 · 16:00 KST 기준/);
   const en = marketDatePageHtml(SHELLS.en, payload, 'en', { domesticRates: { ...day(DATE), published_at: '' } });
-  assert.match(en, /Korean Bond Yields<\/h2>/);
   assert.match(en, /href="\/en\/market\/corpaa3y\/">Corporate AA- 3Y<\/a>/);
-  // Another day's yields, or none: the page is as before.
+  // Another day's yields, or none: the rates board has US 10Y alone.
   const without = marketDatePageHtml(SHELLS.ko, payload, 'ko', {});
-  assert.doesNotMatch(without, /국내 금리|rate-card/);
-  assert.doesNotMatch(marketDatePageHtml(SHELLS.ko, payload, 'ko', { domesticRates: day('2026-08-27') }), /rate-card/);
+  assert.doesNotMatch(without, /rate-row|ktb3y/);
+  assert.doesNotMatch(marketDatePageHtml(SHELLS.ko, payload, 'ko', { domesticRates: day('2026-08-27') }), /rate-row/);
   assert.equal(domesticRatesBody({ market_date: DATE, items: [] }, 'ko'), '');
 });
 
@@ -315,7 +313,7 @@ test('the routes: a rate page exists once a day is stored; a session page carrie
   db.database.prepare(`INSERT INTO market_close_snapshots (market_date, schema_version, generated_at, status, payload_json, published_at, auth_source) VALUES (?, ?, ?, 'final', ?, ?, 'test')`)
     .run('2026-11-20', payload.meta.schema_version, payload.meta.generated_at, JSON.stringify(payload), '2026-11-20T07:10:00Z');
   const session = await (await route(`${PROD}/market/2026-11-20/`, db)).text();
-  assert.match(session, /국내 금리<\/h2>[\s\S]*?3\.642%/);
+  assert.match(session, /data-board="rates"[\s\S]*?3\.642%/);
   const history = await (await route(`${PROD}/market/ktb3y/`, db)).text();
   assert.match(history, /<a href="\/market\/2026-11-20\/">/);
   assert.doesNotMatch(history, /<a href="\/market\/2026-11-19\/">/);
@@ -336,23 +334,23 @@ async function dashboard(lang) {
   return window.MARKET_CLOSE;
 }
 
-test('TODAY shows the record’s own day of yields as section 4 and moves the rest down; another day is not shown', async () => {
-  for (const [lang, title, prefix] of [['ko', '국내 금리', ''], ['en', 'Korean Bond Yields', '/en']]) {
+test('TODAY lists the record’s own day of yields in the rates board after US 10Y; another day is not shown', async () => {
+  for (const [lang, note, prefix] of [['ko', '금융투자협회 최종호가수익률', ''], ['en', 'KOFIA final quote yields', '/en']]) {
     const runtime = await dashboard(lang);
     const payload = JSON.parse(MC_EXAMPLE);
     const target = { innerHTML: '' };
     runtime.render(payload, target, { domesticRates: { ...day(DATE), published_at: '' } });
     const html = target.innerHTML;
-    const numbers = [...html.matchAll(/<h2 id="market-section-(\d+)"><span>(\d+)\.<\/span> ([^<]+)<\/h2>/g)].map(match => [Number(match[2]), match[3]]);
-    assert.deepEqual(numbers.map(([n]) => n), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], lang);
-    assert.equal(numbers[3][1], title);
-    assert.equal((html.match(/rate-card/g) || []).length, 4);
-    assert.match(html, new RegExp(`href="${prefix}/market/ktb3y/"`));
-    assert.match(html, /3\.642%[\s\S]*?▼ 7\.4bp/);
+    const start = html.indexOf('data-board="rates"');
+    const board = html.slice(start, html.indexOf('</section>', start));
+    assert.deepEqual([...board.matchAll(/<tr class="mk-row[^"]*"[^>]* data-(?:code|rate-code)="([A-Z0-9_]+)"/g)].map(m => m[1]), ['US10Y', 'KTB3Y', 'KTB10Y', 'CORPAA3Y', 'CD91'], lang);
+    assert.equal((board.match(/class="mk-row rate-row"/g) || []).length, 4);
+    assert.ok(board.includes(note), lang);
+    assert.match(board, new RegExp(`href="${prefix}/market/ktb3y/"`));
+    assert.match(board, /3\.642%[\s\S]*?▼ 7\.4bp/);
 
     const before = { innerHTML: '' };
     runtime.render(payload, before, { domesticRates: day('2026-08-27') });
-    assert.doesNotMatch(before.innerHTML, /rate-card/);
-    assert.deepEqual([...before.innerHTML.matchAll(/<h2 id="market-section-(\d+)">/g)].map(match => Number(match[1])), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    assert.doesNotMatch(before.innerHTML, /rate-row/);
   }
 });

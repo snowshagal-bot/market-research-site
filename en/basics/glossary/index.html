@@ -45,7 +45,9 @@
 .glossary-letter{scroll-margin-top:80px;padding:18px 0 6px;border-bottom:1px solid var(--line)}
 .glossary-letter>h2{margin:0 0 6px;font-family:Georgia,"Noto Serif KR",serif;font-size:24px;font-weight:500;color:var(--navy)}
 .glossary-terms{margin:0}
-.glossary-entry{padding:12px 0;border-top:1px solid color-mix(in srgb,var(--line) 60%,transparent)}.glossary-entry:first-child{border-top:0}
+.glossary-entry{padding:12px 0;border-top:1px solid color-mix(in srgb,var(--line) 60%,transparent);scroll-margin-top:96px}.glossary-entry:first-child{border-top:0}
+html:has(.glossary-entry:target){scroll-behavior:auto}
+.glossary-entry:target{background:color-mix(in srgb,var(--line) 38%,transparent);box-shadow:0 0 0 10px color-mix(in srgb,var(--line) 38%,transparent);border-radius:6px;border-top-color:transparent}.glossary-entry:target+.glossary-entry{border-top-color:transparent}
 .glossary-entry dt{font-size:16px;font-weight:800;color:var(--text);margin:0 0 4px}
 .glossary-entry dd{margin:0}.glossary-entry dd>p{margin:0;font-size:14.5px;line-height:1.7;color:var(--text-2)}
 .glossary-entry .glossary-sources{margin-top:6px;font-size:12px;line-height:1.6;color:var(--muted)}
@@ -119,12 +121,15 @@
             <a href="/en/research/">Research</a>
             <a href="/en/notes/">Investment Insights</a>
             <a href="/en/basics/">Market Basics</a>
+            <a href="/en/basics/glossary/">Glossary</a>
           </nav>
         </div>
         <div class="site-footer-group">
           <p class="site-footer-heading" aria-hidden="true">Market</p>
           <nav class="site-footer-nav" aria-label="Footer Market menu">
             <a href="/en/market/">Market</a>
+            <a href="/en/market/archive/">Close Archive</a>
+            <a href="/en/market/sectors/">Sectors &amp; Themes</a>
             <a href="/en/disclosures/">Disclosure</a>
             <a href="/en/calendar/">Calendar</a>
           </nav>
@@ -177,7 +182,7 @@
 </dialog>
 
 <script src="/data/posts.js"></script>
-<script src="/assets/locale.js?v=2af8dce9f2"></script>
-<script src="/assets/site.js?v=53fc86e7b4"></script>
+<script src="/assets/locale.js?v=b9ee9a3e99"></script>
+<script src="/assets/site.js?v=765e591453"></script>
 </body>
 </html>

@@ -227,26 +227,26 @@ test('the sitemap and the archive list a new indicator only once it has a value'
   assert.match(nav(marketArchivePageHtml(SHELLS.en, [{ ...row, optional_closes: closesFor(['USDJPY']) }], 'en')), /<a href="\/en\/market\/usdjpy\/">USD\/JPY<\/a>/);
 });
 
-test('session pages show the seven cards with their own units and link those with a value', () => {
+test('session pages show the seven rows with their own units and link those with a value', () => {
   const data = withNew(complete12());
   data.commodities_crypto.SILVER = unavailable(data.commodities_crypto.SILVER);
   const context = { prev: null, next: null, report: null };
   const ko = marketDatePageHtml(SHELLS.ko, data, 'ko', context);
   const en = marketDatePageHtml(SHELLS.en, data, 'en', context);
-  const rates = ko.slice(ko.indexOf('<div class="mini-instrument-grid">'), ko.indexOf('commodity-grid'));
-  const order = [...rates.matchAll(/<small>([^<]+)<\/small>/g)].map(m => m[1]);
-  assert.deepEqual(order.slice(0, 6), ['KRW=X', 'JPYKRW=X', 'CNYKRW=X', 'EURKRW=X', 'DX-Y.NYB', 'JPY=X']);
+  const fxBoard = ko.slice(ko.indexOf('data-board="fx"'), ko.indexOf('</section>', ko.indexOf('data-board="fx"')));
+  const order = [...fxBoard.matchAll(/<tr class="mk-row" data-code="([A-Z0-9_]+)"/g)].map(m => m[1]);
+  assert.deepEqual(order, ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY']);
   assert.match(ko, /href="\/market\/cnykrw\/">원\/위안<\/a>[\s\S]*?200\.26원[\s\S]*?15:30 확정/);
   assert.match(ko, /href="\/market\/usdjpy\/">엔\/달러<\/a>[\s\S]*?158\.51엔/);
-  assert.match(ko, /href="\/market\/copper\/">구리<\/a>[\s\S]*?\$5\.477[\s\S]*?▼ −0\.148/);
+  assert.match(ko, /href="\/market\/copper\/">구리 선물<\/a>[\s\S]*?\$5\.477[\s\S]*?▼ −0\.148/);
   assert.match(ko, /href="\/market\/natgas\/">천연가스<\/a>[\s\S]*?\$3\.748/);
   assert.match(en, /href="\/en\/market\/eurkrw\/">EUR\/KRW<\/a>[\s\S]*?₩1,467\.46/);
   assert.match(en, /href="\/en\/market\/usdjpy\/">USD\/JPY<\/a>[\s\S]*?¥158\.51/);
   assert.match(en, /href="\/en\/market\/brent\/">Brent Crude<\/a>[\s\S]*?\$89\.95/);
-  // Silver failed that day: its card says so and is not a link (its page may not exist yet).
+  // Silver failed that day: its row stays, not a link (its page may not exist yet).
   assert.doesNotMatch(ko, /\/market\/silver\//);
-  assert.match(ko, /<span>은<\/span>/);
-  // A record from before the new indicators shows the six and three cards it always had.
+  assert.match(ko, /<span class="mk-row-name">은 선물<\/span>/);
+  // A record from before the new indicators shows the rows it always had.
   const old = marketDatePageHtml(SHELLS.ko, complete12(), 'ko', context);
   assert.doesNotMatch(old, /cnykrw|copper|brent|JPY=X/);
 });
@@ -318,7 +318,14 @@ async function dashboard(lang) {
   return window.MARKET_CLOSE;
 }
 
-test('TODAY shows nine rate and seven commodity cards, and keeps the old six and three for older records', async () => {
+// The rows of one quote board ('world', 'rates', 'fx', 'commodities'), by instrument code.
+const boardCodes = (html, id) => {
+  const start = html.indexOf(`data-board="${id}"`);
+  const board = html.slice(start, html.indexOf('</section>', start));
+  return [...board.matchAll(/<tr class="mk-row"[^>]* data-code="([A-Z0-9_]+)"/g)].map(m => m[1]);
+};
+
+test('TODAY shows six FX and seven commodity rows, and keeps the old three and three for older records', async () => {
   const data = withNew(complete12());
   data.commodities_crypto.NATGAS = unavailable(data.commodities_crypto.NATGAS);
   for (const [lang, prefix] of [['ko', ''], ['en', '/en']]) {
@@ -326,26 +333,25 @@ test('TODAY shows nine rate and seven commodity cards, and keeps the old six and
     const target = { innerHTML: '' };
     runtime.render(data, target);
     const html = target.innerHTML;
-    const rates = html.slice(html.indexOf('<div class="mini-instrument-grid">'), html.indexOf('commodity-grid'));
-    const commodities = html.slice(html.indexOf('commodity-grid'), html.indexOf('market-section-4'));
-    assert.equal((rates.match(/<article class="instrument-card/g) || []).length, 9, lang);
-    assert.equal((commodities.match(/<article class="instrument-card/g) || []).length, 7, lang);
+    assert.deepEqual(boardCodes(html, 'fx'), ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY'], lang);
+    assert.deepEqual(boardCodes(html, 'commodities'), ['WTI', 'BRENT', 'NATGAS', 'GOLD', 'SILVER', 'COMEX_COPPER', 'BITCOIN'], lang);
     for (const slug of ['cnykrw', 'eurkrw', 'usdjpy', 'brent', 'silver', 'copper']) {
       assert.match(html, new RegExp(`<a class="instrument-history-link" href="${prefix}/market/${slug}/">`), `${lang} ${slug}`);
     }
     // Natural gas failed: the card stays, without a link to a page that may not exist yet.
     assert.doesNotMatch(html, /\/market\/natgas\//);
     assert.match(html, lang === 'ko' ? /천연가스[\s\S]*?데이터 없음/ : /Natural Gas[\s\S]*?Unavailable/);
-    // KRW pairs: the 15:30 fixing, then the live quote.
-    assert.match(html, lang === 'ko' ? /200\.26원[\s\S]*?15:30 확정[\s\S]*?현재[\s\S]*?201\.68원/ : /₩200\.26[\s\S]*?15:30 close[\s\S]*?Latest[\s\S]*?₩201\.68/);
+    // KRW pairs: the 15:30 fixing only. The record's other reading has no time of its own and is not shown.
+    assert.match(html, lang === 'ko' ? /15:30 확정[\s\S]*?200\.26원/ : /15:30 fixing[\s\S]*?₩200\.26/);
+    assert.doesNotMatch(html, /201\.68/);
     assert.match(html, lang === 'ko' ? /158\.51엔/ : /¥158\.51/);
     assert.match(html, /\$5\.477[\s\S]*?▼ −0\.148/);
   }
   const runtime = await dashboard('ko');
   const target = { innerHTML: '' };
   runtime.render(complete12(), target);
-  const rates = target.innerHTML.slice(target.innerHTML.indexOf('<div class="mini-instrument-grid">'), target.innerHTML.indexOf('commodity-grid'));
-  assert.equal((rates.match(/<article class="instrument-card/g) || []).length, 6);
+  assert.deepEqual(boardCodes(target.innerHTML, 'fx'), ['USDKRW', 'JPYKRW', 'DXY']);
+  assert.deepEqual(boardCodes(target.innerHTML, 'commodities'), ['WTI', 'GOLD', 'BITCOIN']);
   assert.doesNotMatch(target.innerHTML, /cnykrw|copper|brent|usdjpy/);
 });
 

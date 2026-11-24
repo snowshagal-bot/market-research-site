@@ -71,8 +71,9 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   after-market trades change them; the 2026-11-23 live check found them still settling at
   15:31~15:34, so the 15:32 and 15:34 runs skip them). The 16:05 export carries the section only
   when the last two captures agree and every listed stock matches its KRX 15:30 bar close and
-  volume, else `unavailable`. Pages: a section right after the market breadth on TODAY and session
-  pages, the 52-week counts labelled as Naver's intraday count (owner). Forward only.
+  volume, else `unavailable`. Pages: one full-width card in the Korean market section on TODAY and session
+  pages (after the market-cap card), the 52-week counts labelled as Naver's intraday count (owner).
+  Forward only.
   Rollout order (owner approval): website PR first (the receiver rejects unknown keys), then the
   publisher PR; rebuild the core and install it (markets.json is unchanged).
 

@@ -135,8 +135,8 @@ test('the Market page footer prints the shared KST stamp instead of the raw gene
     assert.doesNotMatch(target.innerHTML, /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/, `${lang}: ISO timestamp leaked`);
     assert.doesNotMatch(target.innerHTML, /Invalid Date|NaN|undefined/, `${lang}: broken value leaked`);
     assert.doesNotMatch(target.innerHTML, /생성:|Generated:/, `${lang}: old label remains`);
-    // The regular-session basis line is a different concept and stays as it was.
-    assert.match(target.innerHTML, lang === 'ko' ? /15:30 KST 마감 기준/ : /Korea close as of 15:30 KST/);
+    // The regular-session basis line is a different concept: the session's close line names it.
+    assert.match(target.innerHTML, lang === 'ko' ? /<span>정규장 15:30 KST 기준<\/span>/ : /<span>Regular session, 15:30 KST<\/span>/);
   }
 });
 

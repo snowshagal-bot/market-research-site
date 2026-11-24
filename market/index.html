@@ -33,10 +33,8 @@
 <link rel="stylesheet" href="/assets/site.css?v=0c38d298fc">
 <link rel="stylesheet" href="/assets/brand.css?v=e9db46679f">
 <link rel="stylesheet" href="/assets/language.css?v=0c4ca7f4fc">
-<link rel="stylesheet" href="/assets/home-v2.css?v=6def21ee7c">
-<link rel="stylesheet" href="/assets/market-close.css?v=04fa5a05a6">
-<link rel="preload" as="image" href="/assets/market-close-mountain.webp" media="(min-width: 761px)">
-<link rel="preload" as="image" href="/assets/market-close-mountain-mobile.webp" media="(max-width: 760px)">
+<link rel="stylesheet" href="/assets/home-v2.css?v=2b075378be">
+<link rel="stylesheet" href="/assets/market-close.css?v=b4a5486171">
 <script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
 </head>
 <body class="market-close-page" data-market-source="/api/market/latest" data-market-preview-fixture="/contracts/market_close/market_close.example.json">
@@ -67,31 +65,24 @@
   </div>
 </header>
 <main id="market-close-root">
-  <section class="market-hero" aria-labelledby="market-close-heading">
-    <div class="market-wrap market-hero-inner">
-      <div class="market-hero-copy">
-        <p class="market-eyebrow">SNOWSHAGAL</p>
-        <h1 id="market-close-heading">MARKET CLOSE</h1>
-        <p class="market-subtitle">오늘 한국 시장은 어떻게 마감했나</p>
-        <p class="market-date">코스피·코스닥 마감 지표와 투자자 수급, 금리·환율 요약 · 15:30 KST 마감 기준</p>
-        <p class="market-update">데이터 업데이트 · 매 거래일 16:05 KST</p>
-        <p class="market-overseas">* 해외 시장은 각 시장의 최신 거래일 기준</p>
-      </div>
-      <div class="market-mountain" aria-hidden="true"></div>
+  <section class="mk-head" aria-labelledby="market-close-heading">
+    <div class="market-wrap">
+      <p class="mk-eyebrow">한국 증시 마감 기록</p>
+      <h1 id="market-close-heading">오늘 한국 증시 마감</h1>
+      <p class="mk-lead">코스피·코스닥 종가와 투자자 수급, 금리·환율·원자재를 15:30 KST 마감 기준으로 정리합니다. 데이터 업데이트는 매 거래일 16:05 KST, 해외 시장은 각 시장의 최신 거래일 기준입니다.</p>
     </div>
   </section>
   <div class="market-wrap">
-    <div class="market-history-strip">
-      <div class="market-history-modes" role="tablist" aria-label="조회 방식">
-        <button class="market-mode-btn active" type="button" data-market-action="today" role="tab" aria-selected="true">TODAY</button>
-        <button class="market-mode-btn" type="button" data-market-action="view-1w" role="tab" aria-selected="false">1W</button>
-        <button class="market-mode-btn" type="button" data-market-action="view-1m" role="tab" aria-selected="false">1M</button>
-        <span class="market-mode-divider" aria-hidden="true"></span>
-        <button class="market-mode-btn" type="button" data-market-action="toggle-calendar" role="tab" aria-selected="false" aria-expanded="false">HISTORY</button>
-      </div>
-      <div class="market-history-nav">
-        <span class="market-current-date">최신 거래일 마감</span>
-        <button class="market-calendar-toggle" type="button" data-market-action="toggle-calendar" aria-label="달력으로 날짜 선택" aria-expanded="false">📅</button>
+    <div class="mk-datebar market-history-strip" role="toolbar" aria-label="Market navigation">
+      <span class="mk-datebar-label">조회할 거래일</span>
+      <div class="mk-datebar-nav market-history-nav"><span class="market-current-date">최신 거래일 마감</span></div>
+      <div class="mk-datebar-modes">
+        <div class="market-history-modes" role="group" aria-label="보기">
+          <button class="market-mode-btn active" type="button" data-market-action="today" aria-current="page">최근 마감</button>
+          <button class="market-mode-btn" type="button" data-market-action="view-1w">1W</button>
+          <button class="market-mode-btn" type="button" data-market-action="view-1m">1M</button>
+        </div>
+        <a class="mk-archive-link" href="/market/archive/">전체 기록 <span aria-hidden="true">↗</span></a>
       </div>
     </div>
     <div id="market-calendar-drawer" class="market-calendar-drawer" hidden></div>
@@ -323,12 +314,15 @@
             <a href="/research/">리서치</a>
             <a href="/notes/">투자 인사이트</a>
             <a href="/basics/">시장 입문</a>
+            <a href="/basics/glossary/">용어 사전</a>
           </nav>
         </div>
         <div class="site-footer-group">
           <p class="site-footer-heading" aria-hidden="true">마켓</p>
           <nav class="site-footer-nav" aria-label="푸터 마켓 메뉴">
             <a href="/market/">마켓</a>
+            <a href="/market/archive/">날짜별 마감 기록</a>
+            <a href="/market/sectors/">업종·테마</a>
             <a href="/disclosures/">공시</a>
             <a href="/calendar/">캘린더</a>
           </nav>
@@ -381,8 +375,8 @@
 </dialog>
 
 <script src="/data/posts.js"></script>
-<script src="/assets/locale.js?v=2af8dce9f2"></script>
-<script src="/assets/site.js?v=53fc86e7b4"></script>
-<script src="/assets/market-close.js?v=6b4c665d44"></script>
+<script src="/assets/locale.js?v=b9ee9a3e99"></script>
+<script src="/assets/site.js?v=765e591453"></script>
+<script src="/assets/market-close.js?v=530eab8e8f"></script>
 </body>
 </html>

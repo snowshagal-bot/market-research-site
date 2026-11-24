@@ -17,10 +17,122 @@ Uploaded report HTML, canonicals, sitemap dates and ranking policy are unchanged
 This improves initial-HTML link discovery; it does not guarantee Google indexing.
 See `INDEXING_AUDIT_2026-11-14.md` for the 56-report investigation.
 
+For a report with a confirmed translation, the initial HTML footer links
+directly to the other language's report. The footer and the head use the same
+translation group, including the three Market Language lessons and the August 20
+Daily paired on 2026-11-23.
+
+MARKET redesign, phase 1 (2026-11-23): `/market/` TODAY and HISTORY (a date
+from the calendar) follow the owner's mockup. Page head "11월 23일 한국 증시
+마감" with one meta line; a date bar (previous / the date, which opens the
+calendar / next, then 최근 마감 · 1W · 1M and 전체 기록); KOSPI and KOSDAQ cards
+with the 20-session trend and the day's range; "그날의 요약" (KOSPI move,
+breadth, foreign flow, the USD/KRW 15:30 fixing, VIX); 한국 시장 (investor flows
+with bars and a 당일 / 최근 5거래일 toggle, breadth, turnover · program · basis ·
+short selling with the top-5 lists in a disclosure, top 10); and one quote board
+per group (해외 증시 · 변동성, 금리 with the KOFIA yields, 환율, 원자재 · 가상자산;
+tabs at phone width). Every row keeps its basis, the Global Latest overlay, the
+local-holiday and unavailable states. The trend lines come from
+`GET /api/market/trend[?end=]` (`functions/api/market/trend.js`: the last 20 final
+sessions' closes by json_extract plus the KOFIA yields of those dates; a line is
+drawn only when it ends on the session shown). New styles are prefixed `mk-` in
+`assets/market-close.css`.
+
+MARKET redesign, phase 2 (2026-11-23): the server-rendered pages share the
+phase-1 look. `/market/YYYY-MM-DD/` is built like TODAY from the same helpers in
+`functions/_market-date-page.js` (`pageHead`, `indexCard`, `boardRow`,
+`flowTable`, `breadthBlock`, `boardCard`): the head, a date bar (previous ·
+전체 마감 기록 · next), KOSPI / KOSDAQ cards with the 20-session trend ending on
+that session (`loadTrend(db, date)` from `functions/api/market/trend.js`, read
+inside the page budget and dropped on failure), 그날의 요약, 한국 시장 (당일 and
+최근 5거래일 flows both shown, breadth, turnover · program · basis · short
+selling, top 10, KRX sectors and themes) and the four quote boards; the KOFIA
+yields are rows of the 금리 board after US 10Y. The archive, sectors and
+indicator pages use the same head, and their cards, tables and the 1W / 1M
+bodies take the `mk-` card look (`.market-date-page` / `.market-range-dashboard`
+rules at the end of the CSS). The mountain hero is gone from every page, and the
+`/market/` shells no longer preload its images (the files stay in `assets/`).
+
+Redesign follow-ups (2026-11-23): TODAY (`assets/market-close.js`) and the session
+page (`functions/_market-date-page.js`) draw the same record with two renderers.
+`tests/market-render-parity.test.mjs` renders one payload through both and
+compares the boards (row order, names, values, changes, trend lines), the index
+cards, flows, breadth, stats, the day in brief, the top 10 and the `mk-` classes;
+the differences that are on purpose (TODAY's "최근 종가" for a close, TODAY's date
+bar and toggles, the session page's sectors card) are listed in that file, so a change
+to one side that does not reach the other fails. Board names are the site's own
+on both pages (VIX 변동성, 원/100엔, 달러인덱스, 금 선물, 은 선물, 구리 선물 …):
+TODAY no longer prefers the record's `name`, which for GOLD was "국제 금" in the
+collector's earlier records. Rules
+both sides share: a trend line is drawn only when the series has that session's
+own value (a series that never moved is a level line at mid height); the breadth
+head names the larger side (상승비율 on a day more stocks rose than fell); the
+basis tile names the futures contract and its price. The session page waits for
+its trend read at most `MARKET_TREND_BUDGET_MS` (1.5 s), not the 5 s page budget.
+
+Price basis (2026-11-23, after a Codex review): a past date opened on TODAY
+(`/market/?date=…`) reads exactly like that date's own page, row by row (value and
+basis line), and the parity test checks it. The basis of a record figure is the
+same on both:
+- **KRW pairs** (USD/KRW, JPY/KRW, CNY/KRW, EUR/KRW): the 15:30 fixing only, labeled
+  15:30 확정 / 15:30 fixing. The record's other reading (`current`, read when the
+  record was made, with no time of its own) is no longer shown as "현재 ○○원".
+- **A figure still trading at capture** (`data_state` intraday: dollar index,
+  commodities, crypto): 장중 · 16:10 KST / Intraday · 16:10 KST, the record's own
+  capture time (`retrieved_at`, `intradayCaptureTime` in `assets/locale.js`), with
+  the date when it differs. Without `retrieved_at` it says 장중 alone; no time is
+  guessed. The session page used to call these "종가".
+- **A close**: 종가 / Close of its own date; TODAY says 최근 종가 / Recent close.
+- **Global Latest rows on TODAY** keep their own basis (장중 and the observation time).
+The date bar's period buttons read 5거래일 / 20거래일 (EN 5 sessions / 20 sessions; the
+URLs stay `?view=1w|1m`), and 지표별 기록 / Indicator history beside 전체 기록 opens
+`/market/archive/#indicators`. Below 1024px the two links take their own row.
+
+Period lines (2026-11-24): in the 5/20-session views each instrument row draws the
+period's line just before its figures. `/api/market/range` gives every instrument a
+`series`: its value for each session of `window.dates` (`getPeriodValue`, null where
+the record has none, never carried forward). The line starts at `baseline_value`,
+where the period return starts, and is drawn only when the window ends with a value.
+From 761px the names and figures keep their width, so a section's lines stand in one
+column; up to 760px, where a row wraps its figures under its name, the line is left
+out, as on the phone quote boards. An older cached range answer without `series`
+simply has no lines.
+
+Internal links (2026-11-23): four sets of links tie the market pages, the
+reports and the glossary together. All are in the first HTML; none edits a
+report file.
+- **Footer** (`functions/_footer.js`, on every page): 날짜별 마감 기록
+  (`/market/archive/`, which lists every session page and every indicator page),
+  업종·테마 (`/market/sectors/`) and 용어 사전 (`/basics/glossary/`). After changing
+  the footer run `node scripts/sync-static-footers.mjs`.
+- **Home strip**: each of the five figures links to its history page
+  (`/market/kospi/`, `kosdaq`, `usdkrw`, `us10y`, `gold`), in the shipped
+  placeholder, the server's first HTML (`_home-initial.js`) and `site.js`.
+- **Daily report → its session page**: when the final Market Close of the
+  report's date is published, the server's reading nav (`reportMarketSessionLink`
+  in `functions/_seo.js`) carries a link to `/market/YYYY-MM-DD/`;
+  `assets/report-shell.js` reads it from that nav and shows it at the top of the
+  "previous / next / related" block that replaces the nav. No close, no link.
+- **Glossary terms**: every glossary entry has an id (`glossaryTermId`:
+  `#term-베이시스`, `#term-program-trading`). On TODAY and the session pages the
+  labels 시장 폭, 프로그램 순매수, 베이시스 and 공매도 비중 link to their entries
+  (`.mk-term`, dotted underline). The glossary is built from the reports, so a
+  term can disappear with its reports; the link then opens the glossary at the top.
+
+Market Close reads (2026-11-23): a failed schema init (the `sqlite_master`
+probe or the guarded DDL) no longer turns a read into an error. API reads and
+`/market/` pages log it and query the table anyway; publishing still refuses
+until the schema is confirmed. Before this, about one Production read in ten
+answered `DB_INIT_FAILED` / 503. See `DEPLOYMENT.md` for the log line.
+
 Initial HTML string fallback (2026-11-19): generated latest/archive markup is
 inserted with a replacement callback, preserving literal dollar amounts such
 as `$1tn` in report titles instead of interpreting them as regex captures and
-duplicating container tags. The Cloudflare HTMLRewriter path is unchanged.
+duplicating container tags. The same applies to everything the fallback adds
+before `</head>` or `</body>` (report SEO tags and reading links, the home
+bootstrap with the notice, category hreflang links, the engagement script), so
+`$&`, `$'`, `` $` `` and `$$` in titles, notices or tags stay literal too. The
+Cloudflare HTMLRewriter path is unchanged.
 
 Calendar improvements (2026-10-25, owner-approved rollout in #180): the existing daily
 calendar sync fills blank `disclosure_watchlist.corp_name_en` from OpenDART's
@@ -99,6 +211,8 @@ The follow-up four-report homepage layout (2026-10-13) keeps the approved waterc
 
 The two locale homepages use the approved research-desk watercolor (new versioned filenames; old artwork retained), encoded as 1944×810 / 960×400 WebP. `assets/home-editorial.css` scopes the typography, four-report hero, border-led latest cards and mobile two-row market strip to HOME. The manual carousel and announcement slide remain available.
 
+First paint (2026-11-24): the brand slide is shown without a fade. `.hero-slide.active` alone carries no animation; `heroFade` plays only under `.hero-slides[data-hero-moved]`, which `site.js` sets on the first real move of the carousel. Before this, every home visit faded slide 1 in from opacity 0 and Chrome counted the hero image as LCP only after the 0.2 s fade (measured: LCP 200 ms after first paint on Production, 0–32 ms after the change). Cloudflare Web Analytics (7 days to 11-24): LCP p75 2.39 s, TTFB 55% / element render delay 44% of it; most poor LCPs were the Market mountain image, removed on 11-23.
+
 `assets/home-editorial.js` renders the first three category cards for the second hero slide from same-locale post metadata through the shared `editorialBlurb` policy; the existing Research card keeps its hydration contract. The server and browser call the same renderer, so it needs no extra fetch, stored summary or publishing input. No sample market commentary or sample values are shipped.
 
 Every valid Market Close instrument now shows its own basis date even when no Global Latest item overlays it. Overlay eligibility, stale/holiday states, takeaway date matching and the emergency fallback are unchanged. Global reference indicators are visually separated from the two KRX indices.
@@ -139,7 +253,7 @@ Preview hosts remain blocked, and all non-Market mutation APIs keep their existi
 - The page is the `/market/` shell with its head rewritten for the session and `<main>` rendered on the server, numbers included.
   - Head: title, description, canonical, KO/EN `hreflang`, Open Graph, and a WebPage + BreadcrumbList JSON-LD.
   - Sections: indices, daily and 5-session investor flows, rates/FX and commodities, breadth, stock rankings (when the record has them), every KRX sector and theme, top 10 by market cap, and short selling.
-- **Stock rankings** (proposal 6, 2026-11-23, two Draft PRs): `stock_rankings`, an optional SOFT section of contract 1.2.0 with its own `section_status.stock_rankings`. Per market (KOSPI, KOSDAQ) the top five gainers, losers and stocks by trading value, and how many stocks set a 52-week high or low that day (Naver's intraday count, labelled as such beside the numbers; owner chose to keep it, 2026-11-23); stocks only (ETFs and ETNs out, preferred shares in). The collector saves Naver's ranking lists only in 15:35~15:39 KST (CSAT day 16:35~16:39): from 15:40 NXT after-market and after-hours trades move them, and the 2026-11-23 live check showed them still settling at 15:31~15:34. The export carries the section only when the last two captures agree and every listed stock matches its KRX 15:30 bar close and volume. The receiver re-checks rank order, sort direction, signs, duplicates and the date (`validateStockRankings` in `functions/api/market/_shared.js`). TODAY and session pages show it right after the market breadth as 등락률 · 거래대금 상위 종목 / Top Movers & Most Traded (later TODAY sections move down one); a record made before it shows nothing, an unavailable one a one-line note.
+- **Stock rankings** (proposal 6, 2026-11-23, two Draft PRs): `stock_rankings`, an optional SOFT section of contract 1.2.0 with its own `section_status.stock_rankings`. Per market (KOSPI, KOSDAQ) the top five gainers, losers and stocks by trading value, and how many stocks set a 52-week high or low that day (Naver's intraday count, labelled as such beside the numbers; owner chose to keep it, 2026-11-23); stocks only (ETFs and ETNs out, preferred shares in). The collector saves Naver's ranking lists only in 15:35~15:39 KST (CSAT day 16:35~16:39): from 15:40 NXT after-market and after-hours trades move them, and the 2026-11-23 live check showed them still settling at 15:31~15:34. The export carries the section only when the last two captures agree and every listed stock matches its KRX 15:30 bar close and volume. The receiver re-checks rank order, sort direction, signs, duplicates and the date (`validateStockRankings` in `functions/api/market/_shared.js`). TODAY and session pages show it as one full-width card, 등락률 · 거래대금 상위 종목 / Top Movers & Most Traded (`mk-rankings-card`), in the Korean market section after the stats and market-cap cards (before the sectors card on session pages); the two renderers produce the same body (`tests/market-stock-rankings.test.mjs`). A record made before it shows no card, an unavailable one a one-line note.
   - The dashboard script is not loaded, so nothing repaints the page.
   - Classes come from `assets/market-close.css`.
 - Titles lead with the full date and the KOSPI close, then name the data: `2026년 10월 28일 코스피 종가 6,012.44(+6.63%) · 투자자별 매매동향·환율 | Snowshagal`. The Daily report title for the same day leads with the editorial close, so the two read differently.
@@ -555,7 +669,7 @@ Important date semantics:
 
 Files under `reports/` are standalone HTML documents that may contain their own CSS, JavaScript, interactions, embedded images, tooltips, fold/unfold behavior, and animations.
 
-`functions/_middleware.js` intercepts HTML responses under `/reports/` and injects `/assets/report-shell.js`.
+`functions/_middleware.js` intercepts HTML responses under `/reports/` and injects `/assets/report-shell.js`. It also writes the top bar's 52 px spacer (`REPORT_NAV_SPACER`, `#mrs-nav-spacer`) as the first child of `<body>` in the first HTML, and the shell reuses that node (2026-11-24). Before this the shell created the spacer when it ran at the end of the body, so a visitor without the script cached saw the report paint and then drop 52 px: Cloudflare Web Analytics recorded CLS 0.11–1.33 on report pages from that drop. Keep the spacer height equal to `BAR_H` in `report-shell.js`.
 
 The same middleware injects canonical `snowshagal.com` metadata into published report responses and marks non-Production hosts `noindex, nofollow` by response header. It generates the report `<title>` from the real report date, category, and editorial title, or from the post's stored search title (see above). The report's own `<title>`, description, Open Graph, X and `application/ld+json` blocks are removed so each appears exactly once: the site's JSON-LD (Article + BreadcrumbList) is the only structured data on a report page. The description is `reportDescription()` (see the report `<title>` / description rules above): Market Close facts for a Daily or Weekly that has them, otherwise the editorial blurb as written, otherwise the factual date · category · title line; meta, Open Graph, X and JSON-LD all carry that one text, and whatever pieces exist are used so it is never empty. It adds `hreflang` only when both sides of an explicit `translationGroup` exist, so untranslated reports never point to invented English pages.
 

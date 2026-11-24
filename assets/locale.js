@@ -467,6 +467,21 @@
     return showYear ? `${stamp.year}년 ${monthDay} ${hhmm} KST` : `${monthDay} ${hhmm} KST`;
   }
 
+  // When a Market Close figure that was still trading at capture
+  // (data_state "intraday": US indices futures, FX, commodities, crypto) was
+  // read: the record's own capture time, retrieved_at, in KST. "16:10 KST", or
+  // with the date when it is not the figure's own date ("11/21 01:10 KST").
+  // '' when the record carries no capture time: a time is never guessed.
+  function intradayCaptureTime(item) {
+    const date = parseTimestamp(item?.retrieved_at);
+    if (!date) return '';
+    const stamp = seoulParts(date);
+    const two = number => String(number).padStart(2, '0');
+    const clock = `${two(stamp.hour)}:${two(stamp.minute)} KST`;
+    const day = `${stamp.year}-${two(stamp.month)}-${two(stamp.day)}`;
+    return day === String(item?.source_date || '') ? clock : `${stamp.month}/${stamp.day} ${clock}`;
+  }
+
   // The label that goes with a collector stamp. It says when the dataset was
   // refreshed, never what the prices are "as of": that basis stays with the
   // separate `15:30 KST` close notice.
@@ -782,6 +797,7 @@
     DISPLAY_TIMEZONE,
     parseTimestamp,
     formatKstTimestamp,
+    intradayCaptureTime,
     formatDataUpdated,
     dataUpdatedLabel,
     marketCloseAvailability,

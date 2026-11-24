@@ -129,26 +129,58 @@ const MARKET_INDEX = 'idx_market_close_generated';
 // sqlite_master answers the same question. SQLite rewrites the stored CREATE
 // statement when a column is added, so the one-liner columns show up there.
 // Anything unexpected, including an error, means "not known to be current", and
-// the statements run as before.
-async function marketSchemaCurrent(db) {
+// the statements run as before. `seen` says what the probe found, for the log
+// line of a later failure: Production always has the current table, so a probe
+// that saw less is part of the explanation.
+async function marketSchemaProbe(db) {
   try {
     const row = await db.prepare(`SELECT
         (SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?) AS table_sql,
         (SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = ?) AS has_index`)
       .bind(TABLE_NAME, MARKET_INDEX).first();
     const sql = String(row?.table_sql || '');
-    return row?.has_index === 1 && /\btakeaway_ko\b/.test(sql) && /\btakeaway_en\b/.test(sql);
-  } catch (_) {
-    return false;
+    const columns = /\btakeaway_ko\b/.test(sql) && /\btakeaway_en\b/.test(sql);
+    const index = row?.has_index === 1;
+    return {
+      current: index && columns,
+      seen: `table ${sql ? 'present' : 'absent'}, index ${index ? 'present' : 'absent'}, one-liner columns ${columns ? 'present' : 'absent'}`
+    };
+  } catch (error) {
+    return { current: false, seen: `probe failed: ${errorText(error)}` };
   }
 }
 
-export async function ensureMarketTable(env) {
+// An error as one line of text with D1's underlying cause, so a log shows
+// which statement failed and why.
+function errorText(error) {
+  const message = String(error?.message || error || 'unknown error');
+  const cause = error?.cause ? String(error.cause?.message || error.cause) : '';
+  return cause && cause !== message ? `${message} (cause: ${cause})` : message;
+}
+
+/**
+ * The market table's database, after confirming or creating its schema.
+ *
+ * The schema statements only matter to a database that has never held the
+ * table: Preview, tests, a new binding. A request that only reads passes
+ * { readOnly: true }: if the init fails it is logged and the read runs anyway,
+ * so a failed probe or DDL statement does not turn a page or API answer into
+ * an error when the table is there (2026-11-23: about one in ten Production
+ * reads answered DB_INIT_FAILED while the same database served every other
+ * API). A missing table then fails the read itself. Publishing still refuses
+ * to write until the schema is confirmed.
+ */
+export async function ensureMarketTable(env, { readOnly = false } = {}) {
   const db = env.COMMENTS_DB;
   if (!db) throw new MarketDbError('DB_NOT_CONFIGURED', 'Market Close 데이터베이스가 연결되지 않았습니다.', 503);
   if (!schemaPromises.has(db)) {
+    let step = 'schema probe';
+    let seen = '';
     const promise = (async () => {
-      if (await marketSchemaCurrent(db)) return;
+      const probe = await marketSchemaProbe(db);
+      if (probe.current) return;
+      seen = probe.seen;
+      step = 'CREATE TABLE';
       await db.prepare(`CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (
         market_date TEXT PRIMARY KEY,
         schema_version TEXT NOT NULL,
@@ -165,21 +197,27 @@ export async function ensureMarketTable(env) {
       // but the first; anything else is a real failure and must not be
       // swallowed, or a broken table would masquerade as a migrated one.
       for (const column of ['takeaway_ko', 'takeaway_en']) {
+        step = `ALTER TABLE ADD COLUMN ${column}`;
         try { await db.prepare(`ALTER TABLE ${TABLE_NAME} ADD COLUMN ${column} TEXT NOT NULL DEFAULT ''`).run(); }
         catch (error) {
           if (!isDuplicateColumnError(error)) throw error;
         }
       }
+      step = 'CREATE INDEX';
       await db.prepare(`CREATE INDEX IF NOT EXISTS ${MARKET_INDEX} ON ${TABLE_NAME} (generated_at)`).run();
     })().catch(error => {
       schemaPromises.delete(db);
-      throw error;
+      throw new Error(`${step} failed: ${errorText(error)} [${seen}]`, { cause: error });
     });
     schemaPromises.set(db, promise);
   }
   try { await schemaPromises.get(db); }
   catch (error) {
-    console.error('market close schema init failed', error);
+    if (readOnly) {
+      console.error(`market close schema init failed, reading anyway: ${error.message}`);
+      return db;
+    }
+    console.error(`market close schema init failed: ${error.message}`);
     throw new MarketDbError('DB_INIT_FAILED', 'Market Close 데이터베이스 초기화에 실패했습니다.', 500);
   }
   return db;

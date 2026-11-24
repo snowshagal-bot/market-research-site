@@ -8,7 +8,7 @@ export async function onRequestGet({ request, env }) {
       return json({ error: 'INVALID_DATE', message: '올바른 날짜 형식이 아닙니다 (YYYY-MM-DD).' }, 400);
     }
 
-    const db = await ensureMarketTable(env);
+    const db = await ensureMarketTable(env, { readOnly: true });
     const row = await db.prepare(`SELECT market_date, generated_at, published_at, payload_json, takeaway_ko, takeaway_en FROM ${TABLE_NAME} WHERE market_date = ? LIMIT 1`).bind(date).first();
     if (!row) {
       return json({ error: 'MARKET_DATE_NOT_FOUND', message: '해당 날짜의 Market Close 데이터가 없습니다.' }, 404, 'public, max-age=30, s-maxage=60');

@@ -153,16 +153,15 @@ test('1W/1M take the Asian close', () => {
   assert.equal(getPeriodValue('TAIEX', { data_state: 'unavailable', close: null }), null);
 });
 
-test('session pages show the Asian row under the major indices, with a local-holiday note', () => {
+test('session pages list the Asian indices in the overseas board after SOX, with a local-holiday note', () => {
   const context = { prev: null, next: null, report: null };
-  for (const [lang, prefix, title, holiday] of [['ko', '', '아시아 증시', '현지 휴장'], ['en', '/en', 'Asian Markets', 'Local holiday']]) {
+  for (const [lang, prefix, holiday] of [['ko', '', '현지 휴장'], ['en', '/en', 'Local holiday']]) {
     const payload = withAsia(complete12(), { NIKKEI225: shiftDate(complete12().meta.market_date, -1) });
     const page = marketDatePageHtml(SHELLS[lang], payload, lang, context);
-    const start = page.indexOf('market-asia-title');
-    assert.ok(start > page.indexOf('major-index-grid'), lang);
-    const row = page.slice(start, page.indexOf('</section>', start));
-    assert.match(row, new RegExp(`>${title}</h3><div class="mini-instrument-grid market-asia-grid">`));
-    assert.deepEqual([...row.matchAll(/<small>([^<]+)<\/small>/g)].map(m => m[1]), ['^N225', '000001.SS', '^TWII'], lang);
+    const board = page.slice(page.indexOf('data-board="world"'), page.indexOf('data-board="rates"'));
+    const codes = [...board.matchAll(/<tr class="mk-row" data-code="([A-Z0-9_]+)"/g)].map(m => m[1]);
+    assert.deepEqual(codes.slice(codes.indexOf('SOX'), codes.indexOf('SOX') + 4), ['SOX', 'NIKKEI225', 'SHANGHAI', 'TAIEX'], lang);
+    const row = board.slice(board.indexOf('data-code="NIKKEI225"'), board.indexOf('data-code="VIX"'));
     assert.match(row, new RegExp(`href="${prefix}/market/nikkei225/"`), lang);
     assert.match(row, new RegExp(`href="${prefix}/market/taiex/"`), lang);
     assert.match(row, /56,436\.65/);
@@ -225,20 +224,20 @@ async function dashboard(lang) {
   return window.MARKET_CLOSE;
 }
 
-test('TODAY shows the Asian row under the major indices, and nothing for a record without it', async () => {
+test('TODAY lists the Asian indices in the overseas board after SOX, and nothing for a record without it', async () => {
   for (const [lang, prefix, holiday] of [['ko', '', '현지 휴장'], ['en', '/en', 'Local holiday']]) {
     const runtime = await dashboard(lang);
     const target = { innerHTML: '' };
     runtime.render(withAsia(complete12(), { TAIEX: shiftDate(complete12().meta.market_date, -2) }), target);
     const html = target.innerHTML;
-    const start = html.indexOf('market-asia-title');
-    assert.ok(start > html.indexOf('major-index-grid') && start < html.indexOf('<div class="mini-instrument-grid">'), lang);
-    const row = html.slice(start, html.indexOf('</section>', start));
-    assert.equal((row.match(/<article class="instrument-card/g) || []).length, 3, lang);
-    assert.deepEqual([...row.matchAll(/<small>([^<]+)<\/small>/g)].map(m => m[1]), ['^N225', '000001.SS', '^TWII'], lang);
-    assert.match(row, new RegExp(`<a class="instrument-history-link" href="${prefix}/market/shanghai/">`), lang);
-    assert.match(row, /3,533\.79[\s\S]*?▼ −43\.83/);
-    assert.equal((row.match(new RegExp(holiday, 'g')) || []).length, 1, lang);
+    const board = html.slice(html.indexOf('data-board="world"'), html.indexOf('data-board="rates"'));
+    const codes = [...board.matchAll(/<tr class="mk-row"[^>]* data-code="([A-Z0-9_]+)"/g)].map(m => m[1]);
+    assert.deepEqual(codes.slice(3, 7), ['SOX', 'NIKKEI225', 'SHANGHAI', 'TAIEX'], lang);
+    const start = board.indexOf('data-code="NIKKEI225"');
+    const rows = board.slice(start, board.indexOf('data-code="VIX"'));
+    assert.match(rows, new RegExp(`<a class="instrument-history-link" href="${prefix}/market/shanghai/">`), lang);
+    assert.match(rows, /3,533\.79[\s\S]*?▼ −43\.83/);
+    assert.equal((rows.match(new RegExp(holiday, 'g')) || []).length, 1, lang);
   }
   const runtime = await dashboard('ko');
   const target = { innerHTML: '' };

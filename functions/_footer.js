@@ -1,4 +1,4 @@
-export function siteFooter(lang = 'ko') {
+export function siteFooter(lang = 'ko', { reportTranslationHref = '' } = {}) {
   const isEn = lang === 'en';
   const prefix = isEn ? '/en' : '';
   const homePath = isEn ? '/en/' : '/';
@@ -22,7 +22,10 @@ export function siteFooter(lang = 'ko') {
         research: 'Research',
         note: 'Investment Insights',
         basics: 'Market Basics',
+        glossary: 'Glossary',
         market: 'Market',
+        marketArchive: 'Close Archive',
+        marketSectors: 'Sectors &amp; Themes',
         disclosures: 'Disclosure',
         calendar: 'Calendar',
         about: 'About',
@@ -36,7 +39,10 @@ export function siteFooter(lang = 'ko') {
         research: '리서치',
         note: '투자 인사이트',
         basics: '시장 입문',
+        glossary: '용어 사전',
         market: '마켓',
+        marketArchive: '날짜별 마감 기록',
+        marketSectors: '업종·테마',
         disclosures: '공시',
         calendar: '캘린더',
         about: '소개',
@@ -48,6 +54,10 @@ export function siteFooter(lang = 'ko') {
   const disclaimer = isEn
     ? 'Snowshagal provides research and commentary for informational purposes only and does not offer personalized investment advice or recommendations to buy or sell financial products.'
     : '본 사이트의 리서치와 해설은 정보 제공을 목적으로 하며, 특정 금융투자상품에 대한 투자자문 또는 매수·매도 권유를 제공하지 않습니다.';
+  const translationLanguage = isEn ? 'ko' : 'en';
+  const languageLink = reportTranslationHref
+    ? `<a href="${reportTranslationHref.replaceAll('&', '&amp;').replaceAll('"', '&quot;')}" hreflang="${translationLanguage}" lang="${translationLanguage}">${isEn ? '한국어판' : 'English version'}</a>`
+    : `<a href="${labels.langSwitchHref}">${labels.langSwitch}</a>`;
 
   return `<footer id="site-footer" class="footer site-footer">
   <div class="site-wrap">
@@ -68,12 +78,15 @@ export function siteFooter(lang = 'ko') {
             <a href="${prefix}/research/">${labels.research}</a>
             <a href="${prefix}/notes/">${labels.note}</a>
             <a href="${prefix}/basics/">${labels.basics}</a>
+            <a href="${prefix}/basics/glossary/">${labels.glossary}</a>
           </nav>
         </div>
         <div class="site-footer-group">
           <p class="site-footer-heading" aria-hidden="true">${marketHeading}</p>
           <nav class="site-footer-nav" aria-label="${marketNavAria}">
             <a href="${prefix}/market/">${labels.market}</a>
+            <a href="${prefix}/market/archive/">${labels.marketArchive}</a>
+            <a href="${prefix}/market/sectors/">${labels.marketSectors}</a>
             <a href="${prefix}/disclosures/">${labels.disclosures}</a>
             <a href="${prefix}/calendar/">${labels.calendar}</a>
           </nav>
@@ -89,7 +102,7 @@ export function siteFooter(lang = 'ko') {
           <nav class="site-footer-nav" aria-label="${siteNavAria}">
             <a href="${prefix}/about/">${labels.about}</a>
             <a href="mailto:contact@snowshagal.com">${labels.contact}</a>
-            <a href="${labels.langSwitchHref}">${labels.langSwitch}</a>
+            ${languageLink}
           </nav>
         </div>
       </div>

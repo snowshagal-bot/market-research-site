@@ -72,7 +72,7 @@ async function loadSiteScriptContext(initialPosts = [], currentLocale = 'ko', an
     'report-list', 'archive-more', 'filter-year', 'filter-month', 'filter-tag',
     'filter-reset', 'search-dialog', 'global-search-input', 'search-clear-btn',
     'search-results-list', 'search-empty-state', 'search-quick-tags', 'search-tag-cloud',
-    'latest-category-cards'
+    'latest-category-cards', 'hero-slides'
   ];
   const elements = Object.fromEntries(ids.map((id) => [id, element(id)]));
   elements['hero-slide-1'].classList.add('active');
@@ -285,6 +285,37 @@ test('Slide 02 Featured Research: Manual carousel navigation (click, keyboard, s
   heroSection.emit('touchstart', { touches: [{ clientX: 100, clientY: 100 }] });
   heroSection.emit('touchend', { changedTouches: [{ clientX: 220, clientY: 98 }] });
   assert.equal(controller.getActiveIndex(), 0);
+});
+
+test('First paint: the brand slide never fades in; slides fade only after the carousel moves', async () => {
+  // Slide 1 holds the home's LCP image. A fade from opacity 0 on the first
+  // paint pushed LCP back by the 0.2 s of the animation on every home visit.
+  const css = await read('assets/home-v2.css');
+  const activeRule = css.match(/\n\.hero-slide\.active\s*\{([^}]*)\}/);
+  assert.ok(activeRule, '.hero-slide.active rule exists');
+  assert.doesNotMatch(activeRule[1], /animation/, 'the bare active rule carries no animation');
+  assert.match(css, /\.hero-slides\[data-hero-moved\] \.hero-slide\.active\s*\{\s*animation: heroFade/);
+  assert.match(css, /prefers-reduced-motion: reduce\)\s*\{\s*\.hero-slides\[data-hero-moved\] \.hero-slide\.active\s*\{\s*animation: none/);
+
+  const samplePosts = [
+    { id: '1', type: 'research', lang: 'ko', title: '리서치 글', reportDate: '2026-08-27', href: 'reports/1.html' }
+  ];
+  const announcement = { items: [{ title: '공지', content: '내용', exposureStartAt: '2026-08-27T00:00:00Z' }] };
+  const { context, elements } = await loadSiteScriptContext(samplePosts, 'ko', announcement);
+  const controller = context.window.__heroCarouselTest;
+  const wrap = elements['hero-slides'];
+
+  // Initial goTo(0) and the re-render after the notice arrives keep the index.
+  assert.equal(controller.getActiveIndex(), 0);
+  assert.equal(wrap.hasAttribute('data-hero-moved'), false);
+  controller.goTo(0);
+  assert.equal(wrap.hasAttribute('data-hero-moved'), false, 'staying on a slide is not a move');
+  elements['hero-carousel-prev'].emit('click');
+  assert.equal(wrap.hasAttribute('data-hero-moved'), false, 'a clamped move at the first slide is not a move');
+
+  elements['hero-carousel-next'].emit('click');
+  assert.equal(controller.getActiveIndex(), 1);
+  assert.equal(wrap.hasAttribute('data-hero-moved'), true);
 });
 
 test('TASK C: Category Icon scale-up and 44px tap target css rules exist', async () => {

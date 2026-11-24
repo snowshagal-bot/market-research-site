@@ -4,7 +4,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  MARKET_DATE_TIME_BUDGET_MS,
   MARKET_INDICATORS,
+  MARKET_TREND_BUDGET_MS,
   dailyReportFor,
   marketIndicatorPageHtml,
   marketIndicatorPath,
@@ -111,15 +113,16 @@ test('the /market/ shell gets the session head, a server-rendered <main> and no 
   }
 });
 
-test('sections without data are left out and numbered in order; a 1.2.0 incomplete window says so', () => {
-  const sectionTitles = (html) => [...html.matchAll(/<h2 id="market-section-\d+"><span>(\d+)\.<\/span> ([^<]+)<\/h2>/g)].map((m) => `${m[1]} ${m[2]}`);
-  const full = sectionTitles(page('ko'));
-  assert.ok(full.includes('07 KRX 업종 · 테마 등락률'), full.join(' | '));
+test('cards without data are left out; a 1.2.0 incomplete window says so', () => {
+  const cardTitles = (html) => [...html.matchAll(/<h3 id="mk-[a-z-]+-title">([^<]+)<\/h3>/g)].map((m) => m[1]);
+  const full = cardTitles(page('ko'));
+  assert.ok(full.includes('KRX 업종 · 테마 등락률'), full.join(' | '));
+  assert.ok(full.includes('시가총액 상위 10'), full.join(' | '));
 
   const bare = payload({ krx_groups: undefined, short_selling: undefined, market_cap_top10: [] });
-  const titles = sectionTitles(page('ko', bare));
-  assert.ok(!titles.some((title) => /업종|공매도|시가총액/.test(title)), titles.join(' | '));
-  assert.deepEqual(titles.map((title) => title.slice(0, 2)), titles.map((_, index) => String(index + 1).padStart(2, '0')));
+  const titles = cardTitles(page('ko', bare));
+  assert.ok(!titles.some((title) => /업종|시가총액/.test(title)), titles.join(' | '));
+  assert.doesNotMatch(page('ko', bare), /공매도 비중/);
 
   const incomplete = payload({
     meta: { ...FIXTURE.meta, schema_version: '1.2.0' },
@@ -128,7 +131,7 @@ test('sections without data are left out and numbered in order; a 1.2.0 incomple
   const html = page('ko', incomplete);
   assert.match(html, /데이터 불완전 · 3\/5 거래일 확보/);
   assert.match(html, /이날 시장 폭 데이터 없음/);
-  assert.doesNotMatch(html, /class="breadth-card"/);
+  assert.doesNotMatch(html, /class="mk-breadth"/);
 });
 
 test('the source line names only the real sources, and the short ratio says it includes NXT', () => {
@@ -179,6 +182,57 @@ test('the archive lists every session by month, newest first, each linking to it
   assert.match(en, /data-language-choice="ko" href="\/market\/archive\/"/);
 });
 
+test('the session page draws the 20-session trend only when it ends on that session', () => {
+  const dates = ['2026-08-26', '2026-08-27', DATE];
+  const trend = { sessions: 20, end_date: DATE, dates, series: { KOSPI: [6800, 6900, 6788.88], NASDAQ: [21000, 21100, 21050], KTB3Y: [null, null, null] } };
+  const html = page('ko', FIXTURE, { prev: '2026-08-27', trend });
+  const kospiCard = html.slice(html.indexOf('data-code="KOSPI"'), html.indexOf('data-code="KOSDAQ"'));
+  assert.match(kospiCard, /<svg class="mk-spark mk-spark-wide"/);
+  assert.match(html, /<tr class="mk-row" data-code="NASDAQ">[\s\S]*?<svg class="mk-spark"/);
+  // A code without values in the window gets the placeholder, not an empty line.
+  assert.match(html, /<tr class="mk-row" data-code="DOW">[\s\S]*?mk-trend-empty/);
+  // A trend that ends on another session, or none, draws nothing.
+  for (const other of [{ ...trend, end_date: '2026-08-27' }, null]) {
+    assert.doesNotMatch(page('ko', FIXTURE, { trend: other }), /class="mk-spark/);
+  }
+});
+
+test('a row without that session’s value gets no trend line, and a series that never moved is a level line', () => {
+  const dates = ['2026-08-26', '2026-08-27', DATE];
+  // VIX has earlier values but none for this session: a line would end on an earlier day.
+  const trend = { sessions: 20, end_date: DATE, dates, series: { VIX: [18.2, 19.1, null], NASDAQ: [21000, 21000, 21000] } };
+  const data = payload();
+  data.rates_fx_volatility.VIX = { ...data.rates_fx_volatility.VIX, close: null, change: null, change_pct: null, source_date: '' };
+  const html = page('ko', data, { trend });
+  const vixRow = html.slice(html.indexOf('<tr class="mk-row" data-code="VIX">'), html.indexOf('</tr>', html.indexOf('<tr class="mk-row" data-code="VIX">')));
+  assert.doesNotMatch(vixRow, /mk-spark/);
+  assert.match(vixRow, /mk-trend-empty/);
+  // The summary tile does not print "미국장 마감" with no date in front of it.
+  const summary = html.slice(html.indexOf('class="mk-summary-stats"'), html.indexOf('</article>', html.indexOf('class="mk-summary-stats"')));
+  assert.doesNotMatch(summary, /미국장 마감/);
+  assert.match(page('ko', FIXTURE, { trend }), /\d+\/\d+ 미국장 마감/);
+  // 21000 three times: one level line at mid height (h 26 → y 13.0), not on the top edge.
+  const nasdaqRow = html.slice(html.indexOf('<tr class="mk-row" data-code="NASDAQ">'), html.indexOf('</tr>', html.indexOf('<tr class="mk-row" data-code="NASDAQ">')));
+  assert.match(nasdaqRow, /<polyline class="mk-spark-line" points="3\.0,13\.0 44\.0,13\.0 85\.0,13\.0"/);
+});
+
+test('the breadth head names the larger side: advance ratio on an up day, decline ratio otherwise', () => {
+  const up = payload();
+  up.market_breadth.KOSPI = { ...up.market_breadth.KOSPI, rise: 700, fall: 180, flat: 40, rise_ratio: 0.761, fall_ratio: 0.196 };
+  up.market_breadth.KOSDAQ = { ...up.market_breadth.KOSDAQ, rise: 500, fall: 1100, flat: 60, rise_ratio: 0.301, fall_ratio: 0.663 };
+  const html = page('ko', up);
+  const block = market => html.slice(html.indexOf(`class="mk-breadth" data-market="${market}"`), html.indexOf('mk-breadth-bar', html.indexOf(`class="mk-breadth" data-market="${market}"`)));
+  assert.match(block('KOSPI'), /<b class="up">상승비율 76\.1%<\/b>/);
+  assert.doesNotMatch(block('KOSPI'), /하락비율/);
+  assert.match(block('KOSDAQ'), /<b class="down">하락비율 66\.3%<\/b>/);
+  const en = page('en', up);
+  assert.match(en, /<b class="up">Advance ratio 76\.1%<\/b>/);
+  // Equal or missing ratios keep the decline ratio, as before.
+  const even = payload();
+  even.market_breadth.KOSPI = { ...even.market_breadth.KOSPI, rise_ratio: 0.48, fall_ratio: 0.48 };
+  assert.match(page('ko', even), /data-market="KOSPI">\s*<div class="mk-breadth-head"><span>코스피<\/span><b class="down">하락비율 48\.0%<\/b>/);
+});
+
 test('a shell that lost a replaced piece fails loudly instead of shipping the dashboard head', () => {
   const broken = SHELLS.ko.replace(/<link rel="canonical" href="[^"]*">/, '');
   assert.throws(() => marketDatePageHtml(broken, FIXTURE, 'ko'), /missing canonical/);
@@ -191,15 +245,23 @@ function row(date, overrides = {}) {
   return { market_date: date, status: 'final', published_at: `${date}T07:10:00Z`, payload_json: JSON.stringify(data), takeaway_ko: '', takeaway_en: '', prev_date: null, next_date: null, ...overrides };
 }
 
-function marketDb(rows, { hang = false } = {}) {
+// schemaFails: the sqlite_master probe and the DDL throw, as D1 did for about
+// one Production read in ten on 2026-11-23; ordinary reads still answer.
+// trendHangs: the 20-session trend read never answers; every other read does.
+function marketDb(rows, { hang = false, schemaFails = false, trendHangs = false } = {}) {
+  const schemaStatement = sql => /FROM sqlite_master|^\s*(CREATE|ALTER)\b/i.test(sql);
   return {
     prepare(sql) {
       let args = [];
       return {
         bind(...values) { args = values; return this; },
-        async run() { return { success: true }; },
+        async run() {
+          if (schemaFails && schemaStatement(sql)) throw new Error('D1_ERROR: Network connection lost.');
+          return { success: true };
+        },
         async first() {
           if (hang) return new Promise(() => {});
+          if (schemaFails && schemaStatement(sql)) throw new Error('D1_ERROR: Network connection lost.');
           if (/FROM sqlite_master/.test(sql)) return null;
           if (/WHERE market_date = \?1/.test(sql)) {
             const found = rows.find((item) => item.market_date === args[0]);
@@ -215,6 +277,7 @@ function marketDb(rows, { hang = false } = {}) {
         },
         async all() {
           if (hang) return new Promise(() => {});
+          if (trendHangs && /market_date <= \?/.test(sql)) return new Promise(() => {});
           const indicatorPath = sql.match(/'\$\.(indices|rates_fx_volatility|commodities_crypto)\.([A-Z0-9]+)'\) AS item/);
           if (indicatorPath) {
             return {
@@ -308,6 +371,37 @@ test('a database that does not answer gets a quick 503, not a hung page', async 
   assert.equal(response.headers.get('retry-after'), '60');
   assert.equal(response.headers.get('x-robots-tag'), 'noindex');
   assert.ok(Date.now() - started < 2000);
+});
+
+test('a trend read that does not answer leaves the session page without lines, not waiting', async () => {
+  const rows = [row('2026-08-27'), row('2026-08-28')];
+  const started = Date.now();
+  const { response } = await call('https://snowshagal.com/market/2026-08-28/', marketDb(rows, { trendHangs: true }), { trendBudgetMs: 30 });
+  assert.equal(response.status, 200);
+  assert.ok(Date.now() - started < 2000, 'the page budget (5 s) is not spent on the trend');
+  const html = await response.text();
+  assert.match(html, /<h1 id="market-date-heading">2026년 8월 28일 한국 증시 마감<\/h1>/);
+  assert.doesNotMatch(html, /class="mk-spark/);
+  assert.ok(MARKET_TREND_BUDGET_MS < MARKET_DATE_TIME_BUDGET_MS);
+});
+
+test('session, archive and history pages still answer when the schema init fails', async () => {
+  const rows = [row('2026-08-27'), row('2026-08-28')];
+  const logs = [];
+  const originalError = console.error;
+  console.error = (...args) => logs.push(args.join(' '));
+  try {
+    for (const url of ['https://snowshagal.com/market/2026-08-28/', 'https://snowshagal.com/en/market/archive/', 'https://snowshagal.com/market/usdkrw/', 'https://snowshagal.com/en/market/kospi/']) {
+      const { response } = await call(url, marketDb(rows, { schemaFails: true }));
+      assert.equal(response.status, 200, url);
+    }
+  } finally {
+    console.error = originalError;
+  }
+  // The session page's KOFIA lookup fails soft and logs on its own; the market
+  // table lines all say the read went ahead.
+  const marketLines = logs.filter(line => /^market close schema/.test(line));
+  assert.ok(marketLines.length > 0 && marketLines.every(line => /^market close schema init failed, reading anyway: CREATE TABLE failed: D1_ERROR/.test(line)), logs.join('\n'));
 });
 
 /* ---------------------------------------------------------------- sitemap */

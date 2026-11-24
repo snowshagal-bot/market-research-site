@@ -8,6 +8,8 @@ import {
   extractGlossaryTerms,
   glossaryEntries,
   glossaryLetter,
+  glossaryTermHref,
+  glossaryTermId,
   onGlossaryRequest,
   parseGlossaryPath,
   renderGlossaryList,
@@ -169,6 +171,22 @@ function context(url, { assetsFail = false } = {}) {
   };
 }
 
+test('every entry has an id other pages can link to; two spellings of one term share the first', () => {
+  assert.equal(glossaryTermId('베이시스'), 'term-베이시스');
+  assert.equal(glossaryTermId('프로그램 매매'), 'term-프로그램-매매');
+  assert.equal(glossaryTermId('Program Trading'), 'term-program-trading');
+  assert.equal(glossaryTermId('  S&P 500 (지수) '), 'term-s-p-500-지수');
+  assert.equal(glossaryTermId(''), '');
+  assert.equal(glossaryTermHref('시장 폭', 'ko'), '/basics/glossary/#term-시장-폭');
+  assert.equal(glossaryTermHref('Market Breadth', 'en'), '/en/basics/glossary/#term-market-breadth');
+
+  const source = [{ url: '/reports/x', title: 'X' }];
+  const entries = ['Short Selling', 'short-selling', '공매도', '"quoted"'].map(term => ({ term, definition: 'A definition long enough.', sources: source }));
+  const list = renderGlossaryList(entries, 'en');
+  assert.deepEqual([...list.matchAll(/<div class="glossary-entry"(?: id="([^"]*)")?>/g)].map(match => match[1] || null),
+    ['term-short-selling', null, 'term-공매도', 'term-quoted']);
+});
+
 test('the route fills the glossary page, redirects to the slash form and leaves /basics/ alone', async () => {
   assert.deepEqual(parseGlossaryPath('/basics/glossary/'), { lang: 'ko', canonical: true });
   assert.deepEqual(parseGlossaryPath('/en/basics/glossary'), { lang: 'en', canonical: false });
@@ -205,5 +223,18 @@ test('when the data cannot be read the static page goes out with its own note', 
     assert.equal(ctx.passed, 1, 'the static page is fetched once');
   } finally {
     console.error = originalError;
+  }
+});
+
+test('a link to a term lands on it at once: the site-wide smooth scrolling is off for that jump only', () => {
+  // site.css sets html{scroll-behavior:smooth}. A cross-page link to an entry
+  // would animate down a page of several hundred entries (and stalls in a tab
+  // opened in the background), so the glossary turns it off while an entry is
+  // the target. The letter index (a section target) keeps the smooth scroll.
+  assert.match(read('assets/site.css'), /html\{scroll-behavior:smooth/);
+  for (const [lang, page] of Object.entries(PAGES)) {
+    assert.match(page, /html:has\(\.glossary-entry:target\)\{scroll-behavior:auto\}/, lang);
+    assert.match(page, /\.glossary-entry\{[^}]*scroll-margin-top:96px/, lang);
+    assert.doesNotMatch(page, /html\{scroll-behavior:auto\}/, lang);
   }
 });
