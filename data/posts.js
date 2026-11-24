@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-24-research-1ylfgyu",
+    "type": "research",
+    "typeLabel": "비정기 리서치",
+    "lang": "ko",
+    "date": "2026-11-24",
+    "reportDate": "2026-11-24",
+    "registeredDate": "2026-11-24",
+    "registeredAt": "2026-11-24T12:21:01.839Z",
+    "legacyImport": false,
+    "title": "중국이 남긴 물건은 어디로 가나",
+    "seoTitle": "중국이 남긴 물건은 어디로 가나",
+    "subtitle": "",
+    "description": "중국 승용차 수출은 1~10월 약 800만 대로 74% 늘었고, EU·일본·한국은 자동차·철강에 세이프가드와 반덤핑 벽을 쌓고 있다. 그 벽이 한국 자동차·철강·화학에 기회인지 부담인지, 무엇을 봐야 하는지 풀었다.",
+    "tags": [
+      "china",
+      "korea",
+      "autos",
+      "shipbuilding",
+      "oil"
+    ],
+    "readingMinutes": 9,
+    "href": "reports/20261124_Research_NO16_China_Overcapacity_Cover.html",
+    "coverImage": "covers/2026-11-24-research-1ylfgyu.webp",
+    "shareCardImage": "covers/share/2026-11-24-research-1ylfgyu.jpg",
+    "coverThumbnail": "covers/2026-11-24-research-1ylfgyu-450.webp"
+  },
+  {
     "id": "2026-11-24-note-15q5y5a",
     "type": "note",
     "typeLabel": "Investment Insights",
