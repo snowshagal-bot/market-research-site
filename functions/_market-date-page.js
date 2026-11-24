@@ -28,6 +28,7 @@ import '../assets/locale.js';
 import { TABLE_NAME, ensureMarketTable } from './api/market/_shared.js';
 import { aggregateKrxGroups } from './api/market/_aggregate.js';
 import { loadTrend } from './api/market/trend.js';
+import { cardImageUrl, onMarketCardRequest, parseMarketCardPath, readMarketCardMeta } from './_market-card.js';
 import { glossaryTermHref } from './_glossary.js';
 import {
   domesticRateCodesIn,
@@ -136,7 +137,7 @@ function dotDate(value, lang) {
   return lang === 'en' ? `${EN_MONTHS_SHORT[m - 1]} ${String(d).padStart(2, '0')}, ${y}` : `${y}.${String(m).padStart(2, '0')}.${String(d).padStart(2, '0')}`;
 }
 
-function makeFormat(lang) {
+export function makeFormat(lang) {
   const ko = lang !== 'en';
   const number = (value, digits = 2) => valid(value)
     ? new Intl.NumberFormat(ko ? 'ko-KR' : 'en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value)
@@ -997,6 +998,14 @@ export function applyMarketShell(shell, page) {
     if (!pattern.test(out)) throw new Error(`market shell is missing ${key}`);
     out = out.replace(pattern, () => values[key]);
   }
+  // A page with a picture of its own (the session's card) shares that instead
+  // of the dashboard's standard image. The shell's 1200×630 size tags fit both.
+  if (page.image) {
+    out = out
+      .replace(/<meta property="og:image" content="[^"]*">/, () => `<meta property="og:image" content="${html(page.image)}">`)
+      .replace(/<meta name="twitter:image" content="[^"]*">/, () => `<meta name="twitter:image" content="${html(page.image)}">`);
+    if (page.imageAlt) out = out.replace(/<meta property="og:image:alt" content="[^"]*">/, () => `<meta property="og:image:alt" content="${html(page.imageAlt)}">`);
+  }
   return out;
 }
 
@@ -1025,6 +1034,9 @@ export function marketDatePageHtml(shell, payload, lang, context = {}) {
         { name: longDate(date, lang), url: canonical }
       ]
     }),
+    // The session's own card once it has been drawn; the shell's image until then.
+    image: context.card ? cardImageUrl(context.card) : '',
+    imageAlt: context.card ? title : '',
     main: renderMarketDateMain(payload, lang, context)
   });
 }
@@ -1159,6 +1171,9 @@ async function loadShell(env, url, lang) {
 export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MARKET_DATE_TIME_BUDGET_MS, trendBudgetMs = MARKET_TREND_BUDGET_MS } = {}) {
   const { request, env } = context;
   const url = new URL(request.url);
+  // /market/YYYY-MM-DD/card.jpg: the session's share image.
+  const card = parseMarketCardPath(url.pathname);
+  if (card) return onMarketCardRequest(context, card);
   const route = parseMarketPagePath(url.pathname);
   if (!route) return context.next();
   if (!route.canonical) return Response.redirect(`${url.origin}${url.pathname}/${url.search}`, 301);
@@ -1193,7 +1208,9 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
     // The trend lines fail soft too, on a shorter budget of their own: a slow
     // read leaves the cards and rows without lines instead of holding the page.
     const trendPromise = withinBudget(loadSessionTrend(env, route.date), Math.min(budgetMs, trendBudgetMs)).catch(() => null);
-    const [data, shell, posts, domesticRates, trend] = await Promise.all([loadMarketDate(env, route.date, { budgetMs }), loadShell(env, url, route.lang), postsPromise, ratesPromise, trendPromise]);
+    // Whether the session's card exists yet; the page never waits long for the answer.
+    const cardPromise = withinBudget(readMarketCardMeta(env, route.date, route.lang), Math.min(budgetMs, trendBudgetMs)).catch(() => null);
+    const [data, shell, posts, domesticRates, trend, cardMeta] = await Promise.all([loadMarketDate(env, route.date, { budgetMs }), loadShell(env, url, route.lang), postsPromise, ratesPromise, trendPromise, cardPromise]);
     if (!data) return notFound(env, url);
     return htmlResponse(marketDatePageHtml(shell, data.payload, route.lang, {
       prev: data.prev,
@@ -1201,7 +1218,8 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
       publishedAt: data.publishedAt,
       report: dailyReportFor(posts, route.date, route.lang),
       domesticRates,
-      trend
+      trend,
+      card: cardMeta
     }));
   } catch (error) {
     console.error('market date page unavailable', error);
