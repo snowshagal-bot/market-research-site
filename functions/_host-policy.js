@@ -61,6 +61,7 @@ const ADMIN_API_PATHS = new Set([
   '/api/auth/session',
   '/api/admin/runtime-status',
   '/api/admin/announcements',
+  '/api/admin/market-telegram',
   '/api/announcements',
   '/api/disclosures/latest',
   '/api/disclosures/analyze',
@@ -83,6 +84,7 @@ const HUMAN_ADMIN_MUTATION_PATHS = new Set([
   '/api/auth/login',
   '/api/auth/logout',
   '/api/admin/announcements',
+  '/api/admin/market-telegram',
   '/api/disclosures/analyze',
   '/api/disclosures/publish',
   '/api/disclosures/watchlist'

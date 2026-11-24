@@ -79,6 +79,7 @@ origin.
 | `/api/market/date` | GET | `PUBLIC` | Public read; also admitted for admin Market renderer |
 | `/api/market/dates` | GET | `PUBLIC` | Public read; also admitted for admin Market renderer |
 | `/api/market/range` | GET | `PUBLIC` | Public read; also admitted for admin Market renderer |
+| `/api/admin/market-telegram` | GET/POST | `HUMAN_ADMIN` | Telegram post state of a Market Close session (GET, administrator session) and posting it once (POST, exact admin Origin + CSRF); the bot token is never returned |
 | `/api/market/share` | GET | `PUBLIC` | Read-only text of a published session for the blog copy screen (`/admin/market/blog/`); made only of the public record |
 | `/api/disclosures/feed` | GET | `PUBLIC` | Public read; also admitted for admin Market renderer |
 

@@ -204,6 +204,21 @@ export async function readMarketCardMeta(env, date, lang) {
   }
 }
 
+/**
+ * { bytes, type } of the session's stored card when it was drawn from the
+ * record version `generatedAt`, or null. Never throws.
+ */
+export async function readMarketCardImage(env, date, lang, generatedAt) {
+  try {
+    const row = await env.COMMENTS_DB.prepare(`SELECT content_type, image FROM ${CARD_TABLE} WHERE market_date = ? AND lang = ? AND source_key = ? AND image IS NOT NULL LIMIT 1`)
+      .bind(date, lang === 'en' ? 'en' : 'ko', cardSourceKey(generatedAt)).first();
+    const bytes = bytesOf(row?.image);
+    return bytes?.byteLength ? { bytes, type: row.content_type || 'image/jpeg' } : null;
+  } catch (_) {
+    return null;
+  }
+}
+
 /* ----------------------------------------------------------------- render */
 
 export function cardRenderingConfigured(env) {

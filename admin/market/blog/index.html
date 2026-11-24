@@ -8,13 +8,13 @@
 <title>블로그용 글 · Snowshagal Admin</title>
 <link rel="stylesheet" href="/assets/site.css?v=0c38d298fc">
 <link rel="stylesheet" href="/assets/ui-polish.css?v=6ec39e1026">
-<link rel="stylesheet" href="/assets/admin-market-blog.css?v=ab6a936e64">
+<link rel="stylesheet" href="/assets/admin-market-blog.css?v=1ee25f832c">
 <script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
 </head>
 <body>
 <header class="site-header"><div class="site-wrap"><div class="header-row"><a class="brand" href="https://snowshagal.com/"><i></i>SNOWSHAGAL</a><div class="header-actions"><button class="icon-btn" type="button" data-theme-toggle aria-label="다크 모드로 전환">◐</button></div></div></div></header>
 <main class="blog-admin"><div class="site-wrap">
-  <div class="blog-head"><div><a class="toplink" href="../../">← 관리자</a><h1>블로그용 글</h1><p>게시된 장마감 기록으로 블로그에 붙여 넣을 제목·본문·태그와 카드 이미지를 준비합니다.<br>숫자는 모두 15:30 정규장 마감 기준이며, 붙여 넣기 전에 여기서 고칠 수 있습니다.</p></div><div class="blog-note">읽기 전용 · 저장되는 것 없음</div></div>
+  <div class="blog-head"><div><a class="toplink" href="../../">← 관리자</a><h1>블로그용 글</h1><p>게시된 장마감 기록으로 블로그에 붙여 넣을 제목·본문·태그와 카드 이미지를 준비하고, 텔레그램 채널 게시 상태를 봅니다.<br>숫자는 모두 15:30 정규장 마감 기준이며, 붙여 넣기 전에 여기서 고칠 수 있습니다.</p></div><div class="blog-note">글은 저장되지 않음 · 텔레그램만 직접 게시</div></div>
   <nav class="admin-nav" aria-label="관리자 메뉴"><a href="../../">새 리포트 등록</a><a href="../../manage/">게시물 관리</a><a href="../../analytics/">방문 통계</a><a href="../">Market Close</a><a href="./" aria-current="page">블로그용 글</a><a href="../announcements/">공지 관리</a><a href="../../disclosures/">공시 모니터</a></nav>
 
   <div class="blog-toolbar">
@@ -63,12 +63,19 @@
         </ol>
         <p class="blog-hint">본문에 있는 주소는 블로그에서 링크로 바뀝니다. 오늘의 한 줄과 데일리 리포트 주소는 그날 데일리가 게시된 뒤에 들어갑니다.</p>
       </section>
+      <section class="blog-card" aria-labelledby="blog-telegram-heading">
+        <div class="blog-card-head"><h2 id="blog-telegram-heading">텔레그램 채널</h2><span class="blog-badge" id="blog-telegram-badge">확인 중</span></div>
+        <p class="blog-hint blog-telegram-status" id="blog-telegram-status" role="status" aria-live="polite"></p>
+        <textarea id="blog-telegram-caption" rows="9" readonly aria-label="텔레그램에 올라갈 글" hidden></textarea>
+        <div class="blog-image-actions"><button class="copy-button" id="blog-telegram-send" type="button" disabled>텔레그램에 올리기</button></div>
+        <p class="blog-hint">오늘 거래일은 장마감 게시 직후 카드와 함께 자동으로 올라갑니다. 이 버튼은 자동 게시가 빠졌거나 지난 날짜를 올릴 때 씁니다. 한 날짜는 한 번만 올라갑니다.</p>
+      </section>
     </div>
   </div>
 </div></main>
 <script src="/data/posts.js"></script>
 <script src="/assets/locale.js?v=b9ee9a3e99"></script>
 <script src="/assets/site.js?v=765e591453"></script>
-<script src="/assets/admin-market-blog.js?v=9a9a672f41"></script>
+<script src="/assets/admin-market-blog.js?v=2ebbec303c"></script>
 </body>
 </html>

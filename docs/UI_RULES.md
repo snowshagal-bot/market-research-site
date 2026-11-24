@@ -109,7 +109,8 @@ The homepage opens with the Snowshagal brand rather than a rotating post or a ge
 - every copy control is a button at least 40px tall with its own result ("복사했습니다" / "복사 실패") shown on the button, and a failure also says what to do instead;
 - fields are editable and 16px on phones so focusing one does not zoom the page;
 - the body stays plain text: no rich formatting that a blog editor would rewrite;
-- no confirm dialogs: choosing another date simply replaces the text.
+- no confirm dialogs: choosing another date simply replaces the text;
+- the 텔레그램 채널 card shows one state badge (설정 안 됨 / 아직 안 올림 / 올리는 중 / 올림 / 실패), the caption that would be posted (read-only) and one button. A channel post is public and cannot be taken back from the page, so the button asks for a second press within five seconds ("한 번 더 누르면 채널에 올립니다") instead of opening a dialog, and it is disabled once the session is posted.
 
 ## Admin announcements
 

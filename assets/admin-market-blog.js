@@ -1,6 +1,7 @@
 // /admin/market/blog/: a published Market Close session as a blog post to paste.
 // The text comes from /api/market/share and the picture from the session's own
-// card address; nothing on this page is saved anywhere.
+// card address; the text on this page is saved nowhere. The Telegram card shows
+// the session's channel post and can send it (/api/admin/market-telegram).
 (() => {
   'use strict';
 
@@ -28,6 +29,16 @@
   let cardBlob = null;
   let cardUrl = '';
   let loadToken = 0;
+
+  const telegram = {
+    badge: document.getElementById('blog-telegram-badge'),
+    status: document.getElementById('blog-telegram-status'),
+    caption: document.getElementById('blog-telegram-caption'),
+    send: document.getElementById('blog-telegram-send')
+  };
+  const SEND_LABEL = '텔레그램에 올리기';
+  let csrfToken = '';
+  let armedUntil = 0;
 
   const setStatus = (text, kind = '') => {
     status.textContent = text;
@@ -70,6 +81,7 @@
       dateSelect.disabled = false;
       setStatus(`${dateLabel(data.date)} 장마감 기록으로 만들었습니다.`);
       loadCard();
+      loadTelegram();
     } catch (error) {
       if (token !== loadToken) return;
       setStatus(error.message || '불러오지 못했습니다.', 'error');
@@ -181,6 +193,118 @@
     } catch (_) {
       flash(imageCopy, '복사 실패');
       imageStatus.textContent = '이 브라우저에서는 이미지 복사가 되지 않습니다. 파일로 저장한 뒤 사진으로 올려 주세요.';
+    }
+  });
+
+  /* -------------------------------------------------------------- telegram */
+
+  function kstTime(value) {
+    const time = new Date(value);
+    if (Number.isNaN(time.getTime())) return '';
+    return time.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+  }
+
+  function disarm() {
+    armedUntil = 0;
+    telegram.send.textContent = telegram.send.dataset.label || SEND_LABEL;
+  }
+
+  function showTelegram(data, note = '') {
+    const post = data.post;
+    let badge = '아직 안 올림';
+    let text = data.date === current.latest ? '장마감 게시 때 자동으로 올라갑니다. 지금 직접 올릴 수도 있습니다.' : '이 날짜는 채널에 올리지 않았습니다.';
+    let canSend = Boolean(data.caption);
+    let label = SEND_LABEL;
+    if (!data.configured) {
+      badge = '설정 안 됨';
+      text = '텔레그램 봇 토큰과 채널이 아직 설정되지 않았습니다. 설정하면 장마감 게시 직후 자동으로 올라갑니다.';
+      canSend = false;
+    } else if (post?.status === 'sent') {
+      badge = '올림';
+      text = `${kstTime(post.postedAt)} KST에 올렸습니다 (${post.withCard ? '카드 포함' : '글만'}).`;
+      canSend = false;
+    } else if (post?.status === 'pending') {
+      badge = '올리는 중';
+      text = '올리는 중입니다. 잠시 뒤 다시 불러와 주세요.';
+      canSend = false;
+    } else if (post?.status === 'failed') {
+      badge = '실패';
+      text = `올리지 못했습니다${post.detail ? `: ${post.detail}` : '.'}`;
+      label = '다시 올리기';
+    } else if (!data.caption) {
+      text = '이 날짜의 게시된 장마감 기록이 없습니다.';
+    }
+    telegram.badge.textContent = badge;
+    telegram.badge.dataset.state = post?.status || (data.configured ? 'none' : 'off');
+    telegram.status.textContent = note || text;
+    telegram.caption.value = data.caption || '';
+    telegram.caption.hidden = !data.caption;
+    telegram.send.dataset.label = label;
+    telegram.send.disabled = !canSend;
+    disarm();
+  }
+
+  function telegramUnavailable(message) {
+    telegram.badge.textContent = '확인 불가';
+    telegram.badge.dataset.state = 'off';
+    telegram.status.textContent = message;
+    telegram.caption.hidden = true;
+    telegram.send.disabled = true;
+    disarm();
+  }
+
+  async function loadTelegram() {
+    const date = current.date;
+    telegram.badge.textContent = '확인 중';
+    telegram.send.disabled = true;
+    try {
+      const response = await fetch(`/api/admin/market-telegram?date=${encodeURIComponent(date)}`, { cache: 'no-store', headers: { accept: 'application/json' } });
+      const data = await response.json().catch(() => ({}));
+      if (date !== current.date) return;
+      if (!response.ok) throw new Error(data.message || `상태를 불러오지 못했습니다 (${response.status}).`);
+      showTelegram(data);
+    } catch (error) {
+      if (date === current.date) telegramUnavailable(error.message || '상태를 불러오지 못했습니다.');
+    }
+  }
+
+  async function csrf() {
+    if (csrfToken) return csrfToken;
+    const response = await fetch('/api/auth/session', { cache: 'no-store', headers: { accept: 'application/json' } });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok || !body.authenticated || !body.csrfToken) throw new Error('관리자 세션을 확인할 수 없습니다. 다시 로그인해 주세요.');
+    csrfToken = body.csrfToken;
+    return csrfToken;
+  }
+
+  // A post to the channel is public and cannot be taken back from here, so the
+  // button asks for a second press instead of opening a dialog.
+  telegram.send.addEventListener('click', async () => {
+    if (Date.now() > armedUntil) {
+      armedUntil = Date.now() + 5000;
+      telegram.send.textContent = '한 번 더 누르면 채널에 올립니다';
+      setTimeout(() => { if (armedUntil && Date.now() >= armedUntil) disarm(); }, 5100);
+      return;
+    }
+    const date = current.date;
+    armedUntil = 0;
+    telegram.send.disabled = true;
+    telegram.send.textContent = '올리는 중';
+    try {
+      const response = await fetch('/api/admin/market-telegram', {
+        method: 'POST',
+        headers: { accept: 'application/json', 'content-type': 'application/json', 'x-csrf-token': await csrf() },
+        body: JSON.stringify({ date })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (date !== current.date) return;
+      if (data.date) showTelegram(data, data.ok ? '' : data.message);
+      else throw new Error(data.message || `올리지 못했습니다 (${response.status}).`);
+    } catch (error) {
+      if (date !== current.date) return;
+      telegram.status.textContent = error.message || '올리지 못했습니다.';
+      telegram.send.disabled = false;
+      disarm();
     }
   });
 

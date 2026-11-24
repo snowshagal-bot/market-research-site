@@ -44,6 +44,38 @@ function section(heading, lines) {
   return kept.length ? [`[${heading}]`, ...kept].join('\n') : '';
 }
 
+// Telegram's limit for the text under a photo.
+export const TELEGRAM_CAPTION_LIMIT = 1024;
+
+/**
+ * The session as the short text under its card in a channel post: the two
+ * closes, KOSPI net buying, the USD/KRW fixing, the day's one-line read when
+ * there is one, and the session page's address. Plain text, never longer than
+ * TELEGRAM_CAPTION_LIMIT (the one-line read is what gets cut).
+ */
+export function marketChannelCaption(payload, { takeaway = '' } = {}) {
+  const f = makeFormat('ko');
+  const date = String(payload?.meta?.market_date || '');
+  const { m, d, weekday } = dateParts(date);
+  const fx = payload?.rates_fx_volatility?.USDKRW;
+  const closes = [['코스피', payload?.indices?.KOSPI], ['코스닥', payload?.indices?.KOSDAQ]]
+    .filter(([, item]) => valid(item?.close))
+    .map(([name, item]) => `${name} ${f.number(item.close, 2)}${valid(item.change_pct) ? ` (${f.pct(item.change_pct)})` : ''}`);
+  const flows = flowLines(payload, 'KOSPI', f);
+  const facts = [
+    flows.length ? `코스피 순매수: ${flows.join(' · ')}` : '',
+    valid(fx?.close) && fx?.data_state !== 'unavailable' ? `원/달러 ${f.valueUnit('USDKRW', fx.close)} (15:30 확정)` : ''
+  ].filter(Boolean);
+  const head = `${m}월 ${d}일(${weekday}) 증시 마감 · 15:30 정규장 기준`;
+  const link = `전체 기록: ${PRODUCTION_ORIGIN}${marketDatePath(date, 'ko')}`;
+  const build = (line) => [head, closes.join('\n'), facts.join('\n'), line, link].filter(Boolean).join('\n\n');
+
+  const line = String(takeaway || '').replace(/\s+/g, ' ').trim();
+  const room = TELEGRAM_CAPTION_LIMIT - build('').length - 2;
+  if (!line || room < 8) return build('');
+  return build(line.length > room ? `${line.slice(0, room - 1).trimEnd()}…` : line);
+}
+
 /**
  * { title, body, tags, pageUrl } for a published session.
  * `takeaway` is the day's one-line read; `reportUrl` the path of that day's

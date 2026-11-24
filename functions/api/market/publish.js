@@ -1,6 +1,7 @@
 import { MAX_PAYLOAD_BYTES, MAX_TAKEAWAY_LENGTH, TABLE_NAME, MarketDbError, authorizePublish, ensureMarketTable, humanAdminPublishPolicy, isMarketWriteRequest, json, loadMarketSchema, validateMarketPayload } from './_shared.js';
 import { getKrxSessionTimes, kstParts } from '../../_trading-calendar.js';
 import { ensureMarketCards } from '../../_market-card.js';
+import { announceMarketClose } from '../../_market-telegram.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -100,7 +101,11 @@ export async function onRequestPost(context) {
     // does not throw, and a missing table or renderer leaves the page on the
     // standard image.
     if (payload.meta.status === 'final' && typeof context.waitUntil === 'function') {
-      context.waitUntil(ensureMarketCards(env, payload.meta.market_date));
+      const cards = ensureMarketCards(env, payload.meta.market_date);
+      context.waitUntil(cards);
+      // Today's session is also announced once in the Telegram channel, with
+      // the card when it is drawn in time. Inert without the channel's Secrets.
+      context.waitUntil(announceMarketClose(env, payload.meta.market_date, cards));
     }
     return json({ ok: true, market_date: payload.meta.market_date, schema_version: payload.meta.schema_version, action: existing ? 'updated' : 'created', is_latest: isLatest, takeaway: { ko: Boolean(stored.ko), en: Boolean(stored.en) } }, existing ? 200 : 201);
   } catch (error) {

@@ -254,3 +254,18 @@ CREATE TABLE IF NOT EXISTS market_close_cards (
   created_at TEXT,
   PRIMARY KEY (market_date, lang)
 );
+
+-- Market Close posts (migrations/comments/0005_market_close_posts.sql): one row
+-- per published session and outside channel ('telegram'), so a session is
+-- announced once.
+CREATE TABLE IF NOT EXISTS market_close_posts (
+  market_date TEXT NOT NULL,
+  channel TEXT NOT NULL,
+  status TEXT NOT NULL,
+  attempted_at TEXT NOT NULL,
+  message_id TEXT,
+  with_card INTEGER,
+  detail TEXT,
+  posted_at TEXT,
+  PRIMARY KEY (market_date, channel)
+);
