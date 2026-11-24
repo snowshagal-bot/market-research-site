@@ -1,5 +1,31 @@
 [
   {
+    "id": "2026-11-24-note-188c1gp",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-24",
+    "reportDate": "2026-11-24",
+    "registeredDate": "2026-11-24",
+    "registeredAt": "2026-11-24T10:43:14.791Z",
+    "legacyImport": false,
+    "title": "금리를 올려도 은행이 못 웃는 이유: 이번엔 조달금리가 10개월 먼저 뛰었다",
+    "seoTitle": "금리를 올려도 은행 NIM이 줄어든 이유",
+    "subtitle": "",
+    "description": "한국은행이 7·8월 금리를 두 번 올렸는데 3분기 은행 순이자마진(NIM)은 3bp 줄었다. 은행채 1년물이 첫 인상 10개월 전부터 111bp 먼저 오른 이번을 2017·2021년과 비교하고, 2027년 NIM 전망을 풀었다.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "banks-financials",
+      "rates"
+    ],
+    "readingMinutes": 16,
+    "href": "reports/20261124_Investment_Insight_Bank_Funding_Squeeze.html",
+    "coverImage": "covers/2026-11-24-note-188c1gp.webp",
+    "shareCardImage": "covers/share/2026-11-24-note-188c1gp.jpg",
+    "coverThumbnail": "covers/2026-11-24-note-188c1gp-450.webp"
+  },
+  {
     "id": "2026-11-24-daily-qkqek3",
     "type": "daily",
     "typeLabel": "Daily",
