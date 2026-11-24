@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-import { onRequest as middleware, removeTags, tagAttributes } from '../functions/_middleware.js';
+import { onRequest as middleware, REPORT_NAV_SPACER, removeTags, tagAttributes } from '../functions/_middleware.js';
 import { FAVICON_TAGS, findTranslationCounterpart, postLanguage, reportSiteUrl } from '../functions/_seo.js';
 
 const ROOT = new URL('../', import.meta.url);
@@ -264,4 +264,50 @@ test('a Daily report links to its session’s market page only when that close i
   assert.doesNotMatch(await page(unpublished), /data-market-session=/);
   assert.doesNotMatch(await page(daily, false), /data-market-session=/);
   assert.doesNotMatch(await page(note), /data-market-session=/);
+});
+
+test('the top bar spacer is in the first HTML, so the report never drops when the shell arrives', async () => {
+  // report-shell.js runs at the end of the body. When it created the 52 px
+  // spacer itself, a visitor without the script cached saw the report paint
+  // and then move down 52 px (Web Analytics CLS up to 1.33 on report pages).
+  const shellSource = await read('assets/report-shell.js');
+  const barHeight = Number(shellSource.match(/const BAR_H = (\d+);/)?.[1]);
+  assert.equal(barHeight, 52);
+  assert.match(REPORT_NAV_SPACER, new RegExp(`height:${barHeight}px!important`));
+  assert.match(REPORT_NAV_SPACER, /^<div id="mrs-nav-spacer" aria-hidden="true"/);
+
+  const source = '<!doctype html><html lang="ko"><head><title>old</title></head><body class="report" data-note=\'a>b\'><header class="top">report</header><p>body</p></body></html>';
+  const html = await render(POST, source);
+  const bodyOpen = html.match(/<body\b(?:[^>"']|"[^"]*"|'[^']*')*>/)?.[0];
+  assert.equal(bodyOpen, '<body class="report" data-note=\'a>b\'>');
+  assert.ok(html.includes(`${bodyOpen}${REPORT_NAV_SPACER}<header class="top">`), 'first child of <body>');
+  assert.equal(html.split('id="mrs-nav-spacer"').length - 1, 1, 'exactly once');
+  assert.ok(html.indexOf(REPORT_NAV_SPACER) < html.indexOf('<script src="/assets/report-shell.js'));
+
+  // The shell takes the server's node instead of adding a second one.
+  const mount = shellSource.slice(shellSource.indexOf('function mountReportNav'), shellSource.indexOf('function resolveReportLanguageLink'));
+  assert.match(mount, /let spacer = document\.getElementById\('mrs-nav-spacer'\);\s*if \(!spacer\) \{/);
+});
+
+test('the streaming middleware prepends the same spacer to <body>', async () => {
+  const prepended = [];
+  const appended = [];
+  globalThis.HTMLRewriter = class {
+    constructor() { this.handlers = []; }
+    on(selector, handler) { this.handlers.push([selector, handler]); return this; }
+    transform(response) {
+      for (const [selector, handler] of this.handlers) {
+        if (selector === 'body') handler.element({ prepend: (html, options) => prepended.push([html, options]), append: html => appended.push(html) });
+      }
+      return response;
+    }
+  };
+  try {
+    await render(POST, withHead(''));
+    assert.deepEqual(prepended, [[REPORT_NAV_SPACER, { html: true }]]);
+    assert.equal(appended.length, 1);
+    assert.match(appended[0], /<script src="\/assets\/report-shell\.js/);
+  } finally {
+    delete globalThis.HTMLRewriter;
+  }
 });

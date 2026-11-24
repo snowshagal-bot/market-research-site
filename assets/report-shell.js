@@ -74,15 +74,20 @@
   function mountReportNav() {
     if (document.getElementById('mrs-nav-host')) return;
 
-    const spacer = document.createElement('div');
-    spacer.id = 'mrs-nav-spacer';
-    spacer.setAttribute('aria-hidden', 'true');
+    // The middleware writes this spacer into the first HTML, so the report
+    // never moves when the bar arrives. Create it only when it is missing.
+    let spacer = document.getElementById('mrs-nav-spacer');
+    if (!spacer) {
+      spacer = document.createElement('div');
+      spacer.id = 'mrs-nav-spacer';
+      spacer.setAttribute('aria-hidden', 'true');
+      if (document.body.firstChild) document.body.insertBefore(spacer, document.body.firstChild);
+      else document.body.appendChild(spacer);
+    }
     for (const [key, value] of Object.entries({
       display: 'block', width: '100%', height: BAR_H + 'px', minHeight: BAR_H + 'px',
       maxHeight: BAR_H + 'px', margin: '0', padding: '0', border: '0', flex: '0 0 ' + BAR_H + 'px'
     })) spacer.style.setProperty(key, value, 'important');
-    if (document.body.firstChild) document.body.insertBefore(spacer, document.body.firstChild);
-    else document.body.appendChild(spacer);
 
     const host = document.createElement('div');
     host.id = 'mrs-nav-host';
