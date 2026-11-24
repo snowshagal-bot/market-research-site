@@ -250,7 +250,35 @@ export function renamedReportRedirect(request, url) {
   });
 }
 
+// Server-Timing: how long each step of an HTML response took (the asset or
+// route behind the middleware, the post list, the D1-backed fills), plus how
+// many requests this isolate has served, so a cold start shows as n=1.
+let isolateRequests = 0;
+function makeTimer() {
+  const parts = [];
+  const started = Date.now();
+  return {
+    async step(name, work) {
+      const start = Date.now();
+      try { return await work(); } finally { parts.push(`${name};dur=${Date.now() - start}`); }
+    },
+    header(served) { return [...parts, `mw;dur=${Date.now() - started}`, `isolate;desc="n=${served}"`].join(', '); }
+  };
+}
+
 export async function onRequest(context) {
+  isolateRequests += 1;
+  const served = isolateRequests;
+  const timer = makeTimer();
+  const response = await handleRequest(context, timer);
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('text/html')) return response;
+  const headers = new Headers(response.headers);
+  headers.set('server-timing', timer.header(served));
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
+async function handleRequest(context, timer) {
   const url = new URL(context.request.url);
   const hostClass = classifyHost(url);
   const isProduction = hostClass === HOST_CLASS.PUBLIC_PRODUCTION;
@@ -294,7 +322,7 @@ export async function onRequest(context) {
     }
   }
 
-  let response = await context.next();
+  let response = await timer.step('next', () => context.next());
 
   const legacyReportRedirect = legacyReportHtmlRedirect(context.request, url, response);
   if (legacyReportRedirect) return legacyReportRedirect;
@@ -334,10 +362,10 @@ export async function onRequest(context) {
     let tags = null;
     if ((homeLang || landing) && context.env?.ASSETS?.fetch) {
       try {
-        [posts, tags] = await Promise.all([
+        [posts, tags] = await timer.step('posts', () => Promise.all([
           loadPosts(context.request, context.env),
           loadTags(context.request, context.env)
-        ]);
+        ]));
       } catch (_) {
         try { posts = await loadPosts(context.request, context.env); } catch (_) {}
       }
@@ -347,12 +375,12 @@ export async function onRequest(context) {
     // page scripts render, rendered into the HTTP response itself. Null when
     // the page is not one of those, or on any failure or timeout, in which case
     // the static shell is served untouched and the scripts fill it as before.
-    const initial = await buildInitialHtml(url, context.env);
+    const initial = await timer.step('initial', () => buildInitialHtml(url, context.env));
     // / and /en/: Latest Research, the active notice and the TODAY strip, from
     // the same handlers the page script calls, plus a bootstrap so the script
     // does not request them again. Null on any failure: the shell is served as
     // before and the script fetches everything itself.
-    const home = homeLang ? await buildHomeInitial(url, context.env, posts) : null;
+    const home = homeLang ? await timer.step('home', () => buildHomeInitial(url, context.env, posts)) : null;
 
     const landingAlternates = posts && landing ? categoryAlternateTags(posts, landing.type) : '';
     if (isProduction && posts && landing && !categoryHasPosts(posts, landing.type, landing.lang)) {
@@ -470,10 +498,10 @@ export async function onRequest(context) {
   let reportTranslationHref = '';
   let tags = null;
   try {
-    const [postsRes, tagsRes] = await Promise.allSettled([
+    const [postsRes, tagsRes] = await timer.step('posts', () => Promise.allSettled([
       loadPosts(context.request, context.env),
       loadTags(context.request, context.env)
-    ]);
+    ]));
     if (tagsRes.status === 'fulfilled' && tagsRes.value) {
       tags = tagsRes.value;
     }
@@ -485,7 +513,7 @@ export async function onRequest(context) {
         // The published Market Close for the report's date supplies the
         // numbers the <title> and description quote; without one they fall
         // back to dated wording with no numbers.
-        const facts = await loadReportFacts(context.env, post);
+        const facts = await timer.step('facts', () => loadReportFacts(context.env, post));
         // Built once without the file's metas first, so a failure leaves the
         // page untouched, and kept as the fallback should a later build fail.
         const fallback = reportSeoTags(posts, post, { facts, tagRegistry: tags });
