@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-24-daily-qkqek3",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-24",
+    "reportDate": "2026-11-24",
+    "registeredDate": "2026-11-24",
+    "registeredAt": "2026-11-24T08:10:57.845Z",
+    "legacyImport": false,
+    "title": "U.S. Chips Surge on Jensen Huang's Return; KOSPI Jumps 6% to Reclaim 5,000",
+    "subtitle": "",
+    "description": "U.S. chip stocks rebounded 14% after Jensen Huang returned as Nvidia CEO. On Nov. 24 the KOSPI triggered a buy-side sidecar and closed at 5,006.03 (+6.32%). Foreign investors returned as net buyers for the first time in eight sessions (KRW 725.5bn). Drivers and what to watch next.",
+    "takeaway": "U.S. chip stocks rebound 14% in a day after Jensen Huang's return; the KOSPI triggers a buy-side sidecar and reclaims 5,000 after three trading sessions.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-11-24_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-24-daily-14evr2",
+    "coverImage": "covers/2026-11-24-daily-qkqek3.webp",
+    "shareCardImage": "covers/share/2026-11-24-daily-qkqek3.jpg",
+    "coverThumbnail": "covers/2026-11-24-daily-qkqek3-450.webp"
+  },
+  {
     "id": "2026-11-24-daily-14evr2",
     "type": "daily",
     "typeLabel": "주식 리포트",
