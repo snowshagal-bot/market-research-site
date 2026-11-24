@@ -1,5 +1,31 @@
 [
   {
+    "id": "2026-11-24-note-15q5y5a",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-24",
+    "reportDate": "2026-11-24",
+    "registeredDate": "2026-11-24",
+    "registeredAt": "2026-11-24T11:11:43.126Z",
+    "legacyImport": false,
+    "title": "Gold and crypto fell together: What was the real safe haven?",
+    "seoTitle": "Why Gold and Bitcoin Fell Together",
+    "subtitle": "",
+    "description": "Spot gold has fallen 37% from its January record to a 14-month low, with Bitcoin also sliding. A scorecard of gold, the dollar and U.S. Treasuries since September shows what held up in the selloff and why Korean gold fell 44%.",
+    "tags": [
+      "gold",
+      "stablecoins",
+      "crypto"
+    ],
+    "readingMinutes": 14,
+    "href": "reports/en/20261124_Investment_Insight_Safe_Haven_Everything_Fall_EN.html",
+    "translationGroup": "2026-11-24-note-17g8s3u",
+    "coverImage": "covers/2026-11-24-note-15q5y5a.webp",
+    "shareCardImage": "covers/share/2026-11-24-note-15q5y5a.jpg",
+    "coverThumbnail": "covers/2026-11-24-note-15q5y5a-450.webp"
+  },
+  {
     "id": "2026-11-24-note-17g8s3u",
     "type": "note",
     "typeLabel": "투자 인사이트",
