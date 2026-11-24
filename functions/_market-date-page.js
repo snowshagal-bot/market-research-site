@@ -199,6 +199,8 @@ const COPY = {
     allSectors: n => `업종 전체 ${n}개 보기`, allThemes: n => `테마 전체 ${n}개 보기`,
     groupColumns: ['순위', '이름', '시장', '종가', '등락률'],
     capColumns: ['순위', '종목명', '종가', '등락률', '시가총액'],
+    rankingsTitle: '등락률 · 거래대금 상위 종목',
+    rankGainers: '상승률 상위', rankLosers: '하락률 상위', rankTurnover: '거래대금 상위', high52: '52주 신고가', high52Basis: '장중 기준 · 네이버 금융 집계', low52: '52주 신저가', stocksUnit: '종목', limitUp: '상한가', limitDown: '하한가', tradingValue: '거래대금', rankingsNone: '해당 종목 없음', rankingsUnavailable: '이날 종목 순위 데이터 없음', rankingsNote: '주식 종목만(ETF·ETN 제외) · 15:30 정규장 종가 · 등락률은 KRX 전일 종가 대비 · 네이버 금융 순위를 장 마감 후 15:35~15:39에 저장',
     shortAmount: '공매도 거래대금', valueRatio: '거래대금 비중', shortRatioScope: '거래대금 비중은 KRX+NXT 합산 정규시장 거래대금 대비입니다.', shortValue: '공매도 거래대금 TOP5', shortRatio: '공매도 비중 TOP5', regularUnavailable: '정규장 기준 값 없음',
     prev: '이전 거래일', next: '다음 거래일', archive: '전체 마감 기록', dashboard: '대시보드에서 보기', latest: '최신 마감',
     report: '이날의 데일리 리포트', noReport: '이날 발행된 데일리 리포트가 없습니다.',
@@ -227,6 +229,8 @@ const COPY = {
     allSectors: n => `All ${n} sectors`, allThemes: n => `All ${n} themes`,
     groupColumns: ['Rank', 'Name', 'Market', 'Close', 'Change'],
     capColumns: ['Rank', 'Company', 'Close', 'Change', 'Market cap'],
+    rankingsTitle: 'Top Movers & Most Traded',
+    rankGainers: 'Top gainers', rankLosers: 'Top losers', rankTurnover: 'Most traded by value', high52: '52-week highs', high52Basis: 'intraday · Naver Finance count', low52: '52-week lows', stocksUnit: '', limitUp: 'Limit up', limitDown: 'Limit down', tradingValue: 'Value', rankingsNone: 'None', rankingsUnavailable: 'Stock rankings unavailable for this session', rankingsNote: 'Stocks only (ETFs and ETNs excluded) · regular-session close at 15:30 KST · change against the previous KRX close · Naver Finance rankings saved after the close, 15:35–15:39 KST',
     shortAmount: 'Short value', valueRatio: 'Value ratio', shortRatioScope: 'Value ratio is against KRX+NXT combined regular-session turnover.', shortValue: 'Top 5 by Short Value', shortRatio: 'Top 5 by Short Ratio', regularUnavailable: 'No regular-session value',
     prev: 'Previous session', next: 'Next session', archive: 'All sessions', dashboard: 'Open in the dashboard', latest: 'Latest close',
     report: 'Daily report for this session', noReport: 'No Daily report was published for this session.',
@@ -569,6 +573,50 @@ function flowTable(rowsByMarket, f, copy) {
   return `<div class="mk-table-wrap"><table class="mk-table mk-flow-table"><thead><tr><th scope="col">${html(copy.market)}</th><th scope="col">${html(copy.foreign)}</th><th scope="col">${html(copy.institution)}</th><th scope="col">${html(copy.individual)}</th></tr></thead><tbody>${rowsByMarket.map(row => `<tr><th scope="row">${html(row.name)}</th>${row.values.map(value => `<td><span class="mk-flow-value ${f.signClass(value)}">${f.flow(value)}</span>${flowBar(value, max)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
 
+/**
+ * Stock rankings of the session (SOFT, optional): per market the top five
+ * gainers, losers and stocks by trading value, and how many stocks set a
+ * 52-week high or low. A record made before 2026-11-23 has no status and shows
+ * nothing; an unavailable one says so and never shows another day's lists.
+ */
+// Trading value in a ranking row: short, so a small stock's value fits one line.
+function rankingWon(value, f) {
+  if (!valid(value)) return '--';
+  const abs = Math.abs(value);
+  if (abs >= 1e9) return f.won(value);
+  if (f.ko) return abs >= 1e8 ? `${f.number(value / 1e8, 1)}억원` : `${f.number(value / 1e4, 0)}만원`;
+  return `KRW ${f.number(value / 1e6, 0)}M`;
+}
+
+function rankingRow(item, index, kind, f, copy, lang) {
+  const limit = item?.price_limit === 'upper' ? `<em class="ranking-limit up">${html(copy.limitUp)}</em>`
+    : item?.price_limit === 'lower' ? `<em class="ranking-limit down">${html(copy.limitDown)}</em>` : '';
+  const close = valid(item?.close) ? `${f.number(item.close, 0)}${f.ko ? '원' : ''}` : '--';
+  const turnover = kind === 'top_turnover';
+  const detail = turnover
+    ? `${close} · <span class="${f.signClass(item?.change_pct)}">${f.pct(item?.change_pct)}</span>`
+    : `${close} · ${html(copy.tradingValue)} ${rankingWon(item?.trading_value_won, f)}`;
+  const main = turnover ? rankingWon(item?.trading_value_won, f) : f.pct(item?.change_pct);
+  return `<li><span class="ranking-rank">${index + 1}</span><span class="ranking-stock"><span class="ranking-name"><b>${html(companyName(item, lang))}</b>${limit}</span><small>${detail}</small></span><strong class="${turnover ? 'neutral' : f.signClass(item?.change_pct)}">${main}</strong></li>`;
+}
+
+/** The body of the rankings card; '' when the record carries no rankings status. */
+export function stockRankingsBody(payload, status, f, copy, lang) {
+  const state = status?.stock_rankings?.status;
+  if (!state) return '';
+  const markets = payload?.stock_rankings?.markets;
+  if (state !== 'complete' || !markets) return `<p class="unit-note">${html(copy.rankingsUnavailable)}</p>`;
+  const block = (title, rows, kind) => `<div class="ranking-block"><h4>${html(title)}</h4>${(rows || []).length
+    ? `<ol class="ranking-list">${rows.map((item, index) => rankingRow(item, index, kind, f, copy, lang)).join('')}</ol>`
+    : `<p class="unit-note">${html(copy.rankingsNone)}</p>`}</div>`;
+  const count = value => `<b>${f.integer(value)}</b>${copy.stocksUnit ? html(copy.stocksUnit) : ''}`;
+  const cards = ['KOSPI', 'KOSDAQ'].filter(key => markets[key]).map(key => {
+    const item = markets[key];
+    return `<article class="ranking-market"><div class="ranking-market-head"><h4>${key}</h4><p class="ranking-52w"><span>${html(copy.high52)} ${count(item.new_high_52w)}</span><span>${html(copy.low52)} ${count(item.new_low_52w)}</span><span class="ranking-52w-basis">${html(copy.high52Basis)}</span></p></div><div class="ranking-lists">${block(copy.rankGainers, item.top_gainers, 'top_gainers')}${block(copy.rankLosers, item.top_losers, 'top_losers')}${block(copy.rankTurnover, item.top_turnover, 'top_turnover')}</div></article>`;
+  }).join('');
+  return `<div class="ranking-markets">${cards}</div><p class="mk-unit">${html(copy.rankingsNote)}</p>`;
+}
+
 function breadthBlock(key, item, f, copy, pc) {
   const rise = item?.rise_count ?? item?.rise;
   const fall = item?.fall_count ?? item?.fall;
@@ -769,6 +817,12 @@ export function renderMarketDateMain(payload, lang, context = {}) {
       <div class="mk-card-head"><h3 id="mk-top-title">${html(pc.topTitle)}</h3><span class="mk-card-note">${html(pc.regularClose)}</span></div>
       <div class="mk-table-wrap"><table class="mk-table mk-cap-table"><thead><tr><th scope="col">${html(pc.stock)}</th><th scope="col">${html(pc.price)}</th><th scope="col">${html(pc.change)}</th><th scope="col" class="mk-col-cap">${html(pc.marketCap)}</th></tr></thead><tbody>${caps.map(item => `<tr><th scope="row"><span class="mk-rank">${html(item?.rank ?? '--')}</span><span class="stock-name"><b>${html(companyName(item, lang))}</b><small>${html(item?.market || '')} · ${html(item?.ticker || '')}</small></span></th><td>${valid(item?.close) ? `${f.number(item.close, 0)}${f.ko ? '원' : ''}` : '--'}</td><td><span class="${f.signClass(item?.change_pct)}">${f.pct(item?.change_pct)}</span></td><td class="mk-col-cap">${f.won(item?.market_cap_won)}</td></tr>`).join('')}</tbody></table></div>
     </section>` : '';
+  // Stock rankings follow the session's own stats; a record without their status shows no card.
+  const rankingsBody = stockRankingsBody(payload, status, f, copy, lang);
+  const rankingsCard = rankingsBody ? `<section class="mk-card mk-rankings-card" aria-labelledby="mk-rankings-title">
+      <div class="mk-card-head"><h3 id="mk-rankings-title">${html(copy.rankingsTitle)}</h3><span class="mk-card-note">${html(pc.regularClose)}</span></div>
+      ${rankingsBody}
+    </section>` : '';
   const sectorBlock = groupBlock(copy.sectors, copy.allSectors, groups.sectors, f, copy);
   const themeBlock = groupBlock(copy.themes, copy.allThemes, groups.themes, f, copy);
   const groupsCard = sectorBlock || themeBlock
@@ -828,6 +882,7 @@ export function renderMarketDateMain(payload, lang, context = {}) {
       <div class="mk-section-head"><h2 id="mk-kr-title">${html(pc.krTitle)}</h2><span>${html(pc.krCaption)}</span></div>
       <div class="mk-grid mk-grid-kr">${flowsCard}${breadthCardHtml}</div>
       ${statsCard || topCard ? `<div class="mk-grid mk-grid-kr2">${statsCard}${topCard}</div>` : ''}
+      ${rankingsCard ? `<div class="mk-grid-full">${rankingsCard}</div>` : ''}
       ${groupsCard ? `<div class="mk-grid-full">${groupsCard}</div>` : ''}
     </section>
     <section class="mk-section" aria-labelledby="mk-global-title">

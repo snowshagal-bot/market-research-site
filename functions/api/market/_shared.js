@@ -399,6 +399,22 @@ export function validateSectionStatus(payload) {
     if (groups.reason === null) errors.push('$.section_status.krx_groups.reason: unavailable에는 사유가 필요합니다.');
   }
 
+  // Stock rankings (SOFT, optional: records made before 2026-11-23 carry neither
+  // the section nor its status). complete means this session's lists for both
+  // markets; unavailable means null — never another date's rankings.
+  const rankingStatus = status.stock_rankings;
+  if (rankingStatus) {
+    if (rankingStatus.status === 'complete') {
+      if (!payload.stock_rankings) errors.push('$.stock_rankings: section_status가 complete이면 종목 순위가 필요합니다.');
+      if (rankingStatus.reason !== null) errors.push('$.section_status.stock_rankings.reason: complete에는 사유가 없어야 합니다.');
+    } else if (rankingStatus.status === 'unavailable') {
+      if (payload.stock_rankings !== null) errors.push('$.stock_rankings: unavailable이면 null이어야 합니다(다른 날짜 값 대체 금지).');
+      if (rankingStatus.reason === null) errors.push('$.section_status.stock_rankings.reason: unavailable에는 사유가 필요합니다.');
+    }
+  } else if (Object.hasOwn(payload || {}, 'stock_rankings')) {
+    errors.push('$.section_status.stock_rankings: stock_rankings를 싣는 payload에는 상태가 필요합니다.');
+  }
+
   // Market breadth (SOFT): complete means both markets for this very session;
   // unavailable means no breadth numbers at all — never another date's counts.
   const breadthStatus = status.market_breadth || {};
@@ -450,6 +466,50 @@ export function validateSectionStatus(payload) {
   return errors;
 }
 
+const RANKING_LISTS = Object.freeze(['top_gainers', 'top_losers', 'top_turnover']);
+
+/*
+ * Stock rankings: the session's own lists, ranked 1..n in order. Gainers rise,
+ * losers fall, and each list is sorted the way its name says, so a payload can
+ * never carry another session's or a re-sorted list.
+ */
+export function validateStockRankings(payload) {
+  const errors = [];
+  const section = payload?.stock_rankings;
+  if (!section || typeof section !== 'object') return errors;
+  const marketDate = payload?.meta?.market_date;
+  if (section.source_date !== marketDate) errors.push('$.stock_rankings.source_date: market_date와 일치해야 합니다.');
+  const asOf = Date.parse(String(section.as_of || ''));
+  if (!Number.isFinite(asOf) || new Date(asOf + 9 * 3600000).toISOString().slice(0, 10) !== marketDate) {
+    errors.push('$.stock_rankings.as_of: market_date 당일(KST)의 캡처 시각이어야 합니다.');
+  }
+  for (const market of ['KOSPI', 'KOSDAQ']) {
+    const lists = section.markets?.[market];
+    if (!lists || typeof lists !== 'object') continue;
+    for (const key of RANKING_LISTS) {
+      const rows = Array.isArray(lists[key]) ? lists[key] : [];
+      const tickers = new Set();
+      rows.forEach((row, index) => {
+        const path = `$.stock_rankings.markets.${market}.${key}[${index}]`;
+        if (row?.rank !== index + 1) errors.push(`${path}.rank: 1부터 순서대로여야 합니다.`);
+        if (!/^[0-9A-Z]{6}$/.test(String(row?.ticker || ''))) errors.push(`${path}.ticker: 6자리 종목코드여야 합니다.`);
+        if (tickers.has(row?.ticker)) errors.push(`${path}.ticker: 같은 목록에 중복된 종목입니다.`);
+        tickers.add(row?.ticker);
+        if (key === 'top_gainers' && !(row?.change_pct > 0)) errors.push(`${path}.change_pct: 상승률 상위는 상승 종목이어야 합니다.`);
+        if (key === 'top_losers' && !(row?.change_pct < 0)) errors.push(`${path}.change_pct: 하락률 상위는 하락 종목이어야 합니다.`);
+        const previous = rows[index - 1];
+        if (previous) {
+          const sorted = key === 'top_gainers' ? previous.change_pct >= row?.change_pct
+            : key === 'top_losers' ? previous.change_pct <= row?.change_pct
+              : previous.trading_value_won >= row?.trading_value_won;
+          if (!sorted) errors.push(`${path}: ${key} 순서가 맞지 않습니다.`);
+        }
+      });
+    }
+  }
+  return errors;
+}
+
 const legacySchemas = new WeakMap();
 
 // section_status exists only in 1.2.0. Every other version is checked against
@@ -485,6 +545,7 @@ export function validateMarketPayload(payload, schema) {
       });
     }
   }
+  errors.push(...validateStockRankings(payload));
   errors.push(...validateSectionStatus(payload));
   const freshness = validateSourceFreshness(payload);
   errors.push(...freshness.errors);

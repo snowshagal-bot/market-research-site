@@ -101,23 +101,25 @@ Exporter는 원천 웹 페이지를 직접 파싱하지 않는다. UI와 TXT 저
 | FUTURES | `krx_investor_trading.markets.KOSPI200선물`, `program_basis.basis` |
 
 
-**SOFT** — 최근 5거래일 수급, KRX 업종·테마, 글로벌·24시간 지표, 시장 폭. 실패해도 Market Close 전체는 `final`일 수 있다. 대신 `section_status`에 상태를 밝히고, 빈 섹션은 stale 값으로 채우지 않는다.
+**SOFT** — 최근 5거래일 수급, KRX 업종·테마, 글로벌·24시간 지표, 시장 폭, 종목 순위(선택). 실패해도 Market Close 전체는 `final`일 수 있다. 대신 `section_status`에 상태를 밝히고, 빈 섹션은 stale 값으로 채우지 않는다.
 
 ```json
 "section_status": {
   "five_day_flows": {"status": "partial", "reason": "missing_session", "expected_sessions": 5, "available_sessions": 4, "missing_sessions": ["2026-09-22"]},
   "krx_groups": {"status": "unavailable", "reason": "source_validation_failed"},
   "global_indicators": {"status": "complete", "reason": null, "unavailable": []},
-  "market_breadth": {"status": "complete", "reason": null}
+  "market_breadth": {"status": "complete", "reason": null},
+  "stock_rankings": {"status": "complete", "reason": null}
 }
 ```
 
-- 상태 어휘는 `complete`·`partial`·`unavailable`뿐이다(KRX 업종·테마와 시장 폭은 `complete`·`unavailable`). `complete`이면 `reason=null`, 그 밖에는 사유가 필수다.
+- 상태 어휘는 `complete`·`partial`·`unavailable`뿐이다(KRX 업종·테마, 시장 폭, 종목 순위는 `complete`·`unavailable`). `complete`이면 `reason=null`, 그 밖에는 사유가 필수다.
 - 사유 어휘: `missing_session`, `source_validation_failed`, `source_unavailable`, `stale_source_date`, `replay_without_stored_source`.
 - **최근 5거래일**: 5거래일이 모두 있을 때만 `recent_5d_flows`에 누적 숫자를 싣는다. `partial`(확보 1~4일, 확보+누락=5)이나 `unavailable`(0일)이면 `markets={}`, `used_trading_days=0`이다. 4일 합계는 5거래일 누적이 아니므로 그 자리에 넣지 않는다. 화면은 "데이터 불완전 · 4/5 거래일 확보 · 9월 22일 데이터 없음"처럼 확보 상태만 표시한다.
 - **KRX 업종·테마**: KRX 응답이 자체 검증에 실패하거나 없으면 `krx_groups=null`, `status=unavailable`. 다른 날짜 값을 대신 쓰지 않는다.
 - **글로벌·24시간 지표**(NASDAQ·DOW·S&P 500·SOX·VIX·US10Y·USD/KRW·JPY/KRW·DXY·WTI·GOLD·BITCOIN): 실패하거나 기준일이 맞지 않는 지표는 `global_indicators.unavailable`에 적고, 해당 객체는 값·`source_date`가 모두 `null`인 `data_state=unavailable`로 싣는다. 목록에 없는 지표는 기존 기준일 규칙을 그대로 통과해야 한다. KOSPI·KOSDAQ은 SOFT가 아니다.
 - **시장 폭**: `complete`이면 KOSPI·KOSDAQ 모두 `source_date=market_date`. 확인하지 못하면 `market_breadth={}`, `status=unavailable`. 다른 날짜 값이나 오래된 숫자로 채우지 않는다. 화면은 숫자 대신 "이날 시장 폭 데이터 없음"을 표시한다.
+- **종목 순위**(`stock_rankings`, 선택): `complete`이면 그 거래일의 순위 객체, 확인하지 못하면 `stock_rankings=null`, `status=unavailable`. 2026-11-23 이전 기록에는 섹션과 상태가 모두 없다. 섹션을 실으면 상태도 있어야 한다. 아래 "종목 순위" 참고.
 - `section_status`는 1.2.0에만 있다. 1.0.1·1.1.0 payload에 이 필드가 있으면 기존처럼 계약에 없는 필드로 거부한다.
 
 ### 정규장 복원 불가 세부값 (schema 1.1.0 호환)
@@ -145,6 +147,7 @@ Exporter는 원천 웹 페이지를 직접 파싱하지 않는다. UI와 TXT 저
 | `short_selling` | 시장 요약, 거래대금 TOP5, 비중 TOP5 |
 | `market_cap_top10` | KOSPI·KOSDAQ 통합 시가총액 상위 10 |
 | `krx_groups` | KRX 공식 업종 전체와 공식 테마 전체. v1.1.0부터 필수 |
+| `stock_rankings` | 시장별 상승률·하락률·거래대금 상위 5종목, 52주 신고가·신저가 종목 수 (선택, 2026-11-23부터) |
 | `validation` | 최종 승격 여부와 실패 사유 |
 
 ### 2026-11 추가 지표 (선택 항목)
@@ -168,6 +171,27 @@ Exporter는 원천 웹 페이지를 직접 파싱하지 않는다. UI와 TXT 저
 - `COMEX_COPPER`는 LME 구리(`COPPER`, 수집기 데스크톱 전용)와 다른 시장이다. LME 값은 여전히 Market Close에 들어가지 않는다.
 - `VKOSPI`(2026-11-22 추가)는 코스피200 옵션으로 계산하는 KRX 지수다. 값은 그 거래일 파생상품 정규장 마감(15:45 KST) 종가이고, 수집기는 16:00 KST(수능일 17:00) 이후에만 그날 값으로 받는다. `source_date`는 그 거래일이다. 다른 선택 지표처럼 SOFT라서 실패해도 Market Close final을 막지 않고 `global_indicators.unavailable`에 적힌다.
 - `NIKKEI225`·`SHANGHAI`·`TAIEX`(2026-11-22 추가)는 아시아 주요 지수의 현지 정규장 종가다. `source_date`는 **KRX 기준일 당일 또는 그 이전의 가장 최근에 끝난 현지 거래일**이다. 현지 휴장일(예: 2026-11-23 일본 근로감사의 날)에는 직전 현지 거래일 종가를 그 날짜로 싣는다. 현지 달력은 두지 않으므로 수신 측은 `source_date`가 기준일보다 늦지 않고 14일 넘게 이르지 않은지만 검사한다. 그날 현지 장이 열렸는데 아직 끝나지 않았으면(현지 마감 시각 전이거나 Yahoo 최종값 시각이 마감 전) 직전 종가로 대신하지 않고 unavailable로 둔다. `previous_close`는 직전 현지 거래일 종가이고 `change`·`change_pct`는 그 대비다. SOFT이며 `global_indicators.unavailable`에 적힐 수 있다.
+
+## 종목 순위 (stock_rankings)
+
+2026-11-23에 schema 1.2.0 안의 선택 섹션으로 추가했다(`properties`에만 있고 `required`에는 없다). KOSPI·KOSDAQ 각각:
+
+| 필드 | 의미 |
+|---|---|
+| `top_gainers` | 상승률 상위 최대 5종목(모두 상승, 등락률 내림차순) |
+| `top_losers` | 하락률 상위 최대 5종목(모두 하락, 등락률 오름차순) |
+| `top_turnover` | 거래대금 상위 최대 5종목(거래대금 내림차순) |
+| `new_high_52w` / `new_low_52w` | 그날 장중 52주 최고가·최저가를 새로 쓴 종목 수 |
+
+- 종목 객체: `rank`(1부터), `ticker`(6자), `name`, `close`(원), `change_pct`(KRX 전일 종가 대비 %), `trading_value_won`, `price_limit`(`upper`·`lower`·`null`).
+- 대상은 주식 종목(네이버 `stockEndType=stock`)뿐이다. ETF·ETN은 빼고 우선주는 포함한다. 그날 오른 종목이 5개보다 적으면 목록도 짧다(0~5개).
+- 원천: 네이버 금융 국내주식 순위 목록(상승·하락·거래대금 상위·52주 신고가·신저가). 수집기는 장 마감 5분 뒤부터 정규장 스냅샷 구간 끝까지(15:35~15:39 KST, 수능일 16:35~16:39)만 저장한다. 15:40부터는 NXT 애프터마켓·시간외 체결이 목록 가격과 등락률을 바꾸고, 마감 직후 몇 분은 목록 값·순서가 아직 자리 잡지 않기 때문이다(2026-11-23 실측: 15:31:46과 15:32:57 두 캡처 사이 약 4,300항목 중 42개의 종가·등락률이 달랐고, 첫 캡처의 코스피 상승률 상위는 정렬 전이었다). 이 구간의 목록 값은 KRX 15:30 종가·거래량·공식 등락률과 같다(2026-11-20 저장 스냅샷으로 대조).
+- 목록에 실은 종목(시장별 최대 15개)은 모두 KRX 15:30 분봉(네이버 KRX 분봉, `stockExchangeType=KRX`)의 종가·누적 거래량과 같아야 한다. 거래량이 같다는 것은 거래대금이 KRX 정규장 값(NXT 미포함)이라는 뜻이다. 하나라도 다르거나 분봉을 받지 못하면 섹션 전체를 `unavailable`(`source_validation_failed`)로 둔다.
+- 상·하한가에 묶여 종가 단일가가 체결되지 않은 종목은 15:30~15:39 분봉이 없다(예: 2026-11-20 타임X AI, 마지막 체결 15:16). 이때는 그날 정규장 시작부터 15:30 전까지의 마지막 KRX 분봉을 쓰되, 역시 종가·누적 거래량이 목록과 같아야 한다. 거래량이 같으면 그 뒤 체결이 없었으므로 마지막 정규장 체결가가 공식 종가다. 15:40 이후 목록은 시간외 체결로 거래량이 달라져 걸러진다.
+- `new_high_52w`·`new_low_52w`는 네이버 금융 52주 신고가·신저가 목록의 주식 종목 수(장중 기준)다. 종목별 분봉 대조는 하지 않고, 같은 구간의 두 캡처가 같을 때만 싣는다. 화면은 숫자 옆에 "장중 기준 · 네이버 금융 집계"(EN "intraday · Naver Finance count")로 밝힌다(owner 결정 2026-11-23: 라벨을 붙여 유지).
+- 16:05 export는 마지막 두 캡처에서 만든 섹션이 같을 때만 `complete`로 싣는다. 캡처가 둘보다 적으면 `missing_session`, 서로 다르거나 검증에 실패하면 `source_validation_failed`로 `unavailable`이다. 다른 날짜 값으로 채우지 않는다.
+- `source_date`는 `meta.market_date`와 같고 `as_of`(마지막 캡처 시각)는 그날(KST)이어야 한다(수집기는 15:35~15:39 캡처만 쓴다). 수신 측은 순위가 1부터 차례인지, 목록 안 중복 종목, 정렬 방향, 상승/하락 부호를 다시 검사한다(`functions/api/market/_shared.js`의 `validateStockRankings`).
+- 화면: 오늘 화면과 날짜별 기록에서 "시장 폭" 바로 다음 섹션 "등락률 · 거래대금 상위 종목"(EN "Top Movers & Most Traded"). 영문 페이지는 영문명이 없는 종목을 종목코드로 표시한다.
 
 ## KRX 업종·테마
 

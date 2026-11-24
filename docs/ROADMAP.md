@@ -64,6 +64,19 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   Rollback: restore both pre-vkospi backups together (core and config; this also removes the
   Asian indices, installed later); the website can stay, since VKOSPI is optional.
 
+- **Stock rankings (proposal 6, 2026-11-23, two Draft PRs)**: `stock_rankings`, an optional SOFT
+  section of contract 1.2.0: per KRX market the top five gainers, losers and stocks by trading
+  value, and the count of stocks at a new 52-week high/low (stocks only, no ETF/ETN). Source:
+  Naver's ranking lists saved by the regular snapshot task in 15:35~15:39 KST (from 15:40 NXT
+  after-market trades change them; the 2026-11-23 live check found them still settling at
+  15:31~15:34, so the 15:32 and 15:34 runs skip them). The 16:05 export carries the section only
+  when the last two captures agree and every listed stock matches its KRX 15:30 bar close and
+  volume, else `unavailable`. Pages: one full-width card in the Korean market section on TODAY and session
+  pages (after the market-cap card), the 52-week counts labelled as Naver's intraday count (owner).
+  Forward only.
+  Rollout order (owner approval): website PR first (the receiver rejects unknown keys), then the
+  publisher PR; rebuild the core and install it (markets.json is unchanged).
+
 - **Asian indices (installed 2026-11-22; first values 2026-11-23)**: 닛케이225 (`^N225`), 상해종합 (`000001.SS`) and 대만 가권
   (`^TWII`) as optional `indices` codes of contract 1.2.0 (NIKKEI225, SHANGHAI, TAIEX; kind `asia`;
   pages `/market/nikkei225/`, `/market/shanghai/`, `/market/taiex/`), a row under the major indices.
