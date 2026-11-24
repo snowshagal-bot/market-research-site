@@ -71,6 +71,8 @@ Read-only API token used by `/api/analytics` to query Cloudflare GraphQL Analyti
 
 The Web Analytics site tag for `snowshagal.com`, used server-side to isolate the RUM dataset to this site.
 
+It is the `siteTag` in the Web Analytics dashboard URL (`…/web-analytics/overview?siteTag~in=<site tag>`), 32 hex characters. It is not the `token` in the page's `data-cf-beacon` snippet: that is a different value, and with it every query succeeds with zero rows. When a period comes back empty, `/api/analytics` asks once more without the site tag filter (host `snowshagal.com` only) and, if this host's page loads sit under another tag, returns `diagnostic.code = SITE_TAG_MISMATCH` with the first 8 characters of the configured value and the observed tag; `/admin/analytics/` shows it in the empty state. A secret change takes effect on the next deployment.
+
 Do not commit any secret or environment-variable value.
 
 ## Disclosure Monitor dependencies (Draft PR #79)
@@ -111,7 +113,7 @@ The `/admin/analytics/` interface is accessed via administrator session on `admi
 
 `/api/analytics` first uses GraphQL introspection to verify the current account's `rumPageloadEventsAdaptiveGroups` dataset and available dimensions, metrics, filters, and ordering fields. Every aggregate is filtered by both the configured site tag and the exact Production host `snowshagal.com`, and uses the schema-supported `requestPath_notlike: "/admin/%"` filter so Preview traffic and all `/admin/*` operator activity are excluded before aggregation. The primary trend and rankings also use Cloudflare的 `excludeBots: "Yes"` filter and are labeled Bots excluded. These figures are closer to actual-user traffic, but do not mean that every automated request has been removed. One additional trend alias uses the same date/site/host/admin-path conditions without the bot filter to provide All traffic comparison totals. If a required production, admin-path, or bot filter is unavailable, the endpoint fails closed with `ANALYTICS_SCHEMA_UNSUPPORTED` rather than returning polluted statistics. The response contains only aggregated visits, page views, dates, paths, referers, countries, devices, browsers, and operating systems. It is returned with `private, no-store`; the API token, account ID, and site tag are never returned.
 
-No rows is a normal successful response and renders an empty state. Missing configuration, unsupported schema, timeout, authentication failure, and Cloudflare query failure are separate error states and must not be converted to zero totals. Preview validation can use mocked GraphQL responses before Preview secrets are configured; the endpoint never writes Analytics data.
+No rows is a normal successful response and renders an empty state. An empty response may carry the site tag diagnostic above; a failed diagnostic query leaves the plain empty state. Missing configuration, unsupported schema, timeout, authentication failure, and Cloudflare query failure are separate error states and must not be converted to zero totals. Preview validation can use mocked GraphQL responses before Preview secrets are configured; the endpoint never writes Analytics data.
 
 ## Cloudflare D1
 

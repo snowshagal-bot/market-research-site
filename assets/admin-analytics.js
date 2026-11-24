@@ -114,6 +114,11 @@
     $('metric-depth-all').textContent = allTraffic.visits ? formatNumber(allTraffic.pageViews / allTraffic.visits) : '0';
     $('analytics-period').textContent = `${data.range.from} — ${data.range.to} · ${data.range.timezone} 기준`;
     $('analytics-empty').hidden = !data.empty;
+    // A wrong site tag setting, found by the API when the period came back empty.
+    const mismatch = data.diagnostic?.code === 'SITE_TAG_MISMATCH' ? data.diagnostic : null;
+    $('analytics-empty').textContent = mismatch
+      ? `방문 데이터가 0으로 나오는 이유: Cloudflare Pages에 넣은 Web Analytics site tag 설정값(${mismatch.configured}, ${mismatch.configuredLength}자)이 실제 수집 데이터의 site tag와 다릅니다. 실제 site tag: ${mismatch.observed.map((item) => item.siteTag).join(', ')}. Pages 설정에서 이 값으로 바꾼 뒤 다시 배포하세요.`
+      : '아직 이 기간에 수집된 방문 데이터가 없습니다.';
     $('trend-chart').hidden = data.empty;
     renderTrend(data.trend || []);
     renderRanking('top-pages', data.topPages);
@@ -236,7 +241,10 @@
       if (webResult.status === 'rejected' && engagementError) throw webResult.reason;
       rangeButtons.forEach((button) => button.setAttribute('aria-pressed', String(Number(button.dataset.range) === selectedRange)));
       if (webResult.status === 'fulfilled') {
-        setStatus(webResult.value.empty ? '통계 조회가 완료됐습니다. 방문 데이터는 아직 없습니다.' : '통계 조회가 완료됐습니다.');
+        const siteTagMismatch = webResult.value.diagnostic?.code === 'SITE_TAG_MISMATCH';
+        setStatus(siteTagMismatch
+          ? '방문 통계 설정값(site tag)이 실제 데이터와 다릅니다. 방문 추이 칸의 안내를 확인하세요.'
+          : webResult.value.empty ? '통계 조회가 완료됐습니다. 방문 데이터는 아직 없습니다.' : '통계 조회가 완료됐습니다.', siteTagMismatch);
       } else {
         setStatus(`읽기 행동 통계는 조회됐지만 방문 통계 조회에 실패했습니다. ${webResult.reason?.message || ''}`, true);
       }

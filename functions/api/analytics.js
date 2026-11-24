@@ -322,6 +322,50 @@ function buildAnalyticsQuery(schema, accountId, siteTag, dates) {
   }`;
 }
 
+/**
+ * The site tags that actually carry this host's page loads in the period,
+ * without the configured site tag filter. Asked only when the configured tag
+ * returned nothing at all, to tell a wrong CLOUDFLARE_WEB_ANALYTICS_SITE_TAG
+ * (for instance the beacon token pasted in its place) from a quiet period.
+ */
+function buildSiteCheckQuery(schema, accountId, dates) {
+  const start = schema.filters.datetime ? filterDateValue(dates.start) : dates.start;
+  const end = schema.filters.datetime
+    ? schema.filters.end.endsWith('_lt')
+      ? filterDateValue(nextDate(dates.end))
+      : filterDateValue(dates.end, true)
+    : dates.end;
+  const host = schema.filters.hostList ? `[${gqlString(PRODUCTION_HOSTNAME)}]` : gqlString(PRODUCTION_HOSTNAME);
+  const filter = `{ ${schema.filters.start}: ${gqlString(start)}, ${schema.filters.end}: ${gqlString(end)}, ${schema.filters.host}: ${host} }`;
+  const order = schema.countOrder ? `, orderBy: [${schema.countOrder}]` : '';
+  return `query AdminAnalyticsSiteCheck {
+    viewer {
+      accounts(filter: { accountTag: ${gqlString(accountId)} }) {
+        sites: ${schema.dataset}(filter: ${filter}, limit: 10${order}) { count dimensions { ${schema.dimensions.siteTag} } }
+      }
+    }
+  }`;
+}
+
+function siteTagHint(value) {
+  const text = String(value || '');
+  return text.length > 8 ? `${text.slice(0, 8)}…` : text;
+}
+
+function siteTagDiagnostic(data, schema, configured) {
+  const rows = data?.viewer?.accounts?.[0]?.sites;
+  const observed = (Array.isArray(rows) ? rows : [])
+    .map((row) => ({ siteTag: String(row?.dimensions?.[schema.dimensions.siteTag] || '').trim(), pageViews: Number(row?.count || 0) }))
+    .filter((item) => item.siteTag && item.pageViews > 0);
+  if (!observed.length || observed.some((item) => item.siteTag === String(configured))) return null;
+  return {
+    code: 'SITE_TAG_MISMATCH',
+    configured: siteTagHint(configured),
+    configuredLength: String(configured).length,
+    observed
+  };
+}
+
 function metricValue(row, schema) {
   return Number(row?.[schema.visits.container]?.[schema.visits.field] || 0);
 }
@@ -438,7 +482,19 @@ export async function onRequestGet({ request, env }) {
     const dates = rangeDates(days);
     const query = buildAnalyticsQuery(schema, env.CLOUDFLARE_ACCOUNT_ID, env.CLOUDFLARE_WEB_ANALYTICS_SITE_TAG, dates);
     const data = await graphQL(env.CLOUDFLARE_ANALYTICS_API_TOKEN, query, {}, 'analytics:data');
-    return json(normalizeAnalytics(data, schema, days, dates));
+    const result = normalizeAnalytics(data, schema, days, dates);
+    if (result.empty) {
+      // Zero rows under the configured site tag: check whether this host has
+      // page loads under another tag. A failed check leaves the empty state as is.
+      try {
+        const check = await graphQL(env.CLOUDFLARE_ANALYTICS_API_TOKEN, buildSiteCheckQuery(schema, env.CLOUDFLARE_ACCOUNT_ID, dates), {}, 'analytics:site-check');
+        const diagnostic = siteTagDiagnostic(check, schema, env.CLOUDFLARE_WEB_ANALYTICS_SITE_TAG);
+        if (diagnostic) result.diagnostic = diagnostic;
+      } catch (error) {
+        logAnalyticsFailure(error);
+      }
+    }
+    return json(result);
   } catch (error) {
     logAnalyticsFailure(error);
     return json({
@@ -462,6 +518,8 @@ export const __test = {
   discoverSchema,
   rangeDates,
   buildAnalyticsQuery,
+  buildSiteCheckQuery,
+  siteTagDiagnostic,
   normalizeGroups,
   normalizeReferers,
   normalizeTrend,
