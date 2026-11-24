@@ -1,5 +1,30 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-24-note-17g8s3u",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-24",
+    "reportDate": "2026-11-24",
+    "registeredDate": "2026-11-24",
+    "registeredAt": "2026-11-24T11:06:14.979Z",
+    "legacyImport": false,
+    "title": "금도 코인도 같이 빠졌다: 폭락장에서 '안전자산'은 어디였나",
+    "seoTitle": "금값 급락, 금도 코인도 같이 빠진 이유",
+    "subtitle": "",
+    "description": "국제 금값이 1월 사상 최고보다 37% 내려 14개월 만에 최저를 찍었고 비트코인도 함께 빠졌다. 9월 이후 금·달러·美 국채의 성적표로 이번 하락장에서 무엇이 버텼는지, 국내 금값이 44% 빠진 이유와 함께 풀었다.",
+    "tags": [
+      "gold",
+      "stablecoins",
+      "crypto"
+    ],
+    "readingMinutes": 12,
+    "href": "reports/20261124_Investment_Insight_Safe_Haven_Everything_Fall.html",
+    "coverImage": "covers/2026-11-24-note-17g8s3u.webp",
+    "shareCardImage": "covers/share/2026-11-24-note-17g8s3u.jpg",
+    "coverThumbnail": "covers/2026-11-24-note-17g8s3u-450.webp"
+  },
+  {
     "id": "2026-11-24-note-1fmvyd8",
     "type": "note",
     "typeLabel": "Investment Insights",
