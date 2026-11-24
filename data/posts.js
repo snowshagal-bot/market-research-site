@@ -1,5 +1,29 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-25-basics-vdzvvf",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-11-25",
+    "reportDate": "2026-11-25",
+    "registeredDate": "2026-11-25",
+    "registeredAt": "2026-11-24T17:23:29.491Z",
+    "legacyImport": false,
+    "title": "내 증권사 반대매매 기준은 몇 %, 몇 시인가",
+    "seoTitle": "증권사별 담보유지비율·반대매매 시간 정리: 130%·140% 확인하는 법",
+    "subtitle": "",
+    "description": "키움·미래에셋·삼성·한국투자·NH·KB·신한의 신용 담보유지비율(평소 140%)과 증권사별 기준 인하·반대매매 유예 조건, 종목별 담보비율, 추가담보 납부 기한, 반대매매 날짜와 아침 마감, 내 계좌 담보비율 확인 화면, 2027년 1월 31일 뒤 달라지는 점.",
+    "tags": [
+      "market-basic",
+      "futures"
+    ],
+    "readingMinutes": 9,
+    "href": "reports/basics-data-guide-02-margin-call-by-broker.html",
+    "coverImage": "covers/2026-11-25-basics-vdzvvf.webp",
+    "shareCardImage": "covers/share/2026-11-25-basics-vdzvvf.jpg",
+    "coverThumbnail": "covers/2026-11-25-basics-vdzvvf-450.webp"
+  },
+  {
     "id": "2026-11-24-research-at00qm",
     "type": "research",
     "typeLabel": "Research",
