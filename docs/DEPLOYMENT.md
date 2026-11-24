@@ -73,6 +73,20 @@ The Web Analytics site tag for `snowshagal.com`, used server-side to isolate the
 
 It is the `siteTag` in the Web Analytics dashboard URL (`…/web-analytics/overview?siteTag~in=<site tag>`), 32 hex characters. It is not the `token` in the page's `data-cf-beacon` snippet: that is a different value, and with it every query succeeds with zero rows. When a period comes back empty, `/api/analytics` asks once more without the site tag filter (host `snowshagal.com` only) and, if this host's page loads sit under another tag, returns `diagnostic.code = SITE_TAG_MISMATCH` with the first 8 characters of the configured value and the observed tag; `/admin/analytics/` shows it in the empty state. A secret change takes effect on the next deployment.
 
+### `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` (optional)
+
+The Telegram channel post of each Market Close session (`functions/_market-telegram.js`). Without both, nothing is sent and everything else is unchanged.
+
+- `TELEGRAM_BOT_TOKEN`: the bot's token from Telegram's @BotFather. A Secret; it is never logged, stored or returned by any endpoint.
+- `TELEGRAM_CHAT_ID`: the channel, as `@channelname` for a public channel or the numeric id (`-100…`) for a private one.
+
+Owner setup, in this order:
+
+1. In Telegram, create the bot with @BotFather and keep the token.
+2. Create the channel and add the bot as an administrator with the right to post messages.
+3. Cloudflare → Workers & Pages → `market-research-site` → Settings → Variables and Secrets, **Production only**: add both values, then redeploy. Leave Preview without them, so a Preview publish can never post.
+4. Open `/admin/market/blog/`: the 텔레그램 채널 card must say 아직 안 올림 (not 설정 안 됨). Press 텔레그램에 올리기 twice to send the latest session as the first test.
+
 Do not commit any secret or environment-variable value.
 
 ## Disclosure Monitor dependencies (Draft PR #79)
@@ -301,6 +315,17 @@ npx wrangler d1 execute market-research-comments --remote --file=migrations/comm
 ```
 
 Request handlers never create the table: without it the card address answers 302 to the standard Market Close image, a publish skips the card, and session pages keep the standard share image. The same holds where the Browser Rendering Secrets are missing (for example a Preview without them). Status: migration `0004` applied to Preview and Production on 2026-11-24; the first cards (2026-11-24, KO and EN) were drawn that day.
+
+Market Close posts (`functions/_market-telegram.js`) keep one row per published session and outside channel in `market_close_posts`, so a session is announced once however often its record is published again. They reuse `COMMENTS_DB`.
+
+Apply the checked-in idempotent migration to the isolated Preview database first, and only after approval to Production:
+
+```bash
+npx wrangler d1 execute market-research-comments-preview --remote --file=migrations/comments/0005_market_close_posts.sql
+npx wrangler d1 execute market-research-comments --remote --file=migrations/comments/0005_market_close_posts.sql
+```
+
+Request handlers never create the table: without it no post is sent and the admin card reports the failure. Status: migration `0005` is **not applied yet**; the channel Secrets are not set.
 
 Public `GET /api/announcements` returns only `publish_state = published`, `audience = all` rows whose UTC exposure window contains the current server time. Admin create/update/delete require an authenticated administrator session, exact Preview or Production admin Origin, and the session CSRF token. No new Secret or environment variable is required.
 

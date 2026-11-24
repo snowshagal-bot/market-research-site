@@ -73,6 +73,16 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   Not done: cards for past sessions (no backfill), the Daily takeaway on the card, Telegram posting
   (owner decision; needs a bot and a channel the owner creates).
 
+- **Telegram channel post (code only; not active)**: each Market Close session posted once to a
+  Telegram channel, the card with a short caption, right after today's final record is published.
+  Manual steps left, all the owner's (see `docs/DEPLOYMENT.md`, `TELEGRAM_BOT_TOKEN`):
+  1. create the bot (@BotFather) and the channel, and make the bot a channel administrator;
+  2. approve migration `0005_market_close_posts.sql` (Preview, then Production);
+  3. set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` in Cloudflare for Production only, and redeploy;
+  4. on `/admin/market/blog/`, press 텔레그램에 올리기 twice to send the first post as the test.
+  Not checked: a real post. No bot exists yet, so the Telegram side is covered only by tests with a
+  stand-in. Until steps 2 and 3 are done the site behaves exactly as before.
+
 - **Blog copy screen (`/admin/market/blog/`)**: the session as a title, a plain-text body and a tag
   line to paste into the Naver blog, with the card image to copy or save. Nothing is posted
   automatically and nothing is saved. No migration, no new Secret or setting.

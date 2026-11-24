@@ -256,8 +256,9 @@ test('publishing a final record starts both cards after the answer and never dep
   const source = await read('functions/api/market/publish.js');
   const hook = source.slice(source.indexOf('const isLatest ='), source.indexOf('return json({ ok: true'));
   assert.match(hook, /payload\.meta\.status === 'final' && typeof context\.waitUntil === 'function'/);
-  assert.match(hook, /context\.waitUntil\(ensureMarketCards\(env, payload\.meta\.market_date\)\)/);
-  assert.doesNotMatch(hook, /await ensureMarketCards/);
+  // The same drawing is handed to the Telegram announcement (tests/market-telegram.test.mjs).
+  assert.match(hook, /const cards = ensureMarketCards\(env, payload\.meta\.market_date\);\s+context\.waitUntil\(cards\);/);
+  assert.doesNotMatch(hook, /await (?:ensureMarketCards|cards|announceMarketClose)/);
 });
 
 test('migration 0004 is idempotent and matches the reference schema', async () => {
