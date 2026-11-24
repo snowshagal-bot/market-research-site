@@ -66,13 +66,12 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   Rollback: restore both pre-vkospi backups together (core and config; this also removes the
   Asian indices, installed later); the website can stay, since VKOSPI is optional.
 
-- **Market Close card (2026-11-24, Draft PR; owner chose "card image first", 1200×630)**: the
-  session's share image at `/market/YYYY-MM-DD/card.jpg`, drawn from the published record and used as
-  the session page's `og:image`. Rollout (owner approval): apply `migrations/comments/0004_market_close_cards.sql`
-  to Preview and then Production, merge, and check the first card (request the latest session's
-  card address once, or wait for the next publish). No new Secret: it reuses
-  `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_BROWSER_RENDERING_TOKEN`. Not done yet: cards for past
-  sessions (no backfill), Telegram posting and the Naver blog copy screen (owner decisions).
+- **Market Close card (live 2026-11-24, #258)**: the session's share image at
+  `/market/YYYY-MM-DD/card.jpg` (1200×630, owner's choice), drawn from the published record and used as
+  the session page's `og:image`. Migration `0004` is applied to Preview and Production. The
+  2026-11-24 cards (KO, EN) exist; the first automatic drawing at publish time is 2026-11-25.
+  Not done: cards for past sessions (no backfill), the Daily takeaway on the card, Telegram posting
+  and the Naver blog copy screen (owner decisions).
 
 - **Stock rankings (proposal 6; installed 2026-11-24, first values expected 2026-11-25)**: `stock_rankings`, an optional SOFT
   section of contract 1.2.0: per KRX market the top five gainers, losers and stocks by trading

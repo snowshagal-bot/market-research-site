@@ -28,7 +28,7 @@ import '../assets/locale.js';
 import { TABLE_NAME, ensureMarketTable } from './api/market/_shared.js';
 import { aggregateKrxGroups } from './api/market/_aggregate.js';
 import { loadTrend } from './api/market/trend.js';
-import { cardImageUrl, onMarketCardRequest, parseMarketCardPath, readMarketCardMeta } from './_market-card.js';
+import { cardImageUrl, ensureMarketCard, onMarketCardRequest, parseMarketCardPath, readMarketCardMeta } from './_market-card.js';
 import { glossaryTermHref } from './_glossary.js';
 import {
   domesticRateCodesIn,
@@ -1212,6 +1212,12 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
     const cardPromise = withinBudget(readMarketCardMeta(env, route.date, route.lang), Math.min(budgetMs, trendBudgetMs)).catch(() => null);
     const [data, shell, posts, domesticRates, trend, cardMeta] = await Promise.all([loadMarketDate(env, route.date, { budgetMs }), loadShell(env, url, route.lang), postsPromise, ratesPromise, trendPromise, cardPromise]);
     if (!data) return notFound(env, url);
+    // The latest session's card is drawn when its record is published. If that
+    // attempt failed, a visit to the page starts another (one per ten minutes,
+    // in the background); older sessions never do.
+    if (!cardMeta && !data.next && typeof context.waitUntil === 'function') {
+      context.waitUntil(ensureMarketCard(env, route.date, route.lang));
+    }
     return htmlResponse(marketDatePageHtml(shell, data.payload, route.lang, {
       prev: data.prev,
       next: data.next,
