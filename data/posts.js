@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-24-research-at00qm",
+    "type": "research",
+    "typeLabel": "Research",
+    "lang": "en",
+    "date": "2026-11-24",
+    "reportDate": "2026-11-24",
+    "registeredDate": "2026-11-24",
+    "registeredAt": "2026-11-24T12:29:37.254Z",
+    "legacyImport": false,
+    "title": "Where Does China's Surplus Output Go?",
+    "seoTitle": "Where Does China's Surplus Output Go?",
+    "subtitle": "",
+    "description": "China's passenger vehicle exports rose 74% to about 8 million in January–October. The EU, Japan and South Korea are imposing safeguards and anti-dumping measures on autos and steel. This report examines the opportunities and risks for South Korea's automotive, steel and chemical industries.",
+    "tags": [
+      "china",
+      "korea",
+      "autos",
+      "shipbuilding",
+      "oil"
+    ],
+    "readingMinutes": 13,
+    "href": "reports/en/20261124_Snowshagal_Research_No16_China_Overcapacity_EN.html",
+    "coverImage": "covers/2026-11-24-research-at00qm.webp",
+    "shareCardImage": "covers/share/2026-11-24-research-at00qm.jpg",
+    "coverThumbnail": "covers/2026-11-24-research-at00qm-450.webp"
+  },
+  {
     "id": "2026-11-24-research-1ylfgyu",
     "type": "research",
     "typeLabel": "비정기 리서치",
