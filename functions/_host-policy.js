@@ -27,6 +27,8 @@ const ADMIN_STATIC_PATHS = new Set([
   '/assets/admin-analytics.css',
   '/assets/admin-market.js',
   '/assets/admin-market.css',
+  '/assets/admin-market-blog.js',
+  '/assets/admin-market-blog.css',
   '/assets/admin-announcements.js',
   '/assets/admin-announcements.css',
   '/assets/market-close.js',
@@ -70,7 +72,8 @@ const ADMIN_API_PATHS = new Set([
   '/api/market/publish',
   '/api/market/date',
   '/api/market/dates',
-  '/api/market/range'
+  '/api/market/range',
+  '/api/market/share'
 ]);
 
 const HUMAN_ADMIN_MUTATION_PATHS = new Set([
@@ -84,6 +87,8 @@ const HUMAN_ADMIN_MUTATION_PATHS = new Set([
   '/api/disclosures/publish',
   '/api/disclosures/watchlist'
 ]);
+
+const MARKET_CARD_PATH = /^\/(?:en\/)?market\/\d{4}-\d{2}-\d{2}\/card\.jpg$/;
 
 const MUTATION_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
@@ -156,6 +161,8 @@ export function isAdminHostnameAllowedPath(pathname) {
   if (ADMIN_STATIC_PATHS.has(pathname)) return true;
   if (pathname.startsWith('/assets/brand/')) return true;
   if (/^\/covers\/.+\.(?:jpe?g|png|webp)$/i.test(pathname)) return true;
+  // The session's share card, for the blog copy screen (/admin/market/blog/).
+  if (MARKET_CARD_PATH.test(pathname)) return true;
   return ADMIN_API_PATHS.has(pathname);
 }
 
