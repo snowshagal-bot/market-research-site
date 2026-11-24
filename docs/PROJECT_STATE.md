@@ -211,6 +211,8 @@ The follow-up four-report homepage layout (2026-10-13) keeps the approved waterc
 
 The two locale homepages use the approved research-desk watercolor (new versioned filenames; old artwork retained), encoded as 1944×810 / 960×400 WebP. `assets/home-editorial.css` scopes the typography, four-report hero, border-led latest cards and mobile two-row market strip to HOME. The manual carousel and announcement slide remain available.
 
+First paint (2026-11-24): the brand slide is shown without a fade. `.hero-slide.active` alone carries no animation; `heroFade` plays only under `.hero-slides[data-hero-moved]`, which `site.js` sets on the first real move of the carousel. Before this, every home visit faded slide 1 in from opacity 0 and Chrome counted the hero image as LCP only after the 0.2 s fade (measured: LCP 200 ms after first paint on Production, 0–32 ms after the change). Cloudflare Web Analytics (7 days to 11-24): LCP p75 2.39 s, TTFB 55% / element render delay 44% of it; most poor LCPs were the Market mountain image, removed on 11-23.
+
 `assets/home-editorial.js` renders the first three category cards for the second hero slide from same-locale post metadata through the shared `editorialBlurb` policy; the existing Research card keeps its hydration contract. The server and browser call the same renderer, so it needs no extra fetch, stored summary or publishing input. No sample market commentary or sample values are shipped.
 
 Every valid Market Close instrument now shows its own basis date even when no Global Latest item overlays it. Overlay eligibility, stale/holiday states, takeaway date matching and the emergency fallback are unchanged. Global reference indicators are visually separated from the two KRX indices.

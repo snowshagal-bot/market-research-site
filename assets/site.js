@@ -1351,9 +1351,11 @@
     }
 
     const isEn = locale === 'en';
+    const slidesWrap = document.getElementById('hero-slides');
 
     // Track active slide elements
     let activeSlides = [slide1];
+    let activeIndex = 0;
 
     // Find the latest research for this locale
     const latestResearch = posts.find(p => p.type === 'research');
@@ -1457,7 +1459,11 @@
         updateCounterAndControls();
         return;
       }
-      activeIndex = Math.max(0, Math.min(activeSlides.length - 1, index));
+      const nextIndex = Math.max(0, Math.min(activeSlides.length - 1, index));
+      // From the first real move on, a newly shown slide fades in. The first
+      // paint never fades (see .hero-slides[data-hero-moved] in home-v2.css).
+      if (nextIndex !== activeIndex) slidesWrap?.setAttribute('data-hero-moved', '');
+      activeIndex = nextIndex;
       activeSlides.forEach((slide, idx) => {
         const isActive = idx === activeIndex;
         slide.classList.toggle('active', isActive);

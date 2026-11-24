@@ -121,6 +121,12 @@ html[data-theme="dark"] {
 
 .hero-slide.active {
   display: block;
+}
+
+/* The fade plays only once the carousel has moved. The first slide holds the
+   home's LCP image, and a fade from opacity 0 on the first paint pushed LCP
+   back by the length of the animation. */
+.hero-slides[data-hero-moved] .hero-slide.active {
   animation: heroFade .2s ease-out;
 }
 
@@ -130,7 +136,7 @@ html[data-theme="dark"] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-slide.active {
+  .hero-slides[data-hero-moved] .hero-slide.active {
     animation: none;
   }
 }
