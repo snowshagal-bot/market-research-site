@@ -412,4 +412,84 @@ test('analytics page keeps secrets server-side and renders Bots excluded versus 
   assert.match(elements['analytics-status'].textContent, /HTTP 502/);
   assert.match(elements['analytics-status'].textContent, /text\/plain; charset=UTF-8/);
   assert.match(elements['analytics-status'].textContent, /CF-Ray test-ray-SIN/);
+
+
+  // An empty period whose API answer names the site tag the host really uses.
+  context.fetch = async (url) => Response.json(String(url).includes('engagement-stats') ? {
+    ok: true, generatedAt: '2026-08-23T00:00:00.000Z', empty: true,
+    range: { days: 7, from: '2026-08-17', to: '2026-08-23', timezone: 'UTC' },
+    overall: { sessions: 0 }, pages: [], countries: []
+  } : {
+    ok: true, generatedAt: '2026-08-23T00:00:00.000Z', empty: true,
+    range: { days: 7, from: '2026-08-17', to: '2026-08-23', timezone: 'UTC' },
+    totals: { visits: 0, pageViews: 0 }, allTrafficTotals: { visits: 0, pageViews: 0 }, trend: [], topPages: [], referrers: [], countries: [], devices: [], browsers: [], operatingSystems: [],
+    source: { dataset: 'rumPageloadEventsAdaptiveGroups', excludeBots: 'Yes' },
+    diagnostic: { code: 'SITE_TAG_MISMATCH', configured: '0ae93ad1…', configuredLength: 32, observed: [{ siteTag: 'ced499a542c34c6d8f3f60d5f055519a', pageViews: 41 }] }
+  });
+  await context.window.__adminAnalyticsTest.loadAnalytics(7);
+  assert.equal(elements['analytics-empty'].hidden, false);
+  assert.match(elements['analytics-empty'].textContent, /site tag 설정값\(0ae93ad1…, 32자\)/);
+  assert.match(elements['analytics-empty'].textContent, /실제 site tag: ced499a542c34c6d8f3f60d5f055519a/);
+  assert.match(elements['analytics-status'].textContent, /설정값\(site tag\)이 실제 데이터와 다릅니다/);
+});
+
+test('an empty period under the configured site tag reports the site tag the host actually uses', { concurrency: false }, async () => {
+  const originalFetch = globalThis.fetch;
+  const env = await getAuthEnv();
+  const run = async (siteCheck) => {
+    __test.resetSchemaCache();
+    const calls = installCloudflareMock({ empty: true });
+    const mocked = globalThis.fetch;
+    globalThis.fetch = async (url, options) => {
+      const payload = JSON.parse(options.body);
+      if (payload.query.includes('AdminAnalyticsSiteCheck')) {
+        calls.push(payload);
+        if (siteCheck instanceof Error) return Response.json({ errors: [{ message: siteCheck.message }] });
+        return Response.json({ data: { viewer: { accounts: [{ sites: siteCheck }] } } });
+      }
+      return mocked(url, options);
+    };
+    const response = await onRequestGet({ request: request(), env });
+    return { status: response.status, data: await response.json(), calls };
+  };
+  try {
+    // The beacon token pasted as the site tag: this host's loads sit under another tag.
+    const wrong = await run([{ count: 41, dimensions: { siteTag: 'ced499a542c34c6d8f3f60d5f055519a' } }]);
+    assert.equal(wrong.status, 200);
+    assert.equal(wrong.data.empty, true);
+    assert.deepEqual(wrong.data.diagnostic, {
+      code: 'SITE_TAG_MISMATCH',
+      configured: 'site-tag…',
+      configuredLength: 'site-tag-secret'.length,
+      observed: [{ siteTag: 'ced499a542c34c6d8f3f60d5f055519a', pageViews: 41 }]
+    });
+    const check = wrong.calls.find((call) => call.query.includes('AdminAnalyticsSiteCheck')).query;
+    assert.match(check, /requestHost_in: \["snowshagal\.com"\]/);
+    assert.doesNotMatch(check, /siteTag_in/, 'the check drops the configured site tag filter');
+    assert.match(check, /dimensions \{ siteTag \}/);
+
+    // The configured tag is among them: a genuinely quiet period, no diagnostic.
+    const quiet = await run([{ count: 3, dimensions: { siteTag: 'site-tag-secret' } }]);
+    assert.equal(quiet.data.diagnostic, undefined);
+    // Nothing for the host at all: no diagnostic either.
+    assert.equal((await run([])).data.diagnostic, undefined);
+    // A failed check leaves the empty state as it was.
+    const failed = await run(new Error('internal account detail'));
+    assert.equal(failed.status, 200);
+    assert.equal(failed.data.empty, true);
+    assert.equal(failed.data.diagnostic, undefined);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('a period with data never runs the site tag check', { concurrency: false }, async () => {
+  const originalFetch = globalThis.fetch;
+  __test.resetSchemaCache();
+  const calls = installCloudflareMock();
+  const env = await getAuthEnv();
+  try {
+    const data = await (await onRequestGet({ request: request(), env })).json();
+    assert.equal(data.empty, false);
+    assert.equal(data.diagnostic, undefined);
+    assert.equal(calls.some((call) => call.query.includes('AdminAnalyticsSiteCheck')), false);
+  } finally { globalThis.fetch = originalFetch; }
 });
