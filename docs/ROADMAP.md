@@ -22,7 +22,9 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
     KRX closure below; `e5a79ca6` kept as `core.pre-krx0717-20261122.exe`), and that afternoon by
     `5467ba4a` (publisher main dd028db, which adds VKOSPI below; `25d00e83` kept as
     `core.pre-vkospi-20261122.exe`), and that night by `21b5b4c8` (publisher main 8df33e4,
-    which adds the Asian indices below; `5467ba4a` kept as `core.pre-asia-20261122.exe`);
+    which adds the Asian indices below; `5467ba4a` kept as `core.pre-asia-20261122.exe`), and on
+    2026-11-24 by `7c429e77` (publisher main 3aec963, which adds the stock rankings below and the
+    late futures slots; `21b5b4c8` kept as `core.pre-rankings-20261124.exe`);
   - task `시장지표-국내금리` registered (weekdays 16:20–18:20 KST, every 15 minutes);
   - backfill 2026-01-02..2026-11-20 published: 217 days, KOFIA had no rows for 2026-07-17.
   Remaining:
@@ -64,7 +66,7 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   Rollback: restore both pre-vkospi backups together (core and config; this also removes the
   Asian indices, installed later); the website can stay, since VKOSPI is optional.
 
-- **Stock rankings (proposal 6, 2026-11-23, two Draft PRs)**: `stock_rankings`, an optional SOFT
+- **Stock rankings (proposal 6; installed 2026-11-24, first values expected 2026-11-25)**: `stock_rankings`, an optional SOFT
   section of contract 1.2.0: per KRX market the top five gainers, losers and stocks by trading
   value, and the count of stocks at a new 52-week high/low (stocks only, no ETF/ETN). Source:
   Naver's ranking lists saved by the regular snapshot task in 15:35~15:39 KST (from 15:40 NXT
@@ -74,8 +76,13 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   volume, else `unavailable`. Pages: one full-width card in the Korean market section on TODAY and session
   pages (after the market-cap card), the 52-week counts labelled as Naver's intraday count (owner).
   Forward only.
-  Rollout order (owner approval): website PR first (the receiver rejects unknown keys), then the
-  publisher PR; rebuild the core and install it (markets.json is unchanged).
+  Rolled out 2026-11-24 (owner approval): website #243 (c264510), then publisher #20 (3aec963);
+  core `7c429e77` built from it (657 tests) and installed 18:25 ICT. `dist\config\markets.json`
+  (`591e1db9`) and Task Scheduler are unchanged: the existing 15:36 and 15:38 KST regular snapshot
+  runs are the two in-window captures. Rollback: restore `core.pre-rankings-20261124.exe`
+  (`21b5b4c8`); the site shows no card for a record without the section's status.
+  Still to check: the first live record on 2026-11-25 (two captures agree, bar check passes,
+  card on TODAY and `/market/2026-11-25/`).
 
 - **Asian indices (installed 2026-11-22; first values 2026-11-23)**: 닛케이225 (`^N225`), 상해종합 (`000001.SS`) and 대만 가권
   (`^TWII`) as optional `indices` codes of contract 1.2.0 (NIKKEI225, SHANGHAI, TAIEX; kind `asia`;
