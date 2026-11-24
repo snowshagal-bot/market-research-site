@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-24-note-1fmvyd8",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-24",
+    "reportDate": "2026-11-24",
+    "registeredDate": "2026-11-24",
+    "registeredAt": "2026-11-24T10:50:34.021Z",
+    "legacyImport": false,
+    "title": "WHY BANK MARGINS SHRANK DESPITE HIKES Funding rates rose 10 months early",
+    "seoTitle": "Why Korean Bank Margins Fell Despite Rate Hikes",
+    "subtitle": "",
+    "description": "The Bank of Korea raised rates twice in July and August, yet Q3 bank net interest margins fell 3 bp. We compare the 2017 and 2021 cycles with 2026, when one-year bank bond yields began rising ten months before the first hike and gained 111 bp, and examine the 2027 NIM outlook.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "banks-financials",
+      "rates"
+    ],
+    "readingMinutes": 18,
+    "href": "reports/en/20261124_Investment_Insight_Bank_Funding_Squeeze_EN.html",
+    "translationGroup": "2026-11-24-note-188c1gp",
+    "coverImage": "covers/2026-11-24-note-1fmvyd8.webp",
+    "shareCardImage": "covers/share/2026-11-24-note-1fmvyd8.jpg",
+    "coverThumbnail": "covers/2026-11-24-note-1fmvyd8-450.webp"
+  },
+  {
     "id": "2026-11-24-note-188c1gp",
     "type": "note",
     "typeLabel": "투자 인사이트",
