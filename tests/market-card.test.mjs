@@ -270,3 +270,33 @@ test('migration 0004 is idempotent and matches the reference schema', async () =
   const body = sql => sql.match(/CREATE TABLE IF NOT EXISTS market_close_cards \(([\s\S]*?)\);/)[1].replace(/\s+/g, ' ').trim();
   assert.equal(body(reference), body(MIGRATION));
 });
+
+test('the latest session page starts a missing card; an older page or a page with a card does not', async () => {
+  const { db, env } = await database();
+  env.ASSETS = { fetch: async request => new URL(request.url).pathname.endsWith('/market/')
+    ? new Response(SHELL, { headers: { 'content-type': 'text/html' } })
+    : new Response('[]', { headers: { 'content-type': 'application/json' } }) };
+  const originalFetch = globalThis.fetch;
+  const background = renderer();
+  globalThis.fetch = background.fetchImpl;
+  try {
+    const first = cardContext(env, `/market/${DATE}/`);
+    const page = await onMarketPageRequest(first.context);
+    assert.equal(page.status, 200);
+    assert.match(await page.text(), /market-close-share\.jpg/, 'this response still carries the standard image');
+    assert.equal(first.pending.length, 1);
+    assert.deepEqual(await Promise.all(first.pending), [{ status: 'ready', bytes: JPEG.byteLength }]);
+
+    // With the card stored, the page shares it and starts nothing.
+    const second = cardContext(env, `/market/${DATE}/`);
+    assert.ok((await (await onMarketPageRequest(second.context)).text()).includes(`og:image" content="https://snowshagal.com/market/${DATE}/card.jpg?v=`));
+    assert.equal(second.pending.length, 0);
+
+    // The English page has no card yet, but a later session exists: nothing starts.
+    await db.prepare(`INSERT INTO ${TABLE_NAME} (market_date, schema_version, generated_at, status, payload_json, published_at, auth_source, takeaway_ko, takeaway_en) SELECT '2026-12-30', schema_version, generated_at, status, payload_json, published_at, auth_source, '', '' FROM ${TABLE_NAME} WHERE market_date = ?`).bind(DATE).run();
+    const older = cardContext(env, `/en/market/${DATE}/`);
+    assert.equal((await onMarketPageRequest(older.context)).status, 200);
+    assert.equal(older.pending.length, 0);
+    assert.equal(background.calls.length, 1);
+  } finally { globalThis.fetch = originalFetch; }
+});

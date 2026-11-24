@@ -300,7 +300,7 @@ Only after approval, apply the same file to Production:
 npx wrangler d1 execute market-research-comments --remote --file=migrations/comments/0004_market_close_cards.sql
 ```
 
-Request handlers never create the table: without it the card address answers 302 to the standard Market Close image, a publish skips the card, and session pages keep the standard share image. The same holds where the Browser Rendering Secrets are missing (for example a Preview without them). Status: migration `0004` not applied yet.
+Request handlers never create the table: without it the card address answers 302 to the standard Market Close image, a publish skips the card, and session pages keep the standard share image. The same holds where the Browser Rendering Secrets are missing (for example a Preview without them). Status: migration `0004` applied to Preview and Production on 2026-11-24; the first cards (2026-11-24, KO and EN) were drawn that day.
 
 Public `GET /api/announcements` returns only `publish_state = published`, `audience = all` rows whose UTC exposure window contains the current server time. Admin create/update/delete require an authenticated administrator session, exact Preview or Production admin Origin, and the session CSRF token. No new Secret or environment variable is required.
 
