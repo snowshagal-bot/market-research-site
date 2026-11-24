@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-24-daily-14evr2",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-24",
+    "reportDate": "2026-11-24",
+    "registeredDate": "2026-11-24",
+    "registeredAt": "2026-11-24T07:54:41.534Z",
+    "legacyImport": false,
+    "title": "젠슨 황 복귀에 미국 반도체 급반등, 코스피 6% 올라 5,000선 회복",
+    "subtitle": "",
+    "description": "젠슨 황 엔비디아 CEO 복귀로 미국 반도체 14% 반등, 코스피 매수 사이드카 · 11월 24일 코스피 5,006.03(+6.32%), 외국인 8거래일 만에 7,255억 순매수 · 상승 이유와 다음 거래일 확인할 것",
+    "takeaway": "젠슨 황 복귀로 미국 반도체가 하루 만에 14% 반등, 코스피는 매수 사이드카 속 3거래일 만에 5,000선 회복",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-11-24_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-24-daily-14evr2.webp",
+    "shareCardImage": "covers/share/2026-11-24-daily-14evr2.jpg",
+    "coverThumbnail": "covers/2026-11-24-daily-14evr2-450.webp"
+  },
+  {
     "id": "2026-11-23-note-o36yak",
     "type": "note",
     "typeLabel": "Investment Insights",
