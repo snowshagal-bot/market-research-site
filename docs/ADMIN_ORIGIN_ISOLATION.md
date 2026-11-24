@@ -41,6 +41,7 @@ Allowed:
 - `/assets/brand/*` images used by the admin/Market UI;
 - `data/posts.js`, `data/posts.json`, and `data/tags.js`;
 - image files under `/covers/` needed by the existing-post editor;
+- the session share card `/market/YYYY-MM-DD/card.jpg` (and `/en/…`) for the blog copy screen, and no other path under `/market/`;
 - the Market Close JSON Schema;
 - human-admin APIs and the public Market/disclosure reads actually used by admin pages;
 - favicon/manifest files requested by browsers.
@@ -78,6 +79,7 @@ origin.
 | `/api/market/date` | GET | `PUBLIC` | Public read; also admitted for admin Market renderer |
 | `/api/market/dates` | GET | `PUBLIC` | Public read; also admitted for admin Market renderer |
 | `/api/market/range` | GET | `PUBLIC` | Public read; also admitted for admin Market renderer |
+| `/api/market/share` | GET | `PUBLIC` | Read-only text of a published session for the blog copy screen (`/admin/market/blog/`); made only of the public record |
 | `/api/disclosures/feed` | GET | `PUBLIC` | Public read; also admitted for admin Market renderer |
 
 `HYBRID` endpoints make their policy decision after authenticating the credential source.

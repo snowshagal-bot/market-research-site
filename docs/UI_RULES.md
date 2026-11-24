@@ -102,6 +102,15 @@ The homepage opens with the Snowshagal brand rather than a rotating post or a ge
 - generated covers must immediately reuse the PC 1280, mobile 430, and mobile 360 crop previews and the same publish payload as manual JPG/PNG/WebP covers;
 - automatic generation remains optional, failures must not block publishing, and manual cover upload must remain available.
 
+## Admin blog copy screen
+
+- `/admin/market/blog/` uses the same Admin header, pill navigation and bordered cards as the other Admin pages; the navigation has seven items and must stay on one row on desktop and in the two-column grid on phones;
+- desktop: text (title, body, tags) on the left, the card image and the paste order on the right; one column below 900px;
+- every copy control is a button at least 40px tall with its own result ("복사했습니다" / "복사 실패") shown on the button, and a failure also says what to do instead;
+- fields are editable and 16px on phones so focusing one does not zoom the page;
+- the body stays plain text: no rich formatting that a blog editor would rewrite;
+- no confirm dialogs: choosing another date simply replaces the text.
+
 ## Admin announcements
 
 - `/admin/market/announcements/` follows the existing dense, border-led Admin language rather than introducing a separate dashboard design;

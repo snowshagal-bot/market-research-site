@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko" data-site-lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e6">
+<meta name="robots" content="noindex,nofollow">
+<title>블로그용 글 · Snowshagal Admin</title>
+<link rel="stylesheet" href="/assets/site.css?v=0c38d298fc">
+<link rel="stylesheet" href="/assets/ui-polish.css?v=6ec39e1026">
+<link rel="stylesheet" href="/assets/admin-market-blog.css?v=ab6a936e64">
+<script>try{const t=localStorage.getItem('site-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}</script>
+</head>
+<body>
+<header class="site-header"><div class="site-wrap"><div class="header-row"><a class="brand" href="https://snowshagal.com/"><i></i>SNOWSHAGAL</a><div class="header-actions"><button class="icon-btn" type="button" data-theme-toggle aria-label="다크 모드로 전환">◐</button></div></div></div></header>
+<main class="blog-admin"><div class="site-wrap">
+  <div class="blog-head"><div><a class="toplink" href="../../">← 관리자</a><h1>블로그용 글</h1><p>게시된 장마감 기록으로 블로그에 붙여 넣을 제목·본문·태그와 카드 이미지를 준비합니다.<br>숫자는 모두 15:30 정규장 마감 기준이며, 붙여 넣기 전에 여기서 고칠 수 있습니다.</p></div><div class="blog-note">읽기 전용 · 저장되는 것 없음</div></div>
+  <nav class="admin-nav" aria-label="관리자 메뉴"><a href="../../">새 리포트 등록</a><a href="../../manage/">게시물 관리</a><a href="../../analytics/">방문 통계</a><a href="../">Market Close</a><a href="./" aria-current="page">블로그용 글</a><a href="../announcements/">공지 관리</a><a href="../../disclosures/">공시 모니터</a></nav>
+
+  <div class="blog-toolbar">
+    <label for="blog-date">거래일</label>
+    <select id="blog-date" disabled><option>불러오는 중</option></select>
+    <button class="quiet-button" id="blog-reload" type="button">다시 불러오기</button>
+    <a id="blog-page-link" href="https://snowshagal.com/market/" target="_blank" rel="noopener">이날 마켓 페이지 ↗</a>
+    <p class="blog-status" id="blog-status" role="status" aria-live="polite"></p>
+  </div>
+
+  <div class="blog-grid">
+    <div class="blog-text">
+      <section class="blog-card" aria-labelledby="blog-title-heading">
+        <div class="blog-card-head"><h2 id="blog-title-heading">1. 제목</h2><button class="copy-button" type="button" data-copy="blog-title">제목 복사</button></div>
+        <input id="blog-title" type="text" autocomplete="off" spellcheck="false" aria-labelledby="blog-title-heading">
+      </section>
+      <section class="blog-card" aria-labelledby="blog-body-heading">
+        <div class="blog-card-head"><h2 id="blog-body-heading">2. 본문</h2><span class="blog-count" id="blog-body-count"></span><button class="copy-button" type="button" data-copy="blog-body">본문 복사</button></div>
+        <textarea id="blog-body" rows="24" spellcheck="false" aria-labelledby="blog-body-heading"></textarea>
+      </section>
+      <section class="blog-card" aria-labelledby="blog-tags-heading">
+        <div class="blog-card-head"><h2 id="blog-tags-heading">3. 태그</h2><button class="copy-button" type="button" data-copy="blog-tags">태그 복사</button></div>
+        <input id="blog-tags" type="text" autocomplete="off" spellcheck="false" aria-labelledby="blog-tags-heading">
+      </section>
+    </div>
+
+    <div class="blog-side">
+      <section class="blog-card" aria-labelledby="blog-image-heading">
+        <div class="blog-card-head"><h2 id="blog-image-heading">4. 카드 이미지</h2></div>
+        <div class="blog-image-frame" id="blog-image-frame"><img id="blog-image" alt="" hidden><p id="blog-image-empty">카드를 확인하는 중입니다.</p></div>
+        <div class="blog-image-actions">
+          <button class="copy-button" id="blog-image-copy" type="button" disabled>이미지 복사</button>
+          <a class="quiet-button" id="blog-image-save" aria-disabled="true">파일로 저장</a>
+          <button class="quiet-button" id="blog-image-retry" type="button" hidden>카드 다시 확인</button>
+        </div>
+        <p class="blog-hint" id="blog-image-status" role="status" aria-live="polite"></p>
+      </section>
+      <section class="blog-card blog-steps" aria-labelledby="blog-steps-heading">
+        <h2 id="blog-steps-heading">붙여 넣는 순서</h2>
+        <ol>
+          <li>블로그 글쓰기 화면을 엽니다.</li>
+          <li><b>제목 복사</b> → 제목 칸에 붙여 넣기.</li>
+          <li><b>이미지 복사</b> → 본문 맨 위에 붙여 넣기. 붙지 않으면 <b>파일로 저장</b>한 뒤 사진으로 올립니다.</li>
+          <li><b>본문 복사</b> → 이미지 아래에 붙여 넣기.</li>
+          <li><b>태그 복사</b> → 태그 칸이나 본문 끝에 붙여 넣기.</li>
+        </ol>
+        <p class="blog-hint">본문에 있는 주소는 블로그에서 링크로 바뀝니다. 오늘의 한 줄과 데일리 리포트 주소는 그날 데일리가 게시된 뒤에 들어갑니다.</p>
+      </section>
+    </div>
+  </div>
+</div></main>
+<script src="/data/posts.js"></script>
+<script src="/assets/locale.js?v=b9ee9a3e99"></script>
+<script src="/assets/site.js?v=765e591453"></script>
+<script src="/assets/admin-market-blog.js?v=9a9a672f41"></script>
+</body>
+</html>

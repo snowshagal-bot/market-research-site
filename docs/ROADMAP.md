@@ -71,7 +71,15 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   the session page's `og:image`. Migration `0004` is applied to Preview and Production. The
   2026-11-24 cards (KO, EN) exist; the first automatic drawing at publish time is 2026-11-25.
   Not done: cards for past sessions (no backfill), the Daily takeaway on the card, Telegram posting
-  and the Naver blog copy screen (owner decisions).
+  (owner decision; needs a bot and a channel the owner creates).
+
+- **Blog copy screen (`/admin/market/blog/`)**: the session as a title, a plain-text body and a tag
+  line to paste into the Naver blog, with the card image to copy or save. Nothing is posted
+  automatically and nothing is saved. No migration, no new Secret or setting.
+  After merge, owner check on `admin.snowshagal.com` (needs the admin login): the page loads the latest
+  session, the card shows, and one real paste into the blog editor keeps the line breaks and takes
+  the image. The paste into Naver's editor could not be tested from here (Naver is blocked in every
+  tool), so if the image paste fails there, use **파일로 저장** and upload it as a photo.
 
 - **Stock rankings (proposal 6; installed 2026-11-24, first values expected 2026-11-25)**: `stock_rankings`, an optional SOFT
   section of contract 1.2.0: per KRX market the top five gainers, losers and stocks by trading
