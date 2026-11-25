@@ -50,8 +50,8 @@ selling, top 10, KRX sectors and themes) and the four quote boards; the KOFIA
 yields are rows of the 금리 board after US 10Y. The archive, sectors and
 indicator pages use the same head, and their cards, tables and the 1W / 1M
 bodies take the `mk-` card look (`.market-date-page` / `.market-range-dashboard`
-rules at the end of the CSS). The mountain hero is gone from every page, and the
-`/market/` shells no longer preload its images (the files stay in `assets/`).
+rules at the end of the CSS). The mountain hero is gone from every page; its CSS
+rules and the three image files were removed on 2026-11-25.
 
 Redesign follow-ups (2026-11-23): TODAY (`assets/market-close.js`) and the session
 page (`functions/_market-date-page.js`) draw the same record with two renderers.
