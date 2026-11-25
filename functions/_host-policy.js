@@ -33,8 +33,6 @@ const ADMIN_STATIC_PATHS = new Set([
   '/assets/admin-announcements.css',
   '/assets/market-close.js',
   '/assets/market-close.css',
-  '/assets/market-close-mountain.webp',
-  '/assets/market-close-mountain-mobile.webp',
   '/assets/locale.js',
   '/assets/site.js',
   '/assets/cover-generator.js',
