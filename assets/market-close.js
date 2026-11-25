@@ -207,7 +207,9 @@
     'Npay 지수 실시간': 'Naver Pay index quotes',
     '네이버 금융 지수 일봉': 'Naver Finance daily index',
     '네이버 금융': 'Naver Finance',
-    '네이버 금융 하나은행 15:30 회차별 매매기준율 + Yahoo 현재가': 'Hana Bank 15:30 reference rate (Naver Finance) + Yahoo Finance latest'
+    '네이버 금융 하나은행 15:30 회차별 매매기준율 + Yahoo 현재가': 'Hana Bank 15:30 reference rate (Naver Finance) + Yahoo Finance latest',
+    // The Shanghai Composite close when Yahoo has not confirmed it by the 16:05 KST record.
+    '텐센트 증권 실시간 시세': 'Tencent Securities real-time quotes'
   };
   const HANGUL = /[\u3131-\u318e\uac00-\ud7a3]/;
   const sourceLine = labels => {
