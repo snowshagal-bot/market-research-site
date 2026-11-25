@@ -323,7 +323,10 @@ Request handlers never create the table. Without it:
 
 The collector (publisher repository) publishes through its own scheduled task, `시장지표-증시자금`. Its run time follows KOFIA's release time.
 
-Status: not applied yet (2026-11-25).
+Status (2026-11-25):
+- Migration `0006` is applied to Preview and Production.
+- Production holds the 2026 backfill: 219 days, 2026-01-02..2026-11-24.
+- The daily task is not registered yet.
 
 Market Close cards (`functions/_market-card.js`) keep one 1200×630 JPEG per published session and language in `market_close_cards` and serve it at `/market/YYYY-MM-DD/card.jpg` (the session page's share image). They reuse `COMMENTS_DB`, `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_BROWSER_RENDERING_TOKEN`; no new Secret or binding is required. Each card is one Browser Rendering screenshot: about two per trading day, two more when the Daily's takeaway arrives after the publish, and up to 20 attempts a day (KST) in all while older sessions are filled on page visits (`CARD_FILL_PER_DAY` in `functions/_market-card.js`; lower it if the cover generator starts hitting Browser Rendering limits). There is no separate backfill job.
 

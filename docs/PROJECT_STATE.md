@@ -231,7 +231,13 @@ Global Latest is a second, separate market data channel: the current observation
 
 **Domestic Rates (KOFIA yields). Status: merged (#234, 99eb126) and live in Production since 2026-11-22.** Migration `0003` is applied to Preview and Production. Publisher #16 is merged; the installed core (`7c429e77` since 2026-11-24, publisher main 3aec963 with the 2026-07-17 KRX closure, VKOSPI, the Asian indices and the stock rankings) publishes through the task `시장지표-국내금리` (weekdays 16:20–18:20 KST, every 15 minutes). The backfill 2026-01-02..2026-11-20 stored 217 days. The KOFIA final quote yields (금융투자협회 최종호가수익률) of each KRX trading day — KTB 3Y and 10Y, corporate AA- 3Y, CD 91-day — are a third market data channel. KOFIA's afternoon basis is 16:00 KST, after the Market Close record is final (16:05 KST) and frozen, so they cannot be part of it. `functions/api/market/rates/` holds the only instrument list, the 1.0.0 contract validation (`contracts/domestic_rates/`: KRX trading day, not after today, read after `market_date` + `basis_time` KST, `change_bp` = (value − previous) × 100) and `POST /api/market/rates/publish` / `GET /api/market/rates/date` over `market_domestic_rates` (one row per date, migration `0003`, no runtime DDL). A day is created, unchanged for the same figures, or updated only by figures read later (a KOFIA correction). The pages join it by date: `/market/` TODAY requests `?date=latest` beside the Market Close and HISTORY requests that date (each at most 2.5 s, failure leaves it out), and shows the record's own day as section 4 "국내 금리" (later sections move down one); session pages render it as their own numbered section; four history pages (see below). Without the table or the day, every page is as before.
 
-**Market Funds (KOFIA FreeSIS). Status: website PR open (2026-11-25), not merged; migration `0006`, the collector (publisher PR) and the task are not applied yet.**
+**Market Funds (KOFIA FreeSIS). Status: live in Production since 2026-11-25.**
+- Website #265 merged (6bf82ab); publisher #22 merged (a0811b4).
+- Migration `0006` applied to Preview and Production.
+- Core `43bf8144` installed. The previous `7c429e77` is kept as `core.pre-market-funds-20261125.exe`.
+- The 2026 backfill stored 219 days (2026-01-02..2026-11-24).
+- The daily task `시장지표-증시자금` is not registered yet. Its time waits for KOFIA's measured release hour.
+- `previous_date` is KOFIA's previous row, checked only as a weekday 1–14 days earlier: KOFIA also posts the KRX year-end closure (12-31), and 2026-01-02's previous row is 2025-12-31.
 - **What it is:** a fourth market data channel, KOFIA's stock market funds of each KRX trading day:
   - investor deposits (투자자예탁금);
   - margin loans (신용거래융자) in total and by KOSPI and KOSDAQ;

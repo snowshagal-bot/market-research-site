@@ -10,18 +10,20 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
-- **Market Funds: KOFIA deposits, margin loans, forced selling (website PR open 2026-11-25, not merged)**:
+- **Market Funds: KOFIA deposits, margin loans, forced selling (live in Production since 2026-11-25)**:
   investor deposits, margin loans (total, KOSPI, KOSDAQ), unpaid margin and forced selling of each
   KRX trading day from KOFIA FreeSIS, published by KOFIA a business day later. They are a dataset
   of their own (`contracts/market_funds/`, table `market_funds`), joined by date on `/market/`, the
-  session pages and `/market/deposits/`, `margin-loans`, `forced-selling`. Remaining, in order (each
-  needs the owner's approval):
-  1. Apply migration `0006` to Preview, then Production (`docs/DEPLOYMENT.md`).
-  2. Merge the website PR, then the publisher PR (collector `--sync-market-funds`).
-  3. Rebuild and install the core.
-  4. Run the 2026 backfill (`--market-funds-publish` with the backfill range).
-  5. Register the task `시장지표-증시자금` at the time KOFIA's release was measured, not before.
-  6. Check `/market/deposits/` and the session card in Production. Submit the six new URLs in GSC and Naver.
+  session pages and `/market/deposits/`, `margin-loans`, `forced-selling`.
+  Done 2026-11-25:
+  - migration `0006` (Preview, Production);
+  - website #265 merged (6bf82ab) and publisher #22 merged (a0811b4);
+  - core `43bf8144` installed, backup `core.pre-market-funds-20261125.exe` (`7c429e77`);
+  - backfill: 219 days, 2026-01-02..2026-11-24;
+  - Production checks: TODAY card "2026.11.24 기준", the session card, six history pages 200, six sitemap URLs.
+  Remaining:
+  - Register `시장지표-증시자금` (`register_market_funds_task.ps1 -StartAt …`) at KOFIA's measured release time. The owner approves the time.
+  - The owner submits the six new URLs in GSC and Naver.
 
 - **Domestic Rates: KOFIA yields (live in Production since 2026-11-22)**: KTB 3Y and 10Y,
   corporate AA- 3Y and CD 91-day, the KOFIA final quote yields of the 16:00 KST basis, as a
