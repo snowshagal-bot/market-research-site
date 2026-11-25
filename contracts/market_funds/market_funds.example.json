@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-11-25T08:31:05+09:00",
+  "days": [
+    {
+      "market_date": "2026-11-24",
+      "previous_date": "2026-11-23",
+      "retrieved_at": "2026-11-25T08:31:04+09:00",
+      "source": "금융투자협회 증시자금 추이",
+      "items": [
+        { "code": "DEPOSITS", "value": 82049700, "previous_value": 85336163 },
+        { "code": "CREDIT", "value": 25877746, "previous_value": 25942655 },
+        { "code": "CREDIT_KOSPI", "value": 20020227, "previous_value": 20055285 },
+        { "code": "CREDIT_KOSDAQ", "value": 5857519, "previous_value": 5887370 },
+        { "code": "UNPAID", "value": 966031, "previous_value": 876053 },
+        { "code": "FORCED_SALE", "value": 13675, "previous_value": 11147 },
+        { "code": "FORCED_SALE_RATIO", "value": 1.6, "previous_value": 1.2 }
+      ]
+    }
+  ]
+}

@@ -455,8 +455,8 @@ test('retry click triggers init/load exactly once without duplicate calls', asyn
   const script = await read('assets/market-close.js');
   let fetchCount = 0;
   const mockFetch = async (url) => {
-    // The session's KOFIA yields and the trend lines are optional reads beside each load, not part of the init sequence.
-    if (!url.includes('/api/market/rates/') && !url.includes('/api/market/trend')) fetchCount++;
+    // The session's KOFIA yields and market funds and the trend lines are optional reads beside each load, not part of the init sequence.
+    if (!url.includes('/api/market/rates/') && !url.includes('/api/market/funds/') && !url.includes('/api/market/trend')) fetchCount++;
     if (url.includes('/api/market/dates')) {
       return { ok: true, json: async () => ({ dates: ['2026-08-28'], latest: '2026-08-28', earliest: '2026-08-28' }) };
     }
@@ -533,8 +533,8 @@ test('repeated retries do not accumulate popstate listeners and popstate trigger
   const script = await read('assets/market-close.js');
   let fetchCount = 0;
   const mockFetch = async (url) => {
-    // The session's KOFIA yields and the trend lines are optional reads beside each load, not part of the init sequence.
-    if (!url.includes('/api/market/rates/') && !url.includes('/api/market/trend')) fetchCount++;
+    // The session's KOFIA yields and market funds and the trend lines are optional reads beside each load, not part of the init sequence.
+    if (!url.includes('/api/market/rates/') && !url.includes('/api/market/funds/') && !url.includes('/api/market/trend')) fetchCount++;
     if (url.includes('/api/market/dates')) {
       return { ok: true, json: async () => ({ dates: ['2026-08-28'], latest: '2026-08-28', earliest: '2026-08-28' }) };
     }

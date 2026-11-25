@@ -29,7 +29,7 @@ const SHELLS = { ko: await read('market/index.html'), en: await read('en/market/
 const clone = value => JSON.parse(JSON.stringify(value));
 const verdict = payload => validateMarketPayload(payload, schema);
 const VKOSPI = MARKET_INDICATORS.find(item => item.code === 'VKOSPI');
-const OPTIONAL = MARKET_INDICATORS.filter(item => item.optional && !item.domestic);
+const OPTIONAL = MARKET_INDICATORS.filter(item => item.optional && !item.domestic && !item.funds);
 const closesFor = codes => JSON.stringify(OPTIONAL.map(item => (codes.includes(item.code) ? 1 : null)));
 
 /** The 1.1.0 example as a complete 1.2.0 record, its source dates aligned to its market date. */
@@ -77,7 +77,7 @@ const EMPTY_VALUES = { close: null, current: null, change: null, change_pct: nul
 const unavailable = item => ({ ...item, ...EMPTY_VALUES, data_state: 'unavailable', is_cached: false });
 
 test('VKOSPI is an optional indicator beside VIX, dated the KRX session, with /market/vkospi/', () => {
-  assert.deepEqual({ ...VKOSPI }, { optional: true, domestic: false, code: 'VKOSPI', group: 'rates_fx_volatility', kind: 'krxvol', slug: 'vkospi' });
+  assert.deepEqual({ ...VKOSPI }, { optional: true, domestic: false, funds: false, code: 'VKOSPI', group: 'rates_fx_volatility', kind: 'krxvol', slug: 'vkospi' });
   const codes = MARKET_INDICATORS.map(item => item.code);
   assert.equal(codes.indexOf('VKOSPI'), codes.indexOf('VIX') + 1);
   assert.equal(parseMarketPagePath('/market/vkospi/').indicator, VKOSPI);

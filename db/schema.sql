@@ -269,3 +269,16 @@ CREATE TABLE IF NOT EXISTS market_close_posts (
   posted_at TEXT,
   PRIMARY KEY (market_date, channel)
 );
+
+-- Market Funds (migrations/comments/0006_market_funds.sql): one row per KRX
+-- trading day, the KOFIA FreeSIS deposits, margin loans, unpaid margin and
+-- forced selling, published a business day later, separate from Market Close
+-- and joined to it by market_date on the pages.
+CREATE TABLE IF NOT EXISTS market_funds (
+  market_date TEXT PRIMARY KEY,
+  schema_version TEXT NOT NULL,
+  retrieved_at TEXT NOT NULL,
+  payload_json TEXT NOT NULL,
+  published_at TEXT NOT NULL,
+  auth_source TEXT NOT NULL
+);

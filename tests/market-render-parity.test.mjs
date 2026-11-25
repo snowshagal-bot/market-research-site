@@ -49,6 +49,19 @@ const RATES = {
     { code: 'CD91', value: 3.39, previous_value: 3.38, change_bp: 1 }
   ]
 };
+// That day's KOFIA market funds (published a business day later in real life).
+const FUNDS = {
+  market_date: DATE, previous_date: '2026-08-27', retrieved_at: '2026-08-31T08:30:00+09:00', source: '금융투자협회 증시자금 추이', published_at: '',
+  items: [
+    { code: 'DEPOSITS', value: 82049700, previous_value: 85336163 },
+    { code: 'CREDIT', value: 25877746, previous_value: 25942655 },
+    { code: 'CREDIT_KOSPI', value: 20020227, previous_value: 20055285 },
+    { code: 'CREDIT_KOSDAQ', value: 5857519, previous_value: 5887370 },
+    { code: 'UNPAID', value: 966031, previous_value: 876053 },
+    { code: 'FORCED_SALE', value: 13675, previous_value: 11147 },
+    { code: 'FORCED_SALE_RATIO', value: 1.6, previous_value: 1.2 }
+  ]
+};
 const TREND = (() => {
   const series = {};
   for (const group of ['indices', 'rates_fx_volatility', 'commodities_crypto']) {
@@ -73,12 +86,12 @@ function clientHtml(lang, payload = FIXTURE, trend = TREND, { history = false } 
     // As /market/?date=… sets it: a past date while a later close exists.
     Object.assign(window.MARKET_CLOSE.state, { mode: 'history', isLatest: false, latestDate: '2026-11-23' });
   }
-  window.MARKET_CLOSE.render(structuredClone(payload), target, { domesticRates: RATES, trend });
+  window.MARKET_CLOSE.render(structuredClone(payload), target, { domesticRates: RATES, marketFunds: FUNDS, trend });
   return target.innerHTML;
 }
 
 function serverHtml(lang, payload = FIXTURE, trend = TREND) {
-  return renderMarketDateMain(structuredClone(payload), lang, { domesticRates: RATES, trend, prev: '2026-08-27', next: null });
+  return renderMarketDateMain(structuredClone(payload), lang, { domesticRates: RATES, marketFunds: FUNDS, trend, prev: '2026-08-27', next: null });
 }
 
 const text = (fragment) => fragment.replace(/<svg[\s\S]*?<\/svg>/g, ' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
@@ -158,6 +171,7 @@ for (const lang of ['ko', 'en']) {
       ['breadth', '<div class="mk-breadth"', '</div>\n    </div>'],
       ['stats', '<div class="mk-stat">', '</div>'],
       ['the day in brief', '<article class="mk-summary"', '</article>'],
+      ['market funds', '<section class="mk-card mk-funds-card"', '</section>'],
       ['top 10', '<table class="mk-table mk-cap-table"', '</table>']
     ]) {
       const left = blocks(client, open, close).map(text);

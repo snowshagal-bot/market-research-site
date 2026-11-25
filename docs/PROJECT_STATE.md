@@ -231,6 +231,28 @@ Global Latest is a second, separate market data channel: the current observation
 
 **Domestic Rates (KOFIA yields). Status: merged (#234, 99eb126) and live in Production since 2026-11-22.** Migration `0003` is applied to Preview and Production. Publisher #16 is merged; the installed core (`7c429e77` since 2026-11-24, publisher main 3aec963 with the 2026-07-17 KRX closure, VKOSPI, the Asian indices and the stock rankings) publishes through the task `시장지표-국내금리` (weekdays 16:20–18:20 KST, every 15 minutes). The backfill 2026-01-02..2026-11-20 stored 217 days. The KOFIA final quote yields (금융투자협회 최종호가수익률) of each KRX trading day — KTB 3Y and 10Y, corporate AA- 3Y, CD 91-day — are a third market data channel. KOFIA's afternoon basis is 16:00 KST, after the Market Close record is final (16:05 KST) and frozen, so they cannot be part of it. `functions/api/market/rates/` holds the only instrument list, the 1.0.0 contract validation (`contracts/domestic_rates/`: KRX trading day, not after today, read after `market_date` + `basis_time` KST, `change_bp` = (value − previous) × 100) and `POST /api/market/rates/publish` / `GET /api/market/rates/date` over `market_domestic_rates` (one row per date, migration `0003`, no runtime DDL). A day is created, unchanged for the same figures, or updated only by figures read later (a KOFIA correction). The pages join it by date: `/market/` TODAY requests `?date=latest` beside the Market Close and HISTORY requests that date (each at most 2.5 s, failure leaves it out), and shows the record's own day as section 4 "국내 금리" (later sections move down one); session pages render it as their own numbered section; four history pages (see below). Without the table or the day, every page is as before.
 
+**Market Funds (KOFIA FreeSIS). Status: website PR open (2026-11-25), not merged; migration `0006`, the collector (publisher PR) and the task are not applied yet.**
+- **What it is:** a fourth market data channel, KOFIA's stock market funds of each KRX trading day:
+  - investor deposits (투자자예탁금);
+  - margin loans (신용거래융자) in total and by KOSPI and KOSDAQ;
+  - unpaid margin (위탁매매 미수금);
+  - forced selling (반대매매) and its ratio to the previous day's unpaid margin.
+  KOFIA publishes a day's figures on a later business day, so they cannot be part of that day's frozen record.
+- **Server:** `functions/api/market/funds/` holds the only instrument list and the 1.0.0 contract validation (`contracts/market_funds/`). It checks:
+  - a KRX trading day, not after today;
+  - `previous_date` a trading day 1–14 days earlier;
+  - read after 15:30 KST of `market_date`;
+  - whole KRW millions;
+  - credit total = KOSPI + KOSDAQ within 2;
+  - ratio = forced selling ÷ previous unpaid × 100 within 0.051.
+  It serves `POST /api/market/funds/publish` and `GET /api/market/funds/date` over `market_funds` (one row per date, migration `0006`, no runtime DDL). Writes follow the Domestic Rates rules: created, unchanged, or updated only by figures read later.
+- **Card:** a "증시 자금 / Market Funds" card after the session stats and the top 10, built once by `MARKET_LOCALE.marketFundsCard` in `assets/locale.js` so both renderers draw the same HTML.
+  - A session page shows its own day only.
+  - TODAY shows the newest stored day up to the record's date (normally the previous session), at most 10 days older, with its date in the card note.
+  - HISTORY (`?date=`) shows that date's day only.
+- **History pages:** three, `/market/deposits/`, `/market/margin-loans/`, `/market/forced-selling/` (kind `funds`).
+- **Without the table or the day,** every page is as before.
+
 **Global Latest overlay (B3). Status: merged (#145, 43b1eb7), Production.** Market Close stays the base of every market view; on TODAY views only — the homepage strip (`/`, `/en/`) and `/market/` TODAY (KO/EN) — a global instrument's displayed figures may come from Global Latest as a view projection. No payload is rewritten and nothing is stored. HISTORY, 1W and 1M never read or apply it.
 
 - Policy: `assets/locale.js` `globalLatestOverlay(items, payload, now)` (pure; shared by the server and both page scripts). An item is used only when it is well formed (finite positive value/previous close, change and change_pct consistent with them, strict ISO timestamps, `as_of ≤ retrieved_at`, `source_date` within a day of `as_of`), `as_of` is not in the future (5-minute skew), it is fresh **by `as_of`** (intraday: US indices/VIX/US10Y and BITCOIN 60 min, FX/DXY/WTI/GOLD 90 min; `final_close`: only NASDAQ/DOW/SP500/SOX/VIX/US10Y, up to 4 days; VIX since 2026-11, when the collector began publishing its official close stamped after its own 15:15 CT session end), and it is newer than the snapshot's own figure (`as_of` after that item's `retrieved_at`). Anything else keeps the snapshot figure, per item. KOSPI and KOSDAQ are not Global Latest codes and can never be overlaid.
@@ -271,7 +293,12 @@ Preview hosts remain blocked, and all non-Market mutation APIs keep their existi
   - Linked from `/market/`, each session page and the archive; listed in the sitemap.
   - The figures are index price moves, not investor flows, and the page says so.
   - English names for all 85 stored KRX sector/theme index codes live in `assets/locale.js` (`KRX_GROUP_NAMES`, `krxGroupName`), used by the English session, sectors and 1W/1M views. `tests/krx-group-names.test.mjs` checks the list.
-- **Indicator daily histories**: `/market/{slug}/` and `/en/market/{slug}/` for the 29 instruments in `functions/_market-indicators.js` (slug = code in lower case: kospi, kosdaq, nasdaq, dow, sp500, nikkei225, shanghai, taiex, sox, vix, vkospi, us10y, ktb3y, ktb10y, corpaa3y, cd91, usdkrw, jpykrw, cnykrw, eurkrw, dxy, usdjpy, wti, brent, natgas, gold, silver, bitcoin; COMEX_COPPER is `copper`).
+- **Indicator daily histories**: `/market/{slug}/` and `/en/market/{slug}/` for the 32 instruments in `functions/_market-indicators.js` (slug = code in lower case: kospi, kosdaq, nasdaq, dow, sp500, nikkei225, shanghai, taiex, sox, vix, vkospi, us10y, ktb3y, ktb10y, corpaa3y, cd91, usdkrw, jpykrw, cnykrw, eurkrw, dxy, usdjpy, wti, brent, natgas, gold, silver, bitcoin; COMEX_COPPER is `copper`).
+  - The three `funds` ones (DEPOSITS `deposits`, CREDIT `margin-loans`, FORCED_SALE `forced-selling`, kind `funds`) read Market Funds the same way:
+    - amounts in 조원/억원 (KRW tn/bn);
+    - changes against the previous trading day KOFIA's table carries, as an amount and in %;
+    - listed once a day is stored (`loadMarketFundCodes`).
+    Slugs may contain hyphens (`parseMarketPagePath`).
   - The four `domestic` ones (KTB3Y, KTB10Y, CORPAA3Y, CD91, kind `kofia`) read Domestic Rates, not Market Close rows: the KOFIA yield of every stored KRX trading day (a backfill may predate the records), changes in bp against KOFIA's previous-day value, and a date links to its session page only when a final record exists. They are listed (sitemap, archive, related links) once a day is stored (`loadDomesticRateCodes`).
   - The seven added on 2026-11-21 (CNYKRW, EURKRW, USDJPY, BRENT, NATGAS, SILVER, COMEX_COPPER) are `optional`: contract 1.2.0 lists them in `properties` but not `required`, so records made before them lack the keys. A page, its sitemap entry, its archive and related links appear only once a final record has its value (`availableIndicatorCodes`, from one `json_extract` column of their closes); dashboard and session cards link them only beside a value.
   - VKOSPI (website #239 and publisher #18, live since 2026-11-22; first value 2026-11-23; kind `krxvol`, beside VIX in `rates_fx_volatility`) is optional the same way. It is KRX's 코스피 200 변동성지수: the derivatives-session close (15:45 KST, from KOSPI 200 options) of the session itself, read by the collector from KRX Index after 16:00 KST. Its page shows the KRX close with the day's high and low, changed against KRX's previous close.
@@ -824,6 +851,9 @@ The current v1 baseline is now in normal operation. There is no predetermined ne
 - `migrations/comments/0003_market_domestic_rates.sql` — idempotent Domestic Rates table (`market_domestic_rates`)
 - `functions/api/market/rates/` — Domestic Rates (KOFIA yields) contract validation, publish and read endpoints, page loaders
 - `contracts/domestic_rates/` — Domestic Rates JSON Schema, example and contract
+- `migrations/comments/0006_market_funds.sql` — idempotent Market Funds table (`market_funds`)
+- `functions/api/market/funds/` — Market Funds (KOFIA FreeSIS deposits, margin loans, forced selling) contract validation, publish and read endpoints, page loaders
+- `contracts/market_funds/` — Market Funds JSON Schema, example and contract
 - `data/market-summary.js` — fallback data and editorial one-liner for the homepage TODAY strip
 - `data/tags.json` / `data/tags.js` — canonical topic tag registry
 - `scripts/build-search-index.mjs` — builds the search index and syncs reading time

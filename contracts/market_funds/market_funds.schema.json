@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://snowshagal.com/contracts/market_funds/market_funds.schema.json",
+  "title": "Snowshagal Market Funds publish document",
+  "description": "Korean stock market funds for KRX trading days, from KOFIA (Korea Financial Investment Association) FreeSIS: investor deposits, margin loans, unpaid margin and forced selling. KOFIA publishes a day's figures on a later business day, so this is not a Market Close payload: it is stored apart and joined by date on the pages. The server additionally enforces the semantic rules in MARKET_FUNDS_CONTRACT.md (KRX calendar, retrieval after the session, credit parts, clock skew).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "generated_at", "days"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "generated_at": { "$ref": "#/$defs/dateTime" },
+    "days": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 60,
+      "items": { "$ref": "#/$defs/day" }
+    }
+  },
+  "$defs": {
+    "dateTime": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?(?:Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "date": { "type": "string", "format": "date", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "millionKrw": { "type": "integer", "minimum": 0, "maximum": 10000000000 },
+    "percent": { "type": "number", "minimum": 0, "maximum": 100 },
+    "day": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["market_date", "previous_date", "retrieved_at", "source", "items"],
+      "properties": {
+        "market_date": { "$ref": "#/$defs/date" },
+        "previous_date": { "$ref": "#/$defs/date" },
+        "retrieved_at": { "$ref": "#/$defs/dateTime" },
+        "source": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 7,
+          "items": { "$ref": "#/$defs/item" }
+        }
+      }
+    },
+    "item": {
+      "type": "object",
+      "required": ["code", "value", "previous_value"],
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "code": { "enum": ["DEPOSITS", "CREDIT", "CREDIT_KOSPI", "CREDIT_KOSDAQ", "UNPAID", "FORCED_SALE"] },
+            "value": { "$ref": "#/$defs/millionKrw" },
+            "previous_value": { "$ref": "#/$defs/millionKrw" }
+          }
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "code": { "const": "FORCED_SALE_RATIO" },
+            "value": { "$ref": "#/$defs/percent" },
+            "previous_value": { "$ref": "#/$defs/percent" }
+          }
+        }
+      ]
+    }
+  }
+}
