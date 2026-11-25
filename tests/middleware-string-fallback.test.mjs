@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-import { onRequest as middleware, REPORT_NAV_SPACER, removeTags, tagAttributes } from '../functions/_middleware.js';
+import { FONT_CSS_ONLOAD, isGoogleFontsStylesheet, onRequest as middleware, REPORT_NAV_SPACER, removeTags, tagAttributes } from '../functions/_middleware.js';
 import { FAVICON_TAGS, findTranslationCounterpart, postLanguage, reportSiteUrl } from '../functions/_seo.js';
 
 const ROOT = new URL('../', import.meta.url);
@@ -310,4 +310,74 @@ test('the streaming middleware prepends the same spacer to <body>', async () => 
   } finally {
     delete globalThis.HTMLRewriter;
   }
+});
+
+test('Google Fonts stylesheets in reports load without blocking the first paint', async () => {
+  // 86 reports link Korean Google Fonts whose css2 response is ~90 KB gzipped;
+  // on a slow 4G phone the page stayed blank about a second waiting for it.
+  const korean = 'https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&amp;family=IBM+Plex+Sans+KR:wght@400;600&amp;display=swap';
+  const head = [
+    '<link rel="preconnect" href="https://fonts.googleapis.com">',
+    `<link href="${korean}" rel="stylesheet">`,
+    "<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Inter'>",
+    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter&amp;display=swap" media="print">',
+    '<link rel="stylesheet" href="/assets/own.css">'
+  ].join('');
+  const html = headOf(await render(POST, withHead(head)));
+  const preload = `<link rel="preload" as="style" href="${korean}" onload="${FONT_CSS_ONLOAD}"><noscript><link rel="stylesheet" href="${korean}"></noscript>`;
+  assert.ok(html.includes(preload), 'Korean css2 link deferred, entities kept as written');
+  assert.ok(html.includes(`<link rel="preload" as="style" href="https://fonts.googleapis.com/css?family=Inter" onload="${FONT_CSS_ONLOAD}">`), 'single-quoted css (v1) link deferred');
+  assert.ok(html.includes('media="print">'), 'a link that names its own media is left alone');
+  assert.ok(html.includes('<link rel="stylesheet" href="/assets/own.css">'), 'other stylesheets untouched');
+  assert.ok(html.includes('<link rel="preconnect" href="https://fonts.googleapis.com">'), 'preconnect kept');
+  // No render-blocking Google Fonts stylesheet remains outside <noscript>.
+  const outsideNoscript = html.replace(/<noscript>[\s\S]*?<\/noscript>/g, '');
+  const blocking = [...outsideNoscript.matchAll(/<link\b((?:[^>"']|"[^"]*"|'[^']*')*)>/gi)]
+    .map(match => tagAttributes(match[1]))
+    .filter(attrs => attrs.rel === 'stylesheet' && /fonts\.googleapis/.test(attrs.href) && !attrs.media);
+  assert.deepEqual(blocking, []);
+
+  assert.equal(isGoogleFontsStylesheet({ rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=A' }), true);
+  assert.equal(isGoogleFontsStylesheet({ rel: 'Stylesheet', href: 'https://fonts.googleapis.com/css2?family=A' }), true);
+  assert.equal(isGoogleFontsStylesheet({ rel: 'stylesheet', href: 'https://fonts.googleapis.com/icon?family=A' }), false);
+  assert.equal(isGoogleFontsStylesheet({ rel: 'stylesheet', href: 'https://example.com/css2?family=A' }), false);
+  assert.equal(isGoogleFontsStylesheet({ rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=A"x' }), false);
+  assert.equal(isGoogleFontsStylesheet({ rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=A', disabled: '' }), false);
+  assert.equal(isGoogleFontsStylesheet({ rel: 'preload', href: 'https://fonts.googleapis.com/css2?family=A' }), false);
+});
+
+test('the streaming middleware defers the same Google Fonts stylesheets', async () => {
+  let fontSelector = null;
+  let handler = null;
+  globalThis.HTMLRewriter = class {
+    on(selector, h) {
+      if (/fonts\.googleapis/.test(selector)) { fontSelector = selector; handler = h; }
+      return this;
+    }
+    transform(response) { return response; }
+  };
+  try {
+    await render(POST, withHead(''));
+  } finally {
+    delete globalThis.HTMLRewriter;
+  }
+  assert.equal(fontSelector, 'link[rel~="stylesheet"][href^="https://fonts.googleapis.com/css"]');
+  const element = (attrs) => {
+    const state = { attrs: { ...attrs }, after: [] };
+    return {
+      state,
+      get attributes() { return Object.entries(state.attrs)[Symbol.iterator](); },
+      setAttribute(name, value) { state.attrs[name] = value; },
+      after(html, options) { state.after.push([html, options]); }
+    };
+  };
+  const href = 'https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&amp;display=swap';
+  const font = element({ rel: 'stylesheet', href });
+  handler.element(font);
+  assert.deepEqual(font.state.attrs, { rel: 'preload', href, as: 'style', onload: FONT_CSS_ONLOAD });
+  assert.deepEqual(font.state.after, [[`<noscript><link rel="stylesheet" href="${href}"></noscript>`, { html: true }]]);
+  const printOnly = element({ rel: 'stylesheet', href, media: 'print' });
+  handler.element(printOnly);
+  assert.deepEqual(printOnly.state.attrs, { rel: 'stylesheet', href, media: 'print' });
+  assert.deepEqual(printOnly.state.after, []);
 });

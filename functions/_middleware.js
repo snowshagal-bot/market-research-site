@@ -128,6 +128,56 @@ export function removeTags(body, name, predicate) {
   return body.replace(pattern, (whole, source) => (predicate(tagAttributes(source)) ? '' : whole));
 }
 
+/**
+ * Google Fonts stylesheets in uploaded reports load without holding back the
+ * first paint. 86 reports link Korean families (Noto Serif KR, Nanum Myeongjo,
+ * IBM Plex Sans KR …) whose css2 response is ~90 KB gzipped (~420 KB, 670
+ * @font-face rules): on a slow 4G phone it took about a second to arrive, and
+ * the page stayed blank until then. The text already starts in the fallback
+ * font (the URLs ask for display=swap) and swaps when the font files land, so
+ * painting before the stylesheet arrives changes when the page appears, not
+ * how it ends up. The link becomes a high-priority preload that turns itself
+ * into the stylesheet on load, with a <noscript> copy for readers without
+ * JavaScript. A link that already names a media query is left as it is.
+ */
+const GOOGLE_FONTS_CSS = /^https:\/\/fonts\.googleapis\.com\/css2?\?/i;
+export const FONT_CSS_ONLOAD = "this.onload=null;this.rel='stylesheet'";
+
+export function isGoogleFontsStylesheet(attrs) {
+  const href = String(attrs.href ?? '');
+  return relTokens(attrs).some(token => token.toLowerCase() === 'stylesheet')
+    && GOOGLE_FONTS_CSS.test(href)
+    && !/["<>]/.test(href)
+    && !('media' in attrs)
+    && !('disabled' in attrs);
+}
+
+/** The string-path markup for one deferred font stylesheet; `href` is the attribute's source text. */
+export function deferredFontStylesheet(href) {
+  return `<link rel="preload" as="style" href="${href}" onload="${FONT_CSS_ONLOAD}"><noscript><link rel="stylesheet" href="${href}"></noscript>`;
+}
+
+/** Replaces each <link …> start tag that loads Google Fonts CSS with its deferred form. */
+export function deferFontStylesheets(body) {
+  const pattern = /<link\b((?:[^>"']|"[^"]*"|'[^']*')*)>/gi;
+  return body.replace(pattern, (whole, source) => {
+    const attrs = tagAttributes(source);
+    return isGoogleFontsStylesheet(attrs) ? deferredFontStylesheet(attrs.href) : whole;
+  });
+}
+
+const fontStylesheetHandler = {
+  element(element) {
+    const attrs = {};
+    for (const [name, value] of element.attributes) attrs[String(name).toLowerCase()] = value;
+    if (!isGoogleFontsStylesheet(attrs)) return;
+    element.setAttribute('rel', 'preload');
+    element.setAttribute('as', 'style');
+    element.setAttribute('onload', FONT_CSS_ONLOAD);
+    element.after(`<noscript><link rel="stylesheet" href="${attrs.href}"></noscript>`, { html: true });
+  }
+};
+
 const REPORT_HEAD_META = {
   'report-seo-title': 'seoTitle',
   'report-seo-description': 'seoDescription',
@@ -531,6 +581,7 @@ export async function onRequest(context) {
       || attrs.rel === 'apple-touch-icon'
       || attrs.rel === 'manifest'
     ));
+    body = deferFontStylesheets(body);
     body = insertBeforeClosingTag(body, 'head', `${FAVICON_TAGS}${seo}${feedLink}${footerStyle}`);
     body = insertAfterOpeningTag(body, 'body', REPORT_NAV_SPACER);
     body = insertBeforeClosingTag(body, 'body', `${readingNavigation}${footerMarkup}${shell}`);
@@ -568,6 +619,7 @@ export async function onRequest(context) {
     .on('link[rel~="icon"]', { element(element) { element.remove(); } })
     .on('link[rel="apple-touch-icon"]', { element(element) { element.remove(); } })
     .on('link[rel="manifest"]', { element(element) { element.remove(); } })
+    .on('link[rel~="stylesheet"][href^="https://fonts.googleapis.com/css"]', fontStylesheetHandler)
     // Written at </head>, after the file's own metas above have been read.
     .on('head', {
       element(element) {
