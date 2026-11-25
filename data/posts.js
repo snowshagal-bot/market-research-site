@@ -8893,7 +8893,7 @@ window.RESEARCH_POSTS = [
     "registeredDate": "2026-08-25",
     "registeredAt": "2026-08-24T16:18:52.772Z",
     "legacyImport": false,
-    "title": "Waiting for (高度) Altitude",
+    "title": "Waiting for Altitude",
     "subtitle": "",
     "description": "",
     "summary": "Two Semiconductor Giants, Waiting to Revisit Their Highs",
