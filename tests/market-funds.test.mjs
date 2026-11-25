@@ -170,6 +170,9 @@ test('dates: a KRX trading day, its previous trading day, read after that sessio
   assert.match(errorsOf(doc([day('2026-11-24', { previous_date: '2026-11-24' })])), /previous_date: must be 1 to 14 days before/);
   assert.match(errorsOf(doc([day('2026-11-24', { previous_date: '2026-11-01' })])), /previous_date: must be 1 to 14 days before/);
   assert.match(errorsOf(doc([day('2026-11-24', { previous_date: '2026-11-22' })])), /previous_date: 2026-11-22 is not a KRX trading date/);
+  // The calendar starts with 2026: the first day's previous session (2025-12-30) is only checked for gap and weekday.
+  assert.equal(validateMarketFundsDocument(doc([day('2026-01-02', { previous_date: '2025-12-30', retrieved_at: '2026-01-05T08:30:00+09:00' })]), NOW.getTime()).passed, true);
+  assert.match(errorsOf(doc([day('2026-01-02', { previous_date: '2025-12-27', retrieved_at: '2026-01-05T08:30:00+09:00' })])), /previous_date: 2025-12-27 is a weekend/);
   // The balances exist only once the session has closed: 15:30 KST.
   assert.match(errorsOf(doc([day('2026-11-24', { retrieved_at: '2026-11-24T15:29:59+09:00' })])), /before 2026-11-24 15:30 KST/);
   assert.equal(validateMarketFundsDocument(doc([day('2026-11-24', { retrieved_at: '2026-11-24T19:00:00+09:00' })]), NOW.getTime()).passed, true);

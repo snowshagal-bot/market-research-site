@@ -62,7 +62,7 @@ The whole request is rejected (422) and nothing is written when any of these fai
 - **Dates**
   - `market_date` is a real calendar date and a KRX trading date (`functions/_trading-calendar.js`). A year the calendar does not cover fails closed.
   - `market_date` is not after today in KST.
-  - `previous_date` is a KRX trading date before `market_date`, at most 14 calendar days earlier.
+  - `previous_date` is a KRX trading date before `market_date`, at most 14 calendar days earlier. In a year the KRX calendar does not cover, it only has to be a weekday. That year is always earlier than `market_date`: for example 2025-12-30, the previous session of 2026-01-02, the first day of the calendar.
 - **Timing**
   - `retrieved_at` is not before 15:30 KST on `market_date` (the regular close). A day's balances cannot be read before its session ends.
   - `retrieved_at` and `generated_at` are not more than 5 minutes ahead of the server clock.
