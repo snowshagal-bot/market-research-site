@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-25-note-t035my",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-25",
+    "reportDate": "2026-11-25",
+    "registeredDate": "2026-11-25",
+    "registeredAt": "2026-11-25T10:30:06.954Z",
+    "legacyImport": false,
+    "title": "South Korea proposes a 20% ownership cap for crypto exchanges What the draft digital asset law would change — and what it would leave intact",
+    "seoTitle": "South Korea's Digital Asset Bill: The 20% Crypto Exchange Ownership Cap",
+    "subtitle": "",
+    "description": "On Nov. 24, South Korea's FSC unveiled draft digital asset legislation: a 20% exchange shareholding cap (34% with approval), majority bank-owned won stablecoin issuers and a proposed reopening of ICOs after nine years. What the draft sets out and what remains unresolved.",
+    "tags": [
+      "policy",
+      "crypto",
+      "stablecoins",
+      "korea"
+    ],
+    "readingMinutes": 17,
+    "href": "reports/en/20261125_Investment_Insight_Digital_Asset_Act_Draft_EN.html",
+    "translationGroup": "2026-11-25-note-1mdifmp",
+    "coverImage": "covers/2026-11-25-note-t035my.webp",
+    "shareCardImage": "covers/share/2026-11-25-note-t035my.jpg",
+    "coverThumbnail": "covers/2026-11-25-note-t035my-450.webp"
+  },
+  {
     "id": "2026-11-25-note-1mdifmp",
     "type": "note",
     "typeLabel": "투자 인사이트",
