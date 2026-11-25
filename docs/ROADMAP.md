@@ -70,8 +70,15 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   `/market/YYYY-MM-DD/card.jpg` (1200×630, owner's choice), drawn from the published record and used as
   the session page's `og:image`. Migration `0004` is applied to Preview and Production. The
   2026-11-24 cards (KO, EN) exist; the first automatic drawing at publish time is 2026-11-25.
-  Not done: cards for past sessions (no backfill), the Daily takeaway on the card, Telegram posting
-  (owner decision; needs a bot and a channel the owner creates).
+  Telegram posting is the entry below.
+  - **Takeaway line and past sessions (this PR)**: the card now carries the day's takeaway (record
+    line, else the Daily's, same language). A Daily published after the record makes the card stale;
+    the next visit to the latest session's page redraws it. Older sessions are filled when their page
+    is visited, at most 20 attempts a day and one a minute, so about 230 cards take two weeks or more,
+    led by the pages that get visited. No migration, Secret or owner step.
+    After merge, check: the next Daily's card shows its line (open `/market/<date>/` once after the
+    Daily deploy, then the card), and the card rows grow by about 20 a day:
+    `npx -y wrangler d1 execute market-research-comments --remote --json --command "SELECT COUNT(*) AS n, SUM(status='ready') AS ready FROM market_close_cards"`.
 
 - **Telegram channel post (code only; not active)**: each Market Close session posted once to a
   Telegram channel, the card with a short caption, right after today's final record is published.

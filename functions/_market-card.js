@@ -6,11 +6,16 @@
 // Cloudflare Browser Rendering (the same account API the cover generator uses),
 // then kept in D1 (market_close_cards, migration 0004). It is made when a final
 // record is published; a request for the latest session's card that finds none
-// starts one more attempt. Nothing here creates the table: without it every
+// starts one more attempt. The card carries the day's one-line takeaway once
+// there is one (the record's own line, else the Daily report's), so a Daily
+// published after the record makes the card stale and the next visit redraws
+// it. Older sessions are drawn or redrawn when their page is visited, a few a
+// day (CARD_FILL_PER_DAY). Nothing here creates the table: without it every
 // path answers as if no card existed.
-import { escapeHtml } from './_seo.js';
+import { escapeHtml, loadPosts } from './_seo.js';
 import { TABLE_NAME } from './api/market/_shared.js';
 import { longDate, makeFormat, marketDatePath } from './_market-date-page.js';
+import { kstParts } from './_trading-calendar.js';
 
 export const CARD_TABLE = 'market_close_cards';
 // Part of the stored row: a change to the card's design or content rule makes
@@ -27,6 +32,13 @@ const RENDER_TIMEOUT_MS = 28000;
 // A second attempt for the same card waits this long, whatever the first one's end.
 const RETRY_AFTER_MS = 10 * 60 * 1000;
 const MAX_CARD_BYTES = 1024 * 1024;
+// Cards of older sessions are drawn only on a page visit, at most this many
+// attempts a day (KST, every card counted) and one a minute. Browser Rendering
+// is shared with the report cover generator, which must keep its allowance.
+export const CARD_FILL_PER_DAY = 20;
+const CARD_FILL_SPACING_MS = 60 * 1000;
+// The takeaway on the card: two lines at most; a longer one is cut by the card's own style.
+const TAKEAWAY_LIMIT = 200;
 const CARD_PATH = /^\/(en\/)?market\/(\d{4}-\d{2}-\d{2})\/card\.jpg$/;
 
 const html = escapeHtml;
@@ -69,14 +81,37 @@ function weekday(date) {
   return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
 }
 
+const cleanLine = (value) => String(value || '').replace(/[​-‍⁠﻿]/g, '').replace(/\s+/g, ' ').trim().slice(0, TAKEAWAY_LIMIT);
+
+/** The Daily report's takeaway for the session, in that language, or ''. */
+export function dailyTakeaway(posts, date, lang = 'ko') {
+  const key = lang === 'en' ? 'en' : 'ko';
+  const daily = (Array.isArray(posts) ? posts : []).find(item => (
+    item?.type === 'daily'
+    && (item?.lang === 'en' ? 'en' : 'ko') === key
+    && String(item?.reportDate || item?.date || '') === date
+  ));
+  return String(daily?.takeaway || '');
+}
+
+/**
+ * The line the card carries, by the home page's rule: the record's own line
+ * (saved on /admin/market/), else the same day's Daily takeaway in the same
+ * language, else none.
+ */
+export function cardTakeaway(recordLine, posts, date, lang = 'ko') {
+  return cleanLine(recordLine) || cleanLine(dailyTakeaway(posts, date, lang));
+}
+
 /**
  * The card as a standalone 1200×630 HTML page. Only figures of the record's own
  * regular session: both indices, KOSPI investor flows, the USD/KRW fixing,
- * KOSPI breadth and turnover. A missing figure leaves its place out; nothing is
- * carried from another day.
+ * KOSPI breadth and turnover, and the day's takeaway when there is one. A
+ * missing figure leaves its place out; nothing is carried from another day.
  */
-export function marketCardHtml(payload, lang = 'ko') {
+export function marketCardHtml(payload, lang = 'ko', { takeaway = '' } = {}) {
   const key = lang === 'en' ? 'en' : 'ko';
+  const say = cleanLine(takeaway);
   const copy = COPY[key];
   const f = makeFormat(key);
   const date = payload?.meta?.market_date || '';
@@ -129,6 +164,12 @@ body{background:#f7f3eb;color:#16233b;font-family:"Pretendard","Noto Sans KR","N
 .top b span{font-weight:500;color:#8a7a5c}
 .head{margin-top:26px;font-family:"Noto Serif KR","Noto Serif CJK KR","Nanum Myeongjo","Times New Roman",serif;font-variant-numeric:lining-nums;font-size:70px;line-height:1.12;font-weight:700;letter-spacing:-.02em;white-space:nowrap}
 .head .up{color:#b3312c}.head .down{color:#1f4e9c}
+.say{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;margin-top:12px;padding-left:18px;border-left:4px solid #8a7a5c;font-size:25px;line-height:1.42;font-weight:600;color:#3b4658;word-break:keep-all;overflow-wrap:anywhere}
+.has-say .head{margin-top:16px}
+.has-say .grid{margin-top:20px}
+.has-say .index{padding-top:18px}
+.has-say .side{padding-top:16px}
+.has-say .facts{margin-top:22px;padding-top:14px}
 .grid{display:grid;grid-template-columns:300px 300px 1fr;gap:0;margin-top:34px;border-top:2px solid #16233b}
 .index{padding:22px 24px 0 0}
 .index+.index{padding-left:28px;border-left:1px solid #d8d0c2}
@@ -153,9 +194,10 @@ ul{list-style:none}
 </style>
 </head>
 <body>
-<div class="card">
+<div class="card${say ? ' has-say' : ''}">
   <div class="top"><b>SNOWSHAGAL <span>${html(copy.brand)}</span></b><span>${html(dateLine)} · ${html(copy.basis)}</span></div>
   <h1 class="head"><span class="${f.signClass(pct)}">${html(headline)}</span></h1>
+  ${say ? `<p class="say">${html(say)}</p>` : ''}
   <div class="grid">
     ${index(copy.kospi, kospi)}
     ${index(copy.kosdaq, kosdaq)}
@@ -179,9 +221,14 @@ function bytesOf(value) {
   return null;
 }
 
-/** The key a stored card was drawn from: the record's own timestamp and the card design. */
-export function cardSourceKey(generatedAt) {
-  return `${CARD_VERSION}:${String(generatedAt || '')}`;
+/**
+ * The key a stored card was drawn from: the card design, the record's own
+ * timestamp and, when the card carries one, a hash of the takeaway line. A
+ * card without a line keeps the key it had before lines were added.
+ */
+export function cardSourceKey(generatedAt, takeaway = '') {
+  const say = cleanLine(takeaway);
+  return `${CARD_VERSION}:${String(generatedAt || '')}${say ? `#${versionToken(say)}` : ''}`;
 }
 
 // A short, URL-safe form of the source key for ?v=.
@@ -192,13 +239,13 @@ function versionToken(sourceKey) {
 }
 
 /**
- * { date, lang, version } of the session's stored card, or null. Never
- * throws: a missing table or a slow database means "no card".
+ * { date, lang, version, sourceKey } of the session's stored card, or null.
+ * Never throws: a missing table or a slow database means "no card".
  */
 export async function readMarketCardMeta(env, date, lang) {
   try {
     const row = await env.COMMENTS_DB.prepare(`SELECT source_key FROM ${CARD_TABLE} WHERE market_date = ? AND lang = ? AND image IS NOT NULL LIMIT 1`).bind(date, lang === 'en' ? 'en' : 'ko').first();
-    return row ? { date, lang, version: versionToken(row.source_key) } : null;
+    return row ? { date, lang, version: versionToken(row.source_key), sourceKey: String(row.source_key) } : null;
   } catch (_) {
     return null;
   }
@@ -206,12 +253,14 @@ export async function readMarketCardMeta(env, date, lang) {
 
 /**
  * { bytes, type } of the session's stored card when it was drawn from the
- * record version `generatedAt`, or null. Never throws.
+ * record version `generatedAt` (with or without a takeaway line), or null.
+ * Never throws.
  */
 export async function readMarketCardImage(env, date, lang, generatedAt) {
   try {
-    const row = await env.COMMENTS_DB.prepare(`SELECT content_type, image FROM ${CARD_TABLE} WHERE market_date = ? AND lang = ? AND source_key = ? AND image IS NOT NULL LIMIT 1`)
-      .bind(date, lang === 'en' ? 'en' : 'ko', cardSourceKey(generatedAt)).first();
+    const key = cardSourceKey(generatedAt);
+    const row = await env.COMMENTS_DB.prepare(`SELECT content_type, image FROM ${CARD_TABLE} WHERE market_date = ?1 AND lang = ?2 AND (source_key = ?3 OR substr(source_key, 1, length(?3) + 1) = ?3 || '#') AND image IS NOT NULL LIMIT 1`)
+      .bind(date, lang === 'en' ? 'en' : 'ko', key).first();
     const bytes = bytesOf(row?.image);
     return bytes?.byteLength ? { bytes, type: row.content_type || 'image/jpeg' } : null;
   } catch (_) {
@@ -251,35 +300,53 @@ async function captureCard(env, page, fetchImpl = fetch) {
   }
 }
 
+// Midnight KST of `now`'s day, as the ISO text attempted_at is stored in.
+function kstDayStart(now) {
+  return new Date(`${kstParts(now).date}T00:00:00+09:00`).toISOString();
+}
+
 /**
  * Draws and stores the session's card for one language unless a card from the
- * same record already exists or another attempt is under way. Returns what
+ * same record and takeaway already exists or another attempt is under way.
+ * `posts` (the site's post list, or a promise of it) supplies the Daily
+ * takeaway; without it only the record's own line is used. `fill` marks a
+ * drawing for an older session, which also waits for the daily allowance
+ * (CARD_FILL_PER_DAY) and for a minute after any other attempt. Returns what
  * happened; never throws.
  */
-export async function ensureMarketCard(env, date, lang = 'ko', { now = new Date(), fetchImpl = fetch } = {}) {
+export async function ensureMarketCard(env, date, lang = 'ko', { now = new Date(), fetchImpl = fetch, posts = null, fill = false } = {}) {
   const key = lang === 'en' ? 'en' : 'ko';
   if (!cardRenderingConfigured(env)) return { status: 'not_configured' };
   const db = env.COMMENTS_DB;
   let claimed = false;
   try {
-    const record = await db.prepare(`SELECT status, generated_at, payload_json FROM ${TABLE_NAME} WHERE market_date = ? LIMIT 1`).bind(date).first();
+    const [record, postList] = await Promise.all([
+      db.prepare(`SELECT status, generated_at, payload_json, takeaway_${key} AS takeaway FROM ${TABLE_NAME} WHERE market_date = ? LIMIT 1`).bind(date).first(),
+      Promise.resolve(posts).catch(() => null)
+    ]);
     if (!record || record.status !== 'final') return { status: 'no_final_record' };
-    const sourceKey = cardSourceKey(record.generated_at);
+    const takeaway = cardTakeaway(record.takeaway, postList, date, key);
+    const sourceKey = cardSourceKey(record.generated_at, takeaway);
     const stamp = now.toISOString();
     const retryBefore = new Date(now.getTime() - RETRY_AFTER_MS).toISOString();
     // One attempt at a time per card: the row is taken only when there is no
-    // card from this record yet and no attempt in the last ten minutes. A card
-    // drawn from an earlier version of the record stays until the new one is stored.
+    // card from this record and line yet and no attempt in the last ten
+    // minutes. A card drawn from an earlier version stays until the new one is
+    // stored. A fill also needs the day's allowance and a quiet minute; the
+    // whole check is one statement, so two visits cannot both pass it.
     const claim = await db.prepare(`INSERT INTO ${CARD_TABLE} (market_date, lang, status, source_key, attempted_at)
-        VALUES (?1, ?2, 'pending', ?3, ?4)
+        SELECT ?1, ?2, 'pending', ?3, ?4
+        WHERE ?6 = 0 OR (
+          (SELECT COUNT(*) FROM ${CARD_TABLE} WHERE attempted_at >= ?7) < ?8
+          AND NOT EXISTS (SELECT 1 FROM ${CARD_TABLE} WHERE attempted_at >= ?9))
         ON CONFLICT(market_date, lang) DO UPDATE SET status = 'pending', attempted_at = ?4
         WHERE NOT (${CARD_TABLE}.status = 'ready' AND ${CARD_TABLE}.source_key = ?3) AND ${CARD_TABLE}.attempted_at < ?5`)
-      .bind(date, key, sourceKey, stamp, retryBefore).run();
+      .bind(date, key, sourceKey, stamp, retryBefore, fill ? 1 : 0, kstDayStart(now), CARD_FILL_PER_DAY, new Date(now.getTime() - CARD_FILL_SPACING_MS).toISOString()).run();
     if (!claim?.meta?.changes) return { status: 'skipped' };
     claimed = true;
 
     const payload = JSON.parse(record.payload_json);
-    const { bytes, type } = await captureCard(env, marketCardHtml(payload, key), fetchImpl);
+    const { bytes, type } = await captureCard(env, marketCardHtml(payload, key, { takeaway }), fetchImpl);
     await db.prepare(`UPDATE ${CARD_TABLE} SET status = 'ready', source_key = ?3, content_type = ?4, image = ?5, created_at = ?6 WHERE market_date = ?1 AND lang = ?2`)
       .bind(date, key, sourceKey, type, bytes, new Date().toISOString()).run();
     return { status: 'ready', bytes: bytes.byteLength };
@@ -296,6 +363,19 @@ export async function ensureMarketCard(env, date, lang = 'ko', { now = new Date(
 /** Both languages, side by side. For context.waitUntil after a publish. */
 export function ensureMarketCards(env, date, options) {
   return Promise.all([ensureMarketCard(env, date, 'ko', options), ensureMarketCard(env, date, 'en', options)]);
+}
+
+/** The site's post list for the card's takeaway, or null; never rejects. */
+export function cardPosts(request, env) {
+  return Promise.resolve().then(() => loadPosts(request, env)).catch(() => null);
+}
+
+/**
+ * Whether a session page should start a drawing in the background: its card
+ * is missing, or was drawn from another record version or another takeaway.
+ */
+export function marketCardIsStale(cardMeta, payload, takeaway) {
+  return cardMeta?.sourceKey !== cardSourceKey(payload?.meta?.generated_at, takeaway);
 }
 
 /* ------------------------------------------------------------------ route */
@@ -333,7 +413,7 @@ export async function onMarketCardRequest(context, route) {
     }
     const latest = await db.prepare(`SELECT MAX(market_date) AS market_date FROM ${TABLE_NAME} WHERE status = 'final'`).first();
     if (latest?.market_date === route.date && typeof context.waitUntil === 'function') {
-      context.waitUntil(ensureMarketCard(env, route.date, route.lang));
+      context.waitUntil(ensureMarketCard(env, route.date, route.lang, { posts: cardPosts(request, env) }));
     }
   } catch (error) {
     console.error('market card read failed', error?.message || error);
