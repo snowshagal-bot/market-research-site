@@ -38,6 +38,7 @@ import { applyInitialHtmlToRewriter, applyInitialHtmlToString, buildInitialHtml 
 import { buildHomeInitial } from './_home-initial.js';
 import { getSession, validateSafeNextUrl } from './_auth.js';
 import { ga4Tag, appendGa4ToHtml, applyGa4ToRewriter } from './_ga4.js';
+import { REPORT_IMAGE_STYLE, inlineImageHandler, rewriteInlineImages } from './_report-images.js';
 
 function policyResponse(status, error) {
   return new Response(JSON.stringify({ ok: false, error }), {
@@ -582,7 +583,9 @@ export async function onRequest(context) {
       || attrs.rel === 'manifest'
     ));
     body = deferFontStylesheets(body);
-    body = insertBeforeClosingTag(body, 'head', `${FAVICON_TAGS}${seo}${feedLink}${footerStyle}`);
+    // Large inline images become files (functions/_report-images.js).
+    body = await rewriteInlineImages(body, url.pathname);
+    body = insertBeforeClosingTag(body, 'head', `${FAVICON_TAGS}${seo}${feedLink}${footerStyle}${REPORT_IMAGE_STYLE}`);
     body = insertAfterOpeningTag(body, 'body', REPORT_NAV_SPACER);
     body = insertBeforeClosingTag(body, 'body', `${readingNavigation}${footerMarkup}${shell}`);
     body = setHtmlLang(body, lang);
@@ -620,11 +623,13 @@ export async function onRequest(context) {
     .on('link[rel="apple-touch-icon"]', { element(element) { element.remove(); } })
     .on('link[rel="manifest"]', { element(element) { element.remove(); } })
     .on('link[rel~="stylesheet"][href^="https://fonts.googleapis.com/css"]', fontStylesheetHandler)
+    // Large inline images become files (functions/_report-images.js).
+    .on('img', inlineImageHandler(url.pathname))
     // Written at </head>, after the file's own metas above have been read.
     .on('head', {
       element(element) {
         element.onEndTag((end) => {
-          end.before(`${FAVICON_TAGS}${seoFor ? seoFor(ownMeta) : ''}${feedLink}${footerStyle}`, { html: true });
+          end.before(`${FAVICON_TAGS}${seoFor ? seoFor(ownMeta) : ''}${feedLink}${footerStyle}${REPORT_IMAGE_STYLE}`, { html: true });
         });
       }
     })
