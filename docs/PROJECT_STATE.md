@@ -103,7 +103,7 @@ reports and the glossary together. All are in the first HTML; none edits a
 report file.
 - **Footer** (`functions/_footer.js`, on every page): 날짜별 마감 기록
   (`/market/archive/`, which lists every session page and every indicator page),
-  업종·테마 (`/market/sectors/`) and 용어 사전 (`/basics/glossary/`). After changing
+  업종·테마 (`/market/sectors/`), 투자자별 수급 (`/market/investor-flows/`) and 용어 사전 (`/basics/glossary/`). After changing
   the footer run `node scripts/sync-static-footers.mjs`.
 - **Home strip**: each of the five figures links to its history page
   (`/market/kospi/`, `kosdaq`, `usdkrw`, `us10y`, `gold`), in the shipped
@@ -299,6 +299,21 @@ Preview hosts remain blocked, and all non-Market mutation APIs keep their existi
   - Linked from `/market/`, each session page and the archive; listed in the sitemap.
   - The figures are index price moves, not investor flows, and the page says so.
   - English names for all 85 stored KRX sector/theme index codes live in `assets/locale.js` (`KRX_GROUP_NAMES`, `krxGroupName`), used by the English session, sectors and 1W/1M views. `tests/krx-group-names.test.mjs` checks the list.
+- **Investor flows**: `/market/investor-flows/` and `/en/market/investor-flows/` (2026-11-26).
+  - Net buying by foreign, institutional and retail investors, from the final Market Close rows' `krx_investor_trading`. Nothing new is collected.
+  - The page shows:
+    - the newest session, including the KOSPI 200 futures row;
+    - the last five published sessions day by day, for KOSPI and KOSDAQ, with a total;
+    - the month so far;
+    - foreign net buying by month;
+    - a reading guide written like `INDICATOR_GUIDES` (`FLOWS_GUIDE`).
+  - Sums add published sessions only. Each month counts its KRX trading days with `functions/_trading-calendar.js`, from the 1st (or, in the first month on record, from the first record) to its last record. A month missing a record shows "published / KRX trading days", so it is never passed off as KRX's own monthly total. A session without a figure is left out, and a sum over a missing cell is shown as `--`.
+  - The page answers 404 when the newest final session has no KOSPI foreign figure.
+  - Linked from:
+    - the footer (`node scripts/sync-static-footers.mjs`);
+    - the links under TODAY (static shell and `assets/market-close.js`);
+    - each session page and the archive.
+  - Listed in the sitemap and allowed by `scripts/audit-seo.mjs`.
 - **Indicator daily histories**: `/market/{slug}/` and `/en/market/{slug}/` for the 32 instruments in `functions/_market-indicators.js` (slug = code in lower case: kospi, kosdaq, nasdaq, dow, sp500, nikkei225, shanghai, taiex, sox, vix, vkospi, us10y, ktb3y, ktb10y, corpaa3y, cd91, usdkrw, jpykrw, cnykrw, eurkrw, dxy, usdjpy, wti, brent, natgas, gold, silver, bitcoin; COMEX_COPPER is `copper`).
   - The three `funds` ones (DEPOSITS `deposits`, CREDIT `margin-loans`, FORCED_SALE `forced-selling`, kind `funds`) read Market Funds the same way:
     - amounts in 조원/억원 (KRW tn/bn);
