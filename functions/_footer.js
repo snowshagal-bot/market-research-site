@@ -1,3 +1,10 @@
+// The editor's public profiles: linked under Follow on every page and named as
+// the site's sameAs in structured data (functions/_seo.js re-exports this).
+export const SOCIAL_PROFILES = Object.freeze([
+  'https://www.linkedin.com/in/sung-oh-choi-628a5b431/',
+  'https://www.threads.com/@snowshagal'
+]);
+
 export function siteFooter(lang = 'ko', { reportTranslationHref = '' } = {}) {
   const isEn = lang === 'en';
   const prefix = isEn ? '/en' : '';
@@ -98,6 +105,8 @@ export function siteFooter(lang = 'ko', { reportTranslationHref = '' } = {}) {
           <p class="site-footer-heading" aria-hidden="true">${followHeading}</p>
           <nav class="site-footer-nav" aria-label="${followNavAria}">
             <a href="${feedHref}" type="application/atom+xml">RSS</a>
+            <a href="${SOCIAL_PROFILES[0]}" rel="me noopener">LinkedIn</a>
+            <a href="${SOCIAL_PROFILES[1]}" rel="me noopener">Threads</a>
           </nav>
         </div>
         <div class="site-footer-group">

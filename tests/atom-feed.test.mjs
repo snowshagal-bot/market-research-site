@@ -304,11 +304,11 @@ test('admin pages and API routes carry no feed discovery link', async () => {
 
 /* ------------------------------------------------------------------ footer */
 
-test('the footer has a fourth group, Follow, whose only link is the language\'s Atom feed', () => {
+test('the footer has a fourth group, Follow: the language\'s Atom feed, then the editor\'s LinkedIn and Threads', () => {
   for (const [lang, heading, aria, href] of [['ko', '팔로우', '푸터 팔로우 메뉴', '/rss.xml'], ['en', 'Follow', 'Footer Follow menu', '/en/rss.xml']]) {
     const footer = siteFooter(lang);
     assert.equal(count(footer, /class="site-footer-group"/g), 4, `${lang}: four groups`);
-    assert.match(footer, new RegExp(`<p class="site-footer-heading" aria-hidden="true">${heading}</p>\\s*<nav class="site-footer-nav" aria-label="${aria}">\\s*<a href="${href}" type="application/atom\\+xml">RSS</a>\\s*</nav>`));
+    assert.match(footer, new RegExp(`<p class="site-footer-heading" aria-hidden="true">${heading}</p>\\s*<nav class="site-footer-nav" aria-label="${aria}">\\s*<a href="${href}" type="application/atom\\+xml">RSS</a>\\s*<a href="https://www\\.linkedin\\.com/in/sung-oh-choi-628a5b431/" rel="me noopener">LinkedIn</a>\\s*<a href="https://www\\.threads\\.com/@snowshagal" rel="me noopener">Threads</a>\\s*</nav>`));
     const order = [...footer.matchAll(/<p class="site-footer-heading" aria-hidden="true">([^<]*)<\/p>/g)].map(m => m[1]);
     assert.deepEqual(order, lang === 'en' ? ['Reports', 'Market', 'Follow', 'Site'] : ['리포트', '마켓', '팔로우', '사이트']);
     assert.doesNotMatch(footer, /coming soon|Email updates|newsletter/i);

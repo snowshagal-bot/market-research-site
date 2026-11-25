@@ -2,6 +2,7 @@
 // pages load (MARKET_LOCALE), so a card reads the same before and after the
 // browser re-renders it.
 import { availableIndicatorCodes, listedIndicators } from './_market-indicators.js';
+import { SOCIAL_PROFILES } from './_footer.js';
 import '../assets/locale.js';
 // The search-title rule the admin publisher applies before it stores one.
 import '../assets/report-metadata.js';
@@ -835,12 +836,10 @@ export function structuredDataScript(data) {
   return `<script type="application/ld+json">${serializeJsonLd(data)}</script>`;
 }
 
-// The editor's public profiles, named as the same entity as the site. The
-// About pages link to the same addresses; tests keep the two in step.
-export const SOCIAL_PROFILES = Object.freeze([
-  'https://www.linkedin.com/in/sung-oh-choi-628a5b431/',
-  'https://www.threads.com/@snowshagal'
-]);
+// The editor's public profiles (SOCIAL_PROFILES, kept in functions/_footer.js,
+// which links them on every page) are named as the same entity as the site.
+// The About pages link to the same addresses; tests keep them in step.
+export { SOCIAL_PROFILES };
 
 export function organizationStructuredData(lang = 'ko') {
   return {

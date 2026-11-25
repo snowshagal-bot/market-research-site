@@ -103,7 +103,9 @@ reports and the glossary together. All are in the first HTML; none edits a
 report file.
 - **Footer** (`functions/_footer.js`, on every page): 날짜별 마감 기록
   (`/market/archive/`, which lists every session page and every indicator page),
-  업종·테마 (`/market/sectors/`), 투자자별 수급 (`/market/investor-flows/`) and 용어 사전 (`/basics/glossary/`). After changing
+  업종·테마 (`/market/sectors/`), 투자자별 수급 (`/market/investor-flows/`) and 용어 사전 (`/basics/glossary/`).
+  Under 팔로우 it links RSS, LinkedIn and Threads (`SOCIAL_PROFILES` in `_footer.js`, also the
+  site's `sameAs` in structured data). After changing
   the footer run `node scripts/sync-static-footers.mjs`.
 - **Home strip**: each of the five figures links to its history page
   (`/market/kospi/`, `kosdaq`, `usdkrw`, `us10y`, `gold`), in the shipped
