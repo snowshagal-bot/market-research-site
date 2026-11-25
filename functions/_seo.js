@@ -1190,8 +1190,10 @@ function marketSessionEntries(sessions, urlEntry, rateCodes = []) {
   const entries = [];
   const archive = pair('/market/archive/');
   const sectors = pair('/market/sectors/');
+  const flows = pair('/market/investor-flows/');
   entries.push(urlEntry(archive[0].href, dates[0].published_at, archive), urlEntry(archive[1].href, dates[0].published_at, archive));
   entries.push(urlEntry(sectors[0].href, dates[0].published_at, sectors), urlEntry(sectors[1].href, dates[0].published_at, sectors));
+  entries.push(urlEntry(flows[0].href, dates[0].published_at, flows), urlEntry(flows[1].href, dates[0].published_at, flows));
   // An optional indicator is listed once a record has its value, a domestic
   // rate once a day of it is stored (availableIndicatorCodes).
   for (const indicator of listedIndicators(availableIndicatorCodes(sessions, rateCodes))) {

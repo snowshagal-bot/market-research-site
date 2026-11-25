@@ -508,7 +508,7 @@ function parseSitemap(xml) {
   return { locs, alternates };
 }
 
-const MARKET_SESSION_URL = /^https:\/\/snowshagal\.com\/(?:en\/)?market\/(?:\d{4}-\d{2}-\d{2}|archive|sectors|kospi|kosdaq|nasdaq|dow|sp500|sox|vix|vkospi|nikkei225|shanghai|taiex|us10y|ktb3y|ktb10y|corpaa3y|cd91|usdkrw|jpykrw|cnykrw|eurkrw|dxy|usdjpy|wti|brent|natgas|gold|silver|copper|bitcoin)\/$/;
+const MARKET_SESSION_URL = /^https:\/\/snowshagal\.com\/(?:en\/)?market\/(?:\d{4}-\d{2}-\d{2}|archive|sectors|investor-flows|kospi|kosdaq|nasdaq|dow|sp500|sox|vix|vkospi|nikkei225|shanghai|taiex|us10y|ktb3y|ktb10y|corpaa3y|cd91|usdkrw|jpykrw|cnykrw|eurkrw|dxy|usdjpy|wti|brent|natgas|gold|silver|copper|bitcoin)\/$/;
 
 function checkSitemap(report, xml, pages) {
   const { locs, alternates } = parseSitemap(xml);

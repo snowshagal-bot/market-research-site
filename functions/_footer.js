@@ -26,6 +26,7 @@ export function siteFooter(lang = 'ko', { reportTranslationHref = '' } = {}) {
         market: 'Market',
         marketArchive: 'Close Archive',
         marketSectors: 'Sectors &amp; Themes',
+        marketFlows: 'Investor Flows',
         disclosures: 'Disclosure',
         calendar: 'Calendar',
         about: 'About',
@@ -43,6 +44,7 @@ export function siteFooter(lang = 'ko', { reportTranslationHref = '' } = {}) {
         market: '마켓',
         marketArchive: '날짜별 마감 기록',
         marketSectors: '업종·테마',
+        marketFlows: '투자자별 수급',
         disclosures: '공시',
         calendar: '캘린더',
         about: '소개',
@@ -87,6 +89,7 @@ export function siteFooter(lang = 'ko', { reportTranslationHref = '' } = {}) {
             <a href="${prefix}/market/">${labels.market}</a>
             <a href="${prefix}/market/archive/">${labels.marketArchive}</a>
             <a href="${prefix}/market/sectors/">${labels.marketSectors}</a>
+            <a href="${prefix}/market/investor-flows/">${labels.marketFlows}</a>
             <a href="${prefix}/disclosures/">${labels.disclosures}</a>
             <a href="${prefix}/calendar/">${labels.calendar}</a>
           </nav>
