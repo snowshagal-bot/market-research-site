@@ -542,15 +542,24 @@
     });
   }
   const DOMESTIC_RATES_ENDPOINT = '/api/market/rates/date';
+  const MARKET_FUNDS_ENDPOINT = '/api/market/funds/date';
   // The session's KOFIA yields (`date` or 'latest'): the stored day, or null on
   // any failure, a missing day or a late answer. They are published after the
   // close record (KOFIA computes them at 16:00 KST), so their absence is normal.
   function fetchDomesticRates(date) {
+    return fetchStoredDay(DOMESTIC_RATES_ENDPOINT, date);
+  }
+  // The session's KOFIA market funds (`date` or 'latest'), the same way. KOFIA
+  // publishes them a business day after the session.
+  function fetchMarketFunds(date) {
+    return fetchStoredDay(MARKET_FUNDS_ENDPOINT, date);
+  }
+  function fetchStoredDay(endpoint, date) {
     if (typeof fetch !== 'function' || !date) return Promise.resolve(null);
     let timer = null;
     let pending;
     try {
-      pending = fetch(`${DOMESTIC_RATES_ENDPOINT}?date=${encodeURIComponent(date)}`, { headers: { Accept: 'application/json' } });
+      pending = fetch(`${endpoint}?date=${encodeURIComponent(date)}`, { headers: { Accept: 'application/json' } });
     } catch (_) {
       return Promise.resolve(null);
     }
@@ -985,6 +994,15 @@
           const item = rankingMarkets[key];
           return `<article class="ranking-market"><div class="ranking-market-head"><h4>${key}</h4><p class="ranking-52w"><span>${html(copy.high52)} ${rankingCount(item.new_high_52w)}</span><span>${html(copy.low52)} ${rankingCount(item.new_low_52w)}</span><span class="ranking-52w-basis">${html(copy.high52Basis)}</span></p></div><div class="ranking-lists">${rankingBlock(copy.rankGainers, item.top_gainers, 'top_gainers')}${rankingBlock(copy.rankLosers, item.top_losers, 'top_losers')}${rankingBlock(copy.rankTurnover, item.top_turnover, 'top_turnover')}</div></article>`;
         }).join('')}</div><p class="mk-unit">${html(copy.rankingsNote)}</p>`;
+    // KOFIA market funds (their own dataset, a business day late). A past date
+    // shows its own day only; TODAY shows the newest stored day up to the
+    // record's date, at most 10 days older, with its date on the card.
+    const funds = options.marketFunds;
+    const fundsAge = funds && marketDate && /^\d{4}-\d{2}-\d{2}$/.test(String(funds.market_date || ''))
+      ? (Date.parse(`${marketDate}T00:00:00Z`) - Date.parse(`${funds.market_date}T00:00:00Z`)) / 86400000
+      : null;
+    const fundsShown = funds && (isHistory ? funds.market_date === marketDate : fundsAge !== null && fundsAge >= 0 && fundsAge <= 10);
+    const fundsCard = fundsShown ? root.MARKET_LOCALE?.marketFundsCard?.(funds, ko ? 'ko' : 'en', { dateLabel: dateText(funds.market_date) }) || '' : '';
     const rankingsCard = rankingsBody ? `<section class="mk-card mk-rankings-card" aria-labelledby="mk-rankings-title">
       <div class="mk-card-head"><h3 id="mk-rankings-title">${html(copy.rankingsTitle)}</h3><span class="mk-card-note">${copy.regularClose}</span></div>
       ${rankingsBody}
@@ -1044,6 +1062,7 @@
           <div class="mk-section-head"><h2 id="mk-kr-title">${copy.krTitle}</h2><span>${copy.krCaption}</span></div>
           <div class="mk-grid mk-grid-kr">${flowsCard}${breadthCardHtml}</div>
           <div class="mk-grid mk-grid-kr2">${statsCard}${topCard}</div>
+          ${fundsCard ? `<div class="mk-funds-row">${fundsCard}</div>` : ''}
           ${rankingsCard ? `<div class="mk-grid-full">${rankingsCard}</div>` : ''}
         </section>
         <section class="mk-section" aria-labelledby="mk-global-title">
@@ -1445,6 +1464,7 @@
       } else if (mode === 'history' && targetDate) {
         const dateEndpoint = `/api/market/date?date=${encodeURIComponent(targetDate)}`;
         const ratesRequest = fetchDomesticRates(targetDate);
+        const fundsRequest = fetchMarketFunds(targetDate);
         const trendRequest = fetchTrend(targetDate);
         const response = await fetch(dateEndpoint, { headers: { Accept: 'application/json' } });
         if (!response.ok) {
@@ -1454,15 +1474,17 @@
           throw new Error(`HTTP ${response.status}`);
         }
         const data = await response.json();
-        const [domesticRates, trend] = await Promise.all([ratesRequest, trendRequest]);
+        const [domesticRates, marketFunds, trend] = await Promise.all([ratesRequest, fundsRequest, trendRequest]);
         if (superseded()) return;
-        render(data, rootEl, { domesticRates, trend });
+        render(data, rootEl, { domesticRates, marketFunds, trend });
       } else {
         // Today: the Market Close, and Global Latest for the global cards,
         // requested together; a Global Latest failure only leaves it out.
         const latestRequest = fetchGlobalLatest();
         // The newest stored KOFIA day; shown only when it is the record's own date.
         const ratesRequest = fetchDomesticRates('latest');
+        // The newest stored market funds day; usually the session before the record's.
+        const fundsRequest = fetchMarketFunds('latest');
         const trendRequest = fetchTrend(null);
         const source = document.body.dataset.marketSource || '/api/market/latest';
         const response = await fetch(source, { headers: { Accept: 'application/json' } });
@@ -1476,7 +1498,7 @@
           throw new Error(`HTTP ${response.status}`);
         }
         const data = await response.json();
-        const [latest, domesticRates, trend] = await Promise.all([latestRequest, ratesRequest, trendRequest]);
+        const [latest, domesticRates, marketFunds, trend] = await Promise.all([latestRequest, ratesRequest, fundsRequest, trendRequest]);
         if (superseded()) return;
         state.currentDate = data.meta?.market_date || null;
         state.expectedDate = response.headers?.get?.(EXPECTED_MARKET_DATE_HEADER) || null;
@@ -1484,7 +1506,7 @@
         const globalLatest = latest
           ? { items: latest.items, now: root.MARKET_LOCALE.globalLatestNow(latest.servedAt, Date.now()) }
           : null;
-        render(data, rootEl, { globalLatest, domesticRates, trend });
+        render(data, rootEl, { globalLatest, domesticRates, marketFunds, trend });
       }
     } catch (error) {
       console.error('Failed to load market close data', error);

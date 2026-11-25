@@ -32,7 +32,7 @@ const clone = value => JSON.parse(JSON.stringify(value));
 const verdict = payload => validateMarketPayload(payload, schema);
 const ASIA = ['NIKKEI225', 'SHANGHAI', 'TAIEX'];
 const BY_CODE = Object.fromEntries(MARKET_INDICATORS.map(item => [item.code, item]));
-const OPTIONAL = MARKET_INDICATORS.filter(item => item.optional && !item.domestic);
+const OPTIONAL = MARKET_INDICATORS.filter(item => item.optional && !item.domestic && !item.funds);
 const closesFor = codes => JSON.stringify(OPTIONAL.map(item => (codes.includes(item.code) ? 1 : null)));
 
 /** The 1.1.0 example as a complete 1.2.0 record, its source dates aligned to its market date. */
@@ -94,9 +94,9 @@ test('the Asian indices are optional `indices` after SP500, dated the local sess
   const codes = MARKET_INDICATORS.map(item => item.code);
   assert.deepEqual(codes.slice(codes.indexOf('SP500') + 1, codes.indexOf('SP500') + 4), ASIA);
   assert.deepEqual(ASIA.map(code => ({ ...BY_CODE[code] })), [
-    { optional: true, domestic: false, code: 'NIKKEI225', group: 'indices', kind: 'asia', slug: 'nikkei225' },
-    { optional: true, domestic: false, code: 'SHANGHAI', group: 'indices', kind: 'asia', slug: 'shanghai' },
-    { optional: true, domestic: false, code: 'TAIEX', group: 'indices', kind: 'asia', slug: 'taiex' }
+    { optional: true, domestic: false, funds: false, code: 'NIKKEI225', group: 'indices', kind: 'asia', slug: 'nikkei225' },
+    { optional: true, domestic: false, funds: false, code: 'SHANGHAI', group: 'indices', kind: 'asia', slug: 'shanghai' },
+    { optional: true, domestic: false, funds: false, code: 'TAIEX', group: 'indices', kind: 'asia', slug: 'taiex' }
   ]);
   for (const code of ASIA) {
     assert.equal(parseMarketPagePath(`/market/${code.toLowerCase()}/`).indicator, BY_CODE[code]);

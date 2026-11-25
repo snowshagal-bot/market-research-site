@@ -775,6 +775,99 @@
     return KRX_GROUP_NAMES_EN_BY_CODE[code] || KRX_GROUP_NAMES_EN_BY_KO[name] || name;
   }
 
+  /*
+   * Market Funds (KOFIA FreeSIS, contracts/market_funds/): the card that TODAY
+   * (assets/market-close.js) and the session page (functions/_market-date-page.js)
+   * both draw, built here once so the two cannot drift. Amounts arrive in whole
+   * KRW millions. The history page slugs match functions/_market-indicators.js.
+   */
+  const MARKET_FUND_PAGES = Object.freeze({ DEPOSITS: 'deposits', CREDIT: 'margin-loans', FORCED_SALE: 'forced-selling' });
+  const MARKET_FUND_COPY = Object.freeze({
+    ko: {
+      title: '증시 자금',
+      note: date => `${date} 기준 · 다음 영업일 공개`,
+      names: { DEPOSITS: '투자자예탁금', CREDIT: '신용거래융자', UNPAID: '위탁매매 미수금', FORCED_SALE: '반대매매' },
+      vsPrev: '전일 대비', kospi: '코스피', kosdaq: '코스닥', ratio: '미수금 대비',
+      source: '금융투자협회 증시자금 추이 · 투자자예탁금은 장내파생상품 거래예수금 제외 · 대비는 직전 거래일 대비'
+    },
+    en: {
+      title: 'Market Funds',
+      note: date => `As of ${date} · Published the next business day`,
+      names: { DEPOSITS: 'Investor deposits', CREDIT: 'Margin loans', UNPAID: 'Unpaid margin', FORCED_SALE: 'Forced selling' },
+      vsPrev: 'vs. prior day', kospi: 'KOSPI', kosdaq: 'KOSDAQ', ratio: 'of unpaid margin',
+      source: 'KOFIA market funds · Deposits exclude exchange-traded derivatives deposits · Change against the previous trading day'
+    }
+  });
+
+  function marketFundNumber(value, digits, lang) {
+    return new Intl.NumberFormat(lang === 'en' ? 'en-US' : 'ko-KR', { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
+  }
+
+  /** Whole KRW millions as 조원/억원 (KRW tn/bn). */
+  function marketFundAmount(millions, lang) {
+    if (typeof millions !== 'number' || !Number.isFinite(millions)) return '--';
+    const abs = Math.abs(millions);
+    const sign = millions < 0 ? '−' : '';
+    if (lang === 'en') return abs >= 1e6 ? `KRW ${sign}${marketFundNumber(abs / 1e6, 2, lang)}tn` : `KRW ${sign}${marketFundNumber(abs / 1e3, 1, lang)}bn`;
+    return abs >= 1e6 ? `${sign}${marketFundNumber(abs / 1e6, 2, lang)}조원` : `${sign}${marketFundNumber(abs / 100, 0, lang)}억원`;
+  }
+
+  /** A change in KRW millions with its sign (+ / U+2212) and the sign's colour class. */
+  function marketFundChange(diff, lang) {
+    if (typeof diff !== 'number' || !Number.isFinite(diff)) return { text: '--', cls: 'neutral' };
+    const text = marketFundAmount(Math.abs(diff), lang);
+    const sign = diff > 0 ? '+' : diff < 0 ? '−' : '';
+    return { text: lang === 'en' ? text.replace(/^KRW /, `KRW ${sign}`) : `${sign}${text}`, cls: diff > 0 ? 'up' : diff < 0 ? 'down' : 'neutral' };
+  }
+
+  function marketFundPath(code, lang) {
+    const slug = MARKET_FUND_PAGES[code];
+    return slug ? `${lang === 'en' ? '/en' : ''}/market/${slug}/` : '';
+  }
+
+  /**
+   * The Market Funds card for one stored day (the /api/market/funds/date DTO),
+   * or '' when the day has none of the four headline figures. `dateLabel`: the
+   * day as the page writes dates (2026.11.24 / Nov 24, 2026).
+   */
+  function marketFundsCard(day, lang, { dateLabel = '' } = {}) {
+    const key = lang === 'en' ? 'en' : 'ko';
+    const copy = MARKET_FUND_COPY[key];
+    const items = new Map((Array.isArray(day?.items) ? day.items : [])
+      .filter(item => item && typeof item.value === 'number' && Number.isFinite(item.value))
+      .map(item => [item.code, item]));
+    const diff = item => (item && typeof item.previous_value === 'number' && Number.isFinite(item.previous_value) ? item.value - item.previous_value : null);
+    const change = item => {
+      const moved = marketFundChange(diff(item), key);
+      return `${copy.vsPrev} <span class="${moved.cls}">${moved.text}</span>`;
+    };
+    const label = code => {
+      const path = marketFundPath(code, key);
+      return path ? `<a class="instrument-history-link" href="${path}">${copy.names[code]}</a>` : copy.names[code];
+    };
+    const stat = (code, extra = []) => {
+      const item = items.get(code);
+      if (!item) return '';
+      const sub = [change(item), ...extra].filter(Boolean).join(' · ');
+      return `<div class="mk-stat" data-fund="${code}"><span>${label(code)}</span><strong>${marketFundAmount(item.value, key)}</strong><small>${sub}</small></div>`;
+    };
+    const kospi = items.get('CREDIT_KOSPI');
+    const kosdaq = items.get('CREDIT_KOSDAQ');
+    const ratio = items.get('FORCED_SALE_RATIO');
+    const stats = [
+      stat('DEPOSITS'),
+      stat('CREDIT', [kospi ? `${copy.kospi} ${marketFundAmount(kospi.value, key)}` : '', kosdaq ? `${copy.kosdaq} ${marketFundAmount(kosdaq.value, key)}` : '']),
+      stat('UNPAID'),
+      stat('FORCED_SALE', [ratio ? (key === 'en' ? `${marketFundNumber(ratio.value, 1, key)}% ${copy.ratio}` : `${copy.ratio} ${marketFundNumber(ratio.value, 1, key)}%`) : ''])
+    ].filter(Boolean).join('');
+    if (!stats) return '';
+    return `<section class="mk-card mk-funds-card" aria-labelledby="mk-funds-title">
+      <div class="mk-card-head"><h3 id="mk-funds-title">${copy.title}</h3><span class="mk-card-note">${copy.note(dateLabel || String(day?.market_date || ''))}</span></div>
+      <div class="mk-stats">${stats}</div>
+      <p class="mk-unit">${copy.source}</p>
+    </section>`;
+  }
+
   root.MARKET_LOCALE = {
     validLanguages,
     copy,
@@ -812,6 +905,10 @@
     globalLatestNow,
     todayStripBasis,
     KRX_GROUP_NAMES,
-    krxGroupName
+    krxGroupName,
+    MARKET_FUND_PAGES,
+    marketFundAmount,
+    marketFundChange,
+    marketFundsCard
   };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -300,6 +300,31 @@ npx wrangler d1 execute market-research-comments --remote --file=migrations/comm
 
 Request handlers never create the table: without it both endpoints answer `503 DOMESTIC_RATES_SCHEMA_NOT_READY`, and the pages (dashboard, session pages, history pages, archive, sitemap) behave exactly as without rates. A Preview acceptance test may publish a real KOFIA day to the Preview endpoint and delete it afterwards, on Preview only: `DELETE FROM market_domestic_rates WHERE market_date = 'YYYY-MM-DD';`. The Preview deployment's `MARKET_PUBLISH_KEY` is not the collector's, so the collector's own key answers 401 there. Status: migration `0003` applied to Preview and Production on 2026-11-22; Production holds the 2026 backfill and the daily task's days.
 
+### Market Funds on the existing D1 binding
+
+Market Funds (`contracts/market_funds/`) are KOFIA FreeSIS stock market funds of each KRX trading day:
+- investor deposits;
+- margin loans: total, KOSPI, KOSDAQ;
+- unpaid margin;
+- forced selling and its ratio.
+
+KOFIA publishes a day's figures on a later business day, so they are not part of that day's record. They have their own contract (1.0.0), table (`market_funds`, one row per `market_date`) and endpoints (`POST /api/market/funds/publish`, `GET /api/market/funds/date?date=YYYY-MM-DD|latest`). They reuse `COMMENTS_DB`, the Market Close write-host policy and `MARKET_PUBLISH_KEY`; no new Secret or binding is required.
+
+Apply the checked-in idempotent migration to Preview first, then, after approval and before the Production merge, to Production:
+
+```bash
+npx wrangler d1 execute market-research-comments-preview --remote --file=migrations/comments/0006_market_funds.sql
+npx wrangler d1 execute market-research-comments --remote --file=migrations/comments/0006_market_funds.sql
+```
+
+Request handlers never create the table. Without it:
+- both endpoints answer `503 MARKET_FUNDS_SCHEMA_NOT_READY`;
+- the pages behave exactly as without funds.
+
+The collector (publisher repository) publishes through its own scheduled task, `시장지표-증시자금`. Its run time follows KOFIA's release time.
+
+Status: not applied yet (2026-11-25).
+
 Market Close cards (`functions/_market-card.js`) keep one 1200×630 JPEG per published session and language in `market_close_cards` and serve it at `/market/YYYY-MM-DD/card.jpg` (the session page's share image). They reuse `COMMENTS_DB`, `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_BROWSER_RENDERING_TOKEN`; no new Secret or binding is required. Each card is one Browser Rendering screenshot: about two per trading day, two more when the Daily's takeaway arrives after the publish, and up to 20 attempts a day (KST) in all while older sessions are filled on page visits (`CARD_FILL_PER_DAY` in `functions/_market-card.js`; lower it if the cover generator starts hitting Browser Rendering limits). There is no separate backfill job.
 
 Apply the checked-in idempotent migration to the isolated Preview database first:

@@ -525,16 +525,18 @@ function indicatorRow(marketDate, item) {
 }
 
 test('every instrument has a history path; anything else under /market/ is left alone', () => {
-  assert.equal(MARKET_INDICATORS.length, 29);
-  assert.equal(MARKET_INDICATORS.filter((item) => item.optional).length, 15);
+  assert.equal(MARKET_INDICATORS.length, 32);
+  assert.equal(MARKET_INDICATORS.filter((item) => item.optional).length, 18);
   assert.equal(MARKET_INDICATORS.filter((item) => item.domestic).length, 4);
+  assert.equal(MARKET_INDICATORS.filter((item) => item.funds).length, 3);
+  const SLUGS = { COMEX_COPPER: 'copper', DEPOSITS: 'deposits', CREDIT: 'margin-loans', FORCED_SALE: 'forced-selling' };
   for (const item of MARKET_INDICATORS) {
-    assert.equal(item.slug, item.code === 'COMEX_COPPER' ? 'copper' : item.code.toLowerCase());
+    assert.equal(item.slug, SLUGS[item.code] || item.code.toLowerCase());
     assert.deepEqual(parseMarketPagePath(`/market/${item.slug}/`), { lang: 'ko', indicator: item, canonical: true });
     assert.deepEqual(parseMarketPagePath(`/en/market/${item.slug}`), { lang: 'en', indicator: item, canonical: false });
     assert.equal(marketIndicatorPath(item.code, 'en'), `/en/market/${item.slug}/`);
   }
-  for (const other of ['/market/foo/', '/market/KOSPI/', '/market/kospi200/', '/market/index.html', '/market/comex_copper/']) assert.equal(parseMarketPagePath(other), null, other);
+  for (const other of ['/market/foo/', '/market/KOSPI/', '/market/kospi200/', '/market/index.html', '/market/comex_copper/', '/market/margin-loans-/', '/market/-deposits/', '/market/margin--loans/']) assert.equal(parseMarketPagePath(other), null, other);
 });
 
 test('a U.S. value is dated by its U.S. session and listed once; its change is against its own previous close', () => {
