@@ -128,6 +128,8 @@ Shared report UI should therefore be isolated from original report styles. The c
 
 Space that shared UI takes in the page flow must exist in the first HTML, not be inserted by a script after the report has painted: the 52 px top bar spacer is written by the middleware for that reason. A fixed or Shadow DOM element that does not push content can still arrive by script.
 
+Third-party stylesheets must not hold back a report's first paint. Google Fonts CSS links in uploaded reports are turned into self-applying preloads by the middleware. Report text starts in the fallback font and swaps when the web font lands (`display=swap`). When judging a report's look on a cold load, expect that brief fallback.
+
 Do not replace the current model by directly merging report markup into the homepage DOM unless there is a strong architectural reason and regression testing is available.
 
 ## Comments UI

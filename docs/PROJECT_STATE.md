@@ -674,6 +674,17 @@ Files under `reports/` are standalone HTML documents that may contain their own 
 
 `functions/_middleware.js` intercepts HTML responses under `/reports/` and injects `/assets/report-shell.js`. It also writes the top bar's 52 px spacer (`REPORT_NAV_SPACER`, `#mrs-nav-spacer`) as the first child of `<body>` in the first HTML, and the shell reuses that node (2026-11-24). Before this the shell created the spacer when it ran at the end of the body, so a visitor without the script cached saw the report paint and then drop 52 px: Cloudflare Web Analytics recorded CLS 0.11–1.33 on report pages from that drop. Keep the spacer height equal to `BAR_H` in `report-shell.js`.
 
+The middleware also stops a report's Google Fonts stylesheet from holding back the first paint (2026-11-25). Each `<link rel="stylesheet">` to `fonts.googleapis.com/css` or `/css2` becomes `rel="preload" as="style"`, which turns itself into the stylesheet on load. A `<noscript>` copy follows it. A link with its own `media` or `disabled` attribute is left alone. Both the HTMLRewriter path and the string fallback do this (`isGoogleFontsStylesheet`, `deferFontStylesheets`).
+
+Why: 86 reports link Korean families. Their css2 response is about 90 KB gzipped (about 420 KB, 670 `@font-face` rules). With a slow-4G, 4×-CPU phone profile, a page stayed blank about a second while it downloaded.
+
+Measured on the Preview against Production, same profile:
+- Note 13 KO: first paint 2.2–2.4 s → 0.3 s, LCP → 1.1 s.
+- Safe Haven Insight: LCP 2.2–2.4 s → 1.6 s.
+- CLS unchanged on mobile; desktop Note 13 rose from 0 to 0.006.
+
+The URLs already ask for `display=swap`, so the text started in the fallback font before this change too.
+
 The same middleware injects canonical `snowshagal.com` metadata into published report responses and marks non-Production hosts `noindex, nofollow` by response header. It generates the report `<title>` from the real report date, category, and editorial title, or from the post's stored search title (see above). The report's own `<title>`, description, Open Graph, X and `application/ld+json` blocks are removed so each appears exactly once: the site's JSON-LD (Article + BreadcrumbList) is the only structured data on a report page. The description is `reportDescription()` (see the report `<title>` / description rules above): Market Close facts for a Daily or Weekly that has them, otherwise the editorial blurb as written, otherwise the factual date · category · title line; meta, Open Graph, X and JSON-LD all carry that one text, and whatever pieces exist are used so it is never empty. It adds `hreflang` only when both sides of an explicit `translationGroup` exist, so untranslated reports never point to invented English pages.
 
 Since 2026-11-17 the middleware also reads three metas from the uploaded file's own `<head>` as it streams (HTMLRewriter handlers; `reportHeadMeta()` on the string path), and writes the site's head tags at `</head>`, after them:
