@@ -435,6 +435,16 @@ report HTML at request time (a `seoTitle` is read once, at publish, and stored).
 2026-10-25) so it does not compete with dated Daily pages. og:title, twitter:title, canonical,
 hreflang and the JSON-LD headline are unchanged; the JSON-LD description matches the meta tag.
 
+`/market/` and `/en/market/` (TODAY) also put the newest final session's dashboard into the HTTP response (2026-11-26).
+- **Builder.** `functions/_initial-html.js` (`marketTodayEdits`) fills `#market-dashboard-view` using the session page's renderer (`renderMarketDateMain(…, { dashboardOnly: true })`), and sets `data-ssr-date`. Market funds follow TODAY's rule (`fundsMaxAgeDays: 10`).
+- **Before this, crawlers that do not run scripts saw placeholder cards with no figures.**
+- **The script still draws TODAY over it,** adding Global Latest, the phone board tabs and the flow toggle. It leaves the server's figures undimmed while it loads.
+- **Not covered:** `?date=` and `?view=` views, and missing or failing D1, keep the static shell.
+- **Measured on a slow-4G, 4×-CPU phone profile:**
+  - the figures appear at about 1.4 s instead of 2.1–2.3 s;
+  - first paint moves from about 0.7 s to about 1.45 s, because the HTML grows from 28 KB to about 85 KB;
+  - CLS stays 0.
+
 `/disclosures/`, `/en/disclosures/`, `/calendar/` and `/en/calendar/` render their core content
 into the HTTP response. `functions/api/disclosures/_feed-data.js` (`loadDisclosureFeed`) and
 `functions/_calendar-data.js` (`loadCalendarMonth`) hold the data selection that

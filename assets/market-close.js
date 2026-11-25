@@ -1447,7 +1447,9 @@
     state.isLatest = mode === 'today';
 
     const dashboardView = document.getElementById('market-dashboard-view');
-    if (dashboardView) {
+    // The server's first HTML already holds the newest session (data-ssr-date):
+    // keep it at full strength while TODAY loads; dim anything else.
+    if (dashboardView && !(mode === 'today' && dashboardView.dataset?.ssrDate)) {
       dashboardView.classList.add('is-loading');
     }
 

@@ -830,8 +830,14 @@ export function renderMarketDateMain(payload, lang, context = {}) {
     </section>` : '';
   // Stock rankings follow the session's own stats; a record without their status shows no card.
   // KOFIA market funds of this session (Market Funds, joined by date; published a business day later).
-  const fundsCard = context.marketFunds?.market_date === date
-    ? globalThis.MARKET_LOCALE.marketFundsCard(context.marketFunds, key, { dateLabel: dotDate(date, key) })
+  // A session page shows its own day only. TODAY (context.fundsMaxAgeDays,
+  // as assets/market-close.js does) shows the newest day up to the record's
+  // date, at most that many days older, under its own date.
+  const fundsDate = String(context.marketFunds?.market_date || '');
+  const fundsAge = ISO_DATE.test(fundsDate) ? (Date.parse(`${date}T00:00:00Z`) - Date.parse(`${fundsDate}T00:00:00Z`)) / 86400000 : null;
+  const fundsShown = context.fundsMaxAgeDays ? fundsAge !== null && fundsAge >= 0 && fundsAge <= context.fundsMaxAgeDays : fundsDate === date;
+  const fundsCard = fundsShown
+    ? globalThis.MARKET_LOCALE.marketFundsCard(context.marketFunds, key, { dateLabel: dotDate(fundsDate, key) })
     : '';
   const rankingsBody = stockRankingsBody(payload, status, f, copy, lang);
   const rankingsCard = rankingsBody ? `<section class="mk-card mk-rankings-card" aria-labelledby="mk-rankings-title">
@@ -875,19 +881,7 @@ export function renderMarketDateMain(payload, lang, context = {}) {
     : `<p class="market-report-unavailable">${html(copy.noReport)}</p>`;
   const meta = [copy.closeBasis, copy.overseas.replace(/^\*\s*/, '')];
 
-  return `<main id="market-date-root" class="market-date-page" data-market-date="${html(date)}">
-  ${pageHead({
-    id: 'market-date-heading',
-    breadcrumb: `<a href="${key === 'en' ? '/en/' : '/'}">${html(copy.breadcrumbHome)}</a> › <a href="${base}">${html(copy.breadcrumbMarket)}</a> › <a href="${marketArchivePath(lang)}">${html(copy.archive)}</a>`,
-    eyebrow: pc.pageEyebrow,
-    title: copy.heading(date),
-    summary,
-    lead: takeaway,
-    meta
-  })}
-  <div class="market-wrap">${nav}</div>
-  <div class="market-wrap mk-dashboard market-dashboard">
-    <div class="mk-close-line"><p><b>${html(pc.closeOf(monthDayText(date, lang)))}</b> <span>${html(pc.regularBasis)}</span></p>${report}</div>
+  const dashboard = `<div class="mk-close-line"><p><b>${html(pc.closeOf(monthDayText(date, lang)))}</b> <span>${html(pc.regularBasis)}</span></p>${report}</div>
     <div class="mk-top">
       ${k ? indexCard('KOSPI', k, f, copy, pc, lang, date, trend) : ''}
       ${q ? indexCard('KOSDAQ', q, f, copy, pc, lang, date, trend) : ''}
@@ -906,7 +900,23 @@ export function renderMarketDateMain(payload, lang, context = {}) {
       ${boards}
     </section>
     <p class="market-archive-links"><a class="market-date-dashboard" href="${base}?date=${html(date)}">${html(copy.dashboard)} →</a><a href="${marketArchivePath(lang)}">${html(copy.archive)} →</a><a href="${marketSectorsPath(lang)}">${html(copy.sectorsLink)} →</a></p>
-    <div class="market-data-note"><p>${html(copy.source)}</p><p>${html(copy.disclaimer)}</p></div>
+    <div class="market-data-note"><p>${html(copy.source)}</p><p>${html(copy.disclaimer)}</p></div>`;
+  // /market/ TODAY's first HTML (functions/_initial-html.js) takes the dashboard alone.
+  if (context.dashboardOnly) return dashboard;
+
+  return `<main id="market-date-root" class="market-date-page" data-market-date="${html(date)}">
+  ${pageHead({
+    id: 'market-date-heading',
+    breadcrumb: `<a href="${key === 'en' ? '/en/' : '/'}">${html(copy.breadcrumbHome)}</a> › <a href="${base}">${html(copy.breadcrumbMarket)}</a> › <a href="${marketArchivePath(lang)}">${html(copy.archive)}</a>`,
+    eyebrow: pc.pageEyebrow,
+    title: copy.heading(date),
+    summary,
+    lead: takeaway,
+    meta
+  })}
+  <div class="market-wrap">${nav}</div>
+  <div class="market-wrap mk-dashboard market-dashboard">
+    ${dashboard}
   </div>
   <div class="market-wrap">${nav}</div>
 </main>`;
