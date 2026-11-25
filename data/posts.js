@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-25-daily-xylrhu",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-25",
+    "reportDate": "2026-11-25",
+    "registeredDate": "2026-11-25",
+    "registeredAt": "2026-11-25T09:16:48.683Z",
+    "legacyImport": false,
+    "title": "미국 반도체 하루 만에 반락, 코스피 6% 급락해 전날 상승분 모두 반납",
+    "subtitle": "",
+    "description": "미국 반도체 7.88% 반락과 메모리 공급 과잉 경고에 삼성전자·SK하이닉스 10% 안팎 급락 · 11월 25일 코스피 4,697.51(-6.16%), 외국인 1조8,994억 순매도 · 하락 이유와 다음 거래일 확인할 것",
+    "takeaway": "미국 반도체가 하루 만에 8% 반락하고 메모리 공급 과잉 경고가 겹쳐 코스피 6% 급락, 전날 상승분 모두 반납",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-11-25_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-25-daily-xylrhu.webp",
+    "shareCardImage": "covers/share/2026-11-25-daily-xylrhu.jpg",
+    "coverThumbnail": "covers/2026-11-25-daily-xylrhu-450.webp"
+  },
+  {
     "id": "2026-11-25-basics-1p95odb",
     "type": "basics",
     "typeLabel": "Market Basics",
