@@ -198,7 +198,7 @@ test('after a publish the post waits for the card, but not for long', async () =
 
 test('the publish handler hands the card drawing to the announcement, and stays inert without Secrets', async () => {
   const source = await read('functions/api/market/publish.js');
-  assert.match(source, /const cards = ensureMarketCards\(env, payload\.meta\.market_date\);\s+context\.waitUntil\(cards\);/);
+  assert.match(source, /const cards = ensureMarketCards\(env, payload\.meta\.market_date, \{ posts: cardPosts\(request, env\) \}\);\s+context\.waitUntil\(cards\);/);
   assert.match(source, /context\.waitUntil\(announceMarketClose\(env, payload\.meta\.market_date, cards\)\);/);
   assert.equal(typeof publish, 'function');
 });

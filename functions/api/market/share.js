@@ -3,18 +3,12 @@
 // for the latest final session. Read-only, and made only of the public record.
 import { loadPosts } from '../../_seo.js';
 import { dailyReportFor, loadMarketDate } from '../../_market-date-page.js';
+import { dailyTakeaway } from '../../_market-card.js';
 import { marketBlogPost } from '../../_market-share-text.js';
 import { TABLE_NAME, MarketDbError, ensureMarketTable, isValidMarketDate, json } from './_shared.js';
 
 // How many recent sessions the page's date list offers.
 const RECENT_SESSIONS = 30;
-
-function dailyTakeaway(posts, date) {
-  const daily = (Array.isArray(posts) ? posts : []).find(item => (
-    item?.type === 'daily' && item?.lang !== 'en' && String(item?.reportDate || item?.date || '') === date
-  ));
-  return String(daily?.takeaway || '');
-}
 
 export async function onRequestGet({ request, env, loadPostsFn = loadPosts }) {
   try {
@@ -36,7 +30,7 @@ export async function onRequestGet({ request, env, loadPostsFn = loadPosts }) {
 
     // The line saved with the record wins over the Daily report's own, as on the home page.
     const post = marketBlogPost(data.payload, {
-      takeaway: String(data.payload.takeaway?.ko || '').trim() || dailyTakeaway(posts, date),
+      takeaway: String(data.payload.takeaway?.ko || '').trim() || dailyTakeaway(posts, date, 'ko'),
       reportUrl: dailyReportFor(posts, date, 'ko')?.url
     });
     return json({ ...post, latest: dates[0] || date, dates });

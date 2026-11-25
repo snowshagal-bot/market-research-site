@@ -11,13 +11,17 @@ import {
   CARD_VERSION,
   __test,
   cardImageUrl,
+  CARD_FILL_PER_DAY,
   cardSourceKey,
+  cardTakeaway,
+  dailyTakeaway,
   ensureMarketCard,
   ensureMarketCards,
   marketCardHtml,
   marketCardPath,
   onMarketCardRequest,
   parseMarketCardPath,
+  readMarketCardImage,
   readMarketCardMeta
 } from '../functions/_market-card.js';
 import { TABLE_NAME, ensureMarketTable } from '../functions/api/market/_shared.js';
@@ -257,7 +261,7 @@ test('publishing a final record starts both cards after the answer and never dep
   const hook = source.slice(source.indexOf('const isLatest ='), source.indexOf('return json({ ok: true'));
   assert.match(hook, /payload\.meta\.status === 'final' && typeof context\.waitUntil === 'function'/);
   // The same drawing is handed to the Telegram announcement (tests/market-telegram.test.mjs).
-  assert.match(hook, /const cards = ensureMarketCards\(env, payload\.meta\.market_date\);\s+context\.waitUntil\(cards\);/);
+  assert.match(hook, /const cards = ensureMarketCards\(env, payload\.meta\.market_date, \{ posts: cardPosts\(request, env\) \}\);\s+context\.waitUntil\(cards\);/);
   assert.doesNotMatch(hook, /await (?:ensureMarketCards|cards|announceMarketClose)/);
 });
 
@@ -293,11 +297,138 @@ test('the latest session page starts a missing card; an older page or a page wit
     assert.ok((await (await onMarketPageRequest(second.context)).text()).includes(`og:image" content="https://snowshagal.com/market/${DATE}/card.jpg?v=`));
     assert.equal(second.pending.length, 0);
 
-    // The English page has no card yet, but a later session exists: nothing starts.
+    // The English page has no card yet and a later session exists: the visit
+    // asks for a fill, which waits a minute after the Korean drawing.
     await db.prepare(`INSERT INTO ${TABLE_NAME} (market_date, schema_version, generated_at, status, payload_json, published_at, auth_source, takeaway_ko, takeaway_en) SELECT '2026-12-30', schema_version, generated_at, status, payload_json, published_at, auth_source, '', '' FROM ${TABLE_NAME} WHERE market_date = ?`).bind(DATE).run();
     const older = cardContext(env, `/en/market/${DATE}/`);
     assert.equal((await onMarketPageRequest(older.context)).status, 200);
-    assert.equal(older.pending.length, 0);
+    assert.equal(older.pending.length, 1);
+    assert.deepEqual(await Promise.all(older.pending), [{ status: 'skipped' }]);
+    assert.equal(background.calls.length, 1);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+const DAILY_KO = '외국인 순매수에 코스피가 반등, 반도체가 지수를 끌어올렸다';
+const DAILY_EN = 'Foreign buying lifted the KOSPI, led by chipmakers';
+const posts = (date = DATE) => [
+  { type: 'daily', lang: 'ko', reportDate: date, takeaway: `${DAILY_KO}⁠`, href: 'reports/daily/ko.html' },
+  { type: 'daily', lang: 'en', reportDate: date, takeaway: DAILY_EN, href: 'reports/daily/en.html' },
+  { type: 'note', lang: 'ko', reportDate: date, takeaway: '노트의 한 줄은 쓰지 않는다' }
+];
+
+test('the card carries the day’s takeaway: the record’s own line first, else the Daily’s in the same language', () => {
+  assert.equal(cardTakeaway('', posts(), DATE, 'ko'), DAILY_KO, 'zero-width characters are dropped');
+  assert.equal(cardTakeaway('', posts(), DATE, 'en'), DAILY_EN);
+  assert.equal(cardTakeaway('  편집자가   고친 한 줄 ', posts(), DATE, 'ko'), '편집자가 고친 한 줄');
+  assert.equal(cardTakeaway('', posts('2026-01-02'), DATE, 'ko'), '', 'another day’s Daily is never used');
+  assert.equal(cardTakeaway('', null, DATE, 'ko'), '');
+  assert.equal(dailyTakeaway(posts(), DATE, 'en'), DAILY_EN);
+
+  const plain = marketCardHtml(EXAMPLE, 'ko');
+  assert.doesNotMatch(plain, /<p class="say"|class="card has-say"/);
+  const withLine = marketCardHtml(EXAMPLE, 'ko', { takeaway: DAILY_KO });
+  assert.match(withLine, /<div class="card has-say">/);
+  assert.ok(withLine.includes(`<p class="say">${DAILY_KO}</p>`));
+  assert.match(withLine, /-webkit-line-clamp:2/);
+  const hostile = marketCardHtml(EXAMPLE, 'en', { takeaway: '<img src=x onerror=alert(1)>' });
+  assert.doesNotMatch(hostile, /<img src=x/);
+
+  // A card without a line keeps the key it had before lines existed.
+  assert.equal(cardSourceKey('2026-09-15T16:05:00+09:00'), `${CARD_VERSION}:2026-09-15T16:05:00+09:00`);
+  assert.equal(cardSourceKey('2026-09-15T16:05:00+09:00', '   '), cardSourceKey('2026-09-15T16:05:00+09:00'));
+  const lined = cardSourceKey('2026-09-15T16:05:00+09:00', DAILY_KO);
+  assert.ok(lined.startsWith(`${cardSourceKey('2026-09-15T16:05:00+09:00')}#`));
+  assert.notEqual(lined, cardSourceKey('2026-09-15T16:05:00+09:00', '다른 한 줄'));
+});
+
+test('a Daily published after the record redraws the card with its line, and Telegram still finds the card', async () => {
+  const { db, env } = await database();
+  const start = new Date('2026-09-15T07:10:05.000Z');
+  const first = renderer();
+  await ensureMarketCard(env, DATE, 'ko', { now: start, fetchImpl: first.fetchImpl, posts: [] });
+  assert.doesNotMatch(first.calls[0].body.html, /class="say"/);
+
+  // The Daily is out: the stored card is stale, and is redrawn once the retry window has passed.
+  const later = new Date(start.getTime() + __test.RETRY_AFTER_MS + 1000);
+  const second = renderer({ bytes: Uint8Array.from([0xff, 0xd8, 7, 7, 0xff, 0xd9]) });
+  assert.equal((await ensureMarketCard(env, DATE, 'ko', { now: later, fetchImpl: second.fetchImpl, posts: Promise.resolve(posts()) })).status, 'ready');
+  assert.ok(second.calls[0].body.html.includes(`<p class="say">${DAILY_KO}</p>`));
+  const row = await db.prepare(`SELECT source_key FROM ${CARD_TABLE} WHERE market_date = ? AND lang = 'ko'`).bind(DATE).first();
+  assert.equal(row.source_key, cardSourceKey(EXAMPLE.meta.generated_at, DAILY_KO));
+  // Same line again: nothing to do.
+  assert.deepEqual(await ensureMarketCard(env, DATE, 'ko', { now: new Date(later.getTime() + __test.RETRY_AFTER_MS * 2), fetchImpl: second.fetchImpl, posts: Promise.resolve(posts()) }), { status: 'skipped' });
+  assert.equal(second.calls.length, 1);
+
+  // The record's own line wins over the Daily's.
+  await db.prepare(`UPDATE ${TABLE_NAME} SET takeaway_ko = ? WHERE market_date = ?`).bind('편집자의 한 줄', DATE).run();
+  const third = renderer();
+  assert.equal((await ensureMarketCard(env, DATE, 'ko', { now: new Date(later.getTime() + __test.RETRY_AFTER_MS * 3), fetchImpl: third.fetchImpl, posts: posts() })).status, 'ready');
+  assert.ok(third.calls[0].body.html.includes('<p class="say">편집자의 한 줄</p>'));
+
+  // The Telegram post looks the card up by the record version alone.
+  const image = await readMarketCardImage(env, DATE, 'ko', EXAMPLE.meta.generated_at);
+  assert.deepEqual(Array.from(image.bytes), Array.from(JPEG));
+  assert.equal(await readMarketCardImage(env, DATE, 'ko', '2026-09-15T18:00:00+09:00'), null);
+  assert.equal(await readMarketCardImage(env, DATE, 'ko', EXAMPLE.meta.generated_at.slice(0, -1)), null, 'a key that only starts the same does not match');
+});
+
+test('older sessions are filled a few a day, one a minute; the latest session is never held back', async () => {
+  const { db, env } = await database();
+  const insert = date => db.prepare(`INSERT INTO ${TABLE_NAME} (market_date, schema_version, generated_at, status, payload_json, published_at, auth_source, takeaway_ko, takeaway_en) SELECT ?, schema_version, generated_at, status, payload_json, published_at, auth_source, '', '' FROM ${TABLE_NAME} WHERE market_date = ?`).bind(date, DATE).run();
+  await insert('2026-09-14');
+  await insert('2026-09-11');
+  const now = new Date('2026-11-25T03:00:00.000Z'); // 12:00 KST
+  const { calls, fetchImpl } = renderer();
+
+  assert.equal((await ensureMarketCard(env, '2026-09-14', 'ko', { now, fetchImpl, fill: true })).status, 'ready');
+  // Thirty seconds later another fill waits; a drawing of the latest session does not.
+  const soon = new Date(now.getTime() + 30000);
+  assert.deepEqual(await ensureMarketCard(env, '2026-09-11', 'ko', { now: soon, fetchImpl, fill: true }), { status: 'skipped' });
+  assert.equal((await ensureMarketCard(env, DATE, 'ko', { now: soon, fetchImpl })).status, 'ready');
+  assert.equal(calls.length, 2);
+  assert.equal((await ensureMarketCard(env, '2026-09-11', 'ko', { now: new Date(soon.getTime() + 61000), fetchImpl, fill: true })).status, 'ready');
+
+  // The day's allowance counts every attempt since midnight KST, failed ones too.
+  const stamp = new Date(now.getTime() + 5 * 60000).toISOString();
+  for (let i = 0; i < CARD_FILL_PER_DAY; i += 1) {
+    await db.prepare(`INSERT INTO ${CARD_TABLE} (market_date, lang, status, source_key, attempted_at) VALUES (?, 'en', 'failed', 'x', ?)`).bind(`2026-08-${String(i + 1).padStart(2, '0')}`, stamp).run();
+  }
+  const afterAllowance = new Date(now.getTime() + 10 * 60000);
+  assert.deepEqual(await ensureMarketCard(env, '2026-09-14', 'en', { now: afterAllowance, fetchImpl, fill: true }), { status: 'skipped' });
+  assert.equal((await ensureMarketCard(env, DATE, 'en', { now: afterAllowance, fetchImpl })).status, 'ready', 'the latest session is outside the allowance');
+  // After midnight KST (15:00 UTC) the allowance starts again.
+  assert.equal((await ensureMarketCard(env, '2026-09-14', 'en', { now: new Date('2026-11-25T15:01:00.000Z'), fetchImpl, fill: true })).status, 'ready');
+  assert.equal(calls.length, 5);
+});
+
+test('a session page whose card lacks the Daily’s line starts a redraw; an older one as a fill', async () => {
+  const { db, env } = await database();
+  env.ASSETS = { fetch: async request => new URL(request.url).pathname.endsWith('/market/')
+    ? new Response(SHELL, { headers: { 'content-type': 'text/html' } })
+    : new Response(JSON.stringify(posts()), { headers: { 'content-type': 'application/json' } }) };
+  const start = new Date(Date.now() - __test.RETRY_AFTER_MS - 120000);
+  await ensureMarketCard(env, DATE, 'ko', { now: start, fetchImpl: renderer().fetchImpl, posts: [] });
+  await ensureMarketCard(env, DATE, 'en', { now: start, fetchImpl: renderer().fetchImpl, posts: [] });
+  const originalFetch = globalThis.fetch;
+  const background = renderer();
+  globalThis.fetch = background.fetchImpl;
+  try {
+    const latest = cardContext(env, `/market/${DATE}/`);
+    const page = await (await onMarketPageRequest(latest.context)).text();
+    assert.ok(page.includes(`og:image" content="https://snowshagal.com/market/${DATE}/card.jpg?v=`), 'the stale card is still shared meanwhile');
+    assert.deepEqual(await Promise.all(latest.pending), [{ status: 'ready', bytes: JPEG.byteLength }]);
+    assert.ok(background.calls[0].body.html.includes(DAILY_KO));
+    // Now current: the next visit starts nothing.
+    const again = cardContext(env, `/market/${DATE}/`);
+    await onMarketPageRequest(again.context);
+    assert.equal(again.pending.length, 0);
+
+    // The English page of a session that is no longer the latest asks for a
+    // fill, which waits for the quiet minute after the Korean drawing.
+    await db.prepare(`INSERT INTO ${TABLE_NAME} (market_date, schema_version, generated_at, status, payload_json, published_at, auth_source, takeaway_ko, takeaway_en) SELECT '2026-12-30', schema_version, generated_at, status, payload_json, published_at, auth_source, '', '' FROM ${TABLE_NAME} WHERE market_date = ?`).bind(DATE).run();
+    const older = cardContext(env, `/en/market/${DATE}/`);
+    await onMarketPageRequest(older.context);
+    assert.deepEqual(await Promise.all(older.pending), [{ status: 'skipped' }]);
     assert.equal(background.calls.length, 1);
   } finally { globalThis.fetch = originalFetch; }
 });

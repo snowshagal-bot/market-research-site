@@ -137,4 +137,6 @@ node scripts/stamp-daily-takeaway.mjs "reports/8월 27일 주식리포트_커버
 2. 같은 `market_date` · 같은 locale의 Daily `takeaway`
 3. 둘 다 없으면 행 숨김
 
+같은 순서로 장마감 공유 카드(`/market/YYYY-MM-DD/card.jpg`)에도 두 줄까지 들어간다. 데일리를 장마감 게시 뒤에 올리면 그 날짜 페이지를 다음에 열 때 카드가 한 줄을 넣어 다시 그려진다.
+
 날짜와 언어가 정확히 일치할 때만 쓴다. 자세한 내용은 [`contracts/market_close/MARKET_DATA_CONTRACT.md`](../contracts/market_close/MARKET_DATA_CONTRACT.md).
