@@ -1,5 +1,31 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-25-note-1mdifmp",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-25",
+    "reportDate": "2026-11-25",
+    "registeredDate": "2026-11-25",
+    "registeredAt": "2026-11-25T10:17:08.655Z",
+    "legacyImport": false,
+    "title": "코인 거래소에 '주인 20%' 규칙이 생긴다 디지털자산법 정부안이 바꾸는 것과 그대로 두는 것",
+    "seoTitle": "디지털자산법 정부안, 코인 거래소 주인 20% 규칙",
+    "subtitle": "",
+    "description": "금융위원회가 11월 24일 디지털자산업법(디지털자산기본법) 정부안을 냈다. 코인 거래소 주식 소유 20%(승인 시 34%) 한도, 은행 과반 원화 스테이블코인, 9년 만의 ICO 허용 추진 가운데 정해진 것과 남은 것을 정리했다.",
+    "tags": [
+      "policy",
+      "crypto",
+      "stablecoins",
+      "korea"
+    ],
+    "readingMinutes": 14,
+    "href": "reports/20261125_Investment_Insight_Digital_Asset_Act_Draft.html",
+    "coverImage": "covers/2026-11-25-note-1mdifmp.webp",
+    "shareCardImage": "covers/share/2026-11-25-note-1mdifmp.jpg",
+    "coverThumbnail": "covers/2026-11-25-note-1mdifmp-450.webp"
+  },
+  {
     "id": "2026-11-25-daily-zwkqui",
     "type": "daily",
     "typeLabel": "Daily",
