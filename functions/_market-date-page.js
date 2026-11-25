@@ -1205,10 +1205,12 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
 
   try {
     if (route.indicator?.funds) {
-      const [{ days, rows }, shell, rateCodes] = await Promise.all([loadMarketFundIndicator(env, { budgetMs }), loadShell(env, url, route.lang), rateCodesWithin(env, budgetMs)]);
+      // A guided fund page names related reads (no latest-session block: KOFIA publishes a day later).
+      const postsPromise = INDICATOR_GUIDES[route.indicator.code] ? Promise.resolve().then(() => (loadPostsFn || loadPosts)(request, env)).catch(() => []) : Promise.resolve([]);
+      const [{ days, rows }, shell, rateCodes, posts] = await Promise.all([loadMarketFundIndicator(env, { budgetMs }), loadShell(env, url, route.lang), rateCodesWithin(env, budgetMs), postsPromise]);
       const series = marketFundSeries(days, route.indicator, new Set(rows.map(row => row.market_date)));
       if (!series.length) return notFound(env, url);
-      return htmlResponse(marketIndicatorPageHtml(shell, route.indicator, series, route.lang, availableIndicatorCodes(rows, [...rateCodes, ...marketFundCodesIn(days)])));
+      return htmlResponse(marketIndicatorPageHtml(shell, route.indicator, series, route.lang, availableIndicatorCodes(rows, [...rateCodes, ...marketFundCodesIn(days)]), { posts }));
     }
     if (route.indicator?.domestic) {
       const [{ days, rows }, shell] = await Promise.all([loadDomesticRateIndicator(env, { budgetMs }), loadShell(env, url, route.lang)]);
@@ -1896,11 +1898,13 @@ export function marketIndicatorDescription(indicator, series, lang) {
 /*
  * Indicator guides: what a reader who arrives from search for one of these
  * pages asks next. Written by hand for the pages people search for (KOSPI
- * first, 2026-11-26), never generated for every indicator, so no page carries
- * boilerplate. A guide adds two parts:
+ * first, then KOSDAQ, VKOSPI, USD/KRW and investor deposits, 2026-11-26),
+ * never generated for every indicator, so no page carries boilerplate. A guide
+ * adds two parts:
  * - a "latest close" block at the top: the session's one-line takeaway (the
  *   record's own line, else the Daily's, as on the share card) with links to
- *   that session's full record and its Daily report;
+ *   that session's full record and its Daily report. A Market Funds page has
+ *   none: KOFIA publishes a day later, so its newest day is not the session's;
  * - an "about" section after the chart: paragraphs where [[text|term]] links
  *   `term` in the glossary (the term must exist in that language's glossary),
  *   and related Market Basics reads named by their Korean post id (the English
@@ -1923,6 +1927,82 @@ export const INDICATOR_GUIDES = Object.freeze({
         'The KOSPI (Korea Composite Stock Price Index) covers every common stock listed on the Korea Exchange main board, combined by [[market-capitalization weighting]]. It sets the total market value on January 4, 1980 at 100 and expresses today\u2019s market value against that base.',
         'Values on this page are the close of [[regular trading hours]] at 3:30 p.m. KST: the [[closing price|Closing price]], set by a ten-minute single-price auction before the bell. After-hours trading and [[Nextrade|Nextrade (NXT)]] after-market trades do not change it.',
         'Each change is against the previous trading day\u2019s close, and a new value is added around 4 p.m. KST every trading day. Each date in the table opens that session\u2019s full close record, with investor flows, market breadth and sector moves.'
+      ]
+    }
+  },
+  KOSDAQ: {
+    related: ['2026-11-12-basics-17io0go', '2026-08-11-basics-1e0xeuz', '2026-11-15-basics-yi9jg1', '2026-08-20-basics-1jqzwpd'],
+    ko: {
+      title: '코스닥이란',
+      paragraphs: [
+        '코스닥(KOSDAQ)은 한국거래소 코스닥시장에 상장된 종목을 [[시가총액 가중]] 방식으로 묶은 지수입니다. 1996년 7월 1일이 기준일이고, 2004년에 기준값을 100에서 1,000으로 바꿔 지금은 그날의 시가총액을 1,000으로 놓고 셉니다.',
+        '바이오, 2차전지, 반도체 [[소부장]] 같은 성장 업종의 중소형주가 많고, [[개인·외국인·기관]] 가운데 개인의 거래 비중이 큰 시장입니다. 그래서 같은 날에도 코스피보다 등락 폭이 큰 경우가 많습니다.',
+        '이 페이지의 값은 [[정규장]] 마감(오후 3시 30분, KST) [[종가]]이고, 등락은 직전 거래일 종가와 비교한 값입니다. 표의 날짜를 누르면 그날의 투자자별 매매동향과 시장 폭까지 담긴 전체 마감 기록이 열립니다.'
+      ]
+    },
+    en: {
+      title: 'What is the KOSDAQ?',
+      paragraphs: [
+        'The KOSDAQ index covers the stocks listed on the Korea Exchange\u2019s KOSDAQ market, combined by [[market-capitalization weighting]]. Its base date is July 1, 1996; in 2004 the base value was raised from 100 to 1,000, so the index now reads today\u2019s market value against 1,000 on that date.',
+        'The market leans toward smaller growth companies in biotech, batteries and chip [[materials, parts and equipment|Materials, Parts & Equipment]], and individual investors account for a large share of its trading among the [[retail, foreign and institutional|retail · foreign · institutional]] groups. On the same day it often moves more than the KOSPI.',
+        'Values on this page are the close of [[regular trading hours]] at 3:30 p.m. KST (the [[closing price|Closing price]]), and each change is against the previous trading day\u2019s close. Each date in the table opens that session\u2019s full close record, with investor flows and market breadth.'
+      ]
+    }
+  },
+  VKOSPI: {
+    related: ['2026-11-23-basics-a5lumg', '2026-08-10-basics-1rhknmt', '2026-08-20-basics-1jqzwpd', '2026-11-13-basics-1m6tqir'],
+    ko: {
+      title: 'VKOSPI란',
+      paragraphs: [
+        '[[VKOSPI]]는 [[코스피200]] [[옵션]] 가격으로 계산한, 앞으로 30일 동안 코스피200이 얼마나 움직일지에 대한 시장의 예상치입니다. 미국 S&P 500 옵션으로 만드는 VIX와 같은 방식이며, 한국거래소가 발표합니다.',
+        '값은 1년 기준 변동률(%)입니다. 20이면 1년에 위아래 20% 안팎, 한 달로 나누면 약 ±5.8%의 움직임을 예상한다는 뜻입니다. 주가가 급히 빠질 때 하락에 대비하는 [[풋옵션]] 수요가 몰려 값이 뛰는 경우가 많아 ‘공포지수’라고도 부릅니다.',
+        '이 페이지의 값은 파생상품시장 정규장 마감(오후 3시 45분, KST) 종가이고, 등락은 직전 거래일 종가와 비교한 값입니다. 표의 날짜를 누르면 그날의 전체 마감 기록이 열립니다.'
+      ]
+    },
+    en: {
+      title: 'What is the VKOSPI?',
+      paragraphs: [
+        'The [[VKOSPI]] is the market\u2019s expectation of how much the [[KOSPI 200]] will move over the next 30 days, calculated from KOSPI 200 [[options]] prices. It follows the same method as the VIX, which is built from S&P 500 options, and is published by the Korea Exchange.',
+        'The value is an annualized percentage. A reading of 20 means a move of roughly 20% either way over a year, or about \u00b15.8% over a month. When stocks drop quickly, demand for [[put options]] as protection tends to lift it, which is why it is often called a fear gauge.',
+        'Values on this page are the derivatives-session close at 3:45 p.m. KST, and each change is against the previous trading day\u2019s close. Each date in the table opens that session\u2019s full close record.'
+      ]
+    }
+  },
+  USDKRW: {
+    related: ['2026-08-13-basics-1qofo4f', '2026-11-18-basics-143x6rj', '2026-10-09-note-1a56yum', '2026-10-24-note-vgs0zy'],
+    ko: {
+      title: '원/달러 환율이란',
+      paragraphs: [
+        '[[원/달러]] 환율은 1달러를 사는 데 드는 원화 금액입니다. 숫자가 오르면 원화 가치가 내린 것(원화 약세)이고, 숫자가 내리면 [[원화 강세]]입니다.',
+        '이 페이지의 값은 외환시장 종가가 아니라, 하나은행이 오후 3시 30분 무렵 고시한 [[매매기준율]]을 네이버 금융에서 옮긴 값입니다. 서울 외환시장은 오전 9시부터 다음 날 새벽 2시까지 열리므로, 이 값은 그 가운데 한국 증시가 마감할 때의 수준입니다.',
+        '환율은 외국인 투자자의 수익에 직접 닿습니다. 원화가 약해지면 같은 주가라도 달러로 환산한 값이 줄어들어, 외국인 매매와 함께 움직이는 날이 많습니다. 달러 자체의 힘은 [[달러인덱스]]로 따로 볼 수 있고, 표의 날짜를 누르면 그날의 외국인 매매가 담긴 전체 마감 기록이 열립니다.'
+      ]
+    },
+    en: {
+      title: 'What is the USD/KRW rate?',
+      paragraphs: [
+        'The [[USD/KRW]] rate is the number of won it takes to buy one U.S. dollar. A higher number means a weaker won; a lower number means [[a stronger won]].',
+        'Values on this page are not the foreign-exchange market close. They are the [[reference rate|Base Exchange Rate]] Hana Bank posts around 3:30 p.m. KST, as shown on Naver Finance. The Seoul FX market trades from 9 a.m. to 2 a.m. the next day, so this value is the level when the Korean stock market closes.',
+        'The exchange rate feeds straight into foreign investors\u2019 returns: when the won weakens, the same share price is worth less in dollars, so the rate and foreign flows often move together. The dollar\u2019s own strength is tracked by the [[U.S. Dollar Index]], and each date in the table opens that session\u2019s full close record, with foreign investors\u2019 trading.'
+      ]
+    }
+  },
+  DEPOSITS: {
+    related: ['2026-06-04-basics-16di2bp', '2026-11-22-basics-1rhe030', '2026-11-25-basics-vdzvvf', '2026-08-11-basics-1e0xeuz'],
+    ko: {
+      title: '투자자예탁금이란',
+      paragraphs: [
+        '[[투자자예탁금]]은 주식을 사려고 증권사 계좌에 넣어 두었거나, 주식을 팔고 찾지 않아 계좌에 현금으로 남아 있는 돈의 합계입니다. 언제든 주식을 살 수 있는 돈이라 ‘증시 대기자금’이라고도 부릅니다.',
+        '[[금융투자협회]]가 거래일마다 집계해 다음 영업일에 공개합니다. 이 페이지의 값은 장내파생상품 거래예수금을 뺀 금액이고, 날짜는 공개일이 아니라 자금이 집계된 거래일입니다.',
+        '예탁금이 늘었다고 곧 살 돈이 늘었다고 단정할 수는 없습니다. 주식을 많이 판 날에도 판 돈이 계좌에 남으면 예탁금이 늘기 때문입니다. 빚을 내 투자한 규모는 [[신용융자 잔고]], 담보가 모자라 강제로 판 금액은 [[반대매매]] 기록에서 함께 볼 수 있습니다.'
+      ]
+    },
+    en: {
+      title: 'What are investor deposits?',
+      paragraphs: [
+        '[[Investor deposits|investor deposits]] are the cash customers hold at Korean brokerages: money put in to buy stocks, plus sale proceeds left in the account. Because it can buy shares at any moment, it is often called cash on the sidelines.',
+        'The Korea Financial Investment Association (KOFIA) counts it every trading day and publishes it the next business day. Values on this page exclude deposits for exchange-traded derivatives, and each date is the trading day the money was counted, not the day it was published.',
+        'A rise does not by itself mean more money is waiting to buy: on a day of heavy selling, proceeds left in accounts also lift the total. How much is borrowed to buy stocks shows in [[margin loans|Outstanding margin loans]], and shares sold for lack of collateral in [[forced selling]].'
       ]
     }
   }

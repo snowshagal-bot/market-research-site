@@ -25,7 +25,8 @@ const SHELLS = { ko: SHELL_KO, en: SHELL_EN };
 const POSTS = JSON.parse(POSTS_JSON);
 const GLOSSARY = JSON.parse(GLOSSARY_JSON);
 const KOSPI = MARKET_INDICATORS.find(item => item.code === 'KOSPI');
-const KOSDAQ = MARKET_INDICATORS.find(item => item.code === 'KOSDAQ');
+const NASDAQ = MARKET_INDICATORS.find(item => item.code === 'NASDAQ');
+const byCode = code => MARKET_INDICATORS.find(item => item.code === code);
 const SERIES = [
   { date: '2026-11-25', recordDate: '2026-11-25', publishedAt: '2026-11-25T07:10:00Z', close: 4697.51, change: -308.52, changePct: -6.16, high: 4950.1, low: 4690.2 },
   { date: '2026-11-24', recordDate: '2026-11-24', publishedAt: '2026-11-24T07:10:00Z', close: 5006.03, change: 297.49, changePct: 6.32, high: 5010.2, low: 4790.1 }
@@ -82,10 +83,34 @@ test('without posts or a line the block still links the session; pages without a
   assert.match(block(bare, '<section class="indicator-latest"'), /<h2 id="indicator-latest-title">11월 25일 마감<\/h2>\s*<p class="indicator-latest-links"><a href="\/market\/2026-11-25\/">/);
   assert.doesNotMatch(bare, /<h3>함께 읽기<\/h3>/);
   assert.match(bare, /코스피란<\/h2>/);
-  const kosdaq = marketIndicatorPageHtml(SHELLS.ko, KOSDAQ, SERIES, 'ko', undefined, { posts: POSTS, latest: LATEST.ko });
-  assert.doesNotMatch(kosdaq, /indicator-latest|indicator-guide|market-section-3/);
+  const nasdaq = marketIndicatorPageHtml(SHELLS.ko, NASDAQ, SERIES, 'ko', undefined, { posts: POSTS, latest: LATEST.ko });
+  assert.doesNotMatch(nasdaq, /indicator-latest|indicator-guide|market-section-3/);
   for (const name of ['indicator-latest', 'indicator-latest-line', 'indicator-latest-links', 'indicator-guide', 'indicator-guide-reads']) {
     assert.match(CSS, new RegExp(`\\.${name}[{ ,:]`), `${name} is styled`);
+  }
+});
+
+test('KOSDAQ, VKOSPI, USD/KRW and investor deposits carry their own guide; deposits has no latest-session block', () => {
+  const titles = {
+    KOSDAQ: ['코스닥이란', 'What is the KOSDAQ?', '/reports/basics-16-index'],
+    VKOSPI: ['VKOSPI란', 'What is the VKOSPI?', '/reports/basics-21-expiration-day'],
+    USDKRW: ['원/달러 환율이란', 'What is the USD/KRW rate?', '/reports/20261009_Investment_Note_Won_Strength_Bill'],
+    DEPOSITS: ['투자자예탁금이란', 'What are investor deposits?', '/reports/basics-13-deposits']
+  };
+  for (const [code, [ko, en, read]] of Object.entries(titles)) {
+    const indicator = byCode(code);
+    const latest = code === 'DEPOSITS' ? undefined : LATEST.ko;
+    const page = marketIndicatorPageHtml(SHELLS.ko, indicator, SERIES, 'ko', undefined, { posts: POSTS, latest });
+    const about = block(page, '<section class="market-section" aria-labelledby="market-section-3"');
+    assert.ok(about.includes(`<span>03.</span> ${ko}</h2>`), `${code} ko title`);
+    assert.ok(about.includes('<a class="mk-term" href="/basics/glossary/#term-'), `${code} ko terms`);
+    assert.ok(about.includes(`<a href="${read}">`), `${code} ko read`);
+    if (code === 'DEPOSITS') assert.doesNotMatch(page, /indicator-latest/);
+    else assert.match(block(page, '<section class="indicator-latest"'), /11월 25일 마감/, code);
+    const english = marketIndicatorPageHtml(SHELLS.en, indicator, SERIES, 'en', undefined, { posts: POSTS });
+    assert.ok(english.includes(`${en}</h2>`), `${code} en title`);
+    assert.ok(english.includes('<a class="mk-term" href="/en/basics/glossary/#term-'), `${code} en terms`);
+    assert.ok(!english.includes(ko) && !english.includes('함께 읽기'), `${code} en has no Korean guide text`);
   }
 });
 
