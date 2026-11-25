@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-25-daily-zwkqui",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-25",
+    "reportDate": "2026-11-25",
+    "registeredDate": "2026-11-25",
+    "registeredAt": "2026-11-25T09:24:57.605Z",
+    "legacyImport": false,
+    "title": "U.S. Chip Rally Reverses; KOSPI Sinks 6%, Erasing All of Tuesday's Gains",
+    "subtitle": "",
+    "description": "U.S. chip stocks fell 7.88% and a memory oversupply warning hit Samsung Electronics and SK hynix, which lost around 10%. On Nov. 25, the KOSPI closed at 4,697.51 (−6.16%) as foreign investors sold a net KRW 1.8994tn. Key drivers and what to watch next.",
+    "takeaway": "U.S. chip stocks fell 8% a day after their rally. A warning of memory oversupply compounded the selloff, sending the KOSPI down 6% and wiping out the previous day’s gains.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "semiconductors"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-11-25_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-25-daily-xylrhu",
+    "coverImage": "covers/2026-11-25-daily-zwkqui.webp",
+    "shareCardImage": "covers/share/2026-11-25-daily-zwkqui.jpg",
+    "coverThumbnail": "covers/2026-11-25-daily-zwkqui-450.webp"
+  },
+  {
     "id": "2026-11-25-daily-xylrhu",
     "type": "daily",
     "typeLabel": "주식 리포트",
