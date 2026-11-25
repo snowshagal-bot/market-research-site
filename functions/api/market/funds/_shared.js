@@ -155,12 +155,11 @@ function validateDay(day, index, now, errors) {
     errors.push(`${at}.previous_date: YYYY-MM-DD required.`);
   } else if (marketDateOk) {
     const gap = dayOffset(day.previous_date, day.market_date);
+    // KOFIA's previous row: normally the previous KRX session, but KOFIA also
+    // posts the KRX year-end closure (12-31; 2024 and 2025 both have a row), so
+    // it is checked as a weekday 1 to 14 days earlier, not as a KRX session.
     if (gap < 1 || gap > PREVIOUS_DATE_MAX_DAYS) errors.push(`${at}.previous_date: must be 1 to ${PREVIOUS_DATE_MAX_DAYS} days before market_date.`);
-    else if (!isMarketYearSupported('KRX', previous.getUTCFullYear())) {
-      // A year before the calendar's first (2026-01-02's previous session is
-      // 2025-12-30): only the gap and a weekday can be checked.
-      if ([0, 6].includes(previous.getUTCDay())) errors.push(`${at}.previous_date: ${day.previous_date} is a weekend.`);
-    } else if (!isTradingDate(day.previous_date, 'KRX')) errors.push(`${at}.previous_date: ${day.previous_date} is not a KRX trading date.`);
+    else if ([0, 6].includes(previous.getUTCDay())) errors.push(`${at}.previous_date: ${day.previous_date} is a weekend.`);
   }
   if (typeof day.source !== 'string' || !day.source.trim() || day.source.length > 80) errors.push(`${at}.source: non-empty string of at most 80 characters required.`);
 

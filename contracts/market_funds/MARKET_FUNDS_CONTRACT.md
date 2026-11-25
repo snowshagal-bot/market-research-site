@@ -46,7 +46,7 @@ Two relationships hold in the 2026 data:
 
 - `days`: 1 to 60 days, each `market_date` once.
   - One request carries one or two days in daily use and up to 60 in a backfill.
-- `previous_date`: the date of KOFIA's row just before `market_date`. This is the previous KRX trading day; KOFIA has no rows for closed days.
+- `previous_date`: the date of KOFIA's row just before `market_date`. This is normally the previous KRX trading day. KOFIA has no rows for KRX holidays, except the KRX year-end closure (12-31): 2024-12-31 and 2025-12-31 both have rows. So 2026-01-02's `previous_date` is 2025-12-31, and KOFIA's ratio that day is computed on it.
 - `retrieved_at`: when the collector read FreeSIS.
 - `source`: the attribution shown on the pages, `금융투자협회 증시자금 추이`.
 - `items`: 1 to 7, each code once.
@@ -62,7 +62,7 @@ The whole request is rejected (422) and nothing is written when any of these fai
 - **Dates**
   - `market_date` is a real calendar date and a KRX trading date (`functions/_trading-calendar.js`). A year the calendar does not cover fails closed.
   - `market_date` is not after today in KST.
-  - `previous_date` is a KRX trading date before `market_date`, at most 14 calendar days earlier. In a year the KRX calendar does not cover, it only has to be a weekday. That year is always earlier than `market_date`: for example 2025-12-30, the previous session of 2026-01-02, the first day of the calendar.
+  - `previous_date` is a weekday 1 to 14 calendar days before `market_date`. It is not required to be a KRX trading date, because KOFIA's row before the first session of a year is the KRX year-end closure.
 - **Timing**
   - `retrieved_at` is not before 15:30 KST on `market_date` (the regular close). A day's balances cannot be read before its session ends.
   - `retrieved_at` and `generated_at` are not more than 5 minutes ahead of the server clock.
