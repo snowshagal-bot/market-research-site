@@ -16,10 +16,12 @@
 import {
   PRODUCTION_ORIGIN,
   escapeHtml,
+  findTranslationCounterpart,
   formatFlowAmount,
   formatIndexLevel,
   formatSignedPct,
   loadPosts,
+  reportSiteUrl,
   organizationStructuredData,
   serializeJsonLd,
   websiteStructuredData
@@ -1205,10 +1207,22 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
       return htmlResponse(marketIndicatorPageHtml(shell, route.indicator, series, route.lang, availableIndicatorCodes(rows, domesticRateCodesIn(days))));
     }
     if (route.indicator) {
-      const [rows, shell, rateCodes] = await Promise.all([loadMarketIndicator(env, route.indicator, { budgetMs }), loadShell(env, url, route.lang), rateCodesWithin(env, budgetMs)]);
+      const guided = Boolean(INDICATOR_GUIDES[route.indicator.code]);
+      // A guided page also names the latest session's line and Daily; both fail soft.
+      const postsPromise = guided ? Promise.resolve().then(() => (loadPostsFn || loadPosts)(request, env)).catch(() => []) : Promise.resolve([]);
+      const [rows, shell, rateCodes, posts] = await Promise.all([loadMarketIndicator(env, route.indicator, { budgetMs }), loadShell(env, url, route.lang), rateCodesWithin(env, budgetMs), postsPromise]);
       const series = marketIndicatorSeries(rows, route.indicator);
       if (!series.length) return notFound(env, url);
-      return htmlResponse(marketIndicatorPageHtml(shell, route.indicator, series, route.lang, availableIndicatorCodes(rows, rateCodes)));
+      let context = {};
+      if (guided) {
+        const date = series[0].recordDate;
+        const own = await withinBudget(loadRecordTakeaway(env, date), Math.min(budgetMs, trendBudgetMs)).catch(() => null);
+        context = {
+          posts,
+          latest: { date, line: cardTakeaway(own?.[route.lang], posts, date, route.lang), report: dailyReportFor(posts, date, route.lang) }
+        };
+      }
+      return htmlResponse(marketIndicatorPageHtml(shell, route.indicator, series, route.lang, availableIndicatorCodes(rows, rateCodes), context));
     }
     if (route.sectors) {
       const [rows, shell] = await Promise.all([loadMarketSectors(env, { budgetMs }), loadShell(env, url, route.lang)]);
@@ -1869,7 +1883,92 @@ export function marketIndicatorDescription(indicator, series, lang) {
   return text;
 }
 
-export function renderMarketIndicatorMain(indicator, series, lang, available = availableIndicatorCodes([])) {
+/*
+ * Indicator guides: what a reader who arrives from search for one of these
+ * pages asks next. Written by hand for the pages people search for (KOSPI
+ * first, 2026-11-26), never generated for every indicator, so no page carries
+ * boilerplate. A guide adds two parts:
+ * - a "latest close" block at the top: the session's one-line takeaway (the
+ *   record's own line, else the Daily's, as on the share card) with links to
+ *   that session's full record and its Daily report;
+ * - an "about" section after the chart: paragraphs where [[text|term]] links
+ *   `term` in the glossary (the term must exist in that language's glossary),
+ *   and related Market Basics reads named by their Korean post id (the English
+ *   page links the translation, and drops a read without one).
+ */
+export const INDICATOR_GUIDES = Object.freeze({
+  KOSPI: {
+    related: ['2026-11-12-basics-17io0go', '2026-11-15-basics-yi9jg1', '2026-11-18-basics-gt1lmr', '2026-11-13-basics-1m6tqir'],
+    ko: {
+      title: '코스피란',
+      paragraphs: [
+        '코스피(KOSPI)는 한국거래소 유가증권시장에 상장된 보통주 전 종목을 [[시가총액 가중]] 방식으로 묶은 지수입니다. 1980년 1월 4일의 시가총액을 100으로 놓고, 지금 시가총액이 그 몇 배인지를 나타냅니다.',
+        '이 페이지의 값은 [[정규장]] 마감(오후 3시 30분, KST) [[종가]]입니다. 종가는 마감 전 10분 동안의 단일가 매매로 정해지고, 그 뒤의 시간외 거래나 [[넥스트레이드]] 애프터마켓 거래는 이 값을 바꾸지 않습니다.',
+        '등락은 직전 거래일 종가와 비교한 값이고, 새 값은 매 거래일 오후 4시 무렵 추가됩니다. 표의 날짜를 누르면 그날의 투자자별 매매동향, 시장 폭, 업종 등락까지 담긴 전체 마감 기록이 열립니다.'
+      ]
+    },
+    en: {
+      title: 'What is the KOSPI?',
+      paragraphs: [
+        'The KOSPI (Korea Composite Stock Price Index) covers every common stock listed on the Korea Exchange main board, combined by [[market-capitalization weighting]]. It sets the total market value on January 4, 1980 at 100 and expresses today\u2019s market value against that base.',
+        'Values on this page are the close of [[regular trading hours]] at 3:30 p.m. KST: the [[closing price|Closing price]], set by a ten-minute single-price auction before the bell. After-hours trading and [[Nextrade|Nextrade (NXT)]] after-market trades do not change it.',
+        'Each change is against the previous trading day\u2019s close, and a new value is added around 4 p.m. KST every trading day. Each date in the table opens that session\u2019s full close record, with investor flows, market breadth and sector moves.'
+      ]
+    }
+  }
+});
+
+const GUIDE_COPY = {
+  ko: { latestTitle: (m, d) => `${m}월 ${d}일 마감`, sessionLink: '그날 전체 마감 기록', dailyLink: '이날의 데일리 리포트', related: '함께 읽기' },
+  en: { latestTitle: (m, d) => `Close on ${EN_MONTHS_SHORT[m - 1]} ${d}`, sessionLink: 'Full close record for the day', dailyLink: 'Daily report for the day', related: 'Related reading' }
+};
+
+/** A guide paragraph: escaped text, each [[text|term]] a glossary link (term defaults to text). */
+function guideParagraph(text, lang) {
+  return html(text).replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (whole, label, term) => `<a class="mk-term" href="${html(glossaryTermHref(term || label, lang))}">${label}</a>`);
+}
+
+/** The guide's related reads in `lang`: [{ href, title }], from data/posts.json. */
+export function guideReads(guide, posts, lang) {
+  const list = Array.isArray(posts) ? posts : [];
+  return (guide?.related || []).map(id => {
+    const korean = list.find(post => post?.id === id);
+    if (!korean) return null;
+    const post = lang === 'en' ? findTranslationCounterpart(list, korean) : korean;
+    if (!post?.href || !post?.title) return null;
+    return { href: new URL(reportSiteUrl(post.href)).pathname, title: post.title };
+  }).filter(Boolean);
+}
+
+/**
+ * The "latest close" block: `latest` is { date, line, report } for the
+ * newest session (line and report may be empty); '' without a guide.
+ */
+function guideLatestBlock(latest, lang) {
+  if (!latest?.date) return '';
+  const copy = GUIDE_COPY[lang];
+  const { m, d } = dateParts(latest.date);
+  const links = [
+    `<a href="${marketDatePath(latest.date, lang)}">${html(copy.sessionLink)} →</a>`,
+    latest.report?.url ? `<a href="${html(latest.report.url)}">${html(copy.dailyLink)} ↗</a>` : ''
+  ].filter(Boolean).join('');
+  return `<section class="indicator-latest" aria-labelledby="indicator-latest-title">
+      <h2 id="indicator-latest-title">${html(copy.latestTitle(m, d))}</h2>
+      ${latest.line ? `<p class="indicator-latest-line">${html(latest.line)}</p>` : ''}
+      <p class="indicator-latest-links">${links}</p>
+    </section>`;
+}
+
+function guideAboutBody(guide, lang, posts) {
+  const text = guide?.[lang];
+  if (!text) return '';
+  const reads = guideReads(guide, posts, lang);
+  return `<div class="indicator-guide">${text.paragraphs.map(item => `<p>${guideParagraph(item, lang)}</p>`).join('')}${reads.length
+    ? `<h3>${html(GUIDE_COPY[lang].related)}</h3><ul class="indicator-guide-reads">${reads.map(read => `<li><a href="${html(read.href)}">${html(read.title)}</a></li>`).join('')}</ul>`
+    : ''}</div>`;
+}
+
+export function renderMarketIndicatorMain(indicator, series, lang, available = availableIndicatorCodes([]), context = {}) {
   const key = lang === 'en' ? 'en' : 'ko';
   const copy = INDICATOR_COPY[key];
   const base = COPY[key];
@@ -1924,6 +2023,9 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
   const related = listedIndicators(available).filter(item => item.code !== indicator.code)
     .map(item => `<a href="${marketIndicatorPath(item.code, key)}">${html(INDICATOR_SHORT_NAMES[key][item.code])}</a>`).join('');
   const dashboardPath = key === 'en' ? '/en/market/' : '/market/';
+  const guide = INDICATOR_GUIDES[indicator.code] || null;
+  const latestBlock = guide ? guideLatestBlock(context.latest, key) : '';
+  const aboutBody = guide ? guideAboutBody(guide, key, context.posts) : '';
 
   return `<main id="market-date-root" class="market-date-page market-indicator-page" data-market-indicator="${indicator.slug}">
   ${pageHead({
@@ -1935,8 +2037,10 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
     meta: [`${copy.basis[indicator.code] || copy.basis[indicator.kind]}${INDICATOR_UNITS[key][indicator.code] ? ` · ${INDICATOR_UNITS[key][indicator.code]}` : ''}`]
   })}
   <div class="market-wrap market-dashboard">
+    ${latestBlock}
     ${section(1, copy.sections[0], `<div class="indicator-stats">${tiles}</div>`)}
     ${series.length > 1 ? section(2, copy.sections[1], indicatorChart(series, indicator, fmt, copy, key)) : ''}
+    ${aboutBody ? section(series.length > 1 ? 3 : 2, guide[key].title, aboutBody) : ''}
     <p class="unit-note indicator-table-note">${html(indicator.kind === 'us' ? copy.usDates : indicator.kind === 'asia' ? copy.localDates : indicator.kind === 'kofia' ? copy.kofiaDates : indicator.kind === 'funds' ? copy.fundsDates : copy.krxDates)}</p>
 ${monthBlocks}
     <nav class="indicator-links" aria-label="${html(copy.related)}"><h2>${html(copy.related)}</h2><div>${related}</div></nav>
@@ -1946,7 +2050,7 @@ ${monthBlocks}
 </main>`;
 }
 
-export function marketIndicatorPageHtml(shell, indicator, series, lang, available = availableIndicatorCodes([])) {
+export function marketIndicatorPageHtml(shell, indicator, series, lang, available = availableIndicatorCodes([]), context = {}) {
   const key = lang === 'en' ? 'en' : 'ko';
   const title = marketIndicatorTitle(indicator, series, key);
   const description = marketIndicatorDescription(indicator, series, key);
@@ -1970,7 +2074,7 @@ export function marketIndicatorPageHtml(shell, indicator, series, lang, availabl
         { name: INDICATOR_NAMES[key][indicator.code], url: canonical }
       ]
     }),
-    main: renderMarketIndicatorMain(indicator, series, key, available)
+    main: renderMarketIndicatorMain(indicator, series, key, available, context)
   });
 }
 
@@ -2010,6 +2114,14 @@ export async function loadDomesticRateIndicator(env, { budgetMs = MARKET_DATE_TI
     const rows = (result?.results || []).filter(row => ISO_DATE.test(String(row?.market_date || '')));
     return { days, rows };
   })(), budgetMs);
+}
+
+/** A final record's own one-line takeaway ({ ko, en }), or null. */
+export async function loadRecordTakeaway(env, date) {
+  if (!env?.COMMENTS_DB || !ISO_DATE.test(String(date || ''))) return null;
+  const db = await ensureMarketTable(env, { readOnly: true });
+  const row = await db.prepare(`SELECT takeaway_ko, takeaway_en FROM ${TABLE_NAME} WHERE market_date = ? AND status = 'final' LIMIT 1`).bind(date).first();
+  return row ? { ko: String(row.takeaway_ko || ''), en: String(row.takeaway_en || '') } : null;
 }
 
 /**
