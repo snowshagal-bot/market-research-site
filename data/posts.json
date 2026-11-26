@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-26-note-1voizqh",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-26",
+    "reportDate": "2026-11-26",
+    "registeredDate": "2026-11-26",
+    "registeredAt": "2026-11-26T09:23:20.596Z",
+    "legacyImport": false,
+    "title": "Stocks nearly halved. Rates went up.",
+    "seoTitle": "Bank of Korea Rate Hike: Why GDP Growth and Stocks Diverged",
+    "subtitle": "",
+    "description": "After the KOSPI fell nearly 48% from its peak, the Bank of Korea raised its Base Rate to 3.25% and its 2027 GDP growth forecast to 4.1%. Why chip volumes and prices tell different stories, what the dot plot signals, and what the hike means for borrowing costs.",
+    "tags": [
+      "kospi",
+      "korea",
+      "rates",
+      "policy",
+      "korea-treasury-bond"
+    ],
+    "readingMinutes": 24,
+    "href": "reports/en/20261126_Investment_Insight_BOK_Hike_Growth_vs_Stocks_EN.html",
+    "translationGroup": "2026-11-26-note-1spwyox",
+    "coverImage": "covers/2026-11-26-note-1voizqh.webp",
+    "shareCardImage": "covers/share/2026-11-26-note-1voizqh.jpg",
+    "coverThumbnail": "covers/2026-11-26-note-1voizqh-450.webp"
+  },
+  {
     "id": "2026-11-26-note-1spwyox",
     "type": "note",
     "typeLabel": "투자 인사이트",
