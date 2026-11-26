@@ -671,8 +671,8 @@
   }
 
   const GLOBAL_BASIS_COPY = {
-    ko: { intraday: '장중', final_close: '종가', krx: '종가', snapshot: '마감 시점', live: '실시간(야후)', bank: '하나은행 고시' },
-    en: { intraday: 'INTRADAY', final_close: 'CLOSE', krx: 'CLOSE', snapshot: 'KRX CLOSE', live: 'LIVE (YAHOO)', bank: 'HANA BANK RATE' }
+    ko: { intraday: '장중', final_close: '종가', krx: '종가', snapshot: '마감 시점', live: '실시간(야후)', bank: '하나은행 고시', seoul: '15:30 기준가', provisional: '잠정' },
+    en: { intraday: 'INTRADAY', final_close: 'CLOSE', krx: 'CLOSE', snapshot: 'KRX CLOSE', live: 'LIVE (YAHOO)', bank: 'HANA BANK RATE', seoul: '3:30 PM RATE', provisional: 'PROVISIONAL' }
   };
 
   function basisDate(value, language) {
@@ -699,6 +699,8 @@
     let state;
     if (kind === 'latest') state = KRW_PAIR_CODES.has(code) && source.data_state === 'intraday' ? text.live : text[source.data_state] || '';
     else if (kind === 'krx') state = text.krx;
+    else if (code === 'USDKRW' && source.basis === 'seoul_1530') state = text.seoul;
+    else if (code === 'USDKRW' && source.basis === 'bank_provisional') state = text.provisional;
     else if (KRW_PAIR_CODES.has(code)) state = text.bank;
     else state = source.data_state === 'final_close' ? text.final_close : text.snapshot;
     return state ? `${date} · ${state}` : '';

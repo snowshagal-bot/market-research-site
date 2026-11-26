@@ -282,3 +282,16 @@ CREATE TABLE IF NOT EXISTS market_funds (
   published_at TEXT NOT NULL,
   auth_source TEXT NOT NULL
 );
+
+-- FX Close (migrations/comments/0007_market_fx_close.sql): one row per KRX
+-- trading day, the Seoul FX market's USD/KRW 15:30 KST rate from the Bank of
+-- Korea ECOS, published once ECOS has it, separate from Market Close and joined
+-- to it by market_date on the pages.
+CREATE TABLE IF NOT EXISTS market_fx_close (
+  market_date TEXT PRIMARY KEY,
+  schema_version TEXT NOT NULL,
+  retrieved_at TEXT NOT NULL,
+  payload_json TEXT NOT NULL,
+  published_at TEXT NOT NULL,
+  auth_source TEXT NOT NULL
+);

@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-11-26T17:23:05+09:00",
+  "days": [
+    {
+      "market_date": "2026-11-26",
+      "previous_date": "2026-11-25",
+      "retrieved_at": "2026-11-26T17:23:04+09:00",
+      "source": "한국은행 ECOS 원/달러(종가 15:30)",
+      "items": [
+        { "code": "USDKRW", "value": 1342.7, "previous_value": 1343.2 }
+      ]
+    }
+  ]
+}

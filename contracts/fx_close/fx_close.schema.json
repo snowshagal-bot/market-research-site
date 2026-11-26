@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://snowshagal.com/contracts/fx_close/fx_close.schema.json",
+  "title": "Snowshagal FX Close publish document",
+  "description": "The Seoul FX market's USD/KRW rate at 3:30 p.m. KST (원/달러 종가 15:30) for KRX trading days, from the Bank of Korea's ECOS (table 731Y003, item 0000003). This is the figure news and Bank of Korea statistics use. ECOS publishes it later in the day, after the Market Close record is final, so it is stored apart and joined by date on the pages. The server additionally enforces the semantic rules in FX_CLOSE_CONTRACT.md (KRX calendar, retrieval after 15:30 KST, value range, clock skew).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "generated_at", "days"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "generated_at": { "$ref": "#/$defs/dateTime" },
+    "days": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 60,
+      "items": { "$ref": "#/$defs/day" }
+    }
+  },
+  "$defs": {
+    "dateTime": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?(?:Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "date": { "type": "string", "format": "date", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "krwPerUnit": { "type": "number", "minimum": 100, "maximum": 5000 },
+    "day": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["market_date", "previous_date", "retrieved_at", "source", "items"],
+      "properties": {
+        "market_date": { "$ref": "#/$defs/date" },
+        "previous_date": { "$ref": "#/$defs/date" },
+        "retrieved_at": { "$ref": "#/$defs/dateTime" },
+        "source": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": { "$ref": "#/$defs/item" }
+        }
+      }
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "value", "previous_value"],
+      "properties": {
+        "code": { "const": "USDKRW" },
+        "value": { "$ref": "#/$defs/krwPerUnit" },
+        "previous_value": { "$ref": "#/$defs/krwPerUnit" }
+      }
+    }
+  }
+}

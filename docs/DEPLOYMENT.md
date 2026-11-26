@@ -328,6 +328,32 @@ Status (2026-11-25):
 - Production holds the 2026 backfill: 219 days, 2026-01-02..2026-11-24.
 - The daily task is not registered yet.
 
+### FX Close on the existing D1 binding
+
+FX Close (`contracts/fx_close/`) is the Seoul FX market's USD/KRW rate at 15:30 KST of each KRX trading day, from the Bank of Korea ECOS (731Y003 / 0000003): the figure the news and Bank of Korea statistics use. ECOS publishes it after the day's Market Close record is final, so it is not part of that record.
+
+It has its own:
+- contract (1.0.0);
+- table (`market_fx_close`, one row per `market_date`);
+- endpoints (`POST /api/market/fx/publish`, `GET /api/market/fx/date?date=YYYY-MM-DD|latest`).
+
+It reuses `COMMENTS_DB`, the Market Close write-host policy and `MARKET_PUBLISH_KEY`. No new Cloudflare Secret or binding is needed. The ECOS API key stays on the collector PC as the user environment variable `ECOS_API_KEY`; never commit it.
+
+Apply the checked-in idempotent migration to Preview first, then, after approval, to Production:
+
+```bash
+npx wrangler d1 execute market-research-comments-preview --remote --file=migrations/comments/0007_market_fx_close.sql
+npx wrangler d1 execute market-research-comments --remote --file=migrations/comments/0007_market_fx_close.sql
+```
+
+Request handlers never create the table. Without it:
+- both endpoints answer `503 FX_CLOSE_SCHEMA_NOT_READY`;
+- USD/KRW stays the record's Hana Bank rate, labeled 하나은행 고시, everywhere.
+
+Once the table exists, a day without a row reads as 잠정 · 하나은행 고시 until the collector publishes the ECOS value. So run the backfill right after the migration.
+
+The collector (publisher repository) publishes through its own scheduled task, `시장지표-원달러1530`. Its run time follows ECOS's release time.
+
 Market Close cards (`functions/_market-card.js`) keep one 1200×630 JPEG per published session and language in `market_close_cards` and serve it at `/market/YYYY-MM-DD/card.jpg` (the session page's share image). They reuse `COMMENTS_DB`, `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_BROWSER_RENDERING_TOKEN`; no new Secret or binding is required. Each card is one Browser Rendering screenshot: about two per trading day, two more when the Daily's takeaway arrives after the publish, and up to 20 attempts a day (KST) in all while older sessions are filled on page visits (`CARD_FILL_PER_DAY` in `functions/_market-card.js`; lower it if the cover generator starts hitting Browser Rendering limits). There is no separate backfill job.
 
 Apply the checked-in idempotent migration to the isolated Preview database first:
