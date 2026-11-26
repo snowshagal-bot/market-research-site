@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-26-note-1qqxope",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-26",
+    "reportDate": "2026-11-26",
+    "registeredDate": "2026-11-26",
+    "registeredAt": "2026-11-26T07:27:50.089Z",
+    "legacyImport": false,
+    "title": "I didn't sell. SOXL did. Even if the index recovers, your investment may not.",
+    "seoTitle": "SOXL: South Korea's Retail Bet and the Math of Breaking Even",
+    "subtitle": "",
+    "description": "South Korean investors made SOXL their top overseas net buy in October. Since Oct. 6, the semiconductor benchmark proxy fell 35% and SOXL 80%. Even a smooth index recovery could leave SOXL near 70% of its initial price. Seven questions explain daily resets, volatility drag, averaging down and rebalancing.",
+    "tags": [
+      "u-s-a",
+      "semiconductors",
+      "etf",
+      "leveraged-etf"
+    ],
+    "readingMinutes": 20,
+    "href": "reports/en/20261126_Investment_Insight_SOXL_3x_ETF_Seven_Questions_EN.html",
+    "translationGroup": "2026-11-26-note-x9ih9g",
+    "coverImage": "covers/2026-11-26-note-1qqxope.webp",
+    "shareCardImage": "covers/share/2026-11-26-note-1qqxope.jpg",
+    "coverThumbnail": "covers/2026-11-26-note-1qqxope-450.webp"
+  },
+  {
     "id": "2026-11-26-note-x9ih9g",
     "type": "note",
     "typeLabel": "투자 인사이트",
