@@ -424,6 +424,12 @@
     return day.items.filter(item => RATE_CODES.includes(item?.code) && valid(item.value)).map(item => domesticRateRow(item, day, trend)).join('');
   }
 
+  // The link to 3편 (locale.js usdkrwGuide), the same as the session page's.
+  function usdkrwGuideLink(className = '') {
+    const guide = root.MARKET_LOCALE?.usdkrwGuide?.(ko ? 'ko' : 'en');
+    return guide ? `<a${className ? ` class="${className}"` : ''} href="${html(guide.href)}">${html(guide.text)}</a>` : '';
+  }
+
   function boardCard(id, title, note, rows, extra = '') {
     return `<section class="mk-card mk-board" data-board="${id}" aria-labelledby="mk-board-${id}">
       <div class="mk-card-head"><h3 id="mk-board-${id}">${html(title)}</h3><span class="mk-card-note">${html(note)}</span></div>
@@ -892,7 +898,7 @@
       <p class="mk-summary-head">${headline}</p>
       ${breadthPart || foreignPart ? `<p class="mk-summary-sub">${[breadthPart, foreignPart].filter(Boolean).map(html).join(' · ')}</p>` : ''}
       <div class="mk-summary-stats">
-        <div><span>${copy.fxSummary}</span><strong>${valueUnit('USDKRW', usdkrw?.data_state === 'unavailable' ? null : usdkrw?.close)}</strong><small>${copy.fixingNote(shortDate(usdkrw?.source_date || marketDate))}</small></div>
+        <div><span>${copy.fxSummary}</span><strong>${valueUnit('USDKRW', usdkrw?.data_state === 'unavailable' ? null : usdkrw?.close)}</strong><small>${copy.fixingNote(shortDate(usdkrw?.source_date || marketDate))}</small>${usdkrwGuideLink('mk-summary-guide')}</div>
         <div><span>${copy.vixSummary}</span><strong>${valueUnit('VIX', vix.display)}${valid(vixPct) ? ` <em class="${signClass(vixPct)}">${pct(vixPct)}</em>` : ''}</strong><small>${vix.latest ? latestStateHtml(vix.latest) : shortDate(rates.VIX?.source_date) ? copy.usCloseNote(shortDate(rates.VIX.source_date)) : ''}</small></div>
       </div>
     </article>`;
@@ -1034,7 +1040,7 @@
           ${boardCard('rates', copy.boards.rates, copy.boardNotes.rates, ratesRows, kofiaRows ? `<p class="mk-unit">${html(copy.ratesNote)}</p>` : (isHistory ? '' : `<p class="mk-unit">${html(copy.ratesPending)}</p>`))}
         </div>
         <div class="mk-board-col">
-          ${boardCard('fx', copy.boards.fx, copy.boardNotes.fx, fxRows)}
+          ${boardCard('fx', copy.boards.fx, copy.boardNotes.fx, fxRows, `<p class="mk-board-guide">${usdkrwGuideLink()}</p>`)}
           ${boardCard('commodities', copy.boards.commodities, copy.boardNotes.commodities, commodityRows)}
         </div>
       </div>`;

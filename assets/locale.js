@@ -655,6 +655,21 @@
     return candidates.length ? Math.max(...candidates) : null;
   }
 
+  /**
+   * 기초 데이터 가이드 3편 「원·달러 환율 종가는 몇 시 숫자인가」: where the
+   * market pages send a reader who asks what time the USD/KRW figure is from
+   * (/market/usdkrw/, the FX notes of TODAY and every session page). The English
+   * pages link the English edition.
+   */
+  const USDKRW_GUIDE = Object.freeze({
+    ko: Object.freeze({ href: '/reports/basics-data-guide-03-usdkrw-closing-rate', text: '이 숫자는 몇 시 값인가 → 환율 숫자 읽는 법' }),
+    en: Object.freeze({ href: '/reports/en/basics-data-guide-03-usdkrw-closing-rate_EN', text: 'What time is this number? → How to read the USD/KRW rate' })
+  });
+
+  function usdkrwGuide(language) {
+    return USDKRW_GUIDE[language === 'en' ? 'en' : 'ko'];
+  }
+
   const GLOBAL_BASIS_COPY = {
     ko: { intraday: '장중', final_close: '종가', krx: '종가', snapshot: '마감 시점', live: '실시간(야후)', bank: '하나은행 고시' },
     en: { intraday: 'INTRADAY', final_close: 'CLOSE', krx: 'CLOSE', snapshot: 'KRX CLOSE', live: 'LIVE (YAHOO)', bank: 'HANA BANK RATE' }
@@ -921,6 +936,7 @@
     globalLatestOverlay,
     globalLatestNow,
     todayStripBasis,
+    usdkrwGuide,
     KRX_GROUP_NAMES,
     krxGroupName,
     MARKET_FUND_PAGES,

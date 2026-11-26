@@ -114,3 +114,33 @@ test('a live KRW quote stands in only before that day\'s record, and says it is 
   assert.equal(L.todayStripBasis('snapshot', { source_date: '2026-11-26', data_state: 'final_close' }, 'ko', 'GOLD'), '11/26 · 종가');
   assert.equal(L.todayStripBasis('latest', { code: 'GOLD', source_date: '2026-11-26', data_state: 'intraday' }, 'ko'), '11/26 · 장중');
 });
+
+test('3편 is linked from /market/usdkrw/, every session page and TODAY, in each language', async () => {
+  assert.deepEqual(L.usdkrwGuide('ko'), { href: '/reports/basics-data-guide-03-usdkrw-closing-rate', text: '이 숫자는 몇 시 값인가 → 환율 숫자 읽는 법' });
+  assert.equal(L.usdkrwGuide('en').href, '/reports/en/basics-data-guide-03-usdkrw-closing-rate_EN');
+
+  const db = new SqliteD1();
+  db.database.prepare(`CREATE TABLE market_close_snapshots (market_date TEXT PRIMARY KEY, schema_version TEXT NOT NULL, generated_at TEXT NOT NULL, status TEXT NOT NULL, payload_json TEXT NOT NULL, published_at TEXT NOT NULL, auth_source TEXT NOT NULL, takeaway_ko TEXT NOT NULL DEFAULT '', takeaway_en TEXT NOT NULL DEFAULT '')`).run();
+  const payload = record('2026-11-23');
+  db.database.prepare(`INSERT INTO market_close_snapshots (market_date, schema_version, generated_at, status, payload_json, published_at, auth_source) VALUES (?, ?, ?, 'final', ?, ?, 'test')`)
+    .run('2026-11-23', payload.meta.schema_version, payload.meta.generated_at, JSON.stringify(payload), '2026-11-23T07:10:00Z');
+  const env = { COMMENTS_DB: db, ASSETS: { fetch: async request => new Response(new URL(request.url).pathname.startsWith('/en/') ? SHELL_EN : SHELL_KO) } };
+  const page = async path => (await onMarketPageRequest({ request: new Request(`https://snowshagal.com${path}`), env, next: async () => new Response('static') }, { loadPostsFn: async () => [] })).text();
+
+  const ko = '<a href="/reports/basics-data-guide-03-usdkrw-closing-rate">이 숫자는 몇 시 값인가 → 환율 숫자 읽는 법</a>';
+  const en = '<a href="/reports/en/basics-data-guide-03-usdkrw-closing-rate_EN">What time is this number? → How to read the USD/KRW rate</a>';
+  // /market/usdkrw/: right under the basis line, only on USD/KRW.
+  const history = await page('/market/usdkrw/');
+  assert.ok(history.includes(`<p class="mk-guide-link">${ko}</p>`));
+  assert.ok(history.indexOf('mk-guide-link') > history.indexOf('class="mk-meta"') && history.indexOf('mk-guide-link') < history.indexOf('</section>', history.indexOf('class="mk-meta"')));
+  assert.ok((await page('/en/market/usdkrw/')).includes(`<p class="mk-guide-link">${en}</p>`));
+  assert.ok(!(await page('/market/jpykrw/')).includes('mk-guide-link'));
+  // A session page: under the USD/KRW summary note and under the FX board.
+  const session = await page('/market/2026-11-23/');
+  assert.ok(session.includes(`<a class="mk-summary-guide" href="/reports/basics-data-guide-03-usdkrw-closing-rate">`));
+  const fxBoard = session.slice(session.indexOf('data-board="fx"'), session.indexOf('</section>', session.indexOf('data-board="fx"')));
+  assert.ok(fxBoard.includes(`<p class="mk-board-guide">${ko}</p>`));
+  assert.ok((await page('/en/market/2026-11-23/')).includes(`<p class="mk-board-guide">${en}</p>`));
+  // TODAY draws the same two links.
+  for (const call of ["usdkrwGuideLink('mk-summary-guide')", '<p class="mk-board-guide">${usdkrwGuideLink()}</p>']) assert.ok(MARKET_JS.includes(call), call);
+});

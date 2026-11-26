@@ -23,7 +23,7 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
     - Measure when ECOS publishes the day's value. It was present by 17:23 KST on 11-26; the 11-27 measurement is running.
     - If it is not there by 16:05, show 잠정 and confirm later. Market Close records are immutable, so the confirmed value goes in a dataset of its own, like Domestic Rates.
     - Backfill from 2026-08-25.
-  - **Link, remaining:** after 3편 is live, link "이 숫자는 몇 시 값인가" from `/market/usdkrw/`, the session pages' FX note and TODAY's USD/KRW card (EN pages → the `_EN` version).
+  - **Link (prepared 2026-11-26, merged once 3편 is live):** "이 숫자는 몇 시 값인가 → 환율 숫자 읽는 법" under `/market/usdkrw/`'s basis line, under the USD/KRW summary note and the FX board on TODAY and every session page (EN pages → the `_EN` edition). The address lives in `assets/locale.js` `usdkrwGuide`; the home strip has none (each strip card is itself a link).
 
 - **Market Funds: KOFIA deposits, margin loans, forced selling (live in Production since 2026-11-25)**:
   investor deposits, margin loans (total, KOSPI, KOSDAQ), unpaid margin and forced selling of each
