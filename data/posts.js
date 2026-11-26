@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-26-daily-1etoa2l",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-26",
+    "reportDate": "2026-11-26",
+    "registeredDate": "2026-11-26",
+    "registeredAt": "2026-11-26T08:39:49.384Z",
+    "legacyImport": false,
+    "title": "KOSPI’s 2.56% Rebound Fades; Up Just 0.29% on Rate Hike Day",
+    "subtitle": "",
+    "description": "The KOSPI rose as much as 2.56% on dip-buying after a 6% rout, but gave back most of its gains amid the BOK hike and prospects for further tightening. Nov. 26 close: 4,711.21 (+0.29%); foreign net selling KRW 113.7bn. Market drivers and next-session checks.",
+    "takeaway": "Dip-buying after a 6% rout lifted the KOSPI as much as 2.56%, but the BOK’s rate hike and prospects of further tightening left it just 0.29% higher at the close.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors",
+      "rates"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-11-26_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-26-daily-18iwvhw",
+    "coverImage": "covers/2026-11-26-daily-1etoa2l.webp",
+    "shareCardImage": "covers/share/2026-11-26-daily-1etoa2l.jpg",
+    "coverThumbnail": "covers/2026-11-26-daily-1etoa2l-450.webp"
+  },
+  {
     "id": "2026-11-26-daily-18iwvhw",
     "type": "daily",
     "typeLabel": "주식 리포트",
