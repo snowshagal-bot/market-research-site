@@ -90,22 +90,25 @@ test('without posts or a line the block still links the session; pages without a
   }
 });
 
-test('KOSDAQ, VKOSPI, USD/KRW and investor deposits carry their own guide; deposits has no latest-session block', () => {
+test('KOSDAQ, VKOSPI, USD/KRW, investor deposits, margin loans and forced selling carry their own guide; the three Market Funds pages have no latest-session block', () => {
   const titles = {
     KOSDAQ: ['코스닥이란', 'What is the KOSDAQ?', '/reports/basics-16-index'],
     VKOSPI: ['VKOSPI란', 'What is the VKOSPI?', '/reports/basics-21-expiration-day'],
     USDKRW: ['원/달러 환율이란', 'What is the USD/KRW rate?', '/reports/20261009_Investment_Note_Won_Strength_Bill'],
-    DEPOSITS: ['투자자예탁금이란', 'What are investor deposits?', '/reports/basics-13-deposits']
+    DEPOSITS: ['투자자예탁금이란', 'What are investor deposits?', '/reports/basics-13-deposits'],
+    CREDIT: ['신용융자 잔고란', 'What are margin loans?', '/reports/basics-20-margin-call'],
+    FORCED_SALE: ['반대매매 금액이란', 'What is the forced-selling figure?', '/reports/basics-data-guide-02-margin-call-by-broker']
   };
   for (const [code, [ko, en, read]] of Object.entries(titles)) {
     const indicator = byCode(code);
-    const latest = code === 'DEPOSITS' ? undefined : LATEST.ko;
+    const funds = ['DEPOSITS', 'CREDIT', 'FORCED_SALE'].includes(code);
+    const latest = funds ? undefined : LATEST.ko;
     const page = marketIndicatorPageHtml(SHELLS.ko, indicator, SERIES, 'ko', undefined, { posts: POSTS, latest });
     const about = block(page, '<section class="market-section" aria-labelledby="market-section-3"');
     assert.ok(about.includes(`<span>03.</span> ${ko}</h2>`), `${code} ko title`);
     assert.ok(about.includes('<a class="mk-term" href="/basics/glossary/#term-'), `${code} ko terms`);
     assert.ok(about.includes(`<a href="${read}">`), `${code} ko read`);
-    if (code === 'DEPOSITS') assert.doesNotMatch(page, /indicator-latest/);
+    if (funds) assert.doesNotMatch(page, /indicator-latest/);
     else assert.match(block(page, '<section class="indicator-latest"'), /11월 25일 마감/, code);
     const english = marketIndicatorPageHtml(SHELLS.en, indicator, SERIES, 'en', undefined, { posts: POSTS });
     assert.ok(english.includes(`${en}</h2>`), `${code} en title`);
