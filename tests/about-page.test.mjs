@@ -22,7 +22,7 @@ test('shared report shell links to Market', async () => {
 
 test('About page contains editorial introduction, contact, and simplified footer', async () => {
   const html = await read('about/index.html');
-  assert.match(html, /<title>소개 \| Snowshagal Market Research<\/title>/);
+  assert.match(html, /<title>Snowshagal 소개 \| 한국 증시 데이터와 리서치<\/title>/);
   assert.doesNotMatch(html, /name="robots"/);
   const koChrome = html.replace(/<main[\s\S]*<\/main>/, '');
   assert.equal((koChrome.match(/href="\/market\/">마켓<\/a>/g) || []).length, 3, 'header, mobile and footer navigation');
@@ -47,7 +47,7 @@ test('About page contains editorial introduction, contact, and simplified footer
 test('English About page contains matching editorial About and Contact sections', async () => {
   const html = await read('en/about/index.html');
   assert.match(html, /<html lang="en" data-site-lang="en">/);
-  assert.match(html, /<title>About \| Snowshagal Market Research<\/title>/);
+  assert.match(html, /<title>About Snowshagal \| Korean Stock Market Data &amp; Research<\/title>/);
   assert.doesNotMatch(html, /name="robots"/);
   const enChrome = html.replace(/<main[\s\S]*<\/main>/, '');
   assert.equal((enChrome.match(/href="\/en\/market\/">Market<\/a>/g) || []).length, 3, 'header, mobile and footer navigation');
