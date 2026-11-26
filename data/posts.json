@@ -1,5 +1,30 @@
 [
   {
+    "id": "2026-11-27-basics-1k2lszc",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-11-27",
+    "reportDate": "2026-11-27",
+    "registeredDate": "2026-11-26",
+    "registeredAt": "2026-11-26T09:37:42.817Z",
+    "legacyImport": false,
+    "title": "원·달러 환율 종가는 몇 시 숫자인가",
+    "seoTitle": "원달러 환율 종가 기준 시간 정리: 오후 3시30분 기준가·매매기준율·NDF 보는 법",
+    "subtitle": "",
+    "description": "원·달러 환율 종가는 몇 시 숫자인가. 24시간 외환시장에서 뉴스가 쓰는 오후 3시 30분 기준가, 다음 날 아침 7시(여름엔 6시) 하루 마감 종가, 서울외국환중개 매매기준율, 은행 고시 환율(살 때·팔 때), NDF를 어디서 보고 어떻게 견주는지. 해외주식 세금에 쓰는 환율, 환율 우대 90% 계산, 2027년 1월 매매기준율 오후 4시 TWAP 전환까지.",
+    "tags": [
+      "market-basic",
+      "korea",
+      "fx"
+    ],
+    "readingMinutes": 10,
+    "href": "reports/basics-data-guide-03-usdkrw-closing-rate.html",
+    "coverImage": "covers/2026-11-27-basics-1k2lszc.webp",
+    "shareCardImage": "covers/share/2026-11-27-basics-1k2lszc.jpg",
+    "coverThumbnail": "covers/2026-11-27-basics-1k2lszc-450.webp"
+  },
+  {
     "id": "2026-11-26-note-1voizqh",
     "type": "note",
     "typeLabel": "Investment Insights",
