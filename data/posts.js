@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-26-note-1spwyox",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-26",
+    "reportDate": "2026-11-26",
+    "registeredDate": "2026-11-26",
+    "registeredAt": "2026-11-26T09:14:50.537Z",
+    "legacyImport": false,
+    "title": "주가는 반토막인데 금리는 올렸다",
+    "seoTitle": "주가 반토막에도 금리 인상, 한은의 4.1%",
+    "subtitle": "",
+    "description": "코스피가 고점 대비 48% 빠진 다음 날 한국은행은 기준금리를 3.25%로 올리고 내년 성장률 전망을 4.1%로 높였다. 한은은 반도체를 얼마나 파느냐를, 증시는 그 값이 얼마나 갈지를 봤다. 다음 인상과 내 대출까지 풀었다.",
+    "tags": [
+      "kospi",
+      "korea",
+      "rates",
+      "policy",
+      "korea-treasury-bond"
+    ],
+    "readingMinutes": 21,
+    "href": "reports/20261126_Investment_Insight_BOK_Hike_Growth_vs_Stocks.html",
+    "coverImage": "covers/2026-11-26-note-1spwyox.webp",
+    "shareCardImage": "covers/share/2026-11-26-note-1spwyox.jpg",
+    "coverThumbnail": "covers/2026-11-26-note-1spwyox-450.webp"
+  },
+  {
     "id": "2026-11-26-daily-1etoa2l",
     "type": "daily",
     "typeLabel": "Daily",

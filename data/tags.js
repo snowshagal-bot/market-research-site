@@ -340,5 +340,11 @@ window.TAG_REGISTRY = {
     "en": "leveraged ETF",
     "group": "market",
     "custom": true
+  },
+  "korea-treasury-bond": {
+    "ko": "국채",
+    "en": "Korea Treasury Bond",
+    "group": "market",
+    "custom": true
   }
 };
