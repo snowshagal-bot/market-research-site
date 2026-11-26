@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-26-daily-18iwvhw",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-26",
+    "reportDate": "2026-11-26",
+    "registeredDate": "2026-11-26",
+    "registeredAt": "2026-11-26T08:29:35.825Z",
+    "legacyImport": false,
+    "title": "급락 다음 날 장중 2.56% 반등, 코스피 금리 인상 날 0.29% 상승에 그침",
+    "subtitle": "",
+    "description": "전날 6% 급락 뒤 저가 매수로 장중 2.56% 올랐지만 한은 금리 인상과 추가 인상 전망 속에 반납 · 11월 26일 코스피 4,711.21(+0.29%), 외국인 1,137억 순매도 · 상승 이유와 다음 거래일 확인할 것",
+    "takeaway": "전날 6% 급락 뒤 저가 매수로 코스피가 장중 2.56%까지 올랐지만 한은 금리 인상과 추가 인상 전망 속에 대부분 반납, 0.29% 상승 마감",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "semiconductors",
+      "rates"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-11-26_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-26-daily-18iwvhw.webp",
+    "shareCardImage": "covers/share/2026-11-26-daily-18iwvhw.jpg",
+    "coverThumbnail": "covers/2026-11-26-daily-18iwvhw-450.webp"
+  },
+  {
     "id": "2026-11-26-basics-1otw2yk",
     "type": "basics",
     "typeLabel": "Market Basics",
