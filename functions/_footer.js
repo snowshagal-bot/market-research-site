@@ -1,5 +1,4 @@
-// The editor's public profiles: linked under Follow on every page and named as
-// the site's sameAs in structured data (functions/_seo.js re-exports this).
+// The editor profiles linked under Follow in the shared footer.
 export const SOCIAL_PROFILES = Object.freeze([
   'https://www.linkedin.com/in/sung-oh-choi-628a5b431/',
   'https://www.threads.com/@snowshagal'
