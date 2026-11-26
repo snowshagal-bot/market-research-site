@@ -1,5 +1,31 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-26-basics-1otw2yk",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-11-26",
+    "reportDate": "2026-11-26",
+    "registeredDate": "2026-11-26",
+    "registeredAt": "2026-11-26T08:20:04.886Z",
+    "legacyImport": false,
+    "title": "Why Korea's penny stocks face delisting",
+    "seoTitle": "Korea's ₩1,000 Penny Stock Delisting Rule: 30, 45 and 90 Trading Days",
+    "subtitle": "",
+    "description": "A close below ₩1,000 for 30 consecutive trading days puts a Korean stock on the delisting watchlist. To regain compliance, it must close at or above ₩1,000 for 45 consecutive sessions within 90 trading days. Learn why the first five cases reached the delisting threshold on day 46, how reverse splits affect market cap, and what liquidation trading and court injunctions mean for shareholders. Includes a quiz and simulator.",
+    "tags": [
+      "korea",
+      "market-basic",
+      "policy"
+    ],
+    "readingMinutes": 11,
+    "href": "reports/en/Snowshagal_Market_Basics_23_Penny_Stock_Delisting_EN.html",
+    "translationGroup": "2026-11-26-basics-1abe3ve",
+    "coverImage": "covers/2026-11-26-basics-1otw2yk.webp",
+    "shareCardImage": "covers/share/2026-11-26-basics-1otw2yk.jpg",
+    "coverThumbnail": "covers/2026-11-26-basics-1otw2yk-450.webp"
+  },
+  {
     "id": "2026-11-26-basics-1abe3ve",
     "type": "basics",
     "typeLabel": "시장 입문",
