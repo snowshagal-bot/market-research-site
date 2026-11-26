@@ -220,7 +220,7 @@ const COPY = {
     report: '이날의 데일리 리포트', noReport: '이날 발행된 데일리 리포트가 없습니다.',
     breadcrumbHome: '홈', breadcrumbMarket: '마켓',
     rateState: '16:00 최종호가', ratesNote: '금융투자협회 최종호가수익률 · 16:00 KST 기준 · 대비는 금융투자협회 전일 값 대비(bp)',
-    source: '데이터 출처: KRX 한국거래소, 네이버 금융, 야후 파이낸스',
+    source: '데이터 출처: KRX 한국거래소, 네이버 금융, 야후 파이낸스', tencentSource: ', 텐센트 증권(상해종합)',
     disclaimer: '투자 판단의 참고 자료이며, 매수·매도 권유가 아닙니다.',
     unit: '단위: 원 · 순매수는 매수-매도',
     sectorsPage: '업종·테마 5일·20일 순위', sectorsLink: '업종·테마 등락률 순위', flowsLink: '투자자별 수급 · 월간 누적',
@@ -250,7 +250,7 @@ const COPY = {
     report: 'Daily report for this session', noReport: 'No Daily report was published for this session.',
     breadcrumbHome: 'Home', breadcrumbMarket: 'Market',
     rateState: '16:00 KOFIA', ratesNote: 'KOFIA final quote yields, 16:00 KST · Change in bp against KOFIA’s previous-day value',
-    source: 'Sources: KRX, Naver Finance, Yahoo Finance',
+    source: 'Sources: KRX, Naver Finance, Yahoo Finance', tencentSource: ', Tencent Securities (Shanghai Composite)',
     disclaimer: 'For reference only; not a recommendation to buy or sell.',
     unit: 'Net buying = buys minus sells',
     sectorsPage: 'Sector & theme 5- and 20-session rankings', sectorsLink: 'Sector & theme rankings', flowsLink: 'Investor flows by month',
@@ -903,7 +903,7 @@ export function renderMarketDateMain(payload, lang, context = {}) {
       ${boards}
     </section>
     <p class="market-archive-links"><a class="market-date-dashboard" href="${base}?date=${html(date)}">${html(copy.dashboard)} →</a><a href="${marketArchivePath(lang)}">${html(copy.archive)} →</a><a href="${marketSectorsPath(lang)}">${html(copy.sectorsLink)} →</a><a href="${marketFlowsPath(lang)}">${html(copy.flowsLink)} →</a></p>
-    <div class="market-data-note"><p>${html(copy.source)}</p><p>${html(copy.disclaimer)}</p></div>`;
+    <div class="market-data-note"><p>${html(sessionSource(payload, copy))}</p><p>${html(copy.disclaimer)}</p></div>`;
   // /market/ TODAY's first HTML (functions/_initial-html.js) takes the dashboard alone.
   if (context.dashboardOnly) return dashboard;
 
@@ -923,6 +923,15 @@ export function renderMarketDateMain(payload, lang, context = {}) {
   </div>
   <div class="market-wrap">${nav}</div>
 </main>`;
+}
+
+// The record's sources: the fixed list, plus Tencent Securities when the
+// Shanghai Composite close came from its real-time quote (Yahoo had not
+// confirmed the close by the 16:05 KST record).
+const TENCENT_SOURCE = '텐센트 증권 실시간 시세';
+function sessionSource(payload, copy) {
+  const tencent = String(payload?.indices?.SHANGHAI?.source || '').split(' · ')[0] === TENCENT_SOURCE;
+  return tencent ? `${copy.source}${copy.tencentSource}` : copy.source;
 }
 
 /** The <main> for the list of sessions, newest first, grouped by month. */
@@ -1829,7 +1838,7 @@ const INDICATOR_COPY = {
       us: '미국 정규장 종가 · 날짜는 미국 거래일 · 한국 증시 마감 기록에 담긴 값',
       asia: '현지 정규장 종가 · 날짜는 현지 거래일 · 한국 증시 마감 기록에 담긴 값',
       NIKKEI225: '도쿄 정규장 15:30 종가(한국 시각 15:30) · 날짜는 일본 거래일 · 한국 증시 마감 기록에 담긴 값',
-      SHANGHAI: '상하이 정규장 15:00 종가(한국 시각 16:00) · 날짜는 중국 거래일 · 한국 증시 마감 기록에 담긴 값',
+      SHANGHAI: '상하이 정규장 15:00 종가(한국 시각 16:00) · 날짜는 중국 거래일 · 한국 증시 마감 기록에 담긴 값 · 야후 파이낸스, 마감 기록 시점에 종가가 확정되지 않았으면 텐센트 증권 실시간 시세',
       TAIEX: '타이베이 정규장 13:30 종가(한국 시각 14:30) · 날짜는 대만 거래일 · 한국 증시 마감 기록에 담긴 값',
       fx: '15:30 KST 매매기준율(하나은행, 네이버 금융) · 매 거래일 갱신',
       snapshot: '한국 증시 마감 직후(오후 4시 무렵 KST) 시세 · 변동은 직전 기록 대비',
@@ -1873,7 +1882,7 @@ const INDICATOR_COPY = {
       us: 'U.S. regular-session close · Dates are U.S. trading days · As carried by the Korea close record',
       asia: 'Local regular-session close · Dates are local trading days · As carried by the Korea close record',
       NIKKEI225: 'Tokyo regular-session close, 15:30 JST (15:30 KST) · Dates are Japanese trading days · As carried by the Korea close record',
-      SHANGHAI: 'Shanghai regular-session close, 15:00 CST (16:00 KST) · Dates are Chinese trading days · As carried by the Korea close record',
+      SHANGHAI: 'Shanghai regular-session close, 15:00 CST (16:00 KST) · Dates are Chinese trading days · As carried by the Korea close record · Yahoo Finance, or Tencent Securities real-time quotes when Yahoo had not confirmed the close by the record',
       TAIEX: 'Taipei regular-session close, 13:30 (14:30 KST) · Dates are Taiwanese trading days · As carried by the Korea close record',
       fx: '15:30 KST reference rate (Hana Bank, via Naver Finance) · Updated every session',
       snapshot: 'Quote shortly after the Korea close (around 16:00 KST) · Change against the previous record',
