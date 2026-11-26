@@ -448,7 +448,7 @@ function monthDayText(value, lang) {
  * The page head every market page shares: breadcrumb, eyebrow, title, the
  * summary or lead, and one meta line. `summary` is markup; the rest is text.
  */
-function pageHead({ id, breadcrumb, eyebrow, title, summary = '', lead = '', meta = [] }) {
+function pageHead({ id, breadcrumb, eyebrow, title, summary = '', lead = '', meta = [], after = '' }) {
   return `<section class="mk-head" aria-labelledby="${id}"><div class="market-wrap">
       <p class="market-breadcrumb">${breadcrumb}</p>
       <p class="mk-eyebrow">${html(eyebrow)}</p>
@@ -456,6 +456,7 @@ function pageHead({ id, breadcrumb, eyebrow, title, summary = '', lead = '', met
       ${summary ? `<p class="market-date-summary">${summary}</p>` : ''}
       ${lead ? `<p class="mk-lead">${html(lead)}</p>` : ''}
       ${meta.length ? `<p class="mk-meta">${meta.map(item => `<span>${html(item)}</span>`).join('')}</p>` : ''}
+      ${after}
     </div></section>`;
 }
 
@@ -564,6 +565,12 @@ export function domesticRatesBody(day, lang, trend = null) {
   const copy = COPY[lang === 'en' ? 'en' : 'ko'];
   const f = makeFormat(lang);
   return items.map(item => domesticRateRow(item, day, f, copy, lang, trend)).join('');
+}
+
+/** The link to 3편 (assets/locale.js usdkrwGuide), as an ordinary <a>. */
+function usdkrwGuideLink(lang, className = '') {
+  const guide = globalThis.MARKET_LOCALE.usdkrwGuide(lang);
+  return `<a${className ? ` class="${className}"` : ''} href="${html(guide.href)}">${html(guide.text)}</a>`;
 }
 
 function boardCard(id, title, note, rows, pc, extra = '') {
@@ -765,7 +772,7 @@ export function renderMarketDateMain(payload, lang, context = {}) {
       <p class="mk-summary-head">${html(headline)}</p>
       ${breadthPart || foreignPart ? `<p class="mk-summary-sub">${[breadthPart, foreignPart].filter(Boolean).map(html).join(' · ')}</p>` : ''}
       <div class="mk-summary-stats">
-        <div><span>${html(pc.fxSummary)}</span><strong>${f.valueUnit('USDKRW', fx?.data_state === 'unavailable' ? null : fx?.close)}</strong><small>${html(pc.fixingNote(shortDate(fx?.source_date || date)))}</small></div>
+        <div><span>${html(pc.fxSummary)}</span><strong>${f.valueUnit('USDKRW', fx?.data_state === 'unavailable' ? null : fx?.close)}</strong><small>${html(pc.fixingNote(shortDate(fx?.source_date || date)))}</small>${usdkrwGuideLink(lang, 'mk-summary-guide')}</div>
         <div><span>${html(pc.vixSummary)}</span><strong>${f.valueUnit('VIX', vix?.data_state === 'unavailable' ? null : vix?.close)}${valid(vix?.change_pct) ? ` <em class="${f.signClass(vix.change_pct)}">${f.pct(vix.change_pct)}</em>` : ''}</strong><small>${shortDate(vix?.source_date) ? html(pc.usCloseNote(shortDate(vix.source_date))) : ''}</small></div>
       </div>
     </article>`;
@@ -874,7 +881,7 @@ export function renderMarketDateMain(payload, lang, context = {}) {
         ${ratesRows ? boardCard('rates', pc.boards.rates, pc.boardNotes.rates, ratesRows, pc, kofiaRows ? `<p class="mk-unit">${html(copy.ratesNote)}</p>` : '') : ''}
       </div>
       <div class="mk-board-col">
-        ${fxRows ? boardCard('fx', pc.boards.fx, pc.boardNotes.fx, fxRows, pc) : ''}
+        ${fxRows ? boardCard('fx', pc.boards.fx, pc.boardNotes.fx, fxRows, pc, `<p class="mk-board-guide">${usdkrwGuideLink(lang)}</p>`) : ''}
         ${commodityRows ? boardCard('commodities', pc.boards.commodities, pc.boardNotes.commodities, commodityRows, pc) : ''}
       </div>
     </div>`;
@@ -2428,7 +2435,8 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
     eyebrow: copy.eyebrow,
     title: copy.heading(name),
     summary,
-    meta: [`${copy.basis[indicator.code] || copy.basis[indicator.kind]}${INDICATOR_UNITS[key][indicator.code] ? ` · ${INDICATOR_UNITS[key][indicator.code]}` : ''}`]
+    meta: [`${copy.basis[indicator.code] || copy.basis[indicator.kind]}${INDICATOR_UNITS[key][indicator.code] ? ` · ${INDICATOR_UNITS[key][indicator.code]}` : ''}`],
+    after: indicator.code === 'USDKRW' ? `<p class="mk-guide-link">${usdkrwGuideLink(key)}</p>` : ''
   })}
   <div class="market-wrap market-dashboard">
     ${latestBlock}
