@@ -334,5 +334,11 @@ window.TAG_REGISTRY = {
     "en": "National Pension Service",
     "group": "macro",
     "custom": true
+  },
+  "leveraged-etf": {
+    "ko": "래버리지 ETF",
+    "en": "leveraged ETF",
+    "group": "market",
+    "custom": true
   }
 };
