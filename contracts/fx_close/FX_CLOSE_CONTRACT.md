@@ -34,7 +34,10 @@ ECOS publishes one decimal. The same table's 0000013 「원/달러(종가)」 is
 `fx_close.schema.json` is the structure; `fx_close.example.json` is an example.
 
 - `days`: 1 to 60 days, each `market_date` once. Daily use sends one or two days; a backfill request sends up to 60.
-- `previous_date`: the date of ECOS's row just before `market_date`, normally the previous KRX trading day.
+- `previous_date`: the previous KRX trading day that has an ECOS row.
+  - ECOS 731Y003 also carries rows on some KRX holidays: 2026-09-24, 09-25, 10-05 and 10-09.
+  - On those days the official 매매기준율 (731Y001) has no row, because the Seoul FX market was closed. So they are not market closes and are never used, neither as a day nor as a previous day.
+  - The move after a holiday is therefore against the last session's 15:30 rate. For example, 10-06 1,343.6 is compared with 10-02 1,350.6 (−7.0), not with 10-05.
 - `retrieved_at`: when the collector read ECOS.
 - `source`: the attribution, `한국은행 ECOS 원/달러(종가 15:30)`.
 - `items`: exactly one, `USDKRW`.
