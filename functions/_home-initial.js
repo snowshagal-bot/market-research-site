@@ -319,9 +319,9 @@ function stripEdits(session, lang) {
 /** The published payload cut down to what site.js reads for the strip. */
 function bootstrapPayload(payload, lang) {
   // source_date, data_state and retrieved_at: the overlay's newer-than-snapshot
-  // test and the snapshot basis line.
-  const pick = ({ close, change, change_pct: changePct, source_date: sourceDate, data_state: dataState, retrieved_at: retrievedAt }) => (
-    { close, change, change_pct: changePct, source_date: sourceDate, data_state: dataState, retrieved_at: retrievedAt }
+  // test and the snapshot basis line; basis: what USD/KRW is (contracts/fx_close/).
+  const pick = ({ close, change, change_pct: changePct, source_date: sourceDate, data_state: dataState, retrieved_at: retrievedAt, basis }) => (
+    { close, change, change_pct: changePct, source_date: sourceDate, data_state: dataState, retrieved_at: retrievedAt, ...(basis ? { basis } : {}) }
   );
   const out = {
     meta: { market_date: payload.meta.market_date, schema_version: payload.meta.schema_version },

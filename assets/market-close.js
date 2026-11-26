@@ -8,7 +8,7 @@
     calendarToggle: '달력으로 날짜 선택', selectDate: '날짜 선택', closeCalendar: '달력 닫기',
     sections: ['주요 지수', '금리 · 환율 · 변동성', '원자재 · 가상자산', '시장 폭', 'KRX 투자자 매매동향 (당일)', '최근 5거래일 누적 수급', '프로그램 & 베이시스', '시장 내부 지표', '공매도 현황', '시가총액 상위 10종목'],
     ratesTitle: '국내 금리', rateState: '16:00 최종호가', ratesNote: '금융투자협회 최종호가수익률 · 16:00 KST 기준 · 대비는 금융투자협회 전일 값 대비(bp)',
-    open: '시가', high: '고가', low: '저가', previous: '전일', close: '종가', current: '현재', fixedClose: '하나은행 고시', intraday: '장중', recentClose: '최근 종가', unavailable: '데이터 없음',
+    open: '시가', high: '고가', low: '저가', previous: '전일', close: '종가', current: '현재', fixedClose: '하나은행 고시', seoulClose: '15:30 기준가', provisionalBank: '잠정 · 하나은행 고시', intraday: '장중', recentClose: '최근 종가', unavailable: '데이터 없음',
     asiaTitle: '아시아 증시', localHoliday: '현지 휴장',
     latestClose: '종가', snapshotBasis: '마감 시점', liveQuote: '실시간(야후)', asOf: stamp => `${stamp} 기준`,
     rise: '상승종목', fall: '하락종목', flat: '보합종목', upper: '상한가', lower: '하한가', riseRatio: '상승비율', fallRatio: '하락비율',
@@ -47,13 +47,13 @@
     summaryTitle: '그날의 요약', summaryHead: (pctText, word) => `코스피 ${pctText}% ${word}`, upWord: '상승', downWord: '하락', flatWord: '보합',
     breadthPhrase: (count, ratio, word) => `코스피 ${count}종목 ${word}(${ratio})`, foreignPhrase: (amount, word) => `외국인 ${amount} ${word}`, netBuyWord: '순매수', netSellWord: '순매도',
     terms: { breadth: '시장 폭', program: '프로그램 매매', basis: '베이시스', short: '공매도' },
-    fxSummary: '원/달러', fixingNote: md => `${md} 하나은행 고시(15:30 직전)`, vixSummary: '미국 변동성 VIX', usCloseNote: md => `${md} 미국장 마감`,
+    fxSummary: '원/달러', fixingNote: md => `${md} 하나은행 고시(15:30 직전)`, seoulNote: md => `${md} 서울 외환시장 15:30 기준가`, provisionalNote: md => `${md} 잠정 · 하나은행 고시(15:30 직전)`, vixSummary: '미국 변동성 VIX', usCloseNote: md => `${md} 미국장 마감`,
     krTitle: '한국 시장', krCaption: '수급, 등락 종목, 주요 종목 종가', flowsTitle: '투자자별 순매수', flowDay: '당일', flowFive: '최근 5거래일', flowNote: '양수는 순매수, 음수는 순매도',
     breadthCaption: '상승 · 보합 · 하락', statsTitle: '거래 · 프로그램 · 공매도', programTotal: '프로그램 순매수', turnoverOf: name => `${name} 거래대금`, ratio5Text: value => `5일 평균의 ${value}배`,
     shortRatioOf: name => `공매도 비중 · ${name}`, detailsMore: '공매도 상위 · 수급 집중도', topTitle: '시가총액 상위 10',
     globalTitle: '해외 · 금리 · 환율 · 원자재', globalCaption: '추이는 최근 20거래일 · 지표를 누르면 일별 기록',
     boards: { world: '해외 증시 · 변동성', rates: '금리', fx: '환율', commodities: '원자재 · 가상자산' },
-    boardNotes: { world: '미국 지수 · 아시아 각 시장 최근 마감', rates: '국내 금융투자협회 16:00 최종호가', fx: '원화는 하나은행 고시(15:30 직전 회차)', commodities: '달러 기준' },
+    boardNotes: { world: '미국 지수 · 아시아 각 시장 최근 마감', rates: '국내 금융투자협회 16:00 최종호가', fx: '원화는 하나은행 고시(15:30 직전 회차)', fxSeoul: '원/달러는 서울 외환시장 15:30 기준가(한국은행), 그 밖의 원화는 하나은행 고시', fxProvisional: '원/달러는 잠정 하나은행 고시, 한국은행 15:30 기준가가 나오면 바뀜', commodities: '달러 기준' },
     tabs: { world: '해외 증시', rates: '금리', fx: '환율', commodities: '원자재' },
     colIndicator: '지표', colValue: '값', colChange: '전일 대비', colTrend: '추이', ratesPending: '국내 금리는 16:00 KST 이후 게시됩니다.',
     marketNames: { KOSPI: '코스피', KOSDAQ: '코스닥', 'KOSPI200선물': '선물' },
@@ -64,7 +64,7 @@
     calendarToggle: 'Select date from calendar', selectDate: 'Select date', closeCalendar: 'Close calendar',
     sections: ['Major Indices', 'Rates · FX · Volatility', 'Commodities · Crypto', 'Market Breadth', 'KRX Investor Flows (Daily)', 'Cumulative Flows: Last 5 Sessions', 'Program Trading & Basis', 'Market Internals', 'Short Selling', 'Top 10 by Market Cap'],
     ratesTitle: 'Korean Bond Yields', rateState: '16:00 KOFIA', ratesNote: 'KOFIA final quote yields, 16:00 KST · Change in bp against KOFIA’s previous-day value',
-    open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', close: 'Close', current: 'Latest', fixedClose: 'Hana Bank rate', intraday: 'Intraday', recentClose: 'Recent close', unavailable: 'Unavailable',
+    open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', close: 'Close', current: 'Latest', fixedClose: 'Hana Bank rate', seoulClose: '3:30 p.m. rate', provisionalBank: 'Provisional · Hana Bank rate', intraday: 'Intraday', recentClose: 'Recent close', unavailable: 'Unavailable',
     asiaTitle: 'Asian Markets', localHoliday: 'Local holiday',
     latestClose: 'Close', snapshotBasis: 'At KRX close', liveQuote: 'Live (Yahoo)', asOf: stamp => `As of ${stamp}`,
     rise: 'Advancers', fall: 'Decliners', flat: 'Unchanged', upper: 'Limit up', lower: 'Limit down', riseRatio: 'Advance ratio', fallRatio: 'Decline ratio',
@@ -106,13 +106,13 @@
     summaryTitle: 'The day in brief', summaryHead: (pctText, word) => `KOSPI ${word} ${pctText}%`, upWord: 'up', downWord: 'down', flatWord: 'flat',
     breadthPhrase: (count, ratio, word) => `${count} KOSPI stocks ${word} (${ratio})`, foreignPhrase: (amount, word) => `foreign investors ${word} ${amount}`, netBuyWord: 'net bought', netSellWord: 'net sold',
     terms: { breadth: 'Market Breadth', program: 'Program Trading', basis: 'Basis', short: 'Short Selling' },
-    fxSummary: 'USD/KRW', fixingNote: md => `${md} · Hana Bank rate before 15:30`, vixSummary: 'US volatility · VIX', usCloseNote: md => `${md} · US close`,
+    fxSummary: 'USD/KRW', fixingNote: md => `${md} · Hana Bank rate before 15:30`, seoulNote: md => `${md} · Seoul FX market 3:30 p.m. rate`, provisionalNote: md => `${md} · provisional Hana Bank rate before 15:30`, vixSummary: 'US volatility · VIX', usCloseNote: md => `${md} · US close`,
     krTitle: 'Korean Market', krCaption: 'Flows, advancers and decliners, top stocks', flowsTitle: 'Net Buying by Investor', flowDay: 'Today', flowFive: 'Last 5 sessions', flowNote: 'Positive is net buying, negative net selling',
     breadthCaption: 'Advancers · unchanged · decliners', statsTitle: 'Turnover · Program · Short Selling', programTotal: 'Program net buy', turnoverOf: name => `${name} turnover`, ratio5Text: value => `${value}× the 5-session avg.`,
     shortRatioOf: name => `Short ratio · ${name}`, detailsMore: 'Top short selling · flow concentration', topTitle: 'Top 10 by Market Cap',
     globalTitle: 'Overseas · Rates · FX · Commodities', globalCaption: 'Trend over the last 20 sessions · Select an indicator for its daily history',
     boards: { world: 'Overseas Markets · Volatility', rates: 'Rates', fx: 'FX', commodities: 'Commodities · Crypto' },
-    boardNotes: { world: 'US indices · each Asian market’s latest close', rates: 'Korean yields: KOFIA 16:00 final quotes', fx: 'KRW pairs: Hana Bank posted rate (last round before 15:30)', commodities: 'In US dollars' },
+    boardNotes: { world: 'US indices · each Asian market’s latest close', rates: 'Korean yields: KOFIA 16:00 final quotes', fx: 'KRW pairs: Hana Bank posted rate (last round before 15:30)', fxSeoul: 'USD/KRW: Seoul FX market 3:30 p.m. rate (Bank of Korea); other KRW pairs: Hana Bank posted rate', fxProvisional: 'USD/KRW: provisional Hana Bank rate until the Bank of Korea 3:30 p.m. rate is out', commodities: 'In US dollars' },
     tabs: { world: 'Markets', rates: 'Rates', fx: 'FX', commodities: 'Commodities' },
     colIndicator: 'Indicator', colValue: 'Value', colChange: 'Change', colTrend: 'Trend', ratesPending: 'Korean yields are published after 16:00 KST.',
     marketNames: { KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', 'KOSPI200선물': 'KOSPI 200 Futures' },
@@ -208,12 +208,14 @@
     '네이버 금융 지수 일봉': 'Naver Finance daily index',
     '네이버 금융': 'Naver Finance',
     '네이버 금융 하나은행 15:30 회차별 매매기준율 + Yahoo 현재가': 'Hana Bank posted rate (Naver Finance)',
+    // USD/KRW from FX Close (contracts/fx_close/).
+    '한국은행 ECOS 원/달러(종가 15:30)': 'Bank of Korea ECOS (USD/KRW 3:30 p.m.)',
     // The Shanghai Composite close when Yahoo has not confirmed it by the 16:05 KST record.
     '텐센트 증권 실시간 시세': 'Tencent Securities real-time quotes'
   };
   // The collector's label for the KRW pairs names a Yahoo quote the page no longer
   // shows and calls Hana Bank's rate 매매기준율 without 은행 고시 (2026-11-26).
-  const SOURCES_KO = { '네이버 금융 하나은행 15:30 회차별 매매기준율 + Yahoo 현재가': '하나은행 고시(네이버 금융)' };
+  const SOURCES_KO = { '네이버 금융 하나은행 15:30 회차별 매매기준율 + Yahoo 현재가': '하나은행 고시(네이버 금융)', '한국은행 ECOS 원/달러(종가 15:30)': '한국은행 ECOS(원/달러 15:30)' };
   const HANGUL = /[\u3131-\u318e\uac00-\ud7a3]/;
   const sourceLine = labels => {
     const unique = [ko ? 'KRX 한국거래소' : 'KRX', ...labels.map(item => item.split(' · ')[0])]
@@ -302,6 +304,9 @@
   // "종가" on a past date, as on that date's own page.
   const stateText = (key, item, history = false) => {
     if (!item || item.data_state === 'unavailable') return copy.unavailable;
+    // USD/KRW from FX Close is the 15:30 rate; before ECOS publishes it the bank rate is provisional.
+    if (key === 'USDKRW' && item.basis === 'seoul_1530') return copy.seoulClose;
+    if (key === 'USDKRW' && item.basis === 'bank_provisional') return copy.provisionalBank;
     if (isFixing(key)) return copy.fixedClose;
     if (item.data_state === 'intraday') {
       const time = root.MARKET_LOCALE?.intradayCaptureTime?.(item) || '';
@@ -898,7 +903,7 @@
       <p class="mk-summary-head">${headline}</p>
       ${breadthPart || foreignPart ? `<p class="mk-summary-sub">${[breadthPart, foreignPart].filter(Boolean).map(html).join(' · ')}</p>` : ''}
       <div class="mk-summary-stats">
-        <div><span>${copy.fxSummary}</span><strong>${valueUnit('USDKRW', usdkrw?.data_state === 'unavailable' ? null : usdkrw?.close)}</strong><small>${copy.fixingNote(shortDate(usdkrw?.source_date || marketDate))}</small>${usdkrwGuideLink('mk-summary-guide')}</div>
+        <div><span>${copy.fxSummary}</span><strong>${valueUnit('USDKRW', usdkrw?.data_state === 'unavailable' ? null : usdkrw?.close)}</strong><small>${(usdkrw?.basis === 'seoul_1530' ? copy.seoulNote : usdkrw?.basis === 'bank_provisional' ? copy.provisionalNote : copy.fixingNote)(shortDate(usdkrw?.source_date || marketDate))}</small>${usdkrwGuideLink('mk-summary-guide')}</div>
         <div><span>${copy.vixSummary}</span><strong>${valueUnit('VIX', vix.display)}${valid(vixPct) ? ` <em class="${signClass(vixPct)}">${pct(vixPct)}</em>` : ''}</strong><small>${vix.latest ? latestStateHtml(vix.latest) : shortDate(rates.VIX?.source_date) ? copy.usCloseNote(shortDate(rates.VIX.source_date)) : ''}</small></div>
       </div>
     </article>`;
@@ -1040,7 +1045,7 @@
           ${boardCard('rates', copy.boards.rates, copy.boardNotes.rates, ratesRows, kofiaRows ? `<p class="mk-unit">${html(copy.ratesNote)}</p>` : (isHistory ? '' : `<p class="mk-unit">${html(copy.ratesPending)}</p>`))}
         </div>
         <div class="mk-board-col">
-          ${boardCard('fx', copy.boards.fx, copy.boardNotes.fx, fxRows, `<p class="mk-board-guide">${usdkrwGuideLink()}</p>`)}
+          ${boardCard('fx', copy.boards.fx, rates.USDKRW?.basis === 'seoul_1530' ? copy.boardNotes.fxSeoul : rates.USDKRW?.basis === 'bank_provisional' ? copy.boardNotes.fxProvisional : copy.boardNotes.fx, fxRows, `<p class="mk-board-guide">${usdkrwGuideLink()}</p>`)}
           ${boardCard('commodities', copy.boards.commodities, copy.boardNotes.commodities, commodityRows)}
         </div>
       </div>`;

@@ -1,5 +1,6 @@
 import { EXPECTED_MARKET_DATE_HEADER, KRX_SESSION_HEADER, TABLE_NAME, MarketDbError, encodeKrxSessionHeader, ensureMarketTable, formatMarketResponse, json } from './_shared.js';
 import { expectedPublishedKrxTradingDate, krxSessionStatus } from '../../_trading-calendar.js';
+import { loadFxCloseDay } from './fx/_shared.js';
 
 // The session that should be on the site by now, computed with the response so
 // a cached copy carries the expectation of the moment its body was read. The
@@ -24,7 +25,9 @@ export async function onRequestGet({ request, env, now = new Date() }) {
     const db = await ensureMarketTable(env, { readOnly: true });
     const row = await db.prepare(`SELECT market_date, generated_at, published_at, payload_json, takeaway_ko, takeaway_en FROM ${TABLE_NAME} ORDER BY market_date DESC LIMIT 1`).first();
     if (!row) return json({ error: 'NO_MARKET_DATA', message: '아직 게시된 Market Close 데이터가 없습니다.' }, 404, 'public, max-age=30, s-maxage=60');
-    return formatMarketResponse(row, request, expectedDateHeaders(now));
+    // USD/KRW: the day's ECOS 15:30 rate once FX Close has it (contracts/fx_close/).
+    const fxDay = await loadFxCloseDay(env, row.market_date);
+    return formatMarketResponse(row, request, expectedDateHeaders(now), fxDay);
   } catch (error) {
     if (error instanceof MarketDbError) return json({ error: error.code, message: error.message }, error.status);
     console.error('market close latest failed', error);

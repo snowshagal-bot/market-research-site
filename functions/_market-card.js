@@ -13,7 +13,9 @@
 // day (CARD_FILL_PER_DAY). Nothing here creates the table: without it every
 // path answers as if no card existed.
 import { escapeHtml, loadPosts } from './_seo.js';
-import { TABLE_NAME } from './api/market/_shared.js';
+import { TABLE_NAME, normalizeKrwPairs } from './api/market/_shared.js';
+import { applyFxClose, fxCloseStamp } from './api/market/_fx-merge.js';
+import { loadFxCloseDay } from './api/market/fx/_shared.js';
 import { longDate, makeFormat, marketDatePath } from './_market-date-page.js';
 import { kstParts } from './_trading-calendar.js';
 
@@ -63,7 +65,7 @@ const COPY = {
     kospi: '코스피', kosdaq: '코스닥',
     head: (name, pct, word) => `${name} ${pct}% ${word}`, up: '상승', down: '하락', flat: '보합',
     foreign: '외국인', institution: '기관', individual: '개인', flows: '코스피 투자자별 순매수',
-    fx: '원/달러', fxBasis: '하나은행 고시', breadth: '코스피 종목', rise: '상승', fall: '하락', turnover: '코스피 거래대금',
+    fx: '원/달러', fxBasis: '하나은행 고시', fxBasisSeoul: '15:30 기준가', fxBasisProvisional: '잠정 · 하나은행 고시', breadth: '코스피 종목', rise: '상승', fall: '하락', turnover: '코스피 거래대금',
     source: '매 거래일 장마감 기록 · 15:30 종가 기준'
   },
   en: {
@@ -72,7 +74,7 @@ const COPY = {
     kospi: 'KOSPI', kosdaq: 'KOSDAQ',
     head: (name, pct, word) => `${name} ${word} ${pct}%`, up: 'up', down: 'down', flat: 'flat',
     foreign: 'Foreign', institution: 'Institutions', individual: 'Retail', flows: 'KOSPI net buying by investor',
-    fx: 'USD/KRW', fxBasis: 'Hana Bank rate', breadth: 'KOSPI stocks', rise: 'up', fall: 'down', turnover: 'KOSPI turnover',
+    fx: 'USD/KRW', fxBasis: 'Hana Bank rate', fxBasisSeoul: '3:30 p.m. rate', fxBasisProvisional: 'Provisional · Hana Bank rate', breadth: 'KOSPI stocks', rise: 'up', fall: 'down', turnover: 'KOSPI turnover',
     source: 'Korea market close, every trading day'
   }
 };
@@ -144,7 +146,7 @@ export function marketCardHtml(payload, lang = 'ko', { takeaway = '' } = {}) {
   const rise = breadth ? (breadth.rise_count ?? breadth.rise) : null;
   const fall = breadth ? (breadth.fall_count ?? breadth.fall) : null;
   const facts = [
-    valid(fx?.close) && fx?.data_state !== 'unavailable' ? `<li><span>${html(copy.fx)} · ${html(copy.fxBasis)}</span><b>${html(f.valueUnit('USDKRW', fx.close))}</b></li>` : '',
+    valid(fx?.close) && fx?.data_state !== 'unavailable' ? `<li><span>${html(copy.fx)} · ${html(fx.basis === 'seoul_1530' ? copy.fxBasisSeoul : fx.basis === 'bank_provisional' ? copy.fxBasisProvisional : copy.fxBasis)}</span><b>${html(f.valueUnit('USDKRW', fx.close))}</b></li>` : '',
     valid(rise) && valid(fall) ? `<li><span>${html(copy.breadth)}</span><b><i class="up">${html(copy.rise)} ${f.integer(rise)}</i> · <i class="down">${html(copy.fall)} ${f.integer(fall)}</i></b></li>` : '',
     valid(turnover) ? `<li><span>${html(copy.turnover)}</span><b>${html(f.won(turnover))}</b></li>` : ''
   ].join('');
@@ -224,12 +226,14 @@ function bytesOf(value) {
 
 /**
  * The key a stored card was drawn from: the card design, the record's own
- * timestamp and, when the card carries one, a hash of the takeaway line. A
- * card without a line keeps the key it had before lines were added.
+ * timestamp, what its USD/KRW read as (`fx`: fxCloseStamp, so the card is drawn
+ * again once the ECOS 15:30 rate replaces the provisional bank rate) and, when
+ * the card carries one, a hash of the takeaway line. A card without a line or
+ * an FX stamp keeps the key it had before those were added.
  */
-export function cardSourceKey(generatedAt, takeaway = '') {
+export function cardSourceKey(generatedAt, takeaway = '', fx = '') {
   const say = cleanLine(takeaway);
-  return `${CARD_VERSION}:${String(generatedAt || '')}${say ? `#${versionToken(say)}` : ''}`;
+  return `${CARD_VERSION}:${String(generatedAt || '')}${fx ? `~${fx}` : ''}${say ? `#${versionToken(say)}` : ''}`;
 }
 
 // A short, URL-safe form of the source key for ?v=.
@@ -260,7 +264,7 @@ export async function readMarketCardMeta(env, date, lang) {
 export async function readMarketCardImage(env, date, lang, generatedAt) {
   try {
     const key = cardSourceKey(generatedAt);
-    const row = await env.COMMENTS_DB.prepare(`SELECT content_type, image FROM ${CARD_TABLE} WHERE market_date = ?1 AND lang = ?2 AND (source_key = ?3 OR substr(source_key, 1, length(?3) + 1) = ?3 || '#') AND image IS NOT NULL LIMIT 1`)
+    const row = await env.COMMENTS_DB.prepare(`SELECT content_type, image FROM ${CARD_TABLE} WHERE market_date = ?1 AND lang = ?2 AND (source_key = ?3 OR substr(source_key, 1, length(?3) + 1) IN (?3 || '#', ?3 || '~')) AND image IS NOT NULL LIMIT 1`)
       .bind(date, lang === 'en' ? 'en' : 'ko', key).first();
     const bytes = bytesOf(row?.image);
     return bytes?.byteLength ? { bytes, type: row.content_type || 'image/jpeg' } : null;
@@ -327,7 +331,9 @@ export async function ensureMarketCard(env, date, lang = 'ko', { now = new Date(
     ]);
     if (!record || record.status !== 'final') return { status: 'no_final_record' };
     const takeaway = cardTakeaway(record.takeaway, postList, date, key);
-    const sourceKey = cardSourceKey(record.generated_at, takeaway);
+    // The card shows USD/KRW as every page does: the ECOS 15:30 rate once FX Close has it.
+    const payload = applyFxClose(normalizeKrwPairs(JSON.parse(record.payload_json)), await loadFxCloseDay(env, date));
+    const sourceKey = cardSourceKey(record.generated_at, takeaway, fxCloseStamp(payload));
     const stamp = now.toISOString();
     const retryBefore = new Date(now.getTime() - RETRY_AFTER_MS).toISOString();
     // One attempt at a time per card: the row is taken only when there is no
@@ -346,7 +352,6 @@ export async function ensureMarketCard(env, date, lang = 'ko', { now = new Date(
     if (!claim?.meta?.changes) return { status: 'skipped' };
     claimed = true;
 
-    const payload = JSON.parse(record.payload_json);
     const { bytes, type } = await captureCard(env, marketCardHtml(payload, key, { takeaway }), fetchImpl);
     await db.prepare(`UPDATE ${CARD_TABLE} SET status = 'ready', source_key = ?3, content_type = ?4, image = ?5, created_at = ?6 WHERE market_date = ?1 AND lang = ?2`)
       .bind(date, key, sourceKey, type, bytes, new Date().toISOString()).run();
@@ -376,7 +381,7 @@ export function cardPosts(request, env) {
  * is missing, or was drawn from another record version or another takeaway.
  */
 export function marketCardIsStale(cardMeta, payload, takeaway) {
-  return cardMeta?.sourceKey !== cardSourceKey(payload?.meta?.generated_at, takeaway);
+  return cardMeta?.sourceKey !== cardSourceKey(payload?.meta?.generated_at, takeaway, fxCloseStamp(payload));
 }
 
 /* ------------------------------------------------------------------ route */

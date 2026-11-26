@@ -1,6 +1,7 @@
 export const SCHEMA_VERSION = '1.2.0';
 export const SUPPORTED_SCHEMA_VERSIONS = Object.freeze(['1.0.1', '1.1.0', '1.2.0']);
 export const MAX_PAYLOAD_BYTES = 512 * 1024;
+import { applyFxClose } from './_fx-merge.js';
 import { isAdminHost, isPreviewHost, isPublicHost, validateHumanAdminMutation } from '../../_host-policy.js';
 import { requireAdminMutation } from '../../_auth.js';
 import { GLOBAL_INDICATOR_SECTIONS, carriesInstrument, validateSourceFreshness } from './_freshness.js';
@@ -85,12 +86,24 @@ export function normalizeKrwPairs(payload) {
   return payload;
 }
 
-// Bumped whenever normalizeKrwPairs changes what a stored record reads as, so a
-// cached copy (ETag) of the old reading is not reused.
-const PAYLOAD_READING_VERSION = 'krw-move-1';
+// Bumped whenever normalizeKrwPairs or applyFxClose changes what a stored record
+// reads as, so a cached copy (ETag) of the old reading is not reused.
+const PAYLOAD_READING_VERSION = 'krw-move-2';
 
-export function formatMarketResponse(row, request, extraHeaders = {}) {
-  const stamp = `${row.generated_at}|${row.published_at || ''}|${row.takeaway_ko || ''}|${row.takeaway_en || ''}|${PAYLOAD_READING_VERSION}`;
+// What the day's FX Close row adds to the ETag: unavailable, missing, or the row.
+function fxDayStamp(fxDay) {
+  if (fxDay === undefined) return '';
+  if (!fxDay) return 'fx-none';
+  return `fx-${fxDay.published_at || ''}-${fxDay.items?.[0]?.value ?? ''}`;
+}
+
+/**
+ * The API body of a stored record: its KRW pairs' moves read from close and
+ * previous close, and USD/KRW joined with the day's FX Close row (`fxDay`: the
+ * day, null when it has none, undefined when FX Close is unavailable).
+ */
+export function formatMarketResponse(row, request, extraHeaders = {}, fxDay = undefined) {
+  const stamp = `${row.generated_at}|${row.published_at || ''}|${row.takeaway_ko || ''}|${row.takeaway_en || ''}|${PAYLOAD_READING_VERSION}|${fxDayStamp(fxDay)}`;
   const etag = `W/"market-${row.market_date}-${fingerprint(stamp)}"`;
   if (request.headers.get('if-none-match') === etag) {
     return new Response(null, {
@@ -99,7 +112,7 @@ export function formatMarketResponse(row, request, extraHeaders = {}) {
     });
   }
   let payload;
-  try { payload = normalizeKrwPairs(JSON.parse(row.payload_json)); }
+  try { payload = applyFxClose(normalizeKrwPairs(JSON.parse(row.payload_json)), fxDay); }
   catch (error) {
     console.error('stored market close payload is invalid', error);
     return json({ error: 'INVALID_STORED_DATA', message: '저장된 Market Close 데이터를 읽을 수 없습니다.' }, 500);

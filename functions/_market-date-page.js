@@ -28,6 +28,8 @@ import {
 } from './_seo.js';
 import '../assets/locale.js';
 import { TABLE_NAME, ensureMarketTable, normalizeKrwPairs } from './api/market/_shared.js';
+import { applyFxClose } from './api/market/_fx-merge.js';
+import { loadFxCloseDay, loadFxCloseDays } from './api/market/fx/_shared.js';
 import { aggregateKrxGroups } from './api/market/_aggregate.js';
 import { loadTrend } from './api/market/trend.js';
 import { cardImageUrl, cardTakeaway, ensureMarketCard, marketCardIsStale, onMarketCardRequest, parseMarketCardPath, readMarketCardMeta } from './_market-card.js';
@@ -203,7 +205,7 @@ const COPY = {
     overseas: '* 해외 지수·원자재는 각 시장의 최신 거래일 종가',
     sections: ['주요 지수', '투자자별 매매동향 (당일)', '최근 5거래일 누적 수급', '금리 · 환율 · 변동성', '원자재 · 가상자산', '시장 폭', 'KRX 업종 · 테마 등락률', '시가총액 상위 10종목', '공매도 현황', '국내 금리'],
     asiaTitle: '아시아 증시', localHoliday: '현지 휴장',
-    open: '시가', high: '고가', low: '저가', previous: '전일', closeState: '종가', fixedClose: '하나은행 고시', intraday: '장중', unavailable: '데이터 없음',
+    open: '시가', high: '고가', low: '저가', previous: '전일', closeState: '종가', fixedClose: '하나은행 고시', seoulClose: '15:30 기준가', provisionalBank: '잠정 · 하나은행 고시', intraday: '장중', unavailable: '데이터 없음',
     market: '시장', foreign: '외국인', institution: '기관', individual: '개인', futures: '선물',
     fiveDays: (start, end) => `${start} – ${end}`,
     fiveDayIncomplete: (used, total) => `데이터 불완전 · ${used}/${total} 거래일 확보`,
@@ -220,7 +222,7 @@ const COPY = {
     report: '이날의 데일리 리포트', noReport: '이날 발행된 데일리 리포트가 없습니다.',
     breadcrumbHome: '홈', breadcrumbMarket: '마켓',
     rateState: '16:00 최종호가', ratesNote: '금융투자협회 최종호가수익률 · 16:00 KST 기준 · 대비는 금융투자협회 전일 값 대비(bp)',
-    source: '데이터 출처: KRX 한국거래소, 네이버 금융, 야후 파이낸스', tencentSource: ', 텐센트 증권(상해종합)',
+    source: '데이터 출처: KRX 한국거래소, 네이버 금융, 야후 파이낸스', ecosSource: ', 한국은행 ECOS(원/달러 15:30)', tencentSource: ', 텐센트 증권(상해종합)',
     disclaimer: '투자 판단의 참고 자료이며, 매수·매도 권유가 아닙니다.',
     unit: '단위: 원 · 순매수는 매수-매도',
     sectorsPage: '업종·테마 5일·20일 순위', sectorsLink: '업종·테마 등락률 순위', flowsLink: '투자자별 수급 · 월간 누적',
@@ -233,7 +235,7 @@ const COPY = {
     overseas: '* Overseas indices and commodities use each market’s latest close.',
     sections: ['Major Indices', 'Investor Flows (Daily)', 'Cumulative Flows: Last 5 Sessions', 'Rates · FX · Volatility', 'Commodities · Crypto', 'Market Breadth', 'KRX Sectors & Themes', 'Top 10 by Market Cap', 'Short Selling', 'Korean Bond Yields'],
     asiaTitle: 'Asian Markets', localHoliday: 'Local holiday',
-    open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', closeState: 'Close', fixedClose: 'Hana Bank rate', intraday: 'Intraday', unavailable: 'Unavailable',
+    open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', closeState: 'Close', fixedClose: 'Hana Bank rate', seoulClose: '3:30 p.m. rate', provisionalBank: 'Provisional · Hana Bank rate', intraday: 'Intraday', unavailable: 'Unavailable',
     market: 'Market', foreign: 'Foreign', institution: 'Institution', individual: 'Retail', futures: 'KOSPI 200 Futures',
     fiveDays: (start, end) => `${start} – ${end}`,
     fiveDayIncomplete: (used, total) => `Incomplete data · ${used}/${total} sessions available`,
@@ -250,7 +252,7 @@ const COPY = {
     report: 'Daily report for this session', noReport: 'No Daily report was published for this session.',
     breadcrumbHome: 'Home', breadcrumbMarket: 'Market',
     rateState: '16:00 KOFIA', ratesNote: 'KOFIA final quote yields, 16:00 KST · Change in bp against KOFIA’s previous-day value',
-    source: 'Sources: KRX, Naver Finance, Yahoo Finance', tencentSource: ', Tencent Securities (Shanghai Composite)',
+    source: 'Sources: KRX, Naver Finance, Yahoo Finance', ecosSource: ', Bank of Korea ECOS (USD/KRW 3:30 p.m.)', tencentSource: ', Tencent Securities (Shanghai Composite)',
     disclaimer: 'For reference only; not a recommendation to buy or sell.',
     unit: 'Net buying = buys minus sells',
     sectorsPage: 'Sector & theme 5- and 20-session rankings', sectorsLink: 'Sector & theme rankings', flowsLink: 'Investor flows by month',
@@ -404,14 +406,14 @@ const PAGE_COPY = {
     regularClose: '정규장 종가', trendLabel: '최근 20거래일 종가', closeOf: md => `${md} 마감`, regularBasis: '정규장 15:30 KST 기준',
     summaryTitle: '그날의 요약', summaryHead: (pctText, word) => `코스피 ${pctText}% ${word}`, up: '상승', down: '하락', flat: '보합',
     breadthPhrase: (count, ratio, word) => `코스피 ${count}종목 ${word}(${ratio})`, foreignPhrase: (amount, word) => `외국인 ${amount} ${word}`, netBuy: '순매수', netSell: '순매도',
-    fxSummary: '원/달러', fixingNote: md => `${md} 하나은행 고시(15:30 직전)`, vixSummary: '미국 변동성 VIX', usCloseNote: md => `${md} 미국장 마감`,
+    fxSummary: '원/달러', fixingNote: md => `${md} 하나은행 고시(15:30 직전)`, seoulNote: md => `${md} 서울 외환시장 15:30 기준가`, provisionalNote: md => `${md} 잠정 · 하나은행 고시(15:30 직전)`, vixSummary: '미국 변동성 VIX', usCloseNote: md => `${md} 미국장 마감`,
     krTitle: '한국 시장', krCaption: '수급, 등락 종목, 주요 종목 종가', flowsTitle: '투자자별 순매수', flowDay: '당일', flowFive: '최근 5거래일', flowNote: '양수는 순매수, 음수는 순매도',
     breadthTitle: '시장 폭', breadthCaption: '상승 · 보합 · 하락', breadthShort: { rise: '상승', flat: '보합', fall: '하락', upper: '상한', lower: '하한' },
     statsTitle: '거래 · 프로그램 · 공매도', turnoverOf: name => `${name} 거래대금`, ratio5Text: value => `5일 평균의 ${value}배`, programTotal: '프로그램 순매수', arbitrage: '차익', nonArbitrage: '비차익',
     basis: '베이시스', spot: 'KOSPI200 현물', shortRatioOf: name => `공매도 비중 · ${name}`, detailsMore: '공매도 상위 5',
     topTitle: '시가총액 상위 10', groupsTitle: 'KRX 업종 · 테마 등락률', globalTitle: '해외 · 금리 · 환율 · 원자재', globalCaption: '추이는 최근 20거래일 · 지표를 누르면 일별 기록',
     boards: { world: '해외 증시 · 변동성', rates: '금리', fx: '환율', commodities: '원자재 · 가상자산' },
-    boardNotes: { world: '미국 지수 · 아시아 각 시장 최근 마감', rates: '국내 금융투자협회 16:00 최종호가', fx: '원화는 하나은행 고시(15:30 직전 회차)', commodities: '달러 기준' },
+    boardNotes: { world: '미국 지수 · 아시아 각 시장 최근 마감', rates: '국내 금융투자협회 16:00 최종호가', fx: '원화는 하나은행 고시(15:30 직전 회차)', fxSeoul: '원/달러는 서울 외환시장 15:30 기준가(한국은행), 그 밖의 원화는 하나은행 고시', fxProvisional: '원/달러는 잠정 하나은행 고시, 한국은행 15:30 기준가가 나오면 바뀜', commodities: '달러 기준' },
     columns: ['지표', '값', '전일 대비', '추이'], marketNames: { KOSPI: '코스피', KOSDAQ: '코스닥', 'KOSPI200선물': '선물' },
     dateLabel: '거래일', pageEyebrow: '한국 증시 마감 기록', stock: '종목명', future: '선물', terms: { breadth: '시장 폭', program: '프로그램 매매', basis: '베이시스', short: '공매도' }, price: '종가', change: '등락률', marketCap: '시가총액'
   },
@@ -419,14 +421,14 @@ const PAGE_COPY = {
     regularClose: 'Regular close', trendLabel: 'Last 20 sessions', closeOf: md => `Close of ${md}`, regularBasis: 'Regular session, 15:30 KST',
     summaryTitle: 'The day in brief', summaryHead: (pctText, word) => `KOSPI ${word} ${pctText}%`, up: 'up', down: 'down', flat: 'flat',
     breadthPhrase: (count, ratio, word) => `${count} KOSPI stocks ${word} (${ratio})`, foreignPhrase: (amount, word) => `foreign investors ${word} ${amount}`, netBuy: 'net bought', netSell: 'net sold',
-    fxSummary: 'USD/KRW', fixingNote: md => `${md} · Hana Bank rate before 15:30`, vixSummary: 'US volatility · VIX', usCloseNote: md => `${md} · US close`,
+    fxSummary: 'USD/KRW', fixingNote: md => `${md} · Hana Bank rate before 15:30`, seoulNote: md => `${md} · Seoul FX market 3:30 p.m. rate`, provisionalNote: md => `${md} · provisional Hana Bank rate before 15:30`, vixSummary: 'US volatility · VIX', usCloseNote: md => `${md} · US close`,
     krTitle: 'Korean Market', krCaption: 'Flows, advancers and decliners, top stocks', flowsTitle: 'Net Buying by Investor', flowDay: 'Today', flowFive: 'Last 5 sessions', flowNote: 'Positive is net buying, negative net selling',
     breadthTitle: 'Market Breadth', breadthCaption: 'Advancers · unchanged · decliners', breadthShort: { rise: 'Up', flat: 'Flat', fall: 'Down', upper: 'limit', lower: 'limit' },
     statsTitle: 'Turnover · Program · Short Selling', turnoverOf: name => `${name} turnover`, ratio5Text: value => `${value}× the 5-session avg.`, programTotal: 'Program net buy', arbitrage: 'Arbitrage', nonArbitrage: 'Non-arbitrage',
     basis: 'Basis', spot: 'KOSPI 200 spot', shortRatioOf: name => `Short ratio · ${name}`, detailsMore: 'Top 5 short selling',
     topTitle: 'Top 10 by Market Cap', groupsTitle: 'KRX Sectors & Themes', globalTitle: 'Overseas · Rates · FX · Commodities', globalCaption: 'Trend over the last 20 sessions · Select an indicator for its daily history',
     boards: { world: 'Overseas Markets · Volatility', rates: 'Rates', fx: 'FX', commodities: 'Commodities · Crypto' },
-    boardNotes: { world: 'US indices · each Asian market’s latest close', rates: 'Korean yields: KOFIA 16:00 final quotes', fx: 'KRW pairs: Hana Bank posted rate (last round before 15:30)', commodities: 'In US dollars' },
+    boardNotes: { world: 'US indices · each Asian market’s latest close', rates: 'Korean yields: KOFIA 16:00 final quotes', fx: 'KRW pairs: Hana Bank posted rate (last round before 15:30)', fxSeoul: 'USD/KRW: Seoul FX market 3:30 p.m. rate (Bank of Korea); other KRW pairs: Hana Bank posted rate', fxProvisional: 'USD/KRW: provisional Hana Bank rate until the Bank of Korea 3:30 p.m. rate is out', commodities: 'In US dollars' },
     columns: ['Indicator', 'Value', 'Change', 'Trend'], marketNames: { KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', 'KOSPI200선물': 'KOSPI 200 Futures' },
     dateLabel: 'Trading day', pageEyebrow: 'Korea market close archive', stock: 'Company', future: 'Futures', terms: { breadth: 'Market Breadth', program: 'Program Trading', basis: 'Basis', short: 'Short Selling' }, price: 'Close', change: 'Change', marketCap: 'Market cap'
   }
@@ -506,7 +508,7 @@ function instrumentParts(key, item, f, copy, lang, marketDate) {
   const captured = intraday ? globalThis.MARKET_LOCALE.intradayCaptureTime(item) : '';
   const basis = !item || item.data_state === 'unavailable'
     ? copy.unavailable
-    : isFx ? copy.fixedClose : intraday ? (captured ? `${copy.intraday} · ${captured}` : copy.intraday) : copy.closeState;
+    : isFx ? fxStateLabel(key, item, copy) : intraday ? (captured ? `${copy.intraday} · ${captured}` : copy.intraday) : copy.closeState;
   const state = `${dotDate(item?.source_date, lang)} · ${basis}${localHoliday ? ` · ${copy.localHoliday}` : ''}`;
   // An optional indicator's page exists once a record has its value.
   const history = marketIndicatorPath(key, lang) && (!isOptionalIndicator(key) || valid(item?.close)) ? marketIndicatorPath(key, lang) : null;
@@ -565,6 +567,30 @@ export function domesticRatesBody(day, lang, trend = null) {
   const copy = COPY[lang === 'en' ? 'en' : 'ko'];
   const f = makeFormat(lang);
   return items.map(item => domesticRateRow(item, day, f, copy, lang, trend)).join('');
+}
+
+/*
+ * What a KRW pair's figure is (contracts/fx_close/): USD/KRW is the Seoul FX
+ * market's 15:30 rate once FX Close has the day ('seoul_1530'), or the record's
+ * Hana Bank rate marked provisional until then ('bank_provisional'); the other
+ * pairs, and USD/KRW before FX Close exists, are Hana Bank's posted rate.
+ */
+function fxStateLabel(key, item, copy) {
+  if (key === 'USDKRW' && item?.basis === 'seoul_1530') return copy.seoulClose;
+  if (key === 'USDKRW' && item?.basis === 'bank_provisional') return copy.provisionalBank;
+  return copy.fixedClose;
+}
+
+function fxSummaryNote(fx, pc) {
+  if (fx?.basis === 'seoul_1530') return pc.seoulNote;
+  if (fx?.basis === 'bank_provisional') return pc.provisionalNote;
+  return pc.fixingNote;
+}
+
+function fxBoardNote(usd, pc) {
+  if (usd?.basis === 'seoul_1530') return pc.boardNotes.fxSeoul;
+  if (usd?.basis === 'bank_provisional') return pc.boardNotes.fxProvisional;
+  return pc.boardNotes.fx;
 }
 
 /** The link to 3편 (assets/locale.js usdkrwGuide), as an ordinary <a>. */
@@ -772,7 +798,7 @@ export function renderMarketDateMain(payload, lang, context = {}) {
       <p class="mk-summary-head">${html(headline)}</p>
       ${breadthPart || foreignPart ? `<p class="mk-summary-sub">${[breadthPart, foreignPart].filter(Boolean).map(html).join(' · ')}</p>` : ''}
       <div class="mk-summary-stats">
-        <div><span>${html(pc.fxSummary)}</span><strong>${f.valueUnit('USDKRW', fx?.data_state === 'unavailable' ? null : fx?.close)}</strong><small>${html(pc.fixingNote(shortDate(fx?.source_date || date)))}</small>${usdkrwGuideLink(lang, 'mk-summary-guide')}</div>
+        <div><span>${html(pc.fxSummary)}</span><strong>${f.valueUnit('USDKRW', fx?.data_state === 'unavailable' ? null : fx?.close)}</strong><small>${html(fxSummaryNote(fx, pc)(shortDate(fx?.source_date || date)))}</small>${usdkrwGuideLink(lang, 'mk-summary-guide')}</div>
         <div><span>${html(pc.vixSummary)}</span><strong>${f.valueUnit('VIX', vix?.data_state === 'unavailable' ? null : vix?.close)}${valid(vix?.change_pct) ? ` <em class="${f.signClass(vix.change_pct)}">${f.pct(vix.change_pct)}</em>` : ''}</strong><small>${shortDate(vix?.source_date) ? html(pc.usCloseNote(shortDate(vix.source_date))) : ''}</small></div>
       </div>
     </article>`;
@@ -881,7 +907,7 @@ export function renderMarketDateMain(payload, lang, context = {}) {
         ${ratesRows ? boardCard('rates', pc.boards.rates, pc.boardNotes.rates, ratesRows, pc, kofiaRows ? `<p class="mk-unit">${html(copy.ratesNote)}</p>` : '') : ''}
       </div>
       <div class="mk-board-col">
-        ${fxRows ? boardCard('fx', pc.boards.fx, pc.boardNotes.fx, fxRows, pc, `<p class="mk-board-guide">${usdkrwGuideLink(lang)}</p>`) : ''}
+        ${fxRows ? boardCard('fx', pc.boards.fx, fxBoardNote(rates.USDKRW, pc), fxRows, pc, `<p class="mk-board-guide">${usdkrwGuideLink(lang)}</p>`) : ''}
         ${commodityRows ? boardCard('commodities', pc.boards.commodities, pc.boardNotes.commodities, commodityRows, pc) : ''}
       </div>
     </div>`;
@@ -938,7 +964,8 @@ export function renderMarketDateMain(payload, lang, context = {}) {
 const TENCENT_SOURCE = '텐센트 증권 실시간 시세';
 function sessionSource(payload, copy) {
   const tencent = String(payload?.indices?.SHANGHAI?.source || '').split(' · ')[0] === TENCENT_SOURCE;
-  return tencent ? `${copy.source}${copy.tencentSource}` : copy.source;
+  const ecos = payload?.rates_fx_volatility?.USDKRW?.basis === 'seoul_1530';
+  return `${copy.source}${ecos ? copy.ecosSource : ''}${tencent ? copy.tencentSource : ''}`;
 }
 
 /** The <main> for the list of sessions, newest first, grouped by month. */
@@ -1136,6 +1163,8 @@ export async function loadMarketDate(env, date, { budgetMs = MARKET_DATE_TIME_BU
     let payload;
     try { payload = normalizeKrwPairs(JSON.parse(row.payload_json)); } catch (_) { return null; }
     if (payload?.meta?.market_date !== date || payload?.meta?.status !== 'final') return null;
+    // USD/KRW: the day's ECOS 15:30 rate once FX Close has it (contracts/fx_close/).
+    applyFxClose(payload, await loadFxCloseDay(env, date));
     payload.takeaway = { ko: String(row.takeaway_ko || ''), en: String(row.takeaway_en || '') };
     return { payload, prev: row.prev_date || null, next: row.next_date || null, publishedAt: row.published_at || '' };
   })(), budgetMs);
@@ -1154,7 +1183,14 @@ export async function loadMarketArchive(env, { budgetMs = MARKET_DATE_TIME_BUDGE
         json_extract(payload_json, '$.rates_fx_volatility.USDKRW.close') AS usdkrw,
         ${OPTIONAL_INDICATOR_CLOSES_SQL} AS optional_closes
       FROM ${TABLE_NAME} WHERE status = 'final' ORDER BY market_date DESC`).all();
-    return (result?.results || []).filter(row => ISO_DATE.test(String(row?.market_date || '')));
+    const rows = (result?.results || []).filter(row => ISO_DATE.test(String(row?.market_date || '')));
+    // USD/KRW: each day's ECOS 15:30 rate where FX Close has it (contracts/fx_close/).
+    const fxDays = await loadFxCloseDays(env);
+    for (const row of fxDays ? rows : []) {
+      const item = fxDays.get(row.market_date)?.items?.find(entry => entry?.code === 'USDKRW');
+      if (item && valid(item.value)) row.usdkrw = item.value;
+    }
+    return rows;
   })(), budgetMs);
 }
 
@@ -1242,7 +1278,10 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
       // A guided page also names the latest session's line and Daily; both fail soft.
       const postsPromise = guided ? Promise.resolve().then(() => (loadPostsFn || loadPosts)(request, env)).catch(() => []) : Promise.resolve([]);
       const [rows, shell, rateCodes, posts] = await Promise.all([loadMarketIndicator(env, route.indicator, { budgetMs }), loadShell(env, url, route.lang), rateCodesWithin(env, budgetMs), postsPromise]);
-      const series = marketIndicatorSeries(rows, route.indicator);
+      // /market/usdkrw/: the ECOS 15:30 rates once FX Close holds any (ECOS days only).
+      const fxDays = route.indicator.code === 'USDKRW' ? await withinBudget(loadFxCloseDays(env), budgetMs).catch(() => undefined) : undefined;
+      const fxSeoul = Boolean(fxDays && fxDays.size);
+      const series = marketIndicatorSeries(fxSeoul ? usdKrwFxRows(rows, fxDays) : rows, route.indicator);
       if (!series.length) return notFound(env, url);
       let context = {};
       if (guided) {
@@ -1253,6 +1292,7 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
           latest: { date, line: cardTakeaway(own?.[route.lang], posts, date, route.lang), report: dailyReportFor(posts, date, route.lang) }
         };
       }
+      if (fxSeoul) context.fxSeoul = true;
       return htmlResponse(marketIndicatorPageHtml(shell, route.indicator, series, route.lang, availableIndicatorCodes(rows, rateCodes), context));
     }
     if (route.flows) {
@@ -1865,6 +1905,9 @@ const INDICATOR_COPY = {
     fundsDates: '날짜는 자금이 집계된 한국 거래일입니다. 금융투자협회는 다음 영업일에 공개합니다. 날짜를 누르면 그날의 전체 마감 기록이 열립니다.',
     gaps: '한국 증시 마감 기록이 게시된 날의 값만 담았습니다. 기록이 없는 날과, 한국 휴장일에 열린 해외 거래일은 빠질 수 있습니다.',
     kofiaGaps: '금융투자협회가 공시한 한국 거래일의 값입니다. 데이터 출처: 금융투자협회 채권정보센터.',
+    fxSeoulBasis: '서울 외환시장 오후 3시 30분 기준가 · 한국은행 ECOS · 대비는 전 거래일 기준가 대비 · 매 거래일 갱신',
+    fxSeoulValue: '15:30 기준가',
+    fxSeoulGaps: '한국은행 경제통계시스템(ECOS)이 공개한 거래일의 서울 외환시장 오후 3시 30분 기준가입니다. 데이터 출처: 한국은행 ECOS.',
     fundsGaps: '금융투자협회가 공시한 한국 거래일의 값입니다. 데이터 출처: 금융투자협회 종합통계서비스(FreeSIS).',
     chartLabel: (name, first, last) => `${name} 추이, ${first}부터 ${last}까지`,
     chartNote: '거래일 순서로 그린 선입니다. 날짜별 값은 아래 표에 있습니다.',
@@ -1909,6 +1952,9 @@ const INDICATOR_COPY = {
     fundsDates: 'Dates are the Korean trading days the figures describe; KOFIA publishes them the next business day. Each linked date opens that session’s full close record.',
     gaps: 'Only days with a published Korea close record are listed. Days without one, and overseas sessions held on Korean market holidays, may be missing.',
     kofiaGaps: 'Values for each Korean trading day KOFIA published. Source: KOFIA Bond Information Service.',
+    fxSeoulBasis: 'Seoul FX market 3:30 p.m. KST rate · Bank of Korea ECOS · Change against the previous trading day’s rate · Updated every session',
+    fxSeoulValue: '3:30 p.m. rate',
+    fxSeoulGaps: 'The Seoul FX market’s 3:30 p.m. rate of each trading day the Bank of Korea published on ECOS. Source: Bank of Korea ECOS.',
     fundsGaps: 'Values for each Korean trading day KOFIA published. Source: KOFIA FreeSIS statistics.',
     chartLabel: (name, first, last) => `${name} from ${first} to ${last}`,
     chartNote: 'Plotted in trading-day order. Each day’s value is in the table below.',
@@ -1991,6 +2037,18 @@ export function marketFundSeries(days, indicator, recordDates = new Set()) {
  * Close row that carried it. A U.S. session carried by two records is listed
  * once, under the first record.
  */
+/**
+ * /market/usdkrw/ once FX Close holds days: the stored records (for session
+ * links) with USD/KRW replaced by that day's ECOS 15:30 rate, ECOS days only.
+ */
+export function usdKrwFxRows(rows, fxDays) {
+  return (Array.isArray(rows) ? rows : []).flatMap(row => {
+    const item = fxDays.get(String(row?.market_date || ''))?.items?.find(entry => entry?.code === 'USDKRW');
+    if (!item || !valid(item.value) || !valid(item.previous_value)) return [];
+    return [{ ...row, item: { close: item.value, previous_close: item.previous_value, data_state: 'final_close', source_date: row.market_date } }];
+  });
+}
+
 export function marketIndicatorSeries(rows, indicator) {
   const seen = new Map();
   const ordered = (Array.isArray(rows) ? rows : [])
@@ -2297,6 +2355,25 @@ export const INDICATOR_GUIDES = Object.freeze({
         'Values on this page are neither the Seoul FX market’s 3:30 p.m. rate nor the official [[reference rate|Base Exchange Rate]] set by Seoul Money Brokerage. They are Hana Bank’s own posted rate from its last round before 3:30 p.m. KST, as shown on Naver Finance, so they can differ slightly from the 3:30 p.m. figure in the news and Bank of Korea statistics. Each change is against the previous trading day’s posted rate.',
         'The exchange rate feeds straight into foreign investors\u2019 returns: when the won weakens, the same share price is worth less in dollars, so the rate and foreign flows often move together. The dollar\u2019s own strength is tracked by the [[U.S. Dollar Index]], and each date in the table opens that session\u2019s full close record, with foreign investors\u2019 trading.'
       ]
+    },
+    // FX Close live (contracts/fx_close/): the page shows the ECOS 15:30 rate.
+    seoul: {
+      ko: {
+        title: '원/달러 환율이란',
+        paragraphs: [
+          '[[원/달러]] 환율은 1달러를 사는 데 드는 원화 금액입니다. 숫자가 오르면 원화 가치가 내린 것(원화 약세)이고, 숫자가 내리면 [[원화 강세]]입니다.',
+          '이 페이지의 값은 서울 외환시장의 오후 3시 30분 기준가로, 뉴스와 한국은행 경제통계시스템(ECOS)이 쓰는 숫자입니다. 서울외국환중개가 고시하는 공식 [[매매기준율]]이나 은행이 회차마다 내는 고시 환율과는 다른 숫자이고, 등락은 전 거래일 오후 3시 30분 기준가와 비교한 것입니다.',
+          '환율은 외국인 투자자의 수익에 직접 닿습니다. 원화가 약해지면 같은 주가라도 달러로 환산한 값이 줄어들어, 외국인 매매와 함께 움직이는 날이 많습니다. 달러 자체의 힘은 [[달러인덱스]]로 따로 볼 수 있고, 표의 날짜를 누르면 그날의 외국인 매매가 담긴 전체 마감 기록이 열립니다.'
+        ]
+      },
+      en: {
+        title: 'What is the USD/KRW rate?',
+        paragraphs: [
+          'The [[USD/KRW]] rate is the number of won it takes to buy one U.S. dollar. A higher number means a weaker won; a lower number means [[a stronger won]].',
+          'Values on this page are the Seoul FX market\u2019s 3:30 p.m. KST rate, the figure the news and the Bank of Korea\u2019s ECOS statistics use. It is neither the official [[reference rate|Base Exchange Rate]] set by Seoul Money Brokerage nor a bank\u2019s posted rate; each change is against the previous trading day\u2019s 3:30 p.m. rate.',
+          'The exchange rate feeds straight into foreign investors\u2019 returns: when the won weakens, the same share price is worth less in dollars, so the rate and foreign flows often move together. The dollar\u2019s own strength is tracked by the [[U.S. Dollar Index]], and each date in the table opens that session\u2019s full close record, with foreign investors\u2019 trading.'
+        ]
+      }
     }
   },
   DEPOSITS: {
@@ -2419,6 +2496,7 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
   const fmt = indicatorFormat(indicator, f);
   const kind = indicatorKind(indicator);
   const name = INDICATOR_NAMES[key][indicator.code];
+  const valueLabel = context.fxSeoul ? copy.fxSeoulValue : copy.valueLabel[kind];
   const stats = marketIndicatorStats(series);
   const latest = stats.latest;
   const dayChange = isYield(indicator.code)
@@ -2431,7 +2509,7 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
     return move ? indicatorStatTile(label, move.text, `${dotDate(ref.date, key)} ${fmt.value(ref.close)}`, move.sign, f) : '';
   };
   const tiles = [
-    indicatorStatTile(`${copy.latest} ${copy.valueLabel[kind]}`, fmt.value(latest.close), html(dotDate(latest.date, key))),
+    indicatorStatTile(`${copy.latest} ${valueLabel}`, fmt.value(latest.close), html(dotDate(latest.date, key))),
     stats.week ? moveTile(copy.weekAgo, stats.week) : '',
     stats.month ? moveTile(copy.monthAgo, stats.month) : '',
     stats.first ? moveTile(copy.since(dotDate(stats.first.date, key)), stats.first) : '',
@@ -2441,7 +2519,7 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
 
   const withRange = indicator.kind === 'krx' || indicator.kind === 'krxvol';
   const changeHeading = indicator.kind === 'snapshot' ? copy.changeVsPrev.snapshot : copy.columns.change;
-  const headings = [copy.columns.date, copy.valueLabel[kind], changeHeading, copy.columns.pct, ...(withRange ? [copy.columns.high, copy.columns.low] : [])];
+  const headings = [copy.columns.date, valueLabel, changeHeading, copy.columns.pct, ...(withRange ? [copy.columns.high, copy.columns.low] : [])];
   const months = new Map();
   for (const point of series) {
     const month = point.date.slice(0, 7);
@@ -2466,7 +2544,9 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
   const related = listedIndicators(available).filter(item => item.code !== indicator.code)
     .map(item => `<a href="${marketIndicatorPath(item.code, key)}">${html(INDICATOR_SHORT_NAMES[key][item.code])}</a>`).join('');
   const dashboardPath = key === 'en' ? '/en/market/' : '/market/';
-  const guide = INDICATOR_GUIDES[indicator.code] || null;
+  // USD/KRW from FX Close has its own guide wording (INDICATOR_GUIDES.USDKRW.seoul).
+  const baseGuide = INDICATOR_GUIDES[indicator.code] || null;
+  const guide = context.fxSeoul && baseGuide?.seoul ? { ...baseGuide, ko: baseGuide.seoul.ko, en: baseGuide.seoul.en } : baseGuide;
   const latestBlock = guide ? guideLatestBlock(context.latest, key) : '';
   const aboutBody = guide ? guideAboutBody(guide, key, context.posts) : '';
 
@@ -2477,7 +2557,7 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
     eyebrow: copy.eyebrow,
     title: copy.heading(name),
     summary,
-    meta: [`${copy.basis[indicator.code] || copy.basis[indicator.kind]}${INDICATOR_UNITS[key][indicator.code] ? ` · ${INDICATOR_UNITS[key][indicator.code]}` : ''}`],
+    meta: [`${context.fxSeoul ? copy.fxSeoulBasis : copy.basis[indicator.code] || copy.basis[indicator.kind]}${INDICATOR_UNITS[key][indicator.code] ? ` · ${INDICATOR_UNITS[key][indicator.code]}` : ''}`],
     after: indicator.code === 'USDKRW' ? `<p class="mk-guide-link">${usdkrwGuideLink(key)}</p>` : ''
   })}
   <div class="market-wrap market-dashboard">
@@ -2489,7 +2569,7 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
 ${monthBlocks}
     <nav class="indicator-links" aria-label="${html(copy.related)}"><h2>${html(copy.related)}</h2><div>${related}</div></nav>
     <p class="market-archive-links"><a href="${dashboardPath}">${html(copy.dashboard)} →</a><a href="${marketArchivePath(key)}">${html(copy.archive)} →</a></p>
-    <div class="market-data-note"><p>${html(indicator.kind === 'kofia' ? copy.kofiaGaps : indicator.kind === 'funds' ? copy.fundsGaps : `${base.source} · ${copy.gaps}`)}</p><p>${html(base.disclaimer)}</p></div>
+    <div class="market-data-note"><p>${html(context.fxSeoul ? copy.fxSeoulGaps : indicator.kind === 'kofia' ? copy.kofiaGaps : indicator.kind === 'funds' ? copy.fundsGaps : `${base.source} · ${copy.gaps}`)}</p><p>${html(base.disclaimer)}</p></div>
   </div>
 </main>`;
 }

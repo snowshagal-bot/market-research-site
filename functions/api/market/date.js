@@ -1,4 +1,5 @@
 import { TABLE_NAME, MarketDbError, ensureMarketTable, formatMarketResponse, isValidMarketDate, json } from './_shared.js';
+import { loadFxCloseDay } from './fx/_shared.js';
 
 export async function onRequestGet({ request, env }) {
   try {
@@ -13,7 +14,8 @@ export async function onRequestGet({ request, env }) {
     if (!row) {
       return json({ error: 'MARKET_DATE_NOT_FOUND', message: '해당 날짜의 Market Close 데이터가 없습니다.' }, 404, 'public, max-age=30, s-maxage=60');
     }
-    return formatMarketResponse(row, request);
+    // USD/KRW: the day's ECOS 15:30 rate once FX Close has it (contracts/fx_close/).
+    return formatMarketResponse(row, request, {}, await loadFxCloseDay(env, date));
   } catch (error) {
     if (error instanceof MarketDbError) return json({ error: error.code, message: error.message }, error.status);
     console.error('market close date query failed', error);

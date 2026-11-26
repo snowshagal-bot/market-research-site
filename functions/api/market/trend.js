@@ -1,5 +1,6 @@
 import { TABLE_NAME, MarketDbError, ensureMarketTable, fingerprint, isValidMarketDate, json } from './_shared.js';
 import { DOMESTIC_RATES_TABLE, DOMESTIC_RATE_CODES, domesticRatesDayDto } from './rates/_shared.js';
+import { loadFxCloseValues } from './fx/_shared.js';
 
 /**
  * GET /api/market/trend[?end=YYYY-MM-DD]: the small trend lines on /market/.
@@ -63,6 +64,10 @@ export async function loadTrend(db, end = null) {
   const dates = rows.map(row => row.market_date);
   const series = Object.fromEntries(TREND_CODES.map(code => [code, rows.map(row => finite(row[code]))]));
   Object.assign(series, await domesticRateSeries(db, dates));
+  // USD/KRW: the ECOS 15:30 rates once FX Close holds any. A session without one
+  // yet (the evening before ECOS publishes) has no point, never the bank rate.
+  const fx = await loadFxCloseValues(db, dates);
+  if (fx && fx.size) series.USDKRW = dates.map(date => fx.get(date) ?? null);
   return { sessions: TREND_SESSIONS, end_date: dates[dates.length - 1] || null, dates, series };
 }
 

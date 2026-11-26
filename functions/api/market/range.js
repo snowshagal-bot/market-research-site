@@ -1,4 +1,6 @@
-import { TABLE_NAME, MarketDbError, ensureMarketTable, fingerprint, isValidMarketDate, json } from './_shared.js';
+import { TABLE_NAME, MarketDbError, ensureMarketTable, fingerprint, isValidMarketDate, json, normalizeKrwPairs } from './_shared.js';
+import { applyFxClose } from './_fx-merge.js';
+import { fxCloseDayOf, loadFxCloseDays } from './fx/_shared.js';
 import { SUPPORTED_PERIODS, computeMarketRange } from './_aggregate.js';
 
 export async function onRequestGet({ request, env }) {
@@ -55,10 +57,18 @@ export async function onRequestGet({ request, env }) {
       }
     }
 
+    // USD/KRW reads the ECOS 15:30 rate only when every session in the window has
+    // one; otherwise the whole window stays on the bank rate, never a mix of the two.
+    const fxDays = await loadFxCloseDays(env);
+    const fxCovered = fxDays !== undefined && snapshots.length > 0 && snapshots.every(snapshot => fxDays.has(String(snapshot?.meta?.market_date || '')));
+    for (const snapshot of snapshots) {
+      normalizeKrwPairs(snapshot);
+      if (fxCovered) applyFxClose(snapshot, fxCloseDayOf(fxDays, snapshot.meta.market_date));
+    }
     const aggregation = computeMarketRange(snapshots, period, requiredSessions);
 
     // ETag calculation based on period, dates, generated_at, and published_at
-    const stamp = `range|${period}|${chronologicalRows.map(r => `${r.market_date}:${r.generated_at}:${r.published_at || ''}`).join('|')}`;
+    const stamp = `range|${period}|fx:${fxCovered ? snapshots.map(snapshot => snapshot.rates_fx_volatility?.USDKRW?.close ?? '').join(',') : 'bank'}|${chronologicalRows.map(r => `${r.market_date}:${r.generated_at}:${r.published_at || ''}`).join('|')}`;
     const etag = `W/"market-range-${period}-${aggregation.window.start_date || 'none'}-${aggregation.window.end_date || 'none'}-${fingerprint(stamp)}"`;
 
     if (request.headers.get('if-none-match') === etag) {

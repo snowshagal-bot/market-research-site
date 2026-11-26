@@ -18,11 +18,17 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
     - honest labels everywhere (하나은행 고시 / Hana Bank rate, never "15:30 매매기준율");
     - one move on every page (close − previous close, `normalizeKrwPairs`);
     - the home strip's live Yahoo quote only before that day's record, labeled 실시간(야후).
-  - **Plan A, remaining:** USD/KRW becomes ECOS 731Y003/0000003 「원/달러(종가 15:30)」 (news and Bank of Korea statistics use it). Steps:
-    - The owner issues a free ECOS API key and sets it as a user environment variable on the collector PC. Never commit it.
-    - Measure when ECOS publishes the day's value. It was present by 17:23 KST on 11-26; the 11-27 measurement is running.
-    - If it is not there by 16:05, show 잠정 and confirm later. Market Close records are immutable, so the confirmed value goes in a dataset of its own, like Domestic Rates.
-    - Backfill from 2026-08-25.
+  - **Plan A (code done 2026-11-26, rollout pending):** USD/KRW becomes ECOS 731Y003/0000003 「원/달러(종가 15:30)」, the figure news and Bank of Korea statistics use.
+    - **FX Close dataset** (`contracts/fx_close/`, migration `0007`, `POST /api/market/fx/publish`, `GET /api/market/fx/date`) is joined to every reader of a record by `applyFxClose`.
+    - **The ECOS API key** is on the collector PC as the user env var `ECOS_API_KEY` (set 2026-11-26). Never commit it.
+    - **Collector**: publisher `feat/fx-close-ecos`, with `--sync-fx-close`, `--fx-close-backfill` and task `시장지표-원달러1530`.
+    - **Rollout**, each step with the owner's approval:
+      1. migration 0007 on Preview, then Production;
+      2. merge the website PR;
+      3. merge the publisher PR and build and install the core;
+      4. backfill 2026-08-20..today right after the migration (until then every day reads 잠정);
+      5. register the task at ECOS's measured release time.
+    - **Release time**: present by 17:23 KST on 11-26. The 11-27 measurement decides the task's start; a day reads 잠정 · 하나은행 고시 until its row arrives.
   - **Link (prepared 2026-11-26, merged once 3편 is live):** "이 숫자는 몇 시 값인가 → 환율 숫자 읽는 법" under `/market/usdkrw/`'s basis line, under the USD/KRW summary note and the FX board on TODAY and every session page (EN pages → the `_EN` edition). The address lives in `assets/locale.js` `usdkrwGuide`; the home strip has none (each strip card is itself a link).
 
 - **Market Funds: KOFIA deposits, margin loans, forced selling (live in Production since 2026-11-25)**:
