@@ -1,5 +1,31 @@
 [
   {
+    "id": "2026-11-27-basics-hkxai0",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-11-27",
+    "reportDate": "2026-11-27",
+    "registeredDate": "2026-11-26",
+    "registeredAt": "2026-11-26T09:39:03.793Z",
+    "legacyImport": false,
+    "title": "What Time Is the Won-Dollar Closing Rate?",
+    "seoTitle": "What Time Is the Won-Dollar Closing Rate? 3:30 p.m. Rate, Next-Morning Close, Base Rate and NDF Explained",
+    "subtitle": "",
+    "description": "Korea's won-dollar market now trades 24 hours on weekdays, so the closing rate depends on the clock. The 3:30 p.m. rate used in the news, the 7 a.m. end-of-day close, the Seoul Money Brokerage base rate, bank posted rates and the offshore NDF: where to find each, how to compare them, which rate overseas stock tax uses, and the January 2027 switch to a 4 p.m. TWAP base rate.",
+    "tags": [
+      "market-basic",
+      "korea",
+      "fx"
+    ],
+    "readingMinutes": 13,
+    "href": "reports/en/basics-data-guide-03-usdkrw-closing-rate_EN.html",
+    "translationGroup": "2026-11-27-basics-1k2lszc",
+    "coverImage": "covers/2026-11-27-basics-hkxai0.webp",
+    "shareCardImage": "covers/share/2026-11-27-basics-hkxai0.jpg",
+    "coverThumbnail": "covers/2026-11-27-basics-hkxai0-450.webp"
+  },
+  {
     "id": "2026-11-27-basics-1k2lszc",
     "type": "basics",
     "typeLabel": "시장 입문",

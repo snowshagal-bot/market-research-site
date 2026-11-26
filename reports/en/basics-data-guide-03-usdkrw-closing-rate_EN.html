@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta name="color-scheme" content="only light"/>
+<title>What Time Is the Won-Dollar Closing Rate? 3:30 p.m. Rate, Next-Morning Close, Base Rate and NDF Explained | Snowshagal</title>
+<meta name="report-seo-title" content="What Time Is the Won-Dollar Closing Rate? 3:30 p.m. Rate, Next-Morning Close, Base Rate and NDF Explained | Snowshagal"/>
+<meta name="report-seo-description" content="Korea&#x27;s won-dollar market now trades 24 hours on weekdays, so the closing rate depends on the clock. The 3:30 p.m. rate used in the news, the 7 a.m. end-of-day close, the Seoul Money Brokerage base rate, bank posted rates and the offshore NDF: where to find each, how to compare them, which rate overseas stock tax uses, and the January 2027 switch to a 4 p.m. TWAP base rate."/>
+<meta name="description" content="Korea&#x27;s won-dollar market now trades 24 hours on weekdays, so the closing rate depends on the clock. The 3:30 p.m. rate used in the news, the 7 a.m. end-of-day close, the Seoul Money Brokerage base rate, bank posted rates and the offshore NDF: where to find each, how to compare them, which rate overseas stock tax uses, and the January 2027 switch to a 4 p.m. TWAP base rate."/>
+<link rel="canonical" href="https://snowshagal.com/reports/en/basics-data-guide-03-usdkrw-closing-rate_EN"/>
+<meta name="robots" content="index,follow,max-image-preview:large"/>
+<meta property="og:type" content="article"/>
+<meta property="og:site_name" content="Snowshagal"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:locale:alternate" content="ko_KR"/>
+<meta property="og:title" content="What Time Is the Won-Dollar Closing Rate? The 3:30 p.m. Rate, the 7 a.m. Close and the Base Rate"/>
+<meta property="og:description" content="On the same Monday, the news said the won-dollar rate rose 9.7 won and a bank report said it fell 3.4 won. Both were right. What time each Korean exchange-rate figure is taken, and where to find it. Data Guide, Part 3."/>
+<meta property="og:url" content="https://snowshagal.com/reports/en/basics-data-guide-03-usdkrw-closing-rate_EN"/>
+<meta property="og:image" content="https://snowshagal.com/assets/social/basics-data-guide-03-usdkrw-closing-rate_EN.jpg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:alt" content="What time each won-dollar figure is taken: the news rate at 3:30 p.m., the end-of-day close at 7 a.m. the next day, and the base rate as the previous day&#x27;s daytime average"/>
+<meta property="article:published_time" content="2026-11-27"/>
+<meta property="article:section" content="Market Basics"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="What Time Is the Won-Dollar Closing Rate? The 3:30 p.m. Rate, the 7 a.m. Close and the Base Rate"/>
+<meta name="twitter:description" content="On the same Monday, the news said the won-dollar rate rose 9.7 won and a bank report said it fell 3.4 won. Both were right. What time each Korean exchange-rate figure is taken, and where to find it. Data Guide, Part 3."/>
+<meta name="twitter:image" content="https://snowshagal.com/assets/social/basics-data-guide-03-usdkrw-closing-rate_EN.jpg"/>
+<meta name="twitter:image:alt" content="What time each won-dollar figure is taken: the news rate at 3:30 p.m., the end-of-day close at 7 a.m. the next day, and the base rate as the previous day&#x27;s daytime average"/>
+<meta name="theme-color" content="#2A362E"/>
+<script type="application/ld+json">
+[
+ {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "What Time Is the Won-Dollar Closing Rate?",
+  "alternativeHeadline": "Korea's won-dollar closing rate explained: 3:30 p.m. rate, 7 a.m. close, base rate and NDF",
+  "description": "Korea's won-dollar market now trades 24 hours on weekdays, so the closing rate depends on the clock. The 3:30 p.m. rate used in the news, the 7 a.m. end-of-day close, the Seoul Money Brokerage base rate, bank posted rates and the offshore NDF: where to find each, how to compare them, which rate overseas stock tax uses, and the January 2027 switch to a 4 p.m. TWAP base rate.",
+  "inLanguage": "en",
+  "articleSection": "Market Basics",
+  "datePublished": "2026-11-27",
+  "dateModified": "2026-11-27",
+  "image": [
+   "https://snowshagal.com/assets/social/basics-data-guide-03-usdkrw-closing-rate_EN.jpg"
+  ],
+  "mainEntityOfPage": "https://snowshagal.com/reports/en/basics-data-guide-03-usdkrw-closing-rate_EN",
+  "author": {
+   "@type": "Organization",
+   "name": "Snowshagal",
+   "url": "https://snowshagal.com/"
+  },
+  "publisher": {
+   "@type": "Organization",
+   "name": "Snowshagal",
+   "url": "https://snowshagal.com/"
+  },
+  "isPartOf": {
+   "@type": "CreativeWorkSeries",
+   "name": "Data Guide",
+   "url": "https://snowshagal.com/en/basics/"
+  },
+  "keywords": "USD/KRW closing rate, won dollar closing time, Korea 24-hour FX market, Seoul FX market hours, 3:30 pm exchange rate Korea, Korea market average rate, MAR, TWAP base rate Korea 2027, Seoul Money Brokerage base rate, Korean won NDF, swap point, bank posted exchange rate Korea, ECOS exchange rate, Korea overseas stock tax exchange rate, FX discount calculation"
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+   {
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Snowshagal",
+    "item": "https://snowshagal.com/en/"
+   },
+   {
+    "@type": "ListItem",
+    "position": 2,
+    "name": "Market Basics",
+    "item": "https://snowshagal.com/en/basics/"
+   },
+   {
+    "@type": "ListItem",
+    "position": 3,
+    "name": "What Time Is the Won-Dollar Closing Rate?",
+    "item": "https://snowshagal.com/reports/en/basics-data-guide-03-usdkrw-closing-rate_EN"
+   }
+  ]
+ }
+]
+</script>
+<style>
+
+:root{
+  --surface-page:#ECEAE5;
+  --surface-band:#E3E0D9;
+  --surface-inner:#F1EFEA;
+  --surface-detail:#E8E5DF;
+  --surface-muted:#DAD6CE;
+  --ink:#2E2E2C;
+  --ink2:#43423E;
+  --body:#53514C;
+  --sub:#5A5751;
+  --muted:#65625B;
+  --line:#CEC9BF;
+  --line2:#DCD7CE;
+  --green:#46584D;
+  --green-dark:#2F3C34;
+  --green-soft:#DCE3DD;
+  --green-line:#AAB6AC;
+  --green-pale:#A8C6B4;
+  --stk:#3A3632;
+  --l2:#A9784A;
+  --l2-dark:#7A5A34;
+  --l2-soft:#EFE2CF;
+  --l2-line:#D2B48C;
+  --i2:#7A3F44;
+  --i2-soft:#EBDCDD;
+  --rec:#7A3F44;
+  --rec-soft:#F1E3E4;
+  --rec-line:#C29A9E;
+  --up:#B23A47;
+  --down:#3D6595;
+  --board:#2F3C34;
+  --chalk:#ECEAE3;
+  --chalk2:#B9C9BE;
+  --chalk-mark:#E6C98F;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:58px;overflow-x:hidden}
+html,body{max-width:100%}
+body{
+  margin:0;background:var(--surface-page);color:var(--ink);
+  font-family:"Pretendard Variable","Pretendard","SUIT","Noto Sans KR","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  line-height:1.58;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;
+  word-break:keep-all;line-break:strict;
+}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(38px + env(safe-area-inset-bottom,0px));width:100%;position:relative}
+.up{color:var(--up)}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;letter-spacing:inherit}
+
+/* ── 상단바 ── */
+.topbar{position:sticky;top:0;z-index:50;margin:0 -16px;
+  background:rgba(236,234,229,.92);-webkit-backdrop-filter:saturate(150%) blur(12px);backdrop-filter:saturate(150%) blur(12px);
+  border-bottom:1px solid rgba(90,84,74,.13)}
+.tbin{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0)) 18px 9px}
+.tbin .brand{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.tbin .brand i{font-style:normal;color:var(--green)}
+.tbin .ep{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.prog{height:2px;background:rgba(90,84,74,.10)}
+.prog i{display:block;height:100%;width:0;background:var(--green);transition:width .1s linear}
+
+/* ── 표지 ── */
+.cover{margin:0 -16px;padding:18px 22px 15px;
+  background:linear-gradient(158deg,#36443B 0%,#2A362E 52%,#1F2721 100%);color:#EFEDE7}
+.cvkick{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.06em;
+  color:#BFD2C6;border:1px solid rgba(168,198,180,.34);border-radius:999px;padding:5px 12px}
+.cvkick b{color:#EFEDE7;font-weight:800}
+.cvdate{display:inline-block;margin-left:8px;font-size:11.5px;font-weight:700;color:#9FB2A6;letter-spacing:.02em;vertical-align:middle}
+.cvtitle{margin:11px 0 0;font-size:30px;line-height:1.22;font-weight:800;letter-spacing:-.05em;color:#F4F2ED}
+.cvtitle span{display:block;color:var(--green-pale)}
+.cvsub{margin:11px 0 0;font-size:14px;line-height:1.58;font-weight:600;color:#C6D2CA}
+.cvmotif{margin:12px 0 0}
+.cvmotif svg{display:block;width:100%;height:auto;max-width:460px}
+.cvidx{display:flex;gap:6px;margin:12px 0 0;flex-wrap:wrap}
+.cvidx a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;font-size:11.5px;font-weight:800;color:#D3DED7;background:rgba(255,255,255,.07);
+  border:1px solid rgba(168,198,180,.22);border-radius:999px}
+.cvidx a b{color:var(--green-pale);font-weight:800;margin-right:5px}
+.cvstat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:14px 0 0}
+.cvstat div{border:1px dashed rgba(236,234,227,.32);border-radius:10px;padding:8px 9px 9px;background:rgba(255,255,255,.04);min-width:0}
+.cvstat span{display:block;font-size:11px;line-height:1.35;font-weight:700;color:#9FB2A6;word-break:keep-all}
+.cvstat b{display:block;margin-top:3px;font-size:22px;line-height:1.1;font-weight:800;letter-spacing:-.04em;color:#F4F2ED;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cvstat .hot b{color:#E6C98F}
+.cvstat em{display:block;margin-top:2px;font-style:normal;font-size:11.5px;font-weight:800;color:#E6C98F;word-break:keep-all}
+.cvtime{margin:10px 0 0;font-size:11.5px;font-weight:700;color:#9FB2A6}
+
+/* ── 요약 ── */
+.tldr{margin:18px 0 0;background:#FFFDF7;border:2px solid var(--ink);border-radius:14px;box-shadow:4px 4px 0 rgba(46,46,44,.85);padding:13px 16px 15px}
+.tlh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.tlh b{font-size:21px;color:#B23A47;letter-spacing:0}
+.tlh span{font-size:12px;font-weight:800;color:var(--sub)}
+.pts{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
+.pts li{position:relative;padding-left:18px;font-size:15px;line-height:1.62;font-weight:600;color:var(--body);text-wrap:pretty}
+.pts li::before{content:"";position:absolute;left:4px;top:.74em;width:6px;height:6px;border-radius:50%;background:var(--green)}
+.pts li b{color:var(--ink);font-weight:800}
+.pts.sm{gap:6px;margin-top:10px}
+.pts.sm li{font-size:14px;line-height:1.6;padding-left:15px}
+.pts.sm li::before{left:3px;width:5px;height:5px}
+.tiphint{margin:10px 2px 0;font-size:12px;font-weight:700;color:var(--sub)}
+.tiphint::before{content:"";display:inline-block;width:22px;margin-right:6px;vertical-align:3px;border-bottom:1.5px dashed #8B867E}
+
+/* ── 챕터 ── */
+.ch{margin:22px 0 8px}
+.chtop{display:flex;align-items:center;gap:9px;margin-bottom:7px;flex-wrap:wrap}
+.chn{font-size:12px;font-weight:800;color:#EFEDE7;background:var(--ink);border-radius:4px;padding:3px 8px;letter-spacing:.04em}
+.chk{font-size:11.5px;font-weight:800;letter-spacing:.11em;color:var(--sub)}
+.cht{margin:0;font-size:24px;line-height:1.3;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.chrule{display:flex;height:3px;margin-top:11px;gap:2px}
+.chrule i{display:block;height:100%;flex:1}
+.chrule .r1{background:var(--stk)}
+.chrule .r2{background:var(--l2)}
+.chrule .r3{background:var(--i2)}
+.chrule .r4{background:var(--green)}
+
+/* ── 본문 ── */
+.p{margin:9px 0 0;font-size:15px;line-height:1.7;color:var(--body);font-weight:500;text-wrap:pretty}
+.p b{color:var(--ink);font-weight:800}
+.p.lead{font-size:16px;color:var(--ink2);font-weight:600}
+.hd{margin:20px 0 0;font-size:17px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.44;text-wrap:balance}
+.hd small{display:block;font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin-bottom:3px}
+.ilink{color:var(--ink);font-weight:700;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px;text-decoration-color:#A9784A;padding:4px 0}
+.ul{font-weight:800;color:var(--ink);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='8' viewBox='0 0 60 8'%3E%3Cpath d='M0 4.6 Q15 2.6 30 4.4 T60 4.2' fill='none' stroke='%23B23A47' stroke-opacity='.72' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:repeat-x;background-position:0 100%;background-size:60px 8px;padding-bottom:3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.note{position:relative;margin:8px 2px 0;padding-left:16px;font-size:13px;line-height:1.6;font-weight:600;color:var(--sub);text-wrap:pretty}
+.note::before{content:"※";position:absolute;left:0;top:0;color:var(--muted)}
+
+/* ── 배지 ── */
+.vb{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;letter-spacing:.03em;
+  color:#4A4438;background:var(--l2-soft);border:1px solid var(--l2-line);border-radius:999px;padding:3px 9px;white-space:nowrap}
+
+/* ── 문제 카드 ── */
+.pop{margin:14px 0 0;background:var(--surface-inner);border:1.5px solid var(--ink);border-radius:14px;overflow:hidden}
+.poph{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;background:var(--ink);color:#EDEAE4}
+.poph b{font-size:12px;font-weight:800;letter-spacing:.06em}
+.poph .vb{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#D9D4CA}
+.popb{padding:13px 14px 14px}
+.popq{margin:0;font-size:15.5px;line-height:1.52;font-weight:800;letter-spacing:-.03em;color:var(--ink);text-wrap:balance}
+.opts{display:grid;gap:6px;margin:12px 0 0;grid-template-columns:1fr}
+.opt{appearance:none;-webkit-appearance:none;border:1.5px solid var(--line);background:#F7F6F2;border-radius:10px;
+  font-weight:800;color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums;transition:background .15s,border-color .15s;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  white-space:normal;text-align:left;padding:10px 13px;font-size:14.5px;line-height:1.35;letter-spacing:-.02em;word-break:keep-all}
+.opt:hover{border-color:var(--sub)}
+.opt.ok{background:var(--green);border-color:var(--green);color:#F4F2ED}
+.opt.no{background:#E3E0D9;border-color:#E3E0D9;color:var(--muted);text-decoration:line-through}
+.opt.ok::before{content:"✓ "}
+.opt.no::before{content:"✗ "}
+.opt[aria-disabled="true"]{cursor:default}
+.popans{margin:12px 0 0;padding-top:11px;border-top:1px dashed var(--line)}
+.popans[hidden]{display:none}
+.verdict{display:inline-block;font-size:12px;font-weight:800;color:#F4F2ED;background:var(--green);border-radius:6px;padding:3px 9px;margin-bottom:8px;white-space:pre-line}
+.verdict:focus{outline:none}
+.verdict:focus-visible{outline:2px solid #2E2E2C;outline-offset:2px}
+.popnote{margin:9px 0 0;font-size:13.5px;line-height:1.6;font-weight:600;color:var(--body);text-wrap:pretty}
+.popnote b{color:var(--ink);font-weight:800}
+.qshare{appearance:none;-webkit-appearance:none;margin:10px 0 0;width:100%;min-height:44px;border:1.5px dashed var(--line);background:transparent;border-radius:10px;padding:9px 10px;
+  font-size:13px;font-weight:800;color:var(--ink2);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.qshare:hover{border-color:var(--sub)}
+
+/* ── 타임라인 ── */
+.tline{list-style:none;margin:12px 0 0;padding:0}
+.tline li{display:grid;grid-template-columns:44px 1fr;gap:10px}
+.tline time{padding-top:2px;font-size:14px;font-weight:800;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tline p{position:relative;margin:0;padding:0 0 13px 16px;border-left:2px solid #CFC9BE;font-size:15px;line-height:1.6;font-weight:600;color:var(--body)}
+.tline li:last-child p{border-left-color:transparent;padding-bottom:0}
+.tline p::before{content:"";position:absolute;left:-7px;top:.42em;width:12px;height:12px;border-radius:50%;background:#FBF8F1;border:2px solid var(--green);box-sizing:border-box}
+.tline li.hot time{color:#B23A47}
+.tline li.hot p{font-weight:800;color:var(--ink)}
+.tline li.hot p::before{background:#B23A47;border-color:#B23A47}
+.tline.wide li{grid-template-columns:58px 1fr}
+
+/* ── 판서 ── */
+.board{margin:14px -16px 0;padding:15px 22px 16px;background:var(--board);color:var(--chalk);position:relative;overflow:hidden}
+.board:after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 20% 0%,rgba(255,255,255,.06),transparent 55%),radial-gradient(ellipse at 90% 100%,rgba(255,255,255,.04),transparent 50%)}
+.bdk{position:relative;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--chalk2);margin-bottom:9px}
+.bdk:before{content:"";width:18px;height:2px;background:var(--chalk-mark);border-radius:2px}
+.bdt{position:relative;margin:0;font-size:20px;line-height:1.42;font-weight:800;letter-spacing:-.04em;color:#F6F4EE;text-wrap:balance}
+.board .bdt.hand{font-family:'SnowHand','Gaegu','Nanum Pen Script',cursive;font-size:26px;line-height:1.34;letter-spacing:0;font-weight:700}
+.btab{position:relative;display:grid;margin:12px 0 0;border:1px solid rgba(236,234,227,.22);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums}
+.btab span{padding:8px 8px;font-size:12.5px;font-weight:800;text-align:left;border-bottom:1px solid rgba(236,234,227,.12);color:#EDEBE4;word-break:keep-all;line-height:1.45}
+.btab span.h{font-size:10.5px;color:var(--chalk2);background:rgba(255,255,255,.05);letter-spacing:.02em}
+.btab span.l{font-size:12.3px}
+.btab span.e{border-bottom:0}
+.btab .hi{color:var(--chalk-mark)}
+.btab .term{padding:6px 3px;border-bottom:0;font-size:inherit;font-weight:inherit;color:inherit}
+.btab .term .tip{padding:9px 11px;border-bottom:0;font-size:12px;font-weight:600;line-height:1.52;color:#F2F0EB;text-align:left}
+
+/* ── 표 ── */
+.dcmp{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:11px 12px 12px}
+.figh{display:flex;align-items:baseline;justify-content:space-between;gap:3px 10px;flex-wrap:wrap;margin-bottom:9px}
+.figh b{font-size:13.5px;font-weight:800;color:var(--ink)}
+.figh span{font-size:12px;font-weight:700;color:var(--sub)}
+.calc{display:grid;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums}
+.calc span{padding:7px 9px;font-size:13px;font-weight:700;color:var(--body);background:#F7F6F2;border-bottom:1px solid var(--line2);text-align:right;word-break:keep-all;line-height:1.4}
+.calc span.h{font-size:12px;font-weight:800;color:var(--muted);background:var(--surface-detail)}
+.calc span.l{text-align:left;font-weight:800;color:var(--ink);font-size:12.5px}
+.calc span.e{border-bottom:0}
+.calc span.hot{color:#B23A47;font-weight:800}
+.calc span small{display:block;margin-top:1px;font-size:11px;font-weight:700;color:var(--sub);white-space:normal}
+
+/* ── 시뮬레이터 ── */
+.sim{margin:14px -16px 0;padding:14px 16px 15px;background:var(--surface-band);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)}
+.simhd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:0 4px}
+.simhd b{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.simhd span{font-size:11.5px;font-weight:800;color:var(--sub)}
+.simp{margin:5px 4px 0;font-size:13.5px;line-height:1.6;font-weight:600;color:var(--body);text-wrap:pretty}
+.simp b{color:var(--ink);font-weight:800}
+.chip{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:var(--surface-inner);border-radius:999px;padding:6px 11px;
+  font-size:12px;font-weight:800;color:var(--ink2);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#F4F2ED}
+.ddlb{margin:12px 4px 0;font-size:12px;font-weight:800;color:var(--sub)}
+.iflow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:12px 0 0}
+.df{background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;padding:7px 4px 8px;text-align:center;transition:background .15s,border-color .15s;min-width:0}
+.df i{display:block;font-style:normal;font-size:11px;font-weight:800;color:var(--sub);word-break:keep-all}
+.df b{display:block;margin-top:3px;font-size:15px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;white-space:normal;word-break:keep-all;line-height:1.25}
+.df b small{display:block;margin-top:2px;font-size:11px;font-weight:800;color:var(--sub);word-break:keep-all}
+.df.ok{background:var(--green-soft);border-color:var(--green-line)}
+.df.ok b{color:var(--green-dark)}
+.df.no{background:var(--rec-soft);border-color:var(--rec-line)}
+.df.no b{color:var(--rec)}
+.df.ok b small,.df.no b small{color:inherit;opacity:.9}
+.simmsg{margin:0;padding:10px 12px;background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;font-size:13.5px;line-height:1.6;font-weight:700;color:var(--ink);min-height:6.4em;text-wrap:pretty}
+.simfoot{margin:8px 4px 0;font-size:12px;line-height:1.5;font-weight:600;color:var(--muted)}
+
+/* ── 접힘 ── */
+.foldwrap{margin:14px 0 0}
+details.fold{border:1px solid var(--line);border-radius:12px;background:var(--surface-detail);margin:0 0 8px;overflow:hidden}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px;
+  padding:11px 15px;font-size:13px;font-weight:800;color:var(--ink)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary:after{content:"+";font-size:18px;font-weight:800;color:var(--green);line-height:.9}
+details.fold[open]>summary:after{content:"−"}
+details.fold .fb{padding:0 15px 14px}
+.foldwrap.more{margin-top:16px}
+.foldwrap.more summary em{font-style:normal;display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.06em;color:var(--green);border:1px solid var(--green-line);border-radius:999px;padding:1px 7px;margin-right:7px;vertical-align:1px}
+.fb p{margin:0 0 8px;font-size:13.5px;line-height:1.62;color:var(--body);font-weight:600}
+.fb p:last-child{margin-bottom:0}
+.fb p b{color:var(--ink);font-weight:800}
+.gloss{display:grid;grid-template-columns:100px 1fr;gap:7px 11px;margin:2px 0 0;font-size:12.5px}
+.gloss dt{font-weight:800;color:#4B4740}
+.gloss dd{margin:0;color:var(--body);line-height:1.52}
+.src{margin:0;padding-left:26px;display:grid;gap:5px}
+.src li{font-size:12px;line-height:1.52;color:var(--body);font-weight:600}
+.src li b{color:var(--ink)}
+.src a{color:var(--ink2);font-weight:700;text-decoration:underline;text-decoration-color:#A9A49B;text-underline-offset:3px;padding:2px 0;word-break:keep-all}
+.disc{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;padding:12px 8px 0;font-weight:500}
+.foot{text-align:center;font-size:11.5px;color:var(--sub);padding:9px 0 4px;font-weight:800;letter-spacing:-.01em}
+
+/* ── 툴팁 ── */
+.term{display:inline;padding:6px 3px;margin:0 -3px;border-bottom:0;line-height:inherit;white-space:nowrap;cursor:pointer;position:relative;
+  -webkit-tap-highlight-color:transparent;font-weight:800;color:var(--ink);
+  text-decoration:underline dashed #8B867E;text-decoration-thickness:1.5px;text-underline-offset:4px;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;-webkit-user-select:text;user-select:text;
+  touch-action:manipulation;-webkit-touch-callout:none}
+.term .tip{position:fixed;left:12px;top:0;min-width:160px;max-width:min(248px,calc(100vw - 28px));
+  background:#33322F;color:#F2F0EB;font-size:12px;font-weight:600;line-height:1.52;padding:9px 11px;border-radius:9px;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);z-index:60;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease;white-space:normal;text-align:left;text-decoration:none}
+.term .tip:after{content:"";position:absolute;top:100%;left:var(--ax,50%);transform:translateX(-50%);border:6px solid transparent;border-top-color:#33322F}
+.term .tip.below:after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#33322F}
+.term.open .tip{opacity:1;visibility:visible;pointer-events:auto}
+.board .term{color:inherit;text-decoration-color:rgba(236,234,227,.55)}
+@media(hover:hover) and (pointer:fine){
+.term{cursor:help}
+.term:hover{text-decoration-color:var(--ink)}
+.board .term:hover{text-decoration-color:#F4F2ED}}
+
+/* ── 손그림 ── */
+.sdefs{position:absolute;width:0;height:0;overflow:hidden}
+.hand{font-family:'SnowHand','Gaegu','Nanum Pen Script',cursive;font-weight:700;letter-spacing:-.02em}
+.doodle{margin:14px 0 0;padding:8px 6px 4px;background:var(--surface-inner);border:1px solid var(--line);border-radius:14px}
+.doodle svg{display:block;width:100%;height:auto;max-width:460px;margin:0 auto}
+.doodle figcaption{margin:2px 8px 6px;font-size:12px;line-height:1.5;font-weight:700;color:var(--muted);text-align:center}
+
+/* ── 오답노트 ── */
+.trapwrap{margin:16px 0 0;border:1.5px solid var(--i2);border-radius:12px;overflow:hidden}
+.traphd{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;background:var(--i2);color:#F6EEEF}
+.traphd b{font-size:12px;font-weight:800;letter-spacing:.06em}
+.traphd i{font-style:normal;font-size:11px;font-weight:700;color:#E5C9CC}
+.trap{display:grid;gap:1.5px;background:var(--line)}
+.trap .ti{padding:10px 13px;background:var(--surface-inner)}
+.trap .tk{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.trap .tx{margin-top:3px;font-size:14px;font-weight:800;color:var(--i2);line-height:1.48;letter-spacing:-.02em}
+.trap .tx span{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='9' viewBox='0 0 48 9'%3E%3Cpath d='M0 5.2 Q6 2.4 12 4.8 T24 4.6 T36 5.4 T48 4.6' fill='none' stroke='%23B23A47' stroke-opacity='.6' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:repeat-x;background-position:0 60%;background-size:48px 9px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.trap .to{margin-top:5px;font-size:13.5px;font-weight:600;color:var(--body);line-height:1.56;text-wrap:pretty}
+.trap .to b{color:var(--ink);font-weight:800}
+
+/* ── 엔딩 ── */
+.final{margin:16px -16px 0;padding:18px 22px;background:linear-gradient(155deg,#36443B 0%,#232C26 100%);color:#EFEDE7;position:relative;overflow:hidden}
+.final:before{content:"";position:absolute;right:-46px;bottom:-58px;width:160px;height:160px;border-radius:50%;border:1px solid rgba(168,198,180,.18)}
+.final .fk{position:relative;font-size:12px;font-weight:800;letter-spacing:.13em;color:#A0B4A6;margin-bottom:10px}
+.final p{position:relative;margin:0;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.final .f1{font-size:19px;line-height:1.5;text-wrap:balance}
+.final .f1 b{color:var(--green-pale);background:linear-gradient(transparent 58%,rgba(230,201,143,.36) 58%,rgba(230,201,143,.36) 94%,transparent 94%);padding:0 2px}
+.final .f2{margin-top:11px;padding-top:10px;border-top:1px solid rgba(168,198,180,.22);font-size:15px;line-height:1.58;color:#DCE6DE;text-wrap:pretty}
+
+/* ── 공유 ── */
+.sharebox{margin:16px 0 0;padding:14px 14px 13px;background:var(--surface-inner);border:1px solid var(--line);border-radius:14px;text-align:center}
+.shq{margin:0;font-size:14.5px;line-height:1.5;font-weight:800;color:var(--ink);letter-spacing:-.03em;text-wrap:balance}
+.shbtns{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px;margin:11px 0 0}
+.shb{appearance:none;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#F7F6F2;border-radius:10px;
+  padding:10px 4px;min-height:48px;font-size:13px;font-weight:800;color:var(--ink);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;text-align:center;white-space:nowrap}
+.shb.main{background:var(--green);border-color:var(--green);color:#F4F2ED}
+.shmsg{margin:7px 0 0;min-height:1em;font-size:12px;font-weight:700;color:var(--green)}
+
+/* ── 이어 읽기 ── */
+.more7{margin:12px 0 0;display:grid;gap:6px}
+.m7h{font-size:12px;font-weight:800;letter-spacing:.12em;color:var(--muted);margin:2px 2px 2px}
+.m7{display:block;background:var(--surface-inner);border:1px solid var(--line);border-radius:11px;padding:10px 36px 10px 13px;position:relative}
+.m7:after{content:"→";position:absolute;right:13px;top:50%;transform:translateY(-50%);font-weight:800;color:var(--muted)}
+.m7 i{font-style:normal;display:inline-block;font-size:12px;font-weight:800;color:var(--green);margin-right:6px}
+.m7 b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.m7 span{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--sub)}
+.m7.all{background:var(--surface-detail)}
+.m7.cta{background:var(--green);border-color:var(--green)}
+.m7.cta b{color:#F4F2ED}
+.m7.cta span{color:#C6D2CA}
+.m7.cta:after{color:#C6D2CA}
+:focus-visible{outline:2px solid #2E2E2C;outline-offset:2px}
+.cover :focus-visible,.shb.main:focus-visible,.m7.cta:focus-visible{outline-color:#F4F2ED}
+@media(max-width:360px){
+.cvtitle{font-size:27px}
+.cvstat b{font-size:19px}
+.cvstat div{padding:7px 6px 8px}
+.final .f1{font-size:17px}
+.cht{font-size:21px}
+.btab span{padding:7px 6px;font-size:11.8px}
+.gloss{grid-template-columns:86px 1fr}
+}
+
+/* ── 데스크톱 ── */
+@media(min-width:768px){
+.app{max-width:770px;padding-left:28px;padding-right:28px}
+.topbar{margin:0 -28px}
+.cover{margin:0 -28px;padding:44px 40px 34px}
+.cvtitle{font-size:44px}
+.cvsub{font-size:15px;max-width:30em}
+.cvstat b{font-size:30px}
+.cvstat span{font-size:12px}
+.ch{margin-top:48px}
+.cht{font-size:29px}
+.p{font-size:16px}
+.pts li{font-size:16px}
+.tline p{font-size:16px}
+.board,.sim,.final{margin-left:-28px;margin-right:-28px}
+.board{padding:26px 40px}
+.bdt{font-size:24px}
+.board .bdt.hand{font-size:30px}
+.sim{padding:24px 34px}
+.final{padding:32px 40px}
+.final .f1{font-size:25px}
+.final .f2{font-size:18px}
+.trap{grid-template-columns:1fr 1fr 1fr}
+.more7{grid-template-columns:1fr 1fr 1fr}
+.m7.all{grid-column:span 1}
+.m7.cta{grid-column:span 2}
+}
+@media(prefers-reduced-motion:reduce){
+html{scroll-behavior:auto}
+*{transition:none!important;animation:none!important}}
+
+/* 18편 읽기 개선: 줄 카드 */
+.rows{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:2px 14px}
+.rows .rw{display:grid;grid-template-columns:92px 1fr;gap:12px;padding:11px 0;border-top:1px dashed var(--line);align-items:baseline}
+.rows .rw:first-child{border-top:0}
+.rows .rk{font-size:14px;font-weight:800;color:var(--ink);line-height:1.4;font-variant-numeric:tabular-nums;word-break:keep-all}
+.rows .rk small{display:block;margin-top:1px;font-size:12px;font-weight:700;color:var(--sub)}
+.rows .rk .term{white-space:normal}
+.rows .rv{font-size:14.5px;line-height:1.62;font-weight:600;color:var(--body);text-wrap:pretty}
+.rows .rv b{color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums}
+.rows .rw.hot .rk{color:#B23A47}
+.rows .rw.hot .rk .term{color:#B23A47}
+.rows.sm{margin:9px 0 2px;padding:0 12px}
+.rows.sm .rw{padding:7px 0;grid-template-columns:96px 1fr}
+.rows.sm .rk,.rows.sm .rv{font-size:13.5px}
+@media(min-width:768px){
+.rows{padding:4px 18px}
+.rows .rw{grid-template-columns:118px 1fr;gap:16px}
+.rows .rv{font-size:15.5px}
+.rows .rk{font-size:15px}}
+@media(max-width:360px){
+.rows{padding:2px 11px}
+.rows .rw{grid-template-columns:80px 1fr;gap:9px}
+.rows .rv{font-size:14px}
+.rows.sm .rw{grid-template-columns:88px 1fr}}
+
+/* ═════ 20편 추가 ═════ */
+/* 표지 글씨 */
+.cvstat span{font-size:11.5px}
+.cvstat em{font-size:12px}
+/* 심화 접기 안 타임라인 */
+.fb .tline{margin:4px 0 4px}
+.fb .tline p{margin:0;font-size:13.5px;line-height:1.58}
+.fb .tline li:last-child p{padding-bottom:0}
+.fb .tline.wide li{grid-template-columns:68px 1fr}
+.fb .tline time{font-size:13px}
+/* 계산기 */
+.seg{display:grid;gap:6px;margin:6px 0 0}
+.seg.s2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.seg.s3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.seg .chip{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:46px;border-radius:10px;padding:5px 3px;
+  font-size:13.5px;line-height:1.25;font-variant-numeric:tabular-nums;color:var(--ink);word-break:keep-all;text-align:center}
+.seg .chip small{display:block;margin-top:2px;font-size:11px;font-weight:700;color:var(--sub)}
+.seg .chip.on{color:#F4F2ED}
+.seg .chip.on small{color:#CFCAC0}
+@media(max-width:360px){
+.seg .chip{font-size:12.5px;padding:5px 2px}
+.seg .chip small{font-size:10.5px}
+}
+.rows .rv b.up{color:var(--up)}
+
+/* ═════ 데이터 길잡이 2·3편 추가 ═════ */
+.dcmp{margin-top:14px}
+@media(min-width:768px){
+.trap{grid-template-columns:1fr 1fr}}
+.hand{font-family:'SnowHand','Gaegu','Nanum Pen Script',cursive}
+
+/* 붙임 쪽지 */
+.memo{position:relative;margin:16px 6px 0;padding:13px 14px 12px;background:#FBF3D5;border-radius:4px;box-shadow:0 9px 14px -11px rgba(46,46,44,.45),0 1px 0 rgba(46,46,44,.05);transform:rotate(-.4deg)}
+.memo::before{content:"";position:absolute;top:-8px;left:50%;width:62px;height:16px;background:rgba(201,186,150,.5);transform:translateX(-50%) rotate(-2.5deg);border-radius:2px}
+.memo b{display:block;font-family:'SnowHand','Gaegu','Nanum Pen Script',cursive;font-size:18px;font-weight:700;color:#B23A47;line-height:1.3}
+.memo p{margin:3px 0 0;font-size:13.5px;line-height:1.55;font-weight:700;color:var(--ink2);text-wrap:pretty}
+
+/* 내 증권사 카드 */
+.pick{margin:12px 0 0}
+.pchips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.pchips .chip{min-height:40px;border-radius:10px;padding:5px 2px;font-size:13px;line-height:1.2;word-break:keep-all;text-align:center}
+.pchips .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#F4F2ED}
+.pick:not(.js) .pchips{display:none}
+.pick.js:not(.all) .bcard{display:none}
+.pick.js:not(.all) .bcard.on{display:block}
+.bcards{display:grid;gap:12px;margin-top:10px}
+.bcard{background:var(--surface-inner);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.bhd{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 13px;background:var(--green);color:#F4F2ED}
+.bhd b{font-size:16px;font-weight:800;letter-spacing:-.03em}
+.bhd span{flex:none;padding:2px 8px;border-radius:999px;border:1px solid rgba(236,234,227,.45);font-size:11px;font-weight:800;color:#DCE6DF;white-space:nowrap}
+.bdl{margin:0;padding:2px 13px}
+.bdl > div{display:grid;grid-template-columns:86px 1fr;gap:10px;padding:9px 0;border-top:1px dashed var(--line);align-items:baseline}
+.bdl > div:first-child{border-top:0}
+.bdl dt{font-size:13px;font-weight:800;color:var(--ink);line-height:1.4;word-break:keep-all}
+.bdl dd{margin:0;font-size:14px;line-height:1.58;font-weight:600;color:var(--body);text-wrap:pretty}
+.bdl dd b{color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums}
+.bnow{margin:2px 10px 0;padding:9px 11px 10px;border:1.5px dashed #B23A47;border-radius:10px;background:#FAF2F2}
+.bnow i{display:inline-block;padding:1px 8px;border-radius:999px;background:#B23A47;color:#FBF3F3;font-style:normal;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums}
+.bnow p{margin:6px 0 0;font-size:13.8px;line-height:1.58;font-weight:600;color:var(--body);text-wrap:pretty}
+.bnow p b{color:var(--ink);font-weight:800}
+.bsrc{margin:0;padding:9px 13px 11px;font-size:12px;line-height:1.6;font-weight:700;color:var(--muted)}
+.bsrc a{color:var(--green);text-decoration:underline;text-underline-offset:2px}
+@media(min-width:768px){
+.pchips{grid-template-columns:repeat(8,minmax(0,1fr))}
+.pick.all .bcards,.pick:not(.js) .bcards{grid-template-columns:1fr 1fr;align-items:start}
+.bdl > div{grid-template-columns:104px 1fr}
+.bdl dd{font-size:14.5px}
+}
+
+/* 체크리스트 */
+.cklist{margin:24px 4px 0;background:#FBF3D5;border-radius:6px;padding:13px 12px 10px;box-shadow:0 9px 14px -11px rgba(46,46,44,.45),0 1px 0 rgba(46,46,44,.05);position:relative}
+.cklist::before{content:"";position:absolute;top:-8px;left:50%;width:72px;height:16px;background:rgba(201,186,150,.5);transform:translateX(-50%) rotate(-2deg);border-radius:2px}
+.ckh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0 2px 6px}
+.ckh b{font-family:'SnowHand','Gaegu','Nanum Pen Script',cursive;font-size:20px;font-weight:700;color:var(--ink);line-height:1.2}
+.ckh span{font-size:13px;font-weight:800;color:#B23A47;font-variant-numeric:tabular-nums}
+.ckb{appearance:none;-webkit-appearance:none;display:grid;grid-template-columns:22px 1fr;gap:9px;align-items:start;width:100%;margin:0;padding:8px 4px;border:0;border-top:1px dashed rgba(122,90,52,.35);background:none;text-align:left;font:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.ckb::before{content:"";width:18px;height:18px;margin-top:2px;border:2px solid var(--ink2);border-radius:4px;background:#FFFDF4;box-sizing:border-box}
+.ckb[aria-pressed="true"]::before{background:var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.2 8.4l3 3 6.4-6.6' fill='none' stroke='%23F4F2ED' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat;border-color:var(--green)}
+.ckb span{font-size:14px;line-height:1.5;font-weight:700;color:var(--ink2);text-wrap:pretty}
+.ckb span b{color:var(--ink);font-weight:800}
+.ckb[aria-pressed="true"] span{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(70,88,77,.5)}
+.ckdone{margin:4px 2px 0;min-height:1.5em;font-size:12.5px;font-weight:800;color:var(--green)}
+.rows .rk b.hand{display:inline-block;min-width:16px;margin-right:3px;font-size:18px;font-weight:700;color:#B23A47;line-height:1;vertical-align:-1px}
+.cvjump{display:block;margin:10px 0 0;padding:10px 12px;border:1px dashed rgba(236,234,227,.55);border-radius:10px;color:#F2E3C4;font-size:13.5px;font-weight:800;text-align:center;text-decoration:none;letter-spacing:-.01em}
+.cvjump:hover{background:rgba(236,234,227,.08)}
+#cards{scroll-margin-top:64px}
+
+/* 3편 · 카드 칩 여섯 개 */
+.pchips{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(min-width:768px){
+.pchips{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.bnow.nx{border-color:var(--green);background:#EEF3EF}
+.bnow.nx i{background:var(--green)}
+
+/* 3편 · 기사 제목 만들기 */
+#hsim .hl{margin:14px 4px 0;padding:10px 12px 11px;background:#FFFDF7;border:1.5px solid var(--ink);border-radius:4px;box-shadow:3px 3px 0 rgba(46,46,44,.8)}
+#hsim .hl i{display:block;font-style:normal;font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--muted)}
+#hsim .hl b{display:block;margin-top:3px;font-family:'SnowHand','Gaegu','Nanum Pen Script',cursive;font-size:24px;line-height:1.25;font-weight:700;letter-spacing:-.01em;color:var(--ink);font-variant-numeric:tabular-nums;word-break:keep-all}
+#hsim .hl b.up{color:#B23A47}
+#hsim .hl b.dn{color:#3D6595}
+#hsim .hl b.up::before{content:"▲ ";font-family:inherit;font-size:.7em;vertical-align:.12em}
+#hsim .hl b.dn::before{content:"▼ ";font-family:inherit;font-size:.7em;vertical-align:.12em}
+#hsim .simmsg{min-height:4.8em;margin-top:8px}
+#hsim .df b{font-size:14.5px}
+@media(max-width:360px){
+#hsim .df b{font-size:13px}
+#hsim .hl b{font-size:21px}}
+
+/* English-only typographic adjustments; original illustrations, panels, and geometry preserved. */
+html[lang="en"] body{font-family:Inter,"Segoe UI",Arial,"Liberation Sans",sans-serif;letter-spacing:0;word-break:normal;line-break:auto}
+html[lang="en"] .hand,html[lang="en"] .board .bdt.hand{font-family:"Comic Sans MS","Comic Neue","Segoe Print","Liberation Sans",cursive;letter-spacing:0}
+html[lang="en"] .cvtitle,html[lang="en"] .cht{letter-spacing:-.028em}
+html[lang="en"] .cvstat b{font-size:clamp(15px,4vw,22px);letter-spacing:-.028em;white-space:normal;overflow-wrap:normal}
+html[lang="en"] .cvstat span{font-size:10.5px}
+html[lang="en"] .cvstat em{font-size:10.5px}
+html[lang="en"] .rows .rk,html[lang="en"] .rows .rv{overflow-wrap:break-word}
+html[lang="en"] .tline time{font-size:12.5px}
+html[lang="en"] .tline li{grid-template-columns:58px 1fr}
+html[lang="en"] .opt{overflow-wrap:break-word}
+@media(max-width:360px){
+html[lang="en"] .cvstat div{padding:7px 5px}
+html[lang="en"] .cvstat b{font-size:15px}
+html[lang="en"] .cvstat span{font-size:9.5px}
+html[lang="en"] .cvstat em{font-size:9.5px}
+html[lang="en"] .shb{font-size:12px}}
+@media(min-width:768px){
+html[lang="en"] .cvstat b{font-size:28px}
+html[lang="en"] .cvstat span{font-size:12px}}
+html[lang="en"] [lang="ko"]{word-break:keep-all}
+html[lang="en"] .rows .rv b.up{white-space:nowrap}
+.rows .rv b.up{color:var(--up)}
+html[lang="en"] .tline.wide li{grid-template-columns:76px 1fr}
+html[lang="en"] .tline.wide time{font-size:12px;white-space:nowrap}
+html[lang="en"] .rows .rw{grid-template-columns:96px 1fr}
+@media(min-width:768px){
+html[lang="en"] .rows .rw{grid-template-columns:128px 1fr}}
+@media(max-width:360px){
+html[lang="en"] .rows .rw{grid-template-columns:84px 1fr}}
+html[lang="en"] .memo b,html[lang="en"] .ckh b{font-family:"Comic Sans MS","Comic Neue","Segoe Print","Liberation Sans",cursive;font-size:16px}
+html[lang="en"] .pchips .chip{font-size:12px}
+html[lang="en"] .bhd{flex-wrap:wrap;gap:4px 8px}
+html[lang="en"] .bhd b{font-size:15px}
+html[lang="en"] .bdl > div{grid-template-columns:82px 1fr}
+html[lang="en"] .bdl dt,html[lang="en"] .bdl dd,html[lang="en"] .bnow p{word-break:normal;overflow-wrap:break-word}
+html[lang="en"] .board .bdt.hand{font-size:21px}
+html[lang="en"] .seg .chip{font-size:12px}
+html[lang="en"] .seg .chip small{font-size:10px}
+html[lang="en"] .rows .rk b.hand{font-size:15px}
+@media(min-width:768px){
+html[lang="en"] .bdl > div{grid-template-columns:110px 1fr}
+html[lang="en"] .board .bdt.hand{font-size:26px}}
+html[lang="en"] #hsim .hl b{font-family:"Comic Sans MS","Comic Neue","Segoe Print","Liberation Sans",cursive;font-size:19px;letter-spacing:0}
+html[lang="en"] #hsim .df b{font-size:13px}
+@media(max-width:360px){
+html[lang="en"] #hsim .hl b{font-size:17px}
+html[lang="en"] #hsim .df b{font-size:12px}}
+</style>
+</head>
+<body>
+<div class="app">
+<span id="top"></span>
+<svg class="sdefs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="rough" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="chalk" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="11" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1 L8 5 L1 9" fill="none" stroke="#B23A47" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="ahb" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1 L8 5 L1 9" fill="none" stroke="#3D6595" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>
+</svg>
+<header class="topbar">
+  <div class="tbin">
+    <span class="brand"><i>Data Guide</i> · Part 3</span>
+    <span class="ep" aria-hidden="true">03</span>
+  </div>
+  <div class="prog"><i id="pg"></i></div>
+</header>
+
+<main>
+<!-- ══════ Cover ══════ -->
+<div class="cover">
+  <span class="cvkick">Finding Market Data <b>03</b></span>
+  <time class="cvdate" datetime="2026-11-27">Nov.&nbsp;27, 2026 · Market Basics</time>
+  <h1 class="cvtitle">What Time Is the <span>Won-Dollar Closing Rate?</span></h1>
+  <p class="cvsub">On the same Monday,<br/>the news said the won-dollar rate rose 9.7 won.<br/>A bank&#39;s morning report said it fell 3.4.<br/>Both were right. They used different clocks.</p>
+  <div class="cvstat">
+    <div><span>Rate in the news</span><b>3:30&nbsp;p.m.</b><em>the &#8220;day close&#8221;</em></div>
+    <div class="hot"><span>End of the day</span><b>7&nbsp;a.m.</b><em>next day; 6&nbsp;a.m. in summer</em></div>
+    <div><span>Base rate</span><b>Prior-day avg.</b><em>4&nbsp;p.m. ±2.5 min from 2027</em></div>
+  </div>
+  <div class="cvmotif">
+    <svg viewBox="0 0 320 150" role="img" aria-label="Chalkboard drawing. Three cards show the won-dollar rate for Friday, Nov. 20: 1,336.2 won at 3:30 p.m. is the rate in the news, 1,346.0 won at 7 a.m. Saturday is the day&#39;s close, and 1,337.3 won, the daytime average, is the base rate posted on Monday. All three come from Friday&#39;s trading. A character on the right asks, &#8220;Three answers?&#8221;">
+      <text class="hand" x="6" y="15" font-size="11" fill="rgba(236,234,227,.72)">Fri, Nov. 20: how many won per dollar?</text>
+      <g filter="url(#chalk)" stroke-linejoin="round">
+        <rect x="6" y="30" width="70" height="86" rx="6" fill="rgba(233,169,174,.16)" stroke="rgba(236,234,227,.85)" stroke-width="1.4"/>
+        <rect x="82" y="30" width="70" height="86" rx="6" fill="rgba(168,198,180,.22)" stroke="rgba(236,234,227,.85)" stroke-width="1.4"/>
+        <rect x="158" y="30" width="70" height="86" rx="6" fill="rgba(230,201,143,.14)" stroke="rgba(236,234,227,.85)" stroke-width="1.4"/>
+      </g>
+      <g class="hand" text-anchor="middle">
+        <text x="41" y="50" font-size="11" fill="rgba(236,234,227,.85)">3:30 p.m.</text>
+        <text x="117" y="50" font-size="11" fill="rgba(236,234,227,.85)">Sat 7:00 a.m.</text>
+        <text x="193" y="50" font-size="11" fill="rgba(236,234,227,.85)">daytime avg.</text>
+        <text x="41" y="80" font-size="15" fill="#F2E3C4">1,336.2</text>
+        <text x="117" y="80" font-size="15" fill="#F2E3C4">1,346.0</text>
+        <text x="193" y="80" font-size="15" fill="#F2E3C4">1,337.3</text>
+        <text x="41" y="104" font-size="11.5" fill="#F4D5D8">the news</text>
+        <text x="117" y="104" font-size="11.5" fill="#CFE0D5">day&#39;s close</text>
+        <text x="193" y="104" font-size="11.5" fill="#E6C98F">base rate</text>
+        <text x="117" y="140" font-size="11" fill="rgba(236,234,227,.8)">all from Friday · avg. posted Monday</text>
+      </g>
+      <g filter="url(#chalk)"><path d="M240 22 H308 Q314 22 314 28 V54 Q314 60 308 60 H290 L282 72 L280 60 H240 Q234 60 234 54 V28 Q234 22 240 22 Z" fill="rgba(236,234,227,.10)" stroke="rgba(236,234,227,.85)" stroke-width="1.5" stroke-linejoin="round"/></g>
+      <text class="hand" x="274" y="38" font-size="11.5" fill="rgba(236,234,227,.95)" text-anchor="middle">Three</text>
+      <text class="hand" x="274" y="53" font-size="11.5" fill="#F2E3C4" text-anchor="middle">answers?</text>
+      <g transform="translate(262 78) scale(0.82)"><g filter="url(#rough)"><path d="M8 30 Q20 24 32 30 L35 54 Q20 60 5 54 Z" fill="#CFE0D5" stroke="#2E2E2C" stroke-width="1.8" stroke-linejoin="round"/><path d="M13 56 L12 63 M27 56 L28 63" stroke="#2E2E2C" stroke-width="1.8" stroke-linecap="round"/><circle cx="20" cy="16" r="12.5" fill="#FBF8F1" stroke="#2E2E2C" stroke-width="1.8"/></g><ellipse cx="12.5" cy="19.5" rx="2.6" ry="1.6" fill="#E9A9AE" opacity=".75"/><ellipse cx="27.5" cy="19.5" rx="2.6" ry="1.6" fill="#E9A9AE" opacity=".75"/><circle cx="16" cy="14.5" r="1.7" fill="#2E2E2C"/><circle cx="24" cy="14.5" r="1.7" fill="#2E2E2C"/><path d="M17 22.5 Q20 21 23 22.5" fill="none" stroke="#2E2E2C" stroke-width="1.4" stroke-linecap="round"/></g>
+    </svg>
+  </div>
+  <div class="cvidx">
+    <a href="#p1"><b>01</b>Find the rates</a>
+    <a href="#p2"><b>02</b>Compare</a>
+    <a href="#p3"><b>03</b>Clock changes</a>
+  </div>
+  <a class="cvjump" href="#cards">Jump to where to find each rate <span aria-hidden="true">→</span></a>
+  <p class="cvtime">All times KST (UTC+9) · About 9 minutes · 1 quiz · 2 things to try</p>
+</div>
+
+<div class="tldr">
+  <div class="tlh"><b class="hand">Short on time?</b><span>Three-line summary</span></div>
+  <ul class="pts">
+    <li>The won-dollar rate in the news is usually the <b>3:30&nbsp;p.m.</b> figure. The market stays open after that, so the trading day ends at 7&nbsp;a.m. the next morning (6&nbsp;a.m. in summer).</li>
+    <li>The official <span class="term">base rate<span class="tip">The reference rate set by Korea&#39;s Foreign Exchange Transaction Regulation. Seoul Money Brokerage publishes it every business day. It is not the &#8220;base rate&#8221; a bank sets for itself round by round. In Korean, <span lang="ko">매매기준율</span>.</span></span>, published by Seoul Money Brokerage, is the previous trading day&#39;s daytime trading averaged by volume. The &#8220;base rate&#8221; in a bank app starts the morning at this figure, then the bank resets it round by round. From January 2027 the official one becomes an average of the five minutes around 4&nbsp;p.m.</li>
+    <li>Before reading &#8220;up&#8221; or &#8220;down,&#8221; check what it was compared with. <span class="ul">The same day can come out up or down, depending on the comparison.</span></li>
+  </ul>
+  <p class="tiphint">Hover over or tap an underlined term to see its definition.</p>
+</div>
+
+<!-- ══════ Chapter 1 ══════ -->
+<div class="ch" id="p1">
+  <div class="chtop"><span class="chn">01</span><span class="chk">WHERE</span></div>
+  <h2 class="cht">Same Friday,<br/>Three Rates</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">On Friday, Nov.&nbsp;20, the KOSPI fell more than 5%. That night in New York, the Nasdaq dropped more than 5%. Look up Friday&#39;s won-dollar rate on Monday morning and there is more than one number: 1,336.2 won in the news, 1,346.0 won in the &#8220;close&#8221; column of the Bank of Korea&#39;s statistics, and 1,337.3 won, dated Monday, on Seoul Money Brokerage&#39;s website. None of them is wrong.</p>
+<p class="note">The won-dollar rate is how many won it takes to buy one dollar. If it goes from 1,336 to 1,346, the dollar has become more expensive and the won has lost value.</p>
+<p class="p">Since July&nbsp;6, 2026, the won-dollar pair has traded 24 hours on weekdays. Right now the market opens at 7&nbsp;a.m. Monday and closes at 7&nbsp;a.m. Saturday, an hour earlier during U.S. <span class="term">daylight saving time<span class="tip">Clocks move forward an hour in summer. In New York it ran from March&nbsp;8 to Nov.&nbsp;1, 2026. During that period the Seoul won-dollar market ends its day an hour earlier, at 6&nbsp;a.m.</span></span>. So each figure cuts the day at a different point.</p>
+
+<figure class="doodle">
+  <svg viewBox="0 0 320 224" role="img" aria-label="Drawing of the won-dollar path from 7 a.m. Friday to 7 a.m. Saturday. It opened at 1,335.0 won. The 9 a.m. to 3:30 p.m. window is when the base rate is measured; the average of that window is the 1,337.3 won posted on Monday. The 3:30 p.m. figure, 1,336.2 won, is the rate in the news. Overnight, as the Nasdaq fell more than 5%, the rate rose, and the day closed at 1,346.0 won at 7 a.m. Saturday">
+    <text class="hand" x="160" y="16" font-size="12.5" fill="#2E2E2C" text-anchor="middle">7 a.m. Friday → 7 a.m. Saturday</text>
+    <rect x="120" y="28" width="178" height="154" fill="#E8E5DF" opacity=".55"/>
+    <rect x="45" y="52" width="75" height="130" fill="#DCE3DD"/>
+    <g class="hand" text-anchor="middle" font-size="10.5" fill="#2F3C34">
+      <text x="82.5" y="66">daytime avg.</text>
+      <text x="82.5" y="80" font-size="12">= 1,337.3</text>
+      <text x="82.5" y="94">posted Mon.</text>
+    </g>
+    <g transform="translate(196 36)"><path d="M8 0 A9 9 0 1 0 17 11 A7 7 0 1 1 8 0 Z" fill="#F2E3C4" stroke="#7A5A34" stroke-width="1.2"/></g>
+    <text class="hand" x="216" y="49" font-size="11" fill="#7A5A34">Nasdaq −5%</text>
+    <path d="M22 142 C32 141 40 149 52 149 C64 149 72 138 84 136 C96 134 104 140 112 137 L120 135 C140 132 160 122 180 110 C196 100 206 86 220 82 C234 78 244 64 256 64 C268 64 282 72 298 76" fill="none" stroke="#2E2E2C" stroke-width="2" stroke-linecap="round" filter="url(#rough)"/>
+    <circle cx="22" cy="142" r="4" fill="#FBF8F1" stroke="#65625B" stroke-width="1.6"/>
+    <circle cx="120" cy="135" r="5" fill="#B23A47" stroke="#FBF8F1" stroke-width="1.5"/>
+    <circle cx="298" cy="76" r="5" fill="#46584D" stroke="#FBF8F1" stroke-width="1.5"/>
+    <g font-weight="800" fill="#53514C" font-size="10.5"><text x="26" y="166">open 1,335.0</text></g>
+    <text x="126" y="156" font-size="13" font-weight="800" fill="#B23A47">1,336.2</text>
+    <text class="hand" x="126" y="171" font-size="11" fill="#B23A47">the news rate</text>
+    <text x="292" y="102" font-size="13" font-weight="800" fill="#2F3C34" text-anchor="end">1,346.0</text>
+    <text class="hand" x="292" y="117" font-size="11" fill="#2F3C34" text-anchor="end">day&#39;s close</text>
+    <path d="M22 182 H298" fill="none" stroke="#2E2E2C" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M22 178 V186 M45 178 V186 M120 178 V186 M217.5 178 V186 M298 178 V186" fill="none" stroke="#2E2E2C" stroke-width="1.2"/>
+    <g font-size="10" font-weight="800" fill="#53514C">
+      <text x="22" y="198">Fri 7:00</text>
+      <text x="45" y="210" text-anchor="middle">9:00</text>
+      <text x="120" y="198" text-anchor="middle" fill="#B23A47">15:30</text>
+      <text x="217.5" y="198" text-anchor="middle">midnight</text>
+      <text x="298" y="198" text-anchor="end">Sat 7:00</text>
+    </g>
+    <text class="hand" x="209" y="218" font-size="11" fill="#65625B" text-anchor="middle">open overnight since July 2026</text>
+  </svg>
+  <figcaption>The figures and times are actual values for Nov.&nbsp;20. The line is drawn between that day&#39;s high of 1,348.0 won and low of 1,333.8 won.</figcaption>
+</figure>
+
+<h3 class="hd" id="cards">Where to find each rate</h3>
+<p class="p">Add bank posted rates and the NDF to the three and you get five cards. Tap them one at a time, or tap &#8220;All&#8221; to open every card.</p>
+<div class="pick" id="pick">
+  <div class="pchips" role="group" aria-label="Choose a rate">
+    <button class="chip" type="button" data-b="c1530" aria-pressed="true">3:30&nbsp;p.m.</button>
+    <button class="chip" type="button" data-b="cclose" aria-pressed="false">Day&#39;s close</button>
+    <button class="chip" type="button" data-b="cmar" aria-pressed="false">Base rate</button>
+    <button class="chip" type="button" data-b="cbank" aria-pressed="false">Bank rate</button>
+    <button class="chip" type="button" data-b="cndf" aria-pressed="false">NDF</button>
+    <button class="chip" type="button" data-b="all" aria-pressed="false">All</button>
+  </div>
+  <div class="bcards">
+
+    <section class="bcard on" data-b="c1530" aria-label="3:30 p.m. rate">
+      <div class="bhd"><b>3:30&nbsp;p.m. rate</b><span>the rate in the news</span></div>
+      <dl class="bdl">
+        <div><dt>Taken at</dt><dd>The Seoul FX market rate at <b>3:30&nbsp;p.m.</b> The market kept this time when trading went 24 hours. For now it will be used through the first half of 2027</dd></div>
+        <div><dt>Fri, Nov.&nbsp;20</dt><dd><b>1,336.2 won</b></dd></div>
+        <div><dt>Also called</dt><dd>The day-session close (<span lang="ko">주간 거래 종가</span>), the 15:30 close, the 3:30&nbsp;p.m. reference rate (<span lang="ko">오후 3시 30분 기준가</span>)</dd></div>
+        <div><dt>Where</dt><dd>FX stories published just after 3:30&nbsp;p.m. The Bank of Korea&#39;s ECOS database, table 3.1.1.3, item <span lang="ko">「원/달러(종가 15:30)」</span></dd></div>
+        <div><dt>Used by</dt><dd>The news, government statistics and press releases</dd></div>
+      </dl>
+      <p class="bsrc">Sources · <a href="https://ecos.bok.or.kr/" target="_blank" rel="noopener">Bank of Korea ECOS</a>, table 3.1.1.3 · Seoul FX Market Operation Council decision (<a href="https://www.kita.net/board/totalTradeNews/totalTradeNewsDetail.do?no=101967" target="_blank" rel="noopener">Yonhap, May&nbsp;31</a>) · kept through first half of 2027 (<a href="https://kbthink.com/news-list/view.html?newsId=20261120075001392" target="_blank" rel="noopener">Yonhap Infomax, Nov.&nbsp;20</a>) · checked Nov.&nbsp;25, 2026</p>
+    </section>
+
+    <section class="bcard" data-b="cclose" aria-label="End-of-day close">
+      <div class="bhd"><b>End-of-day close</b><span>7&nbsp;a.m. the next day</span></div>
+      <dl class="bdl">
+        <div><dt>Taken at</dt><dd>The FX trade date rolls over at 5&nbsp;p.m. New York time: <b>7&nbsp;a.m. the next day</b> in Korea, 6&nbsp;a.m. during daylight saving time</dd></div>
+        <div><dt>Fri, Nov.&nbsp;20</dt><dd><b>1,346.0 won</b>, the figure at 7&nbsp;a.m. Saturday</dd></div>
+        <div><dt>Same day</dt><dd>The open, high and low use the same day. On Nov.&nbsp;20: open 1,335.0, high 1,348.0, low 1,333.8 won</dd></div>
+        <div><dt>Where</dt><dd>The same ECOS table, item <span lang="ko">「원/달러(종가)」</span>. The close in banks&#39; morning FX reports</dd></div>
+        <div><dt>Used by</dt><dd>Bank FX reports, and anyone looking at the whole day including the overnight move</dd></div>
+      </dl>
+      <p class="bsrc">Sources · <a href="https://mofe.go.kr/sns/2024/foreignExchange.do?category=faq" target="_blank" rel="noopener">Ministry of Economy and Finance FX market FAQ</a> · ECOS · <a href="https://biz.kebhana.com/cont/hanafx/file/Daily261123.pdf" target="_blank" rel="noopener">Hana Bank FX report (Nov.&nbsp;23)</a> · checked Nov.&nbsp;25, 2026</p>
+    </section>
+
+    <section class="bcard" data-b="cmar" aria-label="Base rate">
+      <div class="bhd"><b>Base rate</b><span>the official reference rate</span></div>
+      <dl class="bdl">
+        <div><dt>Taken at</dt><dd>Trades from <b>9&nbsp;a.m. to 3:30&nbsp;p.m. on the previous trading day</b>, <span class="term">averaged by volume<span class="tip">An average that gives more weight to prices where more money changed hands. A weighted average.</span></span>. Posted around 8:30&nbsp;a.m. on business days</dd></div>
+        <div><dt>Date</dt><dd><b>1,337.3 won</b>, from Friday&#39;s trades, is dated <b>Monday, Nov.&nbsp;23</b>. Look up Nov.&nbsp;20 and you get 1,330.8 won, from Thursday&#39;s trades</dd></div>
+        <div><dt>Where</dt><dd>Seoul Money Brokerage&#39;s website and app, <span lang="ko">「매매기준율」</span>. ECOS table 3.1.1.1, item <span lang="ko">「원/미국달러(매매기준율)」</span>. Some bank rate tables carry it as the &#8220;Bank of Korea base rate&#8221; (<span lang="ko">한국은행 기준율</span>; Woori Bank)</dd></div>
+        <div><dt>Bank apps</dt><dd>The &#8220;base rate&#8221; in a bank app matches this one only in the first round of the morning. After that the bank resets it as the market moves</dd></div>
+        <div><dt>Used by</dt><dd>The base exchange rate that laws, contracts and statistics refer to. Korean tax on overseas stock gains is also worked out with it</dd></div>
+      </dl>
+      <div class="bnow nx"><i>From Jan.&nbsp;1, 2027</i><p>It becomes the previous business day&#39;s <b>4&nbsp;p.m.</b> <span class="term">time-weighted average price<span class="tip">Prices sampled at regular intervals in the few minutes around a set time, averaged evenly regardless of volume. TWAP for short.</span></span>. The rate is sampled every second for two and a half minutes either side of 4&nbsp;p.m.: 300 samples from each of the two brokers, 600 in all, averaged evenly.</p></div>
+      <p class="bsrc">Sources · <a href="https://www.law.go.kr/%ED%96%89%EC%A0%95%EA%B7%9C%EC%B9%99/%EC%99%B8%EA%B5%AD%ED%99%98%EA%B1%B0%EB%9E%98%EA%B7%9C%EC%A0%95" target="_blank" rel="noopener">Foreign Exchange Transaction Regulation, Article 1-2</a> · <a href="http://www.smbs.biz/Company/Buss_3_4.jsp" target="_blank" rel="noopener">Seoul Money Brokerage, basis for rate calculation</a> · ECOS · checked Nov.&nbsp;25, 2026</p>
+    </section>
+
+    <section class="bcard" data-b="cbank" aria-label="Bank posted rate">
+      <div class="bhd"><b>Bank posted rate</b><span>what you actually get</span></div>
+      <dl class="bdl">
+        <div><dt>Taken at</dt><dd>Banks post new rates several times a day. Each comes with a <b>round number and a time</b></dd></div>
+        <div><dt>Rates</dt><dd>The bank starts from its own base rate, set by watching the market, and prices buying above it and selling below it. In Woori Bank&#39;s last round on Nov.&nbsp;23, buying cash dollars cost <b>1.75%</b> more and sending a wire about <b>1%</b> more</dd></div>
+        <div><dt>Where</dt><dd>Bank apps and websites (<span lang="ko">환율 조회</span>). If a portal&#39;s FX screen says &#8220;as of ○○ Bank&#8221; (<span lang="ko">○○은행 기준</span>), this is the figure</dd></div>
+        <div><dt>Used by</dt><dd>Anyone changing cash or sending money abroad</dd></div>
+      </dl>
+      <p class="bsrc">Sources · <a href="https://spot.wooribank.com/pot/Dream?withyou=CMCOM0298" target="_blank" rel="noopener">Woori Bank daily exchange rates</a> · checked Nov.&nbsp;25, 2026</p>
+    </section>
+
+    <section class="bcard" data-b="cndf" aria-label="NDF">
+      <div class="bhd"><b>NDF</b><span>offshore forward</span></div>
+      <dl class="bdl">
+        <div><dt>What</dt><dd>A contract that fixes a future exchange rate now; at maturity only the difference is paid, in dollars, not the full amount (a <span class="term">non-deliverable forward<span class="tip">A won-dollar forward traded outside Korea. At maturity no won changes hands; only the difference between the agreed rate and the actual rate is settled in dollars.</span></span>). Traded outside Korea, in New York and elsewhere</dd></div>
+        <div><dt>Taken at</dt><dd>The last quote around the New York close, reported in the next morning&#39;s news</dd></div>
+        <div><dt>Fri, Nov.&nbsp;20</dt><dd>One-month, the maturity morning stories usually cite: <b>1,345.4 won</b> (midpoint of the bid and offer)</dd></div>
+        <div><dt>Where</dt><dd>Morning NDF stories; banks&#39; morning FX reports</dd></div>
+        <div><dt>Used by</dt><dd>Anyone gauging where Seoul will open</dd></div>
+      </dl>
+      <p class="bsrc">Sources · <a href="https://biz.kebhana.com/cont/hanafx/file/Daily261123.pdf" target="_blank" rel="noopener">Hana Bank FX report (Nov.&nbsp;23)</a> · NDF story (<a href="https://www.etoday.co.kr/news/view/2651403" target="_blank" rel="noopener">Etoday, Nov.&nbsp;23</a>) · checked Nov.&nbsp;25, 2026</p>
+    </section>
+
+  </div>
+</div>
+<div class="memo">
+  <b class="hand">Read the small print first</b>
+  <p>Labels such as &#8220;15:30,&#8221; &#8220;close&#8221; (<span lang="ko">종가</span>), &#8220;round&#8221; (<span lang="ko">회차</span>) or &#8220;as of ○○ Bank&#8221; tell you when the figure was taken and who published it. If there is no label, find the source.</p>
+</div>
+
+<h3 class="hd" id="which">So which figure do I need?</h3>
+<div class="rows sm">
+  <div class="rw"><span class="rk">Today, near the stock close</span><span class="rv">The <b>3:30&nbsp;p.m. rate</b>, used by the news and Bank of Korea statistics</span></div>
+  <div class="rw"><span class="rk">Through the New York night</span><span class="rv">The <b>end-of-day close</b>, the 7&nbsp;a.m. figure the next day</span></div>
+  <div class="rw"><span class="rk">Tax on overseas stocks</span><span class="rv">The <b>official base rate</b> on the day the trade settled. Brokers&#39; tax guides point to Seoul Money Brokerage&#39;s figure</span></div>
+  <div class="rw"><span class="rk">Dollars for a trip</span><span class="rv">The bank&#39;s <b>&#8220;buy cash&#8221;</b> rate. An FX discount brings it down</span></div>
+  <div class="rw"><span class="rk">Money sent abroad</span><span class="rv">The bank&#39;s <b>&#8220;send wire&#8221;</b> rate</span></div>
+  <div class="rw"><span class="rk">This morning&#39;s open</span><span class="rv">Last night&#39;s New York <b>NDF</b> and the end-of-day close</span></div>
+</div>
+
+<!-- ══════ Chapter 2 ══════ -->
+<div class="ch" id="p2">
+  <div class="chtop"><span class="chn">02</span><span class="chk">HOW TO READ</span></div>
+  <h2 class="cht">Up or Down<br/>Compared With What?</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">Korean FX stories always start with &#8220;so many won from the previous trading day.&#8221; But there is more than one figure to compare with. Try this first.</p>
+
+<div class="pop" id="quiz1">
+  <div class="poph"><b>Warm-up</b><span class="vb">Think it through</span></div>
+  <div class="popb">
+    <p class="popq">On Monday, Nov.&nbsp;23, the news said the won-dollar rate rose 9.7 won. The next morning a bank&#39;s FX report said it &#8220;closed 3.4 won lower at 1,342.6.&#8221; Which was right?</p>
+    <div class="opts">
+      <button class="opt" type="button" data-ok="0">(1) The news</button>
+      <button class="opt" type="button" data-ok="0">(2) The bank report</button>
+      <button class="opt" type="button" data-ok="1">(3) Both</button>
+    </div>
+    <div class="popans" hidden>
+      <span class="verdict" tabindex="-1">The answer is (3)</span>
+      <p class="popnote">The news compared <b>3:30&nbsp;p.m. with 3:30&nbsp;p.m.</b>: 1,336.2 won on Friday to 1,345.9 on Monday. The bank compared <b>close with close</b>: 1,346.0 to 1,342.6. The drawing below shows both.</p>
+      <button class="qshare" type="button" data-share="quiz">Share this quiz</button>
+    </div>
+  </div>
+</div>
+
+<figure class="doodle">
+  <svg viewBox="0 0 320 172" role="img" aria-label="Two-line comparison. Line one compares 3:30 p.m. with 3:30 p.m.: from 1,336.2 won on Friday to 1,345.9 won on Monday, up 9.7 won. Line two compares close with close: from 1,346.0 won on Friday to 1,342.6 won on Monday, down 3.4 won">
+    <path d="M95 28 V156 M160 28 V156 M225 28 V156 M290 28 V156" fill="none" stroke="#DCD7CE" stroke-width="1" stroke-dasharray="2 3"/>
+    <text class="hand" x="6" y="24" font-size="12.5" fill="#B23A47">(1) 3:30 p.m. vs. 3:30 p.m.</text>
+    <path d="M30 56 H300" fill="none" stroke="#2E2E2C" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M115 56 H230" fill="none" stroke="#B23A47" stroke-width="2.2" stroke-linecap="round" marker-end="url(#ah)"/>
+    <circle cx="110.6" cy="56" r="4.5" fill="#FBF8F1" stroke="#65625B" stroke-width="1.8"/>
+    <circle cx="236.7" cy="56" r="5" fill="#B23A47"/>
+    <text x="173" y="47" font-size="14" font-weight="800" fill="#B23A47" text-anchor="middle">+9.7</text>
+    <g font-size="11" font-weight="800" text-anchor="middle"><text x="110.6" y="74" fill="#65625B">Fri 1,336.2</text><text x="236.7" y="74" fill="#B23A47">Mon 1,345.9</text></g>
+    <text class="hand" x="6" y="102" font-size="12.5" fill="#3D6595">(2) close vs. close</text>
+    <path d="M30 128 H300" fill="none" stroke="#2E2E2C" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M233 128 H200" fill="none" stroke="#3D6595" stroke-width="2.2" stroke-linecap="round" marker-end="url(#ahb)"/>
+    <circle cx="238" cy="128" r="4.5" fill="#FBF8F1" stroke="#65625B" stroke-width="1.8"/>
+    <circle cx="193.8" cy="128" r="5" fill="#3D6595"/>
+    <text x="184" y="124" font-size="14" font-weight="800" fill="#3D6595" text-anchor="end">−3.4</text>
+    <text x="238" y="118" font-size="11" font-weight="800" fill="#65625B" text-anchor="middle">Fri 1,346.0</text>
+    <text x="193.8" y="146" font-size="11" font-weight="800" fill="#3D6595" text-anchor="middle">Mon 1,342.6</text>
+    <g font-size="10" font-weight="700" fill="#8B867E" text-anchor="middle"><text x="95" y="168">1,335</text><text x="160" y="168">1,340</text><text x="225" y="168">1,345</text><text x="290" y="168">1,350</text></g>
+  </svg>
+  <figcaption>The close is the 7&nbsp;a.m. figure the next day: Saturday morning for Friday, Tuesday morning for Monday.</figcaption>
+</figure>
+<p class="p">The split comes from Friday night. After 3:30&nbsp;p.m., the rate rose 9.8 won overnight. Compare 3:30 with 3:30 and that rise counts toward Monday. Compare close with close and it counts toward Friday.</p>
+
+<h3 class="hd">&#8220;From the previous trading day&#8221;: from which figure?</h3>
+<div class="rows sm">
+  <div class="rw"><span class="rk">Afternoon stories</span><span class="rv">The previous day&#39;s <b>3:30&nbsp;p.m.</b> rate. Some say &#8220;from the same time on the previous trading day&#8221;</span></div>
+  <div class="rw"><span class="rk">Opening stories</span><span class="rv">The morning&#39;s first trade against the previous day&#39;s <b>3:30&nbsp;p.m.</b> rate. &#8220;Opened 8.8 won higher&#8221; on Nov.&nbsp;23 is one</span></div>
+  <div class="rw"><span class="rk">Bank morning reports</span><span class="rv"><b>Close against close</b>. Hana Bank&#39;s Nov.&nbsp;24 line, &#8220;closed 3.4 won lower at 1,342.6,&#8221; is one</span></div>
+  <div class="rw"><span class="rk">NDF stories</span><span class="rv">The previous day&#39;s <b>3:30&nbsp;p.m.</b> rate. More below</span></div>
+</div>
+
+<div class="sim" id="hsim">
+  <div class="simhd"><b>Write Monday&#39;s headline</b><span>Actual November figures</span></div>
+  <p class="simp">Pick one Monday, Nov.&nbsp;23, figure and one Friday figure to compare it with.</p>
+  <p class="ddlb">Monday figure</p>
+  <div class="seg s3" role="group" aria-label="Monday figure">
+    <button class="chip" type="button" data-k="m" data-v="o" aria-pressed="false">Morning open<small>1,345.0 · 7&nbsp;a.m.</small></button>
+    <button class="chip on" type="button" data-k="m" data-v="d" aria-pressed="true">3:30&nbsp;p.m.<small>1,345.9</small></button>
+    <button class="chip" type="button" data-k="m" data-v="c" aria-pressed="false">Day&#39;s close<small>1,342.6</small></button>
+  </div>
+  <p class="ddlb">Friday figure to compare with</p>
+  <div class="seg s2" role="group" aria-label="Friday figure to compare with">
+    <button class="chip on" type="button" data-k="f" data-v="d" aria-pressed="true">3:30&nbsp;p.m.<small>1,336.2</small></button>
+    <button class="chip" type="button" data-k="f" data-v="c" aria-pressed="false">Day&#39;s close<small>1,346.0 · Sat a.m.</small></button>
+  </div>
+  <div class="hl" id="hl"><i>As a headline</i><b class="hand" id="hlt">Won-dollar up 9.7 won to 1,345.9</b></div>
+  <div class="iflow">
+    <div class="df" id="h1"><i>Monday</i><b>1,345.9</b></div>
+    <div class="df" id="h2"><i>Friday</i><b>1,336.2</b></div>
+    <div class="df ok" id="h3"><i>Which pair</i><b>The news pair</b></div>
+  </div>
+  <p class="simmsg" id="hmsg" aria-live="polite">The pair the news uses: 3:30 p.m. against 3:30 p.m.</p>
+  <p class="simfoot">Figures from the Bank of Korea&#39;s ECOS and Hana Bank FX reports (Nov.&nbsp;23 and 24).</p>
+</div>
+
+<h3 class="hd">Why the base rate differs from the close</h3>
+<p class="p">The official base rate is an average, not the last price, and it is weighted by volume. Here is how that works on a made-up day.</p>
+<div class="board">
+  <div class="bdk">Chalkboard · Averaging by volume</div>
+  <p class="bdt hand">It leans toward where most of the trading was</p>
+  <div class="btab" style="grid-template-columns:1.35fr 1fr">
+    <span class="h">A made-up day</span><span class="h">Value</span>
+    <span class="l">Traded at 1,500 won</span><span>$10 billion</span>
+    <span class="l">Traded at 1,510 won</span><span>$1 billion</span>
+    <span class="l">Simple average</span><span>1,505.0 won</span>
+    <span class="l hi">Volume-weighted (base-rate method)</span><span class="hi">about 1,500.9 won</span>
+    <span class="l e">Close, if the last trade was at 1,510</span><span class="e">1,510 won</span>
+  </div>
+</div>
+<p class="p">Friday&#39;s daytime average was 1,337.3 won. The nearly 10 won added overnight is not in that figure, posted on Monday. Tuesday&#39;s 1,346.6 won is the average of trades actually done during Monday&#39;s session.</p>
+
+<h3 class="hd">Why the bank&#39;s &#8220;buy&#8221; price is higher</h3>
+<p class="p">Banks post new rates several times a day. Each <span class="term">posted rate<span class="tip">The rate at which a bank says it will buy and sell foreign currency. Banks issue new ones round by round through the day.</span></span> starts from the bank&#39;s <b>own base rate</b>. According to Seoul Money Brokerage, every bank opens the morning with the official base rate, then each resets its own round by round as the market moves. From there the bank prices what customers buy above it and what they sell below it. Buying dollar bills with won before a trip uses the &#8220;buy cash&#8221; rate; changing leftover dollars back into won afterward uses &#8220;sell cash.&#8221;</p>
+<figure class="doodle">
+  <svg viewBox="0 0 320 200" role="img" aria-label="Woori Bank rate table, last round on Nov. 23, 2026. The bank&#39;s own base rate, 1,344.50 won, is in the middle. Above it, sending a wire 1,357.50 won (13.00 won higher) and buying cash 1,368.02 won (23.52 won higher). Below it, receiving a wire 1,331.50 won and selling cash 1,320.98 won. The same table&#39;s Bank of Korea base rate, 1,337.30 won, matches that day&#39;s official base rate">
+    <text class="hand" x="160" y="17" font-size="12.5" fill="#2E2E2C" text-anchor="middle">Woori Bank rates, Nov. 23, last round</text>
+    <g filter="url(#rough)"><rect x="12" y="28" width="216" height="146" rx="8" fill="#FBF8F1" stroke="#2E2E2C" stroke-width="1.4"/></g>
+    <path d="M40 44 V158" fill="none" stroke="#8B867E" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="40" cy="44" r="4.5" fill="#B23A47"/>
+    <circle cx="40" cy="69" r="4" fill="#E2B3B8" stroke="#B23A47" stroke-width="1.3"/>
+    <circle cx="40" cy="100" r="5.5" fill="#2E2E2C"/>
+    <circle cx="40" cy="131" r="4" fill="#C6D3E2" stroke="#3D6595" stroke-width="1.3"/>
+    <circle cx="40" cy="156" r="4.5" fill="#3D6595"/>
+    <g font-size="11" font-weight="800">
+      <text x="52" y="48" fill="#B23A47">Buy cash</text><text x="220" y="48" fill="#B23A47" text-anchor="end">1,368.02</text>
+      <text x="52" y="73" fill="#53514C">Send a wire</text><text x="220" y="73" fill="#53514C" text-anchor="end">1,357.50</text>
+      <text x="52" y="104" fill="#2E2E2C" font-size="12">Bank base rate</text><text x="220" y="104" fill="#2E2E2C" text-anchor="end" font-size="12.5">1,344.50</text>
+      <text x="52" y="135" fill="#53514C">Receive a wire</text><text x="220" y="135" fill="#53514C" text-anchor="end">1,331.50</text>
+      <text x="52" y="160" fill="#3D6595">Sell cash</text><text x="220" y="160" fill="#3D6595" text-anchor="end">1,320.98</text>
+    </g>
+    <path d="M52 110 H220" fill="none" stroke="#CEC9BF" stroke-width="1" stroke-dasharray="2 3"/>
+    <g class="hand" font-size="11.5">
+      <text x="236" y="52" fill="#B23A47">+23.52</text>
+      <text x="236" y="66" font-size="10.5" fill="#B23A47">(1.75%)</text>
+      <text x="236" y="82" fill="#B23A47">+13.00</text>
+      <text x="236" y="128" fill="#3D6595">−13.00</text>
+      <text x="236" y="160" fill="#3D6595">−23.52</text>
+      <text x="236" y="104" font-size="11" fill="#2E2E2C">middle</text>
+    </g>
+    <text class="hand" x="160" y="192" font-size="11" fill="#46584D" text-anchor="middle">Same table&#39;s &#8220;BOK base rate&#8221; 1,337.30 = official base rate</text>
+  </svg>
+  <figcaption>Rates differ by bank, round and discount. The gap between the bank&#39;s base rate and its buy or sell price is the exchange spread. A &#8220;90% FX discount&#8221; cuts that gap (23.52 won when buying cash) by 90%. On this posting that means 1,346.85 won per dollar, or about 2,117 won less for $100.</figcaption>
+</figure>
+<p class="note">That day the official base rate was a single figure, 1,337.30 won, Friday&#39;s daytime average. The bank&#39;s base rate was reset as Monday&#39;s market moved, and the last round stood at 1,344.50 won, 7.2 won higher.</p>
+
+<h3 class="hd">Reading a morning NDF story, line by line</h3>
+<div class="dcmp">
+  <div class="figh"><b>Nov.&nbsp;23 morning story</b><span>Friday night, New York NDF</span></div>
+  <div class="calc" style="grid-template-columns:1.1fr 1fr">
+    <span class="h l">The story says</span><span class="h l">Meaning</span>
+    <span class="l">One-month last quoted at 1,345.2/1,345.6 won</span><span class="l" style="font-weight:700;color:var(--body)">Bid and offer when New York closed. Midpoint 1,345.4 won</span>
+    <span class="l">Adjusted for a swap point of −0.90 won</span><span class="l" style="font-weight:700;color:var(--body)">1,345.4 − (−0.90) = 1,346.3 won, converted so it can be compared with spot</span>
+    <span class="l e">Up 10.1 won from the previous spot close of 1,336.2 won (3:30&nbsp;p.m.)</span><span class="l e" style="font-weight:700;color:var(--body)">1,346.3 − 1,336.2 = 10.1, compared with Friday&#39;s 3:30&nbsp;p.m. rate</span>
+  </div>
+</div>
+<p class="p">An <span class="term">NDF<span class="tip">A won-dollar contract that fixes a future rate now and settles only the difference, in dollars, at maturity. Traded outside Korea.</span></span> comes in several maturities; morning stories usually cite the one-month. A <span class="term">swap point<span class="tip">The gap between the one-month forward rate and the spot rate. It reflects things like the interest-rate gap between the two countries; it is not a forecast of the future rate.</span></span> is the gap between the forward price and the spot price. Since forward = spot + swap point, you subtract the swap point to get back to spot. Taking away a negative number made the figure bigger. 1,346.3 won is not a traded price but one converted for comparison; on this day it was almost exactly where Seoul closed that trading day (1,346.0 won).</p>
+<p class="p">Seoul used to shut at night, so the NDF was the main window on the won overnight. Now that Seoul trades through the night, the end-of-day close is watched as well. The NDF still appears in morning stories because it is a separate market where overseas participants trade.</p>
+
+<!-- ══════ Chapter 3 ══════ -->
+<div class="ch" id="p3">
+  <div class="chtop"><span class="chn">03</span><span class="chk">WATCH OUT</span></div>
+  <h2 class="cht">Changing Clocks,<br/>Common Mistakes</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">The time behind each exchange-rate figure has moved over the years and with the seasons. It is about to move again.</p>
+<ol class="tline wide">
+  <li><time>July&nbsp;2024</time><p>The close moved from 3:30&nbsp;p.m. to 2&nbsp;a.m. the next day (July&nbsp;1).</p></li>
+  <li><time>July&nbsp;2026</time><p>24-hour weekday trading (July&nbsp;6). The day was cut at 6&nbsp;a.m., in line with the New York close.</p></li>
+  <li><time>Nov.&nbsp;2026</time><p>New York daylight saving time ended, so the cut moved to 7&nbsp;a.m. from Nov.&nbsp;2. It goes back to 6&nbsp;a.m. when New York daylight saving returns on March&nbsp;14, 2027.</p></li>
+  <li class="hot"><time>Jan.&nbsp;2027</time><p>The official base rate becomes &#8220;the previous business day&#39;s 4&nbsp;p.m. <span class="term">time-weighted average<span class="tip">Prices sampled at regular intervals in the few minutes around a set time, averaged evenly regardless of volume. TWAP for short.</span></span>&#8221; (Jan.&nbsp;1).</p></li>
+</ol>
+<p class="p">The 3:30&nbsp;p.m. rate stays through the first half of 2027; whether to keep it after that will be decided again toward the end of June. The authorities said they would publish statistics and press releases on that basis. The reason given is that 3:30&nbsp;p.m. is when the stock market&#39;s regular session ends, which suits currency exchange for stock trades and some institutions&#39; valuations. Records such as &#8220;the highest close in so many years&#8221; also chain together daytime closes. Until June 2024, that time was also when the market closed. Some say thin overnight trading makes prices jump, but the Bank of Korea found that volatility from 3:30&nbsp;p.m. to 9&nbsp;a.m. did not rise after the market went 24 hours.</p>
+<p class="p">In 2027 the base rate changes more than its clock time. A volume-weighted average of six and a half hours of daytime trading becomes an even average of the five minutes around 4&nbsp;p.m., to match 24-hour trading and overseas practice. Anything calculated with the base rate, such as tax on overseas stock gains, follows. When you chain base rates across 2027, note that the name stays the same but the method changes.</p>
+<div class="rows sm">
+  <div class="rw"><span class="rk">Holidays</span><span class="rv">The won-dollar pair trades on Korean public holidays. It is closed on <b>weekends and Jan.&nbsp;1</b>. Settlement, when the money actually moves, happens on a day when banks in both Korea and the U.S. are open, and a new official base rate is posted only on business days</span></div>
+  <div class="rw"><span class="rk">Your exchange</span><span class="rv">The 24 hours refer to trading between banks. Each bank sets its own hours for currency exchange and transfers</span></div>
+  <div class="rw"><span class="rk">First and last days</span><span class="rv">The first business day of the year opens at <b>9&nbsp;a.m.</b>; the last closes at <b>midnight</b></span></div>
+  <div class="rw"><span class="rk">Other currencies</span><span class="rv">Direct won-yuan trading still runs only from <b>9&nbsp;a.m. to 3:30&nbsp;p.m.</b> Won rates for the yen or euro are worked out through the dollar (see More)</span></div>
+</div>
+
+<div class="trapwrap">
+  <div class="traphd"><b>MISTAKE LOG</b><i>Four common mistakes</i></div>
+  <div class="trap">
+    <div class="ti">
+      <div class="tk">MISTAKE 01</div>
+      <div class="tx"><span>&#8220;The FX market closes at 3:30&nbsp;p.m.&#8221;</span></div>
+      <div class="to">The won-dollar pair trades <b>24 hours</b> on weekdays. The 3:30 figure is one point in the day.</div>
+    </div>
+    <div class="ti">
+      <div class="tk">MISTAKE 02</div>
+      <div class="tx"><span>&#8220;I can exchange money at the rate in the news.&#8221;</span></div>
+      <div class="to">The news figure is the rate between banks. You get a posted rate the bank sets around its <b>own base rate</b>.</div>
+    </div>
+    <div class="ti">
+      <div class="tk">MISTAKE 03</div>
+      <div class="tx"><span>&#8220;The base rate is the day&#39;s close.&#8221;</span></div>
+      <div class="to">The official base rate is the <b>average</b> of the previous trading day&#39;s daytime trading. The overnight move is not in it, and it is dated the next business day.</div>
+    </div>
+    <div class="ti">
+      <div class="tk">MISTAKE 04</div>
+      <div class="tx"><span>&#8220;If a portal&#39;s rate differs from the news, one of them is wrong.&#8221;</span></div>
+      <div class="to">Check the <b>bank name, round and time</b> in the corner. It is that bank&#39;s rate at that time.</div>
+    </div>
+  </div>
+</div>
+
+<div class="cklist" id="cklist">
+  <div class="ckh"><b class="hand">Five things to check on any FX figure</b><span id="ckn">0/5</span></div>
+  <button class="ckb" type="button" aria-pressed="false"><span>The <b>time</b> next to it (15:30, 7&nbsp;a.m., round)</span></button>
+  <button class="ckb" type="button" aria-pressed="false"><span>For a move, <b>what it was compared with</b></span></button>
+  <button class="ckb" type="button" aria-pressed="false"><span><b>Who published it</b> (the market, Seoul Money Brokerage, a bank)</span></button>
+  <button class="ckb" type="button" aria-pressed="false"><span>For a bank rate, the <b>buy or sell</b> column</span></button>
+  <button class="ckb" type="button" aria-pressed="false"><span>That the base rate&#39;s <b>time and method</b> change in January 2027</span></button>
+  <p class="ckdone" id="ckdone" aria-live="polite"></p>
+</div>
+
+<div class="foldwrap more">
+<details class="fold">
+  <summary><span><em>MORE</em>Hourly rates, the won-yen rate, overseas quote sites</span></summary>
+  <div class="fb">
+    <p><b>Hourly rates</b> · With 24-hour trading, Seoul Money Brokerage and Korea Money Brokerage publish a time-weighted average on the hour, from won-dollar trades in the 2 minutes 30 seconds either side. From 2027 the 4&nbsp;p.m. figure becomes the base rate.</p>
+    <p><b>The won-yen rate</b> · For currencies other than the dollar and the yuan, the base rate is worked out through the dollar (a <span class="term">cross rate<span class="tip">An exchange rate between two currencies worked out through a third, usually the dollar.</span></span>). If a dollar is 1,350 won and 150 yen, then 100 yen is 1,350 ÷ 150 × 100 = 900 won. The Bank of Korea&#39;s won-per-100-yen series is Hana Bank&#39;s rate posted at 3:30&nbsp;p.m.</p>
+    <p><b>Overseas quote sites</b> · A &#8220;close&#8221; on an overseas site is not a figure from the Seoul FX market. Check which market and what time it uses.</p>
+  </div>
+</details>
+</div>
+
+<h3 class="hd">Related Snowshagal reports</h3>
+<div class="rows sm">
+  <div class="rw"><span class="rk">Friday</span><span class="rv"><a class="ilink" href="https://snowshagal.com/reports/en/2026-11-20_Snowshagal_Daily_EN">Nov.&nbsp;20 Daily: &#8220;AI Selloff After Anthropic&#39;s IPO, KOSPI Sinks 5% Below 4,900&#8221;</a></span></div>
+  <div class="rw"><span class="rk">Monday</span><span class="rv"><a class="ilink" href="https://snowshagal.com/reports/en/2026-11-23_Snowshagal_Daily_EN">Nov.&nbsp;23 Daily: &#8220;Nvidia Probe Reports Deepen Chip Rout; KOSPI Reclaims 4,700 After 5.8% Intraday Plunge&#8221;</a></span></div>
+  <div class="rw"><span class="rk">Foreign flows</span><span class="rv"><a class="ilink" href="https://snowshagal.com/reports/en/basics-data-guide-01-krx-net-buying_EN">Data Guide 1: What Did Foreign Investors Buy and Sell Today?</a></span></div>
+  <div class="rw"><span class="rk">Market hours</span><span class="rv"><a class="ilink" href="https://snowshagal.com/reports/en/Snowshagal_Market_Basics_18_How_Long_Is_the_Trading_Day_EN">Market Basics 18: How Long Is the Trading Day?</a></span></div>
+</div>
+
+<div class="final">
+  <div class="fk">PART 3 IN ONE LINE</div>
+  <p class="f1">An exchange rate only makes sense once you know <b>when and how it was measured.</b></p>
+  <p class="f2">The news uses 3:30&nbsp;p.m., the market&#39;s day ends at 7&nbsp;a.m. the next morning (6&nbsp;a.m. in summer), the official base rate is the previous trading day&#39;s daytime average (around 4&nbsp;p.m. from 2027), and a bank app shows the bank&#39;s own figure. Before comparing rates, match their basis.</p>
+</div>
+
+<div class="sharebox">
+  <p class="shq">&#8220;What&#39;s the dollar at today?&#8221;<br/>With the market open all night, the first question is now &#8220;As of when?&#8221;</p>
+  <div class="shbtns">
+    <button class="shb main" type="button" data-share="page">Share</button>
+    <button class="shb" type="button" data-share="copy">Copy link</button>
+    <a class="shb" id="shX" href="https://twitter.com/intent/tweet?text=What%20time%20is%20the%20won-dollar%20closing%20rate%3F%20The%203%3A30%20p.m.%20rate%2C%20the%207%20a.m.%20close%20and%20the%20base%20rate&amp;url=https%3A%2F%2Fsnowshagal.com%2Freports%2Fen%2Fbasics-data-guide-03-usdkrw-closing-rate_EN" target="_blank" rel="noopener">Post on X</a>
+  </div>
+  <p class="shmsg" id="shmsg" aria-live="polite"></p>
+</div>
+
+<div class="more7">
+  <div class="m7h">Keep reading</div>
+  <a class="m7" href="https://snowshagal.com/reports/en/basics-data-guide-02-margin-call-by-broker_EN"><i>Data Guide 2</i><b>What Is My Broker&#39;s Forced-Sale Line, and When Does It Hit?</b><span>Korean brokers&#39; margin lines and morning cutoffs</span></a>
+  <a class="m7" href="https://snowshagal.com/reports/en/basics-data-guide-01-krx-net-buying_EN"><i>Data Guide 1</i><b>What Did Foreign Investors Buy and Sell Today?</b><span>Reading the KRX [12010] screen</span></a>
+  <a class="m7" href="https://snowshagal.com/reports/en/Snowshagal_Market_Basics_18_How_Long_Is_the_Trading_Day_EN"><i>Market Basics 18</i><b>How Long Is the Trading Day?</b><span>When Korea&#39;s stock market opens and closes</span></a>
+  <a class="m7 all" href="https://snowshagal.com/en/basics/"><b>All Market Basics</b><span>From terms to reading the data</span></a>
+  <a class="m7 cta" href="https://snowshagal.com/en/daily/"><b>How did the market move today?</b><span>Snowshagal Daily · close-of-market reports</span></a>
+</div>
+
+<div class="foldwrap">
+<details class="fold">
+  <summary>Quick Glossary</summary>
+  <div class="fb">
+    <dl class="gloss">
+      <dt>Won-dollar rate</dt><dd>The won needed to buy one dollar. When the number rises, the won has lost value</dd>
+      <dt>Seoul FX market</dt><dd>Where banks and other financial firms trade won against foreign currencies through brokers. Individuals exchange money through banks</dd>
+      <dt>Spot</dt><dd>A currency trade at today&#39;s price, usually settled two business days later</dd>
+      <dt>3:30 p.m. rate</dt><dd>The won-dollar rate at 3:30&nbsp;p.m., also called the day-session close</dd>
+      <dt>End-of-day close</dt><dd>The rate when the trade date ends, at 7&nbsp;a.m. the next day (6&nbsp;a.m. in daylight saving time)</dd>
+      <dt>Open, high, low</dt><dd>The first, highest and lowest prices of the day, measured from 7&nbsp;a.m. to 7&nbsp;a.m.</dd>
+      <dt>Base rate</dt><dd><span lang="ko">매매기준율</span>. The reference rate set by the Foreign Exchange Transaction Regulation. For now, the previous trading day&#39;s daytime trades averaged by volume (market average rate, MAR). The &#8220;base rate&#8221; in a bank app starts the morning at this figure and is then reset by the bank round by round</dd>
+      <dt>TWAP</dt><dd>Time-weighted average price: prices sampled at regular intervals around a set time, averaged evenly</dd>
+      <dt>Posted rate</dt><dd>The rate a bank issues round by round, with separate buy and sell prices</dd>
+      <dt>Cash vs. wire</dt><dd>The rate for banknotes and the rate for transfers. The gap is wider on cash</dd>
+      <dt>Spread</dt><dd>In currency exchange, the gap between a bank&#39;s base rate and the prices at which customers buy and sell; an FX discount narrows it. In the market it can also mean the gap between bid and offer</dd>
+      <dt>NDF</dt><dd>A won-dollar contract that fixes a future rate now and settles only the difference, in dollars. Traded outside Korea. Morning stories usually cite the one-month</dd>
+      <dt>Swap point</dt><dd>The gap between the forward rate and the spot rate. Not a forecast of the future rate</dd>
+      <dt>Daylight saving time</dt><dd>Clocks move forward an hour in summer. Seoul&#39;s won-dollar day follows New York&#39;s</dd>
+      <dt>Cross rate</dt><dd>A rate between two currencies worked out through the dollar</dd>
+    </dl>
+  </div>
+</details>
+
+<details class="fold">
+  <summary>Notes on the Numbers</summary>
+  <div class="fb">
+    <p><b>Date checked</b> · Figures and rules were checked on Nov.&nbsp;25, 2026, against the Bank of Korea&#39;s ECOS database, the Foreign Exchange Transaction Regulation, guidance from Seoul Money Brokerage and the Ministry of Economy and Finance, and bank reports. Korean sources only. ECOS figures, the regulation text and the NDF story were checked again on Nov.&nbsp;26.</p>
+    <p><b>End-of-day close</b> · The finance ministry says the trade date changes when New York closes (5&nbsp;p.m. New York time). ECOS has carried a &#8220;close&#8221; item since July&nbsp;1, 2024. Its value for July&nbsp;6, 2026, the first day of 24-hour trading (1,530.0 won), matches the figure reported as of 6&nbsp;a.m. the next day, so we treat it as the rate at the end of the trade date.</p>
+    <p><b>Friday&#39;s figures</b> · The 3:30&nbsp;p.m. rate of 1,336.2 won, the close of 1,346.0 won and the open of 1,335.0 won are ECOS values. The high of 1,348.0 won, the low of 1,333.8 won and the NDF of 1,345.4 won come from Hana Bank&#39;s Nov.&nbsp;23 FX report. The Nasdaq&#39;s 5.28% fall is from New York closing reports.</p>
+    <p><b>Monday&#39;s figures</b> · The 3:30&nbsp;p.m. rate of 1,345.9 won (up 9.7 won) and the open of 1,345.0 won match in ECOS and news reports. The close of 1,342.6 won and the 3.4-won fall were checked against ECOS and Hana Bank&#39;s Nov.&nbsp;24 report.</p>
+    <p><b>Base rate</b> · Through Dec.&nbsp;31, 2026, it is the volume-weighted average of dollar spot trades from 9&nbsp;a.m. to 3:30&nbsp;p.m. on the latest trading day, done through licensed FX brokers and settled two business days later. From Jan.&nbsp;1, 2027, it is the latest business day&#39;s 4&nbsp;p.m. time-weighted average (Article 1-2 of the regulation; Ministry of Economy and Finance Notice No.&nbsp;2026-88). A trading day is any day the won-dollar pair trades, Korean holidays included; a business day is a day banks are open. The regulation excerpt on Seoul Money Brokerage&#39;s site already shows the 2027 wording, but under the addenda the current method applies until the end of this year. The yuan keeps the current method. The volume-weighted example ($10 billion at 1,500 won, $1 billion at 1,510 won) is taken from a news report quoting the authorities.</p>
+    <p><b>Woori Bank example</b> · The last round of Nov.&nbsp;23, 2026, from Woori Bank&#39;s daily rate page. Buying cash was 1.75% above the bank&#39;s base rate and sending a wire about 0.97% above. The same table&#39;s Bank of Korea base rate, 1,337.30 won, matches the ECOS base rate for Nov.&nbsp;23. That every bank&#39;s first round equals the official rate, and that it is posted around 8:30&nbsp;a.m., comes from Seoul Money Brokerage&#39;s FAQ. The gaps and discounts vary by bank, currency and round. The discount example (1,346.85 won, about 2,117 won) leaves out fees and the bank&#39;s rounding.</p>
+    <p><b>Base-rate dates</b> · ECOS and Seoul Money Brokerage list each base rate under the date it was posted, which is the business day after the trading day it comes from. The 1,330.8 won dated Nov.&nbsp;20 comes from trading on the 19th (Thursday); the 1,337.3 won dated Nov.&nbsp;23 comes from trading on the 20th (Friday).</p>
+    <p><b>Market holidays</b> · The won-dollar market is closed on weekends and Jan.&nbsp;1. It is open on Korean public holidays, and settlement falls on a day that is a business day both in Korea and in the other currency&#39;s country (the U.S. for won-dollar).</p>
+    <p><b>Why 3:30&nbsp;p.m.</b> · The point that thin overnight trading makes prices jump comes from a Newsis explainer (July&nbsp;20). The finding that extended-hours volatility did not rise is from the Bank of Korea&#39;s Monetary Policy Report (September 2026), and the reason for changing the base rate (24-hour trading and overseas practice) from reports on the market council&#39;s general meeting. Keeping the 3:30&nbsp;p.m. rate through the first half of 2027 and revisiting it toward the end of June, the stock-market reason, and the 4&nbsp;p.m. method (600 one-second samples, 300 from each of Seoul Money Brokerage and Korea Money Brokerage, simple average) come from a Yonhap Infomax report (Nov.&nbsp;20) on the market council&#39;s Nov.&nbsp;19 meeting.</p>
+    <p><b>Wording in the news</b> · Korean media call the same figure the &#8220;day-session close,&#8221; the &#8220;3:30&nbsp;p.m. reference rate&#8221; or simply the &#8220;close.&#8221; When a story says only &#8220;close,&#8221; check the text to see whether it means 3:30&nbsp;p.m. or the end of the day.</p>
+    <p><b>Daylight saving in 2027</b> · New York daylight saving time starts on Sunday, March&nbsp;14, 2027. After that, the day cut and the Monday open go back to 6&nbsp;a.m. Check the Seoul market notice as well.</p>
+  </div>
+</details>
+
+<details class="fold">
+  <summary>Sources and Data Notes</summary>
+  <div class="fb">
+    <ol class="src">
+      <li><b>Won-dollar open, high, low, 3:30&nbsp;p.m. close and close; won-dollar base rate (Oct.–Nov. 2026)</b> · <a href="https://ecos.bok.or.kr/" target="_blank" rel="noopener">Bank of Korea ECOS</a>, tables 3.1.1.3 and 3.1.1.1 · checked Nov.&nbsp;25, 2026</li>
+      <li><b>24-hour trading (July&nbsp;6, 2026); Monday 6&nbsp;a.m. to Saturday 6&nbsp;a.m. in daylight saving time, otherwise 7&nbsp;a.m. to 7&nbsp;a.m.; basis for open, high and low; 3:30&nbsp;p.m. close and base rate kept for now; basis for official statistics; holiday trading and settlement; first and last business days; 9&nbsp;a.m.–3:30&nbsp;p.m. for non-dollar pairs</b> · Seoul FX Market Operation Council decision, <a href="https://www.kita.net/board/totalTradeNews/totalTradeNewsDetail.do?no=101967" target="_blank" rel="noopener">Yonhap</a>, May&nbsp;31, 2026 (via KITA) · <b>2026 New York daylight saving, March&nbsp;8–Nov.&nbsp;1</b> · <a href="https://www.khan.co.kr/article/202605312055005" target="_blank" rel="noopener">Kyunghyang Shinmun</a>, May&nbsp;31, 2026</li>
+      <li><b>Trade date changes at the New York close; who calculates TWAP and how; the 4&nbsp;p.m. value as the base rate</b> · <a href="https://mofe.go.kr/sns/2024/foreignExchange.do?category=faq" target="_blank" rel="noopener">Ministry of Economy and Finance FX market FAQ</a></li>
+      <li><b>Base-rate definition (trading vs. business day; spot trades through brokers, settled two business days later) and Jan.&nbsp;1, 2027, effective date</b> · <a href="https://www.law.go.kr/%ED%96%89%EC%A0%95%EA%B7%9C%EC%B9%99/%EC%99%B8%EA%B5%AD%ED%99%98%EA%B1%B0%EB%9E%98%EA%B7%9C%EC%A0%95" target="_blank" rel="noopener">Foreign Exchange Transaction Regulation</a> (National Law Information Center; latest amendment Notice No.&nbsp;2026-110) · <a href="https://www.ksure.or.kr/rh-kr/bbs/i-412/detail.do?ntt_sn=625100" target="_blank" rel="noopener">Korea Trade Insurance Corporation notice</a> (Notice No.&nbsp;2026-88) · <b>Announced at least 30 minutes before business opens; method change in January 2027</b> · <a href="http://www.smbs.biz/Company/Buss_3_4.jsp" target="_blank" rel="noopener">Seoul Money Brokerage, basis for rate calculation</a>, <a href="http://www.smbs.biz/ExRate/TodayExRate.jsp" target="_blank" rel="noopener">exchange rates</a> · <b>Posted around 8:30&nbsp;a.m.; first round identical at every bank</b> · <a href="http://www.smbs.biz/Customer/CusMain.jsp" target="_blank" rel="noopener">Seoul Money Brokerage FAQ</a></li>
+      <li><b>Volume-weighted example</b> · <a href="https://www.news1.kr/amp/economy/trend/6217608" target="_blank" rel="noopener">News1</a>, July&nbsp;5, 2026</li>
+      <li><b>Nov.&nbsp;20 high, low and NDF; close of 1,346.0 won and day session of 1,336.2 won</b> · <a href="https://biz.kebhana.com/cont/hanafx/file/Daily261123.pdf" target="_blank" rel="noopener">Hana Bank FX report</a>, Nov.&nbsp;23, 2026 · <b>&#8220;Closed 3.4 won lower at 1,342.6&#8221;; day session of 1,345.9 won</b> · <a href="https://biz.kebhana.com/cont/hanafx/file/Daily261124.pdf" target="_blank" rel="noopener">Hana Bank FX report</a>, Nov.&nbsp;24, 2026</li>
+      <li><b>One-month NDF at 1,345.2/1,345.6 won, swap point −0.90 won, up 10.1 won from the previous spot close</b> · <a href="https://www.etoday.co.kr/news/view/2651403" target="_blank" rel="noopener">&#8220;Won-dollar NDF jumps 10.1 won&#8221;</a> (Etoday), Nov.&nbsp;23, 2026</li>
+      <li><b>Nov.&nbsp;23 3:30&nbsp;p.m. rate of 1,345.9 won (up 9.7), open of 1,345.0 won</b> · <a href="https://biz.sbs.co.kr/article/20000348276" target="_blank" rel="noopener">SBS Biz</a>, Nov.&nbsp;23, 2026 · <b>&#8220;Opened 8.8 won above the previous close&#8221;</b> · <a href="https://www.tokenpost.kr/news/insights/442852" target="_blank" rel="noopener">TokenPost</a>, Nov.&nbsp;23, 2026 · <b>&#8220;From the same time on the previous trading day&#8221;</b> · <a href="https://www.koreancenter.or.kr/news/articleView.html?idxno=1436836" target="_blank" rel="noopener">Yonhap</a> · <b>&#8220;3:30&nbsp;p.m. reference rate (formerly the day-session close)&#8221;</b> · <a href="https://biz.sbs.co.kr/article/20000332633" target="_blank" rel="noopener">SBS Biz</a>, Sept.&nbsp;3, 2026</li>
+      <li><b>Woori Bank, last round of Nov.&nbsp;23, 2026: base rate, cash, wire and Bank of Korea base rate</b> · <a href="https://spot.wooribank.com/pot/Dream?withyou=CMCOM0298" target="_blank" rel="noopener">Woori Bank daily exchange rates</a></li>
+      <li><b>Closed on weekends and Jan.&nbsp;1; settlement on bank business days; plan to change the base rate to fit 24-hour trading and global practice</b> · <a href="https://www.dt.co.kr/article/12065062" target="_blank" rel="noopener">Digital Times</a>, May&nbsp;31, 2026 · <b>Won trades settle on a day that is a business day in both Korea and the other currency&#39;s country</b> · <a href="https://www.fnnews.com/news/202607050652161806" target="_blank" rel="noopener">News1</a> (via Financial News), July&nbsp;5, 2026 · <b>Thin overnight trading makes prices jump, so the close stays at 3:30&nbsp;p.m.</b> · <a href="https://www.newsis.com/view/NISX20260716_0003712703" target="_blank" rel="noopener">Newsis</a>, July&nbsp;20, 2026 · <b>No added volatility in extended hours (3:30&nbsp;p.m. to 9&nbsp;a.m.) after the 24-hour opening</b> · <a href="https://www.bok.or.kr/portal/bbs/B0000156/view.do?menuNo=200067&amp;nttId=11064613" target="_blank" rel="noopener">Bank of Korea Monetary Policy Report</a>, Sept.&nbsp;2026 · <b>Base rate of 1,330.8 won dated Nov.&nbsp;20</b> · ECOS</li>
+      <li><b>Overseas stock gains are converted at the base rate (Seoul Money Brokerage) on the days the proceeds are received and the costs paid</b> · <a href="https://www.truefriend.com/main/bond/research/_static/TF03ca030000.jsp" target="_blank" rel="noopener">Korea Investment &amp; Securities tax FAQ</a> · <b>Settlement-date rate</b> · <a href="https://www.hanwhawm.com/main/oversea/main/OS260_1p.cmd" target="_blank" rel="noopener">Hanwha Investment &amp; Securities overseas stock tax guide</a> · checked Nov.&nbsp;26, 2026</li>
+      <li><b>4&nbsp;p.m. TWAP method (one-second samples, 300 from each broker, 600 averaged evenly); 3:30&nbsp;p.m. close kept through the first half of 2027 and revisited at the end of June</b> · <a href="https://kbthink.com/news-list/view.html?newsId=20261120075001392" target="_blank" rel="noopener">Yonhap Infomax</a>, Nov.&nbsp;20, 2026 (via KB Think)</li>
+      <li><b>Trading-hour history (3:30&nbsp;p.m. from 2016, 2&nbsp;a.m. from July 2024)</b> · <a href="https://news.mtn.co.kr/news-detail/2026070609060569420" target="_blank" rel="noopener">MTN</a>, July&nbsp;6, 2026</li>
+      <li><b>Cross base rates; won per 100 yen as Hana Bank&#39;s 3:30&nbsp;p.m. posted rate</b> · Article 1-2 of the regulation · ECOS item for won per 100 yen (Hana Bank)</li>
+      <li><b>Nasdaq down 5.28% on Nov.&nbsp;20 (New York time)</b> · <a href="https://view.asiae.co.kr/article/2026112109260172331" target="_blank" rel="noopener">Asia Economy</a>, Nov.&nbsp;21, 2026 · <b>KOSPI down 5% on Nov.&nbsp;20</b> · <a href="https://snowshagal.com/reports/en/2026-11-20_Snowshagal_Daily_EN" target="_blank" rel="noopener">Snowshagal Daily</a>, Nov.&nbsp;20, 2026</li>
+      <li>The drawings simplify the content. The shape of the line in the first drawing is not the actual intraday path.</li>
+    </ol>
+  </div>
+</details>
+</div>
+</main>
+
+<p class="disc">This article explains how to find and read market data. Exchange-rate conventions and bank posting practices can change; check the relevant institution&#39;s notices before trading. It does not recommend any financial product or transaction. Investment decisions and their results are the investor&#39;s own.</p>
+<p class="foot">Data Guide · 03</p>
+
+</div>
+
+<script>
+(function(){
+  if(window.__dataGuide03) return; window.__dataGuide03 = true;
+
+  /* 진행 막대 */
+  var pg=document.getElementById('pg');
+  function updateProg(){
+    if(!pg) return;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var y=window.scrollY||window.pageYOffset||0;
+    pg.style.width=(h>0?Math.min(100,Math.max(0,y/h*100)):0)+'%';
+  }
+  window.addEventListener('scroll',updateProg,{passive:true});
+  window.addEventListener('resize',updateProg);
+  updateProg();
+
+  /* 툴팁 */
+  var openedAt=0;
+  function resetTip(el){ var tp=el.querySelector('.tip'); if(tp){ tp.classList.remove('below'); tp.removeAttribute('style'); } }
+  function clampTip(t){
+    var tip=t.querySelector('.tip'); if(!tip) return;
+    var vw=window.innerWidth, pad=12;
+    var w=Math.min(248, vw-2*pad);
+    tip.style.position='fixed'; tip.style.bottom='auto'; tip.style.transform='none';
+    tip.style.width=w+'px'; tip.style.left='0px'; tip.style.top='0px';
+    var tr=t.getBoundingClientRect();
+    var th=tip.getBoundingClientRect().height;
+    var left=tr.left+tr.width/2-w/2;
+    if(left<pad) left=pad;
+    if(left+w>vw-pad) left=vw-pad-w;
+    var top=tr.top-th-9, below=false;
+    if(top<pad+50){ top=tr.bottom+9; below=true; }
+    var vh=window.innerHeight;
+    if(top+th>vh-pad){ top=vh-pad-th; }
+    if(top<pad){ top=pad; }
+    tip.style.left=Math.round(left)+'px';
+    tip.style.top=Math.round(top)+'px';
+    var tb=tip.getBoundingClientRect();
+    var dx=tb.left-left, dy=tb.top-top;
+    if(dx||dy){ tip.style.left=Math.round(left-dx)+'px'; tip.style.top=Math.round(top-dy)+'px'; }
+    tip.classList.toggle('below', below);
+    var ax=tr.left+tr.width/2-left;
+    ax=Math.max(12, Math.min(w-12, ax));
+    tip.style.setProperty('--ax', Math.round(ax)+'px');
+  }
+  var tipSeq=0;
+  var canHover=!!(window.matchMedia&&window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+  function closeTerms(except){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++){ if(open[i]!==except){ open[i].classList.remove('open'); open[i].setAttribute('aria-expanded','false'); resetTip(open[i]); } }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.term'), function(t){
+    t.setAttribute('tabindex','0'); t.setAttribute('role','button');
+    var tp0=t.querySelector('.tip');
+    if(tp0){
+      var nm=''; for(var c=t.firstChild;c;c=c.nextSibling){ if(c!==tp0) nm+=c.textContent; }
+      tipSeq++; tp0.id='tip'+tipSeq; tp0.setAttribute('role','tooltip');
+      t.setAttribute('aria-label',nm.replace(/\s+/g,' ').trim()); t.setAttribute('aria-describedby',tp0.id);
+    }
+    t.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); t.click(); } if(e.key==='Escape'){ closeTerms(null); } });
+    t.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var willOpen=canHover?true:!t.classList.contains('open');
+      closeTerms(t);
+      t.classList.toggle('open', willOpen);
+      t.setAttribute('aria-expanded', willOpen?'true':'false');
+      if(willOpen){ openedAt=Date.now(); clampTip(t); }
+    });
+    t.setAttribute('aria-expanded','false');
+    if(canHover){
+      t.addEventListener('mouseenter', function(){ closeTerms(t); t.classList.add('open'); t.setAttribute('aria-expanded','true'); openedAt=Date.now(); clampTip(t); });
+      t.addEventListener('mouseleave', function(){ t.classList.remove('open'); t.setAttribute('aria-expanded','false'); resetTip(t); });
+    }
+    t.addEventListener('focusout', function(){ if(t.classList.contains('open')){ t.classList.remove('open'); t.setAttribute('aria-expanded','false'); resetTip(t); } });
+  });
+  document.addEventListener('click', function(){ closeTerms(null); });
+  window.addEventListener('scroll', function(){ if(Date.now()-openedAt>700) closeTerms(null); }, {passive:true});
+  window.addEventListener('resize', function(){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++) clampTip(open[i]);
+  });
+
+  /* 문제 카드 */
+  Array.prototype.forEach.call(document.querySelectorAll('.pop'), function(card){
+    var opts=card.querySelectorAll('.opt'), ans=card.querySelector('.popans');
+    var done=false;
+    Array.prototype.forEach.call(opts, function(b){
+      b.addEventListener('click', function(){
+        if(done) return; done=true;
+        Array.prototype.forEach.call(opts, function(o){
+          o.setAttribute('aria-disabled','true');
+          if(o.getAttribute('data-ok')==='1') o.classList.add('ok');
+          else if(o===b) o.classList.add('no');
+        });
+        b.setAttribute('aria-pressed','true');
+        if(ans){
+          ans.hidden=false;
+          var v=ans.querySelector('.verdict');
+          if(v){ v.textContent=(b.getAttribute('data-ok')==='1'?'Correct · ':'Not quite · ')+v.textContent; try{ v.focus({preventScroll:true}); }catch(e){ v.focus(); } }
+        }
+      });
+    });
+  });
+
+
+
+  /* 월요일 환율로 기사 제목 만들기 */
+  var hs=document.getElementById('hsim');
+  if(hs){
+    var HV={m:{o:1345.0,d:1345.9,c:1342.6},f:{d:1336.2,c:1346.0}};
+    var HS={m:'d',f:'d'};
+    var HT={"up": "Won-dollar up {d} won to {v}", "dn": "Won-dollar down {d} won to {v}", "pairs": {"o_d": ["Opening-story pair", 1, "The pair used in morning opening stories. Friday night's rise lands all at once in Monday's opening move."], "o_c": ["Open after the close", 1, "Measured from Friday's end-of-day close, Monday opened 1 won lower. The overnight rise already belongs to Friday."], "d_d": ["The news pair", 1, "The pair the news uses: 3:30 p.m. against 3:30 p.m."], "d_c": ["Mismatched times", 0, "Monday 3:30 p.m. against Saturday 7 a.m. It shows how far the rate moved in between, but it is not a day's move."], "c_d": ["Mismatched times", 0, "Tuesday 7 a.m. against Friday 3:30 p.m. It covers everything from Friday afternoon to the end of Monday, so it is not a day's move."], "c_c": ["The bank-report pair", 1, "Close against close, the pair used in banks' morning FX reports. Friday night's rise counts toward Friday."]}};
+    var hlt=document.getElementById('hlt'), h1=document.getElementById('h1'), h2=document.getElementById('h2'), h3=document.getElementById('h3'), hmsg=document.getElementById('hmsg');
+    function f1(n){ return n.toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1}); }
+    function hdraw(){
+      var mv=HV.m[HS.m], fv=HV.f[HS.f], d=Math.round((mv-fv)*10)/10, pr=HT.pairs[HS.m+'_'+HS.f];
+      var t=(d>=0?HT.up:HT.dn).replace('{d}',f1(Math.abs(d))).replace('{v}',f1(mv));
+      hlt.textContent=t; hlt.className=d>=0?'hand up':'hand dn';
+      h1.querySelector('b').textContent=f1(mv); h2.querySelector('b').textContent=f1(fv);
+      h3.className='df '+(pr[1]?'ok':'no'); h3.querySelector('b').textContent=pr[0];
+      hmsg.textContent=pr[2];
+    }
+    Array.prototype.forEach.call(hs.querySelectorAll('.chip'),function(b){
+      b.addEventListener('click',function(){
+        var k=b.getAttribute('data-k'), v=b.getAttribute('data-v');
+        HS[k]=v;
+        Array.prototype.forEach.call(hs.querySelectorAll('.chip[data-k="'+k+'"]'),function(o){ var on=(o===b); o.classList.toggle('on',on); o.setAttribute('aria-pressed',on?'true':'false'); });
+        hdraw();
+      });
+    });
+    hdraw();
+  }
+
+  /* 어디서 보나 카드 */
+  var pk=document.getElementById('pick');
+  if(pk){
+    pk.classList.add('js');
+    var pchips=pk.querySelectorAll('.pchips .chip'), pcards=pk.querySelectorAll('.bcard');
+    Array.prototype.forEach.call(pchips,function(b){
+      b.addEventListener('click',function(){
+        var id=b.getAttribute('data-b');
+        Array.prototype.forEach.call(pchips,function(o){ var on=(o===b); o.classList.toggle('on',on); o.setAttribute('aria-pressed',on?'true':'false'); });
+        pk.classList.toggle('all',id==='all');
+        Array.prototype.forEach.call(pcards,function(c){ c.classList.toggle('on',c.getAttribute('data-b')===id); });
+      });
+    });
+    Array.prototype.forEach.call(pchips,function(o){ if(o.getAttribute('aria-pressed')==='true') o.classList.add('on'); });
+  }
+
+  /* 체크리스트 */
+  var ckl=document.getElementById('cklist');
+  if(ckl){
+    var ckbs=ckl.querySelectorAll('.ckb'), ckn=document.getElementById('ckn'), ckd=document.getElementById('ckdone');
+    Array.prototype.forEach.call(ckbs,function(b){
+      b.addEventListener('click',function(){
+        b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true');
+        var n=ckl.querySelectorAll('.ckb[aria-pressed="true"]').length;
+        ckn.textContent=n+'/'+ckbs.length;
+        ckd.textContent=(n===ckbs.length)?"All five checked. Next time, you'll ask \"as of what time?\" first.":'';
+      });
+    });
+  }
+
+  /* 공유 */
+  var CANON="https://snowshagal.com/reports/en/basics-data-guide-03-usdkrw-closing-rate_EN";
+  function pageUrl(){ var h=location.href.split('#')[0]; return /^https?:/.test(h)?h:CANON; }
+  var smsg=document.getElementById('shmsg');
+  function say(t){ if(smsg){ smsg.textContent=t; setTimeout(function(){ smsg.textContent=''; },2500); } }
+  function legacy(text){
+    var ta=document.createElement('textarea'); ta.value=text; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); var ok=false;
+    try{ ok=document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+    say(ok?'Link copied':'Copying is blocked. Copy the link from the address bar instead.');
+  }
+  function copy(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(function(){ say('Link copied'); },function(){ legacy(text); }); }
+    else legacy(text);
+  }
+  var TXT={ page:"What time is the won-dollar closing rate? The 3:30 p.m. rate, the 7 a.m. close and the base rate explained", quiz:"Quiz. On Monday, Nov. 23, the news said the won-dollar rate rose 9.7 won. The next morning a bank's FX report said it closed 3.4 won lower at 1,342.6. Which was right? (1) The news (2) The bank report (3) Both" };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-share]'),function(b){
+    b.addEventListener('click',function(){
+      var k=b.getAttribute('data-share'), url=pageUrl();
+      if(k==='copy'){ copy(url); return; }
+      if(k==='quiz') url=url+'#quiz1';
+      var data={title:"What Time Is the Won-Dollar Closing Rate?",text:TXT[k]||TXT.page,url:url};
+      if(navigator.share){ navigator.share(data).catch(function(){}); }
+      else{ copy(data.text+' '+url); }
+    });
+  });
+})();
+</script>
+</body>
+</html>
