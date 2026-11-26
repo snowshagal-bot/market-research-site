@@ -354,6 +354,11 @@ Once the table exists, a day without a row reads as 잠정 · 하나은행 고�
 
 The collector (publisher repository) publishes through its own scheduled task, `시장지표-원달러1530`. Its run time follows ECOS's release time.
 
+Status (2026-11-26):
+- Migration `0007` is applied to Preview and Production.
+- Production holds the backfill: 67 sessions, 2026-08-20..11-26.
+- The task is registered: weekdays from 16:00 KST, every 15 minutes for 3 hours (`-StartAt 14:00` ICT, provisional until ECOS's release time is measured).
+
 Market Close cards (`functions/_market-card.js`) keep one 1200×630 JPEG per published session and language in `market_close_cards` and serve it at `/market/YYYY-MM-DD/card.jpg` (the session page's share image). They reuse `COMMENTS_DB`, `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_BROWSER_RENDERING_TOKEN`; no new Secret or binding is required. Each card is one Browser Rendering screenshot: about two per trading day, two more when the Daily's takeaway arrives after the publish, and up to 20 attempts a day (KST) in all while older sessions are filled on page visits (`CARD_FILL_PER_DAY` in `functions/_market-card.js`; lower it if the cover generator starts hitting Browser Rendering limits). There is no separate backfill job.
 
 Apply the checked-in idempotent migration to the isolated Preview database first:

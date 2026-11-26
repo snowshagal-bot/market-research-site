@@ -85,7 +85,7 @@ same on both:
     - Its live Yahoo quote for USD/KRW or JPY/KRW stands in only before that KST day's record exists (`record_covers_session` in `globalLatestItemStatus`).
     - It is labeled 실시간(야후) / Live (Yahoo). Its move is against Yahoo's own previous close.
     - After 16:05 the home strip and TODAY show the record, as the session page does.
-  - **USD/KRW from FX Close** (code 2026-11-26, rollout pending; `contracts/fx_close/`):
+  - **USD/KRW from FX Close** (live since 2026-11-26; `contracts/fx_close/`, publisher task `시장지표-원달러1530`):
     - **Source:** the Seoul FX market's 15:30 rate from the Bank of Korea ECOS, stored per day in `market_fx_close` and joined by `applyFxClose` (`functions/api/market/_fx-merge.js`).
     - **Readers that join it:** the API (ETag includes the row), session pages, TODAY's first HTML, archive, `/market/usdkrw/` (ECOS days only, its own basis line, column and guide wording), 1W/1M (only when every session in the window has a row), trend lines, card (redrawn when the row arrives), blog text and Telegram.
     - **With a row:** 15:30 기준가 / 3:30 p.m. rate, its move against the previous ECOS day, source 한국은행 ECOS.
