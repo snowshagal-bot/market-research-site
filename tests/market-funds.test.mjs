@@ -394,6 +394,14 @@ test('the routes: a fund page exists once a day is stored; a session page carrie
   assert.ok(deposits.includes('투자자예탁금이란</h2>'));
   assert.ok(deposits.includes('<a href="/reports/basics-13-deposits">'));
   assert.doesNotMatch(deposits, /indicator-latest/);
+  // So do the margin-loan and forced-selling pages (2026-11-26).
+  const margin = await (await route(`${PROD}/market/margin-loans/`, db)).text();
+  assert.ok(margin.includes('신용융자 잔고란</h2>'));
+  assert.ok(margin.includes('<a href="/reports/basics-20-margin-call">'));
+  const forced = await (await route(`${PROD}/market/forced-selling/`, db)).text();
+  assert.ok(forced.includes('반대매매 금액이란</h2>'));
+  assert.ok(forced.includes('신용융자 담보가 모자라 나가는 반대매매는 이 숫자에 들어 있지 않습니다.'));
+  assert.doesNotMatch(forced, /indicator-latest/);
   const other = await route(`${PROD}/market/usdkrw/`, db);
   assert.equal(other.status, 200);
   assert.match(await other.text(), /href="\/market\/deposits\/"/);

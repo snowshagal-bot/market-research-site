@@ -2202,7 +2202,8 @@ export function marketIndicatorDescription(indicator, series, lang) {
 /*
  * Indicator guides: what a reader who arrives from search for one of these
  * pages asks next. Written by hand for the pages people search for (KOSPI
- * first, then KOSDAQ, VKOSPI, USD/KRW and investor deposits, 2026-11-26),
+ * first, then KOSDAQ, VKOSPI, USD/KRW, investor deposits, margin loans and
+ * forced selling, 2026-11-26),
  * never generated for every indicator, so no page carries boilerplate. A guide
  * adds two parts:
  * - a "latest close" block at the top: the session's one-line takeaway (the
@@ -2307,6 +2308,47 @@ export const INDICATOR_GUIDES = Object.freeze({
         '[[Investor deposits|investor deposits]] are the cash customers hold at Korean brokerages: money put in to buy stocks, plus sale proceeds left in the account. Because it can buy shares at any moment, it is often called cash on the sidelines.',
         'The Korea Financial Investment Association (KOFIA) counts it every trading day and publishes it the next business day. Values on this page exclude deposits for exchange-traded derivatives, and each date is the trading day the money was counted, not the day it was published.',
         'A rise does not by itself mean more money is waiting to buy: on a day of heavy selling, proceeds left in accounts also lift the total. How much is borrowed to buy stocks shows in [[margin loans|Outstanding margin loans]], and shares sold for lack of collateral in [[forced selling]].'
+      ]
+    }
+  },
+  // Margin loans and forced selling (2026-11-26), in the terms of 시장 입문 20편
+  // 「반대매매는 언제, 얼마에 나가나」 and 데이터 길잡이 2편: KOFIA's forced-selling
+  // figure counts sales against unpaid settlement balances (미수) only.
+  CREDIT: {
+    related: ['2026-11-22-basics-1rhe030', '2026-11-25-basics-vdzvvf', '2026-08-20-basics-1jqzwpd', '2026-06-04-basics-16di2bp'],
+    ko: {
+      title: '신용융자 잔고란',
+      paragraphs: [
+        '[[신용융자]]는 주식을 사려고 증권사에서 빌린 돈이고, [[신용융자 잔고]]는 그 가운데 아직 갚지 않은 금액입니다. 빚을 내 투자한 규모를 가늠하는 숫자로, 이 페이지의 값은 유가증권시장과 코스닥을 합친 금액입니다.',
+        '빌려서 산 주식은 그 대출의 담보가 됩니다. 주가가 내려 담보 가치가 [[담보유지비율]](보통 대출금의 140%) 아래로 떨어지면 증권사는 담보를 더 넣으라고 요구하고, 채우지 못하면 주식을 강제로 파는 [[반대매매]]에 나섭니다. 잔고가 많이 쌓인 상태에서 급락이 오면 매도가 매도를 부를 수 있는 까닭입니다.',
+        '[[금융투자협회]]가 거래일마다 집계해 다음 영업일에 공개하며, 날짜는 공개일이 아니라 잔고가 집계된 거래일입니다. 잔고가 줄었다면 빚을 갚았거나 반대매매로 정리된 것인데, 둘은 이 숫자만으로 구분되지 않습니다.'
+      ]
+    },
+    en: {
+      title: 'What are margin loans?',
+      paragraphs: [
+        '[[Margin loans]] are money borrowed from a brokerage to buy shares, and the [[outstanding balance|Outstanding margin loans]] is the part not yet repaid. It gauges how much borrowing is behind stock investment; values on this page are the KOSPI and KOSDAQ markets combined.',
+        'Shares bought on margin are the loan\u2019s collateral. When prices fall and the collateral drops below the [[maintenance ratio|Maintenance collateral ratio]], usually 140% of the loan, the broker asks for more collateral and, if it is not topped up, sells the shares: [[forced selling]]. A large balance meeting a sharp drop is how selling can feed more selling.',
+        'The Korea Financial Investment Association (KOFIA) counts the balance every trading day and publishes it the next business day; each date is the trading day it describes. A falling balance means loans were repaid or closed out by forced sales, and this figure alone cannot tell which.'
+      ]
+    }
+  },
+  FORCED_SALE: {
+    related: ['2026-11-22-basics-1rhe030', '2026-11-25-basics-vdzvvf', '2026-08-20-basics-1jqzwpd', '2026-06-04-basics-16di2bp'],
+    ko: {
+      title: '반대매매 금액이란',
+      paragraphs: [
+        '이 페이지의 값은 [[금융투자협회]]가 집계하는 위탁매매 [[미수]]에 대한 실제 반대매매 금액입니다. 미수는 주문 금액의 일부만 [[위탁증거금]]으로 내고 주식을 산 뒤, 나머지를 [[결제일]]까지 내지 못해 생긴 빚입니다.',
+        '미수를 결제일까지 갚지 못하면 증권사는 산 날로부터 3영업일 뒤 아침에 그 주식을 강제로 팝니다. 미수를 낸 투자자는 다음 영업일부터 30일 동안 모든 증권사에서 현금 100%로만 주식을 살 수 있는 [[미수동결계좌]]가 됩니다.',
+        '신용융자 담보가 모자라 나가는 반대매매는 이 숫자에 들어 있지 않습니다. 기사에 나오는 「반대매매 ○○억 원」도 대개 이 협회 통계라서, 빚을 낸 투자 전체의 강제 매도 규모로 읽으면 안 됩니다. 금액은 다음 영업일에 공개되고, 날짜는 집계된 거래일입니다.'
+      ]
+    },
+    en: {
+      title: 'What is the forced-selling figure?',
+      paragraphs: [
+        'Values on this page are KOFIA\u2019s count of [[forced selling]] actually carried out against an [[unpaid settlement balance|Unpaid settlement balance]]: shares bought with only part of the price paid up front, the rest still unpaid on the [[settlement day]].',
+        'If the balance is not paid by the settlement day, the broker sells the shares on the morning of the third business day after the purchase. The investor then has a [[restricted cash-only account]] at every broker for 30 days.',
+        'Forced sales of margin-loan collateral are not in this figure. News reports of \u201cforced selling of \u20a9X billion\u201d usually quote this KOFIA statistic, so it is not the whole of leveraged forced selling. KOFIA publishes it the next business day; each date is the trading day it describes.'
       ]
     }
   }
