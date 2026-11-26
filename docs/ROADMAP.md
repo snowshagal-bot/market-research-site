@@ -18,17 +18,22 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
     - honest labels everywhere (하나은행 고시 / Hana Bank rate, never "15:30 매매기준율");
     - one move on every page (close − previous close, `normalizeKrwPairs`);
     - the home strip's live Yahoo quote only before that day's record, labeled 실시간(야후).
-  - **Plan A (code done 2026-11-26, rollout pending):** USD/KRW becomes ECOS 731Y003/0000003 「원/달러(종가 15:30)」, the figure news and Bank of Korea statistics use.
-    - **FX Close dataset** (`contracts/fx_close/`, migration `0007`, `POST /api/market/fx/publish`, `GET /api/market/fx/date`) is joined to every reader of a record by `applyFxClose`.
-    - **The ECOS API key** is on the collector PC as the user env var `ECOS_API_KEY` (set 2026-11-26). Never commit it.
-    - **Collector**: publisher `feat/fx-close-ecos`, with `--sync-fx-close`, `--fx-close-backfill` and task `시장지표-원달러1530`.
-    - **Rollout**, each step with the owner's approval:
-      1. migration 0007 on Preview, then Production;
-      2. merge the website PR;
-      3. merge the publisher PR and build and install the core;
-      4. backfill 2026-08-20..today right after the migration (until then every day reads 잠정);
-      5. register the task at ECOS's measured release time.
-    - **Release time**: present by 17:23 KST on 11-26. The 11-27 measurement decides the task's start; a day reads 잠정 · 하나은행 고시 until its row arrives.
+  - **Plan A, live in Production since 2026-11-26:** USD/KRW is ECOS 731Y003/0000003 「원/달러(종가 15:30)」, the figure the news and Bank of Korea statistics use.
+    - **Done 2026-11-26** (owner "배포 진행해"):
+      - publisher #25 merged (749da07); core `fcc15d6c` installed (backup `core.pre-fx-close-20261126.exe` = `1b236f7d`);
+      - migration `0007` applied to Preview and Production;
+      - website #277 merged (20d017b);
+      - backfill of 67 sessions, 2026-08-20..11-26 (`--fx-close-backfill`);
+      - task `시장지표-원달러1530` registered: weekdays from 16:00 KST, every 15 minutes for 3 hours.
+    - **Production checks:**
+      - 11-20 1,336.2, 11-23 1,345.9 (+9.70) and 11-24 1,342.4 match ECOS;
+      - 10-06 reads −7.0 against 10-02, the previous session, not ECOS's holiday row;
+      - home strip "15:30 기준가";
+      - `/market/usdkrw/` lists ECOS days.
+    - **Remaining:**
+      - The ECOS release time is measured on 11-27; re-register the task with `-StartAt` if it is late.
+      - A day reads 잠정 · 하나은행 고시 between the 16:05 KST record and the task's first run after ECOS publishes.
+      - An ECOS revision older than the 5-session sync window needs a backfill. Remove the day from `data/fx_close/state.json` first, because backfill skips held days.
   - **Link (prepared 2026-11-26, merged once 3편 is live):** "이 숫자는 몇 시 값인가 → 환율 숫자 읽는 법" under `/market/usdkrw/`'s basis line, under the USD/KRW summary note and the FX board on TODAY and every session page (EN pages → the `_EN` edition). The address lives in `assets/locale.js` `usdkrwGuide`; the home strip has none (each strip card is itself a link).
 
 - **Market Funds: KOFIA deposits, margin loans, forced selling (live in Production since 2026-11-25)**:
