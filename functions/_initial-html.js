@@ -2,6 +2,12 @@ import { feedQuery, loadDisclosureFeed } from './api/disclosures/_feed-data.js';
 import { currentKstYearMonth, loadCalendarMonth } from './_calendar-data.js';
 import { isMarketYearSupported } from './_trading-calendar.js';
 import '../assets/calendar-view.js';
+import { TABLE_NAME, ensureMarketTable } from './api/market/_shared.js';
+import { loadTrend } from './api/market/trend.js';
+import { loadDomesticRatesDay } from './api/market/rates/_shared.js';
+import { loadMarketFundsDay } from './api/market/funds/_shared.js';
+import { dailyReportFor, loadMarketDate, renderMarketDateMain } from './_market-date-page.js';
+import { loadPosts } from './_seo.js';
 const calendarView = globalThis.CALENDAR_VIEW;
 
 /**
@@ -533,9 +539,55 @@ async function calendarEdits(url, env, lang, now) {
   };
 }
 
+/* ------------------------------------------------------- market TODAY */
+
+/**
+ * /market/ and /en/market/ (TODAY): the newest final session's dashboard in
+ * the first HTML, drawn by the session page's renderer, so crawlers and a
+ * reader on a slow phone get the figures before assets/market-close.js runs.
+ * The script then draws TODAY over it as before: the same mk- cards (the
+ * render-parity test keeps the two renderers alike), plus what only TODAY
+ * has (Global Latest, the board tabs, the flow toggle). Market funds follow
+ * TODAY's rule: the newest stored day up to the session, at most 10 days older.
+ * A past date (?date=) or a period view (?view=) is left to the script.
+ */
+async function marketTodayEdits(url, env, lang) {
+  if (url.searchParams.has('date') || url.searchParams.has('view')) return null;
+  if (!env?.COMMENTS_DB) return null;
+  const db = await ensureMarketTable(env, { readOnly: true });
+  const row = await db.prepare(`SELECT market_date FROM ${TABLE_NAME} WHERE status = 'final' ORDER BY market_date DESC LIMIT 1`).first();
+  const date = String(row?.market_date || '');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  const soft = promise => Promise.resolve().then(() => promise).catch(() => null);
+  const [data, domesticRates, marketFunds, trend, posts] = await Promise.all([
+    loadMarketDate(env, date),
+    soft(loadDomesticRatesDay(env, date)),
+    soft(loadMarketFundsDay(env, 'latest')),
+    soft(loadTrend(db, date)),
+    soft(env.ASSETS?.fetch ? loadPosts(new Request(new URL('/data/posts.json', url)), env) : null)
+  ]);
+  if (!data?.payload) return null;
+  const dashboard = renderMarketDateMain(data.payload, lang, {
+    dashboardOnly: true,
+    domesticRates,
+    marketFunds,
+    fundsMaxAgeDays: 10,
+    trend,
+    report: dailyReportFor(posts || [], date, lang)
+  });
+  return {
+    edits: [{
+      id: 'market-dashboard-view',
+      html: dashboard,
+      attrs: { class: 'market-wrap market-dashboard mk-dashboard', 'data-ssr-date': date }
+    }],
+    classToggles: []
+  };
+}
+
 /* --------------------------------------------------------------- routing */
 
-const PAGE_PATTERN = /^\/(en\/)?(disclosures|calendar)\/(?:index\.html)?$/;
+const PAGE_PATTERN = /^\/(en\/)?(disclosures|calendar|market)\/(?:index\.html)?$/;
 
 export function initialHtmlPage(pathname) {
   const match = PAGE_PATTERN.exec(pathname);
@@ -560,7 +612,9 @@ export async function buildInitialHtml(url, env, { now = new Date(), budgetMs = 
   try {
     const build = target.page === 'disclosures'
       ? disclosuresEdits(url, env, target.lang, now)
-      : calendarEdits(url, env, target.lang, now);
+      : target.page === 'market'
+        ? marketTodayEdits(url, env, target.lang)
+        : calendarEdits(url, env, target.lang, now);
     return await withinBudget(build, budgetMs);
   } catch (error) {
     console.error('initial html unavailable', target.page, error?.message || error);

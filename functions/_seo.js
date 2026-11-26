@@ -2,6 +2,7 @@
 // pages load (MARKET_LOCALE), so a card reads the same before and after the
 // browser re-renders it.
 import { availableIndicatorCodes, listedIndicators } from './_market-indicators.js';
+import { SOCIAL_PROFILES } from './_footer.js';
 import '../assets/locale.js';
 // The search-title rule the admin publisher applies before it stores one.
 import '../assets/report-metadata.js';
@@ -835,12 +836,10 @@ export function structuredDataScript(data) {
   return `<script type="application/ld+json">${serializeJsonLd(data)}</script>`;
 }
 
-// The editor's public profiles, named as the same entity as the site. The
-// About pages link to the same addresses; tests keep the two in step.
-export const SOCIAL_PROFILES = Object.freeze([
-  'https://www.linkedin.com/in/sung-oh-choi-628a5b431/',
-  'https://www.threads.com/@snowshagal'
-]);
+// The editor's public profiles (SOCIAL_PROFILES, kept in functions/_footer.js,
+// which links them on every page) are named as the same entity as the site.
+// The About pages link to the same addresses; tests keep them in step.
+export { SOCIAL_PROFILES };
 
 export function organizationStructuredData(lang = 'ko') {
   return {
@@ -1190,8 +1189,10 @@ function marketSessionEntries(sessions, urlEntry, rateCodes = []) {
   const entries = [];
   const archive = pair('/market/archive/');
   const sectors = pair('/market/sectors/');
+  const flows = pair('/market/investor-flows/');
   entries.push(urlEntry(archive[0].href, dates[0].published_at, archive), urlEntry(archive[1].href, dates[0].published_at, archive));
   entries.push(urlEntry(sectors[0].href, dates[0].published_at, sectors), urlEntry(sectors[1].href, dates[0].published_at, sectors));
+  entries.push(urlEntry(flows[0].href, dates[0].published_at, flows), urlEntry(flows[1].href, dates[0].published_at, flows));
   // An optional indicator is listed once a record has its value, a domestic
   // rate once a day of it is stored (availableIndicatorCodes).
   for (const indicator of listedIndicators(availableIndicatorCodes(sessions, rateCodes))) {

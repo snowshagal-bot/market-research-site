@@ -38,6 +38,7 @@ import { OPTIONAL_INDICATOR_CLOSES_SQL } from '../functions/_market-indicators.j
 import { sitemapXml } from '../functions/_seo.js';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
+const POSTS = JSON.parse(await readFile(new URL('../data/posts.json', import.meta.url), 'utf8'));
 const [MIGRATION, SCHEMA_SQL, SCHEMA_JSON, EXAMPLE, CONTRACT_MD, SHELL_KO, SHELL_EN, MC_EXAMPLE, LOCALE_JS, MARKET_JS] = await Promise.all([
   read('migrations/comments/0006_market_funds.sql'), read('db/schema.sql'),
   read('contracts/market_funds/market_funds.schema.json'), read('contracts/market_funds/market_funds.example.json'),
@@ -362,7 +363,7 @@ async function route(url, db) {
     env: { COMMENTS_DB: db, ASSETS: { fetch: async request => new Response(new URL(request.url).pathname === '/en/market/' ? SHELLS.en : SHELLS.ko, { status: new URL(request.url).pathname === '/__not-found__' ? 404 : 200 }) } },
     next: async () => new Response('static')
   };
-  return onMarketPageRequest(context, { loadPostsFn: async () => [] });
+  return onMarketPageRequest(context, { loadPostsFn: async () => POSTS });
 }
 
 test('the routes: a fund page exists once a day is stored; a session page carries its day; nothing breaks without the migration', async () => {
@@ -388,6 +389,11 @@ test('the routes: a fund page exists once a day is stored; a session page carrie
   assert.match(history, /<a href="\/market\/2026-11-24\/">/);
   assert.doesNotMatch(history, /<a href="\/market\/2026-11-23\/">/);
   // Another indicator's page lists the fund pages as related.
+  // The deposits page carries its guide (related reads from the posts) but no latest-session block.
+  const deposits = await (await route(`${PROD}/market/deposits/`, db)).text();
+  assert.ok(deposits.includes('투자자예탁금이란</h2>'));
+  assert.ok(deposits.includes('<a href="/reports/basics-13-deposits">'));
+  assert.doesNotMatch(deposits, /indicator-latest/);
   const other = await route(`${PROD}/market/usdkrw/`, db);
   assert.equal(other.status, 200);
   assert.match(await other.text(), /href="\/market\/deposits\/"/);

@@ -16,10 +16,12 @@
 import {
   PRODUCTION_ORIGIN,
   escapeHtml,
+  findTranslationCounterpart,
   formatFlowAmount,
   formatIndexLevel,
   formatSignedPct,
   loadPosts,
+  reportSiteUrl,
   organizationStructuredData,
   serializeJsonLd,
   websiteStructuredData
@@ -30,6 +32,7 @@ import { aggregateKrxGroups } from './api/market/_aggregate.js';
 import { loadTrend } from './api/market/trend.js';
 import { cardImageUrl, cardTakeaway, ensureMarketCard, marketCardIsStale, onMarketCardRequest, parseMarketCardPath, readMarketCardMeta } from './_market-card.js';
 import { glossaryTermHref } from './_glossary.js';
+import { isMarketYearSupported, isTradingDate, shiftDate } from './_trading-calendar.js';
 import {
   domesticRateCodesIn,
   loadDomesticRateCodes,
@@ -89,6 +92,7 @@ export function marketArchivePath(lang = 'ko') {
 /**
  * { lang, date } for a session page, { lang, archive: true } for the list,
  * { lang, sectors: true } for the sector and theme rankings,
+ * { lang, flows: true } for net buying by investor type,
  * { lang, indicator } for one instrument's daily history,
  * or null for any other path. `canonical` is false when the path lacks the
  * trailing slash the canonical address has.
@@ -100,6 +104,7 @@ export function parseMarketPagePath(pathname) {
   const canonical = match[3] === '/';
   if (match[2] === 'archive') return { lang, archive: true, canonical };
   if (match[2] === 'sectors') return { lang, sectors: true, canonical };
+  if (match[2] === 'investor-flows') return { lang, flows: true, canonical };
   const indicator = marketIndicatorBySlug(match[2]);
   if (indicator) return { lang, indicator, canonical };
   if (!isCalendarDate(match[2])) return null;
@@ -218,7 +223,7 @@ const COPY = {
     source: '데이터 출처: KRX 한국거래소, 네이버 금융, 야후 파이낸스', tencentSource: ', 텐센트 증권(상해종합)',
     disclaimer: '투자 판단의 참고 자료이며, 매수·매도 권유가 아닙니다.',
     unit: '단위: 원 · 순매수는 매수-매도',
-    sectorsPage: '업종·테마 5일·20일 순위', sectorsLink: '업종·테마 등락률 순위',
+    sectorsPage: '업종·테마 5일·20일 순위', sectorsLink: '업종·테마 등락률 순위', flowsLink: '투자자별 수급 · 월간 누적',
     noteTitle: '숫자 너머의 의미를 해석합니다.', noteBody: '이날 시장의 흐름과 배경은 Snowshagal 데일리 리포트에서 이어서 읽을 수 있습니다.'
   },
   en: {
@@ -248,7 +253,7 @@ const COPY = {
     source: 'Sources: KRX, Naver Finance, Yahoo Finance', tencentSource: ', Tencent Securities (Shanghai Composite)',
     disclaimer: 'For reference only; not a recommendation to buy or sell.',
     unit: 'Net buying = buys minus sells',
-    sectorsPage: 'Sector & theme 5- and 20-session rankings', sectorsLink: 'Sector & theme rankings',
+    sectorsPage: 'Sector & theme 5- and 20-session rankings', sectorsLink: 'Sector & theme rankings', flowsLink: 'Investor flows by month',
     noteTitle: 'We interpret the meaning beyond the numbers.', noteBody: 'Continue with the Snowshagal Daily report for the story behind this session.'
   }
 };
@@ -828,8 +833,14 @@ export function renderMarketDateMain(payload, lang, context = {}) {
     </section>` : '';
   // Stock rankings follow the session's own stats; a record without their status shows no card.
   // KOFIA market funds of this session (Market Funds, joined by date; published a business day later).
-  const fundsCard = context.marketFunds?.market_date === date
-    ? globalThis.MARKET_LOCALE.marketFundsCard(context.marketFunds, key, { dateLabel: dotDate(date, key) })
+  // A session page shows its own day only. TODAY (context.fundsMaxAgeDays,
+  // as assets/market-close.js does) shows the newest day up to the record's
+  // date, at most that many days older, under its own date.
+  const fundsDate = String(context.marketFunds?.market_date || '');
+  const fundsAge = ISO_DATE.test(fundsDate) ? (Date.parse(`${date}T00:00:00Z`) - Date.parse(`${fundsDate}T00:00:00Z`)) / 86400000 : null;
+  const fundsShown = context.fundsMaxAgeDays ? fundsAge !== null && fundsAge >= 0 && fundsAge <= context.fundsMaxAgeDays : fundsDate === date;
+  const fundsCard = fundsShown
+    ? globalThis.MARKET_LOCALE.marketFundsCard(context.marketFunds, key, { dateLabel: dotDate(fundsDate, key) })
     : '';
   const rankingsBody = stockRankingsBody(payload, status, f, copy, lang);
   const rankingsCard = rankingsBody ? `<section class="mk-card mk-rankings-card" aria-labelledby="mk-rankings-title">
@@ -873,19 +884,7 @@ export function renderMarketDateMain(payload, lang, context = {}) {
     : `<p class="market-report-unavailable">${html(copy.noReport)}</p>`;
   const meta = [copy.closeBasis, copy.overseas.replace(/^\*\s*/, '')];
 
-  return `<main id="market-date-root" class="market-date-page" data-market-date="${html(date)}">
-  ${pageHead({
-    id: 'market-date-heading',
-    breadcrumb: `<a href="${key === 'en' ? '/en/' : '/'}">${html(copy.breadcrumbHome)}</a> › <a href="${base}">${html(copy.breadcrumbMarket)}</a> › <a href="${marketArchivePath(lang)}">${html(copy.archive)}</a>`,
-    eyebrow: pc.pageEyebrow,
-    title: copy.heading(date),
-    summary,
-    lead: takeaway,
-    meta
-  })}
-  <div class="market-wrap">${nav}</div>
-  <div class="market-wrap mk-dashboard market-dashboard">
-    <div class="mk-close-line"><p><b>${html(pc.closeOf(monthDayText(date, lang)))}</b> <span>${html(pc.regularBasis)}</span></p>${report}</div>
+  const dashboard = `<div class="mk-close-line"><p><b>${html(pc.closeOf(monthDayText(date, lang)))}</b> <span>${html(pc.regularBasis)}</span></p>${report}</div>
     <div class="mk-top">
       ${k ? indexCard('KOSPI', k, f, copy, pc, lang, date, trend) : ''}
       ${q ? indexCard('KOSDAQ', q, f, copy, pc, lang, date, trend) : ''}
@@ -903,8 +902,24 @@ export function renderMarketDateMain(payload, lang, context = {}) {
       <div class="mk-section-head"><h2 id="mk-global-title">${html(pc.globalTitle)}</h2><span>${html(pc.globalCaption)}</span></div>
       ${boards}
     </section>
-    <p class="market-archive-links"><a class="market-date-dashboard" href="${base}?date=${html(date)}">${html(copy.dashboard)} →</a><a href="${marketArchivePath(lang)}">${html(copy.archive)} →</a><a href="${marketSectorsPath(lang)}">${html(copy.sectorsLink)} →</a></p>
-    <div class="market-data-note"><p>${html(sessionSource(payload, copy))}</p><p>${html(copy.disclaimer)}</p></div>
+    <p class="market-archive-links"><a class="market-date-dashboard" href="${base}?date=${html(date)}">${html(copy.dashboard)} →</a><a href="${marketArchivePath(lang)}">${html(copy.archive)} →</a><a href="${marketSectorsPath(lang)}">${html(copy.sectorsLink)} →</a><a href="${marketFlowsPath(lang)}">${html(copy.flowsLink)} →</a></p>
+    <div class="market-data-note"><p>${html(sessionSource(payload, copy))}</p><p>${html(copy.disclaimer)}</p></div>`;
+  // /market/ TODAY's first HTML (functions/_initial-html.js) takes the dashboard alone.
+  if (context.dashboardOnly) return dashboard;
+
+  return `<main id="market-date-root" class="market-date-page" data-market-date="${html(date)}">
+  ${pageHead({
+    id: 'market-date-heading',
+    breadcrumb: `<a href="${key === 'en' ? '/en/' : '/'}">${html(copy.breadcrumbHome)}</a> › <a href="${base}">${html(copy.breadcrumbMarket)}</a> › <a href="${marketArchivePath(lang)}">${html(copy.archive)}</a>`,
+    eyebrow: pc.pageEyebrow,
+    title: copy.heading(date),
+    summary,
+    lead: takeaway,
+    meta
+  })}
+  <div class="market-wrap">${nav}</div>
+  <div class="market-wrap mk-dashboard market-dashboard">
+    ${dashboard}
   </div>
   <div class="market-wrap">${nav}</div>
 </main>`;
@@ -962,7 +977,7 @@ export function renderMarketArchiveMain(rows, lang, rateCodes = []) {
   <div class="market-wrap market-dashboard">
 ${blocks}
     <nav class="indicator-links" id="indicators" aria-labelledby="indicators-heading"><h2 id="indicators-heading">${html(lang === 'en' ? 'Daily history by indicator' : '지표별 일별 기록')}</h2><div>${marketIndicatorLinks(lang, availableIndicatorCodes(rows, rateCodes)).map(link => `<a href="${link.href}">${html(link.name)}</a>`).join('')}</div></nav>
-    <p class="market-archive-links"><a href="${marketSectorsPath(lang)}">${html(copy.sectorsLink)} →</a></p>
+    <p class="market-archive-links"><a href="${marketSectorsPath(lang)}">${html(copy.sectorsLink)} →</a><a href="${marketFlowsPath(lang)}">${html(copy.flowsLink)} →</a></p>
     <div class="market-data-note"><p>${html(copy.source)}</p><p>${html(copy.disclaimer)}</p></div>
   </div>
 </main>`;
@@ -1202,10 +1217,12 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
 
   try {
     if (route.indicator?.funds) {
-      const [{ days, rows }, shell, rateCodes] = await Promise.all([loadMarketFundIndicator(env, { budgetMs }), loadShell(env, url, route.lang), rateCodesWithin(env, budgetMs)]);
+      // A guided fund page names related reads (no latest-session block: KOFIA publishes a day later).
+      const postsPromise = INDICATOR_GUIDES[route.indicator.code] ? Promise.resolve().then(() => (loadPostsFn || loadPosts)(request, env)).catch(() => []) : Promise.resolve([]);
+      const [{ days, rows }, shell, rateCodes, posts] = await Promise.all([loadMarketFundIndicator(env, { budgetMs }), loadShell(env, url, route.lang), rateCodesWithin(env, budgetMs), postsPromise]);
       const series = marketFundSeries(days, route.indicator, new Set(rows.map(row => row.market_date)));
       if (!series.length) return notFound(env, url);
-      return htmlResponse(marketIndicatorPageHtml(shell, route.indicator, series, route.lang, availableIndicatorCodes(rows, [...rateCodes, ...marketFundCodesIn(days)])));
+      return htmlResponse(marketIndicatorPageHtml(shell, route.indicator, series, route.lang, availableIndicatorCodes(rows, [...rateCodes, ...marketFundCodesIn(days)]), { posts }));
     }
     if (route.indicator?.domestic) {
       const [{ days, rows }, shell] = await Promise.all([loadDomesticRateIndicator(env, { budgetMs }), loadShell(env, url, route.lang)]);
@@ -1214,10 +1231,29 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
       return htmlResponse(marketIndicatorPageHtml(shell, route.indicator, series, route.lang, availableIndicatorCodes(rows, domesticRateCodesIn(days))));
     }
     if (route.indicator) {
-      const [rows, shell, rateCodes] = await Promise.all([loadMarketIndicator(env, route.indicator, { budgetMs }), loadShell(env, url, route.lang), rateCodesWithin(env, budgetMs)]);
+      const guided = Boolean(INDICATOR_GUIDES[route.indicator.code]);
+      // A guided page also names the latest session's line and Daily; both fail soft.
+      const postsPromise = guided ? Promise.resolve().then(() => (loadPostsFn || loadPosts)(request, env)).catch(() => []) : Promise.resolve([]);
+      const [rows, shell, rateCodes, posts] = await Promise.all([loadMarketIndicator(env, route.indicator, { budgetMs }), loadShell(env, url, route.lang), rateCodesWithin(env, budgetMs), postsPromise]);
       const series = marketIndicatorSeries(rows, route.indicator);
       if (!series.length) return notFound(env, url);
-      return htmlResponse(marketIndicatorPageHtml(shell, route.indicator, series, route.lang, availableIndicatorCodes(rows, rateCodes)));
+      let context = {};
+      if (guided) {
+        const date = series[0].recordDate;
+        const own = await withinBudget(loadRecordTakeaway(env, date), Math.min(budgetMs, trendBudgetMs)).catch(() => null);
+        context = {
+          posts,
+          latest: { date, line: cardTakeaway(own?.[route.lang], posts, date, route.lang), report: dailyReportFor(posts, date, route.lang) }
+        };
+      }
+      return htmlResponse(marketIndicatorPageHtml(shell, route.indicator, series, route.lang, availableIndicatorCodes(rows, rateCodes), context));
+    }
+    if (route.flows) {
+      const postsPromise = Promise.resolve().then(() => (loadPostsFn || loadPosts)(request, env)).catch(() => []);
+      const [rows, shell, posts] = await Promise.all([loadMarketFlows(env, { budgetMs }), loadShell(env, url, route.lang), postsPromise]);
+      const view = marketFlowsView(rows);
+      if (!view) return notFound(env, url);
+      return htmlResponse(marketFlowsPageHtml(shell, view, route.lang, { posts }));
     }
     if (route.sectors) {
       const [rows, shell] = await Promise.all([loadMarketSectors(env, { budgetMs }), loadShell(env, url, route.lang)]);
@@ -1455,6 +1491,291 @@ export async function loadMarketSectors(env, { budgetMs = MARKET_DATE_TIME_BUDGE
           try { groups = JSON.parse(groups); } catch (_) { groups = null; }
         }
         return { market_date: row.market_date, published_at: row.published_at || '', krx_groups: groups && typeof groups === 'object' ? groups : null };
+      });
+  })(), budgetMs);
+}
+
+/* --------------------------------------------------------- investor flows */
+
+// /market/investor-flows/ and /en/market/investor-flows/: net buying by
+// foreign, institutional and retail investors at one address — the newest
+// session, its last five published sessions day by day, the month so far, and
+// foreign net buying by month. Nothing new is collected: every figure is a
+// final Market Close row's krx_investor_trading (KRX, KRW billion). Sums only
+// add published sessions, and say how many of the month's KRX trading days
+// they cover, so a month with a missing record is never passed off as KRX's
+// own monthly total.
+
+export function marketFlowsPath(lang = 'ko') {
+  return `${lang === 'en' ? '/en' : ''}/market/investor-flows/`;
+}
+
+const FLOW_INVESTORS = ['외국인', '기관', '개인'];
+const FLOW_STOCK_MARKETS = ['KOSPI', 'KOSDAQ'];
+
+const FLOWS_COPY = {
+  ko: {
+    eyebrow: '투자자별 매매동향',
+    heading: '외국인 · 기관 · 개인 순매수',
+    breadcrumb: '투자자별 수급',
+    lead: date => `${longDate(date, 'ko')} 마감 기준 외국인·기관·개인의 코스피·코스닥 순매수입니다. 최근 5거래일 일별 값, 이번 달 누적, 월별 외국인 순매수를 한곳에 모았습니다.`,
+    fact: market => `${market} 외국인`,
+    basis: 'KRX 투자자별 거래실적 · 정규장 마감 후 확정치 · 매 거래일 갱신',
+    sign: '양수는 순매수, 음수는 순매도',
+    sections: [date => `${monthDayText(date, 'ko')} 순매수`, () => '최근 5거래일 일별', month => `${month} 누적`, () => '월별 외국인 순매수'],
+    day: '날짜', total: '합계', month: '월', sessions: '거래일',
+    window: (start, end, n) => `${start} – ${end} · 게시된 ${n}거래일`,
+    monthWindow: (start, end, n, expected) => `${start} – ${end} · 게시된 ${n}거래일${expected > n ? ` (이 기간 KRX 거래일 ${expected}일 중)` : ''}`,
+    sessionsOf: (n, expected) => (expected > n ? `${n} / ${expected}` : String(n)),
+    monthsNote: '거래일은 이 사이트에 마감 기록이 게시된 날 수입니다. 기록이 빠진 날이 있는 달은 “게시일 / KRX 거래일”로 적었고, 그 달 합계는 KRX 공식 월간 합계와 다를 수 있습니다.',
+    monthName: month => `${Number(month.slice(0, 4))}년 ${Number(month.slice(5, 7))}월`,
+    session: '이날 전체 마감 기록', archive: '날짜별 마감 기록 전체',
+    title: date => `오늘 외국인 순매수·순매도 (${dateParts(date).m}월 ${dateParts(date).d}일) · 코스피·코스닥 투자자별 매매동향 | Snowshagal`,
+    description: (date, parts) => [
+      `${longDate(date, 'ko')} 투자자별 순매수.`,
+      ...parts.map(({ market, foreign, institution, individual }) => `${market} 외국인 ${foreign}, 기관 ${institution}, 개인 ${individual}.`),
+      '최근 5거래일·이번 달 누적과 월별 외국인 순매수까지.'
+    ]
+  },
+  en: {
+    eyebrow: 'Investor flows',
+    heading: 'Foreign, Institutional and Retail Net Buying',
+    breadcrumb: 'Investor Flows',
+    lead: date => `Net buying by foreign, institutional and retail investors on the KOSPI and KOSDAQ at the ${longDate(date, 'en')} close, with the last five sessions day by day, the month so far and foreign net buying by month.`,
+    fact: market => `${market} foreign`,
+    basis: 'KRX trading by investor type · Final figures after the regular session · Updated every session',
+    sign: 'Positive is net buying, negative net selling',
+    sections: [date => `Net Buying on ${monthDayText(date, 'en')}`, () => 'Last 5 Sessions, Day by Day', month => `${month} So Far`, () => 'Foreign Net Buying by Month'],
+    day: 'Date', total: 'Total', month: 'Month', sessions: 'Sessions',
+    window: (start, end, n) => `${start} – ${end} · ${n} published sessions`,
+    monthWindow: (start, end, n, expected) => `${start} – ${end} · ${n} published sessions${expected > n ? ` (of ${expected} KRX trading days)` : ''}`,
+    sessionsOf: (n, expected) => (expected > n ? `${n} / ${expected}` : String(n)),
+    monthsNote: 'Sessions are the days with a close record published on this site. A month missing a record shows “published / KRX trading days”, and its total may differ from KRX’s own monthly figure.',
+    monthName: month => `${EN_MONTHS[Number(month.slice(5, 7)) - 1]} ${Number(month.slice(0, 4))}`,
+    session: 'Full record for this session', archive: 'All sessions by date',
+    title: date => `Korea Foreign Investor Net Buying, ${longDate(date, 'en')}: KOSPI & KOSDAQ Flows | Snowshagal`,
+    description: (date, parts) => [
+      `Net buying by investor type on ${longDate(date, 'en')}.`,
+      ...parts.map(({ market, foreign, institution, individual }) => `${market}: foreign ${foreign}, institutions ${institution}, retail ${individual}.`),
+      'Plus the last five sessions, the month so far and foreign net buying by month.'
+    ]
+  }
+};
+
+/**
+ * The reading guide under the tables, written like INDICATOR_GUIDES:
+ * [[text|term]] links the glossary; related reads are Korean post ids.
+ */
+export const FLOWS_GUIDE = Object.freeze({
+  related: ['2026-11-18-basics-143x6rj', '2026-11-12-note-43vr2c', '2026-11-20-note-g01c86', '2026-08-11-basics-1e0xeuz'],
+  ko: {
+    title: '외국인 수급 읽는 법',
+    paragraphs: [
+      '이 페이지의 값은 한국거래소가 정규장 마감 뒤 집계한 투자자별 [[순매수]](산 금액 − 판 금액)입니다. [[개인·외국인·기관]] 밖에도 [[기타법인]] 같은 주체가 있어, 세 값을 더해도 0이 되지는 않습니다.',
+      '외국인 순매도가 크다고 곧 지수가 떨어지는 것은 아닙니다. 같은 날 [[기관합계]]와 개인이 얼마를 받아 갔는지, 매도가 몇 종목에 몰렸는지를 함께 봐야 합니다. 외국인 매매는 [[원/달러]] 환율이나 [[코스피200 선물]] 포지션과 함께 움직이는 날이 많아, 당일 표에는 선물 행도 함께 적었습니다.',
+      '누적 값은 이 사이트에 마감 기록이 게시된 거래일만 더한 것입니다. 종목별로 무엇을 사고팔았는지는 KRX 정보데이터시스템에서 직접 조회할 수 있고, 조회 방법은 아래 첫 번째 글에 정리했습니다.'
+    ]
+  },
+  en: {
+    title: 'How to Read Foreign Flows',
+    paragraphs: [
+      'Values on this page are the Korea Exchange’s count of [[net buying|net purchases]] (amount bought minus amount sold) by investor type after the regular session. Besides the [[retail, foreign and institutional|retail · foreign · institutional]] groups there are others such as [[other corporations|Other corporations]], so the three figures do not add up to zero.',
+      'Heavy foreign selling does not by itself mean the index falls. What [[institutions (total)]] and retail investors absorbed that day, and how many stocks the selling was concentrated in, matter as much. Foreign trading often moves with the [[USD/KRW]] rate and with [[KOSPI 200 futures]] positions, so the day table also shows the futures row.',
+      'Cumulative figures add only the sessions with a close record published on this site. What foreigners bought and sold stock by stock can be looked up in the KRX Data Marketplace; the first read below shows how.'
+    ]
+  }
+});
+
+function flowNet(row, market, investor) {
+  const value = row?.flows?.[market]?.investors?.[investor]?.net_buy;
+  return valid(value) ? value : null;
+}
+
+/** KRX trading days from start to end (inclusive), or 0 when a year is not in the calendar. */
+function krxTradingDaysBetween(start, end) {
+  let count = 0;
+  for (let day = start; day <= end; day = shiftDate(day, 1)) {
+    if (!isMarketYearSupported('KRX', Number(day.slice(0, 4)))) return 0;
+    if (isTradingDate(day, 'KRX')) count += 1;
+  }
+  return count;
+}
+
+/**
+ * The figures the page shows, from the final rows newest first (each
+ * { market_date, published_at, flows }), or null when the newest session has
+ * no KOSPI foreign figure. Sessions without one are left out of every sum.
+ */
+export function marketFlowsView(rows) {
+  const all = Array.isArray(rows) ? rows : [];
+  const list = all.filter(row => ISO_DATE.test(String(row?.market_date || '')) && flowNet(row, 'KOSPI', '외국인') !== null);
+  const latest = list[0];
+  if (!latest || latest !== all[0]) return null;
+  const sumOf = (items, market, investor) => {
+    const values = items.map(row => flowNet(row, market, investor));
+    return values.every(value => value !== null) ? values.reduce((a, b) => a + b, 0) : null;
+  };
+  const totals = items => Object.fromEntries(FLOW_STOCK_MARKETS.map(market => [market, Object.fromEntries(FLOW_INVESTORS.map(investor => [investor, sumOf(items, market, investor)]))]));
+  const recent = list.slice(0, 5);
+  const byMonth = new Map();
+  for (const row of list) {
+    const month = row.market_date.slice(0, 7);
+    if (!byMonth.has(month)) byMonth.set(month, []);
+    byMonth.get(month).push(row);
+  }
+  const firstDate = list.at(-1).market_date;
+  const months = [...byMonth].map(([month, items]) => {
+    const start = items.at(-1).market_date;
+    const end = items[0].market_date;
+    // A month counts the KRX trading days from its 1st (the first record's day
+    // in the first month on record) to its last record.
+    const from = month === firstDate.slice(0, 7) ? firstDate : `${month}-01`;
+    return { month, start, end, sessions: items.length, expected: krxTradingDaysBetween(from, end), totals: totals(items) };
+  });
+  return {
+    date: latest.market_date,
+    publishedAt: latest.published_at || '',
+    day: latest.flows,
+    recent: recent.map(row => ({ date: row.market_date, flows: row.flows })),
+    recentTotals: totals(recent),
+    months
+  };
+}
+
+function flowsDescriptionParts(view, lang) {
+  const f = makeFormat(lang);
+  const names = PAGE_COPY[lang].marketNames;
+  return FLOW_STOCK_MARKETS.map(market => {
+    const [foreign, institution, individual] = FLOW_INVESTORS.map(investor => f.flow(view.day?.[market]?.investors?.[investor]?.net_buy));
+    return { market: names[market], foreign, institution, individual };
+  });
+}
+
+export function marketFlowsTitle(view, lang) {
+  return FLOWS_COPY[lang === 'en' ? 'en' : 'ko'].title(view.date);
+}
+
+export function marketFlowsDescription(view, lang) {
+  const key = lang === 'en' ? 'en' : 'ko';
+  const parts = FLOWS_COPY[key].description(view.date, flowsDescriptionParts(view, key));
+  let text = parts.join(' ');
+  // Drop the closing line, then KOSDAQ, until it fits.
+  while (text.length > 180 && parts.length > 2) {
+    parts.pop();
+    text = parts.join(' ');
+  }
+  return text;
+}
+
+export function renderMarketFlowsMain(view, lang, context = {}) {
+  const key = lang === 'en' ? 'en' : 'ko';
+  const copy = COPY[key];
+  const pc = PAGE_COPY[key];
+  const fc = FLOWS_COPY[key];
+  const f = makeFormat(key);
+  const base = key === 'en' ? '/en/market/' : '/market/';
+  const value = v => `<span class="mk-flow-value ${f.signClass(v)}">${f.flow(v)}</span>`;
+  const summary = FLOW_STOCK_MARKETS.map(market => {
+    const net = view.day?.[market]?.investors?.['외국인']?.net_buy;
+    return valid(net) ? `<span class="market-date-fact">${html(fc.fact(pc.marketNames[market]))} <b class="${f.signClass(net)}">${f.flow(net)}</b></span>` : '';
+  }).filter(Boolean).join('<span class="market-date-sep" aria-hidden="true"> · </span>');
+
+  const dayRows = ['KOSPI', 'KOSDAQ', 'KOSPI200선물'].map(market => ({ name: pc.marketNames[market], values: FLOW_INVESTORS.map(investor => view.day?.[market]?.investors?.[investor]?.net_buy) }));
+  const dayBody = `${flowTable(dayRows, f, copy)}<p class="mk-unit">${html(pc.flowNote)} · <a href="${marketDatePath(view.date, key)}">${html(fc.session)} →</a></p>`;
+
+  const headings = [fc.day, copy.foreign, copy.institution, copy.individual];
+  const recentTable = market => {
+    const rows = view.recent.map(item => [
+      `<a href="${marketDatePath(item.date, key)}">${html(dayLabel(item.date, key))}</a>`,
+      ...FLOW_INVESTORS.map(investor => value(item.flows?.[market]?.investors?.[investor]?.net_buy))
+    ]);
+    rows.push([`<b>${html(fc.total)}</b>`, ...FLOW_INVESTORS.map(investor => value(view.recentTotals[market][investor]))]);
+    return `<div class="market-flows-market"><h3>${html(pc.marketNames[market])}</h3>${dataTable(headings, rows, 'compact market-flows-table')}</div>`;
+  };
+  const first = view.recent.at(-1);
+  const recentBody = `<div class="market-flows-pair">${FLOW_STOCK_MARKETS.map(recentTable).join('')}</div><p class="unit-note">${html(fc.window(dotDate(first.date, key), dotDate(view.date, key), view.recent.length))}</p>`;
+
+  const current = view.months[0];
+  const monthRows = FLOW_STOCK_MARKETS.map(market => ({ name: pc.marketNames[market], values: FLOW_INVESTORS.map(investor => current.totals[market][investor]) }));
+  const monthBody = `${flowTable(monthRows, f, copy)}<p class="unit-note">${html(fc.monthWindow(dotDate(current.start, key), dotDate(current.end, key), current.sessions, current.expected))}</p>`;
+
+  const monthsTable = dataTable(
+    [fc.month, pc.marketNames.KOSPI, pc.marketNames.KOSDAQ, fc.sessions],
+    view.months.map(item => [html(fc.monthName(item.month)), value(item.totals.KOSPI['외국인']), value(item.totals.KOSDAQ['외국인']), html(fc.sessionsOf(item.sessions, item.expected))]),
+    'compact market-flows-months'
+  );
+  const monthsBody = `${monthsTable}<p class="unit-note">${html(fc.monthsNote)}</p>`;
+
+  const guide = FLOWS_GUIDE[key];
+  const reads = guideReads(FLOWS_GUIDE, context.posts, key);
+  const guideBody = `<div class="indicator-guide">${guide.paragraphs.map(item => `<p>${guideParagraph(item, key)}</p>`).join('')}${reads.length
+    ? `<h3>${html(GUIDE_COPY[key].related)}</h3><ul class="indicator-guide-reads">${reads.map(read => `<li><a href="${html(read.href)}">${html(read.title)}</a></li>`).join('')}</ul>`
+    : ''}</div>`;
+
+  return `<main id="market-date-root" class="market-date-page market-flows-page" data-market-date="${html(view.date)}">
+  ${pageHead({
+    id: 'market-flows-heading',
+    breadcrumb: `<a href="${key === 'en' ? '/en/' : '/'}">${html(copy.breadcrumbHome)}</a> › <a href="${base}">${html(copy.breadcrumbMarket)}</a> › ${html(fc.breadcrumb)}`,
+    eyebrow: fc.eyebrow,
+    title: fc.heading,
+    summary,
+    meta: [`${dotDate(view.date, key)} · ${fc.basis}`, fc.sign]
+  })}
+  <div class="market-wrap market-dashboard">
+    <p class="market-sectors-lead">${html(fc.lead(view.date))}</p>
+    ${section(1, fc.sections[0](view.date), dayBody)}
+    ${section(2, fc.sections[1](), recentBody)}
+    ${section(3, fc.sections[2](fc.monthName(current.month)), monthBody)}
+    ${section(4, fc.sections[3](), monthsBody)}
+    ${section(5, guide.title, guideBody)}
+    <p class="market-archive-links"><a href="${marketDatePath(view.date, key)}">${html(fc.session)} →</a><a href="${marketArchivePath(key)}">${html(fc.archive)} →</a><a href="${marketSectorsPath(key)}">${html(copy.sectorsLink)} →</a></p>
+    <div class="market-data-note"><p>${html(copy.source)}</p><p>${html(copy.disclaimer)}</p></div>
+  </div>
+</main>`;
+}
+
+export function marketFlowsPageHtml(shell, view, lang, context = {}) {
+  const key = lang === 'en' ? 'en' : 'ko';
+  const title = marketFlowsTitle(view, key);
+  const description = marketFlowsDescription(view, key);
+  const canonical = `${PRODUCTION_ORIGIN}${marketFlowsPath(key)}`;
+  const copy = COPY[key];
+  return applyMarketShell(shell, {
+    lang: key,
+    title,
+    description,
+    canonical,
+    alternates: { ko: `${PRODUCTION_ORIGIN}${marketFlowsPath('ko')}`, en: `${PRODUCTION_ORIGIN}${marketFlowsPath('en')}` },
+    jsonLd: pageJsonLd({
+      lang: key,
+      title,
+      description,
+      canonical,
+      datePublished: String(view.publishedAt || '').slice(0, 10) || undefined,
+      breadcrumb: [
+        { name: copy.breadcrumbHome, url: `${PRODUCTION_ORIGIN}${key === 'en' ? '/en/' : '/'}` },
+        { name: copy.breadcrumbMarket, url: `${PRODUCTION_ORIGIN}${key === 'en' ? '/en/market/' : '/market/'}` },
+        { name: FLOWS_COPY[key].breadcrumb, url: canonical }
+      ]
+    }),
+    main: renderMarketFlowsMain(view, key, context)
+  });
+}
+
+/** Every final session's investor flows, newest first. */
+export async function loadMarketFlows(env, { budgetMs = MARKET_DATE_TIME_BUDGET_MS } = {}) {
+  return withinBudget((async () => {
+    const db = await ensureMarketTable(env, { readOnly: true });
+    const result = await db.prepare(`SELECT market_date, published_at, json_extract(payload_json, '$.krx_investor_trading.markets') AS flows
+      FROM ${TABLE_NAME} WHERE status = 'final' ORDER BY market_date DESC`).all();
+    return (result?.results || [])
+      .filter(row => ISO_DATE.test(String(row?.market_date || '')))
+      .map(row => {
+        let flows = row.flows;
+        if (typeof flows === 'string') {
+          try { flows = JSON.parse(flows); } catch (_) { flows = null; }
+        }
+        return { market_date: row.market_date, published_at: row.published_at || '', flows: flows && typeof flows === 'object' ? flows : null };
       });
   })(), budgetMs);
 }
@@ -1878,7 +2199,170 @@ export function marketIndicatorDescription(indicator, series, lang) {
   return text;
 }
 
-export function renderMarketIndicatorMain(indicator, series, lang, available = availableIndicatorCodes([])) {
+/*
+ * Indicator guides: what a reader who arrives from search for one of these
+ * pages asks next. Written by hand for the pages people search for (KOSPI
+ * first, then KOSDAQ, VKOSPI, USD/KRW and investor deposits, 2026-11-26),
+ * never generated for every indicator, so no page carries boilerplate. A guide
+ * adds two parts:
+ * - a "latest close" block at the top: the session's one-line takeaway (the
+ *   record's own line, else the Daily's, as on the share card) with links to
+ *   that session's full record and its Daily report. A Market Funds page has
+ *   none: KOFIA publishes a day later, so its newest day is not the session's;
+ * - an "about" section after the chart: paragraphs where [[text|term]] links
+ *   `term` in the glossary (the term must exist in that language's glossary),
+ *   and related Market Basics reads named by their Korean post id (the English
+ *   page links the translation, and drops a read without one).
+ */
+export const INDICATOR_GUIDES = Object.freeze({
+  KOSPI: {
+    related: ['2026-11-12-basics-17io0go', '2026-11-15-basics-yi9jg1', '2026-11-18-basics-gt1lmr', '2026-11-13-basics-1m6tqir'],
+    ko: {
+      title: '코스피란',
+      paragraphs: [
+        '코스피(KOSPI)는 한국거래소 유가증권시장에 상장된 보통주 전 종목을 [[시가총액 가중]] 방식으로 묶은 지수입니다. 1980년 1월 4일의 시가총액을 100으로 놓고, 지금 시가총액이 그 몇 배인지를 나타냅니다.',
+        '이 페이지의 값은 [[정규장]] 마감(오후 3시 30분, KST) [[종가]]입니다. 종가는 마감 전 10분 동안의 단일가 매매로 정해지고, 그 뒤의 시간외 거래나 [[넥스트레이드]] 애프터마켓 거래는 이 값을 바꾸지 않습니다.',
+        '등락은 직전 거래일 종가와 비교한 값이고, 새 값은 매 거래일 오후 4시 무렵 추가됩니다. 표의 날짜를 누르면 그날의 투자자별 매매동향, 시장 폭, 업종 등락까지 담긴 전체 마감 기록이 열립니다.'
+      ]
+    },
+    en: {
+      title: 'What is the KOSPI?',
+      paragraphs: [
+        'The KOSPI (Korea Composite Stock Price Index) covers every common stock listed on the Korea Exchange main board, combined by [[market-capitalization weighting]]. It sets the total market value on January 4, 1980 at 100 and expresses today\u2019s market value against that base.',
+        'Values on this page are the close of [[regular trading hours]] at 3:30 p.m. KST: the [[closing price|Closing price]], set by a ten-minute single-price auction before the bell. After-hours trading and [[Nextrade|Nextrade (NXT)]] after-market trades do not change it.',
+        'Each change is against the previous trading day\u2019s close, and a new value is added around 4 p.m. KST every trading day. Each date in the table opens that session\u2019s full close record, with investor flows, market breadth and sector moves.'
+      ]
+    }
+  },
+  KOSDAQ: {
+    related: ['2026-11-12-basics-17io0go', '2026-08-11-basics-1e0xeuz', '2026-11-15-basics-yi9jg1', '2026-08-20-basics-1jqzwpd'],
+    ko: {
+      title: '코스닥이란',
+      paragraphs: [
+        '코스닥(KOSDAQ)은 한국거래소 코스닥시장에 상장된 종목을 [[시가총액 가중]] 방식으로 묶은 지수입니다. 1996년 7월 1일이 기준일이고, 2004년에 기준값을 100에서 1,000으로 바꿔 지금은 그날의 시가총액을 1,000으로 놓고 셉니다.',
+        '바이오, 2차전지, 반도체 [[소부장]] 같은 성장 업종의 중소형주가 많고, [[개인·외국인·기관]] 가운데 개인의 거래 비중이 큰 시장입니다. 그래서 같은 날에도 코스피보다 등락 폭이 큰 경우가 많습니다.',
+        '이 페이지의 값은 [[정규장]] 마감(오후 3시 30분, KST) [[종가]]이고, 등락은 직전 거래일 종가와 비교한 값입니다. 표의 날짜를 누르면 그날의 투자자별 매매동향과 시장 폭까지 담긴 전체 마감 기록이 열립니다.'
+      ]
+    },
+    en: {
+      title: 'What is the KOSDAQ?',
+      paragraphs: [
+        'The KOSDAQ index covers the stocks listed on the Korea Exchange\u2019s KOSDAQ market, combined by [[market-capitalization weighting]]. Its base date is July 1, 1996; in 2004 the base value was raised from 100 to 1,000, so the index now reads today\u2019s market value against 1,000 on that date.',
+        'The market leans toward smaller growth companies in biotech, batteries and chip [[materials, parts and equipment|Materials, Parts & Equipment]], and individual investors account for a large share of its trading among the [[retail, foreign and institutional|retail · foreign · institutional]] groups. On the same day it often moves more than the KOSPI.',
+        'Values on this page are the close of [[regular trading hours]] at 3:30 p.m. KST (the [[closing price|Closing price]]), and each change is against the previous trading day\u2019s close. Each date in the table opens that session\u2019s full close record, with investor flows and market breadth.'
+      ]
+    }
+  },
+  VKOSPI: {
+    related: ['2026-11-23-basics-a5lumg', '2026-08-10-basics-1rhknmt', '2026-08-20-basics-1jqzwpd', '2026-11-13-basics-1m6tqir'],
+    ko: {
+      title: 'VKOSPI란',
+      paragraphs: [
+        '[[VKOSPI]]는 [[코스피200]] [[옵션]] 가격으로 계산한, 앞으로 30일 동안 코스피200이 얼마나 움직일지에 대한 시장의 예상치입니다. 미국 S&P 500 옵션으로 만드는 VIX와 같은 방식이며, 한국거래소가 발표합니다.',
+        '값은 1년 기준 변동률(%)입니다. 20이면 1년에 위아래 20% 안팎, 한 달로 나누면 약 ±5.8%의 움직임을 예상한다는 뜻입니다. 주가가 급히 빠질 때 하락에 대비하는 [[풋옵션]] 수요가 몰려 값이 뛰는 경우가 많아 ‘공포지수’라고도 부릅니다.',
+        '이 페이지의 값은 파생상품시장 정규장 마감(오후 3시 45분, KST) 종가이고, 등락은 직전 거래일 종가와 비교한 값입니다. 표의 날짜를 누르면 그날의 전체 마감 기록이 열립니다.'
+      ]
+    },
+    en: {
+      title: 'What is the VKOSPI?',
+      paragraphs: [
+        'The [[VKOSPI]] is the market\u2019s expectation of how much the [[KOSPI 200]] will move over the next 30 days, calculated from KOSPI 200 [[options]] prices. It follows the same method as the VIX, which is built from S&P 500 options, and is published by the Korea Exchange.',
+        'The value is an annualized percentage. A reading of 20 means a move of roughly 20% either way over a year, or about \u00b15.8% over a month. When stocks drop quickly, demand for [[put options]] as protection tends to lift it, which is why it is often called a fear gauge.',
+        'Values on this page are the derivatives-session close at 3:45 p.m. KST, and each change is against the previous trading day\u2019s close. Each date in the table opens that session\u2019s full close record.'
+      ]
+    }
+  },
+  USDKRW: {
+    related: ['2026-08-13-basics-1qofo4f', '2026-11-18-basics-143x6rj', '2026-10-09-note-1a56yum', '2026-10-24-note-vgs0zy'],
+    ko: {
+      title: '원/달러 환율이란',
+      paragraphs: [
+        '[[원/달러]] 환율은 1달러를 사는 데 드는 원화 금액입니다. 숫자가 오르면 원화 가치가 내린 것(원화 약세)이고, 숫자가 내리면 [[원화 강세]]입니다.',
+        '이 페이지의 값은 외환시장 종가가 아니라, 하나은행이 오후 3시 30분 무렵 고시한 [[매매기준율]]을 네이버 금융에서 옮긴 값입니다. 서울 외환시장은 오전 9시부터 다음 날 새벽 2시까지 열리므로, 이 값은 그 가운데 한국 증시가 마감할 때의 수준입니다.',
+        '환율은 외국인 투자자의 수익에 직접 닿습니다. 원화가 약해지면 같은 주가라도 달러로 환산한 값이 줄어들어, 외국인 매매와 함께 움직이는 날이 많습니다. 달러 자체의 힘은 [[달러인덱스]]로 따로 볼 수 있고, 표의 날짜를 누르면 그날의 외국인 매매가 담긴 전체 마감 기록이 열립니다.'
+      ]
+    },
+    en: {
+      title: 'What is the USD/KRW rate?',
+      paragraphs: [
+        'The [[USD/KRW]] rate is the number of won it takes to buy one U.S. dollar. A higher number means a weaker won; a lower number means [[a stronger won]].',
+        'Values on this page are not the foreign-exchange market close. They are the [[reference rate|Base Exchange Rate]] Hana Bank posts around 3:30 p.m. KST, as shown on Naver Finance. The Seoul FX market trades from 9 a.m. to 2 a.m. the next day, so this value is the level when the Korean stock market closes.',
+        'The exchange rate feeds straight into foreign investors\u2019 returns: when the won weakens, the same share price is worth less in dollars, so the rate and foreign flows often move together. The dollar\u2019s own strength is tracked by the [[U.S. Dollar Index]], and each date in the table opens that session\u2019s full close record, with foreign investors\u2019 trading.'
+      ]
+    }
+  },
+  DEPOSITS: {
+    related: ['2026-06-04-basics-16di2bp', '2026-11-22-basics-1rhe030', '2026-11-25-basics-vdzvvf', '2026-08-11-basics-1e0xeuz'],
+    ko: {
+      title: '투자자예탁금이란',
+      paragraphs: [
+        '[[투자자예탁금]]은 주식을 사려고 증권사 계좌에 넣어 두었거나, 주식을 팔고 찾지 않아 계좌에 현금으로 남아 있는 돈의 합계입니다. 언제든 주식을 살 수 있는 돈이라 ‘증시 대기자금’이라고도 부릅니다.',
+        '[[금융투자협회]]가 거래일마다 집계해 다음 영업일에 공개합니다. 이 페이지의 값은 장내파생상품 거래예수금을 뺀 금액이고, 날짜는 공개일이 아니라 자금이 집계된 거래일입니다.',
+        '예탁금이 늘었다고 곧 살 돈이 늘었다고 단정할 수는 없습니다. 주식을 많이 판 날에도 판 돈이 계좌에 남으면 예탁금이 늘기 때문입니다. 빚을 내 투자한 규모는 [[신용융자 잔고]], 담보가 모자라 강제로 판 금액은 [[반대매매]] 기록에서 함께 볼 수 있습니다.'
+      ]
+    },
+    en: {
+      title: 'What are investor deposits?',
+      paragraphs: [
+        '[[Investor deposits|investor deposits]] are the cash customers hold at Korean brokerages: money put in to buy stocks, plus sale proceeds left in the account. Because it can buy shares at any moment, it is often called cash on the sidelines.',
+        'The Korea Financial Investment Association (KOFIA) counts it every trading day and publishes it the next business day. Values on this page exclude deposits for exchange-traded derivatives, and each date is the trading day the money was counted, not the day it was published.',
+        'A rise does not by itself mean more money is waiting to buy: on a day of heavy selling, proceeds left in accounts also lift the total. How much is borrowed to buy stocks shows in [[margin loans|Outstanding margin loans]], and shares sold for lack of collateral in [[forced selling]].'
+      ]
+    }
+  }
+});
+
+const GUIDE_COPY = {
+  ko: { latestTitle: (m, d) => `${m}월 ${d}일 마감`, sessionLink: '그날 전체 마감 기록', dailyLink: '이날의 데일리 리포트', related: '함께 읽기' },
+  en: { latestTitle: (m, d) => `Close on ${EN_MONTHS_SHORT[m - 1]} ${d}`, sessionLink: 'Full close record for the day', dailyLink: 'Daily report for the day', related: 'Related reading' }
+};
+
+/** A guide paragraph: escaped text, each [[text|term]] a glossary link (term defaults to text). */
+function guideParagraph(text, lang) {
+  return html(text).replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (whole, label, term) => `<a class="mk-term" href="${html(glossaryTermHref(term || label, lang))}">${label}</a>`);
+}
+
+/** The guide's related reads in `lang`: [{ href, title }], from data/posts.json. */
+export function guideReads(guide, posts, lang) {
+  const list = Array.isArray(posts) ? posts : [];
+  return (guide?.related || []).map(id => {
+    const korean = list.find(post => post?.id === id);
+    if (!korean) return null;
+    const post = lang === 'en' ? findTranslationCounterpart(list, korean) : korean;
+    if (!post?.href || !post?.title) return null;
+    return { href: new URL(reportSiteUrl(post.href)).pathname, title: post.title };
+  }).filter(Boolean);
+}
+
+/**
+ * The "latest close" block: `latest` is { date, line, report } for the
+ * newest session (line and report may be empty); '' without a guide.
+ */
+function guideLatestBlock(latest, lang) {
+  if (!latest?.date) return '';
+  const copy = GUIDE_COPY[lang];
+  const { m, d } = dateParts(latest.date);
+  const links = [
+    `<a href="${marketDatePath(latest.date, lang)}">${html(copy.sessionLink)} →</a>`,
+    latest.report?.url ? `<a href="${html(latest.report.url)}">${html(copy.dailyLink)} ↗</a>` : ''
+  ].filter(Boolean).join('');
+  return `<section class="indicator-latest" aria-labelledby="indicator-latest-title">
+      <h2 id="indicator-latest-title">${html(copy.latestTitle(m, d))}</h2>
+      ${latest.line ? `<p class="indicator-latest-line">${html(latest.line)}</p>` : ''}
+      <p class="indicator-latest-links">${links}</p>
+    </section>`;
+}
+
+function guideAboutBody(guide, lang, posts) {
+  const text = guide?.[lang];
+  if (!text) return '';
+  const reads = guideReads(guide, posts, lang);
+  return `<div class="indicator-guide">${text.paragraphs.map(item => `<p>${guideParagraph(item, lang)}</p>`).join('')}${reads.length
+    ? `<h3>${html(GUIDE_COPY[lang].related)}</h3><ul class="indicator-guide-reads">${reads.map(read => `<li><a href="${html(read.href)}">${html(read.title)}</a></li>`).join('')}</ul>`
+    : ''}</div>`;
+}
+
+export function renderMarketIndicatorMain(indicator, series, lang, available = availableIndicatorCodes([]), context = {}) {
   const key = lang === 'en' ? 'en' : 'ko';
   const copy = INDICATOR_COPY[key];
   const base = COPY[key];
@@ -1933,6 +2417,9 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
   const related = listedIndicators(available).filter(item => item.code !== indicator.code)
     .map(item => `<a href="${marketIndicatorPath(item.code, key)}">${html(INDICATOR_SHORT_NAMES[key][item.code])}</a>`).join('');
   const dashboardPath = key === 'en' ? '/en/market/' : '/market/';
+  const guide = INDICATOR_GUIDES[indicator.code] || null;
+  const latestBlock = guide ? guideLatestBlock(context.latest, key) : '';
+  const aboutBody = guide ? guideAboutBody(guide, key, context.posts) : '';
 
   return `<main id="market-date-root" class="market-date-page market-indicator-page" data-market-indicator="${indicator.slug}">
   ${pageHead({
@@ -1944,8 +2431,10 @@ export function renderMarketIndicatorMain(indicator, series, lang, available = a
     meta: [`${copy.basis[indicator.code] || copy.basis[indicator.kind]}${INDICATOR_UNITS[key][indicator.code] ? ` · ${INDICATOR_UNITS[key][indicator.code]}` : ''}`]
   })}
   <div class="market-wrap market-dashboard">
+    ${latestBlock}
     ${section(1, copy.sections[0], `<div class="indicator-stats">${tiles}</div>`)}
     ${series.length > 1 ? section(2, copy.sections[1], indicatorChart(series, indicator, fmt, copy, key)) : ''}
+    ${aboutBody ? section(series.length > 1 ? 3 : 2, guide[key].title, aboutBody) : ''}
     <p class="unit-note indicator-table-note">${html(indicator.kind === 'us' ? copy.usDates : indicator.kind === 'asia' ? copy.localDates : indicator.kind === 'kofia' ? copy.kofiaDates : indicator.kind === 'funds' ? copy.fundsDates : copy.krxDates)}</p>
 ${monthBlocks}
     <nav class="indicator-links" aria-label="${html(copy.related)}"><h2>${html(copy.related)}</h2><div>${related}</div></nav>
@@ -1955,7 +2444,7 @@ ${monthBlocks}
 </main>`;
 }
 
-export function marketIndicatorPageHtml(shell, indicator, series, lang, available = availableIndicatorCodes([])) {
+export function marketIndicatorPageHtml(shell, indicator, series, lang, available = availableIndicatorCodes([]), context = {}) {
   const key = lang === 'en' ? 'en' : 'ko';
   const title = marketIndicatorTitle(indicator, series, key);
   const description = marketIndicatorDescription(indicator, series, key);
@@ -1979,7 +2468,7 @@ export function marketIndicatorPageHtml(shell, indicator, series, lang, availabl
         { name: INDICATOR_NAMES[key][indicator.code], url: canonical }
       ]
     }),
-    main: renderMarketIndicatorMain(indicator, series, key, available)
+    main: renderMarketIndicatorMain(indicator, series, key, available, context)
   });
 }
 
@@ -2019,6 +2508,14 @@ export async function loadDomesticRateIndicator(env, { budgetMs = MARKET_DATE_TI
     const rows = (result?.results || []).filter(row => ISO_DATE.test(String(row?.market_date || '')));
     return { days, rows };
   })(), budgetMs);
+}
+
+/** A final record's own one-line takeaway ({ ko, en }), or null. */
+export async function loadRecordTakeaway(env, date) {
+  if (!env?.COMMENTS_DB || !ISO_DATE.test(String(date || ''))) return null;
+  const db = await ensureMarketTable(env, { readOnly: true });
+  const row = await db.prepare(`SELECT takeaway_ko, takeaway_en FROM ${TABLE_NAME} WHERE market_date = ? AND status = 'final' LIMIT 1`).bind(date).first();
+  return row ? { ko: String(row.takeaway_ko || ''), en: String(row.takeaway_en || '') } : null;
 }
 
 /**

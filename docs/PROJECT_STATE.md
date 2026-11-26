@@ -103,7 +103,9 @@ reports and the glossary together. All are in the first HTML; none edits a
 report file.
 - **Footer** (`functions/_footer.js`, on every page): 날짜별 마감 기록
   (`/market/archive/`, which lists every session page and every indicator page),
-  업종·테마 (`/market/sectors/`) and 용어 사전 (`/basics/glossary/`). After changing
+  업종·테마 (`/market/sectors/`), 투자자별 수급 (`/market/investor-flows/`) and 용어 사전 (`/basics/glossary/`).
+  Under 팔로우 it links RSS, LinkedIn and Threads (`SOCIAL_PROFILES` in `_footer.js`, also the
+  site's `sameAs` in structured data). After changing
   the footer run `node scripts/sync-static-footers.mjs`.
 - **Home strip**: each of the five figures links to its history page
   (`/market/kospi/`, `kosdaq`, `usdkrw`, `us10y`, `gold`), in the shipped
@@ -299,6 +301,21 @@ Preview hosts remain blocked, and all non-Market mutation APIs keep their existi
   - Linked from `/market/`, each session page and the archive; listed in the sitemap.
   - The figures are index price moves, not investor flows, and the page says so.
   - English names for all 85 stored KRX sector/theme index codes live in `assets/locale.js` (`KRX_GROUP_NAMES`, `krxGroupName`), used by the English session, sectors and 1W/1M views. `tests/krx-group-names.test.mjs` checks the list.
+- **Investor flows**: `/market/investor-flows/` and `/en/market/investor-flows/` (2026-11-26).
+  - Net buying by foreign, institutional and retail investors, from the final Market Close rows' `krx_investor_trading`. Nothing new is collected.
+  - The page shows:
+    - the newest session, including the KOSPI 200 futures row;
+    - the last five published sessions day by day, for KOSPI and KOSDAQ, with a total;
+    - the month so far;
+    - foreign net buying by month;
+    - a reading guide written like `INDICATOR_GUIDES` (`FLOWS_GUIDE`).
+  - Sums add published sessions only. Each month counts its KRX trading days with `functions/_trading-calendar.js`, from the 1st (or, in the first month on record, from the first record) to its last record. A month missing a record shows "published / KRX trading days", so it is never passed off as KRX's own monthly total. A session without a figure is left out, and a sum over a missing cell is shown as `--`.
+  - The page answers 404 when the newest final session has no KOSPI foreign figure.
+  - Linked from:
+    - the footer (`node scripts/sync-static-footers.mjs`);
+    - the links under TODAY (static shell and `assets/market-close.js`);
+    - each session page and the archive.
+  - Listed in the sitemap and allowed by `scripts/audit-seo.mjs`.
 - **Indicator daily histories**: `/market/{slug}/` and `/en/market/{slug}/` for the 32 instruments in `functions/_market-indicators.js` (slug = code in lower case: kospi, kosdaq, nasdaq, dow, sp500, nikkei225, shanghai, taiex, sox, vix, vkospi, us10y, ktb3y, ktb10y, corpaa3y, cd91, usdkrw, jpykrw, cnykrw, eurkrw, dxy, usdjpy, wti, brent, natgas, gold, silver, bitcoin; COMEX_COPPER is `copper`).
   - The three `funds` ones (DEPOSITS `deposits`, CREDIT `margin-loans`, FORCED_SALE `forced-selling`, kind `funds`) read Market Funds the same way:
     - amounts in 조원/억원 (KRW tn/bn);
@@ -310,6 +327,11 @@ Preview hosts remain blocked, and all non-Market mutation APIs keep their existi
   - VKOSPI (website #239 and publisher #18, live since 2026-11-22; first value 2026-11-23; kind `krxvol`, beside VIX in `rates_fx_volatility`) is optional the same way. It is KRX's 코스피 200 변동성지수: the derivatives-session close (15:45 KST, from KOSPI 200 options) of the session itself, read by the collector from KRX Index after 16:00 KST. Its page shows the KRX close with the day's high and low, changed against KRX's previous close.
   - The Asian indices (website #241 and publisher #19, live since 2026-11-22; first values 2026-11-23; kind `asia`, after SP500 in `indices`: NIKKEI225 `^N225`, SHANGHAI `000001.SS`, TAIEX `^TWII`) are optional the same way. Each value is the local regular-session close (Tokyo 15:30, Shanghai 15:00 = 16:00 KST, Taipei 13:30 = 14:30 KST) of the latest local session that ended on or before the KRX date, dated that session. No local calendars are kept: a local holiday carries the previous close with its own date (cards add 현지 휴장 / Local holiday), and the receiver accepts a `source_date` from 14 days before the KRX date up to it (`LOCAL_SESSION_MAX_LAG_DAYS` in `_freshness.js`). History pages list each local session once, like the U.S. ones. Shanghai close source (2026-11-25): SSE runs a closing call auction 14:57–15:00 CST and Yahoo confirms its close only around 16:20 KST, after the 16:05 record, so the collector (publisher `fix/shanghai-close-fallback`) takes the same session's close from Tencent Securities' real-time quote (`텐센트 증권 실시간 시세 · sh000001`) when Yahoo has not confirmed it: same date, quoted at or after 15:01 CST, and Tencent's previous close equal to Yahoo's previous session. The session page and TODAY then list Tencent Securities among the sources, and the Shanghai history page names both.
   - Server-rendered in `functions/_market-date-page.js` from the same final D1 rows (one `json_extract` per page); nothing new is collected.
+  - **Guides** (`INDICATOR_GUIDES`, 2026-11-26: KOSPI (#268), then KOSDAQ, VKOSPI, USD/KRW and investor deposits). Only hand-written pages for indicators people search for get one; never every indicator. A guided page adds:
+    - **At the top:** the newest session's one-line takeaway. The source is the record's own line, else the same day's Daily, by the share card's rule (`cardTakeaway`). It links that session's full record and its Daily report. The deposits page (a Market Funds page) has no such block: KOFIA publishes a day later, so its newest day is not the session's.
+    - **After the chart:** an "about" section ("코스피란" / "What is the KOSPI?" and so on). The USD/KRW guide says plainly that its value is Hana Bank's 15:30 reference rate, not the FX market close. Its paragraphs link glossary terms with `[[text|term]]`. Related Market Basics reads are named by Korean post id, and the English page links their translations.
+    - A test checks that every linked term exists in that language's glossary, and that every read resolves.
+    - The line and the posts fail soft: without them, the block still links the session.
   - Each page: the latest value, 1-week / 1-month / since-start changes, record high and low, a line chart (SVG plot, HTML labels, a native hover per day), and every value by month linking to the session record.
   - What a value is depends on `kind`: `krx` KRX close; `krxvol` the KRX derivatives close (VKOSPI); `asia` an Asian index's local close dated by its local session, listed once; `us` the U.S. close dated by its U.S. session (`source_date`), listed once even when two records carry it; `fx` (USD, JPY, CNY, EUR against KRW) the 15:30 Hana Bank reference rate, changed against the previous fixing (not the payload's live-quote change); `snapshot` (DXY, USD/JPY, WTI, Brent, natural gas, gold, silver, copper, Bitcoin) the quote when the record was made, changed against the previous record because the provider's previous close is a settlement. Commodity pages name their unit (per barrel, MMBtu, troy ounce, pound).
   - Linked from every dashboard and session card name, the 1W/1M rows, and the archive's "지표별 일별 기록" list (`#indicators`); listed in the sitemap (28 URLs, up to 58 once the eleven optional ones have values and Domestic Rates are stored). D1 budget 5 s, then 503; no data 404.
@@ -429,6 +451,16 @@ report HTML at request time (a `seoTitle` is read once, at publish, and stored).
 환율`, worded for the "오늘 한국 증시 현황" queries seen in Naver Search Advisor, owner request
 2026-10-25) so it does not compete with dated Daily pages. og:title, twitter:title, canonical,
 hreflang and the JSON-LD headline are unchanged; the JSON-LD description matches the meta tag.
+
+`/market/` and `/en/market/` (TODAY) also put the newest final session's dashboard into the HTTP response (2026-11-26).
+- **Builder.** `functions/_initial-html.js` (`marketTodayEdits`) fills `#market-dashboard-view` using the session page's renderer (`renderMarketDateMain(…, { dashboardOnly: true })`), and sets `data-ssr-date`. Market funds follow TODAY's rule (`fundsMaxAgeDays: 10`).
+- **Before this, crawlers that do not run scripts saw placeholder cards with no figures.**
+- **The script still draws TODAY over it,** adding Global Latest, the phone board tabs and the flow toggle. It leaves the server's figures undimmed while it loads.
+- **Not covered:** `?date=` and `?view=` views, and missing or failing D1, keep the static shell.
+- **Measured on a slow-4G, 4×-CPU phone profile:**
+  - the figures appear at about 1.4 s instead of 2.1–2.3 s;
+  - first paint moves from about 0.7 s to about 1.45 s, because the HTML grows from 28 KB to about 85 KB;
+  - CLS stays 0.
 
 `/disclosures/`, `/en/disclosures/`, `/calendar/` and `/en/calendar/` render their core content
 into the HTTP response. `functions/api/disclosures/_feed-data.js` (`loadDisclosureFeed`) and
@@ -706,6 +738,8 @@ Important date semantics:
 Files under `reports/` are standalone HTML documents that may contain their own CSS, JavaScript, interactions, embedded images, tooltips, fold/unfold behavior, and animations.
 
 `functions/_middleware.js` intercepts HTML responses under `/reports/` and injects `/assets/report-shell.js`. It also writes the top bar's 52 px spacer (`REPORT_NAV_SPACER`, `#mrs-nav-spacer`) as the first child of `<body>` in the first HTML, and the shell reuses that node (2026-11-24). Before this the shell created the spacer when it ran at the end of the body, so a visitor without the script cached saw the report paint and then drop 52 px: Cloudflare Web Analytics recorded CLS 0.11–1.33 on report pages from that drop. Keep the spacer height equal to `BAR_H` in `report-shell.js`.
+
+Large inline images (2026-11-26, `functions/_report-images.js`). Uploaded reports carried their pictures as base64 `data:` URIs: 74% of all report bytes, up to 2.8 MB per file. The middleware now moves each `<img>` whose base64 is at least 150,000 characters (about 110 KB; 220 images in 183 of 365 reports) to `/report-img/<hash>.<ext>?r=<report path>`, in both the HTMLRewriter path and the string fallback. `functions/report-img/[file].js` finds that image again in the report file by its SHA-256 prefix, and serves the bytes with `public, max-age=31536000, immutable` (and the edge cache). The report files stay as uploaded. Smaller images stay inline: on Note 13 a few-hundred-KB report with its cover inside painted sooner than with a separate request. Hints never override the report: `decoding="async"`; `fetchpriority="high"` on the document's first `<img>`; `loading="lazy"` from the fourth moved image; the intrinsic ratio as `--mrs-ar`, applied by a zero-specificity `:where()` rule in the head, because an inline `aspect-ratio` changed image heights in Research NO.10 on phones. Measured on a slow-4G, 4×-CPU phone profile: 08-24 Daily first paint 3.9 s → 0.7 s, LCP 3.9 → 3.6 s; Research NO.10 parsed to the end in 3.6 s instead of 15.3 s; layouts identical to Production at 390 and 1280 px.
 
 The middleware also stops a report's Google Fonts stylesheet from holding back the first paint (2026-11-25). Each `<link rel="stylesheet">` to `fonts.googleapis.com/css` or `/css2` becomes `rel="preload" as="style"`, which turns itself into the stylesheet on load. A `<noscript>` copy follows it. A link with its own `media` or `disabled` attribute is left alone. Both the HTMLRewriter path and the string fallback do this (`isGoogleFontsStylesheet`, `deferFontStylesheets`).
 

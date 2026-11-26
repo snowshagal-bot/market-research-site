@@ -1,3 +1,10 @@
+// The editor's public profiles: linked under Follow on every page and named as
+// the site's sameAs in structured data (functions/_seo.js re-exports this).
+export const SOCIAL_PROFILES = Object.freeze([
+  'https://www.linkedin.com/in/sung-oh-choi-628a5b431/',
+  'https://www.threads.com/@snowshagal'
+]);
+
 export function siteFooter(lang = 'ko', { reportTranslationHref = '' } = {}) {
   const isEn = lang === 'en';
   const prefix = isEn ? '/en' : '';
@@ -26,6 +33,7 @@ export function siteFooter(lang = 'ko', { reportTranslationHref = '' } = {}) {
         market: 'Market',
         marketArchive: 'Close Archive',
         marketSectors: 'Sectors &amp; Themes',
+        marketFlows: 'Investor Flows',
         disclosures: 'Disclosure',
         calendar: 'Calendar',
         about: 'About',
@@ -43,6 +51,7 @@ export function siteFooter(lang = 'ko', { reportTranslationHref = '' } = {}) {
         market: '마켓',
         marketArchive: '날짜별 마감 기록',
         marketSectors: '업종·테마',
+        marketFlows: '투자자별 수급',
         disclosures: '공시',
         calendar: '캘린더',
         about: '소개',
@@ -87,6 +96,7 @@ export function siteFooter(lang = 'ko', { reportTranslationHref = '' } = {}) {
             <a href="${prefix}/market/">${labels.market}</a>
             <a href="${prefix}/market/archive/">${labels.marketArchive}</a>
             <a href="${prefix}/market/sectors/">${labels.marketSectors}</a>
+            <a href="${prefix}/market/investor-flows/">${labels.marketFlows}</a>
             <a href="${prefix}/disclosures/">${labels.disclosures}</a>
             <a href="${prefix}/calendar/">${labels.calendar}</a>
           </nav>
@@ -95,6 +105,8 @@ export function siteFooter(lang = 'ko', { reportTranslationHref = '' } = {}) {
           <p class="site-footer-heading" aria-hidden="true">${followHeading}</p>
           <nav class="site-footer-nav" aria-label="${followNavAria}">
             <a href="${feedHref}" type="application/atom+xml">RSS</a>
+            <a href="${SOCIAL_PROFILES[0]}" rel="me noopener">LinkedIn</a>
+            <a href="${SOCIAL_PROFILES[1]}" rel="me noopener">Threads</a>
           </nav>
         </div>
         <div class="site-footer-group">
