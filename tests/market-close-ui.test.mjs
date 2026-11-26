@@ -144,10 +144,11 @@ test('FX shows its 15:30 fixing only, and US10Y basis-point changes render witho
     const target = { innerHTML: '' };
     runtime.render(data, target);
     const row = code => target.innerHTML.slice(target.innerHTML.indexOf(`data-code="${code}"`), target.innerHTML.indexOf('</tr>', target.innerHTML.indexOf(`data-code="${code}"`)));
-    // The fixing is the figure and its basis; the record's other reading
+    // Hana Bank's posted rate is the figure and its basis; the record's other reading
     // (`current`, read at capture without a time of its own) is not shown as "현재".
-    assert.match(row('USDKRW'), lang === 'ko' ? /15:30 확정[\s\S]*1,372\.50원[\s\S]*▼ 7\.95/ : /15:30 fixing[\s\S]*₩1,372\.50[\s\S]*▼ 7\.95/);
-    assert.match(row('JPYKRW'), lang === 'ko' ? /15:30 확정[\s\S]*860\.64원[\s\S]*▼ 7\.99/ : /15:30 fixing[\s\S]*₩860\.64[\s\S]*▼ 7\.99/);
+    // The move is the record's own here; the API normalizes it (tests/market-krw-pairs.test.mjs).
+    assert.match(row('USDKRW'), lang === 'ko' ? /하나은행 고시[\s\S]*1,372\.50원[\s\S]*▼ 7\.95/ : /Hana Bank rate[\s\S]*₩1,372\.50[\s\S]*▼ 7\.95/);
+    assert.match(row('JPYKRW'), lang === 'ko' ? /하나은행 고시[\s\S]*860\.64원[\s\S]*▼ 7\.99/ : /Hana Bank rate[\s\S]*₩860\.64[\s\S]*▼ 7\.99/);
     for (const code of ['USDKRW', 'JPYKRW']) {
       assert.doesNotMatch(row(code), lang === 'ko' ? /현재|장중|mk-fixing/ : /Latest|Intraday|mk-fixing/, `${lang} ${code}`);
     }
@@ -189,7 +190,7 @@ test('the English page shows the basis, sources and short-ratio scope in English
     const html = target.innerHTML;
     assert.match(html, new RegExp(`<span class="state-chip">${label}</span>`));
     assert.match(html, /<span>Futures \(2612\)<\/span>/);
-    assert.match(html, /Sources: KRX, Naver Pay index quotes, Naver Finance daily index, .*Hana Bank 15:30 reference rate \(Naver Finance\) \+ Yahoo Finance latest/);
+    assert.match(html, /Sources: KRX, Naver Pay index quotes, Naver Finance daily index, .*Hana Bank posted rate \(Naver Finance\)/);
     assert.match(html, /Value ratio is against KRX\+NXT combined regular-session turnover\./);
     const stats = html.slice(html.indexOf('class="mk-stats"'), html.indexOf('class="mk-details"'));
     assert.ok(stats.includes('Basis'), 'the basis stat is in the stats card');

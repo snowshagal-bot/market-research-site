@@ -224,7 +224,7 @@ export function publishedStripItems(payload, lang, overlay = null) {
   const latest = overlay?.items || {};
   const marketDate = ISO_DATE.test(String(payload?.meta?.market_date || '')) ? payload.meta.market_date : '';
   const overlaid = spec => (api.isGlobalLatestCode(spec.key) && latest[spec.key]) || null;
-  const basis = (kind, source) => api.todayStripBasis(kind, source, lang);
+  const basis = (kind, source, code) => api.todayStripBasis(kind, source, lang, code);
   const items = STRIP_ITEMS.map(spec => {
     const quote = payload?.[spec.group]?.[spec.key];
     const snapshot = stripFigures(spec, quote, lang);
@@ -238,7 +238,7 @@ export function publishedStripItems(payload, lang, overlay = null) {
     }
     if (!snapshot) return { label: spec.label, historyPath, value: '--', change: '', direction: 'flat', basis: '' };
     const kind = api.isGlobalLatestCode(spec.key) ? 'snapshot' : 'krx';
-    return { label: spec.label, historyPath, ...snapshot, basis: basis(kind, kind === 'krx' ? { source_date: marketDate } : quote) };
+    return { label: spec.label, historyPath, ...snapshot, basis: basis(kind, kind === 'krx' ? { source_date: marketDate } : quote, spec.key) };
   }).filter(Boolean);
   return items.length === STRIP_ITEMS.length ? items : null;
 }

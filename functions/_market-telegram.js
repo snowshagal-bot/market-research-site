@@ -7,7 +7,7 @@
 // and TELEGRAM_CHAT_ID, or without the table, nothing is sent and nothing else
 // changes. Nothing here throws, and the bot token never leaves this file: it
 // is not logged, stored or returned.
-import { TABLE_NAME } from './api/market/_shared.js';
+import { TABLE_NAME, normalizeKrwPairs } from './api/market/_shared.js';
 import { kstParts } from './_trading-calendar.js';
 import { readMarketCardImage } from './_market-card.js';
 import { marketChannelCaption } from './_market-share-text.js';
@@ -79,7 +79,7 @@ export async function marketPostCaption(env, date) {
   try {
     const record = await env.COMMENTS_DB.prepare(`SELECT status, payload_json, takeaway_ko FROM ${TABLE_NAME} WHERE market_date = ? LIMIT 1`).bind(date).first();
     if (!record || record.status !== 'final') return '';
-    return marketChannelCaption(JSON.parse(record.payload_json), { takeaway: record.takeaway_ko });
+    return marketChannelCaption(normalizeKrwPairs(JSON.parse(record.payload_json)), { takeaway: record.takeaway_ko });
   } catch (_) {
     return '';
   }
@@ -114,7 +114,7 @@ export async function ensureMarketTelegramPost(env, date, { now = new Date(), fe
     }
     claimed = true;
 
-    const caption = marketChannelCaption(JSON.parse(record.payload_json), { takeaway: record.takeaway_ko });
+    const caption = marketChannelCaption(normalizeKrwPairs(JSON.parse(record.payload_json)), { takeaway: record.takeaway_ko });
     const card = await readMarketCardImage(env, date, 'ko', record.generated_at);
     const result = await sendPost(env, caption, card, fetchImpl);
     if (!result.ok) {

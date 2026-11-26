@@ -878,14 +878,14 @@ test('B3 1-5. HOME: KOSPI/KOSDAQ stay Market Close; USD/KRW and US 10Y show fres
     ko: {
       KOSPI: ['7,080.92', '▲ 0.86%', '9/23 · 종가'],
       KOSDAQ: ['844.48', '▼ 0.19%', '9/23 · 종가'],
-      'USD/KRW': ['1,354.40', '▼ 13.0원', '9/25 · 장중'],
+      'USD/KRW': ['1,354.40', '▼ 13.0원', '9/25 · 실시간(야후)'],
       'US 10Y': ['5.18%', '▲ 2bp', '9/25 · 종가'],
       GOLD: ['$4,356.40', '▲ 0.61%', '9/23 · 마감 시점']
     },
     en: {
       KOSPI: ['7,080.92', '▲ 0.86%', 'SEP 23 · CLOSE'],
       KOSDAQ: ['844.48', '▼ 0.19%', 'SEP 23 · CLOSE'],
-      'USD/KRW': ['1,354.40', '▼ ₩13.0', 'SEP 25 · INTRADAY'],
+      'USD/KRW': ['1,354.40', '▼ ₩13.0', 'SEP 25 · LIVE (YAHOO)'],
       'US 10Y': ['5.18%', '▲ 2bp', 'SEP 25 · CLOSE'],
       GOLD: ['$4,356.40', '▲ 0.61%', 'SEP 23 · KRX CLOSE']
     }
@@ -916,12 +916,12 @@ test('B3 6-8. HOME: stale, future and malformed Global Latest items fall back on
   assert.ok(stripCells(stale.rendered['today-market-grid'].html).every(cell => cell.basis));
 
   const future = await assertParity({ lang: 'ko', db: await b3Database(futureUsd), now: NOW });
-  assert.deepEqual([cellOf(future.rendered, 'USD/KRW').value, cellOf(future.rendered, 'USD/KRW').basis], ['1,358.70', '9/23 · 마감 시점']);
+  assert.deepEqual([cellOf(future.rendered, 'USD/KRW').value, cellOf(future.rendered, 'USD/KRW').basis], ['1,358.70', '9/23 · 하나은행 고시']);
   assert.equal(cellOf(future.rendered, 'US 10Y').basis, '9/25 · 종가');
 
   const malformed = await assertParity({ lang: 'ko', db: await b3Database(malformedRate), now: NOW });
   assert.deepEqual([cellOf(malformed.rendered, 'US 10Y').value, cellOf(malformed.rendered, 'US 10Y').basis], ['4.97%', '9/22 · 종가']);
-  assert.equal(cellOf(malformed.rendered, 'USD/KRW').basis, '9/25 · 장중');
+  assert.equal(cellOf(malformed.rendered, 'USD/KRW').basis, '9/25 · 실시간(야후)');
 });
 
 test('B3 9. HOME: Global Latest failure (handler error, missing table, timeout) leaves the Market Close strip, with no request after load', async () => {
@@ -945,7 +945,7 @@ test('B3 10. HOME: a single usable item is a partial overlay of that card only',
   const onlyGold = [latestItem('GOLD', 4327.8, 4298, { source_date: '2026-09-25', as_of: '2026-09-25T19:20:00Z', retrieved_at: '2026-09-25T19:20:03Z', data_state: 'intraday' })];
   const { rendered } = await assertParity({ lang: 'en', db: await b3Database(onlyGold), now: NOW });
   assert.deepEqual(stripCells(rendered['today-market-grid'].html).map(cell => [cell.label, cell.basis]), [
-    ['KOSPI', 'SEP 23 · CLOSE'], ['KOSDAQ', 'SEP 23 · CLOSE'], ['USD/KRW', 'SEP 23 · KRX CLOSE'], ['US 10Y', 'SEP 22 · CLOSE'], ['GOLD', 'SEP 25 · INTRADAY']
+    ['KOSPI', 'SEP 23 · CLOSE'], ['KOSDAQ', 'SEP 23 · CLOSE'], ['USD/KRW', 'SEP 23 · HANA BANK RATE'], ['US 10Y', 'SEP 22 · CLOSE'], ['GOLD', 'SEP 25 · INTRADAY']
   ]);
   assert.equal(cellOf(rendered, 'GOLD').value, '$4,327.80');
 });

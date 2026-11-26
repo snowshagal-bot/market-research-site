@@ -311,9 +311,10 @@ test('11. MARKET TODAY: fresh Global Latest replaces the global cards, each with
 
   const usdkrw = byName(html, '원/달러');
   assert.equal(usdkrw.value, '1,354.40원');
-  // The 15:30 fixing context is the snapshot's; it is not shown next to a live figure.
-  assert.doesNotMatch(usdkrw.body, /15:30 확정|mk-fixing/);
-  assert.match(usdkrw.state, /^2026\.09\.25 · 장중/);
+  // The record's bank rate context is the snapshot's; it is not shown next to a live figure.
+  assert.doesNotMatch(usdkrw.body, /하나은행 고시|15:30 확정|mk-fixing/);
+  // A live KRW quote says it is live and whose quote it is (2026-11-26).
+  assert.match(usdkrw.state, /^2026\.09\.25 · 실시간\(야후\)/);
 });
 
 test('6-8. MARKET TODAY: stale, future and malformed items keep their snapshot figures, marked as such', async () => {

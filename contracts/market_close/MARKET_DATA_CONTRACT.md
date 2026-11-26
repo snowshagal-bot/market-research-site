@@ -71,7 +71,7 @@ Exporter는 원천 웹 페이지를 직접 파싱하지 않는다. UI와 TXT 저
 - 14개 공개 시장 항목에 최종값과 미래가 아닌 `source_date`가 존재
 - KOSPI·KOSDAQ의 `actual_date`가 `market_date`와 정확히 일치
 - KOSPI·KOSDAQ이 장중 상태가 아니며 OHLC 논리 검증 통과
-- USD/KRW·JPY/KRW의 당일 15:30 KST 하나은행 매매기준율 확정
+- USD/KRW·JPY/KRW의 당일 하나은행 고시 매매기준율(15:30 KST 이전 마지막 회차) 확정
 - KOSPI·KOSDAQ·KOSPI200선물 투자자 수급이 모두 당일 `확정`
 - KOSPI·KOSDAQ 시장 폭이 모두 당일 `확정`
 - 최근 누적 수급이 당일 종료 기준 정확히 5개 거래일·9개 조합
@@ -154,8 +154,8 @@ Exporter는 원천 웹 페이지를 직접 파싱하지 않는다. UI와 TXT 저
 
 | 코드 | 원천 | 섹션 | 기준일 |
 |---|---|---|---|
-| CNYKRW | 하나은행 15:30 매매기준율(네이버) + Yahoo `CNYKRW=X` | `rates_fx_volatility` | 당일 |
-| EURKRW | 하나은행 15:30 매매기준율(네이버) + Yahoo `EURKRW=X` | `rates_fx_volatility` | 당일 |
+| CNYKRW | 하나은행 고시 매매기준율(15:30 이전 마지막 회차, 네이버) + Yahoo `CNYKRW=X` | `rates_fx_volatility` | 당일 |
+| EURKRW | 하나은행 고시 매매기준율(15:30 이전 마지막 회차, 네이버) + Yahoo `EURKRW=X` | `rates_fx_volatility` | 당일 |
 | USDJPY | Yahoo `JPY=X` | `rates_fx_volatility` | 당일 |
 | BRENT | Yahoo `BZ=F` | `commodities_crypto` | 당일 |
 | COMEX_COPPER | Yahoo `HG=F` (COMEX, $/lb) | `commodities_crypto` | 당일 |
@@ -213,7 +213,8 @@ Snowshagal 수신 측은 기존 v1.0.1 payload에 `krx_groups`가 없어도 게�
 
 모든 시장 항목은 같은 공통 형태를 사용한다.
 
-- `close`: 해당 항목의 마감 기준값. 환율은 네이버 금융 하나은행 15:30 KST 확정 매매기준율이다.
+- `close`: 해당 항목의 마감 기준값. 원화 환율은 네이버 금융에 실린 하나은행 고시 매매기준율 가운데 15:30 KST 이전 마지막 회차 값이다. 서울 외환시장 15:30 기준가나 서울외국환중개 공식 매매기준율과 다른 숫자다.
+- 원화 환율의 `change`·`change_pct`: 수집기 값은 Yahoo 현재가 − 전일 고시값(서로 다른 계열)이다. 사이트는 저장된 기록을 읽을 때 `close − previous_close`로 다시 계산한다(`normalizeKrwPairs`, 2026-11-26).
 - `current`: 대시보드 카드의 큰 숫자와 동일한 최종 전달값. 환율은 Yahoo 장중/최근값일 수 있어 `close`와 다를 수 있다.
 - `change`, `change_pct`: 대시보드가 표시하는 `current - previous_close` 산식을 그대로 사용한다.
 - `open`, `high`, `low`: 현재 `MarketSnapshot` 보유값. 제공되지 않으면 `null`이다.
@@ -234,7 +235,7 @@ Snowshagal의 Market Close 화면은 다음 우선순위를 고정 규칙으로 
 | KOSPI·KOSDAQ | `close` | `meta.status=final`, `source_date=market_date`, `data_state=final_close`인 값만 한국시장 종가로 표시한다. `current`를 종가 대신 사용하지 않는다. |
 | 글로벌 지수·금리·변동성·원자재·가상자산 | 한국시장 마감 시점에 payload가 보유한 최근 이용 가능 값 | `data_state=final_close`이면 `close`를 **최근 종가**로 표시하고 실제 `source_date`를 함께 보존한다. `data_state=intraday`이면 `current`를 **장중/최근값**으로 표시하며 종가라고 표기하지 않는다. `as_of`를 기준시각 또는 툴팁에 노출한다. |
 | 해외 휴장 또는 거래일 불일치 | `source_date` 기준 최근값 | `source_date`가 `market_date`와 다르면 **최근 거래일 종가(YYYY-MM-DD)**처럼 실제 거래일을 명시한다. 한국 날짜로 치환하지 않는다. |
-| USD/KRW·JPY/KRW | `close`가 15:30 KST 하나은행 매매기준율 | `current`를 함께 보여줄 경우 **현재 장중값**으로 별도 라벨링한다. 15:30 확정값과 장중값을 혼합하지 않는다. |
+| USD/KRW·JPY/KRW | `close`가 하나은행 고시 매매기준율(15:30 이전 마지막 회차) | 사이트 표기는 「하나은행 고시」. `current`를 함께 보여줄 경우 **현재 장중값**으로 별도 라벨링한다. 고시값과 장중값을 혼합하지 않는다. |
 | `data_state=unavailable` 또는 값이 `null` | `--` | 이전값을 당일 값처럼 대체하지 않는다. `source_date`/`as_of`가 있으면 데이터 기준정보만 보존한다. |
 
 `as_of`는 값의 기준시각이고 `retrieved_at`은 수집시각이다. 홈페이지는 수집시각이 늦다는 이유로 장중값을 종가로 승격해서는 안 된다.

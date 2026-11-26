@@ -247,8 +247,8 @@ test('a past date reads like its own page: the same figure and the same basis on
     const page = rows(serverHtml(lang));
     assert.deepEqual(page.map(row => [row.code, row.value, row.state]), history.map(row => [row.code, row.value, row.state]), lang);
     const state = code => history.find(row => row.code === code).state;
-    // The fixing is the figure; no second "current" reading, no "장중" on it.
-    assert.equal(state('USDKRW'), lang === 'ko' ? '2026.08.28 · 15:30 확정' : 'Aug 28, 2026 · 15:30 fixing');
+    // Hana Bank's posted rate is the figure; no second "current" reading, no "장중" on it.
+    assert.equal(state('USDKRW'), lang === 'ko' ? '2026.08.28 · 하나은행 고시' : 'Aug 28, 2026 · Hana Bank rate');
     // A figure still trading at capture carries the record's capture time (14:05:03 ICT = 16:05 KST), never "종가".
     assert.equal(state('GOLD'), lang === 'ko' ? '2026.08.28 · 장중 · 16:05 KST' : 'Aug 28, 2026 · Intraday · 16:05 KST');
     // A close is a close of its own date.

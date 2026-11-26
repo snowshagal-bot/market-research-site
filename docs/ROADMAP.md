@@ -10,6 +10,21 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+- **USD/KRW: one definition across the site (기초 데이터 가이드 3편, 2026-11-27)**.
+  3편 teaches that the Seoul FX market's 15:30 rate, the official 매매기준율 (Seoul Money Brokerage)
+  and a bank's posted rate are three different numbers. The site's KRW pairs are Hana Bank's posted
+  rate from its last round before 15:30 KST (Naver Finance).
+  - **Plan B, done in code 2026-11-26:**
+    - honest labels everywhere (하나은행 고시 / Hana Bank rate, never "15:30 매매기준율");
+    - one move on every page (close − previous close, `normalizeKrwPairs`);
+    - the home strip's live Yahoo quote only before that day's record, labeled 실시간(야후).
+  - **Plan A, remaining:** USD/KRW becomes ECOS 731Y003/0000003 「원/달러(종가 15:30)」 (news and Bank of Korea statistics use it). Steps:
+    - The owner issues a free ECOS API key and sets it as a user environment variable on the collector PC. Never commit it.
+    - Measure when ECOS publishes the day's value. It was present by 17:23 KST on 11-26; the 11-27 measurement is running.
+    - If it is not there by 16:05, show 잠정 and confirm later. Market Close records are immutable, so the confirmed value goes in a dataset of its own, like Domestic Rates.
+    - Backfill from 2026-08-25.
+  - **Link, remaining:** after 3편 is live, link "이 숫자는 몇 시 값인가" from `/market/usdkrw/`, the session pages' FX note and TODAY's USD/KRW card (EN pages → the `_EN` version).
+
 - **Market Funds: KOFIA deposits, margin loans, forced selling (live in Production since 2026-11-25)**:
   investor deposits, margin loans (total, KOSPI, KOSDAQ), unpaid margin and forced selling of each
   KRX trading day from KOFIA FreeSIS, published by KOFIA a business day later. They are a dataset
@@ -21,8 +36,10 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
   - core `43bf8144` installed, backup `core.pre-market-funds-20261125.exe` (`7c429e77`);
   - backfill: 219 days, 2026-01-02..2026-11-24;
   - Production checks: TODAY card "2026.11.24 기준", the session card, six history pages 200, six sitemap URLs.
+  - Task `시장지표-증시자금` registered 2026-11-26.
+    - KOFIA posted 11-25 on 11-26 between 14:50 and 15:10 KST, so the task runs weekdays 15:30–18:30 KST, every 30 minutes (`-StartAt 13:30` ICT).
+    - Its first run published 11-25.
   Remaining:
-  - Register `시장지표-증시자금` (`register_market_funds_task.ps1 -StartAt …`) at KOFIA's measured release time. The owner approves the time.
   - The owner submits the six new URLs in GSC and Naver.
 
 - **Domestic Rates: KOFIA yields (live in Production since 2026-11-22)**: KTB 3Y and 10Y,
