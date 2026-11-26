@@ -51,7 +51,9 @@ test('the first query shows metadata results at once and requests only this loca
 
 /* 3 */
 test('a body-only match appears once the body arrives', async () => {
-  for (const [lang, query] of [['ko', '6거래일'], ['en', 'indicating']]) {
+  // A word only report bodies carry (no title, summary or tag uses it); 6거래일 stopped
+  // being one when a 2026-11-26 Market Basics post put it in its metadata.
+  for (const [lang, query] of [['ko', '잔존만기'], ['en', 'indicating']]) {
     const search = await bootSearch({ lang, files });
     await search.open();
     await search.settle(META_SRC);

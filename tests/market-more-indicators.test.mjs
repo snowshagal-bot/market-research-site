@@ -236,7 +236,7 @@ test('session pages show the seven rows with their own units and link those with
   const fxBoard = ko.slice(ko.indexOf('data-board="fx"'), ko.indexOf('</section>', ko.indexOf('data-board="fx"')));
   const order = [...fxBoard.matchAll(/<tr class="mk-row" data-code="([A-Z0-9_]+)"/g)].map(m => m[1]);
   assert.deepEqual(order, ['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW', 'DXY', 'USDJPY']);
-  assert.match(ko, /href="\/market\/cnykrw\/">원\/위안<\/a>[\s\S]*?200\.26원[\s\S]*?15:30 확정/);
+  assert.match(ko, /href="\/market\/cnykrw\/">원\/위안<\/a>[\s\S]*?200\.26원[\s\S]*?하나은행 고시/);
   assert.match(ko, /href="\/market\/usdjpy\/">엔\/달러<\/a>[\s\S]*?158\.51엔/);
   assert.match(ko, /href="\/market\/copper\/">구리 선물<\/a>[\s\S]*?\$5\.477[\s\S]*?▼ −0\.148/);
   assert.match(ko, /href="\/market\/natgas\/">천연가스<\/a>[\s\S]*?\$3\.748/);
@@ -341,8 +341,8 @@ test('TODAY shows six FX and seven commodity rows, and keeps the old three and t
     // Natural gas failed: the card stays, without a link to a page that may not exist yet.
     assert.doesNotMatch(html, /\/market\/natgas\//);
     assert.match(html, lang === 'ko' ? /천연가스[\s\S]*?데이터 없음/ : /Natural Gas[\s\S]*?Unavailable/);
-    // KRW pairs: the 15:30 fixing only. The record's other reading has no time of its own and is not shown.
-    assert.match(html, lang === 'ko' ? /15:30 확정[\s\S]*?200\.26원/ : /15:30 fixing[\s\S]*?₩200\.26/);
+    // KRW pairs: Hana Bank's posted rate only. The record's other reading has no time of its own and is not shown.
+    assert.match(html, lang === 'ko' ? /하나은행 고시[\s\S]*?200\.26원/ : /Hana Bank rate[\s\S]*?₩200\.26/);
     assert.doesNotMatch(html, /201\.68/);
     assert.match(html, lang === 'ko' ? /158\.51엔/ : /¥158\.51/);
     assert.match(html, /\$5\.477[\s\S]*?▼ −0\.148/);

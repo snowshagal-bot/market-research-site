@@ -27,7 +27,7 @@ from the calendar) follow the owner's mockup. Page head "11월 23일 한국 증�
 마감" with one meta line; a date bar (previous / the date, which opens the
 calendar / next, then 최근 마감 · 1W · 1M and 전체 기록); KOSPI and KOSDAQ cards
 with the 20-session trend and the day's range; "그날의 요약" (KOSPI move,
-breadth, foreign flow, the USD/KRW 15:30 fixing, VIX); 한국 시장 (investor flows
+breadth, foreign flow, USD/KRW as Hana Bank's posted rate before 15:30, VIX); 한국 시장 (investor flows
 with bars and a 당일 / 최근 5거래일 toggle, breadth, turnover · program · basis ·
 short selling with the top-5 lists in a disclosure, top 10); and one quote board
 per group (해외 증시 · 변동성, 금리 with the KOFIA yields, 환율, 원자재 · 가상자산;
@@ -74,9 +74,18 @@ Price basis (2026-11-23, after a Codex review): a past date opened on TODAY
 (`/market/?date=…`) reads exactly like that date's own page, row by row (value and
 basis line), and the parity test checks it. The basis of a record figure is the
 same on both:
-- **KRW pairs** (USD/KRW, JPY/KRW, CNY/KRW, EUR/KRW): the 15:30 fixing only, labeled
-  15:30 확정 / 15:30 fixing. The record's other reading (`current`, read when the
-  record was made, with no time of its own) is no longer shown as "현재 ○○원".
+- **KRW pairs** (USD/KRW, JPY/KRW, CNY/KRW, EUR/KRW): the record's `close` only.
+  - **What the value is:** Hana Bank's posted rate from its last round before 15:30 KST (via Naver Finance).
+  - **Labels:** 하나은행 고시 / Hana Bank rate (2026-11-26). It is never called "15:30 매매기준율" or a "15:30 fixing". 기초 데이터 가이드 3편 teaches that the 15:30 rate, the official 매매기준율 and a bank's posted rate are three different numbers.
+  - **The move:** `close − previous_close`, the same series on the previous business day.
+    - The rule lives in `normalizeKrwPairs` (`functions/api/market/_shared.js`). Every reader of a stored record applies it: `/api/market/latest` and `/date`, the session pages, TODAY's first HTML, the share text and the Telegram caption.
+    - The collector's own `change` is a Yahoo quote at capture minus the previous posted rate, two series, so it is not shown.
+  - The record's other reading (`current`, read when the record was made, with no time of its own) is not shown as "현재 ○○원".
+  - **Global Latest:**
+    - Its live Yahoo quote for USD/KRW or JPY/KRW stands in only before that KST day's record exists (`record_covers_session` in `globalLatestItemStatus`).
+    - It is labeled 실시간(야후) / Live (Yahoo). Its move is against Yahoo's own previous close.
+    - After 16:05 the home strip and TODAY show the record, as the session page does.
+  - **Planned:** USD/KRW moves to the Seoul FX market's 15:30 rate from ECOS (731Y003/0000003). See ROADMAP.
 - **A figure still trading at capture** (`data_state` intraday: dollar index,
   commodities, crypto): 장중 · 16:10 KST / Intraday · 16:10 KST, the record's own
   capture time (`retrieved_at`, `intradayCaptureTime` in `assets/locale.js`), with
@@ -329,7 +338,7 @@ Preview hosts remain blocked, and all non-Market mutation APIs keep their existi
   - Server-rendered in `functions/_market-date-page.js` from the same final D1 rows (one `json_extract` per page); nothing new is collected.
   - **Guides** (`INDICATOR_GUIDES`, 2026-11-26: KOSPI (#268), then KOSDAQ, VKOSPI, USD/KRW and investor deposits). Only hand-written pages for indicators people search for get one; never every indicator. A guided page adds:
     - **At the top:** the newest session's one-line takeaway. The source is the record's own line, else the same day's Daily, by the share card's rule (`cardTakeaway`). It links that session's full record and its Daily report. The deposits page (a Market Funds page) has no such block: KOFIA publishes a day later, so its newest day is not the session's.
-    - **After the chart:** an "about" section ("코스피란" / "What is the KOSPI?" and so on). The USD/KRW guide says plainly that its value is Hana Bank's 15:30 reference rate, not the FX market close. Its paragraphs link glossary terms with `[[text|term]]`. Related Market Basics reads are named by Korean post id, and the English page links their translations.
+    - **After the chart:** an "about" section ("코스피란" / "What is the KOSPI?" and so on). The USD/KRW guide says, in 3편's terms, that its value is neither the 15:30 rate nor the official 매매기준율, but Hana Bank's posted rate (은행 고시 매매기준율) from its last round before 15:30. Its paragraphs link glossary terms with `[[text|term]]`. Related Market Basics reads are named by Korean post id, and the English page links their translations.
     - A test checks that every linked term exists in that language's glossary, and that every read resolves.
     - The line and the posts fail soft: without them, the block still links the session.
   - Each page: the latest value, 1-week / 1-month / since-start changes, record high and low, a line chart (SVG plot, HTML labels, a native hover per day), and every value by month linking to the session record.

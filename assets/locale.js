@@ -530,6 +530,11 @@
   const DAY_MS = 24 * 60 * 60 * 1000;
   const STRICT_DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
 
+  // The KRW pairs Global Latest carries (Yahoo quotes) whose record is a bank's posted rate.
+  const KRW_PAIR_LATEST = new Set(['USDKRW', 'JPYKRW']);
+  // Every KRW pair a record carries (Hana Bank's posted rate, last round before 15:30 KST).
+  const KRW_PAIR_CODES = new Set(['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW']);
+
   function isGlobalLatestCode(code) {
     return typeof code === 'string' && Object.prototype.hasOwnProperty.call(GLOBAL_LATEST_POLICY, code);
   }
@@ -593,6 +598,15 @@
     } else if (age > policy.intradayMinutes * 60 * 1000) {
       return { usable: false, reason: 'stale' };
     }
+    // A KRW pair's record is Hana Bank's posted rate for that KST date, the figure
+    // every market page shows. Once that day's record exists, a Yahoo quote from
+    // the same KST date (or earlier) never covers it, so the home strip and TODAY
+    // show what the session page shows; before it, the live quote stands in and
+    // says it is live (2026-11-26).
+    if (snapshotQuote && KRW_PAIR_LATEST.has(item.code) && ISO_DATE.test(String(snapshotQuote.source_date || ''))) {
+      const kstDay = new Date(asOf + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      if (kstDay <= snapshotQuote.source_date) return { usable: false, reason: 'record_covers_session' };
+    }
     if (snapshotQuote) {
       const snapshotRetrieved = instantOf(snapshotQuote.retrieved_at);
       if (snapshotRetrieved !== null) {
@@ -642,8 +656,8 @@
   }
 
   const GLOBAL_BASIS_COPY = {
-    ko: { intraday: '장중', final_close: '종가', krx: '종가', snapshot: '마감 시점' },
-    en: { intraday: 'INTRADAY', final_close: 'CLOSE', krx: 'CLOSE', snapshot: 'KRX CLOSE' }
+    ko: { intraday: '장중', final_close: '종가', krx: '종가', snapshot: '마감 시점', live: '실시간(야후)', bank: '하나은행 고시' },
+    en: { intraday: 'INTRADAY', final_close: 'CLOSE', krx: 'CLOSE', snapshot: 'KRX CLOSE', live: 'LIVE (YAHOO)', bank: 'HANA BANK RATE' }
   };
 
   function basisDate(value, language) {
@@ -658,16 +672,19 @@
    * (KOSPI/KOSDAQ close) or 'snapshot' (a global figure kept from the
    * Market Close payload: its own session date, "종가" when that figure was a
    * completed close, otherwise "마감 시점" — the value as captured with the
-   * KRX close).
+   * KRX close). A KRW pair reads "하나은행 고시" from the record and "실시간(야후)"
+   * from Global Latest, whose change is against Yahoo's own previous close.
+   * `code` names the instrument when `source` (a record figure) does not.
    */
-  function todayStripBasis(kind, source, language) {
+  function todayStripBasis(kind, source, language, code = source?.code) {
     const lang = language === 'en' ? 'en' : 'ko';
     const text = GLOBAL_BASIS_COPY[lang];
     const date = basisDate(source?.source_date, lang);
     if (!date) return '';
     let state;
-    if (kind === 'latest') state = text[source.data_state] || '';
+    if (kind === 'latest') state = KRW_PAIR_CODES.has(code) && source.data_state === 'intraday' ? text.live : text[source.data_state] || '';
     else if (kind === 'krx') state = text.krx;
+    else if (KRW_PAIR_CODES.has(code)) state = text.bank;
     else state = source.data_state === 'final_close' ? text.final_close : text.snapshot;
     return state ? `${date} · ${state}` : '';
   }

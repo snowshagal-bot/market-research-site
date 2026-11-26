@@ -64,7 +64,7 @@ export function marketChannelCaption(payload, { takeaway = '' } = {}) {
   const flows = flowLines(payload, 'KOSPI', f);
   const facts = [
     flows.length ? `코스피 순매수: ${flows.join(' · ')}` : '',
-    valid(fx?.close) && fx?.data_state !== 'unavailable' ? `원/달러 ${f.valueUnit('USDKRW', fx.close)} (15:30 확정)` : ''
+    valid(fx?.close) && fx?.data_state !== 'unavailable' ? `원/달러 ${f.valueUnit('USDKRW', fx.close)} (하나은행 고시)` : ''
   ].filter(Boolean);
   const head = `${m}월 ${d}일(${weekday}) 증시 마감 · 15:30 정규장 기준`;
   const link = `전체 기록: ${PRODUCTION_ORIGIN}${marketDatePath(date, 'ko')}`;
@@ -106,7 +106,7 @@ export function marketBlogPost(payload, { takeaway = '', reportUrl = '' } = {}) 
     section('코스피 투자자별 순매수', flowLines(payload, 'KOSPI', f)),
     section('코스닥 투자자별 순매수', flowLines(payload, 'KOSDAQ', f)),
     section('환율 · 시장 폭 · 거래대금', [
-      valid(fx?.close) && fx?.data_state !== 'unavailable' ? `원/달러 ${f.valueUnit('USDKRW', fx.close)} (15:30 확정)` : '',
+      valid(fx?.close) && fx?.data_state !== 'unavailable' ? `원/달러 ${f.valueUnit('USDKRW', fx.close)} (하나은행 고시)` : '',
       valid(rise) && valid(fall) ? `코스피 상승 ${f.integer(rise)}종목 · 하락 ${f.integer(fall)}종목` : '',
       valid(turnover) ? `코스피 거래대금 ${f.won(turnover)}` : ''
     ]),

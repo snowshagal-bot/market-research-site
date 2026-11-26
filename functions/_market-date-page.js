@@ -27,7 +27,7 @@ import {
   websiteStructuredData
 } from './_seo.js';
 import '../assets/locale.js';
-import { TABLE_NAME, ensureMarketTable } from './api/market/_shared.js';
+import { TABLE_NAME, ensureMarketTable, normalizeKrwPairs } from './api/market/_shared.js';
 import { aggregateKrxGroups } from './api/market/_aggregate.js';
 import { loadTrend } from './api/market/trend.js';
 import { cardImageUrl, cardTakeaway, ensureMarketCard, marketCardIsStale, onMarketCardRequest, parseMarketCardPath, readMarketCardMeta } from './_market-card.js';
@@ -59,7 +59,7 @@ import {
 
 export { MARKET_INDICATORS, availableIndicatorCodes, listedIndicators, marketIndicatorBySlug, marketIndicatorPath };
 
-// KRW pairs whose close is the 15:30 Hana Bank fixing.
+// KRW pairs whose close is Hana Bank's posted rate from its last round before 15:30 KST.
 const FIXING_CODES = new Set(['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW']);
 // Asian indices (kind `asia`): dated the local session; on a local holiday the
 // record carries the previous close with its own, earlier date.
@@ -203,7 +203,7 @@ const COPY = {
     overseas: '* 해외 지수·원자재는 각 시장의 최신 거래일 종가',
     sections: ['주요 지수', '투자자별 매매동향 (당일)', '최근 5거래일 누적 수급', '금리 · 환율 · 변동성', '원자재 · 가상자산', '시장 폭', 'KRX 업종 · 테마 등락률', '시가총액 상위 10종목', '공매도 현황', '국내 금리'],
     asiaTitle: '아시아 증시', localHoliday: '현지 휴장',
-    open: '시가', high: '고가', low: '저가', previous: '전일', closeState: '종가', fixedClose: '15:30 확정', intraday: '장중', unavailable: '데이터 없음',
+    open: '시가', high: '고가', low: '저가', previous: '전일', closeState: '종가', fixedClose: '하나은행 고시', intraday: '장중', unavailable: '데이터 없음',
     market: '시장', foreign: '외국인', institution: '기관', individual: '개인', futures: '선물',
     fiveDays: (start, end) => `${start} – ${end}`,
     fiveDayIncomplete: (used, total) => `데이터 불완전 · ${used}/${total} 거래일 확보`,
@@ -233,7 +233,7 @@ const COPY = {
     overseas: '* Overseas indices and commodities use each market’s latest close.',
     sections: ['Major Indices', 'Investor Flows (Daily)', 'Cumulative Flows: Last 5 Sessions', 'Rates · FX · Volatility', 'Commodities · Crypto', 'Market Breadth', 'KRX Sectors & Themes', 'Top 10 by Market Cap', 'Short Selling', 'Korean Bond Yields'],
     asiaTitle: 'Asian Markets', localHoliday: 'Local holiday',
-    open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', closeState: 'Close', fixedClose: '15:30 fixing', intraday: 'Intraday', unavailable: 'Unavailable',
+    open: 'Open', high: 'High', low: 'Low', previous: 'Prev.', closeState: 'Close', fixedClose: 'Hana Bank rate', intraday: 'Intraday', unavailable: 'Unavailable',
     market: 'Market', foreign: 'Foreign', institution: 'Institution', individual: 'Retail', futures: 'KOSPI 200 Futures',
     fiveDays: (start, end) => `${start} – ${end}`,
     fiveDayIncomplete: (used, total) => `Incomplete data · ${used}/${total} sessions available`,
@@ -404,14 +404,14 @@ const PAGE_COPY = {
     regularClose: '정규장 종가', trendLabel: '최근 20거래일 종가', closeOf: md => `${md} 마감`, regularBasis: '정규장 15:30 KST 기준',
     summaryTitle: '그날의 요약', summaryHead: (pctText, word) => `코스피 ${pctText}% ${word}`, up: '상승', down: '하락', flat: '보합',
     breadthPhrase: (count, ratio, word) => `코스피 ${count}종목 ${word}(${ratio})`, foreignPhrase: (amount, word) => `외국인 ${amount} ${word}`, netBuy: '순매수', netSell: '순매도',
-    fxSummary: '원/달러', fixingNote: md => `${md} 15:30 매매기준율`, vixSummary: '미국 변동성 VIX', usCloseNote: md => `${md} 미국장 마감`,
+    fxSummary: '원/달러', fixingNote: md => `${md} 하나은행 고시(15:30 직전)`, vixSummary: '미국 변동성 VIX', usCloseNote: md => `${md} 미국장 마감`,
     krTitle: '한국 시장', krCaption: '수급, 등락 종목, 주요 종목 종가', flowsTitle: '투자자별 순매수', flowDay: '당일', flowFive: '최근 5거래일', flowNote: '양수는 순매수, 음수는 순매도',
     breadthTitle: '시장 폭', breadthCaption: '상승 · 보합 · 하락', breadthShort: { rise: '상승', flat: '보합', fall: '하락', upper: '상한', lower: '하한' },
     statsTitle: '거래 · 프로그램 · 공매도', turnoverOf: name => `${name} 거래대금`, ratio5Text: value => `5일 평균의 ${value}배`, programTotal: '프로그램 순매수', arbitrage: '차익', nonArbitrage: '비차익',
     basis: '베이시스', spot: 'KOSPI200 현물', shortRatioOf: name => `공매도 비중 · ${name}`, detailsMore: '공매도 상위 5',
     topTitle: '시가총액 상위 10', groupsTitle: 'KRX 업종 · 테마 등락률', globalTitle: '해외 · 금리 · 환율 · 원자재', globalCaption: '추이는 최근 20거래일 · 지표를 누르면 일별 기록',
     boards: { world: '해외 증시 · 변동성', rates: '금리', fx: '환율', commodities: '원자재 · 가상자산' },
-    boardNotes: { world: '미국 지수 · 아시아 각 시장 최근 마감', rates: '국내 금융투자협회 16:00 최종호가', fx: '원화는 15:30 매매기준율', commodities: '달러 기준' },
+    boardNotes: { world: '미국 지수 · 아시아 각 시장 최근 마감', rates: '국내 금융투자협회 16:00 최종호가', fx: '원화는 하나은행 고시(15:30 직전 회차)', commodities: '달러 기준' },
     columns: ['지표', '값', '전일 대비', '추이'], marketNames: { KOSPI: '코스피', KOSDAQ: '코스닥', 'KOSPI200선물': '선물' },
     dateLabel: '거래일', pageEyebrow: '한국 증시 마감 기록', stock: '종목명', future: '선물', terms: { breadth: '시장 폭', program: '프로그램 매매', basis: '베이시스', short: '공매도' }, price: '종가', change: '등락률', marketCap: '시가총액'
   },
@@ -419,14 +419,14 @@ const PAGE_COPY = {
     regularClose: 'Regular close', trendLabel: 'Last 20 sessions', closeOf: md => `Close of ${md}`, regularBasis: 'Regular session, 15:30 KST',
     summaryTitle: 'The day in brief', summaryHead: (pctText, word) => `KOSPI ${word} ${pctText}%`, up: 'up', down: 'down', flat: 'flat',
     breadthPhrase: (count, ratio, word) => `${count} KOSPI stocks ${word} (${ratio})`, foreignPhrase: (amount, word) => `foreign investors ${word} ${amount}`, netBuy: 'net bought', netSell: 'net sold',
-    fxSummary: 'USD/KRW', fixingNote: md => `${md} · 15:30 reference rate`, vixSummary: 'US volatility · VIX', usCloseNote: md => `${md} · US close`,
+    fxSummary: 'USD/KRW', fixingNote: md => `${md} · Hana Bank rate before 15:30`, vixSummary: 'US volatility · VIX', usCloseNote: md => `${md} · US close`,
     krTitle: 'Korean Market', krCaption: 'Flows, advancers and decliners, top stocks', flowsTitle: 'Net Buying by Investor', flowDay: 'Today', flowFive: 'Last 5 sessions', flowNote: 'Positive is net buying, negative net selling',
     breadthTitle: 'Market Breadth', breadthCaption: 'Advancers · unchanged · decliners', breadthShort: { rise: 'Up', flat: 'Flat', fall: 'Down', upper: 'limit', lower: 'limit' },
     statsTitle: 'Turnover · Program · Short Selling', turnoverOf: name => `${name} turnover`, ratio5Text: value => `${value}× the 5-session avg.`, programTotal: 'Program net buy', arbitrage: 'Arbitrage', nonArbitrage: 'Non-arbitrage',
     basis: 'Basis', spot: 'KOSPI 200 spot', shortRatioOf: name => `Short ratio · ${name}`, detailsMore: 'Top 5 short selling',
     topTitle: 'Top 10 by Market Cap', groupsTitle: 'KRX Sectors & Themes', globalTitle: 'Overseas · Rates · FX · Commodities', globalCaption: 'Trend over the last 20 sessions · Select an indicator for its daily history',
     boards: { world: 'Overseas Markets · Volatility', rates: 'Rates', fx: 'FX', commodities: 'Commodities · Crypto' },
-    boardNotes: { world: 'US indices · each Asian market’s latest close', rates: 'Korean yields: KOFIA 16:00 final quotes', fx: 'KRW pairs: 15:30 reference rate', commodities: 'In US dollars' },
+    boardNotes: { world: 'US indices · each Asian market’s latest close', rates: 'Korean yields: KOFIA 16:00 final quotes', fx: 'KRW pairs: Hana Bank posted rate (last round before 15:30)', commodities: 'In US dollars' },
     columns: ['Indicator', 'Value', 'Change', 'Trend'], marketNames: { KOSPI: 'KOSPI', KOSDAQ: 'KOSDAQ', 'KOSPI200선물': 'KOSPI 200 Futures' },
     dateLabel: 'Trading day', pageEyebrow: 'Korea market close archive', stock: 'Company', future: 'Futures', terms: { breadth: 'Market Breadth', program: 'Program Trading', basis: 'Basis', short: 'Short Selling' }, price: 'Close', change: 'Change', marketCap: 'Market cap'
   }
@@ -499,7 +499,7 @@ function instrumentParts(key, item, f, copy, lang, marketDate) {
   // An Asian index dated before the session: its market was closed that day.
   const localHoliday = ASIA_CODES.includes(key) && ISO_DATE.test(String(item?.source_date || '')) && ISO_DATE.test(String(marketDate)) && item.source_date < marketDate;
   // The same basis as TODAY (assets/market-close.js stateText): a KRW pair is
-  // its 15:30 fixing; a figure still trading when the record was made says so,
+  // Hana Bank's posted rate (last round before 15:30); a figure still trading when the record was made says so,
   // with its capture time ("장중 · 16:10 KST"), and is never called a close.
   const intraday = !isFx && item?.data_state === 'intraday';
   const captured = intraday ? globalThis.MARKET_LOCALE.intradayCaptureTime(item) : '';
@@ -1127,7 +1127,7 @@ export async function loadMarketDate(env, date, { budgetMs = MARKET_DATE_TIME_BU
       FROM ${TABLE_NAME} WHERE market_date = ?1 LIMIT 1`).bind(date).first();
     if (!row || row.status !== 'final') return null;
     let payload;
-    try { payload = JSON.parse(row.payload_json); } catch (_) { return null; }
+    try { payload = normalizeKrwPairs(JSON.parse(row.payload_json)); } catch (_) { return null; }
     if (payload?.meta?.market_date !== date || payload?.meta?.status !== 'final') return null;
     payload.takeaway = { ko: String(row.takeaway_ko || ''), en: String(row.takeaway_en || '') };
     return { payload, prev: row.prev_date || null, next: row.next_date || null, publishedAt: row.published_at || '' };
@@ -1791,7 +1791,7 @@ export async function loadMarketFlows(env, { budgetMs = MARKET_DATE_TIME_BUDGET_
 // on the instrument and is said on the page:
 //   krx      — KRX regular-session close (dated the KRX session)
 //   us       — the U.S. close the record carries, dated the U.S. session
-//   fx       — the 15:30 KST reference rate (Hana Bank, via Naver Finance)
+//   fx       — Hana Bank's posted rate, last round before 15:30 KST (via Naver Finance)
 //   snapshot — the quote when the record was made, shortly after the Korea
 //              close; its change is against the previous record, because the
 //              provider's previous close is a different series (a settlement)
@@ -1831,7 +1831,7 @@ const INDICATOR_COPY = {
     eyebrow: '지표별 일별 기록',
     heading: name => `${name} 일별 기록`,
     noun: { krx: '일별 종가', krxvol: '일별 종가', us: '일별 종가', asia: '일별 종가', fx: '일별 기록', snapshot: '일별 기록', rate: '일별 기록', kofia: '일별 기록', funds: '일별 추이' },
-    valueLabel: { krx: '종가', krxvol: '종가', us: '종가', asia: '종가', fx: '15:30 환율', snapshot: '기록 시세', rate: '수익률', kofia: '수익률', funds: '금액' },
+    valueLabel: { krx: '종가', krxvol: '종가', us: '종가', asia: '종가', fx: '하나은행 고시', snapshot: '기록 시세', rate: '수익률', kofia: '수익률', funds: '금액' },
     basis: {
       krx: 'KRX 정규장 15:30 종가 기준 · 매 거래일 마감 후 갱신',
       krxvol: 'KRX 파생상품 정규장 15:45 마감 종가(코스피200 옵션 기준) · 매 거래일 마감 후 갱신',
@@ -1840,7 +1840,7 @@ const INDICATOR_COPY = {
       NIKKEI225: '도쿄 정규장 15:30 종가(한국 시각 15:30) · 날짜는 일본 거래일 · 한국 증시 마감 기록에 담긴 값',
       SHANGHAI: '상하이 정규장 15:00 종가(한국 시각 16:00) · 날짜는 중국 거래일 · 한국 증시 마감 기록에 담긴 값 · 야후 파이낸스, 마감 기록 시점에 종가가 확정되지 않았으면 텐센트 증권 실시간 시세',
       TAIEX: '타이베이 정규장 13:30 종가(한국 시각 14:30) · 날짜는 대만 거래일 · 한국 증시 마감 기록에 담긴 값',
-      fx: '15:30 KST 매매기준율(하나은행, 네이버 금융) · 매 거래일 갱신',
+      fx: '하나은행 고시 매매기준율(15:30 직전 회차, 네이버 금융) · 대비는 전 거래일 고시값 대비 · 매 거래일 갱신',
       snapshot: '한국 증시 마감 직후(오후 4시 무렵 KST) 시세 · 변동은 직전 기록 대비',
       kofia: '금융투자협회 최종호가수익률 · 16:00 KST 기준 · 매 거래일 갱신 · 대비는 금융투자협회 전일 값 대비',
       DEPOSITS: '금융투자협회 증시자금 추이 · 장내파생상품 거래예수금 제외 · 거래일 마감 잔액 · 다음 영업일 공개 · 대비는 직전 거래일 대비',
@@ -1875,7 +1875,7 @@ const INDICATOR_COPY = {
     eyebrow: 'Indicator history',
     heading: name => `${name}: Daily History`,
     noun: { krx: 'Daily Close', krxvol: 'Daily Close', us: 'Daily Close', asia: 'Daily Close', fx: 'History', snapshot: 'History', rate: 'History', kofia: 'History', funds: 'History' },
-    valueLabel: { krx: 'Close', krxvol: 'Close', us: 'Close', asia: 'Close', fx: '15:30 rate', snapshot: 'Recorded price', rate: 'Yield', kofia: 'Yield', funds: 'Amount' },
+    valueLabel: { krx: 'Close', krxvol: 'Close', us: 'Close', asia: 'Close', fx: 'Hana Bank rate', snapshot: 'Recorded price', rate: 'Yield', kofia: 'Yield', funds: 'Amount' },
     basis: {
       krx: 'KRX regular-session close, 15:30 KST · Updated after every session',
       krxvol: 'KRX derivatives-session close, 15:45 KST (from KOSPI 200 options) · Updated after every session',
@@ -1884,7 +1884,7 @@ const INDICATOR_COPY = {
       NIKKEI225: 'Tokyo regular-session close, 15:30 JST (15:30 KST) · Dates are Japanese trading days · As carried by the Korea close record',
       SHANGHAI: 'Shanghai regular-session close, 15:00 CST (16:00 KST) · Dates are Chinese trading days · As carried by the Korea close record · Yahoo Finance, or Tencent Securities real-time quotes when Yahoo had not confirmed the close by the record',
       TAIEX: 'Taipei regular-session close, 13:30 (14:30 KST) · Dates are Taiwanese trading days · As carried by the Korea close record',
-      fx: '15:30 KST reference rate (Hana Bank, via Naver Finance) · Updated every session',
+      fx: 'Hana Bank posted rate, last round before 15:30 KST (via Naver Finance) · Change against the previous trading day’s posted rate · Updated every session',
       snapshot: 'Quote shortly after the Korea close (around 16:00 KST) · Change against the previous record',
       kofia: 'KOFIA final quote yield, 16:00 KST · Updated every Korean trading day · Change against KOFIA’s previous-day value',
       DEPOSITS: 'KOFIA market funds · Excludes exchange-traded derivatives deposits · End-of-day balance · Published the next business day · Change against the previous trading day',
@@ -2278,7 +2278,7 @@ export const INDICATOR_GUIDES = Object.freeze({
       title: '원/달러 환율이란',
       paragraphs: [
         '[[원/달러]] 환율은 1달러를 사는 데 드는 원화 금액입니다. 숫자가 오르면 원화 가치가 내린 것(원화 약세)이고, 숫자가 내리면 [[원화 강세]]입니다.',
-        '이 페이지의 값은 외환시장 종가가 아니라, 하나은행이 오후 3시 30분 무렵 고시한 [[매매기준율]]을 네이버 금융에서 옮긴 값입니다. 서울 외환시장은 오전 9시부터 다음 날 새벽 2시까지 열리므로, 이 값은 그 가운데 한국 증시가 마감할 때의 수준입니다.',
+        '이 페이지의 값은 서울 외환시장의 오후 3시 30분 기준가도, 서울외국환중개가 고시하는 공식 [[매매기준율]]도 아닙니다. 하나은행이 오후 3시 30분 직전 회차에 낸 은행 고시 매매기준율을 네이버 금융에서 옮긴 값이라, 뉴스나 한국은행 통계의 오후 3시 30분 값과 조금 다를 수 있습니다. 등락은 전 거래일의 같은 고시값과 비교한 것입니다.',
         '환율은 외국인 투자자의 수익에 직접 닿습니다. 원화가 약해지면 같은 주가라도 달러로 환산한 값이 줄어들어, 외국인 매매와 함께 움직이는 날이 많습니다. 달러 자체의 힘은 [[달러인덱스]]로 따로 볼 수 있고, 표의 날짜를 누르면 그날의 외국인 매매가 담긴 전체 마감 기록이 열립니다.'
       ]
     },
@@ -2286,7 +2286,7 @@ export const INDICATOR_GUIDES = Object.freeze({
       title: 'What is the USD/KRW rate?',
       paragraphs: [
         'The [[USD/KRW]] rate is the number of won it takes to buy one U.S. dollar. A higher number means a weaker won; a lower number means [[a stronger won]].',
-        'Values on this page are not the foreign-exchange market close. They are the [[reference rate|Base Exchange Rate]] Hana Bank posts around 3:30 p.m. KST, as shown on Naver Finance. The Seoul FX market trades from 9 a.m. to 2 a.m. the next day, so this value is the level when the Korean stock market closes.',
+        'Values on this page are neither the Seoul FX market’s 3:30 p.m. rate nor the official [[reference rate|Base Exchange Rate]] set by Seoul Money Brokerage. They are Hana Bank’s own posted rate from its last round before 3:30 p.m. KST, as shown on Naver Finance, so they can differ slightly from the 3:30 p.m. figure in the news and Bank of Korea statistics. Each change is against the previous trading day’s posted rate.',
         'The exchange rate feeds straight into foreign investors\u2019 returns: when the won weakens, the same share price is worth less in dollars, so the rate and foreign flows often move together. The dollar\u2019s own strength is tracked by the [[U.S. Dollar Index]], and each date in the table opens that session\u2019s full close record, with foreign investors\u2019 trading.'
       ]
     }

@@ -55,7 +55,7 @@ test('the post carries the record’s own session figures as plain text', () => 
   assert.ok(post.body.includes(`코스피 ${f.number(kospi.close, 2)} (${f.signed(kospi.change, 2)}, ${f.pct(kospi.change_pct)})`));
   const flows = EXAMPLE.krx_investor_trading.markets.KOSPI.investors;
   for (const name of ['외국인', '기관', '개인']) assert.ok(post.body.includes(`${name} ${f.flow(flows[name].net_buy)}`), name);
-  assert.ok(post.body.includes(`원/달러 ${f.valueUnit('USDKRW', EXAMPLE.rates_fx_volatility.USDKRW.close)} (15:30 확정)`));
+  assert.ok(post.body.includes(`원/달러 ${f.valueUnit('USDKRW', EXAMPLE.rates_fx_volatility.USDKRW.close)} (하나은행 고시)`));
   assert.ok(post.body.includes(`코스피 거래대금 ${f.won(EXAMPLE.market_internals.turnover.KOSPI.value_won)}`));
   assert.ok(post.body.includes(post.pageUrl));
   assert.ok(post.body.endsWith('매수·매도 권유가 아닙니다.'));

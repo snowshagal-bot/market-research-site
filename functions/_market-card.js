@@ -21,7 +21,8 @@ export const CARD_TABLE = 'market_close_cards';
 // Part of the stored row: a change to the card's design or content rule makes
 // every stored card stale, so the next publish (or request for the latest
 // session) redraws it.
-export const CARD_VERSION = '1';
+// 2: the USD/KRW basis reads 하나은행 고시 / Hana Bank rate (2026-11-26).
+export const CARD_VERSION = '2';
 export const CARD_WIDTH = 1200;
 export const CARD_HEIGHT = 630;
 export const CARD_FALLBACK_IMAGE = '/assets/social/market-close-share.jpg';
@@ -62,7 +63,7 @@ const COPY = {
     kospi: '코스피', kosdaq: '코스닥',
     head: (name, pct, word) => `${name} ${pct}% ${word}`, up: '상승', down: '하락', flat: '보합',
     foreign: '외국인', institution: '기관', individual: '개인', flows: '코스피 투자자별 순매수',
-    fx: '원/달러', fxBasis: '15:30 확정', breadth: '코스피 종목', rise: '상승', fall: '하락', turnover: '코스피 거래대금',
+    fx: '원/달러', fxBasis: '하나은행 고시', breadth: '코스피 종목', rise: '상승', fall: '하락', turnover: '코스피 거래대금',
     source: '매 거래일 장마감 기록 · 15:30 종가 기준'
   },
   en: {
@@ -71,7 +72,7 @@ const COPY = {
     kospi: 'KOSPI', kosdaq: 'KOSDAQ',
     head: (name, pct, word) => `${name} ${word} ${pct}%`, up: 'up', down: 'down', flat: 'flat',
     foreign: 'Foreign', institution: 'Institutions', individual: 'Retail', flows: 'KOSPI net buying by investor',
-    fx: 'USD/KRW', fxBasis: '15:30 fixing', breadth: 'KOSPI stocks', rise: 'up', fall: 'down', turnover: 'KOSPI turnover',
+    fx: 'USD/KRW', fxBasis: 'Hana Bank rate', breadth: 'KOSPI stocks', rise: 'up', fall: 'down', turnover: 'KOSPI turnover',
     source: 'Korea market close, every trading day'
   }
 };

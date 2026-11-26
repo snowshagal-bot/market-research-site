@@ -1037,7 +1037,7 @@
     const marketDate = isoDate(payload?.meta?.market_date);
     const overlaid = spec => (localeApi?.isGlobalLatestCode?.(spec.key) && latest[spec.key]) || null;
     // Each instrument keeps its own basis, even without a Global Latest overlay.
-    const basis = (kind, source) => localeApi?.todayStripBasis?.(kind, source, locale) || '';
+    const basis = (kind, source, code) => localeApi?.todayStripBasis?.(kind, source, locale, code) || '';
     const items = TODAY_STRIP_ITEMS.map(spec => {
       const quote = payload?.[spec.group]?.[spec.key];
       const snapshot = stripFigures(spec, quote);
@@ -1050,7 +1050,7 @@
       }
       if (!snapshot) return { label: spec.label, historyPath, value: '--', change: '', direction: 'flat', basis: '' };
       const kind = localeApi?.isGlobalLatestCode?.(spec.key) ? 'snapshot' : 'krx';
-      return { label: spec.label, historyPath, ...snapshot, basis: basis(kind, kind === 'krx' ? { source_date: marketDate } : quote) };
+      return { label: spec.label, historyPath, ...snapshot, basis: basis(kind, kind === 'krx' ? { source_date: marketDate } : quote, spec.key) };
     }).filter(Boolean);
     return items.length === TODAY_STRIP_ITEMS.length ? items : null;
   }

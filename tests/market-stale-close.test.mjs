@@ -5,6 +5,7 @@ import vm from 'node:vm';
 import { expectedLatestKrxTradingDate, expectedPublishedKrxTradingDate } from '../functions/_trading-calendar.js';
 import { onRequestGet as latestRequest } from '../functions/api/market/latest.js';
 import { onRequestGet as dateRequest } from '../functions/api/market/date.js';
+import { normalizeKrwPairs } from '../functions/api/market/_shared.js';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 const kst = stamp => new Date(`${stamp}:00+09:00`);
@@ -63,14 +64,14 @@ function storedRow(marketDate) {
   };
 }
 
-test('/api/market/latest sends x-market-expected-date without changing the payload', async () => {
+test('/api/market/latest sends x-market-expected-date; the payload is the record, with the KRW pairs’ moves read from close and previous close', async () => {
   const row = storedRow('2026-09-15');
   const env = { COMMENTS_DB: new MockDb([row]) };
   const response = await latestRequest({ request: new Request('https://snowshagal.com/api/market/latest'), env, now: kst('2026-09-17T00:04') });
   assert.equal(response.status, 200);
   assert.equal(response.headers.get('x-market-expected-date'), '2026-09-16');
   const body = await response.json();
-  assert.deepEqual(body, { ...JSON.parse(row.payload_json), takeaway: { ko: '', en: '' } });
+  assert.deepEqual(body, { ...normalizeKrwPairs(JSON.parse(row.payload_json)), takeaway: { ko: '', en: '' } });
 
   const before = await latestRequest({ request: new Request('https://snowshagal.com/api/market/latest'), env, now: kst('2026-09-16T16:04') });
   assert.equal(before.headers.get('x-market-expected-date'), '2026-09-15');

@@ -81,12 +81,12 @@ test('the card shows the record’s own session figures in both languages', () =
   assert.match(ko, new RegExp(`코스피 ${Math.abs(kospi.change_pct).toFixed(2)}% ${kospi.change_pct > 0 ? '상승' : '하락'}`));
   assert.ok(ko.includes(new Intl.NumberFormat('ko-KR', { minimumFractionDigits: 2 }).format(kospi.close)));
   assert.ok(ko.includes(`${DATE.replace(/-/g, '.')} (`));
-  for (const text of ['15:30 KST 정규장 마감', '코스닥', '외국인', '기관', '개인', '원/달러 · 15:30 확정', '코스피 거래대금', `snowshagal.com/market/${DATE}/`]) assert.ok(ko.includes(text), text);
+  for (const text of ['15:30 KST 정규장 마감', '코스닥', '외국인', '기관', '개인', '원/달러 · 하나은행 고시', '코스피 거래대금', `snowshagal.com/market/${DATE}/`]) assert.ok(ko.includes(text), text);
   assert.doesNotMatch(ko, /<script|https?:\/\//, 'no script and no outside resource');
 
   const en = marketCardHtml(EXAMPLE, 'en');
   assert.match(en, new RegExp(`KOSPI ${kospi.change_pct > 0 ? 'up' : 'down'} ${Math.abs(kospi.change_pct).toFixed(2)}%`));
-  for (const text of ['Regular session close, 15:30 KST', 'USD/KRW · 15:30 fixing', 'KOSPI turnover', `snowshagal.com/en/market/${DATE}/`]) assert.ok(en.includes(text), text);
+  for (const text of ['Regular session close, 15:30 KST', 'USD/KRW · Hana Bank rate', 'KOSPI turnover', `snowshagal.com/en/market/${DATE}/`]) assert.ok(en.includes(text), text);
   assert.doesNotMatch(en, HANGUL);
 });
 

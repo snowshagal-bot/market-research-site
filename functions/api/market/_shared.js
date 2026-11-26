@@ -60,8 +60,37 @@ export function encodeKrxSessionHeader(status) {
   return encodeURIComponent(JSON.stringify(status));
 }
 
+// The four KRW pairs (USD/KRW, JPY/KRW, CNY/KRW, EUR/KRW). A record's `close` for
+// them is Hana Bank's posted rate from its last round before 15:30 KST (Naver
+// Finance), and `previous_close` is the same series on the previous business
+// day. The collector's own `change` is a Yahoo quote read at capture time minus
+// that previous posted rate, two different series, so every reader takes the
+// move from close and previous_close instead (2026-11-26). The daily history
+// pages already did; now the session page, TODAY, the home strip, the share
+// text and the API all show the same move.
+export const KRW_PAIR_CODES = Object.freeze(['USDKRW', 'JPYKRW', 'CNYKRW', 'EURKRW']);
+
+export function normalizeKrwPairs(payload) {
+  const rates = payload?.rates_fx_volatility;
+  if (!rates || typeof rates !== 'object') return payload;
+  for (const code of KRW_PAIR_CODES) {
+    const item = rates[code];
+    if (!item || typeof item !== 'object') continue;
+    const close = item.close;
+    const previous = item.previous_close;
+    const usable = typeof close === 'number' && Number.isFinite(close) && typeof previous === 'number' && Number.isFinite(previous) && previous > 0;
+    item.change = usable ? close - previous : null;
+    item.change_pct = usable ? (close / previous - 1) * 100 : null;
+  }
+  return payload;
+}
+
+// Bumped whenever normalizeKrwPairs changes what a stored record reads as, so a
+// cached copy (ETag) of the old reading is not reused.
+const PAYLOAD_READING_VERSION = 'krw-move-1';
+
 export function formatMarketResponse(row, request, extraHeaders = {}) {
-  const stamp = `${row.generated_at}|${row.published_at || ''}|${row.takeaway_ko || ''}|${row.takeaway_en || ''}`;
+  const stamp = `${row.generated_at}|${row.published_at || ''}|${row.takeaway_ko || ''}|${row.takeaway_en || ''}|${PAYLOAD_READING_VERSION}`;
   const etag = `W/"market-${row.market_date}-${fingerprint(stamp)}"`;
   if (request.headers.get('if-none-match') === etag) {
     return new Response(null, {
@@ -70,7 +99,7 @@ export function formatMarketResponse(row, request, extraHeaders = {}) {
     });
   }
   let payload;
-  try { payload = JSON.parse(row.payload_json); }
+  try { payload = normalizeKrwPairs(JSON.parse(row.payload_json)); }
   catch (error) {
     console.error('stored market close payload is invalid', error);
     return json({ error: 'INVALID_STORED_DATA', message: '저장된 Market Close 데이터를 읽을 수 없습니다.' }, 500);
