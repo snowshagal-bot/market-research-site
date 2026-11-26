@@ -1,5 +1,30 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-26-basics-1abe3ve",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-11-26",
+    "reportDate": "2026-11-26",
+    "registeredDate": "2026-11-26",
+    "registeredAt": "2026-11-26T08:18:06.653Z",
+    "legacyImport": false,
+    "title": "동전주는 왜 상장폐지되나",
+    "seoTitle": "동전주 상장폐지 기준·관리종목 해제 조건: 동전주는 왜 상장폐지되나",
+    "subtitle": "",
+    "description": "종가가 30거래일 연속 1,000원 밑이면 관리종목, 그 뒤 90거래일 안에 45거래일 연속 1,000원 이상을 지키지 못하면 상장폐지다. 첫 퇴출 결정 다섯 곳이 왜 지정 46거래일째에 나왔는지, 주식병합으로 값을 올려도 시가총액은 왜 그대로인지, 정리매매와 가처분까지 퀴즈와 시뮬레이터로 정리했다.",
+    "tags": [
+      "korea",
+      "market-basic",
+      "policy"
+    ],
+    "readingMinutes": 8,
+    "href": "reports/basics-23-delisting.html",
+    "coverImage": "covers/2026-11-26-basics-1abe3ve.webp",
+    "shareCardImage": "covers/share/2026-11-26-basics-1abe3ve.jpg",
+    "coverThumbnail": "covers/2026-11-26-basics-1abe3ve-450.webp"
+  },
+  {
     "id": "2026-11-26-note-1qqxope",
     "type": "note",
     "typeLabel": "Investment Insights",
