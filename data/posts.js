@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-27-daily-im2eu0",
+    "type": "daily",
+    "typeLabel": "Daily",
+    "lang": "en",
+    "date": "2026-11-27",
+    "reportDate": "2026-11-27",
+    "registeredDate": "2026-11-27",
+    "registeredAt": "2026-11-27T08:33:02.033Z",
+    "legacyImport": false,
+    "title": "Stabilization Fund Hopes, Foreign Stock Buying: KOSPI Jumps 4.3%, KOSDAQ 8.1%",
+    "subtitle": "",
+    "description": "Chip stocks and the KOSDAQ surged on hopes for the stock market stabilization fund and stronger Nasdaq futures. Nov. 27: KOSPI 4,915.68 (+4.34%); foreign investors bought a net KRW 1.1256tn in cash equities but sold futures. Drivers and what to watch next.",
+    "takeaway": "Hopes for the stock market stabilization fund to be activated and expanded, along with stronger Nasdaq futures, lifted the KOSPI 4.34% to 4,915.68, reclaiming 4,900. The KOSDAQ surged 8.13%. Foreign investors bought a net KRW 1.1256tn in cash equities but sold about KRW 1.098tn in futures.",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "policy"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/en/2026-11-27_Snowshagal_Daily_EN.html",
+    "translationGroup": "2026-11-27-daily-e3tioo",
+    "coverImage": "covers/2026-11-27-daily-im2eu0.webp",
+    "shareCardImage": "covers/share/2026-11-27-daily-im2eu0.jpg",
+    "coverThumbnail": "covers/2026-11-27-daily-im2eu0-450.webp"
+  },
+  {
     "id": "2026-11-27-daily-e3tioo",
     "type": "daily",
     "typeLabel": "주식 리포트",
