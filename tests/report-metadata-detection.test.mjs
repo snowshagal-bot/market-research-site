@@ -173,6 +173,21 @@ test('takeaway sources are read in order, and the label is never taken for the l
 
 /* ---------------------------------------------------------------- title */
 
+test('title extraction drops cover word joiners without changing the original heading', () => {
+  const heading = '증안펀드 기대·코스피 4.3%\u2060·\u2060코스닥 8.1% 급등';
+  const doc = parseHtml(`<h1 class="dcv-h1">${heading}</h1>`);
+  assert.equal(api.detectTitle('x.html', doc), '증안펀드 기대·코스피 4.3%·코스닥 8.1% 급등');
+  assert.equal(doc.querySelector('h1').textContent, heading);
+});
+
+test('report-title metadata and fallback titles drop word joiners and keep their own punctuation', () => {
+  const explicit = parseHtml('<meta name="report-title" content="한\u2060·중 FTA_성적표"><h1>다른 표지 제목</h1>');
+  assert.equal(api.detectTitle('x.html', explicit), '한·중 FTA_성적표');
+  const fallback = parseHtml('<meta name="report-title" content="\u2060"><title>한\u2060·중 FTA</title>');
+  assert.equal(api.detectTitle('x.html', fallback), '한·중 FTA');
+  assert.equal(api.detectTitle('한\u2060·중_FTA.html', parseHtml('')), '한·중 FTA');
+});
+
 test('title rows the cover draws as lines keep their break (I, J, K)', async () => {
   assert.equal(api.detectTitle('x.html', await fixture('g-note-ko-meta-description-title')), '물가를 재는 자가 바뀐다');
   assert.equal(api.detectTitle('x.html', await fixture('j-note-en-title')), 'Inflation Gets a New Ruler');

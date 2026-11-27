@@ -622,7 +622,7 @@
 
   function cleanTitle(s) {
     if (!s) return '';
-    return s.replace(/\s*[|·｜]\s*(market research|daily market report|weekly).*$/i,'').replace(/_커버통합|\.html?$/gi,'').replace(/_/g,' ').trim();
+    return s.replace(/\u2060/g, '').replace(/\s*[|·｜]\s*(market research|daily market report|weekly).*$/i,'').replace(/_커버통합|\.html?$/gi,'').replace(/_/g,' ').trim();
   }
 
   // Two things put a cover's second row on its own line, and neither leaves
@@ -726,7 +726,7 @@
   }
 
   function detectTitle(name, doc) {
-    const meta = doc.querySelector('meta[name="report-title"]')?.content?.trim();
+    const meta = doc.querySelector('meta[name="report-title"]')?.content?.replace(/\u2060/g, '').trim();
     if (meta) return meta;
     const blocks = blockSelectors(doc);
     const candidates = [
