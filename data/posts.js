@@ -1,5 +1,33 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-27-note-1hilq29",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-27",
+    "reportDate": "2026-11-27",
+    "registeredDate": "2026-11-27",
+    "registeredAt": "2026-11-27T09:34:35.361Z",
+    "legacyImport": false,
+    "title": "Is backlog a safety net? From reservations to revenue",
+    "seoTitle": "Is Order Backlog a Safety Net? From Reservations to Revenue",
+    "subtitle": "",
+    "description": "Rheinmetall cut 2026 revenue guidance twice despite a 66% rise in firm-order backlog. Power equipment reservations led to a JPY 597.2bn loss, while a multitrillion-won cathode contract ended at KRW 9.73m. Three checks before counting backlog as revenue.",
+    "tags": [
+      "semiconductors",
+      "batteries",
+      "nuclear",
+      "korea",
+      "earnings"
+    ],
+    "readingMinutes": 26,
+    "href": "reports/en/20261127_Investment_Insight_Order_Backlog_EN.html",
+    "translationGroup": "2026-11-27-note-11t0bsh",
+    "coverImage": "covers/2026-11-27-note-1hilq29.webp",
+    "shareCardImage": "covers/share/2026-11-27-note-1hilq29.jpg",
+    "coverThumbnail": "covers/2026-11-27-note-1hilq29-450.webp"
+  },
+  {
     "id": "2026-11-27-note-11t0bsh",
     "type": "note",
     "typeLabel": "투자 인사이트",
