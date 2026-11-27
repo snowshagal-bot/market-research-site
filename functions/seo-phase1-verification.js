@@ -4,7 +4,7 @@ import { onRequestGet as sitemap } from './sitemap.xml.js';
 
 const HOST = 'preview-seo-remediation-phase-1-verification.market-research-site.pages.dev';
 const AUTH_HASH = '5f0ceeafc421dff02108d6c2d9ae8bbc15503e4d89330eb1ef6d4832e5643907';
-const REVISION = 'A';
+const REVISION = 'B';
 let isolate;
 
 const date = '2026-11-26';
