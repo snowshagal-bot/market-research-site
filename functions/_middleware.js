@@ -285,7 +285,9 @@ export const RENAMED_REPORTS = Object.freeze({
   // Published 2026-10-27 under its Korean file name, deleted and published
   // again as basics-13-deposits; 시장 입문 14편 still links the old name.
   '/reports/시장을읽는말들_13편_증시대기자금은어디로갔나': '/reports/basics-13-deposits',
-  '/reports/시장을읽는말들_14편_자회사가상장하면모회사주주는손해일까': '/reports/basics-14-subsidiary-ipo'
+  '/reports/시장을읽는말들_14편_자회사가상장하면모회사주주는손해일까': '/reports/basics-14-subsidiary-ipo',
+  // The old /en/ address served the unmodified Korean report (Git 50dd172).
+  '/reports/en/2026-11-12_Snowshagal_Daily': '/reports/2026-11-12_Snowshagal_Daily'
 });
 
 export function renamedReportRedirect(request, url) {

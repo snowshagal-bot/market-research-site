@@ -199,7 +199,30 @@ test('10. a renamed report moves its old address, with or without .html, to the 
     }
     const head = await get(encoded, { method: 'HEAD' });
     assert.equal(head.status, 301);
+    const final = await get(new URL(head.headers.get('location')).pathname);
+    assert.equal(final.status, 200, to);
+    assert.equal(final.headers.get('location'), null, 'there is no second redirect');
     const posted = await get(encoded, { method: 'POST' });
     assert.notEqual(posted.status, 301, 'only GET and HEAD move');
+  }
+});
+
+test('11. only the verified November 12 misfiled alias moves to the original Korean content', async () => {
+  const alias = '/reports/en/2026-11-12_Snowshagal_Daily';
+  const ko = '/reports/2026-11-12_Snowshagal_Daily';
+  const en = '/reports/en/2026-11-12_Snowshagal_Daily_EN';
+  const unknown = '/reports/en/2026-08-28_KOSPI_Daily_Report_EN_Benchmark';
+  assert.equal((await get(alias)).headers.get('location'), `${PRODUCTION_ORIGIN}${ko}`);
+  assert.equal((await get(unknown)).status, 404);
+  const xml = sitemapXml(posts);
+  assert.ok(!xml.includes(`${PRODUCTION_ORIGIN}${alias}</loc>`));
+  for (const [locale, path, counterpart] of [['ko', ko, en], ['en', en, ko]]) {
+    assert.ok(xml.includes(`${PRODUCTION_ORIGIN}${path}</loc>`));
+    const page = await get(path);
+    assert.equal(page.status, 200);
+    const body = await page.text();
+    assert.ok(body.includes(`<link rel="canonical" href="${PRODUCTION_ORIGIN}${path}"`));
+    assert.ok(body.includes(`hreflang="${locale === 'ko' ? 'en' : 'ko'}" href="${PRODUCTION_ORIGIN}${counterpart}"`));
+    assert.ok(![...body.matchAll(/href="([^"]+)"/g)].some(([, href]) => new URL(href, PRODUCTION_ORIGIN).pathname === alias));
   }
 });

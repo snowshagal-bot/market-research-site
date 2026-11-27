@@ -364,14 +364,22 @@ export async function loadMarketFundsDay(env, date) {
 }
 
 /** Every stored day, newest first, as DTOs. */
-export async function loadMarketFundsDays(env) {
+export async function loadMarketFundsDays(env, { strict = false } = {}) {
   const db = env?.COMMENTS_DB;
-  if (!db || typeof db.prepare !== 'function') return [];
   try {
-    if (!(await tableExists(db))) return [];
+    if (!db || typeof db.prepare !== 'function') {
+      if (strict) throw new Error('COMMENTS_DB is unavailable');
+      return [];
+    }
+    if (!strict && !(await tableExists(db))) return [];
     const result = await db.prepare(`${SELECT_DAY} ORDER BY market_date DESC`).all();
-    return (result?.results || []).map(marketFundsDayDto).filter(Boolean);
+    const days = (result?.results || []).map(marketFundsDayDto);
+    if (strict && (result?.success === false || !Array.isArray(result?.results) || days.some(day => !day))) {
+      throw new Error('Invalid market funds result');
+    }
+    return days.filter(Boolean);
   } catch (error) {
+    if (strict) throw error;
     console.error('market funds unavailable', error);
     return [];
   }

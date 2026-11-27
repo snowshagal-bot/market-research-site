@@ -415,11 +415,13 @@ test('the sitemap lists the archive and every session in both languages, paired'
   assert.doesNotMatch(sitemapXml([]), /market\/archive/);
 });
 
-test('the sitemap still answers when the database is missing', async () => {
+test('the sitemap returns a retryable error when the database and a complete cached sitemap are missing', async () => {
   const env = { ASSETS: { fetch: async () => new Response('[]', { status: 200 }) } };
   const response = await sitemapGet({ request: new Request('https://snowshagal.com/sitemap.xml'), env });
-  assert.equal(response.status, 200);
-  assert.doesNotMatch(await response.text(), /market\/archive/);
+  assert.equal(response.status, 503);
+  assert.equal(response.headers.get('retry-after'), '60');
+  assert.equal(response.headers.get('cache-control'), 'no-store');
+  assert.doesNotMatch(await response.text(), /<urlset/);
 });
 
 /* ------------------------------------------------------- sectors & themes */
@@ -659,7 +661,7 @@ test('the sitemap lists every history page in both languages; the archive and se
   // The optional indicators (2026-11) appear once a record has their value; this one has none.
   for (const item of MARKET_INDICATORS.filter((entry) => entry.optional)) assert.doesNotMatch(xml, new RegExp(`/market/${item.slug}/`));
   for (const item of MARKET_INDICATORS.filter((entry) => !entry.optional)) {
-    assert.match(xml, new RegExp(`<loc>https://snowshagal.com/market/${item.slug}/</loc><lastmod>2026-10-28</lastmod><xhtml:link rel="alternate" hreflang="ko" href="https://snowshagal.com/market/${item.slug}/"/><xhtml:link rel="alternate" hreflang="en" href="https://snowshagal.com/en/market/${item.slug}/"/>`));
+    assert.match(xml, new RegExp(`<loc>https://snowshagal.com/market/${item.slug}/</loc><xhtml:link rel="alternate" hreflang="ko" href="https://snowshagal.com/market/${item.slug}/"/><xhtml:link rel="alternate" hreflang="en" href="https://snowshagal.com/en/market/${item.slug}/"/>`));
     assert.match(xml, new RegExp(`<loc>https://snowshagal.com/en/market/${item.slug}/</loc>`));
   }
   const archive = marketArchivePageHtml(SHELLS.ko, [{ market_date: '2026-10-28', kospi_close: 1, kospi_pct: 0, kosdaq_close: 1, kosdaq_pct: 0, foreign_net: 0, usdkrw: 1 }], 'ko');

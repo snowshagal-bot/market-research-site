@@ -317,8 +317,8 @@ test('the footer has a fourth group, Follow: the language\'s Atom feed, then the
 
 /* --------------------------------------------------------------- untouched */
 
-test('reports, sitemap and robots are untouched', async () => {
-  const status = execSync('git status --porcelain reports/ robots.txt functions/sitemap.xml.js', { cwd: rootDir, encoding: 'utf8' }).trim();
+test('report sources and robots are untouched and sitemap and robots omit Atom feeds', async () => {
+  const status = execSync('git status --porcelain reports/ robots.txt', { cwd: rootDir, encoding: 'utf8' }).trim();
   assert.equal(status, '');
   const { sitemapXml } = await import('../functions/_seo.js');
   assert.doesNotMatch(sitemapXml([post('a')]), /rss\.xml/);

@@ -323,14 +323,22 @@ export async function loadFxCloseDay(env, date) {
 }
 
 /** Every stored day as a Map of market_date to DTO, or undefined when FX Close is unavailable. */
-export async function loadFxCloseDays(env) {
+export async function loadFxCloseDays(env, { strict = false } = {}) {
   const db = env?.COMMENTS_DB;
-  if (!db || typeof db.prepare !== 'function') return undefined;
   try {
-    if (!(await tableExists(db))) return undefined;
+    if (!db || typeof db.prepare !== 'function') {
+      if (strict) throw new Error('COMMENTS_DB is unavailable');
+      return undefined;
+    }
+    if (!strict && !(await tableExists(db))) return undefined;
     const result = await db.prepare(`${SELECT_DAY} ORDER BY market_date DESC`).all();
-    return new Map((result?.results || []).map(fxCloseDayDto).filter(Boolean).map(day => [day.market_date, day]));
+    const days = (result?.results || []).map(fxCloseDayDto);
+    if (strict && (result?.success === false || !Array.isArray(result?.results) || days.some(day => !day))) {
+      throw new Error('Invalid FX close result');
+    }
+    return new Map(days.filter(Boolean).map(day => [day.market_date, day]));
   } catch (error) {
+    if (strict) throw error;
     console.error('fx close unavailable', error);
     return undefined;
   }

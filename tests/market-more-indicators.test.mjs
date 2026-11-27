@@ -213,7 +213,7 @@ test('the sitemap and the archive list a new indicator only once it has a value'
     { market_date: '2026-11-24', published_at: '2026-11-24T08:45:00Z', optional_closes: closesFor(['BRENT', 'COMEX_COPPER']) },
     { market_date: '2026-11-23', published_at: '2026-11-23T08:45:00Z', optional_closes: closesFor([]) }
   ] });
-  assert.match(after, /<loc>https:\/\/snowshagal\.com\/market\/copper\/<\/loc><lastmod>2026-11-24<\/lastmod>/);
+  assert.match(after, /<loc>https:\/\/snowshagal\.com\/market\/copper\/<\/loc><xhtml:link/);
   assert.match(after, /<loc>https:\/\/snowshagal\.com\/en\/market\/brent\/<\/loc>/);
   assert.doesNotMatch(after, /\/market\/silver\//);
 

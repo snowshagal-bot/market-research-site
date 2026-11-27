@@ -309,14 +309,22 @@ export async function loadDomesticRatesDay(env, date) {
 }
 
 /** Every stored day, newest first, as DTOs. */
-export async function loadDomesticRatesDays(env) {
+export async function loadDomesticRatesDays(env, { strict = false } = {}) {
   const db = env?.COMMENTS_DB;
-  if (!db || typeof db.prepare !== 'function') return [];
   try {
-    if (!(await tableExists(db))) return [];
+    if (!db || typeof db.prepare !== 'function') {
+      if (strict) throw new Error('COMMENTS_DB is unavailable');
+      return [];
+    }
+    if (!strict && !(await tableExists(db))) return [];
     const result = await db.prepare(`SELECT market_date, basis_time, payload_json, published_at FROM ${DOMESTIC_RATES_TABLE} ORDER BY market_date DESC`).all();
-    return (result?.results || []).map(domesticRatesDayDto).filter(Boolean);
+    const days = (result?.results || []).map(domesticRatesDayDto);
+    if (strict && (result?.success === false || !Array.isArray(result?.results) || days.some(day => !day))) {
+      throw new Error('Invalid domestic rates result');
+    }
+    return days.filter(Boolean);
   } catch (error) {
+    if (strict) throw error;
     console.error('domestic rates unavailable', error);
     return [];
   }

@@ -103,7 +103,7 @@ test('dynamic sitemap reads posts from the Pages asset binding and returns XML',
   const calls = [];
   const response = await sitemapRequest({
     request: new Request('https://branch.market-research-site.pages.dev/sitemap.xml'),
-    env: { ASSETS: { fetch: async (request) => {
+    env: { COMMENTS_DB: { prepare: () => ({ all: async () => ({ results: [] }) }) }, ASSETS: { fetch: async (request) => {
       calls.push(new URL(request.url).pathname);
       return Response.json(pairedPosts);
     } } }

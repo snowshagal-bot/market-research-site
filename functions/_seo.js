@@ -1103,7 +1103,7 @@ export function reportSeoTags(posts, post, options = {}) {
 // `marketSessions`: [{ market_date, published_at }] for every final Market
 // Close, newest first. Each becomes a KO and an EN session page
 // (/market/YYYY-MM-DD/), and the archive is listed once there is one.
-export function sitemapXml(posts, { marketSessions = [], rateCodes = [] } = {}) {
+export function sitemapXml(posts, { marketSessions = [], rateCodes = [], indicatorLastmods = {} } = {}) {
   const validPosts = posts.filter((post) => (
     post && typeof post.href === 'string' && /^reports\/.+\.html?$/i.test(normalizeSitePath(post.href))
   ));
@@ -1137,12 +1137,12 @@ export function sitemapXml(posts, { marketSessions = [], rateCodes = [] } = {}) 
     { lang: 'en', href: `${PRODUCTION_ORIGIN}/en/basics/glossary/` },
     { lang: 'x-default', href: `${PRODUCTION_ORIGIN}/basics/glossary/` }
   ];
-  const urlEntry = (loc, lastmod, alternates = []) => {
+  const urlEntry = (loc, lastmod, alternates = [], preserveTimestamp = false) => {
     const alternateTags = alternates.map((entry) => (
       `<xhtml:link rel="alternate" hreflang="${entry.lang}" href="${escapeHtml(entry.href)}"/>`
     )).join('');
     const modified = /^\d{4}-\d{2}-\d{2}/.test(String(lastmod || ''))
-      ? `<lastmod>${escapeHtml(String(lastmod).slice(0, 10))}</lastmod>`
+      ? `<lastmod>${escapeHtml(preserveTimestamp ? String(lastmod) : String(lastmod).slice(0, 10))}</lastmod>`
       : '';
     return `<url><loc>${escapeHtml(loc)}</loc>${modified}${alternateTags}</url>`;
   };
@@ -1170,7 +1170,7 @@ export function sitemapXml(posts, { marketSessions = [], rateCodes = [] } = {}) 
     urlEntry(`${PRODUCTION_ORIGIN}/basics/glossary/`, '', glossaryAlternates),
     urlEntry(`${PRODUCTION_ORIGIN}/en/basics/glossary/`, '', glossaryAlternates),
     ...categoryEntries,
-    ...marketSessionEntries(marketSessions, urlEntry, rateCodes),
+    ...marketSessionEntries(marketSessions, urlEntry, rateCodes, indicatorLastmods),
     ...validPosts.map((post) => urlEntry(
       reportSiteUrl(post.href),
       post.updatedAt || post.registeredAt || post.reportDate || post.date,
@@ -1180,7 +1180,7 @@ export function sitemapXml(posts, { marketSessions = [], rateCodes = [] } = {}) 
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${entries.join('')}</urlset>\n`;
 }
 
-function marketSessionEntries(sessions, urlEntry, rateCodes = []) {
+function marketSessionEntries(sessions, urlEntry, rateCodes, indicatorLastmods) {
   const dates = (Array.isArray(sessions) ? sessions : [])
     .filter((session) => /^\d{4}-\d{2}-\d{2}$/.test(String(session?.market_date || '')));
   if (!dates.length) return [];
@@ -1200,7 +1200,8 @@ function marketSessionEntries(sessions, urlEntry, rateCodes = []) {
   // rate once a day of it is stored (availableIndicatorCodes).
   for (const indicator of listedIndicators(availableIndicatorCodes(sessions, rateCodes))) {
     const history = pair(`/market/${indicator.slug}/`);
-    entries.push(urlEntry(history[0].href, dates[0].published_at, history), urlEntry(history[1].href, dates[0].published_at, history));
+    const lastmod = indicatorLastmods[indicator.code];
+    entries.push(urlEntry(history[0].href, lastmod, history, true), urlEntry(history[1].href, lastmod, history, true));
   }
   for (const session of dates) {
     const alternates = pair(`/market/${session.market_date}/`);
