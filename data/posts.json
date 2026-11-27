@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-27-daily-e3tioo",
+    "type": "daily",
+    "typeLabel": "주식 리포트",
+    "lang": "ko",
+    "date": "2026-11-27",
+    "reportDate": "2026-11-27",
+    "registeredDate": "2026-11-27",
+    "registeredAt": "2026-11-27T08:27:25.629Z",
+    "legacyImport": false,
+    "title": "증안펀드 기대와 외국인 현물 매수, 코스피 4.3%·코스닥 8.1% 급등",
+    "subtitle": "",
+    "description": "증안펀드 가동·확대 기대와 나스닥 선물 강세에 반도체·코스닥 동반 급등 · 11월 27일 코스피 4,915.68(+4.34%), 외국인 현물 1조1,256억 순매수·선물 순매도 · 상승 이유와 다음 거래일 확인할 것",
+    "takeaway": "증안펀드 가동·확대 기대와 나스닥 선물 강세에 코스피 4.34% 오른 4,915로 4,900선 회복, 코스닥 8.13% 급등, 외국인은 현물 1조1,256억 순매수·선물 약 1조980억 순매도",
+    "tags": [
+      "kospi",
+      "kosdaq",
+      "flows",
+      "foreign-investors",
+      "policy"
+    ],
+    "readingMinutes": 3,
+    "href": "reports/2026-11-27_Snowshagal_Daily.html",
+    "coverImage": "covers/2026-11-27-daily-e3tioo.webp",
+    "shareCardImage": "covers/share/2026-11-27-daily-e3tioo.jpg",
+    "coverThumbnail": "covers/2026-11-27-daily-e3tioo-450.webp"
+  },
+  {
     "id": "2026-11-27-basics-hkxai0",
     "type": "basics",
     "typeLabel": "Market Basics",
