@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-28-note-nigiaz",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-28",
+    "reportDate": "2026-11-28",
+    "registeredDate": "2026-11-28",
+    "registeredAt": "2026-11-27T15:41:00.106Z",
+    "legacyImport": false,
+    "title": "관세는 합의대로 15%, 바뀐 건 판정문이다",
+    "seoTitle": "과잉생산 관세 15%, 바뀐 건 판정문",
+    "subtitle": "",
+    "description": "USTR이 과잉생산 301조 관세안에서 한국에 최대 15%를 제안해 기존 합의 수준을 지켰지만, 업종 육성 계획·국책은행 대출 등 한국 관행 6개를 불합리로 판정하고 25% 대안을 남겼다. 실제 부담과 면제 품목, 일정을 풀었다.",
+    "tags": [
+      "kospi",
+      "korea",
+      "u-s-a",
+      "tariffs-trade",
+      "policy"
+    ],
+    "readingMinutes": 22,
+    "href": "reports/20261128_Investment_Insight_US_Overcapacity_Tariff.html",
+    "coverImage": "covers/2026-11-28-note-nigiaz.webp",
+    "shareCardImage": "covers/share/2026-11-28-note-nigiaz.jpg",
+    "coverThumbnail": "covers/2026-11-28-note-nigiaz-450.webp"
+  },
+  {
     "id": "2026-11-27-basics-1nk0cmf",
     "type": "basics",
     "typeLabel": "Market Basics",
