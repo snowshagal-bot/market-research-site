@@ -1,5 +1,31 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-27-basics-1nk0cmf",
+    "type": "basics",
+    "typeLabel": "Market Basics",
+    "lang": "en",
+    "date": "2026-11-27",
+    "reportDate": "2026-11-27",
+    "registeredDate": "2026-11-27",
+    "registeredAt": "2026-11-27T11:19:18.990Z",
+    "legacyImport": false,
+    "title": "Why Korea's large retail investors sell at year-end",
+    "seoTitle": "Why Korea's Retail Investors Sell at Year-End: Major Shareholder Tax and the 2026 Deadline",
+    "subtitle": "",
+    "description": "Why do large retail investors sell Korean stocks before year-end? For South Korean tax residents, the KRW 5 billion per-stock major shareholder test uses settled holdings at fiscal year-end. Under KRX rules, the expected 2026 selling cutoff is December 28. Explore the tax rates, settlement calendar and retail flows with a quiz and simulator.",
+    "tags": [
+      "market-basic",
+      "policy",
+      "korea"
+    ],
+    "readingMinutes": 10,
+    "href": "reports/en/Snowshagal_Market_Basics_24_Year_End_Selling_EN.html",
+    "translationGroup": "2026-11-27-basics-67luz3",
+    "coverImage": "covers/2026-11-27-basics-1nk0cmf.webp",
+    "shareCardImage": "covers/share/2026-11-27-basics-1nk0cmf.jpg",
+    "coverThumbnail": "covers/2026-11-27-basics-1nk0cmf-450.webp"
+  },
+  {
     "id": "2026-11-27-basics-67luz3",
     "type": "basics",
     "typeLabel": "시장 입문",
