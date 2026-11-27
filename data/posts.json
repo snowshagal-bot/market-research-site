@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-11-27-note-11t0bsh",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-27",
+    "reportDate": "2026-11-27",
+    "registeredDate": "2026-11-27",
+    "registeredAt": "2026-11-27T09:29:32.529Z",
+    "legacyImport": false,
+    "title": "수주잔고는 안전판인가 예약이 매출이 되기까지",
+    "seoTitle": "수주잔고는 안전판인가: 예약이 매출이 되기까지",
+    "subtitle": "",
+    "description": "라인메탈은 확정 주문 잔고가 66% 늘었는데도 올해 매출 전망을 두 번 낮췄다. 발전 설비 예약은 5,972억엔 손실로, 3조원대 양극재 계약은 973만원으로 끝났다. 수주잔고가 매출이 되기 전에 볼 세 가지를 정리했다.",
+    "tags": [
+      "semiconductors",
+      "batteries",
+      "nuclear",
+      "korea",
+      "earnings"
+    ],
+    "readingMinutes": 25,
+    "href": "reports/20261127_Investment_Insight_Order_Backlog.html",
+    "coverImage": "covers/2026-11-27-note-11t0bsh.webp",
+    "shareCardImage": "covers/share/2026-11-27-note-11t0bsh.jpg",
+    "coverThumbnail": "covers/2026-11-27-note-11t0bsh-450.webp"
+  },
+  {
     "id": "2026-11-27-daily-im2eu0",
     "type": "daily",
     "typeLabel": "Daily",
