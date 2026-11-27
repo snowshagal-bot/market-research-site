@@ -1,5 +1,30 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-27-basics-67luz3",
+    "type": "basics",
+    "typeLabel": "시장 입문",
+    "lang": "ko",
+    "date": "2026-11-27",
+    "reportDate": "2026-11-27",
+    "registeredDate": "2026-11-27",
+    "registeredAt": "2026-11-27T09:52:21.815Z",
+    "legacyImport": false,
+    "title": "연말엔 왜 큰손이 팔고 나가나",
+    "seoTitle": "대주주 양도세 기준·연말 매도 마감일: 연말엔 왜 큰손이 팔고 나가나",
+    "subtitle": "",
+    "description": "한 종목을 50억 원어치 이상 들고 해를 넘기면 세법상 대주주가 되고, 다음 해 그 종목을 팔 때 차익에 양도세가 붙는다. 판정은 12월 31일 잔고, 그것도 결제일 기준이고 31일은 휴장이라 2026년엔 12월 28일이 사실상 마감이다. 대주주 기준과 세율, 연말 개인 매도가 주가에 남기는 흔적까지 퀴즈와 시뮬레이터로 정리했다.",
+    "tags": [
+      "market-basic",
+      "policy",
+      "korea"
+    ],
+    "readingMinutes": 6,
+    "href": "reports/basics-24-major-shareholder.html",
+    "coverImage": "covers/2026-11-27-basics-67luz3.webp",
+    "shareCardImage": "covers/share/2026-11-27-basics-67luz3.jpg",
+    "coverThumbnail": "covers/2026-11-27-basics-67luz3-450.webp"
+  },
+  {
     "id": "2026-11-27-note-1hilq29",
     "type": "note",
     "typeLabel": "Investment Insights",

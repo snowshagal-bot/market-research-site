@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta name="color-scheme" content="only light"/>
+<title>대주주 양도세 기준·연말 매도 마감일: 연말엔 왜 큰손이 팔고 나가나 | Snowshagal</title>
+<!-- 검색·공유 미리보기 (사이트 생성기가 자체 값으로 덮어쓰면 이 값을 쓰도록 설정) -->
+<meta name="description" content="한 종목을 50억 원어치 이상 들고 해를 넘기면 세법상 대주주가 되고, 다음 해 그 종목을 팔 때 차익에 양도세가 붙는다. 판정은 12월 31일 잔고, 그것도 결제일 기준이고 31일은 휴장이라 2026년엔 12월 28일이 사실상 마감이다. 대주주 기준과 세율, 연말 개인 매도가 주가에 남기는 흔적까지 퀴즈와 시뮬레이터로 정리했다."/>
+<link rel="canonical" href="https://snowshagal.com/reports/basics-24-major-shareholder"/>
+<meta name="robots" content="index,follow,max-image-preview:large"/>
+<meta property="og:type" content="article"/>
+<meta property="og:site_name" content="Snowshagal"/>
+<meta property="og:locale" content="ko_KR"/>
+<meta property="og:title" content="12월 31일 전에만 팔면 될까? 연말엔 왜 큰손이 팔고 나가나"/>
+<meta property="og:description" content="한 종목 50억 원 이상을 들고 해를 넘기면 대주주, 다음 해 차익에 22~27.5% 양도세. 판정은 결제일 기준이라 마감은 며칠 앞선다. 12월 마지막 주 개인 매도의 이유. 시장을 읽는 말들 24편."/>
+<meta property="og:url" content="https://snowshagal.com/reports/basics-24-major-shareholder"/>
+<meta property="og:image" content="https://snowshagal.com/assets/social/basics-24-major-shareholder.jpg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:alt" content="대주주 양도세 그림. 12월 31일 잔고로 판정, 한 종목 50억 원 이상이면 다음 해 차익에 양도세. 결제가 이틀 뒤라 2026년엔 12월 28일(월)까지 팔아야 연말 잔고에서 빠진다"/>
+<meta property="article:published_time" content="2026-11-27"/>
+<meta property="article:section" content="시장 입문"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="12월 31일 전에만 팔면 될까? 연말엔 왜 큰손이 팔고 나가나"/>
+<meta name="twitter:description" content="한 종목 50억 원 이상을 들고 해를 넘기면 대주주, 다음 해 차익에 22~27.5% 양도세. 판정은 결제일 기준이라 마감은 며칠 앞선다. 12월 마지막 주 개인 매도의 이유. 시장을 읽는 말들 24편."/>
+<meta name="twitter:image" content="https://snowshagal.com/assets/social/basics-24-major-shareholder.jpg"/>
+<meta name="twitter:image:alt" content="대주주 양도세 그림. 12월 31일 잔고로 판정, 한 종목 50억 원 이상이면 다음 해 차익에 양도세. 결제가 이틀 뒤라 2026년엔 12월 28일(월)까지 팔아야 연말 잔고에서 빠진다"/>
+<meta name="theme-color" content="#2A362E"/>
+<script type="application/ld+json">
+[
+ {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "연말엔 왜 큰손이 팔고 나가나",
+  "alternativeHeadline": "주식 양도세 대주주 기준 종목당 50억 원, 12월 31일 판정과 결제일(D+2), 2026년 연말 매도 마감일, 대주주 양도세율과 연말 개인 순매도",
+  "description": "한 종목을 50억 원어치 이상 들고 해를 넘기면 세법상 대주주가 되고, 다음 해 그 종목을 팔 때 차익에 양도세가 붙는다. 판정은 12월 31일 잔고, 그것도 결제일 기준이고 31일은 휴장이라 2026년엔 12월 28일이 사실상 마감이다. 대주주 기준과 세율, 연말 개인 매도가 주가에 남기는 흔적까지 퀴즈와 시뮬레이터로 정리했다.",
+  "inLanguage": "ko-KR",
+  "articleSection": "시장 입문",
+  "datePublished": "2026-11-27",
+  "dateModified": "2026-11-27",
+  "image": [
+   "https://snowshagal.com/assets/social/basics-24-major-shareholder-16x9.jpg",
+   "https://snowshagal.com/assets/social/basics-24-major-shareholder-4x3.jpg",
+   "https://snowshagal.com/assets/social/basics-24-major-shareholder-1x1.jpg"
+  ],
+  "mainEntityOfPage": "https://snowshagal.com/reports/basics-24-major-shareholder",
+  "author": {
+   "@type": "Organization",
+   "name": "Snowshagal",
+   "url": "https://snowshagal.com/"
+  },
+  "publisher": {
+   "@type": "Organization",
+   "name": "Snowshagal",
+   "url": "https://snowshagal.com/"
+  },
+  "isPartOf": {
+   "@type": "CreativeWorkSeries",
+   "name": "시장을 읽는 말들",
+   "url": "https://snowshagal.com/basics/"
+  },
+  "keywords": "대주주 양도세, 대주주 기준, 주식 양도소득세, 대주주 50억, 대주주 판정일, 연말 매도, 대주주 매도 마감일, 양도세 회피 매물, 결제일 D+2, 연말 휴장일, 12월 개인 순매도, 1월 효과, 소액주주 비과세"
+ },
+ {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+   {
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Snowshagal",
+    "item": "https://snowshagal.com/"
+   },
+   {
+    "@type": "ListItem",
+    "position": 2,
+    "name": "시장 입문",
+    "item": "https://snowshagal.com/basics/"
+   },
+   {
+    "@type": "ListItem",
+    "position": 3,
+    "name": "연말엔 왜 큰손이 팔고 나가나",
+    "item": "https://snowshagal.com/reports/basics-24-major-shareholder"
+   }
+  ]
+ }
+]
+</script>
+<style>
+/* 손글씨 글꼴: Gaegu Bold (SIL Open Font License 1.1, Copyright 2018 The Gaegu Project Authors), 쓰인 글자만 포함 */
+@font-face{font-family:'SnowHand';src:url(data:font/woff2;base64,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) format('woff2');font-weight:400 800;font-display:swap}
+
+:root{
+  --surface-page:#ECEAE5;
+  --surface-band:#E3E0D9;
+  --surface-inner:#F1EFEA;
+  --surface-detail:#E8E5DF;
+  --surface-muted:#DAD6CE;
+  --ink:#2E2E2C;
+  --ink2:#43423E;
+  --body:#53514C;
+  --sub:#5A5751;
+  --muted:#65625B;
+  --line:#CEC9BF;
+  --line2:#DCD7CE;
+  --green:#46584D;
+  --green-dark:#2F3C34;
+  --green-soft:#DCE3DD;
+  --green-line:#AAB6AC;
+  --green-pale:#A8C6B4;
+  --stk:#3A3632;
+  --l2:#A9784A;
+  --l2-dark:#7A5A34;
+  --l2-soft:#EFE2CF;
+  --l2-line:#D2B48C;
+  --i2:#7A3F44;
+  --i2-soft:#EBDCDD;
+  --rec:#7A3F44;
+  --rec-soft:#F1E3E4;
+  --rec-line:#C29A9E;
+  --up:#B23A47;
+  --down:#3D6595;
+  --board:#2F3C34;
+  --chalk:#ECEAE3;
+  --chalk2:#B9C9BE;
+  --chalk-mark:#E6C98F;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:58px;overflow-x:hidden}
+html,body{max-width:100%}
+body{
+  margin:0;background:var(--surface-page);color:var(--ink);
+  font-family:"Pretendard Variable","Pretendard","SUIT","Noto Sans KR","Apple SD Gothic Neo",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  line-height:1.58;letter-spacing:-.02em;-webkit-font-smoothing:antialiased;
+  word-break:keep-all;line-break:strict;
+}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(38px + env(safe-area-inset-bottom,0px));width:100%;position:relative}
+
+
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;letter-spacing:inherit}
+
+
+/* ── 상단바 ── */
+.topbar{position:sticky;top:0;z-index:50;margin:0 -16px;
+  background:rgba(236,234,229,.92);-webkit-backdrop-filter:saturate(150%) blur(12px);backdrop-filter:saturate(150%) blur(12px);
+  border-bottom:1px solid rgba(90,84,74,.13)}
+.tbin{display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0)) 18px 9px}
+.tbin .brand{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.tbin .brand i{font-style:normal;color:var(--green)}
+.tbin .ep{font-size:11.5px;font-weight:800;color:var(--sub);font-variant-numeric:tabular-nums}
+.prog{height:2px;background:rgba(90,84,74,.10)}
+.prog i{display:block;height:100%;width:0;background:var(--green);transition:width .1s linear}
+
+/* ── 표지 ── */
+.cover{margin:0 -16px;padding:18px 22px 15px;
+  background:linear-gradient(158deg,#36443B 0%,#2A362E 52%,#1F2721 100%);color:#EFEDE7}
+.cvkick{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.06em;
+  color:#BFD2C6;border:1px solid rgba(168,198,180,.34);border-radius:999px;padding:5px 12px}
+.cvkick b{color:#EFEDE7;font-weight:800}
+.cvdate{display:inline-block;margin-left:8px;font-size:11.5px;font-weight:700;color:#9FB2A6;letter-spacing:.02em;vertical-align:middle}
+.cvtitle{margin:11px 0 0;font-size:30px;line-height:1.22;font-weight:800;letter-spacing:-.05em;color:#F4F2ED}
+.cvtitle span{display:block;color:var(--green-pale)}
+.cvsub{margin:11px 0 0;font-size:14px;line-height:1.58;font-weight:600;color:#C6D2CA}
+.cvmotif{margin:12px 0 0}
+.cvmotif svg{display:block;width:100%;height:auto;max-width:460px}
+.cvidx{display:flex;gap:6px;margin:12px 0 0;flex-wrap:wrap}
+.cvidx a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;font-size:11.5px;font-weight:800;color:#D3DED7;background:rgba(255,255,255,.07);
+  border:1px solid rgba(168,198,180,.22);border-radius:999px}
+.cvidx a b{color:var(--green-pale);font-weight:800;margin-right:5px}
+.cvstat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:14px 0 0}
+.cvstat div{border:1px dashed rgba(236,234,227,.32);border-radius:10px;padding:8px 9px 9px;background:rgba(255,255,255,.04);min-width:0}
+.cvstat span{display:block;font-size:11px;line-height:1.35;font-weight:700;color:#9FB2A6;word-break:keep-all}
+.cvstat b{display:block;margin-top:3px;font-size:22px;line-height:1.1;font-weight:800;letter-spacing:-.04em;color:#F4F2ED;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cvstat .hot b{color:#E6C98F}
+.cvstat em{display:block;margin-top:2px;font-style:normal;font-size:11.5px;font-weight:800;color:#E6C98F;word-break:keep-all}
+.cvtime{margin:10px 0 0;font-size:11.5px;font-weight:700;color:#9FB2A6}
+
+/* ── 요약 ── */
+.tldr{margin:18px 0 0;background:#FFFDF7;border:2px solid var(--ink);border-radius:14px;box-shadow:4px 4px 0 rgba(46,46,44,.85);padding:13px 16px 15px}
+.tlh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.tlh b{font-size:21px;color:#B23A47;letter-spacing:0}
+.tlh span{font-size:12px;font-weight:800;color:var(--sub)}
+.pts{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
+.pts li{position:relative;padding-left:18px;font-size:15px;line-height:1.62;font-weight:600;color:var(--body);text-wrap:pretty}
+.pts li::before{content:"";position:absolute;left:4px;top:.74em;width:6px;height:6px;border-radius:50%;background:var(--green)}
+.pts li b{color:var(--ink);font-weight:800}
+.pts.sm{gap:6px;margin-top:10px}
+.pts.sm li{font-size:14px;line-height:1.6;padding-left:15px}
+.pts.sm li::before{left:3px;width:5px;height:5px}
+.tiphint{margin:10px 2px 0;font-size:12px;font-weight:700;color:var(--sub)}
+.tiphint::before{content:"";display:inline-block;width:22px;margin-right:6px;vertical-align:3px;border-bottom:1.5px dashed #8B867E}
+
+/* ── 챕터 ── */
+.ch{margin:22px 0 8px}
+.chtop{display:flex;align-items:center;gap:9px;margin-bottom:7px;flex-wrap:wrap}
+.chn{font-size:12px;font-weight:800;color:#EFEDE7;background:var(--ink);border-radius:4px;padding:3px 8px;letter-spacing:.04em}
+.chk{font-size:11.5px;font-weight:800;letter-spacing:.11em;color:var(--sub)}
+.cht{margin:0;font-size:24px;line-height:1.3;font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.chrule{display:flex;height:3px;margin-top:11px;gap:2px}
+.chrule i{display:block;height:100%;flex:1}
+.chrule .r1{background:var(--stk)}.chrule .r2{background:var(--l2)}.chrule .r3{background:var(--i2)}.chrule .r4{background:var(--green)}
+
+/* ── 본문 ── */
+.p{margin:9px 0 0;font-size:15px;line-height:1.7;color:var(--body);font-weight:500;text-wrap:pretty}
+.p b{color:var(--ink);font-weight:800}
+.p.lead{font-size:16px;color:var(--ink2);font-weight:600}
+.hd{margin:20px 0 0;font-size:17px;font-weight:800;letter-spacing:-.03em;color:var(--ink);line-height:1.44;text-wrap:balance}
+.hd small{display:block;font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin-bottom:3px}
+.q{margin:14px 0 0;font-size:19px;line-height:1.45;font-weight:800;letter-spacing:-.04em;color:var(--ink);text-wrap:balance}
+.mk{background:linear-gradient(transparent 58%,rgba(230,201,143,.72) 58%);padding:0 1px}
+.ilink{color:var(--ink);font-weight:700;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px;text-decoration-color:#A9784A;padding:4px 0}
+.ul{font-weight:800;color:var(--ink);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='8' viewBox='0 0 60 8'%3E%3Cpath d='M0 4.6 Q15 2.6 30 4.4 T60 4.2' fill='none' stroke='%23B23A47' stroke-opacity='.72' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:repeat-x;background-position:0 100%;background-size:60px 8px;padding-bottom:3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.note{position:relative;margin:8px 2px 0;padding-left:16px;font-size:13px;line-height:1.6;font-weight:600;color:var(--sub);text-wrap:pretty}
+.note::before{content:"※";position:absolute;left:0;top:0;color:var(--muted)}
+
+
+
+
+
+
+
+/* ── 배지 ── */
+.vb{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;letter-spacing:.03em;
+  color:#4A4438;background:var(--l2-soft);border:1px solid var(--l2-line);border-radius:999px;padding:3px 9px;white-space:nowrap}
+
+/* ── 한 문장 답 ── */
+.ans{margin:14px -16px 0;padding:14px 22px;background:var(--green);color:#EFEDE7;position:relative;overflow:hidden}
+.ans:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green-pale)}
+.ans .ak{font-size:12px;font-weight:800;letter-spacing:.14em;color:#C2D2C7;margin-bottom:8px}
+.ans .av{font-size:19px;line-height:1.46;font-weight:800;letter-spacing:-.04em;color:#F4F2ED;text-wrap:balance}
+
+
+/* ── 문제 카드 ── */
+.pop{margin:14px 0 0;background:var(--surface-inner);border:1.5px solid var(--ink);border-radius:14px;overflow:hidden}
+.poph{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;background:var(--ink);color:#EDEAE4}
+.poph b{font-size:12px;font-weight:800;letter-spacing:.06em}
+.poph .vb{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#D9D4CA}
+.popb{padding:13px 14px 14px}
+.popq{margin:0;font-size:15.5px;line-height:1.52;font-weight:800;letter-spacing:-.03em;color:var(--ink);text-wrap:balance}
+.opts{display:grid;gap:6px;margin:12px 0 0;grid-template-columns:1fr}
+.opt{appearance:none;-webkit-appearance:none;border:1.5px solid var(--line);background:#F7F6F2;border-radius:10px;
+  font-weight:800;color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums;transition:background .15s,border-color .15s;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  white-space:normal;text-align:left;padding:10px 13px;font-size:14.5px;line-height:1.35;letter-spacing:-.02em;word-break:keep-all}
+.opt:hover{border-color:var(--sub)}
+.opt.ok{background:var(--green);border-color:var(--green);color:#F4F2ED}
+.opt.no{background:#E3E0D9;border-color:#E3E0D9;color:var(--muted);text-decoration:line-through}
+.opt.ok::before{content:"✓ "}
+.opt.no::before{content:"✗ "}
+.opt[aria-disabled="true"]{cursor:default}
+.popans{margin:12px 0 0;padding-top:11px;border-top:1px dashed var(--line)}
+.popans[hidden]{display:none}
+.verdict{display:inline-block;font-size:12px;font-weight:800;color:#F4F2ED;background:var(--green);border-radius:6px;padding:3px 9px;margin-bottom:8px;white-space:pre-line}
+.verdict:focus{outline:none}
+.verdict:focus-visible{outline:2px solid #2E2E2C;outline-offset:2px}
+.popnote{margin:9px 0 0;font-size:13.5px;line-height:1.6;font-weight:600;color:var(--body);text-wrap:pretty}
+.popnote b{color:var(--ink);font-weight:800}
+.qshare{appearance:none;-webkit-appearance:none;margin:10px 0 0;width:100%;min-height:44px;border:1.5px dashed var(--line);background:transparent;border-radius:10px;padding:9px 10px;
+  font-size:13px;font-weight:800;color:var(--ink2);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.qshare:hover{border-color:var(--sub)}
+
+/* ── 타임라인 ── */
+.tline{list-style:none;margin:12px 0 0;padding:0}
+.tline li{display:grid;grid-template-columns:44px 1fr;gap:10px}
+.tline time{padding-top:2px;font-size:14px;font-weight:800;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tline p{position:relative;margin:0;padding:0 0 13px 16px;border-left:2px solid #CFC9BE;font-size:15px;line-height:1.6;font-weight:600;color:var(--body)}
+.tline li:last-child p{border-left-color:transparent;padding-bottom:0}
+.tline p::before{content:"";position:absolute;left:-7px;top:.42em;width:12px;height:12px;border-radius:50%;background:#FBF8F1;border:2px solid var(--green);box-sizing:border-box}
+.tline li.hot time{color:#B23A47}
+.tline li.hot p{font-weight:800;color:var(--ink)}
+.tline li.hot p::before{background:#B23A47;border-color:#B23A47}
+.tline.wide li{grid-template-columns:58px 1fr}
+
+/* ── 판서 ── */
+.board{margin:14px -16px 0;padding:15px 22px 16px;background:var(--board);color:var(--chalk);position:relative;overflow:hidden}
+.board:after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 20% 0%,rgba(255,255,255,.06),transparent 55%),radial-gradient(ellipse at 90% 100%,rgba(255,255,255,.04),transparent 50%)}
+.bdk{position:relative;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--chalk2);margin-bottom:9px}
+.bdk:before{content:"";width:18px;height:2px;background:var(--chalk-mark);border-radius:2px}
+.bdt{position:relative;margin:0;font-size:20px;line-height:1.42;font-weight:800;letter-spacing:-.04em;color:#F6F4EE;text-wrap:balance}
+.board .bdt.hand{font-family:'SnowHand','Gaegu','Nanum Pen Script',cursive;font-size:26px;line-height:1.34;letter-spacing:0;font-weight:700}
+.btab{position:relative;display:grid;margin:12px 0 0;border:1px solid rgba(236,234,227,.22);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums}
+.btab span{padding:8px 8px;font-size:12.5px;font-weight:800;text-align:left;border-bottom:1px solid rgba(236,234,227,.12);color:#EDEBE4;word-break:keep-all;line-height:1.45}
+.btab span.h{font-size:10.5px;color:var(--chalk2);background:rgba(255,255,255,.05);letter-spacing:.02em}
+.btab span.l{font-size:12.3px}
+.btab span.e{border-bottom:0}
+.btab .hi{color:var(--chalk-mark)}
+.btab .term{padding:6px 3px;border-bottom:0;font-size:inherit;font-weight:inherit;color:inherit}
+.btab .term .tip{padding:9px 11px;border-bottom:0;font-size:12px;font-weight:600;line-height:1.52;color:#F2F0EB;text-align:left}
+
+/* ── 표 ── */
+.dcmp{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:11px 12px 12px}
+.figh{display:flex;align-items:baseline;justify-content:space-between;gap:3px 10px;flex-wrap:wrap;margin-bottom:9px}
+.figh b{font-size:13.5px;font-weight:800;color:var(--ink)}
+.figh span{font-size:12px;font-weight:700;color:var(--sub)}
+.calc{display:grid;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-variant-numeric:tabular-nums}
+.calc span{padding:7px 9px;font-size:13px;font-weight:700;color:var(--body);background:#F7F6F2;border-bottom:1px solid var(--line2);text-align:right;word-break:keep-all;line-height:1.4}
+.calc span.h{font-size:12px;font-weight:800;color:var(--muted);background:var(--surface-detail)}
+.calc span.l{text-align:left;font-weight:800;color:var(--ink);font-size:12.5px}
+.calc span.e{border-bottom:0}
+.calc span.hot{color:#B23A47;font-weight:800}
+.calc span small{display:block;margin-top:1px;font-size:11px;font-weight:700;color:var(--sub);white-space:normal}
+
+/* ── 시뮬레이터 ── */
+.sim{margin:14px -16px 0;padding:14px 16px 15px;background:var(--surface-band);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2)}
+.simhd{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:0 4px}
+.simhd b{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.simhd span{font-size:11.5px;font-weight:800;color:var(--sub)}
+.simp{margin:5px 4px 0;font-size:13.5px;line-height:1.6;font-weight:600;color:var(--body);text-wrap:pretty}
+.simp b{color:var(--ink);font-weight:800}
+.chip{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:var(--surface-inner);border-radius:999px;padding:6px 11px;
+  font-size:12px;font-weight:800;color:var(--ink2);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#F4F2ED}
+.ddlb{margin:12px 4px 0;font-size:12px;font-weight:800;color:var(--sub)}
+
+
+
+
+
+.iflow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:12px 0 0}
+.df{background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;padding:7px 4px 8px;text-align:center;transition:background .15s,border-color .15s;min-width:0}
+.df i{display:block;font-style:normal;font-size:11px;font-weight:800;color:var(--sub);word-break:keep-all}
+.df b{display:block;margin-top:3px;font-size:15px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;white-space:normal;word-break:keep-all;line-height:1.25}
+.df b small{display:block;margin-top:2px;font-size:11px;font-weight:800;color:var(--sub);word-break:keep-all}
+.df.ok{background:var(--green-soft);border-color:var(--green-line)}.df.ok b{color:var(--green-dark)}
+.df.no{background:var(--rec-soft);border-color:var(--rec-line)}.df.no b{color:var(--rec)}
+.df.ok b small,.df.no b small{color:inherit;opacity:.9}
+.omsgw{display:grid;grid-template-columns:52px 1fr;gap:8px;align-items:center;margin:8px 0 0}
+.oface{width:52px;height:52px;display:block}
+.oface .f-ok,.oface .f-meh,.oface .f-no{display:none}
+.oface.ok .f-ok,.oface.meh .f-meh,.oface.no .f-no{display:inline}
+.simmsg{margin:0;padding:10px 12px;background:var(--surface-inner);border:1px solid var(--line);border-radius:10px;font-size:13.5px;line-height:1.6;font-weight:700;color:var(--ink);min-height:6.4em;text-wrap:pretty}
+.simfoot{margin:8px 4px 0;font-size:12px;line-height:1.5;font-weight:600;color:var(--muted)}
+
+/* ── 접힘 ── */
+.foldwrap{margin:14px 0 0}
+details.fold{border:1px solid var(--line);border-radius:12px;background:var(--surface-detail);margin:0 0 8px;overflow:hidden}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px;
+  padding:11px 15px;font-size:13px;font-weight:800;color:var(--ink)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary:after{content:"+";font-size:18px;font-weight:800;color:var(--green);line-height:.9}
+details.fold[open]>summary:after{content:"−"}
+details.fold .fb{padding:0 15px 14px}
+
+
+.fb p{margin:0 0 8px;font-size:13.5px;line-height:1.62;color:var(--body);font-weight:600}
+.fb p:last-child{margin-bottom:0}
+.fb p b{color:var(--ink);font-weight:800}
+.gloss{display:grid;grid-template-columns:100px 1fr;gap:7px 11px;margin:2px 0 0;font-size:12.5px}
+.gloss dt{font-weight:800;color:#4B4740}
+.gloss dd{margin:0;color:var(--body);line-height:1.52}
+
+
+
+.src{margin:0;padding-left:26px;display:grid;gap:5px}
+.src li{font-size:12px;line-height:1.52;color:var(--body);font-weight:600}
+.src li b{color:var(--ink)}
+.src a{color:var(--ink2);font-weight:700;text-decoration:underline;text-decoration-color:#A9A49B;text-underline-offset:3px;padding:2px 0;word-break:keep-all}
+.disc{font-size:12px;color:var(--muted);text-align:center;line-height:1.5;padding:12px 8px 0;font-weight:500}
+.foot{text-align:center;font-size:11.5px;color:var(--sub);padding:9px 0 4px;font-weight:800;letter-spacing:-.01em}
+
+/* ── 툴팁 ── */
+.term{display:inline;padding:6px 3px;margin:0 -3px;border-bottom:0;line-height:inherit;white-space:nowrap;cursor:pointer;position:relative;
+  -webkit-tap-highlight-color:transparent;font-weight:800;color:var(--ink);
+  text-decoration:underline dashed #8B867E;text-decoration-thickness:1.5px;text-underline-offset:4px;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;-webkit-user-select:text;user-select:text;
+  touch-action:manipulation;-webkit-touch-callout:none}
+.term .tip{position:fixed;left:12px;top:0;min-width:160px;max-width:min(248px,calc(100vw - 28px));
+  background:#33322F;color:#F2F0EB;font-size:12px;font-weight:600;line-height:1.52;padding:9px 11px;border-radius:9px;
+  box-shadow:0 8px 22px rgba(0,0,0,.24);z-index:60;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease;white-space:normal;text-align:left;text-decoration:none}
+.term .tip:after{content:"";position:absolute;top:100%;left:var(--ax,50%);transform:translateX(-50%);border:6px solid transparent;border-top-color:#33322F}
+.term .tip.below:after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:#33322F}
+.term.open .tip{opacity:1;visibility:visible;pointer-events:auto}
+.board .term,.ans .term{color:inherit;text-decoration-color:rgba(236,234,227,.55)}
+@media(hover:hover) and (pointer:fine){.term{cursor:help}.term:hover{text-decoration-color:var(--ink)}.board .term:hover{text-decoration-color:#F4F2ED}}
+
+/* ── 손그림 ── */
+.sdefs{position:absolute;width:0;height:0;overflow:hidden}
+.hand{font-family:'SnowHand','Gaegu','Nanum Pen Script',cursive;font-weight:700;letter-spacing:-.02em}
+.doodle{margin:14px 0 0;padding:8px 6px 4px;background:var(--surface-inner);border:1px solid var(--line);border-radius:14px}
+.doodle svg{display:block;width:100%;height:auto;max-width:460px;margin:0 auto}
+.doodle figcaption{margin:2px 8px 6px;font-size:12px;line-height:1.5;font-weight:700;color:var(--muted);text-align:center}
+
+/* ── 포스트잇 ── */
+.chk4{margin:12px 0 0;display:grid;gap:18px}
+.ck{position:relative;padding:14px 14px 12px;background:#FBF3D5;border-radius:4px;box-shadow:0 9px 14px -11px rgba(46,46,44,.45),0 1px 0 rgba(46,46,44,.05);transform:rotate(-.5deg)}
+.ck:nth-child(even){background:#EAF1EA;transform:rotate(.45deg)}
+.ck::before{content:"";position:absolute;top:-8px;left:50%;width:62px;height:16px;background:rgba(201,186,150,.5);transform:translateX(-50%) rotate(-2.5deg);border-radius:2px}
+.ck .ct{margin:1px 0 0;font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.03em;line-height:1.4;text-wrap:balance}
+.ck .ct i{font-family:'SnowHand','Gaegu','Nanum Pen Script',cursive;font-style:normal;font-size:18px;font-weight:700;color:#B23A47;letter-spacing:0;margin-right:8px;vertical-align:-1px}
+.ck .cd{margin:5px 0 0;font-size:13.5px;line-height:1.52;font-weight:700;color:var(--ink2);text-wrap:pretty}
+.ck .cd b{color:var(--ink)}
+
+/* ── 오답노트 ── */
+.trapwrap{margin:16px 0 0;border:1.5px solid var(--i2);border-radius:12px;overflow:hidden}
+.traphd{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;background:var(--i2);color:#F6EEEF}
+.traphd b{font-size:12px;font-weight:800;letter-spacing:.06em}
+.traphd i{font-style:normal;font-size:11px;font-weight:700;color:#E5C9CC}
+.trap{display:grid;gap:1.5px;background:var(--line)}
+.trap .ti{padding:10px 13px;background:var(--surface-inner)}
+.trap .tk{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.trap .tx{margin-top:3px;font-size:14px;font-weight:800;color:var(--i2);line-height:1.48;letter-spacing:-.02em}
+.trap .tx span{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='9' viewBox='0 0 48 9'%3E%3Cpath d='M0 5.2 Q6 2.4 12 4.8 T24 4.6 T36 5.4 T48 4.6' fill='none' stroke='%23B23A47' stroke-opacity='.6' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:repeat-x;background-position:0 60%;background-size:48px 9px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.trap .to{margin-top:5px;font-size:13.5px;font-weight:600;color:var(--body);line-height:1.56;text-wrap:pretty}
+.trap .to b{color:var(--ink);font-weight:800}
+
+/* ── 엔딩 ── */
+.final{margin:16px -16px 0;padding:18px 22px;background:linear-gradient(155deg,#36443B 0%,#232C26 100%);color:#EFEDE7;position:relative;overflow:hidden}
+.final:before{content:"";position:absolute;right:-46px;bottom:-58px;width:160px;height:160px;border-radius:50%;border:1px solid rgba(168,198,180,.18)}
+.final .fk{position:relative;font-size:12px;font-weight:800;letter-spacing:.13em;color:#A0B4A6;margin-bottom:10px}
+.final p{position:relative;margin:0;font-weight:800;letter-spacing:-.04em;color:#F4F2ED}
+.final .f1{font-size:19px;line-height:1.5;text-wrap:balance}
+.final .f1 b{color:var(--green-pale);background:linear-gradient(transparent 58%,rgba(230,201,143,.36) 58%,rgba(230,201,143,.36) 94%,transparent 94%);padding:0 2px}
+.final .f2{margin-top:11px;padding-top:10px;border-top:1px solid rgba(168,198,180,.22);font-size:15px;line-height:1.58;color:#DCE6DE;text-wrap:pretty}
+
+/* ── 공유 ── */
+.sharebox{margin:16px 0 0;padding:14px 14px 13px;background:var(--surface-inner);border:1px solid var(--line);border-radius:14px;text-align:center}
+.shq{margin:0;font-size:14.5px;line-height:1.5;font-weight:800;color:var(--ink);letter-spacing:-.03em;text-wrap:balance}
+.shbtns{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px;margin:11px 0 0}
+.shb{appearance:none;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#F7F6F2;border-radius:10px;
+  padding:10px 4px;min-height:48px;font-size:13px;font-weight:800;color:var(--ink);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;text-align:center;white-space:nowrap}
+.shb.main{background:var(--green);border-color:var(--green);color:#F4F2ED}
+.shmsg{margin:7px 0 0;min-height:1em;font-size:12px;font-weight:700;color:var(--green)}
+
+/* ── 이어 읽기 ── */
+.more7{margin:12px 0 0;display:grid;gap:6px}
+.m7h{font-size:12px;font-weight:800;letter-spacing:.12em;color:var(--muted);margin:2px 2px 2px}
+.m7{display:block;background:var(--surface-inner);border:1px solid var(--line);border-radius:11px;padding:10px 36px 10px 13px;position:relative}
+.m7:after{content:"→";position:absolute;right:13px;top:50%;transform:translateY(-50%);font-weight:800;color:var(--muted)}
+.m7 i{font-style:normal;display:inline-block;font-size:12px;font-weight:800;color:var(--green);margin-right:6px}
+.m7 b{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.m7 span{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--sub)}
+.m7.all{background:var(--surface-detail)}
+.m7.cta{background:var(--green);border-color:var(--green)}
+.m7.cta b{color:#F4F2ED}.m7.cta span{color:#C6D2CA}.m7.cta:after{color:#C6D2CA}
+
+/* ── 다음 편 ── */
+.next{margin:16px -16px 0;padding:20px 22px;background:linear-gradient(150deg,#454F5C 0%,#2B323C 100%);color:#E9EBEE;position:relative;overflow:hidden}
+.next:before{content:"";position:absolute;right:-40px;bottom:-52px;width:150px;height:150px;border-radius:50%;border:1px solid rgba(180,190,202,.18)}
+.next .nh{position:relative;font-size:12px;font-weight:800;letter-spacing:.12em;color:#C3CAD3;margin-bottom:10px}
+.next p{position:relative;margin:0;font-size:16px;line-height:1.56;font-weight:800;letter-spacing:-.03em;color:#EDEFF2;text-wrap:pretty}
+.next .nt{position:relative;margin-top:14px;padding-top:12px;border-top:1px solid rgba(180,190,202,.22);font-size:12.5px;font-weight:800;color:#B9C1CB}
+.next .nt b{color:#EDEFF2;font-weight:800;margin-right:6px}
+.next.nlink{display:block;text-decoration:none;color:inherit}
+.next.nlink .nt::after{content:" →"}
+
+:focus-visible{outline:2px solid #2E2E2C;outline-offset:2px}
+.cover :focus-visible,.shb.main:focus-visible,.m7.cta:focus-visible{outline-color:#F4F2ED}
+
+
+@media(max-width:360px){
+  .cvtitle{font-size:27px}
+  .cvstat b{font-size:19px}
+  .cvstat div{padding:7px 6px 8px}
+  .q{font-size:17px}
+  .ans .av{font-size:17.5px}
+  .final .f1{font-size:17px}
+  .cht{font-size:21px}
+  .btab span{padding:7px 6px;font-size:11.8px}
+  .gloss{grid-template-columns:86px 1fr}
+}
+
+/* ── 데스크톱 ── */
+@media(min-width:768px){
+  .app{max-width:770px;padding-left:28px;padding-right:28px}
+  .topbar{margin:0 -28px}
+  .cover{margin:0 -28px;padding:44px 40px 34px}
+  .cvtitle{font-size:44px}
+  .cvsub{font-size:15px;max-width:30em}
+  .cvstat b{font-size:30px}.cvstat span{font-size:12px}
+  .ch{margin-top:48px}
+  .cht{font-size:29px}
+  .q{font-size:24px}
+  .p{font-size:16px}
+  .pts li{font-size:16px}
+  .tline p{font-size:16px}
+  .ans,.board,.sim,.final,.next{margin-left:-28px;margin-right:-28px}
+  .ans{padding:26px 40px}
+  .ans .av{font-size:23px}
+  .board{padding:26px 40px}
+  .bdt{font-size:24px}
+  .board .bdt.hand{font-size:30px}
+  .sim{padding:24px 34px}
+  .final{padding:32px 40px}
+  .final .f1{font-size:25px}
+  .final .f2{font-size:18px}
+  .next{padding:28px 40px}
+  .chk4{grid-template-columns:1fr 1fr;gap:14px 20px}
+  .trap{grid-template-columns:1fr 1fr 1fr}
+  .more7{grid-template-columns:1fr 1fr 1fr}
+  .m7.all{grid-column:span 1}
+  .m7.cta{grid-column:span 2}
+  
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+
+/* 18편 읽기 개선: 줄 카드 */
+.rows{margin:12px 0 0;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:2px 14px}
+.rows .rw{display:grid;grid-template-columns:92px 1fr;gap:12px;padding:11px 0;border-top:1px dashed var(--line);align-items:baseline}
+.rows .rw:first-child{border-top:0}
+.rows .rk{font-size:14px;font-weight:800;color:var(--ink);line-height:1.4;font-variant-numeric:tabular-nums;word-break:keep-all}
+.rows .rk small{display:block;margin-top:1px;font-size:12px;font-weight:700;color:var(--sub)}
+.rows .rk .term{white-space:normal}
+.rows .rv{font-size:14.5px;line-height:1.62;font-weight:600;color:var(--body);text-wrap:pretty}
+.rows .rv b{color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums}
+.rows .rw.hot .rk{color:#B23A47}
+.rows .rw.hot .rk .term{color:#B23A47}
+.rows.sm{margin:9px 0 2px;padding:0 12px}
+.rows.sm .rw{padding:7px 0;grid-template-columns:96px 1fr}
+.rows.sm .rk,.rows.sm .rv{font-size:13.5px}
+@media(min-width:768px){.rows{padding:4px 18px}.rows .rw{grid-template-columns:118px 1fr;gap:16px}.rows .rv{font-size:15.5px}.rows .rk{font-size:15px}}
+@media(max-width:360px){.rows{padding:2px 11px}.rows .rw{grid-template-columns:80px 1fr;gap:9px}.rows .rv{font-size:14px}.rows.sm .rw{grid-template-columns:88px 1fr}}
+
+/* ═════ 21편 추가 ═════ */
+/* 표지 글씨 */
+.cvstat span{font-size:11.5px}
+.cvstat em{font-size:12px}
+/* 심화 접기 안 타임라인 */
+.fb .tline{margin:4px 0 4px}
+.fb .tline p{margin:0;font-size:13.5px;line-height:1.58}
+.fb .tline li:last-child p{padding-bottom:0}
+.fb .tline.wide li{grid-template-columns:68px 1fr}
+.fb .tline time{font-size:13px}
+/* 계산기 */
+.seg{display:grid;gap:6px;margin:6px 0 0}
+
+.seg.s3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.seg.s4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.seg .chip{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:46px;border-radius:10px;padding:5px 3px;
+  font-size:13.5px;line-height:1.25;font-variant-numeric:tabular-nums;color:var(--ink);word-break:keep-all;text-align:center}
+.seg .chip small{display:block;margin-top:2px;font-size:11px;font-weight:700;color:var(--sub)}
+.seg .chip.on{color:#F4F2ED}
+.seg .chip.on small{color:#CFCAC0}
+
+
+
+
+@media(max-width:360px){
+  .seg .chip{font-size:12.5px;padding:5px 2px}
+  .seg .chip small{font-size:10.5px}
+  
+}
+
+
+
+/* 가독성 정리 */
+.tline.nowrap time{white-space:nowrap}
+.flow3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:12px 0 0;counter-reset:f}
+.flow3 .fs{position:relative;background:var(--surface-inner);border:1px solid var(--line);border-radius:12px;padding:9px 9px 10px;text-align:center;min-width:0}
+.flow3 .fs+.fs::before{content:"";position:absolute;left:-12px;top:50%;width:10px;height:10px;border-top:2px solid #8B867E;border-right:2px solid #8B867E;transform:translateY(-50%) rotate(45deg);margin-left:-2px}
+.flow3 .fs i{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--ink);color:#F4F2ED;font-style:normal;font-size:12px;font-weight:800}
+.flow3 .fs b{display:block;margin-top:5px;font-size:13.5px;line-height:1.3;font-weight:800;color:var(--ink);word-break:keep-all}
+.flow3 .fs span{display:block;margin-top:3px;font-size:11.5px;line-height:1.4;font-weight:700;color:var(--sub);word-break:keep-all}
+.flow3 .fs.hot{background:var(--rec-soft);border-color:var(--rec-line)}
+.flow3 .fs.hot i{background:#B23A47}
+.flow3 .fs.hot b{color:var(--rec)}
+.ck .cl{margin:4px 0 6px;padding-left:18px}
+.ck .cl li{font-size:13.5px;line-height:1.5;font-weight:700;color:var(--ink2);margin:1px 0}
+.ck .cl li::marker{color:#B23A47}
+.dcmp+.pts.sm{margin-top:10px}
+.calc span.hot small{color:#B23A47;opacity:.85}
+@media(max-width:360px){.flow3{gap:12px}.flow3 .fs{padding:8px 5px 9px}.flow3 .fs b{font-size:12.5px}.flow3 .fs span{font-size:11px}}
+.tline.nowrap li.hot p{font-weight:600;color:var(--body)}
+
+
+/* 21편 */
+
+
+
+.calc.ctr span:not(.l){text-align:center}
+.tlme{margin:12px 0 0;padding:9px 12px 10px;border-radius:10px;background:var(--rec-soft);border:1px solid var(--rec-line);font-size:14px;line-height:1.6;font-weight:600;color:var(--body)}
+.tlme b{display:block;margin-bottom:2px;color:var(--rec);font-weight:800;font-size:13px}
+.dstrip{display:flex;gap:4px;margin:12px 0 0}
+.dcell{flex:1 1 0;min-width:0;border:1.5px solid var(--ink);border-radius:8px;padding:5px 1px 6px;text-align:center;background:#FFFDF7}
+.dcell i{display:block;font-style:normal;font-size:11px;font-weight:800;color:var(--sub)}
+.dcell b{display:block;margin-top:1px;font-size:12.5px;font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.04em}
+.dcell span{display:block;margin-top:2px;font-size:10.5px;font-weight:800;color:var(--sub);line-height:1.25;word-break:keep-all}
+.dcell.off{background:#EFEDE7;border-style:dashed;border-color:#B9B4AA}
+.dcell.off b,.dcell.off i{color:#8B867E}
+.dcell.t{background:#F2DDE0}
+.dcell.pay{background:#F2E3C4;border-color:#B23A47}
+.dcell.pay span{color:#B23A47}
+@media (max-width:360px){.dcell b{font-size:11.5px}.dcell span{font-size:10px}.dstrip{gap:3px}}
+
+/* 23편 */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#tl1 li{grid-template-columns:66px 1fr}
+@media(max-width:360px){#tl1 li{grid-template-columns:62px 1fr}#tl1 time{font-size:13px}}
+/* 23편 리뷰 반영 */
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* 24편 */
+.dstrip{display:flex;gap:4px;margin:12px 0 0}
+.dcell{flex:1 1 0;min-width:0;border:1.5px solid var(--ink);border-radius:8px;padding:5px 1px 6px;text-align:center;background:#FFFDF7}
+.dcell i{display:block;font-style:normal;font-size:11px;font-weight:800;color:var(--sub)}
+.dcell b{display:block;margin-top:1px;font-size:12.5px;font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.04em}
+.dcell span{display:block;margin-top:2px;font-size:10.5px;font-weight:800;color:var(--sub);line-height:1.25;word-break:keep-all}
+.dcell.off{background:#EFEDE7;border-style:dashed;border-color:#B9B4AA}
+.dcell.off b,.dcell.off i{color:#8B867E}
+.dcell.t{background:#F2DDE0}
+.dcell.t span{color:#B23A47}
+.dcell.pay{background:#F2E3C4;border-color:#B23A47}
+.dcell.pay span{color:#B23A47}
+.dcell.judge{box-shadow:0 0 0 2px var(--ink) inset}
+.dcell.judge span{color:var(--ink)}
+@media (max-width:360px){.dcell b{font-size:11.5px}.dcell span{font-size:10px}.dstrip{gap:3px}}
+#ysim .ddlb{margin-top:11px}
+#ysim .iflow{margin-top:10px}
+#ysim .df b{font-size:14.5px}
+#ysim .simmsg{min-height:7.4em}
+
+
+</style>
+</head>
+<body>
+<div class="app">
+<span id="top"></span>
+<svg class="sdefs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="rough" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="chalk" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="11" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1 L8 5 L1 9" fill="none" stroke="#2E2E2C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="ahw" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1 L8 5 L1 9" fill="none" stroke="#ECEAE3" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>
+</svg>
+<header class="topbar">
+  <div class="tbin">
+    <span class="brand"><i>시장을 읽는 말들</i> · 제24편</span>
+    <span class="ep" aria-hidden="true">24</span>
+  </div>
+  <div class="prog"><i id="pg"></i></div>
+</header>
+
+<main>
+<!-- ══════ 표지 ══════ -->
+<div class="cover">
+  <span class="cvkick">경제·주식 용어 연재 <b>24</b></span>
+  <time class="cvdate" datetime="2026-11-27">2026.11.27 · 시장 입문</time>
+  <h1 class="cvtitle">연말엔 왜 큰손이 <span>팔고 나가나</span></h1>
+  <p class="cvsub">한 종목을 50억 원어치 이상 들고 해를 넘기면<br/>다음 해 그 종목을 팔 때 세금이 붙는다.<br/>그래서 12월 마지막 주, 날짜를 세며 판다.</p>
+  <div class="cvstat">
+    <div><span>대주주 기준</span><b>50억</b><em>한 종목 보유액</em></div>
+    <div class="hot"><span>판정하는 날</span><b>12.31</b><em>그날 잔고</em></div>
+    <div><span>세율</span><b>22%</b><em>3억 넘는 몫 27.5%</em></div>
+  </div>
+  <div class="cvmotif">
+    <svg viewBox="0 0 320 156" role="img" aria-label="칠판 그림. 12월 마지막 주 달력 네 칸, 28일 월요일 칸이 노랗게 칠해져 있고 30일 수요일까지 「결제 이틀」 화살표가 이어진다. 31일 목요일 칸은 점선으로 「휴장·잔고 확인」이라 적혀 있다. 오른쪽 캐릭터가 「31일 전에만 팔면 되지?」라고 묻는다.">
+      <text class="hand" x="6" y="15" font-size="11.5" fill="rgba(236,234,227,.72)">12월 마지막 주</text>
+      <g filter="url(#chalk)">
+        <rect x="8" y="30" width="46" height="58" rx="7" fill="rgba(230,201,143,.24)" stroke="#E6C98F" stroke-width="1.8"/>
+        <rect x="60" y="30" width="46" height="58" rx="7" fill="rgba(236,234,227,.08)" stroke="rgba(236,234,227,.8)" stroke-width="1.5"/>
+        <rect x="112" y="30" width="46" height="58" rx="7" fill="rgba(236,234,227,.08)" stroke="rgba(236,234,227,.8)" stroke-width="1.5"/>
+        <rect x="164" y="30" width="46" height="58" rx="7" fill="none" stroke="rgba(236,234,227,.7)" stroke-width="1.5" stroke-dasharray="5 4"/>
+      </g>
+      <g class="hand" text-anchor="middle">
+        <text x="31" y="46" font-size="11" fill="#F2E3C4">월</text>
+        <text x="31" y="74" font-size="22" fill="#F2E3C4">28</text>
+        <text x="83" y="46" font-size="11" fill="rgba(236,234,227,.8)">화</text>
+        <text x="83" y="74" font-size="22" fill="rgba(236,234,227,.92)">29</text>
+        <text x="135" y="46" font-size="11" fill="rgba(236,234,227,.8)">수</text>
+        <text x="135" y="74" font-size="22" fill="rgba(236,234,227,.92)">30</text>
+        <text x="187" y="46" font-size="11" fill="rgba(236,234,227,.6)">목</text>
+        <text x="187" y="74" font-size="22" fill="rgba(236,234,227,.6)">31</text>
+        <text x="187" y="102" font-size="11" fill="#E9A9AE">휴장</text>
+        <text x="187" y="116" font-size="11" fill="#E9A9AE">잔고 확인</text>
+      </g>
+      <path d="M31 94 Q83 128 133 96" fill="none" stroke="#ECEAE3" stroke-width="1.6" stroke-linecap="round" marker-end="url(#ahw)"/>
+      <text class="hand" x="82" y="140" font-size="12" fill="#F2E3C4" text-anchor="middle">결제는 이틀 뒤</text>
+      <g filter="url(#chalk)"><path d="M222 8 H296 Q302 8 302 14 V38 Q302 44 296 44 H290 L304 56 L280 44 H228 Q222 44 222 38 V14 Q222 8 228 8 Z" fill="rgba(236,234,227,.10)" stroke="rgba(236,234,227,.85)" stroke-width="1.5" stroke-linejoin="round"/></g>
+      <text class="hand" x="262" y="23" font-size="12" fill="rgba(236,234,227,.95)" text-anchor="middle">31일 전에만</text>
+      <text class="hand" x="262" y="37" font-size="12" fill="rgba(236,234,227,.95)" text-anchor="middle">팔면 되지?</text>
+      <g transform="translate(266 76) scale(0.86)"><g filter="url(#rough)"><path d="M8 30 Q20 24 32 30 L35 54 Q20 60 5 54 Z" fill="#CFE0D5" stroke="#2E2E2C" stroke-width="1.8" stroke-linejoin="round"/><path d="M13 56 L12 63 M27 56 L28 63" stroke="#2E2E2C" stroke-width="1.8" stroke-linecap="round"/><circle cx="20" cy="16" r="12.5" fill="#FBF8F1" stroke="#2E2E2C" stroke-width="1.8"/></g><ellipse cx="12.5" cy="19.5" rx="2.6" ry="1.6" fill="#E9A9AE" opacity=".75"/><ellipse cx="27.5" cy="19.5" rx="2.6" ry="1.6" fill="#E9A9AE" opacity=".75"/><circle cx="16" cy="14.5" r="1.7" fill="#2E2E2C"/><circle cx="24" cy="14.5" r="1.7" fill="#2E2E2C"/><path d="M17 22 Q20 20.5 23 22" fill="none" stroke="#2E2E2C" stroke-width="1.4" stroke-linecap="round"/><path d="M33 4 Q37 0 40 4 Q41 8 37 9.5 L37 12" fill="none" stroke="#E6C98F" stroke-width="1.6" stroke-linecap="round"/><circle cx="37" cy="15.5" r="1.1" fill="#E6C98F"/></g>
+    </svg>
+  </div>
+  <div class="cvidx">
+    <a href="#p1"><b>01</b>하루 3조 원의 매물</a>
+    <a href="#p2"><b>02</b>12월 31일 하루의 잔고</a>
+    <a href="#p3"><b>03</b>12월 매물은 주가를 누르나</a>
+  </div>
+  <p class="cvtime">읽는 시간 약 10분 · 퀴즈 1개 · 직접 해 보기 1개</p>
+</div>
+
+<div class="tldr">
+  <div class="tlh"><b class="hand">바쁘면 이것만!</b><span>세 줄 요약</span></div>
+  <ul class="pts">
+    <li>12월 31일에 국내 상장사 한 종목을 50억 원어치 이상 가진 개인은 세법상 대주주다(지분율 기준도 따로 있다). 다음 해 그 종목을 팔면 보통 차익의 22~27.5%(지방세 포함)를 양도세로 낸다.</li>
+    <li><span class="ul">판정은 체결일이 아니라 결제일 기준이라, 마감은 연말보다 며칠 앞선다.</span> 2026년엔 거래소 규정상 31일(목)이 휴장일이라, 12월 28일(월)까지 판 주식이 연말 잔고에서 빠진다.</li>
+    <li>대부분의 개인은 이 기준과 거리가 멀다. 그래도 큰손의 매물은 12월 마지막 주 개인 순매도 숫자를 키운다. 다만 개인이 많이 판 12월에도 지수는 평균적으로 올랐다.</li>
+  </ul>
+  <p class="tlme"><b>개인 투자자라면</b>대주주가 아니면 상장주식을 장내에서 팔아도 양도세는 없다. 세금 때문에 연말에 서둘러 팔 까닭도 없다.</p>
+  <p class="tiphint">점선 밑줄 친 말은 마우스를 올리거나 누르면 뜻이 나온다.</p>
+</div>
+
+<!-- ══════ 1장 ══════ -->
+<div class="ch" id="p1">
+  <div class="chtop"><span class="chn">01</span><span class="chk">사건과 질문</span></div>
+  <h2 class="cht">하루 3조 원의<br/>매물</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">2021년 12월 28일, 개인 투자자가 코스피·코스닥에서 하루에 3조 1,586억 원어치를 <span class="term">순매도<span class="tip">판 금액에서 산 금액을 뺀 값이 플러스인 것. 판 쪽이 더 많았다는 뜻이다.</span></span>했다. 당시로선 하루 기준 역대 최대였다.</p>
+<p class="p">그날은 그해 <span class="term">대주주<span class="tip">한 종목을 일정 금액이나 지분율 이상 가진 주주.</span></span>를 가르는 사실상 마지막 매도일이었다. 대주주가 되면 다음 해 그 종목을 팔 때 <span class="term">양도소득세<span class="tip">주식 같은 재산을 팔아 남긴 차익에 매기는 세금.</span></span>를 낸다. 여기서 대주주는 회사를 지배하는 사람이 아니라, 세법이 양도세를 매기려고 나눈 이름이다. 금액 기준은 당시 한 종목 10억 원, 지금은 50억 원이다.</p>
+
+<div class="pop" id="quiz1">
+  <div class="poph"><b>워밍업</b><span class="vb">생각해 보기</span></div>
+  <div class="popb">
+    <p class="popq">2026년 12월 31일(목) 잔고로 대주주가 정해진다. 31일은 연말 휴장일이다. 대주주가 되지 않으려면 늦어도 언제 팔아야 할까?</p>
+    <div class="opts">
+      <button class="opt" type="button" data-ok="0">① 12월 30일(수), 마지막 거래일</button>
+      <button class="opt" type="button" data-ok="0">② 12월 29일(화)</button>
+      <button class="opt" type="button" data-ok="1">③ 12월 28일(월)</button>
+    </div>
+    <div class="popans" hidden>
+      <span class="verdict" tabindex="-1">정답은 ③</span>
+      <p class="popnote">판정은 체결일이 아니라 주식이 실제로 넘어가는 <b>결제일</b>로 본다. ②의 29일에 팔아도 결제는 휴장일을 건너 해를 넘긴다.</p>
+      <button class="qshare" type="button" data-share="quiz">이 문제, 주변에도 내 보기</button>
+    </div>
+  </div>
+</div>
+
+<h3 class="q">연말엔 왜<br/>큰손이 팔고 나가나?</h3>
+<div class="ans">
+  <div class="ak">한 문장 답</div>
+  <div class="av">12월 31일 하루의 잔고가 다음 해 1년의 세금을 정하기 때문이다. 그날 한 종목을 50억 원어치 이상 가지고 있으면 대주주가 되고, 다음 해 그 종목을 팔 때 차익에 세금이 붙는다. 해를 넘기기 전에 기준 밑으로 줄여 두면 그 세금을 피한다.</div>
+</div>
+
+<!-- ══════ 2장 ══════ -->
+<div class="ch" id="p2">
+  <div class="chtop"><span class="chn">02</span><span class="chk">구조와 용어</span></div>
+  <h2 class="cht">12월 31일<br/>하루의 잔고</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">금액 기준 판정은 한 해에 한 번, 적용은 다음 해 1년 내내다.</p>
+
+<div class="board">
+  <div class="bdk">판서 · 하루가 1년을 정한다</div>
+  <p class="bdt hand">12월 31일 잔고가<br/>내년 세금을 정한다</p>
+  <div class="btab" style="grid-template-columns:.95fr 1fr 1fr">
+    <span class="h">한 종목 잔고</span><span class="h">50억 원 미만</span><span class="h">50억 원 이상</span>
+    <span class="l">부르는 말</span><span>소액주주</span><span class="hi">대주주</span>
+    <span class="l">다음 해 장내 매도</span><span>양도세 없음</span><span class="hi">차익에 세금</span>
+    <span class="l e">증권거래세</span><span class="e">낸다</span><span class="e">낸다</span>
+  </div>
+</div>
+<p class="note">판서는 금액 기준만 담았다. 지분율과 최대주주 그룹은 기준이 따로 있다.</p>
+<ul class="pts sm">
+  <li>금액은 종목마다 따로 본다. 여러 종목을 더하지 않는다.</li>
+  <li>값은 12월 31일 종가로 매긴다. 그날이 휴장이면 직전 거래일 종가다.</li>
+  <li><span class="term">지분율<span class="tip">회사가 발행한 전체 주식 가운데 내가 가진 주식의 비율.</span></span>로도 정한다. 코스피 1%, 코스닥 2%, 코넥스 4% 이상이면 금액과 상관없이 대주주다. 지분율은 연말을 기다리지 않는다. 해 중간에 주식을 더 사서 이 선을 넘으면 그때부터 대주주다.</li>
+  <li>보통은 본인 몫만 센다. 다만 <span class="term">최대주주<span class="tip">가족 등 특수관계인과 합쳐 그 회사 주식을 가장 많이 가진 주주.</span></span> 그룹에 속하면 친족 같은 특수관계인 몫까지 합친다. 국세청이 2026년 8월 공개한 추징 사례에도, 본인 몫은 기준에 못 미쳤지만 최대주주 그룹 주주의 친족이라 합산돼 대주주로 과세된 경우가 있다.</li>
+</ul>
+
+<h3 class="hd">대주주가 되면</h3>
+<div class="rows sm">
+  <div class="rw"><span class="rk">대상</span><span class="rv">다음 해 그 종목을 팔 때마다. 1주만 팔아도 과세 대상이다.</span></div>
+  <div class="rw"><span class="rk">세율</span><span class="rv"><span class="term">과세표준<span class="tip">세금을 매기는 바탕 금액. 주식이라면 차익에서 공제를 뺀 값이다.</span></span> 3억 원까지 20%, 넘는 몫은 25%. <span class="term">지방소득세<span class="tip">국세로 낸 소득세의 10%를 지방자치단체에 더 내는 세금.</span></span>가 10% 더 붙어 22%, 27.5%가 된다. 중소기업이 아닌 회사 주식을 1년이 안 돼 팔면 30%다.</span></div>
+  <div class="rw"><span class="rk">신고</span><span class="rv">판 날이 속한 반기가 끝나고 2개월 안에 스스로 신고하고 낸다.</span></div>
+  <div class="rw hot"><span class="rk">이미 대주주</span><span class="rv">2025년 말에 이미 대주주였다면 2026년에 판 몫은 연말에 잔고를 줄여도 그대로 과세 대상이다. 줄인 잔고는 2027년 판정에만 반영된다.</span></div>
+</div>
+<div class="dcmp">
+  <div class="figh"><b>내년에 차익 1억 원을 남기면</b><span>같은 해 다른 주식 손익이 없다고 보면</span></div>
+  <div class="calc" style="grid-template-columns:1fr 1fr">
+    <span class="l">차익</span><span>1억 원</span>
+    <span class="l">기본공제</span><span>− 250만 원</span>
+    <span class="l">과세표준</span><span>9,750만 원</span>
+    <span class="l">양도세 20%</span><span>1,950만 원</span>
+    <span class="l">지방소득세 10%</span><span>195만 원</span>
+    <span class="l e">합계</span><span class="e hot">약 2,145만 원</span>
+  </div>
+</div>
+<p class="note">30% 세율이 붙는 경우라면 같은 차익에 약 3,218만 원이다. 대주주가 아니라면 양도세는 0원이다.</p>
+
+<h3 class="hd">31일 전에만 팔면 되는 게 아니다</h3>
+<p class="p">세법은 주식을 판 날을 주문이 체결된 날이 아니라 <span class="term">결제일<span class="tip">판 주식과 받을 돈이 실제로 맞바뀌는 날. 국내 주식은 체결 2거래일 뒤다.</span></span>로 본다. 국내 주식은 체결 2거래일 뒤(D+2)에 결제된다. 이 이틀이 왜 생기는지는 <a class="ilink" href="https://snowshagal.com/reports/basics-22-settlement">제22편</a>에 있다.</p>
+<div class="flow3">
+  <div class="fs"><i>1</i><b>28일(월)</b><span>판다, 체결</span></div>
+  <div class="fs"><i>2</i><b>30일(수)</b><span>결제, 마지막 거래일</span></div>
+  <div class="fs hot"><i>3</i><b>31일(목)</b><span>판정, 잔고에서 빠져 있다</span></div>
+</div>
+<ul class="pts sm">
+  <li>29일(화)에 팔면 결제가 31일 <span class="term">휴장일<span class="tip">증권시장이 문을 열지 않는 날. 결제도 이날을 건너뛴다.</span></span>과 1월 1일 신정을 건너 1월 4일로 밀린다. 31일 잔고에 그대로 남는다.</li>
+  <li>체결일만 보고 대주주가 아니라고 여겼다가, 결제일 기준으로 대주주가 돼 가산세까지 문 사례도 보도됐다.</li>
+  <li>28일은 <span class="term">배당 기준일<span class="tip">이날 주주명부에 오른 사람이 배당을 받는다. 결제일로 따지므로 2거래일 전까지 사야 한다.</span></span>을 12월 말로 둔 회사의 배당을 받는 마지막 매수일이기도 하다.</li>
+</ul>
+
+<!-- 연말 잔고 시뮬레이터 -->
+<div class="sim" id="ysim">
+  <div class="simhd"><b>내 연말 잔고 셈해 보기</b><span>2026년 달력</span></div>
+  <p class="simp">한 종목을 가진 큰손이라고 해 본다. 12월 30일 종가로 매긴 평가액과, 10억 원어치를 판 날을 고르면 31일 잔고와 대주주 여부가 나온다.</p>
+  <p class="ddlb">한 종목 평가액(12월 30일 종가 기준)</p>
+  <div class="seg s4" role="group" aria-label="한 종목 평가액">
+    <button class="chip sv" type="button" data-k="v" data-v="45" aria-pressed="false">45억 원</button>
+    <button class="chip sv" type="button" data-k="v" data-v="55" aria-pressed="true">55억 원</button>
+    <button class="chip sv" type="button" data-k="v" data-v="60" aria-pressed="false">60억 원</button>
+    <button class="chip sv" type="button" data-k="v" data-v="80" aria-pressed="false">80억 원</button>
+  </div>
+  <p class="ddlb">10억 원어치를 판 날</p>
+  <div class="seg s4" role="group" aria-label="10억 원어치를 판 날">
+    <button class="chip sv" type="button" data-k="d" data-v="0" aria-pressed="true">안 판다</button>
+    <button class="chip sv" type="button" data-k="d" data-v="24" aria-pressed="false">24일<small>목</small></button>
+    <button class="chip sv" type="button" data-k="d" data-v="28" aria-pressed="false">28일<small>월</small></button>
+    <button class="chip sv" type="button" data-k="d" data-v="29" aria-pressed="false">29일<small>화</small></button>
+  </div>
+  <div class="dstrip" id="ystrip" aria-hidden="true"></div>
+  <div class="iflow">
+    <div class="df" id="y1"><i>결제일</i><b>?</b></div>
+    <div class="df" id="y2"><i>31일 잔고</i><b>?</b></div>
+    <div class="df" id="y3"><i>판정</i><b>?</b></div>
+  </div>
+  <div class="omsgw">
+    <svg class="oface meh" id="yface" viewBox="0 0 52 52" aria-hidden="true">
+      <g filter="url(#rough)"><circle cx="26" cy="27" r="21" fill="#FBF8F1" stroke="#2E2E2C" stroke-width="2"/></g>
+      <ellipse cx="15" cy="32" rx="3.6" ry="2.2" fill="#E9A9AE" opacity=".75"/><ellipse cx="37" cy="32" rx="3.6" ry="2.2" fill="#E9A9AE" opacity=".75"/>
+      <g class="f-ok"><path d="M17 23 Q20 19.5 23 23 M29 23 Q32 19.5 35 23" fill="none" stroke="#2E2E2C" stroke-width="2" stroke-linecap="round"/><path d="M19 33 Q26 39 33 33" fill="none" stroke="#2E2E2C" stroke-width="2" stroke-linecap="round"/></g>
+      <g class="f-meh"><circle cx="20" cy="24" r="2" fill="#2E2E2C"/><circle cx="32" cy="24" r="2" fill="#2E2E2C"/><path d="M21 35 H31" fill="none" stroke="#2E2E2C" stroke-width="2" stroke-linecap="round"/></g>
+      <g class="f-no"><circle cx="20" cy="25" r="2.1" fill="#2E2E2C"/><circle cx="32" cy="25" r="2.1" fill="#2E2E2C"/><path d="M15 19 L22 20.5 M37 19 L30 20.5" stroke="#2E2E2C" stroke-width="1.8" stroke-linecap="round"/><path d="M19.5 37.5 Q26 31.5 32.5 37.5" fill="none" stroke="#2E2E2C" stroke-width="2" stroke-linecap="round"/></g>
+    </svg>
+    <p class="simmsg" id="ymsg" aria-live="polite">고르면 결과가 나온다.</p>
+  </div>
+  <p class="simfoot">거래소 규정상 12월 31일은 휴장일이다. 주가는 30일까지 그대로라고 놓았다. 실제 평가액은 30일 종가에 따라 달라진다. 세금은 내년에 차익 1억 원을 남긴다고 보고 셈했다. 지분율 기준과 최대주주 합산은 따지지 않은 가상 예시다.</p>
+</div>
+
+<!-- ══════ 3장 ══════ -->
+<div class="ch" id="p3">
+  <div class="chtop"><span class="chn">03</span><span class="chk">적용과 복습</span></div>
+  <h2 class="cht">12월 매물은<br/>주가를 누르나</h2>
+  <div class="chrule"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i></div>
+</div>
+
+<p class="p lead">큰손 한 사람의 매도는 작아도, 같은 날짜를 보고 움직이는 사람이 많으면 시장 숫자에 드러난다.</p>
+<div class="flow3">
+  <div class="fs"><i>1</i><b>50억 원 근처</b><span>주가가 오르면 이런 큰손이 는다</span></div>
+  <div class="fs"><i>2</i><b>28일까지 매도</b><span>기준 밑으로 일부 줄인다</span></div>
+  <div class="fs hot"><i>3</i><b>개인 순매도</b><span>12월 마지막 주 숫자에 잡힌다</span></div>
+</div>
+<div class="dcmp">
+  <div class="figh"><b>기준일 하루, 개인 순매도</b><span>판 쪽이 더 많은 금액</span></div>
+  <div class="calc ctr" style="grid-template-columns:.9fr .8fr 1.3fr">
+    <span class="h l">날</span><span class="h">대주주 기준</span><span class="h">개인 순매도</span>
+    <span class="l">21.12.28</span><span>10억 원</span><span class="hot">3조 1,586억 원<small>코스피·코스닥, 당시 하루 최대</small></span>
+    <span class="l e">25.12.26</span><span class="e">50억 원</span><span class="e">2조 2,263억 원<small>코스피만</small></span>
+  </div>
+</div>
+<p class="note">개인 순매도엔 세금 말고도 차익 실현, 배당 같은 이유가 섞인다. 2025년 그날엔 외국인이 코스피에서 1조 7,777억 원어치를 순매수했다. 큰손 매도만 떼어 낸 공식 통계는 없다.</p>
+<ul class="pts sm">
+  <li>신한투자증권이 2017~2022년을 보니, 전체 매도 가운데 개인 몫이 기준일 닷새 전 50% 밑에서 기준일엔 65%를 넘었다.</li>
+  <li>이런 매물은 개인 비중이 큰 중형주와 코스닥에 몰리는 경향이 있다.</li>
+</ul>
+
+<figure class="doodle">
+  <svg viewBox="0 0 300 200" role="img" aria-label="막대 그림. 코스닥 개인 투자자. 가운데 가로선 아래로 12월 막대가 「약 2,800억 원 순매도」, 위로 1월 막대가 「약 3,600억 원 순매수」까지 올라가 있다. 12월 막대에서 1월 막대로 화살표가 이어진다.">
+    <text class="hand" x="150" y="17" font-size="14.5" fill="#2E2E2C" text-anchor="middle">코스닥 개인, 12월 순매도 → 1월 순매수</text>
+    <path d="M24 104 H276" stroke="#2E2E2C" stroke-width="1.6" stroke-linecap="round"/>
+    <g filter="url(#rough)">
+      <rect x="62" y="104" width="58" height="54" rx="4" fill="#F2DDE0" stroke="#B23A47" stroke-width="1.6"/>
+      <rect x="180" y="35" width="58" height="69" rx="4" fill="#DCE3DD" stroke="#2E7A55" stroke-width="1.6"/>
+    </g>
+    <path d="M126 136 Q154 146 174 74" fill="none" stroke="#2E2E2C" stroke-width="1.4" stroke-linecap="round" marker-end="url(#ah)"/>
+    <g class="hand" text-anchor="middle">
+      <text x="91" y="96" font-size="13" fill="#2E2E2C">12월</text>
+      <text x="91" y="174" font-size="11.5" fill="#B23A47">약 2,800억 원</text>
+      <text x="91" y="188" font-size="11.5" fill="#B23A47">순매도</text>
+      <text x="209" y="122" font-size="13" fill="#2E2E2C">1월</text>
+      <text x="209" y="140" font-size="11.5" fill="#2E7A55">약 3,600억 원</text>
+      <text x="209" y="154" font-size="11.5" fill="#2E7A55">순매수</text>
+    </g>
+  </svg>
+  <figcaption>자본시장연구원이 집계한 2010~2019년 월평균이다. 코스피에선 개인이 12월에 1조 8,651억 원을 팔고 1월에도 4,878억 원 순매도였다. 1월 순매수는 코스닥에서만 나타났다. 개인 전체의 합계라, 12월에 판 사람과 1월에 산 사람이 같다는 뜻은 아니다.</figcaption>
+</figure>
+
+<h3 class="hd">그 12월, 지수는 내렸나</h3>
+<div class="dcmp">
+  <div class="figh"><b>월평균 지수 수익률</b><span>2010~2019년</span></div>
+  <div class="calc ctr" style="grid-template-columns:.9fr 1fr 1fr">
+    <span class="h l">&nbsp;</span><span class="h">12월</span><span class="h">1월</span>
+    <span class="l">코스피</span><span class="hot">+0.78%</span><span>+1.13%</span>
+    <span class="l e">코스닥</span><span class="e hot">+1.11%</span><span class="e">+3.32%</span>
+  </div>
+</div>
+<ul class="pts sm">
+  <li>개인이 판 물량은 다른 쪽이 받아 갔다. 같은 기간 12월에 기관은 코스피에서 평균 1조 7,806억 원어치를 순매수했다.</li>
+  <li>연구를 한 자본시장연구원도 개인의 연말 매매가 주가 흐름을 크게 움직이지는 못한 것으로 추정했다.</li>
+</ul>
+
+<h3 class="hd">금액 기준은 자주 바뀌었다</h3>
+<ol class="tline wide nowrap" id="tl1">
+  <li><time>2000</time><p>코스피 기준 한 종목 100억 원 또는 지분율 3%.</p></li>
+  <li><time>2013</time><p>코스피 50억 원으로 낮췄다.</p></li>
+  <li><time>16~20</time><p>코스피 25억 → 15억 → 10억 원으로 차례로 낮췄다.</p></li>
+  <li><time>23.12</time><p>모든 시장을 50억 원으로 올렸다. 연말 매도로 생기는 시장 변동성을 줄이겠다는 이유였다.</p></li>
+  <li><time>25.7</time><p>정부가 10억 원으로 되돌리는 세제개편안을 냈다.</p></li>
+  <li class="hot"><time>25.9.15</time><p>반발이 거세자 50억 원을 그대로 두기로 했다. 2026년 말 판정도 50억 원이다.</p></li>
+</ol>
+<div class="rows sm">
+  <div class="rw"><span class="rk">올리자는 쪽</span><span class="rv">해마다 연말에 팔았다가 1월에 되사는 매물이 시장을 흔든다. 기준이 높으면 그 흔들림이 준다.</span></div>
+  <div class="rw"><span class="rk">낮추자는 쪽</span><span class="rv">기준을 올리면 소수 고액 자산가의 세금만 준다. 차익이 있는 곳에 세금을 매기는 원칙에도 어긋난다.</span></div>
+</div>
+
+<h3 class="hd">내 계좌로 확인할 네 가지</h3>
+<div class="chk4">
+  <div class="ck"><p class="ct"><i>01</i>내 잔고 셈</p><div class="cd">종목마다 <b>12월 30일 종가 × 보유 수량</b>을 셈한다.<ul class="cl"><li>같은 종목을 여러 증권사 계좌에 나눠 담았다면 합쳐서 센다</li><li>금액이 50억 원 밑이어도 지분율은 따로 본다</li></ul></div></div>
+  <div class="ck"><p class="ct"><i>02</i>날짜</p><div class="cd">2026년 매도 마감은 <b>12월 28일(월)</b>이다.<ul class="cl"><li>12월 중순 거래소의 연말 시장 운영 공지로 한 번 더 확인한다</li><li>12월 결산이 아닌 회사는 판정일도 다르다</li></ul></div></div>
+  <div class="ck"><p class="ct"><i>03</i>숫자 읽기</p><div class="cd">12월 마지막 주 개인 순매도 기사엔 <b>세금 달력</b>이 섞여 있다. 그 주 지수와 기관·외국인 매매를 함께 본다.</div></div>
+  <div class="ck"><p class="ct"><i>04</i>대주주라면</p><div class="cd">다음 해 그 종목을 팔면 반기마다 <b>예정신고</b>를 한다. 판단이 애매하면 세무사나 국세청에 묻는다.</div></div>
+</div>
+
+<div class="trapwrap">
+  <div class="traphd"><b>오답노트</b><i>그럴듯하지만 틀린 문장</i></div>
+  <div class="trap">
+    <div class="ti">
+      <div class="tk">오답 01</div>
+      <div class="tx"><span>"12월 31일 전에만 팔면 대주주를 피한다"</span></div>
+      <div class="to">기준은 <b>결제일</b>이다. 2026년엔 28일(월)에 팔아야 30일에 결제돼 잔고에서 빠진다.</div>
+    </div>
+    <div class="ti">
+      <div class="tk">오답 02</div>
+      <div class="tx"><span>"50억 원을 넘는 부분에만 세금이 붙는다"</span></div>
+      <div class="to">대주주가 되면 다음 해 그 종목을 팔아 남긴 <b>차익 전체</b>가 과세 대상이다.</div>
+    </div>
+    <div class="ti">
+      <div class="tk">오답 03</div>
+      <div class="tx"><span>"여러 종목을 합쳐 50억 원이면 대주주다"</span></div>
+      <div class="to">30억 원짜리 두 종목이면 <b>어느 쪽도</b> 금액 기준에 걸리지 않는다. 합계가 60억 원이어도 마찬가지다.</div>
+    </div>
+    <div class="ti">
+      <div class="tk">오답 04</div>
+      <div class="tx"><span>"한 종목이 50억 원 밑이면 대주주 걱정은 없다"</span></div>
+      <div class="to">금액만 본 말이다. <b>지분율</b>이 코스피 1%·코스닥 2% 이상이거나, 최대주주 그룹이라 특수관계인 몫까지 합쳐 기준에 닿으면 내 몫이 적어도 대주주다.</div>
+    </div>
+  </div>
+</div>
+
+<div class="final">
+  <div class="fk">제24편의 한 문장</div>
+  <p class="f1">대주주 금액 기준을 가르는 건 1년 내내의 잔고가 아니라 <b>12월 31일 하루의 잔고</b>다.</p>
+  <p class="f2">그 하루에 맞춘 매물이 12월 마지막 주 개인 순매도를 키운다. 다만 그 숫자가 곧 주가 하락을 뜻하지는 않는다.</p>
+</div>
+
+<div class="sharebox">
+  <p class="shq">「12월 31일 전에만 팔면 되는 거 아냐?」<br/>연말마다 이 말 하는 사람, 주변에 꼭 있다.</p>
+  <div class="shbtns">
+    <button class="shb main" type="button" data-share="page">공유하기</button>
+    <button class="shb" type="button" data-share="copy">링크 복사</button>
+    <a class="shb" id="shX" href="https://twitter.com/intent/tweet?text=12%EC%9B%94%2031%EC%9D%BC%20%EC%A0%84%EC%97%90%EB%A7%8C%20%ED%8C%94%EB%A9%B4%20%EB%90%A0%EA%B9%8C%3F%20%EC%97%B0%EB%A7%90%EC%97%94%20%EC%99%9C%20%ED%81%B0%EC%86%90%EC%9D%B4%20%ED%8C%94%EA%B3%A0%20%EB%82%98%EA%B0%80%EB%82%98&amp;url=https%3A%2F%2Fsnowshagal.com%2Freports%2Fbasics-24-major-shareholder" target="_blank" rel="noopener">X에 올리기</a>
+  </div>
+  <p class="shmsg" id="shmsg" aria-live="polite"></p>
+</div>
+
+<div class="more7">
+  <div class="m7h">이어 읽기</div>
+  <a class="m7" href="https://snowshagal.com/reports/basics-22-settlement"><i>제22편</i><b>판 돈은 왜 이틀 뒤에 들어오나</b><span>체결일과 결제일</span></a>
+  <a class="m7" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_10%ED%8E%B8_%EB%B0%B0%EB%8B%B9%EC%9D%80%EC%96%B8%EC%A0%9C%EC%82%AC%EC%95%BC%EB%B0%9B%EB%82%98"><i>제10편</i><b>배당은 언제 사야 받나</b><span>기준일과 마지막 매수일</span></a>
+  <a class="m7" href="https://snowshagal.com/reports/%EC%8B%9C%EC%9E%A5%EC%9D%84%EC%9D%BD%EB%8A%94%EB%A7%90%EB%93%A4_9%ED%8E%B8_%EA%B1%B0%EB%9E%98%EB%9F%89%EC%9D%80%EB%A7%8E%EC%9D%80%EB%8D%B0%EC%99%9C%ED%8C%94%EA%B8%B0%EC%96%B4%EB%A0%A4%EC%9A%B4%EA%B0%80"><i>제9편</i><b>거래량은 많은데 왜 팔기 어려운가</b><span>팔 사람이 몰릴 때 생기는 일</span></a>
+  <a class="m7 all" href="https://snowshagal.com/basics/"><b>시장 입문 전체 보기</b><span>1편부터 순서대로</span></a>
+  <a class="m7 cta" href="https://snowshagal.com/daily/"><b>오늘 장은 어떻게 움직였나</b><span>Snowshagal 데일리 · 매일 장 마감 리포트</span></a>
+</div>
+
+<a class="next nlink" href="https://snowshagal.com/basics/" data-next="/reports/basics-25-short-selling" data-mark="__mwWords25">
+  <div class="nh">다음 편</div>
+  <p>연말에 쏟아지는 매물 다음은, 하락에 거는 매도 이야기다.</p>
+  <div class="nt"><b>제25편</b>공매도 (가제)</div>
+</a>
+
+<div class="foldwrap">
+<details class="fold">
+  <summary>함께 나오는 말 한 줄 사전</summary>
+  <div class="fb">
+    <dl class="gloss">
+      <dt>대주주</dt><dd>세법상 양도세를 내는 주주. 경영권과는 다른 말</dd>
+      <dt>소액주주</dt><dd>대주주가 아닌 주주. 장내 매도 차익에 양도세가 없다</dd>
+      <dt>양도소득세</dt><dd>팔아서 남긴 차익에 매기는 세금</dd>
+      <dt>과세표준</dt><dd>세율을 곱하는 바탕 금액</dd>
+      <dt>지방소득세</dt><dd>소득세에 10%를 더 얹는 지방세</dd>
+      <dt>증권거래세</dt><dd>매도 금액에 매기는 세금, 손익과 무관</dd>
+      <dt>결제일</dt><dd>주식과 돈이 실제로 넘어가는 날, 체결 2거래일 뒤</dd>
+      <dt>휴장일</dt><dd>시장이 쉬는 날. 결제일 셈에서도 빠진다</dd>
+      <dt>순매도</dt><dd>판 금액이 산 금액보다 많은 것</dd>
+      <dt>최대주주 그룹</dt><dd>최대주주와 특수관계인. 대주주 판정 때 몫을 합친다</dd>
+      <dt>예정신고</dt><dd>한 해치를 몰아 하기 전에 반기마다 미리 하는 양도세 신고</dd>
+    </dl>
+  </div>
+</details>
+
+<details class="fold">
+  <summary>숫자를 읽을 때 주의할 점</summary>
+  <div class="fb">
+    <p><b>기준 시점</b> · 2026년 11월 27일까지 나온 발표와 보도 기준이다. 대주주 기준은 시행령으로 정해 정부가 바꿀 수 있다. 2025년에도 10억 원 환원안이 나왔다가 거둬들여졌다.</p>
+    <p><b>휴장일</b> · 거래소 업무규정상 12월 31일은 휴장일이고, 그날이 공휴일이나 토요일이면 직전 매매거래일이 휴장일이다. 31일이 일요일이던 2023년엔 29일(금)이었다.</p>
+    <p><b>범위</b> · 본문은 국내 거주자 개인이 12월 결산 국내 상장사 주식을 가진 경우다. 결산월이 다르면 그 회사의 사업연도 마지막 날 잔고로 본다.</p>
+    <p><b>세율</b> · 20%·25%·30%에 지방소득세 10%를 더한 값이 22%·27.5%·33%다. 기본공제 250만 원은 종목마다가 아니라, 과세 대상 국내·해외 주식을 합쳐 1년에 한 번이다.</p>
+    <p><b>통계</b> · 2021년 숫자는 다음 날 거래소 집계 보도 기준이다(당일 잠정치 3조 903억 원). 개인 하루 순매도 기록은 그 뒤 깨졌고, 2026년 7월 31일엔 코스피에서만 8조 2,543억 원이었다. 2025년 숫자는 코스피만이라 2021년과 바로 견줄 수 없다. 2010~2019년 숫자는 자본시장연구원 보고서 원문 값이고, 신한투자증권 분석은 보도를 옮겼다.</p>
+  </div>
+</details>
+
+<details class="fold">
+  <summary>출처 및 데이터 기준</summary>
+  <div class="fb">
+    <ol class="src">
+      <li><b>2025.9.15 기획재정부, 대주주 범위 「종목당 보유금액 50억 원 이상」 유지 결정(7월 10억 원 환원안 철회)</b> · <a href="https://www.korea.kr/news/policyNewsView.do?newsId=148949309" target="_blank" rel="noopener">정책브리핑</a> · <a href="https://www.hankyung.com/article/2025091534926" target="_blank" rel="noopener">한국경제</a> 2025.09.15</li>
+      <li><b>2026년에도 50억 원 기준 적용, 2026년 12월 30일 마지막 거래일·28일 매도 마감, 결제일 기준, 결제일 기준 대주주 판정에 따른 가산세 추징 사례, 2021년 기준일 개인 순매도 3조 1,586억 원(당시 하루 최대), 신한투자증권 2017~2022년 개인 매도 비중 50%→65%·중형주와 코스닥</b> · <a href="https://www.imaeil.com/page/view/2026101422320572870" target="_blank" rel="noopener">매일신문</a> 2026.10.14</li>
+      <li><b>2021.12.28 개인 코스피 1조 9,975억·코스닥 1조 1,611억 원 순매도(10억 원 기준)</b> · <a href="https://www.blockmedia.co.kr/archives/282262" target="_blank" rel="noopener">블록미디어</a> 2022.12.23 · <b>당일 잠정 코스피 1조 9,613억·코스닥 1조 1,290억 원, 합계 3조 903억 원</b> · <a href="https://economist.co.kr/article/view/ecn202112290009" target="_blank" rel="noopener">이코노미스트</a> 2021.12.29 · <b>2026.7.31 코스피 개인 순매도 8조 2,543억 원 역대 최대(직전 기록 2026.4.8)</b> · <a href="https://www.mt.co.kr/article/2026073116493843008" target="_blank" rel="noopener">머니투데이</a> 2026.07.31</li>
+      <li><b>2025.12.26 코스피 개인 2조 2,263억 원 순매도·외국인 1조 7,777억 원 순매수</b> · <a href="https://news.tf.co.kr/read/economy/2277171.htm" target="_blank" rel="noopener">더팩트</a> 2025.12.30 · <b>그날 대주주 양도세·배당 기준일</b> · <a href="https://bbn.kiwoom.com/rfSD6883" target="_blank" rel="noopener">키움증권 시황</a> 2025.12.26</li>
+      <li><b>코스피 1%·코스닥 2%·코넥스 4% 또는 50억 원 이상, 양도세 22%·27.5%(지방소득세 포함)</b> · <a href="https://kbthink.com/stock/income-tax.html" target="_blank" rel="noopener">KB의 생각</a> · <b>대주주 세율 3억 원 이하 20%·초과 25%, 1년 미만 비중소기업 주식 30%, 반기 말일부터 2개월 안 예정신고</b> · <a href="https://www.taxnet.co.kr/contents/taxnetpost/post-detail?id=390" target="_blank" rel="noopener">택스넷</a></li>
+      <li><b>직전 사업연도 종료일 현재 최종시세가액, 없으면 직전 거래일(소득세법 시행령 제157조)</b> · <a href="https://albup.co.kr/page/interpretation_detail.php?com_idx=1077" target="_blank" rel="noopener">알법 국세청 해석 정리</a> · <b>최대주주가 아니면 본인 보유분만으로 판정</b> · <a href="https://www.heumtax.com/contents/posts/major-shareholder-stock-transfer-tax" target="_blank" rel="noopener">흠택스</a> · <b>지분율은 초과일부터 과세 대상, 판정은 결산월 기준</b> · <a href="https://v.daum.net/v/20250824182207493" target="_blank" rel="noopener">파이낸셜뉴스</a> 2025.08.24</li>
+      <li><b>대주주는 1주만 양도해도 과세(국세청 안내), 10억 환원안 2025년 9월 철회</b> · <a href="https://tilnote.io/pages/6ae7624ea565f4932c73b388" target="_blank" rel="noopener">틸노트</a> 2026.10 · <b>기본공제 연 250만 원</b> · <a href="https://money2.daishin.com/html/Notice/2021/downloads/n_122.pdf" target="_blank" rel="noopener">대신증권 양도세 신고 안내</a> · <b>2020년 양도분부터 과세 대상 국내·국외 주식 손익통산(확정신고 때)</b> · <a href="https://www.taxtimes.co.kr/news/article.html?no=263240" target="_blank" rel="noopener">한국세정신문</a> · <b>국내·해외 주식 합쳐 기본공제 한 번</b> · <a href="https://v.daum.net/v/qEfhyg2XKw" target="_blank" rel="noopener">세무 해설 기사</a></li>
+      <li><b>2010~2019년 투자자별 월평균 누적순매수(개인 코스피 12월 −1조 8,651억·1월 −4,878억, 코스닥 12월 −2,817억·1월 +3,631억, 기관 코스피 12월 +1조 7,806억 원), 월평균 수익률(코스피 12월 0.78%·1월 1.13%, 코스닥 1.11%·3.32%), 개인 거래가 주가 흐름에 큰 영향을 주지 못한 것으로 추정</b> · <a href="https://www.kcmi.re.kr/report/report_view?report_no=1201" target="_blank" rel="noopener">자본시장연구원 이슈보고서 20-09</a>(황세운, 2020.04.24) 표 Ⅲ-1·Ⅲ-2</li>
+      <li><b>대주주 요건: 직전 사업연도 종료일 지분율 또는 시가총액, 또는 그 뒤 주식 취득으로 지분율 요건 충족, 최대주주 그룹은 친족·경영지배관계 법인 보유분 합산</b> · <a href="https://www.law.go.kr/%EB%B2%95%EB%A0%B9/%EC%86%8C%EB%93%9D%EC%84%B8%EB%B2%95%EC%8B%9C%ED%96%89%EB%A0%B9/%EC%A0%9C157%EC%A1%B0" target="_blank" rel="noopener">국가법령정보센터 소득세법 시행령 제157조</a> · <a href="https://view.asiae.co.kr/article/2026080511180032960" target="_blank" rel="noopener">아시아경제</a> · <a href="https://www.mt.co.kr/economy/2026/08/05/2026080512365544643" target="_blank" rel="noopener">머니투데이</a> 2026.08.05(국세청 예정신고 안내) · <b>국세청 추징 사례: 본인 보유분은 미달, 최대주주 그룹 주주와 친족관계라 합산 대상 대주주로 과세, 최대주주 그룹은 친족·경영지배관계 법인 지분 합산</b> · <a href="https://www.taxwatch.co.kr/article/tax/2026/08/05/0001" target="_blank" rel="noopener">택스워치</a> 2026.08.05 · <a href="https://www.taxtimes.co.kr/mobile/article.html?no=276282" target="_blank" rel="noopener">한국세정신문</a> 2026.08.05</li>
+      <li><b>대주주 기준 변천: 2000년 3%·100억, 2013년 2%·50억, 2016년 1%·25억, 2018년 15억, 2020년 10억</b> · <a href="https://biz.newdaily.co.kr/site/data/html/2020/10/27/2020102700137.amp.html" target="_blank" rel="noopener">뉴데일리</a> 2020.10.27 · <b>2023.12 50억 원 상향, 연말 매도로 생기는 하방 압력과 변동성 완화</b> · <a href="https://go.seoul.co.kr/news/newsView.php?id=20231222004006" target="_blank" rel="noopener">서울신문</a> 2023.12.22 · <b>부자감세 논란</b> · <a href="https://www.sejungilbo.com/news/articleView.html?idxno=54888" target="_blank" rel="noopener">세정일보</a> 2025.09.15 · <b>「소득 있는 곳에 과세」 원칙 논쟁</b> · <a href="https://www.segye.com/newsView/20250813515538" target="_blank" rel="noopener">세계일보</a> 2025.08.13</li>
+      <li><b>휴장일: 12월 31일(공휴일 또는 토요일이면 직전 매매거래일), 휴장일엔 매매거래·결제 안 함(거래소 업무규정)</b> · <a href="https://www.daolsecurities.com/customer/guide/stockTrade.jsp" target="_blank" rel="noopener">다올투자증권 매매제도 안내</a> · <b>2025년 31일 휴장·30일 폐장(31일은 결제일에서도 제외), 2025.12.18 공지</b> · <a href="https://www.samsungpop.com/ux/kor/customer/notice/notice/noticeViewContent.do?MenuSeqNo=23456" target="_blank" rel="noopener">삼성증권 공지</a> · <b>2023년 29일 휴장</b> · <a href="https://www.khan.co.kr/article/202312141411001" target="_blank" rel="noopener">경향신문</a> 2023.12.14 · <b>2026년 12월 28일 배당 마지막 매수일, 29일 매수분은 1월 4일 결제</b> · <a href="https://foxcg.com/december-dividend-2026/" target="_blank" rel="noopener">배당 일정 정리</a></li>
+      <li>「내 연말 잔고 셈해 보기」의 평가액·매도 금액·차익은 원리를 보여 주려고 만든 가상 예시다.</li>
+      <li>손글씨 글꼴 · Gaegu(The Gaegu Project Authors, <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL Open Font License 1.1</a>), 쓰인 글자만 잘라 넣었다.</li>
+    </ol>
+  </div>
+</details>
+</div>
+</main>
+
+<p class="disc">이 글은 경제·주식 용어의 뜻과 읽는 방법을 설명하는 교양 자료입니다. 특정 종목의 매수나 매도를 권유하지 않으며, 투자 판단과 그 결과는 투자자 본인에게 있습니다. 세금 설명은 일반적인 안내이고 개인 사정에 따라 달라질 수 있으니, 신고 전에 세무 전문가나 국세청에 확인하시기 바랍니다.</p>
+<p class="foot">시장을 읽는 말들 · 24</p>
+
+</div>
+
+<script>
+(function(){
+  if(window.__mwWords24) return; window.__mwWords24 = true;
+
+  /* 진행 막대 */
+  var pg=document.getElementById('pg');
+  function updateProg(){
+    if(!pg) return;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var y=window.scrollY||window.pageYOffset||0;
+    pg.style.width=(h>0?Math.min(100,Math.max(0,y/h*100)):0)+'%';
+  }
+  window.addEventListener('scroll',updateProg,{passive:true});
+  window.addEventListener('resize',updateProg);
+  updateProg();
+
+  /* 툴팁 */
+  var openedAt=0;
+  function resetTip(el){ var tp=el.querySelector('.tip'); if(tp){ tp.classList.remove('below'); tp.removeAttribute('style'); } }
+  function clampTip(t){
+    var tip=t.querySelector('.tip'); if(!tip) return;
+    var vw=window.innerWidth, pad=12;
+    var w=Math.min(248, vw-2*pad);
+    tip.style.position='fixed'; tip.style.bottom='auto'; tip.style.transform='none';
+    tip.style.width=w+'px'; tip.style.left='0px'; tip.style.top='0px';
+    var tr=t.getBoundingClientRect();
+    var th=tip.getBoundingClientRect().height;
+    var left=tr.left+tr.width/2-w/2;
+    if(left<pad) left=pad;
+    if(left+w>vw-pad) left=vw-pad-w;
+    var top=tr.top-th-9, below=false;
+    if(top<pad+50){ top=tr.bottom+9; below=true; }
+    var vh=window.innerHeight;
+    if(top+th>vh-pad){ top=vh-pad-th; }
+    if(top<pad){ top=pad; }
+    tip.style.left=Math.round(left)+'px';
+    tip.style.top=Math.round(top)+'px';
+    var tb=tip.getBoundingClientRect();
+    var dx=tb.left-left, dy=tb.top-top;
+    if(dx||dy){ tip.style.left=Math.round(left-dx)+'px'; tip.style.top=Math.round(top-dy)+'px'; }
+    tip.classList.toggle('below', below);
+    var ax=tr.left+tr.width/2-left;
+    ax=Math.max(12, Math.min(w-12, ax));
+    tip.style.setProperty('--ax', Math.round(ax)+'px');
+  }
+  var canHover=!!(window.matchMedia&&window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+  function closeTerms(except){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++){ if(open[i]!==except){ open[i].classList.remove('open'); open[i].setAttribute('aria-expanded','false'); resetTip(open[i]); } }
+  }
+  var tipN=0;
+  Array.prototype.forEach.call(document.querySelectorAll('.term'), function(t){
+    t.setAttribute('tabindex','0'); t.setAttribute('role','button');
+    var tp=t.querySelector('.tip'); if(tp){ tp.id='tip'+(++tipN); tp.setAttribute('role','tooltip'); t.setAttribute('aria-describedby',tp.id); }
+    t.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); t.click(); } if(e.key==='Escape'){ closeTerms(null); } });
+    t.addEventListener('click', function(e){
+      e.preventDefault(); e.stopPropagation();
+      var willOpen=canHover?true:!t.classList.contains('open');
+      closeTerms(t);
+      t.classList.toggle('open', willOpen);
+      t.setAttribute('aria-expanded', willOpen?'true':'false');
+      if(willOpen){ openedAt=Date.now(); clampTip(t); }
+    });
+    t.setAttribute('aria-expanded','false');
+    if(canHover){
+      t.addEventListener('mouseenter', function(){ closeTerms(t); t.classList.add('open'); t.setAttribute('aria-expanded','true'); openedAt=Date.now(); clampTip(t); });
+      t.addEventListener('mouseleave', function(){ t.classList.remove('open'); t.setAttribute('aria-expanded','false'); resetTip(t); });
+    }
+    t.addEventListener('focusout', function(){ if(t.classList.contains('open')){ t.classList.remove('open'); t.setAttribute('aria-expanded','false'); resetTip(t); } });
+  });
+  document.addEventListener('click', function(){ closeTerms(null); });
+  window.addEventListener('scroll', function(){ if(Date.now()-openedAt>700) closeTerms(null); }, {passive:true});
+  window.addEventListener('resize', function(){
+    var open=document.querySelectorAll('.term.open');
+    for(var i=0;i<open.length;i++) clampTip(open[i]);
+  });
+
+  /* 문제 카드 */
+  Array.prototype.forEach.call(document.querySelectorAll('.pop'), function(card){
+    var opts=card.querySelectorAll('.opt'), ans=card.querySelector('.popans');
+    var done=false;
+    Array.prototype.forEach.call(opts, function(b){
+      b.addEventListener('click', function(){
+        if(done) return; done=true;
+        Array.prototype.forEach.call(opts, function(o){
+          o.setAttribute('aria-disabled','true');
+          if(o.getAttribute('data-ok')==='1') o.classList.add('ok');
+          else if(o===b) o.classList.add('no');
+        });
+        b.setAttribute('aria-pressed','true');
+        if(ans){
+          ans.hidden=false;
+          var v=ans.querySelector('.verdict');
+          if(v){ v.textContent=(b.getAttribute('data-ok')==='1'?'맞았다 · ':'아쉽다 · ')+v.textContent; try{ v.focus({preventScroll:true}); }catch(e){ v.focus(); } }
+        }
+      });
+    });
+  });
+
+
+  /* 내 연말 잔고 셈해 보기 */
+  var ys={v:'55', d:'0'};
+  var DAYS=[
+    {k:'24',w:'목',b:'24',s:''},
+    {k:'25',w:'금',b:'25',s:'성탄',off:1},
+    {k:'28',w:'월',b:'28',s:''},
+    {k:'29',w:'화',b:'29',s:''},
+    {k:'30',w:'수',b:'30',s:'마지막'},
+    {k:'31',w:'목',b:'31',s:'휴장',off:1,judge:1},
+    {k:'1.4',w:'월',b:'1.4',s:'새해'}
+  ];
+  var PAY={'24':'29','28':'30','29':'1.4'};
+  var PAYTXT={'29':'12월 29일','30':'12월 30일','1.4':'1월 4일'};
+  function yput(id,label,a){
+    var el=document.getElementById(id); if(!el) return;
+    el.querySelector('i').textContent=label;
+    var b=el.querySelector('b'); b.textContent=a[0];
+    if(a[1]){ var sm=document.createElement('small'); sm.textContent=a[1]; b.appendChild(sm); }
+    el.classList.remove('ok','no'); if(a[2]) el.classList.add(a[2]);
+  }
+  function yrender(){
+    Array.prototype.forEach.call(document.querySelectorAll('#ysim .chip.sv'),function(b){
+      var on=(ys[b.getAttribute('data-k')]===b.getAttribute('data-v')); b.classList.toggle('on',on); b.setAttribute('aria-pressed',on?'true':'false');
+    });
+    var V=parseInt(ys.v,10), D=ys.d, sold=(D!=='0'), pay=sold?PAY[D]:null;
+    var settledBefore=sold && pay!=='1.4';
+    var bal=settledBefore?V-10:V;
+    var major=bal>=50;
+    var strip=document.getElementById('ystrip');
+    if(strip){
+      strip.innerHTML='';
+      DAYS.forEach(function(d){
+        var c=document.createElement('div'); var cls='dcell';
+        var lab=d.s;
+        if(d.off) cls+=' off';
+        if(d.judge){ cls+=' judge'; lab='판정'; }
+        if(sold && d.k===D){ cls+=' t'; lab='판 날'; }
+        if(sold && d.k===pay){ cls+=' pay'; lab='결제'; }
+        c.className=cls;
+        c.innerHTML='<i>'+d.w+'</i><b>'+d.b+'</b><span>'+(lab||'&nbsp;')+'</span>';
+        strip.appendChild(c);
+      });
+    }
+    yput('y1','결제일',sold?[PAYTXT[pay],pay==='1.4'?'해를 넘김':'31일 전']:['없음','팔지 않음']);
+    yput('y2','31일 잔고',[bal+'억 원',bal>=50?'50억 원 이상':'50억 원 미만']);
+    yput('y3','판정',major?['대주주','차익 1억이면 약 2,145만 원','no']:['아님','내년 장내 매도 양도세 0원','ok']);
+    var msg='';
+    if(!sold){
+      msg=major?('12월 31일 잔고가 '+V+'억 원이라 대주주다. 내년에 이 종목을 팔면 1주를 팔아도 차익에 세금이 붙는다. 차익이 1억 원이면 약 2,145만 원이다.')
+               :('12월 31일 잔고가 '+V+'억 원으로 50억 원 밑이라 금액 기준으론 대주주가 아니다. 내년에 장내에서 팔아도 양도세는 없다.');
+    }else if(pay==='1.4'){
+      msg='29일에 팔았지만 결제는 31일 휴장과 신정을 건너 1월 4일이다. 12월 31일 잔고엔 아직 '+V+'억 원이 남는다. '+(major?((V-10)>=50?('대주주다. 28일에 팔았어도 '+(V-10)+'억 원이 남아 대주주였다'+((V-10)===50?'. 기준이 50억 원 「이상」이라서다.':'.')):'하루 늦어 대주주가 된다.'):'원래 50억 원 밑이라 대주주는 아니다.');
+    }else if(V<50){
+      msg='처음부터 50억 원 밑이라 팔지 않아도 대주주가 아니다. 세금 때문이라면 이 매도는 필요 없었다.';
+    }else{
+      var dd=(D==='24')?'24일에 판 주식은 성탄절 휴장과 주말을 건너 29일에 결제된다. ':'28일에 판 주식은 30일에 결제된다. ';
+      msg=dd+(major?('그래도 31일 잔고가 '+bal+'억 원이라 대주주다. '+(bal===50?'기준은 50억 원 「이상」이라 딱 50억 원도 걸린다. ':'')+'피하려면 '+(V-50)+'억 원 넘게 팔아야 한다.'):('31일 잔고 '+bal+'억 원, 대주주가 아니다.'));
+    }
+    var face=major?'no':((sold && V<50)?'meh':'ok');
+    var m=document.getElementById('ymsg'); if(m) m.textContent=msg;
+    var f=document.getElementById('yface'); if(f) f.setAttribute('class','oface '+face);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('#ysim .chip.sv'),function(b){
+    b.addEventListener('click',function(){ ys[b.getAttribute('data-k')]=b.getAttribute('data-v'); yrender(); });
+  });
+  yrender();
+
+  /* 다음 편: 올라와 있으면 그 글로, 아니면 시장 입문 목록으로 */
+  var nx=document.querySelector('a.next[data-next]');
+  if(nx && window.fetch && /^https?:$/.test(location.protocol)){
+    var nxGo=function(){
+      var u=nx.getAttribute('data-next'), mk=nx.getAttribute('data-mark');
+      fetch(u,{credentials:'same-origin',cache:'no-cache'})
+        .then(function(r){ return r.ok?r.text():''; })
+        .then(function(t){ if(t && mk && t.indexOf(mk)>-1) nx.setAttribute('href',u); })
+        .catch(function(){});
+    };
+    if('IntersectionObserver' in window){
+      var nxIo=new IntersectionObserver(function(es){
+        for(var k=0;k<es.length;k++){ if(es[k].isIntersecting){ nxIo.disconnect(); nxGo(); break; } }
+      },{rootMargin:'800px 0px'});
+      nxIo.observe(nx);
+    }else nxGo();
+  }
+
+  /* 공유 */
+  var CANON="https://snowshagal.com/reports/basics-24-major-shareholder";
+  function pageUrl(){ var h=location.href.split('#')[0]; return /^https?:/.test(h)?h:CANON; }
+  var smsg=document.getElementById('shmsg');
+  function say(t){ if(smsg){ smsg.textContent=t; setTimeout(function(){ smsg.textContent=''; },2500); } }
+  function legacy(text){
+    var ta=document.createElement('textarea'); ta.value=text; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); var ok=false;
+    try{ ok=document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+    say(ok?'링크를 복사했다':'복사가 막혀 있다. 주소창의 링크를 복사하면 된다');
+  }
+  function copy(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(function(){ say('링크를 복사했다'); },function(){ legacy(text); }); }
+    else legacy(text);
+  }
+  var TXT={ page:"12월 31일 전에만 팔면 될까? 연말엔 왜 큰손이 팔고 나가나", quiz:"문제. 2026년 12월 31일(목, 휴장) 기준 대주주가 되지 않으려면 늦어도 언제 팔아야 할까? ① 12월 30일(수) 마지막 거래일 ② 12월 29일(화) ③ 12월 28일(월)" };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-share]'),function(b){
+    b.addEventListener('click',function(){
+      var k=b.getAttribute('data-share'), url=pageUrl();
+      if(k==='copy'){ copy(url); return; }
+      if(k==='quiz') url=url+'#quiz1';
+      var data={title:"연말엔 왜 큰손이 팔고 나가나",text:TXT[k]||TXT.page,url:url};
+      if(navigator.share){ navigator.share(data).catch(function(){}); }
+      else{ copy(data.text+' '+url); }
+    });
+  });
+})();
+</script>
+</body>
+</html>
