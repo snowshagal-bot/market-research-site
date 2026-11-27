@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-28-note-1c1ym0y",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-28",
+    "reportDate": "2026-11-28",
+    "registeredDate": "2026-11-28",
+    "registeredAt": "2026-11-27T16:53:13.260Z",
+    "legacyImport": false,
+    "title": "15% proposed, A new finding.",
+    "seoTitle": "US Tariffs on Korea: A 15% Proposal, a New Finding",
+    "subtitle": "",
+    "description": "USTR's proposed Section 301 overcapacity tariffs match Korea's 15% deal cap but deem six Korean practices unreasonable and retain a 25% alternative. What the proposal means for duties, exemptions and timing.",
+    "tags": [
+      "kospi",
+      "korea",
+      "u-s-a",
+      "tariffs-trade",
+      "policy"
+    ],
+    "readingMinutes": 22,
+    "href": "reports/en/20261128_Investment_Insight_US_Overcapacity_Tariff_EN.html",
+    "translationGroup": "2026-11-28-note-nigiaz",
+    "coverImage": "covers/2026-11-28-note-1c1ym0y.webp",
+    "shareCardImage": "covers/share/2026-11-28-note-1c1ym0y.jpg",
+    "coverThumbnail": "covers/2026-11-28-note-1c1ym0y-450.webp"
+  },
+  {
     "id": "2026-11-28-note-nigiaz",
     "type": "note",
     "typeLabel": "투자 인사이트",
