@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-28-weekly-1ci03wz",
+    "type": "weekly",
+    "typeLabel": "위클리 리포트",
+    "lang": "ko",
+    "date": "2026-11-28",
+    "reportDate": "2026-11-28",
+    "registeredDate": "2026-11-28",
+    "registeredAt": "2026-11-28T10:55:25.166Z",
+    "legacyImport": false,
+    "title": "널뛴 닷새, 한 뼘 위에서 멈춤",
+    "subtitle": "",
+    "description": "2026년 11월 4주차(11월 23~27일) 한국 증시 주간 리포트. 코스피 +0.94% · 코스닥 +9.81%. 엔비디아 회계 조사 보도, CEO 복귀, 미국 반도체 재급락, 금통위 인상, 증안펀드 기대로 하루씩 방향이 바뀐 닷새. 다음 주는 30일 증안펀드 회의, 엔비디아 청문회와 분기 보고서, 외국인 현물·선물 방향.",
+    "summary": "하루씩 방향이 바뀐 닷새 끝에 코스피 +0.94%로 4,915.68 · 코스닥 +9.81% · 외국인 현물 -4,091억, 선물 +1조2,850억 · 다음 주 세 질문은 증안펀드 회의 뒤 코스피, 엔비디아 일정 뒤 반도체, 외국인 현물·선물 동반 매수",
+    "tags": [
+      "kospi",
+      "flows",
+      "foreign-investors",
+      "kosdaq",
+      "semiconductors"
+    ],
+    "readingMinutes": 6,
+    "href": "reports/2026-11-28_Snowshagal_Weekly.html",
+    "coverImage": "covers/2026-11-28-weekly-1ci03wz.webp",
+    "shareCardImage": "covers/share/2026-11-28-weekly-1ci03wz.jpg",
+    "coverThumbnail": "covers/2026-11-28-weekly-1ci03wz-450.webp"
+  },
+  {
     "id": "2026-11-28-note-1c1ym0y",
     "type": "note",
     "typeLabel": "Investment Insights",
