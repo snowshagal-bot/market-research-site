@@ -607,6 +607,11 @@
     resultTitle.textContent = operation.action === 'delete' ? '삭제되었습니다.' : '저장되었습니다.';
     resultText.textContent = '홈페이지 반영을 확인하고 있습니다.';
     resultDetail.textContent = `GitHub commit ${operation.commit.slice(0, 7)}`;
+    if (operation.linkWarnings?.length) {
+      const hubs = operation.linkWarnings.filter(warning => warning.check === 'links.korean-hub').length;
+      resultDetail.textContent += ` · 링크 검토 ${operation.linkWarnings.length}건${hubs ? ` (국문 허브 ${hubs}건)` : ''}`;
+      console.warn('교정 리포트 링크 검토', operation.linkWarnings);
+    }
     resultHome.textContent = '홈페이지로 이동';
     resultHome.href = 'https://snowshagal.com/';
     resultContinue.textContent = '관리 계속하기';
@@ -730,7 +735,7 @@
         ? ` · 번역 짝(${data.pairedTagUpdates.join(', ')})의 태그도 함께 맞췄습니다`
         : '';
       status.textContent = `GitHub 저장 완료 · commit ${data.commit.slice(0, 7)}${pairNote}`;
-      void beginDeploymentCheck({ action: 'update', id: data.post.id, post: data.post, commit: data.commit });
+      void beginDeploymentCheck({ action: 'update', id: data.post.id, post: data.post, commit: data.commit, linkWarnings: data.linkWarnings });
     } catch (error) {
       status.textContent = error.message || '저장하지 못했습니다.';
     } finally {

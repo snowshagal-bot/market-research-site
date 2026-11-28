@@ -7,6 +7,7 @@ import {
   categoryFeaturedCards,
   categoryArchiveLinks,
   categoryReportLinks,
+  escapeHtml,
   findPostByPath,
   findTranslationCounterpart,
   homepageLatestLinks,
@@ -378,14 +379,15 @@ export async function onRequest(context) {
     let posts = null;
     let tags = null;
     if ((homeLang || landing) && context.env?.ASSETS?.fetch) {
-      try {
-        [posts, tags] = await Promise.all([
-          loadPosts(context.request, context.env),
-          loadTags(context.request, context.env)
-        ]);
-      } catch (_) {
+      const [postsRes, tagsRes] = await Promise.allSettled([
+        loadPosts(context.request, context.env),
+        loadTags(context.request, context.env)
+      ]);
+      if (postsRes.status === 'fulfilled') posts = postsRes.value;
+      else {
         try { posts = await loadPosts(context.request, context.env); } catch (_) {}
       }
+      if (tagsRes.status === 'fulfilled') tags = tagsRes.value;
     }
 
     // /disclosures/ and /calendar/ (KO/EN): the filings and trading days the
@@ -533,22 +535,23 @@ export async function onRequest(context) {
         // numbers the <title> and description quote; without one they fall
         // back to dated wording with no numbers.
         const facts = await loadReportFacts(context.env, post);
-        // Built once without the file's metas first, so a failure leaves the
-        // page untouched, and kept as the fallback should a later build fail.
-        const fallback = reportSeoTags(posts, post, { facts, tagRegistry: tags });
+        const counterpart = findTranslationCounterpart(posts, post);
+        const options = { facts, tagRegistry: tags, counterpart };
         seoFor = (reportMeta) => {
-          try { return reportSeoTags(posts, post, { facts, tagRegistry: tags, reportMeta }); } catch (_) { return fallback; }
+          try { return reportSeoTags(posts, post, { ...options, reportMeta }); } catch (_) {
+            try { return reportSeoTags(posts, post, options); } catch (_) { return ''; }
+          }
         };
         // A Daily links to its session's market page when that record is published.
         readingNavigation = reportReadingNavigation(posts, post, { marketDate: facts?.kind === 'daily' ? facts.marketDate : '' });
-        const counterpart = findTranslationCounterpart(posts, post);
         if (counterpart?.href) reportTranslationHref = new URL(reportSiteUrl(counterpart.href)).pathname;
       }
     }
   } catch (_) {}
 
   const tagBootstrap = serializeTagRegistryBootstrap(tags);
-  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=bb23e734b4"></script><script src="/assets/report-shell.js?v=0e81e3d23c" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
+  const translationAttr = reportLinks ? ` data-translation-href="${escapeHtml(reportTranslationHref)}"` : '';
+  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=bb23e734b4"></script><script src="/assets/report-shell.js?v=800f77a01c" data-category="${active}" data-lang="${lang}"${translationAttr}></script>${engagement}`;
   const footerStyle = `<style id="site-footer-css">${footerCss()}</style>`;
   const footerMarkup = siteFooter(lang, { reportTranslationHref });
   // One feed link per page, for the page's own language. Any Atom link the

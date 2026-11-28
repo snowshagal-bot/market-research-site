@@ -31,6 +31,7 @@ export const REPORT_IMAGE_PREFIX = '/report-img/';
 export const REPORT_IMAGE_STYLE = '<style id="mrs-img-ratio">:where(img[style*="--mrs-ar"]){aspect-ratio:var(--mrs-ar)}</style>';
 const LAZY_FROM = 3;
 const HASH_HEX = 16;
+const imageEncoder = new TextEncoder();
 
 export const IMAGE_TYPES = Object.freeze({ 'image/webp': 'webp', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif' });
 export const IMAGE_MIME = Object.freeze(Object.fromEntries(Object.entries(IMAGE_TYPES).map(([mime, ext]) => [ext, mime])));
@@ -42,7 +43,9 @@ const SRC_ATTR = /(\s)src\s*=\s*(["'])(data:image\/[a-z]+;base64,[A-Za-z0-9+/=]+
 
 /** The mime type and base64 payload of a data URI this module would move, or null. */
 export function movableImage(src) {
-  const match = DATA_URI.exec(String(src || ''));
+  const value = String(src || '');
+  if (value.length < INLINE_IMAGE_MIN) return null;
+  const match = DATA_URI.exec(value);
   if (!match) return null;
   const mime = match[1].toLowerCase();
   if (!IMAGE_TYPES[mime] || match[2].length < INLINE_IMAGE_MIN) return null;
@@ -51,8 +54,8 @@ export function movableImage(src) {
 
 /** A stable, URL-safe hash of the base64 text (SHA-256, first HASH_HEX hex digits). */
 export async function imageHash(base64) {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(base64));
-  return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('').slice(0, HASH_HEX);
+  const digest = await crypto.subtle.digest('SHA-256', imageEncoder.encode(base64));
+  return [...new Uint8Array(digest, 0, HASH_HEX / 2)].map(byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
 /** The served address of a moved image. `reportPath` is the report's URL path. */
@@ -171,7 +174,7 @@ export function inlineImageHandler(reportPath) {
   let seen = 0;
   let moved = 0;
   return {
-    async element(element) {
+    element(element) {
       const first = seen === 0;
       seen += 1;
       const image = movableImage(element.getAttribute('src'));
@@ -181,8 +184,10 @@ export function inlineImageHandler(reportPath) {
       has.delete('src');
       const hints = imageHints({ index: moved, first, has, size: imageSize(image.base64, image.mime), style: element.getAttribute('style') || '' });
       moved += 1;
-      element.setAttribute('src', reportImageUrl(await imageHash(image.base64), image.ext, reportPath));
-      for (const [name, value] of Object.entries(hints)) element.setAttribute(name, value);
+      return imageHash(image.base64).then(hash => {
+        element.setAttribute('src', reportImageUrl(hash, image.ext, reportPath));
+        for (const [name, value] of Object.entries(hints)) element.setAttribute(name, value);
+      });
     }
   };
 }

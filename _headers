@@ -11,19 +11,19 @@
   Content-Security-Policy: frame-ancestors 'none'
 
 /data/posts.js
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: no-cache, must-revalidate
 
 /data/posts.json
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: no-cache, must-revalidate
 
 /data/search-index-meta.js
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: no-cache, must-revalidate
 
 /data/search-index-body-ko.js
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: no-cache, must-revalidate
 
 /data/search-index-body-en.js
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: no-cache, must-revalidate
 
 /data/search-index.json
   Cache-Control: no-cache, no-store, must-revalidate

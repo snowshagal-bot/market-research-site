@@ -1069,6 +1069,9 @@ export function applyMarketShell(shell, page) {
     if (!pattern.test(out)) throw new Error(`market shell is missing ${key}`);
     out = out.replace(pattern, () => values[key]);
   }
+  // The dashboard script uses this list for its Daily-report links. These
+  // server-rendered pages already have their links.
+  out = out.replace(/<script src="\/data\/posts\.js"><\/script>\n?/, '');
   // A page with a picture of its own (the session's card) shares that instead
   // of the dashboard's standard image. The shell's 1200×630 size tags fit both.
   if (page.image) {

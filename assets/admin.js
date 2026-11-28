@@ -1258,6 +1258,7 @@
       ['links.broken-report', '목적지를 찾을 수 없는 리포트 링크'],
       ['links.redirected-report', '이전 주소를 거치는 링크'],
       ['links.korean-edition', '영문 글의 국문 링크'],
+      ['links.korean-hub', '영문 글의 국문 허브 링크'],
       ['links.pending-report', '발행 예정 문서 링크'],
       ['hreflang.review-pair', '번역 짝 후보']
     ].filter(([check]) => warnings.has(check)).map(([, label]) => label);

@@ -234,8 +234,8 @@ test('homepage post metadata bypasses stale browser caches now and on later publ
   assert.match(home, /src="\/data\/posts\.js"/);
   assert.match(englishHome, /src="\/data\/posts\.js"/);
   assert.match(admin, /src="\/data\/posts\.js"/);
-  assert.match(headers, /\/data\/posts\.js\s+Cache-Control: no-cache, no-store, must-revalidate/);
-  assert.match(headers, /\/data\/posts\.json\s+Cache-Control: no-cache, no-store, must-revalidate/);
+  assert.match(headers, /\/data\/posts\.js\s+Cache-Control: no-cache, must-revalidate/);
+  assert.match(headers, /\/data\/posts\.json\s+Cache-Control: no-cache, must-revalidate/);
 });
 
 test('admin exposes an optional validated cover input', async () => {

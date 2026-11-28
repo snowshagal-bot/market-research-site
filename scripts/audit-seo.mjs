@@ -595,6 +595,7 @@ export function auditCorpus({ mode = 'repository', origin = PRODUCTION_ORIGIN, p
     for (const { check, href, suggested } of reportLinkDiagnostics(doc.html, page.post, posts, reportIndex)) {
       if (check === 'links.broken-report') fail(report, check, page, href, suggested || 'registered report URL');
       if (check === 'links.korean-edition') warn(report, check, page, href, `Check editorial intent; English edition: ${suggested}`);
+      if (check === 'links.korean-hub') warn(report, check, page, href, `Check editorial intent; English hub: ${suggested}`);
       if (check === 'links.pending-report') warn(report, check, page, href, 'Planned report; check once it is published');
       if (check === 'links.redirected-report') warn(report, check, page, href, `Link directly to ${suggested}`);
     }

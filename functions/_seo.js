@@ -339,8 +339,7 @@ export function findTranslationCounterpart(posts, post) {
   return lang === 'en' ? korean[0] : english[0];
 }
 
-export function reportAlternates(posts, post) {
-  const counterpart = findTranslationCounterpart(posts, post);
+export function reportAlternates(posts, post, counterpart = findTranslationCounterpart(posts, post)) {
   if (!counterpart) return [];
   const entries = [post, counterpart]
     .map((candidate) => ({ lang: postLanguage(candidate), href: reportSiteUrl(candidate.href) }))
@@ -1067,8 +1066,8 @@ export function reportSeoTags(posts, post, options = {}) {
   // small summary thumbnail only made the same artwork harder to read.
   const twitterImage = ogImage;
   const twitterCard = 'summary_large_image';
-  const counterpart = findTranslationCounterpart(posts, post);
-  const alternates = reportAlternates(posts, post)
+  const { counterpart = findTranslationCounterpart(posts, post) } = options;
+  const alternates = reportAlternates(posts, post, counterpart)
     .map((entry) => `<link rel="alternate" hreflang="${entry.lang}" href="${escapeHtml(entry.href)}">`)
     .join('');
   const descriptionTags = `<meta name="description" content="${escapeHtml(description)}"><meta property="og:description" content="${escapeHtml(description)}"><meta name="twitter:description" content="${escapeHtml(description)}">`;

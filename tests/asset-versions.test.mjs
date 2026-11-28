@@ -156,8 +156,12 @@ test('KO and EN Homepage parity: identical tracked assets use identical content 
   }
 });
 
-test('_headers Cache-Control Guard: all dynamic search and data assets declare no-cache, no-store, must-revalidate', async () => {
+test('_headers Cache-Control Guard: only public post and split search files allow conditional revalidation', async () => {
   const headersContent = await read('_headers');
+  const revalidated = new Set([
+    'data/posts.js', 'data/posts.json', 'data/search-index-meta.js',
+    'data/search-index-body-ko.js', 'data/search-index-body-en.js'
+  ]);
 
   for (const asset of DYNAMIC_DATA_ASSETS) {
     const escaped = asset.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -167,8 +171,8 @@ test('_headers Cache-Control Guard: all dynamic search and data assets declare n
     const cacheControlValue = match[1].trim();
     assert.equal(
       cacheControlValue,
-      'no-cache, no-store, must-revalidate',
-      `/${asset} in _headers must be "no-cache, no-store, must-revalidate", found "${cacheControlValue}"`
+      revalidated.has(asset) ? 'no-cache, must-revalidate' : 'no-cache, no-store, must-revalidate',
+      `Unexpected caching rule for /${asset}`
     );
     assert.doesNotMatch(
       cacheControlValue,
@@ -176,4 +180,5 @@ test('_headers Cache-Control Guard: all dynamic search and data assets declare n
       `/${asset} in _headers must not declare a long max-age policy`
     );
   }
+  assert.doesNotMatch(headersContent, /^(?:\/assets|\/data)\/\*\s*$/m);
 });

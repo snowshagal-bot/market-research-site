@@ -49,7 +49,7 @@ export const flush = async () => {
  * @param {string} [options.siteSource] site.js source (defaults to the working tree)
  * @param {object} options.files map of src path -> script content served for it
  */
-export async function bootSearch({ lang, siteSource, files }) {
+export async function bootSearch({ lang, siteSource, files, preloadPosts = true }) {
   const [localeScript, site, postsJson, tagsJson] = await Promise.all([
     read('assets/locale.js'),
     siteSource ? Promise.resolve(siteSource) : read('assets/site.js'),
@@ -81,7 +81,7 @@ export async function bootSearch({ lang, siteSource, files }) {
     querySelectorAll: (selector) => (selector === '[data-search-trigger]' ? [trigger] : [])
   };
   const window = {
-    RESEARCH_POSTS: JSON.parse(postsJson),
+    ...(preloadPosts ? { RESEARCH_POSTS: JSON.parse(postsJson) } : {}),
     TAG_REGISTRY: JSON.parse(tagsJson),
     addEventListener() {}
   };

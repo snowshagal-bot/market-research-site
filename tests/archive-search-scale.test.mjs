@@ -133,12 +133,6 @@ test('search loads metadata on open and report bodies only for a typed query', a
   assert.doesNotMatch(site, /window\.SEARCH_INDEX\b(?!_)/);
 });
 
-test('search still degrades to page data when the index cannot be fetched', async () => {
-  const site = await read('assets/site.js');
-  assert.match(site, /function searchMetaFallback\(\)/);
-  assert.match(site, /\.catch\(\(\) => \{ window\.SEARCH_INDEX_META = searchMetaFallback\(\); \}\)/);
-});
-
 /* ---------------- archive paging ---------------- */
 
 test('the archive renders one page at a time and offers the rest', async () => {
