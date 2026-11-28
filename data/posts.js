@@ -1,5 +1,32 @@
 window.RESEARCH_POSTS = [
   {
+    "id": "2026-11-29-note-8j30ov",
+    "type": "note",
+    "typeLabel": "Investment Insights",
+    "lang": "en",
+    "date": "2026-11-29",
+    "reportDate": "2026-11-29",
+    "registeredDate": "2026-11-28",
+    "registeredAt": "2026-11-28T12:23:47.976Z",
+    "legacyImport": false,
+    "title": "IT manufacturing jobs 2 in 100 Why Korea's chip boom hasn't lifted spending",
+    "seoTitle": "Why South Korea's Chip Boom Hasn't Reached Consumers",
+    "subtitle": "",
+    "description": "The Bank of Korea raised its 2026 GDP growth forecast to 3.9% but cut private consumption growth to 1.8%, while Q3 real household income fell 2.1%. Three narrow channels, two headwinds and a comparison with Taiwan explain the delay.",
+    "tags": [
+      "korea",
+      "semiconductors",
+      "taiwan",
+      "policy"
+    ],
+    "readingMinutes": 24,
+    "href": "reports/en/20261129_Investment_Insight_Chip_Boom_Consumption_Gap_EN.html",
+    "translationGroup": "2026-11-29-note-1y4r6rl",
+    "coverImage": "covers/2026-11-29-note-8j30ov.webp",
+    "shareCardImage": "covers/share/2026-11-29-note-8j30ov.jpg",
+    "coverThumbnail": "covers/2026-11-29-note-8j30ov-450.webp"
+  },
+  {
     "id": "2026-11-29-note-1y4r6rl",
     "type": "note",
     "typeLabel": "투자 인사이트",
