@@ -1,3 +1,4 @@
+import { SSR_DATA_BUDGET_MS, temporaryPage, withinSsrBudget } from './_temporary-page.js';
 // The market glossary: /basics/glossary/ and /en/basics/glossary/.
 //
 // Reports already explain their terms in tooltips, in two markups:
@@ -260,10 +261,10 @@ async function assetJson(env, url, path) {
 /**
  * functions/basics/[[path]].js and functions/en/basics/[[path]].js. Only the
  * glossary path is handled; /basics/ and anything else go on to the static
- * site. When the data cannot be read the static page goes out as it is, with
- * its own short note in place of the list.
+ * site. When the list cannot be read the static page provides the error copy
+ * and navigation for a temporary response.
  */
-export async function onGlossaryRequest(context) {
+export async function onGlossaryRequest(context, { budgetMs = SSR_DATA_BUDGET_MS } = {}) {
   const url = new URL(context.request.url);
   const route = parseGlossaryPath(url.pathname);
   if (!route) return context.next();
@@ -274,15 +275,18 @@ export async function onGlossaryRequest(context) {
   const headers = new Headers(response.headers);
   headers.delete('content-length');
   try {
-    const [posts, glossary] = await Promise.all([
+    const [posts, glossary] = await withinSsrBudget(Promise.all([
       assetJson(context.env, url, '/data/posts.json'),
       assetJson(context.env, url, `/${GLOSSARY_PATH}`)
-    ]);
+    ]), budgetMs);
+    if (!Array.isArray(posts) || !glossary || typeof glossary !== 'object' || Array.isArray(glossary)) {
+      throw new Error('Invalid glossary data');
+    }
     const body = applyGlossaryList(page, renderGlossaryList(glossaryEntries(posts, glossary, route.lang), route.lang));
     headers.set('cache-control', 'public, max-age=300');
     return new Response(body, { status: 200, headers });
   } catch (error) {
     console.error('glossary list unavailable', error);
-    return new Response(page, { status: response.status, headers });
+    return temporaryPage(page, headers);
   }
 }

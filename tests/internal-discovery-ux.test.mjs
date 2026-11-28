@@ -142,7 +142,7 @@ test('initial HTML navigation agrees with the reader UI for every real report', 
     const { prev, next } = discovery.findAdjacentReports(posts, post.href, post.lang || 'ko');
     const html = reportReadingNavigation(posts, post);
     const expected = [prev, next].filter(Boolean).map(item => cleanReportHref(item.href));
-    const actual = [...html.matchAll(/<a href="([^"]+)"/g)].map(match => match[1].replace(/&amp;/g, '&'));
+    const actual = [...html.matchAll(/<a href="([^"]+)" rel="(?:prev|next)"/g)].map(match => match[1].replace(/&amp;/g, '&'));
     assert.deepEqual(actual, expected, post.href);
     assert.doesNotMatch(html, /\shidden\b|nofollow/);
   }
@@ -425,4 +425,18 @@ test('Report Shell: mount order guarantees body -> discovery -> share -> comment
     mountBody.indexOf('mountComments()')
   ];
   assert.deepEqual(order, [...order].sort((a, b) => a - b), 'Mount functions must execute in exact reader priority order');
+});
+
+test('initial HTML includes a published cross-category report with a shared tag and the same language', () => {
+  const current = { id: 'en-focus', type: 'research', lang: 'en', href: 'reports/en/focus.html', title: 'Focus', tags: ['market'] };
+  const catalog = [
+    { type: 'basics', lang: 'ko', href: 'reports/ko.html', tags: ['market'] },
+    { type: 'basics', lang: 'en', href: 'reports/en/unrelated.html', tags: ['bonds'] },
+    current,
+    { type: 'basics', lang: 'en', href: 'reports/en/guide.html', title: '<Guide>', tags: ['market'] }
+  ];
+  const html = reportReadingNavigation(catalog, current);
+  assert.match(html, /href="\/reports\/en\/guide" data-related-report/);
+  assert.match(html, /&lt;Guide&gt;/);
+  assert.doesNotMatch(html, /\/reports\/ko|unrelated|\.html/);
 });

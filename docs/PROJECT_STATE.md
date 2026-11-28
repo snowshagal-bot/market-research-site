@@ -715,6 +715,8 @@ The UI offers today, 7-day, and 28-day views for Visits, Page views, trend, top 
 
 ### Engagement Analytics
 
+The local Phase 2C candidate starts measured scroll at zero and records movement following scroll input. Back-forward cache restoration continues the same page-load session. The verification report records the measurement transition and the limits of bot classification. [Phase 2C verification](SEO_REMEDIATION_PHASE_2C.md)
+
 The same `/admin/analytics/` page also contains an independent `읽기 행동 / Engagement` section. `/assets/engagement.js` creates one temporary UUID per public page load, counts only foreground active time, retains the maximum scroll depth, and sends changed values at roughly 30-second intervals plus a final background/page-hide update. `functions/_middleware.js` injects the deferred tracker into successful public HTML only when the request hostname is exactly `snowshagal.com`; Preview hosts and `/admin/*`, `/api/*`, and `/cdn-cgi/*` are never tracked.
 
 `POST /api/engagement` validates and UPSERTs one row per page-load session into `engagement_sessions`. `GET /api/engagement-stats?days=1|7|28` reuses `ADMIN_KEY`, returns private/no-store aggregates, and maps report paths to titles using `data/posts.json` where possible. Reading sessions are tracker page loads, not people or Cloudflare Visits. The dashboard reports average and median active time, average maximum scroll, reading/scroll thresholds, and page/country breakdowns. Collection starts only after Production deployment; no historical backfill is inferred.

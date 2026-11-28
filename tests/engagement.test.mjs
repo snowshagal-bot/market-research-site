@@ -116,12 +116,31 @@ test('tracker pauses active time in background, resumes in foreground, and keeps
   winListeners.get('focus')();
   clock = 8000;
   assert.equal(tracker.snapshot().active, 3000);
+  assert.equal(tracker.snapshot().scroll, 0, 'initial viewport is not scroll');
   win.scrollY = 500;
-  winListeners.get('scroll')();
-  assert.equal(tracker.snapshot().scroll, 90);
-  win.scrollY = 10;
-  winListeners.get('scroll')();
-  assert.equal(tracker.snapshot().scroll, 90);
+  winListeners.get('scroll')({ isTrusted: true });
+  assert.equal(tracker.snapshot().scroll, 0, 'scroll restoration or a script alone is not engagement');
+  winListeners.get('wheel')({ isTrusted: false });
+  winListeners.get('scroll')({ isTrusted: true });
+  assert.equal(tracker.snapshot().scroll, 0);
+  winListeners.get('keydown')({ type: 'keydown', key: 'PageDown', isTrusted: true });
+  winListeners.get('scroll')({ isTrusted: true });
+  assert.equal(tracker.snapshot().scroll, 83);
+  clock = 10000;
+  win.scrollY = 600;
+  winListeners.get('scroll')({ isTrusted: true });
+  assert.equal(tracker.snapshot().scroll, 83, 'a stale input does not count');
+
+  winListeners.get('pagehide')();
+  const beforeCache = tracker.snapshot().active;
+  clock += 5000;
+  winListeners.get('pageshow')({ persisted: true });
+  clock += 2000;
+  assert.equal(tracker.snapshot().active, beforeCache + 2000);
+  assert.equal(tracker.sessionId, UUID);
+  winListeners.get('wheel')({ isTrusted: true });
+  winListeners.get('scroll')({ isTrusted: true });
+  assert.equal(tracker.snapshot().scroll, 100);
 });
 
 test('engagement API validates host, UUID, path, active time, and scroll', async () => {

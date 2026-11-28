@@ -142,26 +142,31 @@ test('company and filing names from DART are escaped, never inserted as markup',
   assert.match(html, /주요사항보고서\(&lt;script&gt;alert\(&quot;x&quot;\)&lt;\/script&gt;\)/);
 });
 
-test('a database failure serves the untouched static shell with 200, and the API contract is unchanged', async () => {
-  const { response, html, shell } = await page('/disclosures/', { COMMENTS_DB: broken });
-  assert.equal(response.status, 200);
-  assert.equal(innerById(html, 'disclosures-mount'), innerById(shell, 'disclosures-mount'));
-  assert.match(html, /공시 데이터를 불러오는 중입니다/);
-  assert.doesNotMatch(html, /data-ssr-key/);
+test('disclosures returns a retryable 503 on core failure and resumes on recovery', async () => {
+  const { response, html } = await page('/disclosures/', { COMMENTS_DB: broken });
+  assert.equal(response.status, 503);
+  assert.equal(response.headers.get('retry-after'), '60');
+  assert.equal(response.headers.get('cache-control'), 'no-store');
+  assert.equal(response.headers.get('x-robots-tag'), null);
+  assert.match(html, /공시 데이터를 잠시 불러올 수 없습니다/);
+  assert.doesNotMatch(html, /data-ssr-key|공시 데이터를 불러오는 중입니다/);
   const noDb = await page('/en/disclosures/', {});
-  assert.equal(noDb.response.status, 200);
-  assert.match(noDb.html, /Loading disclosure filings/);
+  assert.equal(noDb.response.status, 503);
+  assert.match(noDb.html, /Disclosure filings are temporarily unavailable/);
+  const recovery = await page('/disclosures/');
+  assert.equal(recovery.response.status, 200);
+  assert.match(recovery.html, /data-ssr-key/);
   const api = await feedGet({ request: new Request('https://snowshagal.com/api/disclosures/feed'), env: { COMMENTS_DB: broken } });
   assert.equal(api.status, 500);
 });
 
-test('a database slower than the time budget falls back to the static shell', async () => {
+test('a core database read slower than the existing budget is classified as unavailable', async () => {
   const hanging = { prepare() { return { bind() { return this; }, first: () => new Promise(() => {}), all: () => new Promise(() => {}), run: () => new Promise(() => {}) }; }, batch: () => new Promise(() => {}) };
   const started = Date.now();
   const result = await buildInitialHtml(new URL('https://snowshagal.com/disclosures/'), { COMMENTS_DB: hanging }, { budgetMs: 40 });
-  assert.equal(result, null);
+  assert.deepEqual(result, { unavailable: { lang: 'ko', page: 'disclosures' } });
   assert.ok(Date.now() - started < 1000);
-  assert.equal(await buildInitialHtml(new URL('https://snowshagal.com/market/'), { COMMENTS_DB: db }), null, 'other pages are untouched');
+  assert.equal(await buildInitialHtml(new URL('https://snowshagal.com/'), { COMMENTS_DB: db }), null, 'other pages are untouched');
 });
 
 /* =================================================================== calendar */

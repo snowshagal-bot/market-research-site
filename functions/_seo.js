@@ -313,8 +313,17 @@ export function reportReadingNavigation(posts, post, { marketDate = '' } = {}) {
     .filter(([candidate]) => candidate)
     .map(([candidate, rel, label]) => `<a href="${escapeHtml(cleanReportHref(candidate.href))}" rel="${rel}"><span>${label}</span><strong>${escapeHtml(candidate.title)}</strong></a>`)
     .join('');
+  // Provide one same-language, cross-category recommendation without an
+  // additional request or repeating the browser's full related-report rank.
+  const tags = Array.isArray(post.tags) ? post.tags : [];
+  const related = tags.length && posts.find(candidate => candidate?.href
+    && candidate.type !== post.type && postLanguage(candidate) === lang
+    && Array.isArray(candidate.tags) && candidate.tags.some(tag => tags.includes(tag)));
+  const relatedLink = related
+    ? `<a href="${escapeHtml(cleanReportHref(related.href))}" data-related-report><span>${lang === 'en' ? 'Related report' : '관련 리포트'}</span><strong>${escapeHtml(related.title)}</strong></a>`
+    : '';
   const marketLink = reportMarketSessionLink(post, marketDate);
-  if (!links && !marketLink) return '';
+  if (!links && !marketLink && !relatedLink) return '';
   return `<nav id="mrs-reading-nav" aria-label="${lang === 'en' ? 'Previous and Next Reports' : '이전/다음 리포트'}">
 <style>
 #mrs-reading-nav{all:initial!important;box-sizing:border-box!important;display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))!important;gap:24px!important;width:100%!important;max-width:860px!important;clear:both!important;margin:32px auto!important;padding:24px 20px!important;border-top:1px solid #d8d0c2!important;font:15px/1.55 system-ui,sans-serif!important;background:#f7f3eb!important;color:#22241f!important}
@@ -322,7 +331,7 @@ export function reportReadingNavigation(posts, post, { marketDate = '' } = {}) {
 #mrs-reading-nav span{all:initial!important;display:block!important;font:12px/1.5 system-ui,sans-serif!important;color:#666b62!important}
 #mrs-reading-nav strong{all:initial!important;display:block!important;font:600 16px/1.5 system-ui,sans-serif!important;color:inherit!important;overflow-wrap:anywhere!important}
 #mrs-reading-nav a:hover strong{text-decoration:underline!important}#mrs-reading-nav a:focus-visible{outline:2px solid #344b40!important;outline-offset:4px!important}
-${marketLink ? '#mrs-reading-nav a[data-market-session]{grid-column:1/-1!important}' : ''}</style>${marketLink}${links}</nav>`;
+${marketLink ? '#mrs-reading-nav a[data-market-session]{grid-column:1/-1!important}' : ''}</style>${marketLink}${links}${relatedLink}</nav>`;
 }
 
 export function findTranslationCounterpart(posts, post) {

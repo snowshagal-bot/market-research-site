@@ -10,7 +10,8 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
-- **SEO Phase 2B resource and server work**. Local implementation and verification on `fix/seo-remediation-phase-2b`. Preview awaits approval. See [the verification report](SEO_REMEDIATION_PHASE_2B.md).
+- **SEO Phase 2C SSR, crawling and engagement**. Local verification passed on `fix/seo-remediation-phase-2c`. Preview awaits approval. See [the verification report](SEO_REMEDIATION_PHASE_2C.md).
+- **SEO Phase 2B resource and server work**. Production deployed at `4fdd4a6cc8cd83c681d4331fbee4e8a0999191f0`. The scoped Browser TTL rule is `24e6e1cdd9254182b655ed16b7997b93`.
 - **SEO Phase 2A internal links and locales**. Production deployed at `ced50a72b8c6f15fdaa4de1a14580613fa3bc9a9`. See [the local validation report](SEO_REMEDIATION_PHASE_2A.md).
 
 - **USD/KRW: one definition across the site (기초 데이터 가이드 3편, 2026-11-27)**.

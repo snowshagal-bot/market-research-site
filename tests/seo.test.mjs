@@ -147,7 +147,10 @@ test('robots permits public crawling, excludes admin APIs, and advertises the ca
   const robots = await read('robots.txt');
   assert.match(robots, /Allow: \//);
   assert.match(robots, /Disallow: \/admin\//);
-  assert.match(robots, /Disallow: \/api\//);
+  assert.match(robots, /^Disallow: \/admin\$$/m);
+  assert.match(robots, /^Disallow: \/api\/admin\/$/m);
+  assert.match(robots, /^Disallow: \/api\/auth\/$/m);
+  assert.doesNotMatch(robots, /^Disallow: \/(?:api|cdn-cgi|assets|data)\/?$/m);
   assert.match(robots, /Sitemap: https:\/\/snowshagal\.com\/sitemap\.xml/);
   assert.doesNotMatch(robots, /pages\.dev/);
   // Daum Webmaster Tool ownership key: Daum re-reads it from robots.txt on every sign-in, so it must stay.

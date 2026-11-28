@@ -123,6 +123,7 @@ test('middleware redirects apex admin UI to admin host and adds admin-only no-st
   const apex = htmlContext(`${PUBLIC_ORIGIN}/admin/`);
   const apexRes = await middleware(apex.context);
   assert.equal(apexRes.status, 307);
+  assert.equal(apexRes.headers.get('x-robots-tag'), 'noindex, nofollow');
   assert.equal(apexRes.headers.get('location'), `${ADMIN_ORIGIN}/admin/`);
   assert.equal(apex.calls(), 0);
 
@@ -135,6 +136,7 @@ test('middleware redirects apex admin UI to admin host and adds admin-only no-st
   const unauthAdmin = htmlContext(`${ADMIN_ORIGIN}/admin/manage/`);
   const unauthRes = await middleware(unauthAdmin.context);
   assert.equal(unauthRes.status, 302);
+  assert.equal(unauthRes.headers.get('x-robots-tag'), 'noindex, nofollow');
   assert.equal(unauthRes.headers.get('location'), `/admin/login/?next=%2Fadmin%2Fmanage%2F`);
 
   const adminLogin = htmlContext(`${ADMIN_ORIGIN}/admin/login/`);
@@ -317,4 +319,17 @@ test('Functions do not introduce wildcard or credentialed cross-origin CORS', as
   const source = (await Promise.all(files.map((file) => readFile(file, 'utf8')))).join('\n');
   assert.doesNotMatch(source, /access-control-allow-origin["']?\s*[:=]\s*["']\*/i);
   assert.doesNotMatch(source, /access-control-allow-credentials["']?\s*[:=]\s*["']true/i);
+});
+
+test('the application serves a dedicated admin robots policy without opening an admin route', async () => {
+  for (const method of ['GET', 'HEAD']) {
+    const fixture = htmlContext(`${ADMIN_ORIGIN}/robots.txt`, { method });
+    const response = await middleware(fixture.context);
+    assert.equal(response.status, 200);
+    assert.equal(fixture.calls(), 0);
+    assert.equal(response.headers.get('content-type'), 'text/plain; charset=utf-8');
+    assert.equal(response.headers.get('cache-control'), 'private, no-store, max-age=0');
+    assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow');
+    assert.equal(await response.text(), method === 'HEAD' ? '' : 'User-agent: *\nDisallow: /\n');
+  }
 });

@@ -44,7 +44,7 @@ async function page(pathWithQuery, env) {
     env: { ...env, ASSETS: { fetch: async () => new Response('[]', { headers: { 'content-type': 'application/json' } }) } },
     next: async () => new Response(SHELLS[url.pathname], { headers: { 'content-type': 'text/html; charset=utf-8' } })
   });
-  return { status: response.status, html: await response.text() };
+  return { status: response.status, headers: response.headers, html: await response.text() };
 }
 
 const dashboardOpen = html => (/<div\b[^>]*\bid="market-dashboard-view"[^>]*>/.exec(html) || [''])[0];
@@ -75,7 +75,7 @@ test('/en/market/ ships the same session in English', async () => {
   assert.doesNotMatch(html, /주요 지수|코스피 6/);
 });
 
-test('a past date, a period view, no database or a failing one keep the static shell', async () => {
+test('legacy query views and valid empty data keep the market shell, while a failed core read returns 503', async () => {
   const db = database();
   for (const path of ['/market/?date=2026-11-24', '/market/?view=1w']) {
     const { status, html } = await page(path, { COMMENTS_DB: db });
@@ -85,14 +85,41 @@ test('a past date, a period view, no database or a failing one keep the static s
   }
   const broken = { prepare() { throw new Error('d1 down'); } };
   for (const env of [{}, { COMMENTS_DB: broken }]) {
-    const { status, html } = await page('/market/', env);
-    assert.equal(status, 200);
+    const { status, html, headers } = await page('/market/', env);
+    assert.equal(status, 503);
+    assert.equal(headers.get('retry-after'), '60');
+    assert.equal(headers.get('cache-control'), 'no-store');
+    assert.equal(headers.get('x-robots-tag'), null);
+    assert.match(html, /시장 데이터를 잠시 불러올 수 없습니다/);
     assert.doesNotMatch(dashboardOpen(html), /data-ssr-date/);
   }
+  db.database.prepare("DELETE FROM market_close_snapshots WHERE status = 'final'").run();
+  assert.equal((await page('/market/', { COMMENTS_DB: db })).status, 200, 'a valid empty store is not an outage');
+  const recovery = await page('/market/', { COMMENTS_DB: database() });
+  assert.equal(recovery.status, 200);
+  assert.match(recovery.html, /data-ssr-date/);
   assert.equal(await buildInitialHtml(new URL('https://snowshagal.com/market/archive/'), { COMMENTS_DB: db }), null, 'other /market/ pages are their own');
 });
 
 test('the script keeps the server’s figures at full strength while TODAY loads', () => {
   const load = MARKET_JS.slice(MARKET_JS.indexOf("const dashboardView = document.getElementById('market-dashboard-view');"));
   assert.match(load.slice(0, 400), /if \(dashboardView && !\(mode === 'today' && dashboardView\.dataset\?\.ssrDate\)\) \{\s*dashboardView\.classList\.add\('is-loading'\);/);
+});
+
+test('a supplemental market funds read that stalls still leaves recent close figures in SSR', async () => {
+  const db = database();
+  const prepare = db.prepare.bind(db);
+  db.prepare = sql => {
+    const statement = prepare(sql);
+    if (/FROM market_funds /.test(sql)) statement.first = () => new Promise(() => {});
+    return statement;
+  };
+  try {
+    const result = await buildInitialHtml(new URL('https://snowshagal.com/market/'), { COMMENTS_DB: db }, { budgetMs: 200 });
+    assert.equal(result.edits[0].attrs['data-ssr-date'], '2026-11-25');
+    assert.match(result.edits[0].html, /4,697\.51/);
+    assert.doesNotMatch(result.edits[0].html, /mk-funds-card/);
+  } finally {
+    db.close();
+  }
 });

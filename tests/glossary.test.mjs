@@ -211,16 +211,20 @@ test('the route fills the glossary page, redirects to the slash form and leaves 
   assert.equal(ctx.passed, 1);
 });
 
-test('when the data cannot be read the static page goes out with its own note', async () => {
+test('when glossary data cannot be read the built-in note is served with a retryable 503', async () => {
   const originalError = console.error;
   console.error = () => {};
   try {
     const ctx = context('https://snowshagal.com/en/basics/glossary/', { assetsFail: true });
     const response = await onGlossaryRequest(ctx);
-    assert.equal(response.status, 200);
+    assert.equal(response.status, 503);
+    assert.equal(response.headers.get('retry-after'), '60');
+    assert.equal(response.headers.get('cache-control'), 'no-store');
+    assert.equal(response.headers.get('x-robots-tag'), null);
     const html = await response.text();
     assert.match(html, /<p class="glossary-empty">/);
     assert.equal(ctx.passed, 1, 'the static page is fetched once');
+    assert.equal((await onGlossaryRequest(context('https://snowshagal.com/basics/glossary/'))).status, 200);
   } finally {
     console.error = originalError;
   }
@@ -237,4 +241,15 @@ test('a link to a term lands on it at once: the site-wide smooth scrolling is of
     assert.match(page, /\.glossary-entry\{[^}]*scroll-margin-top:96px/, lang);
     assert.doesNotMatch(page, /html\{scroll-behavior:auto\}/, lang);
   }
+});
+
+test('a stalled glossary asset returns 503 within the SSR data budget', async () => {
+  const ctx = context('https://snowshagal.com/en/basics/glossary/');
+  const fetchAsset = ctx.env.ASSETS.fetch;
+  ctx.env.ASSETS.fetch = request => new URL(request.url).pathname === '/data/glossary.json'
+    ? new Promise(() => {})
+    : fetchAsset(request);
+  const response = await onGlossaryRequest(ctx, { budgetMs: 20 });
+  assert.equal(response.status, 503);
+  assert.equal(response.headers.get('retry-after'), '60');
 });

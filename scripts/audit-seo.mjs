@@ -8,7 +8,7 @@
  *
  * The unit tests cover each SEO helper and its edge cases; this audit checks
  * the whole public, indexable corpus at once. Repository mode renders every page
- * through the real functions/_middleware.js (string path, no D1, no network)
+ * through the real functions/_middleware.js (string path, local SQLite, no network)
  * and reads the result, so no SEO rule is re-implemented here. Live mode reads
  * the same pages over HTTP. Both feed one set of document checks.
  *
@@ -20,6 +20,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { onRequest as middleware } from '../functions/_middleware.js';
+import { SqliteD1 } from '../tests/helpers/initial-html-fixtures.mjs';
 import { possibleTranslationPairs, reportLinkDiagnostics, reportLinkIndex } from '../functions/_report-links.js';
 import {
   CATEGORY_SLUGS,
@@ -635,26 +636,32 @@ async function quietly(fn) {
 
 /**
  * Every corpus page rendered by the real middleware from the files in the
- * repository, as a Production-host request with no D1 binding. The response
- * is handed to the checks untouched.
+ * repository as Production-host requests. An empty, valid local database
+ * separates SEO invariants from SSR outage scenarios tested elsewhere.
  */
 export async function renderRepository(posts = readPosts()) {
   const corpus = buildCorpus(posts);
-  const env = { ASSETS: repositoryAssets(posts) };
+  const db = new SqliteD1();
+  const env = { ASSETS: repositoryAssets(posts), COMMENTS_DB: db };
   const documents = new Map();
-  for (const page of corpus) {
-    const file = path.join(ROOT, page.file);
-    if (!fs.existsSync(file)) {
-      documents.set(page.canonical, { missing: true });
-      continue;
+  try {
+    db.exec(fs.readFileSync(path.join(ROOT, 'db/schema.sql'), 'utf8'));
+    for (const page of corpus) {
+      const file = path.join(ROOT, page.file);
+      if (!fs.existsSync(file)) {
+        documents.set(page.canonical, { missing: true });
+        continue;
+      }
+      const request = new Request(new URL(page.path, PRODUCTION_ORIGIN));
+      const response = await quietly(() => middleware({
+        request,
+        env,
+        next: async () => new Response(fs.readFileSync(file), { headers: { 'content-type': 'text/html; charset=utf-8' } })
+      }));
+      documents.set(page.canonical, { status: response.status, headers: response.headers, html: await response.text() });
     }
-    const request = new Request(new URL(page.path, PRODUCTION_ORIGIN));
-    const response = await quietly(() => middleware({
-      request,
-      env,
-      next: async () => new Response(fs.readFileSync(file), { headers: { 'content-type': 'text/html; charset=utf-8' } })
-    }));
-    documents.set(page.canonical, { status: response.status, headers: response.headers, html: await response.text() });
+  } finally {
+    db.close();
   }
   return { corpus, documents };
 }

@@ -248,7 +248,7 @@ function row(date, overrides = {}) {
 // schemaFails: the sqlite_master probe and the DDL throw, as D1 did for about
 // one Production read in ten on 2026-11-23; ordinary reads still answer.
 // trendHangs: the 20-session trend read never answers; every other read does.
-function marketDb(rows, { hang = false, schemaFails = false, trendHangs = false } = {}) {
+function marketDb(rows, { hang = false, schemaFails = false, trendHangs = false, fxHangs = false } = {}) {
   const schemaStatement = sql => /FROM sqlite_master|^\s*(CREATE|ALTER)\b/i.test(sql);
   return {
     prepare(sql) {
@@ -262,7 +262,10 @@ function marketDb(rows, { hang = false, schemaFails = false, trendHangs = false 
         async first() {
           if (hang) return new Promise(() => {});
           if (schemaFails && schemaStatement(sql)) throw new Error('D1_ERROR: Network connection lost.');
-          if (/FROM sqlite_master/.test(sql)) return null;
+          if (/FROM sqlite_master/.test(sql)) {
+            if (fxHangs && args[0] === 'market_fx_close') return new Promise(() => {});
+            return null;
+          }
           if (/WHERE market_date = \?1/.test(sql)) {
             const found = rows.find((item) => item.market_date === args[0]);
             if (!found) return null;
@@ -369,7 +372,8 @@ test('a database that does not answer gets a quick 503, not a hung page', async 
   const { response } = await call('https://snowshagal.com/market/2026-08-28/', marketDb([], { hang: true }), { budgetMs: 30 });
   assert.equal(response.status, 503);
   assert.equal(response.headers.get('retry-after'), '60');
-  assert.equal(response.headers.get('x-robots-tag'), 'noindex');
+  assert.equal(response.headers.get('cache-control'), 'no-store');
+  assert.equal(response.headers.get('x-robots-tag'), null);
   assert.ok(Date.now() - started < 2000);
 });
 
@@ -669,4 +673,27 @@ test('the sitemap lists every history page in both languages; the archive and se
   assert.equal((nav.match(/<a href="\/market\/[a-z0-9]+\/">/g) || []).length, 14);
   const session = page('en');
   for (const slug of ['kospi', 'nasdaq', 'usdkrw', 'bitcoin']) assert.match(session, new RegExp(`<a class="instrument-history-link" href="/en/market/${slug}/">`));
+});
+
+test('a final row with invalid contents is temporary, while missing dates remain 404', async () => {
+  const date = '2026-08-28';
+  const broken = marketDb([{ ...row(date), payload_json: '{' }]);
+  const url = 'https://snowshagal.com/en/market/2026-08-28/';
+  const { response } = await call(url, broken);
+  assert.equal(response.status, 503);
+  assert.equal(response.headers.get('x-robots-tag'), null);
+  assert.match(await response.text(), /Market data is temporarily unavailable/);
+  const healthy = marketDb([row(date)]);
+  assert.equal((await call(url, healthy)).response.status, 200);
+  assert.equal((await call('https://snowshagal.com/en/market/2026-08-29/', healthy)).response.status, 404);
+});
+
+test('a stalled optional FX lookup preserves usable market details and archive rows', async () => {
+  const date = '2026-08-28';
+  const db = marketDb([row(date)], { fxHangs: true });
+  for (const path of ['/market/2026-08-28/', '/en/market/archive/']) {
+    const { response } = await call('https://snowshagal.com' + path, db, { budgetMs: 200 });
+    assert.equal(response.status, 200);
+    assert.match(await response.text(), /6,788\.88/);
+  }
 });

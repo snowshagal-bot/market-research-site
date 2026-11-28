@@ -1,3 +1,4 @@
+import { SSR_DATA_BUDGET_MS, withinSsrBudget } from './_temporary-page.js';
 import { feedQuery, loadDisclosureFeed } from './api/disclosures/_feed-data.js';
 import { currentKstYearMonth, loadCalendarMonth } from './_calendar-data.js';
 import { isMarketYearSupported } from './_trading-calendar.js';
@@ -24,13 +25,8 @@ const calendarView = globalThis.CALENDAR_VIEW;
  * the same data and requires identical output, so the page does not change
  * when the script takes over.
  *
- * Nothing here may break a page: any failure or a slow database returns null
- * and the untouched static shell is served, which the scripts then fill in as
- * before.
+ * Core data failures are reported separately from a valid empty view.
  */
-
-export const INITIAL_HTML_TIME_BUDGET_MS = 1500;
-
 export function escapeHtml(value) {
   if (value == null) return '';
   return String(value)
@@ -551,22 +547,24 @@ async function calendarEdits(url, env, lang, now) {
  * TODAY's rule: the newest stored day up to the session, at most 10 days older.
  * A past date (?date=) or a period view (?view=) is left to the script.
  */
-async function marketTodayEdits(url, env, lang) {
+async function marketTodayEdits(url, env, lang, budgetMs) {
   if (url.searchParams.has('date') || url.searchParams.has('view')) return null;
-  if (!env?.COMMENTS_DB) return null;
+  const startedAt = Date.now();
   const db = await ensureMarketTable(env, { readOnly: true });
   const row = await db.prepare(`SELECT market_date FROM ${TABLE_NAME} WHERE status = 'final' ORDER BY market_date DESC LIMIT 1`).first();
   const date = String(row?.market_date || '');
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
-  const soft = promise => Promise.resolve().then(() => promise).catch(() => null);
+  if (!row) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('Invalid latest market date');
+  const remainingMs = Math.max(1, budgetMs - (Date.now() - startedAt));
+  const soft = promise => withinSsrBudget(promise, Math.floor(remainingMs / 2)).catch(() => null);
   const [data, domesticRates, marketFunds, trend, posts] = await Promise.all([
-    loadMarketDate(env, date),
+    loadMarketDate(env, date, { budgetMs: remainingMs }),
     soft(loadDomesticRatesDay(env, date)),
     soft(loadMarketFundsDay(env, 'latest')),
     soft(loadTrend(db, date)),
     soft(env.ASSETS?.fetch ? loadPosts(new Request(new URL('/data/posts.json', url)), env) : null)
   ]);
-  if (!data?.payload) return null;
+  if (!data?.payload) throw new Error('Latest final market snapshot unavailable');
   const dashboard = renderMarketDateMain(data.payload, lang, {
     dashboardOnly: true,
     domesticRates,
@@ -594,31 +592,23 @@ export function initialHtmlPage(pathname) {
   return match ? { lang: match[1] ? 'en' : 'ko', page: match[2] } : null;
 }
 
-function withinBudget(promise, ms) {
-  let timer;
-  return Promise.race([
-    promise.finally(() => clearTimeout(timer)),
-    new Promise(resolve => { timer = setTimeout(() => resolve(null), ms); })
-  ]);
-}
-
 /**
- * The edits for one request, or null when the page is not one of these four,
- * when anything fails, or when the data takes longer than the budget.
+ * Edits for one request. A failed core read is distinct from a valid empty
+ * result and from pages or views that deliberately use their static shell.
  */
-export async function buildInitialHtml(url, env, { now = new Date(), budgetMs = INITIAL_HTML_TIME_BUDGET_MS } = {}) {
+export async function buildInitialHtml(url, env, { now = new Date(), budgetMs = SSR_DATA_BUDGET_MS } = {}) {
   const target = initialHtmlPage(url.pathname);
   if (!target) return null;
   try {
     const build = target.page === 'disclosures'
       ? disclosuresEdits(url, env, target.lang, now)
       : target.page === 'market'
-        ? marketTodayEdits(url, env, target.lang)
+        ? marketTodayEdits(url, env, target.lang, budgetMs)
         : calendarEdits(url, env, target.lang, now);
-    return await withinBudget(build, budgetMs);
+    return await withinSsrBudget(build, budgetMs);
   } catch (error) {
     console.error('initial html unavailable', target.page, error?.message || error);
-    return null;
+    return target.page === 'calendar' ? null : { unavailable: target };
   }
 }
 

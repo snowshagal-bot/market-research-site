@@ -3,12 +3,16 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
 import { onRequest } from '../functions/_middleware.js';
+import { SqliteD1 } from './helpers/initial-html-fixtures.mjs';
 import { GA4_MEASUREMENT_ID, ga4Tag, appendGa4ToHtml } from '../functions/_ga4.js';
 import { STATIC_PUBLIC_PAGES } from '../scripts/static-public-pages.mjs';
 
 const read = file => readFile(new URL(`../${file}`, import.meta.url), 'utf8');
 const posts = JSON.parse(await read('data/posts.json'));
 const tags = JSON.parse(await read('data/tags.json'));
+const db = new SqliteD1();
+db.exec(await read('db/schema.sql'));
+test.after(() => db.close());
 const marker = /<script data-snowshagal-ga4="G-L3XBBY93CG">/g;
 const shell = '<!doctype html><html><head><title>Public report</title></head><body>Report</body></html>';
 const bootstrap = ga4Tag(new URL('https://snowshagal.com/')).replace(/^<script[^>]*>|<\/script>$/g, '');
@@ -23,7 +27,7 @@ async function render(path, html = shell, { origin = 'https://snowshagal.com', s
   return onRequest({
     request: new Request(origin + path, { method }),
     next: async () => new Response(html, { status, headers: { 'content-type': type, 'x-preserve': 'yes' } }),
-    env: { ASSETS: { fetch: async request => {
+    env: { COMMENTS_DB: db, ASSETS: { fetch: async request => {
       const pathname = new URL(request.url || request).pathname;
       if (pathname === '/data/posts.json') return Response.json(corpus);
       if (pathname === '/data/tags.json') return Response.json(tags);

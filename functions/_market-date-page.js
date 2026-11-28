@@ -29,6 +29,7 @@ import {
 import '../assets/locale.js';
 import { TABLE_NAME, ensureMarketTable, normalizeKrwPairs } from './api/market/_shared.js';
 import { applyFxClose } from './api/market/_fx-merge.js';
+import { temporaryDataPage } from './_temporary-page.js';
 import { loadFxCloseDay, loadFxCloseDays } from './api/market/fx/_shared.js';
 import { aggregateKrxGroups } from './api/market/_aggregate.js';
 import { loadTrend } from './api/market/trend.js';
@@ -1151,11 +1152,18 @@ function withinBudget(promise, ms) {
   return Promise.race([promise, late]).finally(() => clearTimeout(timer));
 }
 
+// The source snapshot is already usable. Give the optional ECOS override part
+// of the remaining time so a slow FX lookup cannot block the whole page.
+function optionalFxBudget(deadline) {
+  return Math.min(MARKET_TREND_BUDGET_MS, Math.floor((deadline - Date.now()) / 2));
+}
+
 /**
  * { payload, prev, next, publishedAt } for a final session, or null when the
  * date has no final row. Throws on a database failure or timeout.
  */
 export async function loadMarketDate(env, date, { budgetMs = MARKET_DATE_TIME_BUDGET_MS } = {}) {
+  const deadline = Date.now() + budgetMs;
   return withinBudget((async () => {
     const db = await ensureMarketTable(env, { readOnly: true });
     const row = await db.prepare(`SELECT market_date, status, published_at, payload_json, takeaway_ko, takeaway_en,
@@ -1163,11 +1171,16 @@ export async function loadMarketDate(env, date, { budgetMs = MARKET_DATE_TIME_BU
         (SELECT MIN(market_date) FROM ${TABLE_NAME} WHERE market_date > ?1 AND status = 'final') AS next_date
       FROM ${TABLE_NAME} WHERE market_date = ?1 LIMIT 1`).bind(date).first();
     if (!row || row.status !== 'final') return null;
-    let payload;
-    try { payload = normalizeKrwPairs(JSON.parse(row.payload_json)); } catch (_) { return null; }
-    if (payload?.meta?.market_date !== date || payload?.meta?.status !== 'final') return null;
+    const payload = normalizeKrwPairs(JSON.parse(row.payload_json));
+    if (payload?.meta?.market_date !== date || payload?.meta?.status !== 'final') {
+      throw new Error(`Invalid final market snapshot for ${date}`);
+    }
     // USD/KRW: the day's ECOS 15:30 rate once FX Close has it (contracts/fx_close/).
-    applyFxClose(payload, await loadFxCloseDay(env, date));
+    const fxBudget = optionalFxBudget(deadline);
+    if (fxBudget > 0) {
+      const fx = await withinBudget(loadFxCloseDay(env, date), fxBudget).catch(() => undefined);
+      applyFxClose(payload, fx);
+    }
     payload.takeaway = { ko: String(row.takeaway_ko || ''), en: String(row.takeaway_en || '') };
     return { payload, prev: row.prev_date || null, next: row.next_date || null, publishedAt: row.published_at || '' };
   })(), budgetMs);
@@ -1175,6 +1188,7 @@ export async function loadMarketDate(env, date, { budgetMs = MARKET_DATE_TIME_BU
 
 /** Every final session, newest first, with the figures the archive lists. */
 export async function loadMarketArchive(env, { budgetMs = MARKET_DATE_TIME_BUDGET_MS } = {}) {
+  const deadline = Date.now() + budgetMs;
   return withinBudget((async () => {
     const db = await ensureMarketTable(env, { readOnly: true });
     const result = await db.prepare(`SELECT market_date, published_at,
@@ -1188,7 +1202,10 @@ export async function loadMarketArchive(env, { budgetMs = MARKET_DATE_TIME_BUDGE
       FROM ${TABLE_NAME} WHERE status = 'final' ORDER BY market_date DESC`).all();
     const rows = (result?.results || []).filter(row => ISO_DATE.test(String(row?.market_date || '')));
     // USD/KRW: each day's ECOS 15:30 rate where FX Close has it (contracts/fx_close/).
-    const fxDays = await loadFxCloseDays(env);
+    const fxBudget = optionalFxBudget(deadline);
+    const fxDays = fxBudget > 0
+      ? await withinBudget(loadFxCloseDays(env), fxBudget).catch(() => undefined)
+      : undefined;
     for (const row of fxDays ? rows : []) {
       const item = fxDays.get(row.market_date)?.items?.find(entry => entry?.code === 'USDKRW');
       if (item && valid(item.value)) row.usdkrw = item.value;
@@ -1228,16 +1245,6 @@ async function notFound(env, url) {
     if (page && page.status === 404) return htmlResponse(page.body, 404, { 'x-robots-tag': 'noindex' });
   } catch (_) {}
   return new Response('Not Found', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8', 'x-robots-tag': 'noindex' } });
-}
-
-function unavailable(lang) {
-  const text = lang === 'en'
-    ? 'Market data is temporarily unavailable. Please try again shortly.'
-    : '시장 데이터를 잠시 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.';
-  return new Response(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Snowshagal</title><p>${text}</p><p><a href="${lang === 'en' ? '/en/market/' : '/market/'}">MARKET</a></p>`, {
-    status: 503,
-    headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'retry-after': '60', 'x-robots-tag': 'noindex' }
-  });
 }
 
 async function loadShell(env, url, lang) {
@@ -1349,7 +1356,7 @@ export async function onMarketPageRequest(context, { loadPostsFn, budgetMs = MAR
     }));
   } catch (error) {
     console.error('market date page unavailable', error);
-    return unavailable(route.lang);
+    return temporaryDataPage('market', route.lang);
   }
 }
 

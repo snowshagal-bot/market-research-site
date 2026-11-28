@@ -788,7 +788,7 @@ function headOfPage(html) {
   return html.slice(0, html.search(/<\/head>/i));
 }
 
-test('22. only / and /en/ are home pages; /disclosures/ and /calendar/ are untouched', async () => {
+test('22. only / and /en/ get home initialization, including when a non-home data source fails', async () => {
   assert.equal(homeInitialLang('/'), 'ko');
   assert.equal(homeInitialLang('/en/'), 'en');
   for (const path of ['/disclosures/', '/en/calendar/', '/daily/', '/market/', '/reports/x', '/en/about/']) {
@@ -801,7 +801,7 @@ test('22. only / and /en/ are home pages; /disclosures/ and /calendar/ are untou
     env: { COMMENTS_DB: broken },
     next: async () => new Response(shell, { headers: { 'content-type': 'text/html; charset=utf-8' } })
   });
-  assert.equal(response.status, 200);
+  assert.equal(response.status, 503);
   assert.doesNotMatch(await response.text(), /home-initial-data/);
 });
 

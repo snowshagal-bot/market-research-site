@@ -37,6 +37,7 @@ import { feedDiscoveryTag } from './_feed.js';
 import { loadReportFacts } from './_report-facts.js';
 import { applyInitialHtmlToRewriter, applyInitialHtmlToString, buildInitialHtml } from './_initial-html.js';
 import { buildHomeInitial } from './_home-initial.js';
+import { temporaryDataPage } from './_temporary-page.js';
 import { getSession, validateSafeNextUrl } from './_auth.js';
 import { ga4Tag, appendGa4ToHtml, applyGa4ToRewriter } from './_ga4.js';
 import { REPORT_IMAGE_STYLE, inlineImageHandler, rewriteInlineImages } from './_report-images.js';
@@ -300,15 +301,20 @@ export async function onRequest(context) {
   const url = new URL(context.request.url);
   const hostClass = classifyHost(url);
   const isProduction = hostClass === HOST_CLASS.PUBLIC_PRODUCTION;
+  if (isAdminHost(url) && url.pathname === '/robots.txt' && ['GET', 'HEAD'].includes(context.request.method)) {
+    return withAdminHeaders(new Response(context.request.method === 'HEAD' ? null : 'User-agent: *\nDisallow: /\n', {
+      headers: { 'content-type': 'text/plain; charset=utf-8' }
+    }));
+  }
   const adminDecision = adminHostRouteDecision(context.request);
   if (adminDecision.action === 'deny') return policyResponse(adminDecision.status, 'ADMIN_HOST_PATH_BLOCKED');
   const apexDecision = apexAdminRouteDecision(context.request);
   if (apexDecision.action === 'deny') return policyResponse(apexDecision.status, 'APEX_ADMIN_BLOCKED');
   if (apexDecision.action === 'redirect') {
-    return new Response(null, {
+    return withAdminHeaders(new Response(null, {
       status: apexDecision.status,
-      headers: { location: apexDecision.location, 'cache-control': 'private, no-store, max-age=0' }
-    });
+      headers: { location: apexDecision.location }
+    }));
   }
 
   if (isRepoInternalPath(url.pathname)) return notFoundResponse(context, url);
@@ -323,19 +329,13 @@ export async function onRequest(context) {
     if (isLoginPath) {
       if (isAdmin) {
         const nextTarget = validateSafeNextUrl(url.searchParams.get('next'));
-        return new Response(null, {
-          status: 302,
-          headers: { location: nextTarget, 'cache-control': 'private, no-store, max-age=0' }
-        });
+        return withAdminHeaders(new Response(null, { status: 302, headers: { location: nextTarget } }));
       }
     } else {
       if (!isAdmin) {
         const nextParam = url.pathname + url.search;
         const loginUrl = `/admin/login/?next=${encodeURIComponent(nextParam)}`;
-        return new Response(null, {
-          status: 302,
-          headers: { location: loginUrl, 'cache-control': 'private, no-store, max-age=0' }
-        });
+        return withAdminHeaders(new Response(null, { status: 302, headers: { location: loginUrl } }));
       }
     }
   }
@@ -370,7 +370,7 @@ export async function onRequest(context) {
   if (!contentType.includes('text/html')) return response;
   const ga4 = ga4Tag(url);
   const engagement = isProduction && !/^\/(?:admin|api|cdn-cgi)(?:\/|$)/i.test(url.pathname)
-    ? '<script src="/assets/engagement.js?v=4fd1735fcd" defer></script>'
+    ? '<script src="/assets/engagement.js?v=463f068b0c" defer></script>'
     : '';
 
   if (!url.pathname.startsWith('/reports/')) {
@@ -390,11 +390,14 @@ export async function onRequest(context) {
       if (tagsRes.status === 'fulfilled') tags = tagsRes.value;
     }
 
-    // /disclosures/ and /calendar/ (KO/EN): the filings and trading days the
-    // page scripts render, rendered into the HTTP response itself. Null when
-    // the page is not one of those, or on any failure or timeout, in which case
-    // the static shell is served untouched and the scripts fill it as before.
+    // Serve the core market figures or filings in the first response. The
+    // calendar can still show its exchange schedule when its events are down.
     const initial = await buildInitialHtml(url, context.env);
+    if (initial?.unavailable) {
+      const retry = temporaryDataPage(initial.unavailable.page, initial.unavailable.lang);
+      if (!isProduction) retry.headers.set('x-robots-tag', 'noindex, nofollow');
+      return retry;
+    }
     // / and /en/: Latest Research, the active notice and the TODAY strip, from
     // the same handlers the page script calls, plus a bootstrap so the script
     // does not request them again. Null on any failure: the shell is served as
