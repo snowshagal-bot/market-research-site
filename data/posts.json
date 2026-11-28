@@ -1,5 +1,33 @@
 [
   {
+    "id": "2026-11-28-weekly-1878ldm",
+    "type": "weekly",
+    "typeLabel": "Weekly",
+    "lang": "en",
+    "date": "2026-11-28",
+    "reportDate": "2026-11-28",
+    "registeredDate": "2026-11-28",
+    "registeredAt": "2026-11-28T11:34:34.276Z",
+    "legacyImport": false,
+    "title": "Five Wild Sessions, A Modest Gain",
+    "subtitle": "",
+    "description": "Korean stock market weekly review, Nov. 23–27, 2026. KOSPI +0.94%; KOSDAQ +9.81%. Reports of an Nvidia accounting inquiry, its CEO’s reinstatement, another U.S. chip selloff, a BOK rate hike and stabilization fund hopes drove a week of sharp reversals. Next: the Nov. 30 fund meeting, Nvidia’s hearing and quarterly filing, and foreign cash and futures flows.",
+    "summary": "After five whipsaw sessions, KOSPI gained 0.94% to 4,915.68 and KOSDAQ rose 9.81%. Foreign investors net sold ₩409.1bn in cash equities but net bought ₩1.285tn in futures. Next week: KOSPI after the stabilization fund meeting, chips after Nvidia’s events, and foreign net buying in both markets.",
+    "tags": [
+      "kospi",
+      "flows",
+      "foreign-investors",
+      "kosdaq",
+      "semiconductors"
+    ],
+    "readingMinutes": 9,
+    "href": "reports/en/2026-11-28_Snowshagal_Weekly_EN.html",
+    "translationGroup": "2026-11-28-weekly-1ci03wz",
+    "coverImage": "covers/2026-11-28-weekly-1878ldm.webp",
+    "shareCardImage": "covers/share/2026-11-28-weekly-1878ldm.jpg",
+    "coverThumbnail": "covers/2026-11-28-weekly-1878ldm-450.webp"
+  },
+  {
     "id": "2026-11-28-weekly-1ci03wz",
     "type": "weekly",
     "typeLabel": "위클리 리포트",
