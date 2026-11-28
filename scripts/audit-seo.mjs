@@ -20,6 +20,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { onRequest as middleware } from '../functions/_middleware.js';
+import { possibleTranslationPairs, reportLinkDiagnostics, reportLinkIndex } from '../functions/_report-links.js';
 import {
   CATEGORY_SLUGS,
   ORGANIZATION_ID,
@@ -561,11 +562,12 @@ function corpusCounts(pages) {
  * entry are not audited (live mode audits what the sitemap lists). `sitemap`
  * is the sitemap XML, compared against the whole corpus.
  */
-export function auditCorpus({ mode = 'repository', origin = PRODUCTION_ORIGIN, preview = false, corpus, documents, sitemap }) {
+export function auditCorpus({ mode = 'repository', origin = PRODUCTION_ORIGIN, preview = false, corpus, documents, sitemap, posts = readPosts() }) {
   const report = createReport(mode, origin);
   const assets = { checked: 0, broken: 0 };
   const tally = newTally();
   const audited = [];
+  const reportIndex = reportLinkIndex(posts);
   for (const page of corpus) {
     delete page.renderedCanonical;
     delete page.title;
@@ -589,6 +591,15 @@ export function auditCorpus({ mode = 'repository', origin = PRODUCTION_ORIGIN, p
     const type = doc.headers.get('content-type') || '';
     if (!/text\/html/i.test(type)) fail(report, 'content-type', page, type, 'text/html');
     checkDocument(report, page, readDocument(doc.html), doc.headers, { assets, tally, preview });
+    if (page.kind !== 'report' || !page.post?.href) continue;
+    for (const { check, href, suggested } of reportLinkDiagnostics(doc.html, page.post, posts, reportIndex)) {
+      if (check === 'links.broken-report') fail(report, check, page, href, suggested || 'registered report URL');
+      if (check === 'links.korean-edition') warn(report, check, page, href, `Check editorial intent; English edition: ${suggested}`);
+      if (check === 'links.pending-report') warn(report, check, page, href, 'Planned report; check once it is published');
+      if (check === 'links.redirected-report') warn(report, check, page, href, `Link directly to ${suggested}`);
+    }
+    const sameDayKorean = possibleTranslationPairs(page.post, posts);
+    if (sameDayKorean.length) warn(report, 'hreflang.review-pair', page, sameDayKorean.map(post => post.id), 'Verify the editorial relationship before pairing');
   }
   checkHreflang(report, audited, tally);
   const duplicates = checkUniqueness(report, audited);
@@ -649,7 +660,7 @@ export async function renderRepository(posts = readPosts()) {
 
 export async function auditRepository({ posts = readPosts() } = {}) {
   const { corpus, documents } = await renderRepository(posts);
-  return auditCorpus({ mode: 'repository', corpus, documents, sitemap: sitemapXml(posts) });
+  return auditCorpus({ mode: 'repository', corpus, documents, sitemap: sitemapXml(posts), posts });
 }
 
 /* ------------------------------------------------------------ live mode */
@@ -695,7 +706,7 @@ export async function auditLive(origin, { posts = readPosts() } = {}) {
       documents.set(page.canonical, { error: error.message });
     }
   });
-  const report = auditCorpus({ mode: 'live', origin: base, preview, corpus, documents, sitemap });
+  const report = auditCorpus({ mode: 'live', origin: base, preview, corpus, documents, sitemap, posts });
 
   // Legacy .html → one 301 to the clean URL, for every listed report.
   const reports = targets.filter(page => page.kind === 'report');

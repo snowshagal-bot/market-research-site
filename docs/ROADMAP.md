@@ -10,6 +10,8 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
+- **SEO Phase 2A internal links and locales**. Local gate complete on `fix/seo-remediation-phase-2a`. Preview awaits approval. See [the validation report](SEO_REMEDIATION_PHASE_2A.md).
+
 - **USD/KRW: one definition across the site (기초 데이터 가이드 3편, 2026-11-27)**.
   3편 teaches that the Seoul FX market's 15:30 rate, the official 매매기준율 (Seoul Money Brokerage)
   and a bank's posted rate are three different numbers. The site's KRW pairs are Hana Bank's posted

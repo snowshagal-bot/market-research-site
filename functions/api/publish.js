@@ -2,6 +2,7 @@ import { searchIndexArtifactWriters } from './_search-index.js';
 import { extractGlossaryTerms } from '../_glossary.js';
 import { findLateCoverStyle, lateCoverStyleMessage } from '../_cover-style.js';
 import { SOCIAL_REPORT_CARD_DIR } from '../_seo.js';
+import { possibleTranslationPairs, reportLinkDiagnostics } from '../_report-links.js';
 import { customShareCardProblem } from '../_share-image.js';
 import { isHumanAdminHost, validateHumanAdminMutation } from '../_host-policy.js';
 import { requireAdminMutation } from '../_auth.js';
@@ -890,6 +891,16 @@ export async function onRequestPost(context) {
     };
 
     const originalPostsLength = posts.length;
+    const publishingPosts = [post, ...posts];
+    let linkWarnings = [];
+    try {
+      linkWarnings = reportLinkDiagnostics(html, post, publishingPosts);
+      for (const candidate of possibleTranslationPairs(post, publishingPosts)) {
+        linkWarnings.push({ check: 'hreflang.review-pair', href: `/${candidate.href}` });
+      }
+    } catch (error) {
+      console.warn('Report link advisory could not run', error);
+    }
 
     // Automatic Search Index update (Fail-Closed)
     let searchIndex;
@@ -1057,6 +1068,7 @@ export async function onRequestPost(context) {
       coverImage: coverPath,
       lang,
       translationGroup: translationGroup || null,
+      ...(linkWarnings.length ? { linkWarnings } : {}),
       commitSha: commit.sha
     });
   } catch (err) {

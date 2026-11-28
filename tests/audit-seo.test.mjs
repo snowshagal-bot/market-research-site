@@ -39,6 +39,15 @@ function audit({ page, edit, sitemap = sitemapXml(POSTS) } = {}) {
 }
 const checks = report => report.failures.map(item => item.check);
 
+test('a missing internal report fails the audit while a planned report is advisory', () => {
+  const report = audit({ page: EN, edit: html => html.replace('</body>', `
+    <a href="/reports/no-such-report">Broken</a>
+    <a href="/reports/upcoming-report" data-report-pending>Planned</a>
+    </body>`) });
+  assert.deepEqual(report.failures.filter(item => item.check.startsWith('links.')).map(item => item.actual), ['/reports/no-such-report']);
+  assert.deepEqual(report.warnings.filter(item => item.check === 'links.pending-report').map(item => item.actual), ['/reports/upcoming-report']);
+});
+
 test('the unmodified slice passes with every invariant checked', () => {
   const report = audit();
   assert.deepEqual(report.failures, []);

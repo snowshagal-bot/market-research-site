@@ -660,6 +660,7 @@ window.RESEARCH_POSTS = [
     ],
     "readingMinutes": 13,
     "href": "reports/en/20261124_Snowshagal_Research_No16_China_Overcapacity_EN.html",
+    "translationGroup": "2026-11-24-research-1ylfgyu",
     "coverImage": "covers/2026-11-24-research-at00qm.webp",
     "shareCardImage": "covers/share/2026-11-24-research-at00qm.jpg",
     "coverThumbnail": "covers/2026-11-24-research-at00qm-450.webp"
@@ -687,6 +688,7 @@ window.RESEARCH_POSTS = [
     ],
     "readingMinutes": 9,
     "href": "reports/20261124_Research_NO16_China_Overcapacity_Cover.html",
+    "translationGroup": "2026-11-24-research-1ylfgyu",
     "coverImage": "covers/2026-11-24-research-1ylfgyu.webp",
     "shareCardImage": "covers/share/2026-11-24-research-1ylfgyu.jpg",
     "coverThumbnail": "covers/2026-11-24-research-1ylfgyu-450.webp"
@@ -9890,11 +9892,11 @@ window.RESEARCH_POSTS = [
     "coverImage": "covers/2026-08-03-daily-ely1wy.webp",
     "summary": "Two heavyweight stocks dragged the index, while the rest of the market went its own way.",
     "tags": [
-      "flows",
       "semiconductors",
-      "rates"
+      "flows"
     ],
     "readingMinutes": 4,
+    "translationGroup": "2026-08-03-daily-181n1pj",
     "shareCardImage": "covers/share/2026-08-03-daily-ely1wy.jpg",
     "coverThumbnail": "covers/2026-08-03-daily-ely1wy-450.webp"
   },
@@ -9917,7 +9919,8 @@ window.RESEARCH_POSTS = [
       "semiconductors",
       "flows"
     ],
-    "readingMinutes": 3
+    "readingMinutes": 3,
+    "translationGroup": "2026-08-03-daily-181n1pj"
   },
   {
     "id": "2026-08-week1-weekly",

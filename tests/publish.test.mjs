@@ -256,6 +256,22 @@ async function runPublish(options = {}) {
   return { response, data: await response.json() };
 }
 
+test('publishing returns broken and planned report link advisories without blocking the commit', async () => {
+  const calls = githubMock();
+  try {
+    const { response, data } = await runPublish({ html: `<!doctype html><html><body>
+      <a href="/reports/mistyped">Mistyped</a>
+      <a href="/reports/not-yet-published" data-report-pending>Coming later</a>
+    </body></html>` });
+    assert.equal(response.status, 200);
+    assert.deepEqual(data.linkWarnings, [
+      { check: 'links.broken-report', href: '/reports/mistyped' },
+      { check: 'links.pending-report', href: '/reports/not-yet-published' }
+    ]);
+    assert.ok(calls.some(call => call.method === 'PATCH' && call.path.endsWith('/git/refs/heads/main')));
+  } finally { globalThis.fetch = originalFetch; }
+});
+
 function repositoryReadRefs(calls) {
   return calls
     .filter(call => call.path.includes('/contents/data/posts.json') || call.path.includes('/contents/data/search-index.json'))

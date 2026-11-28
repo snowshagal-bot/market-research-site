@@ -39,6 +39,8 @@ import { buildHomeInitial } from './_home-initial.js';
 import { getSession, validateSafeNextUrl } from './_auth.js';
 import { ga4Tag, appendGa4ToHtml, applyGa4ToRewriter } from './_ga4.js';
 import { REPORT_IMAGE_STYLE, inlineImageHandler, rewriteInlineImages } from './_report-images.js';
+import { RENAMED_REPORTS } from './_report-link-targets.js';
+import { applyReportLinksToRewriter, rewriteReportLinks } from './_report-links.js';
 
 function policyResponse(status, error) {
   return new Response(JSON.stringify({ ok: false, error }), {
@@ -278,17 +280,7 @@ export function legacyReportHtmlRedirect(request, url, response) {
   });
 }
 
-// Reports whose file was renamed after they were published, by decoded path
-// without .html. The old address, with or without .html, moves to the new one
-// so links already shared keep working.
-export const RENAMED_REPORTS = Object.freeze({
-  // Published 2026-10-27 under its Korean file name, deleted and published
-  // again as basics-13-deposits; 시장 입문 14편 still links the old name.
-  '/reports/시장을읽는말들_13편_증시대기자금은어디로갔나': '/reports/basics-13-deposits',
-  '/reports/시장을읽는말들_14편_자회사가상장하면모회사주주는손해일까': '/reports/basics-14-subsidiary-ipo',
-  // The old /en/ address served the unmodified Korean report (Git 50dd172).
-  '/reports/en/2026-11-12_Snowshagal_Daily': '/reports/2026-11-12_Snowshagal_Daily'
-});
+export { RENAMED_REPORTS };
 
 export function renamedReportRedirect(request, url) {
   if (request.method !== 'GET' && request.method !== 'HEAD') return null;
@@ -521,6 +513,7 @@ export async function onRequest(context) {
   let seoFor = null;
   let readingNavigation = '';
   let reportTranslationHref = '';
+  let reportLinks = null;
   let tags = null;
   try {
     const [postsRes, tagsRes] = await Promise.allSettled([
@@ -535,6 +528,7 @@ export async function onRequest(context) {
       const post = findPostByPath(posts, url.pathname);
       if (post) {
         lang = postLanguage(post);
+        reportLinks = { posts, post };
         // The published Market Close for the report's date supplies the
         // numbers the <title> and description quote; without one they fall
         // back to dated wording with no numbers.
@@ -554,7 +548,7 @@ export async function onRequest(context) {
   } catch (_) {}
 
   const tagBootstrap = serializeTagRegistryBootstrap(tags);
-  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=6ea374e7df"></script><script src="/assets/report-shell.js?v=0e81e3d23c" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
+  const shell = `${tagBootstrap}<script src="/assets/locale.js?v=bb23e734b4"></script><script src="/assets/report-shell.js?v=0e81e3d23c" data-category="${active}" data-lang="${lang}"></script>${engagement}`;
   const footerStyle = `<style id="site-footer-css">${footerCss()}</style>`;
   const footerMarkup = siteFooter(lang, { reportTranslationHref });
   // One feed link per page, for the page's own language. Any Atom link the
@@ -585,6 +579,7 @@ export async function onRequest(context) {
       || attrs.rel === 'manifest'
     ));
     body = deferFontStylesheets(body);
+    if (reportLinks) body = rewriteReportLinks(body, reportLinks.posts, reportLinks.post);
     // Large inline images become files (functions/_report-images.js).
     body = await rewriteInlineImages(body, url.pathname);
     body = insertBeforeClosingTag(body, 'head', `${FAVICON_TAGS}${seo}${feedLink}${footerStyle}${REPORT_IMAGE_STYLE}`);
@@ -603,7 +598,9 @@ export async function onRequest(context) {
 
   const ownMeta = {};
   const readOwnMeta = (key) => ({ element(element) { if (!(key in ownMeta)) ownMeta[key] = decodeHtmlEntities(element.getAttribute('content') || ''); } });
-  return applyGa4ToRewriter(new HTMLRewriter(), ga4)
+  let reportRewriter = applyGa4ToRewriter(new HTMLRewriter(), ga4);
+  if (reportLinks) reportRewriter = applyReportLinksToRewriter(reportRewriter, reportLinks.posts, reportLinks.post);
+  return reportRewriter
     .on('meta[name="report-seo-title"]', readOwnMeta('seoTitle'))
     .on('meta[name="report-seo-description"]', readOwnMeta('seoDescription'))
     .on('meta[name="report-takeaway"]', readOwnMeta('takeaway'))

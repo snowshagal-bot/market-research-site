@@ -100,12 +100,19 @@
     const params = new URLSearchParams(window.location.search);
     const dateParam = params.get('date');
     const allParam = params.get('all');
-    if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
-      state.selectedDate = dateParam;
-    }
-    if (allParam === '1' || allParam === 'true') {
-      state.isExpanded = true;
-    }
+    state.selectedDate = dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam) ? dateParam : null;
+    state.isExpanded = allParam === '1' || allParam === 'true';
+  }
+
+  function syncLanguageLinks() {
+    const locale = window.MARKET_LOCALE;
+    if (!locale) return;
+    document.querySelectorAll('[data-language-choice]').forEach(link => {
+      const target = link.dataset.languageChoice;
+      if (locale.validLanguages.includes(target)) {
+        link.href = locale.pageLanguagePath(window.location.pathname, target, window.location.search);
+      }
+    });
   }
 
   function updateUrlState(replace = false) {
@@ -125,6 +132,7 @@
     } else {
       window.history.pushState({}, '', url.toString());
     }
+    syncLanguageLinks();
   }
 
   async function fetchFeed(dateStr, all = false) {
@@ -372,6 +380,7 @@
 
     window.addEventListener('popstate', () => {
       parseUrlState();
+      syncLanguageLinks();
       loadData();
     });
   }

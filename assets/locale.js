@@ -276,7 +276,7 @@
   function normalizeReportPath(value) {
     let path = String(value || '').split(/[?#]/, 1)[0];
     try { path = decodeURIComponent(path); } catch (_) {}
-    return path.replace(/^\/+/, '').replace(/\\/g, '/');
+    return path.replace(/^\/+/, '').replace(/\\/g, '/').normalize('NFC').replace(/\.html?$/i, '');
   }
 
   function localePosts(posts, language) {
@@ -347,9 +347,17 @@
     return category ? `${base}?category=${encodeURIComponent(category)}` : base;
   }
 
+  // Keep this list aligned with the public routes in _market-indicators.js.
+  const MARKET_LANGUAGE_ROUTES = new Set([
+    'archive', 'sectors', 'investor-flows',
+    'kospi', 'kosdaq', 'nasdaq', 'dow', 'sp500', 'nikkei225', 'shanghai', 'taiex', 'sox', 'vix', 'vkospi',
+    'us10y', 'ktb3y', 'ktb10y', 'corpaa3y', 'cd91', 'deposits', 'margin-loans', 'forced-selling',
+    'usdkrw', 'jpykrw', 'cnykrw', 'eurkrw', 'dxy', 'usdjpy', 'wti', 'brent', 'natgas', 'gold', 'silver', 'copper', 'bitcoin'
+  ]);
+
   function pageLanguagePath(pathname, targetLanguage, search = '') {
     const category = new URLSearchParams(String(search || '').replace(/^\?/, '')).get('category') || '';
-    const path = String(pathname || '/');
+    const path = String(pathname || '/').replace(/\/index\.html$/i, '/');
     if (/^\/en\/about\/?$/i.test(path) || /^\/about\/?$/i.test(path)) {
       return targetLanguage === 'en' ? '/en/about/' : '/about/';
     }
@@ -370,9 +378,19 @@
     if (/^\/(?:en\/)?basics\/glossary\/?$/i.test(path)) {
       return targetLanguage === 'en' ? '/en/basics/glossary/' : '/basics/glossary/';
     }
-    // A session page (/market/YYYY-MM-DD/) or the archive keeps its address.
-    const marketPage = path.match(/^\/(?:en\/)?market\/(\d{4}-\d{2}-\d{2}|archive|sectors)\/?$/i);
-    if (marketPage) return `${targetLanguage === 'en' ? '/en' : ''}/market/${marketPage[1].toLowerCase()}/`;
+    if (/^\/(?:en\/)?disclosures\/?$/i.test(path)) {
+      const input = new URLSearchParams(search);
+      const params = new URLSearchParams();
+      const date = input.get('date') || '';
+      if (/^\d{4}-\d{2}-\d{2}$/.test(date)) params.set('date', date);
+      if (['1', 'true'].includes(input.get('all'))) params.set('all', '1');
+      const base = targetLanguage === 'en' ? '/en/disclosures/' : '/disclosures/';
+      return params.size ? `${base}?${params}` : base;
+    }
+    const marketSlug = path.match(/^\/(?:en\/)?market\/([a-z0-9-]+)\/?$/i)?.[1].toLowerCase();
+    if (marketSlug && (MARKET_LANGUAGE_ROUTES.has(marketSlug) || /^\d{4}-\d{2}-\d{2}$/.test(marketSlug))) {
+      return `${targetLanguage === 'en' ? '/en' : ''}/market/${marketSlug}/`;
+    }
     if (/^\/en\/market\/?$/i.test(path) || /^\/market\/?$/i.test(path)) {
       const searchParams = new URLSearchParams(String(search || '').replace(/^\?/, ''));
       const date = searchParams.get('date');

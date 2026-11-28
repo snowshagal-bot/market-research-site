@@ -1244,7 +1244,7 @@
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async function waitForDeployment(postId, reportUrl, postType, registered, language) {
+  async function waitForDeployment(postId, reportUrl, postType, registered, language, linkWarnings = []) {
     const categoryPath = language === 'en'
       ? `/en/?category=${encodeURIComponent(postType)}`
       : `/?category=${encodeURIComponent(postType)}`;
@@ -1253,7 +1253,17 @@
     reportLink.href = reportUrl ? new URL(reportUrl, PUBLIC_ORIGIN).href : '#';
     overlayTitle.textContent = '홈페이지 반영 중';
     overlayText.textContent = 'GitHub 게시가 끝났습니다. Cloudflare가 새 버전을 배포하고 있습니다.';
-    overlayDetail.textContent = `홈페이지 등록일 ${registered} · 새 배포 확인 중`;
+    const warnings = new Set(linkWarnings.map(warning => warning.check));
+    const warningLabels = [
+      ['links.broken-report', '목적지를 찾을 수 없는 리포트 링크'],
+      ['links.redirected-report', '이전 주소를 거치는 링크'],
+      ['links.korean-edition', '영문 글의 국문 링크'],
+      ['links.pending-report', '발행 예정 문서 링크'],
+      ['hreflang.review-pair', '번역 짝 후보']
+    ].filter(([check]) => warnings.has(check)).map(([, label]) => label);
+    const detail = `홈페이지 등록일 ${registered}${warningLabels.length ? ` · 검토 필요 (${linkWarnings.length}건) ${warningLabels.join(', ')}` : ''}`;
+    if (linkWarnings.length) console.warn('게시 리포트 링크 검토', linkWarnings);
+    overlayDetail.textContent = `${detail} · 새 배포 확인 중`;
 
     for (let attempt = 1; attempt <= 40; attempt++) {
       try {
@@ -1264,7 +1274,7 @@
             overlay.classList.add('done');
             overlayTitle.textContent = '홈페이지 반영 완료';
             overlayText.textContent = `${labels[postType] || '리포트'} 목록에 새 글이 등록됐습니다. 다음 리포트를 계속 등록하거나 게시된 화면을 확인할 수 있습니다.`;
-            overlayDetail.textContent = `홈페이지 등록일 ${registered}`;
+            overlayDetail.textContent = detail;
             overlayLinks.hidden = false;
             return;
           }
@@ -1272,14 +1282,14 @@
       } catch (_) {}
 
       if (attempt % 4 === 0) {
-        overlayDetail.textContent = `홈페이지 등록일 ${registered} · Cloudflare 배포 확인 중…`;
+        overlayDetail.textContent = `${detail} · Cloudflare 배포 확인 중…`;
       }
       await sleep(2500);
     }
 
     overlayTitle.textContent = '게시는 완료됐습니다';
     overlayText.textContent = 'Cloudflare 반영 확인이 예상보다 늦어지고 있습니다. 게시 자체는 완료됐습니다. 다음 리포트를 계속 등록하거나 게시된 화면을 확인할 수 있습니다.';
-    overlayDetail.textContent = `홈페이지 등록일 ${registered}`;
+    overlayDetail.textContent = detail;
     overlayLinks.hidden = false;
   }
 
@@ -1497,7 +1507,7 @@
       publishBtn.textContent = '게시 완료';
       publishBtn.disabled = true;
       pendingCustomTags = [];
-      await waitForDeployment(data.id, data.reportUrl, postType, data.registeredDate || '등록 완료', language);
+      await waitForDeployment(data.id, data.reportUrl, postType, data.registeredDate || '등록 완료', language, data.linkWarnings);
     } catch (err) {
       const message = err.message || '게시 중 오류가 발생했습니다.';
       showPublishError(message, { authentication: Boolean(err.authentication) });
