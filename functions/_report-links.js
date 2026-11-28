@@ -1,8 +1,9 @@
-import { PRODUCTION_ORIGIN, escapeHtml, findTranslationCounterpart, postLanguage, reportSiteUrl } from './_seo.js';
+import { PRODUCTION_ORIGIN, cleanReportHref, escapeHtml, findTranslationCounterpart, postLanguage, reportSiteUrl } from './_seo.js';
 import { RENAMED_REPORTS, REPORT_LINK_CORRECTIONS } from './_report-link-targets.js';
 import { REVIEWED_REPORT_LOCALES } from './_report-link-localizations.js';
 
 const SITE_HOSTS = new Set(['snowshagal.com', 'www.snowshagal.com']);
+const PLAIN_HOST = /^(?:https?:)?\/\/([a-z\d.-]+)(?::\d+)?(?=[/?#]|$)/i;
 const BILINGUAL_HUBS = new Set(['/market/', '/basics/', '/daily/', '/notes/']);
 const PENDING_REPORTS = new Set(['/reports/basics-22-settlement']);
 const KO_EDITION = /\b(?:read\s+in\s+korean|(?:original\s+)?korean\s+(?:edition|version|text|source|report|original|only))\b|\(\s*in\s+korean\s*\)|한국어판|한글판|국문판|한국어\s*원문|국문\s*원문/i;
@@ -13,16 +14,20 @@ export function reportLinkPath(pathname) {
 }
 
 function linkTarget(value, base) {
-  if (!value?.trim() || value.trim().startsWith('#')) return null;
+  const href = value?.trim();
+  if (!href || href.startsWith('#')) return null;
+  if (/^(?:mailto|tel|data|javascript):/i.test(href)) return null;
+  const host = PLAIN_HOST.exec(href)?.[1];
+  if (host && !SITE_HOSTS.has(host.toLowerCase())) return null;
   try {
-    const url = new URL(value, base);
-    if (!['https:', 'http:'].includes(url.protocol) || !SITE_HOSTS.has(url.host) || url.username || url.password) return null;
+    const url = new URL(href, base);
+    if ((url.protocol !== 'https:' && url.protocol !== 'http:') || !SITE_HOSTS.has(url.host) || url.username || url.password) return null;
     return url;
   } catch (_) { return null; }
 }
 
 export function reportLinkIndex(posts) {
-  return new Map(posts.map(post => [reportLinkPath(new URL(reportSiteUrl(post.href)).pathname), post]));
+  return new Map(posts.map(post => [cleanReportHref(post.href).normalize('NFC'), post]));
 }
 
 function correctedPath(path, index) {
@@ -36,34 +41,51 @@ function markedKorean(attr, text = '') {
 }
 
 function createLinkRewriter(posts, source) {
-  const index = reportLinkIndex(posts);
+  let index;
   const sourceUrl = reportSiteUrl(source.href);
   const review = REVIEWED_REPORT_LOCALES[source.id];
-  const localized = postLanguage(source) === 'en' && review?.[0] === (source.updatedAt || '') ? new Set(review[1]) : new Set();
+  const localized = postLanguage(source) === 'en' && review?.[0] === (source.updatedAt || '') ? review[1] : [];
   let base = sourceUrl;
+  let baseOrigin = PRODUCTION_ORIGIN;
   let hasBase = false;
 
   return {
     base(href) {
       if (hasBase) return;
       hasBase = true;
-      try { base = new URL(href, sourceUrl).href; } catch (_) {}
+      try {
+        const resolved = new URL(href, sourceUrl);
+        base = resolved.href;
+        baseOrigin = resolved.origin;
+      } catch (_) {}
     },
     anchor(attr) {
-      const url = linkTarget(attr('href'), base);
+      const href = attr('href');
+      const url = linkTarget(href, base);
       if (!url || attr('download') !== null) return null;
       const path = reportLinkPath(url.pathname);
-      const repaired = path ? correctedPath(path, index) : url.pathname;
-      const destination = index.get(repaired);
-      if (path && !destination && (PENDING_REPORTS.has(path) || attr('data-report-pending') !== null)) return { pending: path };
+      let repaired = path || url.pathname;
+      let destination;
+      // Most anchors are outside the report registry or already have a clean
+      // fixed path. Only build the registry for a link that might change.
+      if (path) {
+        const pending = PENDING_REPORTS.has(path) || attr('data-report-pending') !== null;
+        if (pending || path !== url.pathname || localized.includes(path)
+          || Object.hasOwn(RENAMED_REPORTS, path) || Object.hasOwn(REPORT_LINK_CORRECTIONS, path)) {
+          index ??= reportLinkIndex(posts);
+          repaired = correctedPath(path, index);
+          destination = index.get(repaired);
+          if (!destination && pending) return { pending: path };
+        }
+      }
 
-      let nextPath = destination ? new URL(reportSiteUrl(destination.href)).pathname : url.pathname;
+      let nextPath = destination ? reportSiteUrl(destination.href).slice(PRODUCTION_ORIGIN.length) : url.pathname;
       // A different edition can have different anchors and query semantics.
       // The approved backlinks were checked without either; preserve new variants.
-      if (!url.search && !url.hash && localized.has(repaired) && !markedKorean(attr)) {
+      if (!url.search && !url.hash && localized.includes(repaired) && !markedKorean(attr)) {
         if (destination && postLanguage(destination) === 'ko') {
           const alternate = findTranslationCounterpart(posts, destination);
-          if (alternate) nextPath = new URL(reportSiteUrl(alternate.href)).pathname;
+          if (alternate) nextPath = reportSiteUrl(alternate.href).slice(PRODUCTION_ORIGIN.length);
         } else if (BILINGUAL_HUBS.has(repaired)) {
           nextPath = `/en${repaired}`;
         }
@@ -74,7 +96,7 @@ function createLinkRewriter(posts, source) {
       const suffix = url.href.slice(url.origin.length + url.pathname.length);
       // A root-relative URL remains usable on the local and Preview hosts.
       // Keep an explicit origin when the uploaded document specified one.
-      const absolute = www || /^(?:https?:)?\/\//i.test(attr('href').trim()) || new URL(base).origin !== PRODUCTION_ORIGIN;
+      const absolute = www || /^(?:https?:)?\/\//i.test(href.trim()) || baseOrigin !== PRODUCTION_ORIGIN;
       return { href: `${absolute ? PRODUCTION_ORIGIN : ''}${nextPath}${suffix}` };
     }
   };
@@ -84,7 +106,7 @@ export function applyReportLinksToRewriter(rewriter, posts, source) {
   const handler = createLinkRewriter(posts, source);
   return rewriter
     .on('base[href]', { element(element) { handler.base(element.getAttribute('href')); } })
-    .on('a[href]', {
+    .on('a[href]:not([href^="#"])', {
       element(element) {
         const change = handler.anchor(name => {
           const value = element.getAttribute(name);
@@ -101,6 +123,7 @@ export function applyReportLinksToRewriter(rewriter, posts, source) {
 }
 
 function decodeAttribute(value) {
+  if (!value.includes('&')) return value;
   const entities = { amp: '&', apos: "'", quot: '"', lt: '<', gt: '>', nbsp: ' ' };
   return value.replace(/&(#x[\da-f]+|#\d+|amp|apos|quot|lt|gt|nbsp);/gi, (full, token) => {
     if (token[0] !== '#') return entities[token.toLowerCase()] || full;
