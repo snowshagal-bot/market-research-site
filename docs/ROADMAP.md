@@ -10,7 +10,8 @@ The core site architecture, bilingual structure, SEO/clean URLs, category discov
 
 ### Next action
 
-- **SEO Phase 2A internal links and locales**. Local gate complete on `fix/seo-remediation-phase-2a`. Preview awaits approval. See [the validation report](SEO_REMEDIATION_PHASE_2A.md).
+- **SEO Phase 2B resource and server work**. Local implementation and verification on `fix/seo-remediation-phase-2b`. Preview awaits approval. See [the verification report](SEO_REMEDIATION_PHASE_2B.md).
+- **SEO Phase 2A internal links and locales**. Production deployed at `ced50a72b8c6f15fdaa4de1a14580613fa3bc9a9`. See [the local validation report](SEO_REMEDIATION_PHASE_2A.md).
 
 - **USD/KRW: one definition across the site (기초 데이터 가이드 3편, 2026-11-27)**.
   3편 teaches that the Seoul FX market's 15:30 rate, the official 매매기준율 (Seoul Money Brokerage)

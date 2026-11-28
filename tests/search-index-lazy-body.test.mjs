@@ -30,6 +30,24 @@ test('opening the dialog loads metadata only, never a body shard', async () => {
   }
 });
 
+test('a missing search index falls back to the existing or lazily loaded posts, once', async () => {
+  const postsSrc = '/data/posts.js';
+  const fallbackFiles = { ...files, [postsSrc]: await read('data/posts.js') };
+  for (const preloadPosts of [true, false]) {
+    const search = await bootSearch({ lang: 'en', files: fallbackFiles, preloadPosts });
+    await search.open();
+    assert.deepEqual(search.requests, [META_SRC]);
+    await search.settle(META_SRC, { fail: true });
+    if (!preloadPosts) {
+      assert.deepEqual(search.requests, [META_SRC, postsSrc]);
+      await search.settle(postsSrc);
+    }
+    await search.type('semiconductor');
+    assert.ok(search.resultIds().length > 0);
+    assert.equal(search.requests.filter(src => src === postsSrc).length, preloadPosts ? 0 : 1);
+  }
+});
+
 /* 2, 7, 8 */
 test('the first query shows metadata results at once and requests only this locale\'s body, once', async () => {
   for (const [lang, other, query] of [['ko', 'en', '반도체'], ['en', 'ko', 'semiconductor']]) {

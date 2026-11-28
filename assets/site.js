@@ -187,9 +187,9 @@
     });
   }
 
-  // Without the index the dialog still searches what the page already has.
+  // Without the index the dialog still searches post metadata.
   function searchMetaFallback(){
-    return allPosts.map(post => ({
+    return (window.RESEARCH_POSTS || []).map(post => ({
       ...post,
       category: post.type,
       date: post.reportDate || post.date,
@@ -204,9 +204,12 @@
     if (searchMetaState === 'loading') return;
     searchMetaState = 'loading';
     loadScriptOnce(SEARCH_META_SRC)
-      .catch(() => { window.SEARCH_INDEX_META = searchMetaFallback(); })
-      .then(() => {
-        if (!Array.isArray(window.SEARCH_INDEX_META)) window.SEARCH_INDEX_META = searchMetaFallback();
+      .catch(() => {})
+      .then(async () => {
+        if (!Array.isArray(window.SEARCH_INDEX_META)) {
+          if (!Array.isArray(window.RESEARCH_POSTS)) await loadScriptOnce('/data/posts.js').catch(() => {});
+          window.SEARCH_INDEX_META = searchMetaFallback();
+        }
         searchMetaState = 'ready';
         onReady();
       });

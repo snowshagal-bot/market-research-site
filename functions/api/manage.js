@@ -3,6 +3,7 @@ import { extractGlossaryTerms } from "../_glossary.js";
 import { findLateCoverStyle, lateCoverStyleMessage } from "../_cover-style.js";
 import { SOCIAL_REPORT_CARD_DIR } from "../_seo.js";
 import { customShareCardProblem } from "../_share-image.js";
+import { hasActiveLinkReview, reportLinkDiagnostics } from "../_report-links.js";
 import { isHumanAdminHost, validateHumanAdminMutation } from "../_host-policy.js";
 import { requireAdminMutation } from "../_auth.js";
 import "../../assets/report-metadata.js";
@@ -894,6 +895,7 @@ export async function onRequestPost(context) {
     let commitMessage;
     let resultPost = null;
     let resultPairedTitles = [];
+    let linkWarnings = [];
 
     if (action === "delete") {
       posts.splice(postIndex, 1);
@@ -930,6 +932,12 @@ export async function onRequestPost(context) {
         description: managedDescription(editFields.description, existing.description),
         updatedAt: new Date().toISOString(),
       };
+      // Keep the reviewed links across metadata-only edits. An HTML upload
+      // may change editorial intent even if its link URLs look identical.
+      delete updated.reportLinkReviewAt;
+      if (replacementHtml === null && hasActiveLinkReview(existing)) {
+        updated.reportLinkReviewAt = updated.updatedAt;
+      }
       if (editFields.summaryProvided) {
         if (editFields.summary) updated.summary = editFields.summary;
         else delete updated.summary;
@@ -962,6 +970,9 @@ export async function onRequestPost(context) {
       if (replacementHtml !== null) {
         entries.push({ path: existing.href, mode: "100644", type: "blob", content: replacementHtml });
         updated.readingMinutes = calculateReadingMinutes(replacementHtml, postLanguage(existing), existing.type);
+        if (postLanguage(existing) === 'en') {
+          try { linkWarnings = reportLinkDiagnostics(replacementHtml, updated, posts); } catch (_) {}
+        }
       }
 
       const cardPath = `${SOCIAL_REPORT_CARD_DIR}/${existing.id}.jpg`;
@@ -1132,7 +1143,7 @@ export async function onRequestPost(context) {
       return reply({ ok: false, error: "REPOSITORY_CHANGED", message: "저장소가 변경되었습니다. 새로고침 후 다시 시도하세요." }, 409);
     }
 
-    return reply({ ok: true, action, post: resultPost, pairedTagUpdates: resultPairedTitles, commit: commit.sha, apiVersion: API_VERSION });
+    return reply({ ok: true, action, post: resultPost, pairedTagUpdates: resultPairedTitles, commit: commit.sha, apiVersion: API_VERSION, ...(linkWarnings.length ? { linkWarnings } : {}) });
   } catch (error) {
     console.error("post management failed", { status: error?.status, message: error?.message });
     if (error?.status === 409 || error?.status === 422) {

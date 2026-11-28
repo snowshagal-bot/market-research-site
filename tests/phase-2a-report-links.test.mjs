@@ -47,6 +47,24 @@ test('Unicode typo, legacy .html, www, and relative hrefs retain query and fragm
   ]);
 });
 
+test('a metadata-only review marker applies to exactly its saved revision', () => {
+  const changed = '<a href="/market/archive/">Editorial change</a>';
+  const original = `<a href="${koLink}">No.32</a>`;
+  const updatedAt = '2026-11-29T00:00:00Z';
+  const edited = { ...source, updatedAt, reportLinkReviewAt: updatedAt };
+  assert.equal(rewriteReportLinks(original, posts, edited), `<a href="${enLink}">No.32</a>`);
+  assert.equal(rewriteReportLinks(changed, posts, edited), changed);
+  assert.equal(rewriteReportLinks(original, posts, { ...edited, updatedAt: '2026-11-30T00:00:00Z' }), original);
+});
+
+test('English Korean hub warnings preserve explicit Korean citations and exclude the brand home', () => {
+  const plain = '<a href="https://www.snowshagal.com/market?view=weekly#section">Market</a>';
+  const intentional = '<a href="/basics/"><em>Read the Korean original</em></a><a href="/daily/" hreflang="ko">Daily</a>';
+  assert.deepEqual(reportLinkDiagnostics(plain + intentional + '<a href="/">SNOWSHAGAL</a>', source, posts), [
+    { check: 'links.korean-hub', href: 'https://www.snowshagal.com/market?view=weekly#section', suggested: '/en/market/?view=weekly#section' }
+  ]);
+});
+
 test('future links keep their labels, reopen once registered, and remain distinguishable from 404s', () => {
   const pending = '/reports/basics-22-settlement';
   const original = `<a class="next" href="${pending}">Part 22</a>`;

@@ -323,6 +323,28 @@ test('optional HTML replacement keeps href and validates standalone HTML before 
   } finally { globalThis.fetch = originalFetch; }
 });
 
+test('editing metadata preserves an approved link revision while uploading edited HTML clears it and warns', async () => {
+  const registry = JSON.parse(fs.readFileSync(path.join(rootDir, 'data/posts.json'), 'utf8'));
+  const current = registry.find(post => post.id === '2026-11-20-note-1kci22o');
+  const calls = githubMock([current]);
+  try {
+    const { response, data } = await run({ id: current.id, coverAction: 'keep' });
+    assert.equal(response.status, 200);
+    const saved = JSON.parse(treeFrom(calls).find(entry => entry.path === 'data/posts.json').content)[0];
+    assert.equal(saved.reportLinkReviewAt, saved.updatedAt);
+    assert.equal(data.post.reportLinkReviewAt, saved.reportLinkReviewAt);
+    assert.equal(treeFrom(calls).some(entry => entry.path === current.href), false);
+    githubMock([saved]);
+    const revised = await run({
+      id: current.id,
+      file: new File(['<!doctype html><html><body><a href="/market/">Market</a><a href="/basics/" lang="ko">한국어 원문</a></body></html>'], 'reviewed.html', { type: 'text/html' })
+    });
+    assert.equal(revised.response.status, 200);
+    assert.equal(Object.hasOwn(revised.data.post, 'reportLinkReviewAt'), false);
+    assert.deepEqual(revised.data.linkWarnings, [{ check: 'links.korean-hub', href: '/market/', suggested: '/en/market/' }]);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
 test('replacement HTML whose cover is sized after the cover is refused before GitHub is touched', async () => {
   const cover = '<section class="dcv"><img class="dcv-img" src="x.webp"><div class="dcv-copy">t</div></section>';
   const sizing = '<style id="daily-cover">body.cover-edition .dcv{position:relative;width:100%}</style>';

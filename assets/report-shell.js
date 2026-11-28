@@ -135,14 +135,13 @@
   async function resolveReportLanguageLink(link) {
     if (!link || !localeApi) return;
     const fallback = localeApi.homepagePath(targetLocale);
-    link.href = fallback;
-    try {
-      const response = await fetch(`/data/posts.json?langswitch=${Date.now()}`, { cache: 'no-store' });
-      if (!response.ok) return;
-      const posts = await response.json();
-      const counterpart = localeApi.findCounterpart(posts, location.pathname, targetLocale);
-      if (counterpart?.href) link.href = cleanReportUrl(counterpart.href);
-    } catch (_) {}
+    const serverHref = scriptEl?.dataset.translationHref;
+    link.href = serverHref || fallback;
+    // An empty value means the server checked and found no counterpart.
+    if (serverHref !== undefined) return;
+    const posts = await fetchAllPosts();
+    const counterpart = localeApi.findCounterpart(posts, location.pathname, targetLocale);
+    if (counterpart?.href) link.href = cleanReportUrl(counterpart.href);
   }
 
   function reportKey() {

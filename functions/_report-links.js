@@ -5,6 +5,10 @@ import { REVIEWED_REPORT_LOCALES } from './_report-link-localizations.js';
 const SITE_HOSTS = new Set(['snowshagal.com', 'www.snowshagal.com']);
 const PLAIN_HOST = /^(?:https?:)?\/\/([a-z\d.-]+)(?::\d+)?(?=[/?#]|$)/i;
 const BILINGUAL_HUBS = new Set(['/market/', '/basics/', '/daily/', '/notes/']);
+const REVIEW_HUBS = new Set([
+  ...BILINGUAL_HUBS, '/weekly/', '/research/', '/disclosures/', '/calendar/', '/about/',
+  '/basics/glossary/', '/market/archive/', '/market/sectors/', '/market/investor-flows/'
+]);
 const PENDING_REPORTS = new Set(['/reports/basics-22-settlement']);
 const KO_EDITION = /\b(?:read\s+in\s+korean|(?:original\s+)?korean\s+(?:edition|version|text|source|report|original|only))\b|\(\s*in\s+korean\s*\)|한국어판|한글판|국문판|한국어\s*원문|국문\s*원문/i;
 
@@ -40,11 +44,17 @@ function markedKorean(attr, text = '') {
     || KO_EDITION.test([attr('title'), attr('aria-label'), text].join(' '));
 }
 
+export function hasActiveLinkReview(post) {
+  const review = REVIEWED_REPORT_LOCALES[post.id];
+  return Boolean(review && postLanguage(post) === 'en' && (
+    review[0] === (post.updatedAt || '') || (post.updatedAt && post.reportLinkReviewAt === post.updatedAt)
+  ));
+}
+
 function createLinkRewriter(posts, source) {
   let index;
   const sourceUrl = reportSiteUrl(source.href);
-  const review = REVIEWED_REPORT_LOCALES[source.id];
-  const localized = postLanguage(source) === 'en' && review?.[0] === (source.updatedAt || '') ? review[1] : [];
+  const localized = hasActiveLinkReview(source) ? REVIEWED_REPORT_LOCALES[source.id][1] : [];
   let base = sourceUrl;
   let baseOrigin = PRODUCTION_ORIGIN;
   let hasBase = false;
@@ -168,6 +178,8 @@ export function reportLinkDiagnostics(html, source, posts, index = reportLinkInd
   const sourceUrl = reportSiteUrl(source.href);
   let base = sourceUrl;
   let hasBase = false;
+  const english = postLanguage(source) === 'en';
+  const anchorText = start => decodeAttribute(html.slice(start).match(/^([\s\S]*?)<\/a\s*>/i)?.[1]?.replace(/<[^>]*>/g, ' ') || '');
   const issues = [];
   visitLinkTags(html, (tag, attr, textStart) => {
     const href = attr('href');
@@ -181,7 +193,13 @@ export function reportLinkDiagnostics(html, source, posts, index = reportLinkInd
     const pending = attr('data-pending-report');
     const url = linkTarget(href, base);
     const path = url ? reportLinkPath(url.pathname) : '';
-    if (!path && !reportLinkPath(pending || '')) return null;
+    if (!path && !reportLinkPath(pending || '')) {
+      const hub = url?.pathname.replace(/\/?$/, '/');
+      if (english && REVIEW_HUBS.has(hub) && attr('download') === null && !markedKorean(attr, anchorText(textStart))) {
+        issues.push({ check: 'links.korean-hub', href, suggested: `/en${hub}${url.search}${url.hash}` });
+      }
+      return null;
+    }
     const post = index.get(path);
     if (!post) {
       if (pending || PENDING_REPORTS.has(path) || attr('data-report-pending') !== null) {
@@ -192,10 +210,9 @@ export function reportLinkDiagnostics(html, source, posts, index = reportLinkInd
         const suggested = correctedPath(path, index);
         issues.push({ check: 'links.broken-report', href, ...(index.has(suggested) ? { suggested } : {}) });
       }
-    } else if (postLanguage(source) === 'en' && postLanguage(post) === 'ko') {
-      const text = decodeAttribute(html.slice(textStart).match(/^([\s\S]*?)<\/a\s*>/i)?.[1]?.replace(/<[^>]*>/g, ' ') || '');
+    } else if (english && postLanguage(post) === 'ko') {
       const alternate = findTranslationCounterpart(posts, post);
-      if (alternate && !markedKorean(attr, text)) issues.push({ check: 'links.korean-edition', href, suggested: reportSiteUrl(alternate.href) });
+      if (alternate && !markedKorean(attr, anchorText(textStart))) issues.push({ check: 'links.korean-edition', href, suggested: reportSiteUrl(alternate.href) });
     }
     return null;
   });

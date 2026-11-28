@@ -182,7 +182,8 @@ test('admin and public surfaces preserve the announcement contract across admin 
   }
   assert.match(page, /홈 화면에 표시할 운영 공지를 작성하고 노출 기간을 관리합니다/);
   assert.match(page, /한국어와 영어 홈에 동일한 내용이 표시되므로/);
-  assert.match(page, /<script src="\/data\/posts\.js"><\/script>\s*<script src="\/assets\/locale\.js\?v=[a-f0-9]+"><\/script>\s*<script src="\/assets\/site\.js\?v=[a-f0-9]+"><\/script>/);
+  assert.doesNotMatch(page, /src="\/data\/posts\.js"/);
+  assert.match(page, /<script src="\/assets\/locale\.js\?v=[a-f0-9]+"><\/script>\s*<script src="\/assets\/site\.js\?v=[a-f0-9]+"><\/script>/);
   for (const filter of ['major', 'general', 'draft', 'scheduled', 'published', 'expired']) {
     assert.match(page, new RegExp(`data-filter="${filter}"`));
   }
