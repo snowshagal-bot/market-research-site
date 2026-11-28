@@ -1,5 +1,31 @@
 [
   {
+    "id": "2026-11-29-note-1y4r6rl",
+    "type": "note",
+    "typeLabel": "투자 인사이트",
+    "lang": "ko",
+    "date": "2026-11-29",
+    "reportDate": "2026-11-29",
+    "registeredDate": "2026-11-28",
+    "registeredAt": "2026-11-28T12:19:08.012Z",
+    "legacyImport": false,
+    "title": "IT 공장 일자리는 100명 중 2명 반도체 호황은 왜 마트까지 안 오나",
+    "seoTitle": "반도체 호황, 마트까지 안 오는 이유",
+    "subtitle": "",
+    "description": "한국은행은 올해 성장률 전망을 3.9%로 올리면서 민간소비는 1.8%로 낮췄고, 3분기 가구 실질소득은 2.1% 줄었다. 반도체 돈이 가계에 늦게 닿는 좁은 관 셋과 잠긴 밸브 둘, 그 시차와 대만과 다른 점을 풀었다.",
+    "tags": [
+      "korea",
+      "semiconductors",
+      "taiwan",
+      "policy"
+    ],
+    "readingMinutes": 21,
+    "href": "reports/20261129_Investment_Insight_Chip_Boom_Consumption_Gap.html",
+    "coverImage": "covers/2026-11-29-note-1y4r6rl.webp",
+    "shareCardImage": "covers/share/2026-11-29-note-1y4r6rl.jpg",
+    "coverThumbnail": "covers/2026-11-29-note-1y4r6rl-450.webp"
+  },
+  {
     "id": "2026-11-28-weekly-1878ldm",
     "type": "weekly",
     "typeLabel": "Weekly",
